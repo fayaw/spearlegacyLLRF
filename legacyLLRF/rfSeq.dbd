@@ -1,0 +1,6 @@
+registrar("P2RF_CalibRegistrar")
+registrar("rf_dac_loopRegistrar")
+registrar("rf_hvps_loopRegistrar")
+registrar("rf_statesRegistrar")
+registrar("rf_tuner_loopRegistrar")
+registrar("rf_msgsRegistrar")
