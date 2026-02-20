@@ -72,7 +72,7 @@ graph TB
 ## Physical System Layout
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontSize': '16px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 graph LR
  subgraph "RF Power Generation"
  HVPS[High Voltage Power Supply -50 to -90 kV]
@@ -187,6 +187,7 @@ graph TB
 The three main control loops work together in a coordinated fashion:
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 sequenceDiagram
  participant Gap as Gap Voltage Measurement
  participant DAC as DAC Loop
@@ -228,6 +229,7 @@ sequenceDiagram
 - **Setpoint**: Total gap voltage (~3.2 MV)
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 graph LR
  subgraph "DAC Control Loop (approx 1 Hz)"
  Setpoint[Gap Voltage Setpoint approx 3.2 MV]
@@ -282,6 +284,7 @@ def dac_control_loop():
 - **Setpoint**: `SRF1:KLYSDRIVFRWD:POWER:ON` or `HIGH`
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 graph LR
  subgraph "HVPS Control Loop (approx 1 Hz)"
  Drive_SP[Drive Power Setpoint approx 50 W]
@@ -328,7 +331,7 @@ graph TB
  subgraph "Mechanical System"
  Stepper[Stepper Motor 200 steps/rev 400 microsteps/rev]
  Gear[Gear Reduction 2:1 ratio]
- Leadscrew[Lead Screw 20 TPI Acme 0.05 inch per motor rev]
+ Leadscrew[Lead Screw 1/2-10 Acme 0.1 inch per leadscrew turn]
  Tuner_Mech[Cylindrical Tuner Inside Cavity]
  end
  
@@ -360,9 +363,9 @@ graph TB
 - **Steps per Revolution**: 200 (standard)
 - **Microsteps**: 400 per revolution (2 microsteps per step)
 - **Gear Ratio**: 2:1 (2 motor turns = 1 leadscrew turn)
-- **Lead Screw**: 20 TPI Acme thread (0.05" per turn)
+- **Lead Screw**: 1/2-10 Acme thread (0.1" per leadscrew turn, 0.05" per motor revolution)
 - **Resolution**: 1.27 mm per motor revolution
-- **Total Steps per mm**: 800 microsteps / 1.27 mm = 630 steps/mm
+- **Total Steps per mm**: 400 microsteps / 1.27 mm ≈ 315 microsteps/mm
 
 ---
 
@@ -528,6 +531,7 @@ stateDiagram-v2
 Based on Jim's documentation, the turn-on sequence is carefully orchestrated:
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 sequenceDiagram
  participant Operator
  participant StateMachine as State Machine
@@ -634,6 +638,7 @@ graph TB
 The tuner control system implements two feedback loops:
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 graph TB
  subgraph "Primary Loop: Phase Control"
  Phase_Setpoint[Phase Setpoint Cavity on Resonance]
@@ -729,6 +734,7 @@ graph TB
 The legacy SNL code follows a consistent pattern:
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 graph TB
  subgraph "Each Control Loop"
  Defs[*_defs.h Constants Status codes String messages]
