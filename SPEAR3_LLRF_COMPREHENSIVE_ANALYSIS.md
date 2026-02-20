@@ -109,7 +109,7 @@ graph LR
  
  subgraph "Control & Monitoring"
  RFP[RF Processor Analog I/Q Control]
- VXI[VXI Controller SNL Sequences --> Python/EPICS]
+ VXI[VXI Controller]
  end
  
  HVPS --> Klystron
@@ -155,19 +155,19 @@ The fundamental purpose of the RF system is **energy replacement**:
 ```mermaid
 graph TB
  subgraph "Fast Analog Control (approx kHz)"
- RFP_Fast[RF Processor Module • Analog I/Q decomposition • Phase/amplitude comparison • Direct loop feedback • Analog reconstruction]
+ RFP_Fast[RF Processor Module]
  end
  
  subgraph "Slow Digital Control (approx 1 Hz)"
- DAC_Loop[DAC Control Loop • Monitors total gap voltage • Adjusts SRF1:STN:ON:IQ • Controls RFP output amplitude]
+ DAC_Loop[DAC Control Loop]
  
- HVPS_Loop[HVPS Control Loop • Monitors drive power • Adjusts SRF1:HVPS:VOLT:CTRL • Maintains optimal klystron gain]
+ HVPS_Loop[HVPS Control Loop]
  
- Tuner_Loop[Tuner Control Loops (x4) • Monitor cavity phase • Adjust stepper motor position • Maintain cavity resonance]
+ Tuner_Loop[Tuner Control Loops x4]
  end
  
  subgraph "Station Control (seconds)"
- State_Machine[Master State Machine • OFF/PARK/TUNE/ON_CW modes • Loop coordination • Startup/shutdown sequences • Fault handling]
+ State_Machine[Master State Machine]
  end
  
  State_Machine --> DAC_Loop
@@ -579,7 +579,7 @@ Based on Jim's detailed documentation and drawing SA-341-392-61:
 ```mermaid
 graph TB
  subgraph "Stepper Motor Assembly"
- Motor[Superior Electric Slo-Syn M093-FC11 NEMA 34D 200 steps/rev]
+ Motor[Superior Electric Slo-Syn M093-FC11]
  
  Motor_Pulley[Motor Pulley SDP/SI 6A 3-15DF03712 15 groove timing belt]
  
@@ -589,7 +589,7 @@ graph TB
  end
  
  subgraph "Lead Screw Assembly"
- Lead_Screw[Lead Screw 1/2-10 Acme Thread PF-341-392-68 20 TPI]
+ Lead_Screw[Lead Screw 1/2-10 Acme Thread]
  
  Tuner_Element[Cylindrical Tuner Inside RF Cavity]
  end
@@ -690,7 +690,7 @@ graph TB
  end
  
  subgraph "Hardware Layer"
- Galil_Controller[Galil DMC-4143 4-Axis Controller Ethernet Interface]
+ Galil_Controller[Galil DMC-4143 Controller]
  
  Stepper_Drivers[Modern Stepper Drivers Microstepping Current Control]
  
