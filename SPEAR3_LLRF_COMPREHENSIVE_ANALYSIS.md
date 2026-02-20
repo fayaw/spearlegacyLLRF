@@ -37,32 +37,32 @@ The SPEAR3 LLRF (Low-Level RF) control system is a sophisticated multi-loop feed
 
 ```mermaid
 graph TB
-    subgraph "Level 3: Station Control (Python/PyEPICS)"
-        Master[Master State Machine<br/>Station States: OFF/PARK/TUNE/ON_CW<br/>Loop Coordination<br/>Fault Management]
-    end
-    
-    subgraph "Level 2: Feedback Loops (Python + EPICS)"
-        DAC[DAC Control Loop<br/>Gap Voltage Regulation<br/>~1 Hz update rate]
-        HVPS[HVPS Control Loop<br/>Drive Power Regulation<br/>~1 Hz update rate]
-        Tuner[Tuner Control Loops<br/>Cavity Frequency Control<br/>4 independent loops]
-    end
-    
-    subgraph "Level 1: Fast Analog Control"
-        RFP[RF Processor Module<br/>Analog I/Q Processing<br/>Direct Loop Feedback<br/>~kHz bandwidth]
-    end
-    
-    subgraph "Level 0: Hardware"
-        HW[HVPS + Klystron + 4 Cavities + 4 Tuners]
-    end
-    
-    Master --> DAC
-    Master --> HVPS
-    Master --> Tuner
-    
-    DAC --> RFP
-    HVPS --> HW
-    Tuner --> HW
-    RFP --> HW
+ subgraph "Level 3: Station Control (Python/PyEPICS)"
+ Master[Master State Machine Station States: OFF/PARK/TUNE/ON_CW Loop Coordination Fault Management]
+ end
+ 
+ subgraph "Level 2: Feedback Loops (Python + EPICS)"
+ DAC[DAC Control Loop Gap Voltage Regulation approx 1 Hz update rate]
+ HVPS[HVPS Control Loop Drive Power Regulation approx 1 Hz update rate]
+ Tuner[Tuner Control Loops Cavity Frequency Control 4 independent loops]
+ end
+ 
+ subgraph "Level 1: Fast Analog Control"
+ RFP[RF Processor Module Analog I/Q Processing Direct Loop Feedback approx kHz bandwidth]
+ end
+ 
+ subgraph "Level 0: Hardware"
+ HW[HVPS + Klystron + 4 Cavities + 4 Tuners]
+ end
+ 
+ Master --> DAC
+ Master --> HVPS
+ Master --> Tuner
+ 
+ DAC --> RFP
+ HVPS --> HW
+ Tuner --> HW
+ RFP --> HW
 ```
 
 ---
@@ -73,66 +73,66 @@ graph TB
 
 ```mermaid
 graph LR
-    subgraph "RF Power Generation"
-        HVPS[High Voltage<br/>Power Supply<br/>0-50 kV]
-        Drive[Drive Amplifier<br/>Fixed Gain<br/>~50 W output]
-        Klystron[Klystron<br/>~1 MW<br/>476.3 MHz]
-    end
-    
-    subgraph "RF Distribution & Cavities"
-        WG[Waveguide<br/>Distribution]
-        
-        subgraph "Cavity 1"
-            C1[RF Cavity 1<br/>~800 kV]
-            T1[Tuner 1<br/>Stepper Motor]
-            P1[Cavity Probe 1]
-        end
-        
-        subgraph "Cavity 2"
-            C2[RF Cavity 2<br/>~800 kV]
-            T2[Tuner 2<br/>Stepper Motor]
-            P2[Cavity Probe 2]
-        end
-        
-        subgraph "Cavity 3"
-            C3[RF Cavity 3<br/>~800 kV]
-            T3[Tuner 3<br/>Stepper Motor]
-            P3[Cavity Probe 3]
-        end
-        
-        subgraph "Cavity 4"
-            C4[RF Cavity 4<br/>~800 kV]
-            T4[Tuner 4<br/>Stepper Motor]
-            P4[Cavity Probe 4]
-        end
-    end
-    
-    subgraph "Control & Monitoring"
-        RFP[RF Processor<br/>Analog I/Q Control]
-        VXI[VXI Controller<br/>SNL Sequences<br/>→ Python/EPICS]
-    end
-    
-    HVPS --> Klystron
-    Drive --> Klystron
-    RFP --> Drive
-    Klystron --> WG
-    
-    WG --> C1
-    WG --> C2
-    WG --> C3
-    WG --> C4
-    
-    P1 --> RFP
-    P2 --> RFP
-    P3 --> RFP
-    P4 --> RFP
-    
-    VXI --> HVPS
-    VXI --> RFP
-    VXI --> T1
-    VXI --> T2
-    VXI --> T3
-    VXI --> T4
+ subgraph "RF Power Generation"
+ HVPS[High Voltage Power Supply 0-50 kV]
+ Drive[Drive Amplifier Fixed Gain approx 50 W output]
+ Klystron[Klystron approx 1 MW 476.3 MHz]
+ end
+ 
+ subgraph "RF Distribution & Cavities"
+ WG[Waveguide Distribution]
+ 
+ subgraph "Cavity 1"
+ C1[RF Cavity 1 approx 800 kV]
+ T1[Tuner 1 Stepper Motor]
+ P1[Cavity Probe 1]
+ end
+ 
+ subgraph "Cavity 2"
+ C2[RF Cavity 2 approx 800 kV]
+ T2[Tuner 2 Stepper Motor]
+ P2[Cavity Probe 2]
+ end
+ 
+ subgraph "Cavity 3"
+ C3[RF Cavity 3 approx 800 kV]
+ T3[Tuner 3 Stepper Motor]
+ P3[Cavity Probe 3]
+ end
+ 
+ subgraph "Cavity 4"
+ C4[RF Cavity 4 approx 800 kV]
+ T4[Tuner 4 Stepper Motor]
+ P4[Cavity Probe 4]
+ end
+ end
+ 
+ subgraph "Control & Monitoring"
+ RFP[RF Processor Analog I/Q Control]
+ VXI[VXI Controller SNL Sequences --> Python/EPICS]
+ end
+ 
+ HVPS --> Klystron
+ Drive --> Klystron
+ RFP --> Drive
+ Klystron --> WG
+ 
+ WG --> C1
+ WG --> C2
+ WG --> C3
+ WG --> C4
+ 
+ P1 --> RFP
+ P2 --> RFP
+ P3 --> RFP
+ P4 --> RFP
+ 
+ VXI --> HVPS
+ VXI --> RFP
+ VXI --> T1
+ VXI --> T2
+ VXI --> T3
+ VXI --> T4
 ```
 
 ### Energy Balance & Control Purpose
@@ -154,31 +154,31 @@ The fundamental purpose of the RF system is **energy replacement**:
 
 ```mermaid
 graph TB
-    subgraph "Fast Analog Control (~kHz)"
-        RFP_Fast[RF Processor Module<br/>• Analog I/Q decomposition<br/>• Phase/amplitude comparison<br/>• Direct loop feedback<br/>• Analog reconstruction]
-    end
-    
-    subgraph "Slow Digital Control (~1 Hz)"
-        DAC_Loop[DAC Control Loop<br/>• Monitors total gap voltage<br/>• Adjusts SRF1:STN:ON:IQ<br/>• Controls RFP output amplitude]
-        
-        HVPS_Loop[HVPS Control Loop<br/>• Monitors drive power<br/>• Adjusts SRF1:HVPS:VOLT:CTRL<br/>• Maintains optimal klystron gain]
-        
-        Tuner_Loop[Tuner Control Loops (×4)<br/>• Monitor cavity phase<br/>• Adjust stepper motor position<br/>• Maintain cavity resonance]
-    end
-    
-    subgraph "Station Control (seconds)"
-        State_Machine[Master State Machine<br/>• OFF/PARK/TUNE/ON_CW modes<br/>• Loop coordination<br/>• Startup/shutdown sequences<br/>• Fault handling]
-    end
-    
-    State_Machine --> DAC_Loop
-    State_Machine --> HVPS_Loop
-    State_Machine --> Tuner_Loop
-    
-    DAC_Loop --> RFP_Fast
-    HVPS_Loop --> |HVPS Voltage| RFP_Fast
-    Tuner_Loop --> |Cavity Tuning| RFP_Fast
-    
-    RFP_Fast --> |RF Power| Cavities[4 RF Cavities<br/>476.3 MHz]
+ subgraph "Fast Analog Control (approx kHz)"
+ RFP_Fast[RF Processor Module • Analog I/Q decomposition • Phase/amplitude comparison • Direct loop feedback • Analog reconstruction]
+ end
+ 
+ subgraph "Slow Digital Control (approx 1 Hz)"
+ DAC_Loop[DAC Control Loop • Monitors total gap voltage • Adjusts SRF1:STN:ON:IQ • Controls RFP output amplitude]
+ 
+ HVPS_Loop[HVPS Control Loop • Monitors drive power • Adjusts SRF1:HVPS:VOLT:CTRL • Maintains optimal klystron gain]
+ 
+ Tuner_Loop[Tuner Control Loops (x4) • Monitor cavity phase • Adjust stepper motor position • Maintain cavity resonance]
+ end
+ 
+ subgraph "Station Control (seconds)"
+ State_Machine[Master State Machine • OFF/PARK/TUNE/ON_CW modes • Loop coordination • Startup/shutdown sequences • Fault handling]
+ end
+ 
+ State_Machine --> DAC_Loop
+ State_Machine --> HVPS_Loop
+ State_Machine --> Tuner_Loop
+ 
+ DAC_Loop --> RFP_Fast
+ HVPS_Loop --> |HVPS Voltage| RFP_Fast
+ Tuner_Loop --> |Cavity Tuning| RFP_Fast
+ 
+ RFP_Fast --> |RF Power| Cavities[4 RF Cavities 476.3 MHz]
 ```
 
 ### Control Loop Interactions
@@ -187,29 +187,29 @@ The three main control loops work together in a coordinated fashion:
 
 ```mermaid
 sequenceDiagram
-    participant Gap as Gap Voltage<br/>Measurement
-    participant DAC as DAC Loop
-    participant Drive as Drive Power<br/>Measurement
-    participant HVPS as HVPS Loop
-    participant Klystron as Klystron
-    participant Cavity as Cavity Phase<br/>Measurement
-    participant Tuner as Tuner Loop
-    
-    Note over Gap,Tuner: Normal Operation Cycle (~1 Hz)
-    
-    Gap->>DAC: Gap voltage below setpoint
-    DAC->>DAC: Increase SRF1:STN:ON:IQ
-    DAC->>Drive: Drive power increases
-    
-    Drive->>HVPS: Drive power above setpoint
-    HVPS->>HVPS: Increase SRF1:HVPS:VOLT:CTRL
-    HVPS->>Klystron: Higher cathode voltage
-    Klystron->>Drive: Higher gain, drive power decreases
-    
-    Cavity->>Tuner: Phase drift detected
-    Tuner->>Tuner: Calculate position correction
-    Tuner->>Cavity: Move stepper motor
-    Cavity->>Tuner: Phase returns to setpoint
+ participant Gap as Gap Voltage Measurement
+ participant DAC as DAC Loop
+ participant Drive as Drive Power Measurement
+ participant HVPS as HVPS Loop
+ participant Klystron as Klystron
+ participant Cavity as Cavity Phase Measurement
+ participant Tuner as Tuner Loop
+ 
+ Note over Gap,Tuner: Normal Operation Cycle (approx 1 Hz)
+ 
+ Gap->>DAC: Gap voltage below setpoint
+ DAC->>DAC: Increase SRF1:STN:ON:IQ
+ DAC->>Drive: Drive power increases
+ 
+ Drive->>HVPS: Drive power above setpoint
+ HVPS->>HVPS: Increase SRF1:HVPS:VOLT:CTRL
+ HVPS->>Klystron: Higher cathode voltage
+ Klystron->>Drive: Higher gain, drive power decreases
+ 
+ Cavity->>Tuner: Phase drift detected
+ Tuner->>Tuner: Calculate position correction
+ Tuner->>Cavity: Move stepper motor
+ Cavity->>Tuner: Phase returns to setpoint
 ```
 
 
@@ -228,28 +228,28 @@ sequenceDiagram
 
 ```mermaid
 graph LR
-    subgraph "DAC Control Loop (~1 Hz)"
-        Setpoint[Gap Voltage<br/>Setpoint<br/>~3.2 MV]
-        Sum[Sum of 4<br/>Cavity Gap<br/>Voltages]
-        Error[Error<br/>Calculation]
-        Controller[DAC Controller<br/>SNL → Python]
-        DAC_PV[SRF1:STN:ON:IQ<br/>DAC Counts<br/>0-2047]
-    end
-    
-    subgraph "RF Processor Module"
-        RFP[Analog I/Q<br/>Processing]
-        Amp[Amplitude<br/>Control]
-    end
-    
-    Setpoint --> Error
-    Sum --> Error
-    Error --> Controller
-    Controller --> DAC_PV
-    DAC_PV --> RFP
-    RFP --> Amp
-    Amp --> |RF Drive| Klystron[Klystron<br/>~1 MW]
-    Klystron --> Cavities[4 RF Cavities]
-    Cavities --> Sum
+ subgraph "DAC Control Loop (approx 1 Hz)"
+ Setpoint[Gap Voltage Setpoint approx 3.2 MV]
+ Sum[Sum of 4 Cavity Gap Voltages]
+ Error[Error Calculation]
+ Controller[DAC Controller SNL --> Python]
+ DAC_PV[SRF1:STN:ON:IQ DAC Counts 0-2047]
+ end
+ 
+ subgraph "RF Processor Module"
+ RFP[Analog I/Q Processing]
+ Amp[Amplitude Control]
+ end
+ 
+ Setpoint --> Error
+ Sum --> Error
+ Error --> Controller
+ Controller --> DAC_PV
+ DAC_PV --> RFP
+ RFP --> Amp
+ Amp --> |RF Drive| Klystron[Klystron approx 1 MW]
+ Klystron --> Cavities[4 RF Cavities]
+ Cavities --> Sum
 ```
 
 **Algorithm (from `rf_dac_loop.st`)**:
@@ -282,21 +282,21 @@ def dac_control_loop():
 
 ```mermaid
 graph LR
-    subgraph "HVPS Control Loop (~1 Hz)"
-        Drive_SP[Drive Power<br/>Setpoint<br/>~50 W]
-        Drive_Meas[Drive Power<br/>Measurement<br/>SRF1:KLYSDRIVFRWD:POWER]
-        HVPS_Error[Error<br/>Calculation]
-        HVPS_Controller[HVPS Controller<br/>SNL → Python]
-        HVPS_PV[SRF1:HVPS:VOLT:CTRL<br/>Voltage Control<br/>0-50 kV]
-    end
-    
-    Drive_SP --> HVPS_Error
-    Drive_Meas --> HVPS_Error
-    HVPS_Error --> HVPS_Controller
-    HVPS_Controller --> HVPS_PV
-    HVPS_PV --> HVPS[High Voltage<br/>Power Supply]
-    HVPS --> Klystron[Klystron<br/>Cathode Voltage]
-    Klystron --> |Higher Gain<br/>Lower Drive Power| Drive_Meas
+ subgraph "HVPS Control Loop (approx 1 Hz)"
+ Drive_SP[Drive Power Setpoint approx 50 W]
+ Drive_Meas[Drive Power Measurement SRF1:KLYSDRIVFRWD:POWER]
+ HVPS_Error[Error Calculation]
+ HVPS_Controller[HVPS Controller SNL --> Python]
+ HVPS_PV[SRF1:HVPS:VOLT:CTRL Voltage Control 0-50 kV]
+ end
+ 
+ Drive_SP --> HVPS_Error
+ Drive_Meas --> HVPS_Error
+ HVPS_Error --> HVPS_Controller
+ HVPS_Controller --> HVPS_PV
+ HVPS_PV --> HVPS[High Voltage Power Supply]
+ HVPS --> Klystron[Klystron Cathode Voltage]
+ Klystron --> |Higher Gain Lower Drive Power| Drive_Meas
 ```
 
 **Control Strategy**:
@@ -316,42 +316,42 @@ graph LR
 
 ```mermaid
 graph TB
-    subgraph "Tuner Control Loop (per cavity)"
-        Phase_SP[Phase Setpoint<br/>Cavity on Resonance]
-        Phase_Meas[Phase Measurement<br/>Forward vs Cavity]
-        Tuner_Error[Phase Error<br/>Calculation]
-        Tuner_Controller[Tuner Controller<br/>SNL → Python]
-        Motor_Cmd[Stepper Motor<br/>Position Command]
-    end
-    
-    subgraph "Mechanical System"
-        Stepper[Stepper Motor<br/>200 steps/rev<br/>400 microsteps/rev]
-        Gear[Gear Reduction<br/>2:1 ratio]
-        Leadscrew[Lead Screw<br/>20 TPI Acme<br/>0.05" per motor rev]
-        Tuner_Mech[Cylindrical Tuner<br/>Inside Cavity]
-    end
-    
-    subgraph "Measurement System"
-        Forward[Forward Power<br/>Coupler]
-        Cavity_Probe[Cavity Field<br/>Probe]
-        Phase_Det[Phase Detector<br/>in RFP Module]
-    end
-    
-    Phase_SP --> Tuner_Error
-    Phase_Meas --> Tuner_Error
-    Tuner_Error --> Tuner_Controller
-    Tuner_Controller --> Motor_Cmd
-    
-    Motor_Cmd --> Stepper
-    Stepper --> Gear
-    Gear --> Leadscrew
-    Leadscrew --> Tuner_Mech
-    
-    Forward --> Phase_Det
-    Cavity_Probe --> Phase_Det
-    Phase_Det --> Phase_Meas
-    
-    Tuner_Mech -.-> |Changes Cavity<br/>Resonant Frequency| Cavity_Probe
+ subgraph "Tuner Control Loop (per cavity)"
+ Phase_SP[Phase Setpoint Cavity on Resonance]
+ Phase_Meas[Phase Measurement Forward vs Cavity]
+ Tuner_Error[Phase Error Calculation]
+ Tuner_Controller[Tuner Controller SNL --> Python]
+ Motor_Cmd[Stepper Motor Position Command]
+ end
+ 
+ subgraph "Mechanical System"
+ Stepper[Stepper Motor 200 steps/rev 400 microsteps/rev]
+ Gear[Gear Reduction 2:1 ratio]
+ Leadscrew[Lead Screw 20 TPI Acme 0.05 inch per motor rev]
+ Tuner_Mech[Cylindrical Tuner Inside Cavity]
+ end
+ 
+ subgraph "Measurement System"
+ Forward[Forward Power Coupler]
+ Cavity_Probe[Cavity Field Probe]
+ Phase_Det[Phase Detector in RFP Module]
+ end
+ 
+ Phase_SP --> Tuner_Error
+ Phase_Meas --> Tuner_Error
+ Tuner_Error --> Tuner_Controller
+ Tuner_Controller --> Motor_Cmd
+ 
+ Motor_Cmd --> Stepper
+ Stepper --> Gear
+ Gear --> Leadscrew
+ Leadscrew --> Tuner_Mech
+ 
+ Forward --> Phase_Det
+ Cavity_Probe --> Phase_Det
+ Phase_Det --> Phase_Meas
+ 
+ Tuner_Mech -.-> |Changes Cavity Resonant Frequency| Cavity_Probe
 ```
 
 **Tuner Mechanical Specifications** (from Jim's document):
@@ -373,45 +373,45 @@ The RFP is the heart of the fast analog control system:
 
 ```mermaid
 graph LR
-    subgraph "RF Processor Module"
-        subgraph "Input Processing"
-            Cav1_In[Cavity 1<br/>Probe Signal]
-            Cav2_In[Cavity 2<br/>Probe Signal]
-            Cav3_In[Cavity 3<br/>Probe Signal]
-            Cav4_In[Cavity 4<br/>Probe Signal]
-        end
-        
-        subgraph "I/Q Processing"
-            IQ_Decomp[I/Q Decomposition<br/>Analog]
-            Phase_Comp[Phase Comparison]
-            Amp_Comp[Amplitude Comparison]
-        end
-        
-        subgraph "Control"
-            Direct_Loop[Direct Loop<br/>Analog Feedback]
-            DAC_Control[DAC Control<br/>SRF1:STN:ON:IQ]
-        end
-        
-        subgraph "Output"
-            IQ_Recon[I/Q Reconstruction]
-            RF_Out[RF Output to<br/>Drive Amplifier]
-        end
-    end
-    
-    Cav1_In --> IQ_Decomp
-    Cav2_In --> IQ_Decomp
-    Cav3_In --> IQ_Decomp
-    Cav4_In --> IQ_Decomp
-    
-    IQ_Decomp --> Phase_Comp
-    IQ_Decomp --> Amp_Comp
-    
-    Phase_Comp --> Direct_Loop
-    Amp_Comp --> Direct_Loop
-    DAC_Control --> Direct_Loop
-    
-    Direct_Loop --> IQ_Recon
-    IQ_Recon --> RF_Out
+ subgraph "RF Processor Module"
+ subgraph "Input Processing"
+ Cav1_In[Cavity 1 Probe Signal]
+ Cav2_In[Cavity 2 Probe Signal]
+ Cav3_In[Cavity 3 Probe Signal]
+ Cav4_In[Cavity 4 Probe Signal]
+ end
+ 
+ subgraph "I/Q Processing"
+ IQ_Decomp[I/Q Decomposition Analog]
+ Phase_Comp[Phase Comparison]
+ Amp_Comp[Amplitude Comparison]
+ end
+ 
+ subgraph "Control"
+ Direct_Loop[Direct Loop Analog Feedback]
+ DAC_Control[DAC Control SRF1:STN:ON:IQ]
+ end
+ 
+ subgraph "Output"
+ IQ_Recon[I/Q Reconstruction]
+ RF_Out[RF Output to Drive Amplifier]
+ end
+ end
+ 
+ Cav1_In --> IQ_Decomp
+ Cav2_In --> IQ_Decomp
+ Cav3_In --> IQ_Decomp
+ Cav4_In --> IQ_Decomp
+ 
+ IQ_Decomp --> Phase_Comp
+ IQ_Decomp --> Amp_Comp
+ 
+ Phase_Comp --> Direct_Loop
+ Amp_Comp --> Direct_Loop
+ DAC_Control --> Direct_Loop
+ 
+ Direct_Loop --> IQ_Recon
+ IQ_Recon --> RF_Out
 ```
 
 **Key RFP Process Variables**:
@@ -434,33 +434,33 @@ graph LR
 
 ```mermaid
 graph TB
-    subgraph "Current System (Legacy)"
-        VXI_Old[VXI Controller<br/>SNL Sequences]
-        AB_Controller[Allen-Bradley<br/>1746-HSTP1<br/>Controller]
-        PWM_Driver[Superior Electric<br/>SS2000MD4-M<br/>PWM Driver]
-        Motor_Old[Stepper Motor<br/>M093-FC11]
-        Pot[Linear Potentiometer<br/>Position Indication]
-    end
-    
-    subgraph "Proposed System (Python/EPICS)"
-        Python_Control[Python Control<br/>PyEPICS]
-        EPICS_IOC[EPICS IOC<br/>Motor Records]
-        Galil[Galil DMC-4143<br/>4-Axis Controller]
-        Modern_Driver[Modern Stepper<br/>Driver with<br/>Microstepping]
-        Motor_New[Same Motor<br/>M093-FC11<br/>or Equivalent]
-        Encoder[Optional Encoder<br/>for Position Feedback]
-    end
-    
-    VXI_Old --> AB_Controller
-    AB_Controller --> PWM_Driver
-    PWM_Driver --> Motor_Old
-    Motor_Old -.-> Pot
-    
-    Python_Control --> EPICS_IOC
-    EPICS_IOC --> Galil
-    Galil --> Modern_Driver
-    Modern_Driver --> Motor_New
-    Motor_New -.-> Encoder
+ subgraph "Current System (Legacy)"
+ VXI_Old[VXI Controller SNL Sequences]
+ AB_Controller[Allen-Bradley 1746-HSTP1 Controller]
+ PWM_Driver[Superior Electric SS2000MD4-M PWM Driver]
+ Motor_Old[Stepper Motor M093-FC11]
+ Pot[Linear Potentiometer Position Indication]
+ end
+ 
+ subgraph "Proposed System (Python/EPICS)"
+ Python_Control[Python Control PyEPICS]
+ EPICS_IOC[EPICS IOC Motor Records]
+ Galil[Galil DMC-4143 4-Axis Controller]
+ Modern_Driver[Modern Stepper Driver with Microstepping]
+ Motor_New[Same Motor M093-FC11 or Equivalent]
+ Encoder[Optional Encoder for Position Feedback]
+ end
+ 
+ VXI_Old --> AB_Controller
+ AB_Controller --> PWM_Driver
+ PWM_Driver --> Motor_Old
+ Motor_Old -.-> Pot
+ 
+ Python_Control --> EPICS_IOC
+ EPICS_IOC --> Galil
+ Galil --> Modern_Driver
+ Modern_Driver --> Motor_New
+ Motor_New -.-> Encoder
 ```
 
 ---
@@ -473,42 +473,42 @@ The master state machine coordinates all control loops through four main states:
 
 ```mermaid
 stateDiagram-v2
-    [*] --> OFF
-    
-    OFF --> PARK : Park Request
-    OFF --> TUNE : Tune Request
-    OFF --> ON_CW : Direct to ON_CW
-    
-    PARK --> OFF : Turn Off
-    
-    TUNE --> OFF : Turn Off
-    TUNE --> ON_CW : Normal Operation
-    
-    ON_CW --> OFF : Turn Off
-    ON_CW --> TUNE : Reduce Power
-    
-    state OFF {
-        [*] --> AllLoopsOff
-        AllLoopsOff --> HVPSOff
-        HVPSOff --> RFOff
-        RFOff --> [*]
-    }
-    
-    state TUNE {
-        [*] --> TunersToHome
-        TunersToHome --> HVPSMinVoltage
-        HVPSMinVoltage --> LowPowerRF
-        LowPowerRF --> TunerLoopsActive
-        TunerLoopsActive --> [*]
-    }
-    
-    state ON_CW {
-        [*] --> DirectLoopSetup
-        DirectLoopSetup --> GainRamping
-        GainRamping --> FullPowerOperation
-        FullPowerOperation --> AllLoopsActive
-        AllLoopsActive --> [*]
-    }
+ [*] --> OFF
+ 
+ OFF --> PARK : Park Request
+ OFF --> TUNE : Tune Request
+ OFF --> ON_CW : Direct to ON_CW
+ 
+ PARK --> OFF : Turn Off
+ 
+ TUNE --> OFF : Turn Off
+ TUNE --> ON_CW : Normal Operation
+ 
+ ON_CW --> OFF : Turn Off
+ ON_CW --> TUNE : Reduce Power
+ 
+ state OFF {
+ [*] --> AllLoopsOff
+ AllLoopsOff --> HVPSOff
+ HVPSOff --> RFOff
+ RFOff --> [*]
+ }
+ 
+ state TUNE {
+ [*] --> TunersToHome
+ TunersToHome --> HVPSMinVoltage
+ HVPSMinVoltage --> LowPowerRF
+ LowPowerRF --> TunerLoopsActive
+ TunerLoopsActive --> [*]
+ }
+ 
+ state ON_CW {
+ [*] --> DirectLoopSetup
+ DirectLoopSetup --> GainRamping
+ GainRamping --> FullPowerOperation
+ FullPowerOperation --> AllLoopsActive
+ AllLoopsActive --> [*]
+ }
 ```
 
 ### 6.2 Station Turn-On Sequence (ON_CW Mode)
@@ -517,41 +517,41 @@ Based on Jim's documentation, the turn-on sequence is carefully orchestrated:
 
 ```mermaid
 sequenceDiagram
-    participant Operator
-    participant StateMachine as State Machine
-    participant Tuners
-    participant HVPS
-    participant DAC as DAC Loop
-    participant RFP
-    participant DirectLoop as Direct Loop
-    
-    Operator->>StateMachine: Request ON_CW
-    
-    Note over StateMachine: Initial Setup
-    StateMachine->>Tuners: Move to TUNE/ON Home Position
-    StateMachine->>HVPS: Set to Turn-On Voltage (50 kV)
-    StateMachine->>DAC: Set to Fast On Counts (100)
-    
-    Note over StateMachine: Low Power State
-    StateMachine->>RFP: Enable RF output
-    Note right of RFP: ~Few watts drive power<br/>~Few hundred kV gap voltage
-    
-    Note over StateMachine: Enable Direct Loop
-    StateMachine->>DirectLoop: Close analog switch
-    Note right of DirectLoop: Adds integrator to feedback<br/>Causes power transient
-    
-    Note over StateMachine: Ramp to Full Power
-    StateMachine->>DAC: Increase to ~200 counts
-    StateMachine->>HVPS: Begin voltage ramp
-    
-    loop Coordinated Ramping (10-20 seconds)
-        DAC->>DAC: Increase gap voltage
-        HVPS->>HVPS: Increase voltage to maintain drive power
-    end
-    
-    Note over StateMachine: Full Operation
-    StateMachine->>StateMachine: All loops active
-    Note right of StateMachine: ~50W drive power<br/>~3.2 MV gap voltage<br/>~1 MW klystron output
+ participant Operator
+ participant StateMachine as State Machine
+ participant Tuners
+ participant HVPS
+ participant DAC as DAC Loop
+ participant RFP
+ participant DirectLoop as Direct Loop
+ 
+ Operator->>StateMachine: Request ON_CW
+ 
+ Note over StateMachine: Initial Setup
+ StateMachine->>Tuners: Move to TUNE/ON Home Position
+ StateMachine->>HVPS: Set to Turn-On Voltage (50 kV)
+ StateMachine->>DAC: Set to Fast On Counts (100)
+ 
+ Note over StateMachine: Low Power State
+ StateMachine->>RFP: Enable RF output
+ Note right of RFP: approx Few watts drive power approx Few hundred kV gap voltage
+ 
+ Note over StateMachine: Enable Direct Loop
+ StateMachine->>DirectLoop: Close analog switch
+ Note right of DirectLoop: Adds integrator to feedback Causes power transient
+ 
+ Note over StateMachine: Ramp to Full Power
+ StateMachine->>DAC: Increase to approx 200 counts
+ StateMachine->>HVPS: Begin voltage ramp
+ 
+ loop Coordinated Ramping (10-20 seconds)
+ DAC->>DAC: Increase gap voltage
+ HVPS->>HVPS: Increase voltage to maintain drive power
+ end
+ 
+ Note over StateMachine: Full Operation
+ StateMachine->>StateMachine: All loops active
+ Note right of StateMachine: approx 50W drive power approx 3.2 MV gap voltage approx 1 MW klystron output
 ```
 
 ### 6.3 Critical Control Parameters
@@ -578,36 +578,36 @@ Based on Jim's detailed documentation and drawing SA-341-392-61:
 
 ```mermaid
 graph TB
-    subgraph "Stepper Motor Assembly"
-        Motor[Superior Electric<br/>Slo-Syn M093-FC11<br/>NEMA 34D<br/>200 steps/rev]
-        
-        Motor_Pulley[Motor Pulley<br/>SDP/SI 6A 3-15DF03712<br/>15 groove timing belt]
-        
-        Belt[Timing Belt<br/>SDP/SI 6G 3-045037]
-        
-        Screw_Pulley[Lead Screw Pulley<br/>SDP/SI 6A 3-30H3708<br/>30 groove timing belt]
-    end
-    
-    subgraph "Lead Screw Assembly"
-        Lead_Screw[Lead Screw<br/>1/2-10 Acme Thread<br/>PF-341-392-68<br/>20 TPI]
-        
-        Tuner_Element[Cylindrical Tuner<br/>Inside RF Cavity]
-    end
-    
-    subgraph "Position Sensing"
-        Potentiometer[Linear Potentiometer<br/>Position Indication<br/>Not used in feedback]
-        
-        Step_Counter[Step Counter<br/>in Controller<br/>Tracks commanded position]
-    end
-    
-    Motor --> Motor_Pulley
-    Motor_Pulley --> Belt
-    Belt --> Screw_Pulley
-    Screw_Pulley --> Lead_Screw
-    Lead_Screw --> Tuner_Element
-    
-    Tuner_Element -.-> Potentiometer
-    Motor -.-> Step_Counter
+ subgraph "Stepper Motor Assembly"
+ Motor[Superior Electric Slo-Syn M093-FC11 NEMA 34D 200 steps/rev]
+ 
+ Motor_Pulley[Motor Pulley SDP/SI 6A 3-15DF03712 15 groove timing belt]
+ 
+ Belt[Timing Belt SDP/SI 6G 3-045037]
+ 
+ Screw_Pulley[Lead Screw Pulley SDP/SI 6A 3-30H3708 30 groove timing belt]
+ end
+ 
+ subgraph "Lead Screw Assembly"
+ Lead_Screw[Lead Screw 1/2-10 Acme Thread PF-341-392-68 20 TPI]
+ 
+ Tuner_Element[Cylindrical Tuner Inside RF Cavity]
+ end
+ 
+ subgraph "Position Sensing"
+ Potentiometer[Linear Potentiometer Position Indication Not used in feedback]
+ 
+ Step_Counter[Step Counter in Controller Tracks commanded position]
+ end
+ 
+ Motor --> Motor_Pulley
+ Motor_Pulley --> Belt
+ Belt --> Screw_Pulley
+ Screw_Pulley --> Lead_Screw
+ Lead_Screw --> Tuner_Element
+ 
+ Tuner_Element -.-> Potentiometer
+ Motor -.-> Step_Counter
 ```
 
 **Mechanical Calculations**:
@@ -623,38 +623,38 @@ The tuner control system implements two feedback loops:
 
 ```mermaid
 graph TB
-    subgraph "Primary Loop: Phase Control"
-        Phase_Setpoint[Phase Setpoint<br/>Cavity on Resonance]
-        Phase_Measurement[Phase Measurement<br/>Forward vs Cavity Field]
-        Phase_Error[Phase Error]
-        Phase_Controller[Phase Controller<br/>PID-like]
-        Position_Command[Position Command<br/>to Stepper Motor]
-    end
-    
-    subgraph "Secondary Loop: Load Angle Offset"
-        Cavity_Strength[Cavity Strength Control<br/>SRF1:CAV1:STRENGTH:CTRL<br/>Fraction of total gap voltage]
-        Gap_Voltage_Balance[Gap Voltage Balance<br/>Among 4 Cavities]
-        Phase_Offset[Phase Setpoint Offset<br/>to Balance Power]
-    end
-    
-    subgraph "Safety & Limits"
-        Power_Check[Minimum Power Check<br/>Disable if cavity power too low]
-        Motion_Limits[Motion Limits<br/>Prevent mechanical damage]
-        Deadband[Deadband Filter<br/>Prevent unnecessary motion]
-    end
-    
-    Phase_Setpoint --> Phase_Error
-    Phase_Measurement --> Phase_Error
-    Phase_Error --> Phase_Controller
-    Phase_Controller --> Position_Command
-    
-    Cavity_Strength --> Gap_Voltage_Balance
-    Gap_Voltage_Balance --> Phase_Offset
-    Phase_Offset --> Phase_Setpoint
-    
-    Power_Check --> Phase_Controller
-    Motion_Limits --> Position_Command
-    Deadband --> Position_Command
+ subgraph "Primary Loop: Phase Control"
+ Phase_Setpoint[Phase Setpoint Cavity on Resonance]
+ Phase_Measurement[Phase Measurement Forward vs Cavity Field]
+ Phase_Error[Phase Error]
+ Phase_Controller[Phase Controller PID-like]
+ Position_Command[Position Command to Stepper Motor]
+ end
+ 
+ subgraph "Secondary Loop: Load Angle Offset"
+ Cavity_Strength[Cavity Strength Control SRF1:CAV1:STRENGTH:CTRL Fraction of total gap voltage]
+ Gap_Voltage_Balance[Gap Voltage Balance Among 4 Cavities]
+ Phase_Offset[Phase Setpoint Offset to Balance Power]
+ end
+ 
+ subgraph "Safety & Limits"
+ Power_Check[Minimum Power Check Disable if cavity power too low]
+ Motion_Limits[Motion Limits Prevent mechanical damage]
+ Deadband[Deadband Filter Prevent unnecessary motion]
+ end
+ 
+ Phase_Setpoint --> Phase_Error
+ Phase_Measurement --> Phase_Error
+ Phase_Error --> Phase_Controller
+ Phase_Controller --> Position_Command
+ 
+ Cavity_Strength --> Gap_Voltage_Balance
+ Gap_Voltage_Balance --> Phase_Offset
+ Phase_Offset --> Phase_Setpoint
+ 
+ Power_Check --> Phase_Controller
+ Motion_Limits --> Position_Command
+ Deadband --> Position_Command
 ```
 
 **Algorithm Features** (from `rf_tuner_loop.st`):
@@ -675,37 +675,37 @@ graph TB
 
 ```mermaid
 graph TB
-    subgraph "Python High-Level Control"
-        Tuner_Manager[Tuner Manager<br/>Python Class<br/>PyEPICS Interface]
-        
-        Loop_Controller[Loop Controller<br/>Phase Error Processing<br/>Position Calculation]
-        
-        Safety_Monitor[Safety Monitor<br/>Power Checks<br/>Limit Monitoring]
-    end
-    
-    subgraph "EPICS IOC Layer"
-        Motor_Records[EPICS Motor Records<br/>4 instances<br/>Standard motor record]
-        
-        Galil_Driver[Galil EPICS Driver<br/>asyn-based<br/>Motion control]
-    end
-    
-    subgraph "Hardware Layer"
-        Galil_Controller[Galil DMC-4143<br/>4-Axis Controller<br/>Ethernet Interface]
-        
-        Stepper_Drivers[Modern Stepper Drivers<br/>Microstepping<br/>Current Control]
-        
-        Motors[4 × Stepper Motors<br/>Same mechanical assembly]
-    end
-    
-    Tuner_Manager --> Loop_Controller
-    Tuner_Manager --> Safety_Monitor
-    Loop_Controller --> Motor_Records
-    Safety_Monitor --> Motor_Records
-    
-    Motor_Records --> Galil_Driver
-    Galil_Driver --> Galil_Controller
-    Galil_Controller --> Stepper_Drivers
-    Stepper_Drivers --> Motors
+ subgraph "Python High-Level Control"
+ Tuner_Manager[Tuner Manager Python Class PyEPICS Interface]
+ 
+ Loop_Controller[Loop Controller Phase Error Processing Position Calculation]
+ 
+ Safety_Monitor[Safety Monitor Power Checks Limit Monitoring]
+ end
+ 
+ subgraph "EPICS IOC Layer"
+ Motor_Records[EPICS Motor Records 4 instances Standard motor record]
+ 
+ Galil_Driver[Galil EPICS Driver asyn-based Motion control]
+ end
+ 
+ subgraph "Hardware Layer"
+ Galil_Controller[Galil DMC-4143 4-Axis Controller Ethernet Interface]
+ 
+ Stepper_Drivers[Modern Stepper Drivers Microstepping Current Control]
+ 
+ Motors[4 x Stepper Motors Same mechanical assembly]
+ end
+ 
+ Tuner_Manager --> Loop_Controller
+ Tuner_Manager --> Safety_Monitor
+ Loop_Controller --> Motor_Records
+ Safety_Monitor --> Motor_Records
+ 
+ Motor_Records --> Galil_Driver
+ Galil_Driver --> Galil_Controller
+ Galil_Controller --> Stepper_Drivers
+ Stepper_Drivers --> Motors
 ```
 
 ---
@@ -718,36 +718,36 @@ The legacy SNL code follows a consistent pattern:
 
 ```mermaid
 graph TB
-    subgraph "Each Control Loop"
-        Defs[*_defs.h<br/>Constants<br/>Status codes<br/>String messages]
-        
-        PVs[*_pvs.h<br/>Process Variable<br/>declarations<br/>assign/monitor]
-        
-        Macs[*_macs.h<br/>Control algorithm<br/>macros<br/>Status checking]
-        
-        Sequence[*.st<br/>State machine<br/>Main control logic<br/>SNL code]
-    end
-    
-    subgraph "Shared Components"
-        Loop_Defs[rf_loop_defs.h<br/>Common definitions<br/>LOOP_CONTROL_ON/OFF]
-        
-        Loop_Macs[rf_loop_macs.h<br/>Alarm severity<br/>checking macros]
-    end
-    
-    subgraph "Build System"
-        Makefile[Makefile<br/>EPICS build<br/>configuration]
-        
-        DBD[rfSeq.dbd<br/>Database definition<br/>Registrar functions]
-    end
-    
-    Defs --> Sequence
-    PVs --> Sequence
-    Macs --> Sequence
-    Loop_Defs --> Sequence
-    Loop_Macs --> Sequence
-    
-    Makefile --> Sequence
-    DBD --> Sequence
+ subgraph "Each Control Loop"
+ Defs[*_defs.h Constants Status codes String messages]
+ 
+ PVs[*_pvs.h Process Variable declarations assign/monitor]
+ 
+ Macs[*_macs.h Control algorithm macros Status checking]
+ 
+ Sequence[*.st State machine Main control logic SNL code]
+ end
+ 
+ subgraph "Shared Components"
+ Loop_Defs[rf_loop_defs.h Common definitions LOOP_CONTROL_ON/OFF]
+ 
+ Loop_Macs[rf_loop_macs.h Alarm severity checking macros]
+ end
+ 
+ subgraph "Build System"
+ Makefile[Makefile EPICS build configuration]
+ 
+ DBD[rfSeq.dbd Database definition Registrar functions]
+ end
+ 
+ Defs --> Sequence
+ PVs --> Sequence
+ Macs --> Sequence
+ Loop_Defs --> Sequence
+ Loop_Macs --> Sequence
+ 
+ Makefile --> Sequence
+ DBD --> Sequence
 ```
 
 ### 8.2 Key Design Patterns
@@ -812,50 +812,50 @@ int previous_status;       // For change detection
 
 ```mermaid
 graph TB
-    subgraph "Python Application Layer"
-        RF_Station[RF Station Manager<br/>Python Class<br/>Overall coordination]
-        
-        DAC_Controller[DAC Controller<br/>Gap voltage regulation<br/>PyEPICS interface]
-        
-        HVPS_Controller[HVPS Controller<br/>Drive power regulation<br/>PyEPICS interface]
-        
-        Tuner_Manager[Tuner Manager<br/>4 cavity tuners<br/>Motion coordination]
-        
-        State_Machine[State Machine<br/>Station states<br/>Startup/shutdown logic]
-    end
-    
-    subgraph "EPICS IOC Layer"
-        Database[EPICS Database<br/>Process Variables<br/>Calculation records]
-        
-        Motor_Records[Motor Records<br/>Tuner control<br/>Standard EPICS]
-        
-        Device_Support[Device Support<br/>Hardware interfaces<br/>Custom drivers]
-    end
-    
-    subgraph "Hardware Layer"
-        RFP_Module[RF Processor<br/>Existing analog<br/>control system]
-        
-        HVPS_System[HVPS System<br/>Existing power<br/>supply control]
-        
-        Galil_System[Galil Motion<br/>Controller<br/>New tuner system]
-    end
-    
-    RF_Station --> DAC_Controller
-    RF_Station --> HVPS_Controller
-    RF_Station --> Tuner_Manager
-    RF_Station --> State_Machine
-    
-    DAC_Controller --> Database
-    HVPS_Controller --> Database
-    Tuner_Manager --> Motor_Records
-    State_Machine --> Database
-    
-    Database --> Device_Support
-    Motor_Records --> Device_Support
-    
-    Device_Support --> RFP_Module
-    Device_Support --> HVPS_System
-    Device_Support --> Galil_System
+ subgraph "Python Application Layer"
+ RF_Station[RF Station Manager Python Class Overall coordination]
+ 
+ DAC_Controller[DAC Controller Gap voltage regulation PyEPICS interface]
+ 
+ HVPS_Controller[HVPS Controller Drive power regulation PyEPICS interface]
+ 
+ Tuner_Manager[Tuner Manager 4 cavity tuners Motion coordination]
+ 
+ State_Machine[State Machine Station states Startup/shutdown logic]
+ end
+ 
+ subgraph "EPICS IOC Layer"
+ Database[EPICS Database Process Variables Calculation records]
+ 
+ Motor_Records[Motor Records Tuner control Standard EPICS]
+ 
+ Device_Support[Device Support Hardware interfaces Custom drivers]
+ end
+ 
+ subgraph "Hardware Layer"
+ RFP_Module[RF Processor Existing analog control system]
+ 
+ HVPS_System[HVPS System Existing power supply control]
+ 
+ Galil_System[Galil Motion Controller New tuner system]
+ end
+ 
+ RF_Station --> DAC_Controller
+ RF_Station --> HVPS_Controller
+ RF_Station --> Tuner_Manager
+ RF_Station --> State_Machine
+ 
+ DAC_Controller --> Database
+ HVPS_Controller --> Database
+ Tuner_Manager --> Motor_Records
+ State_Machine --> Database
+ 
+ Database --> Device_Support
+ Motor_Records --> Device_Support
+ 
+ Device_Support --> RFP_Module
+ Device_Support --> HVPS_System
+ Device_Support --> Galil_System
 ```
 
 ### 9.2 Python Implementation Framework
@@ -966,44 +966,44 @@ class RFStationManager:
 
 ```mermaid
 graph LR
-    subgraph "Python Application"
-        PyApp[Python RF Manager<br/>PyEPICS Client]
-    end
-    
-    subgraph "EPICS IOC"
-        subgraph "Control PVs"
-            State_Ctrl[SRF1:STN:STATE:CTRL<br/>Station state control]
-            DAC_Ctrl[SRF1:STN:ON:IQ.A<br/>DAC counts control]
-            HVPS_Ctrl[SRF1:HVPS:VOLT:CTRL<br/>HVPS voltage control]
-        end
-        
-        subgraph "Readback PVs"
-            Gap_Voltage[SRF1:STNVOLT:TOTAL<br/>Total gap voltage]
-            Drive_Power[SRF1:KLYSDRIVFRWD:POWER<br/>Drive power measurement]
-            Cavity_Phase[SRF1:CAV*:PHASE<br/>Cavity phase measurements]
-        end
-        
-        subgraph "Calculation Records"
-            DAC_Delta[SRF1:STNVOLT:DAC:DELTA<br/>DAC error calculation]
-            HVPS_Delta[SRF1:KLYSDRIVFRWD:HVPS:DELTA<br/>HVPS error calculation]
-            Phase_Error[SRF1:CAV*:PHASE:ERROR<br/>Phase error calculation]
-        end
-        
-        subgraph "Motor Records"
-            Tuner_Motors[SRF1:CAV*TUNR:MOTOR<br/>Stepper motor control<br/>Standard motor record]
-        end
-    end
-    
-    PyApp <--> State_Ctrl
-    PyApp <--> DAC_Ctrl
-    PyApp <--> HVPS_Ctrl
-    PyApp <--> Gap_Voltage
-    PyApp <--> Drive_Power
-    PyApp <--> Cavity_Phase
-    
-    DAC_Delta --> DAC_Ctrl
-    HVPS_Delta --> HVPS_Ctrl
-    Phase_Error --> Tuner_Motors
+ subgraph "Python Application"
+ PyApp[Python RF Manager PyEPICS Client]
+ end
+ 
+ subgraph "EPICS IOC"
+ subgraph "Control PVs"
+ State_Ctrl[SRF1:STN:STATE:CTRL Station state control]
+ DAC_Ctrl[SRF1:STN:ON:IQ.A DAC counts control]
+ HVPS_Ctrl[SRF1:HVPS:VOLT:CTRL HVPS voltage control]
+ end
+ 
+ subgraph "Readback PVs"
+ Gap_Voltage[SRF1:STNVOLT:TOTAL Total gap voltage]
+ Drive_Power[SRF1:KLYSDRIVFRWD:POWER Drive power measurement]
+ Cavity_Phase[SRF1:CAV*:PHASE Cavity phase measurements]
+ end
+ 
+ subgraph "Calculation Records"
+ DAC_Delta[SRF1:STNVOLT:DAC:DELTA DAC error calculation]
+ HVPS_Delta[SRF1:KLYSDRIVFRWD:HVPS:DELTA HVPS error calculation]
+ Phase_Error[SRF1:CAV*:PHASE:ERROR Phase error calculation]
+ end
+ 
+ subgraph "Motor Records"
+ Tuner_Motors[SRF1:CAV*TUNR:MOTOR Stepper motor control Standard motor record]
+ end
+ end
+ 
+ PyApp <--> State_Ctrl
+ PyApp <--> DAC_Ctrl
+ PyApp <--> HVPS_Ctrl
+ PyApp <--> Gap_Voltage
+ PyApp <--> Drive_Power
+ PyApp <--> Cavity_Phase
+ 
+ DAC_Delta --> DAC_Ctrl
+ HVPS_Delta --> HVPS_Ctrl
+ Phase_Error --> Tuner_Motors
 ```
 
 
@@ -1183,29 +1183,29 @@ class TestDACController(unittest.TestCase):
 
 ```mermaid
 gantt
-    title SPEAR3 LLRF Upgrade Commissioning
-    dateFormat  YYYY-MM-DD
-    section Phase 1
-    IOC Migration           :p1a, 2024-03-01, 30d
-    Database Testing        :p1b, after p1a, 14d
-    Python Framework        :p1c, after p1a, 21d
-    
-    section Phase 2
-    DAC Loop Migration      :p2a, after p1c, 21d
-    HVPS Loop Migration     :p2b, after p2a, 14d
-    State Machine           :p2c, after p2b, 14d
-    Parallel Testing        :p2d, after p2c, 30d
-    
-    section Phase 3
-    Galil Installation     :p3a, after p2d, 14d
-    Motor Record Config    :p3b, after p3a, 7d
-    Tuner Manager          :p3c, after p3b, 21d
-    RF Testing             :p3d, after p3c, 30d
-    
-    section Phase 4
-    Performance Tuning     :p4a, after p3d, 21d
-    Documentation          :p4b, after p3d, 30d
-    Training               :p4c, after p4b, 14d
+ title SPEAR3 LLRF Upgrade Commissioning
+ dateFormat YYYY-MM-DD
+ section Phase 1
+ IOC Migration :p1a, 2024-03-01, 30d
+ Database Testing :p1b, after p1a, 14d
+ Python Framework :p1c, after p1a, 21d
+ 
+ section Phase 2
+ DAC Loop Migration :p2a, after p1c, 21d
+ HVPS Loop Migration :p2b, after p2a, 14d
+ State Machine :p2c, after p2b, 14d
+ Parallel Testing :p2d, after p2c, 30d
+ 
+ section Phase 3
+ Galil Installation :p3a, after p2d, 14d
+ Motor Record Config :p3b, after p3a, 7d
+ Tuner Manager :p3c, after p3b, 21d
+ RF Testing :p3d, after p3c, 30d
+ 
+ section Phase 4
+ Performance Tuning :p4a, after p3d, 21d
+ Documentation :p4b, after p3d, 30d
+ Training :p4c, after p4b, 14d
 ```
 
 **Success Criteria**:
@@ -1257,4 +1257,3 @@ The detailed analysis of Jim's operational document combined with the legacy cod
 - Establish clear rollback procedures
 
 This comprehensive analysis provides the technical foundation needed to successfully upgrade the SPEAR3 LLRF control system to a modern Python/EPICS implementation while maintaining the high reliability and performance required for synchrotron light source operations.
-
