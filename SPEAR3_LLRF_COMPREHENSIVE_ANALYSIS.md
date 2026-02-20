@@ -72,6 +72,7 @@ graph TB
 ## Physical System Layout
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '16px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 graph LR
  subgraph "RF Power Generation"
  HVPS[High Voltage Power Supply -50 to -90 kV]
@@ -433,32 +434,31 @@ graph LR
 - Integrated with EPICS motor record
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '16px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 graph TB
- subgraph "Row 1: Control & Signal Processing"
-  subgraph "Current System (Legacy)"
-  VXI_Old[VXI Controller<br/>SNL Sequences]
-  AB_Controller[Allen-Bradley<br/>1746-HSTP1 Controller]
-  PWM_Driver[Superior Electric<br/>SS2000MD4-M PWM Driver]
-  end
-  
-  subgraph "Proposed System (Python/EPICS)"
-  Python_Control[Python Control<br/>PyEPICS]
-  EPICS_IOC[EPICS IOC<br/>Motor Records]
-  Galil[Galil DMC-4143<br/>4-Axis Controller]
-  Modern_Driver[Modern Stepper Driver<br/>with Microstepping]
-  end
+ %% Control & Signal Processing Layer
+ subgraph "Current System (Legacy)"
+ VXI_Old["<b>VXI Controller</b><br/>SNL Sequences"]
+ AB_Controller["<b>Allen-Bradley</b><br/>1746-HSTP1 Controller"]
+ PWM_Driver["<b>Superior Electric</b><br/>SS2000MD4-M PWM Driver"]
  end
  
- subgraph "Row 2: Physical Components & Feedback"
-  subgraph "Current Hardware"
-  Motor_Old[Stepper Motor<br/>M093-FC11]
-  Pot[Linear Potentiometer<br/>Position Indication]
-  end
-  
-  subgraph "Proposed Hardware"
-  Motor_New[Same Motor M093-FC11<br/>or Equivalent]
-  Encoder[Optional Encoder<br/>Position Feedback]
-  end
+ subgraph "Proposed System (Python/EPICS)"
+ Python_Control["<b>Python Control</b><br/>PyEPICS"]
+ EPICS_IOC["<b>EPICS IOC</b><br/>Motor Records"]
+ Galil["<b>Galil DMC-4143</b><br/>4-Axis Controller"]
+ Modern_Driver["<b>Modern Stepper Driver</b><br/>with Microstepping"]
+ end
+ 
+ %% Physical Components & Feedback Layer
+ subgraph "Current Hardware"
+ Motor_Old["<b>Stepper Motor</b><br/>M093-FC11"]
+ Pot["<b>Linear Potentiometer</b><br/>Position Indication"]
+ end
+ 
+ subgraph "Proposed Hardware"
+ Motor_New["<b>Same Motor M093-FC11</b><br/>or Equivalent"]
+ Encoder["<b>Optional Encoder</b><br/>Position Feedback"]
  end
  
  %% Current System Connections
@@ -1194,27 +1194,29 @@ class TestDACController(unittest.TestCase):
 **Commissioning Phases**:
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '14px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 gantt
- title SPEAR3 LLRF Upgrade Commissioning
+ title SPEAR3 LLRF Upgrade Commissioning (6-Month Duration)
  dateFormat YYYY-MM-DD
- section Phase 1
- IOC Migration :p1a, 2024-03-01, 30d
+ axisFormat %b
+ section Month 1
+ IOC Migration :p1a, 2024-01-01, 30d
  Database Testing :p1b, after p1a, 14d
  Python Framework :p1c, after p1a, 21d
  
- section Phase 2
+ section Month 2-3
  DAC Loop Migration :p2a, after p1c, 21d
  HVPS Loop Migration :p2b, after p2a, 14d
  State Machine :p2c, after p2b, 14d
  Parallel Testing :p2d, after p2c, 30d
  
- section Phase 3
+ section Month 4-5
  Galil Installation :p3a, after p2d, 14d
  Motor Record Config :p3b, after p3a, 7d
  Tuner Manager :p3c, after p3b, 21d
  RF Testing :p3d, after p3c, 30d
  
- section Phase 4
+ section Month 6
  Performance Tuning :p4a, after p3d, 21d
  Documentation :p4b, after p3d, 30d
  Training :p4c, after p4b, 14d
