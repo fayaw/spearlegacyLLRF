@@ -72,7 +72,6 @@ graph TB
 ## Physical System Layout
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 graph LR
  subgraph "RF Power Generation"
  HVPS[High Voltage Power Supply -50 to -90 kV]
@@ -134,6 +133,8 @@ graph LR
  VXI --> T2
  VXI --> T3
  VXI --> T4
+
+ classDef default font-size:20px
 ```
 
 ### Energy Balance & Control Purpose
@@ -187,7 +188,7 @@ graph TB
 The three main control loops work together in a coordinated fashion:
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
+%%{config: {"sequence": {"messageFontSize": 20, "actorFontSize": 20, "noteFontSize": 20}}}%%
 sequenceDiagram
  participant Gap as Gap Voltage Measurement
  participant DAC as DAC Loop
@@ -229,7 +230,6 @@ sequenceDiagram
 - **Setpoint**: Total gap voltage (~3.2 MV)
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 graph LR
  subgraph "DAC Control Loop (approx 1 Hz)"
  Setpoint[Gap Voltage Setpoint approx 3.2 MV]
@@ -253,6 +253,8 @@ graph LR
  Amp --> |RF Drive| Klystron[Klystron approx 1 MW]
  Klystron --> Cavities[4 RF Cavities]
  Cavities --> Sum
+
+ classDef default font-size:20px
 ```
 
 **Algorithm (from `rf_dac_loop.st`)**:
@@ -284,7 +286,6 @@ def dac_control_loop():
 - **Setpoint**: `SRF1:KLYSDRIVFRWD:POWER:ON` or `HIGH`
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 graph LR
  subgraph "HVPS Control Loop (approx 1 Hz)"
  Drive_SP[Drive Power Setpoint approx 50 W]
@@ -301,6 +302,8 @@ graph LR
  HVPS_PV --> HVPS[High Voltage Power Supply]
  HVPS --> Klystron[Klystron Cathode Voltage]
  Klystron --> |Higher Gain Lower Drive Power| Drive_Meas
+
+ classDef default font-size:20px
 ```
 
 **Control Strategy**:
@@ -531,7 +534,7 @@ stateDiagram-v2
 Based on Jim's documentation, the turn-on sequence is carefully orchestrated:
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
+%%{config: {"sequence": {"messageFontSize": 20, "actorFontSize": 20, "noteFontSize": 20}}}%%
 sequenceDiagram
  participant Operator
  participant StateMachine as State Machine
@@ -638,7 +641,6 @@ graph TB
 The tuner control system implements two feedback loops:
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 graph TB
  subgraph "Primary Loop: Phase Control"
  Phase_Setpoint[Phase Setpoint Cavity on Resonance]
@@ -672,6 +674,8 @@ graph TB
  Power_Check --> Phase_Controller
  Motion_Limits --> Position_Command
  Deadband --> Position_Command
+
+ classDef default font-size:20px
 ```
 
 **Algorithm Features** (from `rf_tuner_loop.st`):
@@ -734,7 +738,6 @@ graph TB
 The legacy SNL code follows a consistent pattern:
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial', 'primaryTextColor': '#000000'}}}%%
 graph TB
  subgraph "Each Control Loop"
  Defs[*_defs.h Constants Status codes String messages]
@@ -766,6 +769,8 @@ graph TB
  
  Makefile --> Sequence
  DBD --> Sequence
+
+ classDef default font-size:20px
 ```
 
 ### 8.2 Key Design Patterns
