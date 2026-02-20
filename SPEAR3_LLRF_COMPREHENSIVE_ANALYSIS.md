@@ -28,7 +28,7 @@ The SPEAR3 LLRF (Low-Level RF) control system is a sophisticated multi-loop feed
 | **RF Frequency** | 476.3 MHz | Accelerating frequency |
 | **Total Gap Voltage** | ~3.2 MV | Energy replacement for beam |
 | **Klystron Power** | ~1 MW | RF power source |
-| **HVPS Voltage** | Up to 50 kV | Klystron cathode voltage |
+| **HVPS Voltage** | -50 kV to -90 kV | Klystron cathode voltage |
 | **Drive Power** | ~50 W nominal | Input to klystron |
 | **Number of Cavities** | 4 | Power distribution |
 | **Cavity Gap Voltage** | ~800 kV each | Individual cavity contribution |
@@ -69,12 +69,12 @@ graph TB
 
 ## 2. SPEAR3 RF System Overview
 
-### Physical System Layout
+## Physical System Layout
 
 ```mermaid
 graph LR
  subgraph "RF Power Generation"
- HVPS[High Voltage Power Supply 0-50 kV]
+ HVPS[High Voltage Power Supply -50 to -90 kV]
  Drive[Drive Amplifier Fixed Gain approx 50 W output]
  Klystron[Klystron approx 1 MW 476.3 MHz]
  end
@@ -154,11 +154,11 @@ The fundamental purpose of the RF system is **energy replacement**:
 
 ```mermaid
 graph TB
- subgraph "Fast Analog Control (approx kHz)"
- RFP_Fast[RF Processor Module]
+ subgraph "Level 3: Station Control (seconds)"
+ State_Machine[Master State Machine]
  end
  
- subgraph "Slow Digital Control (approx 1 Hz)"
+ subgraph "Level 2: Slow Digital Control (approx 1 Hz)"
  DAC_Loop[DAC Control Loop]
  
  HVPS_Loop[HVPS Control Loop]
@@ -166,8 +166,8 @@ graph TB
  Tuner_Loop[Tuner Control Loops x4]
  end
  
- subgraph "Station Control (seconds)"
- State_Machine[Master State Machine]
+ subgraph "Level 1: Fast Analog Control (approx kHz)"
+ RFP_Fast[RF Processor Module]
  end
  
  State_Machine --> DAC_Loop
@@ -181,7 +181,7 @@ graph TB
  RFP_Fast --> |RF Power| Cavities[4 RF Cavities 476.3 MHz]
 ```
 
-### Control Loop Interactions
+## Control Loop Interactions
 
 The three main control loops work together in a coordinated fashion:
 
@@ -217,7 +217,7 @@ sequenceDiagram
 
 ## 4. Control Loop Analysis
 
-### 4.1 DAC Control Loop
+## 4.1 DAC Control Loop
 
 **Purpose**: Maintains total gap voltage by controlling the amplitude of the RF Processor output.
 
@@ -271,7 +271,7 @@ def dac_control_loop():
         epics.caput('SRF1:STN:ON:IQ.A', new_counts)
 ```
 
-### 4.2 HVPS Control Loop
+## 4.2 HVPS Control Loop
 
 **Purpose**: Maintains optimal klystron drive power by adjusting the high voltage power supply.
 
@@ -287,7 +287,7 @@ graph LR
  Drive_Meas[Drive Power Measurement SRF1:KLYSDRIVFRWD:POWER]
  HVPS_Error[Error Calculation]
  HVPS_Controller[HVPS Controller SNL --> Python]
- HVPS_PV[SRF1:HVPS:VOLT:CTRL Voltage Control 0-50 kV]
+ HVPS_PV[SRF1:HVPS:VOLT:CTRL Voltage Control -50 to -90 kV]
  end
  
  Drive_SP --> HVPS_Error
@@ -367,7 +367,7 @@ graph TB
 
 ## 5. Hardware Interface Details
 
-### 5.1 RF Processor Module (RFP)
+## 5.1 RF Processor Module (RFP)
 
 The RFP is the heart of the fast analog control system:
 
@@ -434,28 +434,40 @@ graph LR
 
 ```mermaid
 graph TB
- subgraph "Current System (Legacy)"
- VXI_Old[VXI Controller SNL Sequences]
- AB_Controller[Allen-Bradley 1746-HSTP1 Controller]
- PWM_Driver[Superior Electric SS2000MD4-M PWM Driver]
- Motor_Old[Stepper Motor M093-FC11]
- Pot[Linear Potentiometer Position Indication]
+ subgraph "Row 1: Control & Signal Processing"
+  subgraph "Current System (Legacy)"
+  VXI_Old[VXI Controller<br/>SNL Sequences]
+  AB_Controller[Allen-Bradley<br/>1746-HSTP1 Controller]
+  PWM_Driver[Superior Electric<br/>SS2000MD4-M PWM Driver]
+  end
+  
+  subgraph "Proposed System (Python/EPICS)"
+  Python_Control[Python Control<br/>PyEPICS]
+  EPICS_IOC[EPICS IOC<br/>Motor Records]
+  Galil[Galil DMC-4143<br/>4-Axis Controller]
+  Modern_Driver[Modern Stepper Driver<br/>with Microstepping]
+  end
  end
  
- subgraph "Proposed System (Python/EPICS)"
- Python_Control[Python Control PyEPICS]
- EPICS_IOC[EPICS IOC Motor Records]
- Galil[Galil DMC-4143 4-Axis Controller]
- Modern_Driver[Modern Stepper Driver with Microstepping]
- Motor_New[Same Motor M093-FC11 or Equivalent]
- Encoder[Optional Encoder for Position Feedback]
+ subgraph "Row 2: Physical Components & Feedback"
+  subgraph "Current Hardware"
+  Motor_Old[Stepper Motor<br/>M093-FC11]
+  Pot[Linear Potentiometer<br/>Position Indication]
+  end
+  
+  subgraph "Proposed Hardware"
+  Motor_New[Same Motor M093-FC11<br/>or Equivalent]
+  Encoder[Optional Encoder<br/>Position Feedback]
+  end
  end
  
+ %% Current System Connections
  VXI_Old --> AB_Controller
  AB_Controller --> PWM_Driver
  PWM_Driver --> Motor_Old
  Motor_Old -.-> Pot
  
+ %% Proposed System Connections
  Python_Control --> EPICS_IOC
  EPICS_IOC --> Galil
  Galil --> Modern_Driver
@@ -511,7 +523,7 @@ stateDiagram-v2
  }
 ```
 
-### 6.2 Station Turn-On Sequence (ON_CW Mode)
+## 6.2 Station Turn-On Sequence (ON_CW Mode)
 
 Based on Jim's documentation, the turn-on sequence is carefully orchestrated:
 
@@ -529,7 +541,7 @@ sequenceDiagram
  
  Note over StateMachine: Initial Setup
  StateMachine->>Tuners: Move to TUNE/ON Home Position
- StateMachine->>HVPS: Set to Turn-On Voltage (50 kV)
+ StateMachine->>HVPS: Set to Turn-On Voltage (-50 kV)
  StateMachine->>DAC: Set to Fast On Counts (100)
  
  Note over StateMachine: Low Power State
@@ -563,7 +575,7 @@ From the operational document and code analysis:
 | **Direct Loop Gain** | `SRF1:STNDIRECT:LOOP:COUNTS.A` | Tunable | Feedback loop stability |
 | **Direct Loop Phase** | `SRF1:STNDIRECT:LOOP:PHASE.C` | Tunable | Phase compensation |
 | **Fast On Counts** | `SRF1:STN:ONFAST:INIT` | 100 | Initial DAC setting |
-| **Turn-On Voltage** | `SRF1:HVPS:VOLT:MIN` | 50 kV | Initial HVPS voltage |
+| **Turn-On Voltage** | `SRF1:HVPS:VOLT:MIN` | -50 kV | Initial HVPS voltage |
 | **Drive Power Setpoint** | `SRF1:KLYSDRIVFRWD:POWER:ON` | ~50 W | Normal operation |
 | **Gap Voltage Setpoint** | Total of 4 cavities | ~3.2 MV | Energy replacement |
 
@@ -617,7 +629,7 @@ graph TB
 - **Linear Resolution**: 2.54 mm ÷ (2 × 400) = 0.003175 mm per microstep
 - **Total Range**: ~2.5 mm typical motion during startup, ~0.2 mm during operation
 
-### 7.2 Tuner Control Algorithm
+## 7.2 Tuner Control Algorithm
 
 The tuner control system implements two feedback loops:
 
@@ -712,7 +724,7 @@ graph TB
 
 ## 8. Legacy Code Structure
 
-### 8.1 File Organization
+## 8.1 File Organization
 
 The legacy SNL code follows a consistent pattern:
 
