@@ -81,7 +81,7 @@ graph LR
  end
  
  subgraph "RF Distribution & Cavities"
- ["NEWLINE"]
+ SP["NEWLINE"]
  WG[Waveguide Distribution]
  
  subgraph "Cavity 1"
