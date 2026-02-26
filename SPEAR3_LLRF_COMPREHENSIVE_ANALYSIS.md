@@ -80,8 +80,7 @@ graph LR
  Klystron[Klystron approx 1 MW 476.3 MHz]
  end
  
- subgraph "RF Distribution & Cavities"
- SP["NEWLINE"]
+ subgraph "RF Distribution & Cavities" 
  WG[Waveguide Distribution]
  
  subgraph "Cavity 1"
