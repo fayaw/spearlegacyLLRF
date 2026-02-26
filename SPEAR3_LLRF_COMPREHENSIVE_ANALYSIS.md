@@ -72,9 +72,9 @@ graph TB
 ## Physical System Layout
 
 ```mermaid
-%%{init: {'theme':'dark', 'themeVariables': {'fontSize': '20px', 'fontFamily': 'Arial'}}}%%
+%%{init: {'theme':'dark', 'themeVariables': {'fontSize': '28px', 'fontFamily': 'Arial'}}}%%
 graph LR
- subgraph "RF Power Generation"
+ subgraph "RF Power Generation \n"
  HVPS[High Voltage Power Supply -50 to -90 kV]
  Drive[Drive Amplifier Fixed Gain approx 50 W output]
  Klystron[Klystron approx 1 MW 476.3 MHz]
