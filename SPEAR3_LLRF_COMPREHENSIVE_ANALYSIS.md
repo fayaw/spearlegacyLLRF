@@ -187,7 +187,7 @@ graph TB
 The three main control loops work together in a coordinated fashion:
 
 ```mermaid
-%%{config: {"sequence": {"messageFontSize": 28, "actorFontSize": 28, "noteFontSize": 28}}}%%
+%%{config: {"sequence": {"messageFontSize": 20, "actorFontSize": 20, "noteFontSize": 20}}}%%
 sequenceDiagram
  participant Gap as Gap Voltage Measurement
  participant DAC as DAC Loop
