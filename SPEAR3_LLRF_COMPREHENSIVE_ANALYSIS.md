@@ -12,9 +12,10 @@
 5. [Hardware Interface Details](#5-hardware-interface-details)
 6. [Operational Modes & State Machine](#6-operational-modes--state-machine)
 7. [Tuner Control System](#7-tuner-control-system)
-8. [Legacy Code Structure](#8-legacy-code-structure)
-9. [Python/EPICS Migration Strategy](#9-pythonepics-migration-strategy)
-10. [Implementation Recommendations](#10-implementation-recommendations)
+8. [Calibration System](#8-calibration-system)
+9. [Legacy Code Structure](#9-legacy-code-structure)
+10. [Python/EPICS Migration Strategy](#10-pythonepics-migration-strategy)
+11. [Implementation Recommendations](#11-implementation-recommendations)
 
 ---
 
@@ -28,7 +29,7 @@ The SPEAR3 LLRF (Low-Level RF) control system is a sophisticated multi-loop feed
 | **RF Frequency** | 476.3 MHz | Accelerating frequency |
 | **Total Gap Voltage** | ~3.2 MV | Energy replacement for beam |
 | **Klystron Power** | ~1 MW | RF power source |
-| **HVPS Voltage** | -50 kV to -90 kV | Klystron cathode voltage |
+| **HVPS Voltage** | 0 to 50+ kV | Klystron cathode voltage (control system uses positive values) |
 | **Drive Power** | ~50 W nominal | Input to klystron |
 | **Number of Cavities** | 4 | Power distribution |
 | **Cavity Gap Voltage** | ~800 kV each | Individual cavity contribution |
@@ -255,23 +256,77 @@ graph LR
  Cavities --> Sum
 ```
 
-**Algorithm (from `rf_dac_loop.st`)**:
+**DAC Loop Operating States** (from `rf_dac_loop.st`):
+
+1. **`loop_off`**: Station OFF, PARK, or ON_FM - no gap voltage control
+2. **`loop_tune`**: Station TUNE - adjust drive power for cavity processing
+3. **`loop_on`**: Station ON_CW - **complex 4-way branching logic**
+
+**Critical 4-Way Branching in ON_CW Mode** (`rf_dac_loop.st` lines 200-290):
+
+The `loop_on` state implements sophisticated fallback logic depending on:
+- **Direct Loop Status**: ON or OFF
+- **GVF Module Availability**: Available or unavailable (fault/offline)
+
+```
+┌─────────────────┬──────────────────┬─────────────────────────────────────┐
+│ Direct Loop     │ GVF Module       │ Control Strategy                    │
+├─────────────────┼──────────────────┼─────────────────────────────────────┤
+│ OFF             │ Available        │ Adjust DRIVE POWER via GFF counts  │
+│                 │                  │ (gff_counts, on_gff_delta_counts)   │
+├─────────────────┼──────────────────┼─────────────────────────────────────┤
+│ OFF             │ Unavailable      │ Adjust DRIVE POWER via RFP DAC     │
+│                 │                  │ (on_counts, on_rfp_delta_counts)    │
+├─────────────────┼──────────────────┼─────────────────────────────────────┤
+│ ON              │ Available        │ Adjust GAP VOLTAGE via GFF counts  │
+│                 │                  │ (gff_counts, gff_delta_counts)      │
+├─────────────────┼──────────────────┼─────────────────────────────────────┤
+│ ON              │ Unavailable      │ Adjust GAP VOLTAGE via RFP DAC     │
+│                 │                  │ (on_counts, on_delta_counts)        │
+└─────────────────┴──────────────────┴─────────────────────────────────────┘
+```
+
+**GVF Module Fault Detection**: `LOOP_INVALID_SEVERITY(pvSeverity(gvf_module_sevr))`
+
+**Ripple Loop Integration**: The DAC loop also manages ripple loop amplitude tracking:
+- Monitors `ripple_loop_ampl` PV at slower rate (`ripple_loop_ready_ef`)
+- Updates ripple setpoint when amplitude changes and severity is valid
+- Operates in all active states (off, tune, on)
+
+**Algorithm Pseudocode**:
 ```python
-# Pseudocode for Python implementation
 def dac_control_loop():
-    gap_voltage_total = sum([cav1_gap, cav2_gap, cav3_gap, cav4_gap])
-    error = gap_voltage_setpoint - gap_voltage_total
-    
-    # Get delta from EPICS calculation record
-    delta_counts = epics.caget('SRF1:STNVOLT:DAC:DELTA')
-    
-    current_counts = epics.caget('SRF1:STN:ON:IQ.A')
-    new_counts = current_counts + delta_counts
-    
-    # Apply limits and deadband
-    new_counts = max(0, min(2047, new_counts))
-    if abs(delta_counts) > 0.5:  # Deadband
-        epics.caput('SRF1:STN:ON:IQ.A', new_counts)
+    if station_state == STATION_ON_CW:
+        direct_loop_on = epics.caget('SRF1:STN:RFP:DIRECTLOOP')
+        gvf_available = not INVALID_SEVERITY(epics.caget('SRF1:STN:GVF:MODU.SEVR'))
+        
+        if direct_loop_on:
+            # Control gap voltage
+            if gvf_available:
+                # Use GFF module for gap voltage control
+                counts_pv = 'SRF1:STN:GFF:COUNTS'
+                delta_pv = 'SRF1:STNVOLT:GFF:DELTA'
+            else:
+                # Fallback to RFP DAC for gap voltage control
+                counts_pv = 'SRF1:STN:ON:IQ.A'
+                delta_pv = 'SRF1:STNVOLT:DAC:DELTA'
+        else:
+            # Control drive power
+            if gvf_available:
+                # Use GFF module for drive power control
+                counts_pv = 'SRF1:STN:GFF:COUNTS'
+                delta_pv = 'SRF1:STNDRIV:GFF:DELTA'
+            else:
+                # Fallback to RFP DAC for drive power control
+                counts_pv = 'SRF1:STN:ON:IQ.A'
+                delta_pv = 'SRF1:STNDRIV:RFP:DELTA'
+        
+        # Apply delta with deadband and limits
+        current_counts = epics.caget(counts_pv)
+        delta_counts = epics.caget(delta_pv)
+        if abs(delta_counts) > 0.5:  # DAC_LOOP_MIN_DELTA_COUNTS
+            new_counts = max(0, min(2047, current_counts + delta_counts))
+            epics.caput(counts_pv, new_counts)
 ```
 
 ## 4.2 HVPS Control Loop
@@ -291,7 +346,7 @@ graph LR
  Drive_Meas[Drive Power Measurement SRF1:KLYSDRIVFRWD:POWER]
  HVPS_Error[Error Calculation]
  HVPS_Controller[HVPS Controller SNL --> Python]
- HVPS_PV[SRF1:HVPS:VOLT:CTRL Voltage Control -50 to -90 kV]
+ HVPS_PV[SRF1:HVPS:VOLT:CTRL Voltage Control 0 to 50+ kV]
  end
  
  Drive_SP --> HVPS_Error
@@ -303,11 +358,37 @@ graph LR
  Klystron --> |Higher Gain Lower Drive Power| Drive_Meas
 ```
 
-**Control Strategy**:
-- As DAC loop increases RF amplitude → drive power increases
-- HVPS loop detects drive power above setpoint
-- Increases klystron cathode voltage → higher klystron gain
-- Drive power returns to setpoint with higher RF output
+**HVPS Control Modes** (from `rf_hvps_loop.st`):
+
+The HVPS loop operates in **three distinct modes**:
+
+1. **OFF Mode** (`HVPS_LOOP_CONTROL_OFF = 0`):
+   - No voltage control
+   - Used when station is OFF or PARK
+
+2. **PROCESS Mode** (`HVPS_LOOP_CONTROL_PROC = 1`):
+   - **Vacuum processing/conditioning mode**
+   - Used after cavity maintenance to remove particles
+   - **Algorithm** (from `rf_hvps_loop.st` lines 132-200):
+     - **Increase voltage** if all conditions good
+     - **Decrease voltage** if any of:
+       - Klystron forward power > maximum
+       - Cavity gap voltage > setpoint  
+       - **Cavity vacuum > acceptable level** (critical for processing)
+   - Slowly ramps voltage up while vacuum system removes particles
+   - Jim's doc: "adjusts the voltage supplied to the klystron while the vacuum system removes any foreign particles from the inside of the RF cavity"
+
+3. **ON Mode** (`HVPS_LOOP_CONTROL_ON = 2`):
+   - **Normal regulation mode**
+   - Maintains drive power setpoint
+   - **Control Strategy**:
+     - As DAC loop increases RF amplitude → drive power increases
+     - HVPS loop detects drive power above setpoint
+     - Increases klystron cathode voltage → higher klystron gain
+     - Drive power returns to setpoint with higher RF output
+   - **Dual algorithm** depending on station state:
+     - **ON_CW + Direct Loop ON**: Monitor drive power, adjust HVPS inversely
+     - **TUNE or Direct Loop OFF**: Use gap voltage error for HVPS adjustment
 
 ### 4.3 Tuner Control Loops (×4)
 
@@ -545,7 +626,7 @@ sequenceDiagram
  
  Note over StateMachine: Initial Setup
  StateMachine->>Tuners: Move to TUNE/ON Home Position
- StateMachine->>HVPS: Set to Turn-On Voltage (-50 kV)
+ StateMachine->>HVPS: Set to Turn-On Voltage (50 kV)
  StateMachine->>DAC: Set to Fast On Counts (100)
  
  Note over StateMachine: Low Power State
@@ -570,7 +651,34 @@ sequenceDiagram
  Note right of StateMachine: approx 50W drive power approx 3.2 MV gap voltage approx 1 MW klystron output
 ```
 
-### 6.3 Critical Control Parameters
+### 6.3 Fast Turn-On Sequence Details
+
+**From `rf_states.st` analysis**: The system includes a sophisticated fast turn-on capability controlled by `fast_turnon_enable` and implemented in the `ss rf_statesFAST` state set.
+
+**Fast Turn-On Algorithm**:
+
+1. **Initial DAC Value Setting**:
+   - `fastontunecnts` — DAC counts for TUNE mode fast turn-on
+   - `fastononcnts` — DAC counts for ON_CW mode fast turn-on
+   - Values loaded before direct loop closure
+
+2. **Direct Loop Closure Timing**:
+   - **Controlled Transient**: Direct loop closure causes power transient
+   - **Timing Management**: `ss rf_statesFAST` coordinates timing
+   - **Transient Settling**: Wait for transient to settle before proceeding
+
+3. **Gap Voltage Ramp-Up**:
+   - **Wait State**: `s_gv_up` state waits for gap voltage to reach setpoint
+   - **Timeout Protection**: `MAX_GV_UP_WAIT` prevents infinite wait
+   - **Beam Abort Reset**: Only reset beam abort after gap voltage is stable
+
+**Fast vs Normal Turn-On**:
+- **Normal Turn-On**: Gradual ramp from minimum values
+- **Fast Turn-On**: Jump to predetermined "safe" values, then fine-tune
+- **Advantage**: Reduces turn-on time from minutes to seconds
+- **Risk**: Requires careful calibration of fast-on values
+
+### 6.4 Critical Control Parameters
 
 From the operational document and code analysis:
 
@@ -578,10 +686,12 @@ From the operational document and code analysis:
 |-----------|---------|-------|---------|
 | **Direct Loop Gain** | `SRF1:STNDIRECT:LOOP:COUNTS.A` | Tunable | Feedback loop stability |
 | **Direct Loop Phase** | `SRF1:STNDIRECT:LOOP:PHASE.C` | Tunable | Phase compensation |
-| **Fast On Counts** | `SRF1:STN:ONFAST:INIT` | 100 | Initial DAC setting |
-| **Turn-On Voltage** | `SRF1:HVPS:VOLT:MIN` | -50 kV | Initial HVPS voltage |
+| **Fast On Counts (TUNE)** | `SRF1:STN:TUNEFAST:INIT` | ~100 | Fast turn-on for TUNE mode |
+| **Fast On Counts (ON_CW)** | `SRF1:STN:ONFAST:INIT` | ~200 | Fast turn-on for ON_CW mode |
+| **Turn-On Voltage** | `SRF1:HVPS:VOLT:MIN` | 0 to 50+ kV | Initial HVPS voltage |
 | **Drive Power Setpoint** | `SRF1:KLYSDRIVFRWD:POWER:ON` | ~50 W | Normal operation |
 | **Gap Voltage Setpoint** | Total of 4 cavities | ~3.2 MV | Energy replacement |
+| **Max GV Wait Time** | `MAX_GV_UP_WAIT` | ~30 seconds | Gap voltage ramp timeout |
 
 
 ---
@@ -727,9 +837,197 @@ graph TB
 
 ---
 
-## 8. Legacy Code Structure
+## 8. Calibration System
 
-## 8.1 File Organization
+The calibration system is implemented in `rf_calib.st` — the **largest legacy file** at ~2800 lines (112,931 bytes). This comprehensive system calibrates all analog components in the RF Processor (RFP) module.
+
+### 8.1 Calibration Overview
+
+**Purpose**: Null out DC offsets and calibrate gain coefficients for all analog processing stages to ensure accurate I/Q demodulation and control loop operation.
+
+**Critical Importance**: Without proper calibration, the control loops cannot maintain stable RF operation. All analog stages accumulate DC offsets and gain errors that must be compensated.
+
+### 8.2 Calibration Categories
+
+**From `rf_calib.st` analysis**:
+
+#### 8.2.1 Octal DAC Offset Nulling
+- **Klystron Modulator Offsets**: 8 channels for klystron I/Q modulation
+- **Compensation Loop Offsets**: Lead and integral compensation stages  
+- **Comb Loop Offsets**: Comb filter processing stages
+- **RF Modulator Offsets**: RF output modulation stages
+- **Algorithm**: Iterative convergence with `MAX_ATTEMPTS = 50`, `MARGIN = 1` count
+
+#### 8.2.2 Demodulator Coefficient Calibration
+- **Direct Loop Coefficients**: 2×2 matrix (II, IQ, QI, QQ) for cavity demodulation
+- **Cavity Demodulator Offsets**: Individual cavity I/Q offset nulling
+- **Klystron Demodulator Offsets**: Klystron forward/reflected power demodulation
+- **Sum Node Offsets**: Gap voltage summation stage calibration
+
+#### 8.2.3 Control Loop Calibration
+- **Tune Setpoint Calibration**: Phase reference calibration for tuner loops
+- **Gain Stage Calibration**: Amplifier gain coefficient determination
+- **Difference Node Calibration**: Error signal processing stages
+
+### 8.3 Calibration Procedures
+
+**Typical Calibration Sequence** (from `rf_calib.st` state machine):
+
+1. **System Preparation**:
+   - Station must be OFF
+   - All control loops disabled
+   - RF output disabled
+
+2. **Offset Nulling Phase**:
+   - Apply known test signals
+   - Measure resulting outputs
+   - Iteratively adjust DAC offsets until outputs are nulled
+   - Repeat for all 8 octal DAC channels
+
+3. **Coefficient Determination**:
+   - Apply calibrated I and Q test signals
+   - Measure demodulated outputs
+   - Calculate 2×2 transformation matrix coefficients
+   - Store coefficients in EPICS records
+
+4. **Verification Phase**:
+   - Apply test vectors
+   - Verify calibrated response within tolerance
+   - Flag any channels that fail verification
+
+### 8.4 Calibration Data Management
+
+**Storage**: Calibration coefficients stored in EPICS database records:
+- `SRF1:STN:CALIB:*:COEFF:*` — coefficient records
+- `SRF1:STN:CALIB:*:OFFSET:*` — offset records  
+- `SRF1:STN:CALIB:STATUS` — overall calibration status
+
+**Persistence**: Coefficients saved to EPICS autosave files for restoration after IOC restart.
+
+**Validation**: Each calibration includes timestamp and validity checking.
+
+### 8.5 Operational Integration
+
+**Automatic Application**: Once calibrated, coefficients are automatically applied during normal operation:
+- Offset values continuously subtracted from analog signals
+- Matrix coefficients applied to I/Q demodulation
+- Gain corrections applied to control loop signals
+
+**Recalibration Triggers**:
+- After hardware maintenance
+- When control loop performance degrades
+- Scheduled periodic recalibration (monthly/quarterly)
+- After temperature excursions or power cycles
+
+### 8.6 Upgrade Implications
+
+**For LLRF9 Upgrade**: The Dimtel LLRF9 has its own internal calibration system, so most of `rf_calib.st` becomes obsolete. However, the **calibration workflow and data management concepts** must be preserved:
+
+- **LLRF9 Internal**: I/Q demodulation, direct loop, comb loop calibration
+- **Python/EPICS**: System-level calibration orchestration, external power detector calibration, motor position calibration
+- **Operator Interface**: Preserve familiar calibration procedures and status displays
+
+---
+
+## 8.7 Fault Management & Message Logging
+
+The legacy system includes sophisticated fault handling and logging implemented across multiple files.
+
+### 8.7.1 Fault File Writing System (`rf_statesFF` state set)
+
+**Purpose**: Automatically capture diagnostic data when the station trips to OFF state.
+
+**Implementation** (from `rf_states.st` lines 2088-2226):
+- **Dedicated state set**: `rf_statesFF` runs independently from main state machine
+- **Trigger**: Activated by `ffwrite_ef` event flag when station trips
+- **Data Sources**: Captures data from RFP, CFM, and GVF modules
+- **File Management**: 
+  - Rotating fault file numbering (1 to `NUMFAULTS`)
+  - Timestamped fault directories
+  - Automatic cleanup of old fault data
+- **Timeout Handling**: Monitors file write completion with timeouts
+- **Status Restoration**: Restores normal file names and sizes after capture
+
+**Fault Data Captured**:
+```
+Fault #01_20240315_143022/
+├── RFP_module_data.bin    # RF Processor waveforms
+├── CFM_module_data.bin    # Cavity Field Monitor data  
+├── GVF_module_data.bin    # Gap Voltage Feed-forward data
+├── pv_snapshot.txt        # All PV values at fault time
+└── fault_summary.log      # Fault trigger and timing info
+```
+
+### 8.7.2 Message Logging System (`rf_msgs.st`)
+
+**Purpose**: Log operational events and monitor communication errors.
+
+**Event Categories** (from `rf_msgs.st` analysis):
+
+#### Station Events:
+- **Trip Reset Events**: When operator resets station after fault
+- **Station Online/Offline**: State transitions to/from operational modes
+- **Filament Events**: Bypass/on/off state changes with automatic contactor control
+
+#### HVPS Fault Logging:
+- **Conditional Logging**: HVPS faults (12KV, ENERFAST, ENERSLOW, SUPPLY, SCR1, SCR2) only logged when no other station faults are present
+- **Filament Fault Response**: Automatic contactor opening on filament fault
+- **Severity-Based Actions**: Different responses based on fault severity levels
+
+#### Communication Monitoring:
+- **TAXI Error Detection** (`rf_msgsTAXI` state set):
+  - Monitors GVF module CAMAC TAXI overflow errors
+  - Automatic LFB (Low-Frequency Beam feedback) module resync
+  - Randomized delay prevents multiple IOC collision during resync
+  - Error/clear message logging
+
+### 8.7.3 Event Flag Coordination
+
+**Purpose**: Inter-loop communication and synchronization mechanism.
+
+**Key Event Flags** (from `rf_states.st`):
+- `ffwrite_ef` — Triggers fault file writing
+- `directlp_ef`, `comblp_ef`, `gfflp_ef`, `lfblp_ef` — Loop control coordination
+- `leadcomp_ef`, `intcomp_ef` — Compensation control events
+- `ripple_loop_ready_ef` — Ripple loop timing coordination
+
+**Usage Pattern**:
+```c
+// Trigger event
+efSet(ffwrite_ef);
+
+// Wait for event in another state set
+when(efTest(ffwrite_ef)) {
+    efClear(ffwrite_ef);
+    // Process event
+} state next_state
+```
+
+### 8.7.4 Auto-Reset Logic
+
+**Purpose**: Automatic recovery from transient faults.
+
+**Algorithm** (from `rf_states.st` lines 56-58):
+- **Conditions**: Auto-reset enabled AND fault cleared AND contactor status OK
+- **Limits**: Maximum reset attempts (typically 3)
+- **Timing**: Configurable delay between reset attempts
+- **Exclusions**: No auto-reset if contactor fault (hardware safety issue)
+
+### 8.7.5 Upgrade Implications
+
+**For Python/EPICS Migration**:
+
+1. **Fault File System**: Replace with Python-based waveform capture from LLRF9 buffers
+2. **Message Logging**: Use Python logging framework with structured log formats
+3. **Event Coordination**: Replace event flags with Python pub/sub or asyncio events
+4. **Auto-Reset**: Preserve logic but implement in Python with configurable parameters
+5. **TAXI Monitoring**: Adapt concept for whatever replaces CAMAC communication
+
+---
+
+## 9. Legacy Code Structure
+
+### 9.1 File Organization
 
 The legacy SNL code follows a consistent pattern:
 
