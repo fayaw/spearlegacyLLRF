@@ -814,57 +814,73 @@ int    previous_status;  // For change detection — log only on transitions
 │  • Station State Machine (OFF/TUNE/ON_CW)                              │
 │  • HVPS Supervisory Control (setpoint mgmt, safety limits)             │
 │  • Tuner Position Management (load angle offset, motion coordination)  │
+│  • MPS Coordination (safety permits, fault handling)                   │
 │  • Fault Logging & Diagnostics                                         │
 │  • Operator Interface                                                  │
-└────────┬─────────────────┬──────────────────┬──────────────────────────┘
-         │ Ethernet/EPICS  │ Ethernet/EPICS   │ Ethernet/EPICS
-         ▼                 ▼                  ▼
-┌────────────────┐ ┌──────────────┐ ┌────────────────────┐
-│ LLRF9 Unit 1   │ │ LLRF9 Unit 2 │ │ CompactLogix PLC   │
-│ Field Control  │ │ Monitoring   │ │ HVPS Controller    │
-│ • Vector sum   │ │ • 4× reflected│ │ • Voltage regulation│
-│ • PI feedback  │ │ • Interlocks │ │ • Thyristor control │
-│ • 4× tuner     │ │ • Extra ch.  │ │ • PPS interface    │
-│   phase data   │ │              │ │                    │
-│ • Drive output │ │              │ │                    │
-└────────┬───────┘ └──────┬───────┘ └────────┬───────────┘
-         │                │                   │
-         ▼                ▼                   ▼
-    Klystron Drive   RF Interlocks      HVPS Power Stage
-         │                │                   │
-         ▼                ▼                   ▼
-┌──────────────────────────────────────────────────────┐
-│                  Physical RF System                    │
-│  Klystron → Waveguide → 4 RF Cavities (with tuners)  │
-└──────────────────────────────────────────────────────┘
-
-Additional Systems:
-┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
-│ MPS System       │ │ Slow Power       │ │ Motion Controller│
-│ ControlLogix PLC │ │ Monitoring       │ │ (Galil or equiv.)│
-│ • Safety permits │ │ • 8× Minicircuit │ │ • 4× stepper     │
-│ • HVPS/LLRF coord│ │   detectors      │ │   motor control  │
-│ • Arc detection  │ │ • MPS trip levels│ │ • EPICS motor rec│
-└──────────────────┘ └──────────────────┘ └──────────────────┘
+└──┬────┬─────────────────┬──────────────────┬──────────────────┬────────┘
+   │    │ Ethernet/EPICS  │ Ethernet/EPICS   │ Ethernet/EPICS   │ Ethernet/EPICS
+   │    ▼                 ▼                  ▼                  ▼
+   │ ┌────────────────┐ ┌──────────────┐ ┌────────────────────┐ ┌──────────────────┐
+   │ │ LLRF9 Unit 1   │ │ LLRF9 Unit 2 │ │ CompactLogix PLC   │ │ ControlLogix PLC │
+   │ │ Field Control  │ │ Monitoring   │ │ HVPS Controller    │ │ MPS System       │
+   │ │ • Vector sum   │ │ • 4× reflected│ │ • Voltage regulation│ │ • Safety permits │
+   │ │ • PI feedback  │ │ • Interlocks │ │ • Thyristor control │ │ • HVPS/LLRF coord│
+   │ │ • 4× tuner     │ │ • Extra ch.  │ │ • PPS interface    │ │ • Arc detection  │
+   │ │   phase data   │ │              │ │                    │ │                  │
+   │ │ • Drive output │ │              │ │                    │ │                  │
+   │ └────────┬───────┘ └──────┬───────┘ └────────┬───────────┘ └──────────────────┘
+   │          │                │                   │
+   │          ▼                ▼                   ▼
+   │     Klystron Drive   RF Interlocks      HVPS Power Stage
+   │          │                │                   │
+   │          ▼                ▼                   ▼
+   │ ┌──────────────────────────────────────────────────────┐
+   │ │                  Physical RF System                    │
+   │ │  Klystron → Waveguide → 4 RF Cavities (with tuners)  │
+   │ └──────────────────────────────────────────────────────┘
+   │                                      ▲
+   │ ┌──────────────────┐ ┌──────────────────┐ │
+   │ │ Slow Power       │ │ Motion Controller│ │
+   │ │ Monitoring       │ │ (Galil or equiv.)│ │
+   │ │ • 8× Minicircuit │ │ • 4× stepper     │ │
+   │ │   detectors      │ │   motor control  │ │
+   │ │ • EPICS IOC      │ │ • EPICS motor rec│ │
+   │ │ • MPS trip levels│ │                  │ │
+   │ └──────────────────┘ └──────────────────┘ │
+   │          │                   │             │
+   │          └───────────────────┼─────────────┘
+   │ Ethernet/EPICS              │ Ethernet/EPICS
+   └─────────────────────────────┘
 ```
 
 ### 12.2 Communication Flows
 
-**LLRF9 ↔ Python/EPICS**: All via EPICS Channel Access over Ethernet
-- Python reads: cavity amplitudes, phases (10 Hz), interlock status, waveforms
+All subsystems communicate with the Python/EPICS Coordinator via **Ethernet/EPICS Channel Access**, providing a unified control network:
+
+**Python/EPICS ↔ LLRF9 Units (×2)**: EPICS Channel Access over Ethernet
+- Python reads: cavity amplitudes, phases (10 Hz), interlock status, waveforms, diagnostics
 - Python writes: setpoints, feedback enable/disable, configuration parameters
 
-**LLRF9 ↔ MPS**: One hardware signal each direction (interlock chain)
-- LLRF9 → MPS: "LLRF has detected fault and zeroed drive output"
-- MPS → LLRF9: "System permit — OK to produce RF output"
+**Python/EPICS ↔ HVPS Controller (CompactLogix PLC)**: EPICS Channel Access over Ethernet
+- Python reads: voltage/current measurements, digital status, fault conditions
+- Python writes: contactor control, voltage setpoint (≤1 Hz update rate)
 
-**HVPS ↔ MPS**: Fiber optic links (no direct LLRF9↔HVPS hardware)
-- MPS → HVPS: Permit for phase control thyristors; crowbar inhibit
-- HVPS → MPS: "Ready to turn on"
+**Python/EPICS ↔ MPS System (ControlLogix PLC)**: EPICS Channel Access over Ethernet
+- Python reads: safety permit status, interlock states, fault history
+- Python writes: system enable/disable commands, configuration parameters
 
-**Python ↔ HVPS PLC**: EPICS Channel Access
-- Reads: All analog data (voltage, current) and digital status
-- Writes: Contactor control, voltage setpoint (≤1 Hz update rate)
+**Python/EPICS ↔ Motion Controller (Galil)**: EPICS Motor Records over Ethernet
+- Python reads: motor positions, motion status, limit switch states
+- Python writes: position commands, motion profiles, enable/disable
+
+**Python/EPICS ↔ Slow Power Monitoring**: EPICS Channel Access over Ethernet
+- Python reads: 8× power detector readings, trip status
+- Python writes: trip level setpoints, enable/disable
+
+**Hardware Interlocks** (independent of EPICS):
+- LLRF9 ↔ MPS: Hardware interlock chain (optocoupler signals)
+- HVPS ↔ MPS: Fiber optic permits (thyristor enable, crowbar inhibit)
+- Arc Detection → MPS: Hardware trip signals (optocoupler)
 
 ### 12.3 Software Architecture
 
@@ -875,24 +891,37 @@ spear_llrf/
 │   │   ├── state_machine.py     # Station state machine (OFF/TUNE/ON_CW)
 │   │   ├── hvps_loop.py         # HVPS supervisory control
 │   │   ├── tuner_manager.py     # 4-cavity tuner coordination
-│   │   └── load_angle.py        # Load angle offset loop
+│   │   ├── load_angle.py        # Load angle offset loop
+│   │   └── mps_coordinator.py   # MPS system coordination
 │   ├── hardware/
-│   │   ├── llrf9_interface.py   # LLRF9 EPICS PV interface
-│   │   ├── hvps_interface.py    # HVPS PLC interface
-│   │   └── motor_interface.py   # Galil/motor record interface
+│   │   ├── llrf9_interface.py   # LLRF9 EPICS PV interface (×2 units)
+│   │   ├── hvps_interface.py    # HVPS CompactLogix PLC interface
+│   │   ├── mps_interface.py     # MPS ControlLogix PLC interface
+│   │   ├── motor_interface.py   # Galil motion controller interface
+│   │   └── power_monitor.py     # Slow power monitoring interface
 │   ├── safety/
-│   │   ├── interlock_monitor.py # Interlock status monitoring
-│   │   └── fault_handler.py     # Fault detection and recovery
+│   │   ├── interlock_monitor.py # System-wide interlock monitoring
+│   │   ├── fault_handler.py     # Fault detection and recovery
+│   │   └── arc_detection.py     # Arc detection system interface
 │   ├── diagnostics/
 │   │   ├── logging.py           # Structured event logging
-│   │   └── waveform_capture.py  # LLRF9 waveform readout
+│   │   ├── waveform_capture.py  # LLRF9 waveform readout
+│   │   └── performance_monitor.py # System performance metrics
 │   └── main.py                  # Application entry point
 ├── config/
 │   ├── rf_station.yaml          # Station parameters
 │   ├── tuner_params.yaml        # Tuner mechanical parameters
-│   └── safety_limits.yaml       # Safety interlock thresholds
+│   ├── safety_limits.yaml       # Safety interlock thresholds
+│   ├── mps_config.yaml          # MPS system configuration
+│   └── power_monitor_config.yaml # Power monitoring configuration
 ├── tests/
+│   ├── unit/                    # Unit tests for each module
+│   ├── integration/             # Integration tests
+│   └── hardware/                # Hardware-in-loop tests
 └── docs/
+    ├── api/                     # API documentation
+    ├── operations/              # Operations manual
+    └── commissioning/           # Commissioning procedures
 ```
 
 ### 12.4 Control Loop Mapping: Legacy → Upgraded
