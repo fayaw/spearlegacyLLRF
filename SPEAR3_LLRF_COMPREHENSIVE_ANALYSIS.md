@@ -195,19 +195,16 @@ This section covers the **complete** upgrade project scope as defined in the LLR
 
 ### 4.1 Subsystem Overview
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    SPEAR3 RF Upgrade Scope                      │
-├──────────────┬──────────────┬──────────────┬───────────────────┤
-│  LLRF System │  MPS System  │ HVPS Control │ Support Systems   │
-│  (Dimtel     │  (PLC-5 →    │ (SLC-500 →   │                   │
-│   LLRF9 ×2)  │  ControlLogix)│ CompactLogix)│ • Arc Detection   │
-│              │              │              │ • Slow Power Mon. │
-│  Procured ✅ │  Built ✅     │ 75% designed │ • Interface Chassis│
-│  Commissioned│  Tested ✅    │              │ • Tuner Motors    │
-│  on SPEAR3   │  (no RF pwr) │              │ • Software        │
-└──────────────┴──────────────┴──────────────┴───────────────────┘
-```
+### SPEAR3 RF Upgrade Scope
+
+| LLRF System (Dimtel LLRF9 ×2) | MPS System (PLC-5 → ControlLogix) | HVPS Control (SLC-500 → CompactLogix) | Support Systems |
+|------------------------------|----------------------------------|--------------------------------------|-----------------|
+| Procured ✅                  | Built ✅                          | 75% designed                          | • Arc Detection |
+| Commissioned on SPEAR3       | Tested ✅ (no RF power)           |                                      | • Slow Power Monitoring |
+|                              |                                  |                                      | • Interface Chassis |
+|                              |                                  |                                      | • Tuner Motors |
+|                              |                                  |                                      | • Software |
+
 
 ### 4.2 LLRF System (Dimtel LLRF9)
 
