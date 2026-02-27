@@ -55,7 +55,47 @@ The SPEAR3 LLRF upgrade transitions from a legacy VxWorks/SNL-based system to a 
 
 ## 2. System Architecture Overview
 
-### 2.1 Three-Layer Architecture
+### 2.1 Fundamental Architecture Change
+
+The upgrade fundamentally changes the control architecture from a **software-centric** model (VxWorks SNL doing everything) to a **distributed hardware-accelerated** model:
+
+```
+LEGACY SYSTEM                          UPGRADED SYSTEM
+==============                         ================
+
+  VxWorks IOC (one box)                 Multiple specialized subsystems
+  ├── rf_states.st (state machine)      ├── Dimtel LLRF9 (fast RF control)
+  ├── rf_dac_loop.st (gap voltage)      │   ├── Fast analog I/Q processing
+  ├── rf_hvps_loop.st (HVPS control)    │   ├── Direct loop feedback
+  ├── rf_tuner_loop.st x4 (tuners)     │   ├── Comb loop feedback
+  ├── rf_calib.st (calibration)         │   ├── Gap voltage regulation
+  ├── rf_msgs.st (messages)             │   ├── Phase measurement for tuners
+  └── RFP analog module                 │   └── Drive power monitoring
+                                        │
+                                        ├── CompactLogix PLC (HVPS control)
+                                        │   ├── Voltage regulation
+                                        │   ├── HVPS interlocks
+                                        │   └── Contactor control
+                                        │
+                                        ├── CompactLogix PLC (MPS)
+                                        │   ├── Fault summary
+                                        │   ├── Permit management
+                                        │   └── External interlocks
+                                        │
+                                        ├── Motion Controller (tuner motors)
+                                        │   └── 4-axis stepper motor control
+                                        │
+                                        └── Python/EPICS Coordinator (this design)
+                                            ├── Station state machine
+                                            ├── HVPS supervisory control
+                                            ├── Tuner position management
+                                            ├── Load angle offset loop
+                                            ├── Slow power monitoring
+                                            ├── Fault logging & diagnostics
+                                            └── Operator interface
+```
+
+### 2.2 Three-Layer Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -91,13 +131,101 @@ The SPEAR3 LLRF upgrade transitions from a legacy VxWorks/SNL-based system to a 
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 Communication Architecture
+### 2.3 Communication Architecture
+
+```
+                    ┌──────────────────────────────┐
+                    │    Python/EPICS Coordinator    │
+                    │    (Linux Soft IOC + Python)   │
+                    └──────┬───┬───┬───┬───┬───────┘
+                           │   │   │   │   │
+              ┌────────────┘   │   │   │   └────────────┐
+              │                │   │   │                 │
+              ▼                ▼   │   ▼                 ▼
+    ┌─────────────┐  ┌──────────┐ │ ┌──────────┐  ┌──────────┐
+    │  Dimtel     │  │ HVPS PLC │ │ │ MPS PLC  │  │ Slow Pwr │
+    │  LLRF9      │  │ Compact  │ │ │ Compact  │  │ Monitor  │
+    │             │  │ Logix    │ │ │ Logix    │  │ (ADC)    │
+    │ Ethernet/   │  │ EtherNet │ │ │ EtherNet │  │          │
+    │ EPICS       │  │ /IP      │ │ │ /IP      │  │          │
+    └──────┬──────┘  └────┬─────┘ │ └────┬─────┘  └──────────┘
+           │              │       │      │
+           │              │       │      │
+    ┌──────┴──────┐   ┌───┴──┐   │  ┌───┴────────────────────┐
+    │ 4 Cavities  │   │ HVPS │   │  │ Interface Chassis      │
+    │ + Klystron  │   │      │   │  │ ├─ LLRF9 permit I/O    │
+    │ + Waveguide │   └──────┘   │  │ ├─ HVPS fiber optic    │
+    └─────────────┘              │  │ ├─ Arc detectors        │
+                                 │  │ └─ External interlocks  │
+                    ┌────────────┘  └────────────────────────┘
+                    ▼
+            ┌──────────────┐
+            │Motion Ctrl   │
+            │(Galil/other) │
+            │ 4-axis       │
+            │ Ethernet     │
+            └──────┬───────┘
+                   │
+            ┌──────┴───────┐
+            │ 4 Stepper    │
+            │ Motors +     │
+            │ Potentiomtrs │
+            └──────────────┘
+```
 
 **EPICS Network Backbone**: All components communicate via EPICS Channel Access, leveraging existing SPEAR3 infrastructure.
 
 **Ethernet-Based**: LLRF9 units, Python coordinator, and external controllers use standard Ethernet connectivity.
 
 **Fiber Optic Interlocks**: Critical safety signals use fiber optic links for noise immunity and electrical isolation.
+
+### 2.4 Hardware/Software Responsibility Partitioning
+
+This is the **most critical design decision**. The table below maps every legacy function to its new owner:
+
+#### **Function Assignment Matrix**
+
+| Legacy Function | Legacy Owner | New Owner | Interface | Notes |
+|----------------|-------------|-----------|-----------|-------|
+| **Fast I/Q demodulation** | RFP analog | **LLRF9** | Internal | Core LLRF9 function |
+| **Direct loop feedback** | RFP analog + SNL | **LLRF9** | Config via Ethernet | LLRF9 handles loop closure |
+| **Comb loop feedback** | RFP analog + SNL | **LLRF9** | Config via Ethernet | LLRF9 handles comb filtering |
+| **Lead/Integral compensation** | SNL (rf_states.st) | **LLRF9** | Config via Ethernet | LLRF9 internal |
+| **Gap voltage regulation** | SNL (rf_dac_loop.st) | **LLRF9** | Setpoint via EPICS | LLRF9 closes fast loop; Python sets setpoint |
+| **Drive power monitoring** | SNL (rf_dac_loop.st) | **LLRF9 + Python** | LLRF9 measures; Python monitors | Python reads LLRF9 data for HVPS decisions |
+| **HVPS voltage control** | SNL (rf_hvps_loop.st) | **Python/EPICS** | EtherNet/IP to PLC | Python sends voltage setpoints to PLC |
+| **HVPS vacuum processing** | SNL (rf_hvps_loop.st) | **Python/EPICS** | EtherNet/IP to PLC | Python implements process ramp |
+| **Station state machine** | SNL (rf_states.st) | **Python/EPICS** | Channel Access to all subsystems | Python coordinates all subsystem states |
+| **Tuner phase control** | SNL (rf_tuner_loop.st) | **LLRF9** | Delta-move commands to Python | LLRF9 measures phase; sends move commands |
+| **Tuner motor control** | SNL (rf_tuner_loop.st) | **Python/EPICS** | EPICS motor record to controller | Python/motor record drives Galil |
+| **Load angle offset** | SNL (rf_tuner_loop.st) | **Python/EPICS** | Channel Access | Python adjusts phase setpoints for power balance |
+| **Tuner home/reset** | SNL (rf_tuner_loop.st) | **Python/EPICS** | EPICS motor record | Python manages home positions |
+| **Calibration** | SNL (rf_calib.st) | **LLRF9 + Python** | LLRF9 internal cal + Python orchestration | LLRF9 has its own calibration; Python manages workflow |
+| **Fault file capture** | SNL (rf_states.st) | **Python/EPICS** | Read LLRF9 buffers | Python captures waveforms on fault |
+| **Message logging** | SNL (rf_msgs.st) | **Python/EPICS** | Standard Python logging | Modern logging framework |
+| **MPS interface** | Direct hardware | **MPS PLC** | EtherNet/IP to Python | PLC handles fast faults; Python monitors |
+| **HVPS contactor** | SNL (rf_states.st) | **HVPS PLC** | Command via EtherNet/IP | PLC controls contactor; Python commands open/close |
+| **Beam abort control** | SNL (rf_states.st) | **LLRF9 + MPS** | Hardware interlock | Fast path through LLRF9 permit |
+| **Slow power monitoring** | Legacy analog | **External ADC + Python** | ADC → EPICS | New MCL ZX47-40LN detectors |
+| **Arc detection** | None (broken) | **Microstep-MIS → MPS PLC** | Optocoupler to MPS | New capability |
+
+#### **Key Design Principle: LLRF9 is the Inner Loop**
+
+The LLRF9 handles ALL time-critical RF control. Python/EPICS is the **supervisory layer**:
+
+```
+  Python/EPICS Responsibility          LLRF9 Responsibility
+  ─────────────────────────            ────────────────────
+  Station state coordination           Fast I/Q processing (μs)
+  HVPS voltage setpoints (~1 Hz)       Direct loop feedback (kHz)
+  Tuner motor positioning (~1 Hz)      Comb loop feedback
+  Load angle offset (~0.1 Hz)          Gap voltage fast regulation
+  Fault logging & diagnostics          Drive power measurement
+  Operator interface                   Cavity phase measurement
+  Permit management (via MPS)          RF enable/disable
+  Configuration management             Internal calibration
+  Turn-on/shutdown sequencing          Transient management
+```
 
 ---
 
@@ -1158,3 +1286,22 @@ The key innovation is the clear separation of responsibilities: LLRF9 handles al
 **Document Version**: 2.0  
 **Last Updated**: February 2026  
 **Status**: Ready for Implementation
+
+---
+
+## 16. Open Questions Requiring Resolution
+
+1. **LLRF9 API details**: What is the exact communication protocol? EPICS Channel Access, custom TCP, or REST API?
+2. **LLRF9 tuner interface**: Does LLRF9 provide delta-move commands or absolute position targets for tuners?
+3. **Motion controller selection**: Galil DMC-4143 vs. Domenico/Mike Dunning solution — final decision needed
+4. **Motion profiles**: Jim's doc notes legacy only used uniform pulse rates. Need to test acceleration/deceleration profiles on actual cavity.
+5. **HVPS PLC EPICS driver**: Use pycomm3, opcua, or custom EtherNet/IP driver for CompactLogix?
+6. **Slow power monitor ADC**: What ADC hardware will digitize the MCL detector outputs?
+7. **LLRF9 calibration workflow**: What manual steps are required? How does operator interact?
+8. **Fault buffer format**: What is the format/size of LLRF9 fault history buffers?
+
+---
+
+**Document Status**: Consolidated from UPGRADE_SOFTWARE_DESIGN.md + SPEAR3_LLRF_SOFTWARE_DESIGN.md  
+**Merge Date**: February 2026  
+**Ready for**: Implementation Phase 1
