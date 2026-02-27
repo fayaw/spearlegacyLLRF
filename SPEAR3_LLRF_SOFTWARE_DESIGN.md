@@ -191,7 +191,7 @@ This is the **most critical design decision**. The table below maps every legacy
 | **Direct loop feedback** | RFP analog + SNL | **LLRF9** | Config via Ethernet | LLRF9 handles loop closure |
 | **Comb loop feedback** | RFP analog + SNL | **LLRF9** | Config via Ethernet | LLRF9 handles comb filtering |
 | **Lead/Integral compensation** | SNL (rf_states.st) | **LLRF9** | Config via Ethernet | LLRF9 internal |
-| **Gap voltage regulation** | SNL (rf_dac_loop.st) | **LLRF9** | Setpoint via EPICS | LLRF9 closes fast loop; Python sets setpoint |
+| **Gap voltage regulation** | SNL (rf_dac_loop.st) | **LLRF9 + Python** | LLRF9 fast loop; Python supervisory setpoint | LLRF9 closes fast amplitude/phase loop around its setpoint. Python implements slow supervisory loop (~1 Hz) that adjusts LLRF9 amplitude setpoint based on measured total gap voltage error (equivalent to legacy DAC loop). The legacy 4-way branching (direct loop on/off x GVF available/not) is simplified because LLRF9 always handles the inner loop. |
 | **Drive power monitoring** | SNL (rf_dac_loop.st) | **LLRF9 + Python** | LLRF9 measures; Python monitors | Python reads LLRF9 data for HVPS decisions |
 | **HVPS voltage control** | SNL (rf_hvps_loop.st) | **Python/EPICS** | EtherNet/IP to PLC | Python sends voltage setpoints to PLC |
 | **HVPS vacuum processing** | SNL (rf_hvps_loop.st) | **Python/EPICS** | EtherNet/IP to PLC | Python implements process ramp |
@@ -234,26 +234,40 @@ The LLRF9 handles ALL time-critical RF control. Python/EPICS is the **supervisor
 ### 3.1 LLRF9 Configuration for SPEAR3
 
 **Hardware Specifications**:
-- **Model**: LLRF9/476 (476 ± 2.5 MHz operation)
-- **RF Channels**: 9 inputs, 2 drive outputs, 2 spare outputs
+- **Model**: LLRF9/476 (476 ± 2.5 MHz operation, covers SPEAR3's 476.3 MHz)
+- **Quantity**: **2 LLRF9 units required for operation** (4 units procured total: 2 operational + 2 complete spares, per Upgrade Task List)
+- **RF Channels per unit**: 9 inputs (3 LLRF4.6 boards × 3 signal channels, with 1 reference per board), 2 interlocked drive outputs, 2 direct outputs
 - **Configuration**: "One station, four cavities, single power source" (Manual Section 8.4)
-- **Built-in EPICS IOC**: Linux-based with Ethernet connectivity
+- **Built-in EPICS IOC**: Linux-based SBC (mini-ITX), Ethernet connectivity, configurable device name (PV format: `{DEVICE}:HW:CONFIG`)
+- **Thermal stabilization**: Internal cold plate with 3 TEC modules under PID control
 
-**Channel Assignment**:
-```
-ADC0: Cavity 1 probe (primary vector sum)
-ADC1: Cavity 2 probe (secondary vector sum)
-ADC2: Cavity 3 probe (monitoring/interlock)
-ADC3: Cavity 4 probe (monitoring/interlock)
-ADC4: RF reference signal
-ADC5: Forward power monitoring
-ADC6: Reflected power monitoring
-ADC7: Circulator reflected power
-ADC8: Spare/calibration
+**Dual-LLRF9 Architecture**:
 
-DAC0: Klystron drive output (+8 dBm full scale)
-DAC1: Spare/calibration output (-13 dBm full scale)
+The SPEAR3 system uses **two LLRF9 units** because each LLRF4.6 board dedicates one of its four ADC channels to the RF reference signal, leaving 3 signal channels per board (9 signal channels per LLRF9). With 4 cavity probes plus additional monitoring signals (forward power, reflected power, etc.), two units are needed.
+
+Each LLRF4.6 board that performs real-time cavity field control can handle at most 2 cavity probe signals in its vector sum. For SPEAR3's 4-cavity configuration, the cavity probes are split across the two units.
+
+**Channel Assignment** (approximate — final assignment to be confirmed during commissioning):
 ```
+LLRF9 Unit #1 (Primary — handles vector sum and drive output):
+  Board 1: ADC0=Cavity 1 probe, ADC1=Cavity 2 probe, ADC2=Forward power, ADC3=Reference
+  Board 2: ADC4=Cavity 3 probe, ADC5=Cavity 4 probe, ADC6=Reflected power, ADC7=Reference
+  Board 3: ADC8=Circulator reflected, ADC9=Klystron drive fwd, ADC10=Spare, ADC11=Reference
+  DAC0: Klystron drive output (amplified, filtered, interlocked)
+  DAC1: Spare/calibration output
+
+LLRF9 Unit #2 (Secondary — additional monitoring, interlocks, spare capacity):
+  Additional RF monitoring channels for redundancy and diagnostics
+  Independent interlock chain (Note: stations share interlock chain per unit)
+  Spare drive output capability for redundancy
+```
+
+**Note**: The exact channel assignment depends on the SPEAR3-specific LLRF9 firmware configuration from Dimtel. The key constraint is that cavity probes forming a vector sum must be on the same LLRF4.6 board.
+
+**Additional RF Monitoring** (per Upgrade Task List):
+- LLRF9 units monitor 18 RF inputs total
+- 6 additional monitoring points needed from legacy system → handled by external MCL ZX47-40LN-S+ power detectors in slow power monitoring chassis
+- 1 additional input for klystron collector power → for MPS system
 
 ### 3.2 LLRF9 Capabilities Utilized
 
@@ -515,53 +529,116 @@ class StationStateMachine:
         self.transition_table = self._build_transition_table()
         
     def _build_transition_table(self):
-        """Define allowed state transitions with conditions"""
+        """Define allowed state transitions with conditions.
+        
+        Based on legacy rf_states.st state transition matrix (lines 63-77):
+        
+          From\To   OFF   PARK  TUNE  ON_FM  ON_CW
+          OFF         -     Y     Y     Y      Y
+          PARK        Y     -     -     -      -
+          TUNE        Y     -     -     -      Y
+          ON_FM       Y     -     Y     -      -
+          ON_CW       Y     -     Y     -      -
+        
+        Note: OFF can transition directly to any operational state (not 
+        restricted to going through PARK first). This matches SPEAR3 
+        operational practice where operators often go OFF→TUNE→ON_CW.
+        ON_FM and ON_CW can only step back to TUNE (not directly to PARK).
+        PARK can only go to OFF (it was designed for PEP-II and is rarely 
+        used at SPEAR3).
+        """
         return {
-            'OFF': ['PARK'],  # Can only go to PARK from OFF
-            'PARK': ['OFF', 'TUNE'],  # Can go to OFF or TUNE from PARK
-            'TUNE': ['PARK', 'ON_CW'],  # Can go to PARK or ON_CW from TUNE
-            'ON_CW': ['PARK', 'ON_FM'],  # Can go to PARK or ON_FM from ON_CW
-            'ON_FM': ['PARK', 'ON_CW']   # Can go to PARK or ON_CW from ON_FM
+            'OFF':   ['PARK', 'TUNE', 'ON_FM', 'ON_CW'],  # Can go to any state from OFF
+            'PARK':  ['OFF'],                               # Can only go to OFF from PARK
+            'TUNE':  ['OFF', 'ON_CW'],                     # Can go to OFF or ON_CW from TUNE
+            'ON_FM': ['OFF', 'TUNE'],                      # Can go to OFF or TUNE from ON_FM
+            'ON_CW': ['OFF', 'TUNE']                       # Can go to OFF or TUNE from ON_CW
         }
 ```
 
 ### 6.2 State Implementation Details
 
 **OFF State**:
-- All systems disabled
-- LLRF9 RF output disabled
-- HVPS disabled and grounded
-- All tuners parked
-- No permits issued
+- All systems disabled; LLRF9 RF output disabled
+- HVPS triggers off, HVPS voltage zeroed
+- Tuners moved to park position
+- All feedback loops disabled (DAC, HVPS, tuner, direct, comb)
+- Beam abort forced; no permits issued
+- **Fault detection**: If a fault caused the transition to OFF, auto-reset logic may attempt recovery (configurable retry count, typically 3 attempts)
 
 **PARK State**:
-- Safe operational state
-- LLRF9 enabled but RF output at minimum
-- HVPS enabled but voltage = 0
-- Tuners enabled for positioning
-- Basic permits active
+- Legacy state originally designed for PEP-II operation when an RF station was down
+- **Rarely used at SPEAR3** — primarily exists for compatibility
+- HVPS contactor may remain energized
+- Limited fault monitoring active
+- Can only transition to OFF
+- **Note**: Different from TUNE — PARK does not enable RF output
 
 **TUNE State**:
-- Low-power RF for cavity tuning
-- LLRF9 amplitude setpoint = 10% of normal
-- HVPS voltage = 20% of normal
-- Tuner control loops active
-- Automatic tuning algorithms enabled
+- Low-power RF for cavity tuning and system testing
+- **Critical first step**: Tuners moved to TUNE/ON Home position (`SRF1:CAV1TUNR:POSN:ONHOME`)
+- HVPS set to Turn-On Voltage (`SRF1:HVPS:VOLT:MIN`, typically ~50 kV)
+- DAC set to initial low value (~100 counts), producing a few watts of drive power
+- Sufficient field to start measuring RF parameters and enabling LLRF controls
+- Tuner feedback loops active (phase-based control)
+- HVPS loop OFF (user manually controls voltage in TUNE)
+- DAC loop adjusts for drive power (not gap voltage)
+- Used to test new equipment (e.g., refurbished HVPS or new klystron)
+- May need to adjust Direct Loop Phase for new klystron phase differences
 
 **ON_CW State**:
-- Normal continuous wave operation
-- LLRF9 amplitude/phase setpoints at operational values
-- HVPS voltage at operational setpoint
-- All control loops active
-- Full power operation
+- Normal continuous wave operation — **primary operational mode for SPEAR3**
+- Full turn-on sequence (see Section 6.3):
+  1. Direct loop closure (adds integrator, causes controlled power transient)
+  2. Wait for transient to settle (10-20 seconds)
+  3. DAC and HVPS control loops become active
+  4. Coordinated ramp to full power (~50W drive, ~3.2 MV gap voltage, ~1 MW klystron)
+- All feedback loops active: DAC loop (gap voltage), HVPS loop (drive power), tuner loops (cavity frequency), direct/comb/ripple loops
+- Drive power setpoint maintained by HVPS supervisory loop
+- Total gap voltage maintained by DAC supervisory loop
+- Tickle capability for beam tune measurement
 
 **ON_FM State**:
-- Fast modulation operation
-- LLRF9 configured for rapid setpoint changes
-- HVPS voltage modulation enabled
-- Enhanced monitoring for transient conditions
+- **Cavity vacuum processing mode** (NOT "fast modulation" for normal operation)
+- Designed for processing cavities after a vacuum incident to remove foreign particles
+- Loads I/Q modulation files (400 Hz or 1 kHz) into RFP module
+- HVPS PROCESS mode: slowly ramps voltage while monitoring vacuum, decreases if vacuum degrades
+- **Rarely used at SPEAR3** — Jim's doc notes they have only had one vacuum incident and successfully processed using ON_CW mode with varying gap voltage instead
+- Transition path: ON_FM → TUNE → OFF (cannot go directly to ON_CW)
 
-### 6.3 Interlock Integration
+### 6.3 Turn-On Sequence (TUNE to ON_CW)
+
+The turn-on sequence is the most complex state transition. Based on the legacy rf_states.st implementation and Jim's operational document:
+
+**Pre-Conditions (checked before transition begins)**:
+- All interlocks satisfied
+- HVPS contactor energized and ready
+- Tuners at TUNE/ON Home positions (verified via potentiometer)
+
+**Sequence Steps**:
+
+| Step | Action | Detail |
+|------|--------|--------|
+| 1 | Set HVPS to Turn-On Voltage |  (typically ~50 kV) |
+| 2 | Set DAC to Fast-On Counts |  (~200 counts) for ON_CW |
+| 3 | Enable RF Output | LLRF9 permit set; produces a few watts of drive power |
+| 4 | Close Direct Loop | Analog switch closes integrator; **causes controlled power transient** |
+| 5 | Wait for Transient | 10-20 seconds for power transient to settle |
+| 6 | Enable DAC Control Loop | Begins adjusting amplitude to maintain gap voltage |
+| 7 | Enable HVPS Control Loop | HVPS supervisory loop begins drive power regulation |
+| 8 | Coordinated Ramp | DAC increases gap voltage; HVPS tracks to maintain drive power setpoint |
+| 9 | Reach Full Power | ~50W drive power, ~3.2 MV total gap voltage, ~1 MW klystron output |
+| 10 | Reset Beam Abort | Only after gap voltage stable above threshold ( timeout ~30s) |
+
+**Fast Turn-On Mode**: The system includes a fast turn-on capability (controlled by ). This jumps to predetermined "safe" DAC and HVPS values rather than ramping from minimum, reducing turn-on time from minutes to seconds. Requires careful calibration of fast-on values.
+
+### 6.4 Auto-Reset Logic
+
+The legacy system implements automatic fault recovery (from  lines 56-58):
+
+
+
+### 6.5 Interlock Integration
 
 ```python
 class InterlockManager:
@@ -631,7 +708,114 @@ class HVPSControlInterface:
         self.send_voltage_setpoint(next_voltage)
 ```
 
-### 7.2 Fiber Optic Interlock System
+
+### 7.2 HVPS Supervisory Feedback Loop (Critical Addition)
+
+The legacy `rf_hvps_loop.st` implements a **critical supervisory feedback loop** that adjusts the HVPS voltage setpoint based on drive power measurements. The CompactLogix PLC handles low-level voltage regulation and safety, but **the higher-level decision about what voltage to request** must be implemented in the Python coordinator. Without this loop, the system cannot maintain proper drive power levels during normal operation.
+
+**Three Operating Modes** (from legacy `rf_hvps_loop.st`):
+
+1. **OFF Mode** (`HVPS_LOOP_CONTROL_OFF`):
+   - No voltage adjustments
+   - Used when station is OFF or PARK
+   - Tracks current readback voltage passively
+
+2. **PROCESS Mode** (`HVPS_LOOP_CONTROL_PROC`) -- Vacuum Conditioning:
+   - Used after cavity maintenance to remove particles
+   - **Algorithm**: Every ~0.5 seconds:
+     - **Decrease voltage** if ANY of: klystron forward power > max, cavity gap voltage > setpoint, cavity vacuum too high
+     - **Increase voltage** if all conditions are good
+   - Slowly ramps voltage while vacuum system removes particles
+   - Critical for cavity conditioning after vacuum incidents
+
+3. **ON Mode** (`HVPS_LOOP_CONTROL_ON`) -- Normal Drive Power Regulation:
+   - Maintains klystron drive power at its setpoint
+   - **Algorithm**: As DAC loop increases amplitude, drive power increases. HVPS loop increases cathode voltage, giving higher klystron gain, so drive power returns to setpoint with higher RF output.
+   - **Dual behavior** depending on station mode:
+     - **ON_CW + Direct Loop ON**: Uses drive power error to compute HVPS delta (inverted sign: `delta_hvps = -delta_on_voltage`)
+     - **TUNE or Direct Loop OFF**: Uses gap voltage error to compute HVPS delta
+   - Includes cavity voltage limit checking: if any cavity voltage above max AND delta would increase HVPS voltage, the increase is blocked
+
+```python
+class HVPSSupervisoryLoop:
+    """Supervisory HVPS voltage control loop.
+    
+    Equivalent to legacy rf_hvps_loop.st. Adjusts the HVPS voltage SETPOINT 
+    sent to the CompactLogix PLC. The PLC handles actual voltage regulation. 
+    This loop runs at ~1 Hz.
+    """
+    
+    MODES = {
+        'OFF': 0,       # No voltage control
+        'PROCESS': 1,   # Vacuum processing/conditioning
+        'ON': 2         # Normal drive power regulation
+    }
+    
+    def __init__(self):
+        self.mode = 'OFF'
+        self.update_rate = 1.0  # Hz (~0.5s in legacy)
+        self.voltage_setpoint = 0.0
+        self.prev_voltage_setpoint = 0.0
+        
+        # Configurable parameters
+        self.delta_proc_voltage_up = 100.0    # V per step during processing
+        self.delta_proc_voltage_down = -200.0  # V per step during processing
+        self.min_voltage = 0.0
+        self.max_voltage = 90000.0  # 90 kV max
+        self.voltage_tolerance = 500.0  # V readback vs requested tolerance
+        
+    def update(self, station_state, direct_loop_on, measurements):
+        """Main supervisory loop update, called at ~1 Hz"""
+        
+        if self.mode == 'OFF':
+            self.prev_voltage_setpoint = measurements['hvps_voltage_readback']
+            return
+            
+        # Safety checks first (priority order from legacy code)
+        if self._check_module_health(measurements) != 'OK':
+            return  # Don't adjust if hardware is unhealthy
+            
+        if self.mode == 'PROCESS':
+            self._process_mode_update(measurements)
+        elif self.mode == 'ON':
+            self._on_mode_update(station_state, direct_loop_on, measurements)
+    
+    def _process_mode_update(self, m):
+        """Vacuum conditioning: ramp up unless problems detected"""
+        if (m['klystron_fwd_power'] > m['max_klystron_fwd_power'] or
+            m['gap_voltage_above_setpoint'] or
+            m['cavity_vacuum_too_high']):
+            delta = self.delta_proc_voltage_down
+        else:
+            delta = self.delta_proc_voltage_up
+        self._apply_voltage_delta(delta, m['hvps_voltage_readback'])
+    
+    def _on_mode_update(self, station_state, direct_loop_on, m):
+        """Normal operation: maintain drive power setpoint"""
+        if station_state == 'ON_CW' and direct_loop_on:
+            delta = -m['drive_power_delta']  # Inverted sign
+        else:
+            delta = m['gap_voltage_delta']
+        
+        # Block voltage increase if any cavity above max
+        if m['any_cavity_above_max'] and delta > 0:
+            return
+            
+        self._apply_voltage_delta(delta, m['hvps_voltage_readback'])
+    
+    def _apply_voltage_delta(self, delta, readback):
+        """Apply voltage change with readback tolerance checking"""
+        if abs(readback - self.prev_voltage_setpoint) < self.voltage_tolerance:
+            new_voltage = max(self.min_voltage,
+                            min(self.max_voltage, self.voltage_setpoint + delta))
+            self.voltage_setpoint = new_voltage
+            self.prev_voltage_setpoint = new_voltage
+            caput('SPEAR3:LLRF:HVPS:VOLTAGE_SP', new_voltage)
+```
+
+
+
+### 7.3 Fiber Optic Interlock System
 
 ```python
 class FiberOpticInterface:
@@ -654,7 +838,7 @@ class FiberOpticInterface:
         """Receive HVPS ready status from controller"""
 ```
 
-### 7.3 Enerpro Gate Driver Integration
+### 7.4 Enerpro Gate Driver Integration
 
 The task list specifies upgrading to new Enerpro controller boards (~$4000 for 5 boards):
 
@@ -761,6 +945,79 @@ class FieldBalancingController:
             if self._field_imbalance_detected(cavity_id):
                 self._differential_tuning(cavity_id)
 ```
+
+### 8.4 Critical Tuner Control Features from Legacy System
+
+The following features from the legacy tuner control system (`rf_tuner_loop.st` and Jim's operational document) MUST be preserved in the upgraded system:
+
+#### 8.4.1 Stop-and-Init Feature
+
+The legacy controller has a "stop and init" feature that **realigns the internal step counter with the measured potentiometer position without moving the tuner**. Since our system has no encoders (only linear potentiometers for position indication), drift can occur between the commanded step count and actual physical position. This feature is critical for recovering from:
+- Power loss to the motion controller
+- Communication interruption
+- Accumulated step count errors
+
+```python
+class TunerStopAndInit:
+    """Implements the stop-and-init feature for tuner step counter realignment."""
+    
+    def stop_and_init(self, tuner_id):
+        """Realign step counter with potentiometer reading without moving tuner."""
+        pot_voltage = caget(f'SPEAR3:LLRF:TUNER{tuner_id}:POT_RB')
+        pot_position_mm = self.voltage_to_position(pot_voltage)
+        current_step_count = caget(f'SPEAR3:LLRF:TUNER{tuner_id}:STEP_COUNT')
+        new_step_count = self.position_to_steps(pot_position_mm)
+        caput(f'SPEAR3:LLRF:TUNER{tuner_id}:STEP_COUNT', new_step_count)
+```
+
+#### 8.4.2 Home Position Management
+
+Each tuner has TWO home positions that depend on the station operating mode:
+- **TUNE/ON Home** (`SRF1:CAV1TUNR:POSN:ONHOME`): Position used during normal RF operation
+- **PARK Home** (`SRF1:CAV1TUNR:POSN:PARKHOME`): Position used when station is parked/off
+
+During turn-on, tuners are moved to their TUNE/ON Home position BEFORE any RF is applied. The homing sequence uses the potentiometer to verify position within tolerance (`RDBD * LOOP_RESET_TOLS`), making multiple attempts (`LOOP_RESET_COUNT = 5`) with delays between tries.
+
+#### 8.4.3 Load Angle Offset Loop
+
+Per Jim's document: "The load angle offset loop seems to be best suited for our EPICS application rather than LLRF9."
+
+This is a **slow secondary loop** that adjusts the phase setpoints of individual cavity tuner loops to equalize gap voltage contribution across all 4 cavities:
+- User sets desired fraction per cavity via `SRF1:CAV1:STRENGTH:CTRL` (e.g., 0.25 for equal distribution)
+- Loop measures actual gap voltage in each cavity
+- Adjusts individual tuner phase setpoints to redistribute power
+- Runs slower than the primary phase control loop (~0.1 Hz)
+
+#### 8.4.4 Power Interlock for Tuner Control
+
+The tuner control loop is **disabled when cavity power is too low** (from `rf_tuner_loop.st`):
+- Checks `klys_frwd_pwr` against `klys_frwd_pwr_min`
+- If klystron forward power is bad (INVALID severity) or below minimum threshold, tuner loop reports `LOOP_POWR_LOW_STATUS` and does not attempt to move the tuner
+- This prevents erroneous tuner movements when phase measurements are unreliable due to low signal levels
+
+#### 8.4.5 Tuner Mechanical Specifications (for motion profile design)
+
+From Jim's document and drawing SA-341-392-61:
+- **Stepper Motor**: Superior Electric Slo-Syn M093-FC11 (NEMA 34D), 200 steps/rev
+- **Controller Resolution**: 2 microsteps/step = 400 microsteps/rev (legacy); modern controllers offer 16-64 microsteps/step
+- **Gear Ratio**: 15:30 timing belt pulleys = 1:2 (motor:leadscrew)
+- **Lead Screw**: 1/2-10 Acme thread = 0.1"/turn = 2.54 mm/turn
+- **Linear Resolution**: 400 microsteps / (2 leadscrew revs) = 0.003175 mm/microstep (legacy)
+- **Deadband**: 5 microsteps (legacy `RDBD`)
+- **Typical Startup Motion**: ~2.5 mm (1 leadscrew turn, 2 motor turns)
+- **Typical Normal Operation Motion**: ~0.2 mm
+- **Motion Profiles**: Legacy system used uniform pulse rates only. Jim recommends testing acceleration/deceleration profiles on the actual cavity.
+
+#### 8.4.6 Tuner Startup and Recovery Requirements
+
+Per Jim's document, the EPICS driver must handle:
+1. **Power loss recovery**: If the motion controller loses power, it must recover gracefully
+2. **Communication loss**: If communication with the control system is lost, the controller should hold position (not free-run)
+3. **Worst case**: May need to inform LLRF9 of communication failure, potentially triggering station shutdown if cavity goes far out of tune
+4. **Update rate**: Small steps at approximately 1 Hz rate
+5. **Reliability**: The upgrade task list notes persistent reliability issues with previous controller candidates
+
+
 
 ---
 
