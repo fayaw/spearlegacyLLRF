@@ -1,19 +1,19 @@
-# SPEAR3 LLRF Control System — Comprehensive Analysis
+# SPEAR3 LLRF Control System --- Comprehensive Analysis
 ## Legacy System Review & Upgrade Project Scope with Dimtel LLRF9
 
-*Based on detailed analysis of legacy SNL code, Jim's operational documentation, LLRF9 technical manual, and LLRF Upgrade Task List Rev3*
+*Based on detailed analysis of legacy SNL code, Jim's operational documentation, LLRF9 technical manual, Waveform Buffer design document, Interface Chassis specification, and LLRF Upgrade Task List Rev3*
 
-**Document Version**: 3.0  
+**Document Version**: 4.0  
 **Last Updated**: 2026-02-27  
-**Includes**: Full upgrade project scope, LLRF9 integration, and legacy-to-upgrade comparison
+**Includes**: Full upgrade project scope, LLRF9 integration, Waveform Buffer system, Interface Chassis specification, and legacy-to-upgrade comparison
 
 ---
 
 ## Table of Contents
 
 1. [Executive Summary](#1-executive-summary)
-2. [Legacy System vs. Upgraded System — At a Glance](#2-legacy-system-vs-upgraded-system--at-a-glance)
-3. [LLRF9 Controller — The Heart of the Upgrade](#3-llrf9-controller--the-heart-of-the-upgrade)
+2. [Legacy System vs. Upgraded System --- At a Glance](#2-legacy-system-vs-upgraded-system--at-a-glance)
+3. [LLRF9 Controller --- The Heart of the Upgrade](#3-llrf9-controller--the-heart-of-the-upgrade)
 4. [Full Upgrade Project Scope](#4-full-upgrade-project-scope)
 5. [SPEAR3 RF System Overview (Physical System)](#5-spear3-rf-system-overview-physical-system)
 6. [Legacy Control System Architecture](#6-legacy-control-system-architecture)
@@ -29,26 +29,26 @@
 
 ## 1. Executive Summary
 
-The SPEAR3 LLRF (Low-Level RF) control system is a sophisticated multi-loop feedback system that maintains stable RF power for the SPEAR3 storage ring at SSRL. The system controls **one klystron** driving **four RF cavities** at **476.3 MHz**, with individual **stepper motor tuners** for each cavity.
+The SPEAR3 LLRF (Low-Level RF) control system is a sophisticated multi-loop feedback system that maintains stable RF power for the SPEAR3 storage ring at SSRL. The system controls **one klystron** driving **four RF cavities** at **476 MHz**, with individual **stepper motor tuners** for each cavity.
 
-The LLRF upgrade project replaces the entire control electronics chain — not just the low-level RF controller, but also the machine protection system, HVPS controller, tuner motor controllers, and supporting subsystems. **Two Dimtel LLRF9 units** form the core of the new system, with four units purchased to provide a complete set of spares.
+The LLRF upgrade project replaces the entire control electronics chain --- not just the low-level RF controller, but also the machine protection system, HVPS controller, tuner motor controllers, and supporting subsystems. **Two Dimtel LLRF9 units** form the core of the new system, with four units purchased to provide a complete set of spares.
 
 > **Historical Note**: The legacy control software was originally written for the **PEP-II B-Factory** project (circa 1997) and was later adapted for SPEAR3. This heritage explains the presence of operational modes (ON_FM, PARK) and hardware references (VXI, CAMAC) that are no longer used at SPEAR3.
 
 ### Key System Parameters
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| **RF Frequency** | 476.3 MHz | Determined by beam orbit; LLRF9/476 variant supports 476 ± 2.5 MHz |
+| **RF Frequency** | ~476 MHz | Determined by beam orbit; frequency synthesizer sets the exact value. LLRF9/476 variant supports 476 +/- 2.5 MHz |
 | **Total Gap Voltage** | ~3.2 MV | Sum of 4 cavity gap voltages |
 | **Klystron Power** | ~1 MW | Single klystron drives all 4 cavities |
-| **HVPS Voltage** | up to ~90 kV | Klystron cathode voltage |
-| **Drive Power** | ~50 W nominal | Input to klystron from LLRF |
+| **HVPS Voltage** | up to ~90 kV | Klystron cathode voltage. Turn-on voltage is ~50 kV (`SRF1:HVPS:VOLT:MIN`) |
+| **Drive Power** | ~50 W nominal | Input to klystron from drive amplifier |
 | **Number of Cavities** | 4 | Single-cell cavities with individual tuners |
 | **Cavity Gap Voltage** | ~800 kV each | Individual cavity contribution |
 
 ---
 
-## 2. Legacy System vs. Upgraded System — At a Glance
+## 2. Legacy System vs. Upgraded System --- At a Glance
 
 This section provides a clear, side-by-side comparison of the current (legacy) system and the planned upgraded system across every major subsystem.
 
@@ -56,17 +56,19 @@ This section provides a clear, side-by-side comparison of the current (legacy) s
 
 | Aspect | Legacy System | Upgraded System |
 |--------|---------------|-----------------|
-| **LLRF Controller** | Custom PEP-II analog RF Processor (RFP) module in VXI chassis | **Dimtel LLRF9** (×2 units) — digital FPGA-based, integrated EPICS IOC |
+| **LLRF Controller** | Custom PEP-II analog RF Processor (RFP) module in VXI chassis | **Dimtel LLRF9** (x2 units) --- digital FPGA-based, integrated EPICS IOC |
 | **Control Software** | SNL (State Notation Language) on VxWorks RTOS | **Python/PyEPICS** + LLRF9 internal EPICS IOC |
 | **Fast Feedback** | Analog I/Q processing, ~kHz bandwidth | Digital vector sum + PI loops, **270 ns direct loop delay** |
 | **Machine Protection** | PLC-5 (Allen-Bradley 1771) | **ControlLogix 1756** (Allen-Bradley) |
 | **HVPS Controller** | SLC-500 PLC + original Enerpro gate driver | **CompactLogix PLC** + upgraded Enerpro boards |
-| **Tuner Motor Controller** | Allen-Bradley 1746-HSTP1 + Slo-Syn PWM driver | **Modern motion controller** (Galil DMC-4143 or equivalent) |
+| **Tuner Motor Controller** | Allen-Bradley 1746-HSTP1 + Slo-Syn PWM driver | **Modern motion controller** (under investigation --- Galil, Domenico/Dunning design, or Danh's design) |
 | **Tuner Motor Driver** | Superior Electric SS2000MD4-M (obsolete) | Modern stepper driver with microstepping |
-| **RF Signal Monitoring** | VXI-based analog modules (RFP, GVF, CFM) | LLRF9 9-channel digital acquisition + external slow power detectors |
+| **RF Signal Monitoring (fast)** | VXI-based analog modules (RFP, GVF, CFM), 24 channels | LLRF9 9-channel digital acquisition (x2 units = 18 channels) |
+| **RF/HVPS Signal Monitoring (extended)** | Same VXI system | **Waveform Buffer System** (new chassis): 8 RF + 4 HVPS channels with circular buffers and hardware trip |
 | **Arc Detection** | Non-functional existing system | **Microstep-MIS optical arc detectors** (new) |
-| **Interlocks** | Distributed across analog modules | LLRF9 integrated interlocks (9 RF + 8 baseband) + MPS PLC |
-| **Diagnostics** | Limited; fault file capture from VXI modules | LLRF9 waveform capture (16k samples/ch), network/spectrum analyzer |
+| **Interlocks** | Distributed across analog modules | LLRF9 integrated interlocks (9 RF + 8 baseband per unit) + MPS PLC + **Interface Chassis** |
+| **Interlock Coordination** | Direct wiring between subsystems | **Interface Chassis** --- new central hub with first-fault detection, optocoupler isolation, fiber-optic I/O |
+| **Diagnostics** | Limited; fault file capture from VXI modules | LLRF9 waveform capture (16k samples/ch), network/spectrum analyzer, Waveform Buffer circular buffers |
 | **Communication** | VXI backplane, CAMAC, field bus | **Ethernet/EPICS Channel Access** throughout |
 
 ### 2.2 Control Loop Comparison
@@ -75,58 +77,61 @@ This section provides a clear, side-by-side comparison of the current (legacy) s
 |--------------|----------------------|------------------------|
 | **Fast RF Feedback (Direct Loop)** | Analog I/Q in RFP module | LLRF9 FPGA: digital proportional + integral, 270 ns latency |
 | **DAC Control Loop** (~1 Hz) | SNL `rf_dac_loop.st` on VxWorks | LLRF9 vector sum + setpoint control; Python/EPICS for supervisory |
-| **HVPS Control Loop** (~1 Hz) | SNL `rf_hvps_loop.st` on VxWorks | **Python/EPICS** — still required; HVPS remains external to LLRF9 |
-| **Tuner Control Loops** (×4) | SNL `rf_tuner_loop.st` on VxWorks | **LLRF9 phase measurement** → Python/EPICS → Motor controller |
+| **HVPS Control Loop** (~1 Hz) | SNL `rf_hvps_loop.st` on VxWorks | **Python/EPICS** --- still required; HVPS remains external to LLRF9 |
+| **Tuner Control Loops** (x4) | SNL `rf_tuner_loop.st` on VxWorks | **LLRF9 phase measurement** -> Python/EPICS -> Motor controller |
 | **Station State Machine** | SNL `rf_states.st` on VxWorks | **Python/EPICS** supervisory layer |
-| **Calibration** | SNL `rf_calib.st` (2800+ lines, ~20 min) | **LLRF9 built-in digital calibration** — eliminates analog drift |
-| **Ripple Rejection** | Analog ripple loop in legacy hardware | LLRF9 digital feedback — inherently rejects power-line ripple |
-| **Comb/GFF Loops** | Dedicated analog modules (CFM, GVF) | **Eliminated** — replaced by LLRF9 digital feedback |
+| **Calibration** | SNL `rf_calib.st` (2800+ lines, ~20 min) | **LLRF9 built-in digital calibration** --- eliminates analog drift |
+| **Ripple Rejection** | Analog ripple loop in legacy hardware | LLRF9 digital feedback --- inherently rejects power-line ripple |
+| **Comb/GFF Loops** | Dedicated analog modules (CFM, GVF) | **Eliminated** --- replaced by LLRF9 digital feedback |
+| **Klystron Collector Protection** | Not present | **Waveform Buffer System** computes DC power minus RF power; trips on excess |
 
 ### 2.3 What Stays, What Changes, What's New
 
-#### ✅ Retained (same physical hardware)
+#### Retained (same physical hardware)
 - **Klystron** and its RF output
-- **4 RF Cavities** and their waveguide distribution
+- **4 RF Cavities** and their waveguide distribution (circulator, magic-tees, waveguide loads)
 - **Stepper motors** (same M093-FC11 or equivalent) and mechanical tuner assemblies
 - **Linear potentiometers** on tuners (position indication, not used in closed-loop)
-- **HVPS power electronics** (transformer, rectifier, oil system) — controller upgraded, power stage unchanged
+- **HVPS power electronics** (transformer, rectifier, oil system) --- controller upgraded, power stage unchanged
 
-#### 🔄 Replaced / Upgraded
-- **LLRF Controller**: Analog RFP module → Dimtel LLRF9 (×2)
-- **MPS System**: PLC-5 1771 → ControlLogix 1756
-- **HVPS Controller**: SLC-500 → CompactLogix + new Enerpro boards + redesigned analog regulator
-- **Tuner Motor Controllers**: Allen-Bradley HSTP1 + Slo-Syn driver → Galil or equivalent
-- **Control Software**: SNL/VxWorks → Python/EPICS + LLRF9 IOC
-- **Operator Interface**: Legacy EDM panels → modernized panels
+#### Replaced / Upgraded
+- **LLRF Controller**: Analog RFP module -> Dimtel LLRF9 (x2)
+- **MPS System**: PLC-5 1771 -> ControlLogix 1756
+- **HVPS Controller**: SLC-500 -> CompactLogix + new Enerpro boards + redesigned analog regulator
+- **Tuner Motor Controllers**: Allen-Bradley HSTP1 + Slo-Syn driver -> modern motion controller (TBD)
+- **Control Software**: SNL/VxWorks -> Python/EPICS + LLRF9 IOC
+- **Operator Interface**: Legacy EDM panels -> modernized panels
 
-#### 🆕 New Subsystems
+#### New Subsystems
+- **Interface Chassis**: Central interlock coordination hub connecting LLRF9, MPS, HVPS, and external safety systems with first-fault detection, optocoupler/fiber-optic isolation
+- **Waveform Buffer System**: 8 RF + 4 HVPS channel signal conditioning chassis with circular waveform buffers, analog comparator trips, and klystron collector power protection
 - **Arc Detection**: Microstep-MIS optical sensors on cavity windows and klystron
-- **Slow Power Monitoring**: 8-channel Minicircuits detector chassis for circulator/load powers
-- **Interface Chassis**: New integration hub connecting LLRF9, MPS, and HVPS systems
-- **Waveform Diagnostics**: LLRF9 network/spectrum analyzer, 16k-sample waveform capture
+- **Waveform Diagnostics**: LLRF9 network/spectrum analyzer, 16k-sample waveform capture with hardware interlock trigger
 
 ---
 
-## 3. LLRF9 Controller — The Heart of the Upgrade
+## 3. LLRF9 Controller --- The Heart of the Upgrade
 
 ### 3.1 Overview
 
-The Dimtel LLRF9 is a 9-channel low-level RF controller specifically designed for lepton storage rings. SPEAR3 requires the **LLRF9/476 variant** (476 ± 2.5 MHz). **Two LLRF9 units** are required for the 4-cavity configuration; four units have been purchased to provide a complete set of spares.
+The Dimtel LLRF9 is a 9-channel low-level RF controller specifically designed for lepton storage rings. SPEAR3 requires the **LLRF9/476 variant** (476 +/- 2.5 MHz). **Two LLRF9 units** are required for the 4-cavity configuration; four units have been purchased to provide a complete set of spares.
 
 The LLRF9 replaces the legacy analog RFP module and its associated VXI-based signal processing with a fully digital, FPGA-based system that includes its own Linux-based EPICS IOC.
 
 ### 3.2 Hardware Architecture
 
 Each LLRF9 contains:
-- **3 × LLRF4.6 boards**: Each with 4 high-speed ADC channels + 2 DAC channels, powered by a Xilinx Spartan-6 FPGA
+- **3 x LLRF4.6 boards**: Each with 4 high-speed ADC channels + 2 DAC channels, powered by a Xilinx Spartan-6 FPGA
 - **LO/Interconnect module**: Local oscillator synthesis (divide-and-mix topology for low phase noise), RF reference distribution, output amplification/filtering, interlock logic
 - **Linux SBC**: mini-ITX form factor, runs the built-in EPICS IOC
-- **Thermal stabilization**: Aluminum cold plate with 3 TEC (thermoelectric cooler) modules under PID control — critical for phase stability
+- **Thermal stabilization**: Aluminum cold plate with 3 TEC (thermoelectric cooler) modules under PID control --- critical for phase stability
 - **Interlock subsystem**: 9 RF input interlocks + 8 baseband ADC interlocks, hardware daisy-chain
+
+**RF Channel Architecture per LLRF4.6 Board**: Each LLRF4.6 board has 4 ADC inputs. One of the four channels on each board is dedicated to the **RF reference signal**; the remaining 3 channels are used for RF measurements. All phase measurements on the 3 measurement channels are made relative to the reference channel on that board. This reference-per-board approach rejects phase drifts in LO and sampling clock generation. Across 3 boards, this gives 3 reference + 6 measurement channels, but the reference channels are logically shared, so the system is described as having **9 RF input channels** (3 reference + 6 measurement, or equivalently, 9 channels with 3 dedicated to reference).
 
 **LO Signal Generation** (LLRF9/476):
 | Signal | Ratio to f_rf | Frequency (MHz) |
-|--------|--------------|-----------------|
+|--------|--------------|--------------------|
 | Reference (f_rf) | 1 | 476.000 |
 | IF | 1/12 | 39.667 |
 | Local Oscillator | 11/12 | 436.333 |
@@ -137,81 +142,84 @@ Each LLRF9 contains:
 
 Per the LLRF9 manual Section 8.4 ("One station, four cavities, single power source"), this configuration requires **two LLRF9 units**:
 
-**Unit 1 — Field Control & Tuner Loops:**
-- Runs the field control feedback loop (vector sum of cavity probes)
-- Manages all four tuner loops using 10 Hz phase data
-- Connected to: 4 cavity probe signals + 4 cavity forward signals + klystron forward signal
-- Outputs: Klystron drive signal (DAC0)
+**Unit 1 --- Field Control & Tuner Loops:**
+- Runs the field control feedback loop (vector sum of two cavity probes on a single LLRF4.6 board)
+- All four tuner loops use 10 Hz synchronized phase data (probe vs. forward)
+- Connected to: 4 cavity probe signals + 4 cavity forward signals + 1 klystron forward power = 9 channels
+- Outputs: Klystron drive signal (via thermally stabilized output chain on LLRF4.6 boards 1 or 2)
 
-**Unit 2 — Monitoring & Interlocks:**
-- Monitors 4 cavity reflected signals (for interlock protection)
-- Monitors additional signals: circulator loads, magic-T loads, etc.
-- Provides interlock chain redundancy
+**Unit 2 --- Monitoring & Interlocks:**
+- Monitors 4 cavity reflected signals (critical for fast interlock protection against arcs, beam aborts, and transient mismatch)
+- Monitors additional signals: circulator load forward/reflected, klystron reflected, station reference, etc.
+- Provides interlock chain: a reflected power event detected here will turn off the drive output on Unit 1 via the daisy-chained interlock
 - No drive output required
 
-**Communication**: Both units connect via Ethernet to the Python/EPICS coordinator. The LLRF9's built-in EPICS IOC publishes all PVs on the control network.
+**Important constraint**: Only LLRF4.6 modules 1 and 2 on each unit are equipped with thermally stabilized output filtering, interlock, and amplification chains. Module 3's output is available only on the rear panel without these features. Therefore, drive outputs must come from boards 1 or 2.
+
+**Communication**: Both units connect via Ethernet to the Python/EPICS coordinator. Each LLRF9's built-in EPICS IOC publishes all PVs on the control network.
 
 ### 3.4 Key Capabilities
 
 | Capability | Specification | Replaces Legacy... |
 |------------|---------------|-------------------|
-| **Vector sum** | 2-channel digital combining | Analog RFP I/Q summation |
-| **Direct loop delay** | 270 ns | Analog direct loop (~µs) |
+| **Vector sum** | 2-channel digital combining (on single LLRF4.6 board) | Analog RFP I/Q summation |
+| **Direct loop delay** | 270 ns | Analog direct loop (~us) |
 | **Feedback loops** | Proportional + Integral | Analog P+I in RFP |
-| **Phase measurement** | 10 Hz, synchronized across all 9 channels, ±17.4 ns timestamp | VXI-based phase detection |
-| **Setpoint profiles** | 512 points, 70 µs – 18.9 s ramp time | Not available in legacy |
-| **Waveform capture** | 16,384 samples/channel, hardware trigger | Limited fault file dumps |
-| **Network analyzer** | Built-in swept measurement, ±25 kHz around RF | External test equipment |
-| **Interlocks** | 9 RF + 8 baseband, timestamped, daisy-chain I/O | Distributed analog interlocks |
-| **Tuner interface** | EPICS motor record, RS-485 or Ethernet to motor controllers | Allen-Bradley HSTP1 |
-| **Calibration** | Digital — no analog drift; factory EEPROM + installation-specific | rf_calib.st (2800 lines, ~20 min) |
-| **Slow ADC** | 8 channels, 12-bit, ±10V/±5V/0-10V/0-5V, interlockable | External monitoring |
+| **Phase measurement** | 10 Hz, synchronized across all 9 channels, +/-17.4 ns timestamp | VXI-based phase detection |
+| **Setpoint profiles** | 512 points, 70 us -- 37 ms per step (total ramp: 70 us to 18.9 s) | Not available in legacy |
+| **Waveform capture** | 16,384 samples/channel, hardware trigger with adjustable pre/post-trigger | Limited fault file dumps |
+| **Network analyzer** | Built-in swept measurement, +/-25 kHz around RF, 1024 points | External test equipment |
+| **Spectrum analyzer** | Zero-excitation mode of network analyzer | External test equipment |
+| **Interlocks** | 9 RF input (overvoltage) + 8 baseband (window comparator), timestamped to +/-35 ns, daisy-chain I/O | Distributed analog interlocks |
+| **Tuner interface** | EPICS motor record, RS-485 or Ethernet to motor controllers; supports dual tuners per cavity | Allen-Bradley HSTP1 |
+| **Calibration** | Digital --- no analog drift; factory EEPROM for hardware-specific + installation-specific parameters | rf_calib.st (2800 lines, ~20 min) |
+| **Slow ADC** | 8 channels, 12-bit, +/-10V/+/-5V/0-10V/0-5V, opto-isolated, interlockable via window comparator | External monitoring |
+| **RF output interlock** | Dual redundancy: FPGA zeros DAC output AND physical RF switch provides >=40 dB isolation | Single analog disable |
+| **Housekeeping** | Voltage/current monitoring, 10 temperature sensors, 4 fan speed sensors, 3 TEC coolers | Manual checks |
 
 ### 3.5 What LLRF9 Replaces vs. What Remains External
 
-#### ✅ LLRF9 Replaces:
-- Analog RF Processor (RFP) module — all fast I/Q processing
+#### LLRF9 Replaces:
+- Analog RF Processor (RFP) module --- all fast I/Q processing
 - Gap Voltage Feed-forward (GVF) module
 - Cavity Field Monitor (CFM) module
 - Complex calibration system (`rf_calib.st`)
 - Comb loop, direct loop, GFF loop analog processing
 - Phase detection for tuner feedback
 - RF interlock processing
+- Ripple loop (digital feedback inherently rejects power-line ripple)
 
-#### 🔄 Still Required in Python/EPICS Layer:
-- **Station state machine** (OFF/TUNE/ON_CW) — high-level coordination
-- **HVPS supervisory control** — HVPS remains controlled by external PLC
-- **Tuner position management** — LLRF9 provides phase error, Python coordinates motor motion
-- **Load angle offset loop** — for Robinson-stable detuning (especially low beam loading) &  balances gap voltage across 4 cavities
-- **MPS coordination** — system-level fault handling
-- **Slow power monitoring** — additional RF channels beyond LLRF9's 18 inputs
-- **Operator interface** — EDM panels and logging
+#### Still Required in Python/EPICS Layer:
+- **Station state machine** (OFF/TUNE/ON_CW) --- high-level coordination
+- **HVPS supervisory control** --- HVPS remains controlled by external CompactLogix PLC; Python sends voltage setpoints at <=1 Hz
+- **Tuner position management** --- LLRF9 provides phase error at 10 Hz; Python coordinates motor motion via EPICS motor records
+- **Load angle offset loop** --- for Robinson-stable detuning and balancing gap voltage across 4 cavities
+- **MPS coordination** --- system-level fault handling via Interface Chassis
+- **Extended monitoring** --- Waveform Buffer System for RF/HVPS signals beyond LLRF9's 18 inputs
+- **Operator interface** --- EDM panels and logging
 
 ---
 
 ## 4. Full Upgrade Project Scope
 
-This section covers the **complete** upgrade project scope as defined in the LLRF Upgrade Task List (Rev 3, July 2025). The upgrade is far more than an LLRF controller swap — it modernizes the entire RF control electronics chain.
+This section covers the **complete** upgrade project scope as defined in the LLRF Upgrade Task List (Rev 3, July 2025). The upgrade is far more than an LLRF controller swap --- it modernizes the entire RF control electronics chain.
 
 ### 4.1 Subsystem Overview
 
-### SPEAR3 RF Upgrade Scope
-
 ```
-┌───────────────────────────────────────────────────────────────────────────┐
-│                           SPEAR3 RF Upgrade Scope                          │
-├────────────────────┬──────────────────────────┬──────────────────────────┬───────────────────────────┤
-│ LLRF System        │ MPS System               │ HVPS Control             │ Support Systems           │
-│ (Dimtel LLRF9 ×2)  │ (PLC-5 → ControlLogix)   │ (SLC-500 → CompactLogix) │                           │
-├────────────────────┼──────────────────────────┼──────────────────────────┼───────────────────────────┤
-│ Procured      ✓    │ Built            ✓       │ 75% designed             │ • Arc Detection           │
-│ Commissioned       │ Tested           ✓       │                          │ • Slow Power Monitoring  │
-│ on SPEAR3          │ (no RF power)             │                          │ • Interface Chassis      │
-│                    │                          │                          │ • Tuner Motors           │
-│                    │                          │                          │ • Software               │
-└────────────────────┴──────────────────────────┴──────────────────────────┴───────────────────────────┘
++--------------------------------------------------------------------------+
+|                       SPEAR3 RF Upgrade Scope                            |
++------------------+-----------------------+-----------------------+-------+
+| LLRF System      | MPS System            | HVPS Control          | Suppt |
+| (Dimtel LLRF9x2) | (PLC-5->ControlLogix) | (SLC-500->CompactLgx) | Systs |
++------------------+-----------------------+-----------------------+-------+
+| Procured    [x]  | Built           [x]   | 75% designed          | - Arc |
+| Commissioned     | Tested          [x]   |                       | - Wfm |
+| on SPEAR3        | (no RF power)         |                       | - Intf|
+|                  |                       |                       | - Tunr|
+|                  |                       |                       | - SW  |
++------------------+-----------------------+-----------------------+-------+
 ```
-
 
 ### 4.2 LLRF System (Dimtel LLRF9)
 
@@ -228,34 +236,37 @@ This section covers the **complete** upgrade project scope as defined in the LLR
 
 **Upgrade**: Migrate from legacy PLC-5 (1771 I/O) to ControlLogix (1756 I/O) using Rockwell Automation conversion kit.
 
-**Inputs**:
+**Inputs** (from Interface Chassis):
 - One electrical input from LLRF9 (optocoupler)
-- One fiber optic input from HVPS controller
-- One electrical input from RF power detector (optocoupler)
+- One fiber optic input from HVPS controller (STATUS)
+- One electrical input from Waveform Buffer System comparator trips (optocoupler)
 - One electrical input from Microstep-MIS arc detectors (optocoupler)
 - One 24 VDC input from SPEAR3 MPS (optocoupler)
 - One 24 VDC input from SPEAR3 orbit interlock (optocoupler)
 - Two spare inputs
 
-**Outputs**:
+**Outputs** (via Interface Chassis):
 - One electrical output to LLRF9 (disable RF output)
-- One fiber optic output to HVPS (enable phase control thyristors)
-- One fiber optic output to HVPS (prevent crowbar firing)
+- One fiber optic output to HVPS (SCR ENABLE --- enable phase control thyristors)
+- One fiber optic output to HVPS (KLYSTRON CROWBAR --- prevent crowbar firing)
 
 ### 4.4 HVPS Controller
 
 **Status**: 75% specified based on existing system. All CompactLogix PLC modules in house.
 
 **Upgrade Tasks**:
-- Reverse-engineer and rewrite PLC code (SLC-500 → CompactLogix)
+- Reverse-engineer and rewrite PLC code (SLC-500 -> CompactLogix)
 - Redesign analog regulator board with modern components
 - Specify new Enerpro gate firing boards (~$4k for 5 boards)
 - Modify PPS (Personnel Protection System) interface to current standards
 - Build and test on Test Stand 18 before SPEAR3 installation
+- Troubleshoot and repair three broken windings in HVPS1
 
 **Interfaces**:
-- Software: CompactLogix ↔ EPICS (report analog data, digital status; receive contactor control, voltage setpoint at ≤1 Hz)
-- Hardware: Fiber optic permits to/from MPS (no direct LLRF9 ↔ HVPS hardware link)
+- Software: CompactLogix <-> EPICS (report analog data, digital status; receive contactor control, voltage setpoint at <=1 Hz)
+- Hardware: Fiber optic permits to/from Interface Chassis (no direct LLRF9 <-> HVPS hardware link)
+- Fiber optic inputs: SCR ENABLE (permits phase control thyristors) and KLYSTRON CROWBAR (prevents crowbar firing)
+- Fiber optic output: STATUS (ready indicator)
 
 ### 4.5 Arc Detection (New)
 
@@ -264,24 +275,108 @@ This section covers the **complete** upgrade project scope as defined in the LLR
 **Components**: Microstep-MIS optical arc detection sensors
 - 2 sensors per cavity (air-side and vacuum-side of each window) = 8 sensors
 - Additional sensors on circulator and klystron window
-- Estimated ~$20k total (sensors + receivers + cables + adapters)
+- Each sensor connects to a receiver that handles two sensors
+- Estimated ~$20k total (sensors ~$4.7k, receivers ~$3.2k, cables ~$0.9k, adapters ~$7k, DB25 cables ~$0.2k)
 
-### 4.6 Slow Power Monitoring (New)
+### 4.6 Waveform Buffer System (New)
 
-**Status**: Conceptual design.
+**Status**: Design document complete (J. Sebek, January 2026). No fabrication started.
 
-The LLRF9's 18 RF inputs (9 per unit) cannot cover all monitoring points. ~8 additional channels are needed for circulator reflected power, load reflected powers, etc.
+This is a **distinct subsystem** --- separate from the LLRF9 --- that provides extended signal monitoring, waveform capture, and hardware trip capability for RF and HVPS signals not covered by the LLRF9's 18 channels.
 
-**Hardware**: Minicircuits ZX47-40LN-S+ power detectors (~$105 each, 10 units)
-- Analog conditioning (op-amps) and MPS trip levels in a dedicated chassis
-- Digitized signals fed to control system
-- Total hardware ~$1,700 plus chassis fabrication
+**RF Signal Monitoring (8 channels)**:
+
+The legacy system monitors 24 RF signals. The LLRF9 (2 units x 9 channels) covers the 18 most important. The remaining 6, plus 2 additional for redundancy, are:
+
+| Signal | Notes |
+|--------|-------|
+| Klystron Output Forward Power | |
+| Klystron Output Reflected Power | |
+| Circulator Load Forward Power | Appreciable power at low beam current |
+| Circulator Load Reflected Power | |
+| Waveguide Load 1 Forward Power | Sum of reflected from all 4 cavities |
+| Waveguide Load 1 Reflected Power | |
+| Waveguide Load 2 Forward Power | Sum of reflected from Cavities A and B |
+| Waveguide Load 2 Reflected Power | |
+
+- Signal conditioning: RF detectors (Mini-Circuits ZX47-40LN+, output 0.5-2.0V into 50 ohm) with possible op-amp conditioning
+- Digitizers: 12-bit resolution is sufficient; ~1 MHz sampling rate
+- Circular buffers: kilosample depth, frozen on fault trigger
+- Analog comparator circuits with latched fault outputs feed into Interface Chassis
+
+**HVPS Signal Monitoring (4 channels)**:
+
+| Signal | Purpose |
+|--------|---------|
+| HVPS Output Voltage | Diagnose HVPS-caused beam dumps |
+| HVPS Output Current | Diagnose HVPS-caused beam dumps |
+| Transformer 1 Voltage | Detect thyristor firing circuit faults |
+| Transformer 2 Voltage (or Phase Current) | Detect thyristor firing circuit faults |
+
+- Longer buffer requirement: ~100 ms of data (HVPS failures can precede system trip by ~100 ms)
+- Reduced sampling rate acceptable (averaging by ~4 to reduce buffer to ~16k samples)
+- Signal conditioning: voltage dividers to reduce large HVPS signals to digitizer input range
+
+**Klystron Collector Power Protection**:
+
+The Waveform Buffer System provides a critical safety function: protecting the klystron collector from excessive power dissipation. The klystron collector absorbs the difference between the DC input power (HVPS voltage x current) and the RF output power. Since these are not "full power collector" tubes, the collector cannot absorb the full DC beam power.
+
+- Uses HVPS voltage and current channels to compute DC power
+- Uses one RF channel to measure klystron output RF power
+- Calculates: Collector Power = DC Power - RF Power
+- Trips the system if collector power exceeds safe limits
+- Buffered signals also sent to MPS PLC for redundant calculation
+
+**Normal Operation**: Averaged signals made available for archival at ~1 Hz update rate.
 
 ### 4.7 Interface Chassis (New)
 
-**Status**: Interfaces specified for LLRF9; no chassis design started.
+**Status**: Interfaces fully specified (J. Sebek). No chassis design started.
 
-This is the integration hub that connects the LLRF9, MPS, and HVPS controller with proper isolation (optocouplers, fiber optics) and signal conditioning.
+The Interface Chassis is the **integration hub** that connects the LLRF9, MPS, HVPS controller, and external safety systems. It provides proper electrical isolation, signal conditioning, first-fault detection, and fast interlock coordination.
+
+**Design Requirements**:
+1. **First-fault circuit** on all inputs to identify the initiating fault when multiple faults cascade
+2. **Fault latching** --- all inputs latch when they fault
+3. **External reset** --- digital reset from MPS to simultaneously clear all latched faults
+4. **Status reporting** --- all input and output states plus first-fault status reported to MPS via digital control lines
+5. **Electrical isolation** --- all external signals electrically isolated from chassis digital ground using optocouplers
+6. **Processing delay** --- microsecond-scale (standard electronic and electro-optical components)
+
+**Signal Summary**:
+
+| Direction | Signal | Type | Source/Destination |
+|-----------|--------|------|-------------------|
+| **Input** | LLRF9 Status | 5 VDC, up to 60 mA | LLRF9 rear panel |
+| **Input** | HVPS STATUS | Fiber-optic (HFBR-1412 receiver) | HVPS Controller |
+| **Input** | MPS Summary Permit | Digital | RF MPS PLC |
+| **Input** | MPS Heartbeat | Digital | RF MPS PLC |
+| **Input** | Power Signal Permit | Digital (optocoupler) | Waveform Buffer System comparators |
+| **Input** | SPEAR MPS Permit | 24 VDC (optocoupler) | SPEAR MPS |
+| **Input** | Orbit Interlock Permit | 24 VDC (optocoupler) | SPEAR orbit interlock |
+| **Input** | Arc Interlock Permit(s) | Dry contacts or permit (optocoupler) | Microstep-MIS arc detectors |
+| **Input** | Expansion Port 1-2 | TTL (optocoupler) | External systems |
+| **Input** | Expansion Port 3-4 | 24 VDC (optocoupler) | External systems |
+| **Input** | MPS Reset | Digital | RF MPS PLC |
+| **Output** | LLRF9 Enable | 3.2 VDC @ >=8 mA (optocoupler) | LLRF9 interlock input |
+| **Output** | HVPS SCR ENABLE | Fiber-optic (HFBR-2412 driver) | HVPS Controller |
+| **Output** | HVPS KLYSTRON CROWBAR | Fiber-optic (HFBR-2412 driver) | HVPS Controller (keep illuminated) |
+| **Output** | Digital Status Lines | Multi-conductor cable | RF MPS PLC |
+
+**Key Signal Flow Detail**:
+
+When the Interface Chassis receives an LLRF9 Status = OFF (indicating the LLRF9 has detected a fault and zeroed its drive output), the chassis must:
+1. Pass this information to the HVPS via the SCR ENABLE fiber-optic signal to turn off the HVPS
+2. Report the status to the MPS
+
+When any input permit is removed, the chassis must:
+1. Remove the LLRF9 Enable (causing LLRF9 to zero its drive and open its RF switch)
+2. Remove the HVPS SCR ENABLE
+3. Latch the fault and record it in the first-fault register
+
+**Isolation Components**: Broadcom ACSL-6xx0 family optocouplers (max input forward voltage 1.8 VDC, recommended ON current 8 mA, max 15 mA). Broadcom HFBR-2412/HFBR-1412 for fiber-optic signals.
+
+**Logic Coordination Issue**: When the chassis removes the LLRF9 Enable, the LLRF9 Status will also go OFF (since the external interlock input is OR-ed with 17 internal interlock sources). The system must be designed so that once the HVPS is confirmed off, the enable can be restored to the LLRF9. This may require coordinating with the HVPS controller to ensure that it removes its STATUS when SCR ENABLE is removed.
 
 ### 4.8 Stepper Motor Controls for Cavity Tuners
 
@@ -290,31 +385,30 @@ This is the integration hub that connects the LLRF9, MPS, and HVPS controller wi
 **Current hardware (all obsolete)**:
 - Allen-Bradley 1746-HSTP1 controller module
 - Superior Electric Slo-Syn SS2000MD4-M bipolar PWM driver
-- Superior Electric Slo-Syn M093-FC11 stepper motor
+- Superior Electric Slo-Syn M093-FC11 stepper motor (NEMA 34D, 200 steps/rev)
 
 **Candidate replacements**:
-- Galil DMC-4143 four-axis motion controller
 - Motion control solutions developed by Domenico/Mike Dunning
-- Alternative: Danh's design
+- Galil DMC-4143 four-axis motion controller
+- Danh's design
+- MDrive Plus controllers (from Schneider Electric) --- supported by LLRF9 EPICS driver with analog readback for potentiometer
 
 **Requirements**:
 - Robust system with reliable 1 Hz update rate
-- Small step sizes (fraction of a mm)
+- Small step sizes (modern controllers can have 256 microsteps per step)
 - Proper motion profiles (acceleration/deceleration)
 - Graceful handling of power loss and communication failure
-- EPICS motor record interface accepting Channel Access commands from LLRF9
+- EPICS motor record interface accepting Channel Access commands
+- Must work reliably --- previous attempts with candidate controllers have had reliability issues
 
 ### 4.9 Software
 
-**Status**: Conceptual design only — nothing fleshed out.
+**Status**: Conceptual design only --- nothing fleshed out.
 
 **Scope**: Reproduce existing functionality using a combination of:
 - Dimtel LLRF9 internal EPICS IOC (fast feedback, phase measurement, interlocks, diagnostics)
 - Python/PyEPICS (station state machine, HVPS supervisory control, tuner coordination, logging)
 - CompactLogix PLC code (HVPS regulation, MPS logic)
-
----
-
 ## 5. SPEAR3 RF System Overview (Physical System)
 
 ### 5.1 Physical System Layout
@@ -539,10 +633,11 @@ Cavity temperature drifts → resonant frequency shifts
 
 **Tuner Mechanical Specifications**:
 - **Stepper Motor**: Superior Electric Slo-Syn M093-FC11 (NEMA 34D), 200 steps/rev
-- **Microsteps**: 2 per step = 400 microsteps/rev
-- **Gear Ratio**: 15:30 timing belt pulleys = 1:2 (2 motor revolutions = 1 leadscrew revolution)
-- **Lead Screw**: 1/2-10 Acme thread = 0.1″ per leadscrew turn = 2.54 mm per turn
-- **Resolution**: 2.54 mm ÷ (2 × 400) = 0.003175 mm per microstep
+- **Microsteps**: 2 per step = 400 microsteps/rev (legacy controller). Modern controllers support 256 microsteps/step.
+- **Gear Ratio**: Reduction gear requires 2 motor turns per 1 leadscrew turn
+- **Lead Screw Pitch**: Jim's operational document states 20 turns per inch (0.05"/turn = 1.27 mm/turn). Drawing SA-341-392-61 references a 1/2-10 Acme thread (10 TPI = 0.1"/turn = 2.54 mm/turn). **This discrepancy needs to be resolved by verifying the actual hardware.**
+- **Resolution (assuming 20 TPI)**: 1.27 mm / (2 x 400) = 0.0016 mm per microstep
+- **Resolution (assuming 10 TPI)**: 2.54 mm / (2 x 400) = 0.0032 mm per microstep
 - **Deadband**: 5 microsteps (`RDBD`)
 - **Typical Startup Motion**: ~2.5 mm; Normal operation: ~0.2 mm
 
@@ -629,11 +724,13 @@ Based on Jim's documentation and drawing SA-341-392-61:
 **Drive Train**: Stepper motor → 15-groove pulley → timing belt → 30-groove pulley → lead screw → cylindrical tuner
 
 **Calculations**:
-- Gear ratio: 15:30 = 1:2 (2 motor turns = 1 leadscrew turn)
-- Lead screw: 1/2-10 Acme = 0.1″/turn = 2.54 mm/turn
-- Motor: 200 steps/rev × 2 microsteps = 400 microsteps/rev
-- Linear resolution: 2.54 mm / (2 × 400) = 0.003175 mm/microstep
-- Per motor revolution: 0.05″ = 1.27 mm of tuner travel
+- Gear ratio: 2 motor revolutions = 1 leadscrew revolution
+- Lead screw pitch: **See note below** --- sources conflict on whether 10 TPI or 20 TPI
+- Motor: 200 steps/rev x 2 microsteps = 400 microsteps/rev (legacy); modern controllers support up to 256 microsteps/step
+- Per Jim's document (20 TPI): linear resolution = 1.27 mm / (2 x 400) = 0.0016 mm/microstep
+- Per drawing (10 TPI): linear resolution = 2.54 mm / (2 x 400) = 0.0032 mm/microstep
+
+> **Discrepancy Note**: Jim's operational document states the lead screw has "a pitch of 20 turns per inch" (0.05"/turn = 1.27 mm/turn), while the current analysis references a "1/2-10 Acme thread" (10 TPI = 0.1"/turn = 2.54 mm/turn). This should be verified against the actual mechanical hardware before finalizing the upgraded tuner controller parameters.
 
 **Position Sensing**: Linear potentiometers provide position indication but are **not** part of any feedback loop. The step counter in the controller tracks commanded position.
 
@@ -804,250 +901,268 @@ int    previous_status;  // For change detection — log only on transitions
 
 ---
 
+---
+
 ## 12. Upgraded System Integration Architecture
 
 The upgraded SPEAR3 LLRF system operates on **two parallel communication layers**: a fast hardware interlock system (microsecond-scale) for safety and performance, and a slower EPICS supervisory layer (~1 Hz) for command and monitoring. The **Interface Chassis** serves as the critical coordination hub between all subsystems.
 
 ### 12.1 Dual-Layer System Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                    LAYER 2: EPICS Supervisory Control                   │
-│                        Python/EPICS Coordinator                         │
-│  • Station State Machine (OFF/TUNE/ON_CW)                              │
-│  • HVPS Supervisory Control (setpoint mgmt, safety limits)             │
-│  • Tuner Position Management (load angle offset, motion coordination)  │
-│  • Fault Logging & Diagnostics                                         │
-│  • Operator Interface                                                  │
-└──┬────┬─────────────────┬──────────────────┬──────────────────┬────────┘
-   │    │ Ethernet/EPICS  │ Ethernet/EPICS   │ Ethernet/EPICS   │ Ethernet/EPICS
-   │    ▼                 ▼                  ▼                  ▼
-   │ ┌────────────────┐ ┌──────────────┐ ┌────────────────────┐ ┌──────────────────┐
-   │ │ LLRF9 Unit 1   │ │ LLRF9 Unit 2 │ │ CompactLogix PLC   │ │ Motion Controller│
-   │ │ Field Control  │ │ Monitoring   │ │ HVPS Controller    │ │ (Galil DMC-4143) │
-   │ │ • Vector sum   │ │ • 4× reflected│ │ • Voltage regulation│ │ • 4× stepper     │
-   │ │ • PI feedback  │ │ • Interlocks │ │ • Thyristor control │ │   motor control  │
-   │ │ • 4× tuner     │ │ • Extra ch.  │ │ • PPS interface    │ │ • EPICS motor rec│
-   │ │   phase data   │ │              │ │                    │ │                  │
-   │ │ • Drive output │ │              │ │                    │ │                  │
-   │ └────────┬───────┘ └──────┬───────┘ └────────┬───────────┘ └──────────────────┘
-   │          │                │                   │
-   │          ▼                ▼                   ▼
-   │ ┌─────────────────────────────────────────────────────────────────────────┐
-   │ │                LAYER 1: Fast Hardware Interlocks                        │
-   │ │                        Interface Chassis                                │
-   │ │  • First-fault detection & status reporting                             │
-   │ │  • Fault latching & external reset                                      │
-   │ │  • Electrical isolation (optocouplers)                                  │
-   │ │  • Fiber-optic isolation (HFBR transceivers)                            │
-   │ │  • Processing delays: microsecond-scale                                 │
-   │ └─┬─────────────────────┬─────────────────────┬─────────────────────────┬─┘
-   │   │ 3.2V@8mA permit     │ Fiber-optic         │ 24V permits             │
-   │   ▼                     ▼                     ▼                         │
-   │ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────────────────┐ │
-   │ │ LLRF9 Interlock │ │ HVPS Controller │ │ ControlLogix PLC            │ │
-   │ │ • Enable input  │ │ • SCR ENABLE    │ │ MPS System                  │ │
-   │ │ • Status output │ │ • STATUS        │ │ • Safety permits            │ │
-   │ │   (5V@60mA)     │ │ • KLYSTRON      │ │ • HVPS/LLRF coordination    │ │
-   │ │                 │ │   CROWBAR       │ │ • Arc detection             │ │
-   │ └─────────────────┘ └─────────────────┘ └─────────────────────────────┘ │
-   │          │                │                   │                         │
-   │          ▼                ▼                   ▼                         │
-   │     Klystron Drive   HVPS Power Stage   Safety Systems                  │
-   │          │                │                   │                         │
-   │          ▼                ▼                   ▼                         │
-   │ ┌──────────────────────────────────────────────────────┐                │
-   │ │                  Physical RF System                    │                │
-   │ │  Klystron → Waveguide → 4 RF Cavities (with tuners)  │                │
-   │ └──────────────────────────────────────────────────────┘                │
-   │                                      ▲                                   │
-   │ ┌──────────────────┐ ┌──────────────────┐ │                             │
-   │ │ Waveform Buffer  │ │ Arc Detection    │ │                             │
-   │ │ System           │ │ (Microstep-MIS)  │ │                             │
-   │ │ • 6× RF signals  │ │ • 8× optical     │ │                             │
-   │ │ • 4× HVPS signals│ │   sensors        │ │                             │
-   │ │ • 100kHz sampling│ │ • Dry contacts   │ │                             │
-   │ │ • EPICS interface│ │   to Interface   │ │                             │
-   │ └──────────────────┘ └──────────────────┘ │                             │
-   │          │                   │             │                             │
-   │          └───────────────────┼─────────────┘                             │
-   │ Ethernet/EPICS              │ Hardware permits                          │
-   └─────────────────────────────┘                                           │
-                                                                             │
-   ┌─────────────────────────────────────────────────────────────────────────┘
-   │ Additional Permit Sources:
-   │ • SPEAR MPS (24 VDC)
-   │ • Orbit Interlock (24 VDC)  
-   │ • Power Monitoring (permit signal)
-   │ • Expansion Ports (TTL/24V)
-   └─────────────────────────────────────────────────────────────────────────
+```mermaid
+graph TB
+    subgraph "LAYER 2: EPICS Supervisory Control (~1 Hz)"
+        PY["Python/EPICS Coordinator<br/>- Station State Machine (OFF/TUNE/ON_CW)<br/>- HVPS Supervisory Control<br/>- Tuner Position Management<br/>- Fault Logging & Diagnostics<br/>- Operator Interface"]
+    end
+
+    subgraph "Hardware Subsystems"
+        LLRF1["LLRF9 Unit 1<br/>Field Control<br/>- Vector sum<br/>- PI feedback<br/>- 4x tuner phase data<br/>- Drive output"]
+        LLRF2["LLRF9 Unit 2<br/>Monitoring<br/>- 4x reflected<br/>- Interlocks<br/>- Extra channels"]
+        HVPS_PLC["CompactLogix PLC<br/>HVPS Controller<br/>- Voltage regulation<br/>- Thyristor control<br/>- PPS interface"]
+        MOTOR["Motion Controller<br/>(TBD)<br/>- 4x stepper motor<br/>- EPICS motor record"]
+        WFBUF["Waveform Buffer<br/>System<br/>- 8x RF channels<br/>- 4x HVPS channels<br/>- Comparator trips<br/>- Collector protect"]
+    end
+
+    subgraph "LAYER 1: Fast Hardware Interlocks (us-scale)"
+        IC["Interface Chassis<br/>- First-fault detection<br/>- Fault latching & reset<br/>- Optocoupler isolation<br/>- Fiber-optic I/O"]
+    end
+
+    subgraph "External Safety Systems"
+        SPEAR_MPS["SPEAR MPS<br/>(24 VDC permit)"]
+        ORBIT["Orbit Interlock<br/>(24 VDC permit)"]
+        ARC["Arc Detection<br/>(Microstep-MIS)"]
+    end
+
+    subgraph "RF MPS"
+        MPS["ControlLogix 1756<br/>MPS PLC<br/>- Fault summary<br/>- Permit management"]
+    end
+
+    PY -- "Ethernet/EPICS" --> LLRF1
+    PY -- "Ethernet/EPICS" --> LLRF2
+    PY -- "Ethernet/EPICS" --> HVPS_PLC
+    PY -- "Ethernet/EPICS" --> MOTOR
+    PY -- "Ethernet/EPICS" --> WFBUF
+    PY -- "Ethernet/EPICS" --> MPS
+
+    LLRF1 -- "5V status" --> IC
+    IC -- "3.2V@8mA permit" --> LLRF1
+    IC -- "3.2V@8mA permit" --> LLRF2
+    IC -- "Fiber: SCR ENABLE" --> HVPS_PLC
+    HVPS_PLC -- "Fiber: STATUS" --> IC
+    IC -- "Fiber: CROWBAR" --> HVPS_PLC
+
+    MPS -- "Digital permit + heartbeat" --> IC
+    MPS -- "Reset signal" --> IC
+    IC -- "Digital status lines" --> MPS
+
+    SPEAR_MPS -- "24V permit" --> IC
+    ORBIT -- "24V permit" --> IC
+    ARC -- "Dry contacts" --> IC
+    WFBUF -- "Comparator trips" --> IC
 ```
 
-### 12.2 Interface Chassis — The Critical Coordination Hub
+### 12.2 System Integration Overview
 
-The Interface Chassis is **mandatory infrastructure** that provides:
+The upgraded system distributes control responsibility across multiple specialized subsystems, each communicating through well-defined interfaces:
 
-#### 12.2.1 Hardware Signal Coordination
+```mermaid
+graph LR
+    subgraph "Python/EPICS Coordinator"
+        SM["State Machine"]
+        HL["HVPS Loop"]
+        TM["Tuner Manager"]
+        FL["Fault Logger"]
+    end
 
-**LLRF9 Interface**:
-- **Input**: Permit signal (≥3.2 VDC @ ≥8 mA, opto-isolated)
-- **Output**: Status signal (5 VDC, up to 60 mA, non-isolated)
-- **Function**: Enable/disable RF output based on system permits
+    subgraph "Fast RF Control"
+        U1["LLRF9 Unit 1<br/>9 RF inputs<br/>Drive output"]
+        U2["LLRF9 Unit 2<br/>9 RF inputs<br/>Interlocks"]
+    end
 
-**HVPS Interface** (Fiber-optic, HFBR-2412/HFBR-1412):
-- **SCR ENABLE**: Fast hardware permit to enable thyristor firing
-- **STATUS**: Ready indicator from HVPS to Interface Chassis
-- **KLYSTRON CROWBAR**: Protection circuit control (kept illuminated)
+    subgraph "Power Control"
+        HVPS["HVPS PLC<br/>CompactLogix"]
+        HVPS_HW["HVPS<br/>up to 90 kV"]
+    end
 
-**MPS & Safety Interfaces**:
-- **MPS RF Permit**: Digital permit from ControlLogix MPS
-- **MPS Heartbeat**: System health monitoring
-- **SPEAR MPS**: 24 VDC permit (optocoupler isolated)
-- **Orbit Interlock**: 24 VDC permit (optocoupler isolated)
-- **Arc Detection**: Dry contacts from Microstep-MIS sensors
-- **Power Monitoring**: Permit signals from 6+ additional RF probes
+    subgraph "Cavity Tuning"
+        MC["Motor Controller<br/>(TBD)"]
+        M1["Motor 1"]
+        M2["Motor 2"]
+        M3["Motor 3"]
+        M4["Motor 4"]
+    end
 
-#### 12.2.2 Safety & Fault Management
+    subgraph "Safety & Monitoring"
+        IC2["Interface Chassis"]
+        MPS2["MPS PLC"]
+        WB["Waveform Buffers"]
+        AD["Arc Detection"]
+    end
 
-**First-Fault Detection**: Determines which subsystem faulted first in multi-fault scenarios
+    SM --> HL
+    SM --> TM
+    HL -- "voltage setpoint" --> HVPS
+    HVPS --> HVPS_HW
+    TM -- "position commands" --> MC
+    MC --> M1 & M2 & M3 & M4
 
-**Fault Latching**: All faults remain latched until external reset
+    U1 -- "phase data" --> TM
+    U1 -- "drive power" --> HL
+    U1 -- "status" --> IC2
+    U2 -- "interlocks" --> IC2
 
-**Status Reporting**: All input/output states reported to MPS via digital lines
+    IC2 -- "permits" --> U1 & U2
+    IC2 -- "fiber optic" --> HVPS
+    MPS2 -- "permit" --> IC2
+    WB -- "trip signal" --> IC2
+    AD -- "permit" --> IC2
+```
 
-**Electrical Isolation**: Broadcom ACSL-6xx0 optocouplers for all electrical interfaces
+### 12.3 Interface Chassis Signal Flow (Layer 1 Detail)
 
-**Processing Speed**: Microsecond-scale response for hardware safety
+The Interface Chassis manages all fast hardware interlocks. The key design consideration is the logic coordination between the LLRF9 status output and the chassis enable input:
 
-### 12.3 Waveform Buffer System
+**Normal Operation**:
+1. All input permits are active
+2. Interface Chassis asserts LLRF9 Enable and HVPS SCR ENABLE
+3. LLRF9 drives the klystron; HVPS provides high voltage
 
-The LLRF9 units monitor 18 critical signals, but **6+ additional RF signals** plus **HVPS monitoring** require a dedicated waveform buffer system:
+**Fault from LLRF9** (e.g., reflected power interlock):
+1. LLRF9 zeros its DAC output and opens its RF switch (dual redundancy)
+2. LLRF9 Status output goes LOW (5V -> 0V)
+3. Interface Chassis detects LLRF9 Status = OFF
+4. Interface Chassis removes HVPS SCR ENABLE (fiber optic) to protect klystron collector
+5. Interface Chassis reports fault to MPS via digital status lines
+6. First-fault register records LLRF9 as the initiating source
 
-#### 12.3.1 Additional RF Monitoring (6+ channels)
-- Circulator Load Forward/Reflected Power
-- Waveguide Load 1 Forward/Reflected Power  
-- Waveguide Load 2 Forward/Reflected Power
-- Waveguide Load 3 Forward/Reflected Power
-- **Sampling**: 100 kHz, 100 kilosample buffers
-- **Signal Processing**: Mini-Circuits ZX47-40LN+ detectors → 12-bit digitizers + analog comparators
+**Fault from External System** (e.g., SPEAR MPS removes 24V permit):
+1. Interface Chassis detects permit loss, latches fault, records in first-fault register
+2. Interface Chassis removes LLRF9 Enable (3.2V -> 0V)
+3. LLRF9 sees external interlock trip, zeros DAC, opens RF switch
+4. LLRF9 Status goes LOW (this is a consequence, not the initiating fault)
+5. Interface Chassis simultaneously removes HVPS SCR ENABLE
+6. MPS is notified via digital status lines
 
-#### 12.3.2 HVPS Monitoring (4 channels)
-- HVPS Voltage & Current
-- Transformer monitoring signals (2×)
-- **Sampling**: 10 kHz, 100 kilosample buffers (10 seconds of data)
-- **Purpose**: Diagnose HVPS failures that occur ~100 ms before system trips
+**Recovery Sequence**:
+1. MPS sends external reset signal to Interface Chassis
+2. All latched faults are cleared simultaneously
+3. System verifies HVPS STATUS is OFF before re-enabling
+4. LLRF9 Enable is restored; HVPS SCR ENABLE is restored
+5. Python/EPICS coordinator manages the station state transition back to operation
 
-#### 12.3.3 Klystron Collector Power Protection
-- **Calculation**: DC Power (HVPS V×I) - RF Power = Collector Power
-- **Protection**: Trip system if collector power exceeds safe limits
-- **Implementation**: Interface with MPS for coordinated shutdown
+### 12.4 Communication Interfaces
 
-### 12.4 Communication Flows — Dual Layer Architecture
+#### 12.4.1 Layer 1: Fast Hardware Interlocks
 
-#### 12.4.1 Layer 1: Fast Hardware Interlocks (Microsecond-scale)
+**Interface Chassis <-> LLRF9** (Electrical):
+- Interface Chassis -> LLRF9: Permit (3.2 VDC @ >=8 mA, opto-isolated input on LLRF9)
+- LLRF9 -> Interface Chassis: Status (5 VDC @ up to 60 mA, non-isolated output; this is the logical OR of 17 internal interlocks + 1 external permit)
 
-**Interface Chassis ↔ LLRF9**:
-- Interface Chassis → LLRF9: Permit (3.2 VDC @ 8 mA, opto-isolated)
-- LLRF9 → Interface Chassis: Status (5 VDC @ 60 mA, non-isolated)
+**Interface Chassis <-> HVPS** (Fiber-optic):
+- Interface Chassis -> HVPS: SCR ENABLE (fast hardware permit for phase control thyristors)
+- HVPS -> Interface Chassis: STATUS (ready indicator --- active when controller is powered and no crowbar trigger)
+- Interface Chassis -> HVPS: KLYSTRON CROWBAR (must remain illuminated to prevent crowbar thyristors from firing)
 
-**Interface Chassis ↔ HVPS** (Fiber-optic):
-- Interface Chassis → HVPS: SCR ENABLE (fast hardware permit)
-- HVPS → Interface Chassis: STATUS (ready indicator)
-- Interface Chassis → HVPS: KLYSTRON CROWBAR (protection control)
-
-**Safety Systems → Interface Chassis**:
+**Safety Systems -> Interface Chassis**:
 - MPS: Digital permit + heartbeat
 - SPEAR MPS: 24 VDC permit (opto-isolated)
 - Orbit Interlock: 24 VDC permit (opto-isolated)
 - Arc Detection: Dry contacts (opto-isolated)
-- Power Monitoring: Permit signals from comparators
+- Waveform Buffer System: Comparator trip permit (opto-isolated)
+- Expansion Ports: 2x TTL + 2x 24 VDC (opto-isolated)
 
 #### 12.4.2 Layer 2: EPICS Supervisory Control (~1 Hz)
 
-**Python/EPICS ↔ LLRF9 Units (×2)**:
-- Reads: cavity amplitudes, phases (10 Hz), interlock status, waveforms
-- Writes: setpoints, feedback enable/disable, configuration parameters
+**Python/EPICS <-> LLRF9 Units (x2)**:
+- Reads: cavity amplitudes, phases (10 Hz), interlock status, waveforms (16k samples on trigger)
+- Writes: amplitude/phase setpoints, feedback gain/enable, setpoint profiles, configuration parameters
 
-**Python/EPICS ↔ HVPS Controller**:
+**Python/EPICS <-> HVPS Controller**:
 - Reads: voltage/current measurements, digital status, fault conditions
-- Writes: contactor control, voltage setpoint (≤1 Hz update rate)
+- Writes: contactor open/close, voltage setpoint (<=1 Hz update rate)
 
-**Python/EPICS ↔ MPS System**:
-- Reads: safety permit status, interlock states, fault history, Interface Chassis status
+**Python/EPICS <-> MPS System**:
+- Reads: safety permit status, interlock states, fault history, Interface Chassis status (all inputs/outputs and first-fault)
 - Writes: system enable/disable commands, configuration parameters
 
-**Python/EPICS ↔ Motion Controller**:
-- Reads: motor positions, motion status, limit switch states
-- Writes: position commands, motion profiles, enable/disable
+**Python/EPICS <-> Motion Controller**:
+- Reads: motor positions, motion status, limit switch states, potentiometer readings
+- Writes: position commands via EPICS motor record, motion profiles, enable/disable
 
-**Python/EPICS ↔ Waveform Buffer System**:
-- Reads: 6× RF power readings, 4× HVPS signals, trip status, waveform data
-- Writes: trip level setpoints, enable/disable, trigger configuration
+**Python/EPICS <-> Waveform Buffer System**:
+- Reads: 8x RF power readings, 4x HVPS signals, trip status, frozen waveform data on fault
+- Writes: trip level setpoints (if remotely adjustable), enable/disable, trigger configuration
+- Normal operation: ~1 Hz averaged values for archival
 
 ### 12.5 Software Architecture
 
 ```
 spear_llrf/
-├── src/
-│   ├── control/
-│   │   ├── state_machine.py     # Station state machine (OFF/TUNE/ON_CW)
-│   │   ├── hvps_loop.py         # HVPS supervisory control
-│   │   ├── tuner_manager.py     # 4-cavity tuner coordination
-│   │   ├── load_angle.py        # Load angle offset loop
-│   │   └── interlock_coordinator.py # Interface chassis coordination
-│   ├── hardware/
-│   │   ├── llrf9_interface.py   # LLRF9 EPICS PV interface (×2 units)
-│   │   ├── hvps_interface.py    # HVPS CompactLogix PLC interface
-│   │   ├── mps_interface.py     # MPS ControlLogix PLC interface
-│   │   ├── motor_interface.py   # Galil motion controller interface
-│   │   ├── waveform_buffer.py   # Waveform buffer system interface
-│   │   └── interface_chassis.py # Interface chassis status monitoring
-│   ├── safety/
-│   │   ├── interlock_monitor.py # System-wide interlock monitoring
-│   │   ├── fault_handler.py     # Fault detection and recovery
-│   │   ├── arc_detection.py     # Arc detection system interface
-│   │   └── first_fault.py       # First-fault analysis and reporting
-│   ├── diagnostics/
-│   │   ├── logging.py           # Structured event logging
-│   │   ├── waveform_capture.py  # LLRF9 + buffer waveform readout
-│   │   ├── performance_monitor.py # System performance metrics
-│   │   └── collector_protection.py # Klystron collector power monitoring
-│   └── main.py                  # Application entry point
-├── config/
-│   ├── rf_station.yaml          # Station parameters
-│   ├── tuner_params.yaml        # Tuner mechanical parameters
-│   ├── safety_limits.yaml       # Safety interlock thresholds
-│   ├── interface_chassis.yaml   # Interface chassis configuration
-│   ├── waveform_buffer.yaml     # Waveform buffer configuration
-│   └── arc_detection.yaml       # Arc detection system configuration
-├── tests/
-│   ├── unit/                    # Unit tests for each module
-│   ├── integration/             # Integration tests
-│   ├── hardware/                # Hardware-in-loop tests
-│   └── safety/                  # Safety system validation tests
-└── docs/
-    ├── api/                     # API documentation
-    ├── operations/              # Operations manual
-    ├── commissioning/           # Commissioning procedures
-    └── safety/                  # Safety system documentation
++-- src/
+|   +-- control/
+|   |   +-- state_machine.py     # Station state machine (OFF/TUNE/ON_CW)
+|   |   +-- hvps_loop.py         # HVPS supervisory control
+|   |   +-- tuner_manager.py     # 4-cavity tuner coordination
+|   |   +-- load_angle.py        # Load angle offset loop
+|   |   +-- interlock_coordinator.py # Interface chassis coordination
+|   +-- hardware/
+|   |   +-- llrf9_interface.py   # LLRF9 EPICS PV interface (x2 units)
+|   |   +-- hvps_interface.py    # HVPS CompactLogix PLC interface
+|   |   +-- mps_interface.py     # MPS ControlLogix PLC interface
+|   |   +-- motor_interface.py   # Motion controller interface
+|   |   +-- waveform_buffer.py   # Waveform Buffer System interface
+|   |   +-- interface_chassis.py # Interface Chassis status monitoring
+|   +-- safety/
+|   |   +-- interlock_monitor.py # System-wide interlock monitoring
+|   |   +-- fault_handler.py     # Fault detection and recovery
+|   |   +-- arc_detection.py     # Arc detection system interface
+|   |   +-- first_fault.py       # First-fault analysis and reporting
+|   |   +-- collector_protection.py # Klystron collector power monitoring
+|   +-- diagnostics/
+|   |   +-- logging.py           # Structured event logging
+|   |   +-- waveform_capture.py  # LLRF9 + Waveform Buffer waveform readout
+|   |   +-- performance_monitor.py # System performance metrics
+|   +-- main.py                  # Application entry point
++-- config/
+|   +-- rf_station.yaml          # Station parameters
+|   +-- tuner_params.yaml        # Tuner mechanical parameters
+|   +-- safety_limits.yaml       # Safety interlock thresholds
+|   +-- interface_chassis.yaml   # Interface chassis configuration
+|   +-- waveform_buffer.yaml     # Waveform Buffer System configuration
+|   +-- arc_detection.yaml       # Arc detection system configuration
++-- tests/
+|   +-- unit/                    # Unit tests for each module
+|   +-- integration/             # Integration tests
+|   +-- hardware/                # Hardware-in-loop tests
+|   +-- safety/                  # Safety system validation tests
++-- docs/
+    +-- api/                     # API documentation
+    +-- operations/              # Operations manual
+    +-- commissioning/           # Commissioning procedures
+    +-- safety/                  # Safety system documentation
 ```
 
-### 12.6 Control Loop Mapping: Legacy → Upgraded
+### 12.6 Control Loop Mapping: Legacy -> Upgraded
 
 | Legacy Function | Legacy File | Upgraded Location | Notes |
 |----------------|-------------|-------------------|-------|
-| Fast RF feedback | RFP analog module | LLRF9 FPGA | 270 ns loop delay |
-| DAC control loop | `rf_dac_loop.st` | LLRF9 setpoint control + Python supervisory | Most logic in LLRF9 |
-| HVPS control loop | `rf_hvps_loop.st` | Python `hvps_loop.py` + Interface Chassis | Hardware interlocks via Interface Chassis |
-| Tuner control | `rf_tuner_loop.st` | LLRF9 phase data + Python `tuner_manager.py` | Split responsibility |
-| State machine | `rf_states.st` | Python `state_machine.py` + Interface Chassis | Hardware safety via Interface Chassis |
-| Calibration | `rf_calib.st` | LLRF9 internal | Eliminated from software |
-| Fault files | `rf_statesFF` | LLRF9 + Waveform Buffer waveform capture | Hardware-triggered, expanded monitoring |
-| Message logging | `rf_msgs.st` | Python `logging.py` + Interface Chassis status | Structured logging + first-fault detection |
+| Fast RF feedback | RFP analog module | LLRF9 FPGA | 270 ns loop delay; dual redundancy on output disable |
+| DAC control loop | `rf_dac_loop.st` | LLRF9 setpoint control + Python supervisory | LLRF9 closes fast loop; Python sets amplitude setpoint. 4-way branching and GVF fallback eliminated. |
+| HVPS control loop | `rf_hvps_loop.st` | Python `hvps_loop.py` + CompactLogix PLC | PLC handles low-level regulation; Python provides supervisory setpoint management. Hardware safety via Interface Chassis. |
+| Tuner control | `rf_tuner_loop.st` | LLRF9 phase data + Python `tuner_manager.py` + motor controller | LLRF9 provides 10 Hz synchronized phase measurements; Python coordinates motor commands via EPICS motor records |
+| Load angle offset | `rf_tuner_loop.st` | Python `load_angle.py` | Balances gap voltage across 4 cavities by adjusting tuner phase setpoints |
+| State machine | `rf_states.st` | Python `state_machine.py` | Hardware safety delegated to Interface Chassis; Python handles sequencing and coordination |
+| Fast turn-on | `rf_statesFAST` | LLRF9 setpoint profiles (512 pts, 70 us-37 ms/step) + Python | LLRF9 native ramp capability replaces manual fast-on value management |
+| Calibration | `rf_calib.st` | LLRF9 internal digital calibration | 2800 lines of analog calibration code eliminated; LLRF9 EEPROM stores factory + installation calibration |
+| Fault files | `rf_statesFF` | LLRF9 waveform capture + Waveform Buffer System | Hardware-triggered, 16k samples/ch (LLRF9) + kilosample circular buffers (Waveform Buffer). Pre/post-trigger adjustable. |
+| Message logging | `rf_msgs.st` | Python `logging.py` + Interface Chassis first-fault | Structured logging replaces SNL string-based logging; first-fault detection is now in hardware |
 | TAXI monitoring | `rf_msgsTAXI` | Eliminated | CAMAC no longer used |
-| **NEW**: Interface coordination | N/A | Interface Chassis hardware + Python monitoring | Critical safety infrastructure |
-| **NEW**: Extended monitoring | N/A | Waveform Buffer System | 6× RF + 4× HVPS signals |
-| **NEW**: Arc detection | N/A | Microstep-MIS system + Interface Chassis | Optical sensors + hardware interlocks |
+| Ripple loop | Analog hardware | LLRF9 digital feedback | LLRF9's digital feedback loop inherently rejects power-line ripple |
+| Comb/GFF loops | CFM/GVF analog modules | LLRF9 digital feedback | All cavity field stabilization handled by LLRF9 FPGA |
+| **NEW**: Interface coordination | N/A | Interface Chassis hardware + Python monitoring | Central hub for all hardware interlocks with first-fault detection |
+| **NEW**: Extended RF/HVPS monitoring | N/A | Waveform Buffer System | 8x RF + 4x HVPS channels with circular buffers, comparator trips, collector protection |
+| **NEW**: Arc detection | N/A | Microstep-MIS sensors -> Interface Chassis -> MPS | Optical sensors on cavity windows and klystron; hardware interlocks |
+| **NEW**: Collector protection | N/A | Waveform Buffer System + MPS PLC | Redundant calculation of klystron collector power; hardware trip on excess |
 
 ---
 
@@ -1055,32 +1170,36 @@ spear_llrf/
 
 ### 13.1 Implementation Phases
 
-**Phase 1: Foundation** — IOC and database setup, Python framework, LLRF9 PV interface
+**Phase 1: Foundation** --- IOC and database setup, Python framework, LLRF9 PV interface
 
-**Phase 2: Core Control** — State machine, HVPS loop, DAC supervisory control. Parallel testing with legacy.
+**Phase 2: Core Control** --- State machine, HVPS loop, DAC supervisory control. Parallel testing with legacy.
 
-**Phase 3: Tuner System** — Motor controller installation, EPICS motor record configuration, tuner manager with load angle offset loop.
+**Phase 3: Tuner System** --- Motor controller installation, EPICS motor record configuration, tuner manager with load angle offset loop.
 
-**Phase 4: Integration** — MPS commissioning, interface chassis, arc detection, slow power monitoring.
+**Phase 4: Integration** --- MPS commissioning, Interface Chassis fabrication, arc detection installation, Waveform Buffer System fabrication and integration.
 
-**Phase 5: Validation** — Performance tuning, documentation, operator training.
+**Phase 5: Validation** --- Performance tuning, documentation, operator training.
 
 ### 13.2 Success Criteria
 
 | Metric | Legacy Performance | Target |
 |--------|-------------------|--------|
 | Amplitude stability | < 0.1% | Same or better |
-| Phase stability | < 0.1° | Same or better |
-| Tuner resolution | 0.003 mm/microstep | Improved with modern controller |
+| Phase stability | < 0.1 deg | Same or better |
+| Tuner resolution | ~0.002-0.003 mm/microstep (legacy) | Improved with modern controller (up to 256 microsteps/step) |
 | Control loop response | ~1 second | Same or better |
 | Uptime | > 99.5% | Same or better |
+| Fault diagnostics | Limited fault file capture | 16k-sample waveform capture (LLRF9) + kilosample circular buffers (Waveform Buffer) with hardware trigger |
+| First-fault identification | Manual analysis | Hardware first-fault detection in Interface Chassis |
 
 ### 13.3 Risk Mitigation
 
 **Technical Risks**:
-1. **Tuner motor reliability**: Hardest-to-prove subsystem. Test on booster tuners first.
-2. **HVPS PLC code migration**: Reverse engineering required. Build test stand before SPEAR3.
-3. **Communication latency**: Ethernet/EPICS must be sufficient for ~1 Hz control. Proven in prototype.
+1. **Tuner motor reliability**: Hardest-to-prove subsystem. Previous attempts with candidate controllers have had reliability issues. Test on booster tuners first. Consider MDrive Plus (supported by LLRF9 driver) or Domenico/Dunning design.
+2. **HVPS PLC code migration**: Reverse engineering of SLC-500 code required. Build test stand (Test Stand 18) before SPEAR3 installation.
+3. **Communication latency**: Ethernet/EPICS must be sufficient for ~1 Hz control. Proven in prototype commissioning.
+4. **Interface Chassis logic coordination**: The LLRF9 status/enable feedback loop must be carefully designed to allow system recovery after faults. Requires coordination with HVPS STATUS signal behavior.
+5. **Waveform Buffer System integration**: New custom hardware --- requires design, fabrication, and testing of PCBs, analog signal conditioning, and digitizer integration.
 
 **Operational Risks**:
 1. **Rollback plan**: Ability to return to legacy system if needed during commissioning
@@ -1088,12 +1207,13 @@ spear_llrf/
 3. **Incremental deployment**: Phase-by-phase to minimize risk at each step
 
 **Procurement Status** (from Task List, July 2025):
-- LLRF9: ✅ Complete (4 units)
-- MPS PLC modules: ✅ Complete
-- HVPS PLC modules: ✅ Complete
-- Enerpro boards: Needed (~$4k)
-- Arc detection: Needed (~$20k)
-- Slow power monitoring: Needed (~$2k hardware + chassis)
+- LLRF9: Complete (4 units)
+- MPS PLC modules: Complete
+- HVPS PLC modules: Complete (for HVPS1, HVPS2, and B44 Test Stand)
+- Enerpro boards: Needed (~$4k for 5 boards)
+- Arc detection: Needed (~$20k total)
+- Waveform Buffer System: Needed (RF detectors ~$1.7k + chassis fabrication)
+- Interface Chassis: Needed (design + fabrication)
 - Remaining items: Mostly small (<$50k total, fundable from operational budget)
 
 ---
@@ -1102,9 +1222,11 @@ spear_llrf/
 
 | Source | Content | Key Information |
 |--------|---------|-----------------|
-| `Docs/llrf9_manual_print.pdf` | Dimtel LLRF9 Technical Manual v1.5 (Nov 2022) | Hardware specs, feedback architecture, interlock system, configurations |
-| `Docs/LLRFOperation_jims.docx` | Jim's SPEAR3 RF Station Operation Guide | Control hierarchy, tuner mechanics, turn-on sequences, EDM panels |
-| `Docs/LLRFUpgradeTaskListRev3.docx` | LLRF Upgrade Task List Rev 3 (July 2025) | Full project scope, procurement status, interface specifications |
+| `Docs/llrf9_manual_print.pdf` | Dimtel LLRF9 Technical Manual v1.5 (Nov 2022) | Hardware specs, feedback architecture, interlock system, configurations, connector pinouts |
+| `Docs/LLRFOperation_jims.docx` | Jim's SPEAR3 RF Station Operation Guide | Control hierarchy, tuner mechanics, turn-on sequences, EDM panels, tuner gear ratios |
+| `Docs/LLRFUpgradeTaskListRev3.docx` | LLRF Upgrade Task List Rev 3 (July 2025) | Full project scope, procurement status, interface specifications, cost estimates |
+| `Docs/WaveformBuffersforLLRFUpgrade.docx` | Waveform Buffer System Design (J. Sebek, Jan 2026) | RF/HVPS signal monitoring, circular buffers, comparator trips, klystron collector protection |
+| `Docs/llrfInterfaceChassis.docx` | Interface Chassis Specification (J. Sebek) | Signal routing, optocoupler/fiber-optic isolation, first-fault detection, LLRF9/HVPS interface details |
 | `legacyLLRF/rf_states.st` | Master state machine (2227 lines) | Station states, turn-on, fault handling, auto-reset, fault files |
 | `legacyLLRF/rf_dac_loop.st` | DAC control loop (290 lines) | Gap voltage regulation, 4-way branching, ripple loop |
 | `legacyLLRF/rf_hvps_loop.st` | HVPS control loop (343 lines) | Drive power regulation, 3-mode operation, vacuum processing |
