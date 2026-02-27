@@ -355,8 +355,8 @@ graph LR
  end
  end
  
- HVPS --> Klystron
  Drive --> Klystron
+ HVPS --> Klystron
  Klystron --> WG
  
  WG --> C1
