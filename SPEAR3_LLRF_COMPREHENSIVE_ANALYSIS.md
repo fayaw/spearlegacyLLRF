@@ -197,7 +197,7 @@ This section covers the **complete** upgrade project scope as defined in the LLR
 
 ### SPEAR3 RF Upgrade Scope
 
-'''
+```
 ┌───────────────────────────────────────────────────────────────────────────┐
 │                           SPEAR3 RF Upgrade Scope                          │
 ├────────────────────┬──────────────────────────┬──────────────────────────┬───────────────────────────┤
@@ -210,7 +210,7 @@ This section covers the **complete** upgrade project scope as defined in the LLR
 │                    │                          │                          │ • Tuner Motors           │
 │                    │                          │                          │ • Software               │
 └────────────────────┴──────────────────────────┴──────────────────────────┴───────────────────────────┘
-'''
+```
 
 
 ### 4.2 LLRF System (Dimtel LLRF9)
