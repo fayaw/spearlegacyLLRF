@@ -182,7 +182,7 @@ Per the LLRF9 manual Section 8.4 ("One station, four cavities, single power sour
 - **Station state machine** (OFF/TUNE/ON_CW) — high-level coordination
 - **HVPS supervisory control** — HVPS remains controlled by external PLC
 - **Tuner position management** — LLRF9 provides phase error, Python coordinates motor motion
-- **Load angle offset loop** — for Robinson-stable detuning (especially low beam loading)
+- **Load angle offset loop** — for Robinson-stable detuning (especially low beam loading) &  balances gap voltage across 4 cavities
 - **MPS coordination** — system-level fault handling
 - **Slow power monitoring** — additional RF channels beyond LLRF9's 18 inputs
 - **Operator interface** — EDM panels and logging
