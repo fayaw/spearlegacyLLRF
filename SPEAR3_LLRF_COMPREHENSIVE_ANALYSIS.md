@@ -566,11 +566,11 @@ ON_CW        Y              Y
 ```
 
 **State Descriptions**:
-- **OFF**: All loops disabled, HVPS off, RF off, HVPS voltage zeroed
+- **OFF**: All loops disabled, HVPS off, RF off, HVPS voltage zeroed. Used for: Normal shutdown, maintenance, fault recovery.
 - **PARK**: Designed for PEP-II when station was down. **Not used at SPEAR3.**
-- **TUNE**: Low-power testing mode. DAC loop controls drive power. HVPS loop should be off. Tuner loop may be active. Used for controlled system bring-up after hardware changes.
-- **ON_FM**: Cavity vacuum processing mode. **Not used at SPEAR3** (Jim's doc: "We have had one incident... we could successfully process the cavity by varying the gap voltage in the ON_CW mode. We did not need the ON_FM mode.")
-- **ON_CW**: Full power operation. All loops active. Direct loop engaged. Normal operating state.
+- **TUNE**: Low-power testing mode. DAC loop controls drive power (few watts). HVPS loop should be off. Tuner loop may be active. Used for controlled system bring-up after hardware changes.
+- **ON_FM**: PEP-II legacy feature for Cavity vacuum processing mode. **Not used at SPEAR3** (Jim's doc: "We have had one incident... we could successfully process the cavity by varying the gap voltage in the ON_CW mode. We did not need the ON_FM mode.")
+- **ON_CW**: Full power operation. All loops active. Direct loop engaged. DAC loop controls gap voltage (~3.2 MV). HVPS maintains drive power (~50W). Normal operating state.
 
 ### 8.2 Turn-On Sequence (ON_CW)
 
