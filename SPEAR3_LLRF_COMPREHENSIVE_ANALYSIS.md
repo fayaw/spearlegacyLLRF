@@ -197,13 +197,19 @@ This section covers the **complete** upgrade project scope as defined in the LLR
 
 ### SPEAR3 RF Upgrade Scope
 
-| LLRF System (Dimtel LLRF9 ×2) | MPS System (PLC-5 → ControlLogix) | HVPS Control (SLC-500 → CompactLogix) | Support Systems |
-|------------------------------|----------------------------------|--------------------------------------|-----------------|
-| Procured ✅                  | Built ✅                          | 75% designed                          | • Arc Detection |
-| Commissioned on SPEAR3       | Tested ✅ (no RF power)           |                                      | • Slow Power Monitoring |
-|                              |                                  |                                      | • Interface Chassis |
-|                              |                                  |                                      | • Tuner Motors |
-|                              |                                  |                                      | • Software |
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           SPEAR3 RF Upgrade Scope                          │
+├────────────────────┬──────────────────────────┬──────────────────────────┬───────────────────────────┤
+│ LLRF System        │ MPS System               │ HVPS Control             │ Support Systems           │
+│ (Dimtel LLRF9 ×2)  │ (PLC-5 → ControlLogix)   │ (SLC-500 → CompactLogix) │                           │
+├────────────────────┼──────────────────────────┼──────────────────────────┼───────────────────────────┤
+│ Procured      ✓    │ Built            ✓       │ 75% designed             │ • Arc Detection           │
+│ Commissioned       │ Tested           ✓       │                          │ • Slow Power Monitoring  │
+│ on SPEAR3          │ (no RF power)             │                          │ • Interface Chassis      │
+│                    │                          │                          │ • Tuner Motors           │
+│                    │                          │                          │ • Software               │
+└────────────────────┴──────────────────────────┴──────────────────────────┴───────────────────────────┘
+
 
 
 ### 4.2 LLRF System (Dimtel LLRF9)
