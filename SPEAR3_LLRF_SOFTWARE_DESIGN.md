@@ -1,1307 +1,1409 @@
 # SPEAR3 LLRF Upgrade Software Design
-**Version 2.0 - LLRF9 Integration Architecture**  
-**Date: February 2026**  
-**Author: Codegen AI Assistant**
+
+**Document Purpose**: Software architecture and implementation guide for the SPEAR3 LLRF upgrade Python/EPICS coordinator. This document focuses exclusively on software design, APIs, and implementation details. For hardware specifications and system architecture, refer to `SPEAR3_LLRF_UPGRADE_SYSTEM_DESIGN.md`.
+
+**Version**: 4.0  
+**Date**: February 2026  
+**Status**: Implementation Ready  
+**Author**: J. Sebek / Codegen AI Assistant
 
 ---
 
 ## Table of Contents
 
-1. [Executive Summary](#1-executive-summary)
-2. [System Architecture Overview](#2-system-architecture-overview)
-3. [LLRF9 Hardware Integration](#3-llrf9-hardware-integration)
-4. [Python Coordinator Architecture](#4-python-coordinator-architecture)
-5. [EPICS Integration Layer](#5-epics-integration-layer)
-6. [Station State Machine](#6-station-state-machine)
-7. [HVPS Control Interface](#7-hvps-control-interface)
-8. [Tuner Control System](#8-tuner-control-system)
-9. [MPS Integration](#9-mps-integration)
-10. [Operator Interface Design](#10-operator-interface-design)
-11. [Configuration Management](#11-configuration-management)
-12. [Fault Detection & Logging](#12-fault-detection--logging)
-13. [Implementation Plan](#13-implementation-plan)
-14. [Testing & Commissioning Strategy](#14-testing--commissioning-strategy)
-15. [Documentation Requirements](#15-documentation-requirements)
+1. [Software Architecture Overview](#1-software-architecture-overview)
+2. [Python Coordinator Framework](#2-python-coordinator-framework)
+3. [EPICS Integration Layer](#3-epics-integration-layer)
+4. [Station State Machine](#4-station-state-machine)
+5. [HVPS Supervisory Control](#5-hvps-supervisory-control)
+6. [Tuner Control Manager](#6-tuner-control-manager)
+7. [Fault Management System](#7-fault-management-system)
+8. [Configuration Management](#8-configuration-management)
+9. [Operator Interface](#9-operator-interface)
+10. [Testing Framework](#10-testing-framework)
+11. [Deployment and Installation](#11-deployment-and-installation)
+12. [API Reference](#12-api-reference)
 
 ---
 
-## 1. Executive Summary
+## 1. Software Architecture Overview
 
-### 1.1 Project Overview
+### 1.1 Design Philosophy
 
-The SPEAR3 LLRF upgrade transitions from a legacy VxWorks/SNL-based system to a modern distributed architecture leveraging the Dimtel LLRF9 hardware controller with a Python-based supervisory coordinator. This design eliminates ~90% of legacy SNL code complexity while providing enhanced performance, reliability, and maintainability.
+The Python/EPICS coordinator is a **supervisory control layer** that orchestrates the distributed hardware subsystems. It operates at ~1 Hz and is NOT in the fast safety path. The coordinator's core responsibilities are:
 
-### 1.2 Key Design Principles
+1. **Station State Management**: Coordinate OFF/PARK/TUNE/ON_CW transitions
+2. **HVPS Supervisory Loop**: Monitor drive power, adjust HVPS voltage setpoint
+3. **Tuner Management**: Process LLRF9 phase measurements, command motor moves
+4. **Load Angle Balancing**: Adjust individual cavity phase setpoints for power balance
+5. **Fault Coordination**: Log faults, trigger diagnostics, manage recovery
+6. **Operator Interface**: Provide modern control and monitoring capabilities
 
-**Hardware-Accelerated Processing**: LLRF9 handles all real-time RF control (270 ns direct loop, calibration, phase measurement), eliminating complex analog drift compensation.
-
-**Distributed Responsibility Model**: Clear separation between hardware-accelerated RF processing (LLRF9) and supervisory control (Python coordinator).
-
-**Native EPICS Integration**: Built-in LLRF9 EPICS IOC provides seamless integration with existing SPEAR3 control infrastructure.
-
-**Modular Architecture**: Loosely-coupled modules enable incremental development and commissioning during the 1-week Dimtel support window.
-
-### 1.3 Performance Improvements
-
-| Metric | Legacy System | LLRF9 System | Improvement |
-|--------|---------------|---------------|-------------|
-| **Calibration Time** | ~20 minutes | ~3 minutes | 85% reduction |
-| **Code Complexity** | 2800+ lines SNL | ~300 lines Python | 90% reduction |
-| **Interlock Response** | Software (~ms) | Hardware (~µs) | 1000x faster |
-| **Phase Resolution** | Analog limited | Digital precision | Improved accuracy |
-| **Maintenance** | Analog drift issues | Digital stability | Reduced downtime |
-
----
-
-## 2. System Architecture Overview
-
-### 2.1 Fundamental Architecture Change
-
-The upgrade fundamentally changes the control architecture from a **software-centric** model (VxWorks SNL doing everything) to a **distributed hardware-accelerated** model:
-
-```
-LEGACY SYSTEM                          UPGRADED SYSTEM
-==============                         ================
-
-  VxWorks IOC (one box)                 Multiple specialized subsystems
-  ├── rf_states.st (state machine)      ├── Dimtel LLRF9 (fast RF control)
-  ├── rf_dac_loop.st (gap voltage)      │   ├── Fast analog I/Q processing
-  ├── rf_hvps_loop.st (HVPS control)    │   ├── Direct loop feedback
-  ├── rf_tuner_loop.st x4 (tuners)     │   ├── Comb loop feedback
-  ├── rf_calib.st (calibration)         │   ├── Gap voltage regulation
-  ├── rf_msgs.st (messages)             │   ├── Phase measurement for tuners
-  └── RFP analog module                 │   └── Drive power monitoring
-                                        │
-                                        ├── CompactLogix PLC (HVPS control)
-                                        │   ├── Voltage regulation
-                                        │   ├── HVPS interlocks
-                                        │   └── Contactor control
-                                        │
-                                        ├── CompactLogix PLC (MPS)
-                                        │   ├── Fault summary
-                                        │   ├── Permit management
-                                        │   └── External interlocks
-                                        │
-                                        ├── Motion Controller (tuner motors)
-                                        │   └── 4-axis stepper motor control
-                                        │
-                                        └── Python/EPICS Coordinator (this design)
-                                            ├── Station state machine
-                                            ├── HVPS supervisory control
-                                            ├── Tuner position management
-                                            ├── Load angle offset loop
-                                            ├── Slow power monitoring
-                                            ├── Fault logging & diagnostics
-                                            └── Operator interface
-```
-
-### 2.2 Three-Layer Architecture
+### 1.2 Software Stack
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    OPERATOR INTERFACE LAYER                 │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │   Web Interface │  │  EPICS Screens  │  │  Mobile Apps    │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
+│                 Operator Interface Layer                   │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │ Web Dashboard│  │ EPICS Screens│  │ Mobile/Tablet Apps  │ │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
+                              │
+                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                 PYTHON COORDINATOR LAYER                    │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │ Station State   │  │ HVPS Controller │  │ Tuner Manager   │ │
-│  │ Machine         │  │ Interface       │  │                 │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │ Fault Logger    │  │ Config Manager  │  │ MPS Interface   │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
+│              Python Coordinator Application                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │ State       │  │ HVPS        │  │ Tuner Manager       │ │
+│  │ Machine     │  │ Controller  │  │ + Load Angle        │ │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │ Fault       │  │ Config      │  │ Logging &           │ │
+│  │ Manager     │  │ Manager     │  │ Diagnostics         │ │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
+                              │
+                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   HARDWARE CONTROL LAYER                    │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │ LLRF9 Unit #1   │  │ LLRF9 Unit #2   │  │ MPS Controller  │ │
-│  │ (Built-in IOC)  │  │ (Built-in IOC)  │  │ (ControlLogix)  │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │ HVPS Controller │  │ Motion Control  │  │ Arc Detection   │ │
-│  │ (CompactLogix)  │  │ (Galil/etc)     │  │ (Microstep-MIS) │ │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
+│                EPICS Integration Layer                      │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │ PyEPICS     │  │ PV Cache    │  │ Alarm Handler       │ │
+│  │ Interface   │  │ Manager     │  │ + Callbacks         │ │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Hardware Subsystems                      │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │ LLRF9 #1    │  │ LLRF9 #2    │  │ HVPS PLC            │ │
+│  │ Built-in IOC│  │ Built-in IOC│  │ CompactLogix        │ │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │ MPS PLC     │  │ Motor Ctrl  │  │ Waveform Buffer     │ │
+│  │ ControlLogix│  │ (Galil/etc) │  │ System              │ │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 2.3 Communication Architecture
+### 1.3 Key Design Principles
 
-```
-                    ┌──────────────────────────────┐
-                    │    Python/EPICS Coordinator    │
-                    │    (Linux Soft IOC + Python)   │
-                    └──────┬───┬───┬───┬───┬───────┘
-                           │   │   │   │   │
-              ┌────────────┘   │   │   │   └────────────┐
-              │                │   │   │                 │
-              ▼                ▼   │   ▼                 ▼
-    ┌─────────────┐  ┌──────────┐ │ ┌──────────┐  ┌──────────┐
-    │  Dimtel     │  │ HVPS PLC │ │ │ MPS PLC  │  │ Slow Pwr │
-    │  LLRF9      │  │ Compact  │ │ │ Compact  │  │ Monitor  │
-    │             │  │ Logix    │ │ │ Logix    │  │ (ADC)    │
-    │ Ethernet/   │  │ EtherNet │ │ │ EtherNet │  │          │
-    │ EPICS       │  │ /IP      │ │ │ /IP      │  │          │
-    └──────┬──────┘  └────┬─────┘ │ └────┬─────┘  └──────────┘
-           │              │       │      │
-           │              │       │      │
-    ┌──────┴──────┐   ┌───┴──┐   │  ┌───┴────────────────────┐
-    │ 4 Cavities  │   │ HVPS │   │  │ Interface Chassis      │
-    │ + Klystron  │   │      │   │  │ ├─ LLRF9 permit I/O    │
-    │ + Waveguide │   └──────┘   │  │ ├─ HVPS fiber optic    │
-    └─────────────┘              │  │ ├─ Arc detectors        │
-                                 │  │ └─ External interlocks  │
-                    ┌────────────┘  └────────────────────────┘
-                    ▼
-            ┌──────────────┐
-            │Motion Ctrl   │
-            │(Galil/other) │
-            │ 4-axis       │
-            │ Ethernet     │
-            └──────┬───────┘
-                   │
-            ┌──────┴───────┐
-            │ 4 Stepper    │
-            │ Motors +     │
-            │ Potentiomtrs │
-            └──────────────┘
-```
+**Separation of Concerns**: Each module has a single, well-defined responsibility
+**Hardware Abstraction**: All hardware interfaces go through the EPICS layer
+**Configuration-Driven**: All operational parameters externalized to YAML files
+**Fault Tolerance**: Graceful degradation when subsystems are unavailable
+**Testability**: Mock interfaces for all hardware dependencies
+**Maintainability**: Clear APIs, comprehensive logging, type hints throughout
 
-**EPICS Network Backbone**: All components communicate via EPICS Channel Access, leveraging existing SPEAR3 infrastructure.
+### 1.4 Technology Stack
 
-**Ethernet-Based**: LLRF9 units, Python coordinator, and external controllers use standard Ethernet connectivity.
-
-**Fiber Optic Interlocks**: Critical safety signals use fiber optic links for noise immunity and electrical isolation.
-
-### 2.4 Hardware/Software Responsibility Partitioning
-
-This is the **most critical design decision**. The table below maps every legacy function to its new owner:
-
-#### **Function Assignment Matrix**
-
-| Legacy Function | Legacy Owner | New Owner | Interface | Notes |
-|----------------|-------------|-----------|-----------|-------|
-| **Fast I/Q demodulation** | RFP analog | **LLRF9** | Internal | Core LLRF9 function |
-| **Direct loop feedback** | RFP analog + SNL | **LLRF9** | Config via Ethernet | LLRF9 handles loop closure |
-| **Comb loop feedback** | RFP analog + SNL | **LLRF9** | Config via Ethernet | LLRF9 handles comb filtering |
-| **Lead/Integral compensation** | SNL (rf_states.st) | **LLRF9** | Config via Ethernet | LLRF9 internal |
-| **Gap voltage regulation** | SNL (rf_dac_loop.st) | **LLRF9** | Setpoint via EPICS | LLRF9 closes fast loop; Python sets setpoint |
-| **Drive power monitoring** | SNL (rf_dac_loop.st) | **LLRF9 + Python** | LLRF9 measures; Python monitors | Python reads LLRF9 data for HVPS decisions |
-| **HVPS voltage control** | SNL (rf_hvps_loop.st) | **Python/EPICS** | EtherNet/IP to PLC | Python sends voltage setpoints to PLC |
-| **HVPS vacuum processing** | SNL (rf_hvps_loop.st) | **Python/EPICS** | EtherNet/IP to PLC | Python implements process ramp |
-| **Station state machine** | SNL (rf_states.st) | **Python/EPICS** | Channel Access to all subsystems | Python coordinates all subsystem states |
-| **Tuner phase control** | SNL (rf_tuner_loop.st) | **LLRF9** | Delta-move commands to Python | LLRF9 measures phase; sends move commands |
-| **Tuner motor control** | SNL (rf_tuner_loop.st) | **Python/EPICS** | EPICS motor record to controller | Python/motor record drives Galil |
-| **Load angle offset** | SNL (rf_tuner_loop.st) | **Python/EPICS** | Channel Access | Python adjusts phase setpoints for power balance |
-| **Tuner home/reset** | SNL (rf_tuner_loop.st) | **Python/EPICS** | EPICS motor record | Python manages home positions |
-| **Calibration** | SNL (rf_calib.st) | **LLRF9 + Python** | LLRF9 internal cal + Python orchestration | LLRF9 has its own calibration; Python manages workflow |
-| **Fault file capture** | SNL (rf_states.st) | **Python/EPICS** | Read LLRF9 buffers | Python captures waveforms on fault |
-| **Message logging** | SNL (rf_msgs.st) | **Python/EPICS** | Standard Python logging | Modern logging framework |
-| **MPS interface** | Direct hardware | **MPS PLC** | EtherNet/IP to Python | PLC handles fast faults; Python monitors |
-| **HVPS contactor** | SNL (rf_states.st) | **HVPS PLC** | Command via EtherNet/IP | PLC controls contactor; Python commands open/close |
-| **Beam abort control** | SNL (rf_states.st) | **LLRF9 + MPS** | Hardware interlock | Fast path through LLRF9 permit |
-| **Slow power monitoring** | Legacy analog | **External ADC + Python** | ADC → EPICS | New MCL ZX47-40LN detectors |
-| **Arc detection** | None (broken) | **Microstep-MIS → MPS PLC** | Optocoupler to MPS | New capability |
-
-#### **Key Design Principle: LLRF9 is the Inner Loop**
-
-The LLRF9 handles ALL time-critical RF control. Python/EPICS is the **supervisory layer**:
-
-```
-  Python/EPICS Responsibility          LLRF9 Responsibility
-  ─────────────────────────            ────────────────────
-  Station state coordination           Fast I/Q processing (μs)
-  HVPS voltage setpoints (~1 Hz)       Direct loop feedback (kHz)
-  Tuner motor positioning (~1 Hz)      Comb loop feedback
-  Load angle offset (~0.1 Hz)          Gap voltage fast regulation
-  Fault logging & diagnostics          Drive power measurement
-  Operator interface                   Cavity phase measurement
-  Permit management (via MPS)          RF enable/disable
-  Configuration management             Internal calibration
-  Turn-on/shutdown sequencing          Transient management
-```
+| Component | Technology | Version | Purpose |
+|-----------|------------|---------|---------|
+| **Core Language** | Python | 3.9+ | Main application logic |
+| **EPICS Interface** | PyEPICS | 3.5+ | Channel Access client |
+| **Configuration** | PyYAML | 6.0+ | YAML configuration parsing |
+| **Numerical** | NumPy | 1.21+ | Phase calculations, signal processing |
+| **Logging** | Python logging | Built-in | Structured logging with rotation |
+| **Concurrency** | asyncio | Built-in | Async I/O for concurrent operations |
+| **Testing** | pytest | 7.0+ | Unit and integration testing |
+| **Type Checking** | mypy | 0.991+ | Static type analysis |
+| **Web Interface** | Flask/FastAPI | TBD | REST API for web dashboard |
+| **Process Management** | systemd | System | Service management on Linux |
 
 ---
 
-## 3. LLRF9 Hardware Integration
+## 2. Python Coordinator Framework
 
-### 3.1 LLRF9 Configuration for SPEAR3
+### 2.1 Application Structure
 
-**Hardware Specifications**:
-- **Model**: LLRF9/476 (476 ± 2.5 MHz operation)
-- **RF Channels**: 9 inputs, 2 drive outputs, 2 spare outputs
-- **Configuration**: "One station, four cavities, single power source" (Manual Section 8.4)
-- **Built-in EPICS IOC**: Linux-based with Ethernet connectivity
-
-**Channel Assignment**:
 ```
-ADC0: Cavity 1 probe (primary vector sum)
-ADC1: Cavity 2 probe (secondary vector sum)
-ADC2: Cavity 3 probe (monitoring/interlock)
-ADC3: Cavity 4 probe (monitoring/interlock)
-ADC4: RF reference signal
-ADC5: Forward power monitoring
-ADC6: Reflected power monitoring
-ADC7: Circulator reflected power
-ADC8: Spare/calibration
-
-DAC0: Klystron drive output (+8 dBm full scale)
-DAC1: Spare/calibration output (-13 dBm full scale)
-```
-
-### 3.2 LLRF9 Capabilities Utilized
-
-**Real-Time RF Processing**:
-- **Vector Sum Control**: Combines cavity probes (ADC0 + ADC1) with configurable gains
-- **Direct Loop**: 270 ns latency proportional feedback for fast disturbance rejection
-- **Integral Loop**: Long-term error correction and steady-state accuracy
-- **Phase Measurement**: 10 Hz cavity probe vs. forward phase comparison for tuner feedback
-
-**Built-in Calibration System**:
-- **Automatic I/Q Balance**: CORDIC-based processing eliminates manual coefficient calibration
-- **Network Analyzer**: Integrated swept-sine excitation for loop characterization
-- **Digital Processing**: Eliminates analog DAC drift compensation (major legacy complexity)
-
-**Hardware Interlocks**:
-- **RF Input Interlocks**: Fast overvoltage detection with ±35 ns timestamp resolution
-- **Daisy-Chain Support**: Hardware interlock distribution to other systems
-- **Event Timestamping**: ±17.4 ns uncertainty for precise fault sequencing
-
-### 3.3 EPICS Process Variables
-
-The LLRF9 built-in IOC provides native EPICS PVs:
-
-**Control PVs**:
-```
-LLRF9:STATION1:AMPLITUDE_SP     # Amplitude setpoint
-LLRF9:STATION1:PHASE_SP         # Phase setpoint
-LLRF9:STATION1:DIRECT_GAIN      # Direct loop gain
-LLRF9:STATION1:INTEGRAL_GAIN    # Integral loop gain
-LLRF9:STATION1:ENABLE           # RF output enable
-```
-
-**Monitoring PVs**:
-```
-LLRF9:STATION1:AMPLITUDE_RB     # Amplitude readback
-LLRF9:STATION1:PHASE_RB         # Phase readback
-LLRF9:STATION1:CAVITY_PHASE     # Cavity phase for tuner feedback
-LLRF9:STATION1:FORWARD_POWER    # Forward power measurement
-LLRF9:STATION1:REFLECTED_POWER  # Reflected power measurement
-```
-
-**Interlock PVs**:
-```
-LLRF9:STATION1:RF_PERMIT        # RF permit status
-LLRF9:STATION1:FAULT_STATUS     # Fault status word
-LLRF9:STATION1:FAULT_TIMESTAMP  # Last fault timestamp
-```
-
----
-
-## 4. Python Coordinator Architecture
-
-### 4.1 Core Design Philosophy
-
-The Python Coordinator serves as the "brain" of the SPEAR3 LLRF system, providing high-level supervisory control while leveraging LLRF9 hardware for real-time RF processing. It implements the station state machine, coordinates with external systems (HVPS, MPS, tuners), and provides modern operator interfaces.
-
-### 4.2 Modular Class Architecture
-
-```python
-# Core System Architecture
-class SPEAR3_LLRF_Coordinator:
-    """Main coordinator class orchestrating all LLRF subsystems"""
-    
-    def __init__(self):
-        self.station_manager = StationStateManager()
-        self.hvps_interface = HVPSControlInterface()
-        self.tuner_manager = TunerControlManager()
-        self.mps_interface = MPSInterface()
-        self.fault_logger = FaultLogger()
-        self.config_manager = ConfigurationManager()
-        self.web_interface = WebInterface()
-        
-    def initialize_system(self):
-        """Initialize all subsystems and establish communications"""
-        
-    def run_main_loop(self):
-        """Main control loop - 10 Hz update rate"""
-```
-
-### 4.3 Station State Manager
-
-```python
-class StationStateManager:
-    """Implements the 5-state station control logic"""
-    
-    STATES = {
-        'OFF': 'System completely disabled',
-        'PARK': 'Safe state, HVPS off, RF off',
-        'TUNE': 'Tuning mode, low power RF for cavity tuning',
-        'ON_CW': 'Normal CW operation',
-        'ON_FM': 'Fast modulation operation'
-    }
-    
-    def __init__(self):
-        self.current_state = 'OFF'
-        self.target_state = 'OFF'
-        self.state_transition_timer = 0
-        self.interlock_status = {}
-        
-    def request_state_change(self, target_state):
-        """Request transition to new state with safety checks"""
-        
-    def update_state_machine(self):
-        """Execute state machine logic - called at 10 Hz"""
-        
-    def check_transition_conditions(self, target_state):
-        """Verify all conditions are met for state transition"""
-        
-    def execute_state_transition(self):
-        """Perform actual state transition with proper sequencing"""
-```
-
-### 4.4 HVPS Control Interface
-
-```python
-class HVPSControlInterface:
-    """Interface to CompactLogix HVPS controller"""
-    
-    def __init__(self):
-        self.hvps_pv_prefix = "HVPS:STATION1"
-        self.voltage_setpoint = 0.0
-        self.current_voltage = 0.0
-        self.hvps_status = {}
-        self.ramp_rate = 1000.0  # V/s maximum ramp rate
-        
-    def set_voltage_setpoint(self, voltage, ramp_rate=None):
-        """Set HVPS voltage with controlled ramp rate"""
-        
-    def enable_hvps(self):
-        """Enable HVPS with proper sequencing"""
-        
-    def disable_hvps(self):
-        """Disable HVPS safely"""
-        
-    def monitor_hvps_status(self):
-        """Monitor HVPS health and status"""
-        
-    def handle_hvps_fault(self, fault_info):
-        """Handle HVPS fault conditions"""
-```
-
-### 4.5 Tuner Control Manager
-
-```python
-class TunerControlManager:
-    """Coordinates 4-cavity tuner system using LLRF9 phase feedback"""
-    
-    def __init__(self):
-        self.tuner_controllers = {}  # 4 tuner motor controllers
-        self.phase_feedback = {}     # Phase data from LLRF9
-        self.tuner_positions = {}    # Current tuner positions
-        self.pid_controllers = {}    # PID control for each tuner
-        
-    def initialize_tuners(self):
-        """Initialize all 4 tuner motor controllers"""
-        
-    def update_tuner_control(self):
-        """Update tuner positions based on LLRF9 phase feedback"""
-        
-    def home_all_tuners(self):
-        """Execute homing sequence for all tuners"""
-        
-    def balance_cavity_fields(self):
-        """Implement field balancing for multi-cell cavities"""
-        
-    def handle_tuner_fault(self, tuner_id, fault_info):
-        """Handle individual tuner faults"""
-```
-
----
-
-## 5. EPICS Integration Layer
-
-### 5.1 Process Variable Architecture
-
-The EPICS integration layer provides a unified namespace for all SPEAR3 LLRF control and monitoring functions:
-
-**Station Control PVs**:
-```
-SPEAR3:LLRF:STATION:STATE           # Current station state
-SPEAR3:LLRF:STATION:STATE_CMD       # Commanded state change
-SPEAR3:LLRF:STATION:PERMIT          # Overall station permit
-SPEAR3:LLRF:STATION:FAULT_STATUS    # Station fault summary
-```
-
-**RF Control PVs**:
-```
-SPEAR3:LLRF:RF:AMPLITUDE_SP         # Gap voltage amplitude setpoint
-SPEAR3:LLRF:RF:PHASE_SP             # Gap voltage phase setpoint
-SPEAR3:LLRF:RF:AMPLITUDE_RB         # Gap voltage amplitude readback
-SPEAR3:LLRF:RF:PHASE_RB             # Gap voltage phase readback
-SPEAR3:LLRF:RF:FORWARD_POWER        # Forward power measurement
-SPEAR3:LLRF:RF:REFLECTED_POWER      # Reflected power measurement
-```
-
-**HVPS Control PVs**:
-```
-SPEAR3:LLRF:HVPS:VOLTAGE_SP         # HVPS voltage setpoint
-SPEAR3:LLRF:HVPS:VOLTAGE_RB         # HVPS voltage readback
-SPEAR3:LLRF:HVPS:CURRENT_RB         # HVPS current readback
-SPEAR3:LLRF:HVPS:STATUS             # HVPS status word
-SPEAR3:LLRF:HVPS:ENABLE             # HVPS enable command
-```
-
-**Tuner Control PVs**:
-```
-SPEAR3:LLRF:TUNER1:POSITION_SP      # Tuner 1 position setpoint
-SPEAR3:LLRF:TUNER1:POSITION_RB      # Tuner 1 position readback
-SPEAR3:LLRF:TUNER1:PHASE_ERROR      # Tuner 1 phase error
-SPEAR3:LLRF:TUNER1:STATUS           # Tuner 1 status
-# ... similar for TUNER2, TUNER3, TUNER4
-```
-
-### 5.2 EPICS Database Structure
-
-```python
-class EPICSIntegrationLayer:
-    """Manages all EPICS process variables and database records"""
-    
-    def __init__(self):
-        self.pv_database = {}
-        self.calculation_records = {}
-        self.alarm_limits = {}
-        
-    def create_pv_database(self):
-        """Create EPICS database with all required PVs"""
-        
-    def setup_calculation_records(self):
-        """Setup EPICS calc records for derived quantities"""
-        
-    def configure_alarms(self):
-        """Configure alarm limits and severity levels"""
-        
-    def update_pv_values(self, data_dict):
-        """Update PV values from Python coordinator"""
-```
-
----
-
-## 6. Station State Machine
-
-### 6.1 State Definitions and Transitions
-
-The station state machine implements the same 5-state logic as the legacy system but with improved safety interlocks and cleaner transitions:
-
-```python
-class StationStateMachine:
-    """Enhanced 5-state machine with LLRF9 integration"""
-    
-    def __init__(self):
-        self.states = {
-            'OFF': self._state_off,
-            'PARK': self._state_park,
-            'TUNE': self._state_tune,
-            'ON_CW': self._state_on_cw,
-            'ON_FM': self._state_on_fm
-        }
-        self.current_state = 'OFF'
-        self.transition_table = self._build_transition_table()
-        
-    def _build_transition_table(self):
-        """Define allowed state transitions with conditions"""
-        return {
-            'OFF': ['PARK'],  # Can only go to PARK from OFF
-            'PARK': ['OFF', 'TUNE'],  # Can go to OFF or TUNE from PARK
-            'TUNE': ['PARK', 'ON_CW'],  # Can go to PARK or ON_CW from TUNE
-            'ON_CW': ['PARK', 'ON_FM'],  # Can go to PARK or ON_FM from ON_CW
-            'ON_FM': ['PARK', 'ON_CW']   # Can go to PARK or ON_CW from ON_FM
-        }
-```
-
-### 6.2 State Implementation Details
-
-**OFF State**:
-- All systems disabled
-- LLRF9 RF output disabled
-- HVPS disabled and grounded
-- All tuners parked
-- No permits issued
-
-**PARK State**:
-- Safe operational state
-- LLRF9 enabled but RF output at minimum
-- HVPS enabled but voltage = 0
-- Tuners enabled for positioning
-- Basic permits active
-
-**TUNE State**:
-- Low-power RF for cavity tuning
-- LLRF9 amplitude setpoint = 10% of normal
-- HVPS voltage = 20% of normal
-- Tuner control loops active
-- Automatic tuning algorithms enabled
-
-**ON_CW State**:
-- Normal continuous wave operation
-- LLRF9 amplitude/phase setpoints at operational values
-- HVPS voltage at operational setpoint
-- All control loops active
-- Full power operation
-
-**ON_FM State**:
-- Fast modulation operation
-- LLRF9 configured for rapid setpoint changes
-- HVPS voltage modulation enabled
-- Enhanced monitoring for transient conditions
-
-### 6.3 Interlock Integration
-
-```python
-class InterlockManager:
-    """Manages all interlock conditions for state transitions"""
-    
-    def __init__(self):
-        self.interlock_sources = {
-            'SPEAR3_MPS': False,
-            'ORBIT_INTERLOCK': False,
-            'RF_MPS': False,
-            'LLRF9_PERMIT': False,
-            'HVPS_READY': False,
-            'TUNER_READY': False,
-            'ARC_DETECTION': False
-        }
-        
-    def check_all_interlocks(self):
-        """Check all interlock conditions"""
-        return all(self.interlock_sources.values())
-        
-    def get_failed_interlocks(self):
-        """Return list of failed interlocks"""
-        return [name for name, status in self.interlock_sources.items() if not status]
-```
-
----
-
-## 7. HVPS Control Interface
-
-### 7.1 CompactLogix PLC Interface
-
-The HVPS control interface manages communication with the upgraded CompactLogix PLC controller (75% specified in task list):
-
-```python
-class HVPSControlInterface:
-    """Interface to CompactLogix HVPS controller with fiber optic interlocks"""
-    
-    def __init__(self):
-        self.plc_ip_address = "192.168.1.100"  # CompactLogix IP
-        self.fiber_optic_interface = FiberOpticInterface()
-        self.voltage_limits = {
-            'minimum': 0.0,
-            'maximum': 50000.0,  # 50 kV maximum
-            'ramp_rate': 1000.0   # 1 kV/s maximum ramp
-        }
-        
-    def initialize_hvps_interface(self):
-        """Initialize PLC communication and fiber optic links"""
-        
-    def set_voltage_with_ramp(self, target_voltage, ramp_rate=None):
-        """Set HVPS voltage with controlled ramp rate"""
-        if ramp_rate is None:
-            ramp_rate = self.voltage_limits['ramp_rate']
-            
-        # Implement ramping logic at 10 Hz update rate
-        current_voltage = self.get_current_voltage()
-        voltage_step = ramp_rate * 0.1  # 10 Hz update rate
-        
-        if abs(target_voltage - current_voltage) > voltage_step:
-            if target_voltage > current_voltage:
-                next_voltage = current_voltage + voltage_step
-            else:
-                next_voltage = current_voltage - voltage_step
-        else:
-            next_voltage = target_voltage
-            
-        self.send_voltage_setpoint(next_voltage)
-```
-
-### 7.2 Fiber Optic Interlock System
-
-```python
-class FiberOpticInterface:
-    """Manages fiber optic interlock signals with HVPS controller"""
-    
-    def __init__(self):
-        self.fiber_channels = {
-            'MPS_CROWBAR_INHIBIT': 'Prevents MPS from firing crowbar thyristors',
-            'PHASE_CONTROL_ENABLE': 'Allows phase control thyristors to fire',
-            'HVPS_READY_STATUS': 'HVPS ready to output high voltage'
-        }
-        
-    def send_mps_crowbar_inhibit(self, inhibit_state):
-        """Send crowbar inhibit signal to HVPS controller"""
-        
-    def send_phase_control_enable(self, enable_state):
-        """Send phase control enable signal to HVPS controller"""
-        
-    def receive_hvps_ready_status(self):
-        """Receive HVPS ready status from controller"""
-```
-
-### 7.3 Enerpro Gate Driver Integration
-
-The task list specifies upgrading to new Enerpro controller boards (~$4000 for 5 boards):
-
-```python
-class EnerproInterface:
-    """Interface to Enerpro thyristor gate driver boards"""
-    
-    def __init__(self):
-        self.gate_driver_status = {}
-        self.firing_angle_limits = {
-            'minimum': 0.0,
-            'maximum': 180.0
-        }
-        
-    def configure_gate_drivers(self):
-        """Configure Enerpro boards for SPEAR3 operation"""
-        
-    def monitor_gate_driver_health(self):
-        """Monitor gate driver board status and faults"""
-```
-
----
-
-## 8. Tuner Control System
-
-### 8.1 Modern Motion Controller Integration
-
-The task list indicates investigation of motion control solutions developed by Domenico and Mike Dunning. The design accommodates various motion controller options:
-
-```python
-class TunerMotionController:
-    """Abstracted interface for tuner motion controllers"""
-    
-    def __init__(self, controller_type='galil'):
-        self.controller_type = controller_type
-        self.tuner_count = 4
-        self.position_feedback = {}
-        self.motion_profiles = {}
-        
-        # Initialize specific controller
-        if controller_type == 'galil':
-            self.controller = GalilController()
-        elif controller_type == 'domenico':
-            self.controller = DomenicoController()
-        else:
-            raise ValueError(f"Unsupported controller type: {controller_type}")
-```
-
-### 8.2 LLRF9 Phase Feedback Integration
-
-```python
-class TunerPhaseFeedback:
-    """Integrates LLRF9 10 Hz phase measurements for tuner control"""
-    
-    def __init__(self):
-        self.phase_measurements = {}
-        self.phase_setpoints = {}
-        self.pid_controllers = {}
-        self.tuning_deadband = 0.1  # degrees
-        
-    def update_phase_feedback(self):
-        """Get latest phase measurements from LLRF9"""
-        for cavity_id in range(1, 5):
-            pv_name = f"LLRF9:STATION1:CAVITY{cavity_id}_PHASE"
-            self.phase_measurements[cavity_id] = caget(pv_name)
-            
-    def calculate_tuner_corrections(self):
-        """Calculate required tuner movements based on phase errors"""
-        corrections = {}
-        for cavity_id in range(1, 5):
-            phase_error = (self.phase_setpoints[cavity_id] - 
-                          self.phase_measurements[cavity_id])
-            
-            if abs(phase_error) > self.tuning_deadband:
-                pid = self.pid_controllers[cavity_id]
-                correction = pid.update(phase_error)
-                corrections[cavity_id] = correction
-            else:
-                corrections[cavity_id] = 0.0
-                
-        return corrections
-```
-
-### 8.3 Field Balancing for Multi-Cell Cavities
-
-```python
-class FieldBalancingController:
-    """Implements field balancing using differential tuner motion"""
-    
-    def __init__(self):
-        self.cavity_field_measurements = {}
-        self.balancing_algorithms = {
-            'differential_tuning': self._differential_tuning,
-            'iterative_correction': self._iterative_correction
-        }
-        
-    def _differential_tuning(self, cavity_id):
-        """Use differential tuner motion to balance cavity cells"""
-        # Implementation for dual-tuner differential motion
-        
-    def balance_cavity_fields(self):
-        """Execute field balancing for all cavities"""
-        for cavity_id in range(1, 5):
-            if self._field_imbalance_detected(cavity_id):
-                self._differential_tuning(cavity_id)
-```
-
----
-
-## 9. MPS Integration
-
-### 9.1 Interface with Existing MPS System
-
-The task list indicates the MPS system is already complete. The Python coordinator interfaces with this existing system:
-
-```python
-class MPSInterface:
-    """Interface to existing ControlLogix MPS system"""
-    
-    def __init__(self):
-        self.mps_pv_prefix = "MPS:RF:STATION1"
-        self.interlock_inputs = {
-            'LLRF9_FAULT': False,
-            'HVPS_FAULT': False,
-            'ARC_DETECTION': False,
-            'POWER_MONITOR_FAULT': False,
-            'SPEAR3_MPS': False,
-            'ORBIT_INTERLOCK': False
-        }
-        
-    def update_mps_status(self):
-        """Update MPS status from all interlock sources"""
-        
-    def send_rf_permit(self, permit_state):
-        """Send RF permit status to MPS system"""
-        
-    def handle_mps_trip(self, trip_source):
-        """Handle MPS trip conditions"""
-```
-
-### 9.2 Arc Detection Integration
-
-The task list specifies Microstep-MIS optical arc detectors (~$20k total cost):
-
-```python
-class ArcDetectionInterface:
-    """Interface to Microstep-MIS optical arc detection system"""
-    
-    def __init__(self):
-        self.arc_sensors = {
-            'CAVITY1_AIR': 'Cavity 1 air side window',
-            'CAVITY1_VACUUM': 'Cavity 1 vacuum side window',
-            'CAVITY2_AIR': 'Cavity 2 air side window',
-            'CAVITY2_VACUUM': 'Cavity 2 vacuum side window',
-            'CAVITY3_AIR': 'Cavity 3 air side window',
-            'CAVITY3_VACUUM': 'Cavity 3 vacuum side window',
-            'CAVITY4_AIR': 'Cavity 4 air side window',
-            'CAVITY4_VACUUM': 'Cavity 4 vacuum side window',
-            'CIRCULATOR': 'Circulator monitoring',
-            'KLYSTRON_WINDOW': 'Klystron window (if accessible)'
-        }
-        
-    def monitor_arc_detection(self):
-        """Monitor all arc detection sensors"""
-        
-    def handle_arc_detection(self, sensor_id):
-        """Handle arc detection event with fast response"""
-```
-
-### 9.3 Slow Power Monitoring
-
-The task list specifies ~8 channels of slow power monitoring using Minicircuits detectors:
-
-```python
-class SlowPowerMonitoring:
-    """Monitors slow RF power levels using Minicircuits detectors"""
-    
-    def __init__(self):
-        self.power_channels = {
-            'CIRCULATOR_REFLECTED': 'Circulator reflected power',
-            'LOAD1_REFLECTED': 'Load 1 reflected power',
-            'LOAD2_REFLECTED': 'Load 2 reflected power',
-            'LOAD3_REFLECTED': 'Load 3 reflected power',
-            'LOAD4_REFLECTED': 'Load 4 reflected power',
-            'FORWARD_POWER': 'Forward power monitoring',
-            'KLYSTRON_COLLECTOR': 'Klystron collector power',
-            'SPARE_CHANNEL': 'Spare monitoring channel'
-        }
-        self.power_limits = {}
-        self.trip_levels = {}
-        
-    def monitor_power_levels(self):
-        """Monitor all slow power channels"""
-        
-    def check_power_trip_levels(self):
-        """Check if any power levels exceed trip thresholds"""
-```
-
----
-
-## 10. Operator Interface Design
-
-### 10.1 Modern Web-Based Interface
-
-The operator interface transitions from legacy EPICS screens to a modern web-based system:
-
-```python
-class WebInterface:
-    """Modern web-based operator interface using Flask/React"""
-    
-    def __init__(self):
-        self.flask_app = Flask(__name__)
-        self.socketio = SocketIO(self.flask_app)
-        self.dashboard_components = {
-            'station_status': StationStatusWidget(),
-            'rf_control': RFControlWidget(),
-            'hvps_control': HVPSControlWidget(),
-            'tuner_control': TunerControlWidget(),
-            'fault_display': FaultDisplayWidget()
-        }
-        
-    def create_dashboard(self):
-        """Create responsive dashboard with real-time updates"""
-        
-    def setup_realtime_updates(self):
-        """Setup WebSocket connections for real-time data"""
-        
-    def create_mobile_interface(self):
-        """Create mobile-friendly interface for operators"""
-```
-
-### 10.2 Dashboard Components
-
-**Station Status Widget**:
-- Current state display with visual indicators
-- State transition controls with safety confirmations
-- Interlock status summary with detailed fault information
-- System health overview
-
-**RF Control Widget**:
-- Amplitude and phase setpoint controls
-- Real-time waveform displays from LLRF9
-- Loop gain adjustments
-- Calibration status and controls
-
-**HVPS Control Widget**:
-- Voltage setpoint with ramping controls
-- Current and power monitoring
-- Thyristor status display
-- Safety interlock status
-
-**Tuner Control Widget**:
-- Individual tuner position displays
-- Phase error monitoring
-- Automatic tuning controls
-- Field balancing status
-
-### 10.3 Alarm and Notification System
-
-```python
-class AlarmSystem:
-    """Comprehensive alarm and notification system"""
-    
-    def __init__(self):
-        self.alarm_levels = {
-            'INFO': 'Informational messages',
-            'WARNING': 'Warning conditions',
-            'ALARM': 'Alarm conditions requiring attention',
-            'CRITICAL': 'Critical faults requiring immediate action'
-        }
-        self.notification_channels = {
-            'web_interface': True,
-            'email': True,
-            'sms': False,
-            'slack': True
-        }
-        
-    def process_alarm(self, alarm_data):
-        """Process and distribute alarm notifications"""
-        
-    def create_alarm_log(self):
-        """Create searchable alarm log with filtering"""
-```
-
----
-
-## 11. Configuration Management
-
-### 11.1 Centralized Configuration System
-
-```python
-class ConfigurationManager:
-    """Centralized configuration management for all LLRF parameters"""
-    
-    def __init__(self):
-        self.config_file = "spear3_llrf_config.yaml"
-        self.config_data = {}
-        self.parameter_limits = {}
-        self.default_values = {}
-        
-    def load_configuration(self):
-        """Load configuration from YAML file with validation"""
-        
-    def save_configuration(self):
-        """Save current configuration with backup"""
-        
-    def validate_parameters(self, config_dict):
-        """Validate all parameters against defined limits"""
-        
-    def create_configuration_backup(self):
-        """Create timestamped configuration backup"""
-```
-
-### 11.2 Parameter Categories
-
-**RF Parameters**:
-```yaml
-rf_parameters:
-  amplitude_setpoint: 1000.0  # kV
-  phase_setpoint: 0.0         # degrees
-  direct_loop_gain: 10.0
-  integral_loop_gain: 1.0
-  calibration_interval: 3600  # seconds
-```
-
-**HVPS Parameters**:
-```yaml
-hvps_parameters:
-  voltage_setpoint: 45000.0   # V
-  current_limit: 2.0          # A
-  ramp_rate: 1000.0          # V/s
-  crowbar_threshold: 3.0      # A
-```
-
-**Tuner Parameters**:
-```yaml
-tuner_parameters:
-  phase_setpoints: [0.0, 0.0, 0.0, 0.0]  # degrees
-  pid_gains: [[1.0, 0.1, 0.01], [1.0, 0.1, 0.01], [1.0, 0.1, 0.01], [1.0, 0.1, 0.01]]
-  deadband: 0.1               # degrees
-  max_step_size: 100          # steps
-```
-
----
-
-## 12. Fault Detection & Logging
-
-### 12.1 Enhanced Fault Detection
-
-```python
-class FaultDetectionSystem:
-    """Advanced fault detection leveraging LLRF9 timestamps"""
-    
-    def __init__(self):
-        self.fault_sources = {
-            'LLRF9_HARDWARE': 'LLRF9 internal faults',
-            'HVPS_CONTROLLER': 'HVPS controller faults',
-            'ARC_DETECTION': 'Optical arc detection',
-            'POWER_MONITORING': 'RF power limit violations',
-            'TUNER_SYSTEM': 'Tuner motor faults',
-            'INTERLOCK_SYSTEM': 'External interlock faults'
-        }
-        self.fault_correlator = FaultCorrelator()
-        
-    def process_fault_event(self, fault_data):
-        """Process fault with nanosecond timestamp correlation"""
-        
-    def analyze_fault_sequence(self, fault_list):
-        """Analyze fault sequence to determine root cause"""
-```
-
-### 12.2 Fault Correlation and Analysis
-
-```python
-class FaultCorrelator:
-    """Correlates faults across multiple systems using precise timestamps"""
-    
-    def __init__(self):
-        self.timestamp_resolution = 17.4e-9  # LLRF9 timestamp resolution
-        self.correlation_window = 1e-3       # 1 ms correlation window
-        
-    def correlate_faults(self, fault_events):
-        """Correlate faults within timing window"""
-        
-    def determine_fault_sequence(self, correlated_faults):
-        """Determine causal sequence of fault events"""
-        
-    def generate_fault_report(self, fault_analysis):
-        """Generate comprehensive fault analysis report"""
-```
-
-### 12.3 Logging and Data Archival
-
-```python
-class DataLogger:
-    """Comprehensive data logging and archival system"""
-    
-    def __init__(self):
-        self.log_channels = {
-            'rf_data': 10,      # 10 Hz RF measurements
-            'hvps_data': 10,    # 10 Hz HVPS data
-            'tuner_data': 1,    # 1 Hz tuner positions
-            'fault_events': 0,  # Event-driven fault logging
-            'operator_actions': 0  # Event-driven operator logs
-        }
-        
-    def setup_data_archival(self):
-        """Setup data archival to SPEAR3 data systems"""
-        
-    def create_shift_reports(self):
-        """Generate automated shift reports"""
-```
-
----
-
-## 13. Implementation Plan
-
-### 13.1 Development Phases
-
-**Phase 1: Core Infrastructure (Months 1-2)**
-- Python coordinator framework development
-- EPICS integration layer implementation
-- Basic station state machine
-- LLRF9 communication interface
-- Configuration management system
-
-**Phase 2: Subsystem Integration (Months 3-4)**
-- HVPS control interface development
-- MPS system integration
-- Tuner control system implementation
-- Arc detection interface
-- Slow power monitoring integration
-
-**Phase 3: Operator Interface (Months 5-6)**
-- Web-based dashboard development
-- Mobile interface creation
-- Alarm and notification system
-- Data logging and archival
-- Documentation completion
-
-### 13.2 Resource Requirements
-
-**Software Development**:
-- Senior Python developer: 6 months
-- EPICS specialist: 3 months
-- Web developer: 2 months
-- Testing engineer: 2 months
-
-**Hardware Integration**:
-- Controls engineer: 4 months
-- Electrical technician: 3 months
-- Mechanical support: 1 month
-
-### 13.3 Risk Mitigation
-
-**Technical Risks**:
-- LLRF9 integration complexity → Leverage Dimtel's 1-week commissioning support
-- Motion controller selection → Prototype testing with candidate controllers
-- HVPS interface timing → Test stand validation before SPEAR3 installation
-
-**Schedule Risks**:
-- Parallel development of independent modules
-- Early prototype testing and validation
-- Incremental commissioning approach
-
----
-
-## 14. Testing & Commissioning Strategy
-
-### 14.1 Test Stand Development
-
-**HVPS Test Stand (Test Lab)**:
-- Commission new HVPS controller in Test Stand 18
-- Validate CompactLogix PLC interface
-- Test Enerpro gate driver boards
-- Verify fiber optic interlock system
-
-**LLRF9 Prototype Testing**:
-- Leverage existing SPEAR3 prototype experience
-- Validate Python coordinator interface
-- Test all control loops and interlocks
-- Verify calibration procedures
-
-### 14.2 Commissioning Sequence
-
-**Week 1: LLRF9 Hardware Commissioning (with Dimtel Support)**
-- LLRF9 installation and RF signal routing
-- Basic RF processing validation
-- Calibration system commissioning
-- EPICS IOC configuration
-
-**Week 2: Python Coordinator Integration**
-- Station state machine testing
-- HVPS interface validation
-- Tuner system integration
-- MPS interface testing
-
-**Week 3: System Integration Testing**
-- Full system operation testing
-- Fault injection testing
-- Performance validation
-- Operator training
-
-**Week 4: Production Transition**
-- Legacy system parallel operation
-- Performance comparison
-- Final system validation
-- Documentation completion
-
-### 14.3 Acceptance Criteria
-
-**Performance Requirements**:
-- RF amplitude stability: ±0.1%
-- RF phase stability: ±0.1°
-- Calibration time: <5 minutes
-- State transition time: <30 seconds
-- Fault response time: <1 second
-
-**Reliability Requirements**:
-- System availability: >99.5%
-- Mean time between failures: >1000 hours
-- Fault detection coverage: >95%
-- Automatic recovery capability: >90%
-
----
-
-## 15. Documentation Requirements
-
-### 15.1 Software Documentation Package
-
-**Technical Documentation**:
-- Software architecture document (this document)
-- API reference documentation
-- Configuration parameter guide
-- Troubleshooting procedures
-- Maintenance procedures
-
-**Operator Documentation**:
-- Operator interface user guide
-- Standard operating procedures
-- Emergency response procedures
-- Alarm response guide
-- Training materials
-
-**Engineering Documentation**:
-- System design specifications
-- Interface control documents
-- Test procedures and results
-- Commissioning procedures
-- As-built documentation
-
-### 15.2 Code Documentation Standards
-
-```python
-class DocumentationStandards:
-    """
-    All Python code must follow these documentation standards:
-    
-    - Comprehensive docstrings for all classes and methods
-    - Type hints for all function parameters and return values
-    - Inline comments for complex logic
-    - Configuration parameter documentation
-    - Error handling documentation
-    """
-    
-    def example_method(self, parameter: float) -> bool:
-        """
-        Example method demonstrating documentation standards.
-        
-        Args:
-            parameter: Description of parameter with units and range
-            
-        Returns:
-            Boolean indicating success/failure
-            
-        Raises:
-            ValueError: If parameter is out of range
-            ConnectionError: If EPICS communication fails
-        """
-        pass
-```
-
-### 15.3 Version Control and Change Management
-
-**Git Repository Structure**:
-```
-spear3-llrf-upgrade/
-├── src/
-│   ├── coordinator/          # Python coordinator modules
-│   ├── epics/               # EPICS database files
-│   ├── web_interface/       # Web interface code
-│   └── tests/               # Unit and integration tests
+spear3_llrf/
+├── coordinator/
+│   ├── __init__.py
+│   ├── main.py                    # Application entry point
+│   ├── state_machine.py           # Station state management
+│   ├── hvps_controller.py         # HVPS supervisory loop
+│   ├── tuner_manager.py           # Tuner control for 4 cavities
+│   ├── load_angle_controller.py   # Power balancing loop
+│   ├── fault_manager.py           # Fault detection and recovery
+│   └── diagnostics.py             # System diagnostics and health
+├── epics_interface/
+│   ├── __init__.py
+│   ├── pv_manager.py              # PV definitions and caching
+│   ├── channel_access.py          # PyEPICS wrapper with error handling
+│   ├── alarm_handler.py           # Alarm processing and callbacks
+│   └── mock_interface.py          # Mock hardware for testing
 ├── config/
-│   ├── default_config.yaml  # Default configuration
-│   └── test_config.yaml     # Test configuration
-├── docs/
-│   ├── architecture/        # Architecture documentation
-│   ├── api/                 # API documentation
-│   └── procedures/          # Operating procedures
+│   ├── station_config.yaml        # Station parameters
+│   ├── hvps_config.yaml           # HVPS control parameters
+│   ├── tuner_config.yaml          # Tuner and motor parameters
+│   ├── fault_config.yaml          # Fault detection thresholds
+│   └── pv_definitions.yaml        # All PV names and properties
+├── web_interface/
+│   ├── __init__.py
+│   ├── api.py                     # REST API endpoints
+│   ├── dashboard.py               # Web dashboard backend
+│   └── static/                    # Web assets (HTML, CSS, JS)
+├── utils/
+│   ├── __init__.py
+│   ├── logging_config.py          # Logging setup and formatters
+│   ├── phase_calculations.py      # RF phase and power calculations
+│   └── validation.py              # Configuration validation
+├── tests/
+│   ├── __init__.py
+│   ├── test_state_machine.py
+│   ├── test_hvps_controller.py
+│   ├── test_tuner_manager.py
+│   ├── test_fault_manager.py
+│   └── fixtures/                  # Test data and mock configurations
 └── scripts/
-    ├── deployment/          # Deployment scripts
-    └── maintenance/         # Maintenance scripts
+    ├── install.py                 # Installation and setup
+    ├── start_coordinator.py       # Service startup script
+    └── diagnostics.py             # System diagnostic tools
 ```
 
-**Change Management Process**:
-- All changes require code review
-- Automated testing before deployment
-- Configuration changes require approval
-- Emergency change procedures defined
-- Change log maintenance
+### 2.2 Core Application Class
+
+```python
+# coordinator/main.py
+import asyncio
+import logging
+from typing import Dict, Optional
+from dataclasses import dataclass
+from pathlib import Path
+
+from .state_machine import StationStateMachine
+from .hvps_controller import HVPSController
+from .tuner_manager import TunerManager
+from .load_angle_controller import LoadAngleController
+from .fault_manager import FaultManager
+from ..epics_interface import EPICSInterface
+from ..config import ConfigManager
+from ..utils.logging_config import setup_logging
+
+@dataclass
+class CoordinatorStatus:
+    """Overall coordinator status"""
+    running: bool = False
+    station_state: str = "OFF"
+    fault_count: int = 0
+    uptime_seconds: float = 0.0
+    last_update: Optional[str] = None
+
+class SPEAR3LLRFCoordinator:
+    """
+    Main coordinator application for SPEAR3 LLRF upgrade.
+    
+    Orchestrates all supervisory control functions:
+    - Station state management
+    - HVPS supervisory control
+    - Tuner management and load angle balancing
+    - Fault detection and recovery
+    """
+    
+    def __init__(self, config_dir: Path):
+        self.config_dir = config_dir
+        self.logger = logging.getLogger(__name__)
+        self.status = CoordinatorStatus()
+        
+        # Load configuration
+        self.config = ConfigManager(config_dir)
+        
+        # Initialize EPICS interface
+        self.epics = EPICSInterface(self.config.pv_definitions)
+        
+        # Initialize control modules
+        self.state_machine = StationStateMachine(
+            self.epics, self.config.station_config
+        )
+        self.hvps_controller = HVPSController(
+            self.epics, self.config.hvps_config
+        )
+        self.tuner_manager = TunerManager(
+            self.epics, self.config.tuner_config
+        )
+        self.load_angle_controller = LoadAngleController(
+            self.epics, self.config.tuner_config
+        )
+        self.fault_manager = FaultManager(
+            self.epics, self.config.fault_config
+        )
+        
+        # Control loop tasks
+        self._tasks: Dict[str, asyncio.Task] = {}
+        self._shutdown_event = asyncio.Event()
+    
+    async def start(self) -> None:
+        """Start the coordinator application"""
+        self.logger.info("Starting SPEAR3 LLRF Coordinator")
+        
+        try:
+            # Initialize EPICS connections
+            await self.epics.initialize()
+            
+            # Start control modules
+            await self.state_machine.start()
+            await self.hvps_controller.start()
+            await self.tuner_manager.start()
+            await self.load_angle_controller.start()
+            await self.fault_manager.start()
+            
+            # Start control loops
+            self._tasks['state_machine'] = asyncio.create_task(
+                self._run_state_machine_loop()
+            )
+            self._tasks['hvps_control'] = asyncio.create_task(
+                self._run_hvps_loop()
+            )
+            self._tasks['tuner_control'] = asyncio.create_task(
+                self._run_tuner_loop()
+            )
+            self._tasks['load_angle'] = asyncio.create_task(
+                self._run_load_angle_loop()
+            )
+            self._tasks['fault_monitoring'] = asyncio.create_task(
+                self._run_fault_monitoring_loop()
+            )
+            
+            self.status.running = True
+            self.logger.info("Coordinator started successfully")
+            
+            # Wait for shutdown signal
+            await self._shutdown_event.wait()
+            
+        except Exception as e:
+            self.logger.error(f"Failed to start coordinator: {e}")
+            raise
+        finally:
+            await self.shutdown()
+    
+    async def shutdown(self) -> None:
+        """Graceful shutdown of coordinator"""
+        self.logger.info("Shutting down SPEAR3 LLRF Coordinator")
+        
+        self.status.running = False
+        
+        # Cancel all tasks
+        for name, task in self._tasks.items():
+            if not task.done():
+                self.logger.info(f"Cancelling {name} task")
+                task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
+        
+        # Shutdown modules
+        await self.fault_manager.shutdown()
+        await self.load_angle_controller.shutdown()
+        await self.tuner_manager.shutdown()
+        await self.hvps_controller.shutdown()
+        await self.state_machine.shutdown()
+        await self.epics.shutdown()
+        
+        self.logger.info("Coordinator shutdown complete")
+    
+    async def _run_state_machine_loop(self) -> None:
+        """Main state machine control loop (~1 Hz)"""
+        while self.status.running:
+            try:
+                await self.state_machine.update()
+                self.status.station_state = self.state_machine.current_state
+                await asyncio.sleep(1.0)  # 1 Hz update rate
+            except Exception as e:
+                self.logger.error(f"State machine loop error: {e}")
+                await asyncio.sleep(1.0)
+    
+    async def _run_hvps_loop(self) -> None:
+        """HVPS supervisory control loop (~1 Hz)"""
+        while self.status.running:
+            try:
+                await self.hvps_controller.update()
+                await asyncio.sleep(1.0)  # 1 Hz update rate
+            except Exception as e:
+                self.logger.error(f"HVPS control loop error: {e}")
+                await asyncio.sleep(1.0)
+    
+    async def _run_tuner_loop(self) -> None:
+        """Tuner control loop (~1 Hz)"""
+        while self.status.running:
+            try:
+                await self.tuner_manager.update()
+                await asyncio.sleep(1.0)  # 1 Hz update rate
+            except Exception as e:
+                self.logger.error(f"Tuner control loop error: {e}")
+                await asyncio.sleep(1.0)
+    
+    async def _run_load_angle_loop(self) -> None:
+        """Load angle balancing loop (~0.1 Hz)"""
+        while self.status.running:
+            try:
+                await self.load_angle_controller.update()
+                await asyncio.sleep(10.0)  # 0.1 Hz update rate
+            except Exception as e:
+                self.logger.error(f"Load angle loop error: {e}")
+                await asyncio.sleep(10.0)
+    
+    async def _run_fault_monitoring_loop(self) -> None:
+        """Fault monitoring loop (~10 Hz)"""
+        while self.status.running:
+            try:
+                await self.fault_manager.update()
+                await asyncio.sleep(0.1)  # 10 Hz update rate
+            except Exception as e:
+                self.logger.error(f"Fault monitoring loop error: {e}")
+                await asyncio.sleep(0.1)
+
+# Entry point
+async def main():
+    """Main entry point for the coordinator application"""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='SPEAR3 LLRF Coordinator')
+    parser.add_argument('--config-dir', type=Path, 
+                       default=Path('/opt/spear3_llrf/config'),
+                       help='Configuration directory')
+    parser.add_argument('--log-level', default='INFO',
+                       choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
+                       help='Logging level')
+    
+    args = parser.parse_args()
+    
+    # Setup logging
+    setup_logging(level=args.log_level)
+    
+    # Create and start coordinator
+    coordinator = SPEAR3LLRFCoordinator(args.config_dir)
+    
+    try:
+        await coordinator.start()
+    except KeyboardInterrupt:
+        logging.info("Received interrupt signal")
+    except Exception as e:
+        logging.error(f"Coordinator failed: {e}")
+        raise
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
 
 ---
 
-## Conclusion
+## 3. EPICS Integration Layer
 
-This software design provides a comprehensive architecture for the SPEAR3 LLRF upgrade, leveraging the LLRF9 hardware capabilities while maintaining operational familiarity for SPEAR3 operators. The modular design enables incremental development and commissioning, reducing risk and ensuring successful deployment within the project timeline and budget constraints.
+### 3.1 PV Manager
 
-The key innovation is the clear separation of responsibilities: LLRF9 handles all real-time RF processing with hardware acceleration, while the Python coordinator provides high-level supervisory control and modern operator interfaces. This architecture eliminates ~90% of legacy SNL code complexity while providing enhanced performance, reliability, and maintainability.
+The PV Manager provides a centralized interface to all EPICS Process Variables with caching, error handling, and type safety.
 
-**Next Steps**:
-1. Review and approve this software design document
-2. Begin Phase 1 development (Python coordinator framework)
-3. Establish development environment and version control
-4. Initiate HVPS test stand commissioning
-5. Schedule Dimtel commissioning support for LLRF9 integration
+```python
+# epics_interface/pv_manager.py
+import logging
+from typing import Dict, Any, Optional, Union, Callable, List
+from dataclasses import dataclass, field
+from enum import Enum
+import epics
+import asyncio
+from threading import Lock
+
+class PVStatus(Enum):
+    """PV connection and data status"""
+    DISCONNECTED = "disconnected"
+    CONNECTED = "connected"
+    INVALID = "invalid"
+    TIMEOUT = "timeout"
+
+@dataclass
+class PVDefinition:
+    """Process Variable definition"""
+    name: str
+    description: str
+    data_type: str  # 'float', 'int', 'string', 'enum'
+    units: Optional[str] = None
+    precision: Optional[int] = None
+    limits: Optional[tuple] = None
+    enum_strings: Optional[List[str]] = None
+    timeout: float = 5.0
+
+@dataclass
+class PVValue:
+    """Cached PV value with metadata"""
+    value: Any
+    timestamp: float
+    status: PVStatus
+    severity: str = "NO_ALARM"
+    char_value: Optional[str] = None
+
+class PVManager:
+    """
+    Centralized EPICS PV management with caching and error handling.
+    
+    Provides:
+    - Automatic connection management
+    - Value caching with timestamps
+    - Alarm status monitoring
+    - Callback registration
+    - Mock interface for testing
+    """
+    
+    def __init__(self, pv_definitions: Dict[str, PVDefinition], mock_mode: bool = False):
+        self.pv_definitions = pv_definitions
+        self.mock_mode = mock_mode
+        self.logger = logging.getLogger(__name__)
+        
+        # PV objects and cached values
+        self._pvs: Dict[str, epics.PV] = {}
+        self._values: Dict[str, PVValue] = {}
+        self._callbacks: Dict[str, List[Callable]] = {}
+        self._lock = Lock()
+        
+        # Mock data for testing
+        self._mock_values: Dict[str, Any] = {}
+        
+    async def initialize(self) -> None:
+        """Initialize all PV connections"""
+        self.logger.info(f"Initializing PV Manager ({'mock' if self.mock_mode else 'real'} mode)")
+        
+        if self.mock_mode:
+            await self._initialize_mock_pvs()
+        else:
+            await self._initialize_real_pvs()
+    
+    async def _initialize_real_pvs(self) -> None:
+        """Initialize real EPICS PV connections"""
+        for pv_name, definition in self.pv_definitions.items():
+            try:
+                pv = epics.PV(
+                    definition.name,
+                    connection_timeout=definition.timeout,
+                    auto_monitor=True
+                )
+                
+                # Wait for connection
+                if not pv.wait_for_connection(timeout=definition.timeout):
+                    self.logger.warning(f"PV {pv_name} failed to connect")
+                    self._values[pv_name] = PVValue(
+                        value=None,
+                        timestamp=0.0,
+                        status=PVStatus.DISCONNECTED
+                    )
+                else:
+                    self.logger.debug(f"PV {pv_name} connected")
+                    self._values[pv_name] = PVValue(
+                        value=pv.value,
+                        timestamp=pv.timestamp,
+                        status=PVStatus.CONNECTED,
+                        severity=pv.severity,
+                        char_value=pv.char_value
+                    )
+                
+                # Set up callback for value changes
+                pv.add_callback(self._pv_callback, index=pv_name)
+                self._pvs[pv_name] = pv
+                
+            except Exception as e:
+                self.logger.error(f"Failed to initialize PV {pv_name}: {e}")
+                self._values[pv_name] = PVValue(
+                    value=None,
+                    timestamp=0.0,
+                    status=PVStatus.INVALID
+                )
+    
+    async def _initialize_mock_pvs(self) -> None:
+        """Initialize mock PVs for testing"""
+        for pv_name, definition in self.pv_definitions.items():
+            # Set default mock values based on data type
+            if definition.data_type == 'float':
+                mock_value = 0.0
+            elif definition.data_type == 'int':
+                mock_value = 0
+            elif definition.data_type == 'string':
+                mock_value = ""
+            elif definition.data_type == 'enum':
+                mock_value = 0
+            else:
+                mock_value = None
+            
+            self._mock_values[pv_name] = mock_value
+            self._values[pv_name] = PVValue(
+                value=mock_value,
+                timestamp=asyncio.get_event_loop().time(),
+                status=PVStatus.CONNECTED
+            )
+    
+    def _pv_callback(self, pvname: str = None, value=None, timestamp=None, 
+                     severity=None, char_value=None, **kwargs):
+        """Callback for PV value changes"""
+        if pvname in self._values:
+            with self._lock:
+                self._values[pvname] = PVValue(
+                    value=value,
+                    timestamp=timestamp,
+                    status=PVStatus.CONNECTED,
+                    severity=severity,
+                    char_value=char_value
+                )
+            
+            # Notify registered callbacks
+            if pvname in self._callbacks:
+                for callback in self._callbacks[pvname]:
+                    try:
+                        callback(pvname, value, timestamp, severity)
+                    except Exception as e:
+                        self.logger.error(f"Callback error for {pvname}: {e}")
+    
+    def get_value(self, pv_name: str) -> Optional[PVValue]:
+        """Get cached PV value"""
+        return self._values.get(pv_name)
+    
+    def get_raw_value(self, pv_name: str) -> Any:
+        """Get just the raw value (convenience method)"""
+        pv_value = self.get_value(pv_name)
+        return pv_value.value if pv_value else None
+    
+    async def put_value(self, pv_name: str, value: Any, wait: bool = False) -> bool:
+        """Set PV value"""
+        if self.mock_mode:
+            return await self._put_mock_value(pv_name, value)
+        else:
+            return await self._put_real_value(pv_name, value, wait)
+    
+    async def _put_real_value(self, pv_name: str, value: Any, wait: bool) -> bool:
+        """Set real PV value"""
+        if pv_name not in self._pvs:
+            self.logger.error(f"PV {pv_name} not initialized")
+            return False
+        
+        pv = self._pvs[pv_name]
+        if not pv.connected:
+            self.logger.error(f"PV {pv_name} not connected")
+            return False
+        
+        try:
+            success = pv.put(value, wait=wait)
+            if success:
+                self.logger.debug(f"Set {pv_name} = {value}")
+            else:
+                self.logger.error(f"Failed to set {pv_name} = {value}")
+            return success
+        except Exception as e:
+            self.logger.error(f"Error setting {pv_name}: {e}")
+            return False
+    
+    async def _put_mock_value(self, pv_name: str, value: Any) -> bool:
+        """Set mock PV value"""
+        if pv_name not in self._mock_values:
+            self.logger.error(f"Mock PV {pv_name} not defined")
+            return False
+        
+        self._mock_values[pv_name] = value
+        
+        # Update cached value and trigger callbacks
+        with self._lock:
+            self._values[pv_name] = PVValue(
+                value=value,
+                timestamp=asyncio.get_event_loop().time(),
+                status=PVStatus.CONNECTED
+            )
+        
+        # Trigger callbacks
+        if pv_name in self._callbacks:
+            for callback in self._callbacks[pv_name]:
+                try:
+                    callback(pv_name, value, asyncio.get_event_loop().time(), "NO_ALARM")
+                except Exception as e:
+                    self.logger.error(f"Mock callback error for {pv_name}: {e}")
+        
+        return True
+    
+    def add_callback(self, pv_name: str, callback: Callable) -> None:
+        """Register callback for PV changes"""
+        if pv_name not in self._callbacks:
+            self._callbacks[pv_name] = []
+        self._callbacks[pv_name].append(callback)
+    
+    def remove_callback(self, pv_name: str, callback: Callable) -> None:
+        """Remove callback for PV changes"""
+        if pv_name in self._callbacks:
+            try:
+                self._callbacks[pv_name].remove(callback)
+            except ValueError:
+                pass
+    
+    def get_connection_status(self) -> Dict[str, PVStatus]:
+        """Get connection status for all PVs"""
+        return {name: value.status for name, value in self._values.items()}
+    
+    def get_alarm_summary(self) -> Dict[str, str]:
+        """Get alarm status for all PVs"""
+        return {
+            name: value.severity 
+            for name, value in self._values.items() 
+            if value.severity not in ["NO_ALARM", ""]
+        }
+    
+    async def shutdown(self) -> None:
+        """Shutdown PV manager"""
+        self.logger.info("Shutting down PV Manager")
+        
+        if not self.mock_mode:
+            for pv in self._pvs.values():
+                try:
+                    pv.disconnect()
+                except Exception as e:
+                    self.logger.error(f"Error disconnecting PV: {e}")
+        
+        self._pvs.clear()
+        self._values.clear()
+        self._callbacks.clear()
+```
+
+### 3.2 EPICS Interface
+
+```python
+# epics_interface/__init__.py
+from .pv_manager import PVManager, PVDefinition, PVValue, PVStatus
+from .channel_access import EPICSInterface
+from .alarm_handler import AlarmHandler
+
+__all__ = ['EPICSInterface', 'PVManager', 'PVDefinition', 'PVValue', 'PVStatus', 'AlarmHandler']
+
+# epics_interface/channel_access.py
+import logging
+from typing import Dict, Any, Optional, List
+from pathlib import Path
+import yaml
+
+from .pv_manager import PVManager, PVDefinition
+
+class EPICSInterface:
+    """
+    High-level EPICS interface for SPEAR3 LLRF coordinator.
+    
+    Provides organized access to all subsystem PVs:
+    - LLRF9 units (field control and monitoring)
+    - HVPS controller
+    - MPS system
+    - Motor controllers
+    - Waveform buffer system
+    """
+    
+    def __init__(self, pv_definitions_file: Path, mock_mode: bool = False):
+        self.logger = logging.getLogger(__name__)
+        self.mock_mode = mock_mode
+        
+        # Load PV definitions
+        self.pv_definitions = self._load_pv_definitions(pv_definitions_file)
+        
+        # Initialize PV manager
+        self.pv_manager = PVManager(self.pv_definitions, mock_mode)
+        
+        # Organized PV access
+        self.llrf9_field = LLRF9Interface(self.pv_manager, "LLRF1")
+        self.llrf9_monitor = LLRF9Interface(self.pv_manager, "LLRF2")
+        self.hvps = HVPSInterface(self.pv_manager)
+        self.mps = MPSInterface(self.pv_manager)
+        self.tuners = TunerInterface(self.pv_manager)
+        self.waveform_buffer = WaveformBufferInterface(self.pv_manager)
+    
+    def _load_pv_definitions(self, definitions_file: Path) -> Dict[str, PVDefinition]:
+        """Load PV definitions from YAML file"""
+        try:
+            with open(definitions_file, 'r') as f:
+                data = yaml.safe_load(f)
+            
+            definitions = {}
+            for category, pvs in data.items():
+                for pv_name, pv_data in pvs.items():
+                    definitions[pv_name] = PVDefinition(
+                        name=pv_data['name'],
+                        description=pv_data.get('description', ''),
+                        data_type=pv_data.get('type', 'float'),
+                        units=pv_data.get('units'),
+                        precision=pv_data.get('precision'),
+                        limits=pv_data.get('limits'),
+                        enum_strings=pv_data.get('enum_strings'),
+                        timeout=pv_data.get('timeout', 5.0)
+                    )
+            
+            self.logger.info(f"Loaded {len(definitions)} PV definitions")
+            return definitions
+            
+        except Exception as e:
+            self.logger.error(f"Failed to load PV definitions: {e}")
+            raise
+    
+    async def initialize(self) -> None:
+        """Initialize EPICS interface"""
+        await self.pv_manager.initialize()
+    
+    async def shutdown(self) -> None:
+        """Shutdown EPICS interface"""
+        await self.pv_manager.shutdown()
+
+class LLRF9Interface:
+    """Interface to LLRF9 unit PVs"""
+    
+    def __init__(self, pv_manager: PVManager, prefix: str):
+        self.pv_manager = pv_manager
+        self.prefix = prefix
+    
+    async def get_gap_voltage(self) -> Optional[float]:
+        """Get total gap voltage (MV)"""
+        return self.pv_manager.get_raw_value(f"{self.prefix}:GAP_VOLTAGE")
+    
+    async def set_gap_voltage_setpoint(self, voltage_mv: float) -> bool:
+        """Set gap voltage setpoint (MV)"""
+        return await self.pv_manager.put_value(f"{self.prefix}:GAP_VOLTAGE:SP", voltage_mv)
+    
+    async def get_drive_power(self) -> Optional[float]:
+        """Get drive power (W)"""
+        return self.pv_manager.get_raw_value(f"{self.prefix}:DRIVE_POWER")
+    
+    async def get_cavity_phases(self) -> List[Optional[float]]:
+        """Get phase measurements for all 4 cavities (degrees)"""
+        phases = []
+        for cavity in ['A', 'B', 'C', 'D']:
+            phase = self.pv_manager.get_raw_value(f"{self.prefix}:CAV{cavity}:PHASE")
+            phases.append(phase)
+        return phases
+    
+    async def get_cavity_amplitudes(self) -> List[Optional[float]]:
+        """Get amplitude measurements for all 4 cavities (MV)"""
+        amplitudes = []
+        for cavity in ['A', 'B', 'C', 'D']:
+            amp = self.pv_manager.get_raw_value(f"{self.prefix}:CAV{cavity}:AMPLITUDE")
+            amplitudes.append(amp)
+        return amplitudes
+    
+    async def set_cavity_phase_offset(self, cavity: str, offset_deg: float) -> bool:
+        """Set phase offset for individual cavity (degrees)"""
+        return await self.pv_manager.put_value(f"{self.prefix}:CAV{cavity}:PHASE_OFFSET", offset_deg)
+    
+    async def get_interlock_status(self) -> Dict[str, Any]:
+        """Get interlock status"""
+        return {
+            'active': self.pv_manager.get_raw_value(f"{self.prefix}:INTERLOCK:ACTIVE"),
+            'source': self.pv_manager.get_raw_value(f"{self.prefix}:INTERLOCK:SOURCE"),
+            'timestamp': self.pv_manager.get_raw_value(f"{self.prefix}:INTERLOCK:TIMESTAMP")
+        }
+
+class HVPSInterface:
+    """Interface to HVPS controller PVs"""
+    
+    def __init__(self, pv_manager: PVManager):
+        self.pv_manager = pv_manager
+    
+    async def get_voltage(self) -> Optional[float]:
+        """Get HVPS voltage (kV)"""
+        return self.pv_manager.get_raw_value("SRF1:HVPS:VOLTAGE")
+    
+    async def set_voltage_setpoint(self, voltage_kv: float) -> bool:
+        """Set HVPS voltage setpoint (kV)"""
+        return await self.pv_manager.put_value("SRF1:HVPS:VOLTAGE:SP", voltage_kv)
+    
+    async def get_current(self) -> Optional[float]:
+        """Get HVPS current (A)"""
+        return self.pv_manager.get_raw_value("SRF1:HVPS:CURRENT")
+    
+    async def get_contactor_status(self) -> Optional[bool]:
+        """Get contactor status"""
+        return self.pv_manager.get_raw_value("SRF1:HVPS:CONTACTOR:STATUS")
+    
+    async def set_contactor(self, close: bool) -> bool:
+        """Control contactor (True = close, False = open)"""
+        return await self.pv_manager.put_value("SRF1:HVPS:CONTACTOR:CMD", 1 if close else 0)
+
+class MPSInterface:
+    """Interface to MPS system PVs"""
+    
+    def __init__(self, pv_manager: PVManager):
+        self.pv_manager = pv_manager
+    
+    async def get_permit_status(self) -> Optional[bool]:
+        """Get overall MPS permit status"""
+        return self.pv_manager.get_raw_value("SRF1:MPS:PERMIT")
+    
+    async def get_fault_summary(self) -> Dict[str, Any]:
+        """Get fault summary"""
+        return {
+            'active_faults': self.pv_manager.get_raw_value("SRF1:MPS:FAULTS:ACTIVE"),
+            'first_fault': self.pv_manager.get_raw_value("SRF1:MPS:FAULTS:FIRST"),
+            'fault_count': self.pv_manager.get_raw_value("SRF1:MPS:FAULTS:COUNT")
+        }
+
+class TunerInterface:
+    """Interface to tuner motor controller PVs"""
+    
+    def __init__(self, pv_manager: PVManager):
+        self.pv_manager = pv_manager
+    
+    async def get_positions(self) -> List[Optional[float]]:
+        """Get all tuner positions (mm)"""
+        positions = []
+        for cavity in ['A', 'B', 'C', 'D']:
+            pos = self.pv_manager.get_raw_value(f"SRF1:CAV{cavity}TUNR:POSITION")
+            positions.append(pos)
+        return positions
+    
+    async def move_tuner(self, cavity: str, position_mm: float) -> bool:
+        """Move tuner to absolute position (mm)"""
+        return await self.pv_manager.put_value(f"SRF1:CAV{cavity}TUNR:POSITION:SP", position_mm)
+    
+    async def get_motor_status(self, cavity: str) -> Dict[str, Any]:
+        """Get motor status for cavity"""
+        return {
+            'moving': self.pv_manager.get_raw_value(f"SRF1:CAV{cavity}TUNR:MOVING"),
+            'done': self.pv_manager.get_raw_value(f"SRF1:CAV{cavity}TUNR:DONE"),
+            'limit_high': self.pv_manager.get_raw_value(f"SRF1:CAV{cavity}TUNR:LIMIT_HIGH"),
+            'limit_low': self.pv_manager.get_raw_value(f"SRF1:CAV{cavity}TUNR:LIMIT_LOW")
+        }
+
+class WaveformBufferInterface:
+    """Interface to waveform buffer system PVs"""
+    
+    def __init__(self, pv_manager: PVManager):
+        self.pv_manager = pv_manager
+    
+    async def get_rf_powers(self) -> Dict[str, Optional[float]]:
+        """Get RF power measurements (W)"""
+        return {
+            'wg_load1_fwd': self.pv_manager.get_raw_value("SRF1:WGLOAD1:FWD_POWER"),
+            'wg_load1_refl': self.pv_manager.get_raw_value("SRF1:WGLOAD1:REFL_POWER"),
+            'wg_load2_fwd': self.pv_manager.get_raw_value("SRF1:WGLOAD2:FWD_POWER"),
+            'wg_load2_refl': self.pv_manager.get_raw_value("SRF1:WGLOAD2:REFL_POWER"),
+            'wg_load3_fwd': self.pv_manager.get_raw_value("SRF1:WGLOAD3:FWD_POWER"),
+            'wg_load3_refl': self.pv_manager.get_raw_value("SRF1:WGLOAD3:REFL_POWER"),
+            'klys_drive': self.pv_manager.get_raw_value("SRF1:KLYS:DRIVE_POWER"),
+            'klys_fwd': self.pv_manager.get_raw_value("SRF1:KLYS:FWD_POWER")
+        }
+    
+    async def get_hvps_signals(self) -> Dict[str, Optional[float]]:
+        """Get HVPS monitoring signals"""
+        return {
+            'voltage': self.pv_manager.get_raw_value("SRF1:HVPS:VOLTAGE_MON"),
+            'current': self.pv_manager.get_raw_value("SRF1:HVPS:CURRENT_MON"),
+            'transformer1': self.pv_manager.get_raw_value("SRF1:HVPS:XFMR1_VOLTAGE"),
+            'transformer2': self.pv_manager.get_raw_value("SRF1:HVPS:XFMR2_VOLTAGE")
+        }
+```
+
 
 ---
 
-**Document Version**: 2.0  
-**Last Updated**: February 2026  
-**Status**: Ready for Implementation
+## 4. Station State Machine
 
----
+The station state machine coordinates all subsystem states and manages the complex turn-on/turn-off sequences.
 
-## 16. Open Questions Requiring Resolution
+```python
+# coordinator/state_machine.py
+import logging
+import asyncio
+from typing import Dict, Optional, List, Callable
+from enum import Enum
+from dataclasses import dataclass
+import time
 
-1. **LLRF9 API details**: What is the exact communication protocol? EPICS Channel Access, custom TCP, or REST API?
-2. **LLRF9 tuner interface**: Does LLRF9 provide delta-move commands or absolute position targets for tuners?
-3. **Motion controller selection**: Galil DMC-4143 vs. Domenico/Mike Dunning solution — final decision needed
-4. **Motion profiles**: Jim's doc notes legacy only used uniform pulse rates. Need to test acceleration/deceleration profiles on actual cavity.
-5. **HVPS PLC EPICS driver**: Use pycomm3, opcua, or custom EtherNet/IP driver for CompactLogix?
-6. **Slow power monitor ADC**: What ADC hardware will digitize the MCL detector outputs?
-7. **LLRF9 calibration workflow**: What manual steps are required? How does operator interact?
-8. **Fault buffer format**: What is the format/size of LLRF9 fault history buffers?
+from ..epics_interface import EPICSInterface
 
----
+class StationState(Enum):
+    """Station operating states"""
+    OFF = "OFF"
+    PARK = "PARK"  
+    TUNE = "TUNE"
+    ON_CW = "ON_CW"
 
-**Document Status**: Consolidated from UPGRADE_SOFTWARE_DESIGN.md + SPEAR3_LLRF_SOFTWARE_DESIGN.md  
-**Merge Date**: February 2026  
-**Ready for**: Implementation Phase 1
+class StateTransition(Enum):
+    """Valid state transitions"""
+    OFF_TO_PARK = "OFF_TO_PARK"
+    OFF_TO_TUNE = "OFF_TO_TUNE"
+    OFF_TO_ON_CW = "OFF_TO_ON_CW"
+    PARK_TO_OFF = "PARK_TO_OFF"
+    TUNE_TO_OFF = "TUNE_TO_OFF"
+    TUNE_TO_ON_CW = "TUNE_TO_ON_CW"
+    ON_CW_TO_OFF = "ON_CW_TO_OFF"
+    ON_CW_TO_TUNE = "ON_CW_TO_TUNE"
+
+@dataclass
+class TransitionStep:
+    """Individual step in state transition sequence"""
+    name: str
+    description: str
+    timeout_seconds: float
+    execute_func: Callable
+    verify_func: Optional[Callable] = None
+
+class StationStateMachine:
+    """
+    SPEAR3 LLRF Station State Machine
+    
+    Manages station states and coordinates complex turn-on/turn-off sequences:
+    - OFF: Station completely off, tuners at park position
+    - PARK: HVPS off, tuners at park position (legacy compatibility)
+    - TUNE: Low-power testing mode with tuner feedback
+    - ON_CW: Full-power operation with all loops active
+    """
+    
+    def __init__(self, epics: EPICSInterface, config: Dict):
+        self.epics = epics
+        self.config = config
+        self.logger = logging.getLogger(__name__)
+        
+        # Current state
+        self.current_state = StationState.OFF
+        self.target_state = StationState.OFF
+        self.transition_in_progress = False
+        self.transition_start_time = 0.0
+        
+        # Transition sequences
+        self.transition_sequences = self._build_transition_sequences()
+        
+        # Auto-restart parameters
+        self.auto_restart_enabled = config.get('auto_restart_enabled', True)
+        self.auto_restart_retries = config.get('auto_restart_retries', 3)
+        self.auto_restart_delay = config.get('auto_restart_delay', 30.0)
+        self.restart_counter = 0
+        
+        # Callbacks for state changes
+        self.state_change_callbacks: List[Callable] = []
+    
+    async def start(self) -> None:
+        """Initialize state machine"""
+        self.logger.info("Starting Station State Machine")
+        
+        # Read current state from hardware if possible
+        await self._determine_initial_state()
+        
+        self.logger.info(f"Initial station state: {self.current_state.value}")
+    
+    async def shutdown(self) -> None:
+        """Shutdown state machine"""
+        self.logger.info("Shutting down Station State Machine")
+        
+        # If not already OFF, transition to OFF
+        if self.current_state != StationState.OFF:
+            await self.request_state_change(StationState.OFF)
+    
+    async def update(self) -> None:
+        """Main state machine update loop (~1 Hz)"""
+        # Check for fault conditions that require immediate shutdown
+        await self._check_fault_conditions()
+        
+        # Process any pending state transitions
+        if self.transition_in_progress:
+            await self._process_transition()
+        
+        # Update state-dependent monitoring
+        await self._update_state_monitoring()
+    
+    async def request_state_change(self, target_state: StationState) -> bool:
+        """Request state change"""
+        if self.transition_in_progress:
+            self.logger.warning(f"Transition already in progress, ignoring request for {target_state.value}")
+            return False
+        
+        if target_state == self.current_state:
+            self.logger.debug(f"Already in state {target_state.value}")
+            return True
+        
+        # Validate transition
+        if not self._is_valid_transition(self.current_state, target_state):
+            self.logger.error(f"Invalid transition: {self.current_state.value} -> {target_state.value}")
+            return False
+        
+        self.logger.info(f"Requesting state change: {self.current_state.value} -> {target_state.value}")
+        self.target_state = target_state
+        self.transition_in_progress = True
+        self.transition_start_time = time.time()
+        
+        return True
+    
+    def _is_valid_transition(self, from_state: StationState, to_state: StationState) -> bool:
+        """Check if state transition is valid"""
+        valid_transitions = {
+            StationState.OFF: [StationState.PARK, StationState.TUNE, StationState.ON_CW],
+            StationState.PARK: [StationState.OFF],
+            StationState.TUNE: [StationState.OFF, StationState.ON_CW],
+            StationState.ON_CW: [StationState.OFF, StationState.TUNE]
+        }
+        
+        return to_state in valid_transitions.get(from_state, [])
+    
+    async def _determine_initial_state(self) -> None:
+        """Determine initial state from hardware status"""
+        try:
+            # Check HVPS status
+            hvps_voltage = await self.epics.hvps.get_voltage()
+            hvps_contactor = await self.epics.hvps.get_contactor_status()
+            
+            # Check LLRF9 status
+            gap_voltage = await self.epics.llrf9_field.get_gap_voltage()
+            
+            # Check MPS permit
+            mps_permit = await self.epics.mps.get_permit_status()
+            
+            # Determine state based on hardware status
+            if not mps_permit or not hvps_contactor:
+                self.current_state = StationState.OFF
+            elif hvps_voltage and hvps_voltage > 10.0 and gap_voltage and gap_voltage > 1.0:
+                self.current_state = StationState.ON_CW
+            elif hvps_voltage and hvps_voltage > 10.0:
+                self.current_state = StationState.TUNE
+            else:
+                self.current_state = StationState.OFF
+                
+        except Exception as e:
+            self.logger.error(f"Failed to determine initial state: {e}")
+            self.current_state = StationState.OFF
+    
+    async def _check_fault_conditions(self) -> None:
+        """Check for fault conditions requiring immediate shutdown"""
+        try:
+            # Check MPS permit
+            mps_permit = await self.epics.mps.get_permit_status()
+            if not mps_permit and self.current_state != StationState.OFF:
+                self.logger.warning("MPS permit lost, forcing OFF state")
+                await self.request_state_change(StationState.OFF)
+                return
+            
+            # Check LLRF9 interlock status
+            llrf9_status = await self.epics.llrf9_field.get_interlock_status()
+            if llrf9_status.get('active') and self.current_state in [StationState.TUNE, StationState.ON_CW]:
+                self.logger.warning("LLRF9 interlock active, forcing OFF state")
+                await self.request_state_change(StationState.OFF)
+                return
+                
+        except Exception as e:
+            self.logger.error(f"Error checking fault conditions: {e}")
+    
+    async def _process_transition(self) -> None:
+        """Process current state transition"""
+        transition_key = f"{self.current_state.value}_TO_{self.target_state.value}"
+        
+        if transition_key not in self.transition_sequences:
+            self.logger.error(f"No transition sequence defined for {transition_key}")
+            self.transition_in_progress = False
+            return
+        
+        sequence = self.transition_sequences[transition_key]
+        
+        try:
+            # Execute transition sequence
+            for step in sequence:
+                self.logger.info(f"Executing transition step: {step.name}")
+                
+                # Execute step
+                success = await step.execute_func()
+                if not success:
+                    self.logger.error(f"Transition step failed: {step.name}")
+                    await self._handle_transition_failure()
+                    return
+                
+                # Verify step if verification function provided
+                if step.verify_func:
+                    verified = await step.verify_func()
+                    if not verified:
+                        self.logger.error(f"Transition step verification failed: {step.name}")
+                        await self._handle_transition_failure()
+                        return
+                
+                self.logger.debug(f"Transition step completed: {step.name}")
+            
+            # Transition completed successfully
+            self.logger.info(f"State transition completed: {self.current_state.value} -> {self.target_state.value}")
+            self.current_state = self.target_state
+            self.transition_in_progress = False
+            self.restart_counter = 0  # Reset restart counter on successful transition
+            
+            # Notify callbacks
+            for callback in self.state_change_callbacks:
+                try:
+                    await callback(self.current_state)
+                except Exception as e:
+                    self.logger.error(f"State change callback error: {e}")
+                    
+        except Exception as e:
+            self.logger.error(f"Transition execution error: {e}")
+            await self._handle_transition_failure()
+    
+    async def _handle_transition_failure(self) -> None:
+        """Handle transition failure"""
+        self.logger.error("Transition failed, forcing OFF state")
+        
+        # Force to OFF state
+        self.current_state = StationState.OFF
+        self.target_state = StationState.OFF
+        self.transition_in_progress = False
+        
+        # Emergency shutdown sequence
+        await self._emergency_shutdown()
+        
+        # Consider auto-restart if enabled
+        if self.auto_restart_enabled and self.restart_counter < self.auto_restart_retries:
+            self.restart_counter += 1
+            self.logger.info(f"Scheduling auto-restart attempt {self.restart_counter}/{self.auto_restart_retries}")
+            # Schedule restart after delay (implementation depends on requirements)
+    
+    async def _emergency_shutdown(self) -> None:
+        """Emergency shutdown sequence"""
+        try:
+            # Disable LLRF9 output
+            await self.epics.llrf9_field.set_gap_voltage_setpoint(0.0)
+            
+            # Open HVPS contactor
+            await self.epics.hvps.set_contactor(False)
+            
+            # Set HVPS voltage to zero
+            await self.epics.hvps.set_voltage_setpoint(0.0)
+            
+            self.logger.info("Emergency shutdown completed")
+            
+        except Exception as e:
+            self.logger.error(f"Emergency shutdown error: {e}")
+    
+    def _build_transition_sequences(self) -> Dict[str, List[TransitionStep]]:
+        """Build all state transition sequences"""
+        sequences = {}
+        
+        # OFF -> ON_CW (most complex transition)
+        sequences["OFF_TO_ON_CW"] = [
+            TransitionStep(
+                name="verify_preconditions",
+                description="Verify all preconditions for turn-on",
+                timeout_seconds=10.0,
+                execute_func=self._verify_turn_on_preconditions
+            ),
+            TransitionStep(
+                name="move_tuners_to_on_home",
+                description="Move all tuners to ON home positions",
+                timeout_seconds=60.0,
+                execute_func=self._move_tuners_to_on_home,
+                verify_func=self._verify_tuners_at_on_home
+            ),
+            TransitionStep(
+                name="initialize_hvps",
+                description="Set HVPS to turn-on voltage and enable",
+                timeout_seconds=30.0,
+                execute_func=self._initialize_hvps,
+                verify_func=self._verify_hvps_ready
+            ),
+            TransitionStep(
+                name="initialize_llrf9_drive",
+                description="Set initial gap voltage and enable LLRF9 output",
+                timeout_seconds=10.0,
+                execute_func=self._initialize_llrf9_drive,
+                verify_func=self._verify_rf_power_present
+            ),
+            TransitionStep(
+                name="engage_direct_loop",
+                description="Close direct loop feedback",
+                timeout_seconds=10.0,
+                execute_func=self._engage_direct_loop,
+                verify_func=self._verify_direct_loop_stable
+            ),
+            TransitionStep(
+                name="ramp_to_operational_power",
+                description="Ramp gap voltage and HVPS to operational levels",
+                timeout_seconds=60.0,
+                execute_func=self._ramp_to_operational_power,
+                verify_func=self._verify_operational_power
+            ),
+            TransitionStep(
+                name="enable_remaining_loops",
+                description="Enable tuner feedback and load angle loops",
+                timeout_seconds=10.0,
+                execute_func=self._enable_remaining_loops
+            ),
+            TransitionStep(
+                name="finalize_turn_on",
+                description="Final checks and logging",
+                timeout_seconds=5.0,
+                execute_func=self._finalize_turn_on
+            )
+        ]
+        
+        # ON_CW -> OFF
+        sequences["ON_CW_TO_OFF"] = [
+            TransitionStep(
+                name="disable_feedback_loops",
+                description="Disable all feedback loops",
+                timeout_seconds=5.0,
+                execute_func=self._disable_feedback_loops
+            ),
+            TransitionStep(
+                name="ramp_down_power",
+                description="Ramp down gap voltage and HVPS",
+                timeout_seconds=30.0,
+                execute_func=self._ramp_down_power
+            ),
+            TransitionStep(
+                name="disable_llrf9_output",
+                description="Disable LLRF9 drive output",
+                timeout_seconds=5.0,
+                execute_func=self._disable_llrf9_output
+            ),
+            TransitionStep(
+                name="shutdown_hvps",
+                description="Set HVPS to zero and open contactor",
+                timeout_seconds=10.0,
+                execute_func=self._shutdown_hvps
+            ),
+            TransitionStep(
+                name="move_tuners_to_park",
+                description="Move tuners to park positions",
+                timeout_seconds=60.0,
+                execute_func=self._move_tuners_to_park
+            )
+        ]
+        
+        # Add other transition sequences (TUNE, PARK, etc.)
+        sequences.update(self._build_simple_transitions())
+        
+        return sequences
+    
+    def _build_simple_transitions(self) -> Dict[str, List[TransitionStep]]:
+        """Build simpler transition sequences"""
+        sequences = {}
+        
+        # OFF -> TUNE
+        sequences["OFF_TO_TUNE"] = [
+            TransitionStep(
+                name="verify_preconditions",
+                description="Verify preconditions for TUNE mode",
+                timeout_seconds=10.0,
+                execute_func=self._verify_tune_preconditions
+            ),
+            TransitionStep(
+                name="initialize_hvps_low_power",
+                description="Initialize HVPS for low power operation",
+                timeout_seconds=30.0,
+                execute_func=self._initialize_hvps_low_power
+            ),
+            TransitionStep(
+                name="enable_tune_mode",
+                description="Enable TUNE mode with limited power",
+                timeout_seconds=10.0,
+                execute_func=self._enable_tune_mode
+            )
+        ]
+        
+        # TUNE -> ON_CW
+        sequences["TUNE_TO_ON_CW"] = [
+            TransitionStep(
+                name="ramp_to_full_power",
+                description="Ramp from TUNE to full power",
+                timeout_seconds=60.0,
+                execute_func=self._ramp_tune_to_full_power
+            ),
+            TransitionStep(
+                name="enable_all_loops",
+                description="Enable all feedback loops",
+                timeout_seconds=10.0,
+                execute_func=self._enable_remaining_loops
+            )
+        ]
+        
+        # Add other simple transitions...
+        
+        return sequences
+    
+    # Transition step implementation methods
+    async def _verify_turn_on_preconditions(self) -> bool:
+        """Verify all preconditions for turn-on"""
+        try:
+            # Check MPS permit
+            mps_permit = await self.epics.mps.get_permit_status()
+            if not mps_permit:
+                self.logger.error("MPS permit not active")
+                return False
+            
+            # Check HVPS contactor status
+            contactor_status = await self.epics.hvps.get_contactor_status()
+            if contactor_status is None:
+                self.logger.error("Cannot read HVPS contactor status")
+                return False
+            
+            # Check for active faults
+            fault_summary = await self.epics.mps.get_fault_summary()
+            if fault_summary.get('active_faults', 0) > 0:
+                self.logger.error("Active faults present")
+                return False
+            
+            self.logger.info("Turn-on preconditions verified")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error verifying preconditions: {e}")
+            return False
+    
+    async def _move_tuners_to_on_home(self) -> bool:
+        """Move all tuners to ON home positions"""
+        try:
+            # Get ON home positions from config
+            on_home_positions = {
+                'A': self.config.get('tuner_on_home_a', 10.5),
+                'B': self.config.get('tuner_on_home_b', 10.3),
+                'C': self.config.get('tuner_on_home_c', 10.7),
+                'D': self.config.get('tuner_on_home_d', 10.1)
+            }
+            
+            # Command all tuners to move
+            for cavity, position in on_home_positions.items():
+                success = await self.epics.tuners.move_tuner(cavity, position)
+                if not success:
+                    self.logger.error(f"Failed to command tuner {cavity} to ON home")
+                    return False
+            
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Error moving tuners to ON home: {e}")
+            return False
+    
+    async def _verify_tuners_at_on_home(self) -> bool:
+        """Verify all tuners reached ON home positions"""
+        try:
+            timeout = 60.0  # 60 second timeout
+            start_time = time.time()
+            
+            while time.time() - start_time < timeout:
+                all_done = True
+                
+                for cavity in ['A', 'B', 'C', 'D']:
+                    status = await self.epics.tuners.get_motor_status(cavity)
+                    if status.get('moving', True):  # Default to True if unknown
+                        all_done = False
+                        break
+                
+                if all_done:
+                    self.logger.info("All tuners reached ON home positions")
+                    return True
+                
+                await asyncio.sleep(1.0)  # Check every second
+            
+            self.logger.error("Timeout waiting for tuners to reach ON home")
+            return False
+            
+        except Exception as e:
+            self.logger.error(f"Error verifying tuners at ON home: {e}")
+            return False
+    
+    # Additional transition step methods would be implemented here...
+    # (initialize_hvps, initialize_llrf9_drive, engage_direct_loop, etc.)
+    
+    async def _update_state_monitoring(self) -> None:
+        """Update state-dependent monitoring"""
+        # Implementation depends on specific monitoring requirements
+        pass
+    
+    def add_state_change_callback(self, callback: Callable) -> None:
+        """Add callback for state changes"""
+        self.state_change_callbacks.append(callback)
+    
+    def remove_state_change_callback(self, callback: Callable) -> None:
+        """Remove state change callback"""
+        try:
+            self.state_change_callbacks.remove(callback)
+        except ValueError:
+            pass
+```
+
