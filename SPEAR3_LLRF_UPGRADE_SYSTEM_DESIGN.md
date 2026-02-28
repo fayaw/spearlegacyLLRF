@@ -36,13 +36,13 @@
 
 ### 1.1 Scope
 
-The SPEAR3 LLRF upgrade replaces the entire RF control electronics chain for a single RF station consisting of one klystron driving four single-cell RF cavities at ~476 MHz. The upgrade modernizes every control subsystem while retaining the physical RF infrastructure (klystron, cavities, waveguide distribution, stepper motors, and HVPS power stage).
+The SPEAR3 LLRF upgrade replaces the entire RF control electronics chain for a single RF station consisting of one klystron driving four single-cell RF cavities at 476.3 MHz. The upgrade modernizes every control subsystem while retaining the physical RF infrastructure (klystron, cavities, waveguide distribution, stepper motors, and HVPS power stage).
 
 ### 1.2 Key System Parameters
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| RF Frequency | ~476 MHz | Beam-orbit determined; LLRF9/476 supports 476 +/- 2.5 MHz |
+| RF Frequency | 476.3 MHz | SPEAR3 RF frequency; LLRF9/476 supports 476 +/- 2.5 MHz |
 | Total Gap Voltage | ~3.2 MV | Sum of 4 cavity gap voltages |
 | Klystron Power | ~1 MW | Single klystron drives all 4 cavities |
 | HVPS Voltage | up to ~90 kV | Klystron cathode voltage; turn-on voltage ~50 kV |
@@ -55,11 +55,11 @@ The SPEAR3 LLRF upgrade replaces the entire RF control electronics chain for a s
 | Subsystem | Hardware | Status |
 |-----------|----------|--------|
 | LLRF Controller | Dimtel LLRF9/476 x2 (+2 spares) | Procured, prototype commissioned |
-| MPS | ControlLogix 1756 PLC | Built, tested (no RF power) |
-| HVPS Controller | CompactLogix PLC + Enerpro boards | 75% designed; PLC modules in house |
-| Tuner Motor Controller | **[TBD]** - Galil/Domenico-Dunning/MDrive Plus | Conceptual; prototype chassis built |
+| MPS | ControlLogix 1756 PLC | Hardware assembled, software written, tested without RF power; ready for EPICS development |
+| HVPS Controller | CompactLogix PLC + Enerpro boards | Upgraded prototype exists; PLC replacement needed for EPICS development |
+| Tuner Motor Controller | Galil DMC-4143 (ready) | Galil controller ready, can drive motor; next step: test with real cavity signal |
 | Interface Chassis | Custom - optocoupler/fiber-optic hub | Interfaces specified; no chassis design |
-| Waveform Buffer System | Custom - 8 RF + 4 HVPS channels | Design document complete; no fabrication |
+| Waveform Buffer System | Custom - 8 RF + 4 HVPS channels | Prototype design complete, PCB fabricated; assembly and testing needed |
 | Arc Detection | Microstep-MIS optical sensors | Concept exists; not yet procured |
 | Control Software | Python/PyEPICS + LLRF9 built-in IOC | Conceptual design only |
 
@@ -507,7 +507,7 @@ The physical tuner assemblies are retained from the legacy system:
 - **Stepper Motor**: Superior Electric Slo-Syn M093-FC11 (NEMA 34D), 200 steps/rev
 - **Drive Train**: Motor -> 15-groove pulley -> timing belt -> 30-groove pulley -> lead screw -> cylindrical tuner
 - **Gear Ratio**: 2 motor revolutions = 1 leadscrew revolution
-- **Lead Screw Pitch**: **[VERIFY]** Sources conflict --- Jim's doc says 20 TPI (0.05"/turn = 1.27 mm/turn); drawing SA-341-392-61 references 1/2-10 Acme thread (10 TPI = 0.1"/turn = 2.54 mm/turn). Must verify actual hardware.
+- **Lead Screw Pitch**: 20 TPI (0.05"/turn = 1.27 mm/turn) — verified from actual hardware.
 - **Position Sensing**: Linear potentiometers provide position indication (not used in any closed-loop feedback; step counter tracks commanded position)
 
 ### 8.2 Legacy Controller (Being Replaced)
@@ -542,14 +542,15 @@ The physical tuner assemblies are retained from the legacy system:
 ### 8.5 Resolution Calculations
 
 **With legacy 2 microsteps/step (400 microsteps/rev):**
-- If 20 TPI: 1.27 mm / (2 x 400) = 0.0016 mm/microstep
-- If 10 TPI: 2.54 mm / (2 x 400) = 0.0032 mm/microstep
+- 20 TPI: 1.27 mm / (2 x 400) = 0.0016 mm/microstep
 
-**With modern 256 microsteps/step (51,200 microsteps/rev):**
-- If 20 TPI: 1.27 mm / (2 x 51,200) = 0.000012 mm/microstep
-- If 10 TPI: 2.54 mm / (2 x 51,200) = 0.000025 mm/microstep
 
-> **[RECOMMENDED]** Before selecting the motor controller, verify the actual lead screw pitch on installed hardware. The factor-of-two difference between 10 TPI and 20 TPI significantly affects resolution and control parameters. Also test candidate controllers on booster tuners first (lower risk than storage ring).
+**With modern controller (microsteps/step TBD):**
+- Modern controllers support up to 256 microsteps/step
+- 20 TPI at 256 microsteps/step: 1.27 mm / (2 x 51,200) = 0.000012 mm/microstep
+- **[TBD]** Verify optimal microstepping setting for Galil controller
+
+> **[RECOMMENDED]** Test the Galil controller with real cavity signal to verify tuner motion on actual cavity before full deployment. Determine optimal microstepping setting for the confirmed 20 TPI lead screw.
 
 ### 8.6 Typical Motion Parameters
 
@@ -1179,93 +1180,133 @@ SRF1:WFB:RF1:WAVEFORM       # RF channel 1 frozen waveform (on fault)
 
 ## 16. Implementation Phases & Commissioning
 
-### 16.1 Phase 1: Foundation
+### 16.1 Project Constraints
 
-**Scope**: EPICS IOC and database setup, Python framework, LLRF9 PV interface
+**Critical Constraint**: The SPEAR3 LLRF upgrade has **extremely limited flexibility for integration testing** since bringing systems online directly impacts SPEAR operations. This severely constrains the available testing window and requires a fundamentally different approach than typical development projects.
 
-**Deliverables**:
-- Python coordinator framework with module structure
-- LLRF9 EPICS PV interface (read/write all control and monitoring PVs)
-- Configuration management (YAML-based)
-- Basic logging infrastructure
-- Unit test framework
+**Key Implications**:
+- Maximum standalone subsystem testing must occur before installation
+- Integration testing must be incremental and carefully planned
+- Some subsystems can be brought online for limited testing without full operational impact
+- Full system integration testing window is minimal
 
-**Dependencies**: LLRF9 units available for bench testing
+### 16.2 Current Project Status Summary
 
-### 16.2 Phase 2: Core Control
+| Subsystem | Current Status | Next Critical Step |
+|-----------|---------------|-------------------|
+| **Tuner Motor Controller** | Galil controller ready, can drive motor | Test with real cavity signal, verify motion on actual cavity |
+| **HVPS Controller** | Upgraded prototype exists | PLC replacement needed to bring system online for EPICS development |
+| **MPS** | Hardware assembled, software written, tested without RF power | Bring online for EPICS software development |
+| **Waveform Buffer** | Prototype design complete, PCB fabricated | Assembly and testing |
+| **Interface Chassis** | Interfaces specified | Design and fabrication |
+| **Arc Detection** | Concept exists | Procurement and installation |
+| **Python/EPICS Software** | Conceptual design only | Development requires live subsystems |
 
-**Scope**: Station state machine, HVPS supervisory loop, RF amplitude supervisory control
+### 16.3 Revised Implementation Strategy
 
-**Deliverables**:
-- Station state machine (OFF/TUNE/ON_CW transitions)
-- HVPS supervisory control loop (all 3 modes)
-- HVPS PLC code (CompactLogix) --- requires Test Stand 18 validation first
-- Parallel testing capability with legacy system
+**Phase 1: Maximum Standalone Development**
+- **HVPS PLC Replacement**: Priority #1 — enables EPICS software development
+- **MPS Online**: Bring MPS online for EPICS interface development
+- **Waveform Buffer Assembly**: Complete assembly and standalone testing
+- **Interface Chassis Design/Fab**: Complete design and fabrication
+- **Python Framework**: Develop with simulated interfaces where live hardware unavailable
 
-**Dependencies**: HVPS PLC code complete, Test Stand 18 operational
+**Phase 2: Incremental Subsystem Integration**
+- **Tuner Testing**: Test Galil controller with real cavity signal (can be done with minimal operational impact)
+- **HVPS Integration**: Integrate HVPS PLC with Python/EPICS (can test at low voltage)
+- **MPS Integration**: Integrate MPS with Python coordinator
+- **Waveform Buffer Integration**: Install and test with existing RF signals
 
-### 16.3 Phase 3: Tuner System
+**Phase 3: Critical Path Integration**
+- **Interface Chassis Installation**: Install and connect all interlock signals
+- **Arc Detection Installation**: Install sensors and integrate with Interface Chassis
+- **End-to-End Interlock Testing**: Verify complete interlock chain (limited RF power)
 
-**Scope**: Motor controller selection, installation, EPICS motor record configuration, tuner manager
+**Phase 4: LLRF9 Integration (Dimtel Support Week)**
+- **LLRF9 Installation**: Install both units, connect RF signals
+- **Basic RF Processing**: Verify vector sum, feedback loops, calibration
+- **EPICS Integration**: Configure IOC, verify all PV interfaces
+- **Limited Power Testing**: Test with reduced power levels
 
-**Deliverables**:
-- Motor controller selected and tested (on booster tuners first)
-- EPICS motor record configuration for 4-axis control
-- Tuner manager with phase feedback from LLRF9
-- Load angle offset loop
-- Home position management and "stop and init"
+**Phase 5: Full Power Commissioning**
+- **Incremental Power Ramp**: Gradually increase power while monitoring all systems
+- **Performance Validation**: Verify meets all success criteria
+- **Operator Training**: Train operators on new system
+- **Documentation**: Complete commissioning report
 
-**Dependencies**: Motor controller selection finalized **[TBD]**
+### 16.4 Risk Mitigation Strategies
 
-### 16.4 Phase 4: Integration
+**Strategy 1: Parallel Development Paths**
+- Develop Python software with simulated hardware interfaces
+- Use LLRF9 bench testing for software development where possible
+- Prepare all mechanical/electrical work in advance
 
-**Scope**: MPS commissioning with RF, Interface Chassis fabrication, arc detection installation, Waveform Buffer fabrication
+**Strategy 2: Incremental Integration**
+- Bring subsystems online individually for EPICS development
+- Test interlock chains at component level before full integration
+- Use existing RF signals for Waveform Buffer testing
 
-**Deliverables**:
-- Interface Chassis designed, fabricated, and tested
-- Waveform Buffer System designed, fabricated, and tested
-- Arc detection sensors installed and connected
-- Full interlock chain verified end-to-end
-- Collector power protection validated
+**Strategy 3: Minimize On-Machine Time**
+- Complete maximum fabrication/assembly off-machine
+- Pre-test all cables, connections, and interfaces
+- Have backup plans for all critical components
 
-**Dependencies**: Interface Chassis and Waveform Buffer System designs finalized
+**Strategy 4: Staged Power Testing**
+- Begin integration at lowest possible power levels
+- Incrementally increase power only after verifying each subsystem
+- Maintain ability to revert to legacy system if needed
 
-### 16.5 Phase 5: Validation
+### 16.5 Dimtel Commissioning Support Window
 
-**Scope**: Performance tuning, documentation, operator training
+Dimtel offers **one week** of on-site commissioning support. Given the constrained testing environment, this window must be used optimally:
 
-**Deliverables**:
-- Performance benchmarking against legacy system
-- Operator documentation and training
-- Commissioning report
-- Full system acceptance
+**Pre-Dimtel Requirements** (must be 100% complete):
+- All RF cables fabricated and tested
+- Interface Chassis installed and tested
+- Waveform Buffer installed and tested
+- Python framework tested with all available hardware
+- MPS and HVPS integration complete
+- All mechanical installation complete
 
-### 16.6 Dimtel Commissioning Support Window
-
-Dimtel offers **one week** of on-site commissioning support. This window should be used for:
-
+**Dimtel Week Focus**:
 1. LLRF9 installation and RF signal routing verification
 2. Basic RF processing validation (vector sum, feedback loops)
 3. Calibration system commissioning
 4. EPICS IOC configuration and PV verification
-5. Interlock system checkout
-6. Network/spectrum analyzer demonstration
-7. Waveform capture configuration
+5. Interlock system checkout with LLRF9
+6. Limited power testing and loop tuning
+7. Documentation of any configuration changes
 
-> **[RECOMMENDED]** Maximize preparation before the Dimtel week: have all RF cables fabricated, all EPICS infrastructure ready, the Python framework tested in simulation, and a clear list of questions/configurations to address. The Dimtel support week is the most time-constrained resource in the project.
-
-### 16.7 Success Criteria
+### 16.6 Success Criteria
 
 | Metric | Legacy Performance | Target |
 |--------|-------------------|--------|
 | Amplitude stability | < 0.1% | Same or better |
 | Phase stability | < 0.1 deg | Same or better |
-| Tuner resolution | ~0.002-0.003 mm/microstep | Improved (up to 256 microsteps/step) |
+| Tuner resolution | ~0.002-0.003 mm/microstep | Improved (higher microstepping) |
 | Control loop response | ~1 second | Same or better |
 | Uptime | > 99.5% | Same or better |
 | Fault diagnostics | Limited fault file capture | 16k waveform + kilosample buffers + first-fault |
 | Calibration time | ~20 minutes | ~3 minutes (LLRF9 digital) |
 | First-fault identification | Manual analysis | Hardware first-fault detection |
+
+### 16.7 Critical Path Items
+
+**Immediate Priority (blocks all software development)**:
+1. HVPS PLC replacement and bring online
+2. MPS bring online for EPICS development
+
+**High Priority (required for integration)**:
+3. Waveform Buffer assembly and testing
+4. Interface Chassis design and fabrication
+5. Tuner testing with real cavity signal
+
+**Medium Priority (required for commissioning)**:
+6. Arc detection procurement and installation
+7. Python/EPICS software development
+8. End-to-end interlock testing
+
+The success of this project depends critically on maximizing standalone development and testing before the limited integration window.
 
 ---
 
