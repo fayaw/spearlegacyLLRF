@@ -1,4 +1,4 @@
-# SPEAR3 LLRF Control System --- Comprehensive Analysis
+# Overview of the Current and Upgraded System
 ## Legacy System Review & Upgrade Project Scope with Dimtel LLRF9
 
 *Based on detailed analysis of legacy SNL code, Jim's operational documentation, LLRF9 technical manual, Waveform Buffer design document, Interface Chassis specification, and LLRF Upgrade Task List Rev3*
