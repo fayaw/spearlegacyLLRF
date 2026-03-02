@@ -1,0 +1,304 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 546
+y 271
+w 325
+h 490
+font "courier-bold-r-12.0"
+ctlFont "courier-bold-r-12.0"
+btnFont "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+textColor index 0
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 75
+ctlBgColor2 index 46
+topShadowColor index 77
+botShadowColor index 73
+title "iGp12: Drive Source $(drv)"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 30
+w 325
+h 460
+lineColor index 83
+fill
+fillColor index 83
+lineWidth 0
+alarmPv "$(sys):$(dev):PANEL:BG"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 40
+w 305
+h 440
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 325
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 40
+w 305
+h 25
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DRIVE SOURCE $(drv)"
+}
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 270
+y 5
+w 45
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 0
+y 0
+w 210
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "ID=$(sys):$(dev):DRIVE$(drv)"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 325
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 325
+  2 325
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 215
+y 5
+w 45
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Control Panel"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Menu Button)
+object activeMenuButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 100
+y 70
+w 110
+h 25
+fgColor index 14
+bgColor index 75
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):DRIVE$(drv):WAVEFORM"
+font "courier-bold-r-14.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 70
+w 70
+h 25
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "WAVEFORM"
+}
+endObjectProperties
+
+# (Embedded Window)
+object activePipClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 100
+w 305
+h 380
+fgColor index 0
+bgColor index 76
+topShadowColor index 77
+botShadowColor index 73
+displaySource "menu"
+filePv "$(sys):$(dev):DRIVE$(drv):GEN.VALD"
+center
+sizeOfs 5
+numDsps 2
+displayFileName {
+  0 "drive_synth"
+  1 "drive_arb"
+}
+menuLabel {
+  0 "0"
+  1 "1"
+}
+noScroll
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 260
+y 70
+w 45
+h 25
+fgColor index 0
+onColor index 73
+offColor index 75
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):DRIVE$(drv):MOD"
+indicatorPv "$(sys):$(dev):DRIVE$(drv):MOD"
+onLabel "0"
+offLabel "1"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 220
+y 70
+w 35
+h 25
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "TMOD"
+}
+endObjectProperties
+

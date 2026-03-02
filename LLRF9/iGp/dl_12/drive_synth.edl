@@ -1,0 +1,395 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 964
+y 364
+w 325
+h 490
+font "courier-bold-r-12.0"
+ctlFont "courier-bold-r-12.0"
+btnFont "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+textColor index 0
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 75
+ctlBgColor2 index 46
+topShadowColor index 77
+botShadowColor index 73
+title "iGp12: Drive Source $(drv)"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 305
+h 380
+lineColor index 75
+fill
+fillColor index 75
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 20
+w 28
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FREQ"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 165
+y 20
+w 28
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "AMPL"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 45
+y 10
+w 110
+h 30
+controlPv "$(sys):$(dev):DRIVE$(drv):FREQ"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 215
+y 10
+w 80
+h 30
+controlPv "$(sys):$(dev):DRIVE$(drv):AMPL"
+precision 3
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 140
+w 112
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "ACTUAL FREQUENCY"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 130
+y 90
+w 165
+h 35
+controlPv "$(sys):$(dev):DRIVE$(drv):PATTERN"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-12.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 100
+w 91
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DRIVE PATTERN"
+}
+autoSize
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 130
+y 135
+w 165
+h 25
+controlPv "$(sys):$(dev):DRIVE$(drv):FREQ_ACT:STRING"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-12.0"
+fontAlign "right"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 175
+w 77
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "ACTUAL SPAN"
+}
+autoSize
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 130
+y 170
+w 165
+h 25
+controlPv "$(sys):$(dev):DRIVE$(drv):SPAN_ACT:STRING"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-12.0"
+fontAlign "right"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 45
+y 50
+w 110
+h 30
+controlPv "$(sys):$(dev):DRIVE$(drv):SPAN"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 60
+w 28
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "SPAN"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 215
+y 50
+w 80
+h 30
+controlPv "$(sys):$(dev):DRIVE$(drv):PERIOD"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 165
+y 60
+w 42
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "PERIOD"
+}
+autoSize
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 130
+y 205
+w 165
+h 25
+controlPv "$(sys):$(dev):DRIVE$(drv):PERIOD_ACT"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-12.0"
+fontAlign "right"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 210
+w 91
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "ACTUAL PERIOD"
+}
+autoSize
+endObjectProperties
+
+# (PNG Image)
+object activePngClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 280
+w 284
+h 78
+file "drive.png"
+endObjectProperties
+
+# (Embedded Window)
+object activePipClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 0
+y 230
+w 295
+h 50
+fgColor index 0
+bgColor index 76
+topShadowColor index 77
+botShadowColor index 73
+displaySource "menu"
+filePv "LOC\\$(!W)drvID=i:$(drv)"
+center
+sizeOfs 5
+numDsps 3
+displayFileName {
+  0 "drive_tracking_0"
+  1 "drive_tracking_1"
+  2 "drive_tracking_0"
+}
+menuLabel {
+  0 "0"
+  1 "1"
+  2 "2"
+}
+noScroll
+endObjectProperties
+

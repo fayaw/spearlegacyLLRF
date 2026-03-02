@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# This script regenerates edmObjects and edmPvObjects
+# after installation
+#
+# Copyright (c) 2010-2011 Dimtel, Inc., All Rights Reserved
+#
+# $Id: edm_config,v 1.4 2015/02/13 10:17:05 dim Exp $
+# $Date: 2015/02/13 10:17:05 $
+# $Author: dim $
+# $Revision: 1.4 $
+# $Log: edm_config,v $
+# Revision 1.4  2015/02/13 10:17:05  dim
+# Updated to work correctly on 32 and 64 bit machines
+#
+# Revision 1.3  2011/04/15 18:10:12  dim
+# Library names consistent with edm-1-12-46
+#
+# Revision 1.2  2010/10/05 18:16:54  dim
+# Initial cleanup
+#
+#
+
+EDM=${IGPTOP}/bin/${HOST_ARCH}/edm
+
+cd ${EDMFILES}
+rm -f edmObjects edmPvObjects
+
+# Generate edmPvObjects
+$EDM -addpv ${IGPTOP}/extensions/lib/${HOST_ARCH}/libEpics.so
+$EDM -addpv ${IGPTOP}/extensions/lib/${HOST_ARCH}/libLoc.so
+$EDM -addpv ${IGPTOP}/extensions/lib/${HOST_ARCH}/libLog.so
+$EDM -addpv ${IGPTOP}/extensions/lib/${HOST_ARCH}/libCalc.so
+
+# Generate edmObjects
+$EDM -add ${IGPTOP}/extensions/lib/${HOST_ARCH}/libEdmBase.so
+$EDM -add ${IGPTOP}/extensions/lib/${HOST_ARCH}/lib7e1b4e6f-239d-4650-95e6-a040d41ba633.so
+$EDM -add ${IGPTOP}/extensions/lib/${HOST_ARCH}/lib57d79238-2924-420b-ba67-dfbecdf03fcd.so
+$EDM -add ${IGPTOP}/extensions/lib/${HOST_ARCH}/libcf322683-513e-4570-a44b-7cdd7cae0de5.so
+$EDM -add ${IGPTOP}/extensions/lib/${HOST_ARCH}/libTwoDProfileMonitor.so
+$EDM -add ${IGPTOP}/extensions/lib/${HOST_ARCH}/libPV.so
+$EDM -add ${IGPTOP}/extensions/lib/${HOST_ARCH}/libEdmDiamond.so
+$EDM -add ${IGPTOP}/extensions/lib/${HOST_ARCH}/libEdmTriumf.so
+$EDM -add ${IGPTOP}/extensions/lib/${HOST_ARCH}/libIndicator.so
+$EDM -add ${IGPTOP}/extensions/lib/${HOST_ARCH}/libMultSegRamp.so
+$EDM -add ${IGPTOP}/extensions/lib/${HOST_ARCH}/libSlac.so

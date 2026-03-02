@@ -1,0 +1,207 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 258
+y 302
+w 520
+h 420
+font "courier-bold-r-12.0"
+ctlFont "courier-bold-r-12.0"
+btnFont "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 15
+ctlBgColor2 index 49
+topShadowColor index 1
+botShadowColor index 14
+title "iGp: GPIO control"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 15
+y 40
+w 490
+h 45
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 520
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 445
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 0
+y 0
+w 365
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "SYSTEM:$(sys) DEVICE:$(dev)"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 520
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 520
+  2 520
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 375
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Devices"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Embedded Window)
+object activePipClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 5
+y 90
+w 500
+h 315
+fgColor index 12
+bgColor index 12
+topShadowColor index 75
+botShadowColor index 75
+displaySource "menu"
+filePv "$(sys):$(dev):GPIO_SEL"
+center
+setSize
+sizeOfs 5
+numDsps 2
+displayFileName {
+  0 "gpio_bits"
+  1 "gpio_fbe"
+}
+menuLabel {
+  0 "GPIO bit-by-bit control"
+  1 "GPIO FBE control"
+}
+noScroll
+endObjectProperties
+
+# (Choice Button)
+object activeChoiceButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 25
+y 50
+w 470
+h 25
+fgColor index 0
+bgColor index 75
+selectColor index 73
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):GPIO_SEL"
+font "courier-bold-r-12.0"
+orientation "horizontal"
+endObjectProperties
+

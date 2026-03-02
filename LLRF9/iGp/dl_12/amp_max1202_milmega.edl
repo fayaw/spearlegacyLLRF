@@ -1,0 +1,495 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 955
+y 215
+w 240
+h 360
+font "courier-bold-r-12.0"
+ctlFont "courier-bold-r-12.0"
+btnFont "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+textColor index 0
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 75
+ctlBgColor2 index 46
+topShadowColor index 77
+botShadowColor index 73
+title "iGp12: MilMega $(amp) monitor"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 30
+w 240
+h 330
+lineColor index 83
+fill
+fillColor index 83
+lineWidth 0
+alarmPv "$\(sys\):$\(dev\):PANEL:BG"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 40
+w 220
+h 130
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 240
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 45
+w 220
+h 20
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "POWER AMPLIFIER $(amp)"
+}
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 190
+y 5
+w 40
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 0
+y 0
+w 180
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "ID=$(sys):$(dev):$(amp)"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 240
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 240
+  2 240
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 180
+w 220
+h 170
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 5
+release 0
+x 156
+y 191
+w 63
+h 68
+controlPv "$(sys):$(dev):MMGRAW:$(amp):FWD"
+format "decimal"
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 59
+limitsFromDb
+precision 1
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Bar)
+object activeBarClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 190
+w 135
+h 70
+indicatorColor index 34
+fgColor index 0
+bgColor index 59
+indicatorPv "$(sys):$(dev):MMGRAW:$(amp):FWD"
+label "Forward power"
+showScale
+origin "0"
+font "courier-bold-r-12.0"
+labelTicks "2"
+majorTicks "2"
+minorTicks "2"
+border
+limitsFromDb
+scaleFormat "FFloat"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 155
+y 190
+w 65
+h 70
+lineColor index 0
+fillColor index 15
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 139
+w 35
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "SLOPE"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 60
+y 130
+w 65
+h 30
+controlPv "$(sys):$(dev):MMGRAW:$(amp):SLOPE"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 5
+release 0
+x 156
+y 271
+w 63
+h 68
+controlPv "$(sys):$(dev):MMGRAW:$(amp):REV"
+format "decimal"
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 59
+limitsFromDb
+precision 1
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Bar)
+object activeBarClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 270
+w 135
+h 70
+indicatorColor index 23
+fgColor index 0
+bgColor index 59
+indicatorPv "$(sys):$(dev):MMGRAW:$(amp):REV"
+label "Reverse power"
+showScale
+origin "0"
+font "courier-bold-r-12.0"
+labelTicks "2"
+majorTicks "2"
+minorTicks "2"
+border
+limitsFromDb
+precision "1"
+min "0"
+max "20"
+scaleFormat "FFloat"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 155
+y 270
+w 65
+h 70
+lineColor index 0
+fillColor index 15
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 45
+y 95
+w 50
+h 25
+controlPv "$(sys):$(dev):MMGRAW:$(amp):RF"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-12.0"
+fontAlign "center"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 75
+w 75
+h 15
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "RF STATUS"
+}
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 20
+y 100
+w 15
+h 15
+lineColor index 56
+fill
+fillColor index 82
+alarmPv "$(sys):$(dev):MMGRAW:$(amp):RF"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 170
+y 95
+w 50
+h 25
+controlPv "$(sys):$(dev):MMGRAW:$(amp):FAULT"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-12.0"
+fontAlign "center"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 145
+y 75
+w 75
+h 15
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FAULT LATCH"
+}
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 145
+y 100
+w 15
+h 15
+lineColor index 56
+fill
+fillColor index 82
+alarmPv "$(sys):$(dev):MMGRAW:$(amp):FAULT"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 165
+y 130
+w 55
+h 30
+controlPv "$(sys):$(dev):MMGRAW:$(amp):OFFSET"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 135
+y 139
+w 21
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "OFF"
+}
+autoSize
+endObjectProperties
+

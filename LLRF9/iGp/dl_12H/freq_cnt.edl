@@ -1,0 +1,331 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 274
+y 536
+w 380
+h 220
+font "courier-bold-r-12.0"
+ctlFont "courier-bold-r-12.0"
+btnFont "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 15
+ctlBgColor2 index 49
+topShadowColor index 1
+botShadowColor index 14
+title "iGp12H: Frequency counters"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 40
+w 360
+h 170
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 380
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 40
+w 360
+h 20
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FREQUENCY COUNTERS"
+}
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 320
+y 5
+w 50
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 0
+y 0
+w 260
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "ID=$(sys):$(dev)"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 380
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 380
+  2 380
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 3
+release 0
+x 260
+y 5
+w 50
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Devices"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 195
+y 70
+w 165
+h 25
+controlPv "$(sys):$(dev):FREQ_CNT:CH0"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-12.0"
+fontAlign "right"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 195
+y 105
+w 165
+h 25
+controlPv "$(sys):$(dev):FREQ_CNT:CH1"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-12.0"
+fontAlign "right"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 195
+y 140
+w 165
+h 25
+controlPv "$(sys):$(dev):FREQ_CNT:CH2"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-12.0"
+fontAlign "right"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 195
+y 175
+w 165
+h 25
+controlPv "$(sys):$(dev):FREQ_CNT:CH3"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-12.0"
+fontAlign "right"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 76
+w 77
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "INPUT CLOCK"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 111
+w 98
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DCM1 FULL-RATE"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 146
+w 56
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DCM2 2/3"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 181
+w 63
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DAC CLOCK"
+}
+autoSize
+endObjectProperties
+

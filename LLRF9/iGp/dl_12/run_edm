@@ -1,0 +1,13 @@
+#!/bin/sh
+
+sys=IGPF
+dev=TEST
+if [ $# -ge 1 ]; then
+  dev=$1
+  if [ $# -eq 2 ]; then
+    sys=$2
+  fi
+fi
+
+#cd ${HOME}/designs/iGp/dl
+edm -x -m "data=.,sys=${sys},dev=${dev}" main.edl

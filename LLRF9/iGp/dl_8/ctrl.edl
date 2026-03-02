@@ -1,0 +1,1662 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 107
+y 213
+w 460
+h 480
+font "courier-bold-r-8.0"
+ctlFont "courier-bold-r-8.0"
+btnFont "courier-bold-r-8.0"
+fgColor index 15
+bgColor index 12
+textColor index 0
+ctlFgColor1 index 0
+ctlFgColor2 index 0
+ctlBgColor1 index 75
+ctlBgColor2 index 75
+topShadowColor index 1
+botShadowColor index 15
+title "iGp: Control Panel"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 230
+y 315
+w 100
+h 155
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 460
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 40
+w 210
+h 430
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 390
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 0
+y 0
+w 310
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "SYSTEM:$(sys) DEVICE:$(dev)"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 255
+w 112
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "GROW/DAMP ENABLE"
+}
+autoSize
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 140
+y 250
+w 70
+h 20
+fgColor index 0
+onColor index 73
+offColor index 75
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):GDEN"
+indicatorPv "$(sys):$(dev):GDEN"
+onLabel "ON"
+offLabel "OFF"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 140
+y 75
+w 70
+h 20
+fgColor index 0
+onColor index 73
+offColor index 75
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):SETSEL"
+indicatorPv "$(sys):$(dev):SETSEL"
+onLabel "0"
+offLabel "1"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 80
+w 105
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "COEFFICIENT SET"
+}
+autoSize
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 340
+y 40
+w 110
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Devices"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "devices.edl"
+}
+symbols {
+  0 "D=$(dev)"
+}
+icon
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 340
+y 170
+w 110
+h 300
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 350
+y 235
+w 91
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DCM1 unlocked"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 350
+y 315
+w 98
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FIR saturation"
+}
+autoSize
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 350
+y 215
+w 12
+h 12
+lineColor index 56
+fill
+fillColor index 81
+alarmPv "$(sys):$(dev):CLKMISS"
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 350
+y 335
+w 12
+h 12
+lineColor index 56
+fill
+fillColor index 81
+alarmPv "$(sys):$(dev):SAT"
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 350
+y 255
+w 12
+h 12
+lineColor index 56
+fill
+fillColor index 81
+alarmPv "$(sys):$(dev):DCM_UNLOCK"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 350
+y 195
+w 91
+h 15
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Clock missing"
+}
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 380
+y 250
+w 60
+h 20
+controlPv "$(sys):$(dev):DCM_UNLOCK:COUNT"
+format "decimal"
+font "courier-bold-r-10.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 1
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 380
+y 210
+w 60
+h 20
+controlPv "$(sys):$(dev):CLKMISS:COUNT"
+format "decimal"
+font "courier-bold-r-10.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 1
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 380
+y 330
+w 60
+h 20
+controlPv "$(sys):$(dev):SAT:COUNT"
+format "decimal"
+font "courier-bold-r-10.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 1
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 350
+y 440
+w 90
+h 20
+fgColor index 0
+onColor index 73
+offColor index 75
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):CNTRST"
+onLabel "reset"
+offLabel "reset"
+buttonType "push"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 255
+y 410
+w 54
+h 15
+font "courier-bold-r-14.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "MEMORY"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 245
+y 430
+w 70
+h 30
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):DATAREAD"
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 250
+y 435
+w 60
+h 20
+fgColor index 0
+onColor index 73
+offColor index 75
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):DATARD"
+onLabel "read"
+offLabel "memory"
+buttonType "push"
+3d
+font "courier-bold-r-14.0"
+objType "controls"
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 340
+y 90
+w 110
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Waveforms"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "wform.edl"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev)"
+}
+icon
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 230
+y 95
+w 100
+h 210
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 265
+y 285
+w 35
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 23
+bgColor index 15
+useDisplayBg
+visPv "$(sys):$(dev):MON:ARM"
+visMin "1"
+visMax "2"
+value {
+  "ARMED"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 250
+y 100
+w 63
+h 15
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "TRIGGER"
+}
+autoSize
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 240
+y 225
+w 80
+h 20
+fgColor index 0
+onColor index 73
+offColor index 75
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):ARM"
+indicatorPv "$(sys):$(dev):ARM"
+onLabel "ARM"
+offLabel "OFF"
+buttonType "push"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 240
+y 210
+w 80
+h 15
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Arm"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 265
+y 285
+w 35
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 31
+bgColor index 15
+useDisplayBg
+visPv "$(sys):$(dev):MON:ARM"
+visMin "0"
+visMax "1"
+value {
+  "RESET"
+}
+autoSize
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 240
+y 190
+w 80
+h 20
+fgColor index 0
+onColor index 73
+offColor index 75
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):DACQ"
+indicatorPv "$(sys):$(dev):DACQ"
+onLabel "Trig"
+offLabel "Off"
+buttonType "push"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 240
+y 175
+w 80
+h 15
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Acquire"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 109
+w 70
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "SHIFT GAIN"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 140
+y 100
+w 70
+h 30
+controlPv "$(sys):$(dev):SHIFTGAIN"
+fgColor index 15
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 385
+w 77
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "GROW LENGTH"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 140
+y 370
+w 70
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):GDADDR"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 145
+y 375
+w 60
+h 30
+controlPv "$(sys):$(dev):GDLEN"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 435
+w 56
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "HOLD-OFF"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 140
+y 420
+w 70
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:HOLDOFF"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 145
+y 425
+w 60
+h 30
+controlPv "$(sys):$(dev):WRT:HOLDOFF"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 225
+y 40
+w 110
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Coefficients"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "coeffs.edl"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev)"
+}
+icon
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 240
+y 260
+w 80
+h 20
+fgColor index 0
+onColor index 73
+offColor index 75
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):BR_ARM"
+indicatorPv "$(sys):$(dev):BR_ARM"
+onLabel "ON"
+offLabel "OFF"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 240
+y 245
+w 80
+h 15
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Auto re-arm"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 290
+w 105
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "REC. DOWNSAMPLE"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 140
+y 280
+w 70
+h 30
+controlPv "$(sys):$(dev):REC_DS"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 340
+y 115
+w 110
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Environment"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "env.edl"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev)"
+}
+icon
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 460
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 460
+  2 460
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 370
+y 175
+w 54
+h 15
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "STATUS"
+}
+autoSize
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 10
+y 210
+w 210
+h 0
+lineColor index 15
+fillColor index 15
+lineStyle "dash"
+numPoints 3
+xPoints {
+  0 10
+  1 220
+  2 220
+}
+yPoints {
+  0 210
+  1 210
+  2 210
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 350
+y 395
+w 98
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Interval (sec)"
+}
+autoSize
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 350
+y 410
+w 90
+h 20
+controlPv "$(sys):$(dev):RST:COUNT"
+format "decimal"
+font "courier-bold-r-10.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 245
+y 125
+w 7
+h 42
+
+beginGroup
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 243
+y 127
+w 7
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "S"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 243
+y 141
+w 7
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "R"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 243
+y 156
+w 7
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "C"
+}
+autoSize
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 320
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Control Panel"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 340
+y 140
+w 110
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Config S/R"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "saverest.edl"
+}
+symbols {
+  0 "D=$(dev)"
+}
+icon
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 350
+y 375
+w 12
+h 12
+lineColor index 56
+fill
+fillColor index 81
+alarmPv "$(sys):$(dev):FID_ERR"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 380
+y 370
+w 60
+h 20
+controlPv "$(sys):$(dev):FID_ERR:COUNT"
+format "decimal"
+font "courier-bold-r-10.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 1
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 345
+y 355
+w 98
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Fiducial error"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 335
+w 91
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "RECORD LENGTH"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 140
+y 320
+w 70
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):RECADDR"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 145
+y 325
+w 60
+h 30
+controlPv "$(sys):$(dev):RECLEN"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 350
+y 275
+w 91
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DCM2 unlocked"
+}
+autoSize
+endObjectProperties
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 350
+y 295
+w 12
+h 12
+lineColor index 56
+fill
+fillColor index 81
+alarmPv "$(sys):$(dev):DCM2_UNLOCK"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 380
+y 290
+w 60
+h 20
+controlPv "$(sys):$(dev):DCM2_UNLOCK:COUNT"
+format "decimal"
+font "courier-bold-r-10.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 1
+useHexPrefix
+newPos
+objType "monitors"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 235
+y 320
+w 90
+h 15
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "ACQ MEMORY"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 144
+w 84
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DOWNSAMPLING"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 140
+y 135
+w 70
+h 30
+controlPv "$(sys):$(dev):PROC_DS"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 340
+y 65
+w 110
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Drive"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "drive.edl"
+}
+symbols {
+  0 "D=$(dev)"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 225
+y 65
+w 110
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Timing"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "delay.edl"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev)"
+}
+icon
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 40
+y 50
+w 153
+h 15
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FEEDBACK SETTINGS"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 45
+y 220
+w 144
+h 15
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DATA ACQUISITION"
+}
+autoSize
+endObjectProperties
+
+# (Choice Button)
+object activeChoiceButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 260
+y 125
+w 60
+h 40
+fgColor index 0
+bgColor index 75
+selectColor index 73
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):EXTEN"
+font "courier-bold-r-12.0"
+endObjectProperties
+
+# (Choice Button)
+object activeChoiceButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 240
+y 345
+w 80
+h 50
+fgColor index 0
+bgColor index 75
+selectColor index 73
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):MEMSEL"
+font "courier-bold-r-12.0"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 140
+y 170
+w 70
+h 30
+controlPv "$(sys):$(dev):SAT_THRESHOLD"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 180
+w 98
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "SAT. THRESHOLD"
+}
+autoSize
+endObjectProperties
+

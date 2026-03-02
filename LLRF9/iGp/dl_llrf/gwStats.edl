@@ -1,0 +1,619 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 607
+y 155
+w 280
+h 335
+font "courier-bold-r-12.0"
+ctlFont "courier-bold-r-12.0"
+btnFont "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 15
+ctlBgColor2 index 49
+topShadowColor index 1
+botShadowColor index 14
+title "LLRF: Gateway statistics"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 30
+w 280
+h 305
+lineColor index 83
+fill
+fillColor index 83
+lineWidth 0
+alarmPv "$(sys):PANEL:BG"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 280
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 225
+y 5
+w 45
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 0
+y 0
+w 160
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "ID=$(sys)"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 280
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 280
+  2 280
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 170
+y 5
+w 45
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Devices"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 40
+w 260
+h 285
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 40
+w 260
+h 20
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "IOC gateway statistics"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 75
+w 91
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Connected PVs"
+}
+autoSize
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 170
+y 70
+w 90
+h 20
+controlPv "$(sys):gateway:connected"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 125
+w 140
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Inactive connections"
+}
+autoSize
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 170
+y 120
+w 90
+h 20
+controlPv "$(sys):gateway:inactive"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 100
+w 126
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Active connections"
+}
+autoSize
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 170
+y 95
+w 90
+h 20
+controlPv "$(sys):gateway:active"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 200
+w 119
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Client event rate"
+}
+autoSize
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 170
+y 195
+w 90
+h 20
+controlPv "$(sys):gateway:clientEventRate"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 170
+y 220
+w 90
+h 20
+controlPv "$(sys):gateway:clientPostRate"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 225
+w 112
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Client post rate"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 250
+w 63
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Loop rate"
+}
+autoSize
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 170
+y 245
+w 90
+h 20
+controlPv "$(sys):gateway:loopRate"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 275
+w 84
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "IOC CPU load"
+}
+autoSize
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 170
+y 270
+w 90
+h 20
+controlPv "$(sys):gateway:load"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 300
+w 140
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Gateway CPU fraction"
+}
+autoSize
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 170
+y 295
+w 90
+h 20
+controlPv "$(sys):gateway:cpuFract"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 150
+w 119
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Server event rate"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 175
+w 112
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Server post rate"
+}
+autoSize
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 170
+y 170
+w 90
+h 20
+controlPv "$(sys):gateway:serverPostRate"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 170
+y 145
+w 90
+h 20
+controlPv "$(sys):gateway:serverEventRate"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+

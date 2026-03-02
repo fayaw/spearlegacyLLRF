@@ -1,0 +1,99 @@
+#!/bin/bash
+
+# This script starts EDM with the top-level iGp display. The script reads
+# the gateware revision from the IOC and determines whether to use iGp or
+# iGp12 panels. Command line optioncan be used to force the selection.
+# If the IOC is not responding (short timeout is used), iGp_display defaults
+# to iGp12 panels.
+#
+# Copyright (c) 2010 Dimtel, Inc., All Rights Reserved
+#
+# $Id: iGp_display,v 1.7 2022/01/14 18:55:02 dim Exp $
+# $Date: 2022/01/14 18:55:02 $
+# $Author: dim $
+# $Revision: 1.7 $
+# $Log: iGp_display,v $
+# Revision 1.7  2022/01/14 18:55:02  dim
+# Added data macro for save/restore top directory (sr and pvs under it)
+#
+# Revision 1.6  2020/02/11 18:25:28  dim
+# Added support for variable sysid
+#
+# Revision 1.5  2015/02/13 10:17:05  dim
+# Updated to work correctly on 32 and 64 bit machines
+#
+# Revision 1.4  2012/03/12 08:46:06  dim
+# Added support for iGp-HF version
+#
+# Revision 1.3  2011/12/13 08:15:45  dim
+# bash != sh, as it turns out
+#
+# Revision 1.2  2010/10/05 18:16:54  dim
+# Initial cleanup
+#
+#
+
+usage() {
+  echo "Usage: $1 [-r 8|12|12H] [-s SYSROOT] [DEVICE]"
+  echo "  [DEVICE]      - IOC device name, defaults to TEST"
+  echo "  [-r 8|12|12H] - Force opening of iGp (8), iGp12 (12), or iGp12H (12H) panels"
+  echo "  [-s SYSROOT]  - Set system root part, defaults to IGPF"
+  
+  exit 1
+}
+
+script=`basename $0`
+caget=${IGPTOP}/bin/${HOST_ARCH}/caget
+
+sys=IGPF
+
+while getopts r:s: o; do
+  case "$o" in
+    r)   rev="$OPTARG";;
+    s)   sys="$OPTARG";;
+    [?]) usage ${script};;
+  esac
+done
+let sft=${OPTIND}-1
+shift ${sft}
+
+if [ -n "$1" ]; then
+  dev=$1;
+else
+  dev=TEST;
+fi
+
+if [ -n "${rev}" ]; then
+  if [ ${rev} != "12" -a ${rev} != "8" -a ${rev} != "12H" ]; then
+    echo "Invalid option: ''-r ${rev}'', acceptable values 8, 12, and 12H"
+    usage ${script}
+  fi
+else
+  # System is not set, try reading the revision
+  gw_type=`${caget} -t ${sys}:${dev}:GW_TYPE 2> /dev/null`
+  if [ $? -ne 0 ]; then
+    # caget failed...
+    echo "${script}: could not read FPGA gateware type, channel ${sys}:${dev}:GW_TYPE"
+    echo "${script}: if the IOC is not running, use -r switch to select"
+    echo "${script}: the appropriate version. Aborting now."
+    exit 2
+  fi
+  revision=`${caget} -t ${sys}:${dev}:REVISION 2> /dev/null`
+  if [ $? -ne 0 ]; then
+    # caget failed
+    echo "${script}: could not read FPGA revision, channel ${sys}:${dev}:REVISION"
+    echo "${script}: if the IOC is not running, use -r switch to select"
+    echo "${script}: the appropriate version. Aborting now."
+    exit 2
+  fi
+  if [ ${gw_type} -ge 16 ]; then
+    rev=12H;
+  elif [ ${revision/.*/} -ge 3 ]; then
+    rev=12;
+  else
+    rev=8;
+  fi
+fi
+
+cd ${IGPTOP}/dl_${rev}
+${IGPTOP}/bin/${HOST_ARCH}/edm -cmap -x -noedit -m "data=${IGPTOP}/dl_${rev},sys=${sys},dev=${dev}" main.edl

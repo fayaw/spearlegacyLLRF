@@ -1,0 +1,437 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 574
+y 384
+w 441
+h 121
+font "courier-bold-r-8.0"
+ctlFont "courier-bold-r-8.0"
+btnFont "courier-bold-r-8.0"
+fgColor index 15
+bgColor index 12
+textColor index 0
+ctlFgColor1 index 0
+ctlFgColor2 index 0
+ctlBgColor1 index 75
+ctlBgColor2 index 75
+topShadowColor index 1
+botShadowColor index 15
+title "LLRF: Top Control Panel ($(sys))"
+showGrid
+snapToGrid
+gridSize 4
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 440
+h 120
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 0
+y 4
+w 208
+h 20
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "FIELD CONTROL"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 208
+y 8
+w 108
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Tuner loop 1"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "tuner.edl"
+}
+symbols {
+  0 "tuner=C1"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 324
+y 92
+w 108
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "NA/SA 3"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "rtna.edl"
+}
+symbols {
+  0 "dev=BRD3"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 324
+y 64
+w 108
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "NA/SA 2"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "rtna.edl"
+}
+symbols {
+  0 "dev=BRD2"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 324
+y 36
+w 108
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "NA/SA 1"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "rtna.edl"
+}
+symbols {
+  0 "dev=BRD1"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 8
+y 92
+w 88
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Feedback"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "feedback.edl"
+}
+symbols {
+  0 "dev=BRD1"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 8
+y 64
+w 88
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Setpoint"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "ramp.edl"
+}
+symbols {
+  0 "dev=BRD1"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 8
+y 36
+w 88
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Top"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "top_two_cav.edl"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 324
+y 8
+w 108
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Tuner loop 2"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "tuner.edl"
+}
+symbols {
+  0 "tuner=C2"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 104
+y 64
+w 96
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Waveforms 2"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "wform.edl"
+}
+symbols {
+  0 "dev=BRD2"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 208
+y 64
+w 108
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Acq ctrl 2"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "wform_ctrl.edl"
+}
+symbols {
+  0 "dev=BRD2"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 208
+y 36
+w 108
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Acq ctrl 1"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "wform_ctrl.edl"
+}
+symbols {
+  0 "dev=BRD1"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 104
+y 36
+w 96
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Waveforms 1"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "wform.edl"
+}
+symbols {
+  0 "dev=BRD1"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 104
+y 92
+w 96
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Waveforms 3"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "wform.edl"
+}
+symbols {
+  0 "dev=BRD3"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 208
+y 92
+w 108
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Acq ctrl 3"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "wform_ctrl.edl"
+}
+symbols {
+  0 "dev=BRD3"
+}
+icon
+endObjectProperties
+

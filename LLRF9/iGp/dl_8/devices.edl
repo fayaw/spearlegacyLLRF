@@ -1,0 +1,1097 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 204
+y 277
+w 570
+h 275
+font "courier-bold-r-12.0"
+ctlFont "courier-bold-r-12.0"
+btnFont "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 15
+ctlBgColor2 index 49
+topShadowColor index 1
+botShadowColor index 14
+title "iGp: Device Controls"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 40
+w 220
+h 225
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 160
+y 65
+w 60
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:ECLDEL0"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 570
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 40
+w 220
+h 20
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "MC100EP195 DELAY LINES"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 455
+y 40
+w 105
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "MAX1202 ADC"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "max1202.edl"
+}
+menuLabel {
+  0 "MAX1202"
+}
+symbols {
+  0 "D=$(dev)"
+}
+icon
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 500
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 0
+y 0
+w 420
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "SYSTEM:$(sys) DEVICE:$(dev)"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 570
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 570
+  2 570
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 430
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Devices"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 165
+y 70
+w 50
+h 30
+controlPv "$(sys):$(dev):WRT:ECLDEL0"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 240
+y 40
+w 205
+h 225
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 240
+y 40
+w 205
+h 20
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "AD8842 DAC"
+}
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 160
+y 115
+w 60
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:ECLDEL1"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 165
+y 120
+w 50
+h 30
+controlPv "$(sys):$(dev):WRT:ECLDEL1"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 160
+y 165
+w 60
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:ECLDEL2"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 160
+y 215
+w 60
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:ECLDEL3"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 165
+y 220
+w 50
+h 30
+controlPv "$(sys):$(dev):WRT:ECLDEL3"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 165
+y 170
+w 50
+h 30
+controlPv "$(sys):$(dev):WRT:ECLDEL2"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 270
+y 65
+w 60
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:AD8842CH0"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 275
+y 70
+w 50
+h 30
+controlPv "$(sys):$(dev):WRT:AD8842CH0"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 79
+w 126
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "ADC (MAX104) CLOCK"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 129
+w 98
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FIDUCIAL CLOCK"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 179
+w 56
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FIDUCIAL"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 229
+w 133
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DAC (MAX5889) CLOCK"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 250
+y 79
+w 7
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "0"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 270
+y 115
+w 60
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:AD8842CH1"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 275
+y 120
+w 50
+h 30
+controlPv "$(sys):$(dev):WRT:AD8842CH1"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 250
+y 129
+w 7
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "1"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 270
+y 165
+w 60
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:AD8842CH2"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 275
+y 170
+w 50
+h 30
+controlPv "$(sys):$(dev):WRT:AD8842CH2"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 250
+y 179
+w 7
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "2"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 270
+y 215
+w 60
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:AD8842CH3"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 275
+y 220
+w 50
+h 30
+controlPv "$(sys):$(dev):WRT:AD8842CH3"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 250
+y 229
+w 7
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "3"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 375
+y 65
+w 60
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:AD8842CH4"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 380
+y 70
+w 50
+h 30
+controlPv "$(sys):$(dev):WRT:AD8842CH4"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 355
+y 79
+w 7
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "4"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 375
+y 115
+w 60
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:AD8842CH5"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 380
+y 120
+w 50
+h 30
+controlPv "$(sys):$(dev):WRT:AD8842CH5"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 355
+y 129
+w 7
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "5"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 375
+y 165
+w 60
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:AD8842CH6"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 380
+y 170
+w 50
+h 30
+controlPv "$(sys):$(dev):WRT:AD8842CH6"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 355
+y 179
+w 7
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "6"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 375
+y 215
+w 60
+h 40
+lineColor index 15
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):REGWRT:AD8842CH7"
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 380
+y 220
+w 50
+h 30
+controlPv "$(sys):$(dev):WRT:AD8842CH7"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 355
+y 229
+w 7
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "7"
+}
+autoSize
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 455
+y 70
+w 105
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "GPIO"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "gpio.edl"
+}
+menuLabel {
+  0 "GPIO"
+}
+symbols {
+  0 "D=$(dev)"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 455
+y 100
+w 105
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "TIMING"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "delay.edl"
+}
+menuLabel {
+  0 "TIMING"
+}
+symbols {
+  0 "D=$(dev)"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 455
+y 130
+w 105
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "POWER AMP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "amplifier.edl"
+}
+menuLabel {
+  0 "POWER AMP"
+}
+symbols {
+  0 "D=$(dev)"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 455
+y 160
+w 105
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "AMP0 (ADC/8)"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "amp_max1202.edl"
+}
+menuLabel {
+  0 "AMP0 (ADC/8)"
+}
+symbols {
+  0 "amp=AMP0"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 455
+y 190
+w 105
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "AMP1 (ADC/8)"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "amp_max1202.edl"
+}
+menuLabel {
+  0 "AMP1 (ADC/8)"
+}
+symbols {
+  0 "amp=AMP1"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 455
+y 220
+w 105
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Masks"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "masks.edl"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev)"
+}
+icon
+endObjectProperties
+

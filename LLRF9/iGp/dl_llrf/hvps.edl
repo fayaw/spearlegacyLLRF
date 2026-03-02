@@ -1,0 +1,1259 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 464
+y 53
+w 500
+h 420
+font "courier-bold-r-8.0"
+ctlFont "courier-bold-r-8.0"
+btnFont "courier-bold-r-8.0"
+fgColor index 15
+bgColor index 12
+textColor index 0
+ctlFgColor1 index 0
+ctlFgColor2 index 0
+ctlBgColor1 index 75
+ctlBgColor2 index 75
+topShadowColor index 1
+botShadowColor index 15
+title "LLRF: Drive power loop ($(sys))"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 30
+w 500
+h 390
+lineColor index 83
+fill
+fillColor index 83
+lineWidth 0
+alarmPv "$(sys):PANEL:BG"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 40
+w 480
+h 370
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Textentry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 160
+y 145
+w 85
+h 30
+controlPv "$(sys):HVPS:POWER:HIGH"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 505
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 430
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 0
+y 0
+w 350
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "ID=$(sys)"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 505
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 505
+  2 505
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 360
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Control Panel"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 40
+w 480
+h 20
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DRIVE POWER CONTROL LOOP"
+}
+endObjectProperties
+
+# (Textentry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 160
+y 110
+w 85
+h 30
+controlPv "$(sys):HVPS:POWER:ON"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 115
+w 135
+h 30
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "LOW DRIVE SETPOINT"
+}
+endObjectProperties
+
+# (Textentry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 160
+y 180
+w 85
+h 30
+controlPv "$(sys):HVPS:POWER:DEADBAND"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 20
+y 335
+w 65
+h 15
+controlPv "$(sys):HVPS:SETPT"
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Textentry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 395
+y 145
+w 85
+h 30
+controlPv "$(sys):HVPS:KLYFWD:HYST"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 125
+y 300
+w 70
+h 15
+controlPv "$(sys):HVPS:ERR"
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 395
+y 340
+w 35
+h 50
+lineColor index 0
+fillColor index 75
+lineWidth 2
+closePolygon
+numPoints 3
+xPoints {
+  0 395
+  1 428
+  2 395
+}
+yPoints {
+  0 340
+  1 365
+  2 390
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 120
+y 370
+w 250
+h 30
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 5
+xPoints {
+  0 120
+  1 120
+  2 359
+  3 359
+  4 370
+}
+yPoints {
+  0 380
+  1 400
+  2 400
+  3 370
+  4 370
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 430
+y 365
+w 30
+h 0
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 2
+xPoints {
+  0 460
+  1 430
+}
+yPoints {
+  0 365
+  1 365
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 355
+y 365
+w 40
+h 0
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 2
+xPoints {
+  0 395
+  1 355
+}
+yPoints {
+  0 365
+  1 365
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 215
+y 365
+w 85
+h 15
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DRIVE POWER"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 125
+y 280
+w 70
+h 15
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "ERROR"
+}
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 330
+w 50
+h 50
+
+beginGroup
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 95
+y 330
+w 50
+h 50
+lineColor index 0
+fillColor index 75
+lineWidth 2
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 110
+y 345
+w 20
+h 20
+
+beginGroup
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 110
+y 355
+w 20
+h 0
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 3
+xPoints {
+  0 130
+  1 130
+  2 110
+}
+yPoints {
+  0 355
+  1 355
+  2 355
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 120
+y 345
+w 0
+h 20
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 3
+xPoints {
+  0 120
+  1 120
+  2 120
+}
+yPoints {
+  0 365
+  1 365
+  2 345
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 20
+y 355
+w 75
+h 0
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 2
+xPoints {
+  0 95
+  1 20
+}
+yPoints {
+  0 355
+  1 355
+}
+endObjectProperties
+
+# (Textentry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 210
+y 280
+w 85
+h 30
+controlPv "$(sys):HVPS:GAIN"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 215
+y 380
+w 85
+h 15
+controlPv "SRF1:KLYSDRIVFRWD:POWER"
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 145
+w 135
+h 30
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "HIGH DRIVE SETPOINT"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 320
+w 65
+h 15
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "SETPOINT"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 180
+w 135
+h 30
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "LOOP DEADBAND"
+}
+endObjectProperties
+
+# (Textentry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 395
+y 110
+w 85
+h 30
+controlPv "$(sys):HVPS:KLYFWD:HIGH"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 270
+y 120
+w 120
+h 15
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "SWITCH POINT"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 270
+y 155
+w 120
+h 15
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "SWITCH HYSTERESIS"
+}
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 385
+y 270
+w 50
+h 50
+
+beginGroup
+
+# (Circle)
+object activeCircleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 385
+y 270
+w 50
+h 50
+lineColor index 0
+fillColor index 75
+lineWidth 2
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 400
+y 285
+w 20
+h 20
+
+beginGroup
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 400
+y 295
+w 20
+h 0
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 3
+xPoints {
+  0 420
+  1 420
+  2 400
+}
+yPoints {
+  0 295
+  1 295
+  2 295
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 410
+y 285
+w 0
+h 20
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 3
+xPoints {
+  0 410
+  1 410
+  2 410
+}
+yPoints {
+  0 305
+  1 305
+  2 285
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 410
+y 320
+w 0
+h 30
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 2
+xPoints {
+  0 410
+  1 410
+}
+yPoints {
+  0 320
+  1 350
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 270
+y 190
+w 120
+h 15
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "COLLECTOR LIMIT"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 300
+y 295
+w 85
+h 0
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 2
+xPoints {
+  0 385
+  1 300
+}
+yPoints {
+  0 295
+  1 295
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 120
+y 295
+w 85
+h 35
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 3
+xPoints {
+  0 205
+  1 120
+  2 120
+}
+yPoints {
+  0 295
+  1 295
+  2 330
+}
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 310
+y 300
+w 65
+h 15
+controlPv "$(sys):HVPS:DELTA"
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 310
+y 280
+w 45
+h 15
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DELTA"
+}
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 125
+y 225
+w 355
+h 25
+controlPv "$(sys):HVPS:LOOP:MSG"
+font "courier-bold-r-14.0"
+fgColor index 19
+bgColor index 12
+limitsFromDb
+nullColor index 75
+nullCondition "nullEq0"
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 225
+w 100
+h 25
+font "courier-bold-r-14.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "LOOP STATUS"
+}
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 205
+y 275
+w 95
+h 40
+lineColor index 0
+fillColor index 75
+lineWidth 2
+endObjectProperties
+
+# (Textentry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 395
+y 180
+w 85
+h 30
+controlPv "$(sys):HVPS:PCOLL_MAX"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Textentry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 310
+y 320
+w 70
+h 30
+controlPv "$(sys):HVPS:MAX_DELTA"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 210
+y 320
+w 100
+h 30
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "MAXIMUM DELTA"
+}
+endObjectProperties
+
+# (Text)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 415
+y 330
+w 63
+h 15
+controlPv "SRF1:HVPS:VOLT:CTRL"
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 47
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 105
+y 390
+w 10
+h 0
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 2
+xPoints {
+  0 115
+  1 105
+}
+yPoints {
+  0 390
+  1 390
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 365
+y 285
+w 10
+h 0
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 2
+xPoints {
+  0 375
+  1 365
+}
+yPoints {
+  0 285
+  1 285
+}
+endObjectProperties
+
+# (Group)
+object activeGroupClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 80
+y 360
+w 10
+h 10
+
+beginGroup
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 80
+y 365
+w 10
+h 0
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 2
+xPoints {
+  0 90
+  1 80
+}
+yPoints {
+  0 365
+  1 365
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 85
+y 360
+w 0
+h 10
+lineColor index 0
+fillColor index 75
+lineWidth 2
+numPoints 2
+xPoints {
+  0 85
+  1 85
+}
+yPoints {
+  0 360
+  1 370
+}
+endObjectProperties
+
+endGroup
+
+endObjectProperties
+
+# (Choice Button)
+object activeChoiceButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 20
+y 75
+w 460
+h 25
+fgColor index 0
+bgColor index 75
+selectColor index 73
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):HVPS:MODE"
+font "courier-bold-r-12.0"
+orientation "horizontal"
+endObjectProperties
+

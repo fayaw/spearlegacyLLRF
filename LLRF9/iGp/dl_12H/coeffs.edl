@@ -1,0 +1,963 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 386
+y 121
+w 650
+h 615
+font "courier-bold-r-12.0"
+ctlFont "courier-bold-r-12.0"
+btnFont "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 15
+ctlBgColor2 index 49
+topShadowColor index 1
+botShadowColor index 14
+title "iGp12H: Coefficients ($(sys):$(dev))"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 160
+w 630
+h 375
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 15
+y 200
+w 305
+h 145
+lineColor index 81
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):CVERIFY:SET0"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 40
+w 320
+h 85
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 650
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+# Geometry
+x 340
+y 40
+w 300
+h 110
+# Appearance
+border
+plotAreaBorder
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "courier-bold-r-10.0"
+# Operating Modes
+nPts 2
+# X axis properties
+showXAxis
+xAxisSrc "AutoScale"
+xMin 0
+xMax 7
+xLabelIntervals 4
+xShowLabelGrid
+# Y axis properties
+yAxisSrc "fromUser"
+yMin -131072
+yMax 131072
+yLabelIntervals 10
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 1
+yPv {
+  0 "$(sys):$(dev):COEFF"
+}
+plotStyle {
+  0 "point"
+}
+lineThickness {
+  0 2
+}
+plotUpdateMode {
+  0 "y"
+}
+plotSymbolType {
+  0 "circle"
+}
+ySigned {
+  0 1
+}
+plotColor {
+  0 index 35
+}
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 565
+y 550
+w 75
+h 20
+fgColor index 15
+onColor index 5
+offColor index 12
+inconsistentColor index 46
+topShadowColor index 14
+botShadowColor index 10
+controlPv "$(sys):$(dev):BO:CPCOEFF"
+indicatorPv "$(sys):$(dev):BO:CPCOEFF"
+onLabel "LOAD"
+offLabel "OFF"
+buttonType "push"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 67
+y 45
+w 207
+h 15
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "NEW COEFFICIENTS VECTOR"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 15
+y 70
+w 77
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Description"
+}
+autoSize
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 15
+y 180
+w 305
+h 15
+controlPv "$(sys):$(dev):DESC:CSET0"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-10.0"
+fontAlign "center"
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+# Geometry
+x 20
+y 205
+w 295
+h 135
+# Appearance
+border
+plotAreaBorder
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "courier-bold-r-10.0"
+# Operating Modes
+nPts 2
+# X axis properties
+showXAxis
+xAxisSrc "AutoScale"
+xMin 0
+xMax 7
+xLabelIntervals 1
+xMajorsPerLabel 1
+xMinorsPerMajor 0
+xShowLabelGrid
+# Y axis properties
+yAxisSrc "fromUser"
+yMin -131072
+yMax 131072
+yLabelIntervals 10
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 1
+yPv {
+  0 "$(sys):$(dev):CSET0"
+}
+plotStyle {
+  0 "point"
+}
+lineThickness {
+  0 2
+}
+plotUpdateMode {
+  0 "y"
+}
+plotSymbolType {
+  0 "circle"
+}
+xSigned {
+  0 22741828
+}
+ySigned {
+  0 137364884
+}
+plotColor {
+  0 index 23
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 546
+w 70
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "TARGET SET"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 425
+y 555
+w 119
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "LOAD COEFFICIENTS"
+}
+autoSize
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 565
+y 585
+w 75
+h 20
+fgColor index 15
+onColor index 5
+offColor index 12
+inconsistentColor index 46
+topShadowColor index 14
+botShadowColor index 10
+controlPv "$(sys):$(dev):BO:CVERIFY"
+indicatorPv "$(sys):$(dev):BO:CVERIFY"
+onLabel "VEFIRY"
+offLabel "OFF"
+buttonType "push"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 425
+y 590
+w 133
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "VERIFY COEFFICIENTS"
+}
+autoSize
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 3
+release 0
+x 10
+y 130
+w 320
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Generate"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "cgen.edl"
+}
+symbols {
+  0 "D=$(dev)"
+}
+icon
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 15
+y 85
+w 310
+h 35
+controlPv "$(sys):$(dev):DESC:COEFF"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-12.0"
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 580
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 0
+y 0
+w 500
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "ID=$(sys):$(dev)"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 650
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 650
+  2 650
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 3
+release 0
+x 510
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Coefficients"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Choice Button)
+object activeChoiceButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 135
+y 545
+w 275
+h 15
+fgColor index 15
+bgColor index 12
+selectColor index 5
+inconsistentColor index 46
+topShadowColor index 14
+botShadowColor index 9
+controlPv "$(sys):$(dev):LDSET"
+font "courier-bold-r-12.0"
+orientation "horizontal"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 330
+y 200
+w 305
+h 145
+lineColor index 81
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):CVERIFY:SET1"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 330
+y 180
+w 305
+h 15
+controlPv "$(sys):$(dev):DESC:CSET1"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-10.0"
+fontAlign "center"
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+# Geometry
+x 335
+y 205
+w 295
+h 135
+# Appearance
+border
+plotAreaBorder
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "courier-bold-r-10.0"
+# Operating Modes
+nPts 2
+# X axis properties
+showXAxis
+xAxisSrc "AutoScale"
+xMin 0
+xMax 7
+xLabelIntervals 1
+xMajorsPerLabel 1
+xMinorsPerMajor 0
+xShowLabelGrid
+# Y axis properties
+yAxisSrc "fromUser"
+yMin -131072
+yMax 131072
+yLabelIntervals 10
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 1
+yPv {
+  0 "$(sys):$(dev):CSET1"
+}
+plotStyle {
+  0 "point"
+}
+lineThickness {
+  0 2
+}
+plotUpdateMode {
+  0 "y"
+}
+plotSymbolType {
+  0 "circle"
+}
+plotColor {
+  0 index 23
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 165
+w 35
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "SET 0"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 330
+y 165
+w 35
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "SET 1"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 15
+y 385
+w 305
+h 145
+lineColor index 81
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):CVERIFY:SET2"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 15
+y 365
+w 305
+h 15
+controlPv "$(sys):$(dev):DESC:CSET2"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-10.0"
+fontAlign "center"
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+# Geometry
+x 20
+y 390
+w 295
+h 135
+# Appearance
+border
+plotAreaBorder
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "courier-bold-r-10.0"
+# Operating Modes
+nPts 2
+# X axis properties
+showXAxis
+xAxisSrc "AutoScale"
+xMin 0
+xMax 7
+xLabelIntervals 1
+xMajorsPerLabel 1
+xMinorsPerMajor 0
+xShowLabelGrid
+# Y axis properties
+yAxisSrc "fromUser"
+yMin -131072
+yMax 131072
+yLabelIntervals 10
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 1
+yPv {
+  0 "$(sys):$(dev):CSET2"
+}
+plotStyle {
+  0 "point"
+}
+lineThickness {
+  0 2
+}
+plotUpdateMode {
+  0 "y"
+}
+plotSymbolType {
+  0 "circle"
+}
+plotColor {
+  0 index 23
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 20
+y 350
+w 35
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "SET 2"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 330
+y 385
+w 305
+h 145
+lineColor index 81
+fill
+fillColor index 81
+lineWidth 0
+alarmPv "$(sys):$(dev):CVERIFY:SET3"
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 330
+y 365
+w 305
+h 15
+controlPv "$(sys):$(dev):DESC:CSET3"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-10.0"
+fontAlign "center"
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+# Geometry
+x 335
+y 390
+w 295
+h 135
+# Appearance
+border
+plotAreaBorder
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "courier-bold-r-10.0"
+# Operating Modes
+nPts 2
+# X axis properties
+showXAxis
+xAxisSrc "AutoScale"
+xMin 0
+xMax 7
+xLabelIntervals 1
+xMajorsPerLabel 1
+xMinorsPerMajor 0
+xShowLabelGrid
+# Y axis properties
+yAxisSrc "fromUser"
+yMin -131072
+yMax 131072
+yLabelIntervals 10
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 1
+yPv {
+  0 "$(sys):$(dev):CSET3"
+}
+plotStyle {
+  0 "point"
+}
+lineThickness {
+  0 2
+}
+plotUpdateMode {
+  0 "y"
+}
+plotSymbolType {
+  0 "circle"
+}
+ySigned {
+  0 51
+}
+plotColor {
+  0 index 23
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 330
+y 350
+w 35
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "SET 3"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 130
+y 570
+w 285
+h 35
+controlPv "$(sys):$(dev):FB:PATTERN"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-12.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 581
+w 112
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FEEDBACK PATTERN"
+}
+autoSize
+endObjectProperties
+

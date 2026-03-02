@@ -1,0 +1,315 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 4
+y 374
+w 715
+h 565
+font "courier-medium-r-8.0"
+ctlFont "helvetica-bold-r-14.0"
+btnFont "helvetica-bold-r-14.0"
+fgColor index 15
+bgColor index 12
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 15
+ctlBgColor2 index 49
+topShadowColor index 1
+botShadowColor index 14
+title "iGp: Masks"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 3
+release 0
+# Geometry
+x 5
+y 390
+w 700
+h 165
+# Appearance
+border
+graphTitle "Spectrum averaging mask ($(sys):$(dev):ACQ:MASK)"
+xLabel "Bunch number"
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "helvetica-bold-r-12.0"
+# Operating Modes
+plotMode "plotLastNPts"
+nPts 1
+# X axis properties
+showXAxis
+xAxisSrc "AutoScale"
+xMax 1
+xShowLabelGrid
+# Y axis properties
+showYAxis
+yAxisSrc "fromUser"
+yMin -0.1
+yMax 1.1
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 1
+yPv {
+  0 "$(sys):$(dev):ACQ:MASK"
+}
+plotStyle {
+  0 "point"
+}
+plotUpdateMode {
+  0 "xOrY"
+}
+plotSymbolType {
+  0 "circle"
+}
+plotColor {
+  0 index 34
+}
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 715
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 645
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 0
+y 0
+w 570
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "SYSTEM:$(sys) DEVICE:$(dev)"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 715
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 715
+  2 715
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 575
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Waveforms"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 3
+release 0
+# Geometry
+x 5
+y 40
+w 700
+h 165
+# Appearance
+border
+graphTitle "Feedback mask ($(sys):$(dev):FB:MASK)"
+xLabel "Bunch number"
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "helvetica-bold-r-12.0"
+# Operating Modes
+plotMode "plotLastNPts"
+nPts 1
+# X axis properties
+showXAxis
+xAxisSrc "AutoScale"
+xMax 1
+xShowLabelGrid
+# Y axis properties
+showYAxis
+yAxisSrc "fromUser"
+yMin -0.1
+yMax 1.1
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 1
+yPv {
+  0 "$(sys):$(dev):FB:MASK"
+}
+plotStyle {
+  0 "point"
+}
+plotUpdateMode {
+  0 "xOrY"
+}
+plotSymbolType {
+  0 "circle"
+}
+ySigned {
+  0 141066040
+}
+plotColor {
+  0 index 28
+}
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 3
+release 0
+# Geometry
+x 5
+y 215
+w 700
+h 165
+# Appearance
+border
+graphTitle "Drive mask ($(sys):$(dev):DRIVE:MASK)"
+xLabel "Bunch number"
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "helvetica-bold-r-12.0"
+# Operating Modes
+plotMode "plotLastNPts"
+nPts 1
+# X axis properties
+showXAxis
+xAxisSrc "AutoScale"
+xMax 1
+xShowLabelGrid
+# Y axis properties
+showYAxis
+yAxisSrc "fromUser"
+yMin -0.1
+yMax 1.1
+yLabelIntervals 1
+yMajorsPerLabel 0
+yMinorsPerMajor 0
+yAxisPrecision 0
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 1
+yPv {
+  0 "$(sys):$(dev):DRIVE:MASK"
+}
+plotStyle {
+  0 "point"
+}
+plotUpdateMode {
+  0 "xOrY"
+}
+plotSymbolType {
+  0 "circle"
+}
+xSigned {
+  0 141462416
+}
+ySigned {
+  0 141333192
+}
+plotColor {
+  0 index 23
+}
+endObjectProperties
+

@@ -1,0 +1,4 @@
+3
+EPICS /opt/epics/extensions/lib/linux-x86/libEpics.so EPICS PV
+LOC /opt/epics/extensions/lib/linux-x86/libLoc.so Local PV
+CALC /opt/epics/extensions/lib/linux-x86/libCalc.so Calculation PV

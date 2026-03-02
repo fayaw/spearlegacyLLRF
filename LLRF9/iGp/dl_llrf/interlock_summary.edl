@@ -1,0 +1,964 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 849
+y 289
+w 460
+h 437
+font "courier-bold-r-8.0"
+ctlFont "courier-bold-r-8.0"
+btnFont "courier-bold-r-8.0"
+fgColor index 15
+bgColor index 12
+textColor index 0
+ctlFgColor1 index 0
+ctlFgColor2 index 0
+ctlBgColor1 index 75
+ctlBgColor2 index 75
+topShadowColor index 1
+botShadowColor index 15
+title "LLRF: Interlock summary ($(sys))"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 30
+w 460
+h 370
+lineColor index 83
+fill
+fillColor index 83
+lineWidth 0
+alarmPv "$(sys):PANEL:BG"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 460
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 40
+w 440
+h 350
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 390
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 0
+y 0
+w 310
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "$(sys)"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 460
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 460
+  2 460
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 320
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Control Panel"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 50
+w 120
+h 20
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 81
+alarmPv "$(sys):ILOCK:ALL"
+value {
+  "INTERLOCK STATUS"
+}
+border
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 20
+y 105
+w 305
+h 20
+controlPv "$(sys):ILOCK:SRC1"
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 75
+nullCondition "nullEq0"
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 123
+y 80
+w 99
+h 15
+font "courier-bold-r-14.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "TRIP SOURCE"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 369
+y 80
+w 36
+h 15
+font "courier-bold-r-14.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "TIME"
+}
+autoSize
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 20
+y 130
+w 305
+h 20
+controlPv "$(sys):ILOCK:SRC2"
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 78
+nullCondition "nullEq0"
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 335
+y 50
+w 105
+h 20
+fgColor index 0
+onColor index 73
+offColor index 75
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):ILOCK:RESET"
+onLabel "reset"
+offLabel "reset"
+buttonType "push"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 20
+y 155
+w 305
+h 20
+controlPv "$(sys):ILOCK:SRC3"
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 75
+nullCondition "nullEq0"
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 20
+y 180
+w 305
+h 20
+controlPv "$(sys):ILOCK:SRC4"
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 78
+nullCondition "nullEq0"
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 20
+y 205
+w 305
+h 20
+controlPv "$(sys):ILOCK:SRC5"
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 75
+nullCondition "nullEq0"
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 20
+y 230
+w 305
+h 20
+controlPv "$(sys):ILOCK:SRC6"
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 78
+nullCondition "nullEq0"
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 20
+y 255
+w 305
+h 20
+controlPv "$(sys):ILOCK:SRC7"
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 75
+nullCondition "nullEq0"
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 20
+y 280
+w 305
+h 20
+controlPv "$(sys):ILOCK:SRC8"
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 78
+nullCondition "nullEq0"
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 335
+y 280
+w 105
+h 20
+controlPv "$(sys):ILOCK:TIME8"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullPv "$(sys):ILOCK:TIME8"
+nullColor index 12
+nullCondition "nullEq0"
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 335
+y 305
+w 105
+h 20
+controlPv "$(sys):ILOCK:TIME9"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullPv "$(sys):ILOCK:TIME9"
+nullColor index 12
+nullCondition "nullEq0"
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 20
+y 305
+w 305
+h 20
+controlPv "$(sys):ILOCK:SRC9"
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 75
+nullCondition "nullEq0"
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 20
+y 330
+w 305
+h 20
+controlPv "$(sys):ILOCK:SRC10"
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 78
+nullCondition "nullEq0"
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 335
+y 330
+w 105
+h 20
+controlPv "$(sys):ILOCK:TIME10"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullPv "$(sys):ILOCK:TIME10"
+nullColor index 12
+nullCondition "nullEq0"
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 335
+y 255
+w 105
+h 20
+controlPv "$(sys):ILOCK:TIME7"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullPv "$(sys):ILOCK:TIME7"
+nullColor index 12
+nullCondition "nullEq0"
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 335
+y 230
+w 105
+h 20
+controlPv "$(sys):ILOCK:TIME6"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullPv "$(sys):ILOCK:TIME6"
+nullColor index 12
+nullCondition "nullEq0"
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 335
+y 205
+w 105
+h 20
+controlPv "$(sys):ILOCK:TIME5"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullPv "$(sys):ILOCK:TIME5"
+nullColor index 12
+nullCondition "nullEq0"
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 335
+y 180
+w 105
+h 20
+controlPv "$(sys):ILOCK:TIME4"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullPv "$(sys):ILOCK:TIME4"
+nullColor index 12
+nullCondition "nullEq0"
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 335
+y 155
+w 105
+h 20
+controlPv "$(sys):ILOCK:TIME3"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullPv "$(sys):ILOCK:TIME3"
+nullColor index 12
+nullCondition "nullEq0"
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 335
+y 130
+w 105
+h 20
+controlPv "$(sys):ILOCK:TIME2"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullPv "$(sys):ILOCK:TIME2"
+nullColor index 12
+nullCondition "nullEq0"
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 335
+y 105
+w 105
+h 20
+controlPv "$(sys):ILOCK:TIME1"
+font "courier-bold-r-12.0"
+fontAlign "right"
+fgColor index 15
+bgColor index 12
+limitsFromDb
+nullColor index 12
+nullCondition "nullEq0"
+showUnits
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 10
+y 410
+w 102
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Board 1"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "interlocks.edl"
+}
+symbols {
+  0 "dev=BRD1"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 120
+y 410
+w 102
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Board 2"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "interlocks.edl"
+}
+symbols {
+  0 "dev=BRD2"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 235
+y 410
+w 102
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Board 3"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "interlocks.edl"
+}
+symbols {
+  0 "dev=BRD3"
+}
+icon
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 345
+y 410
+w 105
+h 20
+fgColor index 15
+bgColor index 61
+topShadowColor index 63
+botShadowColor index 59
+font "courier-bold-r-12.0"
+buttonLabel "Slow ADC"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "max1270interlock_phys.edl"
+}
+symbols {
+  0 "dev=BRD1"
+}
+icon
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 145
+y 50
+w 60
+h 20
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 81
+alarmPv "$(sys):BRD1:INTERLOCK:HVPS"
+value {
+  "HVPS"
+}
+border
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 210
+y 50
+w 115
+h 20
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 82
+alarmPv "$(sys):BRD2:EXT:INTERLOCK"
+value {
+  "INTERLOCK INPUT"
+}
+border
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 280
+y 360
+w 75
+h 20
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 82
+alarmPv "$(sys):BRD2:EXT:TRIG1"
+value {
+  "TRIGGER 1"
+}
+border
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 125
+y 360
+w 130
+h 20
+fgColor index 0
+onColor index 73
+offColor index 75
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):BRD1:TRIG2ILOCK"
+indicatorPv "$(sys):BRD1:TRIG2ILOCK"
+onLabel "Interlock/trigger"
+offLabel "Trigger"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 365
+w 98
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "TRIGGER 2 MODE"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 365
+y 360
+w 75
+h 20
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 82
+alarmPv "$(sys):BRD2:EXT:TRIG2"
+value {
+  "TRIGGER 2"
+}
+border
+endObjectProperties
+

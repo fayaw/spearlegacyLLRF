@@ -1,0 +1,665 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 1128
+y 210
+w 530
+h 300
+font "helvetica-medium-r-18.0"
+ctlFont "helvetica-bold-r-10.0"
+btnFont "helvetica-medium-r-18.0"
+fgColor index 15
+bgColor index 11
+textColor index 15
+ctlFgColor1 index 39
+ctlFgColor2 index 84
+ctlBgColor1 index 21
+ctlBgColor2 index 71
+topShadowColor index 68
+botShadowColor index 85
+title "EPICS Environment Variables"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 30
+w 530
+h 270
+lineColor index 83
+fill
+fillColor index 83
+lineWidth 0
+alarmPv "$(sys):$(dev):PANEL:BG"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 10
+y 40
+w 510
+h 250
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 65
+w 180
+h 15
+font "helvetica-medium-r-12.0"
+fgColor index 15
+bgColor index 3
+useDisplayBg
+value {
+  "EPICS_CA_SERVER_PORT"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 85
+w 198
+h 15
+font "helvetica-medium-r-12.0"
+fgColor index 15
+bgColor index 3
+useDisplayBg
+value {
+  "EPICS_CA_REPEATER_PORT"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 105
+w 162
+h 15
+font "helvetica-medium-r-12.0"
+fgColor index 15
+bgColor index 3
+useDisplayBg
+value {
+  "EPICS_CA_ADDR_LIST"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 125
+w 207
+h 15
+font "helvetica-medium-r-12.0"
+fgColor index 15
+bgColor index 3
+useDisplayBg
+value {
+  "EPICS_CA_AUTO_ADDR_LIST"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 145
+w 216
+h 15
+font "helvetica-medium-r-12.0"
+fgColor index 15
+bgColor index 3
+useDisplayBg
+value {
+  "EPICS_CA_MAX_ARRAY_BYTES"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 165
+w 207
+h 15
+font "helvetica-medium-r-12.0"
+fgColor index 15
+bgColor index 3
+useDisplayBg
+value {
+  "EPICS_CA_CONN_TMO"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 185
+w 215
+h 15
+font "helvetica-medium-r-12.0"
+fgColor index 15
+bgColor index 3
+useDisplayBg
+value {
+  "EPICS_CA_MAX_SEARCH_PERIOD"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 205
+w 252
+h 15
+font "helvetica-medium-r-12.0"
+fgColor index 15
+bgColor index 3
+useDisplayBg
+value {
+  "EPICS_CA_BEACON_PERIOD"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 225
+w 126
+h 15
+font "helvetica-medium-r-12.0"
+fgColor index 15
+bgColor index 3
+useDisplayBg
+value {
+  "EPICS_TIMEZONE"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 245
+w 162
+h 15
+font "helvetica-medium-r-12.0"
+fgColor index 15
+bgColor index 3
+useDisplayBg
+value {
+  "EPICS_IOC_LOG_PORT"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 20
+y 265
+w 162
+h 15
+font "helvetica-medium-r-12.0"
+fgColor index 15
+bgColor index 3
+useDisplayBg
+value {
+  "EPICS_IOC_LOG_INET"
+}
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 240
+y 65
+w 270
+h 15
+controlPv "$(sys):$(dev):STAT:CA_SRVR_PORT"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 84
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 240
+y 85
+w 270
+h 15
+controlPv "$(sys):$(dev):STAT:CA_RPTR_PORT"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 84
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 240
+y 105
+w 270
+h 15
+controlPv "$(sys):$(dev):STAT:CA_ADDR_LIST"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 84
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 240
+y 125
+w 270
+h 15
+controlPv "$(sys):$(dev):STAT:CA_AUTO_ADDR"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 84
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 240
+y 145
+w 270
+h 15
+controlPv "$(sys):$(dev):STAT:CA_MAX_ARRAY"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 84
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 240
+y 165
+w 270
+h 15
+controlPv "$(sys):$(dev):STAT:CA_CONN_TIME"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 84
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 240
+y 185
+w 270
+h 15
+controlPv "$(sys):$(dev):STAT:CA_SRCH_TIME"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 84
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 240
+y 205
+w 270
+h 15
+controlPv "$(sys):$(dev):STAT:CA_BEAC_TIME"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 84
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 240
+y 225
+w 270
+h 15
+controlPv "$(sys):$(dev):STAT:TIMEZONE"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 84
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 240
+y 245
+w 270
+h 15
+controlPv "$(sys):$(dev):STAT:IOC_LOG_PORT"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 84
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Text Monitor)
+object activeXTextDspClass:noedit
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 240
+y 265
+w 270
+h 15
+controlPv "$(sys):$(dev):STAT:IOC_LOG_INET"
+format "decimal"
+font "helvetica-medium-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 10
+limitsFromDb
+nullColor index 84
+smartRefresh
+fastUpdate
+newPos
+objType "controls"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 530
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 460
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 0
+y 0
+w 380
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "ID=$(sys):$(dev)"
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 390
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Devices"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 40
+w 510
+h 20
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "EPICS Environment Variables"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 530
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 530
+  2 530
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+

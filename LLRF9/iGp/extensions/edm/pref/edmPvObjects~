@@ -1,0 +1,3 @@
+2
+EPICS /opt/epics/extensions/lib/linux-x86_64/libEpics.so EPICS PV
+LOC /opt/epics/extensions/lib/linux-x86_64/libLoc.so Local PV

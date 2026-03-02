@@ -1,0 +1,195 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 365
+y 398
+w 430
+h 130
+font "courier-bold-r-12.0"
+ctlFont "courier-bold-r-12.0"
+btnFont "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+textColor index 15
+ctlFgColor1 index 0
+ctlFgColor2 index 0
+ctlBgColor1 index 75
+ctlBgColor2 index 75
+topShadowColor index 77
+botShadowColor index 73
+title "Configuration Restore: Confirm"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Shell Command)
+object shellCmdClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 10
+y 90
+w 140
+h 30
+fgColor index 15
+bgColor index 12
+topShadowColor index 14
+botShadowColor index 10
+font "courier-bold-r-18.0"
+closeDisplay
+buttonLabel "YES"
+numCmds 1
+command {
+  0 "CWput ./sr/$(dev)/`caget -t $(sys):$(dev):SRFILEIN`"
+}
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 280
+y 90
+w 140
+h 30
+fgColor index 15
+bgColor index 12
+topShadowColor index 14
+botShadowColor index 10
+label "NO"
+font "courier-bold-r-18.0"
+3d
+endObjectProperties
+
+# (Text Update)
+object TextupdateClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 160
+y 35
+w 260
+h 20
+controlPv "$(sys):$(dev):SRFILEIN"
+fgColor index 15
+fgAlarm
+bgColor index 12
+fill
+font "courier-bold-r-14.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 110
+y 25
+w 270
+h 15
+font "courier-medium-r-14.0"
+fgColor index 15
+bgColor index 75
+useDisplayBg
+value {
+  "Configuration will be restored"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 110
+y 55
+w 207
+h 15
+font "courier-medium-r-14.0"
+fgColor index 15
+bgColor index 75
+useDisplayBg
+value {
+  "Do you want to proceed?"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 110
+y 36
+w 45
+h 20
+font "courier-medium-r-14.0"
+fgColor index 15
+bgColor index 75
+useDisplayBg
+value {
+  "from:"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 30
+y 25
+w 60
+h 50
+lineColor index 23
+fill
+fillColor index 39
+lineWidth 2
+closePolygon
+numPoints 3
+xPoints {
+  0 30
+  1 90
+  2 60
+}
+yPoints {
+  0 75
+  1 75
+  2 25
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 56
+y 37
+w 9
+h 38
+font "utopia-bold-r-32.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 75
+useDisplayBg
+value {
+  "!"
+}
+autoSize
+endObjectProperties
+

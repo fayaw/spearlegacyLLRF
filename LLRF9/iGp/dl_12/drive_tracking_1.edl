@@ -1,0 +1,27 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 1074
+y 431
+w 295
+h 35
+font "courier-bold-r-12.0"
+ctlFont "courier-bold-r-12.0"
+btnFont "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 75
+textColor index 0
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 75
+ctlBgColor2 index 46
+topShadowColor index 77
+botShadowColor index 73
+title "iGp12: Drive Source $(drv)"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+

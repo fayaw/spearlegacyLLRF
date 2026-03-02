@@ -1,0 +1,94 @@
+#!/bin/sh
+
+# This script adds the new IOC to relevant config files
+#
+# Copyright (c) 2010 Dimtel, Inc., All Rights Reserved
+#
+# $Id: IOC_add,v 1.6 2020/02/11 18:24:55 dim Exp $
+# $Date: 2020/02/11 18:24:55 $
+# $Author: dim $
+# $Revision: 1.6 $
+# $Log: IOC_add,v $
+# Revision 1.6  2020/02/11 18:24:55  dim
+# Added support for variable sysid
+#
+# Revision 1.5  2016/08/22 22:38:58  dim
+# Integrated LLRF panels and matlab tools
+#
+# Revision 1.4  2014/10/24 00:13:29  dim
+# Updated to use template PV list, system base can now be specified
+#
+# Revision 1.3  2011/04/15 18:11:27  dim
+# Avoid creating save/restore directory if it already exists
+#
+# Revision 1.2  2010/10/05 18:16:54  dim
+# Initial cleanup
+#
+#
+
+if [ $# -lt 2 ]; then
+  echo "Usage: $0 <IP address> <device name> [system name]"
+  echo -e "       system name defaults to IGPF\n"
+  echo "To add LLRF9 IOC, use HW as device name, for example:"
+  echo "$0 192.168.1.1 HW DLLRF1"
+  echo "will add DLLRF1 IOC"
+  exit 1
+fi
+
+if [ $# -eq 3 ]; then
+  sys=$3
+else
+  sys=IGPF
+fi
+dev=$2
+ip_addr=$1
+
+# Test the IOC communication
+/bin/ping -c1 ${ip_addr} > /dev/null
+if [ $? -ne 0 ]; then
+  echo "Could not communicate with IOC IP address ${ip_addr}, aborting"
+  exit 2
+fi
+
+revision=`EPICS_CA_ADDR_LIST=${ip_addr} caget -t ${sys}:${dev}:REVISION`
+if [ $? -ne 0 ]; then
+  echo "Could not read FPGA/system revision from the IOC (${sys}:${dev}:REVISION), aborting"
+  exit 3
+fi
+
+# Check revision major version
+if [ ${revision/.*/} -ge 9 ]; then
+  rev=llrf;
+  unit=${sys};
+  sysid=${sys};
+elif [ ${revision/.*/} -ge 3 ]; then
+  rev=12;
+  unit=${dev};
+  sysid=${sys}:${dev};
+else
+  rev=8;
+  unit=${dev};
+  sysif=${sys}:${dev};
+fi
+
+tmpf=`mktemp`
+addr_list=${IGPTOP}/config/epics_addr_list
+echo ${ip_addr} >> ${addr_list}
+/bin/sort ${addr_list} | /usr/bin/uniq > ${tmpf}
+/bin/mv ${tmpf} ${addr_list}
+
+cd ${IGPTOP}/dl_${rev}/pvs
+
+if [ ${rev} == 'llrf' ]; then
+  /bin/sed -e "s/^\$(SYS)/${sysid}/" _SR_TEMPLATE_ > ${sys}.pvs
+else
+  /bin/sed -e "s/^\$(SYS):\$(DEV)/${sysid}/" _SR_TEMPLATE_ > ${dev}.pvs
+fi
+
+[ ! -d ${IGPTOP}/dl_${rev}/sr/${unit} ] && /bin/mkdir ${IGPTOP}/dl_${rev}/sr/${unit}
+
+
+cat <<EOF
+Device name ${sysid} at IP address ${ip_addr} added. Please log out and
+back in for the changes to take effect
+EOF

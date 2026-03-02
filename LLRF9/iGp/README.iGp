@@ -1,0 +1,19 @@
+                         iGp12 software distribution
+
+This is the top directory of the iGp12 software installation. To
+use the tools in this installation a proper environment must be set up. 
+Installation script adds the environment configuration command (. envSet.sh)
+to ".bashrc".
+
+Once the environment is configured, scripts for iGp12/iGp control become
+available.  These include:
+
+iGp_display - Opens the top-level user interface panel in EDM
+
+In addition, the following EPICS tools are available:
+
+caput      - Modify a PV
+caget      - Read out a PV
+camonitor  - Monitor a PV for changes
+CWget      - Read multiple PVs, used for configuration saving
+CWput      - Restores values saved by CWget

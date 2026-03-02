@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ $# -eq 1 ]; then
+  dev=$1
+else
+  dev=TEST
+fi
+
+#cd ${HOME}/designs/iGp/dl
+edm -x -m "sys=IGPF,dev=${dev}" main.edl

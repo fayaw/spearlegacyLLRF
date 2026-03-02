@@ -1,0 +1,164 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 1464
+y 67
+w 351
+h 406
+font "courier-medium-r-8.0"
+ctlFont "helvetica-bold-r-14.0"
+btnFont "helvetica-bold-r-14.0"
+fgColor index 15
+bgColor index 12
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 15
+ctlBgColor2 index 49
+topShadowColor index 1
+botShadowColor index 14
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+# Geometry
+x 0
+y 0
+w 350
+h 200
+# Appearance
+border
+graphTitle "Magnitude"
+xLabel "Frequency (kHz)"
+yLabel "dB"
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "helvetica-bold-r-12.0"
+# Operating Modes
+plotMode "plotLastNPts"
+nPts 1
+# X axis properties
+showXAxis
+xAxisSrc "AutoScale"
+xMin 0
+xMax 0.2
+# Y axis properties
+showYAxis
+yAxisSrc "AutoScale"
+yMin -1
+yMax 1
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 2
+xPv {
+  0 "$(sys):$(dev):$(acq):FREQ"
+  1 "$(sys):$(dev):$(acq):VEC:PEAKFREQ1"
+}
+yPv {
+  0 "$(sys):$(dev):$(acq):MAG"
+  1 "$(sys):$(dev):$(acq):VEC:PEAK1"
+}
+plotStyle {
+  1 "point"
+}
+lineThickness {
+  1 2
+}
+plotUpdateMode {
+  0 "xOrY"
+  1 "xOrY"
+}
+plotSymbolType {
+  1 "circle"
+}
+ySigned {
+  0 3112244
+  1 1
+}
+plotColor {
+  0 index 26
+  1 index 47
+}
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+# Geometry
+x 0
+y 205
+w 350
+h 200
+# Appearance
+border
+graphTitle "Phase"
+xLabel "Frequency (kHz)"
+yLabel "deg"
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "helvetica-bold-r-12.0"
+# Operating Modes
+plotMode "plotLastNPts"
+nPts 1
+# X axis properties
+showXAxis
+xAxisSrc "AutoScale"
+xMin 0
+xMax 0.2
+# Y axis properties
+showYAxis
+yAxisSrc "AutoScale"
+yMin -1
+yMax 1
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 2
+xPv {
+  0 "$(sys):$(dev):$(acq):FREQ"
+  1 "$(sys):$(dev):$(acq):VEC:PEAKFREQ1"
+}
+yPv {
+  0 "$(sys):$(dev):$(acq):PHASE"
+  1 "$(sys):$(dev):$(acq):VEC:PHASE1"
+}
+plotStyle {
+  1 "point"
+}
+lineThickness {
+  1 2
+}
+plotUpdateMode {
+  0 "xOrY"
+  1 "xOrY"
+}
+plotSymbolType {
+  1 "circle"
+}
+ySigned {
+  0 3112244
+  1 1
+}
+plotColor {
+  0 index 22
+  1 index 47
+}
+endObjectProperties
+

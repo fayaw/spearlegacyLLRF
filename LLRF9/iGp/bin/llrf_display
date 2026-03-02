@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# This script starts EDM with the top-level LLRF display.
+#
+# Copyright (c) 2016 Dimtel, Inc., All Rights Reserved
+#
+# $Id: llrf_display,v 1.2 2020/07/17 17:32:05 dim Exp $
+# $Date: 2020/07/17 17:32:05 $
+# $Author: dim $
+# $Revision: 1.2 $
+# $Log: llrf_display,v $
+# Revision 1.2  2020/07/17 17:32:05  dim
+# Added data macro
+#
+# Revision 1.1  2017/03/03 21:44:30  dim
+# Initial import
+#
+
+usage() {
+  echo "Usage: $1 [SYSTEM]"
+  echo "  [SYSTEM]      - IOC device name, defaults to LLRF"
+  
+  exit 1
+}
+
+script=`basename $0`
+caget=${IGPTOP}/bin/${HOST_ARCH}/caget
+
+if [ -n "$1" ]; then
+  sys=$1;
+else
+  sys=LLRF;
+fi
+
+cd ${IGPTOP}/dl_llrf
+${IGPTOP}/bin/${HOST_ARCH}/edm -cmap -x -noedit -m "data=.,sys=$sys" top.edl

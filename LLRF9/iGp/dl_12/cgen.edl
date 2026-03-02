@@ -1,0 +1,710 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 137
+y 314
+w 655
+h 360
+font "courier-bold-r-8.0"
+ctlFont "courier-bold-r-8.0"
+btnFont "courier-bold-r-8.0"
+fgColor index 15
+bgColor index 12
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 15
+ctlBgColor2 index 49
+topShadowColor index 1
+botShadowColor index 14
+title "iGp12: Coefficient Generator"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 30
+w 655
+h 330
+lineColor index 83
+fill
+fillColor index 83
+lineWidth 0
+alarmPv "$(sys):$(dev):PANEL:BG"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 200
+y 40
+w 120
+h 150
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 8
+release 0
+# Geometry
+x 330
+y 70
+w 315
+h 120
+# Appearance
+border
+plotAreaBorder
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "courier-bold-r-10.0"
+# Operating Modes
+nPts 2
+# X axis properties
+showXAxis
+xAxisSrc "AutoScale"
+xMin 0
+xMax 15
+xLabelIntervals 4
+xShowLabelGrid
+# Y axis properties
+yAxisSrc "fromUser"
+yMin -32768
+yMax 32767
+yLabelIntervals 10
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 1
+yPv {
+  0 "$(sys):$(dev):COEFF"
+}
+plotStyle {
+  0 "point"
+}
+lineThickness {
+  0 2
+}
+plotUpdateMode {
+  0 "y"
+}
+plotSymbolType {
+  0 "circle"
+}
+ySigned {
+  0 1
+}
+plotColor {
+  0 index 35
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 50
+w 70
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "GAIN [0-1]"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 125
+y 40
+w 65
+h 30
+controlPv "$(sys):$(dev):FLT:GAIN"
+displayMode "decimal"
+precision 2
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 90
+w 98
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "PHASE, DEGREES"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 125
+y 80
+w 65
+h 30
+controlPv "$(sys):$(dev):FLT:PHASE"
+displayMode "decimal"
+precision 2
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 130
+w 105
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FREQUENCY [0-1]"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 125
+y 120
+w 65
+h 30
+controlPv "$(sys):$(dev):FLT:FREQ"
+displayMode "decimal"
+precision 5
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 10
+y 165
+w 98
+h 13
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "NUMBER OF TAPS"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 125
+y 160
+w 65
+h 30
+controlPv "$(sys):$(dev):FLT:TAPS"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 8
+release 0
+# Geometry
+x 5
+y 200
+w 315
+h 150
+# Appearance
+border
+plotAreaBorder
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "courier-bold-r-10.0"
+# Operating Modes
+plotMode "plotLastNPts"
+nPts 1
+# X axis properties
+showXAxis
+xAxisSrc "fromUser"
+xMin 0
+xMax 0.5
+# Y axis properties
+showYAxis
+yAxisSrc "fromUser"
+yMin -50
+yMax 25
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 2
+xPv {
+  0 "$(sys):$(dev):FTF:FREQ"
+  1 "$(sys):$(dev):FTF:FTUNE"
+}
+yPv {
+  0 "$(sys):$(dev):FTF:MAG"
+  1 "$(sys):$(dev):FTF:GTUNE"
+}
+plotStyle {
+  1 "point"
+}
+lineThickness {
+  0 2
+  1 3
+}
+plotUpdateMode {
+  0 "xOrY"
+  1 "xOrY"
+}
+plotSymbolType {
+  1 "circle"
+}
+ySigned {
+  0 1
+  1 1
+}
+plotColor {
+  0 index 35
+  1 index 47
+}
+endObjectProperties
+
+# (X-Y Graph)
+object xyGraphClass
+beginObjectProperties
+major 4
+minor 8
+release 0
+# Geometry
+x 330
+y 200
+w 315
+h 150
+# Appearance
+border
+plotAreaBorder
+fgColor index 15
+bgColor index 79
+gridColor index 5
+font "courier-bold-r-10.0"
+# Operating Modes
+plotMode "plotLastNPts"
+nPts 1
+# X axis properties
+showXAxis
+xAxisSrc "fromUser"
+xMin 0
+xMax 0.5
+# Y axis properties
+showYAxis
+yAxisSrc "fromUser"
+yMin -180
+yMax 180
+# Y2 axis properties
+y2AxisSrc "AutoScale"
+y2Max 1
+# Trace Properties
+numTraces 2
+xPv {
+  0 "$(sys):$(dev):FTF:FREQ"
+  1 "$(sys):$(dev):FTF:FTUNE"
+}
+yPv {
+  0 "$(sys):$(dev):FTF:PHASE"
+  1 "$(sys):$(dev):FTF:PTUNE"
+}
+plotStyle {
+  1 "point"
+}
+lineThickness {
+  0 2
+  1 3
+}
+plotUpdateMode {
+  0 "xOrY"
+  1 "xOrY"
+}
+plotSymbolType {
+  1 "circle"
+}
+xSigned {
+  0 22741828
+}
+ySigned {
+  0 137630844
+  1 1
+}
+plotColor {
+  0 index 23
+  1 index 47
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 225
+y 45
+w 70
+h 26
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Fractional"
+  "tune"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 210
+y 80
+w 100
+h 30
+controlPv "$(sys):$(dev):FTF:TUNE"
+displayMode "decimal"
+precision 5
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 265
+y 125
+w 45
+h 20
+controlPv "$(sys):$(dev):FTF:GTUNE"
+format "decimal"
+font "courier-bold-r-10.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+precision 1
+nullColor index 1
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 210
+y 122
+w 28
+h 26
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Gain"
+  "(dB)"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 210
+y 157
+w 35
+h 26
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "Phase"
+  "(deg)"
+}
+autoSize
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 7
+release 0
+x 265
+y 160
+w 45
+h 20
+controlPv "$(sys):$(dev):FTF:PTUNE"
+format "decimal"
+font "courier-bold-r-10.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 12
+precision 1
+nullColor index 1
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 655
+h 30
+lineColor index 15
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 585
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 1
+x 0
+y 0
+w 505
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 51
+useDisplayBg
+value {
+  "ID=$(sys):$(dev)"
+}
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 655
+h 0
+lineColor index 15
+fillColor index 15
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 655
+  2 655
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 4
+release 0
+x 515
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Coefficient Generator"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 545
+y 40
+w 100
+h 20
+fgColor index 15
+onColor index 5
+offColor index 12
+inconsistentColor index 46
+topShadowColor index 14
+botShadowColor index 10
+controlPv "$(sys):$(dev):BO:CPCOEFF"
+indicatorPv "$(sys):$(dev):BO:CPCOEFF"
+onLabel "LOAD"
+offLabel "OFF"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Choice Button)
+object activeChoiceButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 330
+y 40
+w 205
+h 20
+fgColor index 15
+bgColor index 12
+selectColor index 5
+inconsistentColor index 46
+topShadowColor index 14
+botShadowColor index 9
+controlPv "$(sys):$(dev):LDSET"
+font "courier-bold-r-12.0"
+orientation "horizontal"
+endObjectProperties
+

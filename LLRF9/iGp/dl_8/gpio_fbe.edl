@@ -1,0 +1,825 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 796
+y 108
+w 500
+h 315
+font "courier-bold-r-12.0"
+ctlFont "courier-bold-r-12.0"
+btnFont "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 12
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 15
+ctlBgColor2 index 49
+topShadowColor index 1
+botShadowColor index 14
+title "iGp12: GPIO FBE control"
+showGrid
+snapToGrid
+gridSize 5
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 225
+w 230
+h 80
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Bar)
+object activeBarClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 235
+w 150
+h 60
+indicatorColor index 34
+fgColor index 0
+bgColor index 59
+indicatorPv "$(sys):$(dev):CIC:MEAN"
+label "ADC average"
+showScale
+origin "0"
+font "courier-bold-r-12.0"
+labelTicks "2"
+majorTicks "2"
+minorTicks "2"
+border
+limitsFromDb
+min "-128"
+max "128"
+scaleFormat "FFloat"
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 240
+y 225
+w 250
+h 80
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 240
+y 0
+w 250
+h 215
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 230
+h 215
+lineColor index 15
+fill
+fillColor index 75
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 34
+w 105
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FRONT-END PHASE"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 125
+y 95
+w 55
+h 30
+controlPv "$(sys):$(dev):FE_ATTEN"
+displayMode "decimal"
+precision 1
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 104
+w 105
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FRONT-END ATTEN"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 125
+y 135
+w 55
+h 30
+controlPv "$(sys):$(dev):BE_PHASE"
+displayMode "decimal"
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 144
+w 98
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "BACK-END PHASE"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 125
+y 175
+w 55
+h 30
+controlPv "$(sys):$(dev):BE_ATTEN"
+displayMode "decimal"
+precision 1
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 184
+w 98
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "BACK-END ATTEN"
+}
+autoSize
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 5
+release 0
+x 161
+y 236
+w 58
+h 58
+controlPv "$(sys):$(dev):CIC:MEAN"
+format "decimal"
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 59
+precision 1
+nullColor index 47
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 0
+y 0
+w 230
+h 20
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FRONT/BACK END REGISTERS"
+}
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 240
+y 0
+w 250
+h 20
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "PHASE SERVO LOOP"
+}
+endObjectProperties
+
+# (Choice Button)
+object activeChoiceButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 375
+y 25
+w 105
+h 20
+fgColor index 14
+bgColor index 75
+selectColor index 73
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):PHASE_SERVO:MODE"
+font "courier-bold-r-12.0"
+orientation "horizontal"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 250
+y 29
+w 84
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "LOOP CLOSURE"
+}
+autoSize
+endObjectProperties
+
+# (Choice Button)
+object activeChoiceButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 375
+y 55
+w 105
+h 20
+fgColor index 14
+bgColor index 75
+selectColor index 73
+inconsistentColor index 46
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):PHASE_SERVO:SIGN"
+font "courier-bold-r-12.0"
+orientation "horizontal"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 250
+y 59
+w 63
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "LOOP SIGN"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 375
+y 85
+w 55
+h 30
+controlPv "$(sys):$(dev):PHASE_SERVO:GAIN"
+displayMode "decimal"
+precision 3
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 250
+y 94
+w 63
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "LOOP GAIN"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 250
+y 134
+w 84
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "INPUT OFFSET"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 375
+y 125
+w 55
+h 30
+controlPv "$(sys):$(dev):PHASE_SERVO:OFFSET"
+displayMode "decimal"
+precision 3
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 250
+y 174
+w 112
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "SATURATION LIMIT"
+}
+autoSize
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 375
+y 165
+w 55
+h 30
+controlPv "$(sys):$(dev):PHASE_SERVO:MAXDELTA"
+displayMode "decimal"
+precision 1
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Bar)
+object activeBarClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 250
+y 235
+w 230
+h 60
+indicatorColor index 34
+fgColor index 0
+bgColor index 59
+indicatorPv "$(sys):$(dev):PHASE_SERVO:DELTA"
+label "Phase servo output"
+showScale
+origin "0"
+font "courier-bold-r-12.0"
+labelTicks "2"
+majorTicks "2"
+minorTicks "2"
+border
+min "-350"
+max "350"
+scaleFormat "FFloat"
+endObjectProperties
+
+# (Up/Down Button)
+object activeUpdownButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 435
+y 85
+w 45
+h 30
+fgColor index 0
+bgColor index 75
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):PHASE_SERVO:GAIN"
+savedValuePv "LOC\\$(!W)gain_save=d"
+coarseValue "1"
+fineValue "0.1"
+label "<>"
+3d
+rate 0.1
+font "courier-bold-r-12.0"
+scaleMin 0
+scaleMax 10
+endObjectProperties
+
+# (Up/Down Button)
+object activeUpdownButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 435
+y 125
+w 45
+h 30
+fgColor index 0
+bgColor index 75
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):PHASE_SERVO:OFFSET"
+savedValuePv "LOC\\$(!W)offset_save=d"
+coarseValue "1"
+fineValue "0.1"
+label "<>"
+3d
+rate 0.1
+font "courier-bold-r-12.0"
+scaleMin -128
+scaleMax 127
+endObjectProperties
+
+# (Up/Down Button)
+object activeUpdownButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 435
+y 165
+w 45
+h 30
+fgColor index 0
+bgColor index 75
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):PHASE_SERVO:MAXDELTA"
+savedValuePv "LOC\\$(!W)maxdelta_save=d"
+coarseValue "100"
+fineValue "1"
+label "<>"
+3d
+rate 0.1
+font "courier-bold-r-12.0"
+scaleMin -4095
+scaleMax 4095
+endObjectProperties
+
+# (Text Entry)
+object TextentryClass
+beginObjectProperties
+major 10
+minor 0
+release 0
+x 125
+y 25
+w 55
+h 30
+controlPv "$(sys):$(dev):PHASE_SERVO:SETPT"
+displayMode "decimal"
+precision 1
+fgColor index 15
+fgAlarm
+bgColor index 0
+fill
+font "courier-bold-r-10.0"
+endObjectProperties
+
+# (Up/Down Button)
+object activeUpdownButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 185
+y 25
+w 35
+h 30
+fgColor index 0
+bgColor index 75
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):PHASE_SERVO:SETPT"
+savedValuePv "LOC\\$(!W)setpoint_save=d"
+coarseValue "100"
+fineValue "1"
+label "<>"
+3d
+rate 0.1
+font "courier-bold-r-12.0"
+scaleMin 0
+scaleMax 4095
+endObjectProperties
+
+# (Up/Down Button)
+object activeUpdownButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 185
+y 95
+w 35
+h 30
+fgColor index 0
+bgColor index 75
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):FE_ATTEN"
+savedValuePv "LOC\\$(!W)fe_atten_save=d"
+coarseValue "3"
+fineValue "0.5"
+label "<>"
+3d
+rate 0.1
+font "courier-bold-r-12.0"
+scaleMin 0
+scaleMax 31.5
+endObjectProperties
+
+# (Up/Down Button)
+object activeUpdownButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 185
+y 135
+w 35
+h 30
+fgColor index 0
+bgColor index 75
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):BE_PHASE"
+savedValuePv "LOC\\$(!W)be_phase_save=d"
+coarseValue "100"
+fineValue "1"
+label "<>"
+3d
+rate 0.1
+font "courier-bold-r-12.0"
+scaleMin 0
+scaleMax 4095
+endObjectProperties
+
+# (Up/Down Button)
+object activeUpdownButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 185
+y 175
+w 35
+h 30
+fgColor index 0
+bgColor index 75
+topShadowColor index 77
+botShadowColor index 73
+controlPv "$(sys):$(dev):BE_ATTEN"
+savedValuePv "LOC\\$(!W)be_atten_save=d"
+coarseValue "3"
+fineValue "0.5"
+label "<>"
+3d
+rate 0.1
+font "courier-bold-r-12.0"
+scaleMin 0
+scaleMax 31.5
+endObjectProperties
+
+# (Text Control)
+object activeXTextDspClass
+beginObjectProperties
+major 4
+minor 5
+release 0
+x 125
+y 65
+w 95
+h 20
+controlPv "$(sys):$(dev):FE_PHASE"
+format "decimal"
+font "courier-bold-r-12.0"
+fontAlign "center"
+fgColor index 0
+bgColor index 59
+precision 1
+nullColor index 47
+newPos
+objType "monitors"
+noExecuteClipMask
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 60
+w 105
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "FRONT-END PHASE"
+}
+autoSize
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 10
+y 75
+w 77
+h 13
+font "courier-bold-r-12.0"
+fgColor index 15
+bgColor index 15
+useDisplayBg
+value {
+  "DAC SETTING"
+}
+autoSize
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 160
+y 235
+w 60
+h 60
+lineColor index 14
+fillColor index 15
+endObjectProperties
+

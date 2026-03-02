@@ -1,0 +1,217 @@
+4 0 1
+beginScreenProperties
+major 4
+minor 0
+release 1
+x 515
+y 573
+w 420
+h 180
+font "courier-bold-r-8.0"
+ctlFont "courier-bold-r-8.0"
+btnFont "courier-bold-r-8.0"
+fgColor index 14
+bgColor index 12
+textColor index 14
+ctlFgColor1 index 14
+ctlFgColor2 index 1
+ctlBgColor1 index 0
+ctlBgColor2 index 49
+topShadowColor index 1
+botShadowColor index 14
+title "iGp: Main Panel"
+showGrid
+snapToGrid
+endScreenProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 0
+y 0
+w 420
+h 30
+lineColor index 8
+fill
+fillColor index 9
+lineWidth 0
+endObjectProperties
+
+# (Rectangle)
+object activeRectangleClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 140
+y 100
+w 140
+h 60
+lineColor index 14
+fill
+fillColor index 80
+alarmPv "$(sys):$(dev):ERRSUM"
+endObjectProperties
+
+# (Exit Button)
+object activeExitButtonClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 350
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+label "EXIT"
+font "courier-bold-r-14.0"
+3d
+exitProgram
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 150
+y 110
+w 120
+h 40
+fgColor index 15
+bgColor index 12
+topShadowColor index 0
+botShadowColor index 9
+font "courier-bold-r-24.0"
+buttonLabel "SETUP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "ctrl.edl"
+}
+menuLabel {
+  0 "TEST"
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev)"
+}
+replaceSymbols {
+  0 1
+}
+icon
+endObjectProperties
+
+# (Static Text)
+object activeXTextClass
+beginObjectProperties
+major 4
+minor 1
+release 0
+x 0
+y 0
+w 270
+h 30
+font "courier-bold-r-14.0"
+fontAlign "center"
+fgColor index 15
+bgColor index 0
+useDisplayBg
+value {
+  "SYSTEM:$(sys) DEVICE:$(dev)"
+}
+endObjectProperties
+
+# (Button)
+object activeButtonClass
+beginObjectProperties
+major 4
+minor 0
+release 0
+x 160
+y 50
+w 100
+h 30
+fgColor index 15
+onColor index 6
+offColor index 12
+inconsistentColor index 61
+topShadowColor index 14
+botShadowColor index 8
+controlPv "$(sys):$(dev):FBCTRL"
+indicatorPv "$(sys):$(dev):FBCTRL"
+onLabel "CHANNEL ON"
+offLabel "CHANNEL OFF"
+3d
+font "courier-bold-r-12.0"
+objType "controls"
+endObjectProperties
+
+# (Lines)
+object activeLineClass
+beginObjectProperties
+major 4
+minor 0
+release 1
+x 0
+y 30
+w 420
+h 0
+lineColor index 0
+fillColor index 0
+lineWidth 2
+numPoints 3
+xPoints {
+  0 0
+  1 420
+  2 420
+}
+yPoints {
+  0 30
+  1 30
+  2 30
+}
+endObjectProperties
+
+# (Related Display)
+object relatedDisplayClass
+beginObjectProperties
+major 4
+minor 2
+release 0
+x 280
+y 5
+w 60
+h 20
+fgColor index 0
+bgColor index 9
+topShadowColor index 12
+botShadowColor index 6
+font "courier-bold-r-14.0"
+buttonLabel "HELP"
+numPvs 4
+numDsps 1
+displayFileName {
+  0 "help.edl"
+}
+menuLabel {
+  0 "HELP"
+}
+allowDups {
+  0 1
+}
+symbols {
+  0 "sys=$(sys),dev=$(dev),panel=Main Panel"
+}
+replaceSymbols {
+  0 1
+}
+endObjectProperties
+

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# Quick EDM start script, one argument - top level system ID
+#
+# Copyright (c) 2007-2010 Dimtel, Inc., All Rights Reserved
+#
+# $Id: run_edm,v 1.2 2019/09/19 14:49:03 dim Exp $
+# $Date: 2019/09/19 14:49:03 $
+# $Author: dim $
+# $Revision: 1.2 $
+# $Log: run_edm,v $
+# Revision 1.2  2019/09/19 14:49:03  dim
+# Added $(data) macro
+#
+# Revision 1.1  2017/03/10 17:30:36  dim
+# Initial import
+#
+
+if [ $# -eq 1 ]; then
+  sys=$1
+else
+  sys=LLRF
+fi
+
+edm -x -m "data=.,sys=${sys}" top.edl
