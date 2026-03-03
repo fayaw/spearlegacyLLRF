@@ -1,0 +1,196 @@
+=== HVPS PPS Interlocks - Extracted from HoffmanBoxPPSWiring.docx ===
+
+Para 0: HVPS PPS Interlocks
+Para 1: PPS Connections in the HVPS Controller
+Para 2: The wiring involved in the PPS system goes through several connectors and terminal strips in the HVPS controller (ref. WD-730-790-02-C6).
+Para 3: PPS GOB12-88PNE
+Para 4: This was a Burndy circular 8 pin connector.  Is it now a Souriau Trim Trio part?  If so, what is the part number?  The connector likely comes from the locked PPS box installed securely on the HVPS controller.  The pin names, wire colors, functions, and terminations are listed in Table 1.
+Para 5: Table :  Connection information from input PPS Burndy connector.
+Para 6: I assume, without proof (must check with Tracy) that the PPS 1 and 2 enables are sourced between pins E – F and G – H, respectively, and that the PPS looks for closed contacts between A – B and C – D.
+Para 7: AMP 8Pin
+Para 8: There is an AMP 8 pin connector that connects to the four LEDs, two each green and two each red, that display the PPS status on the outside of the Hoffman box.
+Para 9: Switchgear PPS
+Para 10: The PPS logic inside of the switchgear is documented on several drawings.  GP 439-704-02-C1 is a relatively old drawing with some information, but few details.  It shows the auxiliary contacts as being wires 20, 21, and 22 connected to TB3-22, TB3-23, and TB3-24.  It is not clear that this drawing is current.
+Para 11: rossEngr713203 is the internal Ross Engineering system schematic drawing from 1978.  It includes the drawing for the controller driver, P/N 820360, and the Vacuum Contactor, P/N 813203.  The interest of this drawing is that it contains the drawing for TB2 in the vacuum contactor and relays S1 – S5 in the vacuum contactor assembly.
+Para 12: GP 439-704-02-C1 and rossEngr713203 interface with the wiring diagram ID 308-801-06-C1.  On this wiring diagram, wires 20, 21, and 22 are terminated on terminals 18, 19, and 20 on TB2.  The NO contact is shown across terminals 18 and 19; the NC contact is shown across terminals 19 and 20.  These are all consistent with the labeling on rossEngr713203.  ID 308-801-06-C1 is difficult for me to interpret and may contain errors.  We may need to consult with an expert on this drawing to understand it correctly.
+Para 13: WD-730-790-01-C3 may be more current documentation.  It contains both TS-5 in the Hoffman Box, listed as Contactor Controls, and TB2 in the Contactor Disconnect panel in the HVPS.  The part of this wiring diagram relevant to just the interface between the Hoffman Box and the Contactor Disconnect is self-contained in WD-730-794-02-C0.  This latter diagram has more details about the function of the wires on TS-5, the Contactor Controls in the Hoffman Box.  From now on I will just refer to the latter document.
+Para 14: Table :  Wiring documentation for Contactor Controls input in the Hoffman Box as shown on WD-730-790-02-C6
+Para 15: I include two tables for TS-5, the Contactor Controls terminal strip in the Hoffman Box.  Table 2 summarizes the documentation from the point of view of the Hoffmann Box and WD-730-790-02-C6.  It looks at the terminations, sources and/or destinations, of the signals from within the Hoffman Box.  It assumes that a trunk cable goes from TS-5 to the HVPS, but gives no details of this trunk cable.
+Para 16: The second table, table 3, summarizes the wiring from the point of view of TB2 in the HVPS, using WD-730-794-02-C0.  We track the connection from TS-5 to TB2 by matching the wire colors in the wire bundle that connects the two strips.  We use as the function name in table 3 the names assigned to TS-5 in WD-730-794-02-C0, recognizing that those names are different from those listed in table 2, which are copied from the labels in WD-730-790-02-C6.
+Para 17: Table 3:  Wiring documentation for Contactor Interface inside of the HVPS as shown on WD-730-794-02-C0
+Para 18: Switchgear Controller Theory of Operation and the Effect of the PPS System on it
+Para 19: There are some inconsistencies in the current documentation so, until we complete some field inspections, we are unsure of the exact interface between the PPS and the switchgear.  Based on the existing documentation I will investigate two possible interpretations of how the PPS system controls the switchgear.
+Para 20: General Contactor Operation and Permits
+Para 21: I include here, for at least my own information, the basic theory of operation of the switchgear controller.  I use GP 439-704-02-C1 as the basis for this analysis.  The primary purpose of the schematic is to show the internal logic and workings of the controller.  In addition to the schematic the document also has text, very useful for troubleshooting, to describe the sequence of operation.  For our purposes, I am more interested in the general input/output operation of the controller and how it relates to external controls, including the effect of the PPS control on the contactor operation.  For this part, we are interested primarily in the far-left hand side and far-right hand side of the document.
+Para 22: The vacuum contactor control consists of two coils, one, L2, that requires a high-power input to initially close the contactor and another, lower power coil, L1, that holds the closed contactor in that position.  rossEngr713203 shows these coils and labels.  GP 439-704-02-C1 mislabels L1 as L2, identifying two different contactor coils with the same name.  In order to energize the high-power coil L2, K1 must be energized which requires, among other conditions, that the auxiliary external control contactor MX be energized.  In order to energize the holding coil L1, MX must continue to be energized and the auxiliary tripping relay, TX, must be de-energized.
+Para 23: The logic for the TX relay is seen on the left-hand side of the schematic.  The main inputs are from the four MCO protection relays, one for each phase and one for neutral, that will trip, and close their interlock contact, on either an instantaneous overcurrent fault (50) or a time overcurrent fault (51).  The function of the TX relay is to summarize these various faults and remove the permit from the hold-in coil.  The TX coil has another input chain.  This chain consists of the RR relay NC contact, the TX NO contact and a manual reset switch.  If the TX coil is energized and the RR coil is not energized, the TX coil latches.  It will only clear if all the MCO relays have no faults, and either the RR coil is energized, or the local reset switch is depressed.
+Para 24: K4 is another relay that controls operation of the contactor.  (For this discussion I rely on GP 439-704-02-C1 and assume, without justification, that this diagram is correct.  I will point out differences between this diagram and others when I find them.)  K4 has two NO contacts.  One interrupts the control voltage downstream of the MCO protective relays.  Removal of this voltage removes the voltages that energize the time delay relay block as well as relays K1, K2, and eventually K3.  All these relays, except for K3, should open quickly.  K3, which is energized by the voltage on a large storage capacitor may take some time to open.  However, on the 24V DC controls section of this schematic we see that a second K4 NO contact is inserted between wire name BB and one side of the MX coil.  (An NC contact from an 86 lockout relay is also in series with this MX coil.)  Neither of these contacts is shown in WD-730-794-02-C0.  Another potential error on this drawing is the labeling of the functions of the RR and K4 relays.  The drawing labels RR as the PPS relay and K4 as the RESET relay.  These labels may be swapped from the actual functions of these relays.  A NO contact of the MX coil is in series with the L1 coil that holds the contactor in place after it has closed.  De-energizing K4 in turn de-energizes MX which opens the contactor.
+Para 25: Assumption that RR Coil is the PPS Control
+Para 26: The RR coil is energized via a signal from the Contactor Enabled line, Output 2 on pin 5 of the 1746-0X8 in Slot 5.  However, I do not see how the RR coil either prevents the vacuum contactor from turning on or removes the permit from the contactor once it is on.  It seems its sole function is to prevent the TX relay from latching on an MCO overcurrent fault.  The RR relay seems to act as a reset of the TX relay after it has latched.
+Para 27: Assumption that K4 Coil is the PPS Control
+Para 28: The K4 relay controls, through the MX relay, the hold-in current for the L1 coil of the contactor.  K4 also removes all control power to the contactor controller.  This will cause the stored energy in the contactor controller to dissipate.  The controller will take some time after K4 is re-energized to build up sufficient voltage in C6 to re-energize K3 and place the controller in a “ready” state so that the contactor can be re-closed.  This explains why it takes several seconds to re-close the contactor after it has been opened by removing the PPS enable.
+Para 29: Conclusion  
+Para 30: In summary, it appears that the labeling of the RR and K4 relays on WD-730-794-02-C0 is in error; the two labels should be swapped.  The RR relay can act as a reset, but K4 is the relay that is used to open the contactor and disable the controller on a PPS fault.  Also, the K4 NO and 86 NC contacts should be placed between the BB input and the MX coil on that wiring diagram.  Based on the documentation in WD-730-790-00-C6, the signal to the K4 relay on WD-730-794-02-C0 is sourced from an output of the PLC and not directly from the external PPS signals.
+Para 31: The readback for the signals labeled PPS monitor on WD-730-794-02-C0 are connected to the auxiliary contact S5 on the vacuum contactor.
+Para 32: Grounding Tank PPS
+Para 33: We use the wiring diagrams of the Hoffman Box, WD-730-790-02-C6, and the Grounding Tank, WD-790-794-06-C0, and the schematic diagram of the Grounding Tank, SD-730-790-05-C1, to document the PPS wiring to the Grounding Tank.
+Para 34: Tables 4 and 5 summarize the details of the wiring connections from the Hoffman Box through to the final terminations in the Grounding Tank.
+Para 35: Table 4:  Wiring to TS-6 in the Hoffman Box.
+Para 36: Table 5:  Wiring from TS-6 in the Hoffman Box to the Grounding Tank connections.
+Para 37: TS-6 in the Hoffman Box carries the wiring to the Grounding Tank.  This wiring is distributed to three different connectors in the Grounding Tank, each corresponding to different equipment.  Terminals 1 – 6 carry the signals to the Danfysik UltraStab DC current transducer used to measure the HVPS output current to the klystron.  This connector is labeled J2 on WD-730-794-06-C0.  The Danfysik has an internal DB9 connector to which these wires are connected.  It requires external  supplies.  (The wiring diagram for the Hoffman Box has inconsistent values for these supplies.)  These voltages are supplied by a SOLA supply that also provides analog voltages for the Monitor Board, SD-730-793-12.  (It does not, but it could, also provide power to the Regulator Card, PC-237-230-14-C0.)    The Danfysik analog output is between terminals 1 – 2 on TS-6.  This voltage is connected to both the analog Input 3 of the Slot-9 AB-1746-NI4 module and the current input of the PS Monitor Board.
+Para 38: Terminals 7 – 8 connect to the NC dry contact of an oil level sensor in the Grounding Tank.  The Hoffman Box sources 12 VDC to terminal 7 and terminal 8 is monitored by Input 8 of the Slot-6 AB-1746-IB16 module.
+Para 39: Terminals 9 – 14 and 19 – 21 are connected to some of the pins of the connector labeled P5 on WD-730-794-06-C0 and labeled J1 on SD-730-790-05-C1.  Terminals 20 – 21 are on opposite sides of a  current-measuring shunt; terminal 21 is referenced to the earth of the Grounding Tank.  The voltage drop across these two pins measures the current in the HVPS return cable. 
+Para 40: The connections to terminals 9 – 14 and 19 provide control to a Ross Grounding Switch and monitor the status of the two, manual and electrical, grounding switches in the Grounding Tank.
+Para 41: Terminals 9 and 10 monitor the status of the manual grounding (“mushroom”) switch via its auxiliary dry contacts.  The Hoffman Box sources 12 VDC control voltage to the NC contact and the voltage on the common terminal is sensed by the Slot-6 AB-1746-IB16 module on its IN9, pin 9.  (The documentation on this dry contact is inconsistent.  WD-730-794-06-C0 shows this as NO; SD-730-790-05-C1 shows this as NC.  We need to determine the correct value.)
+Para 42: Terminals 13 and 14 energize the coil of the Ross switch.  This is driven by the voltage across Slot-2 AB-1746-IO8 Output 3 to AC Common.  (We should document the specification for the Ross Grounding Switch coil.)  The Ross switch has an auxiliary contact with common, NO, and NC connections on terminals 11, 12, and 19, respectively.
+Para 43: WD-730-794-06-C0 and SD-730-790-05-C1 also document a coaxial cable that is sourced by a  Pearson CT 110 wide bandwidth current transformer.  This cable is used to monitor the HVPS output cable for transients that signify klystron arcs and initiate a crowbar trigger when it senses a large enough transient.  It is not part of the PPS connection.  Rather it feeds J1 of the Left Side Trigger Interconnect Board, SD-730-793-08-C1.
+Para 44: Finally, there are four terminals on TS-6, 15 – 18, that monitor the oil levels in the SCR phase tank and crowbar tank.  The connections to the control voltage and PLC inputs in the Hoffman box are documented on WD-790-02-C6.  The connections to the NC dry contacts in the appropriate HVPS tanks are shown on WD-730-790-01-C3.
+Para 45: PLC Code for the PPS
+Para 46: The HVPS controller has an intelligent SLC-500 based programmable logic controller (PLC).  This PLC currently is part of the PPS logic.  The external PPS interface chassis inputs PPS 1 and PPS 2 control signals to the PLC via the Slot-6 AB-1746-IB16 Inputs 14 and 15, respectively.  The relevant PLC outputs are Slot 5  AB-1746-OX8-5  OUT 2 to energize the coil of the K4 relay in the HVPS (Contactor Enable) and Slot-2 AB-1746-IO8  OUT3  5 to energize the coil of the Ross Grounding Switch.
+Para 47: PPS 1 Input
+Para 48: PPS 1 input is read into Slot-6 AB-1746-IB16 Input 14.  In the PLC code this appears in rungs
+Para 49: 0014  To set emergency off bits
+Para 50: 0015  In parallel with PPS 2 input to set B3:1 for PPS ON
+Para 51: 0016  In series with PPS 2 (and others) to energize the Ross Ground Switch Relay Coil
+Para 52: PPS 2 Input
+Para 53: PPS 2 input is read into Slot-6 AB-1746-IB16 Input 15.  In the PLC code this appears in rungs
+Para 54: 0015  In parallel with PPS 1 input to set B3:1 for PPS ON
+Para 55: 0016  In series with PPS 1 (and others) to energize the Ross Ground Switch Relay Coil
+Para 56: 0068  In series with touch panel key enable to enable the Bias Power (120 VAC to Kepko power supplies)
+Para 57: Contactor Enable
+Para 58: The output of Slot 5  AB-1746-OX8-5  OUT 2 energizes the coil of the K4 relay in the HVPS.  It appears in rungs
+Para 59: 0002  In series with master ready to Close Contactor O:5 1  (Is this Contactor On/Off or Contactor Enable?)
+Para 60: 0017  In series with Touch Panel Enable and Emergency Off Clear, 1746-OX8 2 is called Crowbar On.  Is this really Contactor Enable that energizes the coil of the K4 relay?
+Para 61: I think, but am not sure, that I understand how the coil of the K4 relay is energized and how the contactor is closed.  I think that rung 0017 is mis-labeled and that it really controls Contactor Enable.  This, in turn, energizes the coil of the K4 relay (I also assume other wiring diagrams have labeling errors).  After the K4 relay has been energized, the MX relay can be energized, which enables the HV vacuum contactor controller to close the vacuum contactor.
+Para 62: Energizing the K4 relay is done using an AB-1746-OX8, which operates relay contacts.  The input of this pair of contacts is the PPS 1 signal that is sourced from the PPS GOB12-88PNE connector.  Therefore even if the PLC fails, this signal fails safe.  If the PPS GOB12-88PNE connector does not source the 24 VDC control voltage a closed contact on the AB-1746-OX8 cannot energize the K4 relay coil.
+Para 63: Energize Ross Grounding Switch
+Para 64: The output of Slot-2 AB-1746-IO8  OUT3  5 energizes the coil of the Ross Grounding Switch.  It appears in rungs
+Para 65: 0016  If both PPS 1 and PPS 2 are enabled, energize the coil of the Ross Ground Switch Relay.
+Para 66: A possible fault scenario is that the PLC fails and sources the 120 VAC signal to the coil of the Ross Ground Switch Relay with no command given by the PPS system.
+Para 67: PPS Readbacks
+Para 68: As stated above, I assume that the external PPS interface chassis is looking for closed contacts between pins A – B and pins C – D of the GOB12-88PNE connector.
+Para 69: A – B Pins
+Para 70: Pin A connects to TS-5 15, which connects to the common of auxiliary contacts S5 on the HV vacuum contactor (ref. WD-730-794-02-C0).  Pin B connects to TS-5 14, which connects to the NC contact of the S5 auxiliary contacts.  When the HV vacuum contactor is open, the external PPS interface chassis will see a closed circuit and when the HV vacuum contactor closes, the external PPS interface chassis will see an open circuit.
+Para 71: C – D Pins
+Para 72: Pin C connects to TS-6 12, which connects to the NC contact of the auxiliary contacts of the Ross Grounding Switch (ref. SD-730-790-05-C1).  Pin D connects to TS-6 11, which connects to the common of the auxiliary contacts.  When the Ross Grounding Switch is in its normal, closed, position, the auxiliary contacts are also closed and the external PPS interface chassis will see a closed circuit.  When the switch is energized to allow power to reach the klystron, the external PPS interface chassis will see an open circuit.
+Para 73: Monitoring of PPS Readbacks
+Para 74: There are local LEDs on a PPS box on top of the Hoffman box that monitor the condition of the signals sent from and to the PPS interface chassis.  There is no such monitoring in the PLC chassis.
+Para 75: Existing Hand Drawing
+Para 76: Figure 1 is a an existing sketch of some relevant PPS connections in the HVPS.  Much of it is correct but, based on my reading of the schematics and wiring diagrams, I think that there are some trivial errors in the sketch.  Pin A should connect to TS-5 15 and B to TS-5 14, not TS-4 14 and TS-4 15.
+Para 79: Figure :  Sketch of PPS interface
+
+=== TABLES ===
+
+
+Table 0:
+  Row 0: Pin | Wire Color | Function | Termination
+  Row 1: A | Red/Black | Contactor controls | TS-5 15 (PPS)
+  Row 2: B | Red | Contactor controls | TS-5 14
+  Row 3:  |  | PPS1 Green LED Anode | AMP-8Pin  J2 1
+  Row 4: C | Orange | Ground Relay | TS-6 12
+  Row 5: D | Green/Black | Ground Relay | TS-6 11
+  Row 6:  | Blue | PPS2 Green LED Anode | AMP-8Pin  J2 3
+  Row 7: E | Green | Permits | TS-8 1
+  Row 8:  |  | PPS 1 | Slot 6  AB-1746-IB16  In 14
+  Row 9:  |  | PPS4 Red LED Anode | AMP-8Pin  J2 7
+  Row 10:  | White | Local Panel  Emergency Off | Key switch 1A
+  Row 11: F | Black | Contactor controls  PPS common | TS-5 3
+  Row 12: G | Blue | Permits | TS-8 3
+  Row 13:  |  | PPS 2 | Slot 6  AB-1746-IB16  In 15
+  Row 14:  | White | PPS3 Red LED Anode | AMP-8Pin  J2 5
+  Row 15:  | Blue | PPS LED in Local Panel | PPS LED1 Anode
+  Row 16: H | White | Permits common | TS-8 6
+  Row 17:  | Green | Contactor controls common | TS-5 1,8
+  Row 18:  |  | Control power supply, Grounding tank, etc., common | TS-2 2,4,6, TS-6 2, etc.
+  Row 19:  | Red/Black | PPS1 Green LED Cathode | AMP-8Pin  J2 2
+  Row 20:  | White/Black | PPS3 Red LED Cathode | AMP-8Pin  J2 6
+  Row 21:  | Green/Black | PPS4 Red LED Cathode | AMP-8Pin  J2 8
+  Row 22:  | Black | PPS2 Green LED Cathode (TS-2 4) | AMP-8Pin  J2 4
+  Row 23:  | Green | Local Panel diode cathodes (except for On and Off) | Internal panel wiring
+
+Table 1:
+  Row 0: TS-5 | Wire Color | Function | Termination
+  Row 1: 1 | Green | Common | System common from AMP-8PIN, PPS Trim Trio, Local Control Panel, Transformer Interlocks, Control Power, Enerpro, Regulator Board, etc.
+  Row 2: 2 | Red | Contactor On/Off | Slot 5  AB-1746-OX8-3  OUT 1
+  Row 3: 3 | Black | PPS Common | PPS GOB12-88PNE  F
+  Row 4: 4 | Black | Contactor Enable | Slot 5  AB-1746-OX8-5  OUT 2
+  Row 5: 5 | N/C | Reset | 
+  Row 6: 6 | N/C | ?? | 
+  Row 7: 7 | Brown | Blocking | Slot 7  AB-1746-IV16-0  IN 0
+  Row 8: 8 | Green | Common | System common (tied to 1)
+  Row 9: 9 | Red | Overcurrent | Slot 7  AB-1746-IV16-1  IN 1
+  Row 10: 10 | ?? | Contactor Open | TS-8 8  Local Panel LED Off cathode
+  Row 11: 11 | Orange | Contactor Closed Contactor OK | Slot 7  AB-1746-IV16-2  IN 2
+TS-8 7  Local Panel LED On cathode
+  Row 12: 12 | N/C | ?? | 
+  Row 13: 13 | Blue | Contactor Ready | Slot 7  AB-1746-IV16-3  IN 3
+  Row 14: 14 | Red | PPS | PPS GOB12-88PNE  B
+AMP-8Pin 1 PPS1 Green LED anode
+  Row 15: 15 | Red/Black | ?? | PPS GOB12-88PNE  B
+
+Table 2:
+  Row 0: TS-5 | Wire Color | TB2 | Function | Termination
+  Row 1: 1 | Green/White | CC1 | Common | MX On/Off relay coil
+  Row 2: 2 | Red/Black | BB | On | MX On/Off relay coil
+  Row 3: 3 | White | CC | PPS Common | RR (PPS) and K-4 (Reset) coil
+  Row 4: 4 | Black | 11? | PPS Permit | K-4 (Reset) coil  (Drawing error?)
+  Row 5: 5 | Red/White | EE | Reset | RR (PPS) coil  (Drawing error?)
+  Row 6: 6 | Blue/White | 10 | Auxiliary Trip | Overcurrent Relay S2-3 NC (Drawing error?)
+  Row 7: 7 | Blue/Black | 7 | Overcurrent NC | Blocking Relay S1-3 NC (Drawing error?)
+  Row 8: 8 | Green/Black | 9 | Interlock Common | Common Contactor Ready S4-2, Contactor S3-2, Overcurrent S2-2, Blocking Relay S1-2
+  Row 9: 9 | Black/White | 8 | Overcurrent NO | Overcurrent S2-1 NO
+  Row 10: 10 | White/Black | DD | Contactor Closed | Contactor S3-3 NC
+  Row 11: 11 | Orange | W | Contactor Open | Contactor S3-1 NO
+  Row 12: 12 | Orange/Black | 14 | Contactor Ready NO | Contactor Ready S4-1 NO
+  Row 13: 13 | Blue | 16 | Contactor Ready NC | Contactor Ready S4-3 NC
+  Row 14: 14 | Green | 22 | PPS Monitor Common | Contacts PPS S5-3 NC (Labeling error?)
+  Row 15: 15 | Red | 21 | PPS Monitor | Contacts PPS S5-2 Common (Labeling error?)
+
+Table 3:
+  Row 0: TS-6 | Wire Color | Function | Termination
+  Row 1: 1 | Red; White | DC Current | Slot-9 AB-1746-NI4 9  In3+;  Voltage Monitor TS-3 10
+  Row 2: 2 | Black;  Green? | DC Common | Slot-9 AB-1746-NI4 10  In3-;  SOLA PS-6 P1-2 Common;  Control Power Supply TS-2  2, and others
+  Row 3: 3 | Green?; Blue | -12 V (-15 V?) | Voltage Monitor TS-3  8;  SOLA PS-6 P1-3  -V DC
+  Row 4: 4 | Red | 12 V (15 V?) | Voltage Monitor TS-3  9;  SOLA PS-6 P1-1 +V DC
+  Row 5: 5 | Red | Status + | Control Power Supply TS-2  5, and others
+  Row 6: 6 | NC | Status – Transductor | 
+  Row 7: 7 | Red | +12 V | TS-6 5, 7, 9, 15, 17 and others
+  Row 8: 8 | Red | Ground Tank Oil | Slot-6 AB-1746-IB16  IN8  8
+  Row 9: 9 | Red | +12 V | TS-6 5, 7, 9, 15, 17 and others
+  Row 10: 10 | Gray | Ground Switch NC | Slot-6 AB-1746-IB16  IN9  9
+  Row 11: 11 | Green/Black; Blue | Ground Relay NC | PPS GOB12-88PNE  D;  AMP-8Pin 3
+  Row 12: 12 | Orange | Ground Relay NC | PPS GOB12-88PNE  C
+  Row 13: 13 | Black | Ground Relay Coil | Slot-2 AB-1746-IO8  OUT3  5
+  Row 14: 14 | White | Ground Relay Coil | Slot-2 AB-1746-IO8  AC Common  10
+  Row 15: 15 | Red | +12 V | TS-6 5, 7, 9, 15, 17 and others
+  Row 16: 16 | Violet | Crowbar Tank Oil | Slot-6 AB-1746-IB16  IN10  10
+  Row 17: 17 | Red | +12 V | TS-6 5, 7, 9, 15, 17 and others
+  Row 18: 18 | Yellow | SCR Tank Oil | Slot-6 AB-1746-IB16  IN11  11
+  Row 19: 19 | Black | Ground Relay NO | Transformer Interlocks TS-4 3,
+Slot-7 AB-1746-IV16  IN13  13
+  Row 20: 20 | BNC signal | Shunt + | BNC-12 signal
+  Row 21: 21 | BNC shield | Shunt Common | BNC-12 shield
+
+Table 4:
+  Row 0: TS-6 | Wire Color | LEV-3; P5(J1?); J2 | Function | Termination
+  Row 1: 1 | Black | J2-6 | DC Current Output | Danfysik Output
+  Row 2: 2 | Green | J2-4 | DC Common | Danfysik Ground
+  Row 3: 3 | Blue | J2-5 | -15 V | Danfysik -15 VDC
+  Row 4: 4 | Red | J2-9 | 15 V | Danfysik +15 VDC
+  Row 5: 5 | White | J2-8 | Status + | Danfysik Status +
+  Row 6: 6 | NC | J2-3 | Status – Transductor | Danfysik Status -
+  Row 7: 7 | ? | LEV-3 1 | +12 V | Oil Level NC Dry Contact
+  Row 8: 8 | ? | LEV-3 2 | Ground Tank Oil | Oil Level NC Dry Contact
+  Row 9: 9 | Black | P5-C | +12 V (NO?) | Manual Ground Switch Aux NC
+  Row 10: 10 | White/Black | P5-D | Manual Ground Switch Common | Manual Ground Switch Aux Common
+  Row 11: 11 | Orange | P5-J | Ground Relay NC | Ross Ground Relay Aux Common
+  Row 12: 12 | Red/Black | P5-H | Ground Relay NC | Ross Ground Relay Aux NC
+  Row 13: 13 | Blue | P5-F | Ground Relay Coil | Ross Ground Relay Coil
+  Row 14: 14 | Green | P5-E | Ground Relay Coil | Ross Ground Relay Coil
+  Row 15: 15 | NC |  | +12 V | TS-6 5, 7, 9, 15, 17 and others
+  Row 16: 16 | NC |  | Crowbar Tank Oil | Slot-6 AB-1746-IB16  IN10  10
+  Row 17: 17 | NC |  | +12 V | TS-6 5, 7, 9, 15, 17 and others
+  Row 18: 18 | NC |  | SCR Tank Oil | Slot-6 AB-1746-IB16  IN11  11
+  Row 19: 19 | Green/Black | P5-I | Ground Relay NO | Ross Ground Relay Aux NO
+  Row 20: 20 | Red | P5-A | Shunt + | 15 A/50 mV Shunt +
+  Row 21: 21 | White | P5-B | Shunt Common | 15 A/50 mV Shunt Common
