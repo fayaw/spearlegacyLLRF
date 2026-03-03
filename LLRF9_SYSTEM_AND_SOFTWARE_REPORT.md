@@ -858,7 +858,7 @@ caput LLRF:SR:STATE 2; CWget {pvs}/LLRF.pvs {data}/sr/LLRF/`caget -t LLRF:SRFILE
 
 ### 13.1 Unit Roles
 
-Per LLRF9 manual Section 8.4 and the upgrade system design:
+Per LLRF9 manual Section 8.4 ("One station, four cavities, single power source") and the upgrade system design:
 
 **LLRF9 Unit 1 --- Field Control & Tuners**:
 
@@ -868,7 +868,8 @@ Per LLRF9 manual Section 8.4 and the upgrade system design:
 | BRD2 | Cav 3 probe | Cav 4 probe | Cav 2 forward | Station ref | (spare) |
 | BRD3 | Cav 3 fwd | Cav 4 fwd | Kly forward | Station ref | (rear panel only) |
 
-- Runs vector sum feedback on BRD1 (Cav 1+2) and BRD2 (Cav 3+4)
+- **Primary vector sum feedback**: BRD1 only (Cav 1+2) drives the klystron for all 4 cavities
+- **Key insight**: Cavities 3 & 4 are monitored but NOT in the main feedback loop
 - Provides klystron drive output from BRD1 (thermally stabilized)
 - Measures all 8 probe/forward phases for tuner loops
 - 10 Hz synchronized phase data for all 4 tuners
@@ -885,14 +886,132 @@ Per LLRF9 manual Section 8.4 and the upgrade system design:
 - Interlock chain: reflected event on Unit 2 trips Unit 1's drive via daisy-chain
 - No drive output required
 
-### 13.2 Inter-Unit Communication
+### 13.2 4-Cavity Control Strategy
+
+**Critical Understanding**: The LLRF9 manual Section 8.4 states: *"In this configuration, field control loop only uses a subset of two cavities in the vector sum algorithm."*
+
+This means SPEAR3's 4-cavity system uses a **hierarchical control approach**:
+
+#### **Level 1: Fast Feedback (270 ns) - LLRF9 FPGA**
+- **Primary vector sum**: Only Cavities 1 & 2 (Unit 1, Board 1) are in the main feedback loop
+- **Single drive output**: The 2-cavity vector sum drives the klystron for all 4 cavities
+- **FPGA computation**:
+  ```
+  Vector_Sum = ROT_CAV1_GAIN * exp(j * ROT_CAV1_PHASE) * Cavity1_IQ 
+             + ROT_CAV2_GAIN * exp(j * ROT_CAV2_PHASE) * Cavity2_IQ
+  
+  # This vector sum → 270 ns feedback → DAC → Klystron drive → ALL 4 cavities
+  ```
+
+#### **Level 2: Medium Feedback (~1 Hz) - Python Coordinator**
+- **Individual tuner loops**: All 4 cavities have separate tuner control using 10 Hz phase data
+- **Cavity synchronization**: Python reads probe vs. forward phase for each cavity and adjusts tuner motors
+- **Purpose**: Keep all 4 cavities properly tuned so the 2-cavity vector sum represents the "average" behavior
+
+#### **Level 3: Slow Balancing (~0.1 Hz) - Python Coordinator**
+- **Load angle balancing**: Python adjusts individual cavity tuner offsets to equalize amplitudes
+- **Power distribution**: Ensures all 4 cavities contribute equally to the total gap voltage
+- **Method**: Read all 4 cavity amplitudes, calculate target, adjust `TUNER:Cn:OFFSET` PVs
+
+#### **Why This Works**
+**Physical principle**: In a well-tuned 4-cavity system:
+- Cavities 1 & 2 (in the vector sum) represent the "average" field behavior of all 4 cavities
+- Cavities 3 & 4 are kept in sync via individual tuner management
+- Single klystron drive can control all 4 if they're properly tuned and balanced
+- This is a **proven configuration** used at other accelerator facilities
+
+#### **Python Coordinator Responsibilities**
+```python
+class SPEAR3Coordinator:
+    def configure_vector_sum(self):
+        # Set up 2-cavity vector sum on Unit 1, Board 1
+        caput("LLRF1:BRD1:ROT:CAV1:GAIN", 1.0)
+        caput("LLRF1:BRD1:ROT:CAV1:PHASE", 0.0)
+        caput("LLRF1:BRD1:ROT:CAV2:GAIN", 0.95)  # Slight adjustment for balance
+        caput("LLRF1:BRD1:ROT:CAV2:PHASE", 2.5)  # Phase trim
+    
+    def manage_all_tuners(self):
+        # Read 10 Hz phase data for all 4 cavities
+        phases = [
+            caget("LLRF1:BRD1:CH0:PHASE"),  # Cavity 1
+            caget("LLRF1:BRD1:CH1:PHASE"),  # Cavity 2  
+            caget("LLRF1:BRD2:CH0:PHASE"),  # Cavity 3
+            caget("LLRF1:BRD2:CH1:PHASE"),  # Cavity 4
+        ]
+        # Adjust tuner motors to maintain target phases
+        for i, phase in enumerate(phases):
+            if abs(phase - target_phase) > deadband:
+                self.adjust_tuner_motor(cavity=i+1, delta=calculate_move(phase))
+    
+    def balance_cavity_amplitudes(self):
+        # Read all 4 cavity amplitudes
+        amplitudes = [
+            caget("LLRF1:BRD1:CH0:AMP"),   # Cavity 1
+            caget("LLRF1:BRD1:CH1:AMP"),   # Cavity 2
+            caget("LLRF1:BRD2:CH0:AMP"),   # Cavity 3  
+            caget("LLRF1:BRD2:CH1:AMP"),   # Cavity 4
+        ]
+        # Adjust tuner offsets to equalize power
+        target_amp = np.mean(amplitudes)
+        for i, amp in enumerate(amplitudes):
+            if abs(amp - target_amp) > tolerance:
+                offset_delta = calculate_offset_adjustment(amp, target_amp)
+                caput(f"LLRF1:TUNER:C{i+1}:OFFSET", offset_delta)
+```
+
+### 13.3 Critical PVs for 4-Cavity Operation
+
+**For Primary Vector Sum Configuration (Unit 1, Board 1)**:
+```
+LLRF1:BRD1:FB:ASET                # Amplitude setpoint for vector sum
+LLRF1:BRD1:FB:PSET                # Phase setpoint for vector sum
+LLRF1:BRD1:FB:CTRL                # Open/closed loop control
+LLRF1:BRD1:ROT:CAV1:GAIN          # Cavity 1 rotation gain
+LLRF1:BRD1:ROT:CAV1:PHASE         # Cavity 1 rotation phase
+LLRF1:BRD1:ROT:CAV2:GAIN          # Cavity 2 rotation gain
+LLRF1:BRD1:ROT:CAV2:PHASE         # Cavity 2 rotation phase
+LLRF1:BRD1:ROT:P_OL:GAIN          # Proportional open-loop gain
+LLRF1:BRD1:ROT:P_OL:PHASE         # Proportional open-loop phase
+```
+
+**For Individual Tuner Management (All 4 Cavities)**:
+```
+LLRF1:BRD1:CH0:PHASE              # Cavity 1 probe phase (10 Hz)
+LLRF1:BRD1:CH1:PHASE              # Cavity 2 probe phase (10 Hz)
+LLRF1:BRD2:CH0:PHASE              # Cavity 3 probe phase (10 Hz)
+LLRF1:BRD2:CH1:PHASE              # Cavity 4 probe phase (10 Hz)
+LLRF1:BRD1:CH0:AMP                # Cavity 1 probe amplitude
+LLRF1:BRD1:CH1:AMP                # Cavity 2 probe amplitude
+LLRF1:BRD2:CH0:AMP                # Cavity 3 probe amplitude
+LLRF1:BRD2:CH1:AMP                # Cavity 4 probe amplitude
+LLRF1:TUNER:C1:OFFSET             # Cavity 1 tuner detuning offset
+LLRF1:TUNER:C2:OFFSET             # Cavity 2 tuner detuning offset
+LLRF1:TUNER:C3:OFFSET             # Cavity 3 tuner detuning offset
+LLRF1:TUNER:C4:OFFSET             # Cavity 4 tuner detuning offset
+LLRF1:TUNER:C1:CLOSE              # Cavity 1 tuner loop open/close
+LLRF1:TUNER:C2:CLOSE              # Cavity 2 tuner loop open/close
+LLRF1:TUNER:C3:CLOSE              # Cavity 3 tuner loop open/close
+LLRF1:TUNER:C4:CLOSE              # Cavity 4 tuner loop open/close
+```
+
+**For Monitoring/Interlocks (Unit 2)**:
+```
+LLRF2:BRD1:CH0:AMP                # Cavity 1 reflected power
+LLRF2:BRD1:CH1:AMP                # Cavity 2 reflected power
+LLRF2:BRD2:CH0:AMP                # Cavity 3 reflected power
+LLRF2:BRD2:CH1:AMP                # Cavity 4 reflected power
+LLRF2:BRD1:INTERLOCK              # Unit 2 interlock status
+LLRF2:BRD2:INTERLOCK              # Unit 2 interlock status
+```
+
+### 13.4 Inter-Unit Communication
 
 The two units communicate through:
 1. **Hardware interlock daisy-chain**: Direct electrical connection via LEMO connectors
 2. **EPICS Channel Access**: Both units on same Ethernet network, Python coordinator reads/writes to both
 3. **Interface Chassis**: Coordinates interlock signals between units and external systems
 
-### 13.3 PV Naming for Two Units
+### 13.5 PV Naming for Two Units
 
 For SPEAR3, the two LLRF9 units will have different system prefixes:
 
@@ -1156,4 +1275,3 @@ LLRF:BRDn:TEC:*                 # TEC readbacks
 | `LLRF9/iGp/matlab/iGp/*.m` | MATLAB | 20+ iGp analysis scripts |
 | `LLRF9/iGp/extensions/labca/` | Binary | MATLAB-EPICS interface libraries |
 | `LLRF9/iGp/base/lib/` | Binary | EPICS 3.14 runtime libraries |
-
