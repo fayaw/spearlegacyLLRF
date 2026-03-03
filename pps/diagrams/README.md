@@ -6,18 +6,18 @@
 
 ## Purpose
 
-These Mermaid and ASCII text diagrams are **AI-readable representations** of the original engineering schematics. They are designed to allow AI systems to understand the HVPS PPS design for:
-- Design review and analysis
-- Safety system verification
-- System documentation
-- Troubleshooting guidance
-- Upgrade planning (replacing obsolete hardware)
+These comprehensive documents provide **AI-readable analysis** of both the current legacy system and planned upgrade architecture. They enable AI systems to understand the complete HVPS PPS design for:
+- **Current system analysis** — Legacy hardware and identified issues
+- **Upgrade planning** — Modern architecture addressing PPS compliance
+- **Safety system verification** — PPS chain analysis and fail-safe mechanisms
+- **Implementation guidance** — Phased upgrade roadmap with risk mitigation
+- **Design process support** — Complete technical understanding for AI assistance
 
 ## Document Index
 
-| # | File | Source PDF | Description |
-|---|------|-----------|-------------|
-| 0 | [00_SYSTEM_OVERVIEW_CORRECTED.md](00_SYSTEM_OVERVIEW_CORRECTED.md) | All + docx | **2nd validation pass** — Master system architecture with corrections |
+| # | File | Source | Description |
+|---|------|--------|-------------|
+| 0 | [00_SYSTEM_OVERVIEW.md](00_SYSTEM_OVERVIEW.md) | **All sources** | **Master overview** — Current system + upgrade architecture |
 | 1 | [01_gp4397040201_vacuum_contactor_controller.md](01_gp4397040201_vacuum_contactor_controller.md) | `gp4397040201.pdf` | Vacuum contactor controller relay logic, closing/opening sequences |
 | 2 | [02_rossEngr713203_vacuum_contactor_driver.md](02_rossEngr713203_vacuum_contactor_driver.md) | `rossEngr713203.pdf` | Ross Engineering driver & contactor, TB2 pinout, auxiliary contacts |
 | 3 | [03_sd7307900501_grounding_tank.md](03_sd7307900501_grounding_tank.md) | `sd7307900501.pdf` | Grounding tank schematic, Ross switch, Danfysik, arc fault |
@@ -26,6 +26,7 @@ These Mermaid and ASCII text diagrams are **AI-readable representations** of the
 | 6 | [06_wd7307940600_interconnection_grounding_tank.md](06_wd7307940600_interconnection_grounding_tank.md) | `wd7307940600.pdf` | Detailed TS-6 to Grounding Tank wiring |
 | 7 | [07_PLC_CODE_AND_LOGIC.md](07_PLC_CODE_AND_LOGIC.md) | docx analysis | PLC ladder logic rungs, fault scenarios |
 | 8 | [08_CORRECTED_HAND_DRAWING.md](08_CORRECTED_HAND_DRAWING.md) | docx Figure 1 | **Hand drawing corrected** — PPS interface with TS-4→TS-5 fix |
+| 9 | [09_UPGRADE_IMPLEMENTATION_PLAN.md](09_UPGRADE_IMPLEMENTATION_PLAN.md) | **Design docs** | **Upgrade roadmap** — Implementation phases, risks, decisions |
 
 ## Quick Reference
 
