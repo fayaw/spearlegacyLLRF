@@ -1,0 +1,133 @@
+--- Page 1 ---
+8 7 6 5) 4 3 a 1
+[ae|____emscnionion [we [om |B oe
+, REVISED FOR CORRECTNESS IE
+HOFFMAN 12X10 wo _ CONTACTOR DISCONNECT 120V 1 WSG oO Ke, | 10/0
+15 REG COM _2
+S fi f_ i O O a ac PPS BELDEN 83715 15C *16 TEFLON
+oc vatege 77 (YF ancoen carat sacaeo wee ram] _[[ © 9 pH fa ot 3
+FS A a OO A XXX 4
+DC Voltage 28 (oO <r) en: O a re CONTACTOR READY TB2 '
+) 2 es ees re: 6 5
+wane TCO SE 0 } Lf} — 88 $A] saa =
+Leven (ori ee) : Ole O BL O , 8 Y 7
+Seale see To |§ a a oo
+Co b BLK T28-1-503 THERMOCOUPLE BNC-2 2 O |2 Q Teva CONTACTOR CLOSED ‘e) 2 ‘
+; cog
+Tope [Lee -16|* -)2 =} =~ 5 re
+OIL-LEVEL P5 a es 12 [390 eit | oe Fw
+oo IE TSAI sL0T3 FO ee a A le > +
+o_o 2° Ts of 3
+TS-NWL ale ——— tN rm cLO a RESET CONTACTS PPS 6 12
+s a 9 (Ke N TIT Ne a a BLU O = 8
+O aisc LS eS Oe -(0 a, AIR TEMP ‘e) 3 PPS COM ar ie. 14
+1S (FUN 8__| com a 5 2|—
+O 44 =lS 4 [an nn WT N IN 2- O 2 RED/BL ON Pe CLOSE READY 3 15
+CROWBAR Psu N oo orcyaLk [| ! 1
+43 PWHT/BCKN IN 2 COMMON O ; 12 16
+° Pat 5 | com ° | warvenk | -
+O PEELE ON BELDEN 83715 15C 7 IN 1 ae ; 6 ee eu
+SLAC-1 *16 TEFLON IN 1+ PPS-S , >O W418
+0 Bees aut ms a tee ee 66 eS eed
+of pe  Femer =e voi g3s4 | PERSONEL_ PROTECTION] [>To [TST «at a:
+39 R42 = O IN B+ Fa 0 <y<2 O = 14 208
+O se tee | tc Peer NE-T7SE-THERMC R—E sist EY SYSTEM | cave oto a |
+Ors a Pe ed Pe aoe sk er es ovencummenr «1S
+37 B33 PRO O 5 16 22
+an es = a DO PP Nan mere :  #
+: a a Sr Oe A caus | <r nen
+O aa eae S| 2 decom Neca 1c BLOCKING RELAY 24
+Oo 44 Paid Pra ae CROWBAR SCR TOP OIL A RED/WuT me EMPTY 25
+R= |
+ene. Ven enw 0 Na DRIVERS PT2G-1-509_THEAMOCOUELE >= TOP OIL B 4] 0 HH 26
+© Ea Poa ol taco ere : — ae .
+Oo 2 R2 R25 A A Ae PT | Neen 0727 w HIELD PI a a el Q- Wl 27
+sada Yew p—aoaew 0 Nac WY) ae EN | A RED/BLK BB Lu
+‘- O | a R21 Let A A PT, | AEE oc _ rN 0 frre 8 $ ST cevwat PO Pees us cCi 28 C
+v saoa YSw  Sa%28 0 jcavvaux N= GRIVELE Oo Porn ¢ Besos se GRN/WHT 5 cc! S K
+os Po Puree Ses Oo FRAEN 8 bee eas Tot 3 T(«+) el n 2
+thoes : # CORO WAT BLK
+| 23g as wer ToT. Ng TEN o ewe eee IE $I & = 20 3¢
+O on | ago Yew bags" | 0 jorc 88761 TWISTED SHIELDED Li as 5 ya es $ WW
+Ne oe ce ed | re 9 EEN 8 eer a3
+O Ne pent peotew | TT | lux TS-7 - 1 N i y a K 2 = 22 32
+© 1-28 Men roy TS a. STN - VP w L< 23 33
+03 a3 fax | 7 ito 2 120V
+O- im ot 2 tax ) A o Er com as
+O itt O — SHIELD P2
+24 : ~
+O Lt. oz 1 a Gan re O ‘an TEN by (ff A< TERMINAL STRIP LAYOUT
+i ny O tra r — Blu
+O # 4 = ee yee 2] 8
+oe O O FREAN ? oor s $8
+O : ot | gs | es a COR _WHT— BLK I T1e S| <
+| FF T |v O WENN Ss 2: Goon (ese A N
+r —~ = RED
+e) aav_204 FR la (coy | 6 fe) ae FCON =~ ee PWR SPLY CONTROLS
+SOW eo ee I S| 8B
+NWL TRANSFORMER RE cat O 738 a. H+ 8 Zo Ma 727 $ = tse
+TS-NWL. Teav 208 (eorex | 8 | 2 be eg
+z 0 is ee o 2 was : U ett ti
+9 [ise ra Pane : px} fe | o
+o Ls 3RN w@ 16 On arve Ge Fe DISPLAY
+3
+pig Py (sue | =] O 28761 TWISTED Lev-t O
+oF : rT O 21 6 5 og | 2 ~ a ie re O
+o be suse} zt | ||| &) 0 Pe SDE Ss, (oes | Ts]
+x wy OIL-LEVEL O
+ole | ysucwt Ps dG a} O ow | [es |
+Gine ra obs au O
+oo | 2 12 ax Ga in Fl
+psa] St O O ~ SCR TIGGERS ad Te O
+O pi wr giirem O
+BELDEN 83715 15C *16 TEFLON TRANSFORMER MONITORS HOFFMAN 12X10
+iS ORG/BLK SHIELD
+5 aa =
+Se ee ace =o
+ara O 13 aD
+13
+a pw fe A 5 be TT
+12 WHT/BLK Oe
+5 La pseu} 2 | o me ITT
+ii
+aa eee} © | TeMPERTURE ° Bel, I TERMINATION TANK
+0 ares re : ne
+@) GRN HIELD P5
+avant = | o She aw 4 * Meee ss
+(omer | 7 SUDDEN PRESSURE O ss e Ne a es
+ara O O RED-8 o Ne 5S
+=i A
+i ae ew +? 3
+o L3 GRN/BLK To O O ay 5 Sp F $
+ee es ee [esata | ope QS
+: 3
+‘e) 7 GRN/WHT (rae O OIL LEVEL LOW Oo P53 i 4 ORG — J<¢
+es es tye O 26761 TWISTED
+oT: 0 es 1e=
+ee ee ee ss ° é
+O 4 BLU/WHT | a O O fs B ts. bE ay,
+ee eye “0 ee ee
+O 3 RED/BLK | = | as | O wo SG _ OIL-LEVEL
+15 a cS [EDEL LG
+2 O 4 8 Roos
+O OT. Tay J ¢ Meee
+oO 4 RED/WHT TRANSFORMER INTERLOCKS 5 3 ° ae 3
+SHIELD a ow 8 eo
+O 7 SR
+@ 7
+NWL- TRANSFORMER Se
+NWL #39308 Oo oD Vane a a g
+TRANSFORMER INTERLOCKS PWR SUPP REGULATOR REQ-BLK a CONS
+BELDEN 83715 ISC 6 TEFLON HOFFMAN BOX 34x42 —— 2. ra.
+KLYSTRON ARC KLYSTRON ARC
+A STANFORD LINEAR ACCELERATOR CENTER |CAD FILE NAME: 73079@21.WO3 | SHEET 1 OF 1 A
+WHT/BLK U.S. DEPARTMENT OF ENERGY
+STANFORD UNIVERSITY STANFORD, CALIFORNIA
+PROPRIETARY DATA OF STANFORD UNIVERSITY AND/OR U.S. DEPARTMENT OF PEPII RF SYSTEMS
+ENERGY, RECIPIENT SHALL NOT PUBLISH THE INFORMATION WITHIN UNLESS
+GRANTED SPECIFIC PERMISSION OF STANFORD UNIVERSITY. OMW KI YSTRON PWR SPL. Y
+7 APPROVAL
+a ENGR R.cASSEL | | Rs CASSEL INTERCONNECTION WIRING
+“n DFTR _W. GORECKI [es/a2/200a|
+— ———w0-730-790-01-c3_ | D
+8 7 6 5 A A 3 2 PEP2 2MW KLY PS INTCON , Re CB

@@ -1,0 +1,81 @@
+--- Page 1 ---
+| | | a |
+. \ ! , 1 ; a TT]
+i came | 3 -
+_— oe l 2
+. 1
+a ; LANE Levins SY
+; . V | { i zone [ore] aescmption SS _~*d |
+[~~ eare Tarenoves |
+VAC | JA CoRRECTIONS AND ADDITIONS |3\san7a|_ Aol _| |
+| covracrs = =9oT.. TO OT PSDB [CUSTOMER CHANGE [isreavel Hee | |
+pb po pe ge Hf free Fem, mvrnNENS fa nel Pek |
+. LOA L2 | PEC 78 | pee 78 ra ;
+D |_| & [SEE ECN # B10 227-23 | 3f#wes| DD:
+| poor He se eS
+| £1 Te | ac cB |
+INTLK 254
+FU FNP &/p AMP FAM 34,AMP | oS ae ee i
+| | SLD BLO vo TI SiO 80 ea f--—O6 o—— HOT IIBV AC tae Toe HOLDING AND | ; t
+ZI2V At. Tee? ; | har | 1. | propor coiL 1.5, OPERATIONS
+1 p1Xt I \/20¥ £0 Ay | | 2 MED COUNTER
+, 1 Aa . 5 2} . ,
+I— | 5 |<" laa awe a 600 V | |
+. i | 35-100 VA MY ; MX. ' . 13. et L | :
+re S) R. i
+sor | see Meee
+} | 20V ty x 14. ae 9!8 A oar HOLDKIE CO
+IZ6Y¥ HOV , Q 5. | .
+{ , os _ H
+; | | 18 OPS sor wsa5e | CLOSE CO 1&a | vores 7
+1 HSE) : N\. ‘
+|-~-] | ALLEN BRADLEY I. 2 ow 1. CAUTION MUST BE Us !
+| ee SIZE | (a) te Mx [| “oe MOT LUSED | THIS 15 A HV ENERGY ‘STORAGE
+I Cc >. | TIS : DEVICE OPERATING AT 300 TO ~~
+: | R2 . an ; 9 NOT USED | 400 V DC, DISCHARGE TiME To .
+| Lo. | 80 V iS APPROX, 5 MINUTES Cc
+| SOa OOW itn, (R) ; oO ; Al A Mewes ee yas APPROX. iC .
+4 t
+| + -) CaZ ‘Nd mee} | 10, c. S2. CLOSE ND | serone TOUCKIMe Live PARTS
+. ‘ ST 5 MINUT: '
+| Of ee Con eraoOs } | | K3| a g CLOSE LiMiT | AFTER REMOVING POWER AND Lo
+|| aie” — Che nee ey | 2,Mbi_we einen ile
+t 4 = sr emeemen Et . :
+| + { ‘mon 200- GON t wo ry RADY 40H] 7) 13. @ $2 A | 2. Close CIRCUITS SHOULD BE ~ 4 | :
+i | TarB~t SATS SIB ! { Wy OPERATION |. OetAt IUD LIGHT ; I OPEKS Hid. wine. MTP TERE 15 Cons De :
+; we re READY IND. (6) 114. Ave! ht B | ERABLE DISTANCE BETWEEN ;
+. KI +350V OC may SO ie Ai OPERATION LIS, 4zal MC | | SUPPLY, "OR CLOSE RELAY. At .
+| 2 tasoy | 273 KZ NOT READY. IND a i LEAST #12 WIRE SHOULD BE ' . -
+me LOT Reby ile ai 4% =a | USED.
+| a | iy | MM [ ‘ * 8 nUX 3. 1
+| . . : + 3. 115 VAC POW a -
+. | CW 3 _| +390 vor LN7, ve MO | ; 8 AMPS HOMENTARY, 1/2, ANP | sO,
+; VOLTAGE SEM SOR RSE | {. { ' CONTINUOUS, i
+| | GOARBIAN me SDK Ig li . 18 | | : |
+B URLOT~100 HA Ree wr a c +350 v0 | Met hee as | 4, SAFETY BOGR INTERLOCKS $1
+| | 0 ry rw PEL hg | Hoge t Serr yy, moras Sham vitn oom) |=
+| @ Ie AY | ° REMOTE SAFETY - . 120 AC | ra) & | ST OAME. CArALITOKS B
+7 . {TYIN' '
+| | [es |! 16 Iywenc DISCHARGE INTERLOLKS 219, ! | 5 SECONDS WHEN DniwtR
+Lo ! leas ce al ; . ; loo _ BOOR 1S OPENED. ;
+l souer . 0 Ctweype ' vy | ‘ ,
+; | (S) DSI AES! lig . (930 nor asep I -
+, LOCKL READY 11D X7 5 t { - 1 vi
+| | fo, | NOF USED 62) ___ LRN CUETO APR 14 2021 .
+. i be eae pump RB | SUGGESTED MM BI3ZO8 ‘1
+ah (see M07 #) 2S 256 | INTERCONNECTIONS BY USER ;
+; +/bV OC BY: aurit “
+| . SZ. o re man / @ oanvr ds, beens ~ .
+| * - . @: | HCA-1-A J Wa3—T Td
+| . 40000 MD AMP ZY DE CONTALTOR, SHOKIKL tht DE EMERBIZED Gti :
+! 4.000 ete aM ee : EMOTE SATET! CLOSED (DRIVER DOOR CLOSED AND DEENERGIZED.
+i | Se yugnmeg pace OMT Kt J . a .
+All | [$$ $<] aera” pe lt ~ ROSS ENGINEERING CORP.
+| | Ss ee (ee F228 en 2g 599 WESTCHESTER DR. - CAMPBELL, CALIF. 95008 A:
+| | arene Secmnce sgh en 9a 78)" A SPEED WRC COTE ;
+| LL DAMER _ WCA-! -A PA _ 820360 _ | +--+ EA LL sigled EMEMEY SAMAR RMA FMLA |
+mn ee eet ee) [J Pr TR ra SY STEAKS SCM AETV E =
+ee ee CODETPERT. WD | DRAWING we .
+| | , ee
+. 4 3! 2. “i
+; an oo eS in ten? — . EES Ie

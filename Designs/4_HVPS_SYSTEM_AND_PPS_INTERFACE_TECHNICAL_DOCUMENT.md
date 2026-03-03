@@ -1259,3 +1259,83 @@ The Python coordinator monitors the Interface Chassis status (via MPS PLC EPICS 
 ---
 
 *Document generated from analysis of: legacyLLRF/rf_hvps_loop.st, legacyLLRF/rf_hvps_loop_*.h, pps/HoffmanBoxPPSWiring.docx, pps/MSG from Jim Sebek to Faya about PPS.md, pps/*.pdf schematics, Docs_JS/*.docx, Designs/1-3_*.md, LLRF9/iGp/dl_llrf/hvps.edl*
+## Schematic Analysis Update
+
+Based on OCR extraction from the PDF schematics in `pps/`, the following specific component details have been identified:
+
+### Vacuum Contactor Controller (gp4397040201.pdf)
+
+**Relay Specifications**:
+- **K4**: 25A relay, controls contactor enable function, connects to TB1-1
+- **RR**: 3.2A reset relay, resets TX latch to prevent repeated trips  
+- **TX**: 15A trip/fault latch relay, summarizes MCO protection relay faults
+- **MX**: 56KM coil relay, controls L1 hold-in circuit, connects to TB3-22
+- **K1, K2, K3**: Time delay and energy relays (K3 rated 25W, connects to TB3-6, TB3-5)
+
+**MCO Protection Relays**:
+- **50A, 50B, 50C, 50N**: Four-phase overcurrent protection relays (instantaneous and time-delay characteristics)
+
+**Terminal Block Assignments**:
+- **TB1**: TB1-1 (K4 hot), TB1-7, TB1-15 (door interlocks), TB1-19, TB1-20
+- **TB2**: TB2-3, TB2-9 through TB2-14 (contactor interface and auxiliary contacts)
+- **TB3**: TB3-5 through TB3-22 (energy relay connections)
+
+**Power Supply**:
+- Internal HV DC power supply (300-400 VDC per Ross Engineering drawing)
+- 372V references for control circuits
+- Component ratings: 330K, 250K resistors; various capacitors
+
+**Control Logic Labels**:
+- "CLOSE RELAY", "READY", "DOOR INTLKS", "ENERGY RELAY"
+- Local reset and PPS interface connections
+
+### Ross Engineering Vacuum Contactor (rossEngr713203.pdf, 1978)
+
+**Critical L1/L2 Coil Information**:
+- **L1**: Holding coil (low power, maintains contactor closed)
+- **L2**: Close coil (high power, initially closes contactor)
+- Auxiliary contacts S1-S5 provide status feedback
+
+**Safety Warnings from 1978 Drawing**:
+- HV energy storage device operating at 300-400 VDC
+- Discharge time approximately 5 minutes
+- Minimum wire gauge #12 required
+- Considerable distance required between supply and close relay
+- Allen-Bradley relay specifications referenced
+
+### Hoffman Box Internal Wiring (wd7307900206.pdf)
+
+**Power Supply Specifications**:
+- **Kepko-12@V/1A**: 12V DC, 1A power supply
+- **Kepko-5V/2@A**: 5V DC, 2A power supply  
+- **Kepko-240V/@2.25A**: 240V, 2.25A power supply
+
+**Interface Connections**:
+- **Enerpro firing board**: SCR gate driver connections
+- **BNC-3 through BNC-12**: Crowbar and monitor signal connections
+- **A-PHASE, B-PHASE, C-PHASE**: Three-phase connections
+- **GOB12-88PNE**: PPS input connector interface
+- **AMP-8PIN**: PPS status LED connections
+
+**Terminal Strip References**:
+- **TS-7**: Multiple terminal connections for system integration
+- **TS-3, TS-6**: Interface board integrations
+
+### TS-5 to TB2 Interconnection (wd7307940600.pdf)
+
+**External Equipment Connections**:
+- **LEV-3**: Oil level sensors
+- **Shunt connections**: Current measurement
+- **Manual ground switch**: Safety grounding
+- **SCR oil level monitoring**: TS-6-18 connection
+- **BELDEN 93709**: Cable specifications (#16, #18 wire)
+
+### Documentation Corrections Required
+
+Based on schematic analysis, the following corrections are needed:
+
+1. **RR/K4 Relay Ratings**: Confirmed K4 is 25A, RR is 3.2A (not swapped as suspected)
+2. **L1/L2 Labeling**: Ross Engineering drawing shows correct L1 (hold) / L2 (close) labeling
+3. **MCO Protection**: Four independent relays (50A, 50B, 50C, 50N) confirmed
+4. **Terminal Block Mapping**: Specific TB1, TB2, TB3 pin assignments now documented
+5. **Power Supply Ratings**: Actual Kepko model numbers and ratings identified
