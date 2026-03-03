@@ -192,7 +192,8 @@ Each LLRF4.6 board has 4 ADC inputs. One channel per board is dedicated to the *
 Per LLRF9 manual Section 8.4 ("One station, four cavities, single power source"):
 
 **Unit 1 --- Field Control & Tuner Loops:**
-- Runs the field control feedback loop (vector sum of two cavity probes on a single LLRF4.6 board)
+- **Primary vector sum feedback**: Only Cavities 1 & 2 (Board 1) drive the klystron for all 4 cavities
+- **Key insight**: Cavities 3 & 4 are monitored but NOT in the main 270 ns feedback loop
 - All four tuner loops use 10 Hz synchronized phase data (probe vs. forward)
 - Connected to: 4 cavity probe signals + 4 cavity forward signals + 1 klystron forward power = 9 channels
 - Outputs: Klystron drive signal via thermally stabilized output chain (LLRF4.6 boards 1 or 2 only)
@@ -1096,7 +1097,7 @@ The upgrade uses the existing SPEAR3 PV naming where possible for operator famil
 - `SRF1:CAV1TUNR:` through `SRF1:CAV4TUNR:` --- Tuner-specific PVs
 
 **New PV prefixes** for upgrade subsystems:
-- `LLRF9:U1:` / `LLRF9:U2:` --- LLRF9 Unit 1 and 2 internal PVs (from built-in IOC)
+- `LLRF1:` / `LLRF2:` --- LLRF9 Unit 1 and 2 internal PVs (from built-in IOC, board/channel structure)
 - `SRF1:IC:` --- Interface Chassis status PVs
 - `SRF1:WFB:` --- Waveform Buffer System PVs
 - `SRF1:ARC:` --- Arc detection PVs
@@ -1114,16 +1115,106 @@ SRF1:STN:AUTORESET:ENABLE   # Auto-reset enable/disable
 SRF1:STN:AUTORESET:COUNT    # Current auto-reset attempt count
 ```
 
-**RF Control (via LLRF9):**
+**LLRF9 Unit 1 (Field Control) - Primary Vector Sum & Tuner Data:**
 ```
-LLRF9:U1:AMPL:SP            # Amplitude setpoint
-LLRF9:U1:AMPL:RB            # Amplitude readback
-LLRF9:U1:PHASE:SP           # Phase setpoint
-LLRF9:U1:PHASE:RB           # Phase readback
-LLRF9:U1:DIRECT:GAIN        # Direct loop gain
-LLRF9:U1:INTEG:GAIN         # Integral loop gain
-LLRF9:U1:ENABLE             # RF output enable
-LLRF9:U1:PERMIT             # RF permit status
+# Primary Vector Sum Control (Board 1 - Cavities 1+2 only)
+LLRF1:BRD1:FB:ASET                # Amplitude setpoint for vector sum
+LLRF1:BRD1:FB:PSET                # Phase setpoint for vector sum  
+LLRF1:BRD1:FB:CTRL                # Open/closed loop control
+LLRF1:BRD1:FB:ENABLE              # Feedback enable/disable
+LLRF1:BRD1:FB:PERMIT              # Feedback permit status
+
+# Vector Sum Configuration (Board 1)
+LLRF1:BRD1:ROT:CAV1:GAIN          # Cavity 1 rotation gain
+LLRF1:BRD1:ROT:CAV1:PHASE         # Cavity 1 rotation phase
+LLRF1:BRD1:ROT:CAV2:GAIN          # Cavity 2 rotation gain
+LLRF1:BRD1:ROT:CAV2:PHASE         # Cavity 2 rotation phase
+LLRF1:BRD1:ROT:P_OL:GAIN          # Proportional open-loop gain
+LLRF1:BRD1:ROT:P_OL:PHASE         # Proportional open-loop phase
+LLRF1:BRD1:ROT:I_OL:GAIN          # Integral open-loop gain
+LLRF1:BRD1:ROT:I_OL:PHASE         # Integral open-loop phase
+
+# Cavity Measurements (All 4 Cavities - 10 Hz synchronized)
+LLRF1:BRD1:CH0:PHASE              # Cavity 1 probe phase
+LLRF1:BRD1:CH0:AMP                # Cavity 1 probe amplitude
+LLRF1:BRD1:CH1:PHASE              # Cavity 2 probe phase
+LLRF1:BRD1:CH1:AMP                # Cavity 2 probe amplitude
+LLRF1:BRD2:CH0:PHASE              # Cavity 3 probe phase
+LLRF1:BRD2:CH0:AMP                # Cavity 3 probe amplitude
+LLRF1:BRD2:CH1:PHASE              # Cavity 4 probe phase
+LLRF1:BRD2:CH1:AMP                # Cavity 4 probe amplitude
+
+# Forward Power Measurements
+LLRF1:BRD1:CH2:PHASE              # Cavity 1 forward phase
+LLRF1:BRD1:CH2:AMP                # Cavity 1 forward amplitude
+LLRF1:BRD2:CH2:PHASE              # Cavity 2 forward phase
+LLRF1:BRD2:CH2:AMP                # Cavity 2 forward amplitude
+LLRF1:BRD3:CH0:PHASE              # Cavity 3 forward phase
+LLRF1:BRD3:CH0:AMP                # Cavity 3 forward amplitude
+LLRF1:BRD3:CH1:PHASE              # Cavity 4 forward phase
+LLRF1:BRD3:CH1:AMP                # Cavity 4 forward amplitude
+
+# Klystron Power
+LLRF1:BRD3:CH2:PHASE              # Klystron forward phase
+LLRF1:BRD3:CH2:AMP                # Klystron forward amplitude
+
+# Built-in Tuner Control (All 4 Cavities)
+LLRF1:TUNER:C1:OFFSET             # Cavity 1 tuner detuning offset
+LLRF1:TUNER:C1:CLOSE              # Cavity 1 tuner loop open/close
+LLRF1:TUNER:C1:GAIN               # Cavity 1 tuner loop gain
+LLRF1:TUNER:C2:OFFSET             # Cavity 2 tuner detuning offset
+LLRF1:TUNER:C2:CLOSE              # Cavity 2 tuner loop open/close
+LLRF1:TUNER:C2:GAIN               # Cavity 2 tuner loop gain
+LLRF1:TUNER:C3:OFFSET             # Cavity 3 tuner detuning offset
+LLRF1:TUNER:C3:CLOSE              # Cavity 3 tuner loop open/close
+LLRF1:TUNER:C3:GAIN               # Cavity 3 tuner loop gain
+LLRF1:TUNER:C4:OFFSET             # Cavity 4 tuner detuning offset
+LLRF1:TUNER:C4:CLOSE              # Cavity 4 tuner loop open/close
+LLRF1:TUNER:C4:GAIN               # Cavity 4 tuner loop gain
+
+# Waveform Acquisition (16,384 samples per trigger)
+LLRF1:BRD1:WAVEFORM:TRIGGER       # Trigger waveform acquisition
+LLRF1:BRD1:CH0:WAVEFORM           # Cavity 1 probe waveform
+LLRF1:BRD1:CH1:WAVEFORM           # Cavity 2 probe waveform
+LLRF1:BRD2:CH0:WAVEFORM           # Cavity 3 probe waveform
+LLRF1:BRD2:CH1:WAVEFORM           # Cavity 4 probe waveform
+
+# Interlock Status
+LLRF1:BRD1:INTERLOCK              # Board 1 interlock status
+LLRF1:BRD2:INTERLOCK              # Board 2 interlock status
+LLRF1:BRD3:INTERLOCK              # Board 3 interlock status
+```
+
+**LLRF9 Unit 2 (Monitoring & Interlocks) - Reflected Power Protection:**
+```
+# Reflected Power Monitoring (All 4 Cavities)
+LLRF2:BRD1:CH0:AMP                # Cavity 1 reflected power
+LLRF2:BRD1:CH0:PHASE              # Cavity 1 reflected phase
+LLRF2:BRD1:CH1:AMP                # Cavity 2 reflected power
+LLRF2:BRD1:CH1:PHASE              # Cavity 2 reflected phase
+LLRF2:BRD2:CH0:AMP                # Cavity 3 reflected power
+LLRF2:BRD2:CH0:PHASE              # Cavity 3 reflected phase
+LLRF2:BRD2:CH1:AMP                # Cavity 4 reflected power
+LLRF2:BRD2:CH1:PHASE              # Cavity 4 reflected phase
+
+# Klystron & Circulator Monitoring
+LLRF2:BRD3:CH0:AMP                # Klystron reflected power
+LLRF2:BRD3:CH0:PHASE              # Klystron reflected phase
+LLRF2:BRD1:CH2:AMP                # Circulator load forward power
+LLRF2:BRD2:CH2:AMP                # Circulator load reverse power
+
+# Hardware Interlock Chain
+LLRF2:BRD1:INTERLOCK              # Board 1 interlock status
+LLRF2:BRD2:INTERLOCK              # Board 2 interlock status
+LLRF2:BRD3:INTERLOCK              # Board 3 interlock status
+LLRF2:INTERLOCK:CHAIN             # Daisy-chain interlock to Unit 1
+
+# Waveform Acquisition (Fault Analysis)
+LLRF2:BRD1:WAVEFORM:TRIGGER       # Trigger waveform acquisition
+LLRF2:BRD1:CH0:WAVEFORM           # Cavity 1 reflected waveform
+LLRF2:BRD1:CH1:WAVEFORM           # Cavity 2 reflected waveform
+LLRF2:BRD2:CH0:WAVEFORM           # Cavity 3 reflected waveform
+LLRF2:BRD2:CH1:WAVEFORM           # Cavity 4 reflected waveform
 ```
 
 **HVPS:**
@@ -1174,7 +1265,7 @@ SRF1:WFB:COLLECTOR:TRIP     # Collector power trip status
 SRF1:WFB:RF1:WAVEFORM       # RF channel 1 frozen waveform (on fault)
 ```
 
-> **Note**: Actual LLRF9 PV names will be determined by the Dimtel IOC database configuration. The prefixes shown above are representative and should be finalized during commissioning.
+> **Note**: The LLRF9 PV structure shown above is based on the standard LLRF9 EPICS IOC database. The exact PV prefixes (LLRF1/LLRF2 vs. alternative naming) will be configured during Dimtel commissioning week. All PV names within each unit follow the standard LLRF9 board/channel structure.
 
 ---
 
