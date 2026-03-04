@@ -684,36 +684,6 @@ Transfer Function: H(s) = K / (τs + 1) where τ = 0.68 s
 
 > **Sources**: `hvps/architecture/designNotes/` (11 files), `hvps/architecture/HVPS_Engineering_Technical_Note.md`, legacy PLC documentation
 
---- pycomm3, OPC-UA, or custom EtherNet/IP driver
-- Data: Analog measurements (voltage, current), digital status, fault conditions
-- Commands: Contactor control, voltage setpoint
-
-**Hardware interlocks** (PLC <-> Interface Chassis):
-- **Fiber-optic inputs from Interface Chassis**:
-  - SCR ENABLE: Permits phase control thyristors to fire
-  - KLYSTRON CROWBAR: Must remain illuminated to prevent crowbar thyristors from firing
-- **Fiber-optic output to Interface Chassis**:
-  - STATUS: Active when controller is powered and no crowbar trigger present
-
-**No direct LLRF9-to-HVPS hardware connection** --- all interlock coordination goes through the Interface Chassis.
-
-### 6.3 Enerpro Gate Driver Upgrade
-
-- Replace existing gate driver boards with new Enerpro controller boards (~$4k for 5 boards)
-- Redesign analog regulator board with modern components
-- Test on Test Stand 18 before SPEAR3 installation
-
-### 6.4 PLC Code Development
-
-- Reverse-engineer existing SLC-500 PLC code
-- Rewrite for CompactLogix platform
-- Must handle: voltage regulation loop, contactor sequencing, over-current protection, PPS interface
-- Modify PPS (Personnel Protection System) interface to current standards
-
-### 6.5 HVPS Maintenance Item
-
-Three broken windings in HVPS1 need to be troubleshot and repaired.
-
 ---
 
 ## 7. Machine Protection System (MPS)
