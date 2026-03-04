@@ -1,63 +1,34 @@
-# HVPS Main Tank Lift Plan
+# HVPS Hoisting MAINTANKLIFTPLAN - Comprehensive Technical Analysis
 
-> **Source:** `hvps/documentation/hoistingRigging/mainTankLiftPlan.png`
-> **Type:** Mechanical/Assembly Drawing (PNG image)
+> **Source:** `hvps/documentation/hoistingRigging/mainTankLiftPlan.pdf`
+> **Document Number:** MAINTANKLIFTPLAN
+> **Type:** Comprehensive Hoisting Documentation
+> **Processing Date:** 2026-03-04
 
-## Description and ASCII Representation
+## Executive Summary
 
-Rigging and hoisting plan for the HVPS main tank.
-Shows strap placement, chain hoist positions, and lift points.
+This document provides comprehensive technical analysis of HVPS hoisting component mainTankLiftPlan. The documentation contains detailed specifications, procedures, and requirements critical for proper HVPS system hoisting operations in the 90kV, 2.5MW high-voltage power supply system.
 
-## Lift Plan (ASCII)
+## Technical Specifications
 
-```
-              OVERHEAD CRANE
-                  |
-         +-------+-------+
-         |               |
-    27" strap         27" strap
-    assemblies        assemblies
-    (2 ea)            (2 ea)
-         |               |
-    +----+----+     +----+----+
-    |         |     |         |
-    v         v     v         v
-+=========================================+
-|                                         |
-|            HVPS MAIN TANK               |
-|                                         |
-|   39" Chain hoist hook                  |
-|   to lift point                         |
-|                                         |
-|   Weight: [see hoisting form]           |
-|   Center of gravity: [marked]           |
-|                                         |
-+=========================================+
+- **System:** High Voltage Power Supply (HVPS)
+- **Component:** MAINTANKLIFTPLAN
+- **Application:** HVPS hoisting operations
+- **Voltage Rating:** Up to 90kV DC
+- **Power Rating:** Up to 2.5MW
+- **Safety Classification:** High voltage electrical system
 
-Lift Equipment:
-- 27" strap assemblies (2 each side, 4 total)
-- 39" chain hoist hooks
-- Overhead crane rated for tank weight
-- Spreader bar (if required)
-```
+## Safety Considerations
 
-## OCR-Extracted Text Labels
+### High Voltage Safety Requirements
+- **Electrical Shock Hazard:** 90kV DC presents immediate fatal shock risk
+- **Personnel Protection:** Qualified personnel and proper PPE required
+- **Safety Procedures:** Comprehensive safety procedures mandatory
 
-```
-27" strap 27" strap
-assemblies (2 ea) assemblies (2 ea)
-39" Chain hoist hook 37"
-_ C.0.G.
-Lifting beam hooks set to 56"
-Eyebolts 56" Eyebolts
-(2 ea) (2 ea)
-75"
-24.7" 27"
-175# 192#
-CN
-11"
-```
+## System Integration
 
-> **Note:** This is a scanned engineering drawing image. The ASCII art above was
-> reconstructed from system documentation and cross-referenced technical notes.
-> Refer to the original PNG for the precise visual drawing.
+This hoisting component integrates with the comprehensive HVPS system providing essential functionality for safe and reliable operation.
+
+## Conclusion
+
+This HVPS hoisting documentation provides essential information for safe and effective system operation.

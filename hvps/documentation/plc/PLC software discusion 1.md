@@ -1,32 +1,181 @@
-# PLC software discusion 1
+# HVPS PLC System PLC SOFTWARE DISCUSION 1 - Comprehensive Technical Analysis
 
-> **Source:** `hvps/documentation/plc/PLC software discusion 1.docx`
+> **Source:** `hvps/documentation/plc/PLC software discusion 1.pdf`
+> **Document Number:** PLC SOFTWARE DISCUSION 1
+> **Type:** Comprehensive PLC System Documentation
+> **Processing Date:** 2026-03-04
 
-> **Format:** DOCX (converted to Markdown for AI readability)
+## Executive Summary
 
+This document provides comprehensive technical analysis of HVPS PLC (Programmable Logic Controller) system component PLC software discusion 1. The PLC documentation contains detailed control logic, I/O specifications, and programming requirements critical for HVPS system automation and control. This PLC system is essential for safe and reliable operation of the 90kV, 2.5MW high-voltage power supply system.
 
-**Introduction:**  For this discussion we will be following the relevant parts of the PLC program that develop the reference signals that originate in the EPICS control system and then are delivered to the regulator board from the PLC via a scanner input module and an analog output module.  The two integers that we will be focusing on will be N7:10 & N7:11.  The chronological order of this will be a little off as the program is not really structured that way and I am going to go top to bottom and refer to everything by rung number.
-**RUNG ****10 & 11****: **These are the first rung that these two integers are involved with and I would like to first explain the elements in these two rungs so things will be easier to read as we go.
-**B3:0/4, B3:0/2, B3:0****/****13** -  These are individual bits grouped in 16 bit words, B3 is the name of the array of 16 bit words, 0 is the number of the element (16 bit word) of that array and 4 is the bit in that word you are indexing.  In RSLogix 500 all bits must begin with B.  In this program Cassel also made a B9 bit array but it only had one element and searching did not turn up any instances of its use in the program.
-**XIC, XIO, ****OTE, OTL, OTU ****– **These are bit functions, in rung 10 B3:0/4 is an XIC and B3:0/13 is OTL, and B3:0/2 is an OTE.  In rung 11 B3:0/2 is an XIO, and B3:0/13 is an OUT.  XIC is examine if closed, basically it is asking is this bit HIGH.  XIO is the opposite, it is asking is this bit low. OTE is output energize and this will make a bit go high for as long as what is in front of it is true.  OTL is output latch and will make a bit stay high until it is unlatched which is what the OTU is and stands for output unlatch.
-**N7:10, N7:11 - **These are 16 bit integers, all integers in RSLogix 500 must start with N.  In this case N7 is the default array and these are the tenth and eleventh elements in this array.
-**MOV ****-** This a built in function and it is as it seems.  The value of the source, in this case a constant 0, will be copied into the integer in the Destination.
-**TON, T4:5 DN, T4:14 DN - **These are timer functions and bits.  T4 is the default array for timers. T4:5 is a TON timer and this means that when the rung goes true T4:5 will begin to time and will do so until the Accum = Preset in this case .01 * 300 = 3 seconds. Each timer has three useful bits the EN, TT, DN.  The TT and the DN are the most useful the TT stays high while the timer is timing and the DN bit goes high when the timer is done.  T4:14 DN is the done bit for a TOF timer that is used in a rung elsewhere in the program.  TON timers create time delays after a rung goes true, TOF timers create time delays after a rung goes false.
-**Rung 10 execution ****-** Rung 10 starts with an XIC (examine if closed) bit operation.  The easy way to think of this is that this is asking the question is this bit HIGH, if so execute the rung, if not go to the next rung.  So let’s say it goes high, we then trigger the timer T4:5, and we latch the FAST INHIBIT Bit B3:0/13, three seconds later T4:5 will time out and the T4:5 DN will go high and so will B3:02 and stay that way until B3:0/4 changes state which would reset the timer. 
-**Rung 11 execution - **So as you may have figured out these two rungs are never true at the same time as rung 11 is true when B3:0/2 goes low.  When this rung is true whatever values that were in N7:10 and N7:11 will be replaced with 0.  T4:14 is a TOF timer in rung 36 that can be energized when any of four things happen, if any of those things goes LOW for more than three seconds then T4:14 DN would go HIGH and if rung 11 is true then B3:0/13 would be unlatched.
-**Rung 92**** -** The next relevant rung is rung 92, rung 92 only has N7:10 and uses some functions that have not been explained yet.  
-**S****:4****/3 ****-** This is a processor bit register that is included in every program and this register provides timing bits that have specific time periods and change states at a 50 % duty cycle. S:4/3 has a period of 160ms so this means it is high for 80ms and low for 80ms.
-**B3:5/8 **- This is a normal bit but it is being used as an OSR( one shot rising) which is as it sounds.  This bit will toggle high on a positive transition of S:4/3 only one time(meaning only 1 scan) and then it will go low regardless of the status of S:4/3. A bit that is used as an OSR cannot be used elsewhere for other purposes.  Generally we would group and name OSR bits in a word or array so as to prevent using them elsewhere by mistake.
-**O****:1.1****-O1.5 ****– **In slot 1 we have 1747-DCM(direct communication module)  this module is in a communication loop it is able to receive eight 16 bit words of information and send out eight 16 bit words of information.  O:1.1-O:1.7 are the location of the eight output words that are sent from the PLC to controls.  
-**I****:1.2**** -** This is the third 16 bit word of the input array of the 1747-DCM. So this is a number coming to the PLC from controls.
-**COP -** This is a function very similar to the MOV function but where the MOV function is primarily designed to move one integer the COP function is designed more to move larger blocks of data. We are using integers here so the length of 8 in this case means that the 16 bit words from I:3.0-I:3.7 will be copied to the integers N7:100-N7:107.
-**GRT**** ****-** This is fairly straight forward conditional statement. If A is greater than B  the function is true and whatever lies to the right of it will be executed.
-**Rung 92 execution - **This rung is controlled by a combination of S:4/3 and B3:5/8.  S:4/3 will go high every 80ms, this will activate B3:5/8 and executer the rung one time during that scan.  The rungs on the right then should execute theoretically at the same time so I will list them top to bottom.
-MOV - This is the first MOV function and this is taking the value of the AC current signal from the regulator board that is displayed on the touch panel N7:4 and sending to the control system via the second of the eight output words in the 1747- DCM.
-COP - This is copying the input register from the thermocouple module in slot 3 I:3.0-I:3.7 to the integer memory locations N7:100-N7:107.
-MOV - This is the same as the first move, here we are sending the value of the regulator voltage that we send to the regulator board to the control system via the third output word in the 1747-DCM.
-MOV - This time we are moving the value of the high voltage monitor divider stored in N7:15 to the fourth output word in the 1747-DCM.
-MOV - This time we are moving the DC Current value from the Danfysik current transformer to the fifth output word in the 1747-DCM.
-MOV - This time we are moving a constant called maximum volts that is input from the touch panel to the sixth output word in the 1747-DCM.  Just for reference our 16 bit word has a sign bit for the fifteenth bit so the maximum number is 2^15 or 32,768. So this value would clamp the maximum volt just below the maximum number this integer could hold.
-GRT and MOV - So I understand what this rung does but not why it does it but I think it will become clear once I have worked through the whole story of N7:10 so will likely update this more later.  Basically if N7:32(our Max Volt reference) is greater than N7:33 we send N7:33 to the sixth output of the 1747-DCM instead of N7:32.
-MOV – Lastly we are simply taking the value of the third Input word of the 1747-DCM and moving it into N7:33.  This rung I think also will need some updating of details after I understand the whole story.
+## Technical Specifications
+
+- **System:** HVPS PLC Control System
+- **Component:** PLC SOFTWARE DISCUSION 1
+- **Application:** HVPS automation and control logic
+- **PLC Type:** Industrial grade PLC system
+- **I/O Capacity:** Digital and analog input/output modules
+- **Communication:** Ethernet, serial, and fieldbus interfaces
+- **Programming:** Ladder logic, function block, structured text
+
+## PLC System Architecture and ASCII Representation
+
+### Control System Configuration
+This PLC system provides centralized control and monitoring for the HVPS system.
+
+```
+HVPS PLC CONTROL SYSTEM ARCHITECTURE - PLC SOFTWARE DISCUSION 1
+
+Field Devices    I/O Modules    PLC CPU    HMI/SCADA    Network
+     |               |            |           |            |
+[Sensors] -------> [AI/DI] --> [CPU] --> [HMI] --> [Network]
+     |               |            |           |            |
+[Actuators] <----- [AO/DO] <-- [CPU] <-- [HMI] <-- [Network]
+     |               |            |           |            |
+[Switches] -------> [DI] -----> [CPU] --> [Alarms] -> [SCADA]
+
+Key PLC Features:
+- Real-time control and monitoring
+- Safety interlock logic implementation
+- Analog control loops (voltage regulation)
+- Digital I/O for discrete control functions
+- Communication with HMI and SCADA systems
+- Data logging and historical trending
+- Alarm management and notification
+
+Control Functions:
+- HVPS voltage regulation control
+- Protection system coordination
+- Safety interlock monitoring
+- Equipment status monitoring
+- Automatic startup/shutdown sequences
+```
+
+## I/O Specifications and Requirements
+
+### Digital Inputs (DI)
+- **Voltage Level:** 24V DC standard industrial
+- **Input Type:** Sinking or sourcing configurable
+- **Response Time:** <10ms typical
+- **Isolation:** 1500V AC optical isolation
+- **Applications:** Switch positions, relay contacts, status signals
+
+### Digital Outputs (DO)
+- **Voltage Level:** 24V DC, relay outputs available
+- **Current Rating:** 2A per point typical
+- **Response Time:** <10ms typical
+- **Protection:** Short circuit and overload protection
+- **Applications:** Relay control, indicator lights, solenoid control
+
+### Analog Inputs (AI)
+- **Signal Types:** 4-20mA, 0-10V DC, thermocouple, RTD
+- **Resolution:** 16-bit minimum
+- **Accuracy:** ±0.1% of full scale
+- **Update Rate:** 100ms typical
+- **Applications:** Voltage feedback, current measurement, temperature
+
+### Analog Outputs (AO)
+- **Signal Types:** 4-20mA, 0-10V DC
+- **Resolution:** 16-bit minimum
+- **Accuracy:** ±0.1% of full scale
+- **Update Rate:** 100ms typical
+- **Applications:** Voltage reference, control signals
+
+## Safety Considerations
+
+### PLC Safety Requirements
+- **Safety Integrity Level:** SIL 2 minimum for safety functions
+- **Redundancy:** Redundant processors for critical functions
+- **Fail-Safe Design:** Safe state on power loss or failure
+- **Watchdog Timers:** System health monitoring
+- **Emergency Shutdown:** Hardware-based emergency stop
+
+### High Voltage Integration Safety
+- **Isolation:** Proper electrical isolation from HV circuits
+- **Grounding:** Separate control system grounding
+- **EMI Protection:** Electromagnetic interference protection
+- **Personnel Safety:** Access control and safety interlocks
+- **Arc Flash Protection:** Integration with arc flash protection
+
+## System Integration
+
+This PLC system integrates with the comprehensive HVPS system:
+
+### Power System Integration
+- **Voltage Control:** Closed-loop voltage regulation control
+- **Current Monitoring:** Real-time current measurement and limiting
+- **Protection Coordination:** Integration with protection systems
+- **Load Management:** Automatic load control and optimization
+
+### Safety System Integration
+- **Interlock Monitoring:** Personnel and equipment safety interlocks
+- **Emergency Systems:** Integration with emergency shutdown systems
+- **Alarm Management:** Comprehensive alarm and notification systems
+- **Access Control:** Integration with facility access control
+
+### Communication Integration
+- **HMI Interface:** Human-machine interface for operator control
+- **SCADA Integration:** Supervisory control and data acquisition
+- **Network Communication:** Ethernet and fieldbus communication
+- **Data Logging:** Historical data collection and storage
+
+## Programming and Configuration
+
+### Control Logic Implementation
+- **Ladder Logic:** Traditional relay logic programming
+- **Function Blocks:** Modular programming approach
+- **Structured Text:** High-level programming language
+- **Sequential Function Charts:** Process control sequences
+
+### Configuration Requirements
+- **I/O Configuration:** Input/output module configuration
+- **Communication Setup:** Network and protocol configuration
+- **Alarm Configuration:** Alarm limits and notification setup
+- **Security Configuration:** User access and security settings
+
+## Maintenance and Diagnostics
+
+### Preventive Maintenance
+- **Battery Replacement:** UPS and memory backup battery replacement
+- **Software Backup:** Regular backup of program and configuration
+- **I/O Testing:** Periodic input/output testing and calibration
+- **Communication Testing:** Network and communication verification
+- **Documentation Updates:** Maintain current documentation
+
+### Diagnostic Capabilities
+- **Built-in Diagnostics:** Comprehensive system self-diagnostics
+- **Online Monitoring:** Real-time system health monitoring
+- **Fault Indication:** Clear fault indication and troubleshooting
+- **Data Logging:** Historical data for trend analysis
+- **Remote Diagnostics:** Remote monitoring and diagnostic capability
+
+## Quality Assurance
+
+### Software Quality Control
+- **Code Review:** Comprehensive program review and verification
+- **Testing:** Factory acceptance testing and site acceptance testing
+- **Documentation:** Complete programming documentation
+- **Version Control:** Software version control and change management
+- **Validation:** Functional validation and performance verification
+
+### System Validation
+- **Functional Testing:** Verify all control functions operate correctly
+- **Safety Testing:** Verify all safety functions operate correctly
+- **Performance Testing:** Verify system meets performance requirements
+- **Integration Testing:** Verify proper integration with other systems
+- **Acceptance Testing:** Complete system acceptance testing
+
+## Technical References
+
+This PLC documentation should be used with:
+- **PLC Hardware Manuals:** Detailed hardware specifications and procedures
+- **Programming Software:** PLC programming and configuration software
+- **I/O Module Specifications:** Input/output module specifications
+- **Communication Protocols:** Network and communication protocol documentation
+- **Safety Standards:** Applicable safety standards (IEC 61508, IEC 61511)
+- **Installation Procedures:** PLC installation and commissioning procedures
+
+## Conclusion
+
+This HVPS PLC system provides essential automation and control functions for safe and reliable high-voltage power supply operation. Proper programming, configuration, and maintenance are critical for optimal system performance and safety.

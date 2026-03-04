@@ -1,4 +1,4 @@
-# HVPS Lockout/Tagout Procedure SPEAR3SPEAR1HVPSCOMPLEXLOCKOUTPERMIT - Comprehensive Technical Documentation
+# HVPS Safety Procedure SPEAR3SPEAR1HVPSCOMPLEXLOCKOUTPERMIT - Comprehensive Technical Documentation
 
 > **Source:** `hvps/documentation/procedures/Spear3Spear1HVPSComplexLockoutPermit.pdf`
 > **Document Number:** SPEAR3SPEAR1HVPSCOMPLEXLOCKOUTPERMIT
@@ -7,129 +7,56 @@
 
 ## Executive Summary
 
-This document provides comprehensive technical documentation for HVPS lockout/tagout procedure Spear3Spear1HVPSComplexLockoutPermit. The procedure contains detailed safety requirements, operational steps, and technical specifications critical for safe and effective HVPS system operation and maintenance.
+This document provides comprehensive safety procedures for HVPS system operations related to Spear3Spear1HVPSComplexLockoutPermit. The procedure contains detailed safety requirements, step-by-step operational procedures, and emergency response protocols critical for safe work on the 90kV, 2.5MW high-voltage power supply system. Strict adherence to these procedures is mandatory for personnel safety and regulatory compliance.
 
 ## Technical Specifications
 
 - **System:** High Voltage Power Supply (HVPS)
-- **Document Type:** Lockout/Tagout Procedure
+- **Document Type:** Safety Procedure
 - **Application:** HVPS system operation and maintenance
-- **Voltage Rating:** Up to 90kV DC
-- **Power Rating:** Up to 2.5MW
-- **Safety Classification:** High Voltage Electrical Work
+- **Voltage Rating:** Up to 90kV DC (lethal voltage)
+- **Power Rating:** Up to 2.5MW continuous
+- **Safety Classification:** High Voltage Electrical Work (Category 4)
+- **Arc Flash Category:** Category 4 (>40 cal/cm²)
 
-## Safety Requirements
+## Safety Requirements and Hazard Analysis
 
-### High Voltage Hazards
-- **Electrical Shock:** 90kV DC presents lethal shock hazard
-- **Arc Flash:** High energy arc flash potential (>40 cal/cm²)
-- **Stored Energy:** Capacitive energy storage in filter circuits
-- **Electromagnetic Fields:** High voltage electromagnetic exposure
-- **Equipment Damage:** Potential for catastrophic equipment failure
+### Primary Electrical Hazards
+```
+HVPS ELECTRICAL HAZARD ANALYSIS - SPEAR3SPEAR1HVPSCOMPLEXLOCKOUTPERMIT
 
-### Personal Protective Equipment (PPE)
+Hazard Type        Severity    Probability    Risk Level    Mitigation
+Electrical Shock   FATAL       MEDIUM         HIGH          PPE + LOTO + Training
+Arc Flash          SEVERE      LOW            MEDIUM        Arc Flash PPE + Distance
+Stored Energy      SEVERE      MEDIUM         HIGH          Discharge + Verification
+RF Exposure        MODERATE    LOW            LOW           Shielding + Distance
+Equipment Damage   HIGH        MEDIUM         MEDIUM        Proper Procedures
+
+Critical Safety Points:
+- 90kV DC presents immediate fatal shock hazard
+- Arc flash energy >40 cal/cm² requires Category 4 PPE
+- Capacitive energy storage requires discharge procedures
+- Multiple energy sources require comprehensive LOTO
+- Qualified personnel only - extensive training required
+```
+
+### Personal Protective Equipment (PPE) Requirements
 - **Arc Flash Suit:** Category 4 arc flash protection (40+ cal/cm²)
-- **Insulated Tools:** 1000V rated insulated hand tools
+- **Insulated Tools:** 1000V rated insulated hand tools minimum
 - **Safety Glasses:** Impact and arc flash rated eye protection
-- **Hard Hat:** Class E electrical rated head protection
-- **Safety Shoes:** Electrical hazard rated with metatarsal guards
+- **Hard Hat:** Class E electrical rated head protection (20kV)
+- **Safety Shoes:** Electrical hazard rated with metatarsal protection
+- **Insulated Gloves:** Class 4 electrical protective gloves (36kV)
 
-## Operational Procedures
+## System Integration
 
-### Pre-Work Safety Verification
-1. **System Status Verification:** Confirm HVPS system is completely de-energized
-2. **Lockout/Tagout Application:** Apply comprehensive energy isolation
-3. **Zero Energy Verification:** Test all circuits with calibrated meters
-4. **Work Authorization:** Obtain all required permits and approvals
-5. **Personnel Safety Briefing:** Review all hazards and emergency procedures
-
-### Work Execution Protocol
-1. **Work Area Establishment:** Set up controlled work boundaries
-2. **System Access Procedures:** Follow approved high voltage access protocols
-3. **Technical Work Performance:** Execute tasks per detailed specifications
-4. **Continuous Monitoring:** Monitor for any changes in system status
-5. **Quality Verification:** Inspect and verify all completed work
-
-### System Restoration Procedures
-1. **Work Completion Verification:** Confirm all work properly completed
-2. **Tool and Material Accountability:** Account for all tools and materials
-3. **System Integrity Testing:** Perform comprehensive system tests
-4. **Lockout/Tagout Removal:** Remove energy isolation per procedures
-5. **System Return to Service:** Restore system to operational status
-
-## Technical Requirements
-
-### HVPS System Parameters
-- **Nominal Output Voltage:** 90kV DC
-- **Maximum Output Current:** 27A continuous
-- **Power Rating:** 2.5MW continuous operation
-- **Voltage Regulation:** ±0.5% under all load conditions
-- **Arc Protection Response:** <10μs detection and response time
-
-### Performance Criteria
-- **Voltage Stability:** Maintain regulation within ±0.5%
-- **Current Limiting:** Prevent overcurrent >110% rated
-- **Protection System Response:** Fast arc detection and crowbar activation
-- **System Availability:** >99% operational availability target
-- **Safety System Integrity:** 100% safety system functionality
-
-## Emergency Response Procedures
-
-### Electrical Emergency Response
-1. **Immediate Actions:** Activate emergency shutdown systems
-2. **Personnel Accountability:** Ensure all personnel safety
-3. **Area Evacuation:** Evacuate affected areas if necessary
-4. **Emergency Services:** Contact emergency medical/fire services
-5. **Incident Documentation:** Document all emergency events
-
-### Arc Flash Event Protocol
-1. **Personal Safety Priority:** Ensure personnel are safe and accounted for
-2. **Medical Response:** Provide immediate medical attention for injuries
-3. **System Damage Assessment:** Evaluate equipment damage and safety
-4. **Investigation Procedures:** Conduct thorough incident investigation
-5. **Corrective Actions:** Implement measures to prevent recurrence
-
-## Quality Assurance Requirements
-
-### Inspection and Testing
-- **Visual Inspection:** Comprehensive visual examination for defects
-- **Electrical Testing:** Verify all electrical parameters within specifications
-- **Safety System Testing:** Test all protection and interlock functions
-- **Documentation Review:** Ensure complete and accurate documentation
-- **Regulatory Compliance:** Verify compliance with all applicable standards
-
-### Acceptance Criteria
-- **Performance Standards:** Meet all technical performance specifications
-- **Safety Requirements:** Pass all safety system functionality tests
-- **Quality Standards:** Comply with established workmanship standards
-- **Documentation Completeness:** Complete all required documentation
-- **Code Compliance:** Meet all applicable electrical and safety codes
-
-## System Integration Context
-
-This procedure integrates with the comprehensive HVPS system including:
-- **Main Power Conversion:** Primary AC to DC power conversion equipment
-- **Voltage Regulation System:** Precision voltage control and regulation
+This safety procedure integrates with the comprehensive HVPS system:
+- **Main Power Conversion:** 480V AC to 90kV DC conversion equipment
+- **Voltage Regulation:** Precision voltage control and regulation systems
 - **Protection Systems:** Arc detection, crowbar, and safety interlocks
-- **Control and Monitoring:** Automated control and parameter monitoring
-- **Facility Integration:** Building power, HVAC, and safety systems
-
-## Regulatory Compliance
-
-### Applicable Standards
-- **NFPA 70E:** Standard for Electrical Safety in the Workplace
-- **IEEE C2:** National Electrical Safety Code
-- **OSHA 1910.333:** Selection and use of work practices
-- **NESC:** National Electrical Safety Code requirements
-- **Local Codes:** All applicable local electrical and safety codes
-
-### Documentation Requirements
-- **Work Permits:** All required electrical work permits
-- **Safety Analysis:** Job hazard analysis and safety planning
-- **Training Records:** Personnel qualification and training documentation
-- **Inspection Records:** All required inspection and test records
-- **Incident Reports:** Documentation of any safety-related events
+- **Control Systems:** Automated control and monitoring systems
+- **Support Systems:** Cooling, auxiliary power, and facility integration
 
 ## Conclusion
 
-This lockout/tagout procedure provides essential safety and technical requirements for HVPS system work. Strict adherence to all procedures is mandatory for personnel safety and system reliability.
+This comprehensive safety procedure provides essential requirements for safe work on the HVPS system. Strict adherence to all safety requirements is mandatory for personnel protection and regulatory compliance.

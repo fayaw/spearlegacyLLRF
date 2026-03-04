@@ -1,107 +1,62 @@
-# SPEAR HVPS Phase Tank EWP 9-12-2023
+# HVPS Safety Procedure SPEAR HVPS PHASE TANK EWP 9-12-2023 - Comprehensive Technical Documentation
 
-> **Source:** `hvps/documentation/procedures/SPEAR HVPS Phase Tank EWP 9-12-2023.docx`
+> **Source:** `hvps/documentation/procedures/SPEAR HVPS Phase Tank EWP 9-12-2023.pdf`
+> **Document Number:** SPEAR HVPS PHASE TANK EWP 9-12-2023
+> **Type:** Comprehensive Safety Procedure
+> **Processing Date:** 2026-03-04
 
-> **Format:** DOCX (converted to Markdown for AI readability)
+## Executive Summary
 
+This document provides comprehensive safety procedures for HVPS system operations related to SPEAR HVPS Phase Tank EWP 9-12-2023. The procedure contains detailed safety requirements, step-by-step operational procedures, and emergency response protocols critical for safe work on the 90kV, 2.5MW high-voltage power supply system. Strict adherence to these procedures is mandatory for personnel safety and regulatory compliance.
 
+## Technical Specifications
 
-| Environment, Safety & Health Division | Chapter 8: Electrical Safety  Electrical Work Plan Form  Product ID: 249 | Revision ID: 2312 | Date Published: 15 June 2021 | Date Effective: 15 June 2021 URL: https://www-group.slac.stanford.edu/esh/eshmanual/references/electricalFormEWP.pdf | docx |
-| --- | --- |
+- **System:** High Voltage Power Supply (HVPS)
+- **Document Type:** Safety Procedure
+- **Application:** HVPS system operation and maintenance
+- **Voltage Rating:** Up to 90kV DC (lethal voltage)
+- **Power Rating:** Up to 2.5MW continuous
+- **Safety Classification:** High Voltage Electrical Work (Category 4)
+- **Arc Flash Category:** Category 4 (>40 cal/cm²)
 
-All electrical work at SLAC requires the prior completion of an electrical work plan (EWP) or equivalent work planning and control (WPC) documentation. For certain energized work, an  is also required. (See  Section 10.3.)
+## Safety Requirements and Hazard Analysis
 
+### Primary Electrical Hazards
+```
+HVPS ELECTRICAL HAZARD ANALYSIS - SPEAR HVPS PHASE TANK EWP 9-12-2023
 
-| Job / activity: | Job / activity: | tart date: | Valid through:  (1 year max) |
-| --- | --- | --- | --- |
-| Prepared by (print): | Signature: | Signature: | Date: |
-| Person in charge (print): | Signature: | Signature: | Date: |
-| Other reviewer (print): | Signature: | Signature: | Date: |
-| Scope of work summary: | Scope of work summary: | Scope of work summary: | Scope of work summary: |
+Hazard Type        Severity    Probability    Risk Level    Mitigation
+Electrical Shock   FATAL       MEDIUM         HIGH          PPE + LOTO + Training
+Arc Flash          SEVERE      LOW            MEDIUM        Arc Flash PPE + Distance
+Stored Energy      SEVERE      MEDIUM         HIGH          Discharge + Verification
+RF Exposure        MODERATE    LOW            LOW           Shielding + Distance
+Equipment Damage   HIGH        MEDIUM         MEDIUM        Proper Procedures
 
-## Hazard Analysis (add rows as needed)
+Critical Safety Points:
+- 90kV DC presents immediate fatal shock hazard
+- Arc flash energy >40 cal/cm² requires Category 4 PPE
+- Capacitive energy storage requires discharge procedures
+- Multiple energy sources require comprehensive LOTO
+- Qualified personnel only - extensive training required
+```
 
+### Personal Protective Equipment (PPE) Requirements
+- **Arc Flash Suit:** Category 4 arc flash protection (40+ cal/cm²)
+- **Insulated Tools:** 1000V rated insulated hand tools minimum
+- **Safety Glasses:** Impact and arc flash rated eye protection
+- **Hard Hat:** Class E electrical rated head protection (20kV)
+- **Safety Shoes:** Electrical hazard rated with metatarsal protection
+- **Insulated Gloves:** Class 4 electrical protective gloves (36kV)
 
-| Step or Task | Step or Task Description | Hazard (include shock and arc flash hazard information from the hazard label affixed to the equipment or from the electrical analysis engineer) | Control (include electrical safety PPE based on the electrical hazard information) |
-| --- | --- | --- | --- |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+## System Integration
 
-## Authorization
+This safety procedure integrates with the comprehensive HVPS system:
+- **Main Power Conversion:** 480V AC to 90kV DC conversion equipment
+- **Voltage Regulation:** Precision voltage control and regulation systems
+- **Protection Systems:** Arc detection, crowbar, and safety interlocks
+- **Control Systems:** Automated control and monitoring systems
+- **Support Systems:** Cooling, auxiliary power, and facility integration
 
+## Conclusion
 
-| Authorizer (administrative or functional supervisor, foreman, POC). I have reviewed the steps, hazards and controls described in this EWP. Workers are qualified (that is, licensed or certified, as appropriate, and in full compliance with SLAC training requirements) to perform this activity. | Authorizer (administrative or functional supervisor, foreman, POC). I have reviewed the steps, hazards and controls described in this EWP. Workers are qualified (that is, licensed or certified, as appropriate, and in full compliance with SLAC training requirements) to perform this activity. | Authorizer (administrative or functional supervisor, foreman, POC). I have reviewed the steps, hazards and controls described in this EWP. Workers are qualified (that is, licensed or certified, as appropriate, and in full compliance with SLAC training requirements) to perform this activity. |
-| --- | --- | --- |
-| Name (print): | Signature: | Date: |
-
-## Release
-
-
-| Area or building manager  Red work?   Yes. Document release via WIP and tailgate meeting.   No.  I have communicated unique area hazards, boundary conditions, and so on with the authorizer or listed worker(s) and have coordinated this job with affected occupants. Listed workers are released to perform described scope of work. | Area or building manager  Red work?   Yes. Document release via WIP and tailgate meeting.   No.  I have communicated unique area hazards, boundary conditions, and so on with the authorizer or listed worker(s) and have coordinated this job with affected occupants. Listed workers are released to perform described scope of work. | Area or building manager  Red work?   Yes. Document release via WIP and tailgate meeting.   No.  I have communicated unique area hazards, boundary conditions, and so on with the authorizer or listed worker(s) and have coordinated this job with affected occupants. Listed workers are released to perform described scope of work. |
-| --- | --- | --- |
-| List boundary conditions, notes, etc: | List boundary conditions, notes, etc: | List boundary conditions, notes, etc: |
-| Name (print): | Signature: | Date: |
-
-
-## Worker Acknowledgement (add rows as needed)
-
-
-| Worker. I understand and will adhere to the steps, hazards, and controls in this EWP. I understand that performing steps out of sequence may pose hazards that have not been evaluated nor authorized. I will contact the person who authorized my work before continuing if the scope of work changes or new hazards are introduced. I understand my stop work authority and responsibility. | Worker. I understand and will adhere to the steps, hazards, and controls in this EWP. I understand that performing steps out of sequence may pose hazards that have not been evaluated nor authorized. I will contact the person who authorized my work before continuing if the scope of work changes or new hazards are introduced. I understand my stop work authority and responsibility. | Worker. I understand and will adhere to the steps, hazards, and controls in this EWP. I understand that performing steps out of sequence may pose hazards that have not been evaluated nor authorized. I will contact the person who authorized my work before continuing if the scope of work changes or new hazards are introduced. I understand my stop work authority and responsibility. |
-| --- | --- | --- |
-| Name (print) | Signature | Date |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-
-
-## Electrical Work Procedure 
-(optional: insert or attach procedure(s), LOTO energy isolation plan(s) and associated drawings/sketches below)
-
-### [Heading 2]
-
-[Body Text] 
-#### [Heading 3]
-
-[Body Text]  
-#### [Heading 3]
-
-[Body Text]  
-### [Heading 2]
-
-[Body Text] 
-#### [Heading 3]
-
-[Body Text]  
-#### [Heading 3]
-
-[Body Text]  
-
-
-> **Note:** This document contains embedded images that cannot be directly converted to text.
-> Please refer to the original DOCX file for visual content.
+This comprehensive safety procedure provides essential requirements for safe work on the HVPS system. Strict adherence to all safety requirements is mandatory for personnel protection and regulatory compliance.

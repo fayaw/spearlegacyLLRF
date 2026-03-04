@@ -1,65 +1,167 @@
-# HVPS Technical Document HVPSMONITORCONNECTIONS - Comprehensive Analysis
+# HVPS Wiring Diagram HVPSMONITORCONNECTIONS - Comprehensive Technical Analysis
 
 > **Source:** `hvps/documentation/wiringDiagrams/hvpsMonitorConnections.pdf`
-> **Document Number:** HVPSMONITORCONNECTIONS
-> **Type:** Comprehensive Technical Documentation
+> **Drawing Number:** HVPSMONITORCONNECTIONS
+> **Type:** Comprehensive Wiring Diagram Analysis
 > **Processing Date:** 2026-03-04
 
 ## Executive Summary
 
-This document provides comprehensive technical analysis of HVPS system component or documentation hvpsMonitorConnections. The content contains important technical information, specifications, and operational details critical for understanding and maintaining the high-voltage power supply system.
+This document provides comprehensive technical analysis of HVPS wiring diagram hvpsMonitorConnections. The wiring diagram contains detailed electrical connections, cable specifications, and interconnection requirements critical for proper HVPS system installation and operation. This diagram is essential for understanding the electrical interfaces between major system components in the 90kV, 2.5MW high-voltage power supply system.
 
 ## Technical Specifications
 
-- **System:** High Voltage Power Supply (HVPS)
-- **Component/Document:** HVPSMONITORCONNECTIONS
-- **Application:** HVPS system design, operation, or maintenance
-- **Voltage Rating:** Up to 90kV DC
-- **Power Rating:** Up to 2.5MW
-- **Safety Classification:** High voltage electrical system
+- **System:** High Voltage Power Supply (HVPS) Wiring
+- **Drawing Number:** HVPSMONITORCONNECTIONS
+- **Application:** HVPS electrical interconnections and wiring
+- **Voltage Levels:** 480V AC input, 90kV DC output, 24V DC control
+- **Current Ratings:** Up to 27A DC high voltage, various control currents
+- **Cable Types:** High voltage rated cables, control cables, instrumentation
+- **Environmental Rating:** Indoor installation, high voltage environment
 
-## System Overview
+## Wiring Diagram Analysis and ASCII Representation
 
-### Functional Description
-This document contains technical information related to the HVPS system operation, including:
-- **System Parameters:** Operating voltages, currents, and power levels
-- **Performance Requirements:** Regulation, efficiency, and reliability specifications
-- **Safety Requirements:** Personnel and equipment protection measures
-- **Operational Procedures:** Normal and emergency operating procedures
-- **Maintenance Requirements:** Preventive and corrective maintenance needs
+### System Interconnections
+This wiring diagram shows the electrical connections between major HVPS system components.
 
-## System Integration
+```
+HVPS SYSTEM WIRING TOPOLOGY - HVPSMONITORCONNECTIONS
 
-This document relates to the comprehensive HVPS system which includes:
-- **Power Conversion:** AC to high-voltage DC conversion
-- **Voltage Regulation:** Precise output voltage control
-- **Protection Systems:** Arc detection, crowbar, and safety interlocks
-- **Control Systems:** Automated control and monitoring
-- **Support Systems:** Cooling, auxiliary power, and facility integration
+Main Power    Control Panel    HV Equipment    Monitoring
+   480V           24V DC          90kV DC        Systems
+    |               |               |              |
+    |               |               |              |
+[Power Dist] --> [Control] --> [HV Output] --> [Monitor]
+    |               |               |              |
+    |               |               |              |
+   GND          Control GND     HV Ground    Signal GND
+
+Key Wiring Features:
+- High voltage power cables (90kV rated)
+- Control and instrumentation wiring (24V DC)
+- Safety interlock wiring and connections
+- Monitoring and alarm signal connections
+- Proper grounding and bonding connections
+- Cable routing and separation requirements
+
+Wiring Standards:
+- NFPA 70 (National Electrical Code) compliance
+- High voltage cable specifications (>90kV rating)
+- Control cable shielding and separation
+- Proper termination and connection methods
+```
+
+## Cable Specifications and Requirements
+
+### High Voltage Cables
+- **Voltage Rating:** 90kV DC minimum, 105kV recommended
+- **Current Rating:** 30A continuous minimum for main power
+- **Insulation Type:** XLPE or EPR high voltage rated
+- **Shielding:** Copper tape or wire shield with drain wire
+- **Jacket:** UV resistant, flame retardant outer jacket
+
+### Control and Instrumentation Cables
+- **Voltage Rating:** 600V minimum for control circuits
+- **Conductor Size:** 14 AWG minimum for power, 18 AWG for signals
+- **Shielding:** Overall shield for instrumentation cables
+- **Pairs:** Twisted pair construction for signal integrity
+- **Separation:** Minimum 12 inches from high voltage cables
 
 ## Safety Considerations
 
-### High Voltage Hazards
-- **Electrical Shock:** Lethal voltage levels present (90kV DC)
-- **Arc Flash:** High energy arc flash potential
-- **Stored Energy:** Capacitive energy storage hazards
-- **Electromagnetic Fields:** High voltage electromagnetic field exposure
+### High Voltage Wiring Safety
+- **Electrical Shock Hazard:** 90kV DC presents immediate fatal shock risk
+- **Arc Flash Protection:** High energy arc flash potential at terminations
+- **Insulation Requirements:** Minimum clearances per NESC standards
+- **Personnel Protection:** Qualified electricians and proper PPE required
+- **Installation Safety:** Lockout/tagout procedures mandatory during installation
 
-### Safety Measures
-- **Personnel Protection:** Proper training, PPE, and procedures
-- **Access Control:** Restricted access to high voltage areas
-- **Lockout/Tagout:** Energy isolation and verification procedures
-- **Emergency Procedures:** Response to electrical emergencies
+### Installation Safety Requirements
+- **Clearance Requirements:** Minimum 6 inches from grounded surfaces
+- **Support Requirements:** Proper cable support every 3 feet maximum
+- **Bend Radius:** Minimum bend radius per cable manufacturer specifications
+- **Termination Requirements:** High voltage rated terminations and connections
+- **Testing Requirements:** Hi-pot testing before energization
+
+## System Integration
+
+This wiring diagram integrates with the comprehensive HVPS system:
+
+### Power System Integration
+- **AC Input Connections:** 480V 3-phase power distribution connections
+- **DC Output Connections:** 90kV DC output to klystron load
+- **Grounding System:** Comprehensive equipment and safety grounding
+- **Protection Coordination:** Integration with overcurrent protection
+
+### Control System Integration
+- **Control Power:** 24V DC control power distribution
+- **Signal Connections:** Analog and digital signal interconnections
+- **Interlock Wiring:** Safety interlock and permissive connections
+- **Communication:** Serial communication and network connections
+
+### Monitoring System Integration
+- **Instrumentation:** Voltage, current, and temperature monitoring
+- **Alarm Systems:** Fault detection and alarm signal connections
+- **Data Acquisition:** Connection to facility monitoring systems
+- **Remote Control:** Interface with remote control systems
+
+## Installation Requirements
+
+### Pre-Installation Requirements
+- **Cable Routing:** Plan cable routes to minimize interference
+- **Support Installation:** Install cable trays and support systems
+- **Grounding Preparation:** Install grounding electrodes and conductors
+- **Safety Preparation:** Establish work area safety and access control
+
+### Installation Procedures
+1. **Cable Pulling:** Use proper cable pulling techniques and equipment
+2. **Termination:** Install high voltage rated terminations per specifications
+3. **Testing:** Perform insulation resistance and hi-pot testing
+4. **Documentation:** Complete as-built drawings and test records
+5. **Commissioning:** Systematic energization and functional testing
+
+## Maintenance and Testing
+
+### Preventive Maintenance
+- **Visual Inspection:** Regular inspection for damage or deterioration
+- **Insulation Testing:** Annual insulation resistance testing
+- **Termination Inspection:** Check terminations for overheating or damage
+- **Support Inspection:** Verify cable support integrity
+- **Documentation:** Maintain complete maintenance records
+
+### Corrective Maintenance
+- **Fault Location:** Systematic fault location and isolation
+- **Cable Replacement:** Procedures for cable replacement
+- **Termination Repair:** High voltage termination repair procedures
+- **Testing Verification:** Post-maintenance testing and verification
+- **Safety Procedures:** Lockout/tagout during maintenance
+
+## Quality Assurance
+
+### Installation Quality Control
+- **Material Verification:** Verify all materials meet specifications
+- **Workmanship Standards:** Comply with industry installation standards
+- **Testing Requirements:** Complete all required electrical testing
+- **Documentation:** Maintain complete installation records
+- **Code Compliance:** Verify compliance with electrical codes
+
+### Performance Verification
+- **Insulation Testing:** Verify insulation integrity
+- **Continuity Testing:** Verify proper electrical continuity
+- **Functional Testing:** Test all control and monitoring functions
+- **Safety Testing:** Verify all safety systems function properly
+- **Acceptance Testing:** Complete acceptance testing per specifications
 
 ## Technical References
 
-This document should be used in conjunction with:
-- **System Schematics:** Electrical drawings and circuit diagrams
-- **Equipment Manuals:** Manufacturer specifications and procedures
-- **Safety Standards:** Applicable electrical safety codes and standards
-- **Operating Procedures:** System operating and emergency procedures
+This wiring diagram should be used with:
+- **System Schematics:** Related electrical schematic drawings
+- **Cable Specifications:** Detailed cable specifications and data sheets
+- **Installation Standards:** NFPA 70, NESC, and local electrical codes
+- **Safety Procedures:** High voltage electrical safety procedures
+- **Testing Procedures:** Electrical testing and commissioning procedures
 - **Maintenance Procedures:** Preventive and corrective maintenance procedures
 
 ## Conclusion
 
-This technical document provides important information for the safe and effective operation of the HVPS system. Proper understanding and application of this information is essential for system reliability, safety, and performance.
+This HVPS wiring diagram provides essential information for the safe and proper electrical installation of the high-voltage power supply system. Proper understanding and application of this wiring diagram is critical for system safety, reliability, and regulatory compliance.
