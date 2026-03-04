@@ -1,0 +1,278 @@
+% standard latex packages are in
+%  C:\Program Files\MiKTeX 2.9\tex\latex
+%  or in
+%  C:\Users\sebek\AppData\Local\Programs\MiKTeX 2.9\tex\latex
+% personal packages are in
+%  C:\localtexmf\tex\latex
+% standard built-in texstudio templates in
+%  C:\Program Files\texstudio\templates
+% personal templates are in
+%  C:\Users\sebek\AppData\Roaming\texstudio\templates\user
+\documentclass[letterpaper,11pt]{article}
+\usepackage[top=1in, bottom=1.25in, left=1.25in, right=1.25in]{geometry}
+\usepackage{graphicx} % in order to include graphics
+% \usepackage{epstopdf} % when one wants to input .eps files
+\usepackage{textcomp} % for some macros such as textcelsius or textdegree
+\usepackage[retainorgcmds]{IEEEtrantools} % for use of IEEEeqnarray
+% \begin{IEEEeqnarray*}{rCl}
+% \IEEEyesnumber
+% \IEEEnonumber
+% \end{IEEEeqnarray*}
+\usepackage{amsmath} % for nice mathematical typsetting
+\usepackage{amssymb} % for other symbols, including \triangleq
+\usepackage{url}     % formats urls in the text
+\usepackage{siunitx} % allows formatting of numbers and units
+% tikz package and libraries in localtexmf
+%  \usepackage{tikz}    % drawing package for shapes
+%  \usetikzlibrary{shapes,arrows} % tikz library
+%  \usetikzlibrary{dsp,chains}
+%  \usepackage{signalflowdiagram}
+% template for including pdf graphics
+% trim order is left, bottom, right, top
+% default units are bp (big points = 1/72 inch)
+%	\begin{figure}[tbph]
+%		\centering
+%		\includegraphics[trim= 3.75cm 8.8cm 3.35cm 8.5cm,clip,width=0.95\linewidth]{graphicsDir/grahpicsFile.pdf
+%		\caption[myCaptionLabel]{This is my caption.}
+%		\label{fig:myFigureLabel}
+%	\end{figure}
+% begin/end {center} can also be used but this adds additional lines ahead of and after the graphics
+%\begin{center}
+%\end{center}
+
+\author{J.~Sebek}
+\title{SPEAR3 High Voltage Power Supply Hazards}
+\begin{document}
+	\maketitle
+%	\tableofcontents
+\section{Introduction}
+This note documents the hazards in the SPEAR3 high voltage power supply (HVPS) and then addresses the discharge of potential stored energy in the system.  The high level specifications of the HVPS can be found in the specification for the supply \cite{cassel04}, although not all details of the HVPS design are contained in that document.  Using this note as a reference, a procedure can be developed to safely measure zero voltage both on the HVPS output and also its internal components, if required.  The requirements for dealing with potential electrical hazards, although not discussed in this document, are given in the latest version of the National Fire Protection Association (NFPA) 70E standard \cite{nfpa21}.
+
+\section{HVPS Architecture}
+The purpose of the HVPS is to provide direct current (DC) power to a \SI{1.5}{\MW} klystron.  The source of its input power is the three-phase \SI{12.47}{\kV} RMS line.  The HVPS is rated to output up to \SI{-90}{\kV}, \SI{27}{\ampere}, or \SI{2.5}{\MW} of power to the klystron.  Figure \ref{fig:hvpsSchematic} gives a high level schematic of the HVPS.
+
+\begin{figure}[tbph]
+	\centering
+	% include full schematic and trim to eliminate boilerplate
+	\includegraphics[trim= 11cm 15cm 30cm 7cm,clip,width=1.0\linewidth]{graphics/sd7307900101.pdf}
+	\caption[hvpsSchematic]{High level schematic of HVPS and klystron.}
+	\label{fig:hvpsSchematic}
+\end{figure}
+The power supply specification gives \SI{350}{\kV A} as the rating for the input phase-shifting transformer.  However this number does not seem to be correct, especially since the output rating of the power supply is \SI{2.5}{\MW}.  A figure in the specification gives the input power rating of the source as \SI{2.5}{\mega\volt\ampere} and the rating of each of the two rectifier transformers as \SI{1.5}{\mega\volt\ampere} each.  Figure \ref{fig:hvpsSchematic}, a later HVPS schematic gives the input power rating of the source as \SI{3.0}{\mega\volt\ampere}.  Based on these other numbers, I assume that the number given as the rating in the specification likely is a typographical error that has a missing zero.  I therefore assume that the correct rating of the phase-shifting transformer is \SI{3.5}{\mega\volt\ampere}.  For this rating, the full load current for each phase is
+\begin{equation} \label{eqn:inputXfmrCurrent}
+	I_\Phi = \frac{3500}{\sqrt{3}\cdot 12.47} = \SI{162}{\ampere}.
+\end{equation}
+
+The phase-shifting transformer is an extended delta configuration that creates two three-phase waveforms from the \SI{12.47}{\kV} RMS line, one advanced by \SI{15}{\degree} and one retarded by \SI{15}{\degree}.  Each has a phase-to-phase amplitude of \SI{12.91}{\kV} RMS.  (The specification also carries along the error of using \SI{12.47}{\kV} RMS instead of \SI{12.91}{\kV} RMS, even though the correct value of the shifted voltages is shown in a figure in the specification.  The specification does give a tolerance of $\pm5\%$ in all voltage ratings and this difference is within that tolerance.  We will use the value of \SI{12.91}{\kV} RMS in our calculations in this note.)
+
+The phase-shifted waveforms are applied to the primary legs of two open wye transformers, labeled T1 and T2 in Fig. \ref{fig:hvpsSchematic}, each rated at \SI{1.5}{\mega\volt\ampere}.  Each of these transformers feed two wye secondaries.  Both of the T1 secondaries, T1-S1 and T1-S2, have phase-to-phase voltages of  \SI{21.0}{\kV} RMS.  One of the T2 secondaries, T2-S1, also has a voltage of \SI{21.0}{\kV} RMS, while the other, T2-S2, only has half of that voltage, \SI{10.5}{\kV} RMS.
+
+Each open wye primary feeds a six-pulse thyristor rectifier stack.  The load of each of these stacks is a \SI{0.3}{\henry} inductor.  No individual thyristor can hold off the required voltage from the open-wye primary.  Therefore each thyristor stack is comprised of 14 individual Powerex T8K7 thyristors. There are energy storage devices, capacitors, that are associated with these stacks.  Each thyristor has a \SI{0.047}{\micro\farad} capacitor in a snubber across it and each stack has an additional snubber with a \SI{0.015}{\micro\farad} capacitor.
+
+The four secondaries of the two transformers feed rectifiers that convert the voltage to DC.  Each secondary has a main output which feeds its main diode rectifier stack.  The secondary also has a tap set at $105\%$ of the main output.  This tap feeds an \SI{8}{\micro\farad} capacitor that, along with a pair of \SI{500}{\ohm} series resistors, filters out some of the output HVPS ripple.\label{S:filterDiscussion}  Not shown in Fig. \ref{fig:hvpsSchematic} is a \SI{0.22}{\micro\farad} capacitor across the output.
+
+\section{Potential Electrical Hazards}
+\subsection{HVPS Input}
+The input power to the HVPS is three phase AC line with a phase to phase voltage of \SI{12.47}{\kV} RMS.  Nominal rated maximum current is \SI{162}{\ampere}, although typical input current is about \SI{113}{\ampere}.  This voltage is entirely contained within the metal enclosed switchgear, which is the responsibility of the facilities and operations group.  All work performed on this switchgear is performed by them.
+
+\subsection{HVPS Output}
+The output power of the HVPS can range to \SI{-90}{\kV}, \SI{27}{\ampere}, although its nominal value at full \SI{500}{\mA} SPEAR operation is \SI{-74.7}{\kV} and \SI{22.0}{\ampere}.
+
+\subsection{Control Power}
+The HVPS and its associated switchgear has two sources of control power.  DC control power, at \SI{125}{\volt DC} is used for control of the local contactor controller in the switchgear.  This power is sourced from Substation 507.  In addition to providing power for its internal logic, the controller uses this voltage for part of its local machine protection system (MPS) to ensure that there has been no excessive pressure in the transformer main tank, the main tank oil temperature is at an acceptable level, and the low conductivity cooling water is flowing through the appropriate oil cooling radiators.
+
+Three phases of \SI{208}{\volt AC} control power is used in the HVPS.  One phase is used to provide power for the contactor controller, another phase is used to power the oil pump inside of the main tank, and the third phase provides power to the light used to illuminate the switchgear compartment.
+
+\subsection{Trigger Pulses}
+The HVPS controller sends trains of \SI{16}{\micro\second} pulses in \SI{15}{\degree} bursts to fire the thyristors in the phase control stacks.  The amplitude of the first pulse is \SI{240}{\volt}; the amplitudes of the later pulses are \SI{120}{\volt}.  Similar voltages are used to fire the crowbar thyristors in the event of a potential arc in either the klystron or the HVPS output.
+
+\subsection{HVPS Stored Energy}
+\subsubsection{Filter Inductors}
+Each of the HVPS rectifer transformers has an inductor that is fed by and filters the current from the thyristors in the open wye primary.  The inductance of each inductor is \SI{0.3}{\henry} and its full load current is \SI{85}{\ampere}.  The stored energy in each inductor is
+\begin{equation}\label{eqn:inductorEnergy}
+	\mathcal{E}_{L} = \dfrac{1}{2}LI^{2} = \left(\dfrac{1}{2}\right)0.3 \left(85\right)^{2} = \SI{1084}{\joule}.
+\end{equation}
+\subsubsection{Phase Control Thyristor Stack Snubber Capacitors}
+Each rectifier transformer open wye primary has six phase control thyristor stacks.  The phase to phase transformer voltage is \SI{12.91}{\kV} RMS.  The maximum voltage on any of the snubber capacitors is therefore
+\begin{equation}\label{eqn:thyristorSnubberCapVoltage}
+	V_{\max} = \sqrt{2}\cdot \SI{12.91}{\kV} = \SI{18.26}{\kV}.
+\end{equation}
+Each stack as an R-C series snubber circuit in which the capacitance is \SI{0.015}{\micro\farad}.  The largest amount of stored energy in any of these capacitors is
+\begin{equation}\label{eqn:thyristorSnubberCapStackEnergy}
+	\mathcal{E}_{C}=\dfrac{1}{2}CV^{2}=\left(\dfrac{1}{2}\right)0.015\cdot 10^{-6} \left(18.26\cdot 10^{3}\right)^{2} = \SI{2.5}{\joule}.
+\end{equation}
+Note that the instantaneous stored energy is different in each snubber capacitor.  The voltage drop across each capacitor will be different, ranging from zero in the conducting legs of the bridge to the maximum value given in Eqn. \ref{eqn:thyristorSnubberCapStackEnergy}.
+
+Each of the fourteen thyristors in each stack has a \SI{0.047}{\micro\farad} snubber capacitor.  Assuming equal voltage sharing across the thyristors, the maximum energy stored in each of these snubber capacitors will be
+\begin{equation}\label{eqn:thyristorSnubberCapEnergy}
+	\mathcal{E}_{C}=\left(\dfrac{1}{2}\right) 0.047\cdot 10^{-6} \left(\dfrac{18.26\cdot 10^{3}}{14}\right)^{2} = \SI{40}{\milli\joule}.
+\end{equation}
+
+\subsubsection{Main Filter Capacitors}
+The output section of the HVPS includes a filter, discussed on page \pageref{S:filterDiscussion} in Section \ref{S:filterDiscussion}.  The total stored energy in these capacitors, at full DC voltage, is
+\begin{equation}\label{eqn:mainFilterEnergy}
+	\mathcal{E}_{C} = \left(\dfrac{1}{2}\right)8\cdot 10^{-6}\left(3\cdot 26^{2} + 13^{2}\right)10^{6} = \SI{8788}{\joule}.
+\end{equation}
+(Note that there is a small, $6\%$, error in the stored energy calculation if one approximates this circuit, for the purpose of modeling the discharge time constant, as four equal stages.  In that case
+\begin{equation}\label{eqn:mainFilterEnergyApprox}
+	\mathcal{E}_{C} = \left(\dfrac{1}{2}\right)2\cdot 10^{-6}\left(91^{2}\right)10^{6} = \SI{8281}{\joule}.
+\end{equation}
+instead of the value calculated in Eqn. \ref{eqn:mainFilterEnergy}.)
+\subsection{Additional Output Filter Capacitor}
+Not shown in Fig. \ref{fig:hvpsSchematic} is an additional \SI{0.22}{\micro\farad} filter capacitor across the HVPS output.  The stored energy in this capacitor is \SI{911}{\joule}.
+\subsection{Output Cables}
+The output cables used to carry the HVPS to the klystron are Mil-C-17/81-0001 cable, formerly known as RG~220.  Their capacitance per unit length is listed as either \SI{103}{\pF/\meter} for Mil-C-17/81-0001 or \SI{101}{\pF/\meter} for RG~220.  The cable lengths from the HVPS to the transfer tank is about \SI{10}{\meter} and that from the transfer tank to the termination tank is less than \SI{50}{\meter}.  At full output voltage, the stored energy in the cables is about \SI{4.2}{\joule} and \SI{21}{\joule}, respectively.  The total stored energy in all of the output capacitance is approximately \SI{9824}{\joule}.
+
+\section{Discharge of Stored Energy}
+Before working on the HVPS we must ensure that we have both eliminated any input sources of energy and have discharged any stored energy within the supply.  This section discusses the engineered methods used to discharge the various elements that store energy and measures and/or calculates the appropriate time constants of the circuits and the times until the voltages of the capacitors are below the hazardous levels.  We will discuss the various discharge time constants for normal, controlled turn-offs of the HVPS as well as for those for abnormal turn-offs of the HVPS where there may be some unexpected system failure.
+
+\subsection{Normal HVPS Shutdown}
+By far, most of the shutdowns of the high power radio frequency (RF) system and the HVPS are as designed, even if the cause of the shutdown is not desired.  The normal situation occurs when the RF system is operating as designed and there is a request to turn off the RF system.  The source of the request can be programmatic; operations wants to dump the SPEAR electron beam.  Or the source can be a request from either the SPEAR personnel protection system (PPS) or either the RF or SPEAR machine protection systems (MPS) because a system fault has been detected.  In both of these cases there is a well-defined turn off procedure.  The beam is dumped and the RF station turns off.  When the station turns off, it instructs the HVPS controller to turn off the HVPS output.  The controller removes the triggers from the phase control thyristors in a manner that both discharges the stored current in the filter inductors and prevents further voltage from being impressed on the secondaries of the rectifier transformers.
+
+\subsubsection{Filter Inductors}
+As described above, there is an \SI{0.3}{\henry} filter inductor in the center of each of the wyes of the two primary rectifier transformers.  When the HVPS controller is commanded to turn off the HVPS, it removes the thyristor firing triggers from all but the $B^{+}$ and $B^{-}$ stacks of the thyristor bridge.
+
+This action servers two purposes.  First, it disables the rectification function of the thyristor bridge.  Second, by latching on the thyristors in the $B^{+}$ and $B^{-}$ stacks, it provides a short circuit path in which the stored current in the inductors can flow and dissipate.
+
+Figure \ref{fig:inductorDischargeData} shows the inductor voltage during a beam dump.  One can see the inductor voltage discharge while the $B$ stacks are conducting.  The voltage reaches its final zero value after about \SI{10}{\ms}.  This discharge time is significantly less than the time constant calculated from just the \SI{0.38}{\ohm} resistance of the inductor.  The additional resistance of the thyristors in their conducting state is responsible for the decrease in the $L/R$ time constant.  The discharge through the thyristor stacks also discharges the stored energy on the snubber capacitors in these thyristor stacks. 
+\begin{figure}[tbph]
+	\centering
+	% include full schematic and trim to eliminate boilerplate
+	\includegraphics[trim= 4cm 8.5cm 4cm 8.5cm,clip,width=1.0\linewidth]{graphics/beamDumpInductors20220523.pdf}
+	\caption[inductorDischargeData]{Measurement of the filter inductor voltage when the HVPS turns off.}
+	\label{fig:inductorDischargeData}
+\end{figure}
+
+\subsubsection{Output Capacitors}\label{ss:outputCapsNormal}
+The devices that connect stored energy directly to the output are the capacitances of the output filters and cables.  During normal operation this energy is quickly dissipated through the klystron.  The Child-Langmuir law gives the non-linear relation between the cathode voltage and current as
+\begin{equation}\label{eqn:childLangmuir}
+	I = P\cdot V^{\frac{3}{2}}
+\end{equation}
+where $I$ is the beam current, $V$ is the beam voltage, and $P$ is the perveance of the cathode which, for the SPEAR3 klystron is about $10^{-6}$.  We numerically solve the non-linear equation
+\begin{equation}\label{eqn:decayThroughKlystron}
+	\dfrac{q}{C} = R\dfrac{dq}{dt} - P^{-\frac{2}{3}}\left(-\dfrac{dq}{dt}\right)^{\frac{2}{3}}
+\end{equation}
+where $q$ is the charge on the capacitor $C=\SI{2}{\micro\farad}$, $R=\SI{1000}{\Omega}$ is the resistance between the capacitor and the klystron, and $P$ is the perveance of the klystron.  The result, plotted in Fig. \ref{fig:klystronDischargeCalc}, shows that the output voltage decays below \SI{50}{\volt} within \SI{250}{\ms}.  This time is consistent with the observed voltage decay out of HVPS when the system is turned off, as shown in Fig. \ref{fig:klystronDischargeData}.
+
+\begin{figure}[tbph]
+	\centering
+	% include full schematic and trim to eliminate boilerplate
+	\includegraphics[trim= 4cm 8.5cm 4cm 8.5cm,clip,width=1.0\linewidth]{graphics/hvpsKlystronDecay.pdf}
+	\caption[hvpsKlystronDecayCalc]{Calculation of capacitor voltage discharge through klystron when the HVPS turns off.}
+	\label{fig:klystronDischargeCalc}
+\end{figure}
+\begin{figure}[tbph]
+	\centering
+	% include full schematic and trim to eliminate boilerplate
+	\includegraphics[trim= 4cm 8.5cm 4cm 8.5cm,clip,width=1.0\linewidth]{graphics/beamDump20220720133520.pdf}
+	\caption[hvpsKlystronDecayData]{Measurement of HVPS output to klystron when the HVPS turns off.}
+	\label{fig:klystronDischargeData}
+\end{figure}
+
+\subsubsection{HVPS Output Voltage}
+Even when the RF station and its HVPS are turned off, the HVPS output with the normal klystron load is about \SI{1.3}{\kV} and not zero volts.  Even with the phase control thyristors not firing, there is still some leakage from the primary to the secondary of the rectifier transformers that is rectified by the output rectifiers.  The control system is able to measure this voltage.  It can be seen live on the local controller and/or EPICS displays; the voltages are archived in the History buffers.
+
+Figure \ref{fig:historyHvpsTurnOffData} plots the HVPS voltage and current during a normal turn-off of the RF system.  At 20:07 the RF station was turned off.  The HVPS output voltage and current data, each sampled every two seconds, show that they both decreased from their operating voltage to near zero together as the HVPS was turned off.  Note that the measured HVPS output voltage is about \SI{1.3}{\kV}.  This shows that our voltage diagnostic is still accurately measuring the output voltage after the station is turned off.
+
+Most unexpected beam losses are caused by transient errors.  There may be a dip in the input \SI{12.47}{\kV} RMS voltage, a magnet power supply may trip, there may be a ring vacuum fault, etc.  In these cases the goal is to refill beam as quickly as possible.  Once the transient fault is cleared, beam will be reinjected into SPEAR.  For these cases the HVPS output will remain at this ``low'' \SI{1.3}{\kV} value.
+
+However other beam losses may be caused by PPS faults or access into the ring is required.  In both of these cases the input AC contactor is opened, removing the \SI{12.47}{\kV} RMS from the input of the phase shifting transformer.  Since there is now no AC line voltage on the HVPS input, there is no AC voltage on the secondaries of the rectifier transformers and no DC output voltage from the HVPS.  Shortly before 20:13 in Fig. \ref{fig:historyHvpsTurnOffData} the contactor was opened to gain access into SPEAR, causing the HVPS output to go from its ``low'' value to zero.
+
+\begin{figure}[tbph]
+	\centering
+	% include full schematic and trim to eliminate boilerplate
+	\includegraphics[trim= 0cm 0cm 0cm 0cm, clip, width=1.0\linewidth] {graphics/hvpsVoltageCurrentTurnOffContactorOpen.png}
+	\caption[historyHvpsTurnOffData]{History plot of HVPS voltage and current when HVPS is first turned off and then the contactor is opened.}
+	\label{fig:historyHvpsTurnOffData}
+\end{figure}
+
+\subsection{Abnormal HVPS Shutdown}
+The high power RF system can fail in abnormal ways.  For example, the klystron could short or open, as could the high voltage cables from the HVPS to the klystron.  Also, there could be internal damage to some HVPS components that either shorts or opens some of the internal circuitry.  We will not discuss all possible errors that can occur within the HVPS.  If there is evidence that a normal shutdown did not occur, the HVPS subject matter experts (SME) will need to develop a specific plan to work on the internals of the HVPS.  This plan will include the removal of stored hazardous energy.
+
+\subsubsection{Filter Inductors}
+During normal operation, at full load, the current in the filter inductors is \SI{85}{\ampere}.  If the circuit attempts to stop this current flow a large voltage, proportional to the derivative of the current, will develop across the inductor.  Metal oxide varistors (MOV) are placed in parallel with each thyristor in each phase stack to enforce voltage sharing among the thyristors.  The voltage developed across the filter inductor will force these MOVs to conduct.  Once this conduction begins, a fraction of the MOV current is shunted to the gate of the thyristor.  This fraction is sufficient to trigger the thyristor and begin conduction.  This process discharges the stored energy in the inductor.
+
+\subsubsection{Thyristor Stack Capacitors}
+MOVs and other associated circuitry are used to share the voltage among the 14 thyristors in an individual stack.  The typical resistance across each thyristor is approximately \SI{20}{\mega\ohm}, for a total impedance of \SI{280}{\mega\ohm} aross the stack.
+
+The voltage on a capacitor in an R-C circuit decays exponentially with a time constant $\tau = RC$.  The voltage, as a function of time, on this capacitor is
+\begin{equation}\label{eqn:rcDecay}
+	v\left(t\right) = V_{0}e^{-\frac{t}{RC}} = V_{0}e^{-\frac{t}{\tau}}.
+\end{equation}
+The capacitor voltage will decrease below \SI{50}{\volt} after a time
+\begin{equation}\label{eqn:decayTime50V}
+	t_{50} = \tau\cdot\log\left(\frac{V_{0}}{50}\right).
+\end{equation}
+
+For the stack as a whole, using the values of $C = \SI{0.015}{\micro\farad}$ and $R = \SI{280}{\mega\ohm}$, the time constant of the stack circuit is $\tau = \SI{4.2}{\second}$.  Using this value and $V_{0} = \SI{18.26}{\kV}$ in Eqn. \ref{eqn:decayTime50V}, the time for the stack snubber capacitor to reach \SI{50}{\volt} is $t =\SI{24.8}{\second}$.
+
+Repeating the same calculation for each individual thyristor in the stack, in which $C = \SI{0.047}{\micro\farad}$, $R = \SI{20}{\mega\ohm}$, $\tau = \SI{0.94}{\second}$ and $V_{0} = \SI{1.304}{\kV}$, we find the time for each snubber capacitor across each individual thyristor to reach \SI{50}{\volt} is $t =\SI{3.07}{\second}$.
+
+Both of these times are extremely short compared to the time it would take to both lock off the HVPS and remove the cover from the HVPS phase control tank.
+
+\subsubsection{Output Filter Capacitors}
+In section \ref{ss:outputCapsNormal} we have already calculated and measured the discharge time, measured in a fraction of a second, of the filter capacitors with a normal klystron load.  There may be faults in which the klystron load is not normal if, for example, the connection between the HVPS and klystron opens.  This section calculates the finite, but much slower, bleed down times of the filter capacitors for these abnormal situations.  Since the output is a series of four stages, we will perform these calculations for a single stage.
+
+Looking outward from the filter capacitors in Fig. \ref{fig:hvpsSchematic} we see three stages with resistive discharge paths, the filter rectifiers, the main rectifiers, and the crowbar thyristor stacks.  Not shown in Fig. \ref{fig:hvpsSchematic} are two parallel, equivalent voltage dividers that are used by the HVPS controller to monitor the HVPS output voltage.
+
+\paragraph{Filter Rectifiers}
+Each filter rectifier bridge is comprised of six rectifier stacks which, in turn, are each comprised of multiple diode packs.  Each of these packs has a parallel R-C circuit in shunt with the diodes in order to force voltage sharing among the diodes.  The measured resistance of each stack is \SI{120}{\mega\ohm}.  The configuration of the rectifier bridge is two stacks in series for each phase and three of these double stacks in parallel to rectify all three phases.  The total shunt resistance of each filter rectifier is $R_{S} = \frac{2}{3}\SI{120}{\mega\ohm} = \SI{80}{\mega\ohm}$.
+
+Just including these rectifiers, the time constant for the filter capacitor discharge is $\tau = \SI{640}{\second}$ and the time to reach \SI{12.5}{\volt} is $t_{12.5} = \SI{4890}{\second} = \SI{81.5}{\minute}$.  (We calculated the discharge time to \SI{12.5}{\volt} instead of \SI{50}{\volt} so that the sum of the voltage across all four capacitors is less than \SI{50}{\volt}.)  Note that if these filter rectifiers are disconnected from the capacitor, the capacitor will be removed from the circuit.  Any stored energy in the capacitors will be isolated from all circuit components downstream of the capacitors.  If the HVPS requires repair that involves opening the main tank, one should definitely inspect the configuration of the output to ensure that the capacitors are at least connected to the filter rectifiers in order to determine what, if any, shunt resistance is across the capacitors.
+
+\paragraph{Main Rectifiers}
+If the \SI{500}{\ohm} filter resistors in Fig. \ref{fig:hvpsSchematic} are not open, the resistance of the main rectifier bridges will also contribute to the time constant of the capacitor circuit.  Each of the six stacks in a bridge is also built using multiple diode packs with shunt resistors that enforce voltage sharing across each pack.  The resistance across each stack is \SI{5}{\mega\ohm}; the total resistance across a bridge is \SI{3.3}{\mega\ohm}.  The time constant due to just the resistors in the main bridge is $\tau = \SI{26.7}{\second}$ and the time to reach \SI{12.5}{\volt} is $t_{12.5} = \SI{204}{\second}$.
+\paragraph{Crowbar Thyristors}
+Each capacitor has a crowbar thyristor stack to discharge the capacitors in the event of an arc in either the klystron or the HVPS transformer.  Each stack is comprised of six thyristors, each in parallel with a \SI{5}{\mega\ohm} voltage sharing resistor.  The total resistance in the stack is \SI{30}{\mega\ohm} and the time constant due to just these resistors is $\tau = \SI{240}{\second}$.
+\paragraph{Output Voltage Dividers}
+The HVPS has two identical voltage dividers across its output that are used to measure the HVPS output for purposes of control and monitoring.  The total resistance of each divider is \SI{100}{\mega\ohm}.  As configured with the designed HVPS controller terminations, the controller measures the voltage across the bottom \SI{10}{\kilo\ohm} of the divider to measure \SI{9.1}{\volt} at the full HVPS output of \SI{91}{\kV}.
+
+In order to be consistent with the earlier calculations, we use $\frac{1}{4}$ of the total resistance values to obtain a shunt resistance for the two dividers of \SI{12.5}{\mega\ohm}.  The time constant due to these dividers is $\tau = \SI{100}{\second}$.
+\paragraph{Total Resistive Time Constant}
+If only the klystron is removed from the circuit, the total resistive time constant seen by the filter capacitors is determined by the parallel combination of the five different resistive loads.
+\begin{IEEEeqnarray*}{rCl}
+	% \IEEEyesnumber
+	% \IEEEnonumber
+	R_{Tot}^{-1} & = &\frac{1}{80\times 10^{6}} + \frac{1}{3.3\times 10^{6}} + \frac{1}{30\times 10^{6}} + \frac{1}{25\times 10^{6}} + \frac{1}{25\times 10^{6}}\\
+	R_{Tot} & = &\SI{2.348}{\mega\ohm}.
+\end{IEEEeqnarray*}
+The total time constant is $\tau = \SI{18.79}{\second}$ and the voltage of each capacitor decreases below \SI{12.5}{\volt} in \SI{144}{\second}.
+
+If we include the additional \SI{0.22}{\micro\farad} of the additional output filter capacitor and \SI{0.0061}{\micro\farad} across the entire output and quadruple the sum of these two values in order to partition these capacitances into sections across each of the large filter capacitors, the total effective capacitance is \SI{8.90}{\micro\farad}.  The time constant for the output is $\tau = \SI{20.9}{\second}$ and the total output voltage decreases below \SI{50}{\volt} in \SI{160}{\second}.
+
+\section{Summary}
+In this note we have identified the voltage sources to the HVPS involved in producing the HVPS output.  We have also listed the design parameters for the full load currents and voltages, starting from the input \SI{12.47}{\kV} RMS and extending to the \SI{90}{\kV} DC output voltage.
+
+We have also calculated the maximum stored energy in the reactive components of the HVPS.  From both calculations and measurements we see that the stored energy is quickly dissipated in the normal turn-off of the HVPS.
+
+Even if there is a failure in the HVPS, output cable, or klystron that causes the output circuit to open, the stored energy inside the HVPS will be dissipated in a few minutes, much shorter than the time it takes to access the HVPS.
+
+The only possible cause for concern is if there is an internal failure of the HVPS in which the large filter capacitors are disconnected from the main rectifiers.  In this case the dissipation of the capacitor energy to a safe level is calculated to be \SI{81.5}{\minute}.  Such a failure will require careful inspection of the supply and proper planning before coming into contact with any component in the HVPS output section.
+
+The results of the calculations performed in this note are summarized in Table \ref{tbl:storedEnergy}.
+
+\begin{table}[hb]
+	\begin{center}
+		\begin{tabular}{  l  c  c  c  c  }
+			\hline
+			Component       &  Value   & $\mathcal{E}$(J) & $\tau$(s) & $t_{Discharge}$(s) \rule[-8pt]{0pt}{22pt} \\ \hline
+			Filter inductor & \SI{0.3}{\henry} & 1084 & $\textless 0.1$ & $\textless 0.1$ \rule{0pt}{14pt} \\ %\hline
+			Phase stack snubber capacitor & \SI{0.015}{\micro\farad} &  2.5  & 4.2 & 24.8 \\ %\hline
+			Phase thyristor snubber capacitor & \SI{0.047}{\micro\farad} &  0.040 & 0.94 & 3.1 \\ %\hline
+			Filter capacitor (normal shutdown) & \SI{2}{\micro\farad} &  8788 & $\textless 1$ & $\textless 1$ \\ %\hline
+			Output capacitor (normal shutdown) & \SI{0.22}{\micro\farad} & 911 & $\textless 1$ & $\textless 1$ \\ %\hline
+			Output cables (normal shutdown) & \SI{0.006}{\micro\farad} & 25 & $\textless 1$ & $\textless 1$ \\ %\hline
+			Total output capacitance (normal shutdown) & \SI{2.23}{\micro\farad} & 9824 & $\textless 1$ & $\textless 1$ \\ %\hline
+			Total output capacitance (output open) & \SI{2.23}{\micro\farad} & 9824 & 20.9 & 160 \\ %\hline
+			Filter capacitor (internal HVPS failure) & \SI{2}{\micro\farad} & 8788 & 640 & 4890 \\ \hline
+		\end{tabular}
+		\caption{Stored energy and time constants of HVPS reactive elements.}\label{tbl:storedEnergy}
+	\end{center}
+\end{table}
+
+% we do not need to insert a \section*{References) line
+\bibliographystyle{IEEEtran}
+% need to include full path for .bib file
+\bibliography{/localtexmf/bibtex/bib/sebek}
+
+\end{document}
