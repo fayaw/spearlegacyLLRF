@@ -418,46 +418,271 @@ Averaged signals made available for archival at ~1 Hz update rate via EPICS.
 
 ## 6. HVPS Control System
 
-### 6.1 Architecture
+### 6.1 System Architecture Overview
 
-The HVPS control is split between the CompactLogix PLC (low-level regulation) and the Python/EPICS coordinator (supervisory control):
+The HVPS control system upgrade transitions from legacy SLC-500 PLC to a modern distributed architecture with clear separation between safety-critical hardware functions and supervisory control:
 
-- **CompactLogix PLC**: Voltage regulation via analog output to Enerpro gate driver boards, thyristor firing angle control, contactor control, PPS interface, local safety interlocks
-- **Python/EPICS**: Sends voltage setpoint (<=1 Hz), contactor open/close commands, reads back voltage/current/status
+**Legacy System (Being Replaced):**
+- Allen-Bradley SLC-500 PLC with 16-bit integer arithmetic
+- Enerpro FCOG6100 Rev K + FCOAUX60 auxiliary board
+- SLAC SD-237-230-14 regulator board with obsolete components
+- VXI-based EPICS interface via DCM module
 
-### 6.2 Hardware Interfaces
+**Upgraded System:**
+- CompactLogix PLC with floating-point capability and modern Ethernet interfaces
+- Enerpro FCOG1200 Rev L (single board, no auxiliary needed)
+- Redesigned regulator board with modern components
+- Direct EPICS interface via EtherNet/IP protocol
 
-**Software interface** (PLC <-> EPICS):
-- Protocol: EtherNet/IP via CompactLogix Ethernet port
-- EPICS driver: **[TBD]** --- pycomm3, OPC-UA, or custom EtherNet/IP driver
-- Data: Analog measurements (voltage, current), digital status, fault conditions
-- Commands: Contactor control, voltage setpoint
+### 6.2 Hardware/Software Responsibility Matrix
 
-**Hardware interlocks** (PLC <-> Interface Chassis):
-- **Fiber-optic inputs from Interface Chassis**:
-  - SCR ENABLE: Permits phase control thyristors to fire
-  - KLYSTRON CROWBAR: Must remain illuminated to prevent crowbar thyristors from firing
-- **Fiber-optic output to Interface Chassis**:
-  - STATUS: Active when controller is powered and no crowbar trigger present
+| Function | Owner | Interface | Update Rate | Safety Critical |
+|----------|-------|-----------|-------------|-----------------|
+| **HVPS voltage regulation** | CompactLogix PLC | Analog I/O to regulator board | PLC scan rate (~ms) | Yes |
+| **Thyristor firing control** | Enerpro FCOG1200 | Analog SIGHI from regulator | Continuous (60 Hz sync) | Yes |
+| **Phase angle calculation** | CompactLogix PLC | Digital (floating-point) | PLC scan rate | Yes |
+| **Contactor control** | CompactLogix PLC | Digital I/O | On command | Yes |
+| **Internal MPS logic** | CompactLogix PLC | Digital I/O (20 interlocks) | PLC scan rate | Yes |
+| **SCR enable processing** | CompactLogix PLC | Fiber optic input (HFBR-2412) | Hardware speed | Yes |
+| **Status reporting** | CompactLogix PLC | Fiber optic output (HFBR-1412) | Hardware speed | Yes |
+| **Crowbar trigger** | CompactLogix PLC | Fiber optic output (HFBR-1412) | Hardware speed | Yes |
+| **HVPS supervisory setpoint** | Python/EPICS | EtherNet/IP Channel Access | ≤1 Hz | No |
+| **Drive power monitoring** | Python/EPICS | LLRF9 data via Channel Access | ~1 Hz | No |
+| **HVPS loop coordination** | Python/EPICS | Channel Access | ~1 Hz | No |
+| **Fault logging** | Python/EPICS | Channel Access | Event-driven | No |
 
-**No direct LLRF9-to-HVPS hardware connection** --- all interlock coordination goes through the Interface Chassis.
+### 6.3 Power Section (Retained Hardware)
 
-### 6.3 Enerpro Gate Driver Upgrade
+The physical power section remains unchanged from the legacy system:
 
-- Replace existing gate driver boards with new Enerpro controller boards (~$4k for 5 boards)
-- Redesign analog regulator board with modern components
-- Test on Test Stand 18 before SPEAR3 installation
+**12-Pulse Thyristor-Controlled Rectifier:**
+- **Input**: 12.47 kV RMS, 3-phase, 60 Hz
+- **Output**: 0 to −90 kVDC, up to 2.5 MW
+- **Transformers**: 3.5 MVA phase-shifting + two 1.5 MVA rectifier transformers
+- **Phase offset**: ±15° for 12-pulse operation
+- **Thyristor stacks**: 12 phase control + 4 crowbar stacks
+- **Filter inductors**: 0.3 H each (4 total), 1,084 J stored energy per inductor
+- **Output capacitors**: 8 µF per section (×4) + 0.22 µF output capacitor
 
-### 6.4 PLC Code Development
+**Voltage/Current Monitoring:**
+- **Voltage dividers**: 100 MΩ each with 1.1 ms time constant (145 Hz bandwidth)
+- **Current transformers**: Hall effect sensors for DC current measurement
+- **Isolation**: All measurements isolated from high voltage via transformers/dividers
 
-- Reverse-engineer existing SLC-500 PLC code
-- Rewrite for CompactLogix platform
-- Must handle: voltage regulation loop, contactor sequencing, over-current protection, PPS interface
-- Modify PPS (Personnel Protection System) interface to current standards
+### 6.4 CompactLogix PLC Specifications
 
-### 6.5 HVPS Maintenance Item
+**Hardware Requirements:**
+- **Processor**: CompactLogix 5370 series with floating-point math capability
+- **Memory**: Sufficient for complex control algorithms (minimum 2 MB)
+- **I/O Modules**: Analog input (voltage/current), analog output (regulator control), digital I/O (interlocks)
+- **Communication**: Ethernet port for EPICS interface
+- **Fiber optic interface**: HFBR-1412 transmitter + HFBR-2412 receiver modules
 
-Three broken windings in HVPS1 need to be troubleshot and repaired.
+**Key Advantages over Legacy SLC-500:**
+- **Floating-point arithmetic**: Eliminates 16-bit integer overflow issues in phase angle calculations
+- **Modern Ethernet**: Direct EPICS interface without VXI/DCM complexity
+- **Larger memory**: Supports more sophisticated control algorithms
+- **Better diagnostics**: Enhanced fault detection and reporting capabilities
+
+### 6.5 Enerpro Gate Driver Upgrade
+
+**Legacy System (FCOG6100 Rev K):**
+- Requires FCOAUX60 auxiliary board for full functionality
+- Limited diagnostic capabilities
+- Older component technology
+
+**Upgraded System (FCOG1200 Rev L):**
+- **Single board solution**: No auxiliary board required
+- **Enhanced diagnostics**: Built-in fault detection and reporting
+- **Modern components**: Improved reliability and availability
+- **Cost**: ~$4k for complete set (5 boards: 12 phase control + 4 crowbar + 1 spare)
+
+**Interface Specifications:**
+- **Control input**: Analog SIGHI signal from regulator board
+- **Phase reference**: 60 Hz line sync for thyristor timing
+- **Gate outputs**: Isolated gate drive signals to thyristor stacks
+- **Status feedback**: Fault and operational status to PLC
+
+### 6.6 Regulator Board Redesign
+
+**Obsolete Components Being Replaced:**
+
+| Legacy Component | Function | Replacement Strategy |
+|------------------|----------|---------------------|
+| VTL5C optocoupler | Analog signal isolation | Modern optocoupler with equivalent specs |
+| MAD4030-B multiplier | Analog multiplication | Modern analog multiplier IC |
+| 1N3064 diode | Diode OR summing | Standard silicon diode |
+| BUF634 DIP op-amp | High-current buffer | Modern surface-mount equivalent |
+
+**Design Requirements:**
+- **Input**: Voltage and current feedback signals from power section
+- **Processing**: Error amplification, compensation, and signal conditioning
+- **Output**: Analog SIGHI signal to Enerpro FCOG1200
+- **Isolation**: Maintain electrical isolation between control and power sections
+- **Bandwidth**: Sufficient for stable regulation (typically 10-100 Hz)
+
+### 6.7 Interface Specifications
+
+#### 6.7.1 Fiber Optic Interfaces (via Interface Chassis)
+
+| Signal | Direction | Connector | Protocol | Function |
+|--------|-----------|-----------|----------|----------|
+| **SCR ENABLE** | Interface Chassis → HVPS | HFBR-2412 receiver | Active high | Phase control thyristor trigger enable |
+| **KLYSTRON CROWBAR** | Interface Chassis → HVPS | HFBR-2412 receiver | Active high | Crowbar thyristor inhibit control |
+| **STATUS** | HVPS → Interface Chassis | HFBR-1412 transmitter | Active high | HVPS controller ready status |
+
+**Signal Characteristics:**
+- **Wavelength**: 820 nm (standard for HFBR series)
+- **Fiber type**: 200 µm core plastic optical fiber
+- **Logic levels**: TTL compatible (0V = logic low, 5V = logic high)
+- **Response time**: <1 microsecond for interlock propagation
+
+#### 6.7.2 EPICS Interface (via CompactLogix PLC)
+
+**Communication Protocol:**
+- **Physical**: Ethernet (100 Mbps minimum)
+- **Protocol**: EtherNet/IP with EPICS Channel Access gateway
+- **Driver**: **[RECOMMENDED]** pycomm3 for Python/EPICS integration
+- **Update rate**: 1 Hz for supervisory control, faster for critical alarms
+
+**Process Variable Examples:**
+
+| PV Category | Example PV | Data Type | Access | Purpose |
+|-------------|------------|-----------|--------|---------|
+| Setpoint | `SRF1:HVPS:VOLT:CTRL.VAL` | REAL | Read/Write | Voltage setpoint from Python coordinator |
+| Readback | `SRF1:HVPS:VOLT:RBCK` | REAL | Read | Actual output voltage |
+| Readback | `SRF1:HVPS:CURR:RBCK` | REAL | Read | Output current |
+| Status | `SRF1:HVPS:STATUS:READY` | BINARY | Read | Controller ready status |
+| Status | `SRF1:HVPS:STATUS:CONTACTOR` | BINARY | Read | Contactor closed status |
+| Control | `SRF1:HVPS:CONTACTOR:CMD` | BINARY | Read/Write | Contactor on/off command |
+| Interlock | `SRF1:HVPS:INTLK:SUMMARY` | BINARY | Read | Internal interlock summary |
+| Interlock | `SRF1:HVPS:INTLK:ARC` | BINARY | Read | Arc detection status |
+| Interlock | `SRF1:HVPS:INTLK:OVERCURR` | BINARY | Read | Overcurrent protection status |
+
+### 6.8 Control Algorithm Specifications
+
+#### 6.8.1 Voltage Regulation Loop
+
+**Legacy Algorithm (16-bit integer):**
+```
+Digital Low-Pass Filter: τ ≈ 0.68 s
+Phase Angle Mapping: 6000-18000 counts (16-bit range)
+Transfer Function: H(s) = K / (τs + 1) where τ = 0.68 s
+```
+
+**Upgraded Algorithm (floating-point):**
+- **Improved precision**: No integer overflow issues
+- **Enhanced filtering**: More sophisticated digital filters possible
+- **Better diagnostics**: Floating-point enables advanced fault detection
+- **Adaptive control**: Capability for load-dependent compensation
+
+#### 6.8.2 Machine Protection System Integration
+
+**Internal Interlocks (20 signals):**
+- Arc monitors (cavity, klystron, circulator)
+- Oil level and temperature sensors
+- Cooling water flow and temperature
+- Contactor status and auxiliary contacts
+- Crowbar status and ready signals
+- Voltage and current limit monitoring
+
+**Interlock Processing:**
+- **Fast inhibit**: 3-second delay before regulator enable
+- **Fault latching**: Maintains fault status until manual reset
+- **First-fault detection**: Identifies initiating fault in cascade scenarios
+
+### 6.9 Integration with Upgrade System
+
+#### 6.9.1 HVPS-LLRF9 Coordination
+
+**Drive Power Regulation:**
+1. **LLRF9 measurement**: Klystron forward power (Unit 1, Channel 6)
+2. **Python coordinator**: Monitors drive power via EPICS PV
+3. **Setpoint calculation**: Adjusts HVPS voltage to maintain constant drive power
+4. **PLC execution**: Implements voltage regulation based on received setpoint
+
+**Timing Requirements:**
+- **LLRF9 measurement**: 10 Hz synchronized across all channels
+- **Python coordination**: ~1 Hz supervisory loop
+- **PLC regulation**: Continuous (PLC scan rate ~1 ms)
+- **Hardware interlocks**: <1 microsecond response via Interface Chassis
+
+#### 6.9.2 Protection Coordination
+
+**RF Fault Sequence:**
+1. LLRF9 Unit 2 detects reflected power spike
+2. LLRF9 removes drive output and status signal
+3. Interface Chassis removes SCR ENABLE to HVPS
+4. HVPS PLC inhibits thyristor firing within microseconds
+5. Klystron collector protected from full DC power
+
+**HVPS Fault Sequence:**
+1. HVPS PLC detects internal fault (arc, overcurrent, etc.)
+2. HVPS removes STATUS signal to Interface Chassis
+3. Interface Chassis removes LLRF9 enable
+4. System coordination prevents damage to both klystron and HVPS
+
+### 6.10 Implementation Plan
+
+#### 6.10.1 Hardware Procurement
+
+**Immediate Requirements:**
+1. **CompactLogix PLC**: 5370 series with Ethernet and I/O modules
+2. **Enerpro FCOG1200**: 5 boards (12 phase + 4 crowbar + 1 spare)
+3. **Regulator board redesign**: PCB fabrication with modern components
+4. **Fiber optic modules**: HFBR-1412/2412 transceivers and connectors
+
+**Cost Estimate:**
+- CompactLogix PLC system: ~$15k
+- Enerpro boards: ~$4k
+- Regulator board redesign: ~$5k
+- Fiber optic interfaces: ~$2k
+- **Total**: ~$26k
+
+#### 6.10.2 Software Development
+
+**PLC Code Modernization:**
+1. **Legacy code analysis**: Reverse-engineer SLC-500 ladder logic
+2. **Algorithm translation**: Convert to CompactLogix with floating-point math
+3. **Enhanced diagnostics**: Add improved fault detection and reporting
+4. **Interface development**: Implement fiber optic and Ethernet interfaces
+
+**EPICS Integration:**
+1. **IOC development**: Create EPICS IOC for CompactLogix interface
+2. **PV database**: Define process variables for all HVPS functions
+3. **Python coordinator**: Integrate HVPS supervisory control
+4. **Operator interface**: Update EDM panels for new functionality
+
+#### 6.10.3 Testing and Commissioning
+
+**Bench Testing:**
+1. **Controller validation**: Test new PLC with LLRF9 simulator
+2. **Interface testing**: Verify fiber optic and Ethernet communications
+3. **Algorithm validation**: Confirm regulation performance matches legacy
+
+**System Integration:**
+1. **Warm-spare installation**: Deploy on backup HVPS first
+2. **Interface Chassis integration**: Test with all permit signals
+3. **LLRF9 coordination**: Validate drive power regulation loop
+4. **Full system commissioning**: Complete integration testing
+
+**Migration to Production:**
+1. **Parallel operation**: Run new and legacy controllers simultaneously
+2. **Performance comparison**: Validate equivalent or improved performance
+3. **Cutover procedure**: Planned transition during maintenance window
+4. **Validation testing**: Confirm all functions operate correctly
+
+### 6.11 HVPS Maintenance Item
+
+**Current Issue**: Three broken windings in HVPS1 transformer need troubleshooting and repair.
+
+**Recommended Approach:**
+1. **Diagnostic testing**: Comprehensive electrical testing to identify fault locations
+2. **Repair strategy**: Determine if repair or replacement is more cost-effective
+3. **Scheduling**: Coordinate with upgrade installation to minimize downtime
+4. **Documentation**: Update maintenance records and procedures
+
+> **Sources**: `hvps/architecture/designNotes/` (11 files), `hvps/architecture/HVPS_Engineering_Technical_Note.md`, legacy PLC documentation
 
 ---
 
