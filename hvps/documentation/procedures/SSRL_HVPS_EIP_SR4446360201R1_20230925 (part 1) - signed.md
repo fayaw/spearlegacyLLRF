@@ -1,0 +1,622 @@
+# SSRL_HVPS_EIP_SR4446360201R1_20230925 (part 1) - signed
+
+> **Source:** `hvps/documentation/procedures/SSRL_HVPS_EIP_SR4446360201R1_20230925 (part 1) - signed.pdf`
+> **Format:** PDF (converted to Markdown for AI readability)
+> **Pages:** 24
+
+
+---
+## Page 1
+
+SPEAR3 RF HVPS Energy Isolation Plan
+SR-444-636-02-R1
+1 TABLE OF CONTENTS
+2 Table of Figures ..................................................................................................................................... 2
+3 Author/Approvers/Validators ............................................................................................................... 3
+3.1 Author ........................................................................................................................................... 3
+3.2 Reviewers ...................................................................................................................................... 3
+3.3 Management Approval ................................................................................................................. 3
+3.4 Validator ........................................................................................................................................ 3
+4 Procedure Purpose................................................................................................................................ 3
+5 Equipment Required to Execute Procedure ......................................................................................... 4
+6 Equipment Description ......................................................................................................................... 4
+7 Potential Hazards .................................................................................................................................. 6
+7.1 Electrical Sources .......................................................................................................................... 6
+7.1.1 Three Phase 𝟏𝟐.𝟒𝟕 kV RMS Input Voltage ........................................................................... 6
+7.1.2 Thyristor Firing Pulses ........................................................................................................... 6
+7.1.3 Switch-over Tank ................................................................................................................... 7
+7.1.4 AC Control Power for Termination Tank HV Relay ............................................................... 7
+7.1.5 AC Control Power for the Switchgear Controller .................................................................. 7
+7.1.6 DC Control Power for the Switchgear Controller .................................................................. 7
+7.2 Stored Electrical Energy ................................................................................................................ 8
+7.3 High Voltage Oil ............................................................................................................................ 8
+7.4 Elevated Work Platform ................................................................................................................ 9
+8 Preparation to Work on Inactive (Idle) HVPS Supply ............................................................................ 9
+8.1 Verify Initial Conditions ................................................................................................................. 9
+8.1.1 Determine active HVPS ......................................................................................................... 9
+8.1.2 Verify the inactive supply is properly locked out .................................................................. 9
+9 Notification of Operations of the Intent to Disable the HVPSs........................................................... 12
+9.1 Verify CATER and RSWCF Exist and Obtain Authorization to Disable Supplies .......................... 12
+10 Control of Hazardous Energy .......................................................................................................... 13
+
+
+---
+## Page 2
+
+10.1 Sequence of Steps to Turn off the HVPS and Disable the Ability to Close the 12.47 kVAC
+Contactor ................................................................................................................................................ 13
+10.1.1 Turn Off the RF System ....................................................................................................... 13
+10.1.2 Open the 12.47 kVAC Contactor ......................................................................................... 14
+10.1.3 Disable the Contactor Control Power ................................................................................. 14
+10.2 Document Active HVPS Turn Off ................................................................................................. 15
+10.3 Remove Hazardous Inputs from System ..................................................................................... 17
+10.3.1 Instruct the HV Electricians to Make Safe the 12.47 kVAC Input to the HVPS ................... 17
+10.3.2 Verify the 12.47 kVAC is Removed from the Active HVPS .................................................. 17
+10.3.3 208 VAC Switchgear Control Power .................................................................................... 17
+10.3.4 Remove 125 VDC switchgear control power. ..................................................................... 19
+10.3.5 Measure the Readings of the HVPS Voltage Monitors ....................................................... 20
+10.3.6 120 VAC HVPS Controller Control Power ............................................................................ 21
+10.3.7 Verify No HVPS Controller Power on Either HVPS Controller ............................................. 22
+10.4 Zero Voltage Verification of HVPS Connection to the Klystron .................................................. 22
+11 Group Lockout Complete ................................................................................................................ 23
+2 TABLE OF FIGURES
+Figure 1: Schematic diagram of SPEAR HVPS ............................................................................................... 6
+Figure 2: SPEAR1 switchgear door with viewing window. ......................................................................... 10
+Figure 3: HVPS 208 VAC control power disconnect switches .................................................................... 11
+Figure 4: B117 LBP breaker panel for HVPS controller 120 VAC control power. ....................................... 12
+Figure 5: SPEAR RF Klystron HVPS panel with HVPS off and 12.47 kV contactor still closed. ................... 13
+Figure 6: SPEAR RF Klystron HVPS panel with HVPS off and 12.47 kV contactor open. ............................ 14
+Figure 7: SPEAR RF Klystron HVPS panel with HVPS off, 12.47 kV contactor open, and 120 VAC contactor
+control power removed. ............................................................................................................................. 15
+Figure 8: HVPS turned off at 20:07. Contactor opened at 20:12:40. ........................................................ 16
+Figure 9: EDM display for HVPS EPICS variables ........................................................................................ 18
+Figure 10: 125 VDC control power enclosure and circuit breakers ........................................................... 19
+Figure 11: The inside of the HVPS controller enclosure. ........................................................................... 20
+Figure 12: TS3 with voltage divider terminations for SPEAR1 (left) and SPEAR2 (right) ........................... 21
+Figure 13: 120 VAC control power for HVPS controller for SPEAR1 (left) and SPEAR2 (right). ................. 22
+Figure 14: Termination tank ....................................................................................................................... 23
+Figure 15: Complex Lockout Permit for the SPEAR3 RF HVPS Isolation Plan SR-444-636-02-R1 .............. 24
+
+
+---
+## Page 3
+
+3 AUTHOR/APPROVERS/VALIDATORS
+3.1 AUTHOR
+__ J _ am _ e _ s _ J. _ S _ eb _ ek ______________________________ _S_ep_ _25_,_ 2_02_3____________
+James J. Sebek (Sep 25, 2023 13:54 PDT)
+SSRL Technical Expert: Jim Sebek Date
+3.2 REVIEWERS
+__M_ar_c _La_rr_us________________________________ _S_ep_ _26_,_ 2_02_3____________
+Marc Larrus (Sep 26, 2023 09:32 PDT)
+EED-OPS Technical Expert: Marc Larrus Date
+__B._ M_O_RR_I_S________________________________ _S_ep_ _25_,_ 2_02_3____________
+B. MORRIS (Sep 25, 2023 13:53 PDT)
+Independent Reviewer: Ben Morris Date
+_______________________________________ _S_ep_ _25_,_ 2_02_3____________
+Keith Jobe (Sep 25, 2023 13:35 PDT)
+Electrical Safety Officer: Keith Jobe Date
+3.3 MANAGEMENT APPROVAL
+__To_ny_ B_e_uk_er_s_______________________________ _S_ep_ _25_,_ 2_02_3____________
+Tony Beukers (Sep 25, 2023 13:54 PDT)
+EED-OPS Deputy Department Head: Tony Beukers Date
+3.4 VALIDATOR
+I have implemented this procedure in its entirety and have found it to be clear, complete, and accurate.
+_______________________________________ ____________________
+EED-OPS Technical Validator: ______________ Date
+4 PROCEDURE PURPOSE
+The purpose of this document is to be an energy isolation plan (EIP) for working on either of the SPEAR
+High Voltage Power Supplies (HVPSs), either SPEAR1 or SPEAR2. At the beginning of this procedure, one
+of the HVPSs will have been the operational supply for the SPEAR3 RF system. The other HVPS will have
+been “idle”, that is, it will have been disconnected from all energy sources and its output will have been
+verified to be at 0 VDC. It is disconnected from the 12.47 kV RMS premises power, has been
+disconnected from other voltage sources, and its outputs are shorted to ground. All of its stored energy
+should have dissipated, but the dissipation has not been verified. The EIP will verify that there will be no
+stored energy accessible to the worker.
+There is an underlined section, “______”, before each individual step to be executed in this procedure
+for the lead authorized worker (LAW) to initial as they complete it. The steps within this procedure in
+which lock out tag out (LOTO) locks are applied and/or zero voltage verification (ZVV) is performed have
+a different underlined section, “______”, intended to alert the LAW that these steps are LOTO and/or
+ZVV related.
+
+
+---
+## Page 4
+
+This procedure only provides an EIP for the HVPS. It does not cover any work performed on the HVPS.
+Other maintenance procedures are required to cover that work.
+5 EQUIPMENT REQUIRED TO EXECUTE PROCEDURE
+The following equipment is required to execute this procedure:
+• Eight (8) each identically keyed red locks dedicated to the execution of this EIP and referred to in
+this EIP as “Operations Lockout Locks”, eight (8) each Group Lockout Tags, appropriately filled
+out to label the EIP and the equipment to be locked out with the Operations Lockout Locks. The
+locks and tags will be applied to:
+o Three of each are used to apply LOTO on the input energy sources for HVPS1,
+o Three of each are used to apply LOTO on the input energy sources for HVPS2,
+o One of each for the 125 VDC source common to both HVPSs,
+o One of each for the mechanical shorting mechanism in the termination tank
+immediately ahead of the klystron,
+• One red personal Lockout Lock belonging to the LAW and one orange Group Master Lockout
+Tag, both to be applied by the LAW on the group lockout box.
+• Digital multimeter (DMM), with a millivolt scale for DC, to use to measure system voltages.
+• Appropriate PPE for measuring potential 120 VAC and 125 VDC sources.
+This equipment should be assembled before starting this procedure.
+6 EQUIPMENT DESCRIPTION
+The equipment covered by this procedure are the SPEAR3 HVPSs SPEAR1 and SPEAR2, both located in
+building 514. (Henceforth we will refer to the storage ring as SPEAR so that the only numbered versions
+of SPEAR in this document will refer to HVPSs.) Each HVPS has its own associated switchgear, which
+includes a disconnect switch, fuses, protective relays, and a vacuum contactor. The purpose of each
+HVPS is to supply DC power to the SPEAR klystron which, in turn, provides radiofrequency (RF) power to
+the SPEAR cavities which accelerate the SPEAR electron beam. The maximum output rating of each
+HVPS is −90 kVDC at 27 A, or 2.5 MW. A schematic diagram of the HVPS is shown in Figure 1.
+SPEAR has only one klystron, so only one of the HVPSs can ever be used at a time. The other is staged as
+a “warm spare”. SPEAR1 and SPEAR2 share a common three phase 12.47 kV RMS feed that comes from
+breaker 160 in substation 507. The HVPSs are administratively controlled so that, at most, only one
+HVPS can be energized at a time. Each has its own separate controller, but they share the input 12.47
+kV RMS feed, HV output cables to the klystron, and connections to the low-level radio frequency (LLRF)
+system.
+There is an aluminum oil-filled switch tank located next to B514 that connects the appropriate HVPS to
+the klystron. The aluminum tank is electrically grounded to earth at the tank location and the tank is
+filled with FR3 dielectric oil to increase the voltage withstand between the exposed conductors and the
+grounded tank. The oil is rated to exceed the IEEE C57.147 standard that specifies a breakdown of
+greater than 130 kV for distances of one inch (25.4 mm). The two output cables, high voltage and
+
+
+---
+## Page 5
+
+return, of both HVPSs are terminated in the tank. The high voltage cable of the active HVPS is
+connected to the high voltage cable that connects to the termination tank next to the klystron.
+Similarly, the return cable of the active HVPS is connected to the return cable that connects to the
+termination tank. The high voltage and return cables of the warm spare are always shorted together
+and shorted to ground in one of two configurations. Either they are connected to a shorting bar inside
+of the switch tank or they are shorted together and to ground outside of the switch tank. In the latter
+case, a worker on the warm spare can visually see an air gap between the cables and any cables
+connected either to the other supply or the klystron.
+The termination tank, located next to the klystron, is of similar construction to the switch tank, in that it
+is made from aluminum and electrically grounded to earth at the tank. It also uses a high voltage
+dielectric oil but, for historical reasons, this oil is conventional mineral oil and not a natural ester like
+FR3.
+The HVPS that functions as the warm spare is administratively locked off. Its input 12.47 kV RMS
+switchgear disconnect switch is locked in the open position, its three input 200 A, 50E medium voltage
+fuses are removed, and the load side of the vacuum contactors, the line side of the HVPS, is grounded.
+A low voltage disconnect switch is opened to interrupt the 208 VAC control power to the switchgear,
+and the breaker for the 120 VAC power to the HVPS controller is opened. Administrative locks from the
+RF group are placed on these two disconnect switches and the breaker to ensure that power is not
+inadvertently re-introduced into the spare.
+
+
+---
+## Page 6
+
+Figure 1: Schematic diagram of SPEAR HVPS
+7 POTENTIAL HAZARDS
+7.1 ELECTRICAL SOURCES
+7.1.1 Three Phase 𝟏𝟐.𝟒𝟕 kV RMS Input Voltage
+The HVPS power is supplied by the 12.47 kV RMS premises power. Removing the premises power
+removes this hazard and prevents the HVPS from generating continuous output power. The medium
+voltage disconnect switch and the vacuum contactor are shown on the left side of Figure 1.
+7.1.2 Thyristor Firing Pulses
+The HVPS power is controlled by the appropriate firing of thyristors. The firing pulses, generated by the
+HVPS controller, are in short bursts, but their amplitude may be as large as 200 V. These pulses are fully
+contained within the HVPS. They pose no electrical hazard to anyone outside of the closed HVPS.
+Removing a single phase 120 VAC control power to the HVPS controller by opening a breaker removes
+this hazard. The two breakers enabling the control power to the two controllers are shown in Figure 4.
+
+
+---
+## Page 7
+
+7.1.3 Switch-over Tank
+The switch-over tank is the oil-filled mechanical structure that is used to select which HVPS is connected
+to the klystron load. This selection is made by connecting the two cables from the -90 kV output bus of
+the active supply to the cables that connect to the klystron after passing through the termination tank.
+The output cables of the inactive supply are mechanically connected together, and therefore electrically
+shorted to each other and then to ground, either inside of the switch-over tank or external to this tank.
+7.1.4 AC Control Power for Termination Tank HV Relay
+The termination tank has a high voltage (Ross Engineering) relay that needs to be energized with 120
+VAC when the HVPS is active. During the transition from making one HVPS inactive and the other one
+active, the source of the 120 VAC control power is switched from one HVPS controller to the other. The
+connectors that carry this control power and that are required to be handled during the switch between
+HVPSs are touch safe. Removing the control power from both HVPS controllers removes this power
+during the switchover procedure. The breakers enabling the control power are shown in Figure 4.
+The control power for the termination tank HV relay never enters the HVPS, itself, so this is not a hazard
+to working on or inside of the HVPS. This paragraph is only included in this document to show that any
+potential hazard it may produce has not been ignored.
+7.1.5 AC Control Power for the Switchgear Controller
+The switchgear, immediately upstream of and connected to the HVPS, has its own controller to operate
+its HV contactor. When its 120 VAC control power is removed from the switchgear, the 12.47 kVAC
+vacuum contactor cannot be closed. In addition to controlling the contactor, this control power also
+powers a service lamp in the switchgear and an oil pump in the HVPS main tank. This power is entirely
+contained within the HVPS. Opening a disconnect switch, shown in Figure 3, removes this power from
+the HVPS. The only potential hazard this poses to anyone working on the HVPS itself is if the oil pump
+within the HVPS main tank needs to be serviced.
+7.1.6 DC Control Power for the Switchgear Controller
+125 VDC is used for DC control power in the switchgear. This power is sourced from a supply within
+substation 507. We distribute that power to SPEAR1 and SPEAR2 through a local breaker panel in B514,
+shown in Figure 10. Opening this breaker removes that power from the switchgear and associated
+interlocks.
+The 125 VDC control power serves several functions. First, it supplies the control power to the MX relay
+coil. Activating the MX relay coil is necessary to remotely close, and keep closed, the 12.47 kVAC
+contactor in the HVPS switchgear. Second the 125 VDC is used to provide power to the four each ABB
+MCO protective relays and the three each phase current meters. Finally, the 125 VDC provides the
+power for the 86L lockout relay and its associated circuitry. The inputs to the lockout relay are the
+normally open relay contacts from the trip circuits of the MCOs as well as the normally open HVPS
+machine protection system signals from tank over-pressure, oil over-temperature, and low flow of the
+HVPS low conductivity water (LCW). If any of these contacts close, the 125 VDC control power energizes
+the lockout relay coil. When energized, the relay opens a normally closed contact that removes the
+power from the MX relay coil, opening the contactor.
+
+
+---
+## Page 8
+
+Both HVPSs share a common LCW flow interlock which is connected to the 125 VDC power. During the
+switch between HVPSs, a touch safe connector must be moved to connect the active HVPS. Removing
+the 125 VDC control power protects against potential damage to the control hardware.
+The only potential hazard the 125 VDC control power may pose is to someone working in the HVPS main
+tank, near any of the HVPS MPS circuit elements that are powered by this voltage.
+7.2 STORED ELECTRICAL ENERGY
+There are three types of capacitive elements closely coupled to the HVPS output. The first is a series of
+four each 8 𝜇𝐹 capacitors that connect to and extend across the output through pairs of 500 Ω
+resistors. The second is a single 0.22 𝜇𝐹 capacitor directly across the output. The third is the
+approximately 60 m of Mil-C-17/81-0001 (RG220) cable between the HVPS output and the klystron. The
+capacitance of this cable is about 6 nF. The total stored energy in these three sets of capacitors, at full
+rated output voltage, is about 9 kJ.
+Under normal conditions, once the HVPS is turned off, the stored energy is dissipated into the klystron
+in a fraction of a second. If the measured output voltage of the HVPS is zero, there is no stored energy
+in these capacitors that can be accessed from outside of the HVPS. The HVPS output voltage is
+monitored by a redundant set of passive voltage dividers. The low voltage output of these dividers can
+be measured in the HVPS controller, and from these redundant measurements, one can calculate the
+output voltage of the supply. If, from these measurements, any potentially hazardous voltage is
+calculated to be on the HVPS output, one needs to discharge this voltage using properly rated high
+voltage resistive discharge sticks. Any voltage measurement directly on the HVPS output must be
+performed using properly rated high voltage probes. It is imperative that one does not enter the
+restricted approach boundary when measuring and/or discharging the unknown voltage on the
+conductors.
+Inside of the termination tank shown in Figure 1 are two shorting mechanisms. When they are shorted
+together, they connect the center conductor of the -90 kV cable with the center conductor of the return
+cable. One mechanism is an electro-mechanical high voltage relay controlled by the HVPS controller and
+the other is a purely mechanical plunger. When either of these mechanisms short the cables, they
+provide a short across the output filter capacitors in the HVPS. (Note that these mechanisms are too
+detailed to be shown in the figure.)
+7.3 HIGH VOLTAGE OIL
+Tens of gallons of FR3 high voltage oil fills the switch-tank to provide electrical insulation. The switch-
+over from the active supply to the warm spare requires manipulation of the Mil-C-17/81-0001 cables in
+this tank. The oil is pumped out of the tank before the switch-over occurs and the tank is refilled after
+the switch-over. The pump assembly used in this step is bulky and the barrels that are used to
+temporarily store the oil are heavy when filled with the oil. Proper lifting techniques must be used,
+when required. Also, good housekeeping practices should be followed to minimize and clean up any oil
+spillage that could lead to slips and/or falls during this switch-over.
+The HVPS contains 2600 gallons of the FR3 oil. Approximately 100 gallons is in each of the two small
+tanks, the phase tank and the crowbar tank, and the rest is in the main tank. Pumping out large
+
+
+---
+## Page 9
+
+fractions of the oil from the main tank requires setting up large temporary oil storage tanks in a
+temporary portable secondary oil containment berm adjacent to building 514. The secondary oil
+containment berm and storage tanks add potential slip and trip hazards to the work area. Care must be
+taken to follow safe work practices when working in this secondary oil containment berm.
+7.4 ELEVATED WORK PLATFORM
+Work to access the inside of any part of the HVPS requires access to the top of the HVPS. Both HVPSs
+are enclosed by permanent scaffolding that protects the worker from falling off of the HVPS when on
+top of it. That being said, the top of each HVPS has several trip hazards and the metallic surfaces may be
+slippery due to oil film on them. Care must be taken to follow safe work practices when on top of the
+HVPS.
+8 PREPARATION TO WORK ON INACTIVE (IDLE) HVPS SUPPLY
+8.1 VERIFY INITIAL CONDITIONS
+The first steps of this procedure are to verify that the inactive HVPS is, indeed, in a known inactive (idle)
+safe state. If this is not the case, this procedure should be stopped and the appropriate SMEs for the
+HVPS should be called in to properly secure the inactive HVPS.
+8.1.1 Determine active HVPS
+______ Write either SPEAR1 or SPEAR2 in the space at right to denote the active HVPS ________
+______ Write the other HVPS name in the space at the right to denote the inactive HVPS ________. If
+this is not the supply to be worked on, STOP THIS PROCEDURE and contact an HVPS SME for assistance.
+8.1.2 Verify the inactive supply is properly locked out
+The inactive supply, the one listed in the second line of 8.1.1, must be controlled to ensure that it does
+not have any active source during this procedure. Three RF Group configuration locks should be
+controlling these sources. This series of steps ensures that these locks are in place.
+8.1.2.1 12.47 kVAC Input
+______ Verify the 12.47 kVAC disconnect switch on the metal-enclosed switchgear of the inactive
+supply is in the open position and an RF Group configuration lock is controlling the switch. The dark blue
+arrow in Figure 2 shows the location of the disconnect switch. In this figure the switch is locked in the
+open position.
+______ Apply a red CoHE Operations Lockout Lock and an appropriately filled out Group Lockout Tag to
+the open 12.47 kVAC disconnect switch. The common key to this red CoHE Operations Lockout Lock and
+all the other identically keyed Operations Lockout Locks shall be placed in a group lockout box to which
+all affected workers shall apply their own personal red LOTO lock.
+______ By looking through the window of the switchgear door, visually verify there are three air gaps in
+the switchgear, one for each phase, by verifying that the three 50E 200A fuses are removed from the
+switchgear. The viewing window is shown by the blue arrow in Figure 2. If you are not certain if the
+fuses are removed, STOP THIS PROCEDURE and contact an HVPS SME for assistance. If you see that the
+
+
+---
+## Page 10
+
+fuses are in the switchgear and have not been removed, STOP THIS PROCEDURE and contact an HVPS
+SME for assistance, who will contact the facilities electricians to put this inactive HVPS input in a safe
+condition.
+Figure 2: SPEAR1 switchgear door with viewing window.
+8.1.2.2 208 VAC Switchgear Control Power
+______ Verify that the disconnect switch to the 208 VAC control power of the inactive HVPS is in the
+open position and an RF Group configuration lock is controlling the switch. In Figure 3, the disconnect
+switch for SPEAR1 is on the right and the disconnect switch for SPEAR2 is on the left. In Figure 3 the
+SPEAR1 disconnect switch is in the open position and the SPEAR2 disconnect switch is locked in the
+closed position with an administrative lock.
+______ Apply a red CoHE Operations Lockout Lock and an appropriately filled out Group Lockout Tag to
+the open disconnect switch.
+
+
+---
+## Page 11
+
+SPEAR2 208 VAC SPEAR1 208 VAC
+Figure 3: HVPS 208 VAC control power disconnect switches
+8.1.2.3 120 VAC HVPS Controller Control Power
+______ Verify that the 120 VAC circuit breaker for the HVPS controller of the inactive HVPS is in the
+open position and an RF Group configuration lock is controlling the breaker. (B117 Panel LPB CB 20, the
+blue arrow in Figure 4, for SPEAR1 and CB 34, the dark blue arrow in Figure 4, for SPEAR2)
+______ Apply a red CoHE Operations Lockout Lock and an appropriately filled out Group Lockout Tag to
+keep the circuit breaker in the open position.
+
+
+---
+## Page 12
+
+SPEAR1 120 VAC
+SPEAR2 120 VAC
+Figure 4: B117 LBP breaker panel for HVPS controller 120 VAC control power.
+9 NOTIFICATION OF OPERATIONS OF THE INTENT TO DISABLE THE HVPSS
+9.1 VERIFY CATER AND RSWCF EXIST AND OBTAIN AUTHORIZATION TO DISABLE SUPPLIES
+For work on the HVPS system, two configuration control documents must be entered and approved. A
+CATER is required to let SPEAR operations know of the work and a radiation safety work control form
+(RSWCF) is required to allow the accelerator directorate safety officer (ADSO) to manage the radiation
+implications of the work. (A PPS recertification of the supply may be required after the work.) The
+SPEAR operations group will grant permission for this work to proceed only after the CATER and RSWCF
+are in place.
+______ CATER number corresponding to the HVPS work ________
+______ RSWCF number corresponding to the HVPS work ________
+______ Obtain permission from the SPEAR operations group to proceed with the work.
+
+
+---
+## Page 13
+
+10 CONTROL OF HAZARDOUS ENERGY
+10.1 SEQUENCE OF STEPS TO TURN OFF THE HVPS AND DISABLE THE ABILITY TO CLOSE THE 12.47
+KVAC CONTACTOR
+The orderly shutdown of the HVPS in preparation for the work on an HVPS occurs in several steps.
+10.1.1 Turn Off the RF System
+The first step in this sequence is to turn off the RF system using the EPICS control system, by setting the
+Station State to the OFF state. After this is done, the Klystron HVPS panel, shown in Figure 5, shows the
+station is OFF and certain controls of the HVPS, Enerpro Fast Inhibit, Supply Status, and the two SCR
+banks, are also off. Note that even though the HVPS is off, there is still about 1.3 kVDC at the supply
+output, as seen by the readings of the two different monitors, RF PLC Voltage and HVPS Voltage. This is
+due to leakage from the input 12.47 kVAC across the HVPS transformer to the output diode rectifiers. In
+this condition, the RF system can immediately be turned on by setting the Station State to ON_CW.
+Figure 5: SPEAR RF Klystron HVPS panel with HVPS off and 12.47 kV contactor still closed.
+
+
+---
+## Page 14
+
+10.1.2 Open the 12.47 kVAC Contactor
+The next step in the sequence is to open the 12.47 kVAC contactor by pressing the Contactor Open
+control. Opening the contactor removes the input voltage to the HVPS and therefore also zeros the
+output voltage, as seen on RF PLC Voltage and HVPS Voltage. We see in Figure 6 that opening the
+contactor gives red alarms for five other process variables. Both the Contactor Closed and Contactor
+Open now display the OPEN status of the contactor. This makes the 12.47 kV input voltage NOTAVAIL.
+The loss of the input voltage makes the supply NOTREADY and the Enerpro Slow Start INACTIVE. The
+system can still be turned on remotely, first by closing the contactor and then setting the Station State
+to ON_CW.
+Figure 6: SPEAR RF Klystron HVPS panel with HVPS off and 12.47 kV contactor open.
+10.1.3 Disable the Contactor Control Power
+The final step in the sequence removes the control power to the contactor controller. Without this
+control power, the contactor is unable to close and provide any 12.47 kVAC power to the HVPS. The
+control power is removed by opening the appropriate 208 VAC disconnect switch, shown in Figure 3.
+Figure 7 shows the Klystron HVPS panel after the control power is removed. Now red alarm status is
+given to show that the Contactor Status is OFF and the Contactor is NOTREADY. The contactor cannot
+
+
+---
+## Page 15
+
+now be closed, so the system cannot be turned on until the 208 VAC control power is restored by closing
+the disconnect switch.
+Figure 7: SPEAR RF Klystron HVPS panel with HVPS off, 12.47 kV contactor open, and 120 VAC contactor control power
+removed.
+10.2 DOCUMENT ACTIVE HVPS TURN OFF
+Documenting how the active HVPS turned off will allow us to better understand any potential hazards
+that may occur due to stored energy not discharged during the turn off.
+In a normal turn off, the HVPS voltage and current transition quickly from their operating voltage and
+current to low values. As described above, as long as the 12.47 kVAC contactor remains closed the
+measured output voltage shows a residual reading of approximately 1.3 kV. Once the contactor is
+opened, the value of this measured voltage drops to zero.
+The active HVPS Voltage and HVPS Current are archived in the SPEAR history buffers and can be viewed
+after the HVPS is off. They are in the pull-down menus Parameter->SPEAR RF Klys and HVPS Parameters.
+(If you are unfamiliar with the HISTORYPLOT application, contact an HVPS SME or a SPEAR operator for
+
+
+---
+## Page 16
+
+assistance.) Figure 8 shows a HISTORYPLOT of the HVPS voltage and current in preparation for access
+into the SPEAR ring. The supply was turned off at 20:07 and its input 12.47 kVAC contactor was opened
+at 20:12:40.
+Figure 8: HVPS turned off at 20:07. Contactor opened at 20:12:40.
+Using the HISTORYPLOT application:
+______ Record the time when the HVPS was turned off ________.
+______ Record the HVPS Voltage before ________ and after ________ shutdown. In normal
+operation, the HVPS voltage can range from 50 kV to 80 kV. After the shutdown, a measured residual
+voltage of about 1.3 kV may still remain.
+______ Record the HVPS Current before ________ and after ________ shutdown. In normal
+operation, the HVPS current can range from 12 A to 25 A. After the shutdown, the measured current is
+very close to 0 A.
+______ Record the time when the contactor was opened ________.
+______ Record the HVPS Voltage after the contactor was opened ________. After the contactor is
+opened, the measured voltage is very close to 0 kV.
+
+
+---
+## Page 17
+
+10.3 REMOVE HAZARDOUS INPUTS FROM SYSTEM
+10.3.1 Instruct the HV Electricians to Make Safe the 12.47 kVAC Input to the HVPS
+______ Contact the HV electricians to remove the 12.47 kVAC input from the active supply and
+authorize their work.
+10.3.2 Verify the 12.47 kVAC is Removed from the Active HVPS
+______ Verify the 12.47 kVAC disconnect switch on the metal-enclosed switchgear of the active HVPS is
+in the open position. Refer to Figure 2 for a picture of a typical switchgear door with window and
+disconnect switch.
+______ Apply a red CoHE Operations Lockout Lock and an appropriately filled out Group Lockout Tag to
+the open 12.47 kVAC disconnect switch.
+______ By looking through the window of the switchgear door, visually verify there are three air gaps in
+the switchgear, one for each phase, by verifying that the three 50E 200A fuses are removed from the
+switchgear. If you are not certain if the fuses are removed, STOP THIS PROCEDURE and contact a HVPS
+SME for assistance. If you see that the fuses are in the switchgear and have not been removed, STOP
+THIS PROCEDURE and contact the facilities electricians to put this inactive HVPS input in a safe
+condition.
+10.3.3 208 VAC Switchgear Control Power
+To check the effects of removing this power, one needs to bring up the SPEAR RF Station EDM panel on
+a linux machine. If you are unfamiliar with this EDM application, contact an HVPS SME or a SPEAR
+operator for assistance and ask them to bring up the RF Detail panel and, from there, the HVPS panel.
+This is the same panel that was used to explain the turn-off procedure of the RF system in Figure 5,
+Figure 6, and Figure 7 in sections 10.1.1, 10.1.2, and 10.1.3, respectively.
+
+
+---
+## Page 18
+
+Figure 9: EDM display for HVPS EPICS variables
+This section will be successfully completed if the 12.47 kVAC contactor cannot be turned on. If the PPS
+is still active and gives a PERMIT to the HVPS, one can verify that this action will remove the ability to
+close the 12.47 kVAC contactor. If the PPS gives a NOPERMIT, all we will be able to verify is that the
+contactor cannot close. The PPS status is displayed in the area of Figure 9 pointed to by the red arrow.
+______ From the SPEAR RF Klystron HVPS panel, check and record the status of the PPS ________
+______ If the status is PERMIT, verify that the Contactor Ready status is READY, in the area of Figure 9
+pointed to by the dark blue arrow.
+______ Move the disconnect switch to the 208 VAC control power, shown in Figure 3, of the active
+HVPS down to the open position.
+______ Apply a red CoHE Operations Lockout Lock and an appropriately filled out Group Lockout Tag to
+the open disconnect switch.
+______ Verify that the Contactor Ready status in Figure 9 is NOTREADY
+
+
+---
+## Page 19
+
+______ Attempt to close the HVPS contactor by first pressing the Reset button, purple arrow, and then
+pressing Contactor Close, light blue arrow, in Figure 9.
+______ Record the value of Contactor Ready ________
+______ Record the value of Contactor Status ________
+______ If either the Contactor Ready is READY and/or the Contactor Status is ON, STOP THE
+PROCEDURE and contact an HVPS SME. Otherwise, continue with the procedure.
+10.3.4 Remove 125 VDC switchgear control power.
+The 125 VDC control power for the switchgear passes through an enclosure in B514 that contains three
+touch-safe circuit breakers. The red arrow in Figure 10 points to the main breaker, which is in the ON
+position in the picture. The dark red arrow points to the breaker for SPEAR2, which is also in the ON
+position. The green arrow points to the breaker for SPEAR1, which is in the OFF position.
+______ In the 125 VDC service enclosure, open the breaker switch for the active HVPS and, if it is not
+already in the open position, open the breaker switch for the inactive HVPS.
+______ Perform a ZVV on the load (bottom) side of both 125 VDC breaker switches for both HVPSs.
+______ Close the cover of the service enclosure that contains the 125 VDC breaker switches and apply a
+red CoHE Operations Lockout Lock and an appropriately filled out Group Lockout Tag to secure the cover
+of this enclosure.
+MAIN SPEAR2 SPEAR1
+Figure 10: 125 VDC control power enclosure and circuit breakers
+
+
+### Table 1
+
+| MAIN | SPEAR2 | SPEAR1 |
+| --- | --- | --- |
+
+
+---
+## Page 20
+
+VOLTAGE DIVIDERS
+120 VAC
+Figure 11: The inside of the HVPS controller enclosure.
+10.3.5 Measure the Readings of the HVPS Voltage Monitors
+Each HVPS has two redundant HVPS voltage dividers that are used as monitors. When properly
+connected to the HVPS controller on terminal strip (TS) 3, the voltage division ratio is 10000:1. By
+measuring the outputs of these voltage dividers on the previously active HVPS, we can gain more
+confidence in our knowledge of the current output voltage of the HVPS. Because of the large voltage
+division ratio, a Category III rated DVM that has a millivolt setting is most useful for these
+measurements.
+
+
+---
+## Page 21
+
+Figure 12: TS3 with voltage divider terminations for SPEAR1 (left) and SPEAR2 (right)
+The inside of the HVPS controller enclosure is shown in Figure 11. It is safe to make the measurements
+described in this procedure inside of the controller since all potentially hazardous voltages are covered.
+In Figure 11, a blue arrow points to the location of TS3, where the voltage dividers are terminated.
+Figure 12 shows the details of TS3 in the controllers for both SPEAR1 and SPEAR2. In both pictures, the
+blue arrow points to the two terminals of voltage divider 1 and the dark blue arrow points to the two
+terminals of voltage divider 2.
+______ Measure the voltage across TS3 1-2 of the active HVPS and record the reading of voltage divider
+1 ________
+______ If this reading is greater than 0.1 V, the calculated output voltage is greater than 1 kV. If so,
+STOP EXECUTING THIS PROCEDURE and contact an HVPS SME.
+______ Measure the voltage across TS3 3-4 of the active HVPS and record the reading of voltage divider
+2 ________
+______ If this reading is greater than 0.1 V, the calculated output voltage is greater than 1 kV. If so,
+STOP EXECUTING THIS PROCEDURE and contact an HVPS SME.
+10.3.6 120 VAC HVPS Controller Control Power
+______ Open the 120 VAC circuit breaker for the HVPS controller of the active HVPS. (B117 Panel LPB
+CB 20 for SPEAR1 and CB 34 for SPEAR2. Refer to Figure 4.)
+______ Apply a red CoHE Operations Lockout Lock and an appropriately filled out Group Lockout Tag to
+the open circuit breaker
+
+
+---
+## Page 22
+
+Figure 13: 120 VAC control power for HVPS controller for SPEAR1 (left) and SPEAR2 (right).
+10.3.7 Verify No HVPS Controller Power on Either HVPS Controller
+The 120 VAC control power enters each HVPS Controller and the line and neutral wires land on terminal
+blocks on the TS1 DIN rail. Figure 13 shows the touch safe TS1 DIN rails on which the input control
+power is terminated. For both SPEAR1 and SPEAR2, the red arrow points to the line connection, the
+white arrow to the neutral connection, and the green arrow to the ground connection.
+______ Perform a ZVV on the control power for SPEAR1 on the TS1 DIN rail connections between line
+(black) and neutral (white), line and ground (green), and neutral and ground.
+______ Perform a ZVV on the control power for SPEAR2 on the TS1 DIN rail connections between line
+(red) and neutral (white), line and ground (green), and neutral and ground.
+10.4 ZERO VOLTAGE VERIFICATION OF HVPS CONNECTION TO THE KLYSTRON
+______ Visually verify through the viewport on the oil-filled transition tank in B132-101 that the wiper
+of the high voltage (Ross) relay has shorted to the ground bar of the relay assembly. The blue arrow in
+the photograph on the left side of Figure 14 points to the viewport and the yellow arrow in the
+photograph on the right side of the figure points to the wiper lying on the ground bar, pointed to by the
+green arrow, of the high voltage relay assembly.
+______ Fully depress the mechanical shorting plunger, pointed to by the red arrow in Figure 14, in the
+transition tank in B132-101 to short the output cables and place a red CoHE Operations Lockout Lock
+and an appropriately filled out Group Lockout Tag on the hasp to secure the plunger in the down
+position.
+
+
+---
+## Page 23
+
+WIPER
+GROUND
+Figure 14: Termination tank
+11 GROUP LOCKOUT COMPLETE
+______ The LAW shall place the common key to the eight Operations Lockout Locks applied in this
+procedure in the group lockout box. Then they shall place their personal lock on the group lockout box
+and apply the orange Group Master Lockout Tag on the box.
+______ The LAW shall obtain a copy of the Complex Lockout Permit for the SPEAR3 RF HVPS Energy
+Isolation Plan SR-444-636-02-R1, stored in the file Spear3HVPSComplexLockoutPermit.xlsx and a copy of
+which is displayed in Figure 15, complete Section 2 of the permit, and place it adjacent to the group
+lockout box.
+
+
+---
+## Page 24
+
+Figure 15: Complex Lockout Permit for the SPEAR3 RF HVPS Isolation Plan SR-444-636-02-R1
