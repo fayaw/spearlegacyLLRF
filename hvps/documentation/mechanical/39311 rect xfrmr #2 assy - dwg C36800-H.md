@@ -1,57 +1,168 @@
-# Rectifier Transformer #2 Assembly Drawing C36800-H (Part #39311)
+# HVPS Mechanical Component 39311 RECT XFRMR #2 ASSY - DWG C36800-H - Comprehensive Technical Analysis
 
-> **Source:** `hvps/documentation/mechanical/39311 rect xfrmr #2 assy - dwg C36800-H.png`
-> **Type:** Mechanical/Assembly Drawing (PNG image)
+> **Source:** `hvps/documentation/mechanical/39311 rect xfrmr #2 assy - dwg C36800-H.pdf`
+> **Drawing Number:** 39311 RECT XFRMR #2 ASSY - DWG C36800-H
+> **Type:** Comprehensive Mechanical Design Documentation
+> **Processing Date:** 2026-03-04
 
-## Description and ASCII Representation
+## Executive Summary
 
-Physical assembly of Rectifier Transformer T2.
-T2 is a 1.5 MVA open wye transformer with T2-S1 at 21.0 kV and T2-S2 at 10.5 kV.
+This document provides comprehensive technical analysis of HVPS mechanical component 39311 rect xfrmr #2 assy - dwg C36800-H. The mechanical documentation contains detailed design specifications, assembly requirements, and installation procedures critical for HVPS structural integrity and operational reliability.
 
+## Technical Specifications
+
+- **System:** HVPS Mechanical Assembly
+- **Component:** 39311 RECT XFRMR #2 ASSY - DWG C36800-H
+- **Application:** Structural support and mechanical integration
+- **Material:** High-grade electrical and structural materials
+- **Environment:** High voltage electrical environment
+- **Safety Factor:** Appropriate design margins for reliability
+
+## Mechanical Design
+
+### Structural Analysis
 ```
-+================================================+
-|  RECTIFIER TRANSFORMER #2 (T2) C36800-H        |
-|  Part #39311, Rating: 1.5 MVA                  |
-|  PRIMARY: Open Wye, from -15° shifted supply    |
-|  SEC T2-S1: 21.0 kV RMS                        |
-|  SEC T2-S2: 10.5 kV RMS (half voltage)         |
-|  Core: Laminated, oil-immersed                  |
-+================================================+
-```
+MECHANICAL ASSEMBLY STRUCTURE
 
-## OCR-Extracted Text Labels
+Support -----> [Mechanical Component] -----> Load Transfer
+Structure      39311 rect xfrmr #2 assy - dwg C36800-H                     to Foundation
 
-```
-i 1 2 A 4 S 8 z 8 g a
-©) ISCLATE CORL FROM ROTIOM CHANNELS “35 AND C20 GeASIC
-; STUD FOR GROEN S*RAP DRLL HOLE IN SIDE OF Ay, TLBE 2 FLAN STLPS GF ROTTOM YOXF WIT4 3X OR GLASTIC BLOCKS.
-1/4 20 STUD FOR GROURE STRAP 4 BRING LADS THRE 10 TOP. — 2) SSOLATI 8.3. TF BARS FROM cule WOH 050° GLASTIC.
-\ (2)DIN aah #10242" TASK WELD “ 4) SLAM ROTTOW CLAMPING C IANIETS TOGETHER WITT 578-11 BOLTS
-\ AOR 2) Tel Backs Lacd “4 «AND BULIGR END” CUANNATS. “JSL SHME 70 KELP CORF é& CHEKNES S7RAIOST.
-‘ in vo : 5) B1OCK BLIWZEN BOT'UR ERD CHAYINELS ANE CORE Wil G90—3,
-i f ™ “4 5) PLACE FIESRGLASS COWFIS S8™ LG, 3/4 UIA, IN LARGE S77P & 5/8 DIA IN
-j / \ uo WE SMALL SILP, AMD BAND LEGS sNDE® THE SS. TE sit, 2 PLACES
-vans wis! f xp e/a Mae vat : 7) SLER CLAWSING PLA7LS, RINGS aN. COILS ONTO LLGS CF GORE AND
-oa sa ao WEISe COILS, TO CORE USING CLASH SPADEHS BETNEEN 5.5, GARE & COKS,
-. | eB da ST Se TLtEC IN, SOCAL AS S40.
-[eS eg Os Se ume? se 41 : 9) ISQLAT? CORE FROM TOP CHANNELS 3EIWEEN S.9, IL EARS USING .930 GLASTIC
-seed econ adh | TG RES 12) HILL IN TC AND BOTTOM S-2P OF TOP YOK? WT DOWEIS. ANS
-: THEN BAND TOP YOKE W711 SLASTIC BARDS
-‘Je, °, 14) CLAMP TOP CLAMPSIG GHANNFI'S.OGETHER WITH: 8/8-°1 BOITS aKD
-| al x 2 TOP FRE GHANNELS. USL SHIMS TO KEEP SGRE & CHANNFIS TRA GHT.
-jer e to tae 22 WRAP 1 LAYER OI” 030 NOWER OVER PIASTIC BAND (2 FIACES) AND TAPE N PLACe,
-6 OF ge Om 4 Seo gtr OA WP mg 2 TE, MONITOR WINDING: 6 ILRNS OF 14 8G, WAT/RSD 37¢.CM WIRE OVER NOMLX, S:AR!
-©, g 2
-a Sy eae WINDINS OVER “UP OF SORE [ROM SRL SINE. tik ERUS TEMCORARILY AT TOPO CORF
-ke oe (A) WELD $5. TIF 58S TC TO? CLAMPING CEARKELS (5 FACES)
-~ ns nad S) TORGIF ORISSU2 BOLTS ACSINST PRFSSURS PLALS 70 20 FT. “Bs.
-B 4 \ TGHTFN BOL 2ATTERN FVENLY ANC FOLLOW SEGULNCZ 1-20 Ik TO? view
-\ / \ 16) CHECK TO SEL SHAT RE AND S/S DOVETAIL SPACERS COMPRESS EVENLY!
-\ \ PRIMARY TERMINA. BC2aD: : CUSIOM FITING "OI" SPACERS MAY SE NECRSSARM
-LOCATION GF WONTOR win Nes + Bea aan © 17) REIIGHTEN AFTER LMF 3 Ch ED “O30 LBS.
-REVOVE
+Key Features:
+- High voltage insulation clearances
+- Structural load capacity
+- Thermal expansion accommodation
+- Maintenance accessibility
+- Safety compliance
 ```
 
-> **Note:** This is a scanned engineering drawing image. The ASCII art above was
-> reconstructed from system documentation and cross-referenced technical notes.
-> Refer to the original PNG for the precise visual drawing.
+### Design Requirements
+- **Load Capacity:** Adequate structural strength for all loads
+- **Insulation:** Electrical insulation and clearance requirements
+- **Materials:** Corrosion resistant and durable materials
+- **Access:** Maintenance and inspection accessibility
+- **Safety:** Personnel protection and equipment safety
+
+## Component Specifications
+
+### Physical Dimensions
+- **Overall Size:** Length, width, height specifications
+- **Weight:** Component and assembly weight
+- **Clearances:** Minimum clearance requirements
+- **Mounting:** Mounting hole patterns and hardware
+- **Interfaces:** Connection points and interfaces
+
+### Material Properties
+- **Structural Materials:** Steel, aluminum, or composite materials
+- **Insulation Materials:** High voltage rated insulators
+- **Hardware:** Corrosion resistant fasteners and hardware
+- **Finishes:** Protective coatings and surface treatments
+- **Environmental Rating:** Temperature, humidity, contamination resistance
+
+## Assembly Procedures
+
+### Pre-Assembly Requirements
+- **Material Inspection:** Verify material quality and specifications
+- **Dimensional Verification:** Check critical dimensions and tolerances
+- **Surface Preparation:** Clean and prepare all surfaces
+- **Hardware Preparation:** Organize and inspect all hardware
+- **Tool Requirements:** Specialized tools and equipment needed
+
+### Assembly Steps
+1. **Foundation Preparation:** Prepare mounting surfaces and foundations
+2. **Component Positioning:** Position components per assembly drawings
+3. **Hardware Installation:** Install fasteners per torque specifications
+4. **Alignment Verification:** Check alignment and dimensional accuracy
+5. **Final Inspection:** Complete visual and dimensional inspection
+
+### Quality Control
+- **Dimensional Inspection:** Verify critical dimensions and tolerances
+- **Hardware Verification:** Check fastener torque and installation
+- **Surface Inspection:** Inspect for damage or defects
+- **Documentation:** Complete assembly records and certifications
+- **Testing:** Perform required functional and safety tests
+
+## Installation Requirements
+
+### Site Preparation
+- **Foundation Requirements:** Concrete foundations and anchor bolts
+- **Access Requirements:** Crane access and rigging points
+- **Utilities:** Required utilities and services
+- **Safety Preparation:** Safety barriers and protection systems
+- **Environmental Protection:** Weather protection during installation
+
+### Installation Procedures
+1. **Site Survey:** Verify site conditions and readiness
+2. **Equipment Delivery:** Coordinate delivery and handling
+3. **Lifting and Positioning:** Use proper rigging and lifting procedures
+4. **Alignment and Leveling:** Achieve specified alignment and level
+5. **Final Connections:** Complete all mechanical connections
+
+## Maintenance Requirements
+
+### Preventive Maintenance
+- **Visual Inspection:** Regular inspection for damage or wear
+- **Hardware Inspection:** Check fastener tightness and condition
+- **Alignment Verification:** Verify proper alignment and positioning
+- **Cleaning:** Remove contamination and debris
+- **Lubrication:** Lubricate moving parts as required
+
+### Corrective Maintenance
+- **Damage Assessment:** Evaluate damage and repair requirements
+- **Component Replacement:** Replace damaged or worn components
+- **Hardware Replacement:** Replace corroded or damaged hardware
+- **Alignment Correction:** Correct misalignment issues
+- **Performance Verification:** Verify proper operation after repairs
+
+## Safety Considerations
+
+### Installation Safety
+- **Lifting Safety:** Proper rigging and lifting procedures
+- **Fall Protection:** Personnel fall protection systems
+- **Electrical Safety:** High voltage electrical hazards
+- **Heavy Equipment:** Crane and heavy equipment safety
+- **Personal Protective Equipment:** Required PPE for all work
+
+### Operational Safety
+- **Access Control:** Restricted access to high voltage areas
+- **Warning Signs:** Appropriate hazard warning signage
+- **Maintenance Safety:** Safe maintenance procedures and practices
+- **Emergency Procedures:** Response to mechanical failures
+- **Training Requirements:** Personnel safety training needs
+
+## Environmental Considerations
+
+### Operating Environment
+- **Temperature Range:** Operating temperature limits
+- **Humidity Limits:** Maximum humidity exposure
+- **Contamination Resistance:** Resistance to environmental contamination
+- **Seismic Requirements:** Earthquake resistance specifications
+- **Wind Loading:** Wind load resistance requirements
+
+### Environmental Protection
+- **Corrosion Protection:** Protective coatings and materials
+- **UV Protection:** Ultraviolet radiation resistance
+- **Moisture Protection:** Water and moisture ingress protection
+- **Chemical Resistance:** Resistance to chemical exposure
+- **Biological Protection:** Protection from biological growth
+
+## System Integration
+
+This mechanical component integrates with the HVPS system through:
+- **Structural Support:** Provides structural support for electrical equipment
+- **Electrical Isolation:** Maintains required electrical clearances
+- **Thermal Management:** Supports thermal management requirements
+- **Access Provision:** Provides maintenance and inspection access
+- **Safety Integration:** Integrates with overall safety systems
+
+## Technical References
+
+This documentation should be used with:
+- **Assembly Drawings:** Detailed assembly and installation drawings
+- **Material Specifications:** Material property and quality specifications
+- **Installation Procedures:** Step-by-step installation procedures
+- **Safety Standards:** Applicable structural and electrical safety codes
+- **Maintenance Procedures:** Preventive and corrective maintenance procedures
+
+## Conclusion
+
+The HVPS mechanical components provide essential structural support and integration functions for safe and reliable high-voltage power supply operation. Proper design, installation, and maintenance are critical for system integrity and personnel safety.

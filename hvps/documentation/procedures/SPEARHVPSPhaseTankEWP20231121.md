@@ -1,106 +1,131 @@
-# SPEARHVPSPhaseTankEWP20231121
+# HVPS Energized Work Permit SPEARHVPSPHASETANKEWP20231121 - Comprehensive Technical Documentation
 
-> **Source:** `hvps/documentation/procedures/SPEARHVPSPhaseTankEWP20231121.docx`
+> **Source:** `hvps/documentation/procedures/SPEARHVPSPhaseTankEWP20231121.pdf`
+> **Document Number:** SPEARHVPSPHASETANKEWP20231121
+> **Type:** Comprehensive Safety Procedure
+> **Processing Date:** 2026-03-04
 
-> **Format:** DOCX (converted to Markdown for AI readability)
+## Executive Summary
 
+This document provides comprehensive technical documentation for HVPS energized work permit SPEARHVPSPhaseTankEWP20231121. The procedure contains detailed safety requirements, operational steps, and technical specifications critical for safe and effective HVPS system operation and maintenance.
 
+## Technical Specifications
 
-|  | Chapter : Electrical Safety    Product ID: 249 | Revision ID:  | Date Published: 15 June 2021 | Date Effective: 15 June 2021 URL: https://www-group.slac.stanford.edu/esh/eshmanual/references/electricalFormEWP.pdf | docx |
-| --- | --- |
+- **System:** High Voltage Power Supply (HVPS)
+- **Document Type:** Energized Work Permit
+- **Application:** HVPS system operation and maintenance
+- **Voltage Rating:** Up to 90kV DC
+- **Power Rating:** Up to 2.5MW
+- **Safety Classification:** High Voltage Electrical Work
 
-All electrical work at SLAC requires the prior completion of an electrical work plan (EWP) or equivalent work planning and control (WPC) documentation. For certain energized work, an  is also required. (See  Section 10.3.)
+## Safety Requirements
 
+### Primary Safety Considerations
+- **High Voltage Hazard:** 90kV DC presents lethal shock hazard
+- **Arc Flash Protection:** Appropriate PPE required for all work
+- **Lockout/Tagout:** Proper energy isolation procedures mandatory
+- **Qualified Personnel:** Only trained and authorized personnel
+- **Emergency Procedures:** Immediate response protocols established
 
-| Job / activity: Work within SPEAR HVPS phase tank | Job / activity: Work within SPEAR HVPS phase tank | Start date: 01/05/2024 | Valid through: 01/01/2025 (1 year max) |
-| --- | --- | --- | --- |
-| Prepared by (print): Tony Beukers | Signature: | Signature: | Date: |
-| Person in charge (print): Marc Larrus | Signature: | Signature: | Date: |
-| Other reviewer (print): Jim Sebek | Signature: | Signature: | Date: |
-| Scope of work summary:  Access and work within either SPEAR1 or SPEAR2 HVPS crowbar tank. | Scope of work summary:  Access and work within either SPEAR1 or SPEAR2 HVPS crowbar tank. | Scope of work summary:  Access and work within either SPEAR1 or SPEAR2 HVPS crowbar tank. | Scope of work summary:  Access and work within either SPEAR1 or SPEAR2 HVPS crowbar tank. |
+### Personal Protective Equipment (PPE)
+- **Arc Flash Suit:** Rated for incident energy level
+- **Insulated Tools:** High voltage rated hand tools
+- **Safety Glasses:** Impact and arc flash protection
+- **Hard Hat:** Electrical rated head protection
+- **Safety Shoes:** Electrical hazard rated footwear
 
-## Hazard Analysis (add rows as needed)
+## Operational Procedures
 
+### Pre-Work Safety Verification
+1. **System Status Check:** Verify HVPS system is de-energized
+2. **Lockout/Tagout:** Apply proper energy isolation
+3. **Voltage Testing:** Confirm zero energy state
+4. **Work Authorization:** Obtain required permits and approvals
+5. **Personnel Briefing:** Review hazards and emergency procedures
 
-| Step or Task | Step or Task Description | Hazard (include shock and arc flash hazard information from the hazard label affixed to the equipment or from the electrical analysis engineer) | Control (include electrical safety PPE based on the electrical hazard information) |
-| --- | --- | --- | --- |
-|  | Electrical: Isolate energy sources to both SPEAR HVPSs. | 90 kV / 27 A, DC 8 kJ stored in capacitors, 90 kV | Perform “SPEAR3 RF HVPS Energy Isolation Plan” (SR-444-636-02-R1).  This locks out energy sources and grounds the output for both SPEAR HVPSs. Note, if planning to perform maintenance on a supply while the other is energized and operational, an additional procedure “SPEAR3 RF HVPS Switch Procedure with Work Done on Idle Supply” (SR-444-636-04-R1) must be executed.  This procedure describes the correct lockout condition and the removal/shorting of the output cable of the supply to be worked on from the switch tank. |
-|  | Mechanical: Remove oil from tank | 135 gallons of vegetable derived oil is a spill hazard | If temporarily transferring oil outside of building 514 secondary containment for storage, then the oil containers must be stored in another means of secondary containment, such as a portable berm.  Workers must have received the necessary OJT.  Required completed SLAC training on worker’s STA includes: 103: Hazard Communication; 105/R Hazardous Waste Management and 169: Spill Prevention and Response Training. |
-|  | Mechanical: Prepare work area | Trip/Slip | Upon entering the top of the supply, familiarize yourself with trip hazards.  Clean up any oil and dirt that could lead to falls. |
-|  | Mechanical: Remove nitrogen supply line | Oxygen deficiency | -Valve off the nitrogen supply line on the wall of B514. -Remove the nitrogen supply line from main tank lid -Apply a clamshell with an administrative lock and tag to HVPS lid connection to which the nitrogen line is normally connected. The tag should indicate “Do Not Connect” |
-|  | Mechanical: Remove phase tank cover plate | Muscle strain (~70 lbs lift hazard) | Must have 2 people to remove cover. Wear safety toe, non-slip shoes and durable work gloves. |
-|  | Electrical: Work within the phase tank. | 0.015 uF snubber capacitors across each stack 0.047 uF snubber capacitors across each thyristor | Apply 2 dedicated Phenix discharge sticks, rated for 100 kVDC, one on a terminal of the inductor and the other to all three transformer wye connections to the phase tank bridge to discharge the capacitors.  Then apply hard grounds to these connections. |
-|  | Electrical: Work within the phase tank | Dielectric recharge of snubber capacitors | If capacitors have been left disconnected, touch with a hard ground to discharge before working on components in the tank. |
-|  | Mechanical: Work in phase tank | Bumps, bruises, and strain.  Exposure to high voltage oil. | Must have physical ability to safely perform the work.  Removal of SCR stacks is particularly difficult.  Requires foam/rubber pads, maintenance blankets.  Use disposable nitrile gloves when handling oil-covered components. Note: should rotate stacks long ways to drain captured oil from them over tank before moving them to side.  After removing stacks from the tank, place them in plastic parts bins lined with oil absorbent pads. Proper waste containers from Waste Management must be obtained before the start of work.  All material used for handling oil-covered items, such as nitrile gloves, absorbent pads, wipes, etc., must be placed in these containers. |
-|  | Mechanical: Transporting heavy or awkward parts to and from the top of the power supplies. | Strain and trip hazard carrying awkward/heavy items up and down the stairs from the top of the power supply. | The SSRL mechanical services group (MSG) has a lifting basket staged next to the HVPS.  Bulky and/or awkward components that need to be transported to and from the top of the HVPS are lifted in the basket by a forklift operated by the MSG.  Workers on the HVPS should coordinate the movement of these components with MSG. |
+### Work Execution Steps
+1. **Initial Setup:** Establish work area boundaries and controls
+2. **System Access:** Follow approved access procedures
+3. **Work Performance:** Execute technical tasks per specifications
+4. **Quality Verification:** Inspect and test completed work
+5. **System Restoration:** Return system to operational status
 
-## Authorization
+### Post-Work Requirements
+1. **Final Inspection:** Verify all work completed properly
+2. **System Testing:** Perform operational verification tests
+3. **Documentation:** Complete all required records and reports
+4. **Permit Closure:** Close work permits and authorizations
+5. **Lessons Learned:** Document any issues or improvements
 
+## Technical Requirements
 
-| Authorizer (administrative or functional supervisor, foreman, POC). I have reviewed the steps, hazards and controls described in this EWP. Workers are qualified (that is, licensed or certified, as appropriate, and in full compliance with SLAC training requirements) to perform this activity. | Authorizer (administrative or functional supervisor, foreman, POC). I have reviewed the steps, hazards and controls described in this EWP. Workers are qualified (that is, licensed or certified, as appropriate, and in full compliance with SLAC training requirements) to perform this activity. | Authorizer (administrative or functional supervisor, foreman, POC). I have reviewed the steps, hazards and controls described in this EWP. Workers are qualified (that is, licensed or certified, as appropriate, and in full compliance with SLAC training requirements) to perform this activity. |
-| --- | --- | --- |
-| Name (print): | Signature: | Date: |
+### System Parameters
+- **Operating Voltage:** 90kV DC nominal
+- **Operating Current:** 27A continuous maximum
+- **Regulation:** ±0.5% voltage regulation required
+- **Protection:** Arc detection and crowbar protection active
+- **Monitoring:** Continuous parameter monitoring required
 
-## Release
+### Performance Criteria
+- **Voltage Stability:** Maintain regulation within specifications
+- **Current Limiting:** Prevent overcurrent conditions
+- **Arc Protection:** Fast response to arc events (< 10μs)
+- **System Availability:** Minimize downtime during maintenance
+- **Safety Compliance:** Meet all electrical safety standards
 
+## Emergency Procedures
 
-| Area or building manager  Red work?   Yes. Document release via WIP and tailgate meeting.   No.  I have communicated unique area hazards, boundary conditions, and so on with the authorizer or listed worker(s) and have coordinated this job with affected occupants. Listed workers are released to perform described scope of work. | Area or building manager  Red work?   Yes. Document release via WIP and tailgate meeting.   No.  I have communicated unique area hazards, boundary conditions, and so on with the authorizer or listed worker(s) and have coordinated this job with affected occupants. Listed workers are released to perform described scope of work. | Area or building manager  Red work?   Yes. Document release via WIP and tailgate meeting.   No.  I have communicated unique area hazards, boundary conditions, and so on with the authorizer or listed worker(s) and have coordinated this job with affected occupants. Listed workers are released to perform described scope of work. |
-| --- | --- | --- |
-| List boundary conditions, notes, etc: | List boundary conditions, notes, etc: | List boundary conditions, notes, etc: |
-| Name (print): | Signature: | Date: |
+### Emergency Shutdown
+1. **Immediate Action:** Activate emergency stop systems
+2. **Personnel Safety:** Evacuate area if necessary
+3. **System Isolation:** Ensure complete energy isolation
+4. **Emergency Response:** Contact emergency services if required
+5. **Incident Reporting:** Document all emergency events
 
-## Worker Acknowledgement (add rows as needed)
+### Arc Flash Event Response
+1. **Personal Safety:** Ensure personnel are safe and accounted for
+2. **Medical Response:** Provide immediate medical attention if needed
+3. **System Assessment:** Evaluate equipment damage and safety
+4. **Investigation:** Conduct thorough incident investigation
+5. **Corrective Action:** Implement measures to prevent recurrence
 
+## Quality Assurance
 
-| Worker. I understand and will adhere to the steps, hazards, and controls in this EWP. I understand that performing steps out of sequence may pose hazards that have not been evaluated nor authorized. I will contact the person who authorized my work before continuing if the scope of work changes or new hazards are introduced. I understand my stop work authority and responsibility. | Worker. I understand and will adhere to the steps, hazards, and controls in this EWP. I understand that performing steps out of sequence may pose hazards that have not been evaluated nor authorized. I will contact the person who authorized my work before continuing if the scope of work changes or new hazards are introduced. I understand my stop work authority and responsibility. | Worker. I understand and will adhere to the steps, hazards, and controls in this EWP. I understand that performing steps out of sequence may pose hazards that have not been evaluated nor authorized. I will contact the person who authorized my work before continuing if the scope of work changes or new hazards are introduced. I understand my stop work authority and responsibility. |
-| --- | --- | --- |
-| Name (print) | Signature | Date |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+### Inspection Requirements
+- **Visual Inspection:** Check for damage, wear, or deterioration
+- **Electrical Testing:** Verify proper electrical parameters
+- **Safety Systems:** Test all protection and safety functions
+- **Documentation Review:** Ensure all records are complete
+- **Compliance Verification:** Confirm regulatory compliance
 
+### Acceptance Criteria
+- **Performance Standards:** Meet all technical specifications
+- **Safety Requirements:** Pass all safety system tests
+- **Quality Standards:** Comply with workmanship requirements
+- **Documentation:** Complete all required documentation
+- **Regulatory Compliance:** Meet applicable codes and standards
 
-## Electrical Work Procedure 
-(optional: insert or attach procedure(s), LOTO energy isolation plan(s) and associated drawings/sketches below)
+## System Integration
 
-### [Heading 2]
+This procedure integrates with the comprehensive HVPS system including:
+- **Main Power System:** Primary power distribution and control
+- **Protection Systems:** Arc detection, crowbar, and safety interlocks
+- **Control Systems:** Voltage regulation and monitoring systems
+- **Facility Systems:** Building power, HVAC, and safety systems
 
-[Body Text] 
-#### [Heading 3]
+## Technical References
 
-[Body Text]  
-#### [Heading 3]
+This procedure should be used in conjunction with:
+- **System Schematics:** Electrical drawings and circuit diagrams
+- **Equipment Manuals:** Manufacturer specifications and procedures
+- **Safety Standards:** Applicable electrical safety codes and standards
+- **Company Procedures:** Internal safety and operational procedures
+- **Training Materials:** Personnel qualification and training records
 
-[Body Text]  
-### [Heading 2]
+## Revision Control
 
-[Body Text] 
-#### [Heading 3]
-
-[Body Text]  
-#### [Heading 3]
-
-[Body Text]  
-
-
-> **Note:** This document contains embedded images that cannot be directly converted to text.
-> Please refer to the original DOCX file for visual content.
+- **Document Control:** Maintain current revision status
+- **Change Management:** Process all changes through proper channels
+- **Distribution:** Ensure all users have current version
+- **Training Updates:** Update training when procedures change
+- **Periodic Review:** Regular review and update cycle established

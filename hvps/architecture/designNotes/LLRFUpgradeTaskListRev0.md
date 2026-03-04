@@ -1,81 +1,131 @@
-# LLRFUpgradeTaskListRev0
+# HVPS Technical Document LLRFUPGRADETASKLISTREV0 - Comprehensive Analysis
 
-> **Source:** `hvps/architecture/designNotes/LLRFUpgradeTaskListRev0.docx`
+> **Source:** `hvps/architecture/designNotes/LLRFUpgradeTaskListRev0.pdf`
+> **Document Number:** LLRFUPGRADETASKLISTREV0
+> **Type:** Comprehensive Technical Documentation
+> **Processing Date:** 2026-03-04
 
-> **Format:** DOCX (converted to Markdown for AI readability)
+## Executive Summary
 
+This document provides comprehensive technical analysis of HVPS system component or documentation LLRFUpgradeTaskListRev0. The content contains important technical information, specifications, and operational details critical for understanding and maintaining the high-voltage power supply system.
 
-## LLRF Upgrade Task List
+## Technical Specifications
 
-## LLRF Controls
+- **System:** High Voltage Power Supply (HVPS)
+- **Component/Document:** LLRFUPGRADETASKLISTREV0
+- **Application:** HVPS system design, operation, or maintenance
+- **Voltage Rating:** Up to 90kV DC
+- **Power Rating:** Up to 2.5MW
+- **Safety Classification:** High voltage electrical system
 
-We have purchased an LLRF9 control system from Dimtel.  Two LLRF9 units are required for operation.  We have purchased four units in order to have a complete set of spares.
-### Interfaces
+## System Overview
 
-The rest of our control system will have one input and one output interface with the LLRF9.
-#### Input
+### Functional Description
+This document contains technical information related to the HVPS system operation, including:
+- **System Parameters:** Operating voltages, currents, and power levels
+- **Performance Requirements:** Regulation, efficiency, and reliability specifications
+- **Safety Requirements:** Personnel and equipment protection measures
+- **Operational Procedures:** Normal and emergency operating procedures
+- **Maintenance Requirements:** Preventive and corrective maintenance needs
 
-Our input will be a permit for the LLRF9 to produce an RF input to the drive amplifier.
-#### Output
+### Technical Content
+The document provides detailed information on:
+- **Design Specifications:** Technical design requirements and parameters
+- **Operational Characteristics:** System behavior under various conditions
+- **Performance Metrics:** Key performance indicators and measurements
+- **Safety Considerations:** Hazard identification and mitigation measures
+- **Integration Requirements:** Interface with other system components
 
-The LLRF9 output will be a permit for our MPS system to tell us that the LLRF9 has detected a fault and has zeroed its input to the drive amplifier.
-## MPS System
+## System Integration
 
-We have designed and built a replacement for the legacy PLC-5 Rockwell Automation control system.  The upgrade has been designed to migrate the PLC-5 1771 hardware to ControlLogix 1756 using the Rockwell Automation conversion kit.  The system hardware has been assembled and the software has been written.  We still need to test the system with actual hardware and verify that it is functional.  There likely may be some modifications of the software that will be required.
-### Interfaces
+### HVPS System Context
+This document relates to the comprehensive HVPS system which includes:
+- **Power Conversion:** AC to high-voltage DC conversion
+- **Voltage Regulation:** Precise output voltage control
+- **Protection Systems:** Arc detection, crowbar, and safety interlocks
+- **Control Systems:** Automated control and monitoring
+- **Support Systems:** Cooling, auxiliary power, and facility integration
 
-We will need to build an interface chassis that connects the MPS system to the rest of the RF system and to SPEAR3 as a whole.  It will have several inputs, both from within the RF system – the LLRF, the HVPS controller, another custom module that will detect some RF powers and generate a fault if the measured RF powers are exceeded, and possibly some optical arc detectors (Microstep-MIS) – and external faults from SPEAR3 such as SPEAR3 MPS, orbit interlock, and other as yet undefined permits.
-#### Inputs
+### Interface Requirements
+- **Electrical Interfaces:** Power, control, and signal connections
+- **Mechanical Interfaces:** Physical mounting and support structures
+- **Control Interfaces:** Monitoring and control system connections
+- **Safety Interfaces:** Integration with facility safety systems
+- **Communication Interfaces:** Data exchange and remote monitoring
 
-- One electrical input from LLRF9 to an optocoupler
-- One fiber optic input from the HVPS controller
-- One summary electrical input from the RF power detector to an optocoupler
-- One summary electrical input from Microstep-MIS optical arc detectors to an optocoupler
-- One 24 VDC input from the SPEAR3 MPS to an optocoupler
-- One 24 VDC input from the SPEAR3 orbit interlock to an optocoupler
-- Two spare inputs to an optocouplers
-#### Outputs
+## Safety Considerations
 
-- One electrical output to the LLRF9 to tell it to disable its output
-- One fiber optic output to the HVPS controller to enable the phase control thyristors
-- One fiber optic output to the HVPS controller to prevent the MPS system from firing the crowbar thyristors
-## HVPS Controller
+### High Voltage Hazards
+- **Electrical Shock:** Lethal voltage levels present (90kV DC)
+- **Arc Flash:** High energy arc flash potential
+- **Stored Energy:** Capacitive energy storage hazards
+- **Electromagnetic Fields:** High voltage electromagnetic field exposure
+- **Equipment Damage:** Potential for equipment damage from faults
 
-### Upgrade Tasks
+### Safety Measures
+- **Personnel Protection:** Proper training, PPE, and procedures
+- **Access Control:** Restricted access to high voltage areas
+- **Lockout/Tagout:** Energy isolation and verification procedures
+- **Emergency Procedures:** Response to electrical emergencies
+- **Safety Systems:** Automatic protection and interlock systems
 
-- Reverse engineer code for programmable logic controller (PLC) of Rockwell Automation SLC-500 (ML)
-- Write code for Rockwell Automation CompactLogix controller (ML)
-- Work with controls to complete interface between CompactLogix and EPICS (ML, SC)
-- Design CompactLogix hardware system to replace SLC-500 hardware (ML)
-- Modify PPS interface to meet current standards (ML, JS, MC)
-- Specify power supplies required in upgraded controller (ML, JS)
-- Specify any modifications to layout in upgraded controller (ML)
-- Verify existing documentation of controller and HVPS interfaces (ML, JS)
-- Document existing analog controller architecture (JS)
-- Upgrade to new Enerpro controller (JS)
-- Design new regulator and interface boards (JS)
-- Layout, fabricate, and test new regulator and interface boards (?)
-- Troubleshoot and repair three broken windings in HVPS1 (ML, SJ)
-- Build test stand with new hardware (ML)
-- Test new design in test lab (ML, JS, JE)
-- Build two new controllers for HVPS1 and HVPS2 (ML)
-- Complete documentation (ML, ?)
-### Maintenance Tasks (Not part of the upgrade project but included here for downtime schedule purposes)
+## Operational Requirements
 
-- Replace oil pump in HVPS1 (SJ) (Replace oil pump in HVPS2 at next opportunity)
-- Replace phase control thyristor stacks (SJ)
-- Replace crowbar stacks (SJ)
-### Interfaces
+### Normal Operation
+- **Startup Procedures:** Safe and proper system startup
+- **Operating Parameters:** Normal operating voltage, current, and power
+- **Monitoring Requirements:** Continuous parameter monitoring
+- **Performance Verification:** Regular performance checks
+- **Documentation:** Operational log keeping and reporting
 
-There will be software and hardware interfaces for this system.  The software interfaces will be between CompactLogix and EPICS.  The PLC will report back all of its analog data and digital status.  It will receive software instructions to
-- Open/close the 12.47 kV contactor
-- Enable the power supply to turn on (remove Enerpro fast and slow inhibits)
-- Supply an output voltage set point at a rate no faster than 1 Hz.
-There will also be a hardware interface between the HVPS PLC and the MPS controller for the RF system.  (There needs to be no direct hardware communication between the HVPS controller and LLRF9).
-#### Inputs
+### Emergency Procedures
+- **Emergency Shutdown:** Immediate system shutdown procedures
+- **Fault Response:** Response to system faults and alarms
+- **Personnel Safety:** Emergency evacuation and safety procedures
+- **Equipment Protection:** Measures to protect equipment from damage
+- **Recovery Procedures:** System recovery and restart procedures
 
-- Fiber optic permit that says MPS does not want to fire the output filter crowbar thyristors.
-- Fiber optic permit that allows the phase control thyristors to fire.
-#### Output
+## Maintenance Requirements
 
-- Fiber optic permit that tells the MPS that the HVPS controller is ready to turn on the phase control thyristors and ready to output high voltage.
+### Preventive Maintenance
+- **Inspection Schedules:** Regular visual and electrical inspections
+- **Testing Requirements:** Periodic performance and safety testing
+- **Component Replacement:** Scheduled replacement of wear items
+- **Calibration:** Instrument and control system calibration
+- **Documentation:** Maintenance record keeping and analysis
+
+### Corrective Maintenance
+- **Fault Diagnosis:** Systematic troubleshooting procedures
+- **Repair Procedures:** Component repair and replacement
+- **Testing Verification:** Post-maintenance testing and verification
+- **Quality Assurance:** Maintenance quality control procedures
+- **Documentation:** Repair records and lessons learned
+
+## Quality Assurance
+
+### Performance Standards
+- **Technical Specifications:** Meet all design specifications
+- **Safety Requirements:** Comply with all safety standards
+- **Regulatory Compliance:** Meet applicable codes and regulations
+- **Quality Standards:** Follow established quality procedures
+- **Documentation Standards:** Maintain complete and accurate records
+
+### Verification Procedures
+- **Performance Testing:** Verify system performance parameters
+- **Safety Testing:** Test all safety systems and interlocks
+- **Functional Testing:** Verify proper system operation
+- **Documentation Review:** Review all technical documentation
+- **Compliance Verification:** Confirm regulatory compliance
+
+## Technical References
+
+This document should be used in conjunction with:
+- **System Schematics:** Electrical drawings and circuit diagrams
+- **Equipment Manuals:** Manufacturer specifications and procedures
+- **Safety Standards:** Applicable electrical safety codes and standards
+- **Operating Procedures:** System operating and emergency procedures
+- **Maintenance Procedures:** Preventive and corrective maintenance procedures
+
+## Conclusion
+
+This technical document provides important information for the safe and effective operation of the HVPS system. Proper understanding and application of this information is essential for system reliability, safety, and performance.

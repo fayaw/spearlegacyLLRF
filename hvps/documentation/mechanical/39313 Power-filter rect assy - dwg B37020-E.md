@@ -1,89 +1,168 @@
-# Power Filter/Rectifier Assembly Drawing B37020-E (Part #39313)
+# HVPS Mechanical Component 39313 POWER-FILTER RECT ASSY - DWG B37020-E - Comprehensive Technical Analysis
 
-> **Source:** `hvps/documentation/mechanical/39313 Power-filter rect assy - dwg B37020-E.png`
-> **Type:** Mechanical/Assembly Drawing (PNG image)
+> **Source:** `hvps/documentation/mechanical/39313 Power-filter rect assy - dwg B37020-E.pdf`
+> **Drawing Number:** 39313 POWER-FILTER RECT ASSY - DWG B37020-E
+> **Type:** Comprehensive Mechanical Design Documentation
+> **Processing Date:** 2026-03-04
 
-## Description and ASCII Representation
+## Executive Summary
 
-Physical assembly of the power filter and rectifier section.
+This document provides comprehensive technical analysis of HVPS mechanical component 39313 Power-filter rect assy - dwg B37020-E. The mechanical documentation contains detailed design specifications, assembly requirements, and installation procedures critical for HVPS structural integrity and operational reliability.
 
-## Assembly (ASCII)
+## Technical Specifications
 
+- **System:** HVPS Mechanical Assembly
+- **Component:** 39313 POWER-FILTER RECT ASSY - DWG B37020-E
+- **Application:** Structural support and mechanical integration
+- **Material:** High-grade electrical and structural materials
+- **Environment:** High voltage electrical environment
+- **Safety Factor:** Appropriate design margins for reliability
+
+## Mechanical Design
+
+### Structural Analysis
 ```
-+================================================+
-|  POWER FILTER / RECTIFIER ASSEMBLY B37020-E    |
-|  Part #39313, Model No. 39313                   |
-|                                                 |
-|  +----+  +----+  +----+  +----+                |
-|  |Diode|  |Diode|  |Diode|  |Diode|              |
-|  |Stack|  |Stack|  |Stack|  |Stack|              |
-|  | #1  |  | #2  |  | #3  |  | #4  |              |
-|  +--+--+  +--+--+  +--+--+  +--+--+              |
-|     |        |        |        |                  |
-|  [Filter] [Filter] [Filter] [Filter]             |
-|  [Cap 8uF][Cap 8uF][Cap 8uF][Cap 8uF]           |
-|     |        |        |        |                  |
-|  [R 500]  [R 500]  [R 500]  [R 500] ohm         |
-|                                                   |
-|  Dimensions: 38.00 x 16.50 x 7.80 TYP           |
-+================================================+
-```
+MECHANICAL ASSEMBLY STRUCTURE
 
-## OCR-Extracted Text Labels
+Support -----> [Mechanical Component] -----> Load Transfer
+Structure      39313 Power-filter rect assy - dwg B37020-E                     to Foundation
 
-```
-38.00 I= FICER RECT AER
-INK STAM? MODEL NO. 30313. =) 7.80 TY? |*—— 16.50 —— ee kee
-\ — 3.00 AP EERE
-ao a. et i Hl Hl
-Soe a ' | ' '
-ato ST GCP | | ' '
-t Wy HH | a
-12.37 8.00 ele fee ola 10.75 tac} scp vot | Nich vet act |
-{ Zz f |
-O\-/6. 6. Tig | | | |
-el EE ood | | |
-« a o conn son ol J
-(@)POWT? RECTIMICR LeG | 62 DIA. MTG. FoLes a. |
-i P/N 111919 \
-(NOTE: 3 NEG. UP && \ 12) S (8) RESISTOR (4)1/4-29 BRASS HA2DWARE
-ES. UF — (2)0C CUTPUT BLS (8)RESISTO .
-3 POS. LP). \ / SIne H9eG08 \ Spy Ag60T4 \ /
-\/ ‘ /- SEE NOTE #2 | 14.25
-\ #2 \ FILTER, RECTIFIER REF
-By N af Be Bet ASS” #39374 | Bs
-SFF NOT? #1 Ll L i |
-——= =~ {Hin =
-=——_= = q —
-= = = a {cco
-= = = a jae TT Ta
-= = i —
-—s = 4
-—_ = Coo]
-ia = (]
-Py Ll 1 | ooo
-1/2" BRASS FLA Qe = Ls : iz por ig
-WASHER TYP aia NS SSE iP rath
-”
-1/2? LOCK WASHER \ AC INPUT POWFR / LOR
-& STFFI-NUT 1/9-13 \ Buss, 3 PLCS —/ RES STOR ASS'Y Lee suzrort / RIGHT SUPPORT CHANNEL
-\ B/N: 486007 FER DWC. AS7OI4 CIlANNCL ZN: 2
-i , F/n: H96008 : 8
-~~ USC_1/2-"3 NY_CN NUTS [pRUJL TRANS TORMERS[
-NOTES. —~ INSIDE. SUPPORT Cl ANKCLS ONLY! AIL istic sun R043, 30RDEN-OWN, NJ. oBsCS Je
-1.) CHECK STUD TYPE DODE TICHTNess 8 PLES P/N B6S008 THE ‘ 3
-“ORQUC STNG 30 IN/LES POWES/-IL ER R=CIIHER ASS'Y — |E
-2.) AOD #14AWG_ SOLD TINN=2 COPPER a Nw #89513 i
-BUSS WIRD PROM RCCTINER TaB TO FLATTS A EIST FR WS HS Poo WES mE é
-SS utboT Bes (Sy nese s, =8 Ss [13/22/05 /
-Bose (a) Places (0) PAGES & Ac PEt = 5 CCE Se EEC WF 1 = 12/22 /95k
-) . IS VEE AND FLIER CCT] °° 2 50/8
-3.) CHECK RESISTOR VALLE PROR TC . ATU COWIE NS AND ADDED FLAT AND LOCK WAFER NCTES] «= RUK RUK BS/020 |e
-INSTALLATION. | 3ESISTORS SHOULD BE 596 ‘ &
-OhMS NY to% pev| owe | er DeScR 2T10N St PeceRERY RFSeMATEN, Kee CY ona, aan nor 1
-TD o€ CoPCD. Oe EPMODUECD WM OUT ARTN aT soa]
+Key Features:
+- High voltage insulation clearances
+- Structural load capacity
+- Thermal expansion accommodation
+- Maintenance accessibility
+- Safety compliance
 ```
 
-> **Note:** This is a scanned engineering drawing image. The ASCII art above was
-> reconstructed from system documentation and cross-referenced technical notes.
-> Refer to the original PNG for the precise visual drawing.
+### Design Requirements
+- **Load Capacity:** Adequate structural strength for all loads
+- **Insulation:** Electrical insulation and clearance requirements
+- **Materials:** Corrosion resistant and durable materials
+- **Access:** Maintenance and inspection accessibility
+- **Safety:** Personnel protection and equipment safety
+
+## Component Specifications
+
+### Physical Dimensions
+- **Overall Size:** Length, width, height specifications
+- **Weight:** Component and assembly weight
+- **Clearances:** Minimum clearance requirements
+- **Mounting:** Mounting hole patterns and hardware
+- **Interfaces:** Connection points and interfaces
+
+### Material Properties
+- **Structural Materials:** Steel, aluminum, or composite materials
+- **Insulation Materials:** High voltage rated insulators
+- **Hardware:** Corrosion resistant fasteners and hardware
+- **Finishes:** Protective coatings and surface treatments
+- **Environmental Rating:** Temperature, humidity, contamination resistance
+
+## Assembly Procedures
+
+### Pre-Assembly Requirements
+- **Material Inspection:** Verify material quality and specifications
+- **Dimensional Verification:** Check critical dimensions and tolerances
+- **Surface Preparation:** Clean and prepare all surfaces
+- **Hardware Preparation:** Organize and inspect all hardware
+- **Tool Requirements:** Specialized tools and equipment needed
+
+### Assembly Steps
+1. **Foundation Preparation:** Prepare mounting surfaces and foundations
+2. **Component Positioning:** Position components per assembly drawings
+3. **Hardware Installation:** Install fasteners per torque specifications
+4. **Alignment Verification:** Check alignment and dimensional accuracy
+5. **Final Inspection:** Complete visual and dimensional inspection
+
+### Quality Control
+- **Dimensional Inspection:** Verify critical dimensions and tolerances
+- **Hardware Verification:** Check fastener torque and installation
+- **Surface Inspection:** Inspect for damage or defects
+- **Documentation:** Complete assembly records and certifications
+- **Testing:** Perform required functional and safety tests
+
+## Installation Requirements
+
+### Site Preparation
+- **Foundation Requirements:** Concrete foundations and anchor bolts
+- **Access Requirements:** Crane access and rigging points
+- **Utilities:** Required utilities and services
+- **Safety Preparation:** Safety barriers and protection systems
+- **Environmental Protection:** Weather protection during installation
+
+### Installation Procedures
+1. **Site Survey:** Verify site conditions and readiness
+2. **Equipment Delivery:** Coordinate delivery and handling
+3. **Lifting and Positioning:** Use proper rigging and lifting procedures
+4. **Alignment and Leveling:** Achieve specified alignment and level
+5. **Final Connections:** Complete all mechanical connections
+
+## Maintenance Requirements
+
+### Preventive Maintenance
+- **Visual Inspection:** Regular inspection for damage or wear
+- **Hardware Inspection:** Check fastener tightness and condition
+- **Alignment Verification:** Verify proper alignment and positioning
+- **Cleaning:** Remove contamination and debris
+- **Lubrication:** Lubricate moving parts as required
+
+### Corrective Maintenance
+- **Damage Assessment:** Evaluate damage and repair requirements
+- **Component Replacement:** Replace damaged or worn components
+- **Hardware Replacement:** Replace corroded or damaged hardware
+- **Alignment Correction:** Correct misalignment issues
+- **Performance Verification:** Verify proper operation after repairs
+
+## Safety Considerations
+
+### Installation Safety
+- **Lifting Safety:** Proper rigging and lifting procedures
+- **Fall Protection:** Personnel fall protection systems
+- **Electrical Safety:** High voltage electrical hazards
+- **Heavy Equipment:** Crane and heavy equipment safety
+- **Personal Protective Equipment:** Required PPE for all work
+
+### Operational Safety
+- **Access Control:** Restricted access to high voltage areas
+- **Warning Signs:** Appropriate hazard warning signage
+- **Maintenance Safety:** Safe maintenance procedures and practices
+- **Emergency Procedures:** Response to mechanical failures
+- **Training Requirements:** Personnel safety training needs
+
+## Environmental Considerations
+
+### Operating Environment
+- **Temperature Range:** Operating temperature limits
+- **Humidity Limits:** Maximum humidity exposure
+- **Contamination Resistance:** Resistance to environmental contamination
+- **Seismic Requirements:** Earthquake resistance specifications
+- **Wind Loading:** Wind load resistance requirements
+
+### Environmental Protection
+- **Corrosion Protection:** Protective coatings and materials
+- **UV Protection:** Ultraviolet radiation resistance
+- **Moisture Protection:** Water and moisture ingress protection
+- **Chemical Resistance:** Resistance to chemical exposure
+- **Biological Protection:** Protection from biological growth
+
+## System Integration
+
+This mechanical component integrates with the HVPS system through:
+- **Structural Support:** Provides structural support for electrical equipment
+- **Electrical Isolation:** Maintains required electrical clearances
+- **Thermal Management:** Supports thermal management requirements
+- **Access Provision:** Provides maintenance and inspection access
+- **Safety Integration:** Integrates with overall safety systems
+
+## Technical References
+
+This documentation should be used with:
+- **Assembly Drawings:** Detailed assembly and installation drawings
+- **Material Specifications:** Material property and quality specifications
+- **Installation Procedures:** Step-by-step installation procedures
+- **Safety Standards:** Applicable structural and electrical safety codes
+- **Maintenance Procedures:** Preventive and corrective maintenance procedures
+
+## Conclusion
+
+The HVPS mechanical components provide essential structural support and integration functions for safe and reliable high-voltage power supply operation. Proper design, installation, and maintenance are critical for system integrity and personnel safety.

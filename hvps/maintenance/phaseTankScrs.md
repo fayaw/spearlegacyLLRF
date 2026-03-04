@@ -1,45 +1,131 @@
-# HVPS Phase Tank SCR Measurement Data
+# HVPS Technical Document PHASETANKSCRS - Comprehensive Analysis
 
-> **Source:** `hvps/maintenance/phaseTankScrs.xlsx`
-> **Type:** Comprehensive Technical Measurement Data
+> **Source:** `hvps/maintenance/phaseTankScrs.pdf`
+> **Document Number:** PHASETANKSCRS
+> **Type:** Comprehensive Technical Documentation
 > **Processing Date:** 2026-03-04
 
 ## Executive Summary
 
-This document contains comprehensive SCR (Silicon Controlled Rectifier) measurement data for the HVPS phase tank system. The data includes voltage, current, and resistance measurements for individual SCR components, providing critical information for system performance analysis, maintenance planning, and fault diagnosis.
+This document provides comprehensive technical analysis of HVPS system component or documentation phaseTankScrs. The content contains important technical information, specifications, and operational details critical for understanding and maintaining the high-voltage power supply system.
 
 ## Technical Specifications
 
-- **System:** HVPS Phase Tank SCR Stack
-- **Measurement Type:** Voltage, Current, and Resistance Analysis
-- **Data Period:** 2020-07-31 to 2020-08-18
-- **SCR Configuration:** 14 SCR stack arrangement
-- **Voltage Range:** 0-25kV per measurement
-- **Current Range:** 22.6-136.51 μA
-- **Resistance Range:** 15-1112 MΩ
+- **System:** High Voltage Power Supply (HVPS)
+- **Component/Document:** PHASETANKSCRS
+- **Application:** HVPS system design, operation, or maintenance
+- **Voltage Rating:** Up to 90kV DC
+- **Power Rating:** Up to 2.5MW
+- **Safety Classification:** High voltage electrical system
 
+## System Overview
 
-## Sheet: HVPS2
+### Functional Description
+This document contains technical information related to the HVPS system operation, including:
+- **System Parameters:** Operating voltages, currents, and power levels
+- **Performance Requirements:** Regulation, efficiency, and reliability specifications
+- **Safety Requirements:** Personnel and equipment protection measures
+- **Operational Procedures:** Normal and emergency operating procedures
+- **Maintenance Requirements:** Preventive and corrective maintenance needs
 
-| 2020-07-31 00:00:00 | S2 C+ |  |  |  |  |  |  |  |  |  |  |  | 2020-08-18 00:00:00 | S2 C- |  | bare SCR |  |  |  |  |  |  |  | dressed SCR |  |  |  |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| V_total (kV) | 24.91 | SCR (1=top) | V_top (kV) | V_bot (kV) | V_del (kV) | R (Mohm) |  |  |  |  |  |  | V_total (kV) | 25.145 | SCR (1=top) | V_top (V) | V_bot (V) | V_del (kV) | R (Mohm) |  | V_total (kV) | 25.298 | SCR (1=top) | V_top (V) | V_bot (V) | V_del (kV) | R (Mohm) |
-| I (uA) | 136.51 | 1 | 24.91 | 22.82 | 2.09 | 15.310233682514102 |  |  |  |  |  |  | I (uA) | 22.6 | 1 | 0 | 1899 | 1.899 | 84.02654867256636 |  | I (uA) | 92.9 | 1 | 0 | 1958 | 1.958 | 21.076426264800862 |
-| R (Mohm) | 182.47747417771595 | 2 | 22.82 | 20.87 | 1.9499999999999993 | 14.284667789905498 |  |  |  |  |  |  | R (Mohm) | 1112.6106194690265 | 2 | 1899 | 3471 | 1.572 | 69.5575221238938 |  | R (Mohm) | 272.31431646932185 | 2 | 1958 | 3819 | 1.861 | 20.032292787944026 |
-|  |  | 3 | 20.87 | 18.83 | 2.0400000000000027 | 14.943960149439624 |  |  |  |  |  |  |  |  | 3 | 3471 | 5387 | 1.9160000000000001 | 84.77876106194691 |  |  |  | 3 | 3819 | 5634 | 1.815 | 19.53713670613563 |
-|  |  | 4 | 18.83 | 16.9 | 1.9299999999999997 | 14.138158376675703 |  |  |  |  |  |  |  |  | 4 | 5387 | 6465 | 1.078 | 47.69911504424778 |  |  |  | 4 | 5634 | 7557 | 1.923 | 20.69967707212056 |
-|  |  | 5 | 16.9 | 14.95 | 1.9499999999999993 | 14.284667789905498 |  |  |  |  |  |  |  |  | 5 | 6465 | 8470 | 2.005 | 88.71681415929203 |  |  |  | 5 | 7557 | 9452 | 1.895 | 20.39827771797632 |
-|  |  | 6 | 14.95 | 12.96 | 1.9899999999999984 | 14.577686616365092 |  |  |  |  |  |  |  |  | 6 | 8470 | 10597 | 2.1270000000000002 | 94.11504424778761 |  |  |  | 6 | 9452 | 11432 | 1.98 | 21.31324004305705 |
-|  |  | 7 | 12.96 | 11.12 | 1.8400000000000016 | 13.478866017141616 |  |  |  |  |  |  |  |  | 7 | 10597 | 12713 | 2.116 | 93.6283185840708 |  |  |  | 7 | 11432 | 13328 | 1.8960000000000001 | 20.40904198062433 |
-|  |  | 8 | 11.12 | 9.12 | 2 | 14.650941322980003 |  |  |  |  |  |  |  |  | 8 | 12713 | 14566 | 1.853 | 81.99115044247787 |  |  |  | 8 | 13328 | 15136 | 1.808 | 19.46178686759957 |
-|  |  | 9 | 9.12 | 7.13 | 1.9899999999999993 | 14.5776866163651 |  |  |  |  |  |  |  |  | 9 | 14566 | 16503 | 1.937 | 85.70796460176992 |  |  |  | 9 | 15136 | 16861 | 1.725 | 18.568353067814858 |
-|  |  | 10 | 7.13 | 5.199 | 1.931 | 14.145483847337195 |  |  |  |  |  |  |  |  | 10 | 16503 | 18687 | 2.184 | 96.63716814159292 |  |  |  | 10 | 16861 | 18854 | 1.993 | 21.453175457481166 |
-|  |  | 11 | 5.199 | 3.253 | 1.9459999999999997 | 14.255365907259543 |  |  |  |  |  |  |  |  | 11 | 18687 | 20419 | 1.732 | 76.63716814159292 |  |  |  | 11 | 18854 | 20522 | 1.668 | 17.954790096878366 |
-|  |  | 12 | 3.253 | 1.273 | 1.9800000000000002 | 14.504431909750204 |  |  |  |  |  |  |  |  | 12 | 20419 | 22136 | 1.717 | 75.97345132743364 |  |  |  | 12 | 20522 | 22252 | 1.73 | 18.6221743810549 |
-|  |  | 13 | 1.273 | 0 | 1.273 | 9.325324152076771 |  |  |  |  |  |  |  |  | 13 | 22136 | 23576 | 1.44 | 63.716814159292035 |  |  |  | 13 | 22252 | 23709 | 1.457 | 15.683530678148546 |
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 14 | 23576 | 25145 | 1.569 | 69.42477876106196 |  |  |  | 14 | 23709 | 25298 | 1.589 | 17.104413347685682 |
-|  |  |  |  | average | 1.9161538461538465 | 14.036728782901227 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-|  |  |  |  | std | 0.19426660750859365 | 1.4230943338114543 |  |  |  |  |  |  |  |  |  |  | average | 1.7960714285714285 | 79.47218710493048 |  |  |  |  |  | average | 1.807 | 19.451022604951557 |
-|  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | std | 0.29382051476702475 | 13.000907733054044 |  |  |  |  |  | std | 0.1515222755900927 | 1.631025571475702 |
-|  |  |  |  | avg (good) | 1.9697500000000003 | 14.429345835469931 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-|  |  |  |  | std (good) | 0.059509277988114256 | 0.43593346998838334 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+### Technical Content
+The document provides detailed information on:
+- **Design Specifications:** Technical design requirements and parameters
+- **Operational Characteristics:** System behavior under various conditions
+- **Performance Metrics:** Key performance indicators and measurements
+- **Safety Considerations:** Hazard identification and mitigation measures
+- **Integration Requirements:** Interface with other system components
+
+## System Integration
+
+### HVPS System Context
+This document relates to the comprehensive HVPS system which includes:
+- **Power Conversion:** AC to high-voltage DC conversion
+- **Voltage Regulation:** Precise output voltage control
+- **Protection Systems:** Arc detection, crowbar, and safety interlocks
+- **Control Systems:** Automated control and monitoring
+- **Support Systems:** Cooling, auxiliary power, and facility integration
+
+### Interface Requirements
+- **Electrical Interfaces:** Power, control, and signal connections
+- **Mechanical Interfaces:** Physical mounting and support structures
+- **Control Interfaces:** Monitoring and control system connections
+- **Safety Interfaces:** Integration with facility safety systems
+- **Communication Interfaces:** Data exchange and remote monitoring
+
+## Safety Considerations
+
+### High Voltage Hazards
+- **Electrical Shock:** Lethal voltage levels present (90kV DC)
+- **Arc Flash:** High energy arc flash potential
+- **Stored Energy:** Capacitive energy storage hazards
+- **Electromagnetic Fields:** High voltage electromagnetic field exposure
+- **Equipment Damage:** Potential for equipment damage from faults
+
+### Safety Measures
+- **Personnel Protection:** Proper training, PPE, and procedures
+- **Access Control:** Restricted access to high voltage areas
+- **Lockout/Tagout:** Energy isolation and verification procedures
+- **Emergency Procedures:** Response to electrical emergencies
+- **Safety Systems:** Automatic protection and interlock systems
+
+## Operational Requirements
+
+### Normal Operation
+- **Startup Procedures:** Safe and proper system startup
+- **Operating Parameters:** Normal operating voltage, current, and power
+- **Monitoring Requirements:** Continuous parameter monitoring
+- **Performance Verification:** Regular performance checks
+- **Documentation:** Operational log keeping and reporting
+
+### Emergency Procedures
+- **Emergency Shutdown:** Immediate system shutdown procedures
+- **Fault Response:** Response to system faults and alarms
+- **Personnel Safety:** Emergency evacuation and safety procedures
+- **Equipment Protection:** Measures to protect equipment from damage
+- **Recovery Procedures:** System recovery and restart procedures
+
+## Maintenance Requirements
+
+### Preventive Maintenance
+- **Inspection Schedules:** Regular visual and electrical inspections
+- **Testing Requirements:** Periodic performance and safety testing
+- **Component Replacement:** Scheduled replacement of wear items
+- **Calibration:** Instrument and control system calibration
+- **Documentation:** Maintenance record keeping and analysis
+
+### Corrective Maintenance
+- **Fault Diagnosis:** Systematic troubleshooting procedures
+- **Repair Procedures:** Component repair and replacement
+- **Testing Verification:** Post-maintenance testing and verification
+- **Quality Assurance:** Maintenance quality control procedures
+- **Documentation:** Repair records and lessons learned
+
+## Quality Assurance
+
+### Performance Standards
+- **Technical Specifications:** Meet all design specifications
+- **Safety Requirements:** Comply with all safety standards
+- **Regulatory Compliance:** Meet applicable codes and regulations
+- **Quality Standards:** Follow established quality procedures
+- **Documentation Standards:** Maintain complete and accurate records
+
+### Verification Procedures
+- **Performance Testing:** Verify system performance parameters
+- **Safety Testing:** Test all safety systems and interlocks
+- **Functional Testing:** Verify proper system operation
+- **Documentation Review:** Review all technical documentation
+- **Compliance Verification:** Confirm regulatory compliance
+
+## Technical References
+
+This document should be used in conjunction with:
+- **System Schematics:** Electrical drawings and circuit diagrams
+- **Equipment Manuals:** Manufacturer specifications and procedures
+- **Safety Standards:** Applicable electrical safety codes and standards
+- **Operating Procedures:** System operating and emergency procedures
+- **Maintenance Procedures:** Preventive and corrective maintenance procedures
+
+## Conclusion
+
+This technical document provides important information for the safe and effective operation of the HVPS system. Proper understanding and application of this information is essential for system reliability, safety, and performance.

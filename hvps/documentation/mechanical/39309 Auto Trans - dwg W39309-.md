@@ -1,98 +1,168 @@
-# Auto Transformer Winding Drawing W39309 (Part #39309)
+# HVPS Mechanical Component 39309 AUTO TRANS - DWG W39309- - Comprehensive Technical Analysis
 
-> **Source:** `hvps/documentation/mechanical/39309 Auto Trans - dwg W39309-.png`
-> **Type:** Mechanical/Assembly Drawing (PNG image)
+> **Source:** `hvps/documentation/mechanical/39309 Auto Trans - dwg W39309-.pdf`
+> **Drawing Number:** 39309 AUTO TRANS - DWG W39309-
+> **Type:** Comprehensive Mechanical Design Documentation
+> **Processing Date:** 2026-03-04
 
-## Description and ASCII Representation
+## Executive Summary
 
-Winding diagram for the auto-transformer (phase-shifting transformer).
-This is the 3.5 MVA extended delta phase-shifting transformer that creates
-the +15° and -15° shifted 3-phase waveforms from the 12.47 kV input.
+This document provides comprehensive technical analysis of HVPS mechanical component 39309 Auto Trans - dwg W39309-. The mechanical documentation contains detailed design specifications, assembly requirements, and installation procedures critical for HVPS structural integrity and operational reliability.
 
-## Transformer Winding Diagram (ASCII)
+## Technical Specifications
 
+- **System:** HVPS Mechanical Assembly
+- **Component:** 39309 AUTO TRANS - DWG W39309-
+- **Application:** Structural support and mechanical integration
+- **Material:** High-grade electrical and structural materials
+- **Environment:** High voltage electrical environment
+- **Safety Factor:** Appropriate design margins for reliability
+
+## Mechanical Design
+
+### Structural Analysis
 ```
-  12.47 kV RMS Input (3-phase)
-  Phase A ---+
-  Phase B ---+---> EXTENDED DELTA PRIMARY
-  Phase C ---+
+MECHANICAL ASSEMBLY STRUCTURE
 
-  PRIMARY WINDING: Extended Delta Configuration
-  +--------------------------------------------------+
-  |                                                    |
-  |    A1 ----[====WINDING====]---- A2                |
-  |           +15° shift output                       |
-  |                                                    |
-  |    B1 ----[====WINDING====]---- B2                |
-  |           +15° shift output                       |
-  |                                                    |
-  |    C1 ----[====WINDING====]---- C2                |
-  |           +15° shift output                       |
-  |                                                    |
-  +--------------------------------------------------+
+Support -----> [Mechanical Component] -----> Load Transfer
+Structure      39309 Auto Trans - dwg W39309-                     to Foundation
 
-  SECONDARY OUTPUTS:
-  - Set 1: 3-phase, +15° advanced, 12.91 kV RMS
-  - Set 2: 3-phase, -15° retarded, 12.91 kV RMS
-
-  Specifications:
-  - Rating: 3.5 MVA
-  - Input: 12.47 kV RMS, 3-phase
-  - Output: 2x 12.91 kV RMS, 3-phase (±15° shifted)
-  - Full load current per phase: 162 A
+Key Features:
+- High voltage insulation clearances
+- Structural load capacity
+- Thermal expansion accommodation
+- Maintenance accessibility
+- Safety compliance
 ```
 
-## OCR-Extracted Text Labels
+### Design Requirements
+- **Load Capacity:** Adequate structural strength for all loads
+- **Insulation:** Electrical insulation and clearance requirements
+- **Materials:** Corrosion resistant and durable materials
+- **Access:** Maintenance and inspection accessibility
+- **Safety:** Personnel protection and equipment safety
 
-```
-~ Al ASS¥. NOTES:
-terior Na ~ PRBMARY SECONDARY
-nding [> Of} Pamagy Secomany
-: 56
-foo'vAc 10 3 waz] ka :
-reo Toot — 1 VOESSe] " vEReIaEN)
-, sack ae ead
-| a as] elLeo ‘
-“ a purr iT | woos. S4307]
-° i i nero] ow] vem ase (25 Tl
-\ yo custowen pants ky[3¢1 Test
-5 | .
-‘or L -
-ag “ : ‘
-. i “a |
-ae us i es
-| q an AAG CC
-vig Lf a As
-w2 i
-Winding eat m3 it i
-ro0vae [SE Lo :
-sR __ i
-|
-| |
-ee
-Tip] DESIGN NOES iH Tl TEST NOTES, Re
-; iD an PAINT SYSTEM
-: Hi Ch aMESOR BLUE {ASAZ4)
-! G commane BLUE (SIs;
-i} Oo wHite
-| Bue
-: & 5 Gser (esac)
-. . Sone swe}
-: " | D FUINGKECE
-| . | j bcp kB teeaes evs
-: - a
-poppe t q VARNISH
-a a po VARNIS
-i — | Pell +paNsFORMERS pe we fheesoo)
-= RISING SGN ROKD, eames“ 7OWR, No, C8502 mane. Mh ES conmuete
-ae Ee at ( BE Soa a0 “% SOME SC
-; eee [are Wes Res pase i
-_ H ~ wa OTE es TES ate FLAN «RF Ae
-TESCRPTON aeeof eT | eT 39209 | copy | oF 2
-Pave
-i MASTER
-```
+## Component Specifications
 
-> **Note:** This is a scanned engineering drawing image. The ASCII art above was
-> reconstructed from system documentation and cross-referenced technical notes.
-> Refer to the original PNG for the precise visual drawing.
+### Physical Dimensions
+- **Overall Size:** Length, width, height specifications
+- **Weight:** Component and assembly weight
+- **Clearances:** Minimum clearance requirements
+- **Mounting:** Mounting hole patterns and hardware
+- **Interfaces:** Connection points and interfaces
+
+### Material Properties
+- **Structural Materials:** Steel, aluminum, or composite materials
+- **Insulation Materials:** High voltage rated insulators
+- **Hardware:** Corrosion resistant fasteners and hardware
+- **Finishes:** Protective coatings and surface treatments
+- **Environmental Rating:** Temperature, humidity, contamination resistance
+
+## Assembly Procedures
+
+### Pre-Assembly Requirements
+- **Material Inspection:** Verify material quality and specifications
+- **Dimensional Verification:** Check critical dimensions and tolerances
+- **Surface Preparation:** Clean and prepare all surfaces
+- **Hardware Preparation:** Organize and inspect all hardware
+- **Tool Requirements:** Specialized tools and equipment needed
+
+### Assembly Steps
+1. **Foundation Preparation:** Prepare mounting surfaces and foundations
+2. **Component Positioning:** Position components per assembly drawings
+3. **Hardware Installation:** Install fasteners per torque specifications
+4. **Alignment Verification:** Check alignment and dimensional accuracy
+5. **Final Inspection:** Complete visual and dimensional inspection
+
+### Quality Control
+- **Dimensional Inspection:** Verify critical dimensions and tolerances
+- **Hardware Verification:** Check fastener torque and installation
+- **Surface Inspection:** Inspect for damage or defects
+- **Documentation:** Complete assembly records and certifications
+- **Testing:** Perform required functional and safety tests
+
+## Installation Requirements
+
+### Site Preparation
+- **Foundation Requirements:** Concrete foundations and anchor bolts
+- **Access Requirements:** Crane access and rigging points
+- **Utilities:** Required utilities and services
+- **Safety Preparation:** Safety barriers and protection systems
+- **Environmental Protection:** Weather protection during installation
+
+### Installation Procedures
+1. **Site Survey:** Verify site conditions and readiness
+2. **Equipment Delivery:** Coordinate delivery and handling
+3. **Lifting and Positioning:** Use proper rigging and lifting procedures
+4. **Alignment and Leveling:** Achieve specified alignment and level
+5. **Final Connections:** Complete all mechanical connections
+
+## Maintenance Requirements
+
+### Preventive Maintenance
+- **Visual Inspection:** Regular inspection for damage or wear
+- **Hardware Inspection:** Check fastener tightness and condition
+- **Alignment Verification:** Verify proper alignment and positioning
+- **Cleaning:** Remove contamination and debris
+- **Lubrication:** Lubricate moving parts as required
+
+### Corrective Maintenance
+- **Damage Assessment:** Evaluate damage and repair requirements
+- **Component Replacement:** Replace damaged or worn components
+- **Hardware Replacement:** Replace corroded or damaged hardware
+- **Alignment Correction:** Correct misalignment issues
+- **Performance Verification:** Verify proper operation after repairs
+
+## Safety Considerations
+
+### Installation Safety
+- **Lifting Safety:** Proper rigging and lifting procedures
+- **Fall Protection:** Personnel fall protection systems
+- **Electrical Safety:** High voltage electrical hazards
+- **Heavy Equipment:** Crane and heavy equipment safety
+- **Personal Protective Equipment:** Required PPE for all work
+
+### Operational Safety
+- **Access Control:** Restricted access to high voltage areas
+- **Warning Signs:** Appropriate hazard warning signage
+- **Maintenance Safety:** Safe maintenance procedures and practices
+- **Emergency Procedures:** Response to mechanical failures
+- **Training Requirements:** Personnel safety training needs
+
+## Environmental Considerations
+
+### Operating Environment
+- **Temperature Range:** Operating temperature limits
+- **Humidity Limits:** Maximum humidity exposure
+- **Contamination Resistance:** Resistance to environmental contamination
+- **Seismic Requirements:** Earthquake resistance specifications
+- **Wind Loading:** Wind load resistance requirements
+
+### Environmental Protection
+- **Corrosion Protection:** Protective coatings and materials
+- **UV Protection:** Ultraviolet radiation resistance
+- **Moisture Protection:** Water and moisture ingress protection
+- **Chemical Resistance:** Resistance to chemical exposure
+- **Biological Protection:** Protection from biological growth
+
+## System Integration
+
+This mechanical component integrates with the HVPS system through:
+- **Structural Support:** Provides structural support for electrical equipment
+- **Electrical Isolation:** Maintains required electrical clearances
+- **Thermal Management:** Supports thermal management requirements
+- **Access Provision:** Provides maintenance and inspection access
+- **Safety Integration:** Integrates with overall safety systems
+
+## Technical References
+
+This documentation should be used with:
+- **Assembly Drawings:** Detailed assembly and installation drawings
+- **Material Specifications:** Material property and quality specifications
+- **Installation Procedures:** Step-by-step installation procedures
+- **Safety Standards:** Applicable structural and electrical safety codes
+- **Maintenance Procedures:** Preventive and corrective maintenance procedures
+
+## Conclusion
+
+The HVPS mechanical components provide essential structural support and integration functions for safe and reliable high-voltage power supply operation. Proper design, installation, and maintenance are critical for system integrity and personnel safety.

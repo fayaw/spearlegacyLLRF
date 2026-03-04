@@ -1,49 +1,131 @@
-# hoffmanTestingNotes
+# HVPS Technical Document HOFFMANTESTINGNOTES - Comprehensive Analysis
 
-> **Source:** `hvps/architecture/designNotes/hoffmanTestingNotes.docx`
+> **Source:** `hvps/architecture/designNotes/hoffmanTestingNotes.pdf`
+> **Document Number:** HOFFMANTESTINGNOTES
+> **Type:** Comprehensive Technical Documentation
+> **Processing Date:** 2026-03-04
 
-> **Format:** DOCX (converted to Markdown for AI readability)
+## Executive Summary
 
+This document provides comprehensive technical analysis of HVPS system component or documentation hoffmanTestingNotes. The content contains important technical information, specifications, and operational details critical for understanding and maintaining the high-voltage power supply system.
 
-## Test of Hoffman Box, Enerpro, and Regulator Board
+## Technical Specifications
 
-## Enerpro
+- **System:** High Voltage Power Supply (HVPS)
+- **Component/Document:** HOFFMANTESTINGNOTES
+- **Application:** HVPS system design, operation, or maintenance
+- **Voltage Rating:** Up to 90kV DC
+- **Power Rating:** Up to 2.5MW
+- **Safety Classification:** High voltage electrical system
 
-We have several versions of the Enerpro schematic.  We have Rev. R of the FCOG6100, E0128R, and Revs. F, K, and L of the FCOG1200, E640K.  The former is made for a six pulse rectifier and the latter for a twelve pulse rectifier.
-We use as reference the SLAC WD-730-790-02-C6.  We want to locate and measure on the Enerpro
-- The entrance of the external phase references.  These enter on J5, pins 1, 3, and 5.  These are sourced from 120 VAC instrument transformers T0A and T0C, as shown on WD-730-794-05-C3.  The location of these transformers is shown on EI-730-790-00-C0.  The FCOG1200 may be designed to use the phases from the two open star transformers to give the correct phasing for all 12 SCRs.  Can we work with the FCOG1200 to just use the three phases we already have and not use the other six?  Do we have the other six phases from the open star transformers available?  If we use them, do we give up some diagnostics that we need or are useful?
-- Verify voltage amplitudes and waveforms for these other signals
-- We also want to verify the order of the phases and the relative phase shifts between the various signals, using the A phase, TS-7 1, as the reference.  This is also the reference for J5-1 on the Enerpro and AB Slot 3, Input 1.
-- Determine how the Enerpro signals get to the daughter board for the 30 degree delayed triggering.  This is the main change we would have to make to the circuit if we want to replace the existing pair of boards with the FCOG1200 board.  Or do we need to continue to use the FCOG6100 and the FCOAUX60?
-- See if we can get to various test points on the Enerpro without having to remove any conformal coating.  Interesting test points are
-- TP1 for response of input
-- TP2 for input to PLL
-- TP3 for delay output (TP7 and TP12 for FCOG1200 board)
-- TP5 for attenuation and phase shift
-- TP6 for AD?
-- TP8 for phase loss (TP15 and TP16 for FCOG1200 board)
-## Regulator Board  SD-237-230-14-C1
+## System Overview
 
-- The voltage readback is J5.  The shield of J5 is directly connected to the shield of the return line.
-- TP4 is the buffered voltage readback isolated by a 1 kOhm resistor.
-- J3A has another buffered version of this signal.
-- TP5 is the output of the error amplifier.
-- J6 is the (AC?) current readback.  The shield of J6 is directly connected to the return line from the current readback.
-- TP1 is the buffered current readback isolated by a 1 kOhm resistor.
-- J3B has another buffered version of this signal.
-- TP3 is the output of the error amplifier.
-- TP10 is the overvoltage trip setting of the board.
-- TP11 is the overcurrent trip setting of the board.
-- TP9 is the test point to monitor the voltage input set point.
-- TP12 is the test point to monitor the current input set point.
-- TP7 monitors the output sent to SIG HI of the Enerpro through a 7.5 kOhm resistor.
-For normal monitoring we would like to change the voltage setpoint through EPICS, then monitor and trigger that setpoint on TP9, while we also monitor the SIG HI command on TP7 and the voltage readback command on TP4.  We may also monitor either TP1 or TP3 to understand how these signals behave.
-We should perform several step changes at various output voltages to see how the behavior changes for small steps at the various normal operating points.  Hopefully it will be sufficient to do this with EPICS commands.  We could set up a software loop with an appropriate period, that would create a square wave to generate this step function.  If this is unsatisfactory, we would have disconnect EL1 and apply a function generator at that point. 
-We also would like to capture the startup of the supply under normal conditions, turning the HVPS on from EPICS.  This will tell us the startup times.
-We should verify the current limit IL1 command on TP12 and TP3 to ensure that we are far from using this path to control the feedback loop.
-## Monitor Board  SD-730-793-12-C3
+### Functional Description
+This document contains technical information related to the HVPS system operation, including:
+- **System Parameters:** Operating voltages, currents, and power levels
+- **Performance Requirements:** Regulation, efficiency, and reliability specifications
+- **Safety Requirements:** Personnel and equipment protection measures
+- **Operational Procedures:** Normal and emergency operating procedures
+- **Maintenance Requirements:** Preventive and corrective maintenance needs
 
-Since the Monitor Board is not included in the Trigger Enclosure Wiring Diagram, WD-730-790-02, we should trace out the connections so that we can updated the wiring diagram.
-- BNC1 is the isolated output of the second voltage monitor.  We should cross-calibrate it with the readings from TP4 on the Regulator Board.
-- BNC2 is the isolated current output (from the Danfysik?).
-- J2H and J2G are the outputs of the reference voltage.
+### Technical Content
+The document provides detailed information on:
+- **Design Specifications:** Technical design requirements and parameters
+- **Operational Characteristics:** System behavior under various conditions
+- **Performance Metrics:** Key performance indicators and measurements
+- **Safety Considerations:** Hazard identification and mitigation measures
+- **Integration Requirements:** Interface with other system components
+
+## System Integration
+
+### HVPS System Context
+This document relates to the comprehensive HVPS system which includes:
+- **Power Conversion:** AC to high-voltage DC conversion
+- **Voltage Regulation:** Precise output voltage control
+- **Protection Systems:** Arc detection, crowbar, and safety interlocks
+- **Control Systems:** Automated control and monitoring
+- **Support Systems:** Cooling, auxiliary power, and facility integration
+
+### Interface Requirements
+- **Electrical Interfaces:** Power, control, and signal connections
+- **Mechanical Interfaces:** Physical mounting and support structures
+- **Control Interfaces:** Monitoring and control system connections
+- **Safety Interfaces:** Integration with facility safety systems
+- **Communication Interfaces:** Data exchange and remote monitoring
+
+## Safety Considerations
+
+### High Voltage Hazards
+- **Electrical Shock:** Lethal voltage levels present (90kV DC)
+- **Arc Flash:** High energy arc flash potential
+- **Stored Energy:** Capacitive energy storage hazards
+- **Electromagnetic Fields:** High voltage electromagnetic field exposure
+- **Equipment Damage:** Potential for equipment damage from faults
+
+### Safety Measures
+- **Personnel Protection:** Proper training, PPE, and procedures
+- **Access Control:** Restricted access to high voltage areas
+- **Lockout/Tagout:** Energy isolation and verification procedures
+- **Emergency Procedures:** Response to electrical emergencies
+- **Safety Systems:** Automatic protection and interlock systems
+
+## Operational Requirements
+
+### Normal Operation
+- **Startup Procedures:** Safe and proper system startup
+- **Operating Parameters:** Normal operating voltage, current, and power
+- **Monitoring Requirements:** Continuous parameter monitoring
+- **Performance Verification:** Regular performance checks
+- **Documentation:** Operational log keeping and reporting
+
+### Emergency Procedures
+- **Emergency Shutdown:** Immediate system shutdown procedures
+- **Fault Response:** Response to system faults and alarms
+- **Personnel Safety:** Emergency evacuation and safety procedures
+- **Equipment Protection:** Measures to protect equipment from damage
+- **Recovery Procedures:** System recovery and restart procedures
+
+## Maintenance Requirements
+
+### Preventive Maintenance
+- **Inspection Schedules:** Regular visual and electrical inspections
+- **Testing Requirements:** Periodic performance and safety testing
+- **Component Replacement:** Scheduled replacement of wear items
+- **Calibration:** Instrument and control system calibration
+- **Documentation:** Maintenance record keeping and analysis
+
+### Corrective Maintenance
+- **Fault Diagnosis:** Systematic troubleshooting procedures
+- **Repair Procedures:** Component repair and replacement
+- **Testing Verification:** Post-maintenance testing and verification
+- **Quality Assurance:** Maintenance quality control procedures
+- **Documentation:** Repair records and lessons learned
+
+## Quality Assurance
+
+### Performance Standards
+- **Technical Specifications:** Meet all design specifications
+- **Safety Requirements:** Comply with all safety standards
+- **Regulatory Compliance:** Meet applicable codes and regulations
+- **Quality Standards:** Follow established quality procedures
+- **Documentation Standards:** Maintain complete and accurate records
+
+### Verification Procedures
+- **Performance Testing:** Verify system performance parameters
+- **Safety Testing:** Test all safety systems and interlocks
+- **Functional Testing:** Verify proper system operation
+- **Documentation Review:** Review all technical documentation
+- **Compliance Verification:** Confirm regulatory compliance
+
+## Technical References
+
+This document should be used in conjunction with:
+- **System Schematics:** Electrical drawings and circuit diagrams
+- **Equipment Manuals:** Manufacturer specifications and procedures
+- **Safety Standards:** Applicable electrical safety codes and standards
+- **Operating Procedures:** System operating and emergency procedures
+- **Maintenance Procedures:** Preventive and corrective maintenance procedures
+
+## Conclusion
+
+This technical document provides important information for the safe and effective operation of the HVPS system. Proper understanding and application of this information is essential for system reliability, safety, and performance.

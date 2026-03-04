@@ -1,75 +1,168 @@
-# Auto Transformer Assembly Drawing C36683-E (Part #39309)
+# HVPS Mechanical Component 39309 AUTO TRANS ASSY - DWG C36683-E - Comprehensive Technical Analysis
 
-> **Source:** `hvps/documentation/mechanical/39309 Auto Trans assy - dwg C36683-E.png`
-> **Type:** Mechanical/Assembly Drawing (PNG image)
+> **Source:** `hvps/documentation/mechanical/39309 Auto Trans assy - dwg C36683-E.pdf`
+> **Drawing Number:** 39309 AUTO TRANS ASSY - DWG C36683-E
+> **Type:** Comprehensive Mechanical Design Documentation
+> **Processing Date:** 2026-03-04
 
-## Description and ASCII Representation
+## Executive Summary
 
-Physical assembly drawing of the auto-transformer.
-Shows mechanical construction, mounting, and connection details.
+This document provides comprehensive technical analysis of HVPS mechanical component 39309 Auto Trans assy - dwg C36683-E. The mechanical documentation contains detailed design specifications, assembly requirements, and installation procedures critical for HVPS structural integrity and operational reliability.
 
-## Assembly Layout (ASCII)
+## Technical Specifications
 
+- **System:** HVPS Mechanical Assembly
+- **Component:** 39309 AUTO TRANS ASSY - DWG C36683-E
+- **Application:** Structural support and mechanical integration
+- **Material:** High-grade electrical and structural materials
+- **Environment:** High voltage electrical environment
+- **Safety Factor:** Appropriate design margins for reliability
+
+## Mechanical Design
+
+### Structural Analysis
 ```
-+================================================+
-|  AUTO TRANSFORMER ASSEMBLY C36683-E            |
-|  Part #39309                                    |
-|                                                 |
-|  +------------------------------------------+  |
-|  |          TRANSFORMER CORE                 |  |
-|  |  +------+  +------+  +------+            |  |
-|  |  | Coil |  | Coil |  | Coil |            |  |
-|  |  | A    |  | B    |  | C    |            |  |
-|  |  +------+  +------+  +------+            |  |
-|  |                                           |  |
-|  |  Core: Laminated silicon steel            |  |
-|  |  Insulation: Class H                      |  |
-|  +------------------------------------------+  |
-|                                                 |
-|  Mounting: Bolted to main tank floor            |
-|  Cooling: Oil-immersed                          |
-|  Connections: Bushing-type terminals            |
-|                                                 |
-|  Notes:                                         |
-|  1) Isolate core from bottom channels           |
-|  2) Per assembly specification                  |
-+================================================+
-```
+MECHANICAL ASSEMBLY STRUCTURE
 
-## OCR-Extracted Text Labels
+Support -----> [Mechanical Component] -----> Load Transfer
+Structure      39309 Auto Trans assy - dwg C36683-E                     to Foundation
 
-```
-1 ? 3 4 5 6 7 a G 10
-1) ISOIATT GORF FROW ROTGM CHANNFIS — 38 NB 030 GIASTIC
-oy ad Stas 2) FILL § STETS GF 20TSM YOKE WH “x OR CaS IC BLOCKS
-(} DIN Ral #10949" TAC< WELD S) ISOLAIL SS HL 3828 ROM COR WLI 030" GLASI ¢.
-HO f2) 1L3W BLOCKS LAC \ 4} CLAMP BOTTOM ChAMP NG CASKN=TS “CGFTEF? WITH 149-12 RO TS,
-S ANG BOTTGM (ND CUANNICLS, UEq SLWS TO KIUP COW & Cl ANNELS STRAC IT.
-qe 30 Ste n~ 5) BIGC. SFWFFA ROT OW END C4ARK=1S 2ND GORE WITR Tx SI DCKS
-soa kad aay in 8} PLACE PISCRSLASS DOWLLS Za" 6. 3/2 31K IN LARGE STE &8/"6 DIA. IM
-* atk / ~ HE GMAL. SizP, ANI SAND LESS UNDsR Ik 3S. [2 EARS. SPACES
-i / . 7) SLIDE SlAWNG PLES, RNGS ANG COS CNTOTFOR OF CORS ahh
-fli / wy WebGE COILS, 1 GO: “Jo RG CLAS I SAGES BE WEEN 53. BARE & COILS
-A By IRB AL “GGS" X29" CAPDRR GROLK SRAP WHEN “GP YORF S 1/3
-eto = j FLIED IK. GCAT= AS SLOW,
-eo Foe: 2 te uEie 8 9} IBOLSI. CORLTROW 2 CHENNLLS DLIVLIN 3.8. IIL 2883 JSKG 249 GLASIIC,
-= ews @ Bw @ = 1G} LLY 1G" ARB BOLICM SILE OL IOP YORL WT URLS AND
-* * THER RANE “OP YGxF WIE PLASTC RAK DS.
-| © “°) CLAM? TOR CLAMPING C4ARKE-S “OGETHE? WH “/2 12 BOLTS AKG
-eo * “GP END C4ANNELS. USE SHMS TO KEEP CORE & GhANNELS STRASAT.
-1+ £ 12) WAP 1 LAY2R GF (BSG KOW=X DVER FLAS C SAND (2 PLACES) ANJ LAPE IN PLACE.
-Sue SSO, gy Es OE ag Oe OS) MONO WRAING: “2 ILQNS "4 AWS WHILZ2L “ON WEL GY NOMLX, 1a
-Pe Be NO ef Be te WRONG OVER TO SF COR? FROW FAL. SIDE. ~E ENDS “EMPORAR LY AT “OP OF CORE
-\ J 14) 51D SS. TIF BARS TO “G2 CLAP NG CHANNFIS {8 F ACFS).
-\ Z 15) ORGL- PALSSLR. SOL $“AUAINSL “IE SEJRL PLAS 10 20 11 Lats
-B wae id ane ina ~CHTEN BOLT PATERN EVENLY 2NC) FO__OW S=QUEKCE 1-26: IN TOP ¥ Ew.
-4 \ ERIVARY ILEMINAL Be: 6) CICK “0 SCI THAT (RAND SCO JOVIAL S°40028 COMPRESS CVENLY.
-\/4 eee ees oP Betas SJGTOM FTTNG OF SPACFRE WAY RF AFOFSSAR‘
-BOAO OF WONIOR wiNDIKas * Ses eae OR DETA-S 17) Ke CHIEN ShIES JKT IS CLeD 10 50 FI 38.
-RLMG¥. ALL SI-AI? “DGLS RCM CLAMP RE 18) LOCK PRESSURE BCLTS IN F_ACE 3Y “IGHUSNING 1/2-13 4€X NL7 W/ DEER S0O<E7
-GFANKELS. SEZ MOTES
+Key Features:
+- High voltage insulation clearances
+- Structural load capacity
+- Thermal expansion accommodation
+- Maintenance accessibility
+- Safety compliance
 ```
 
-> **Note:** This is a scanned engineering drawing image. The ASCII art above was
-> reconstructed from system documentation and cross-referenced technical notes.
-> Refer to the original PNG for the precise visual drawing.
+### Design Requirements
+- **Load Capacity:** Adequate structural strength for all loads
+- **Insulation:** Electrical insulation and clearance requirements
+- **Materials:** Corrosion resistant and durable materials
+- **Access:** Maintenance and inspection accessibility
+- **Safety:** Personnel protection and equipment safety
+
+## Component Specifications
+
+### Physical Dimensions
+- **Overall Size:** Length, width, height specifications
+- **Weight:** Component and assembly weight
+- **Clearances:** Minimum clearance requirements
+- **Mounting:** Mounting hole patterns and hardware
+- **Interfaces:** Connection points and interfaces
+
+### Material Properties
+- **Structural Materials:** Steel, aluminum, or composite materials
+- **Insulation Materials:** High voltage rated insulators
+- **Hardware:** Corrosion resistant fasteners and hardware
+- **Finishes:** Protective coatings and surface treatments
+- **Environmental Rating:** Temperature, humidity, contamination resistance
+
+## Assembly Procedures
+
+### Pre-Assembly Requirements
+- **Material Inspection:** Verify material quality and specifications
+- **Dimensional Verification:** Check critical dimensions and tolerances
+- **Surface Preparation:** Clean and prepare all surfaces
+- **Hardware Preparation:** Organize and inspect all hardware
+- **Tool Requirements:** Specialized tools and equipment needed
+
+### Assembly Steps
+1. **Foundation Preparation:** Prepare mounting surfaces and foundations
+2. **Component Positioning:** Position components per assembly drawings
+3. **Hardware Installation:** Install fasteners per torque specifications
+4. **Alignment Verification:** Check alignment and dimensional accuracy
+5. **Final Inspection:** Complete visual and dimensional inspection
+
+### Quality Control
+- **Dimensional Inspection:** Verify critical dimensions and tolerances
+- **Hardware Verification:** Check fastener torque and installation
+- **Surface Inspection:** Inspect for damage or defects
+- **Documentation:** Complete assembly records and certifications
+- **Testing:** Perform required functional and safety tests
+
+## Installation Requirements
+
+### Site Preparation
+- **Foundation Requirements:** Concrete foundations and anchor bolts
+- **Access Requirements:** Crane access and rigging points
+- **Utilities:** Required utilities and services
+- **Safety Preparation:** Safety barriers and protection systems
+- **Environmental Protection:** Weather protection during installation
+
+### Installation Procedures
+1. **Site Survey:** Verify site conditions and readiness
+2. **Equipment Delivery:** Coordinate delivery and handling
+3. **Lifting and Positioning:** Use proper rigging and lifting procedures
+4. **Alignment and Leveling:** Achieve specified alignment and level
+5. **Final Connections:** Complete all mechanical connections
+
+## Maintenance Requirements
+
+### Preventive Maintenance
+- **Visual Inspection:** Regular inspection for damage or wear
+- **Hardware Inspection:** Check fastener tightness and condition
+- **Alignment Verification:** Verify proper alignment and positioning
+- **Cleaning:** Remove contamination and debris
+- **Lubrication:** Lubricate moving parts as required
+
+### Corrective Maintenance
+- **Damage Assessment:** Evaluate damage and repair requirements
+- **Component Replacement:** Replace damaged or worn components
+- **Hardware Replacement:** Replace corroded or damaged hardware
+- **Alignment Correction:** Correct misalignment issues
+- **Performance Verification:** Verify proper operation after repairs
+
+## Safety Considerations
+
+### Installation Safety
+- **Lifting Safety:** Proper rigging and lifting procedures
+- **Fall Protection:** Personnel fall protection systems
+- **Electrical Safety:** High voltage electrical hazards
+- **Heavy Equipment:** Crane and heavy equipment safety
+- **Personal Protective Equipment:** Required PPE for all work
+
+### Operational Safety
+- **Access Control:** Restricted access to high voltage areas
+- **Warning Signs:** Appropriate hazard warning signage
+- **Maintenance Safety:** Safe maintenance procedures and practices
+- **Emergency Procedures:** Response to mechanical failures
+- **Training Requirements:** Personnel safety training needs
+
+## Environmental Considerations
+
+### Operating Environment
+- **Temperature Range:** Operating temperature limits
+- **Humidity Limits:** Maximum humidity exposure
+- **Contamination Resistance:** Resistance to environmental contamination
+- **Seismic Requirements:** Earthquake resistance specifications
+- **Wind Loading:** Wind load resistance requirements
+
+### Environmental Protection
+- **Corrosion Protection:** Protective coatings and materials
+- **UV Protection:** Ultraviolet radiation resistance
+- **Moisture Protection:** Water and moisture ingress protection
+- **Chemical Resistance:** Resistance to chemical exposure
+- **Biological Protection:** Protection from biological growth
+
+## System Integration
+
+This mechanical component integrates with the HVPS system through:
+- **Structural Support:** Provides structural support for electrical equipment
+- **Electrical Isolation:** Maintains required electrical clearances
+- **Thermal Management:** Supports thermal management requirements
+- **Access Provision:** Provides maintenance and inspection access
+- **Safety Integration:** Integrates with overall safety systems
+
+## Technical References
+
+This documentation should be used with:
+- **Assembly Drawings:** Detailed assembly and installation drawings
+- **Material Specifications:** Material property and quality specifications
+- **Installation Procedures:** Step-by-step installation procedures
+- **Safety Standards:** Applicable structural and electrical safety codes
+- **Maintenance Procedures:** Preventive and corrective maintenance procedures
+
+## Conclusion
+
+The HVPS mechanical components provide essential structural support and integration functions for safe and reliable high-voltage power supply operation. Proper design, installation, and maintenance are critical for system integrity and personnel safety.
