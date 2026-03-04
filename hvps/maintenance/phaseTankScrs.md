@@ -1,7 +1,22 @@
-# phaseTankScrs
+# HVPS Phase Tank SCR Measurement Data
 
 > **Source:** `hvps/maintenance/phaseTankScrs.xlsx`
-> **Format:** XLSX (converted to Markdown for AI readability)
+> **Type:** Comprehensive Technical Measurement Data
+> **Processing Date:** 2026-03-04
+
+## Executive Summary
+
+This document contains comprehensive SCR (Silicon Controlled Rectifier) measurement data for the HVPS phase tank system. The data includes voltage, current, and resistance measurements for individual SCR components, providing critical information for system performance analysis, maintenance planning, and fault diagnosis.
+
+## Technical Specifications
+
+- **System:** HVPS Phase Tank SCR Stack
+- **Measurement Type:** Voltage, Current, and Resistance Analysis
+- **Data Period:** 2020-07-31 to 2020-08-18
+- **SCR Configuration:** 14 SCR stack arrangement
+- **Voltage Range:** 0-25kV per measurement
+- **Current Range:** 22.6-136.51 μA
+- **Resistance Range:** 15-1112 MΩ
 
 
 ## Sheet: HVPS2

@@ -1,7 +1,22 @@
-# hvpsMeasurements20220314
+# HVPS PLC Measurements - March 14, 2022
 
 > **Source:** `hvps/documentation/plc/hvpsMeasurements20220314.xlsx`
-> **Format:** XLSX (converted to Markdown for AI readability)
+> **Type:** Comprehensive Technical Measurement Data
+> **Processing Date:** 2026-03-04
+
+## Executive Summary
+
+This document contains comprehensive PLC (Programmable Logic Controller) measurement data from the HVPS regulator test points collected on March 14, 2022. The data includes voltage measurements, PLC register values, and calculated parameters critical for system calibration, performance verification, and control system analysis.
+
+## Technical Specifications
+
+- **Measurement Date:** March 14, 2022
+- **System:** HVPS Regulator Control System
+- **Data Source:** PLC test points and registers
+- **Voltage Range:** 60.01-68.74 kV (vHvps)
+- **Gap Voltage Range:** 2000-3200 V (vGap)
+- **PLC Registers:** N7:30, N7:10, N7:11, N7:13, N7:15, N7:40, N7:41
+- **Test Points:** TP4, TP7
 
 
 ## Sheet: Sheet1
