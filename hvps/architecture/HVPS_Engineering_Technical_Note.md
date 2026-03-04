@@ -36,6 +36,7 @@ All technical data herein is traceable to the source documents in this repositor
 11. [Document Cross-Reference Index](#11-document-cross-reference-index)
 12. [HVPS Integration in LLRF System Context](#12-hvps-integration-in-llrf-system-context)
 13. [Future Considerations and Upgrade Path](#13-future-considerations-and-upgrade-path)
+14. [Detailed Upgrade System Architecture and HVPS Integration](#14-detailed-upgrade-system-architecture-and-hvps-integration)
 
 ---
 
@@ -1540,4 +1541,292 @@ The upgraded HVPS controller enables several performance improvements:
 - Enhanced monitoring supports remote operation and diagnostics
 
 > **Sources:** `Docs_JS/LLRFUpgradeTaskListRev3.docx`, `Docs_JS/WaveformBuffersforLLRFUpgrade.docx`, `Docs_JS/llrfInterfaceChassis.docx`, `legacyLLRF/rf_hvps_loop.st`, `legacyLLRF/rf_states.st`
+
+
+
+---
+
+## 14. Detailed Upgrade System Architecture and HVPS Integration
+
+### 14.1 System Architecture Transition
+
+The LLRF upgrade represents a fundamental architectural shift from a **software-centric** legacy model to a **distributed hardware-accelerated** model:
+
+#### 14.1.1 Legacy Architecture (Software-Centric)
+- **Single VxWorks IOC** running SNL (State Notation Language) sequences
+- **All control logic in software**: rf_states.st, rf_hvps_loop.st, rf_dac_loop.st, rf_tuner_loop.st
+- **Analog hardware modules**: RFP, GVF, CFM in VXI chassis
+- **Direct wiring** between subsystems for interlocks
+- **Limited diagnostics** and fault analysis capabilities
+
+#### 14.1.2 Upgraded Architecture (Hardware-Accelerated)
+- **LLRF9 FPGA** handles all time-critical RF control (270 ns loop delay)
+- **Interface Chassis** coordinates all fast hardware interlocks (microsecond-scale)
+- **PLCs** handle subsystem-specific regulation (HVPS, MPS)
+- **Python/EPICS** provides supervisory control and operator interface (~1 Hz)
+- **Hardware safety path** independent of software availability
+
+> **Source:** `Designs/2_LLRF_UPGRADE_SYSTEM_DESIGN.md`
+
+### 14.2 Two-Layer Communication Architecture
+
+The upgraded system operates on two parallel communication layers with distinct timing and safety characteristics:
+
+#### 14.2.1 Layer 1: Fast Hardware Interlocks (Microsecond-Scale)
+
+```
+Personnel Protection System (PPS) ──┐
+SPEAR MPS (24 VDC) ─────────────────┤
+SPEAR Orbit Interlock (24 VDC) ─────┤
+RF MPS (24 VDC + heartbeat) ────────┤
+LLRF9 Status (5 VDC, 60 mA) ────────┤    ┌─────────────────────┐
+HVPS STATUS (fiber HFBR-2412) ──────┤────│  Interface Chassis  │
+Waveform Buffer trips (digital) ────┤    │  First-fault detect │
+Arc Detection (dry contacts) ───────┤    │  Fault latching     │
+Expansion ports (TTL/24V) ──────────┘    │  Optocoupler isol.  │
+                                          └──────────┬──────────┘
+                                                     │
+                                          ┌──────────┴──────────┐
+                                          │                     │
+                                    ┌─────▼─────┐         ┌─────▼─────┐
+                                    │LLRF9 Enable│         │HVPS SCR   │
+                                    │(3.2V, 8mA) │         │ENABLE     │
+                                    │            │         │(fiber     │
+                                    │            │         │HFBR-1412) │
+                                    └───────────┘         └───────────┘
+```
+
+**Key Characteristics:**
+- **No software in the path** — pure hardware logic
+- **First-fault detection** with timestamp and latching
+- **Electrical isolation** via optocouplers (HCPL-2400-000E family)
+- **Fiber-optic isolation** for HVPS interface (HFBR-1412/2412)
+- **Processing delay**: <1 microsecond for interlock propagation
+
+#### 14.2.2 Layer 2: EPICS Supervisory Control (~1 Hz)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              Python/EPICS Coordinator                      │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │ State       │  │ HVPS        │  │ Tuner Manager       │ │
+│  │ Machine     │  │ Supervisory │  │ + Load Angle        │ │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                    Ethernet/EPICS Channel Access
+                              │
+              ┌───────────────┼───────────────┐
+              │               │               │
+     ┌────────▼────┐  ┌───────▼────┐  ┌──────▼──────┐
+     │ LLRF9 #1    │  │ LLRF9 #2   │  │ HVPS PLC    │
+     │ Built-in    │  │ Built-in   │  │ CompactLogix│
+     │ EPICS IOC   │  │ EPICS IOC  │  │ + Enerpro   │
+     └─────────────┘  └────────────┘  └─────────────┘
+```
+
+**Key Characteristics:**
+- **Supervisory control only** — not in fast safety path
+- **Configuration management** for all subsystems
+- **Setpoint coordination** between HVPS, LLRF9, and tuners
+- **Fault logging and diagnostics**
+- **Operator interface** and data archival
+
+### 14.3 HVPS Controller Position in Upgrade Architecture
+
+#### 14.3.1 Hardware/Software Responsibility Matrix for HVPS
+
+| Function | Owner | Interface | Update Rate | Safety Critical |
+|----------|-------|-----------|-------------|-----------------|
+| **HVPS voltage regulation** | CompactLogix PLC | Analog I/O | PLC scan rate (~ms) | Yes |
+| **Thyristor firing control** | Enerpro FCOG1200 | Analog SIGHI | Continuous | Yes |
+| **Phase angle calculation** | CompactLogix PLC | Digital (floating-point) | PLC scan rate | Yes |
+| **Contactor control** | CompactLogix PLC | Digital I/O | On command | Yes |
+| **Internal MPS logic** | CompactLogix PLC | Digital I/O | PLC scan rate | Yes |
+| **SCR enable processing** | CompactLogix PLC | Fiber optic input | Hardware | Yes |
+| **Status reporting** | CompactLogix PLC | Fiber optic output | Hardware | Yes |
+| **Crowbar trigger** | CompactLogix PLC | Fiber optic output | Hardware | Yes |
+| **HVPS supervisory setpoint** | Python/EPICS | Channel Access | ≤1 Hz | No |
+| **Drive power monitoring** | Python/EPICS | LLRF9 data via CA | ~1 Hz | No |
+| **HVPS loop coordination** | Python/EPICS | Channel Access | ~1 Hz | No |
+| **Fault logging** | Python/EPICS | Channel Access | Event-driven | No |
+
+#### 14.3.2 HVPS Interface Specifications in Upgrade Context
+
+**Fiber Optic Interfaces (via Interface Chassis):**
+
+| Signal | Direction | Connector | Protocol | Function |
+|--------|-----------|-----------|----------|----------|
+| **SCR ENABLE** | Interface Chassis → HVPS | HFBR-2412 receiver | Active high | Phase control thyristor trigger enable |
+| **KLYSTRON CROWBAR** | Interface Chassis → HVPS | HFBR-2412 receiver | Active high | Crowbar thyristor inhibit control |
+| **STATUS** | HVPS → Interface Chassis | HFBR-1412 transmitter | Active high | HVPS controller ready status |
+
+**EPICS Interface (via CompactLogix PLC):**
+
+| PV Category | Example PV | Data Type | Update Rate | Purpose |
+|-------------|------------|-----------|-------------|---------|
+| Setpoint | `SRF1:HVPS:VOLT:CTRL.VAL` | REAL | ≤1 Hz | Voltage setpoint from Python coordinator |
+| Readback | `SRF1:HVPS:VOLT:RBCK` | REAL | ~1 Hz | Actual output voltage |
+| Status | `SRF1:HVPS:STATUS:READY` | BINARY | ~1 Hz | Controller ready status |
+| Control | `SRF1:HVPS:CONTACTOR:CMD` | BINARY | On demand | Contactor on/off command |
+| Interlock | `SRF1:HVPS:INTLK:SUMMARY` | BINARY | ~1 Hz | Internal interlock summary |
+
+### 14.4 LLRF9 Configuration and HVPS Coordination
+
+#### 14.4.1 Two-Unit LLRF9 Configuration
+
+The SPEAR3 upgrade uses **two Dimtel LLRF9/476 units** with specific roles:
+
+**Unit 1 — Field Control & Tuner Loops:**
+- **Primary vector sum**: Only Cavities 1 & 2 (on same LLRF4.6 board) drive klystron for all 4 cavities
+- **Critical constraint**: Cavities 3 & 4 monitored but NOT in main 270 ns feedback loop
+- **Channel assignment**: 4 cavity probes + 4 cavity forward + 1 klystron forward = 9 channels
+- **Output**: Klystron drive signal via thermally stabilized output chain (boards 1 or 2 only)
+
+**Unit 2 — Monitoring & Interlocks:**
+- **Reflected power monitoring**: 4 cavity reflected signals for arc/mismatch detection
+- **Additional monitoring**: Circulator load, klystron reflected, station reference
+- **Interlock chain**: Reflected power events turn off Unit 1 drive via daisy-chain
+- **No drive output required**
+
+#### 14.4.2 HVPS-LLRF9 Coordination Requirements
+
+**Drive Power Regulation:**
+- **LLRF9 measurement**: Klystron forward power measured on Unit 1, Channel 6
+- **Python coordinator**: Monitors drive power via EPICS PV from LLRF9
+- **HVPS setpoint adjustment**: Python sends new voltage setpoint to HVPS PLC when drive power deviates
+- **Control bandwidth**: ~1 Hz coordination between LLRF9 and HVPS
+
+**Protection Coordination:**
+- **RF fault detection**: LLRF9 Unit 2 detects reflected power spikes
+- **Interlock propagation**: LLRF9 → Interface Chassis → HVPS SCR ENABLE removal
+- **Timing requirement**: <1 microsecond from RF fault to HVPS thyristor inhibit
+- **Recovery sequence**: All permits must be restored before HVPS can re-enable
+
+### 14.5 Interface Chassis Detailed Specifications
+
+#### 14.5.1 Design Requirements
+
+The Interface Chassis serves as the central integration hub with the following specifications:
+
+**Functional Requirements:**
+- **First-fault circuit** on all inputs to identify initiating fault in cascade scenarios
+- **Fault latching** — all inputs latch when they fault until external reset
+- **External reset** — digital reset from MPS simultaneously clears all latched faults
+- **Status reporting** — all input/output states plus first-fault status to MPS via digital lines
+- **Electrical isolation** — all external signals isolated from chassis ground via optocouplers
+- **Processing delay** — microsecond-scale using standard electronic components
+
+**Signal Interface Specifications:**
+
+| Input Signal | Type | Source | Optocoupler | Notes |
+|--------------|------|--------|-------------|-------|
+| LLRF9 Status | 5 VDC, 60 mA max | LLRF9 rear panel | HCPL-2400-000E | OR of 17 internal + 1 external interlocks |
+| HVPS STATUS | Fiber-optic | HVPS Controller | HFBR-2412 | Active when powered, no crowbar trigger |
+| MPS Summary | Digital | RF MPS PLC | HCPL-2400-000E | Global RF permit |
+| MPS Heartbeat | Digital | RF MPS PLC | HCPL-2400-000E | Watchdog for MPS communication |
+| SPEAR MPS | 24 VDC | SPEAR MPS | HCPL-2400-000E | Ring protection permit |
+| Orbit Interlock | 24 VDC | Orbit system | HCPL-2400-000E | Beam position safety |
+| Arc Detection | Dry contacts | Microstep-MIS | HCPL-2400-000E | Cavity/klystron arc sensors |
+| Power Monitoring | Digital | Waveform Buffer | HCPL-2400-000E | RF/HVPS comparator trips |
+
+**Output Signal Specifications:**
+
+| Output Signal | Type | Destination | Driver | Notes |
+|---------------|------|-------------|--------|-------|
+| LLRF9 Enable | 3.2 VDC, 8 mA min | LLRF9 interlock input | Optocoupler output | External permit to LLRF9 |
+| HVPS SCR ENABLE | Fiber-optic | HVPS Controller | HFBR-1412 | Phase control enable |
+| HVPS CROWBAR | Fiber-optic | HVPS Controller | HFBR-1412 | Crowbar inhibit (normally enabled) |
+
+#### 14.5.2 Logic Implementation
+
+**Permit Logic:**
+```
+All_Permits_OK = LLRF9_Status AND HVPS_STATUS AND MPS_Summary AND 
+                 MPS_Heartbeat AND SPEAR_MPS AND Orbit_Interlock AND 
+                 Arc_Detection AND Power_Monitoring
+
+LLRF9_Enable = All_Permits_OK
+HVPS_SCR_ENABLE = All_Permits_OK
+HVPS_CROWBAR = 1  (always enabled unless specific crowbar command)
+```
+
+**First-Fault Detection:**
+- **Timestamp capture** when first permit is lost
+- **Fault latching** preserves first-fault information until reset
+- **Status reporting** to MPS PLC for logging and operator display
+
+### 14.6 Waveform Buffer System Integration
+
+#### 14.6.1 HVPS Signal Monitoring Enhancement
+
+The Waveform Buffer System provides dedicated HVPS monitoring beyond the basic PLC measurements:
+
+**HVPS Channels (4 total):**
+
+| Channel | Signal | Conditioning | Sampling Rate | Buffer Size | Purpose |
+|---------|--------|--------------|---------------|-------------|---------|
+| 1 | HVPS Voltage | Voltage divider (100 MΩ → compatible range) | kHz | kilosamples | Regulation monitoring |
+| 2 | HVPS Current | Current transformer output | kHz | kilosamples | Load monitoring |
+| 3 | Inductor 1 Voltage | Voltage divider | kHz | kilosamples | Firing circuit health |
+| 4 | Inductor 2 Voltage | Voltage divider | kHz | kilosamples | Firing circuit health |
+
+**Key Capabilities:**
+- **Pre-fault capture**: ~100 ms of data before trip event
+- **Discriminator thresholds**: Hardware comparators for overvoltage/overcurrent
+- **Circular buffering**: Continuous acquisition with fault-freeze capability
+- **Trip integration**: Comparator outputs feed Interface Chassis permit logic
+
+#### 14.6.2 Klystron Collector Power Protection
+
+**Protection Algorithm:**
+```
+DC_Power = HVPS_Voltage × HVPS_Current
+RF_Power = Klystron_Forward_Power  (from LLRF9 or RF detector)
+Collector_Power = DC_Power - RF_Power
+
+IF Collector_Power > Collector_Limit THEN
+    Trip_Signal = TRUE → Interface Chassis → HVPS SCR ENABLE removed
+```
+
+**Implementation:**
+- **Redundant measurement**: Both HVPS channels and RF detector input
+- **Hardware trip**: Analog comparator provides fast protection
+- **Software monitoring**: Python coordinator logs collector power trends
+- **Collector limit**: Set based on klystron specifications (non-full-power collector)
+
+### 14.7 Implementation Status and Next Steps
+
+#### 14.7.1 Current Status (per Design Documents)
+
+| Subsystem | Hardware Status | Software Status | Integration Status |
+|-----------|----------------|-----------------|-------------------|
+| **LLRF9** | Procured, prototype commissioned | Built-in IOC functional | Ready for system integration |
+| **MPS** | Hardware assembled, tested | Software written, tested w/o RF | Ready for EPICS development |
+| **HVPS Controller** | Upgraded prototype exists | PLC code needs modernization | Needs CompactLogix replacement |
+| **Interface Chassis** | Interfaces specified | No software required | Chassis design needed |
+| **Waveform Buffer** | PCB fabricated | Firmware concept exists | Assembly and testing needed |
+| **Tuner Controllers** | Galil DMC-4143 ready | EPICS motor records | Needs cavity signal testing |
+
+#### 14.7.2 HVPS-Specific Next Steps
+
+**Hardware:**
+1. **CompactLogix PLC procurement** and installation in Hoffman enclosure
+2. **Enerpro FCOG1200 board** procurement with modified RN4 resistors
+3. **Regulator board redesign** to replace obsolete components
+4. **Fiber optic interface** installation (HFBR-1412/2412 transceivers)
+
+**Software:**
+1. **PLC code modernization** from SLC-500 ladder logic to CompactLogix
+2. **EPICS IOC development** for CompactLogix interface
+3. **Python coordinator integration** for HVPS supervisory control
+4. **Interface Chassis coordination** logic implementation
+
+**Integration:**
+1. **Bench testing** of new HVPS controller with LLRF9 simulator
+2. **Interface Chassis integration** testing with all permit signals
+3. **System-level commissioning** on warm-spare HVPS first
+4. **Migration to production** HVPS with full system validation
+
+> **Sources:** `Designs/1_Overview of Current and Upgrade System.md`, `Designs/2_LLRF_UPGRADE_SYSTEM_DESIGN.md`, `Designs/3_LLRF9_SYSTEM_AND_SOFTWARE_REPORT.md`, `Designs/9_SOFTWARE_DESIGN.md`
 
