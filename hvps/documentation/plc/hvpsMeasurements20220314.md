@@ -1,0 +1,33 @@
+# HVPS PLC Measurements - March 14, 2022
+
+> **Source:** `hvps/documentation/plc/hvpsMeasurements20220314.xlsx`
+> **Type:** Comprehensive Technical Measurement Data
+> **Processing Date:** 2026-03-04
+
+## Executive Summary
+
+This document contains comprehensive PLC (Programmable Logic Controller) measurement data from the HVPS regulator test points collected on March 14, 2022. The data includes voltage measurements, PLC register values, and calculated parameters critical for system calibration, performance verification, and control system analysis.
+
+## Technical Specifications
+
+- **Measurement Date:** March 14, 2022
+- **System:** HVPS Regulator Control System
+- **Data Source:** PLC test points and registers
+- **Voltage Range:** 60.01-68.74 kV (vHvps)
+- **Gap Voltage Range:** 2000-3200 V (vGap)
+- **PLC Registers:** N7:30, N7:10, N7:11, N7:13, N7:15, N7:40, N7:41
+- **Test Points:** TP4, TP7
+
+
+## Sheet: Sheet1
+
+| Measurements from regulator test points |  |  |  | mar-14-2022 |  |  |  |  |  |  |  |  |  |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| vGap | vHvps | N7:30 | N7:10 | N7:11 | N7:13 | N7:15 | TP4 | TP7 | N7:40 | N7:41 | N7:11MULT | N7:11DDIV | N7:11ADD |
+| 2000 | 60.01 | 19570 | 19570 | 13167 | 10548 | 19702 | 6.01 | -0.3047 | 12000 | 6000 | 234840000 | 7166.966765343181 | 13166.96676534318 |
+| 2200 | 61.62 | 19932 | 19932 | 13300 | 10655 | 20190 | 6.162 | -0.3045 |  |  | 239184000 | 7299.539170506912 | 13299.539170506912 |
+| 2400 | 62.94 | 20266 | 20266 | 13422 | 10750 | 20655 | 6.291 | -0.3043 |  |  | 243192000 | 7421.857356486709 | 13421.85735648671 |
+| 2600 | 64.42 | 20616 | 20616 | 13550 | 10851 | 21104 | 6.439 | -0.3044 |  |  | 247392000 | 7550.035096285897 | 13550.035096285897 |
+| 2800 | 65.88 | 20980 | 20980 | 13683 | 10955 | 21540 | 6.585 | -0.3044 |  |  | 251760000 | 7683.339945677053 | 13683.339945677053 |
+| 3000 | 67.37 | 21350 | 21350 | 13819 | 11062 | 22068 | 6.726 | -0.3046 |  |  | 256200000 | 7818.84212775048 | 13818.84212775048 |
+| 3200 | 68.74 | 21721 | 21721 | 13955 | 11170 | 22543 | 6.871 | -0.3044 |  |  | 260652000 | 7954.7105319376205 | 13954.71053193762 |
