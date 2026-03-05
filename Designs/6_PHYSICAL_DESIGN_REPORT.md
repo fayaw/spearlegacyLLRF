@@ -169,8 +169,10 @@ The upgraded system replaces all control electronics while retaining the RF plan
 - Interface Chassis — central hardware interlock coordination hub
 - Waveform Buffer System — 8 RF + 4 HVPS channel extended monitoring
 - Arc Detection — Microstep-MIS optical sensors on cavity windows and klystron
-- Klystron Heater Controller — SCR-based with EPICS integration
-- Collector Power Protection — computed in Waveform Buffer System
+
+**Enhanced Subsystems** (upgraded from legacy):
+- Klystron Heater Controller — Motor-driven variac → SCR-based with EPICS integration
+- Collector Power Protection — Forward power proxy → Direct DC-RF power calculation in Waveform Buffer System
 
 
 ---
@@ -186,7 +188,8 @@ The SPEAR3 RF station spans multiple buildings and locations at SSRL/SLAC:
 | **Contactor Disconnect Panel** (Switchgear, adjacent to B514) | Vacuum contactor (Ross HQ3), Contactor controller (Ross HCA-1-A), K4/MX/RR/L1 relays, S5 auxiliary contact | 12.47 kV AC switchgear |
 | **Termination Tank** (near klystron) | HV cable termination, Ross Engineering HV relay | Mineral oil filled |
 | **Switch-over Tank** (adjacent B514) | HV cable connections between SPEAR1/SPEAR2 and klystron | FR3 oil filled |
-| **SPEAR3 Storage Ring Tunnel** | Klystron, 4 RF cavities, waveguide distribution, tuner assemblies, arc detection sensors, drive amplifier | Radiation area |
+| **Building B132** (Klystron Gallery) | Klystron, drive amplifier | Near storage ring |
+| **SPEAR3 Storage Ring Tunnel** | 4 RF cavities, waveguide distribution, tuner assemblies, arc detection sensors | Radiation area |
 
 ### Cabling Between Locations
 
@@ -196,7 +199,8 @@ The SPEAR3 RF station spans multiple buildings and locations at SSRL/SLAC:
 | B118 → Termination Tank (Grounding) | Belding 83709 + Belden 83715 | 9C + 15C #16 Teflon | TS-6 to grounding tank |
 | B118 → B514 (HVPS) | Electrical cable pairs | SCR trigger cables (12 pairs) | Controller to Phase Tank thyristor stacks |
 | B118 → B514 (HVPS) | Fiber optic | SCR ENABLE, CROWBAR, STATUS | Controller to HVPS (upgrade: via Interface Chassis) |
-| B118 → Tunnel | Coax cables | RF signals (forward, reflected, probe) | LLRF inputs |
+| B118 → B132 | Coax cables | RF drive signal | To drive amplifier |
+| B118 → Tunnel | Coax cables | RF signals (forward, reflected, probe) | LLRF inputs from cavities |
 | B118 → Tunnel | Multi-conductor | Motor power + encoder signals | To tuner assemblies |
 
 ---
@@ -207,7 +211,7 @@ The RF plant is the physical chain that delivers 476 MHz RF power from the klyst
 
 ### 4.1 Klystron
 
-The single klystron operates at approximately 1 MW output power, driven at ~50 W input from the drive amplifier. The klystron cathode is powered by the HVPS at up to ~90 kV (nominal ~74.7 kV at 500 mA beam current). It has a non-full-power collector requiring dedicated protection (see Waveform Buffer System, Section 11).
+The single klystron is located in Building B132 (Klystron Gallery) and operates at approximately 1 MW output power, driven at ~50 W input from the drive amplifier. The klystron cathode is powered by the HVPS at up to ~90 kV (nominal ~74.7 kV at 500 mA beam current). It has a non-full-power collector requiring dedicated protection (see Section 11.3 for upgrade and current implementation in Section 4.5).
 
 ### 4.2 Waveguide Distribution
 
@@ -227,7 +231,23 @@ Four single-cell cavities at 476 MHz, each contributing ~800 kV gap voltage for 
 
 ### 4.4 Drive Amplifier
 
-The drive amplifier boosts the LLRF9 output signal (~0 dBm) to ~50 W to drive the klystron input. In the upgrade, the LLRF9 Unit 1 output (from the thermally stabilized output chain on Board 1 or Board 2) connects to the drive amplifier input. A KAW2051M12 amplifier datasheet is available in `llrf/driveAmp/`.
+The drive amplifier is located in Building B132 near the klystron and boosts the LLRF9 output signal (~0 dBm) to ~50 W to drive the klystron input. In the upgrade, the LLRF9 Unit 1 output (from the thermally stabilized output chain on Board 1 or Board 2) connects to the drive amplifier input via coax cable from B118. A KAW2051M12 amplifier datasheet is available in `llrf/driveAmp/`.
+
+### 4.5 Legacy Collector Power Protection
+
+The current SPEAR3 system includes collector power protection implemented through the HVPS control loop. The legacy system monitors klystron forward power and compares it against configurable limits:
+
+**Current Implementation**:
+- **Monitoring**: `LLRF:HVPS:PCOLL_MAX` PV sets maximum collector power limit
+- **Protection Logic**: HVPS loop (`rf_hvps_loop.st`) monitors `klystron_forward_power` vs. `max_klystron_forward_power`
+- **Action**: When klystron forward power exceeds limits, HVPS voltage is reduced (`delta_proc_voltage_down`)
+- **Integration**: Collector limit displayed in HVPS EDL panel ("COLLECTOR LIMIT")
+
+**Legacy Limitations**:
+- Indirect protection through HVPS voltage adjustment (slow response)
+- No direct DC power measurement or calculation
+- Limited diagnostic capability for collector power trends
+- Protection relies on forward power proxy rather than actual collector power calculation
 
 
 ---
@@ -617,7 +637,7 @@ The Waveform Buffer System is a new signal conditioning and monitoring chassis t
 
 1. **Extended RF signal monitoring** — 8 RF channels with circular waveform buffers for pre-fault capture
 2. **HVPS signal monitoring** — 4 channels (voltage, current, 2 inductor voltages) with circular buffers
-3. **Klystron collector power protection** — computes DC power minus RF power and triggers a hardware trip if collector power exceeds the limit
+3. **Enhanced klystron collector power protection** — computes DC power minus RF power (vs. legacy forward power proxy) and triggers a hardware trip if collector power exceeds the limit
 
 ### 11.2 Channel Configuration
 
@@ -641,13 +661,14 @@ The Waveform Buffer System is a new signal conditioning and monitoring chassis t
 
 - **Circular buffers**: Continuous acquisition at kHz rate; freeze on fault trigger for pre/post-fault capture (~100 ms pre-fault data)
 - **Analog comparator trips**: Hardware-based threshold detection on each channel; comparator outputs feed Interface Chassis
-- **Collector power protection algorithm**:
+- **Enhanced collector power protection algorithm** (improvement over legacy forward power proxy):
   ```
   DC_Power = HVPS_Voltage × HVPS_Current
   RF_Power = Klystron_Forward_Power
   Collector_Power = DC_Power - RF_Power
   IF Collector_Power > Collector_Limit THEN Trip
   ```
+  This provides direct collector power calculation vs. the legacy system's forward power proxy method.
 - **EPICS interface**: Waveform readout, threshold configuration, trip status
 
 ### 11.4 Interfaces
@@ -693,7 +714,25 @@ The arc detection system is a new subsystem that provides optical monitoring of 
 
 ### 13.1 Legacy System
 
-The current klystron heater uses a motor-driven variac for voltage adjustment, feeding a Kepko 5V/20A power supply (PS-2 in the Hoffman Box). This is a PEP-II era system with limited precision, slow response (seconds to minutes), and increasing maintenance requirements.
+The current klystron heater control system is inherited from the PEP-II era and consists of a motor-driven variac for voltage adjustment, feeding a Kepko 5V/20A power supply (PS-2) located in the Hoffman Box.
+
+**Current System Architecture**:
+- **Input Power**: 120VAC, Phase C (from Hoffman box wiring)
+- **Control Method**: Motor-driven variac for voltage adjustment
+- **Power Supply**: Kepko 5V/20A (PS-2) with transformer isolation for HV safety
+- **Output**: 5V/20A maximum (~100W typical operation)
+- **Control Interface**: Manual or slow automatic adjustment
+- **EPICS Integration**: Limited monitoring capabilities
+
+**System Limitations**:
+- **Slow Response**: Motor-driven variac requires seconds to minutes for adjustment
+- **Limited Precision**: Mechanical variac resolution ~1-2% of full scale
+- **Aging Components**: 25+ year old system with increasing failure rates
+- **Manual Operation**: Requires operator intervention for power adjustments
+- **Poor EPICS Integration**: Limited monitoring and control capabilities
+- **No Automated Sequences**: Manual warm-up and cool-down procedures
+- **Minimal Diagnostics**: No real-time power, voltage, or current monitoring
+- **Maintenance Issues**: Mechanical wear, obsolete parts, calibration drift
 
 ### 13.2 Upgraded System — SCR-Based Control
 
