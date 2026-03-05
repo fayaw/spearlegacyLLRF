@@ -413,7 +413,11 @@ Two Dimtel LLRF9/476 units replace the entire VXI-based LLRF system (four units 
 
 ## 6. Subsystem 2: High Voltage Power Supply (HVPS)
 
-> **Detailed reference**: `hvps/`
+> **Primary source references**: 
+> - Architecture: `hvps/architecture/designNotes/interfacesBetweenRFSystemControllers.docx`, `RFSystemMPSRequirements.docx`, `EnerproVoltageandCurrentRegulatorBoardNotes.docx`
+> - PLC Documentation: `hvps/documentation/plc/plcNotesR1.docx`, `CasselPLCCode.pdf`
+> - Legacy System: `hvps/architecture/designNotes/rfedmHvpsLabelsPvs.docx`, `HoffmanBoxPPSWiring.docx`
+> - Wiring/Schematics: `hvps/documentation/wiringDiagrams/`
 
 ### 6.1 Power Section (Retained)
 
@@ -445,15 +449,35 @@ The power section, including transformers, thyristor stacks, filter inductors, s
 
 The legacy controller is housed in a Hoffman NEMA enclosure (34"×42") in Building B118 and contains:
 
-- **PLC**: Allen-Bradley SLC-500 (1747-L532 CPU) with I/O modules in slots 1-9 (OBSOLETE)
-- **Enerpro Firing Board**: Current SCR gate driver
-- **Regulator Card** (PC-237-230-14-C0): Analog voltage regulation loop
+- 
+**PLC**: Allen-Bradley SLC-500 (1747-L532 CPU) with I/O modules (OBSOLETE):
+
+| Slot | Module | Function |
+|------|--------|-----------|
+| CPU | AB-1747-L532 | Processor |
+| 1 | AB-1747-DCM | Data Communications (Scanner) |
+| 2 | AB-1746-IO8 | 8-pt Digital I/O — **Ross switch coil (OUT3)** |
+| 3 | AB-1746-THERMC | Thermocouple inputs (SCR/air/transformer temps) |
+| 5 | AB-1746-OX8 | 8-pt Relay Output — **Contactor enable K4 (OUT2)**, Contactor On/Off (OUT1) |
+| 6 | AB-1746-IB16 | 16 DC Input — **PPS 1 (IN14)**, **PPS 2 (IN15)**, Oil Level (IN8), Manual GRN SW (IN9) |
+| 7 | AB-1746-IV16 | 16 DC Input (various permits) |
+| 8 | AB-1746-NIO4V | 4-ch Analog I/O — voltage setpoint output to Enerpro via regulator (N7:10 → OUT0) |
+| 9 | AB-1746-NI4 | 4-ch Analog Input — Danfysik HVPS current (IN3) |
+
+> **Source**: `hvps/documentation/plc/plcNotesR1.docx` (N7:10/N7:11 analysis, slot assignments)
+- **Enerpro Firing Board**: FCOG6100 + FCOAUX60 (30° delayed triggering daughter board) — Current SCR gate driver
+- **Regulator Card** (SD-237-230-14-C1): SLAC-designed analog voltage regulation loop with INA117 (difference amp), INA114 (instrumentation amp), OP77 (op-amp, 600 kHz GBW), BUF634 (high-current buffer), 4N32 optocoupler, and VTL5C opto-controlled variable resistor (OBSOLETE component)
 - **Power Supplies**: SOLA ±15V/+5V/24V, Kepko 120V (×2), Kepko 5V/20A, Kepko 240V
 - **PS Monitor Board** (SD-730-793-12): Monitors power supply health
 - **Terminal Strips**: TS-5 (contactor, 15 terminals), TS-6 (grounding tank, 21 terminals), TS-3 (PPS LEDs), TS-7 (power distribution)
-- **PPS Connector**: GOB12-88PNE (Burndy/Souriau Trim Trio), 8-pin, in locked box
+- **PPS Connector**: Originally Burndy circular 8-pin; possibly replaced with Souriau Trim Trio equivalent (GOB12-88PNE) — exact current part number requires field verification
 
-The SLC-500 PLC executes ladder logic for voltage regulation, contactor management, temperature monitoring, and — critically — PPS safety chain control (Ross grounding switch via Slot-2 IO8 OUT3).
+The SLC-500 PLC executes ladder logic for voltage regulation, contactor management, temperature monitoring, and — critically — PPS safety chain control:
+- **PPS 1**: Controls K4 contactor enable path; also has hardware fail-safe wired directly to OX8 relay input (bypasses PLC)
+- **PPS 2**: Controls Ross grounding switch coil via Slot-2 IO8 OUT3 (Rung 0016)
+- **Hardware fail-safe**: K4 relay input side wired directly to PPS 1 signal (24 VDC), preventing PLC failure from keeping K4 energized without PPS enable
+
+> **Sources**: `hvps/architecture/designNotes/HoffmanBoxPPSWiring.docx`, `RFSystemMPSRequirements.docx`
 
 ### 6.3 Upgraded Controller
 
@@ -463,7 +487,11 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
 - **CompactLogix PLC**: Replaces SLC-500; handles voltage regulation, temperature monitoring, fault management, and EPICS communication
 - **Enerpro FCOG1200 Board**: Upgraded SCR gate driver with modified RN4 resistors for SPEAR monitor winding impedance (2 MΩ)
 - **Redesigned Analog Regulator**: Replaces obsolete regulator card components
-- **Fiber Optic Interfaces**: HFBR-1412 transmitter (STATUS), HFBR-2412 receivers (SCR ENABLE, CROWBAR) — connected to Interface Chassis, NOT directly to LLRF
+- **Fiber Optic Interfaces**: Bidirectional communication with Interface Chassis:
+  - STATUS: HVPS controller → HFBR-1412 transmitter → Interface Chassis (indicates control supply presence + no crowbar fired)
+  - SCR ENABLE: Interface Chassis → HFBR-2412 receiver → HVPS controller (permit signal, active-high for fail-safe)
+  - CROWBAR: Interface Chassis → HFBR-2412 receiver → HVPS controller (crowbar fire command)
+  - Normal operation: All signals illuminated/active; signal loss = fault condition
 
 **Key change**: The CompactLogix PLC is removed from the PPS safety chain. PPS functions (K4 relay, Ross switch control) are routed through the new Interface Chassis instead. The PLC handles only non-safety functions: voltage regulation, temperature monitoring, and EPICS interface.
 
@@ -475,11 +503,41 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
 | Readback | `SRF1:HVPS:VOLT:RBCK` | ~1 Hz |
 | Status | `SRF1:HVPS:STATUS:READY` | ~1 Hz |
 | Control | `SRF1:HVPS:CONTACTOR:CMD` | On demand |
+
+**Legacy HVPS Status PVs** (for reference and troubleshooting):
+
+| Status Parameter | Function | Source |
+|------------------|----------|---------|
+| Contactor Closed | K4 relay status / Aux relay status | Slot-6 inputs |
+| Over Voltage | Regulator card latch indication | SD-237-230-14-C1 |
+| Klystron Arc | Grounding tank + LHS trigger board detection | BNC-12 input |
+| Transformer Arc | HVPS + RHS trigger board detection | BNC-0 input |
+| Crowbar Status | Thyristor pulse detection | Enerpro board |
+| PPS Chain Status | PPS 1 and PPS 2 availability | Slot-6 IN14/IN15 |
+| SCR 1/2 Firing | Left/right side thyristor trigger status | Enerpro monitoring |
+| AC Current | Input current measurement | Transformer monitoring |
+| Temperature/Oil | SCR/air/transformer temperatures, oil level | Slot-3 thermocouples |
+| 12 kV Availability | Supply status/readiness | Switchgear feedback |
+| Fast Inhibit/Slow Start | Enerpro protection states | Gate driver board |
+
+> **Source**: `hvps/architecture/designNotes/rfedmHvpsLabelsPvs.docx` (RF expert panel configuration)
 | Interlock | `SRF1:HVPS:INTLK:SUMMARY` | ~1 Hz |
 
 ### 6.5 HVPS Interfaces
 
 - **Interface Chassis** (fiber optic): SCR ENABLE (in), CROWBAR inhibit (in), STATUS (out)
+
+**Crowbar Triggering Sources** (five independent sources for defense-in-depth protection):
+
+1. **SCR ENABLE** (fiber-optic): Interface Chassis → HVPS controller (loss of signal disables SCR triggers)
+2. **TRANSFORMER ARC TRIGGER** (BNC-0): Electronic signal from Hoffman box (AC current measurement or Stangenes transformer arc detection)
+3. **KLYSTRON CROWBAR** (fiber-optic): LLRF/Interface Chassis → HVPS controller (klystron protection command)
+4. **KLYSTRON ARC TRIGGER** (BNC-12): Electronic signal from Hoffman box (termination tank shunt sensing excessive current)
+5. **PLC FORCE CROWBAR** (Slot-5 OUT3): Active-low signal from SLC-500, monitored on BNC connector
+
+> **Protection philosophy**: Any single source can disable SCR triggers or fire crowbar; redundancy ensures protection even with single-point failures. Filter inductor stored energy is safely discharged through Enerpro logic and secondary rectifiers.
+> 
+> **Source**: `hvps/architecture/designNotes/RFSystemMPSRequirements.docx`
 - **Python Coordinator** (EPICS/Ethernet): Voltage setpoint, readbacks, fault status
 - **Waveform Buffer System**: HVPS voltage, current, inductor voltages monitored on 4 dedicated channels
 - **Switchgear**: Existing field cables to vacuum contactor controller and grounding tank
