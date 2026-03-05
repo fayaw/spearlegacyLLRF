@@ -1,0 +1,363 @@
+192.168.42.2, DMC4143 Rev 1.3h, 22285
+
+:JG 100
+:SH
+161 Sine amp axis not initialized
+?
+:MT -2,-2,-2,-2
+:SHB
+:MOB
+:SHB
+:
+:MT -2,-2,-2,-2
+:AGB=3
+:MG_AGB
+ 3.0000
+:MG_MO
+58 Bad command response
+?MG_MO
+58 Bad command response
+?MG_MOB
+ 1.0000
+:
+Connection closed
+
+192.168.42.2, DMC4143 Rev 1.3h, 22285
+
+:SHB
+:MOB
+:SHB
+:PRB=1024
+:MG_PRB
+ 1024.0000
+:BGB
+22 Begin not possible due to limit switch
+?
+:BGB
+22 Begin not possible due to limit switch
+?
+:BGB
+:PRB=51200
+:BGB
+:SPB?
+54 ? as part of string
+?
+:SPB=?
+ 100
+:SPB=10000
+:PRB=51200
+:MO
+:
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Text from 20240614
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+192.168.42.2, DMC4143 Rev 1.3h, 22285
+
+:AUB=?
+ 9.0
+:MG_AUB
+ 9.0000
+:AU 12,12,12,12
+:MG_AUB
+ 12.0000
+:AG 2,2,2,2
+:MG_AGB
+ 2.0000
+:MG_MO
+58 Bad command response
+?MO
+:SH
+161 Sine amp axis not initialized
+?SHB
+161 Sine amp axis not initialized
+?MT -2,-2,-2,-2
+:SHB
+:MO
+:AU 12,12,12,12
+:AG 2,2,2,2
+:MG_LCB
+ 0.0000
+:LC 1,1,1,1
+:MG_LCB
+ -1.0000
+:LCB=1
+:MB_LCB
+:MG_LCB
+ -1.0000
+:LCB=1
+:MG_LCB
+ -1.0000
+:SHB
+:MG_LCB
+ -1.0000
+:MO
+:SHB
+:MG_CN
+ 1.0000
+:MG_CNA
+ 1.0000
+:MG_CNB
+ 1.0000
+:MG_CNC
+ 1.0000
+:MG_CND
+ 1.0000
+:MO
+:SPB=?
+ 100
+:SPB=10000
+:PRB=51200
+:SHB
+:SPB=?
+ 10000
+:PRB=51200
+:BGB
+:MO
+:SPB=1000
+:SPB=?
+ 1000
+:SHB
+:BGB
+:PRB=-51200
+:BGB
+:PRB=204800
+7 Command not valid while running
+?AB
+:ACB=?
+ 256000
+:TMB=?
+ 0.0000
+:TM = 1000,1000,1000,1000
+:MO
+:SHB
+:ACB=2560
+:ACB=?
+ 2048
+:TMB=?
+ 0.0000
+:MG_TMB
+ 1000.0000
+:PRB=51200
+:MG_PRB
+ 51200.0000
+:BGB
+:AB
+:MO
+:SHB
+:MG_PRB
+ 51200.0000
+:BG B
+:JGB=5120
+:MG_AGB
+ 2.0000
+:MG_TKB
+ 0.0000
+:MG_TKL
+58 Bad command response
+?MG_TLB
+ 5.0000
+:TKB=1.5
+:MG_TKB
+ 1.5002
+:SHB
+:PRB=51200
+:BG B
+:MG_SPB
+ 5120.0000
+:SPB=1000
+:BG B
+:MG_AGB
+ 2.0000
+:AGB=3
+:MG_AGB
+ 3.0000
+:PRB=5120
+:MG_PRB
+ 5120.0000
+:SHB
+:BG B
+:TA 1
+ 15
+:TA 2
+ 0
+:TA 3
+ 0
+:TA 4
+6 Number out of range
+?TA 0
+ 0
+:AZ 1
+134 All Motors must be in MO for this command
+?MO
+:AZ 1
+:TA 1
+ 15
+:SH
+:TA 1
+ 15
+:MO
+:AZ 1
+:AZ 2
+:TA 1
+ 15
+:MG_YBB
+ 200.0000
+:MG_YAB
+ 2.0000
+:YAB=64
+:MG_YAB
+ 64.0000
+:SH
+:MG_PRB
+ 5120.0000
+:BG B
+:BG B
+:MO
+:YAB=256
+:SHB
+:BG B
+:PRB=51200
+:BG B
+:MG_KSB
+ 2.0000
+:MG_PRB
+ 51200.0000
+:PRB=12800
+:KSB=8
+:YSB=?
+ 0
+:KSB=8
+:MG_KSB
+ 8.0000
+:BG B
+:BG B
+:MG_SPB
+ 1000.0000
+:SPB=10000
+:MO
+:SPB=10000
+:SHB
+:BG B
+:SPB=25000
+:MO
+:SPB=25000
+:SHB
+:BG B
+:MO
+:PRB=51200
+:SHB
+:BG B
+:MO
+:PRB=-51200
+:SHB
+:BG B
+:MO
+:SPB=50000
+:SHB
+:BG B
+:AB
+:MG_PRB
+ 51200.0000
+:MO
+:PRB= -51200
+:MG_PRB
+ -51200.0000
+:SHB
+:BG B
+:
+:MG_PRB
+ 0.0000
+:MO
+:SHB
+:
+Connection closed
+
+192.168.42.2, DMC4143 Rev 1.3h, 22285
+
+:MO
+:MO
+:SHB
+:MO
+:MG_PRB
+ 0.0000
+:MG_MT
+58 Bad command response
+?MT=?
+ 0.0000
+:MT -2,-2,-2,-2
+:MT=?
+ 0.0000
+:MT ?,?,?,?
+ -2.0, -2.0, -2.0, -2.0
+:
+
+
+
+Connection closed
+
+192.168.42.2, DMC4143 Rev 1.3h, 22285
+
+:MO
+:MO
+:SHB
+:MO
+:MG_PRB
+ 0.0000
+:MG_MT
+58 Bad command response
+?MT=?
+ 0.0000
+:MT -2,-2,-2,-2
+:MT=?
+ 0.0000
+:MT ?,?,?,?
+ -2.0, -2.0, -2.0, -2.0
+:MT ?,?,?,?
+ -2.0, -2.0, -2.0, -2.0
+:AU 12,12,12,12
+:AU ?,?,?,?
+ 12.0, 12.0, 12.0, 12.0
+:AG 3,3,3,3
+:AG ?,?,?,?
+ 3, 3, 3, 3
+:LC 1,1,1,1
+:LC ?,?,?,?
+ -1, -1, -1, -1
+:YAB=2
+:MG_YAB
+ 2.0000
+:MG_KSB
+ 2.0000
+:YAB=256
+:SPB=100000
+:MG_SPB
+ 100000.0000
+:MG_ACB
+ 2048.0000
+:MO
+:SHB
+:PRB=5120
+:BG B
+:PRB= -5120
+:BG B
+:PRB=51200
+:BG B
+:SPB=200000
+:BG B
+:ACB=10240
+:MG_ACB
+ 10240.0000
+:BG B
+:KSB=8
+:MG_KSB
+ 8.0000
+:BG B
+:KSB=16
+:BG B
+:SPB=50000
+:BG B
+:BG B
+:
