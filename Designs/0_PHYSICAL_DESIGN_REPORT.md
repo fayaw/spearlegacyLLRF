@@ -488,29 +488,116 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
 
 ## 7. Subsystem 3: Machine Protection System (MPS)
 
-### 7.1 Legacy System
+### 7.1 Purpose and Protection Philosophy
 
-The legacy MPS uses an Allen-Bradley PLC-5 (1771 series). It aggregates interlock signals from the RF system, HVPS, and external sources (SPEAR MPS, orbit interlock) and manages the RF permit.
+The RF Machine Protection System (MPS) is the subsystem-level protection controller for the SPEAR3 RF station. Its purpose is to aggregate fault status from all RF subsystems and external safety systems, manage the overall system permit, and coordinate fault recovery.
 
-### 7.2 Upgraded System — ControlLogix 1756
+The protection philosophy, as defined in the RF system MPS requirements (`hvps/architecture/designNotes/RFSystemMPSRequirements.docx`), is:
 
-The MPS PLC is upgraded to Allen-Bradley ControlLogix 1756 platform.
+1. **Protect high-power elements** (HVPS, klystron, cavities) from damage by eliminating stored energy and disabling upstream power sources when faults occur.
+2. **Redundant protection** — multiple independent mechanisms protect each element (e.g., fiber-optic SCR disable, crowbar firing, contactor opening).
+3. **Fail-safe design** — all permits are active-high so that a broken cable or lost signal removes the permit.
+4. **Graceful shutdown** — when upstream elements trip, downstream elements are notified so they can shut down in an orderly fashion.
 
-**Status**: Hardware assembled, software written, tested without RF power. Ready for EPICS development and system integration.
+The MPS does **not** directly control the LLRF9 or HVPS hardware. Instead, it provides permit and control signals to the **Interface Chassis** (Section 8), which performs the fast hardware AND-logic and drives the actual interlock outputs to the LLRF9 and HVPS controller. This separation ensures that hardware interlock response times remain at the microsecond scale (Interface Chassis), while the MPS operates at PLC scan rates (~milliseconds) for fault aggregation, logging, and coordination.
 
-**Functions**:
-- Aggregate all RF interlock inputs (from Interface Chassis status outputs)
-- Issue global RF permit signal (to Interface Chassis)
-- Provide heartbeat signal to Interface Chassis (watchdog for MPS communication health)
-- Issue reset signal to Interface Chassis (clears all latched faults)
-- Log fault events with timestamps
-- Provide EPICS interface for operator monitoring and diagnostics
+### 7.2 Legacy System
 
-### 7.3 MPS Interfaces
+The legacy MPS uses an **Allen-Bradley PLC-5** processor with **1771-series I/O modules**. It aggregates interlock signals from the RF system (via distributed analog modules and direct wiring), the HVPS, and external sources (SPEAR MPS, orbit interlock), and manages the RF permit chain.
 
-- **Interface Chassis**: MPS Summary permit (out), MPS Heartbeat watchdog (out), Reset signal (out), Fault status (in)
-- **Python Coordinator** (EPICS): Status readbacks, fault history, permit control
-- **External Safety Systems**: SPEAR MPS permit, orbit interlock, radiation safety (via Interface Chassis)
+In the legacy system, interlock coordination was distributed across analog modules, PLC I/O, and direct point-to-point wiring with no central coordination point. The PLC-5 communicated with the EPICS control system via a 1771-DCM scanner module.
+
+> **Legacy MPS wiring diagrams**: 33 sheets in `llrf/documentation/mpsWiringDiagrams/` (drawings wd3403300200 through wd3403303400).
+
+### 7.3 Upgraded System — ControlLogix 1756
+
+The MPS PLC is upgraded from PLC-5 to **Allen-Bradley ControlLogix 1756** platform using a Rockwell Automation conversion kit. The ControlLogix platform provides modern Ethernet/IP communication, faster scan times, and long-term vendor support.
+
+**Status**: Hardware assembled, software written, tested on SPEAR3 without RF power. Ready for EPICS IOC development and system integration.
+
+### 7.4 MPS Outputs to Interface Chassis
+
+In the upgraded system, the MPS communicates with the Interface Chassis via digital signals. These are the **only** direct hardware outputs from the MPS PLC to the interlock system:
+
+| Output Signal | Type | Description |
+|---------------|------|-------------|
+| MPS Summary Permit | Digital | Global RF permit from MPS. One of several AND-gate inputs in the Interface Chassis. When removed, the Interface Chassis removes LLRF9 Enable and HVPS SCR ENABLE. |
+| MPS Heartbeat | Digital | Watchdog signal. If the Interface Chassis stops receiving the heartbeat (indicating MPS PLC failure or communication loss), it removes all output permits. |
+| MPS Reset | Digital | Clears all latched faults in the Interface Chassis first-fault register simultaneously. Required to restore system permits after a fault. |
+
+**Important**: The MPS does **not** directly drive the LLRF9 Enable, HVPS SCR ENABLE, or HVPS KLYSTRON CROWBAR signals. Those are Interface Chassis outputs, driven by the AND-logic of all input permits (see Section 8). The MPS contributes its Summary Permit as one input to that AND gate.
+
+### 7.5 MPS Inputs from Interface Chassis
+
+The MPS receives comprehensive status from the Interface Chassis via a multi-conductor digital cable:
+
+| Input Signal | Description |
+|--------------|-------------|
+| All input permit states | Status of every Interface Chassis input (LLRF9 Status, HVPS STATUS, SPEAR MPS, Orbit Interlock, Arc Detection, Waveform Buffer, expansion ports) |
+| All output permit states | Status of every Interface Chassis output (LLRF9 Enable, HVPS SCR ENABLE, HVPS CROWBAR) |
+| First-fault register | Identifies the initiating fault source when multiple faults cascade. Hardware-latched at the moment of initial fault detection. |
+
+This information allows the MPS to:
+- Determine which subsystem caused a trip
+- Log complete fault histories with timestamps
+- Report detailed status to the Python/EPICS coordinator for operator diagnostics
+
+### 7.6 MPS Role in the Protection Chain
+
+The RF system implements a layered protection architecture. The MPS operates at **Layer 3** (PLC scan rate, ~milliseconds):
+
+| Protection Layer | Subsystem | Response Time | Function |
+|------------------|-----------|---------------|----------|
+| Layer 1 | LLRF9 FPGA | <1 μs | RF overvoltage interlocks, baseband window comparators, DAC zeroing, RF switch |
+| Layer 2 | Interface Chassis | <1 μs | Hardware AND-logic, first-fault latching, HVPS fiber-optic control, LLRF9 enable |
+| Layer 3 | **MPS PLC** | **~ms (PLC scan)** | **Fault aggregation, permit management, reset coordination, event logging** |
+| Layer 4 | Python coordinator | ~1 Hz | State machine, supervisory control, operator interface, auto-recovery |
+
+The MPS functions include:
+- Aggregating fault status from all subsystems (via Interface Chassis digital status lines)
+- Providing the MPS Summary Permit to the Interface Chassis AND-gate
+- Sending the heartbeat watchdog signal to the Interface Chassis
+- Issuing the reset signal to the Interface Chassis to clear latched faults after a trip
+- Logging fault events with timestamps for post-mortem analysis
+- Providing redundant collector power calculation (from Waveform Buffer System data sent to MPS for independent verification)
+- Reporting complete system status to the Python/EPICS coordinator
+
+### 7.7 EPICS Interface
+
+The MPS ControlLogix PLC will provide an EPICS interface for operator monitoring and diagnostics. The PV namespace is `SRF1:MPS:`. Key PVs include:
+
+| PV | Type | Description |
+|----|------|-------------|
+| `SRF1:MPS:PERMIT` | BINARY | Overall MPS permit status |
+| `SRF1:MPS:FAULTS:ACTIVE` | MULTI-BIT | Currently active fault sources |
+| `SRF1:MPS:FAULTS:FIRST` | ENUM | First-fault identification (from Interface Chassis) |
+| `SRF1:MPS:FAULTS:COUNT` | INTEGER | Accumulated fault event count |
+
+The Python coordinator reads these PVs to:
+- Determine whether the MPS permit is active before allowing state transitions (e.g., OFF → STANDBY → ON)
+- Force a transition to OFF state if MPS permit is lost during operation
+- Display fault summaries and first-fault information to operators
+
+### 7.8 MPS Interfaces Summary
+
+| Interface Partner | Signal Direction | Signals | Medium |
+|-------------------|-----------------|---------|--------|
+| **Interface Chassis** | MPS → IC | Summary Permit, Heartbeat, Reset | Digital (multi-conductor cable) |
+| **Interface Chassis** | IC → MPS | All input/output states, first-fault register | Digital (multi-conductor cable) |
+| **Python Coordinator** | Bidirectional | Permit status, fault history, reset commands | EPICS Channel Access (Ethernet) |
+
+**Note**: External safety systems (SPEAR MPS permit, orbit interlock) connect to the **Interface Chassis** directly, not to the MPS PLC. The MPS receives their status indirectly via the Interface Chassis digital status lines. This design ensures that external safety permits participate in the fast hardware AND-logic (<1 μs) within the Interface Chassis, rather than being limited to PLC scan rates.
+
+### 7.9 Source Documents
+
+| File | Description |
+|------|-------------|
+| `hvps/architecture/designNotes/RFSystemMPSRequirements.docx` | RF system machine protection requirements and protection philosophy (J. Sebek) |
+| `hvps/architecture/designNotes/interfacesBetweenRFSystemControllers.docx` | Interface Chassis design — defines the MPS-to-Interface Chassis signal interface |
+| `llrf/documentation/mpsWiringDiagrams/` | 33 legacy MPS wiring diagram sheets (wd3403300200–wd3403303400) |
+| `pps/diagrams/00_SYSTEM_OVERVIEW.md` | System-level architecture showing MPS in the upgraded system context |
+| `llrf/llrf9/iGp/dl_llrf/interlock_summary.edl` | LLRF9 interlock summary display (EDM) — shows LLRF9-side interlock PVs that feed into the protection chain |
+| `pps/MSG from Jim Sebek to Faya about PPS.md` | Background on PPS/MPS concerns and upgrade drivers (2022 email) |
 
 
 ---
