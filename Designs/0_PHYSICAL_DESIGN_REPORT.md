@@ -57,7 +57,7 @@ This document is intended to serve as the entry point for the detailed engineeri
 
 ## 1. Executive Summary
 
-The SPEAR3 RF station provides 476 MHz RF power to the SPEAR3 storage ring at the Stanford Synchrotron Radiation Lightsource (SSRL). A single klystron, driven at approximately 1 MW, feeds four single-cell RF cavities through a waveguide distribution network. The combined cavity gap voltage is approximately 3.2 MV.
+The SPEAR3 RF station provides 476 MHz RF power to the SPEAR3 storage ring at the Stanford Synchrotron Radiation Lightsource (SSRL). A single 1.5 MW klystron, operating at approximately 1 MW output power, feeds four single-cell RF cavities through a waveguide distribution network. The combined cavity gap voltage is approximately 2.85 MV (nominal at 500 mA beam current).
 
 The LLRF Upgrade Project replaces the entire control electronics chain — not merely the low-level RF controller, but also the machine protection system, HVPS controller, tuner motor controllers, and supporting infrastructure. The project also introduces several new subsystems that did not exist in the legacy system: an Interface Chassis for centralized hardware interlock coordination, a Waveform Buffer System for extended signal monitoring and klystron collector protection, an optical arc detection system, and a modernized klystron cathode heater controller.
 
@@ -66,14 +66,17 @@ The LLRF Upgrade Project replaces the entire control electronics chain — not m
 | Parameter | Value |
 |-----------|-------|
 | RF Frequency | ~476 MHz |
-| Total Gap Voltage | ~3.2 MV (sum of 4 cavities) |
-| Cavity Gap Voltage | ~800 kV each |
-| Klystron Power | ~1 MW |
+| Total Gap Voltage | ~2.85 MV (sum of 4 cavities, nominal at 500 mA beam) |
+| Cavity Gap Voltage | ~710 kV each (nominal) |
+| Klystron Power | ~1.5 MW rated, ~1 MW typical operating |
 | HVPS Voltage | up to ~90 kV (negative polarity) |
 | HVPS Operating Voltage | ~74.7 kV at 500 mA beam |
 | Drive Power | ~50 W nominal |
 | Number of Cavities | 4 (single-cell, individual tuners) |
 | LLRF9 Units | 2 active, 2 spare (4 purchased) |
+
+
+> **Source**: Gap voltage and beam current data from LLRF9 commissioning measurements (`llrf/tests/llrf9Tests.tex`, J. Sebek, 2021). Klystron rated power from HVPS hazard documentation (`hvps/documentation/procedures/spear3HvpsHazards.tex`).
 
 ### Upgrade Drivers
 
@@ -92,13 +95,28 @@ The LLRF Upgrade Project replaces the entire control electronics chain — not m
 
 The legacy SPEAR3 LLRF system was originally designed for the PEP-II B-Factory (circa 1997) and later adapted for SPEAR3. It consists of:
 
-- **LLRF Controller**: Custom PEP-II analog RF Processor (RFP) module in a VXI chassis, with associated analog signal processing modules (CFM, GVF) for comb filter and gap voltage feedback
-- **Control Software**: State Notation Language (SNL) programs on VxWorks RTOS, running on the VXI crate processor
-- **HVPS Controller**: Allen-Bradley SLC-500 PLC with Enerpro SCR gate driver boards, housed in a Hoffman NEMA enclosure in Building B118
-- **Machine Protection System (MPS)**: Allen-Bradley PLC-5 (1771 series)
-- **Tuner Motor Controllers**: Allen-Bradley 1746-HSTP1 stepper modules with Superior Electric SS2000MD4-M Slo-Syn PWM drivers (obsolete)
+- **LLRF Controller**: Custom PEP-II analog RF Processor (RFP) module in a VXI chassis, with associated analog signal processing modules:
+  - **CFM** (Comb Filter Module) — comb filter for power-line harmonic rejection (two units: CFM1, CFM2)
+  - **GVF** (Gap Voltage Feedback) — gap voltage feedback loop, monitored via CAMAC TAXI interface
+  - **GFF** (Gap Feed-Forward) — gap feed-forward reference path providing drive power and gap voltage setpoints through dedicated octal DACs
+  - See: `llrf/legacyLLRF/rf_dac_loop.st` (RFP/GFF DAC loop), `llrf/legacyLLRF/rf_calib.st` (CFM calibration)
+- **Control Software**: Six State Notation Language (SNL) programs on VxWorks RTOS, running on the VXI crate processor, compiled into a single `rfSeq` IOC library:
+  - `rf_tuner_loop.st` — Cavity tuner stepper motor control
+  - `rf_hvps_loop.st` — HVPS supervisory control and regulation
+  - `rf_states.st` — RF station state machine control (PEP-II heritage, R. Sass, 1997)
+  - `rf_dac_loop.st` — Drive Power and Gap Voltage RFP/GFF DAC loop (S. Allison, 1997)
+  - `rf_calib.st` — Calibration sequences (R. Claus, SLAC/PEP-II LLRF Group)
+  - `rf_msgs.st` — Message logging and CAMAC TAXI error monitoring
+  - See: `llrf/legacyLLRF/Makefile`, `llrf/legacyLLRF/rf_dac_loop_pvs.h`
+- **HVPS Controller**: Allen-Bradley SLC-500 PLC (processor: AB-1747-L532, scanner: AB-1747-DCM) with Enerpro SCR gate driver boards, housed in a Hoffman NEMA enclosure in Building B118
+  - See: `pps/diagrams/07_PLC_CODE_AND_LOGIC.md`, `pps/diagrams/04_wd7307900206_hoffman_box_wiring.md`
+- **Machine Protection System (MPS)**: Allen-Bradley PLC-5 (1771 series), since converted to ControlLogix 1756 (hardware assembled, software written, tested without RF power)
+  - See: `llrf/documentation/mpsWiringDiagrams/`, `hvps/architecture/designNotes/RFSystemMPSRequirements.docx`
+- **Tuner Motor Controllers**: Allen-Bradley 1746-HSTP1 stepper modules with Superior Electric SS2000MD4-M Slo-Syn PWM drivers (obsolete); stepper motors are Superior Electric Slo-Syn M093-FC11 (NEMA 34D)
+  - See: `llrf/tuners/SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf`, `llrf/tuners/SLO-SYN.pdf`
 - **Interlock System**: Distributed across analog modules, PLC I/O, and direct wiring with no central coordination point
-- **Communication**: VXI backplane, CAMAC, field bus, limited EPICS
+- **Communication**: VXI backplane, CAMAC bus with TAXI serial link, field bus, limited EPICS Channel Access. The GVF module is monitored via CAMAC TAXI; a dedicated SNL sequence (`rf_msgs.st`) detects TAXI errors and triggers automatic Low Frequency Bypass (LFB) resynchronization with randomized delay to prevent IOC collision.
+  - See: `llrf/legacyLLRF/rf_msgs.st`
 
 ### 2.2 Upgraded System Architecture
 
@@ -155,13 +173,14 @@ The upgraded system replaces all control electronics while retaining the RF plan
 - HVPS power electronics (transformer, rectifier, oil system, crowbar)
 - Vacuum contactor (Ross HQ3) and contactor controller (Ross HCA-1-A)
 - Ross grounding switch, Danfysik DC-CT, Pearson CT-110
-- Field cabling (Belden 83715 15C #16 Teflon, Belding 83709 9C #16 Teflon)
+- Field cabling (Belden 83715 15C #16 Teflon, Belden 83709 9C #16 Teflon; note: original drawings spell "Belding" for 83709)
 
 **Replaced / Upgraded**:
 - LLRF Controller: Analog RFP → Dimtel LLRF9/476 (×2 units)
 - MPS: PLC-5 1771 → ControlLogix 1756
 - HVPS Controller: SLC-500 → CompactLogix PLC + new Enerpro boards + redesigned analog regulator
-- Tuner Motor Controllers: AB 1746-HSTP1 + Slo-Syn → modern motion controller (Galil DMC-4143 or alternative, TBD)
+- Tuner Motor Controllers: AB 1746-HSTP1 + Slo-Syn → Galil DMC-4143 Rev 1.3h 4-axis motion controller (commissioned August 2025, operational)
+  - See: `llrf/tuners/galil/functioningGalil20250825SwapABToManual.txt`, `llrf/tuners/galil/firstMotion2024.txt`
 - Control Software: SNL/VxWorks → Python/PyEPICS + LLRF9 internal EPICS IOC
 - Operator Interface: Legacy EDM panels → modernized panels
 
@@ -196,7 +215,7 @@ The SPEAR3 RF station spans multiple buildings and locations at SSRL/SLAC:
 | Cable Run | Cable Type | Conductors | Route |
 |-----------|-----------|------------|-------|
 | B118 → Switchgear (Contactor) | Belden 83715 | 15C #16 Teflon | TS-5 to contactor controller |
-| B118 → Termination Tank (Grounding) | Belding 83709 + Belden 83715 | 9C + 15C #16 Teflon | TS-6 to grounding tank |
+| B118 → Termination Tank (Grounding) | Belden 83709 + Belden 83715 | 9C + 15C #16 Teflon | TS-6 to grounding tank |
 | B118 → B514 (HVPS) | Electrical cable pairs | SCR trigger cables (12 pairs) | Controller to Phase Tank thyristor stacks |
 | B118 → B514 (HVPS) | Fiber optic | SCR ENABLE, CROWBAR, STATUS | Controller to HVPS (upgrade: via Interface Chassis) |
 | B132 → B132 | Coax cables | RF drive signal | To drive amplifier |
@@ -222,7 +241,7 @@ The klystron output feeds a waveguide network consisting of:
 
 ### 4.3 RF Cavities
 
-Four single-cell cavities at 476 MHz, each contributing ~800 kV gap voltage for a total of ~3.2 MV. Each cavity has:
+Four single-cell cavities at 476 MHz, each contributing ~710 kV gap voltage (nominal) for a total of ~2.85 MV at 500 mA beam current. Each cavity has:
 - A cavity probe (monitors internal field amplitude and phase)
 - A forward power coupler
 - A reflected power coupler
