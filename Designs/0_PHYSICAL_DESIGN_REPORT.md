@@ -1,7 +1,7 @@
 # SPEAR3 LLRF Upgrade System — Physical Design Report
 
 **Document ID**: SPEAR3-LLRF-PDR-001
-**Revision**: R0
+**Revision**: R1
 **Date**: March 2026
 **Author**: LLRF Upgrade Engineering Team (SSRL/SLAC)
 **Classification**: Top-Level System Design Reference
@@ -57,7 +57,7 @@ This document is intended to serve as the entry point for the detailed engineeri
 
 ## 1. Executive Summary
 
-The SPEAR3 RF station provides 476 MHz RF power to the SPEAR3 storage ring at the Stanford Synchrotron Radiation Lightsource (SSRL). A single klystron, driven at approximately 1 MW, feeds four single-cell RF cavities through a waveguide distribution network. The combined cavity gap voltage is approximately 3.2 MV.
+The SPEAR3 RF station provides 476 MHz RF power to the SPEAR3 storage ring at the Stanford Synchrotron Radiation Lightsource (SSRL). A single 1.5 MW klystron, outputting approximately 1 MW of RF power during normal operation, feeds four single-cell RF cavities through a waveguide distribution network. The combined cavity gap voltage is approximately 3.2 MV.
 
 The LLRF Upgrade Project replaces the entire control electronics chain — not merely the low-level RF controller, but also the machine protection system, HVPS controller, tuner motor controllers, and supporting infrastructure. The project also introduces several new subsystems that did not exist in the legacy system: an Interface Chassis for centralized hardware interlock coordination, a Waveform Buffer System for extended signal monitoring and klystron collector protection, an optical arc detection system, and a modernized klystron cathode heater controller.
 
@@ -68,11 +68,16 @@ The LLRF Upgrade Project replaces the entire control electronics chain — not m
 | RF Frequency | ~476 MHz |
 | Total Gap Voltage | ~3.2 MV (sum of 4 cavities) |
 | Cavity Gap Voltage | ~800 kV each |
-| Klystron Power | ~1 MW |
-| HVPS Voltage | up to ~90 kV (negative polarity) |
-| HVPS Operating Voltage | ~74.7 kV at 500 mA beam |
-| Drive Power | ~50 W nominal |
+| Klystron Rating | 1.5 MW (output ~1 MW in normal operation) |
+| HVPS Maximum Output Voltage | −90 kVDC (negative polarity) |
+| HVPS Maximum Output Current | 27 A |
+| HVPS Maximum Output Power | 2.5 MW |
+| HVPS Operating Voltage | ~−74.7 kV at 500 mA beam |
+| HVPS Operating Current | ~22.0 A at 500 mA beam |
+| HVPS Turn-On Voltage | ~−50 kV (`SRF1:HVPS:VOLT:MIN`) |
+| Drive Power | ~50 W nominal (from drive amplifier to klystron) |
 | Number of Cavities | 4 (single-cell, individual tuners) |
+| Number of HVPSs | 2 (SPEAR1, SPEAR2) — one active, one warm spare |
 | LLRF9 Units | 2 active, 2 spare (4 purchased) |
 
 ### Upgrade Drivers
@@ -94,9 +99,9 @@ The legacy SPEAR3 LLRF system was originally designed for the PEP-II B-Factory (
 
 - **LLRF Controller**: Custom PEP-II analog RF Processor (RFP) module in a VXI chassis, with associated analog signal processing modules (CFM, GVF) for comb filter and gap voltage feedback
 - **Control Software**: State Notation Language (SNL) programs on VxWorks RTOS, running on the VXI crate processor
-- **HVPS Controller**: Allen-Bradley SLC-500 PLC with Enerpro SCR gate driver boards, housed in a Hoffman NEMA enclosure in Building B118
+- **HVPS Controller**: Allen-Bradley SLC-500 PLC (processor AB-1747-L532) with Enerpro FCOG6100/FCOAUX60 SCR gate driver boards and SLAC-designed analog regulator card (PC-237-230-14-C0), housed in a Hoffman NEMA enclosure (34"×42") in Building B118. The HVPS power section (main tank, phase tank, crowbar tank) is in Building B514.
 - **Machine Protection System (MPS)**: Allen-Bradley PLC-5 (1771 series)
-- **Tuner Motor Controllers**: Allen-Bradley 1746-HSTP1 stepper modules with Superior Electric SS2000MD4-M Slo-Syn PWM drivers (obsolete)
+- **Tuner Motor Controllers**: Allen-Bradley 1746-HSTP1 stepper modules with Superior Electric SS2000MD4-M Slo-Syn PWM drivers (obsolete). The stepper controllers are set for 200 steps/revolution with a 2:1 reduction gear and a 20 turns/inch lead screw (1.27 mm/revolution).
 - **Interlock System**: Distributed across analog modules, PLC I/O, and direct wiring with no central coordination point
 - **Communication**: VXI backplane, CAMAC, field bus, limited EPICS
 
@@ -196,7 +201,7 @@ The SPEAR3 RF station spans multiple buildings and locations at SSRL/SLAC:
 | Cable Run | Cable Type | Conductors | Route |
 |-----------|-----------|------------|-------|
 | B118 → Switchgear (Contactor) | Belden 83715 | 15C #16 Teflon | TS-5 to contactor controller |
-| B118 → Termination Tank (Grounding) | Belding 83709 + Belden 83715 | 9C + 15C #16 Teflon | TS-6 to grounding tank |
+| B118 → Grounding Tank (B514) | Belding 83709 + Belden 83715 | 9C + 15C #16 Teflon | TS-6 to Grounding Tank (Ross switch, Danfysik, Pearson) |
 | B118 → B514 (HVPS) | Electrical cable pairs | SCR trigger cables (12 pairs) | Controller to Phase Tank thyristor stacks |
 | B118 → B514 (HVPS) | Fiber optic | SCR ENABLE, CROWBAR, STATUS | Controller to HVPS (upgrade: via Interface Chassis) |
 | B118 → B132 | Coax cables | RF drive signal | To drive amplifier |
@@ -211,7 +216,7 @@ The RF plant is the physical chain that delivers 476 MHz RF power from the klyst
 
 ### 4.1 Klystron
 
-The single klystron is located in Building B132 (Klystron Gallery) and operates at approximately 1 MW output power, driven at ~50 W input from the drive amplifier. The klystron cathode is powered by the HVPS at up to ~90 kV (nominal ~74.7 kV at 500 mA beam current). It has a non-full-power collector requiring dedicated protection (see Section 11.3 for upgrade and current implementation in Section 4.5).
+The single 1.5 MW klystron is located in Building B132 (Klystron Gallery) and outputs approximately 1 MW of RF power during normal 500 mA beam operation, driven at ~50 W input from a fixed-gain drive amplifier. The klystron cathode is powered by the HVPS at up to −90 kVDC (nominal ~−74.7 kV, ~22.0 A at 500 mA beam current). The klystron gain is not fixed — it depends on the HVPS output voltage: for a fixed input drive power, klystron output power increases with increasing HVPS voltage. This relationship is fundamental to the HVPS supervisory control loop (see Section 15.2). The klystron has a non-full-power collector requiring dedicated protection (see Section 11.3 for upgrade and current implementation in Section 4.5).
 
 ### 4.2 Waveguide Distribution
 
@@ -378,15 +383,30 @@ The power section, including transformers, thyristor stacks, filter inductors, s
 
 The legacy controller is housed in a Hoffman NEMA enclosure (34"×42") in Building B118 and contains:
 
-- **PLC**: Allen-Bradley SLC-500 (1747-L532 CPU) with I/O modules in slots 1-9 (OBSOLETE)
-- **Enerpro Firing Board**: Current SCR gate driver
+- **PLC**: Allen-Bradley SLC-500 (1747-L532 CPU) with I/O modules (OBSOLETE):
+
+| Slot | Module | Function |
+|------|--------|----------|
+| CPU | AB-1747-L532 | Processor |
+| 1 | AB-1747-DCM | Data Communications (Scanner) |
+| 2 | AB-1746-IO8 | 8-pt Digital I/O — **Ross switch coil (OUT3)** |
+| 3 | AB-1746-THERMC | Thermocouple inputs (SCR/air/transformer temps) |
+| 5 | AB-1746-OX8 | 8-pt Relay Output — **Contactor enable K4 (OUT2)**, Contactor On/Off (OUT1) |
+| 6 | AB-1746-IB16 | 16 DC Input — **PPS 1 (IN14)**, **PPS 2 (IN15)**, Oil Level (IN8), Manual GRN SW (IN9) |
+| 7 | AB-1746-IV16 | 16 DC Input (various permits) |
+| 8 | AB-1746-NIO4V | 4-ch Analog I/O (voltage setpoint output to Enerpro via regulator) |
+| 9 | AB-1746-NI4 | 4-ch Analog Input — Danfysik HVPS current (IN3) |
+
+- **Enerpro Firing Board**: Current FCOG6100 + FCOAUX60 SCR gate driver (with daughter board for 30° delayed triggering)
 - **Regulator Card** (PC-237-230-14-C0): Analog voltage regulation loop
 - **Power Supplies**: SOLA ±15V/+5V/24V, Kepko 120V (×2), Kepko 5V/20A, Kepko 240V
 - **PS Monitor Board** (SD-730-793-12): Monitors power supply health
 - **Terminal Strips**: TS-5 (contactor, 15 terminals), TS-6 (grounding tank, 21 terminals), TS-3 (PPS LEDs), TS-7 (power distribution)
-- **PPS Connector**: GOB12-88PNE (Burndy/Souriau Trim Trio), 8-pin, in locked box
+- **PPS Connector**: GOB12-88PNE (originally a Burndy circular 8-pin connector; may now be a Souriau Trim Trio equivalent — exact part number unverified), in locked PPS box on Hoffman enclosure
+- **Trigger Interconnect Boards**: Left Side (SD-730-793-08) and Right Side (SD-730-793-07) for SCR gate pulse distribution and crowbar triggering
+- **Interface Boards**: INT1, INT2 for signal conditioning
 
-The SLC-500 PLC executes ladder logic for voltage regulation, contactor management, temperature monitoring, and — critically — PPS safety chain control (Ross grounding switch via Slot-2 IO8 OUT3).
+The SLC-500 PLC executes ladder logic for voltage regulation, contactor management, temperature monitoring, and — critically — PPS safety chain control. The PLC controls the Ross grounding switch coil (120 VAC via Slot-2 IO8 OUT3, Rung 0016) based on PPS 1 AND PPS 2 input states. The contactor enable path (Slot-5 OX8 OUT2, Rung 0017) has a hardware fail-safe: the OX8 relay's input side is wired directly to the PPS 1 signal (24 VDC from the GOB12-88PNE connector), so even if the PLC fails, K4 cannot be energized without PPS enable.
 
 ### 6.3 Upgraded Controller
 
@@ -396,7 +416,11 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
 - **CompactLogix PLC**: Replaces SLC-500; handles voltage regulation, temperature monitoring, fault management, and EPICS communication
 - **Enerpro FCOG1200 Board**: Upgraded SCR gate driver with modified RN4 resistors for SPEAR monitor winding impedance (2 MΩ)
 - **Redesigned Analog Regulator**: Replaces obsolete regulator card components
-- **Fiber Optic Interfaces**: HFBR-1412 transmitter (STATUS), HFBR-2412 receivers (SCR ENABLE, CROWBAR) — connected to Interface Chassis, NOT directly to LLRF
+- **Fiber Optic Interfaces** (at HVPS Controller):
+  - **STATUS out** → HFBR-1412 transmitter: illuminated when control supply present and no crowbar fired
+  - **SCR ENABLE in** ← HFBR-2412 receiver: enables phase control thyristor triggers
+  - **CROWBAR in** ← HFBR-2412 receiver: inhibits crowbar firing (normally illuminated; removing signal fires crowbar)
+  - All fiber optic signals connected to the new Interface Chassis, NOT directly to the LLRF
 
 **Key change**: The CompactLogix PLC is removed from the PPS safety chain. PPS functions (K4 relay, Ross switch control) are routed through the new Interface Chassis instead. The PLC handles only non-safety functions: voltage regulation, temperature monitoring, and EPICS interface.
 
@@ -410,12 +434,26 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
 | Control | `SRF1:HVPS:CONTACTOR:CMD` | On demand |
 | Interlock | `SRF1:HVPS:INTLK:SUMMARY` | ~1 Hz |
 
+**Legacy HVPS Status PVs** (subset, documented in `hvps/architecture/designNotes/rfedmHvpsLabelsPvs.docx`):
+
+| Panel Label | PV | Description |
+|-------------|-----|-------------|
+| Contactor Closed | `SRF1:HVPSCONTACT:CLOSE:STAT` | Aux. relay that closes when contactor closed |
+| Over Voltage | `SRF1:HVPS:VOLT:LTCH` | HVPS voltage limit exceeded (regulator card) |
+| Klystron Arc | `SRF1:HVPSKLYS:ARC:LTCH` | Klystron arc sensed (grounding tank + LHS trigger board) |
+| Transformer Arc | `SRF1:HVPSXFORM:ARC:LTCH` | Transformer arc sensed (HVPS + RHS trigger board) |
+| Crowbar | `SRF1:HVPS:CROWBAR:LTCH` | Senses pulses to crowbar thyristors |
+| PPS | `SRF1:HVPS:PPS:STAT` | PPS chain is made up |
+| SCR 1 | `SRF1:HVPSSCR1:ON:STAT` | Firing status of left side board thyristors |
+| SCR 2 | `SRF1:HVPSSCR2:ON:STAT` | Firing status of right side board thyristors |
+
 ### 6.5 HVPS Interfaces
 
-- **Interface Chassis** (fiber optic): SCR ENABLE (in), CROWBAR inhibit (in), STATUS (out)
+- **Interface Chassis** (fiber optic): SCR ENABLE (from Interface Chassis to HVPS via HFBR-1412→HFBR-2412), CROWBAR inhibit (from Interface Chassis to HVPS), STATUS (from HVPS to Interface Chassis via HFBR-1412→HFBR-2412)
 - **Python Coordinator** (EPICS/Ethernet): Voltage setpoint, readbacks, fault status
 - **Waveform Buffer System**: HVPS voltage, current, inductor voltages monitored on 4 dedicated channels
-- **Switchgear**: Existing field cables to vacuum contactor controller and grounding tank
+- **Switchgear** (B514): Existing field cables to vacuum contactor controller (Belden 83715, 15C #16 Teflon via TS-5) and grounding/termination tank (Belding 83709, 9C #16 Teflon via TS-6)
+- **Crowbar Triggering**: Five sources can disable SCR triggers or fire the crowbar: (1) SCR ENABLE fiber-optic, (2) Transformer Arc Trigger, (3) Klystron Crowbar fiber-optic, (4) Klystron Arc Trigger, (5) PLC FORCE CROWBAR
 
 ---
 
@@ -458,10 +496,10 @@ The Interface Chassis is a completely new subsystem that serves as the central h
 
 The Interface Chassis provides:
 - **First-fault detection** — hardware-based latching circuit identifies the initiating fault in cascade scenarios
-- **Electrical isolation** — all external signals isolated from chassis ground via optocouplers (HCPL-2400-000E) and fiber-optic transceivers (HFBR-1412/2412)
-- **Microsecond-scale response** — implemented in standard electronic components (no processor in the critical path)
+- **Electrical isolation** — all external electrical signals are isolated from the chassis digital ground via optocouplers. The optocoupler for high-speed digital isolation is the Broadcom HCPL-2400-000E (response time ~100 ns). For isolation between external interface areas and internal digital circuitry, the Broadcom ACSL-6xx0 family (max input forward voltage 1.8 VDC, recommended min ON-state current 8 mA, max 15 mA) is used. Fiber-optic transceivers (HFBR-1412 transmitter / HFBR-2412 receiver) isolate the HVPS signals.
+- **Microsecond-scale response** — implemented in standard electronic and electro-optical components (no processor in the critical path); processing delays on the order of microseconds
 - **Fault latching** — all inputs latch when faulted until external reset from MPS
-- **Status reporting** — all input/output states and first-fault status reported to MPS PLC
+- **Status reporting** — all input/output states and first-fault status reported to MPS PLC via digital control lines
 
 ### 8.2 Input Signals
 
@@ -532,7 +570,7 @@ The PPS is the radiation and electrical safety interlock system managed by SLAC'
 - **Chain 1**: Vacuum contactor (removes 12.47 kV input power to HVPS)
 - **Chain 2**: Ross grounding switch (shorts the HVPS output to ground)
 
-The PPS interface uses a GOB12-88PNE (Burndy/Souriau Trim Trio) 8-pin circular connector mounted in a locked box on the Hoffman enclosure.
+The PPS interface uses a GOB12-88PNE 8-pin circular connector (originally a Burndy connector; may now be a Souriau Trim Trio equivalent — exact part number unverified) mounted in a locked PPS box on the Hoffman enclosure. PPS 1 provides 24 VDC when safety chain is made (controls contactor enable and provides status), and PPS 2 provides 24 VDC for Ross grounding switch control.
 
 ### 9.2 Legacy PPS Design (Problems)
 
@@ -575,9 +613,10 @@ This adds significant administrative scope beyond the engineering work and requi
 Each of the 4 RF cavities has a mechanical tuner that adjusts the cavity resonant frequency by moving a plunger into or out of the cavity volume. The tuner is driven by a stepper motor (Superior Electric M093-FC11 or equivalent) through a gear reduction mechanism.
 
 **Tuner parameters** (from legacy documentation):
-- Gear ratio: 80:1 (worm gear)
-- Lead screw pitch: 10 turns/inch
-- Microstep resolution: 0.002–0.003 mm per microstep (legacy)
+- Steps per revolution: 400 (nominal), set for 200 steps/revolution in legacy operation
+- Gear reduction: 2:1 (reduction gear between motor and lead screw)
+- Lead screw pitch: 20 turns/inch (1.27 mm per revolution at lead screw)
+- Microstep resolution: 0.002–0.003 mm per microstep (legacy; upgrade target: up to 256 microsteps/step)
 - Linear potentiometer: Provides absolute position indication (not used in closed-loop control)
 - Travel range: ~12 mm total mechanical range
 - ON home positions: ~10.1–10.7 mm (cavity-dependent)
@@ -1140,6 +1179,6 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 
 **Document Control**:
 - **Created**: March 2026
-- **Revision**: R0
+- **Revision**: R1 — Corrected HVPS specifications, building locations, component details, PPS connector, tuner parameters, fiber-optic signal directions, PLC slot map, and crowbar triggering sources based on comprehensive review of all source documents.
 - **Next Review**: Upon completion of Interface Chassis preliminary design
 - **Distribution**: LLRF Upgrade Team, SPEAR3 Operations, Engineering Management, PPS/Protection Group
