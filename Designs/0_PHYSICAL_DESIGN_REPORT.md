@@ -106,8 +106,8 @@ The upgraded system replaces all control electronics while retaining the RF plan
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        OPERATOR LAYER                              │
-│   EDM Panels  │  Web Dashboard  │  EPICS Archiver  │  Logging     │
+│                        OPERATOR LAYER                               │
+│   EDM Panels  │  Web Dashboard  │  EPICS Archiver  │  Logging       │
 └───────────────────────────┬─────────────────────────────────────────┘
                             │ EPICS Channel Access
 ┌───────────────────────────┴─────────────────────────────────────────┐
