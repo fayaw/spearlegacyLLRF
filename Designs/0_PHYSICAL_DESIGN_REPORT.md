@@ -111,37 +111,37 @@ The upgraded system replaces all control electronics while retaining the RF plan
 └───────────────────────────┬─────────────────────────────────────────┘
                             │ EPICS Channel Access
 ┌───────────────────────────┴─────────────────────────────────────────┐
-│                  PYTHON/EPICS COORDINATOR                          │
-│  State Machine │ HVPS Loop │ Tuner Manager │ Fault Manager │ Diag │
+│                  PYTHON/EPICS COORDINATOR                           │
+│  State Machine │ HVPS Loop │ Tuner Manager │ Fault Manager │ Diag   │
 └───────────────────────────┬─────────────────────────────────────────┘
                             │ EPICS Channel Access (~1 Hz supervisory)
 ┌───────────────────────────┴─────────────────────────────────────────┐
-│                     HARDWARE SUBSYSTEMS                            │
+│                     HARDWARE SUBSYSTEMS                             │
 │                                                                     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────────────┐  │
-│  │ LLRF9 #1 │  │ LLRF9 #2 │  │ HVPS PLC │  │ MPS PLC           │  │
-│  │ (Field   │  │ (Monitor │  │ Compact- │  │ ControlLogix 1756 │  │
-│  │  Control │  │  + Intlk)│  │ Logix    │  │                   │  │
-│  │  + Tuner)│  │          │  │          │  │                   │  │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬──────────────┘  │
-│       │              │              │              │                 │
-│  ┌────┴──────────────┴──────────────┴──────────────┴──────────┐    │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────────────┐    │
+│  │ LLRF9 #1 │  │ LLRF9 #2 │  │ HVPS PLC │  │ MPS PLC           │    │
+│  │ (Field   │  │ (Monitor │  │ Compact- │  │ ControlLogix 1756 │    │
+│  │  Control │  │  + Intlk)│  │ Logix    │  │                   │    │
+│  │  + Tuner)│  │          │  │          │  │                   │    │
+│  └────┬─────┘  └────┬─────┘  └─────┬────┘  └──────┬────────────┘    │
+│       │             │              │              │                 │
+│  ┌────┴─────────────┴──────────────┴──────────────┴────────────┐    │
 │  │              INTERFACE CHASSIS (NEW)                        │    │
 │  │   First-fault detection │ Optocoupler isolation │ Fiber I/O │    │
-│  └────┬──────────────┬──────────────┬──────────────┬──────────┘    │
-│       │              │              │              │                 │
-│  ┌────┴─────┐  ┌─────┴────┐  ┌─────┴────┐  ┌─────┴──────────┐    │
-│  │ Waveform │  │   Arc    │  │  Motor   │  │ Heater         │    │
-│  │ Buffer   │  │ Detect.  │  │ Ctrl     │  │ Controller     │    │
-│  │ System   │  │ (MIS)    │  │ (4-axis) │  │ (SCR-based)    │    │
-│  └──────────┘  └──────────┘  └──────────┘  └────────────────┘    │
+│  └────┬──────────────┬──────────────┬──────────────┬───────────┘    │
+│       │              │              │              │                │
+│  ┌────┴─────┐  ┌─────┴────┐  ┌──────┴───┐  ┌───────┴────────┐       │
+│  │ Waveform │  │   Arc    │  │  Motor   │  │ Heater         │       │
+│  │ Buffer   │  │ Detect.  │  │ Ctrl     │  │ Controller     │       │
+│  │ System   │  │ (MIS)    │  │ (4-axis) │  │ (SCR-based)    │       │
+│  └──────────┘  └──────────┘  └──────────┘  └────────────────┘       │
 └─────────────────────────────────────────────────────────────────────┘
                             │
               Hardware interlock signals
                             │
 ┌───────────────────────────┴─────────────────────────────────────────┐
-│                      SAFETY SYSTEMS                                │
-│  PPS Interface │ SPEAR MPS │ Orbit Interlock │ External Permits    │
+│                      SAFETY SYSTEMS                                 │
+│  PPS Interface │ SPEAR MPS │ Orbit Interlock │ External Permits     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -183,12 +183,12 @@ The SPEAR3 RF station spans multiple buildings and locations at SSRL/SLAC:
 
 | Location | Equipment | Notes |
 |----------|-----------|-------|
-| **Building B118** (Controller Room) | HVPS Controller (Hoffman Box), LLRF9 units, MPS PLC, Interface Chassis, Waveform Buffer, Motion Controller, Python coordinator server | Main control electronics location |
+| **Building B118** (Controller Room) | HVPS Controller (Hoffman Box) | HVPS control location |
 | **Building B514** (HVPS Vault) | HVPS Main Tank (transformer, rectifier, inductor, filter caps), Phase Tank (12 thyristor stacks), Crowbar Tank (4 thyristor stacks, output V-divider), Grounding Tank (Danfysik DC-CT, Pearson CT-110, Ross switch) | High-voltage power section; FR3 oil-filled, N₂ blanket |
 | **Contactor Disconnect Panel** (Switchgear, adjacent to B514) | Vacuum contactor (Ross HQ3), Contactor controller (Ross HCA-1-A), K4/MX/RR/L1 relays, S5 auxiliary contact | 12.47 kV AC switchgear |
 | **Termination Tank** (near klystron) | HV cable termination, Ross Engineering HV relay | Mineral oil filled |
 | **Switch-over Tank** (adjacent B514) | HV cable connections between SPEAR1/SPEAR2 and klystron | FR3 oil filled |
-| **Building B132** (Klystron Gallery) | Klystron, drive amplifier | Near storage ring |
+| **Building B132** (Klystron ) | Klystron, drive amplifier, LLRF9 units, MPS PLC, Interface Chassis, Waveform Buffer, Motion Controller, Python coordinator server | Main control electronics location|
 | **SPEAR3 Storage Ring Tunnel** | 4 RF cavities, waveguide distribution, tuner assemblies, arc detection sensors | Radiation area |
 
 ### Cabling Between Locations
@@ -199,9 +199,9 @@ The SPEAR3 RF station spans multiple buildings and locations at SSRL/SLAC:
 | B118 → Termination Tank (Grounding) | Belding 83709 + Belden 83715 | 9C + 15C #16 Teflon | TS-6 to grounding tank |
 | B118 → B514 (HVPS) | Electrical cable pairs | SCR trigger cables (12 pairs) | Controller to Phase Tank thyristor stacks |
 | B118 → B514 (HVPS) | Fiber optic | SCR ENABLE, CROWBAR, STATUS | Controller to HVPS (upgrade: via Interface Chassis) |
-| B118 → B132 | Coax cables | RF drive signal | To drive amplifier |
-| B118 → Tunnel | Coax cables | RF signals (forward, reflected, probe) | LLRF inputs from cavities |
-| B118 → Tunnel | Multi-conductor | Motor power + encoder signals | To tuner assemblies |
+| B132 → B132 | Coax cables | RF drive signal | To drive amplifier |
+| B132 → Tunnel | Coax cables | RF signals (forward, reflected, probe) | LLRF inputs from cavities |
+| B132 → Tunnel | Multi-conductor | Motor power + encoder signals | To tuner assemblies |
 
 ---
 
