@@ -211,13 +211,13 @@ The RF plant is the physical chain that delivers 476 MHz RF power from the klyst
 
 ### 4.1 Klystron
 
-The single klystron is located in Building B132 (Klystron Gallery) and operates at approximately 1 MW output power, driven at ~50 W input from the drive amplifier. The klystron cathode is powered by the HVPS at up to ~90 kV (nominal ~74.7 kV at 500 mA beam current). It has a non-full-power collector requiring dedicated protection (see Section 11.3 for upgrade and current implementation in Section 4.5).
+The single klystron is located in Building B132 and operates at approximately 1 MW output power, driven at ~50 W input from the drive amplifier. The klystron cathode is powered by the HVPS at up to ~90 kV (nominal ~74.7 kV at 500 mA beam current). It has a non-full-power collector requiring dedicated protection (see Section 11.3 for upgrade and current implementation in Section 4.5).
 
 ### 4.2 Waveguide Distribution
 
 The klystron output feeds a waveguide network consisting of:
 - A circulator (protects klystron from reflected power)
-- Magic-tee power splitters (distributes power to 4 cavities)
+- Magic-tee power splitters (two stage splitter that distributes power to 4 cavities)
 - Waveguide loads (absorb rejected power)
 
 ### 4.3 RF Cavities
@@ -231,7 +231,7 @@ Four single-cell cavities at 476 MHz, each contributing ~800 kV gap voltage for 
 
 ### 4.4 Drive Amplifier
 
-The drive amplifier is located in Building B132 near the klystron and boosts the LLRF9 output signal (~0 dBm) to ~50 W to drive the klystron input. In the upgrade, the LLRF9 Unit 1 output (from the thermally stabilized output chain on Board 1 or Board 2) connects to the drive amplifier input via coax cable from B118. A KAW2051M12 amplifier datasheet is available in `llrf/driveAmp/`.
+The drive amplifier is located in Building B132 near the klystron and boosts the LLRF9 output signal (~0 dBm) to ~50 W to drive the klystron input. In the upgrade, the LLRF9 Unit 1 output (from the thermally stabilized output chain on Board 1 or Board 2) connects to the drive amplifier input via coax cable. A KAW2051M12 amplifier datasheet is available in `llrf/driveAmp/`.
 
 ### 4.5 Legacy Collector Power Protection
 
@@ -249,12 +249,74 @@ The current SPEAR3 system includes collector power protection implemented throug
 - Limited diagnostic capability for collector power trends
 - Protection relies on forward power proxy rather than actual collector power calculation
 
+### 4.6 RF Signal Monitoring
+
+The amplitudes of the RF data need to be acquired. The RF signals that are currently monitored are listed in the table below, along with their location in the RF plant signal flow.
+
+#### RF Plant Signal Flow
+
+```
+  (6) Station Ref ────────────────────────────────────────────────────────────────────────────────────────
+  (5) Kly Drive ──► [Drive Amp] ──► [KLYSTRON] ──(1)Fwd──► [CIRCULATOR] ──(3,4)──► [CIRC LOAD]
+                                      (2) Refl ◄──────────  P1=kly  P2→waveguide
+                                                                      │
+                                                                      ▼
+                                                            [MAGIC TEE 1]  (1st split: half power each side)
+                                                               P2│       P3│       P4│
+                                                                 │         │         └──► [WG LOAD 1] (7,8)
+                                                                 │         │
+                                              ───────────────────┘         └───────────────────────
+                                             │                                                     │
+                                             ▼                                                     ▼
+                                    [MAGIC TEE 2]  (2nd split)                          [MAGIC TEE 3]  (2nd split)
+                                     P2│    P3│    P4│                                   P2│    P3│    P4│
+                                       │      │      └──► [WG LOAD 2] (15,16)              │      │      └──► [WG LOAD 3] (23,24)
+                                       │      │                                             │      │
+                                       ▼      ▼                                             ▼      ▼
+                                   [CAV A] [CAV B]                                      [CAV C] [CAV D]
+                                   Fwd (9)  Fwd (11)                                   Fwd (17) Fwd (19)
+                                  Refl (10) Refl (12)                                 Refl (18) Refl (20)
+                                 Probe (13) Probe (14)                               Probe (21) Probe (22)
+```
+
+> **Note on waveguide loads**: By the magic-tee symmetry, equal reflected power from the two cavities feeding a magic tee exits port 4 into the attached waveguide load, not back toward the klystron. The circulator load absorbs power that the circulator does not properly direct to the cavities along with any net reflection returning from the first magic tee.
+
+#### Monitored RF Signals
+
+| # | Signal | Monitored By | Notes |
+|---|--------|--------------|-------|
+| 1 | Klystron Output Forward Power | LLRF9 Unit 2 BRD2 | RF power at the klystron output traveling toward the circulator; primary measure of station RF output level. |
+| 2 | Klystron Output Reflected Power | LLRF9 Unit 2 BRD2 | RF power reflected back into the klystron output port from the load chain; should be near zero; used for klystron protection. |
+| 3 | Circulator Load Forward Power | Waveform Buffer Ch1 | Power delivered to the circulator load (circulator port 3); absorbs power the circulator does not properly direct to the cavities plus any net reflection returning from the waveguide network. |
+| 4 | Circulator Load Reflected Power | Waveform Buffer Ch2 | Power reflected from the circulator load back into the circulator; indicates load match quality. |
+| 5 | Klystron Drive Power | LLRF9 Unit 2 BRD1 | Input drive signal level to the klystron from the drive amplifier; sets the klystron gain and operating point. |
+| 6 | Station Reference Power | Waveform Buffer Ch3 | Monitor of the 476 MHz reference signal level distributed to the LLRF system; loss of this signal indicates a reference chain fault. |
+| 7 | Waveguide Load 1 Forward Power | LLRF9 Unit 1 BRD3 | Power entering WG Load 1 at port 4 of Magic Tee 1; absorbs the combined out-of-phase reflections from the two second-layer magic tees that make it back to Magic Tee 1. |
+| 8 | Waveguide Load 1 Reflected Power | Waveform Buffer Ch4 | Power reflected from WG Load 1 back into Magic Tee 1; indicates load match quality. |
+| 9 | Cavity A Forward Power | LLRF9 Unit 1 BRD1 | RF power traveling into Cavity A from Magic Tee 2; used to monitor power distribution balance across cavities. |
+| 10 | Cavity A Reflected Power | LLRF9 Unit 2 BRD3 | Power reflected from Cavity A back into the waveguide; elevated reflection indicates cavity detuning or mismatch. |
+| 11 | Cavity B Forward Power | LLRF9 Unit 1 BRD2 | RF power traveling into Cavity B from Magic Tee 2; compared with Cavity A forward to verify magic-tee balance. |
+| 12 | Cavity B Reflected Power | LLRF9 Unit 2 BRD3 | Power reflected from Cavity B; monitored for detuning and arc detection. |
+| 13 | Cavity A Probe Signal | LLRF9 Unit 1 BRD1 | Electric field sampled by Cavity A's internal pickup probe; direct measure of the accelerating voltage amplitude and phase; primary LLRF fast feedback and tuner control input for Cavity A. |
+| 14 | Cavity B Probe Signal | LLRF9 Unit 1 BRD1 | Electric field from Cavity B's internal probe; used in the LLRF vector-sum feedback and Cavity B tuner control. |
+| 15 | Waveguide Load 2 Forward Power | LLRF9 Unit 1 BRD3 | Power entering WG Load 2 at port 4 of Magic Tee 2; absorbs the sum of equal reflected power from Cavities A and B. |
+| 16 | Waveguide Load 2 Reflected Power | Waveform Buffer Ch5 | Power reflected from WG Load 2; indicates match quality of the load. |
+| 17 | Cavity C Forward Power | LLRF9 Unit 1 BRD2 | RF power traveling into Cavity C from Magic Tee 3. |
+| 18 | Cavity C Reflected Power | LLRF9 Unit 2 BRD3 | Power reflected from Cavity C; monitored for detuning and arc detection. |
+| 19 | Cavity D Forward Power | LLRF9 Unit 2 BRD1 | RF power traveling into Cavity D from Magic Tee 3. |
+| 20 | Cavity D Reflected Power | LLRF9 Unit 2 BRD2 | Power reflected from Cavity D. |
+| 21 | Cavity C Probe Signal | LLRF9 Unit 1 BRD2 | Electric field from Cavity C's internal probe; used in the LLRF vector-sum feedback and Cavity C tuner control. |
+| 22 | Cavity D Probe Signal | LLRF9 Unit 2 BRD1 | Electric field from Cavity D's internal probe; used in the LLRF vector-sum feedback and Cavity D tuner control. |
+| 23 | Waveguide Load 3 Forward Power | LLRF9 Unit 1 BRD3 | Power entering WG Load 3 at port 4 of Magic Tee 3; absorbs the sum of equal reflected power from Cavities C and D. |
+| 24 | Waveguide Load 3 Reflected Power | Waveform Buffer Ch6 | Power reflected from WG Load 3; indicates match quality of the load. |
+
+
 
 ---
 
 ## 5. Subsystem 1: LLRF Controller
 
-> **Detailed reference**: `Designs/3_LLRF9_SYSTEM_AND_SOFTWARE_REPORT.md`
+> **Detailed reference**: `llrf/llrf9`
 
 ### 5.1 Legacy System
 
@@ -267,10 +329,10 @@ The legacy system processes 24 RF channels through the VXI system and uses analo
 Two Dimtel LLRF9/476 units replace the entire VXI-based LLRF system (four units purchased; two active, two spares).
 
 **Hardware per unit**:
-- 3 × LLRF4.6 boards: each with Xilinx Spartan-6 FPGA, 4 high-speed ADC channels, 2 DAC channels
+- 3 × LLRF4.6 boards: each with Xilinx Spartan-6 FPGA, 4 high-speed ADC channels, 2 DAC channels, 3 RF channel.
 - LO/Interconnect module: divide-and-mix LO synthesis for low phase noise, RF reference distribution, output amplification/filtering, interlock logic
 - Linux SBC (mini-ITX): runs the built-in EPICS IOC (EPICS Base 3.14)
-- Thermal stabilization: aluminum cold plate with 3 TEC modules under PID control
+- Thermal stabilization: aluminum cold plate with 3 TEC modules under PID control, only available to board1&2
 - Power supply: 90-264 VAC auto-ranging
 - 3U 19" rack chassis
 
@@ -295,27 +357,31 @@ Two Dimtel LLRF9/476 units replace the entire VXI-based LLRF system (four units 
 
 **Unit 1 — Field Control & Tuner Loops**:
 
-| Board | Ch0 (Ref) | Ch1 | Ch2 | Ch3 | Output |
-|-------|-----------|-----|-----|-----|--------|
-| BRD1 | Station Ref | Cav 1 Probe | Cav 2 Probe | Cav 1 Fwd | Klystron Drive |
-| BRD2 | Station Ref | Cav 3 Probe | Cav 4 Probe | Cav 2 Fwd | (Spare / Monitor) |
-| BRD3 | Station Ref | Cav 3 Fwd | Cav 4 Fwd | Kly Fwd | (Rear panel only) |
+| Board | Ch0 (Ref) | Ch1 | Ch2 | Ch3 | Output | Thermal Stabilization |
+|-------|-----------|-----|-----|-----|--------|-----------------------|
+| BRD1 | Station Ref | Cav A Probe | Cav B Probe | Cav A Fwd | Klystron Drive | Y |
+| BRD2 | Station Ref | Cav C Probe | Cav C Fwd | Cav B Fwd | (Spare / Monitor) | Y |
+| BRD3 | Station Ref | WG Load 1 Fwd | WG Load 2 Fwd | WG Load 3 Fwd | (Not used) | N |
 
-- **Primary vector sum**: Only Cavities 1 & 2 (on BRD1, same board as output) participate in the 270 ns direct feedback loop for klystron drive
-- **Critical constraint**: Cavities 3 & 4 are monitored but NOT in the main fast feedback loop
+- **Primary vector sum**: Only Cavities A & B (on BRD1, same board as output) participate in the 270 ns direct feedback loop for klystron drive
+- **Critical constraint**: Cavities C & D are monitored but NOT in the main fast feedback loop
 - **Tuner phase data**: All 4 cavity probe phases available at 10 Hz for tuner control
+- **BRD3**: Monitors the three waveguide load forward power signals (WG Load 1, 2, 3); RF connections on rear panel only; no thermal stabilization
 
 **Unit 2 — Monitoring & Interlocks**:
 
-| Board | Ch0 (Ref) | Ch1 | Ch2 | Ch3 | Output |
-|-------|-----------|-----|-----|-----|--------|
-| BRD1 | Station Ref | Cav 1 Refl | Cav 2 Refl | Circ Load | (Not used) |
-| BRD2 | Station Ref | Cav 3 Refl | Cav 4 Refl | Kly Refl | (Not used) |
-| BRD3 | Station Ref | (Spare) | (Spare) | (Spare) | (Not used) |
+| Board | Ch0 (Ref) | Ch1 | Ch2 | Ch3 | Output | Thermal Stabilization |
+|-------|-----------|-----|-----|-----|--------|-----------------------|
+| BRD1 | Station Ref | Cav D Probe | Cav D Fwd | Drv Fwd | (Not used) | Y |
+| BRD2 | Station Ref | Cav D Refl | Kly Refl | Kly Fwd | (Not used) | Y |
+| BRD3 | Station Ref | Cav A Refl | Cav B Refl | Cav C Refl | (Not used) | N |
+
 
 - **Reflected power monitoring**: All 4 cavity reflected + klystron reflected for arc/mismatch detection
 - **Interlock chain**: Reflected power events → Unit 2 interlock output → Interface Chassis → disables Unit 1 drive
 - **No drive output required** from Unit 2
+
+> **Remaining RF signals**: The 6 signals not covered by the two LLRF9 units (Circulator Load Fwd/Refl, Station Reference, WG Load 1/2/3 Reflected) are monitored by the Waveform Buffer System — see [Section 11](#11-subsystem-7-waveform-buffer-system).
 
 ### 5.4 Key Performance Specifications
 
@@ -347,7 +413,7 @@ Two Dimtel LLRF9/476 units replace the entire VXI-based LLRF system (four units 
 
 ## 6. Subsystem 2: High Voltage Power Supply (HVPS)
 
-> **Detailed reference**: `Designs/4_HVPS_Engineering_Technical_Note.md`, `Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md`
+> **Detailed reference**: `hvps/`
 
 ### 6.1 Power Section (Retained)
 
@@ -367,10 +433,11 @@ The HVPS converts 12.47 kV RMS 3-phase AC to regulated DC high voltage for the k
 | Maximum output voltage | −90 kV DC |
 | Maximum output current | 27 A |
 | Maximum output power | 2.5 MW |
-| Nominal operating voltage | −74.7 kV (at 500 mA beam) |
-| Nominal operating current | 22.0 A (at 500 mA beam) |
+| Nominal operating voltage | −74.7 kV |
+| Nominal operating current | 22.0 A |
 | Rectifier topology | 12-pulse, thyristor phase-controlled |
 | Number of HVPSs | 2 (SPEAR1 active, SPEAR2 warm spare) |
+- **Nominal operatiing beam current**: 500 mA
 
 The power section, including transformers, thyristor stacks, filter inductors, secondary rectifiers, crowbar, oil system, and all power cabling, is retained unchanged.
 
@@ -450,7 +517,7 @@ The MPS PLC is upgraded to Allen-Bradley ControlLogix 1756 platform.
 
 ## 8. Subsystem 4: Interface Chassis
 
-> **Detailed reference**: `Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md`, `llrf/architecture/llrfInterfaceChassis.docx`
+> **Detailed reference**: `llrf/architecture/llrfInterfaceChassis.docx`
 
 ### 8.1 Purpose
 
@@ -523,7 +590,7 @@ The Interface Chassis is custom hardware requiring PCB design for:
 
 ## 9. Subsystem 5: Personnel Protection System (PPS) Interface
 
-> **Detailed reference**: `Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md`, `pps/diagrams/00_SYSTEM_OVERVIEW.md`
+> **Detailed reference**: `pps/`
 
 ### 9.1 PPS Overview
 
@@ -558,7 +625,7 @@ The upgraded design removes the PLC from the PPS safety chain entirely:
 ### 9.4 PPS Regulatory Considerations
 
 Any modification to PPS wiring, control logic, or readback paths requires:
-- Review and approval by SLAC protection managers
+- Review and approval by SLAC AD Safety Division 
 - Formal change control documentation
 - Radiation safety verification testing
 - Possibly a radiation safety work control form
@@ -587,7 +654,7 @@ Each of the 4 RF cavities has a mechanical tuner that adjusts the cavity resonan
 
 - **Motor controller**: Allen-Bradley 1746-HSTP1 (high-speed stepper module, OBSOLETE)
 - **Motor driver**: Superior Electric SS2000MD4-M Slo-Syn PWM driver (OBSOLETE)
-- **Control software**: SNL `rf_tuner_loop.st` (555 lines) — phase-based feedback with home reset, motion monitoring, and load angle offset computation
+- **Control software**: SNL `rf_tuner_loop.st`  — phase-based feedback with home reset, motion monitoring, and load angle offset computation
 - **Phase source**: Legacy analog RFP module
 
 ### 10.3 Upgraded Controller
@@ -635,7 +702,7 @@ The tuner motor controller is identified as the hardest-to-prove subsystem. Prev
 
 The Waveform Buffer System is a new signal conditioning and monitoring chassis that extends the LLRF9's RF monitoring capabilities and adds dedicated HVPS signal monitoring. It serves three functions:
 
-1. **Extended RF signal monitoring** — 8 RF channels with circular waveform buffers for pre-fault capture
+1. **Extended RF signal monitoring** — 8 RF channels with circular waveform buffers for pre-fault capture; monitors the 6 RF signals not assigned to the two LLRF9 units
 2. **HVPS signal monitoring** — 4 channels (voltage, current, 2 inductor voltages) with circular buffers
 3. **Enhanced klystron collector power protection** — computes DC power minus RF power (vs. legacy forward power proxy) and triggers a hardware trip if collector power exceeds the limit
 
@@ -643,10 +710,17 @@ The Waveform Buffer System is a new signal conditioning and monitoring chassis t
 
 **RF Channels (8)**:
 
-| Channel | Signal | Purpose |
-|---------|--------|---------|
-| 1–4 | Cavity 1–4 forward power | Forward power monitoring |
-| 5–8 | Cavity 1–4 reflected power | Reflected power / mismatch monitoring |
+The two LLRF9 units together cover 18 of the 24 monitored RF signals (see [Section 5.3](#53-two-unit-configuration-for-spear3)). The 6 remaining signals are routed to the Waveform Buffer RF inputs:
+
+| Channel | Signal # | Signal | Purpose |
+|---------|----------|---------|---------|
+| 1 | 3 | Circulator Load Forward Power | Monitors power dissipated in circulator load; cross-check of circulator isolation |
+| 2 | 4 | Circulator Load Reflected Power | Indicates circulator load match quality |
+| 3 | 6 | Station Reference Power | Monitors 476 MHz reference level; loss of reference triggers fault |
+| 4 | 8 | Waveguide Load 1 Reflected Power | Monitors WG Load 1 match quality |
+| 5 | 16 | Waveguide Load 2 Reflected Power | Monitors WG Load 2 match quality |
+| 6 | 24 | Waveguide Load 3 Reflected Power | Monitors WG Load 3 match quality |
+| 7–8 | — | (Spare) | Reserved for future use |
 
 **HVPS Channels (4)**:
 
@@ -714,7 +788,7 @@ The arc detection system is a new subsystem that provides optical monitoring of 
 
 ### 13.1 Legacy System
 
-The current klystron heater control system is inherited from the PEP-II era and consists of a motor-driven variac for voltage adjustment, feeding a Kepko 5V/20A power supply (PS-2) located in the Hoffman Box.
+The current klystron heater control system is inherited from the PEP-II era and consists of a motor-driven variac for voltage adjustment, feeding a Kepko 5V/20A power supply (PS-2).
 
 **Current System Architecture**:
 - **Input Power**: 120VAC, Phase C (from Hoffman box wiring)
@@ -757,7 +831,6 @@ Python/EPICS Coordinator → SCR Controller → Low-Pass Filter (120–180 Hz)
 - LC low-pass filter (fc ≈ 159 Hz) attenuates switching harmonics
 - True RMS voltage/current monitoring (AD637 RMS-to-DC converters)
 - Automated warm-up, standby, and cool-down sequences
-- Estimated cost: ~$17,100
 
 ### 13.3 Interfaces
 
@@ -769,7 +842,7 @@ Python/EPICS Coordinator → SCR Controller → Low-Pass Filter (120–180 Hz)
 
 ## 14. Subsystem 10: Control Software
 
-> **Detailed reference**: `Designs/9_SOFTWARE_DESIGN.md`
+> **Detailed reference**: `llrf/epicsSequences/legacyLLRF, Docs_JS/LLRFOperation_jims.docx`
 
 ### 14.1 Legacy Software
 
@@ -788,40 +861,13 @@ The legacy control software consists of SNL (State Notation Language) programs r
 
 The upgrade replaces all SNL code with a Python/PyEPICS coordinator application that operates as a supervisory control layer at ~1 Hz. It is NOT in the fast safety path.
 
-**Software stack**:
-- Python 3.9+ with PyEPICS 3.5+
-- asyncio for concurrent operations
-- PyYAML for configuration
-- NumPy for phase/power calculations
-- pytest for testing
-- Flask/FastAPI for web dashboard
-
-**Application structure**:
-```
-spear3_llrf/
-├── coordinator/          # Core control modules
-│   ├── state_machine.py  # Station state management (OFF/PARK/TUNE/ON_CW)
-│   ├── hvps_controller.py # HVPS supervisory loop
-│   ├── tuner_manager.py  # 4-cavity tuner control
-│   ├── load_angle_controller.py # Power balancing
-│   ├── fault_manager.py  # Fault detection and recovery
-│   └── diagnostics.py    # System health monitoring
-├── epics_interface/      # Hardware abstraction layer
-│   ├── pv_manager.py     # PV definitions and caching
-│   ├── channel_access.py # PyEPICS wrapper
-│   └── mock_interface.py # Test mocks
-├── config/               # YAML configuration files
-├── web_interface/        # REST API and dashboard
-├── tests/                # Unit and integration tests
-└── scripts/              # Installation, startup, diagnostics
-```
-
 ### 14.3 Key Design Principles
 
 - **Separation of concerns**: Each module has a single responsibility
 - **Hardware abstraction**: All hardware interfaces go through the EPICS layer
-- **Configuration-driven**: All operational parameters in YAML files
+- **Configuration-driven**: All operational parameters in configuration files
 - **Fault tolerance**: Graceful degradation when subsystems are unavailable
+- **Diagnostics**: Structured event logging, LLRF9 + waveform buffer readout, system performance metrics, and logging
 - **Testability**: Mock interfaces for all hardware dependencies
 - **Safety delegation**: Hardware safety handled by Interface Chassis; Python handles sequencing and coordination only
 
@@ -887,7 +933,7 @@ The PLC handles low-level voltage regulation; the Python coordinator provides su
 
 | Aspect | Legacy | Upgraded |
 |--------|--------|----------|
-| Implementation | SNL `rf_calib.st` (2,800+ lines, ~20 min) | LLRF9 built-in digital calibration |
+| Implementation | SNL `rf_calib.st` (2,800+ lines, ~20 min) | Python `rf_calib.py` + LLRF9 built-in digital calibration |
 | Scope | Analog offset nulling, coefficient calibration for RFP module | Factory + installation calibration stored in EEPROM |
 | Duration | ~20 minutes | Minutes (digital, no analog drift) |
 
@@ -1030,15 +1076,46 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 
 ### 19.1 Implementation Phases
 
-**Phase 1 — Foundation**: IOC and database setup, Python framework, LLRF9 PV interface, EPICS environment configuration.
+> **Critical Constraint**: The SPEAR3 LLRF upgrade has extremely limited flexibility for integration testing since bringing systems online directly impacts SPEAR operations. This severely constrains the available testing window and requires a fundamentally different approach than typical development projects.
 
-**Phase 2 — Core Control**: State machine, HVPS supervisory loop, DAC supervisory control. Parallel testing with legacy system.
+**Key Implications**:
+- Maximum standalone subsystem testing must occur before installation
+- Integration testing must be incremental and carefully planned
+- Some subsystems can be brought online for limited testing without full operational impact
+- Full system integration testing window is minimal
 
-**Phase 3 — Tuner System**: Motor controller installation and testing (booster tuners first), EPICS motor record configuration, tuner manager with load angle offset loop.
+#### Phase 1: Maximum Standalone Development
 
-**Phase 4 — Integration**: MPS commissioning, Interface Chassis fabrication and testing, arc detection installation, Waveform Buffer System fabrication and integration, heater controller installation.
+- **Software Framework**: Develop with simulated interfaces where live hardware unavailable
+- **Tuner Testing**: Test Galil controller with Booster RF cavity
+- **LLRF9 Installation**: Install both units, connect RF signals, and bring them online
+- **MPS Online**: Bring MPS online for EPICS interface development
+- **HVPS PLC Online**: Enables EPICS software development
+- **Waveform Buffer Assembly**: Complete assembly and standalone testing
+- **Interface Chassis Design/Fab**: Complete design and fabrication
+- **HVPS Controller**: Design, fabrication, and installation
+- **Arc Detector**: Design and fabrication
+- **Test Stand 18**: Upgrade to work with the upgraded HVPS controller
 
-**Phase 5 — Validation**: System-level commissioning, performance tuning, operator training, documentation.
+#### Phase 2: Incremental Subsystem Integration
+
+- **Tuner Test with SPEAR Cavity**
+- **HVPS Integration**: Integrate HVPS PLC with Python/EPICS (test at test stand T18)
+- **MPS Integration**: Integrate MPS with LLRF9, waveform buffer, arc detector, HVPS PLC, interface chassis, and software coordinator with existing RF signals
+
+#### Phase 3: Critical Path Integration
+
+- **LLRF9 Integration — Basic RF Processing**: Verify vector sum, feedback loops, online calibration
+- **EPICS Integration**: Configure IOC, verify all PV interfaces
+- **End-to-End Interlock Testing**: Verify complete interlock chain (limited RF power)
+
+#### Phase 4: Full Power Commissioning
+
+- **Incremental Power Ramp**: Gradually increase power while monitoring all systems
+- **Performance Validation**: Verify all success criteria are met
+- **Operator Training**: Train operators on new system
+- **Documentation**: Complete commissioning report
+
 
 ### 19.2 Procurement Status
 
