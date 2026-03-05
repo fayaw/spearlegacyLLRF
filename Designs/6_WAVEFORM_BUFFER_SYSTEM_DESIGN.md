@@ -149,8 +149,9 @@ Each RF channel follows this signal path:
 The HVPS signals are at high voltage and current levels that must be reduced to the ADC input range:
 
 - **HVPS Voltage (up to ~90 kV)**: Resistive voltage divider network reduces to 0--10 V range, then scaled to ADC input range. The existing HVPS infrastructure includes a 100 Mohm voltage divider in the crowbar tank that produces a proportional low-voltage output.
-- **HVPS Current (up to ~27 A)**: Danfysik DC-CT current transducer output (located in the grounding tank) provides an isolated, proportional voltage signal.
-- **Transformer Voltages**: Monitor winding outputs from the phase-shifting transformer (~100 V peak-to-peak, 2 Mohm source impedance at HVPS end) are conditioned through voltage dividers.
+- **HVPS Current (up to ~27 A)**: **Danfysik DC-CT current transducer** output (located in the grounding tank) provides an isolated, proportional voltage signal. This is the same transducer used by the legacy system for current feedback.
+- **Transformer Voltages**: Monitor winding outputs from the **phase-shifting transformer** (located in B118 HVPS controller Hoffman Box) provide ~100 V peak-to-peak signals with 2 Mohm source impedance. These are conditioned through precision voltage dividers.
+- **HVPS Regulation**: The **Enerpro FCOG voltage/current regulator board** provides precision feedback control for HVPS output. Monitor signals from this board may also be captured for diagnostics.
 
 ### 5.3 Longer Buffer Requirement
 

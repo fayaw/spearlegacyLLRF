@@ -19,7 +19,8 @@
 | Arc Detector Design | `Designs/7_ARC_DETECTOR_SYSTEM_DESIGN.md` | Arc detection permit integration |
 | MPS Design | `Designs/10_MACHINE_PROTECTION_SYSTEM_DESIGN.md` | MPS-IC coordination protocol |
 | Interface Chassis Spec | `Docs_JS/llrfInterfaceChassis.docx` | J. Sebek original specification |
-| PPS System Overview | `pps/diagrams/00_SYSTEM_OVERVIEW.md` | PPS-IC boundary |
+| PPS System Overview | `pps/diagrams/00_SYSTEM_OVERVIEW.md` | PPS-IC boundary and legacy safety issues |
+| PPS PLC Code Analysis | `pps/diagrams/07_PLC_CODE_AND_LOGIC.md` | SLC-500 ladder logic and failure modes |
 
 ---
 
@@ -445,12 +446,21 @@ The recovery sequence must be designed carefully:
 
 ### 11.1 Upgrade Architecture for PPS
 
-In the upgraded system, the Interface Chassis replaces the PLC in the PPS safety chain. The PPS signals are routed directly through the Interface Chassis to control:
+In the upgraded system, the Interface Chassis replaces the PLC in the PPS safety chain. This addresses **critical safety concerns** identified in the legacy system:
 
-- **K4 relay**: PPS 1 Enable -> Interface Chassis -> K4 relay coil (contactor control)
-- **Ross grounding switch**: PPS 2 Enable -> Interface Chassis -> Ross coil (HV ground)
+**Legacy System Issues (from PPS analysis)**:
+- ⚠️ **PLC Dependency**: Ross switch controlled by SLC-500 PLC (Rung 0016) — less fail-safe than direct control
+- ⚠️ **Wiring Exposure**: PPS wires terminate on TS-5 and TS-6 inside HVPS controller (radiation safety concern)
+- ⚠️ **Hardware Obsolescence**: SLC-500 PLC and 1746 modules are obsolete
+- ⚠️ **Potential Failure Mode**: If PLC fails with outputs stuck ON, Ross switch stays energized/open (unsafe)
 
-This eliminates the legacy design concern where the PLC was in the PPS safety chain for the Ross switch.
+**Upgraded PPS Control (Direct, No PLC Dependency)**:
+- **K4 relay**: PPS 1 Enable → Interface Chassis → K4 relay coil (contactor control)
+- **Ross grounding switch**: PPS 2 Enable → Interface Chassis → Ross coil (HV ground)
+- **Direct Control**: No PLC in the PPS safety chain — hardware-speed response
+- **Fail-Safe Design**: Loss of PPS signal or Interface Chassis power → immediate safe state
+
+This eliminates the legacy design concern where the PLC was in the PPS safety chain for the Ross switch and addresses all identified safety issues.
 
 ### 11.2 PPS Readback
 

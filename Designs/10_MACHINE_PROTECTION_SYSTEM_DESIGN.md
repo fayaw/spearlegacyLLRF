@@ -22,6 +22,8 @@
 | MPS Wiring Diagrams | `llrf/documentation/mpsWiringDiagrams/wd3403300200-3400.pdf` | Legacy MPS wiring (34 sheets) |
 | PPS System Overview | `pps/diagrams/00_SYSTEM_OVERVIEW.md` | PPS-MPS boundary |
 | PLC Code and Logic | `pps/diagrams/07_PLC_CODE_AND_LOGIC.md` | Legacy PLC ladder logic reference |
+| Legacy LLRF Code | `llrf/legacyLLRF/rf_states.st` | SNL state machine (62KB, 5 states) |
+| Legacy HVPS Code | `llrf/legacyLLRF/rf_hvps_loop.st` | SNL HVPS control loop (12KB) |
 
 ---
 
@@ -86,7 +88,27 @@ The legacy MPS aggregates interlocks from:
 - Temperature interlocks
 - External permits (SPEAR MPS, orbit interlocks)
 
-### 2.3 Reasons for Upgrade
+### 2.3 Legacy LLRF System Integration
+
+The legacy LLRF system uses extensive **State Notation Language (SNL)** code (~2800+ lines) running on VxWorks IOCs:
+
+| Program | Size | Function |
+|---------|------|----------|
+| `rf_states.st` | 62KB | Main state machine: OFF, PARK, TUNE, ON_FM, ON_CW |
+| `rf_hvps_loop.st` | 12KB | HVPS control: processing and regulation modes |
+| `rf_dac_loop.st` | 10KB | RF drive control and feedback |
+| `rf_tuner_loop.st` | 18KB | Cavity tuner stepper motor control |
+| `rf_calib.st` | 110KB | Calibration routines and fault handling |
+| `rf_msgs.st` | 11KB | Message handling and fault reporting |
+
+**Key Legacy LLRF Characteristics**:
+- **State transitions**: Legal transitions defined (e.g., OFF → PARK/TUNE/ON_FM/ON_CW)
+- **Automatic reset/restart**: Allows recovery from transient faults
+- **Tickle mode**: Small RF modulation for cavity tune measurement
+- **Fast turnon sequence**: Optimized startup with timing delays
+- **Direct loop control**: Integration with DAC and feedback systems
+
+### 2.4 Reasons for Upgrade
 
 | Issue | Impact |
 |-------|--------|
@@ -95,6 +117,7 @@ The legacy MPS aggregates interlocks from:
 | **Communication** | DH+ protocol is obsolete; no modern EPICS drivers |
 | **Expandability** | Cannot easily add new interlock sources (arc detection, Waveform Buffer) |
 | **Documentation** | Legacy PLC code requires reverse engineering |
+| **LLRF Integration** | VXI-based LLRF system being replaced with LLRF9 controllers |
 
 ---
 
