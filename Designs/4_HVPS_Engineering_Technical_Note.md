@@ -332,13 +332,17 @@ The legacy HVPS controller resides in a Hoffman enclosure in Building 118. It co
 
 | Slot | Module | Function |
 |---|---|---|
-| 1 | AB-1747-DCM | Communication to VXI IOC (8 words in, 8 words out) |
-| 2 | Digital Input | Binary interlock inputs (I:2) |
-| 3 | AB-1746-NI8 | Thermocouple inputs (I:3.0–I:3.7 → N7:100–N7:107) |
-| 5 | Digital Output | Binary control outputs (O:5) |
-| 6 | Digital Input | Binary interlock inputs (I:6) |
-| 8 | AB-1746-NIO4V | 4 analog I/O: 2 inputs + 2 outputs |
-| 9 | AB-1746-NI4 | 4 analog inputs |
+| CPU | AB-1747-L532 | Processor |
+| 1 | AB-1747-DCM | Data Communications (Scanner) — Communication to VXI IOC (8 words in, 8 words out) |
+| 2 | AB-1746-IO8 | 8-pt Digital I/O — **Ross switch coil (OUT3)** |
+| 3 | AB-1746-THERMC | Thermocouple inputs (SCR/air/transformer temps) — I:3.0–I:3.7 → N7:100–N7:107 |
+| 5 | AB-1746-OX8 | 8-pt Relay Output — **Contactor enable K4 (OUT2)**, Contactor On/Off (OUT1) |
+| 6 | AB-1746-IB16 | 16 DC Input — **PPS 1 (IN14)**, **PPS 2 (IN15)**, Oil Level (IN8), Manual GRN SW (IN9) |
+| 7 | AB-1746-IV16 | 16 DC Input (various permits) |
+| 8 | AB-1746-NIO4V | 4-ch Analog I/O — voltage setpoint output to Enerpro via regulator (N7:10 → OUT0) |
+| 9 | AB-1746-NI4 | 4-ch Analog Input — Danfysik HVPS current (IN3) |
+
+> **Source**: `hvps/documentation/plc/plcNotesR1.docx` (N7:10/N7:11 analysis, slot assignments)
 
 #### 3.3.2 Analog I/O Map
 
@@ -633,6 +637,47 @@ When B3:0/4 (SCR On Latch) goes high (Rung 10):
 > **Source:** `documentation/plc/hvpsPlcLabels.xlsx`, `documentation/plc/PLC software discusion 1.docx`, `architecture/designNotes/rfedmHvpsLabelsPvs.docx`
 
 ---
+
+### 4.6 Crowbar Triggering Sources (Defense-in-Depth Protection)
+
+The HVPS crowbar system implements **five independent triggering sources** for comprehensive protection:
+
+| Trigger Source | Input Type | Connector/Location | Function |
+|---|---|---|---|
+| **SCR ENABLE Loss** | Fiber-optic signal loss | Interface Chassis → HVPS | Disables SCR triggers when fiber signal lost |
+| **TRANSFORMER ARC TRIGGER** | BNC analog input | **BNC-0** (AC current or Stangenes detector) | Fast crowbar on transformer arc detection |
+| **KLYSTRON CROWBAR** | Fiber-optic command | Interface Chassis → HVPS | Crowbar command from LLRF/Interface Chassis |
+| **KLYSTRON ARC TRIGGER** | BNC analog input | **BNC-12** (termination tank shunt) | Fast crowbar on klystron arc detection |
+| **PLC FORCE CROWBAR** | Digital output | Slot-5 OUT3 (active-low) | Software-commanded crowbar via PLC |
+
+**Design Philosophy**: Defense-in-depth protection ensures that multiple independent fault detection mechanisms can trigger crowbar protection, preventing single-point failures in the protection system.
+
+> **Source**: `hvps/documentation/plc/plcNotesR1.docx`, `hvps/documentation/wiringDiagrams/hvpsMonitorConnections.xlsx`
+
+### 4.7 PPS Safety Chain Hardware Fail-Safe Mechanism
+
+The Personnel Protection System (PPS) interface implements **hardware fail-safe** architecture:
+
+**Dual-Control Architecture:**
+- **PPS 1 (IN14)**: Direct hardware path to K4 contactor relay (24 VDC input)
+- **PPS 2 (IN15)**: PLC software path to Ross switch control (Rung 0016)
+
+**Hardware Fail-Safe Operation:**
+- **K4 relay input** wired directly to PPS 1 signal (24 VDC), **bypassing PLC**
+- **PLC failure immunity**: Hardware path prevents PLC software failures from maintaining K4 energization
+- **Dual redundancy**: Both PPS signals must be present for normal operation
+
+**Normal Operation:**
+- PPS 1 → Direct K4 relay energization (hardware path)
+- PPS 2 → PLC Slot-6 IN15 → Ross switch control via Slot-2 OUT3 (software path)
+
+**Failure Modes:**
+- **PPS 1 loss**: K4 relay de-energizes immediately (hardware fail-safe)
+- **PPS 2 loss**: Ross switch opens via PLC logic (software path)
+- **PLC failure**: K4 hardware path still responds to PPS 1 (fail-safe design)
+
+> **Source**: `hvps/documentation/plc/plcNotesR1.docx` (N7:10/N7:11 analysis), `hvps/documentation/procedures/HoffmanBoxPPSWiring.docx`
+
 
 ## 5. EPICS Control System Interface
 
