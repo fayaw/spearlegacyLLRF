@@ -332,7 +332,7 @@ Two Dimtel LLRF9/476 units replace the entire VXI-based LLRF system (four units 
 - 3 × LLRF4.6 boards: each with Xilinx Spartan-6 FPGA, 4 high-speed ADC channels, 2 DAC channels, 3 RF channel.
 - LO/Interconnect module: divide-and-mix LO synthesis for low phase noise, RF reference distribution, output amplification/filtering, interlock logic
 - Linux SBC (mini-ITX): runs the built-in EPICS IOC (EPICS Base 3.14)
-- Thermal stabilization: aluminum cold plate with 3 TEC modules under PID control, only available to board1&2
+- Thermal stabilization: aluminum cold plate with 3 TEC modules under PID control, (one per board)
 - Power supply: 90-264 VAC auto-ranging
 - 3U 19" rack chassis
 
@@ -389,7 +389,7 @@ Two Dimtel LLRF9/476 units replace the entire VXI-based LLRF system (four units 
 |-----------|-------|
 | Direct loop delay | 270 ns |
 | RF input channels | 9 per unit (18 total) |
-| RF input range | 0 to -30 dBm |
+| RF input range | +2 dBm full-scale |
 | ADC resolution | 12-bit |
 | Setpoint profile points | 512 |
 | Setpoint step time range | 70 μs to 37 ms per step |
@@ -397,7 +397,7 @@ Two Dimtel LLRF9/476 units replace the entire VXI-based LLRF system (four units 
 | Scalar readback rate | 10 Hz |
 | Scalar readback bandwidth | 4.4 Hz |
 | Phase readback resolution | Sub-degree |
-| Interlock timestamp resolution | ±17.4 ns |
+| Interlock timestamp resolution | 35 ns |
 
 ### 5.5 Interfaces
 
