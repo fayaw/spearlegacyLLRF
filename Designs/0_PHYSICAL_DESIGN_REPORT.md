@@ -575,74 +575,35 @@ The MPS PLC is upgraded to Allen-Bradley ControlLogix 1756 platform.
 
 ## 8. Subsystem 4: Interface Chassis
 
-> **Detailed reference**: `llrf/architecture/llrfInterfaceChassis.docx`
+> **Detailed design reference**: [Designs/11_INTERFACE_CHASSIS_DESIGN.md](Designs/11_INTERFACE_CHASSIS_DESIGN.md)
 
 ### 8.1 Purpose
 
-The Interface Chassis is a completely new subsystem that serves as the central hub for all hardware interlock coordination. It did not exist in the legacy system, where interlocks were distributed across analog modules, PLC I/O, and direct wiring with no central coordination point.
+The Interface Chassis is a **new subsystem** that centralizes all hardware interlock coordination for the RF system. It replaces distributed interlock functions from the legacy system (Local Panel, Arc Interlock Chassis, VXI modules, Allen-Bradley PLC-5 daisy chain) with a single hardware-based coordination point.
 
-The Interface Chassis provides:
-- **First-fault detection** — hardware-based latching circuit identifies the initiating fault in cascade scenarios
-- **Electrical isolation** — all external signals isolated from chassis ground via optocouplers (HCPL-2400-000E) and fiber-optic transceivers (HFBR-1412/2412)
-- **Microsecond-scale response** — implemented in standard electronic components (no processor in the critical path)
-- **Fault latching** — all inputs latch when faulted until external reset from MPS
-- **Status reporting** — all input/output states and first-fault status reported to MPS PLC
+**Key capabilities**:
+- **First-fault detection** — hardware latching identifies the initiating fault in cascade scenarios
+- **Microsecond-scale response** — combinational logic with no processor in the critical path
+- **Electrical isolation** — all external signals isolated via optocouplers and fiber-optic transceivers
+- **Fault latching** — all inputs latch when faulted until external MPS reset
+- **Status reporting** — comprehensive digital reporting to MPS PLC
 
-### 8.2 Input Signals
+### 8.2 Interface Summary
 
-| Input Signal | Type | Source | Isolation | Notes |
-|--------------|------|--------|-----------|-------|
-| LLRF9 Status | 5 VDC, 60 mA max | LLRF9 rear panel | HCPL-2400-000E | OR of 17 internal + 1 external interlocks |
-| HVPS STATUS | Fiber-optic | HVPS Controller | HFBR-2412 | Active when powered, no crowbar trigger |
-| MPS Summary | Digital | RF MPS PLC | HCPL-2400-000E | Global RF permit |
-| MPS Heartbeat | Digital | RF MPS PLC | HCPL-2400-000E | Watchdog for MPS communication |
-| SPEAR MPS | 24 VDC | SPEAR MPS | HCPL-2400-000E | Ring protection permit |
-| Orbit Interlock | 24 VDC | Orbit system | HCPL-2400-000E | Beam position safety |
-| Arc Detection | Dry contacts | Microstep-MIS | HCPL-2400-000E | Cavity/klystron arc sensors |
-| Power Monitoring | Digital | Waveform Buffer | HCPL-2400-000E | RF/HVPS comparator trips |
+**Primary inputs**: LLRF9 status, HVPS fiber-optic status, MPS permits/heartbeat/reset, SPEAR MPS, orbit interlock, arc detection, power monitoring, expansion ports
 
-### 8.3 Output Signals
+**Primary outputs**: LLRF9 enable, HVPS SCR ENABLE (fiber), HVPS CROWBAR (fiber), fault status reporting to MPS
 
-| Output Signal | Type | Destination | Driver | Notes |
-|---------------|------|-------------|--------|-------|
-| LLRF9 Enable | 3.2 VDC, 8 mA min | LLRF9 Unit 1 interlock input | Optocoupler | External permit to LLRF9 |
-| HVPS SCR ENABLE | Fiber-optic | HVPS Controller | HFBR-1412 | Phase control thyristor enable |
-| HVPS CROWBAR | Fiber-optic | HVPS Controller | HFBR-1412 | Crowbar inhibit (normally enabled) |
-| K4 Relay Drive | Relay / optocoupler | Switchgear K4 relay | Direct drive | PPS Chain 1 — contactor control |
-| Ross Switch Drive | Relay / optocoupler | Grounding tank Ross switch | Direct drive | PPS Chain 2 — grounding switch |
-| PPS Readback A-B | NC contacts | PPS Chassis | Relay | S5 contactor readback to PPS |
-| PPS Readback C-D | NC contacts | PPS Chassis | Relay | Ross switch readback to PPS |
-| Fault Status | Digital lines | MPS PLC | Optocoupler | All input states + first-fault register |
+**Critical design consideration**: The Interface Chassis creates a bidirectional feedback loop between LLRF9 and HVPS that requires careful recovery sequencing logic.
 
-### 8.4 Permit Logic
+### 8.3 Implementation Status
 
-```
-All_Permits_OK = LLRF9_Status AND HVPS_STATUS AND MPS_Summary AND 
-                 MPS_Heartbeat AND SPEAR_MPS AND Orbit_Interlock AND 
-                 Arc_Detection AND Power_Monitoring
+- **Interface specification**: Complete (J. Sebek, `llrf/architecture/llrfInterfaceChassis.docx`)
+- **Chassis design**: Not started
+- **PCB design**: Not started  
+- **Fabrication**: Not started
 
-LLRF9_Enable    = All_Permits_OK
-HVPS_SCR_ENABLE = All_Permits_OK
-HVPS_CROWBAR    = 1  (always enabled unless specific crowbar command)
-K4_Drive        = PPS_Enable_1 AND All_Permits_OK
-Ross_Drive      = PPS_Enable_2 AND All_Permits_OK
-```
-
-### 8.5 Critical Design Consideration — LLRF9/HVPS Feedback Loop
-
-The Interface Chassis creates a bidirectional feedback loop between LLRF9 and HVPS:
-- LLRF9 fault → Interface Chassis removes HVPS SCR ENABLE → HVPS loses STATUS → Interface Chassis sees HVPS_STATUS lost → further complicates recovery
-
-The Interface Chassis must implement proper sequencing logic for system restart after faults. This logic does not exist in the legacy system.
-
-### 8.6 Physical Implementation
-
-The Interface Chassis is custom hardware requiring PCB design for:
-- Optocoupler circuits (mixed voltage levels: 3.2V, 5V, 24V, 120VAC)
-- Fiber-optic transceiver mounting (HFBR-1412/2412)
-- First-fault detection digital logic with timing design
-- Signal isolation meeting PPS standards
-- Location TBD (inside Hoffman Box, separate enclosure, or rack-mounted)
+**Note**: The Interface Chassis is on the critical path for system integration. PPS-related outputs (K4 relay, Ross switch) are upgrade concepts requiring separate PPS regulatory approval.
 
 ---
 
