@@ -3,7 +3,7 @@
 **Document ID**: SPEAR3-LLRF-PDR-001
 **Revision**: R0
 **Date**: March 3 2026
-**Author**: LLRF Upgrade Engineering Team (SSRL/SLAC)
+**Author**: RF Department, SSRL/Accelerator
 **Classification**: Top-Level System Design Reference
 
 ---
