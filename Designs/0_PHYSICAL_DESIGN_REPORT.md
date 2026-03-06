@@ -12,7 +12,7 @@
 
 This Physical Design Report is the top-level system design reference for the SPEAR3 Low-Level RF (LLRF) Upgrade Project. It describes the overall system architecture, the scope and high-level design of each subsystem in both the current (legacy) and upgraded configurations, and the interfaces and interactions between subsystems.
 
-This document is intended to serve as the entry point for the detailed engineering design of each subsystem. It consolidates physical design information from across the project and provides traceability to the detailed design documents in this project.
+This document is intended to serve as the entry point for the detailed engineering design of each subsystem. It consolidates physical design information from across the project and provides traceability to the detailed design documents in Section 20.
 
 ---
 
@@ -902,7 +902,7 @@ The arc detection system is a new subsystem that provides optical monitoring of 
 ### 12.3 Installation
 
 There are **5 sensors** total:
-- 4 sensors mounted on cavity window viewports (one per cavity: Cav A, B, C, D)
+- 8 sensors mounted on cavity window viewports (one per cavity: Cav A, B, C, D)
 - 1 sensor mounted on the klystron window
 
 Mechanical mounting requires custom adapters for the existing CF flange viewports (see `llrf/arcDetector/Mechanical/Reference/` for viewport specifications). Sensor fibers run to the Microstep-MIS controller unit located in B132.
