@@ -65,15 +65,17 @@ The LLRF Upgrade Project replaces the entire control electronics chain — not m
 
 | Parameter | Value |
 |-----------|-------|
-| RF Frequency | ~476 MHz |
+| RF Frequency | ~476.3 MHz |
 | Total Gap Voltage | ~3.2 MV (sum of 4 cavities) |
 | Cavity Gap Voltage | ~800 kV each |
-| Klystron Power | ~1 MW |
+| Klystron Power | ~1.5 MW rated, ~1 MW typical operating |
 | HVPS Voltage | up to ~90 kV (negative polarity) |
 | HVPS Operating Voltage | ~74.7 kV at 500 mA beam |
 | Drive Power | ~50 W nominal |
 | Number of Cavities | 4 (single-cell, individual tuners) |
 | LLRF9 Units | 2 active, 2 spare (4 purchased) |
+
+> **Source**: Gap voltage and beam current data from LLRF9 commissioning measurements (`llrf/tests/llrf9Tests.tex`, J. Sebek, 2021). Klystron rated power from HVPS hazard documentation (`hvps/documentation/procedures/spear3HvpsHazards.tex`).
 
 ### Upgrade Drivers
 
@@ -92,13 +94,28 @@ The LLRF Upgrade Project replaces the entire control electronics chain — not m
 
 The legacy SPEAR3 LLRF system was originally designed for the PEP-II B-Factory (circa 1997) and later adapted for SPEAR3. It consists of:
 
-- **LLRF Controller**: Custom PEP-II analog RF Processor (RFP) module in a VXI chassis, with associated analog signal processing modules (CFM, GVF) for comb filter and gap voltage feedback
-- **Control Software**: State Notation Language (SNL) programs on VxWorks RTOS, running on the VXI crate processor
-- **HVPS Controller**: Allen-Bradley SLC-500 PLC with Enerpro SCR gate driver boards, housed in a Hoffman NEMA enclosure in Building B118
-- **Machine Protection System (MPS)**: Allen-Bradley PLC-5 (1771 series)
-- **Tuner Motor Controllers**: Allen-Bradley 1746-HSTP1 stepper modules with Superior Electric SS2000MD4-M Slo-Syn PWM drivers (obsolete)
+- **LLRF Controller**: Custom PEP-II analog RF Processor (RFP) module in a VXI chassis, with associated analog signal processing modules:
+  - **CFM** (Comb Filter Module) — comb filter for power-line harmonic rejection (two units: CFM1, CFM2)
+  - **GVF** (Gap Voltage Feedback) — gap voltage feedback loop, monitored via CAMAC TAXI interface
+  - **GFF** (Gap Feed-Forward) — gap feed-forward reference path providing drive power and gap voltage setpoints through dedicated octal DACs
+  - See: `llrf/legacyLLRF/rf_dac_loop.st` (RFP/GFF DAC loop), `llrf/legacyLLRF/rf_calib.st` (CFM calibration)
+- **Control Software**: Six State Notation Language (SNL) programs on VxWorks RTOS, running on the VXI crate processor, compiled into a single `rfSeq` IOC library:
+  - `rf_tuner_loop.st` — Cavity tuner stepper motor control
+  - `rf_hvps_loop.st` — HVPS supervisory control and regulation
+  - `rf_states.st` — RF station state machine control (PEP-II heritage, R. Sass, 1997)
+  - `rf_dac_loop.st` — Drive Power and Gap Voltage RFP/GFF DAC loop (S. Allison, 1997)
+  - `rf_calib.st` — Calibration sequences (R. Claus, SLAC/PEP-II LLRF Group)
+  - `rf_msgs.st` — Message logging and CAMAC TAXI error monitoring
+  - See: `llrf/legacyLLRF/Makefile`, `llrf/legacyLLRF/rf_dac_loop_pvs.h`
+- **HVPS Controller**: Allen-Bradley SLC-500 PLC (processor: AB-1747-L532, scanner: AB-1747-DCM) with Enerpro SCR gate driver boards, housed in a Hoffman NEMA enclosure in Building B118
+  - See: `pps/HoffmanBoxPPSWiring.docx`
+- **Machine Protection System (MPS)**: Allen-Bradley PLC-5 (1771 series), since converted to ControlLogix 1756 (hardware assembled, software written, tested without RF power)
+  - See: `llrf/documentation/mpsWiringDiagrams/`, `hvps/architecture/designNotes/RFSystemMPSRequirements.docx`
+- **Tuner Motor Controllers**: Allen-Bradley 1746-HSTP1 stepper modules with Superior Electric SS2000MD4-M Slo-Syn PWM drivers (obsolete); stepper motors are Superior Electric Slo-Syn M093-FC11 (NEMA 34D)
+  - See: `llrf/tuners/SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf`, `llrf/tuners/SLO-SYN.pdf`
 - **Interlock System**: Distributed across analog modules, PLC I/O, and direct wiring with no central coordination point
-- **Communication**: VXI backplane, CAMAC, field bus, limited EPICS
+- **Communication**: VXI backplane, CAMAC bus with TAXI serial link, field bus, limited EPICS Channel Access. The GVF module is monitored via CAMAC TAXI; a dedicated SNL sequence (`rf_msgs.st`) detects TAXI errors and triggers automatic Low Frequency Bypass (LFB) resynchronization with randomized delay to prevent IOC collision.
+  - See: `llrf/legacyLLRF/rf_msgs.st`
 
 ### 2.2 Upgraded System Architecture
 
@@ -133,7 +150,7 @@ The upgraded system replaces all control electronics while retaining the RF plan
 │  ┌────┴─────┐  ┌─────┴────┐  ┌──────┴───┐  ┌───────┴────────┐       │
 │  │ Waveform │  │   Arc    │  │  Motor   │  │ Heater         │       │
 │  │ Buffer   │  │ Detect.  │  │ Ctrl     │  │ Controller     │       │
-│  │ System   │  │ (MIS)    │  │ (4-axis) │  │ (SCR-based)    │       │
+│  │ System   │  │          │  │ (4-axis) │  │ (SCR-based)    │       │
 │  └──────────┘  └──────────┘  └──────────┘  └────────────────┘       │
 └─────────────────────────────────────────────────────────────────────┘
                             │
@@ -155,20 +172,21 @@ The upgraded system replaces all control electronics while retaining the RF plan
 - HVPS power electronics (transformer, rectifier, oil system, crowbar)
 - Vacuum contactor (Ross HQ3) and contactor controller (Ross HCA-1-A)
 - Ross grounding switch, Danfysik DC-CT, Pearson CT-110
-- Field cabling (Belden 83715 15C #16 Teflon, Belding 83709 9C #16 Teflon)
+- Field cabling (Belden 83715 15C #16 Teflon, Belden 83709 9C #16 Teflon)
 
 **Replaced / Upgraded**:
 - LLRF Controller: Analog RFP → Dimtel LLRF9/476 (×2 units)
 - MPS: PLC-5 1771 → ControlLogix 1756
 - HVPS Controller: SLC-500 → CompactLogix PLC + new Enerpro boards + redesigned analog regulator
-- Tuner Motor Controllers: AB 1746-HSTP1 + Slo-Syn → modern motion controller (Galil DMC-4143 or alternative, TBD)
+- Tuner Motor Controllers: AB 1746-HSTP1 + Slo-Syn → Galil DMC-4143 Rev 1.3h 4-axis motion controller (commissioned August 2025, operational)
+  - See: `llrf/tuners/galil/functioningGalil20250825SwapABToManual.txt`, `llrf/tuners/galil/firstMotion2024.txt`
 - Control Software: SNL/VxWorks → Python/PyEPICS + LLRF9 internal EPICS IOC
 - Operator Interface: Legacy EDM panels → modernized panels
 
 **New Subsystems** (did not exist in legacy):
 - Interface Chassis — central hardware interlock coordination hub
 - Waveform Buffer System — 8 RF + 4 HVPS channel extended monitoring
-- Arc Detection — Microstep-MIS optical sensors on cavity windows and klystron
+- Arc Detection — total 10 of Microstep-MIS optical sensors on 4 cavity windows and 1 klystron windown, process chassis
 
 **Enhanced Subsystems** (upgraded from legacy):
 - Klystron Heater Controller — Motor-driven variac → SCR-based with EPICS integration
@@ -389,7 +407,7 @@ Two Dimtel LLRF9/476 units replace the entire VXI-based LLRF system (four units 
 |-----------|-------|
 | Direct loop delay | 270 ns |
 | RF input channels | 9 per unit (18 total) |
-| RF input range | 0 to -30 dBm |
+| RF input range |  +2 dBm full-scale|
 | ADC resolution | 12-bit |
 | Setpoint profile points | 512 |
 | Setpoint step time range | 70 μs to 37 ms per step |
@@ -448,9 +466,7 @@ The power section, including transformers, thyristor stacks, filter inductors, s
 ### 6.2 Legacy Controller
 
 The legacy controller is housed in a Hoffman NEMA enclosure (34"×42") in Building B118 and contains:
-
-- 
-**PLC**: Allen-Bradley SLC-500 (1747-L532 CPU) with I/O modules (OBSOLETE):
+- **PLC**: Allen-Bradley SLC-500 (1747-L532 CPU) with I/O modules (OBSOLETE):
 
 | Slot | Module | Function |
 |------|--------|-----------|
