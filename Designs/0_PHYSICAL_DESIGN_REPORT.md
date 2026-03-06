@@ -517,7 +517,7 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
   - CROWBAR: Interface Chassis → HFBR-2412 receiver → HVPS controller (crowbar fire command)
   - Normal operation: All signals illuminated/active; signal loss = fault condition
 
-**Key change**: The CompactLogix PLC is removed from the PPS safety chain. PPS functions (K4 relay, Ross switch control) are handled by a separate dedicated PPS interface box, not the Interface Chassis. The Interface Chassis handles only LLRF/HVPS interlocks. The PLC handles only non-safety functions: voltage regulation, temperature monitoring, and EPICS interface.
+**Key change**: The CompactLogix PLC is removed from the PPS safety chain. PPS functions (K4 relay, Ross switch control) are handled by a separate dedicated PPS interface box, not the Interface Chassis. The Interface Chassis handles only non-PPS interlocks. The PLC handles only non-safety functions: voltage regulation, temperature monitoring, and EPICS interface.
 
 ### 6.4 HVPS EPICS Interface
 
