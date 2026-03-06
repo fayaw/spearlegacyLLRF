@@ -1259,7 +1259,7 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 | `Designs/3_LLRF9_SYSTEM_AND_SOFTWARE_REPORT.md` | Markdown | LLRF9 hardware, EPICS IOC, PV architecture, 550+ PVs |
 | `Designs/4_HVPS_Engineering_Technical_Note.md` | Markdown | HVPS power section, controller, upgrade design |
 | `Designs/5_KLYSTRON_HEATER_SUBSYSTEM_UPGRADE.md` | Markdown | SCR-based heater control system design |
-| `Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md` | Markdown | PPS interface, safety chain (⚠️ Contains errors - see pps/ for correct architecture) |
+| `Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md` | Markdown | PPS interface, safety chain (⚠️ Superseded; contains known errors and is retained only for historical reference. Do not use for current PPS architecture.) |
 | `Designs/9_SOFTWARE_DESIGN.md` | Markdown | Python/EPICS coordinator architecture and API |
 
 ### LLRF Source Material
