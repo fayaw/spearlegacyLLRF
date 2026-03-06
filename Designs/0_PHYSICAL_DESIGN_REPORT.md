@@ -162,6 +162,14 @@ The upgraded system replaces all control electronics while retaining the RF plan
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
+
+**Key Architectural Principle**: The Interface Chassis handles **operational interlocks** (LLRF/HVPS coordination), while the **PPS Interface** uses a completely separate, dedicated PPS interface box for **safety-critical functions**. These two systems are architecturally independent:
+
+- **Interface Chassis**: First-fault detection, optocoupler isolation, fiber I/O for LLRF9/HVPS/MPS coordination
+- **PPS Interface Box**: Separate Bud enclosure with 4 relays, status LEDs, PPS-lockable connector for K4 relay and Ross switch control
+
+This separation ensures PPS compliance and maintains clear distinction between safety-critical and operational functions.
+
 ### 2.3 What Stays, What Changes, What Is New
 
 **Retained Physical Hardware** (same equipment):
