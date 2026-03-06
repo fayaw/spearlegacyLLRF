@@ -163,12 +163,12 @@ The upgraded system replaces all control electronics while retaining the RF plan
 ```
 
 
-**Key Architectural Principle**: The Interface Chassis handles **operational interlocks** (LLRF/HVPS coordination), while the **PPS Interface** uses a completely separate, dedicated PPS interface box for **safety-critical functions**. These two systems are architecturally independent:
+**Key Architectural Principle**: The Interface Chassis implements **machine/equipment protection and operational interlocks** (LLRF/HVPS/MPS coordination), while personnel safety (PPS) functions are implemented exclusively in a completely separate, dedicated **PPS Interface Box**. These two safety-related subsystems are architecturally independent:
 
-- **Interface Chassis**: First-fault detection, optocoupler isolation, fiber I/O for LLRF9/HVPS/MPS coordination
-- **PPS Interface Box**: Separate Bud enclosure with 4 relays, status LEDs, PPS-lockable connector for K4 relay and Ross switch control
+- **Interface Chassis (Machine/Equipment Protection)**: First-fault detection, optocoupler isolation, fiber I/O for LLRF9/HVPS/MPS/orbit coordination and other machine-protection interlocks
+- **PPS Interface Box (Personnel Safety / PPS)**: Separate Bud enclosure with 4 relays, status LEDs, PPS-lockable connector for K4 relay and Ross switch control
 
-This separation ensures PPS compliance and maintains clear distinction between safety-critical and operational functions.
+This separation provides PPS compliance and maintains a clear distinction between personnel-safety (PPS) functions and machine/equipment protection interlocks, even though both participate in the overall protection chain.
 
 ### 2.3 What Stays, What Changes, What Is New
 
