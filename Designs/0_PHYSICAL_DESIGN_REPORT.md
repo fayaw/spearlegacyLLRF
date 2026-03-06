@@ -2,7 +2,7 @@
 
 **Document ID**: SPEAR3-LLRF-PDR-001
 **Revision**: R0
-**Date**: March 2026
+**Date**: March 3 2026
 **Author**: LLRF Upgrade Engineering Team (SSRL/SLAC)
 **Classification**: Top-Level System Design Reference
 
@@ -12,21 +12,7 @@
 
 This Physical Design Report is the top-level system design reference for the SPEAR3 Low-Level RF (LLRF) Upgrade Project. It describes the overall system architecture, the scope and high-level design of each subsystem in both the current (legacy) and upgraded configurations, and the interfaces and interactions between subsystems.
 
-This document is intended to serve as the entry point for the detailed engineering design of each subsystem. It consolidates physical design information from across the project and provides traceability to the detailed design documents in this repository.
-
-**Audience**: RF group engineers, controls engineers, PPS/protection specialists, operations staff, and management reviewers.
-
-**Related Design Documents**:
-
-| Doc # | Title | Content |
-|-------|-------|---------|
-| 1 | Overview of Current and Upgrade System | Full legacy/upgrade comparison, control loop mapping |
-| 2 | SPEAR3 LLRF Upgrade System Design | Detailed engineering design (docx) |
-| 3 | LLRF9 System & Software Report | LLRF9 hardware, EPICS IOC, PV architecture |
-| 4 | HVPS Engineering Technical Note | HVPS power section, controller, upgrade design |
-| 5 | Klystron Heater Subsystem Upgrade | SCR-based heater control design |
-| 8 | HVPS-PPS Interface Technical Document | PPS interface, safety chain, Interface Chassis |
-| 9 | Software Design | Python/EPICS coordinator architecture |
+This document is intended to serve as the entry point for the detailed engineering design of each subsystem. It consolidates physical design information from across the project and provides traceability to the detailed design documents in this project.
 
 ---
 
@@ -122,44 +108,43 @@ The legacy SPEAR3 LLRF system was originally designed for the PEP-II B-Factory (
 The upgraded system replaces all control electronics while retaining the RF plant physical infrastructure (klystron, cavities, waveguide, HVPS power section, tuner mechanical assemblies). The upgraded architecture is:
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        OPERATOR LAYER                               │
-│   EDM Panels  │  Web Dashboard  │  EPICS Archiver  │  Logging       │
-└───────────────────────────┬─────────────────────────────────────────┘
-                            │ EPICS Channel Access
-┌───────────────────────────┴─────────────────────────────────────────┐
-│                  PYTHON/EPICS COORDINATOR                           │
-│  State Machine │ HVPS Loop │ Tuner Manager │ Fault Manager │ Diag   │
-└───────────────────────────┬─────────────────────────────────────────┘
-                            │ EPICS Channel Access (~1 Hz supervisory)
-┌───────────────────────────┴─────────────────────────────────────────┐
-│                     HARDWARE SUBSYSTEMS                             │
-│                                                                     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────────────┐    │
-│  │ LLRF9 #1 │  │ LLRF9 #2 │  │ HVPS PLC │  │ MPS PLC           │    │
-│  │ (Field   │  │ (Monitor │  │ Compact- │  │ ControlLogix 1756 │    │
-│  │  Control │  │  + Intlk)│  │ Logix    │  │                   │    │
-│  │  + Tuner)│  │          │  │          │  │                   │    │
-│  └────┬─────┘  └────┬─────┘  └─────┬────┘  └──────┬────────────┘    │
-│       │             │              │              │                 │
-│  ┌────┴─────────────┴──────────────┴──────────────┴────────────┐    │
-│  │              INTERFACE CHASSIS (NEW)                        │    │
-│  │   First-fault detection │ Optocoupler isolation │ Fiber I/O │    │
-│  └────┬──────────────┬──────────────┬──────────────┬───────────┘    │
-│       │              │              │              │                │
-│  ┌────┴─────┐  ┌─────┴────┐  ┌──────┴───┐  ┌───────┴────────┐       │
-│  │ Waveform │  │   Arc    │  │  Motor   │  │ Heater         │       │
-│  │ Buffer   │  │ Detect.  │  │ Ctrl     │  │ Controller     │       │
-│  │ System   │  │          │  │ (4-axis) │  │ (SCR-based)    │       │
-│  └──────────┘  └──────────┘  └──────────┘  └────────────────┘       │
-└─────────────────────────────────────────────────────────────────────┘
-                            │
-              Hardware interlock signals
-                            │
-┌───────────────────────────┴─────────────────────────────────────────┐
-│                      SAFETY SYSTEMS                                 │
-│  PPS Interface │ SPEAR MPS │ Orbit Interlock │ External Permits     │
-└─────────────────────────────────────────────────────────────────────┘
+                 ┌───────────────────────────────────────────────────────────────┐
+                 │                       OPERATOR LAYER                          │
+                 │   EDM Panels │ Web Dashboard │ EPICS Archiver │ Logging       │
+                 └───────────────────────────────┬───────────────────────────────┘
+                                                 │ EPICS Channel Access
+                 ┌───────────────────────────────┴───────────────────────────────┐
+                 │                  PYTHON/EPICS COORDINATOR                     │
+                 │  State Machine │ HVPS Loop │ Tuner Mgr │ Fault Mgr │ Diag     │
+                 └───────────────────────────────┬───────────────────────────────┘
+                                                 │ EPICS CA (~1 Hz supervisory)
+┌────────────────────────────────────────────────┴──────────────────────┐  ┌───────────────────────────────────┐
+│                     Control HARDWARE SUBSYSTEMS                       │  │              HVPS                 │
+│                                                                       │  │   (High Voltage Power Supply:     │
+│  ┌──────────┐  ┌──────────┐  ┌─────────────────┐  ┌─────────────┐     │  │    transformer, rectifier,        │
+│  │ LLRF9 #1 │  │ LLRF9 #2 │  │    MPS PLC      │  │  HVPS PLC   ├─────│─►│  crowbar, thyristor stacks,       │
+│  │ (Field   │  │ (Monitor │  │  CtrlLogix 1756 │  │ CompactLogix│     │  |  grounding tank, Ross switch)     │
+│  │  Control │  │  + Intlk)│  │                 │  │             │     │  └────────────────┬──────────────────┘
+│  │  + Tuner)│  │          │  └────────┬────────┘  └──────┬──────┘     │                   │ PPS interlock signals
+│  └────┬─────┘  └────┬─────┘           │                  │            │                   │ (K4 relay, Ross switch)
+│       │             │                 |                  |            │                   ▼
+│  ┌────┴─────────────┴─────────────────┴──────────────────┴─────────┐  │  ┌───────────────────────────────────┐
+│  │                    INTERFACE CHASSIS (NEW)                      │  │  │       PPS INTERFACE BOX           │
+│  │       First-fault detection │ Optocoupler iso │ Fiber I/O       │  │  │  (Bud enclosure, 4 relays,        │
+│  └────┬──────────────┬──────────────┬──────────────────┬───────────┘  │  │   status LEDs, lockable conn.,    │
+│       │              │              │                  |              │  │   K4 relay + Ross switch ctrl)    │
+│  ┌────┴─────┐  ┌─────┴───┐  ┌───────┴────┐  ┌──────────┴─────┐        │  └────────────────┬──────────────────┘
+│  │ Waveform │  │   Arc   │  │   Motor    │  │    Heater      │        │                   │ PPS chain signals
+│  │ Buffer   │  │ Detect. │  │    Ctrl    │  │   Controller   │        │                   ▼
+│  │ System   │  │         │  │  (4-axis)  │  │  (SCR-based)   │        │  ┌───────────────────────────────────┐
+│  └──────────┘  └─────────┘  └────────────┘  └────────────────┘        │  │           SPEAR PPS               │
+└──────────────────────────────┬────────────────────────────────────────┘  │  (Personnel Protection System)    │
+                               │ machine protection interlock signals      └───────────────────────────────────┘
+                               ▼
+                 ┌─────────────────────────────────────────────────────┐
+                 │         MACHINE PROTECTION SAFETY SYSTEMS           │
+                 │    SPEAR MPS │ Orbit Interlock │ External Permits   │
+                 └─────────────────────────────────────────────────────┘
 ```
 
 
@@ -167,8 +152,6 @@ The upgraded system replaces all control electronics while retaining the RF plan
 
 - **Interface Chassis (Machine/Equipment Protection)**: First-fault detection, optocoupler isolation, fiber I/O for LLRF9/HVPS/MPS/orbit coordination and other machine-protection interlocks
 - **PPS Interface Box (Personnel Safety / PPS)**: Separate Bud enclosure with 4 relays, status LEDs, PPS-lockable connector for K4 relay and Ross switch control
-
-This separation provides PPS compliance and maintains a clear distinction between personnel-safety (PPS) functions and machine/equipment protection interlocks, even though both participate in the overall protection chain.
 
 ### 2.3 What Stays, What Changes, What Is New
 
@@ -195,6 +178,7 @@ This separation provides PPS compliance and maintains a clear distinction betwee
 - Interface Chassis — central hardware interlock coordination hub
 - Waveform Buffer System — 8 RF + 4 HVPS channel extended monitoring
 - Arc Detection — total 10 of Microstep-MIS optical sensors on 4 cavity windows and 1 klystron windown, process chassis
+- PPS interface Box
 
 **Enhanced Subsystems** (upgraded from legacy):
 - Klystron Heater Controller — Motor-driven variac → SCR-based with EPICS integration
@@ -307,7 +291,7 @@ The amplitudes of the RF data need to be acquired. The RF signals that are curre
 
 > **Note on waveguide loads**: By the magic-tee symmetry, equal reflected power from the two cavities feeding a magic tee exits port 4 into the attached waveguide load, not back toward the klystron. The circulator load absorbs power that the circulator does not properly direct to the cavities along with any net reflection returning from the first magic tee.
 
-#### Monitored RF Signals
+#### Monitored RF Signals [TBD]
 
 | # | Signal | Monitored By | Notes |
 |---|--------|--------------|-------|
@@ -421,7 +405,6 @@ Two Dimtel LLRF9/476 units replace the entire VXI-based LLRF system (four units 
 | Setpoint step time range | 70 μs to 37 ms per step |
 | Waveform samples/channel | 16,384 |
 | Scalar readback rate | 10 Hz |
-| Scalar readback bandwidth | 4.4 Hz |
 | Phase readback resolution | Sub-degree |
 | Interlock timestamp resolution | ±17.4 ns |
 
@@ -519,7 +502,8 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
 
 **Key change**: The CompactLogix PLC is removed from the PPS safety chain. PPS functions (K4 relay, Ross switch control) are handled by a separate dedicated PPS interface box, not the Interface Chassis. The Interface Chassis handles only non-PPS interlocks. The PLC handles only non-safety functions: voltage regulation, temperature monitoring, and EPICS interface.
 
-### 6.4 HVPS EPICS Interface
+### 6.4 HVPS Controller Interface
+-**with EPICS**:
 
 | PV Category | Example PV | Update Rate |
 |-------------|------------|-------------|
@@ -547,7 +531,7 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
 > **Source**: `hvps/architecture/designNotes/rfedmHvpsLabelsPvs.docx` (RF expert panel configuration)
 | Interlock | `SRF1:HVPS:INTLK:SUMMARY` | ~1 Hz |
 
-### 6.5 HVPS Interfaces
+-**with InterfaceChassis**:
 
 - **Interface Chassis** (fiber optic): SCR ENABLE (in), CROWBAR inhibit (in), STATUS (out)
 
@@ -567,32 +551,117 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
 - **Switchgear**: Existing field cables to vacuum contactor controller and grounding tank
 
 ---
-
 ## 7. Subsystem 3: Machine Protection System (MPS)
 
-### 7.1 Legacy System
+### 7.1 Purpose and Protection Philosophy
 
-The legacy MPS uses an Allen-Bradley PLC-5 (1771 series). It aggregates interlock signals from the RF system, HVPS, and external sources (SPEAR MPS, orbit interlock) and manages the RF permit.
+The RF Machine Protection System (MPS) is the subsystem-level protection controller for the SPEAR3 RF station. Its purpose is to aggregate fault status from all RF subsystems and external safety systems, manage the overall system permit, and coordinate fault recovery.
 
-### 7.2 Upgraded System — ControlLogix 1756
+The protection philosophy, as defined in the RF system MPS requirements (`hvps/architecture/designNotes/RFSystemMPSRequirements.docx`), is:
 
-The MPS PLC is upgraded to Allen-Bradley ControlLogix 1756 platform.
+1. **Protect high-power elements** (HVPS, klystron, cavities) from damage by eliminating stored energy and disabling upstream power sources when faults occur.
+2. **Redundant protection** — multiple independent mechanisms protect each element (e.g., fiber-optic SCR disable, crowbar firing, contactor opening).
+3. **Fail-safe design** — all permits are active-high so that a broken cable or lost signal removes the permit.
+4. **Graceful shutdown** — when upstream elements trip, downstream elements are notified so they can shut down in an orderly fashion.
 
-**Status**: Hardware assembled, software written, tested without RF power. Ready for EPICS development and system integration.
+The MPS does **not** directly control the LLRF9 or HVPS hardware. Instead, it provides permit and control signals to the **Interface Chassis** (Section 8), which performs the fast hardware AND-logic and drives the actual interlock outputs to the LLRF9 and HVPS controller. This separation ensures that hardware interlock response times remain at the microsecond scale (Interface Chassis), while the MPS operates at PLC scan rates (~milliseconds) for fault aggregation, logging, and coordination.
 
-**Functions**:
-- Aggregate all RF interlock inputs (from Interface Chassis status outputs)
-- Issue global RF permit signal (to Interface Chassis)
-- Provide heartbeat signal to Interface Chassis (watchdog for MPS communication health)
-- Issue reset signal to Interface Chassis (clears all latched faults)
-- Log fault events with timestamps
-- Provide EPICS interface for operator monitoring and diagnostics
+### 7.2 Legacy System
 
-### 7.3 MPS Interfaces
+The legacy MPS uses an **Allen-Bradley PLC-5** processor with **1771-series I/O modules**. It aggregates interlock signals from the RF system (via distributed analog modules and direct wiring), the HVPS, and external sources (SPEAR MPS, orbit interlock), and manages the RF permit chain.
 
-- **Interface Chassis**: MPS Summary permit (out), MPS Heartbeat watchdog (out), Reset signal (out), Fault status (in)
-- **Python Coordinator** (EPICS): Status readbacks, fault history, permit control
-- **External Safety Systems**: SPEAR MPS permit, orbit interlock, radiation safety (via Interface Chassis)
+In the legacy system, interlock coordination was distributed across analog modules, PLC I/O, and direct point-to-point wiring with no central coordination point. The PLC-5 communicated with the EPICS control system via a 1771-DCM scanner module.
+
+> **Legacy MPS wiring diagrams**: 33 sheets in `llrf/documentation/mpsWiringDiagrams/` (drawings wd3403300200 through wd3403303400).
+
+### 7.3 Upgraded System — ControlLogix 1756
+
+The MPS PLC is upgraded from PLC-5 to **Allen-Bradley ControlLogix 1756** platform using a Rockwell Automation conversion kit. The ControlLogix platform provides modern Ethernet/IP communication, faster scan times, and long-term vendor support.
+
+**Status**: Hardware assembled, software written, tested on SPEAR3 without RF power. Ready for EPICS IOC development and system integration.
+
+### 7.4 MPS Outputs to Interface Chassis
+
+In the upgraded system, the MPS communicates with the Interface Chassis via digital signals. These are the **only** direct hardware outputs from the MPS PLC to the interlock system:
+
+| Output Signal | Type | Description |
+|---------------|------|-------------|
+| MPS Summary Permit | Digital | Global RF permit from MPS. One of several AND-gate inputs in the Interface Chassis. When removed, the Interface Chassis removes LLRF9 Enable and HVPS SCR ENABLE. |
+| MPS Heartbeat | Digital | Watchdog signal. If the Interface Chassis stops receiving the heartbeat (indicating MPS PLC failure or communication loss), it removes all output permits. |
+| MPS Reset | Digital | Clears all latched faults in the Interface Chassis first-fault register simultaneously. Required to restore system permits after a fault. |
+
+**Important**: The MPS does **not** directly drive the LLRF9 Enable, HVPS SCR ENABLE, or HVPS KLYSTRON CROWBAR signals. Those are Interface Chassis outputs, driven by the AND-logic of all input permits (see Section 8). The MPS contributes its Summary Permit as one input to that AND gate.
+
+### 7.5 MPS Inputs from Interface Chassis
+
+The MPS receives comprehensive status from the Interface Chassis via a multi-conductor digital cable:
+
+| Input Signal | Description |
+|--------------|-------------|
+| All input permit states | Status of every Interface Chassis input (LLRF9 Status, HVPS STATUS, SPEAR MPS, Orbit Interlock, Arc Detection, Waveform Buffer, expansion ports) |
+| All output permit states | Status of every Interface Chassis output (LLRF9 Enable, HVPS SCR ENABLE, HVPS CROWBAR) |
+| First-fault register | Identifies the initiating fault source when multiple faults cascade. Hardware-latched at the moment of initial fault detection. |
+
+This information allows the MPS to:
+- Determine which subsystem caused a trip
+- Log complete fault histories with timestamps
+- Report detailed status to the Python/EPICS coordinator for operator diagnostics
+
+### 7.6 MPS Role in the Protection Chain
+
+The RF system implements a layered protection architecture. The MPS operates at **Layer 3** (PLC scan rate, ~milliseconds):
+
+| Protection Layer | Subsystem | Response Time | Function |
+|------------------|-----------|---------------|----------|
+| Layer 1 | LLRF9 FPGA | <1 μs | RF overvoltage interlocks, baseband window comparators, DAC zeroing, RF switch |
+| Layer 2 | Interface Chassis | <1 μs | Hardware AND-logic, first-fault latching, HVPS fiber-optic control, LLRF9 enable |
+| Layer 3 | **MPS PLC** | **~ms (PLC scan)** | **Fault aggregation, permit management, reset coordination, event logging** |
+| Layer 4 | Python coordinator | ~1 Hz | State machine, supervisory control, operator interface, auto-recovery |
+
+The MPS functions include:
+- Aggregating fault status from all subsystems (via Interface Chassis digital status lines)
+- Providing the MPS Summary Permit to the Interface Chassis AND-gate
+- Sending the heartbeat watchdog signal to the Interface Chassis
+- Issuing the reset signal to the Interface Chassis to clear latched faults after a trip
+- Logging fault events with timestamps for post-mortem analysis
+- Providing redundant collector power calculation (from Waveform Buffer System data sent to MPS for independent verification)
+- Reporting complete system status to the Python/EPICS coordinator
+
+### 7.7 EPICS Interface
+
+The MPS ControlLogix PLC will provide an EPICS interface for operator monitoring and diagnostics. The PV namespace is `SRF1:MPS:`. Key PVs include:
+
+| PV | Type | Description |
+|----|------|-------------|
+| `SRF1:MPS:PERMIT` | BINARY | Overall MPS permit status |
+| `SRF1:MPS:FAULTS:ACTIVE` | MULTI-BIT | Currently active fault sources |
+| `SRF1:MPS:FAULTS:FIRST` | ENUM | First-fault identification (from Interface Chassis) |
+| `SRF1:MPS:FAULTS:COUNT` | INTEGER | Accumulated fault event count |
+
+The Python coordinator reads these PVs to:
+- Determine whether the MPS permit is active before allowing state transitions (e.g., OFF → STANDBY → ON)
+- Force a transition to OFF state if MPS permit is lost during operation
+- Display fault summaries and first-fault information to operators
+
+### 7.8 MPS Interfaces Summary
+
+| Interface Partner | Signal Direction | Signals | Medium |
+|-------------------|-----------------|---------|--------|
+| **Interface Chassis** | MPS → IC | Summary Permit, Heartbeat, Reset | Digital (multi-conductor cable) |
+| **Interface Chassis** | IC → MPS | All input/output states, first-fault register | Digital (multi-conductor cable) |
+| **Python Coordinator** | Bidirectional | Permit status, fault history, reset commands | EPICS Channel Access (Ethernet) |
+
+**Note**: External safety systems (SPEAR MPS permit, orbit interlock) connect to the **Interface Chassis** directly, not to the MPS PLC. The MPS receives their status indirectly via the Interface Chassis digital status lines. This design ensures that external safety permits participate in the fast hardware AND-logic (<1 μs) within the Interface Chassis, rather than being limited to PLC scan rates.
+
+### 7.9 Source Documents
+
+| File | Description |
+|------|-------------|
+| `hvps/architecture/designNotes/RFSystemMPSRequirements.docx` | RF system machine protection requirements and protection philosophy (J. Sebek) |
+| `hvps/architecture/designNotes/interfacesBetweenRFSystemControllers.docx` | Interface Chassis design — defines the MPS-to-Interface Chassis signal interface |
+| `llrf/documentation/mpsWiringDiagrams/` | 33 legacy MPS wiring diagram sheets (wd3403300200–wd3403303400) |
+| `pps/diagrams/00_SYSTEM_OVERVIEW.md` | System-level architecture showing MPS in the upgraded system context |
+| `llrf/llrf9/iGp/dl_llrf/interlock_summary.edl` | LLRF9 interlock summary display (EDM) — shows LLRF9-side interlock PVs that feed into the protection chain |
 
 
 ---
@@ -605,63 +674,29 @@ The MPS PLC is upgraded to Allen-Bradley ControlLogix 1756 platform.
 
 The Interface Chassis is a completely new subsystem that serves as the central hub for all hardware interlock coordination. It did not exist in the legacy system, where interlocks were distributed across analog modules, PLC I/O, and direct wiring with no central coordination point.
 
-The Interface Chassis provides:
-- **First-fault detection** — hardware-based latching circuit identifies the initiating fault in cascade scenarios
-- **Electrical isolation** — all external signals isolated from chassis ground via optocouplers (HCPL-2400-000E) and fiber-optic transceivers (HFBR-1412/2412)
-- **Microsecond-scale response** — implemented in standard electronic components (no processor in the critical path)
-- **Fault latching** — all inputs latch when faulted until external reset from MPS
-- **Status reporting** — all input/output states and first-fault status reported to MPS PLC
+**Key capabilities**:
+- **First-fault detection** — hardware latching identifies the initiating fault in cascade scenarios
+- **Microsecond-scale response** — combinational logic with no processor in the critical path
+- **Electrical isolation** — all external signals isolated via optocouplers and fiber-optic transceivers
+- **Fault latching** — all inputs latch when faulted until external MPS reset
+- **Status reporting** — comprehensive digital reporting to MPS PLC
 
-### 8.2 Input Signals
+### 8.2 Interface Summary
 
-| Input Signal | Type | Source | Isolation | Notes |
-|--------------|------|--------|-----------|-------|
-| LLRF9 Status | 5 VDC, 60 mA max | LLRF9 rear panel | HCPL-2400-000E | OR of 17 internal + 1 external interlocks |
-| HVPS STATUS | Fiber-optic | HVPS Controller | HFBR-2412 | Active when powered, no crowbar trigger |
-| MPS Summary | Digital | RF MPS PLC | HCPL-2400-000E | Global RF permit |
-| MPS Heartbeat | Digital | RF MPS PLC | HCPL-2400-000E | Watchdog for MPS communication |
-| SPEAR MPS | 24 VDC | SPEAR MPS | HCPL-2400-000E | Ring protection permit |
-| Orbit Interlock | 24 VDC | Orbit system | HCPL-2400-000E | Beam position safety |
-| Arc Detection | Dry contacts | Microstep-MIS | HCPL-2400-000E | Cavity/klystron arc sensors |
-| Power Monitoring | Digital | Waveform Buffer | HCPL-2400-000E | RF/HVPS comparator trips |
+**Primary inputs**: LLRF9 status, HVPS fiber-optic status, MPS permits/heartbeat/reset, SPEAR MPS, orbit interlock, arc detection, power monitoring, expansion ports
 
-### 8.3 Output Signals
+**Primary outputs**: LLRF9 enable, HVPS SCR ENABLE (fiber), HVPS CROWBAR (fiber), fault status reporting to MPS
 
-| Output Signal | Type | Destination | Driver | Notes |
-|---------------|------|-------------|--------|-------|
-| LLRF9 Enable | 3.2 VDC, 8 mA min | LLRF9 Unit 1 interlock input | Optocoupler | External permit to LLRF9 |
-| HVPS SCR ENABLE | Fiber-optic | HVPS Controller | HFBR-1412 | Phase control thyristor enable |
-| HVPS CROWBAR | Fiber-optic | HVPS Controller | HFBR-1412 | Crowbar inhibit (normally enabled) |
-| Fault Status | Digital lines | MPS PLC | Optocoupler | All input states + first-fault register |
+**Critical design consideration**: The Interface Chassis creates a bidirectional feedback loop between LLRF9 and HVPS that requires careful recovery sequencing logic.
 
-### 8.4 Permit Logic
+### 8.3 Implementation Status
 
-```
-All_Permits_OK = LLRF9_Status AND HVPS_STATUS AND MPS_Summary AND 
-                 MPS_Heartbeat AND SPEAR_MPS AND Orbit_Interlock AND 
-                 Arc_Detection AND Power_Monitoring
+- **Interface specification**: Complete (J. Sebek, `llrf/architecture/llrfInterfaceChassis.docx`)
+- **Chassis design**: Not started
+- **PCB design**: Not started  
+- **Fabrication**: Not started
 
-LLRF9_Enable    = All_Permits_OK
-HVPS_SCR_ENABLE = All_Permits_OK
-HVPS_CROWBAR    = 1  (always enabled unless specific crowbar command)
-# Note: PPS functions (K4 relay, Ross switch) are handled by separate PPS Interface Box, not Interface Chassis
-```
-
-### 8.5 Critical Design Consideration — LLRF9/HVPS Feedback Loop
-
-The Interface Chassis creates a bidirectional feedback loop between LLRF9 and HVPS:
-- LLRF9 fault → Interface Chassis removes HVPS SCR ENABLE → HVPS loses STATUS → Interface Chassis sees HVPS_STATUS lost → further complicates recovery
-
-The Interface Chassis must implement proper sequencing logic for system restart after faults. This logic does not exist in the legacy system.
-
-### 8.6 Physical Implementation
-
-The Interface Chassis is custom hardware requiring PCB design for:
-- Optocoupler circuits (mixed voltage levels: 3.2V, 5V, 24V, 120VAC)
-- Fiber-optic transceiver mounting (HFBR-1412/2412)
-- First-fault detection digital logic with timing design
-- Signal isolation meeting PPS standards
-- Location TBD (inside Hoffman Box, separate enclosure, or rack-mounted)
+**Note**: The Interface Chassis is on the critical path for system integration. 
 
 ---
 
@@ -688,14 +723,14 @@ In the legacy system, PPS signals are routed through the Hoffman Box:
 
 ### 9.3 Upgraded PPS Design
 
-The upgraded design adopts the standard PPS interface solution already approved and in use by the PPS group for the 6575 modulator and gallery systems. **The PPS interface is completely separate from the Interface Chassis** and uses a dedicated PPS interface box.
+The upgraded design adopts the standard PPS interface solution already approved and in use by the PPS group for the 6575 modulator and gallery systems. It uses a dedicated PPS interface box.
 
-**PPS Interface Box Characteristics** (per Ben Morris, March 2026):
+**PPS Interface Box Characteristics** (per Ben Morris, March 5, 2026):
 - Small Bud enclosure (≈6″ × 5″ × 4″)
 - Contains 4 relays, status LEDs (Permit A/B granted & enabled), and inhibit push-buttons
 - Single board with one connector that the PPS group can lock with their collar
 - Provides two independent permit channels + two readback channels (dry contacts)
-- Completely isolated from the HVPS/LLRF internals
+- Completely isolated from the HVPS internals
 - Labeled "PPS Interface – RSWCF required to open" (standard PPS practice)
 
 **PPS Signal Flow**:
@@ -713,7 +748,7 @@ The upgraded design adopts the standard PPS interface solution already approved 
 - Meets all current PPS requirements (two independent channels, lockable interface, visible verification)
 - Eliminates the "unique RF situation" that the PPS group dislikes
 
-> **Source**: `pps/pps_Ben.md` (March 2026 meeting), `pps/MSG from Jim Sebek to Faya about PPS.md`
+> **Source**: `pps/pps_Ben.md` (March 5 2026 meeting), `pps/MSG from Jim Sebek to Faya about PPS.md`
 
 ### 9.4 PPS Regulatory Considerations
 
@@ -723,7 +758,7 @@ Any modification to PPS wiring, control logic, or readback paths requires:
 - Radiation safety verification testing
 - Possibly a radiation safety work control form
 
-This adds significant administrative scope beyond the engineering work and requires early engagement with the PPS/protection group (initiated by Jim Sebek's 2022 email to Matt Cyterski and Tracy Yott).
+This adds significant administrative scope beyond the engineering work and requires early engagement with the PPS/protection group.
 
 
 ---
