@@ -694,7 +694,7 @@ The upgraded design adopts the standard PPS interface solution already approved 
 - Small Bud enclosure (≈6″ × 5″ × 4″)
 - Contains 4 relays, status LEDs (Permit A/B granted & enabled), and inhibit push-buttons
 - Single board with one connector that the PPS group can lock with their collar
-- Provides two independent permit channels + two read-back channels (dry contacts)
+- Provides two independent permit channels + two readback channels (dry contacts)
 - Completely isolated from the HVPS/LLRF internals
 - Labeled "PPS Interface – RSWCF required to open" (standard PPS practice)
 
