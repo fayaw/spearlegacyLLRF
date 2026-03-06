@@ -509,7 +509,7 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
   - CROWBAR: Interface Chassis → HFBR-2412 receiver → HVPS controller (crowbar fire command)
   - Normal operation: All signals illuminated/active; signal loss = fault condition
 
-**Key change**: The CompactLogix PLC is removed from the PPS safety chain. PPS functions (K4 relay, Ross switch control) are routed through the new Interface Chassis instead. The PLC handles only non-safety functions: voltage regulation, temperature monitoring, and EPICS interface.
+**Key change**: The CompactLogix PLC is removed from the PPS safety chain. PPS functions (K4 relay, Ross switch control) are handled by a separate dedicated PPS interface box, not the Interface Chassis. The Interface Chassis handles only LLRF/HVPS interlocks. The PLC handles only non-safety functions: voltage regulation, temperature monitoring, and EPICS interface.
 
 ### 6.4 HVPS EPICS Interface
 
@@ -624,10 +624,6 @@ The Interface Chassis provides:
 | LLRF9 Enable | 3.2 VDC, 8 mA min | LLRF9 Unit 1 interlock input | Optocoupler | External permit to LLRF9 |
 | HVPS SCR ENABLE | Fiber-optic | HVPS Controller | HFBR-1412 | Phase control thyristor enable |
 | HVPS CROWBAR | Fiber-optic | HVPS Controller | HFBR-1412 | Crowbar inhibit (normally enabled) |
-| K4 Relay Drive | Relay / optocoupler | Switchgear K4 relay | Direct drive | PPS Chain 1 — contactor control |
-| Ross Switch Drive | Relay / optocoupler | Grounding tank Ross switch | Direct drive | PPS Chain 2 — grounding switch |
-| PPS Readback A-B | NC contacts | PPS Chassis | Relay | S5 contactor readback to PPS |
-| PPS Readback C-D | NC contacts | PPS Chassis | Relay | Ross switch readback to PPS |
 | Fault Status | Digital lines | MPS PLC | Optocoupler | All input states + first-fault register |
 
 ### 8.4 Permit Logic
@@ -640,8 +636,7 @@ All_Permits_OK = LLRF9_Status AND HVPS_STATUS AND MPS_Summary AND
 LLRF9_Enable    = All_Permits_OK
 HVPS_SCR_ENABLE = All_Permits_OK
 HVPS_CROWBAR    = 1  (always enabled unless specific crowbar command)
-K4_Drive        = PPS_Enable_1 AND All_Permits_OK
-Ross_Drive      = PPS_Enable_2 AND All_Permits_OK
+# Note: PPS functions (K4 relay, Ross switch) are handled by separate PPS Interface Box, not Interface Chassis
 ```
 
 ### 8.5 Critical Design Consideration — LLRF9/HVPS Feedback Loop
@@ -685,16 +680,32 @@ In the legacy system, PPS signals are routed through the Hoffman Box:
 
 ### 9.3 Upgraded PPS Design
 
-The upgraded design removes the PLC from the PPS safety chain entirely:
+The upgraded design adopts the standard PPS interface solution already approved and in use by the PPS group for the 6575 modulator and gallery systems. **The PPS interface is completely separate from the Interface Chassis** and uses a dedicated PPS interface box.
 
-- **Chain 1 (Contactor)**: PPS Enable 1 → Interface Chassis (optocoupler isolated) → K4 relay direct drive → MX → L1 holding coil. S5 NC auxiliary contact readback via Interface Chassis to PPS.
-- **Chain 2 (Ross Switch)**: PPS Enable 2 → Interface Chassis (optocoupler isolated) → Ross switch direct drive. Ross NC auxiliary contact readback via Interface Chassis to PPS.
+**PPS Interface Box Characteristics** (per Ben Morris, March 2026):
+- Small Bud enclosure (≈6″ × 5″ × 4″)
+- Contains 4 relays, status LEDs (Permit A/B granted & enabled), and inhibit push-buttons
+- Single board with one connector that the PPS group can lock with their collar
+- Provides two independent permit channels + two read-back channels (dry contacts)
+- Completely isolated from the HVPS/LLRF internals
+- Labeled "PPS Interface – RSWCF required to open" (standard PPS practice)
+
+**PPS Signal Flow**:
+- **Chain 1 (Contactor)**: PPS Enable 1 → **PPS Interface Box** → K4 relay direct drive → MX → L1 holding coil. S5 NC auxiliary contact readback via **PPS Interface Box** to PPS.
+- **Chain 2 (Ross Switch)**: PPS Enable 2 → **PPS Interface Box** → Ross switch direct drive. Ross NC auxiliary contact readback via **PPS Interface Box** to PPS.
+
+**Additional Safety Relays**: Because the inhibit and safety-discharge wiring cannot be physically separated inside the existing HVPS and termination tank, a second relay is added in series with the inhibit/safety-discharge lines (one relay per channel). These relays are labeled "PPS Controlled – RSWCF required before work" with PPS-provided cable tags.
 
 **Key improvements**:
 - No PLC dependency for safety functions
-- Electrical isolation of all PPS signals through optocouplers
-- PPS wiring isolated from non-PPS equipment
-- Hardware fail-safe: Interface Chassis power loss → all outputs de-energize → K4, Ross, LLRF9, HVPS SCR all safe
+- Uses proven PPS-approved design (identical to gallery systems)
+- Electrical isolation of all PPS signals
+- PPS wiring completely isolated from non-PPS equipment  
+- Clear visual feedback and independent inhibit capability
+- Meets all current PPS requirements (two independent channels, lockable interface, visible verification)
+- Eliminates the "unique RF situation" that the PPS group dislikes
+
+> **Source**: `pps/pps_Ben.md` (March 2026 meeting), `pps/MSG from Jim Sebek to Faya about PPS.md`
 
 ### 9.4 PPS Regulatory Considerations
 
@@ -1099,7 +1110,7 @@ All critical subsystems are designed to fail safe:
 
 | Subsystem | Failure Mode | Safe State |
 |-----------|-------------|------------|
-| Interface Chassis power loss | All outputs de-energize | LLRF9 disabled, HVPS SCR disabled, K4/Ross de-energized |
+| Interface Chassis power loss | All outputs de-energize | LLRF9 disabled, HVPS SCR disabled (K4/Ross controlled by separate PPS interface box) |
 | LLRF9 power loss | Interlock status goes low | Interface Chassis removes permits |
 | HVPS PLC failure | STATUS signal lost | Interface Chassis removes permits |
 | MPS PLC failure | Heartbeat lost | Interface Chassis removes permits |
@@ -1139,7 +1150,7 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 |------|------|---------|
 | Interface Chassis ↔ all hardware | Hardwired digital/fiber | Safety interlocks (no network dependency) |
 | LLRF9 Unit 1 ↔ Unit 2 | LEMO interlock daisy-chain | Fast interlock propagation |
-| PPS ↔ Interface Chassis | Hardwired (GOB12-88PNE) | Personnel safety (no network dependency) |
+| PPS ↔ PPS Interface Box | Hardwired (GOB12-88PNE) | Personnel safety (no network dependency) |
 | Arc Detection → Interface Chassis | Dry contact relay | Arc interlock (no network dependency) |
 
 **Critical design principle**: All safety-critical communication paths are hardwired. No safety function depends on the Ethernet network or EPICS Channel Access. Network loss pauses supervisory control but does not compromise protection.
@@ -1240,7 +1251,7 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 | `Designs/3_LLRF9_SYSTEM_AND_SOFTWARE_REPORT.md` | Markdown | LLRF9 hardware, EPICS IOC, PV architecture, 550+ PVs |
 | `Designs/4_HVPS_Engineering_Technical_Note.md` | Markdown | HVPS power section, controller, upgrade design |
 | `Designs/5_KLYSTRON_HEATER_SUBSYSTEM_UPGRADE.md` | Markdown | SCR-based heater control system design |
-| `Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md` | Markdown | PPS interface, safety chain, Interface Chassis |
+| `Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md` | Markdown | PPS interface, safety chain (⚠️ Contains errors - see pps/ for correct architecture) |
 | `Designs/9_SOFTWARE_DESIGN.md` | Markdown | Python/EPICS coordinator architecture and API |
 
 ### LLRF Source Material
