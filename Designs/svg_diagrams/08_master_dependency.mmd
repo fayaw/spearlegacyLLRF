@@ -1,0 +1,134 @@
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '12px', 'fontFamily': 'arial', 'primaryColor': '#ffffff', 'primaryTextColor': '#000000', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
+flowchart LR
+    %% ─── PHASE 1 ─── Standalone Development ───
+    subgraph hw1["HVPS — Stream 1: CompactLogix PLC"]
+        direction LR
+        HA1("✅ PLC HW<br/>Received") --> HA2("PLC Online<br/>B44 Test Stand") --> HA3("EPICS Dev<br/>SRF1:HVPS: PVs") --> HA4("SW Integration<br/>Test: HVPS")
+    end
+
+    subgraph hw2["HVPS — Stream 2: SCR + Regulator"]
+        direction LR
+        HB1("Procure<br/>FCOG1200 ×5") --> HB2("Regulator<br/>Board Design") --> HB3("Regulator<br/>Board Fab") --> HB4("Standalone<br/>Test on TS18")
+    end
+
+    subgraph htr["Heater Controller"]
+        direction LR
+        HTR1("Design") --> HTR2("Fabrication") --> HTR3("Bench Test") --> HTR4("SW Integration<br/>Test: Heater")
+    end
+
+    subgraph mps["Kly MPS PLC"]
+        direction LR
+        MPS1("✅ HW Ready") --> MPS2("EPICS IOC Dev") --> MSW("SW Integ Test") --> MPS3("Mock IC Test") --> MPS4("IC Integ Test")
+    end
+
+    subgraph wfb["Waveform Buffer System"]
+        direction LR
+        WFB1("✅ Design Done") --> WFB2("PCB Design") --> WFB3("Fab + Assy") --> WFB4("Standalone Test") --> WSW("SW Integ Test") --> WFB5("IC Integ Test")
+    end
+
+    subgraph ic["⚠️ Interface Chassis — CRITICAL PATH"]
+        direction LR
+        IC1("🔄 Eng Spec") --> IC2("Logic Design") --> IC3("PCB + Mech") --> IC4("Fab + Assy") --> IC5("Standalone Test")
+    end
+
+    subgraph sw["⚠️ Control Software — CRITICAL"]
+        direction LR
+        SWA1("Arch Design") --> SWA2("HW Interface<br/>Modules + Mocks")
+        SWA3("All HW Iface<br/>Modules Tested")
+        SWB1("State Machine") --> SWB2("HVPS Loop +<br/>Tuner + Load") --> SWB3("Fault Mgr +<br/>Recovery + EDM")
+        SWA3 & SWB3 --> SWMRG("SW Streams<br/>Merged")
+    end
+
+    subgraph llrf["LLRF9 Units 1 & 2"]
+        direction LR
+        L1_node("✅ Received") --> L2_node("Install B132") --> L3_node("EPICS IOC") --> L4_node("RF Test") --> L5_node("IC Integ Test")
+    end
+
+    subgraph arc_det["Arc Detection"]
+        direction LR
+        ARC1("Procure") --> ARC2("Mount Adapt") --> ARC3("Chassis Design") --> ARC4("Fab") --> ARC5("Standalone Test") --> ARC6("IC Integ Test")
+    end
+
+    subgraph gal["Galil Tuner Controller"]
+        direction LR
+        GAL1("✅ Aug 2025") --> GAL2("Booster Test") --> GAL3("SPEAR3 Test") --> GAL4("EPICS Motor") --> GAL5("IC Integ Test")
+    end
+
+    subgraph pps_track["PPS Interface Box"]
+        direction LR
+        PPS1("Design") --> PPS2("Safety Review") --> PPS3("Fab") --> PPS4("Test") --> PPS5("Commission")
+    end
+
+    %% ─── PHASE 2A ─── TS18 Sub-Integration ───
+    subgraph ts18["Phase 2A — TS18 Sub-Integration (Klystron + Dummy Load)"]
+        direction LR
+        TS1["① HVPS<br/>Combined"] --> TS2["② + Heater"] --> TS3["③ + Interface<br/>Chassis"] --> TS4["④ + Kly MPS"] --> TS5["⑤ + Waveform<br/>Buffer"] --> TS6["⑥ + Software"] --> TS7["⑦ RF Power<br/>Ramp"]
+    end
+
+    %% ─── PHASE 2B ─── SPEAR3 Full Integration ───
+    subgraph spear["Phase 2B — SPEAR3 Full Integration (Live Cavities)"]
+        direction LR
+        SP1["① + LLRF9 ×2"] --> SP2["② + Galil"] --> SP3["③ + Arc Det"] --> SP4["④ End-to-End<br/>Verify"]
+    end
+
+    %% ─── PHASE 3 & 4 ─── Final Commissioning ───
+    subgraph final["Phase 3 & 4 — Final Commissioning"]
+        direction LR
+        FC1["+ PPS Box"] --> FC2["SW Validation"] --> FC3["RF Ramp<br/>on SPEAR3"] --> FC4["Performance<br/>Validation"] --> FC5["Op Training"] --> FC6(["✅ OPERATION"])
+    end
+
+    %% ─── DEPENDENCY EDGES ───
+
+    %% HVPS streams → TS18-①
+    HA4 -->|"Stream 1 +<br/>SW tested"| TS1
+    HB4 -->|"Stream 2<br/>ready"| TS1
+
+    %% Heater → TS18-②
+    HTR4 -->|"Bench + SW<br/>tested"| TS2
+
+    %% Software modules ready → enables per-subsystem SW integration tests
+    SWA2 -->|"SW module"| HA4
+    SWA2 -->|"SW module"| HTR4
+    SWA2 -->|"SW module"| MSW
+    SWA2 -->|"SW module"| WSW
+
+    %% Per-subsystem SW integration tests → SW merge gate
+    HA4 -->|"HVPS tested"| SWA3
+    HTR4 -->|"Heater tested"| SWA3
+    MSW -->|"MPS tested"| SWA3
+    WSW -->|"WFB tested"| SWA3
+
+    %% IC standalone → IC joins at TS18-③
+    IC5 -->|"IC ready"| TS3
+
+    %% IC standalone → enables each subsystem's IC integration test
+    IC5 -->|"IC ready"| MPS4
+    IC5 -->|"IC ready"| WFB5
+    IC5 -->|"IC ready"| L5_node
+    IC5 -->|"IC ready"| GAL5
+    IC5 -->|"IC ready"| ARC6
+
+    %% Per-subsystem IC integ tests → TS18 steps
+    MPS4 -->|"IC integ<br/>passed"| TS4
+    WFB5 -->|"IC integ<br/>passed"| TS5
+
+    %% Software merged → TS18-⑥
+    SWMRG -->|"SW merged"| TS6
+
+    %% TS18 complete + cavity-dependent IC integ → SPEAR3
+    TS7 -->|"TS18<br/>complete"| SP1
+    L5_node -->|"IC integ<br/>passed"| SP1
+    GAL5 -->|"IC integ<br/>passed"| SP2
+    ARC6 -->|"IC integ<br/>passed"| SP3
+
+    %% SPEAR3 + PPS → Final Commissioning
+    SP4 --> FC1
+    PPS5 -->|"Safety approval"| FC1
+
+    %% ─── STYLES ───
+    style ic fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style sw fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style ts18 fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style spear fill:#d5e8d4,stroke:#82b366,stroke-width:2px,color:#000000
+    style final fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px,color:#000000
+    style pps_track fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#000000

@@ -1,0 +1,54 @@
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '13px', 'fontFamily': 'arial', 'primaryColor': '#ffffff', 'primaryTextColor': '#000000', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
+flowchart TB
+    subgraph inputs["Interface Chassis INPUTS"]
+        direction TB
+        IN1["LLRF9 Unit 1 Status"]
+        IN2["LLRF9 Unit 2 Status"]
+        IN3["HVPS STATUS<br/>(fiber optic)"]
+        IN4["Kly MPS Summary Permit"]
+        IN5["Kly MPS Heartbeat"]
+        IN6["SPEAR MPS Permit<br/>(external)"]
+        IN7["Orbit Interlock<br/>(external)"]
+        IN8["Arc Detection Permit<br/>(OR of 5 sensors)"]
+        IN9["Arc Detection 5-bit ID"]
+        IN10["WFB Comparator Trips"]
+        IN11["Expansion Ports"]
+    end
+
+    subgraph logic["INTERNAL LOGIC — Combinational (< 1 μs)"]
+        direction TB
+        AND["Hardware AND-gate<br/>(all permits)"]
+        FF["First-Fault<br/>Latching Register"]
+        HBT["Heartbeat<br/>Watchdog"]
+        ISO["Optocoupler<br/>Isolation"]
+    end
+
+    subgraph outputs["Interface Chassis OUTPUTS"]
+        direction TB
+        OUT1["LLRF9 Enable<br/>(to Unit 1)"]
+        OUT2["HVPS SCR ENABLE<br/>(fiber optic)"]
+        OUT3["HVPS CROWBAR<br/>(fiber optic)"]
+        OUT4["Fault Status Word<br/>(to Kly MPS PLC)"]
+        OUT5["All Input/Output States<br/>(to Kly MPS PLC)"]
+        OUT6["First-Fault Register<br/>(to Kly MPS PLC)"]
+    end
+
+    IN1 & IN2 & IN3 & IN4 & IN6 & IN7 & IN8 & IN10 & IN11 --> ISO --> AND
+    IN5 --> HBT --> AND
+    IN9 --> FF
+    AND --> FF
+    AND --> OUT1
+    AND --> OUT2
+    AND --> OUT3
+    FF --> OUT4
+    FF --> OUT6
+    AND --> OUT5
+
+    subgraph reset_path["Reset Path"]
+        RESET["Kly MPS Reset<br/>Signal"] --> FF
+    end
+
+    style logic fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style inputs fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#000000
+    style outputs fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#000000
+    style reset_path fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#000000

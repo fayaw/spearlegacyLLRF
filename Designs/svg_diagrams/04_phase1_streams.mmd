@@ -1,0 +1,62 @@
+flowchart LR
+    subgraph hw1["HVPS — Stream 1: CompactLogix PLC"]
+        direction LR
+        HA1("✅ PLC HW<br/>Received") --> HA2("PLC Online<br/>B44 Test Stand") --> HA3("EPICS Dev<br/>SRF1:HVPS: PVs") --> HA4("SW Integration<br/>Test: HVPS<br/>module vs live<br/>CompactLogix")
+    end
+
+    subgraph hw2["HVPS — Stream 2: SCR Gate Driver + Regulator Board"]
+        direction LR
+        HB1("Procure<br/>FCOG1200 ×5") --> HB2("Regulator<br/>Board Design") --> HB3("Regulator<br/>Board Fab") --> HB4("Standalone<br/>Test on TS18")
+    end
+
+    subgraph htr["Heater Controller (SCR-based)"]
+        direction LR
+        HTR1("Design<br/>SCR + Filter<br/>+ RMS Monitor") --> HTR2("Fabrication") --> HTR3("Bench<br/>Test") --> HTR4("SW Integration<br/>Test: Heater<br/>module vs live<br/>SCR controller")
+    end
+
+    subgraph mps["Klystron MPS PLC (ControlLogix 1756)"]
+        direction LR
+        MPS1("✅ HW Assembled<br/>Standalone Tested<br/>no RF power") --> MPS2("EPICS IOC Dev<br/>SRF1:MPS: PVs<br/>permit/fault/reset") --> MSW("SW Integration<br/>Test: MPS EPICS<br/>module vs live<br/>ControlLogix") --> MPS3("Mock Test<br/>vs Simulated<br/>IC I/O") --> MPS4("IC Integration<br/>Test: fault status<br/>word, heartbeat,<br/>reset sequencing")
+    end
+
+    subgraph wfb["Waveform Buffer System"]
+        direction LR
+        WFB1("✅ System<br/>Design Complete") --> WFB2("PCB Design<br/>ADC + comparators<br/>+ EPICS") --> WFB3("Fabrication<br/>+ Assembly") --> WFB4("Standalone Test<br/>circ. buffers,<br/>comparators,<br/>EPICS waveforms") --> WSW("SW Integration<br/>Test: WFB EPICS<br/>module vs live<br/>PCB hardware") --> WFB5("IC Integration<br/>Test: comparator<br/>trips → IC<br/>permit logic")
+    end
+
+    subgraph ic["⚠️ Interface Chassis — CRITICAL PATH"]
+        direction LR
+        IC1("🔄 Eng Spec<br/>Finalize I/O<br/>Signal List") --> IC2("Logic Design<br/>AND-gate<br/>First-fault<br/>Fiber I/O") --> IC3("PCB + Mech<br/>Design") --> IC4("Fabrication<br/>+ Assembly") --> IC5("Standalone Test<br/>interlock logic,<br/>fiber I/O,<br/>hbt watchdog")
+    end
+
+    subgraph sw["⚠️ Control Software (Python/EPICS) — CRITICAL, Start Now"]
+        direction LR
+        SWA1("Arch Design<br/>+ PV Naming<br/>Conventions") --> SWA2("HW Interface<br/>Modules<br/>+ Mock Interfaces<br/>per subsystem")
+        SWA3("All HW Iface<br/>Modules live-<br/>tested: HVPS,<br/>Heater, MPS, WFB")
+        SWB1("State Machine<br/>OFF→PARK→<br/>TUNE→ON_CW<br/>→FAULT") --> SWB2("HVPS Loop<br/>+ Tuner Mgr<br/>+ Load Angle") --> SWB3("Fault Mgr<br/>+ Auto-Recovery<br/>+ Logging<br/>+ EDM Panels")
+        SWA3 & SWB3 --> SWMRG("SW Streams<br/>Merged<br/>All modules<br/>tested vs<br/>real HW")
+    end
+
+    subgraph llrf["LLRF9 — Units 1 and 2 (cavity-dependent)"]
+        direction LR
+        L1("✅ 4 Units<br/>Received") --> L2("Install B132<br/>+ Connect<br/>24 RF Cables") --> L3("EPICS IOC<br/>Verify PVs<br/>LLRF1: LLRF2:") --> L4("Standalone RF<br/>Test: vector sum<br/>feedback, tuner<br/>phase at 10 Hz") --> L5("IC Integration<br/>Test: enable<br/>signal, interlock<br/>daisy-chain")
+    end
+
+    subgraph arc_det["Arc Detection System (cavity-dependent)"]
+        direction LR
+        ARC1("Procure<br/>10 Sensors<br/>5 Process<br/>Chassis + spares") --> ARC2("Mech Mounting<br/>Adapters for<br/>CF Flange<br/>Viewports") --> ARC3("Chassis Design<br/>HW OR-gate<br/>5-bit Latch<br/>for fault ID") --> ARC4("Chassis<br/>Fabrication") --> ARC5("Standalone Test<br/>fast permit OR<br/>+ 5-bit ID latch") --> ARC6("IC Integration<br/>Test: fast permit<br/>+ 5-bit fault ID<br/>into IC reg")
+    end
+
+    subgraph gal["Galil DMC-4143 Motion Controller (cavity-dependent)"]
+        direction LR
+        GAL1("✅ Operational<br/>Aug 2025<br/>SPEAR3 installed") --> GAL2("Booster Cavity<br/>Test — validate<br/>before storage<br/>ring") --> GAL3("SPEAR3 Cavity<br/>Test — tuner<br/>steps, pot<br/>readback") --> GAL4("EPICS Motor<br/>Record integ.<br/>+ LLRF9<br/>phase feedback") --> GAL5("IC Integration<br/>Test: EPICS<br/>motor cmds +<br/>tuner loop via IC")
+    end
+
+    subgraph pps_track["PPS Interface Box — Independent Safety Approval Track"]
+        direction LR
+        PPS1("Design<br/>4-relay board<br/>LEDs, lockable<br/>per SLAC std") --> PPS2("SLAC AD Safety<br/>Div Review<br/>+ Approval") --> PPS3("Fabrication") --> PPS4("Test with<br/>Hoffman Box<br/>K4 + Ross sw") --> PPS5("Commission")
+    end
+
+    style ic fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style sw fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style pps_track fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#000000

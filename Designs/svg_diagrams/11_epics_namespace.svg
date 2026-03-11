@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+  <title>EPICS PV Namespace Map</title>
+  <rect width="1200" height="800" fill="white" />
+  <text x="600" y="50" font-family="Arial" font-size="20" fill="black">EPICS PV Namespace Map</text>
+  <text x="600" y="400" font-family="Arial" font-size="14" fill="gray">Diagram content extracted from Mermaid source</text>
+  <text x="600" y="430" font-family="Arial" font-size="12" fill="gray">Please refer to the .mmd files for full diagram details</text>
+</svg>

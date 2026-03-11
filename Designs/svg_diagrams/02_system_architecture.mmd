@@ -1,0 +1,73 @@
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '14px', 'fontFamily': 'arial', 'primaryColor': '#ffffff', 'primaryTextColor': '#000000', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
+flowchart TB
+    subgraph operator["Operator Layer"]
+        EDM["EDM Panels"]
+        ARCH["EPICS Archiver"]
+        LOG["Logging"]
+    end
+
+    subgraph software["Control Software — Python/EPICS Coordinator"]
+        SM["State Machine<br/>OFF→PARK→TUNE→ON_CW→FAULT"]
+        HVPS_LOOP["HVPS Supervisory Loop"]
+        TUNER_MGR["Tuner Manager"]
+        FAULT_MGR["Fault Manager +<br/>Auto-Recovery"]
+    end
+
+    subgraph epics_net["EPICS Channel Access Network"]
+        direction LR
+        LLRF9_1["LLRF9 Unit 1<br/>Field Control + Tuner<br/>LLRF1: PVs"]
+        LLRF9_2["LLRF9 Unit 2<br/>Monitoring + Interlocks<br/>LLRF2: PVs"]
+        HVPS_PLC["HVPS CompactLogix<br/>SRF1:HVPS: PVs"]
+        MPS_PLC["Kly MPS ControlLogix<br/>SRF1:MPS: PVs"]
+        GALIL["Galil DMC-4143<br/>SRF1:MTR: PVs"]
+        WFB["Waveform Buffer<br/>SRF1:WFBUF: PVs"]
+        HTR["Heater Controller<br/>SRF1:HTR: PVs"]
+    end
+
+    subgraph hw_interlock["Hardware Interlock Layer — < 1 μs"]
+        IC["⚠️ INTERFACE CHASSIS<br/>Central Interlock Hub<br/>AND-gate · First-fault · Fiber I/O"]
+    end
+
+    subgraph safety["Personnel Safety"]
+        PPS["PPS Interface Box<br/>K4 Relay + Ross Switch<br/>Independent Safety Track"]
+    end
+
+    subgraph sensors["Field Sensors"]
+        ARC["Arc Detection<br/>5 Microstep-MIS Sensors<br/>+ Chassis (OR + 5-bit latch)"]
+    end
+
+    subgraph rf_plant["RF Plant — Retained Infrastructure"]
+        KLY["Klystron<br/>~1 MW @ 476 MHz"]
+        CAV["4 RF Cavities<br/>~800 kV each"]
+        WG["Waveguide<br/>Distribution"]
+        TUNERS["4 Stepper Motor<br/>Tuners"]
+        HVPS_PWR["HVPS Power Section<br/>up to −90 kV DC"]
+    end
+
+    operator ---|EPICS CA| software
+    software ---|EPICS CA| epics_net
+
+    LLRF9_1 <-->|"Interlock<br/>daisy-chain"| LLRF9_2
+    LLRF9_1 -->|"Enable"| IC
+    LLRF9_2 -->|"Interlock<br/>Status"| IC
+    IC -->|"LLRF9 Enable"| LLRF9_1
+    IC <-->|"Fiber Optic<br/>SCR ENABLE<br/>CROWBAR<br/>STATUS"| HVPS_PLC
+    MPS_PLC <-->|"Permit/HBT/Reset<br/>+ Status Word"| IC
+    WFB -->|"Comparator<br/>Trip Outputs"| IC
+    ARC -->|"Permit + 5-bit ID"| IC
+    PPS -->|"K4 + Ross"| HVPS_PWR
+
+    LLRF9_1 -->|"Drive"| KLY
+    HVPS_PLC -->|"Regulation"| HVPS_PWR
+    HVPS_PWR -->|"HV DC"| KLY
+    KLY --> WG --> CAV
+    GALIL -->|"Motor Cmds"| TUNERS
+    TUNERS -->|"Freq Adjust"| CAV
+    HTR -->|"Heater Power"| KLY
+    WFB ---|"RF + HVPS<br/>Signal Monitoring"| KLY
+
+    style IC fill:#fff2cc,stroke:#d6b656,stroke-width:3px,color:#000000
+    style PPS fill:#ffe6cc,stroke:#d79b00,stroke-width:2px,color:#000000
+    style software fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px,color:#000000
+    style hw_interlock fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style rf_plant fill:#f8cecc,stroke:#b85450,stroke-width:1px,color:#000000

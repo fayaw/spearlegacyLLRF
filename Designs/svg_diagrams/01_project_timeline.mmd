@@ -1,0 +1,41 @@
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '16px', 'fontFamily': 'arial', 'primaryColor': '#ffffff', 'primaryTextColor': '#000000', 'primaryBorderColor': '#000000', 'lineColor': '#000000', 'sectionBkgColor': '#f9f9f9', 'altSectionBkgColor': '#ffffff', 'gridColor': '#e0e0e0', 'section0': '#dae8fc', 'section1': '#fff2cc', 'section2': '#d5e8d4', 'section3': '#ffe6cc', 'cScale0': '#000000', 'cScale1': '#000000', 'cScale2': '#000000'}}}%%
+gantt
+    title SPEAR3 LLRF Upgrade — Project Phases
+    dateFormat YYYY-MM
+    axisFormat %b %Y
+
+    section Phase 1 — Standalone
+    HVPS PLC + EPICS             :done,    hvps1, 2026-01, 2026-06
+    HVPS SCR Gate Driver + Reg   :active,  hvps2, 2026-01, 2026-09
+    Heater Controller Design/Fab :         htr,   2026-02, 2026-09
+    Kly MPS EPICS IOC Dev        :         mps,   2026-02, 2026-08
+    Waveform Buffer PCB + Test   :active,  wfb,   2026-01, 2026-09
+    Interface Chassis Design/Fab :crit,    ic,    2026-01, 2026-10
+    Arc Detection Procurement    :         arc,   2026-02, 2026-09
+    Control Software Dev         :crit,    sw,    2026-01, 2026-11
+    LLRF9 Install + RF Test      :         llrf,  2026-03, 2026-09
+    Galil Booster Cavity Test    :active,  gal,   2026-01, 2026-06
+    PPS Interface Box            :         pps,   2026-02, 2026-10
+
+    section Phase 2A — TS18
+    HVPS Combined Test           :         ts1,  after hvps1 hvps2, 2026-10
+    + Heater Controller          :         ts2,  after ts1 htr, 2026-11
+    + Interface Chassis          :         ts3,  after ts2 ic, 2026-11
+    + Kly MPS PLC                :         ts4,  after ts3 mps, 2026-12
+    + Waveform Buffer            :         ts5,  after ts4 wfb, 2026-12
+    + Software Full Stack        :         ts6,  after ts5 sw, 2027-01
+    RF Power Ramp (Dummy Load)   :         ts7,  after ts6, 2027-02
+
+    section Phase 2B — SPEAR3
+    + LLRF9 Units 1 and 2        :         sp1,  after ts7 llrf, 2027-03
+    + Galil Tuner Controller     :         sp2,  after sp1 gal, 2027-04
+    + Arc Detection System       :         sp3,  after sp2 arc, 2027-05
+    End-to-End Interlock Verify  :         sp4,  after sp3, 2027-06
+
+    section Phase 3-4 — Commission
+    PPS Box Connected            :         fc1,  after sp4 pps, 2027-07
+    Full SW Validation           :         fc2,  after fc1, 2027-07
+    RF Power Ramp (Cavities)     :         fc3,  after fc2, 2027-08
+    Performance Validation       :         fc4,  after fc3, 2027-08
+    Op Training + Docs           :         fc5,  after fc4, 2027-09
+    OPERATION                    :milestone, op, after fc5, 0d

@@ -1,0 +1,18 @@
+flowchart LR
+    SP4_OUT(["SPEAR3 Integration<br/>Complete"])
+    PPS_OK(["PPS Safety<br/>Approval Granted"])
+
+    FC1["① PPS Box<br/>Connected<br/>(K4 + Ross sw<br/>via dedicated box)"]
+    FC2["② SW Full<br/>Validation<br/>vs complete<br/>hardware"]
+    FC3["③ RF Power<br/>Ramp on<br/>SPEAR3<br/>with cavities"]
+    FC4["④ Performance<br/>Validation<br/>(stability, diag,<br/>success criteria)"]
+    FC5["⑤ Op Training<br/>+ Commissioning<br/>Docs"]
+    FC6(["✅ OPERATION"])
+
+    SP4_OUT --> FC1
+    PPS_OK -->|"Safety approval<br/>granted"| FC1
+    FC1 --> FC2 --> FC3 --> FC4 --> FC5 --> FC6
+
+    style FC6 fill:#c3e88d,stroke:#689f38,stroke-width:3px,color:#000000
+    style PPS_OK fill:#ffe6cc,stroke:#d79b00,stroke-width:2px,color:#000000
+    style SP4_OUT fill:#d5e8d4,stroke:#82b366,stroke-width:2px,color:#000000

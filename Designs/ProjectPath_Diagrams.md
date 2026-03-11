@@ -14,7 +14,7 @@ This document provides a set of visual diagrams covering the SPEAR3 LLRF Upgrade
 The project is organized into four phases, progressing from standalone development through incremental integration to full commissioning.
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontSize': '16px'}}}%%
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '16px', 'fontFamily': 'arial', 'primaryColor': '#ffffff', 'primaryTextColor': '#000000', 'primaryBorderColor': '#000000', 'lineColor': '#000000', 'sectionBkgColor': '#f9f9f9', 'altSectionBkgColor': '#ffffff', 'gridColor': '#e0e0e0', 'section0': '#dae8fc', 'section1': '#fff2cc', 'section2': '#d5e8d4', 'section3': '#ffe6cc', 'cScale0': '#000000', 'cScale1': '#000000', 'cScale2': '#000000'}}}%%
 gantt
     title SPEAR3 LLRF Upgrade — Project Phases
     dateFormat YYYY-MM
@@ -648,48 +648,66 @@ quadrantChart
 ## 12. EPICS PV Namespace Map
 
 ```mermaid
-mindmap
-  root((SPEAR3 LLRF<br/>EPICS PVs))
-    LLRF1
-      ::icon(📡)
-      Field Control
-      Tuner Phase
-      Vector Sum
-      Waveforms
-    LLRF2
-      ::icon(📡)
-      Monitoring
-      Reflected Power
-      Interlocks
-    SRF1:HVPS
-      ::icon(⚡)
-      Voltage Setpoint/Readback
-      Contactor Control
-      Interlock Status
-      Temperature
-    SRF1:MPS
-      ::icon(🛡️)
-      Permit Status
-      Fault Active
-      First-Fault ID
-      Event Count
-    SRF1:MTR
-      ::icon(⚙️)
-      Motor Position
-      Tuner Steps
-      Potentiometer
-    SRF1:WFBUF
-      ::icon(📊)
-      RF Waveforms
-      HVPS Channels
-      Comparator Thresholds
-      Collector Power
-    SRF1:HTR
-      ::icon(🔥)
-      Heater Voltage
-      Current RMS
-      Warm-up Sequence
-      Ready Status
+flowchart TB
+    subgraph epics_root["SPEAR3 LLRF EPICS PV Namespace"]
+        direction TB
+        
+        subgraph llrf1_group["LLRF1: (Unit 1 - Field Control)"]
+            LLRF1_FC["Field Control"]
+            LLRF1_TP["Tuner Phase"]
+            LLRF1_VS["Vector Sum"]
+            LLRF1_WF["Waveforms"]
+        end
+        
+        subgraph llrf2_group["LLRF2: (Unit 2 - Monitoring)"]
+            LLRF2_MON["Monitoring"]
+            LLRF2_RP["Reflected Power"]
+            LLRF2_INT["Interlocks"]
+        end
+        
+        subgraph hvps_group["SRF1:HVPS: (High Voltage Power Supply)"]
+            HVPS_VSR["Voltage Setpoint/Readback"]
+            HVPS_CC["Contactor Control"]
+            HVPS_IS["Interlock Status"]
+            HVPS_TEMP["Temperature"]
+        end
+        
+        subgraph mps_group["SRF1:MPS: (Machine Protection System)"]
+            MPS_PS["Permit Status"]
+            MPS_FA["Fault Active"]
+            MPS_FF["First-Fault ID"]
+            MPS_EC["Event Count"]
+        end
+        
+        subgraph mtr_group["SRF1:MTR: (Motor/Tuner Control)"]
+            MTR_MP["Motor Position"]
+            MTR_TS["Tuner Steps"]
+            MTR_POT["Potentiometer"]
+        end
+        
+        subgraph wfbuf_group["SRF1:WFBUF: (Waveform Buffer)"]
+            WFBUF_RF["RF Waveforms"]
+            WFBUF_HVPS["HVPS Channels"]
+            WFBUF_CT["Comparator Thresholds"]
+            WFBUF_CP["Collector Power"]
+        end
+        
+        subgraph htr_group["SRF1:HTR: (Heater Controller)"]
+            HTR_HV["Heater Voltage"]
+            HTR_CR["Current RMS"]
+            HTR_WS["Warm-up Sequence"]
+            HTR_RS["Ready Status"]
+        end
+    end
+    
+    style epics_root fill:#f9f9f9,stroke:#333,stroke-width:2px,color:#000000
+    style llrf1_group fill:#e1f5fe,stroke:#0277bd,stroke-width:2px,color:#000000
+    style llrf2_group fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px,color:#000000
+    style hvps_group fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000000
+    style mps_group fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000000
+    style mtr_group fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000000
+    style wfbuf_group fill:#e0f2f1,stroke:#00695c,stroke-width:2px,color:#000000
+    style htr_group fill:#fff8e1,stroke:#f57f17,stroke-width:2px,color:#000000
 
 ---
 

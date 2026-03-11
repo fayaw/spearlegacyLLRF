@@ -1,0 +1,15 @@
+flowchart LR
+    TS7_OUT(["TS18 Complete<br/>HVPS + Heater +<br/>Kly MPS + WFB +<br/>IC + Software"])
+
+    SP1["① + LLRF9 ×2<br/>RF fast feedback<br/>270 ns loop · IC<br/>enable chain ·<br/>waveform capture"]
+    SP2["② + Galil<br/>Cavity tuner<br/>EPICS loop ·<br/>Load angle<br/>offset ctrl"]
+    SP3["③ + Arc Detection<br/>Fast permit to IC<br/>(OR of 5 sensors) ·<br/>5-bit fault ID<br/>latch in IC"]
+    SP4["④ End-to-End<br/>Interlock Verify ·<br/>Fault injection<br/>all protection<br/>layers"]
+
+    TS7_OUT --> SP1 --> SP2 --> SP3 --> SP4
+
+    style TS7_OUT fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style SP1 fill:#d5e8d4,stroke:#82b366,color:#000000
+    style SP2 fill:#d5e8d4,stroke:#82b366,color:#000000
+    style SP3 fill:#d5e8d4,stroke:#82b366,color:#000000
+    style SP4 fill:#c3e88d,stroke:#689f38,stroke-width:2px,color:#000000
