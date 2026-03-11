@@ -1,5 +1,7 @@
 # 01 — Product Overview & Evolution
 
+> **Sources**: `OP-0111_C FCOG1200 (F&K) Operating Manual - Copy.pdf`, `OP-0102_FCOG6100_Op_Manual.pdf`, `FCOG1200 Brochure.pdf`, `PD720_FCOG6100_Prod_Gd_07-2017.pdf`, `E640_F/K/L FCOG1200 Schematics`, `enerproDiscussion07072022.docx`
+
 ## Product Families
 
 ### FCOG1200 — 12-Pulse General Purpose Gate Firing Board
@@ -248,4 +250,3 @@ Three configuration options for current balancing:
 - **Wide industrial acceptance** for 12-pulse applications
 - **Compatible with standard thyristor gate drives**
 - **Meets stringent THD specifications** imposed by utilities
-

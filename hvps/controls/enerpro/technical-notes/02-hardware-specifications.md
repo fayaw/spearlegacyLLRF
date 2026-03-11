@@ -1,5 +1,7 @@
 # 02 — Hardware Specifications
 
+> **Sources**: `OP-0111_C FCOG1200 (F&K) Operating Manual - Copy.pdf`, `OP-0102_FCOG6100_Op_Manual.pdf`, `E640_L FCOG1200 Schematic (03-01-21).pdf`, `E640_K FCOG1200 Schematic (09-30-09).pdf`, `E128_R_Schematic_11-14.pdf`, `enerproDiscussion07072022.docx`
+
 ## FCOG1200 Complete Specifications
 
 ### Electrical Specifications
@@ -323,4 +325,3 @@ All waveforms documented in operating manual with:
 - **Manufacturing**: Standard PCB assembly processes
 - **Testing**: Factory checkout procedures documented
 - **Documentation**: Comprehensive technical documentation package
-

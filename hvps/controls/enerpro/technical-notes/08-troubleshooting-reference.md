@@ -1,5 +1,7 @@
 # 08 — Troubleshooting & Maintenance Reference
 
+> **Sources**: `OP-0111_C FCOG1200 (F&K) Operating Manual - Copy.pdf`, `OP-0102_FCOG6100_Op_Manual.pdf`, `E640_L FCOG1200 Schematic (03-01-21).pdf`, `E128_R_Schematic_11-14.pdf`, `FCOG1200 Auto Balance.pdf`
+
 ## Test Points and Signal Monitoring
 
 ### Oscilloscope Test Points
@@ -462,4 +464,3 @@
 - **Change Documentation**: Complete documentation of changes
 - **Testing**: Verification testing after changes
 - **Update Records**: Update all affected documentation
-

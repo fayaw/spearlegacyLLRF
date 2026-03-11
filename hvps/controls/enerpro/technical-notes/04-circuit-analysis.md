@@ -1,5 +1,7 @@
 # 04 — Circuit Analysis & Schematics
 
+> **Sources**: `E640_F FCOG1200 Schematic (08-13-96).pdf`, `E640_K FCOG1200 Schematic (09-30-09).pdf`, `E640_L FCOG1200 Schematic (03-01-21).pdf`, `E128_R_Schematic_11-14.pdf`, `OP-0111_C FCOG1200 (F&K) Operating Manual - Copy.pdf`, `bourbeauIEEE1983_04504257.pdf`
+
 ## Schematic Evolution Overview
 
 The FCOG1200 firing board has undergone continuous development over 25+ years, with three major documented revisions showing progressive improvements in stability, manufacturability, and functionality.
@@ -341,4 +343,3 @@ From IEEE paper analysis (Bourbeau 1983):
 - **Assembly Complexity**: Automated assembly vs. manual assembly
 - **Test Requirements**: Comprehensive testing vs. minimal testing
 - **Documentation**: Complete documentation vs. minimal documentation
-

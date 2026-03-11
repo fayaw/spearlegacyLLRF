@@ -1,5 +1,7 @@
 # 07 — Auto-Balance System
 
+> **Sources**: `FCOG1200 Auto Balance.pdf`, `OP-0111_C FCOG1200 (F&K) Operating Manual - Copy.pdf`, `E640_F/K/L FCOG1200 Schematics`, `Closing the Loop.pdf`, `enerproBoardHvps.docx`
+
 ## Auto-Balance System Overview
 
 The FCOG1200 firing board provides three distinct methods for balancing currents in parallel 12-pulse converter systems. This capability is essential for optimal harmonic cancellation and system performance.
@@ -396,4 +398,3 @@ All auto-balance methods require current monitoring:
 2. **Trend Analysis**: Monitor performance trends over time
 3. **Fault Analysis**: Analyze any balance system faults
 4. **Predictive Maintenance**: Identify potential issues before failure
-

@@ -4,6 +4,8 @@
 
 ## Document Inventory
 
+### PDF Documents
+
 | Document | Pages | Size | Content Type | Key Information |
 |----------|-------|------|--------------|-----------------|
 | **OP-0111_C FCOG1200 (F&K) Operating Manual - Copy.pdf** | 16 | 1.01 MB | Complete operating manual | 12-pulse firing board operation, Rev. C (June 2020) |
@@ -18,6 +20,14 @@
 | **Closing the Loop.pdf** | 1 | 126 KB | PCIM 1999 article | 12-pulse conversion benefits |
 | **bourbeauIEEE1983_04504257.pdf** | 8 | 4.36 MB | IEEE paper | LSI-based thyristor firing circuit theory |
 | **PHASE CONTROL THEORY.PDF** | 11 | 1.02 MB | Theory diagrams | Phase control principles (diagrams only) |
+
+### DOCX Documents
+
+| Document | Content Type | Key Information |
+|----------|--------------|-----------------|
+| **enerproDiscussion07072022.docx** | Technical discussion | Enerpro call notes, phase reference requirements, FCOG1200 Rev L details |
+| **enerproPhaseReferenceAdapter.docx** | Design document | Phase reference adapter board design and calculations |
+| **enerproBoardHvps.docx** | System integration | HVPS system integration with Enerpro boards, existing system analysis |
 
 ## Product Families
 
@@ -39,6 +49,7 @@
 
 | Note | Title | Content Coverage |
 |------|-------|------------------|
+| [00-system-overview.md](00-system-overview.md) | **HVPS Control System Overview** | **Complete system architecture with Enerpro integration and diagrams** |
 | [01-product-overview.md](01-product-overview.md) | Product Overview & Evolution | Product families, timeline, key features, applications |
 | [02-hardware-specifications.md](02-hardware-specifications.md) | Hardware Specifications | Complete specs, connectors, power requirements, I/O |
 | [03-control-signal-interface.md](03-control-signal-interface.md) | Control Signal Interface | SIG HI command, phase references, test points |
@@ -83,4 +94,3 @@ All source PDFs are located in: `hvps/controls/enerpro/enerproDocuments/`
 ---
 
 *Technical notes compiled from Enerpro documentation dated 1983-2021*
-

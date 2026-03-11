@@ -1,5 +1,7 @@
 # 05 — Operating Procedures
 
+> **Sources**: `OP-0111_C FCOG1200 (F&K) Operating Manual - Copy.pdf`, `OP-0102_FCOG6100_Op_Manual.pdf`, `FCOG1200 Auto Balance.pdf`, `E640_L FCOG1200 Schematic (03-01-21).pdf`, `enerproDiscussion07072022.docx`
+
 ## Initial Setup and Configuration
 
 ### Pre-Installation Checklist
@@ -381,4 +383,3 @@ The on-board auto-balance circuit:
 - **Calibration Data**: Record calibration values and dates
 - **Modifications**: Document any field modifications
 - **Troubleshooting**: Record problems and solutions
-

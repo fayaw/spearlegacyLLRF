@@ -1,5 +1,7 @@
 # 03 — Control Signal Interface
 
+> **Sources**: `OP-0111_C FCOG1200 (F&K) Operating Manual - Copy.pdf`, `OP-0102_FCOG6100_Op_Manual.pdf`, `enerproDiscussion07072022.docx`, `enerproBoardHvps.docx`, `enerproPhaseReferenceAdapter.docx`
+
 ## SIG HI Command Input
 
 The SIG HI signal is the primary delay angle command input that controls the firing angle of the thyristors. Both FCOG1200 and FCOG6100 boards accept flexible command formats.
@@ -302,4 +304,3 @@ The phase loss circuit monitors the balance of the six-phase input voltages and 
 - **Emergency Stop**: Coordinate with overall system emergency stop
 - **Status Monitoring**: Provide status signals to control system
 - **Fault Reporting**: Clear indication of fault conditions and causes
-

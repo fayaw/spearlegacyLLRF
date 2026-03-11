@@ -1,5 +1,7 @@
 # 06 — Control Theory & Algorithms
 
+> **Sources**: `bourbeauIEEE1983_04504257.pdf`, `PHASE CONTROL THEORY.PDF`, `OP-0111_C FCOG1200 (F&K) Operating Manual - Copy.pdf`, `Closing the Loop.pdf`, `FCOG1200 Auto Balance.pdf`, `enerproBoardHvps.docx`
+
 ## Phase-Locked Loop (PLL) Fundamentals
 
 The Enerpro firing boards utilize a sophisticated phase-locked loop architecture to achieve frequency-independent delay angle control. This approach provides significant advantages over traditional RC delay circuits.
@@ -355,4 +357,3 @@ The PLL automatically tracks mains frequency variations:
 - **LED Indicators**: Visual status indication
 - **Signal Access**: Key signals available for monitoring
 - **Waveform Documentation**: Reference waveforms for comparison
-
