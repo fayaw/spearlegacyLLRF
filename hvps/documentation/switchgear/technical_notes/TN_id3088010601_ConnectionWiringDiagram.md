@@ -36,6 +36,50 @@ Purpose: Detailed extraction of design information from circuit schematic for AI
 
 This is the physical connection wiring diagram for the 12.47 kV vacuum contactor controller system. Unlike the schematic diagram (GP-439-704-02) which shows circuit logic, this drawing shows the actual physical wiring connections between equipment sections. It depicts the switchgear cabinet layout including the rear compartment, front view, swinging panel, and all inter-equipment wiring. The drawing documents how components are physically interconnected using terminal blocks, wire numbers, and cable routing between the switchgear, vacuum contactor driver, and external equipment.
 
+**Physical Cabinet Layout Diagram:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    SWITCHGEAR ENCLOSURE                        │
+│                    48" × 140" NEMAT Rated                      │
+│                                                                 │
+│  ┌─────────────────┐              ┌─────────────────┐          │
+│  │  REAR COMPART   │              │  FRONT COMPART  │          │
+│  │                 │              │                 │          │
+│  │ 12.47kV Incoming│              │ Control Panels  │          │
+│  │ OA, OB, OC      │              │ Protection      │          │
+│  │ #4-15KV Cable   │              │ Relays          │          │
+│  │ 120VAC Source   │              │ Terminal Blocks │          │
+│  │                 │              │                 │          │
+│  └─────────────────┘              └─────────────────┘          │
+│                                                                 │
+│  ┌─────────────────┐              ┌─────────────────┐          │
+│  │  SWINGING PANEL │              │   VIEWING       │          │
+│  │                 │              │   WINDOW        │          │
+│  │ HCA Driver Box  │              │                 │          │
+│  │ (Maintenance    │              │ Front Panel     │          │
+│  │  Access)        │              │ Observation     │          │
+│  │                 │              │                 │          │
+│  └─────────────────┘              └─────────────────┘          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Wiring Interconnection Overview:**
+```
+Rear Compartment ──┬── #4-15KV Cable ──▶ HVPS Transformer
+                   │
+                   ├── 120VAC ──▶ Internal Power Supplies
+                   │
+                   └── CT Secondaries ──▶ Protection Relays
+
+Front Compartment ──┬── TB1/TB2/TB3 ──▶ Control Circuits
+                    │
+                    ├── Protection Relays ──▶ Trip Logic
+                    │
+                    └── Status Indicators ──▶ Operator Interface
+
+Swinging Panel ──── HCA Driver ──▶ Vacuum Contactor Control
+```
+
 # 3. Physical Layout Sections
 
 ## 3.1 Rear Compartment
@@ -199,4 +243,3 @@ This is the physical connection wiring diagram for the 12.47 kV vacuum contactor
 # 11. Operating Principles Summary
 
 This connection wiring diagram documents the physical implementation of the 12.47 kV vacuum contactor controller system for SLAC's PEP-II accelerator. The drawing translates the circuit logic shown in the schematic diagram (GP-439-704-02) into actual wiring connections between three main equipment sections: the switchgear cabinet (with TB3 and TB4 terminal blocks), the vacuum contactor and its driver unit (with TB2 terminal block, mounted on a swinging panel), and the external RF power supply transformer (with TBD terminal block). The incoming 12.47 kV three-phase power enters through the rear compartment via #4-15KV cable, passes through current transformers (50/5 ratio) for protection relay measurement, and is switched by the vacuum contactor to the load. Protection is implemented through overcurrent relays (50-51) connected via a current test block, undervoltage relay (27), and a lockout relay system using motor contactors MC3/MC4/MC5/MC7. The vacuum contactor driver (Ross Engineering design) is mounted on a swinging panel for maintenance access and includes pressure switches, temperature monitoring, and 125VDC control power. Door interlocks ensure safe access to all compartments, with the energy storage capacitors automatically discharging when doors are opened. The 600A, 13.8KV rated switch provides the main disconnection capability for the system.
-

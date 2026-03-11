@@ -34,6 +34,37 @@ Purpose: Detailed extraction of design information from circuit schematic for AI
 
 This is the detailed electrical schematic diagram for the 12.47 kV outdoor switchgear vacuum contactor system used in the PEP-II accelerator at SLAC. It provides the complete circuit logic for all control, protection, and power supply subsystems. The drawing is organized into functional blocks covering: overcurrent protection and ground trip, vacuum contactor open/close circuitry, energy storage closing, DC voltage sensing, internal HV and LV DC power supplies, and the interface to the RF power supply transformer. This is the most detailed schematic in the switchgear documentation set and is the primary reference for understanding circuit operation.
 
+**System Architecture Diagram:**
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   12.47 kV      │    │   SWITCHGEAR    │    │      HVPS       │
+│   Utility       │────│   Vacuum        │────│   Transformer  │
+│   Supply        │    │   Contactor     │    │   Primary       │
+│   3-Phase       │    │   HQ3 15kV/400A │    │   Input         │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │
+                       ┌──────▼──────┐
+                       │  Protection │
+                       │   System    │
+                       │ 50-51, 27   │
+                       │ BR, Lockout │
+                       └─────────────┘
+```
+
+**Power Flow and Control Hierarchy:**
+```
+Primary Power:    12.47kV ──▶ CT ──▶ HQ3 Contactor ──▶ HVPS Transformer
+
+Control Power:    115VAC ──▶ Internal Supplies ──▶ 125VDC + 350VDC
+                                    │
+                                    ▼
+Protection:       50-51 Relays ──▶ Control Logic ──▶ Trip/Close Commands
+                  27 Relay
+                  BR Relay
+
+Energy Storage:   350VDC ──▶ 3500mF Capacitor ──▶ Closing Coil (214 Joules)
+```
+
 # 3. Functional Block Diagram (as shown on schematic)
 
 ## 3.1 Block Layout (Left to Right)
@@ -197,13 +228,80 @@ The following sequence describes the complete closing and opening operation of t
 - 2. CURRENT SENSING RELAY TO CHECK VOLTAGE IN HOLDING COIL. CHECK K3 VOLTAGE IN CLOSING COIL.
 - 3. WHEN FULL CURRENT IS REACHED IN HOLDING COIL, K3 CLOSES AND IF K2 READY RELAY IS CLOSED, WITH FULL ENERGY AVAILABLE AND HOLDING COIL IS MECHANICALLY SEALED-IN THUS ACTUATING INTERLOCK S1, K1 THEN CLOSES APPLYING STORED ENERGY TO CLOSING COIL L2. (BLOCK 1)
 - 4. L2 SOLENOID THEN CLOSES TOGGLE WHICH CLOSES HV CONTACTS WITH HIGH CLOSING FORCE.
+
+**Closing Sequence Timing Diagram:**
+```
+Time:     0ms    50ms   100ms  150ms  200ms  250ms  300ms
+          │      │      │      │      │      │      │
+MX Cmd:   ┌──────┴──────────────────────────────────────
+          │
+K3 Check: ──────┐      ┌─────────────────────────────────
+                └──────┘
+
+K2 Ready: ────────────────────────────────────────────── (Stays high)
+
+K1 Apply: ──────────────┐      ┌─────────────────────────
+                        └──────┘ (~100ms pulse)
+
+L2 Close: ──────────────┐  ┌─┐  ┌─────────────────────────
+                        └──┘ └──┘ (High force, then hold)
+
+HV Ctcts: ────────────────────┐  ┌─────────────────────────
+                              └──┘ (Closed position)
+
+L1 Hold:  ──────────────────────┐ ┌─────────────────────
+                                └─┘ (DC holding current)
+```
+
 ## 6.3 TO OPEN
 
 - 5. MX OPENED TO START UPON SEQUENCE OF VACUUM CONTACTOR (OR TX, LOCAL OFF, OR INTERLOCKS OPEN). (IF BR BLOCKING RELAY CLOSED BY EXCESSIVE FAULT, MX AND TX LOCAL OFF ARE BYPASSED AND CONTACTOR CANNOT OPEN IMMEDIATELY EVEN IF AC IS LOST AND AS LONG AS BR STAYS CLOSED UNTIL CG DECAYS. WITH LOSS OF AC CONTROL VOLTAGE, CONTACTOR WILL HOLD IN FOR AT LEAST 170 MILLISECONDS BEFORE DROPPING OUT).
 - 6. WHEN DC CURRENT IS SHUTOFF TO L1 HOLDING COIL, L1 HOLDING SOLENOID DROPS OUT WITHIN 1 CYCLE DROPPING TOGGLE BASE AND OPENING HV VACUUM CONTACTOR WHICH THEN CLEARS IN APPROXIMATELY 1/2 TO 1 CYCLE. (HV CONTACTS NOMINALLY AT THE FIRST CURRENT ZERO AFTER CONTACTS PART).
 - 7. AS SOON AS L1 DROPS OUT AND OPENS HV VACUUM CONTACTS TOGGLE BREAKS AND RESETS L1 AND L2. THIS THEN ALLOWS RECLOSING, AFTER ENERGY STORAGE CLOSING CAPACITOR IS RECHARGED IN A FEW SECONDS TO A LEVEL SENSED BY THE DRIVER VOLTAGE SENSOR WHICH THEN CLOSES K2 READY RELAY.
 - 8. READY INDICATOR THEN INDICATES WHETHER VOLTAGE ON ENERGY STORAGE CLOSING CAPACITOR IS SUFFICIENT FOR POSITIVE CLOSING AND ALSO ALLOWS CLOSING SEQUENCE TO START IF MX AND REMAINDER OF CLOSING CIRCUIT IS CLOSED AT RESET. ANTIPUMP RELAY MAY BE NECESSARY, HOWEVER, RECHARGE TIME REDUCES PUMPING RATE. USING TX IN A RESET CIRCUIT SUFFICES FOR POSITIVE ANTIPUMP.
-- 9. DOOR INTERLOCKS ON THE ENERGY STORAGE DRIVER UNIT AUTOMATICALLY DISCHARGE CAPACITORS WHEN DRIVER DOOR IS OPENED. EXTERNAL TERMINALS ARE ALSO PROVIDED TO TEST OR DISCHARGE CAPACITORS WITHOUT OPENING DOOR.
+- 9. DOOR INTERLOCKS ON THE ENERGY STORAGE DRIVER UNIT AUTOMATICALLY DISCHARGE CAPACITORS WHEN DRIVER DRIVER DOOR IS OPENED. EXTERNAL TERMINALS ARE ALSO PROVIDED TO TEST OR DISCHARGE CAPACITORS WITHOUT OPENING DOOR.
+
+**Opening Sequence Timing Diagram:**
+```
+Time:     0ms    20ms   40ms   60ms   80ms   100ms  120ms
+          │      │      │      │      │      │      │
+MX Cmd:   ┌──────┐
+          └──────┴──────────────────────────────────────
+
+L1 Hold:  ┌──────┐      ┌─────────────────────────────────
+          └──────┴──────┘ (Drops within 1 cycle)
+
+HV Ctcts: ┌─────────────┐      ┌─────────────────────────
+          └─────────────┴──────┘ (Opens at current zero)
+
+Toggle:   ┌─────────────────────┐      ┌─────────────────
+          └─────────────────────┴──────┘ (Resets mechanism)
+
+Recharge: ──────────────────────────────┐ ┌─────────────
+                                        └─┘ (Few seconds)
+
+K2 Ready: ────────────────────────────────┐ ┌───────────
+                                          └─┘ (Ready again)
+```
+
+**Fault Ride-Through (BR Blocking Relay Active):**
+```
+Fault Current > 2000A:
+BR Relay:     ────┐                    ┌─────────────────
+                  └────────────────────┘ (Min 170ms hold)
+
+MX Command:   ┌───┐ ← Ignored while BR active
+              └───┘
+
+L1 Holding:   ──────────────────────────┐ ┌─────────────
+                                        └─┘ (Held by BR)
+
+HV Contacts:  ──────────────────────────┐ ┌─────────────
+                                        └─┘ (Stays closed)
+
+Fault Decay:  ████████████████████████████ ┌─────────────
+              High Current               └─┘ Normal Level
+```
 ## 6.4 CAUTION
 
 AC MUST BE OFF BEFORE EXTERNAL DISCHARGE OF CAPACITORS IS DONE TO PREVENT BLOWING AC FUSES.
@@ -273,4 +371,3 @@ AC MUST BE OFF BEFORE EXTERNAL DISCHARGE OF CAPACITORS IS DONE TO PREVENT BLOWIN
 # 11. Operating Principles Summary
 
 This schematic represents the complete electrical control system for a 12.47 kV vacuum contactor used in the SLAC PEP-II accelerator's RF power distribution. The system operates on the stored-energy closing principle: a 3500mF capacitor bank is charged to approximately 350 VDC through an internal HV DC power supply. When a close command is initiated (MX relay), a sequence of checks verifies holding coil energization (K3 current sensing), adequate stored energy (K2 ready relay), and proper interlock status (S1). Upon verification, relay K1 connects the charged capacitor to closing coil L2, which actuates a toggle mechanism that closes the vacuum contactor's HV contacts with high force. The holding coil L1 then maintains the closed position using DC power from the internal supply. Opening requires interruption of the L1 holding coil current, which causes the toggle to release within approximately 1 power cycle. The system includes comprehensive protection: overcurrent relays (50-51) on all three phases and neutral with CT ratios of 200:5, undervoltage protection (27 relay), and a blocking relay (BR) that prevents premature opening during fault conditions exceeding 2000A. The 125VDC switchgear control bus provides power for the protection and control circuits, with safety interlocks on all access doors that automatically discharge energy storage capacitors when opened.
-

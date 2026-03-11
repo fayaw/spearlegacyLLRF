@@ -55,6 +55,23 @@ The SPEAR3 storage ring operates with a single RF station consisting of:
 12.47 kV Mains → Switchgear → HVPS Transformer/Rectifier → ~90 kV DC → Klystron → ~1 MW RF → 4 Cavities
 ```
 
+**Detailed Power Flow Diagram:**
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌──────────────┐
+│   SLAC 12.47kV  │    │   SWITCHGEAR     │    │      HVPS       │    │   KLYSTRON   │
+│   Distribution  │────│   Vacuum         │────│   Transformer   │────│   ~1 MW RF   │
+│   3-Phase AC    │    │   Contactor      │    │   Rectifier     │    │   476.3 MHz  │
+└─────────────────┘    │   15kV/400A      │    │   ~90 kV DC     │    └──────┬───────┘
+                       │   Protection     │    └─────────────────┘           │
+                       └──────────────────┘                                  │
+                              │                                              │
+                       ┌──────▼──────┐                               ┌───────▼────────┐
+                       │     PPS     │                               │  4 RF Cavities │
+                       │  Interface  │                               │  476.3 MHz     │
+                       │   Safety    │                               │  ~250 kW each │
+                       └─────────────┘                               └────────────────┘
+```
+
 The switchgear system serves as the critical interface between:
 - **Utility power**: 12.47 kV three-phase AC from SLAC electrical distribution
 - **HVPS input**: Controlled connection to the high-voltage transformer primary
@@ -83,6 +100,7 @@ The switchgear system consists of three main subsystems:
 
 ### 2.2 Power Flow Architecture
 
+**Primary Power Circuit:**
 ```
 12.47 kV Incoming Line (3-phase)
     ↓
@@ -93,6 +111,57 @@ Vacuum Contactor (15 kV, 400A, 3-pole HQ3)
 Surge Arrestors
     ↓
 HVPS Transformer Primary
+```
+
+**Detailed Electrical Single-Line Diagram:**
+```
+SLAC 12.47kV Distribution
+         │
+    ┌────┴────┐
+    │   CT    │  Current Transformers
+    │  200/5  │  (Protection Measurement)
+    └────┬────┘
+         │
+    ┌────▼────┐
+    │   HQ3   │  Vacuum Contactor
+    │ 15kV/   │  (Ross Engineering)
+    │ 400A    │  3-pole, stored energy
+    │ 3-pole  │  closing mechanism
+    └────┬────┘
+         │
+    ┌────▼────┐
+    │ Surge   │  Lightning/Switching
+    │Arrestor │  Protection
+    └────┬────┘
+         │
+    ┌────▼────┐
+    │  HVPS   │  High Voltage Power Supply
+    │Transform│  Primary Winding
+    │  Primary│  12.47kV → ~90kV DC
+    └─────────┘
+```
+
+**Protection and Control Circuit Overview:**
+```
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐
+│   50-51     │    │      27      │    │     BR      │
+│ Overcurrent │    │ Undervoltage │    │  Blocking   │
+│   A,B,C,N   │    │    Relay     │    │   Relay     │
+└──────┬──────┘    └──────┬───────┘    └──────┬──────┘
+       │                  │                   │
+       └──────────────────┼───────────────────┘
+                          │
+                   ┌──────▼──────┐
+                   │   Control   │
+                   │   Logic     │
+                   │  (TB3 Bus)  │
+                   └──────┬──────┘
+                          │
+                   ┌──────▼──────┐
+                   │ HQ3 Vacuum  │
+                   │ Contactor   │
+                   │  Control    │
+                   └─────────────┘
 ```
 
 ### 2.3 Major Equipment Components
@@ -139,6 +208,42 @@ The vacuum contactor uses a **capacitor-based stored energy closing system**:
 5. **Energy application**: K1 relay connects stored energy to closing coil L2
 6. **Mechanical closing**: L2 solenoid actuates toggle mechanism with high force
 7. **Holding**: L1 holding coil maintains closed position using DC power
+
+**Energy Storage Circuit Diagram:**
+```
++350VDC Supply ──┬── 10MΩ ──┬── C1 (3500mF) ──┬── L2 (Closing Coil)
+                 │   25W    │                 │
+                 │          │                 K1 ← MX Close Command
+                 │          │                 │
+                 │      330kΩ/250kΩ           │
+                 │      Voltage Divider       │
+                 │          │                 │
+                 │          K2 ← Ready        │
+                 │          │                 │
+                 └── C7 ────┴─── 220Ω ────────┘
+                  (40,000mF)     50W
+                    40V       Discharge
+```
+
+**Closing Sequence Timing Diagram:**
+```
+MX Command    ────┐     ┌─────────────────────
+                  └─────┘
+
+K2 Ready      ──────────────────────────────────  (Stays high when charged)
+
+K1 Energy     ────────┐   ┌─────────────────────
+                      └───┘  (~100ms pulse)
+
+L2 Current    ────────┐ ┌─┐ ┌─────────────────────
+                      └─┘ └─┘  (High pulse, then holding)
+
+HV Contacts   ────────────┐ ┌─────────────────────
+                          └─┘  (Closed position)
+
+L1 Holding    ──────────────┐ ┌─────────────────
+                            └─┘  (DC holding current)
+```
 
 ### 3.3 Opening Sequence
 
@@ -302,31 +407,85 @@ The switchgear system is integrated with SLAC's Personnel Protection System (PPS
 
 The system uses a comprehensive terminal block system for interconnection:
 
+**Terminal Block Layout Diagram:**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    SWITCHGEAR ENCLOSURE                        │
+│                                                                 │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
+│  │     TB1     │  │     TB2     │  │     TB3     │             │
+│  │ HCA Driver  │  │ HQ3 Vacuum  │  │ Switchgear  │             │
+│  │   Box       │  │ Contactor   │  │  Control    │             │
+│  │ 21 Terms    │  │ 14 Terms    │  │ 24 Terms    │             │
+│  └─────────────┘  └─────────────┘  └─────────────┘             │
+│                                                                 │
+│  ┌─────────────┐  ┌─────────────┐                              │
+│  │     TB4     │  │     TBD     │                              │
+│  │  Power/CT   │  │ RFPS/Ext    │                              │
+│  │ Connections │  │ 11 Terms    │                              │
+│  │             │  │             │                              │
+│  └─────────────┘  └─────────────┘                              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
 **TB1 - HCA Driver Box (21 terminals):**
-- Control voltage interlock (TB1-1)
-- Energy storage circuits (TB1-9, TB1-15)
-- Relay control circuits (TB1-10, TB1-11, TB1-12)
-- Internal power supplies (TB1-20, TB1-21)
+```
+TB1-1:  Control Voltage Interlock    TB1-11: K1 Relay Control
+TB1-2:  [Reserved]                   TB1-12: K2 Relay Control  
+TB1-3:  [Reserved]                   TB1-13: K3 Relay Control
+TB1-4:  [Reserved]                   TB1-14: [Reserved]
+TB1-5:  [Reserved]                   TB1-15: Energy Storage Return
+TB1-6:  [Reserved]                   TB1-16: [Reserved]
+TB1-7:  [Reserved]                   TB1-17: [Reserved]
+TB1-8:  [Reserved]                   TB1-18: [Reserved]
+TB1-9:  Energy Storage Circuit       TB1-19: [Reserved]
+TB1-10: MX Relay Control             TB1-20: +350VDC Supply
+                                     TB1-21: Internal LV Supply
+```
 
 **TB2 - HQ3 Vacuum Contactor (14 terminals):**
-- Fast dropout circuit (TB2-1)
-- Local controls (TB2-3, TB2-12)
-- Position indication (TB2-S2, TB2-S3A, TB2-S3B)
-- Voltage sensing (TB2-6)
+```
+TB2-1:   Fast Dropout Circuit        TB2-8:  [Reserved]
+TB2-2:   [Reserved]                  TB2-9:  [Reserved]
+TB2-3:   Local Control               TB2-10: [Reserved]
+TB2-4:   [Reserved]                  TB2-11: [Reserved]
+TB2-5:   [Reserved]                  TB2-12: Local Control
+TB2-6:   Voltage Sensing             TB2-13: [Reserved]
+TB2-7:   [Reserved]                  TB2-14: [Reserved]
+TB2-S2:  Position Switch 2           TB2-S3A: Position Switch 3A
+TB2-S3B: Position Switch 3B
+```
 
-**TB3 - Switchgear (24 terminals):**
-- Protection relay connections (TB3-5 through TB3-24)
-- Power supply interfaces (TB3-14, TB3-15)
-- External system connections (TB3-9, TB3-10, TB3-22)
+**TB3 - Switchgear Control (24 terminals):**
+```
+TB3-1:  [Reserved]                   TB3-13: [Reserved]
+TB3-2:  [Reserved]                   TB3-14: 125VDC Supply
+TB3-3:  [Reserved]                   TB3-15: 115VAC Supply
+TB3-4:  [Reserved]                   TB3-16: [Reserved]
+TB3-5:  27 Relay (Undervoltage)      TB3-17: [Reserved]
+TB3-6:  50-51A (Phase A O/C)         TB3-18: [Reserved]
+TB3-7:  50-51B (Phase B O/C)         TB3-19: [Reserved]
+TB3-8:  50-51C (Phase C O/C)         TB3-20: [Reserved]
+TB3-9:  External System Interface    TB3-21: [Reserved]
+TB3-10: MC3/MC4/MC5 Lockout         TB3-22: External Monitoring
+TB3-11: 50-51N (Neutral O/C)         TB3-23: [Reserved]
+TB3-12: BR Blocking Relay            TB3-24: [Reserved]
+```
 
 **TB4 - Power/CT Terminal Block:**
-- Current transformer secondary connections
-- Power circuit interfaces
+- Current transformer secondary connections (200/5 or 50/5 ratio)
+- Power circuit interfaces and test blocks
+- CT shorting switches for maintenance
 
 **TBD - RFPS/External Terminal Block (11 terminals):**
-- RF power supply transformer connections
-- External monitoring and control
-- Oil pump transformer (cooling system)
+```
+TBD-1:  RF Power Supply Transformer  TBD-7:  [Reserved]
+TBD-2:  Oil Pump Transformer         TBD-8:  [Reserved]
+TBD-3:  External Monitoring          TBD-9:  [Reserved]
+TBD-4:  External Control             TBD-10: [Reserved]
+TBD-5:  [Reserved]                   TBD-11: [Reserved]
+TBD-6:  [Reserved]
+```
 
 ### 7.3 Wire Naming and Documentation
 
@@ -411,20 +570,67 @@ The SPEAR3 LLRF Upgrade Project modernizes the entire RF control system, includi
 
 The new **Interface Chassis** serves as the coordination hub between:
 
+**Interface Chassis Signal Flow Diagram:**
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   LLRF9 Unit 1  │    │                 │    │   HVPS PLC      │
+│   Status: 5VDC  │───▶│                 │───▶│ SCR ENABLE      │
+│   Enable: 3.2V  │◀───│                 │    │ (Fiber Optic)   │
+└─────────────────┘    │                 │    └─────────────────┘
+                       │   INTERFACE     │
+┌─────────────────┐    │    CHASSIS      │    ┌─────────────────┐
+│   LLRF9 Unit 2  │    │                 │    │   HVPS PLC      │
+│   Status: 5VDC  │───▶│  - Logic        │◀───│ STATUS          │
+│   Enable: 3.2V  │◀───│  - Isolation    │    │ (Fiber Optic)   │
+└─────────────────┘    │  - First Fault  │    └─────────────────┘
+                       │                 │
+┌─────────────────┐    │                 │    ┌─────────────────┐
+│   SPEAR MPS     │    │                 │───▶│   HVPS PLC      │
+│   24VDC Permit  │───▶│                 │    │ CROWBAR INHIBIT │
+└─────────────────┘    └─────────────────┘    │ (Fiber Optic)   │
+                                              └─────────────────┘
+```
+
+**Signal Interface Details:**
+
 **LLRF9 Units (×2):**
-- Status monitoring (5 VDC signals)
-- Enable control (3.2 VDC @ 8mA permits)
-- Fast interlock coordination
+- **Status monitoring**: 5 VDC signals (fault indication)
+- **Enable control**: 3.2 VDC @ 8mA permits (interlock input)
+- **Fast interlock coordination**: <1ms response time
 
 **HVPS Controller:**
-- SCR ENABLE (fiber optic to HVPS)
-- STATUS monitoring (fiber optic from HVPS)
-- KLYSTRON CROWBAR (fiber optic, must remain illuminated)
+- **SCR ENABLE**: Fiber optic to HVPS (permits phase control thyristors)
+- **STATUS monitoring**: Fiber optic from HVPS (ready indication)
+- **KLYSTRON CROWBAR**: Fiber optic, must remain illuminated to prevent crowbar firing
 
 **Switchgear System:**
-- Integration with existing protection relays
-- Coordination with vacuum contactor control
-- First-fault detection and logging
+- **Integration**: Existing protection relays coordinate through Interface Chassis
+- **Vacuum contactor control**: Coordinated shutdown sequencing
+- **First-fault detection**: Hardware-based fault source identification
+
+**Interlock Logic Flow:**
+```
+Normal Operation:
+SPEAR MPS = OK ──┐
+                 ├─ AND ──▶ LLRF9 Enable = ON
+LLRF9 Status = OK ┘              │
+                                 ▼
+                         HVPS SCR Enable = ON
+                                 │
+                                 ▼
+                         System Operational
+
+Fault Condition (LLRF9):
+LLRF9 Status = FAULT ──▶ Interface Chassis ──▶ HVPS SCR Enable = OFF
+                                │
+                                ▼
+                         LLRF9 Enable = OFF (feedback)
+
+Fault Condition (External):
+SPEAR MPS = FAULT ──▶ Interface Chassis ──┬──▶ LLRF9 Enable = OFF
+                                          │
+                                          └──▶ HVPS SCR Enable = OFF
+```
 
 ### 9.4 Upgrade Benefits
 
