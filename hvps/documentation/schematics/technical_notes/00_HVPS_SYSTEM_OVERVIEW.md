@@ -51,11 +51,31 @@ The SPEAR3 HVPS converts 12.5KV 3-phase AC mains power into regulated -77KV DC a
 - **Safety**: Integrated with Personnel Protection System (PPS)
 
 ### 1.3 System Topology
-```
-12.5KV 3φ AC → Phase Shift Transformer → 12-Pulse SCR Rectifier → 
-HV Filter → -77KV DC → Klystron Load
-     ↑                    ↑                    ↑
-Control System      Protection System    Monitoring System
+
+```mermaid
+graph TD
+    A[12.5KV 3φ AC<br/>Facility Power] --> B[Phase Shifting<br/>Transformer<br/>30° Shift]
+    B --> C[12-Pulse SCR<br/>Rectifier<br/>6× 40KV 80A]
+    C --> D[HV Filter Network<br/>350µHY + 30NFD]
+    D --> E[-77KV DC @ 27A<br/>Klystron Load<br/>~2MW]
+    
+    F[Control System<br/>SD-237-230-14] --> C
+    G[Protection System<br/>Crowbar + Arc Det.] --> C
+    H[Monitoring System<br/>SD-730-793-12] --> D
+    
+    I[SCR Drivers<br/>SD-730-793-03] --> C
+    J[Trigger Interconnect<br/>SD-730-793-07/08] --> I
+    F --> J
+    
+    K[Crowbar Drivers<br/>SD-730-793-04] --> L[Crowbar SCR<br/>40KV 80A]
+    G --> K
+    L --> D
+    
+    style A fill:#e1f5fe
+    style E fill:#f3e5f5
+    style F fill:#e8f5e8
+    style G fill:#fff3e0
+    style H fill:#fce4ec
 ```
 
 ---
@@ -63,6 +83,75 @@ Control System      Protection System    Monitoring System
 ## 2. System Architecture Overview
 
 ### 2.1 Functional Block Diagram
+
+```mermaid
+graph TB
+    subgraph "Power Conversion Subsystem"
+        A1[12.5KV 3φ AC Input<br/>~160A]
+        A2[Phase Shifting Transformer<br/>30° Phase Offset]
+        A3[SCR Rectifier Set A<br/>3× 40KV 80A SCRs]
+        A4[SCR Rectifier Set B<br/>3× 40KV 80A SCRs]
+        A5[HV Filter Network<br/>L: 350µHY, C: 30NFD]
+        A6[-77KV DC Output<br/>27A to Klystron]
+        
+        A1 --> A2
+        A2 --> A3
+        A2 --> A4
+        A3 --> A5
+        A4 --> A5
+        A5 --> A6
+    end
+    
+    subgraph "Control & Regulation Subsystem"
+        B1[Voltage/Current Regulator<br/>SD-237-230-14<br/>INA117, MC34074]
+        B2[SCR Driver Boards<br/>SD-730-793-03<br/>CD4047B, IXFH12N90]
+        B3[Right Trigger Interconnect<br/>SD-730-793-07<br/>6-Phase Control]
+        B4[Left Trigger Interconnect<br/>SD-730-793-08<br/>Mirror Architecture]
+        
+        B1 --> B2
+        B2 --> B3
+        B2 --> B4
+        B3 --> A3
+        B4 --> A4
+    end
+    
+    subgraph "Protection Subsystem"
+        C1[Arc Detection<br/>Klystron + Transformer]
+        C2[Crowbar Driver A<br/>SD-730-793-04<br/>MIC-4427 Optical]
+        C3[Crowbar Driver B<br/>SD-730-794-04<br/>IRFDP120 MOSFETs]
+        C4[Crowbar SCR<br/>40KV 80A<br/>Fast Protection]
+        C5[PPS Interface<br/>Personnel Safety]
+        
+        C1 --> C2
+        C1 --> C3
+        C2 --> C4
+        C3 --> C4
+        C4 --> A5
+        C5 --> B1
+    end
+    
+    subgraph "Monitoring & Interface Subsystem"
+        D1[Monitor Board<br/>SD-730-793-12<br/>Dual Isolated]
+        D2[Grounding Tank<br/>SD-730-790-05<br/>Danfysik Sensing]
+        D3[EPICS Interface<br/>Control System]
+        D4[Voltage Feedback<br/>10kV/V Scale]
+        D5[Current Feedback<br/>5A/V Scale]
+        
+        A5 --> D2
+        D2 --> D1
+        D1 --> D4
+        D1 --> D5
+        D4 --> B1
+        D5 --> B1
+        D1 --> D3
+    end
+    
+    style A1 fill:#e1f5fe
+    style A6 fill:#f3e5f5
+    style B1 fill:#e8f5e8
+    style C4 fill:#fff3e0
+    style D1 fill:#fce4ec
+```
 
 The HVPS consists of four major subsystems:
 
@@ -112,6 +201,52 @@ The HVPS consists of four major subsystems:
 - Reduces input current distortion
 - Improves power quality and regulation
 
+```mermaid
+graph TD
+    subgraph "12-Pulse Rectifier Architecture"
+        A[12.5KV 3φ AC<br/>Primary Input] --> B[Phase Shifting<br/>Transformer]
+        
+        B --> C[Secondary Set A<br/>0° Phase]
+        B --> D[Secondary Set B<br/>30° Phase Shift]
+        
+        C --> E[6-Pulse Rectifier A<br/>SCR1, SCR3, SCR5]
+        D --> F[6-Pulse Rectifier B<br/>SCR2, SCR4, SCR6]
+        
+        E --> G[DC Output Combiner]
+        F --> G
+        
+        G --> H[HV Filter Network<br/>350µHY + 30NFD]
+        H --> I[-77KV DC Output<br/>720Hz Ripple]
+        
+        subgraph "SCR Gate Control"
+            J[Trigger Interconnect<br/>SD-730-793-07/08]
+            K[SCR Drivers<br/>SD-730-793-03]
+            L[Gate Pulse<br/>Transformers]
+            
+            J --> K
+            K --> L
+            L --> E
+            L --> F
+        end
+        
+        subgraph "Timing Relationships"
+            M[Phase A: 0°, 60°, 120°]
+            N[Phase B: 30°, 90°, 150°]
+            O[Combined: 12-pulse<br/>30° intervals]
+            
+            M --> E
+            N --> F
+            E --> O
+            F --> O
+        end
+    end
+    
+    style A fill:#e1f5fe
+    style I fill:#f3e5f5
+    style J fill:#e8f5e8
+    style O fill:#fff3e0
+```
+
 ### 3.2 SCR Rectifier System
 **Thyristor Specifications:**
 - **Rating**: 40KV 80A per device
@@ -142,6 +277,75 @@ The HVPS consists of four major subsystems:
 ---
 
 ## 4. Control and Regulation System
+
+```mermaid
+graph TD
+    subgraph "Control System Architecture"
+        subgraph "Master Regulator (SD-237-230-14)"
+            A1[Voltage Command<br/>Input] --> A2[INA117<br/>Voltage Limit Amp]
+            A3[Current Command<br/>Input] --> A4[INA117<br/>Current Limit Amp]
+            A5[Voltage Feedback<br/>10kV/V] --> A6[INA117<br/>Voltage Diff Amp]
+            A7[Current Feedback<br/>5A/V] --> A8[INA114<br/>Current Diff Amp]
+            
+            A2 --> A9[MC34074<br/>Control Logic]
+            A4 --> A9
+            A6 --> A9
+            A8 --> A9
+            
+            A9 --> A10[OP77<br/>Phase Control<br/>Output]
+            
+            A11[Over-Voltage<br/>Trip] --> A12[CD4044B<br/>RS Latches]
+            A13[Over-Current<br/>Trip] --> A12
+            A14[Manual Trip<br/>R32 1K] --> A12
+            
+            A12 --> A15[4N32 Optocouplers<br/>6× Isolation]
+            A10 --> A15
+        end
+        
+        subgraph "SCR Driver System (SD-730-793-03)"
+            B1[60Hz Trigger<br/>Input] --> B2[CD4047B<br/>Timing Control]
+            B2 --> B3[CD4528<br/>Monostable #1<br/>50µS ±5%]
+            B2 --> B4[CD4528<br/>Monostable #2<br/>16µS ±1µS]
+            
+            B3 --> B5[CD4049<br/>Hex Inverters]
+            B4 --> B5
+            B5 --> B6[MIC-4451<br/>MOSFET Driver]
+            B6 --> B7[IXFH12N90<br/>Power MOSFETs<br/>900V, 12A]
+            B7 --> B8[Gate Pulse<br/>Transformers]
+        end
+        
+        subgraph "Trigger Interconnect (SD-730-793-07/08)"
+            C1[Right Side Board<br/>SD-730-793-07] --> C2[3× MIC-4427<br/>SCR Drivers]
+            C3[Left Side Board<br/>SD-730-793-08] --> C4[3× MIC-4427<br/>SCR Drivers]
+            
+            C5[Arc Detection<br/>Klystron + Transformer] --> C6[P3KE7 TVS<br/>Protection]
+            C6 --> C7[CD4538<br/>20mS Timing]
+            C7 --> C8[Fault Logic]
+            
+            C9[Fiber Optic I/O<br/>HFBR-1412/2412] --> C10[Status<br/>Communication]
+            C11[24V Fault/Enable<br/>Bus] --> C8
+        end
+        
+        A15 --> B1
+        B8 --> C2
+        B8 --> C4
+        C2 --> D1[SCR Rectifier<br/>Set A]
+        C4 --> D2[SCR Rectifier<br/>Set B]
+        
+        D1 --> D3[HV Output<br/>-77KV @ 27A]
+        D2 --> D3
+        
+        D3 --> E1[Voltage/Current<br/>Sensing]
+        E1 --> A5
+        E1 --> A7
+    end
+    
+    style A1 fill:#e8f5e8
+    style A10 fill:#e8f5e8
+    style B2 fill:#fff3e0
+    style C2 fill:#fce4ec
+    style D3 fill:#f3e5f5
+```
 
 ### 4.1 Master Regulator Board (SD-237-230-14)
 **Architecture:**
@@ -201,6 +405,87 @@ The HVPS consists of four major subsystems:
 
 ## 5. Protection and Safety Systems
 
+```mermaid
+graph TD
+    subgraph "Multi-Layer Protection Architecture"
+        subgraph "Hardware Level Protection"
+            H1[Zener Diodes<br/>1N4744 15V<br/>Gate Protection]
+            H2[TVS Diodes<br/>P3KE7<br/>Transient Protection]
+            H3[Fuses & Breakers<br/>Overcurrent Protection]
+            H4[Ferrite Beads<br/>300Ω/500Ω<br/>EMI Filtering]
+        end
+        
+        subgraph "Circuit Level Protection"
+            C1[Over-Voltage<br/>Comparator] --> C2[CD4044B<br/>RS Latches]
+            C3[Over-Current<br/>Comparator] --> C2
+            C4[Manual Trip<br/>Input] --> C2
+            C5[Under-Voltage<br/>Lockout] --> C2
+            
+            C2 --> C6[4N32 Optocouplers<br/>Galvanic Isolation]
+            C6 --> C7[SCR Inhibit<br/>Signal]
+        end
+        
+        subgraph "System Level Protection"
+            S1[Primary Crowbar<br/>SD-730-793-04] --> S2[40KV 80A<br/>Crowbar SCR]
+            S3[Secondary Crowbar<br/>SD-730-794-04] --> S4[3× IRFDP120<br/>MOSFETs]
+            
+            S5[Arc Detection<br/>Klystron] --> S6[CD4538<br/>20mS Timer]
+            S7[Arc Detection<br/>Transformer] --> S6
+            S6 --> S8[Fault Logic<br/>Coordination]
+            
+            S8 --> S1
+            S8 --> S3
+            S8 --> C7
+        end
+        
+        subgraph "Facility Level Protection"
+            F1[PPS Interface<br/>Personnel Safety] --> F2[Interlock Chain<br/>Verification]
+            F3[Disconnect Breakers<br/>Main Power] --> F4[Emergency<br/>Shutdown]
+            F5[Access Control<br/>Door Interlocks] --> F2
+            
+            F2 --> F6[System Enable<br/>Permission]
+            F4 --> F7[Immediate<br/>Power Removal]
+        end
+        
+        subgraph "Arc Detection Detail"
+            A1[Klystron Arc<br/>BNC Input] --> A2[R26 33K<br/>Signal Conditioning]
+            A3[Transformer Arc<br/>BNC Input] --> A4[R33 35K<br/>Signal Conditioning]
+            
+            A2 --> A5[P3KE7 TVS<br/>Protection]
+            A4 --> A5
+            A5 --> A6[CD4538<br/>Monostable<br/>20mS]
+            A6 --> A7[Fault/Enable<br/>Logic Bus]
+        end
+        
+        subgraph "Crowbar Timing Detail"
+            T1[Fault Trigger] --> T2[CD4047B<br/>Single-Shot]
+            T2 --> T3[CD4538<br/>50mS Enable]
+            T3 --> T4[MIC-4427<br/>Optical Driver]
+            T4 --> T5[Fiber Optic<br/>Isolation]
+            T5 --> T6[Crowbar SCR<br/>Gate Drive]
+            
+            T7[Alternative Path<br/>IRFDP120] --> T8[Faster Response<br/><10µS]
+        end
+        
+        H1 --> C1
+        H2 --> A5
+        C7 --> S1
+        S2 --> D1[HV Output<br/>Protection]
+        S4 --> D1
+        F6 --> C2
+        F7 --> D1
+        A7 --> S8
+        T6 --> S2
+        T8 --> S4
+    end
+    
+    style H1 fill:#e3f2fd
+    style C2 fill:#e8f5e8
+    style S2 fill:#fff3e0
+    style F2 fill:#fce4ec
+    style D1 fill:#f3e5f5
+```
+
 ### 5.1 Crowbar Protection System
 **Primary Crowbar (SD-730-793-04):**
 - **Thyristor**: 40KV 80A crowbar SCR
@@ -235,6 +520,91 @@ The HVPS consists of four major subsystems:
 ---
 
 ## 6. Monitoring and Interface Systems
+
+```mermaid
+graph TD
+    subgraph "Monitoring & Interface Architecture"
+        subgraph "HV Sensing (Grounding Tank SD-730-790-05)"
+            G1[HV Output<br/>-77KV @ 27A] --> G2[Voltage Divider<br/>25KV 100A<br/>Transducer]
+            G1 --> G3[Current Sensing<br/>Danfysik DC-CT<br/>Positive Output]
+            G1 --> G4[Current Shunt<br/>15A/50MV<br/>Backup Sensing]
+            
+            G5[Filter Inductors<br/>L1, L2 350µHY] --> G6[Series Connection<br/>700µHY Total]
+            G7[Filter Capacitors<br/>C3,C5 30NFD<br/>C4 10NFD] --> G8[Ripple Filtering<br/>720Hz]
+            
+            G2 --> G9[Voltage Signal<br/>to Monitor Board]
+            G3 --> G10[Current Signal<br/>to Monitor Board]
+            G4 --> G10
+        end
+        
+        subgraph "Monitor Board (SD-730-793-12)"
+            subgraph "Domain 1 (GND1)"
+                M1[NMH2415S<br/>DC-DC Conv #1] --> M2[±15V1 Isolated<br/>1500V Isolation]
+                M2 --> M3[BUF634<br/>Unity Buffer #1]
+                M2 --> M4[BUF634<br/>Unity Buffer #2]
+                M2 --> M5[BUF634<br/>Unity Buffer #3]
+                
+                M3 --> M6[Channel 1<br/>Monitor]
+                M4 --> M7[Channel 2<br/>Monitor]
+                M5 --> M8[Crowbar Monitor<br/>BNC3]
+            end
+            
+            subgraph "Domain 2 (GND2)"
+                M9[NMH2415S<br/>DC-DC Conv #2] --> M10[±15V2 Isolated<br/>1500V Isolation]
+                M10 --> M11[Precision Divider<br/>R33/R36<br/>511Ω/536Ω 1%]
+                M10 --> M12[Current Network<br/>R2 1K + R32 10K]
+                
+                M11 --> M13[BUF634<br/>Voltage Buffer]
+                M12 --> M14[BUF634<br/>Current Buffer]
+                
+                M13 --> M15[Voltage Output<br/>10kV/V Scale<br/>BNC1]
+                M14 --> M16[Current Output<br/>5A/V Scale<br/>BNC2]
+            end
+            
+            M17[Reference Cal<br/>R25 2K<br/>12-turn Trimmer] --> M11
+            M18[Distributed<br/>Decoupling<br/>20× 0.47µF] --> M2
+            M18 --> M10
+        end
+        
+        subgraph "Interface Systems"
+            I1[EPICS Control<br/>System] --> I2[Real-time<br/>Monitoring]
+            I3[PPS Interface<br/>Personnel Safety] --> I4[Interlock<br/>Coordination]
+            I5[Fiber Optic<br/>Communication<br/>HFBR-1412/2412] --> I6[Status<br/>Reporting]
+            
+            I2 --> I7[Voltage/Current<br/>Display & Logging]
+            I4 --> I8[Safety System<br/>Integration]
+            I6 --> I9[Remote Status<br/>Monitoring]
+            
+            I10[Alarm System] --> I11[Fault Reporting<br/>& Notification]
+            I12[Historical Data<br/>Logging] --> I13[Trend Analysis<br/>& Maintenance]
+        end
+        
+        G9 --> M11
+        G10 --> M12
+        M15 --> I1
+        M16 --> I1
+        M8 --> I3
+        
+        subgraph "Feedback Control Loop"
+            F1[Monitor Outputs<br/>10kV/V, 5A/V] --> F2[Regulator Board<br/>SD-237-230-14]
+            F2 --> F3[INA117 Diff Amps<br/>Error Processing]
+            F3 --> F4[MC34074 Control<br/>Logic Processing]
+            F4 --> F5[OP77 Phase<br/>Control Output]
+            F5 --> F6[SCR Gate<br/>Phase Angle]
+            F6 --> F7[Power Output<br/>Regulation]
+            F7 --> G1
+        end
+        
+        M15 --> F1
+        M16 --> F1
+    end
+    
+    style G1 fill:#f3e5f5
+    style M2 fill:#e3f2fd
+    style M10 fill:#e3f2fd
+    style I1 fill:#e8f5e8
+    style F2 fill:#fff3e0
+```
 
 ### 6.1 Monitor Board (SD-730-793-12)
 **Dual Isolated Architecture:**
@@ -307,6 +677,115 @@ SD-730-793-04/SD-730-794-04 (Crowbar) ←→ Arc detection inputs
 ---
 
 ## 8. Signal Flow and Interconnections
+
+```mermaid
+graph TD
+    subgraph "Complete HVPS Signal Flow Architecture"
+        subgraph "Power Flow Path"
+            P1[12.5KV 3φ AC<br/>Facility Power<br/>~160A] --> P2[Phase Shifting<br/>Transformer<br/>30° Offset]
+            P2 --> P3[SCR Rectifier A<br/>3× 40KV 80A<br/>0° Phase]
+            P2 --> P4[SCR Rectifier B<br/>3× 40KV 80A<br/>30° Phase]
+            P3 --> P5[DC Combiner<br/>12-Pulse Output]
+            P4 --> P5
+            P5 --> P6[HV Filter Network<br/>Grounding Tank<br/>350µHY + 30NFD]
+            P6 --> P7[-77KV DC @ 27A<br/>Klystron Load<br/>~2MW Output]
+        end
+        
+        subgraph "Control Signal Flow"
+            C1[Voltage Command<br/>External Input] --> C2[Regulator Board<br/>SD-237-230-14<br/>INA117 Processing]
+            C3[Current Command<br/>External Input] --> C2
+            
+            C2 --> C4[OP77 Phase<br/>Control Output<br/>0-10V]
+            C4 --> C5[4N32 Optocouplers<br/>6× Isolation<br/>Galvanic Barrier]
+            C5 --> C6[SCR Driver Boards<br/>SD-730-793-03<br/>CD4047B Timing]
+            
+            C6 --> C7[Gate Pulse<br/>Generation<br/>50µS ±5%]
+            C7 --> C8[Trigger Interconnect<br/>SD-730-793-07/08<br/>6-Phase Coordination]
+            
+            C8 --> C9[SCR Gate Drives<br/>Phase A: 0°,60°,120°]
+            C8 --> C10[SCR Gate Drives<br/>Phase B: 30°,90°,150°]
+            
+            C9 --> P3
+            C10 --> P4
+        end
+        
+        subgraph "Feedback Signal Flow"
+            F1[HV Voltage Sensing<br/>25KV 100A<br/>Transducer] --> F2[Monitor Board<br/>SD-730-793-12<br/>Domain 2]
+            F3[HV Current Sensing<br/>Danfysik DC-CT<br/>+ 15A/50MV Shunt] --> F2
+            
+            F2 --> F4[Precision Scaling<br/>511Ω/536Ω 1%<br/>Voltage Divider]
+            F2 --> F5[Current Network<br/>1K + 10K<br/>Resistors]
+            
+            F4 --> F6[BUF634 Buffer<br/>Voltage Output<br/>10kV/V Scale]
+            F5 --> F7[BUF634 Buffer<br/>Current Output<br/>5A/V Scale]
+            
+            F6 --> F8[Voltage Feedback<br/>to Regulator<br/>INA117 Diff Amp]
+            F7 --> F9[Current Feedback<br/>to Regulator<br/>INA114 Diff Amp]
+            
+            F8 --> C2
+            F9 --> C2
+            
+            P6 --> F1
+            P6 --> F3
+        end
+        
+        subgraph "Protection Signal Flow"
+            PR1[Arc Detection<br/>Klystron BNC] --> PR2[Signal Conditioning<br/>R26 33K + P3KE7<br/>TVS Protection]
+            PR3[Arc Detection<br/>Transformer BNC] --> PR4[Signal Conditioning<br/>R33 35K + P3KE7<br/>TVS Protection]
+            
+            PR2 --> PR5[CD4538 Timer<br/>20mS Monostable<br/>Arc Processing]
+            PR4 --> PR5
+            PR5 --> PR6[Fault Logic<br/>Coordination<br/>24V Bus]
+            
+            PR7[Over-Voltage<br/>Comparator] --> PR8[CD4044B Latches<br/>Trip Logic<br/>Protection]
+            PR9[Over-Current<br/>Comparator] --> PR8
+            PR10[Manual Trip<br/>R32 1K Input] --> PR8
+            
+            PR8 --> PR11[SCR Inhibit<br/>Signal<br/>Emergency Stop]
+            PR6 --> PR12[Crowbar Trigger<br/>SD-730-793-04<br/>Single-Shot]
+            
+            PR12 --> PR13[40KV 80A<br/>Crowbar SCR<br/>Fast Protection]
+            PR13 --> P5
+            PR11 --> C5
+            
+            F8 --> PR7
+            F9 --> PR9
+        end
+        
+        subgraph "Interface Signal Flow"
+            I1[EPICS Control<br/>System Interface] --> I2[Command Inputs<br/>Voltage/Current<br/>Setpoints]
+            I3[PPS Interface<br/>Personnel Safety<br/>Interlocks] --> I4[System Enable<br/>Permission<br/>Logic]
+            
+            I2 --> C1
+            I2 --> C3
+            I4 --> C2
+            
+            F6 --> I5[Real-time<br/>Monitoring<br/>Display & Logging]
+            F7 --> I5
+            
+            I6[Fiber Optic<br/>Communication<br/>HFBR-1412/2412] --> I7[Status Reporting<br/>Remote Monitoring<br/>Fault Notification]
+            
+            PR6 --> I7
+            PR8 --> I7
+        end
+        
+        subgraph "Power Supply Distribution"
+            PS1[±15V Rails<br/>Regulator Board<br/>Precision Analog] --> C2
+            PS2[+12V Rails<br/>793-Series Boards<br/>Digital Logic] --> C6
+            PS3[+15V Rails<br/>794-Series + Monitor<br/>Alternative Supply] --> F2
+            PS4[+30V Rail<br/>Output Stages<br/>High Voltage] --> C4
+            
+            PS5[NMH2415S<br/>DC-DC Converters<br/>1500V Isolation] --> F2
+        end
+    end
+    
+    style P1 fill:#e1f5fe
+    style P7 fill:#f3e5f5
+    style C2 fill:#e8f5e8
+    style F2 fill:#fce4ec
+    style PR8 fill:#fff3e0
+    style I1 fill:#e8f5e8
+```
 
 ### 8.1 Primary Signal Paths
 
