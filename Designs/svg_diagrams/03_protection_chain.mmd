@@ -1,0 +1,43 @@
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '14px', 'fontFamily': 'arial', 'primaryColor': '#ffffff', 'primaryTextColor': '#000000', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
+flowchart LR
+    subgraph L1["Layer 1 — LLRF9 FPGA < 1 μs"]
+        direction TB
+        L1A["RF Overvoltage<br/>Interlocks"]
+        L1B["Baseband Window<br/>Comparators"]
+        L1C["DAC Zeroing +<br/>RF Switch"]
+    end
+
+    subgraph L2["Layer 2 — Interface Chassis < 1 μs"]
+        direction TB
+        L2A["Hardware AND-gate<br/>(all permits)"]
+        L2B["First-Fault<br/>Latching Register"]
+        L2C["Fiber Optic<br/>HVPS Control"]
+        L2D["LLRF9 Enable<br/>Output"]
+    end
+
+    subgraph L3["Layer 3 — Kly MPS PLC ~ms"]
+        direction TB
+        L3A["Fault Aggregation<br/>from IC Status Word"]
+        L3B["Permit Management<br/>+ Heartbeat Watchdog"]
+        L3C["Reset Coordination<br/>+ Event Logging"]
+    end
+
+    subgraph L4["Layer 4 — Python Coordinator ~1 Hz"]
+        direction TB
+        L4A["State Machine<br/>OFF→PARK→TUNE→ON_CW"]
+        L4B["Supervisory Control<br/>HVPS Loop, Tuner Mgr"]
+        L4C["Auto-Recovery<br/>+ Operator Interface"]
+    end
+
+    L1 -->|"Interlock<br/>Status"| L2
+    L2 -->|"Digital Status<br/>Word"| L3
+    L3 -->|"EPICS PVs"| L4
+
+    L4 -->|"Setpoints +<br/>Commands"| L3
+    L3 -->|"Summary Permit<br/>+ Heartbeat"| L2
+    L2 -->|"Enable<br/>Signal"| L1
+
+    style L1 fill:#ffcccc,stroke:#cc0000,stroke-width:2px,color:#000000
+    style L2 fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style L3 fill:#d5e8d4,stroke:#82b366,stroke-width:2px,color:#000000
+    style L4 fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px,color:#000000

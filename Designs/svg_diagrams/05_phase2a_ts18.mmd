@@ -1,0 +1,18 @@
+flowchart LR
+    TS1["① HVPS Combined<br/>PLC + SCR Gate<br/>Driver + Regulator<br/>Closed-loop HV<br/>regulation"]
+    TS2["② + Heater Ctrl<br/>Warm-up / cool-down<br/>sequences · HVPS–<br/>Heater coordination<br/>interlock"]
+    TS3["③ + Interface Chassis<br/>Hardware interlock<br/>loop · Fiber links:<br/>SCR ENABLE,<br/>CROWBAR, STATUS"]
+    TS4["④ + Kly MPS PLC<br/>Permit / heartbeat /<br/>reset round-trip ·<br/>First-fault latch<br/>validation"]
+    TS5["⑤ + Waveform Buffer<br/>HVPS ch: V, I,<br/>inductor voltages ·<br/>Kly fwd/refl RF ch ·<br/>Collector power algo<br/>DC−RF = Pcollector"]
+    TS6["⑥ + Software<br/>Full stack live:<br/>state machine,<br/>HVPS loop, heater<br/>seq, fault mgr, EDM"]
+    TS7["⑦ Incremental<br/>RF Power Ramp<br/>into dummy load ·<br/>Control loop tests ·<br/>Protection chain<br/>validation"]
+
+    TS1 --> TS2 --> TS3 --> TS4 --> TS5 --> TS6 --> TS7
+
+    style TS1 fill:#dae8fc,stroke:#6c8ebf,color:#000000
+    style TS2 fill:#dae8fc,stroke:#6c8ebf,color:#000000
+    style TS3 fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style TS4 fill:#dae8fc,stroke:#6c8ebf,color:#000000
+    style TS5 fill:#dae8fc,stroke:#6c8ebf,color:#000000
+    style TS6 fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style TS7 fill:#d5e8d4,stroke:#82b366,stroke-width:2px,color:#000000
