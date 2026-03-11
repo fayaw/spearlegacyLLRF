@@ -14,23 +14,24 @@ This document provides a set of visual diagrams covering the SPEAR3 LLRF Upgrade
 The project is organized into four phases, progressing from standalone development through incremental integration to full commissioning.
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '16px'}}}%%
 gantt
     title SPEAR3 LLRF Upgrade — Project Phases
     dateFormat YYYY-MM
     axisFormat %b %Y
 
     section Phase 1 — Standalone
-    HVPS PLC + EPICS             :done,    hvps1, 2025-06, 2026-06
-    HVPS SCR Gate Driver + Reg   :active,  hvps2, 2026-03, 2026-09
-    Heater Controller Design/Fab :         htr,   2026-04, 2026-09
-    Kly MPS EPICS IOC Dev        :         mps,   2026-04, 2026-08
-    Waveform Buffer PCB + Test   :active,  wfb,   2026-03, 2026-09
-    Interface Chassis Design/Fab :crit,    ic,    2026-03, 2026-10
-    Arc Detection Procurement    :         arc,   2026-04, 2026-09
-    Control Software Dev         :crit,    sw,    2026-03, 2026-11
-    LLRF9 Install + RF Test      :         llrf,  2026-05, 2026-09
-    Galil Booster Cavity Test    :active,  gal,   2026-03, 2026-06
-    PPS Interface Box            :         pps,   2026-04, 2026-10
+    HVPS PLC + EPICS             :done,    hvps1, 2026-01, 2026-06
+    HVPS SCR Gate Driver + Reg   :active,  hvps2, 2026-01, 2026-09
+    Heater Controller Design/Fab :         htr,   2026-02, 2026-09
+    Kly MPS EPICS IOC Dev        :         mps,   2026-02, 2026-08
+    Waveform Buffer PCB + Test   :active,  wfb,   2026-01, 2026-09
+    Interface Chassis Design/Fab :crit,    ic,    2026-01, 2026-10
+    Arc Detection Procurement    :         arc,   2026-02, 2026-09
+    Control Software Dev         :crit,    sw,    2026-01, 2026-11
+    LLRF9 Install + RF Test      :         llrf,  2026-03, 2026-09
+    Galil Booster Cavity Test    :active,  gal,   2026-01, 2026-06
+    PPS Interface Box            :         pps,   2026-02, 2026-10
 
     section Phase 2A — TS18
     HVPS Combined Test           :         ts1,  after hvps1 hvps2, 2026-10
@@ -43,16 +44,16 @@ gantt
 
     section Phase 2B — SPEAR3
     + LLRF9 Units 1 and 2        :         sp1,  after ts7 llrf, 2027-03
-    + Galil Tuner Controller     :         sp2,  after sp1 gal, 2027-03
-    + Arc Detection System       :         sp3,  after sp2 arc, 2027-04
-    End-to-End Interlock Verify  :         sp4,  after sp3, 2027-04
+    + Galil Tuner Controller     :         sp2,  after sp1 gal, 2027-04
+    + Arc Detection System       :         sp3,  after sp2 arc, 2027-05
+    End-to-End Interlock Verify  :         sp4,  after sp3, 2027-06
 
     section Phase 3-4 — Commission
-    PPS Box Connected            :         fc1,  after sp4 pps, 2027-05
-    Full SW Validation           :         fc2,  after fc1, 2027-05
-    RF Power Ramp (Cavities)     :         fc3,  after fc2, 2027-06
-    Performance Validation       :         fc4,  after fc3, 2027-07
-    Op Training + Docs           :         fc5,  after fc4, 2027-07
+    PPS Box Connected            :         fc1,  after sp4 pps, 2027-07
+    Full SW Validation           :         fc2,  after fc1, 2027-07
+    RF Power Ramp (Cavities)     :         fc3,  after fc2, 2027-08
+    Performance Validation       :         fc4,  after fc3, 2027-08
+    Op Training + Docs           :         fc5,  after fc4, 2027-09
     OPERATION                    :milestone, op, after fc5, 0d
 ```
 
@@ -63,6 +64,7 @@ gantt
 Shows the upgraded system's 10 subsystems and their primary interconnections.
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '14px', 'fontFamily': 'arial', 'primaryColor': '#ffffff', 'primaryTextColor': '#000000', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
 flowchart TB
     subgraph operator["Operator Layer"]
         EDM["EDM Panels"]
@@ -130,11 +132,11 @@ flowchart TB
     HTR -->|"Heater Power"| KLY
     WFB ---|"RF + HVPS<br/>Signal Monitoring"| KLY
 
-    style IC fill:#fff8e1,stroke:#f9a825,stroke-width:3px
-    style PPS fill:#fce4ec,stroke:#c62828,stroke-width:2px
-    style software fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    style hw_interlock fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
-    style rf_plant fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1px
+    style IC fill:#fff2cc,stroke:#d6b656,stroke-width:3px,color:#000000
+    style PPS fill:#ffe6cc,stroke:#d79b00,stroke-width:2px,color:#000000
+    style software fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px,color:#000000
+    style hw_interlock fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style rf_plant fill:#f8cecc,stroke:#b85450,stroke-width:1px,color:#000000
 ```
 
 ---
@@ -144,6 +146,7 @@ flowchart TB
 The system implements defense-in-depth with four protection layers, each at a different response time scale.
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '14px', 'fontFamily': 'arial', 'primaryColor': '#ffffff', 'primaryTextColor': '#000000', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
 flowchart LR
     subgraph L1["Layer 1 — LLRF9 FPGA < 1 μs"]
         direction TB
@@ -182,10 +185,10 @@ flowchart LR
     L3 -->|"Summary Permit<br/>+ Heartbeat"| L2
     L2 -->|"Enable<br/>Signal"| L1
 
-    style L1 fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    style L2 fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
-    style L3 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style L4 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style L1 fill:#ffcccc,stroke:#cc0000,stroke-width:2px,color:#000000
+    style L2 fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style L3 fill:#d5e8d4,stroke:#82b366,stroke-width:2px,color:#000000
+    style L4 fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px,color:#000000
 ```
 
 ### Failure Mode Safety
@@ -267,9 +270,9 @@ flowchart LR
         PPS1("Design<br/>4-relay board<br/>LEDs, lockable<br/>per SLAC std") --> PPS2("SLAC AD Safety<br/>Div Review<br/>+ Approval") --> PPS3("Fabrication") --> PPS4("Test with<br/>Hoffman Box<br/>K4 + Ross sw") --> PPS5("Commission")
     end
 
-    style ic fill:#fff8e1,stroke:#f9a825,stroke-width:2px
-    style sw fill:#fff8e1,stroke:#f9a825,stroke-width:2px
-    style pps_track fill:#fce4ec,stroke:#c62828,stroke-width:1px
+    style ic fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style sw fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style pps_track fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#000000
 ```
 
 ---
@@ -290,13 +293,13 @@ flowchart LR
 
     TS1 --> TS2 --> TS3 --> TS4 --> TS5 --> TS6 --> TS7
 
-    style TS1 fill:#e3f2fd,stroke:#1565c0
-    style TS2 fill:#e3f2fd,stroke:#1565c0
-    style TS3 fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
-    style TS4 fill:#e3f2fd,stroke:#1565c0
-    style TS5 fill:#e3f2fd,stroke:#1565c0
-    style TS6 fill:#fff8e1,stroke:#f9a825,stroke-width:2px
-    style TS7 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style TS1 fill:#dae8fc,stroke:#6c8ebf,color:#000000
+    style TS2 fill:#dae8fc,stroke:#6c8ebf,color:#000000
+    style TS3 fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style TS4 fill:#dae8fc,stroke:#6c8ebf,color:#000000
+    style TS5 fill:#dae8fc,stroke:#6c8ebf,color:#000000
+    style TS6 fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style TS7 fill:#d5e8d4,stroke:#82b366,stroke-width:2px,color:#000000
 ```
 
 ### TS18 Test Capabilities vs. Limitations
@@ -330,11 +333,11 @@ flowchart LR
 
     TS7_OUT --> SP1 --> SP2 --> SP3 --> SP4
 
-    style TS7_OUT fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
-    style SP1 fill:#e8f5e9,stroke:#2e7d32
-    style SP2 fill:#e8f5e9,stroke:#2e7d32
-    style SP3 fill:#e8f5e9,stroke:#2e7d32
-    style SP4 fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px
+    style TS7_OUT fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style SP1 fill:#d5e8d4,stroke:#82b366,color:#000000
+    style SP2 fill:#d5e8d4,stroke:#82b366,color:#000000
+    style SP3 fill:#d5e8d4,stroke:#82b366,color:#000000
+    style SP4 fill:#c3e88d,stroke:#689f38,stroke-width:2px,color:#000000
 ```
 
 ---
@@ -357,9 +360,9 @@ flowchart LR
     PPS_OK -->|"Safety approval<br/>granted"| FC1
     FC1 --> FC2 --> FC3 --> FC4 --> FC5 --> FC6
 
-    style FC6 fill:#c8e6c9,stroke:#1b5e20,stroke-width:3px
-    style PPS_OK fill:#fce4ec,stroke:#c62828,stroke-width:2px
-    style SP4_OUT fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style FC6 fill:#c3e88d,stroke:#689f38,stroke-width:3px,color:#000000
+    style PPS_OK fill:#ffe6cc,stroke:#d79b00,stroke-width:2px,color:#000000
+    style SP4_OUT fill:#d5e8d4,stroke:#82b366,stroke-width:2px,color:#000000
 ```
 
 ### Success Criteria
@@ -387,6 +390,7 @@ This is the comprehensive dependency diagram showing all Phase 1 standalone trac
 - SPEAR3 (Phase 2B) adds the three cavity-dependent subsystems to the TS18 output
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '12px', 'fontFamily': 'arial', 'primaryColor': '#ffffff', 'primaryTextColor': '#000000', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
 flowchart LR
     %% ─── PHASE 1 ─── Standalone Development ───
     subgraph hw1["HVPS — Stream 1: CompactLogix PLC"]
@@ -514,12 +518,12 @@ flowchart LR
     PPS5 -->|"Safety approval"| FC1
 
     %% ─── STYLES ───
-    style ic fill:#fff8e1,stroke:#f9a825,stroke-width:2px
-    style sw fill:#fff8e1,stroke:#f9a825,stroke-width:2px
-    style ts18 fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
-    style spear fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style final fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    style pps_track fill:#fce4ec,stroke:#c62828,stroke-width:1px
+    style ic fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style sw fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style ts18 fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style spear fill:#d5e8d4,stroke:#82b366,stroke-width:2px,color:#000000
+    style final fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px,color:#000000
+    style pps_track fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#000000
 ```
 
 ---
@@ -529,6 +533,7 @@ flowchart LR
 The Interface Chassis is the central interlock hub. This diagram shows all inputs, outputs, and internal logic.
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontSize': '13px', 'fontFamily': 'arial', 'primaryColor': '#ffffff', 'primaryTextColor': '#000000', 'primaryBorderColor': '#000000', 'lineColor': '#000000'}}}%%
 flowchart TB
     subgraph inputs["Interface Chassis INPUTS"]
         direction TB
@@ -578,10 +583,10 @@ flowchart TB
         RESET["Kly MPS Reset<br/>Signal"] --> FF
     end
 
-    style logic fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
-    style inputs fill:#e3f2fd,stroke:#1565c0,stroke-width:1px
-    style outputs fill:#e8f5e9,stroke:#2e7d32,stroke-width:1px
-    style reset_path fill:#fce4ec,stroke:#c62828,stroke-width:1px
+    style logic fill:#fff2cc,stroke:#d6b656,stroke-width:2px,color:#000000
+    style inputs fill:#dae8fc,stroke:#6c8ebf,stroke-width:1px,color:#000000
+    style outputs fill:#d5e8d4,stroke:#82b366,stroke-width:1px,color:#000000
+    style reset_path fill:#ffe6cc,stroke:#d79b00,stroke-width:1px,color:#000000
 ```
 
 ---
@@ -685,7 +690,6 @@ mindmap
       Current RMS
       Warm-up Sequence
       Ready Status
-```
 
 ---
 
