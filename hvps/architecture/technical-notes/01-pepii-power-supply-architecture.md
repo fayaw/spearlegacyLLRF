@@ -10,11 +10,13 @@ This document analyzes the foundational architecture of the PEP II klystron powe
 
 ### **Primary Requirements**
 - **Power Rating**: 2.5 MVA DC power supply
-- **Output Voltage**: 83 kV at 23 amps DC continuous
+- **Output Voltage**: 83 kV at 23 amps DC continuous (SLAC-PUB-7591)
+  - *Note: PowerPoint presentation shows 27A DC continuous, indicating possible system uprating*
 - **Voltage Control Range**: 0-90 kV
-- **Regulation**: < 0.1% above 60 kV
+- **Regulation**: < 0.1% above 60 kV (SLAC-PUB-7591)
+  - *Note: PowerPoint shows < ±0.5% @ >65kV, indicating specification variance*
 - **Voltage Ripple**: < 1% peak-to-peak (< 0.2% RMS) above 60 kV
-- **Arc Protection**: < 5 joules energy delivery during klystron arc (< 40 joules without crowbar)
+- **Arc Protection**: < 5 joules energy delivery during klystron arc (< 20 joules without crowbar)
 
 ### **Design Constraints**
 1. **Low Cost**: Target < $140 per kVA
@@ -130,10 +132,12 @@ The system includes a sophisticated thyristor crowbar for klystron protection:
 
 **Protection Performance:**
 - **Energy Limitation**: < 5 joules delivered to klystron arc with crowbar
-- **Backup Protection**: < 40 joules without crowbar operation
+- **Backup Protection**: < 20 joules without crowbar operation
 - **Response Time**: ~10 microseconds crowbar delay
 - **Current Limiting**: Primary inductor limits fault current rise
 - **Complete Interruption**: 4-8 milliseconds primary current interruption
+- **Fault Current**: 50 amps for 4 milliseconds during crowbar failure
+- **I²t Protection**: ~15 amp²seconds protection value
 
 ### **Fault Response Characteristics**
 
@@ -186,6 +190,29 @@ To meet size constraints, critical components are oil-immersed:
 - **Maintenance Access**: Oil-to-oil feed-throughs allow service
 - **Existing Infrastructure**: Fits on existing transformer pads
 
+### **Transformer Tank Contents**
+
+The main transformer tank contains:
+- **Two filter inductors**
+- **Two power transformers** (open Wye primary, dual Wye secondaries)
+- **One phase shifting transformer** (< 15% of full load MVA)
+- **4 filter diode rectifier stacks**
+- **4 filter capacitors**
+- **8 filter resistor loads**
+- **4 power diode rectifier stacks**
+
+### **Crowbar Tank Components**
+
+- **4 SCR stacks** with snubber networks
+- **Impedance matching** to output cable
+- **Two voltage dividers** for high voltage monitoring
+- **200 μH inductors** in termination tank for cable discharge current reduction
+
+### **Primary Control Tank Components**
+
+- **12 SCR stacks** for primary control
+- **12 snubber networks** to limit dV/dt and damp capacitance ringing
+
 ## Performance Characteristics
 
 ### **Voltage Regulation**
@@ -222,6 +249,13 @@ The system achieves excellent regulation through primary control:
 2. **Compact Design**: Reduced installation costs
 3. **Simplified Control**: Primary-side regulation reduces complexity
 4. **Existing Infrastructure**: Utilizes existing transformer pads
+
+### **Manufacturing and Installation**
+
+**Primary Manufacturer:**
+- **NWL Transformer**: Power supply transformers, rectifiers, and transformer tank
+- **SLAC**: SCR Primary controller and SCR crowbar (manufactured and tested)
+- **Integration**: SLAC components installed by NWL into transformer tanks
 
 ## Design Innovation Summary
 
@@ -269,7 +303,7 @@ The principles documented in this 1997 publication form the foundation for:
 | **Ripple (P-P)** | < 1% | Above 60 kV |
 | **Ripple (RMS)** | < 0.2% | Above 60 kV |
 | **Arc Energy** | < 5 J | With crowbar |
-| **Arc Energy (Backup)** | < 40 J | Without crowbar |
+| **Arc Energy (Backup)** | < 20 J | Without crowbar |
 | **Crowbar Delay** | ~10 μs | Response time |
 | **Primary Voltage** | 12.5 kV | Thyristor rating |
 | **Pulse Count** | 12 | Harmonic reduction |
@@ -280,4 +314,3 @@ The principles documented in this 1997 publication form the foundation for:
 **Document Status**: Complete technical analysis of SLAC-PUB-7591  
 **Related Documents**: PowerPoint schematics, detailed circuit drawings, design notes  
 **Application**: Foundation for understanding current HVPS architecture evolution
-
