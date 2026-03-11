@@ -155,6 +155,91 @@ Measured Characteristics:
 
 ---
 
+## System Upgrade Analysis: Current vs. Proposed
+
+### 🔴 **Current System Limitations (FCOG6100 + FCOAUX60)**
+
+#### **Hardware Constraints**
+- **Obsolete Components**: FCOG6100 Rev K and FCOAUX60 Rev D are legacy products with limited support
+- **Two-Board Architecture**: Requires separate FCOAUX60 auxiliary board for 12-pulse operation
+- **Limited Phase References**: Only 3 phase inputs (J5) requiring external phase shifting
+- **No Auto-Balance**: Manual balance adjustment only via external error amplifier
+- **Aging PLC Platform**: Allen-Bradley SLC 500 with limited processing capability
+
+#### **Operational Issues**
+- **Manual Tuning Required**: Balance adjustment requires manual intervention and expertise
+- **Limited Bandwidth**: Restricted control loop bandwidth affects dynamic response
+- **Phase Loss Sensitivity**: Basic phase loss detection with limited diagnostic capability
+- **Maintenance Challenges**: Aging components with increasing failure rates
+- **Limited Monitoring**: Basic voltage/current feedback with minimal system diagnostics
+
+#### **Integration Difficulties**
+- **Complex Wiring**: Multiple boards require extensive interconnections
+- **Signal Conditioning**: External circuits needed for proper phase reference conditioning
+- **Limited Flexibility**: Fixed configuration with minimal adaptability
+- **Troubleshooting Complexity**: Multiple failure points across two-board system
+
+### 🟢 **Proposed System Advantages (FCOG1200 Rev L)**
+
+#### **Modern Hardware Benefits**
+- **Current Technology**: FCOG1200 Rev L is actively supported with modern components
+- **Integrated Design**: Single-board 12-pulse operation eliminates auxiliary board
+- **Enhanced Phase Processing**: 6 phase inputs (J7) with integrated phase shifting capability
+- **Built-in Auto-Balance**: Automatic balance control with manual override option
+- **Advanced PLC**: Modern Allen-Bradley platform with enhanced processing power
+
+#### **Operational Improvements**
+- **Automatic Operation**: Auto-balance reduces manual intervention requirements
+- **Higher Bandwidth**: ~360 Hz bandwidth (6×fmains) improves dynamic response
+- **Advanced Diagnostics**: Enhanced phase loss detection with detailed fault reporting
+- **Improved Reliability**: Modern components with better MTBF characteristics
+- **Comprehensive Monitoring**: Enhanced system status and diagnostic capabilities
+
+#### **Integration Advantages**
+- **Simplified Architecture**: Single firing board reduces complexity
+- **Standardized Interface**: J7 connector provides clean phase reference interface
+- **Flexible Configuration**: Software-configurable parameters for different applications
+- **Better Serviceability**: Single-point troubleshooting and maintenance
+- **Future-Proof Design**: Scalable architecture for future enhancements
+
+### 📊 **Performance Comparison Summary**
+
+| **Aspect** | **Current (FCOG6100)** | **Proposed (FCOG1200)** | **Improvement** |
+|------------|------------------------|--------------------------|-----------------|
+| **Reliability** | Legacy components, aging | Modern, current production | ⬆️ **High** |
+| **Maintenance** | Complex, multi-board | Simplified, single-board | ⬆️ **High** |
+| **Balance Control** | Manual adjustment only | Automatic + manual override | ⬆️ **High** |
+| **Bandwidth** | Limited (~60 Hz) | Enhanced (~360 Hz) | ⬆️ **Medium** |
+| **Diagnostics** | Basic fault detection | Advanced fault reporting | ⬆️ **High** |
+| **Phase Processing** | 3 inputs, external shifting | 6 inputs, integrated shifting | ⬆️ **Medium** |
+| **Support** | Limited/obsolete | Full manufacturer support | ⬆️ **High** |
+| **Configuration** | Fixed hardware | Software configurable | ⬆️ **Medium** |
+
+### 💰 **Cost-Benefit Analysis**
+
+#### **Upgrade Investment**
+- **FCOG1200 Rev L Board**: ~$8,000-12,000 (estimated)
+- **Phase Reference Adapter**: ~$2,000-3,000 (custom design)
+- **PLC Upgrade**: ~$5,000-8,000 (modern platform)
+- **Engineering/Integration**: ~$15,000-25,000 (design and commissioning)
+- **Total Estimated Cost**: ~$30,000-48,000
+
+#### **Long-term Benefits**
+- **Reduced Maintenance**: 50-70% reduction in maintenance interventions
+- **Improved Uptime**: Enhanced reliability reduces unplanned outages
+- **Operational Efficiency**: Automatic balance control reduces operator workload
+- **Future Support**: Continued manufacturer support vs. obsolete components
+- **Performance Gains**: Better regulation and faster response times
+
+#### **Risk Mitigation**
+- **Component Availability**: Current production vs. obsolete parts
+- **Technical Support**: Active engineering support vs. limited legacy support
+- **Failure Recovery**: Faster diagnosis and repair with modern diagnostics
+- **Operational Continuity**: Reduced risk of extended outages due to component failures
+
+---
+
+
 ## Phase Reference Adapter Board Design
 
 ### Design Requirements (from Enerpro Discussion)
