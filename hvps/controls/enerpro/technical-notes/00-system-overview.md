@@ -25,17 +25,19 @@ The SPEAR RF Klystron High Voltage Power Supply (HVPS) control system integrates
                        │ • I:1 Inputs    │    │ • Voltage FB    │    │ • Monitor       │
                        │ • O:1 Outputs   │    │ • Current FB    │    │   Windings      │
                        └─────────────────┘    └─────────────────┘    └─────────────────┘
-                                                        │                        │
-                                                        ▼                        ▼
-                                               ┌─────────────────┐    ┌─────────────────┐
-                                               │ 12-Pulse        │    │ Phase Reference │
-                                               │ Thyristor       │    │ Adapter Board   │
-                                               │ Bridges         │    │                 │
-                                               │                 │    │ • 3×2MΩ Resistors│
-                                               │ • Bridge X      │    │ • J7 Interface  │
-                                               │ • Bridge Y      │    │ • Phase Shift   │
-                                               │ • 30° Shift     │    │   Generation    │
-                                               └─────────────────┘    └─────────────────┘
+                                │                        │                        │
+                                │                        ▼                        ▼
+                                │               ┌─────────────────┐    ┌─────────────────┐
+                                │               │ 12-Pulse        │◄───│ Phase Reference │
+                                │               │ Thyristor       │    │ Adapter Board   │
+                                │               │ Bridges         │    │                 │
+                                │               │                 │    │ • 3×2MΩ Resistors│
+                                │               │ • Bridge X      │    │ • J7 Interface  │
+                                │               │ • Bridge Y      │    │ • Phase Shift   │
+                                │               │ • 30° Shift     │    │   Generation    │
+                                │               └─────────────────┘    └─────────────────┘
+                                │                        │
+                                └────────────────────────┼─────► (Status & Control I/O)
                                                         │
                                                         ▼
                                                ┌─────────────────┐
@@ -350,4 +352,3 @@ Since independent monitoring of the two secondary bridges is not available, the 
 | **Bandwidth** | Limited | ~360 Hz (auto-balance) |
 
 This comprehensive system overview provides the foundation for successful integration of the Enerpro FCOG1200 firing board into the existing HVPS control system while maintaining compatibility with existing hardware and improving overall performance through 12-pulse operation.
-
