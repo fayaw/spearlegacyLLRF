@@ -1,8 +1,29 @@
 <?xml version='1.0' encoding='utf-8'?>
-<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
-  <title>Phase 3 &amp; 4 — Final Commissioning</title>
-  <rect width="1200" height="800" fill="white" />
-  <text x="600" y="50" font-family="Arial" font-size="20" fill="black">Phase 3 &amp; 4 — Final Commissioning</text>
-  <text x="600" y="400" font-family="Arial" font-size="14" fill="gray">Diagram content extracted from Mermaid source</text>
-  <text x="600" y="430" font-family="Arial" font-size="12" fill="gray">Please refer to the .mmd files for full diagram details</text>
+<svg width="1200" height="700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700">
+  <title>Phase 3-4 Commissioning</title>
+  <rect width="1200" height="700" fill="white" />
+  <text x="600" y="30" font-family="Arial" font-size="24" fill="black" text-anchor="middle">Phase 3 &amp; 4 — Final Commissioning</text>
+  <text x="600" y="60" font-family="Arial" font-size="16" fill="#666" text-anchor="middle">PPS Connection, Validation &amp; Operation</text>
+  <rect x="100" y="120" width="1000" height="80" fill="#ffe6cc" stroke="black" stroke-width="2" rx="5" />
+  <text x="120" y="145" font-family="Arial" font-size="16" fill="black" text-anchor="start">Phase 3: PPS Connection</text>
+  <text x="120" y="165" font-family="Arial" font-size="12" fill="#333" text-anchor="start">Personnel Protection System integration</text>
+  <text x="120" y="180" font-family="Arial" font-size="12" fill="#333" text-anchor="start">Safety approval and validation</text>
+  <rect x="100" y="240" width="480" height="80" fill="#d5e8d4" stroke="black" stroke-width="2" rx="5" />
+  <text x="120" y="265" font-family="Arial" font-size="16" fill="black" text-anchor="start">Phase 4A: Power Ramp</text>
+  <text x="120" y="285" font-family="Arial" font-size="12" fill="#333" text-anchor="start">Incremental RF power increase</text>
+  <text x="120" y="300" font-family="Arial" font-size="12" fill="#333" text-anchor="start">Performance validation</text>
+  <rect x="620" y="240" width="480" height="80" fill="#e8f5e8" stroke="black" stroke-width="2" rx="5" />
+  <text x="640" y="265" font-family="Arial" font-size="16" fill="black" text-anchor="start">Phase 4B: Operator Training</text>
+  <text x="640" y="285" font-family="Arial" font-size="12" fill="#333" text-anchor="start">Control system training</text>
+  <text x="640" y="300" font-family="Arial" font-size="12" fill="#333" text-anchor="start">Procedure documentation</text>
+  <rect x="100" y="360" width="1000" height="80" fill="#dae8fc" stroke="black" stroke-width="2" rx="5" />
+  <text x="120" y="385" font-family="Arial" font-size="16" fill="black" text-anchor="start">Phase 4C: Full Operation</text>
+  <text x="120" y="405" font-family="Arial" font-size="12" fill="#333" text-anchor="start">24/7 operation capability</text>
+  <text x="120" y="420" font-family="Arial" font-size="12" fill="#333" text-anchor="start">Maintenance procedures</text>
+  <text x="600" y="520" font-family="Arial" font-size="18" fill="black" text-anchor="middle">Final Deliverables</text>
+  <text x="600" y="550" font-family="Arial" font-size="12" fill="#006600" text-anchor="middle">• Complete system documentation and procedures</text>
+  <text x="600" y="575" font-family="Arial" font-size="12" fill="#006600" text-anchor="middle">• Operator training materials and certification</text>
+  <text x="600" y="600" font-family="Arial" font-size="12" fill="#006600" text-anchor="middle">• Maintenance schedules and spare parts inventory</text>
+  <text x="600" y="625" font-family="Arial" font-size="12" fill="#006600" text-anchor="middle">• Performance validation reports</text>
+  <text x="600" y="650" font-family="Arial" font-size="12" fill="#006600" text-anchor="middle">• Legacy system decommissioning plan</text>
 </svg>

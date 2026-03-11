@@ -1,8 +1,29 @@
 <?xml version='1.0' encoding='utf-8'?>
-<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
-  <title>Phase 2B — SPEAR3 Full Integration</title>
-  <rect width="1200" height="800" fill="white" />
-  <text x="600" y="50" font-family="Arial" font-size="20" fill="black">Phase 2B — SPEAR3 Full Integration</text>
-  <text x="600" y="400" font-family="Arial" font-size="14" fill="gray">Diagram content extracted from Mermaid source</text>
-  <text x="600" y="430" font-family="Arial" font-size="12" fill="gray">Please refer to the .mmd files for full diagram details</text>
+<svg width="1200" height="600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600">
+  <title>Phase 2B SPEAR3 Integration</title>
+  <rect width="1200" height="600" fill="white" />
+  <text x="600" y="30" font-family="Arial" font-size="24" fill="black" text-anchor="middle">Phase 2B — SPEAR3 Full Integration</text>
+  <text x="600" y="60" font-family="Arial" font-size="16" fill="#666" text-anchor="middle">Add Cavity-Dependent Subsystems</text>
+  <rect x="100" y="120" width="300" height="80" fill="#dae8fc" stroke="black" stroke-width="2" rx="5" />
+  <text x="110" y="145" font-family="Arial" font-size="14" fill="black" text-anchor="start">① + LLRF9 Units 1 &amp; 2</text>
+  <text x="110" y="165" font-family="Arial" font-size="11" fill="#333" text-anchor="start">Vector-sum feedback</text>
+  <text x="110" y="180" font-family="Arial" font-size="11" fill="#333" text-anchor="start">Field control</text>
+  <rect x="450" y="120" width="300" height="80" fill="#e8f5e8" stroke="black" stroke-width="2" rx="5" />
+  <text x="460" y="145" font-family="Arial" font-size="14" fill="black" text-anchor="start">② + Galil Tuner Controller</text>
+  <text x="460" y="165" font-family="Arial" font-size="11" fill="#333" text-anchor="start">Motor position control</text>
+  <text x="460" y="180" font-family="Arial" font-size="11" fill="#333" text-anchor="start">Tuner steps</text>
+  <rect x="800" y="120" width="300" height="80" fill="#ffebee" stroke="black" stroke-width="2" rx="5" />
+  <text x="810" y="145" font-family="Arial" font-size="14" fill="black" text-anchor="start">③ + Arc Detection System</text>
+  <text x="810" y="165" font-family="Arial" font-size="11" fill="#333" text-anchor="start">Microstep-MIS sensors</text>
+  <text x="810" y="180" font-family="Arial" font-size="11" fill="#333" text-anchor="start">Fault detection</text>
+  <rect x="100" y="250" width="1000" height="80" fill="#d5e8d4" stroke="black" stroke-width="2" rx="5" />
+  <text x="110" y="275" font-family="Arial" font-size="14" fill="black" text-anchor="start">④ End-to-End Verification</text>
+  <text x="110" y="295" font-family="Arial" font-size="11" fill="#333" text-anchor="start">Complete interlock chain validation</text>
+  <text x="110" y="310" font-family="Arial" font-size="11" fill="#333" text-anchor="start">Performance testing</text>
+  <text x="600" y="400" font-family="Arial" font-size="18" fill="black" text-anchor="middle">Success Criteria</text>
+  <text x="600" y="430" font-family="Arial" font-size="12" fill="#006600" text-anchor="middle">• Amplitude stability: &lt; 0.1%</text>
+  <text x="600" y="455" font-family="Arial" font-size="12" fill="#006600" text-anchor="middle">• Phase stability: &lt; 0.1°</text>
+  <text x="600" y="480" font-family="Arial" font-size="12" fill="#006600" text-anchor="middle">• Tuner resolution: 256 microsteps/step</text>
+  <text x="600" y="505" font-family="Arial" font-size="12" fill="#006600" text-anchor="middle">• Control loop response: ~1 second</text>
+  <text x="600" y="530" font-family="Arial" font-size="12" fill="#006600" text-anchor="middle">• Complete fault diagnostics with waveform capture</text>
 </svg>
