@@ -94,20 +94,97 @@ The architecture analysis reveals a sophisticated power supply design based on t
                     └─────────────────────────────────────────┘
 ```
 
+## Current SPEAR3 HVPS System Architecture
+
+### **System Overview**
+
+The current SPEAR3 HVPS is based on the original PEP-II design but adapted for SPEAR3 operational requirements:
+
+| **Parameter** | **Original PEP-II** | **Current SPEAR3** | **Notes** |
+|---------------|---------------------|-------------------|-----------|
+| **Output Voltage** | 83 kV @ 23-27 A | −77 kV @ 22 A | Negative polarity for klystron cathode |
+| **Output Power** | 2.5 MW maximum | 1.7 MW nominal | Lower operating point |
+| **Input Power** | 12.5 kV 3-phase | 12.47 kV 3-phase | From substation 507, breaker 160 |
+| **Topology** | 12-pulse thyristor | 12-pulse thyristor | Star point controller maintained |
+| **Units** | 8 units (PEP-II) | 2 units (SPEAR1/SPEAR2) | One active, one spare |
+| **Location** | PEP-II facility | Building 514 (power), Building 118 (control) | Distributed architecture |
+
+### **Current System Block Diagram**
+
+```
+  12.47 kV RMS 3φ AC (Substation 507, Breaker 160)
+        │
+   ┌────┴────┐
+   │Switchgear│──── Disconnect, Fuses (3×50A), Vacuum Contactor
+   └────┬────┘
+        │
+  ┌─────┴──────┐
+  │ Phase-Shift │  Extended Delta Transformer (3.5 MVA)
+  │ Transformer │  Creates ±15° phase-shifted outputs
+  └──┬─────┬───┘
+     │     │
+  ┌──┴──┐ ┌┴───┐
+  │ T1  │ │ T2 │   Rectifier Transformers (1.5 MVA each)
+  │(+15°)│ │(-15°)│  Open-wye primaries, dual-wye secondaries
+  └──┬──┘ └┬───┘
+     │     │
+  ┌──┴──┐ ┌┴───┐
+  │6-Pulse│ │6-Pulse│   Phase Control Thyristor Bridges
+  │Bridge │ │Bridge │   12 stacks × 14 Powerex T8K7 each
+  └──┬──┘ └┬───┘
+     │     │
+  ┌──┴──┐ ┌┴───┐
+  │L1    │ │L2   │   Filter Inductors (0.3 H each, 85 A rated)
+  │(0.3H)│ │(0.3H)│   1,084 J stored energy at full load
+  └──┬──┘ └┬───┘
+     │     │
+  ┌──┴─────┴───┐
+  │  Secondary  │  4 diode rectifier bridges in series
+  │  Rectifiers │  Main: 30 kV 30 A, Filter: 30 kV 3 A
+  │  + Filters  │  8 µF filter caps + 500Ω isolation resistors
+  └──────┬──────┘
+         │
+  ┌──────┴──────┐
+  │   Crowbar   │  4 SCR stacks (100 kV, 80 A)
+  │  Protection │  Fiber-optic trigger (~1µs delay)
+  └──────┬──────┘
+         │
+    −77 kV DC @ 22 A
+    (to Klystron)
+```
+
+### **Current Control System Architecture**
+
+The SPEAR3 HVPS uses a distributed legacy control system:
+
+```
+EPICS IOC ←→ VXI Crate ←→ PLC ←→ Regulator Card ←→ Enerpro Board ←→ SCR Gates
+    ↑                      ↑           ↑              ↑               ↑
+Operator    Communication  Logic &    Analog         Firing          Power
+Interface   Interface      Safety     Control        Control         Control
+```
+
+**Key Control Components:**
+- **PLC:** Allen-Bradley SLC-5/03 with SSRLV6-4-05-10 program
+- **Regulator Card:** PC-237-230-14-C0 (voltage/current feedback conditioning)
+- **Firing Board:** Enerpro FCOG1200 (12-pulse SCR gate pulse generation)
+- **EPICS Interface:** VXI crate with DCM module, DH485 protocol
+- **Power Supplies:** 6 Kepco units (±15V, +5V, +24V, +240V, +24VAC)
+
 ## Key Performance Specifications
 
 ### **Power Supply Performance Matrix**
 
-| **Parameter** | **Specification** | **Achievement** | **Innovation** |
-|---------------|------------------|-----------------|----------------|
-| **Power Rating** | 2.5 MVA | 83 kV × 23-27 A | High power density |
-| **Voltage Range** | 0-90 kV | Continuous control | Primary regulation |
-| **Regulation** | < 0.1% | Above 60 kV | Excellent stability |
-| **Ripple** | < 1% P-P | < 0.2% RMS | 12-pulse design |
-| **Arc Protection** | < 5 J | With crowbar | Energy limitation |
-| **Response Time** | ~10 μs | Crowbar activation | Fast protection |
-| **Cost** | < $140/kVA | 1997 target | Cost effective |
-| **Size** | Compact | Existing pads | Oil immersion |
+| **Parameter** | **Original Specification** | **Current Achievement** | **Innovation** |
+|---------------|---------------------------|------------------------|----------------|
+| **Power Rating** | 2.5 MVA | 1.7 MW nominal (SPEAR3) | High power density |
+| **Voltage Range** | 0-90 kV | −77 kV nominal (−90 kV max) | Primary regulation |
+| **Regulation** | < 0.1% | <±0.5% at >65 kV | Excellent stability |
+| **Ripple** | < 1% P-P | <1% P-P, <0.2% RMS | 12-pulse design |
+| **Arc Protection** | < 5 J | <5 J with crowbar, <40 J without | Energy limitation |
+| **Response Time** | ~10 μs | ~1μs fiber-optic trigger | Fast protection |
+| **Cost** | < $140/kVA | 1997 target achieved | Cost effective |
+| **Size** | Compact | Existing pads utilized | Oil immersion |
 
 ## Component Technology Analysis
 
@@ -461,4 +538,3 @@ The architecture analysis reveals a sophisticated power supply design based on t
 **Integration**: Links all architecture documentation components  
 **Application**: Master reference for HVPS system understanding and development  
 **Maintenance**: Regular updates as system evolves and additional analysis completed
-
