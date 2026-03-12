@@ -101,8 +101,9 @@ class PLCController:
         (Full scale ≈ 90 kV → 32000 counts)
         """
         # Scale: 0 kV → 0, 77 kV → ~27378, 90 kV → 32000
+        # Adjust scaling to better reach target voltage
         self.n7_30 = int(np.clip(
-            abs(voltage_kv) / 90.0 * 32000, 0, 32767))
+            abs(voltage_kv) / 85.0 * 32000, 0, 32767))
 
     def turn_on(self):
         """Enable the regulator (B3:0/2 = True)."""
@@ -315,8 +316,8 @@ class RegulatorBoard:
         self.out_cfg = config.output
 
         # PI controller gains (tuned for HVPS dynamics)
-        self.kp = 1.0        # Proportional gain
-        self.ki = 5.0        # Integral gain
+        self.kp = 2.0        # Proportional gain (increased)
+        self.ki = 8.0        # Integral gain (increased)
         self._integral = 0.0
         self._output = 0.0
 

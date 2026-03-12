@@ -201,8 +201,8 @@ class SixPulseBridge:
         if v_avg <= 0:
             return 0.0
         alpha_rad = np.radians(alpha_deg)
-        # Ripple amplitude for 6-pulse: approximately 4.2% of V_dc at α=0
-        ripple_factor = 0.042 * (1.0 + 0.5 * abs(np.sin(alpha_rad)))
+        # Ripple amplitude for 6-pulse: reduced for better realism
+        ripple_factor = 0.015 * (1.0 + 0.3 * abs(np.sin(alpha_rad)))
         omega_ripple = 2 * np.pi * 6 * f_line
         ripple = v_avg * ripple_factor * np.cos(omega_ripple * t)
         return v_avg + ripple
@@ -321,9 +321,11 @@ class LCFilter:
 
         i_total = self.i_L1 + self.i_L2
 
-        # Capacitor: dv_C/dt = (i_total - i_load) / C
+        # Capacitor: dv_C/dt = (i_total - i_load - i_damp) / C
         if self.C > 0:
-            dv_C = (i_total - i_load) / self.C * dt
+            # Add damping current through isolation resistor
+            i_damp = self.v_C / self.R_damp if self.R_damp > 0 else 0.0
+            dv_C = (i_total - i_load - i_damp) / self.C * dt
             self.v_C += dv_C
         else:
             self.v_C = v_bridge1 + v_bridge2  # No filtering
@@ -535,4 +537,3 @@ class PowerConversionChain:
             state.ripple_pp_v = abs(v_12pulse - v_filtered)
 
         return state
-
