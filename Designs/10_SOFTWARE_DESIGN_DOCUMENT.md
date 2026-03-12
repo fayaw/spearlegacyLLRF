@@ -17,6 +17,8 @@ This document is derived from the Physical Design Report (SPEAR3-LLRF-PDR-001), 
 
 **Key Principle**: The Python coordinator is a **supervisory control layer** operating at ~1 Hz. It is explicitly **NOT** in any fast safety path. All safety-critical protection is handled by hardware: the LLRF9 FPGA interlocks (<1 μs), the Interface Chassis hardware AND-logic (<1 μs), and the Kly MPS PLC (~ms). The Python coordinator handles sequencing, coordination, diagnostics, and operator interface.
 
+**System Overview**: SPEAR3 RF station provides 476 MHz RF power to the SPEAR3 storage ring. A single klystron operating at approximately 1 MW feeds four single-cell RF cavities through a waveguide distribution network, providing ~3.2 MV combined gap voltage.
+
 ---
 
 ## Table of Contents
@@ -70,7 +72,7 @@ The Python coordinator sits at **Layer 4** of the protection hierarchy and commu
 | Kly MPS ControlLogix | External gateway | `SRF1:MPS:` | ~1 Hz | EPICS CA |
 | Motion Controller (Galil) | Motor record IOC | `SRF1:MTR:` | On demand | EPICS CA |
 | Waveform Buffer | Dedicated IOC | `SRF1:WFBUF:` | ~1 Hz / event | EPICS CA |
-| Heater Controller | Dedicated IOC | `SRF1:HTR:` | 10 Hz | EPICS CA |
+| Heater Controller | Dedicated IOC | `SRF1:KLYS:HEATER:` | 10 Hz | EPICS CA |
 
 ### 1.3 Design Constraints
 
@@ -91,7 +93,7 @@ The Python coordinator sits at **Layer 4** of the protection hierarchy and commu
 | `rf_hvps_loop.st` | 343 | `hvps_controller.py` | HVPS supervisory control loop |
 | `rf_tuner_loop.st` | 555 | `tuner_manager.py` | 4-cavity tuner management |
 | `rf_dac_loop.st` | 290 | *Eliminated* | LLRF9 handles internally via setpoint profiles |
-| `rf_calib.st` | 2,800+ | `calibration.py` | Reduced scope — LLRF9 digital calibration |
+| `rf_calib.st` | 3,345 | `calibration.py` | Reduced scope — LLRF9 digital calibration |
 | `rf_msgs.st` | 352 | `fault_manager.py` + `event_logger.py` | Structured logging replaces CAMAC TAXI monitoring |
 
 
@@ -786,7 +788,7 @@ The Fault Manager is the central fault detection, logging, and recovery coordina
 | Tuner phase error | Phase exceeds limit for > N cycles | WARNING | Auto-retry, then FAULT |
 | Collector power high | Waveform Buffer calculation | CRITICAL | HVPS voltage reduction |
 | Arc detection | Interface Chassis arc status bits | CRITICAL | Immediate FAULT state |
-| Heater fault | `SRF1:HTR:FAULT` monitor | WARNING | Prevent HVPS enable |
+| Heater fault | `SRF1:KLYS:HEATER:FAULT` monitor | WARNING | Prevent HVPS enable |
 
 ### 9.3 First-Fault Analysis
 
@@ -914,12 +916,12 @@ class HeaterController(BaseController):
 
 | PV | Direction | Description |
 |----|-----------|-------------|
-| `SRF1:HTR:VOLT:RMS` | Read | RMS heater voltage |
-| `SRF1:HTR:CURR:RMS` | Read | RMS heater current |
-| `SRF1:HTR:MODE` | Read/Write | Operating mode (OFF/STANDBY/WARMUP/OPERATING/COOLDOWN) |
-| `SRF1:HTR:STATUS` | Read | System status |
-| `SRF1:HTR:FAULT` | Read | Fault conditions |
-| `SRF1:HTR:CTRL:SP` | Write | Power setpoint (0-100%) |
+| `SRF1:KLYS:HEATER:VOLT:RMS` | Read | RMS heater voltage |
+| `SRF1:KLYS:HEATER:CURR:RMS` | Read | RMS heater current |
+| `SRF1:KLYS:HEATER:MODE` | Read/Write | Operating mode (OFF/STANDBY/WARMUP/OPERATING/COOLDOWN) |
+| `SRF1:KLYS:HEATER:STATUS` | Read | System status |
+| `SRF1:KLYS:HEATER:FAULT` | Read | Fault conditions |
+| `SRF1:KLYS:HEATER:CTRL:SP` | Write | Power setpoint (0-100%) |
 
 ---
 
@@ -927,7 +929,7 @@ class HeaterController(BaseController):
 
 ### 12.1 Purpose
 
-Replaces `rf_calib.st` (2,800+ lines). The scope is significantly reduced because the LLRF9's digital signal processing eliminates the need for analog offset nulling and coefficient calibration that dominated the legacy system.
+Replaces `rf_calib.st` | 3,345 lines). The scope is significantly reduced because the LLRF9's digital signal processing eliminates the need for analog offset nulling and coefficient calibration that dominated the legacy system.
 
 ### 12.2 Remaining Calibration Tasks
 
@@ -1159,7 +1161,7 @@ EDM panels access the coordinator PVs alongside direct LLRF9, HVPS, and MPS PVs.
 | `SRF1:MPS:` | ControlLogix PLC | ~20 | MPS permit, faults, first-fault, Interface Chassis status |
 | `SRF1:MTR:` | Motor record IOC | ~40 | 4 motor records (position, velocity, limits) |
 | `SRF1:WFBUF:` | Waveform Buffer IOC | ~30 | Waveform data, comparator thresholds, collector power |
-| `SRF1:HTR:` | Heater Controller IOC | ~15 | Heater voltage, current, mode, faults |
+| `SRF1:KLYS:HEATER:` | Heater Controller IOC | ~15 | Heater voltage, current, mode, faults |
 | `SRF1:COORD:` | Python Coordinator | ~25 | Coordinator state, faults, diagnostics |
 
 ### 15.2 Critical PV Read Set (Monitored at 10 Hz)
@@ -1416,7 +1418,7 @@ WantedBy=multi-user.target
 | `SRF1:MTR:C3` | Cavity 3 tuner motor | Motor record IOC | B132 |
 | `SRF1:MTR:C4` | Cavity 4 tuner motor | Motor record IOC | B132 |
 | `SRF1:WFBUF:` | Waveform Buffer System | Dedicated IOC | B132 |
-| `SRF1:HTR:` | Klystron heater controller | Dedicated IOC | B132 |
+| `SRF1:KLYS:HEATER:` | Klystron heater controller | Dedicated IOC | B132 |
 | `SRF1:COORD:` | Python Coordinator | caproto server | B132 |
 
 ### 21.2 Source Document Traceability
