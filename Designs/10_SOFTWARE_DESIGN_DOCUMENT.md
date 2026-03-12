@@ -68,6 +68,8 @@ The Python coordinator sits at **Layer 4** of the protection hierarchy and commu
 | LLRF9 Unit 2 | Built-in Linux IOC | `LLRF2:` | 10 Hz scalars | EPICS CA |
 | HVPS CompactLogix | External gateway | `SRF1:HVPS:` | ~1 Hz | EPICS CA |
 | Kly MPS ControlLogix | External gateway | `SRF1:MPS:` | ~1 Hz | EPICS CA |
+| **Interface Chassis** | **Via MPS PLC gateway** | **`SRF1:MPS:IC:`** | **~1 Hz** | **EPICS CA** |
+| **Arc Detection System** | **Via MPS PLC gateway** | **`SRF1:MPS:ARC:`** | **~1 Hz / event** | **EPICS CA** |
 | Motion Controller (Galil) | Motor record IOC | `SRF1:MTR:` | On demand | EPICS CA |
 | Waveform Buffer | Dedicated IOC | `SRF1:WFBUF:` | ~1 Hz / event | EPICS CA |
 | Heater Controller | Dedicated IOC | `SRF1:HTR:` | 10 Hz | EPICS CA |
@@ -205,6 +207,8 @@ spear3_llrf/
 │   ├── llrf9_interface.py      # LLRF9 unit hardware abstraction
 │   ├── hvps_interface.py       # HVPS CompactLogix PLC interface
 │   ├── mps_interface.py        # Kly MPS ControlLogix PLC interface
+│   ├── interface_chassis_interface.py  # Interface Chassis status via MPS PLC
+│   ├── arc_detection_interface.py      # Arc detection system via MPS PLC
 │   ├── motor_interface.py      # Galil DMC-4143 motor record interface
 │   ├── waveform_buf_interface.py  # Waveform Buffer System interface
 │   └── heater_interface.py     # Klystron heater SCR controller interface
@@ -263,10 +267,13 @@ main.py
         │     ├── LLRF9Interface(x2) ── interfaces/llrf9_interface.py
         │     ├── HVPSInterface ────── interfaces/hvps_interface.py
         │     ├── MPSInterface ─────── interfaces/mps_interface.py
+        │     ├── InterfaceChassisInterface ── interfaces/interface_chassis_interface.py
+        │     ├── ArcDetectionInterface ── interfaces/arc_detection_interface.py
         │     └── HeaterInterface ──── interfaces/heater_interface.py
         ├── HVPSController ─────────── controllers/hvps_controller.py
         │     ├── LLRF9Interface
-        │     └── HVPSInterface
+        │     ├── HVPSInterface
+        │     └── InterfaceChassisInterface
         ├── TunerManager ───────────── controllers/tuner_manager.py
         │     ├── LLRF9Interface
         │     └── MotorInterface(x4) ── interfaces/motor_interface.py
@@ -877,14 +884,70 @@ Provides the Python coordinator's interface to the Waveform Buffer System. Reads
 | `SRF1:WFBUF:TRIP:SUMMARY` | Binary | Summary trip status to Interface Chassis |
 
 ---
-
-## 11. Heater Controller Interface
+## 11. Interface Chassis Interface
 
 ### 11.1 Purpose
 
+The Interface Chassis Interface provides the Python coordinator's access to the Interface Chassis status and control functions. Since the Interface Chassis communicates via hardwired digital signals to the MPS PLC, this interface accesses IC data **indirectly** through the MPS PLC EPICS gateway.
+
+**Key capabilities**:
+- Read all Interface Chassis input permit states
+- Read Interface Chassis output permit states  
+- Access first-fault register for root cause analysis
+- Monitor arc detection system status (5-bit fired-detector ID)
+- Coordinate recovery sequences with IC state
+- Support diagnostic analysis of interlock cascades
+
+### 11.2 Key PVs (via MPS PLC)
+
+| PV | Type | Description |
+|----|------|-------------|
+| `SRF1:MPS:IC:LLRF9_STATUS` | Binary | LLRF9 status input to IC |
+| `SRF1:MPS:IC:HVPS_STATUS` | Binary | HVPS STATUS fiber input to IC |
+| `SRF1:MPS:IC:MPS_PERMIT` | Binary | MPS RF Summary Permit input to IC |
+| `SRF1:MPS:IC:SPEAR_MPS_PERMIT` | Binary | SPEAR MPS permit input to IC |
+| `SRF1:MPS:IC:ORBIT_INTERLOCK` | Binary | Orbit interlock permit input to IC |
+| `SRF1:MPS:IC:ARC_DETECTION` | Binary | Arc detection summary permit to IC |
+| `SRF1:MPS:IC:POWER_MONITORING` | Binary | Waveform Buffer power monitoring permit to IC |
+| `SRF1:MPS:IC:LLRF9_ENABLE` | Binary | IC output: LLRF9 Enable |
+| `SRF1:MPS:IC:HVPS_SCR_ENABLE` | Binary | IC output: HVPS SCR ENABLE (fiber) |
+| `SRF1:MPS:IC:FIRST_FAULT_REG` | Integer | First-fault register bit field |
+| `SRF1:MPS:IC:FIRST_FAULT_TIME` | String | Timestamp of first fault |
+| `SRF1:MPS:IC:RECOVERY_ACTIVE` | Binary | IC recovery sequence in progress |
+
+---
+
+## 12. Arc Detection Interface
+
+### 12.1 Purpose
+
+The Arc Detection Interface provides access to the arc detection system status through the Interface Chassis → MPS PLC → EPICS path. It monitors the 5 optical arc sensors (4 cavity windows + 1 klystron window) and provides per-sensor diagnostic information.
+
+### 12.2 Key PVs (via MPS PLC)
+
+| PV | Type | Description |
+|----|------|-------------|
+| `SRF1:MPS:ARC:CAV_A_TRIP` | Binary | Cavity A arc sensor trip status |
+| `SRF1:MPS:ARC:CAV_B_TRIP` | Binary | Cavity B arc sensor trip status |
+| `SRF1:MPS:ARC:CAV_C_TRIP` | Binary | Cavity C arc sensor trip status |
+| `SRF1:MPS:ARC:CAV_D_TRIP` | Binary | Cavity D arc sensor trip status |
+| `SRF1:MPS:ARC:KLY_TRIP` | Binary | Klystron arc sensor trip status |
+| `SRF1:MPS:ARC:SUMMARY_TRIP` | Binary | Any arc detected (OR of all 5 sensors) |
+| `SRF1:MPS:ARC:PERMIT` | Binary | Arc detection permit to Interface Chassis |
+| `SRF1:MPS:ARC:FIRED_ID_REG` | Integer | 5-bit register identifying which sensor(s) fired |
+| `SRF1:MPS:ARC:EVENT_COUNT` | Integer | Total arc events since startup |
+| `SRF1:MPS:ARC:LAST_EVENT_TIME` | String | Timestamp of last arc event |
+
+---
+
+
+## 13. Heater Controller Interface
+
+### 13.1 Purpose
+
 Coordinates the klystron cathode heater SCR controller with the station state machine. Manages warm-up and cool-down sequences, ensuring the heater is at operating temperature before allowing HVPS enable.
 
-### 11.2 Coordination Logic
+### 13.2 Coordination Logic
 
 ```python
 class HeaterController(BaseController):
@@ -910,7 +973,7 @@ class HeaterController(BaseController):
         return self.heater.get_mode() == HeaterMode.OPERATING
 ```
 
-### 11.3 Key PVs
+### 13.3 Key PVs
 
 | PV | Direction | Description |
 |----|-----------|-------------|
@@ -923,7 +986,7 @@ class HeaterController(BaseController):
 
 ---
 
-## 12. Calibration System
+## 14. Calibration System
 
 ### 12.1 Purpose
 
@@ -992,7 +1055,7 @@ def configure_vector_sum(self, unit: LLRF9Interface, board: str = "BRD1"):
 
 ---
 
-## 13. Configuration Management
+## 15. Configuration Management
 
 ### 13.1 Configuration File Structure
 
@@ -1103,7 +1166,7 @@ class ConfigManager:
 
 ---
 
-## 14. Operator Interface
+## 16. Operator Interface
 
 ### 14.1 Coordinator PV Server
 
@@ -1147,7 +1210,7 @@ EDM panels access the coordinator PVs alongside direct LLRF9, HVPS, and MPS PVs.
 
 ---
 
-## 15. EPICS PV Contract Reference
+## 17. EPICS PV Contract Reference
 
 ### 15.1 PV Namespaces
 
@@ -1194,7 +1257,7 @@ SRF1:HVPS:VOLT:RBCK           # Voltage readback
 
 ---
 
-## 16. Concurrency and Threading Model
+## 18. Concurrency and Threading Model
 
 ### 16.1 Architecture
 
@@ -1235,7 +1298,7 @@ PyEPICS Channel Access callbacks execute on the CA callback thread. The design e
 
 ---
 
-## 17. Error Handling and Recovery
+## 19. Error Handling and Recovery
 
 ### 17.1 Error Categories
 
@@ -1261,7 +1324,7 @@ PyEPICS Channel Access callbacks execute on the CA callback thread. The design e
 
 ---
 
-## 18. Testing Strategy
+## 20. Testing Strategy
 
 ### 18.1 Test Pyramid
 
@@ -1319,7 +1382,7 @@ class MockLLRF9(LLRF9Interface):
 
 ---
 
-## 19. Deployment and Operations
+## 21. Deployment and Operations
 
 ### 19.1 Deployment
 
@@ -1367,7 +1430,7 @@ WantedBy=multi-user.target
 
 ---
 
-## 20. Legacy Code Mapping
+## 22. Legacy Code Mapping
 
 ### 20.1 Detailed Function Mapping
 
@@ -1391,7 +1454,7 @@ WantedBy=multi-user.target
 
 ---
 
-## 21. Appendix: PV Namespace Registry
+## 23. Appendix: PV Namespace Registry
 
 ### 21.1 Complete PV Prefix Allocation
 
