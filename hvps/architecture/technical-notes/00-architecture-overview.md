@@ -18,15 +18,18 @@ This document provides a comprehensive design report for the current SPEAR3 High
 
 ### **Overall System Configuration**
 
-The SPEAR3 HVPS consists of two identical units providing operational redundancy:
+The SPEAR3 HVPS evolution from the original PEP-II design to current operational configuration:
 
-| **Parameter** | **SPEAR1 (Active)** | **SPEAR2 (Spare)** | **System Total** |
-|---------------|---------------------|---------------------|------------------|
-| **Status** | Primary operational unit | Warm spare/backup | N/A |
-| **Output** | −77 kV @ 22 A | −77 kV @ 22 A | 1.7 MW nominal |
-| **Input** | 12.47 kV 3-phase | 12.47 kV 3-phase | Substation 507 |
-| **Location** | Building 514 | Building 514 | Distributed control |
-| **Control** | Building 118 | Building 118 | EPICS/PLC based |
+| **Parameter** | **Original PEP-II** | **SPEAR1 (Active)** | **SPEAR2 (Spare)** | **System Notes** |
+|---------------|---------------------|---------------------|---------------------|------------------|
+| **Design Era** | 1997 (8 units) | Current SPEAR3 | Current SPEAR3 | Based on PEP-II architecture |
+| **Status** | Historical reference | Primary operational unit | Warm spare/backup | Operational redundancy |
+| **Output** | 83 kV @ 23-27 A | −77 kV @ 22 A | −77 kV @ 22 A | Negative polarity for klystron |
+| **Power** | 2.5 MW maximum | 1.7 MW nominal | 1.7 MW nominal | Lower operating point |
+| **Input** | 12.5 kV 3-phase | 12.47 kV 3-phase | 12.47 kV 3-phase | Substation 507, breaker 160 |
+| **Location** | PEP-II facility | Building 514 | Building 514 | Distributed control architecture |
+| **Control** | Local control | Building 118 | Building 118 | EPICS/PLC based |
+| **Units** | 8 independent units | 1 of 2 units | 1 of 2 units | Reduced from 8 to 2 units |
 
 ### **Power System Block Diagram**
 
@@ -56,41 +59,63 @@ Substation 507, Breaker 160
   │Bridge │ │Bridge │   12 stacks total × 14 Powerex T8K7 SCRs each
   │(SCR1-6)│ │(SCR7-12)│  Star point controller configuration
   └──┬──┘ └┬───┘
-     │     │
-  ┌──┴──┐ ┌┴───┐
-  │ L1  │ │ L2 │   Filter Inductors (Primary Side)
-  │0.3H │ │0.3H│   85 A rated, 1,084 J stored energy each
-  │85A  │ │85A │   Air core, temperature monitored
-  └──┬──┘ └┬───┘
-     │     │
-  ┌──┴─────┴───┐
-  │  Secondary  │  4 Diode Rectifier Bridges (Series Connected)
-  │  Rectifiers │  Main Bridge: 30 kV, 30 A rating
-  │  (D1-D24)   │  Filter Bridge: 30 kV, 3 A rating
-  │             │  Total: 120 kV capability, 22 A continuous
-  └──────┬──────┘
+     │     │ ┌─────────────────────────────────────────────┐
+  ┌──┴──┐ ┌┴───┐                                          │
+  │ L1  │ │ L2 │   Filter Inductors (Primary Side)        │
+  │0.3H │ │0.3H│   85 A rated, 1,084 J stored energy each │
+  │85A  │ │85A │   Air core, temperature monitored        │
+  └──┬──┘ └┬───┘                                          │
+     │     │                                              │
+  ┌──┴─────┴───┐                                          │
+  │  Secondary  │  4 Diode Rectifier Bridges (Series)     │
+  │  Rectifiers │  Main Bridge: 30 kV, 30 A rating        │
+  │  (D1-D24)   │  Filter Bridge: 30 kV, 3 A rating       │
+  │             │  Total: 120 kV capability, 22 A cont.   │
+  └──────┬──────┘                                          │
+         │                                                │
+  ┌──────┴──────┐                                          │
+  │ Filter Bank │  Capacitor Bank: 8 μF total             │
+  │ & Isolation │  500Ω Isolation Resistors (PEP-II)      │
+  │ Resistors   │  Voltage Divider Network (1000:1)       │
+  └──────┬──────┘                                          │
+         │                                                │
+  ┌──────┴──────┐                                          │
+  │   Crowbar   │  4 SCR Stacks (Series Connected)        │
+  │  Protection │  100 kV, 80 A rating each               │
+  │  (SCR13-16) │  Fiber-optic trigger (~1μs delay)       │
+  │             │  dV/dt snubber networks                 │
+  └──────┬──────┘                                          │
+         │                                                │
+  ┌──────┴──────┐                                          │
+  │ Cable Term. │  200μH Inductors (Layer 4 Protection)   │
+  │ Inductors   │  Reduce cable discharge current         │
+  │ (L3, L4)    │  Klystron interface protection          │
+  └──────┬──────┘                                          │
+         │                                                │
+    −77 kV DC @ 22 A                                      │
+    (to SPEAR3 Klystron)                                  │
+                                                          │
+                                                          │
+    ┌─────────────────────────────────────────────────────┘
+    │
+    │  B118 Waveform Buffer System Signals (4 channels):
+    │
+    ├─── Signal 1: Primary AC Current (from T1/T2 primary)
+    ├─── Signal 2: DC Output Voltage (from voltage divider)
+    ├─── Signal 3: DC Output Current (from Danfysik DC-CT)
+    └─── Signal 4: Crowbar Trigger Status (from fiber-optic system)
          │
-  ┌──────┴──────┐
-  │ Filter Bank │  Capacitor Bank: 8 μF total
-  │ & Isolation │  500Ω Isolation Resistors (PEP-II Innovation)
-  │ Resistors   │  Voltage Divider Network (1000:1)
-  └──────┬──────┘
-         │
-  ┌──────┴──────┐
-  │   Crowbar   │  4 SCR Stacks (Series Connected)
-  │  Protection │  100 kV, 80 A rating each
-  │  (SCR13-16) │  Fiber-optic trigger system (~1μs delay)
-  │             │  dV/dt snubber networks
-  └──────┬──────┘
-         │
-  ┌──────┴──────┐
-  │ Cable Term. │  200μH Inductors (Layer 4 Protection)
-  │ Inductors   │  Reduce cable discharge current
-  │ (L3, L4)    │  Klystron interface protection
-  └──────┬──────┘
-         │
-    −77 kV DC @ 22 A
-    (to SPEAR3 Klystron)
+         ▼
+    ┌─────────────────┐
+    │   Building 118  │  Scope/Waveform Buffer System
+    │  Control Room   │  • 4-channel signal acquisition
+    │                 │  • Upgraded design integration
+    │  ┌─────────────┐│  • Real-time monitoring
+    │  │ Oscilloscope││  • Event recording capability
+    │  │ & Waveform  ││  • System diagnostics
+    │  │ Buffer Sys. ││
+    │  └─────────────┘│
+    └─────────────────┘
 ```
 
 ## Power Conversion System
@@ -341,6 +366,33 @@ The SPEAR3 HVPS implements a sophisticated **four-layer protection system** desi
 - **Alarm Levels**: Low level alarm, critically low level trip
 - **Indication**: Local and remote indication via PLC
 
+### **B118 Waveform Buffer System**
+
+**Advanced Signal Acquisition (4 Channels):**
+The Building 118 control room houses an oscilloscope and waveform buffer system that monitors 4 critical HVPS signals for upgraded design integration and system diagnostics:
+
+| **Channel** | **Signal Source** | **Signal Type** | **Purpose** | **Specifications** |
+|-------------|------------------|-----------------|-------------|-------------------|
+| **Channel 1** | T1/T2 Primary | AC Current | Primary power monitoring | AC waveform, 60 Hz, proportional to load |
+| **Channel 2** | Voltage Divider | DC Output Voltage | High voltage monitoring | DC level, −77 kV nominal, 1000:1 scaling |
+| **Channel 3** | Danfysik DC-CT | DC Output Current | Load current monitoring | DC level, 22 A nominal, ±10V output |
+| **Channel 4** | Fiber-Optic System | Crowbar Trigger Status | Protection system status | Digital/analog, crowbar activation events |
+
+**System Capabilities:**
+- **Real-time Monitoring**: Continuous acquisition of all 4 channels
+- **Event Recording**: Triggered recording during system events (arcs, faults)
+- **Waveform Analysis**: Post-event analysis and system diagnostics
+- **Integration**: Designed for upgraded control system integration
+- **Data Storage**: Historical waveform data for trend analysis
+- **Remote Access**: Network connectivity for remote monitoring
+
+**Applications:**
+- **Arc Event Analysis**: Detailed waveform capture during klystron arcs
+- **System Performance**: Monitoring voltage regulation and current stability
+- **Protection Verification**: Crowbar system response time measurement
+- **Predictive Maintenance**: Trend analysis for component degradation
+- **System Optimization**: Performance tuning and efficiency analysis
+
 ## Physical Layout and Installation
 
 ### **Building 514 (Power Equipment)**
@@ -541,4 +593,3 @@ The system is expected to continue reliable operation for many years with proper
 **Scope**: Complete SPEAR3 HVPS system as currently configured  
 **Application**: System understanding, maintenance planning, and modernization guidance  
 **Maintenance**: Regular updates as system evolves and improvements are implemented
-
