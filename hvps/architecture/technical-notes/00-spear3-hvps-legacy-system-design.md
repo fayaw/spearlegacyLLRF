@@ -1,10 +1,10 @@
-# 00 — SPEAR3 HVPS System Design Report
+# 00 — SPEAR3 HVPS Legacy System Design Report
 
-> **Current System Design**: Comprehensive technical design report for the SPEAR3 High Voltage Power Supply system
+> **Legacy System Documentation**: Comprehensive technical design report for the current SPEAR3 High Voltage Power Supply system (pre-upgrade)
 
 ## Executive Summary
 
-This document provides a comprehensive design report for the current SPEAR3 High Voltage Power Supply (HVPS) system operating at SLAC National Accelerator Laboratory. The system delivers −77 kV DC at 22 A (1.7 MW nominal) to power the SPEAR3 storage ring klystrons. Based on the proven PEP-II design architecture from 1997, the current system has been adapted for SPEAR3 operational requirements while maintaining the innovative star point controller topology and multi-layer arc protection system.
+This document provides a comprehensive design report for the current SPEAR3 High Voltage Power Supply (HVPS) legacy system operating at SLAC National Accelerator Laboratory. The system delivers −77 kV DC at 22 A (1.7 MW nominal) to power the SPEAR3 storage ring klystrons. Based on the proven PEP-II design architecture from 1997, this legacy system has been adapted for SPEAR3 operational requirements while maintaining the innovative star point controller topology and multi-layer arc protection system. This documentation serves as the baseline reference for the current system prior to planned LLRF upgrade integration.
 
 **Key System Characteristics:**
 - **Power Rating**: 1.7 MW nominal, 2.5 MW maximum capability
@@ -98,12 +98,12 @@ Substation 507, Breaker 160
                                                           │
     ┌─────────────────────────────────────────────────────┘
     │
-    │  B118 Waveform Buffer System Signals (4 channels):
+    │  B118 HVPS Monitoring Signals (4 channels):
     │
-    ├─── Signal 1: Primary AC Current (from T1/T2 primary)
-    ├─── Signal 2: DC Output Voltage (from voltage divider)
-    ├─── Signal 3: DC Output Current (from Danfysik DC-CT)
-    └─── Signal 4: Crowbar Trigger Status (from fiber-optic system)
+    ├─── Signal 1: HVPS Output Voltage (DC voltage monitoring)
+    ├─── Signal 2: HVPS Output Current (DC current monitoring)
+    ├─── Signal 3: Inductor 2 Voltage (T2 firing circuit timing)
+    └─── Signal 4: Transformer 1 Phase Current (T1 firing circuit health)
          │
          ▼
     ┌─────────────────┐
@@ -373,18 +373,18 @@ The Building 118 control room houses an oscilloscope and waveform buffer system 
 
 | **Channel** | **Signal Source** | **Signal Type** | **Purpose** | **Specifications** |
 |-------------|------------------|-----------------|-------------|-------------------|
-| **Channel 1** | T1/T2 Primary | AC Current | Primary power monitoring | AC waveform, 60 Hz, proportional to load |
-| **Channel 2** | Voltage Divider | DC Output Voltage | High voltage monitoring | DC level, −77 kV nominal, 1000:1 scaling |
-| **Channel 3** | Danfysik DC-CT | DC Output Current | Load current monitoring | DC level, 22 A nominal, ±10V output |
-| **Channel 4** | Fiber-Optic System | Crowbar Trigger Status | Protection system status | Digital/analog, crowbar activation events |
+| **Channel 1** | HVPS output | DC Voltage | Primary power monitoring | 0 to −90 kV DC, voltage divider (1000:1 ratio) |
+| **Channel 2** | HVPS output | DC Current | Load current monitoring | 0 to 30 A DC nominal (22 A typical), Danfysik DC-CT sensor with ±10V output |
+| **Channel 3** | Inductor 2 (T2) | Sawtooth voltage | T2 firing circuit timing diagnosis | Sawtooth pattern indicates thyristor firing |
+| **Channel 4** | Transformer 1 | AC Phase Current | T1 firing circuit health | AC waveform with thyristor commutation spikes |
 
 **System Capabilities:**
-- **Real-time Monitoring**: Continuous acquisition of all 4 channels
-- **Event Recording**: Triggered recording during system events (arcs, faults)
-- **Waveform Analysis**: Post-event analysis and system diagnostics
-- **Integration**: Designed for upgraded control system integration
-- **Data Storage**: Historical waveform data for trend analysis
-- **Remote Access**: Network connectivity for remote monitoring
+- **Real-time Monitoring**: Continuous 100 ms rolling buffer of all 4 channels
+- **Event Recording**: Automatic capture triggered on voltage loss or fault conditions
+- **Waveform Analysis**: Post-event detailed analysis of causal events leading to faults
+- **Integration**: Designed for upgraded control system and LLRF integration
+- **Data Storage**: Historical waveform data for trend analysis and component degradation detection
+- **Remote Access**: Network connectivity for remote monitoring and archive
 
 **Applications:**
 - **Arc Event Analysis**: Detailed waveform capture during klystron arcs
