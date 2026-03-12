@@ -1,6 +1,7 @@
 # PEP-II / SPEAR3 Klystron Filament Heater — Comprehensive Technical Notes
 
 **Source Drawing**: SD-349-311-20, Rev E2 (`sd3403110002.pdf`)  
+**Alternate Reference**: SD-340-311-00 (appears in some drawing references)  
 **Title**: PEP2 RF KLY FILAMENT SCHEMATIC  
 **Original Designer**: P. Corredoura, Stanford Linear Accelerator Center  
 **Organization**: Stanford University / U.S. Department of Energy  
@@ -44,17 +45,54 @@ The SPEAR3 RF station provides 476 MHz RF power to the storage ring via a single
 
 **System Hierarchy**:
 ```
-SPEAR3 RF Station
-├── LLRF Controller (legacy VXI / upgrade: LLRF9 FPGA)
-├── High Voltage Power Supply (HVPS) — up to ~90 kV
-├── Klystron Machine Protection System (Kly MPS)
-├── Drive Amplifier — ~50 W at 476 MHz
-├── Cavity Tuner Controllers (4 cavities)
-├── Waveguide Distribution Network
-├── Arc Detection System
-├── Interface Chassis (upgrade)
-├── Waveform Buffer System (upgrade)
-└── **Klystron Cathode Heater** ← this document
+                           SPEAR3 RF STATION ARCHITECTURE
+                              (476 MHz, ~1 MW Output)
+
+                    ┌─────────────────────────────────────────┐
+                    │         SPEAR3 Storage Ring             │
+                    │      (4 Single-Cell Cavities)          │
+                    └─────────────────┬───────────────────────┘
+                                      │ 476 MHz RF Power
+                                      │
+    ┌─────────────────────────────────┼─────────────────────────────────┐
+    │                    RF STATION (Building B132)                     │
+    │                                 │                                 │
+    │  ┌─────────────────┐    ┌──────▼──────┐    ┌─────────────────┐   │
+    │  │ LLRF Controller │    │ Klystron    │    │ Waveguide       │   │
+    │  │ (VXI Legacy)    │───►│ ~1 MW       │───►│ Distribution    │   │
+    │  │ (LLRF9 Upgrade) │    │ 476 MHz     │    │ Network         │   │
+    │  └─────────────────┘    └─────────────┘    └─────────────────┘   │
+    │           │                      ▲                               │
+    │           │                      │                               │
+    │           ▼                      │                               │
+    │  ┌─────────────────┐    ┌──────────────┐                        │
+    │  │ Drive Amplifier │    │ HVPS         │                        │
+    │  │ ~50 W           │    │ up to 90 kV  │                        │
+    │  │ 476 MHz         │    │ (B118)       │                        │
+    │  └─────────────────┘    └──────────────┘                        │
+    │           │                      ▲                               │
+    │           │              ┌───────┴───────┐                       │
+    │           │              │               │                       │
+    │           ▼              ▼               ▼                       │
+    │  ┌─────────────────┐  ┌─────────────┐ ┌─────────────────┐       │
+    │  │ Interface       │  │ Kly MPS     │ │ **CATHODE       │       │
+    │  │ Chassis         │  │ (Machine    │ │ HEATER**        │◄──────┤
+    │  │ (Upgrade)       │  │ Protection) │ │ (This Document) │       │
+    │  └─────────────────┘  └─────────────┘ └─────────────────┘       │
+    │           │                      │               │               │
+    │           ▼                      ▼               ▼               │
+    │  ┌─────────────────┐    ┌─────────────────┐ ┌─────────────────┐ │
+    │  │ Waveform Buffer │    │ Arc Detection   │ │ Cavity Tuner    │ │
+    │  │ System          │    │ System          │ │ Controllers     │ │
+    │  │ (Upgrade)       │    │ (Optical)       │ │ (4 Cavities)    │ │
+    │  └─────────────────┘    └─────────────────┘ └─────────────────┘ │
+    └─────────────────────────────────────────────────────────────────┘
+
+                              CRITICAL DEPENDENCIES
+    
+    Startup Sequence:  Heater → HVPS → RF Drive → Klystron → Cavities
+    Shutdown Sequence: RF Off → HVPS Off → Heater Cooldown
+    Protection Chain:  Any fault → MPS → Emergency shutdown of all systems
 ```
 
 ### 2.2 Operational Sequence
@@ -82,20 +120,40 @@ The filament heater controller is physically located in the RF station equipment
 ### 3.1 Power Path — Block Diagram
 
 ```
-120 VAC ──► [TB1 Input] ──► [10A Fuse/Breaker] ──► [SS Relay] ──► [Variac V1]
-    Phase C                                           (FILAMENT_ON)   (1 KVA)
-                                                                        │
-                                                                        ▼
-                                                               [Toroidal Xfmr T1]
-                                                                  10:1 ratio
-                                                                  3-turn primary
-                                                                        │
-                                                                        ▼
-                                                              Filament Output
-                                                              ~4.84 V RMS nom.
-                                                              ~14.0 V RMS max.
-                                                              to Klystron Cathode
+                    SPEAR3 KLYSTRON FILAMENT HEATER POWER PATH
+                              (SD-349-311-20 Rev E2)
+
+Facility Power                                                    Klystron Cathode
+     │                                                                    │
+     ▼                                                                    ▼
+┌─────────────┐    ┌──────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│ 120 VAC     │    │ 10A Fuse/   │    │ SS Relay    │    │ Variac V1   │    │ Toroidal    │
+│ Phase C     │───►│ Breaker      │───►│ (FILAMENT_  │───►│ 1.00 KVA    │───►│ Xfmr T1     │
+│ (Hoffman    │    │ (TB1)        │    │ ON control) │    │ 0-140 VAC   │    │ 10:1 ratio  │
+│ Box B118)   │    │              │    │              │    │ Motor Drive │    │ 3-turn pri  │
+└─────────────┘    └──────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+                                                                  │                    │
+                                                                  ▼                    ▼
+                                                          ┌─────────────┐    ┌─────────────┐
+                                                          │ Motor M1    │    │ Filament    │
+                                                          │ UP/DOWN     │    │ Output      │
+                                                          │ Limit SW    │    │ ~4.84 V RMS │
+                                                          │ (A/B PLC)   │    │ ~20 A       │
+                                                          └─────────────┘    │ to Cathode  │
+                                                                             └─────────────┘
+                                                                                    │
+                                                                                    ▼
+                                                                             ┌─────────────┐
+                                                                             │ Current     │
+                                                                             │ Monitoring  │
+                                                                             │ (Texmate CT)│
+                                                                             └─────────────┘
 ```
+
+**Signal Flow Summary**:
+- **AC Power**: 120 VAC Phase C → 10A Protection → SS Relay → Variac → Transformer → Cathode
+- **Control**: A/B PLC → Local Panel (Fiber) → J1 Connector → FILAMENT_ON, MOTOR-UP
+- **Monitoring**: Voltage/Current Sensors → A/B PLC → EPICS/VXI System
 
 ### 3.2 AC Input Section
 
@@ -325,13 +383,45 @@ The TB2 terminal block provides the power output and monitoring connections:
 
 The filament heater interfaces with the Allen-Bradley (A/B) PLC system that controls the overall RF station:
 
-**Signal Flow**:
+**Complete Control Interface Architecture**:
 ```
-A/B PLC (in Hoffman Box, B118)
-    ↕ (Fiber Optic Link — HFBR-series transceivers)
-Local Panel (SD-340-311-01)
-    ↕ (Hardwired — J1 connector)
-Filament Heater Chassis (SD-349-311-20)
+                    SPEAR3 FILAMENT HEATER CONTROL INTERFACE
+                              (Multi-Level Isolation)
+
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                            BUILDING B118 (HVPS Area)                                │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐                 │
+│  │ VXI/LLRF        │    │ Allen-Bradley   │    │ Hoffman Box     │                 │
+│  │ Controller      │───►│ PLC System      │───►│ 120 VAC         │                 │
+│  │ (Legacy)        │    │ Digital I/O     │    │ Distribution    │                 │
+│  │                 │    │ Analog I/O      │    │                 │                 │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘                 │
+│                                  │                                                  │
+└──────────────────────────────────┼──────────────────────────────────────────────────┘
+                                   │ (Fiber Optic Link)
+                                   │ HFBR-2414T/2416T Transceivers
+                                   │ Complete Galvanic Isolation
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                           BUILDING B132 (RF Station)                                │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐                 │
+│  │ Local Panel     │    │ Filament Heater │    │ Klystron        │                 │
+│  │ SD-340-311-01   │───►│ Chassis         │───►│ Cathode         │                 │
+│  │ Fiber→24V Logic │    │ SD-349-311-20   │    │ (~90 kV HV)     │                 │
+│  │ Signal Conditioning │ │ J1 Connector    │    │                 │                 │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘                 │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+                              J1 CONNECTOR PINOUT
+                         (Filament Heater ↔ Local Panel)
+
+    Digital Commands (FROM A/B PLC):                Analog Monitoring (TO A/B PLC):
+    ┌─────────────────────────────┐                ┌─────────────────────────────┐
+    │ FILAMENT_ON                 │                │ V_MON+ (Voltage Monitor)    │
+    │ FILAMENT_ON_RETURN          │                │ V_MON- (Voltage Return)     │
+    │ MOTOR-UP                    │                │ A_MON+ (Current Monitor)    │
+    │ MOTOR-UP_RETURN             │                │ A_MON- (Current Return)     │
+    └─────────────────────────────┘                └─────────────────────────────┘
 ```
 
 **Digital Outputs (PLC → Heater)**:
@@ -616,6 +706,9 @@ Key Components (from schematic):
 Expected Values (annotated on drawing):
   Secondary voltage: 4.84 V RMS (at terminal block 35)
   Maximum capacity: 14.0 V RMS, 1.00 KVA
+  
+Note: Enhanced OCR analysis confirms "140 RMS" on drawing refers to 
+maximum variac output of 140 VAC, which becomes 14.0 V RMS at secondary.
 
 Control I/O (J1):
   FROM A/B DIGITAL OUT CONTROL → FILAMENT_ON

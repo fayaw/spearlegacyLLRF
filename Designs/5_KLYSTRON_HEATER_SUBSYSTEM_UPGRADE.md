@@ -28,19 +28,66 @@ This technical note documents the design and implementation requirements for upg
 
 The current klystron heater control system is inherited from the PEP-II era and consists of:
 
-**System Architecture**:
-- **Control Method**: Motor-driven variac for voltage adjustment
-- **Power Supply**: Kepko 5V/20A (PS-2) in Hoffman box
-- **Control Interface**: Manual or slow automatic adjustment
-- **Integration**: Limited EPICS monitoring capabilities
+**Legacy vs. Upgrade System Comparison**:
+```
+                    LEGACY SYSTEM (PEP-II Era)          vs.          UPGRADE SYSTEM (SCR-Based)
+                         SD-349-311-20                                    Modern Replacement
+
+┌─────────────────────────────────────────────┐    ┌─────────────────────────────────────────────┐
+│              CONTROL METHOD                 │    │              CONTROL METHOD                 │
+│  ┌─────────────────┐  ┌─────────────────┐   │    │  ┌─────────────────┐  ┌─────────────────┐   │
+│  │ Allen-Bradley   │  │ Motor-Driven    │   │    │  │ EPICS IOC       │  │ SCR Zero-       │   │
+│  │ PLC             │─►│ Variac          │   │    │  │ Python          │─►│ Crossing        │   │
+│  │ (Limited I/O)   │  │ (Mechanical)    │   │    │  │ Coordinator     │  │ Control         │   │
+│  └─────────────────┘  └─────────────────┘   │    │  └─────────────────┘  └─────────────────┘   │
+│                                             │    │                                             │
+│              POWER STAGE                    │    │              POWER STAGE                    │
+│  ┌─────────────────┐  ┌─────────────────┐   │    │  ┌─────────────────┐  ┌─────────────────┐   │
+│  │ 120 VAC         │  │ SS Relay        │   │    │  │ 120 VAC         │  │ SCR Power       │   │
+│  │ Phase C         │─►│ ON/OFF Only     │   │    │  │ Phase C         │─►│ Stage           │   │
+│  │                 │  │                 │   │    │  │                 │  │ (Proportional)  │   │
+│  └─────────────────┘  └─────────────────┘   │    │  └─────────────────┘  └─────────────────┘   │
+│           │                    │            │    │           │                    │            │
+│           ▼                    ▼            │    │           ▼                    ▼            │
+│  ┌─────────────────┐  ┌─────────────────┐   │    │  ┌─────────────────┐  ┌─────────────────┐   │
+│  │ Variac V1       │  │ Toroidal        │   │    │  │ LC Low-Pass     │  │ Isolation       │   │
+│  │ 1 KVA           │─►│ Transformer     │   │    │  │ Filter          │─►│ Transformer     │   │
+│  │ 0-140 VAC       │  │ 10:1 Ratio      │   │    │  │ (120-180 Hz)    │  │ (Retained)      │   │
+│  └─────────────────┘  └─────────────────┘   │    │  └─────────────────┘  └─────────────────┘   │
+│           │                    │            │    │           │                    │            │
+│           ▼                    ▼            │    │           ▼                    ▼            │
+│  ┌─────────────────┐  ┌─────────────────┐   │    │  ┌─────────────────┐  ┌─────────────────┐   │
+│  │ Motor M1        │  │ ~4.84 V RMS     │   │    │  │ True RMS        │  │ 5V/20A Output  │   │
+│  │ UP/DOWN         │  │ ~20 A           │   │    │  │ Monitoring      │  │ Precise         │   │
+│  │ Limit Switches  │  │ to Cathode      │   │    │  │ (AD637)         │  │ Regulation      │   │
+│  └─────────────────┘  └─────────────────┘   │    │  └─────────────────┘  └─────────────────┘   │
+│                                             │    │                                             │
+│              MONITORING                     │    │              MONITORING                     │
+│  ┌─────────────────┐  ┌─────────────────┐   │    │  ┌─────────────────┐  ┌─────────────────┐   │
+│  │ Texmate CT      │  │ Front Panel     │   │    │  │ Hall Effect     │  │ Digital         │   │
+│  │ Analog Meters   │  │ LEDs DS1/DS2    │   │    │  │ Sensors         │  │ Display         │   │
+│  │ Hours Counter   │  │ Manual Switches │   │    │  │ 16-bit ADC      │  │ EPICS PVs       │   │
+│  └─────────────────┘  └─────────────────┘   │    │  └─────────────────┘  └─────────────────┘   │
+└─────────────────────────────────────────────┘    └─────────────────────────────────────────────┘
+
+        PERFORMANCE COMPARISON
+        
+Response Time:     Seconds to Minutes          vs.         <100 milliseconds
+Regulation:        ±1-2% (mechanical)          vs.         ±0.1% (digital)
+Reliability:       Mechanical wear             vs.         Solid-state
+Integration:       Limited EPICS               vs.         Full EPICS IOC
+Maintenance:       Regular service required    vs.         Minimal maintenance
+Harmonics:         Clean (variac)              vs.         Filtered (LC filter)
+Safety:            Basic protection            vs.         Comprehensive interlocks
+```
 
 **Current Specifications** (from system documentation):
 ```
 Input Power: 120VAC, Phase C (from Hoffman box wiring)
-Output: 5V/20A maximum (Kepko PS-2)
+Output: 5V/20A maximum (from legacy Kepko PS-2 or variac system)
 Power Rating: ~100W typical operation
-Isolation: Transformer isolated for HV safety
-Control: Manual variac adjustment via motor drive
+Isolation: Transformer isolated for HV safety (up to 90 kV)
+Control: Manual variac adjustment via motor drive (A/B PLC interface)
 ```
 
 ### 1.2 System Limitations
@@ -108,21 +155,64 @@ Response Time: <100ms (vs. seconds for variac)
 
 ### 3.1 Control Architecture
 
-**System Block Diagram**:
+**Complete SCR-Based System Architecture**:
 ```
-EPICS/Python Coordinator
-    ↓ (Ethernet/EPICS PVs)
-SCR Heater Controller
-    ↓ (Gate drive signals)
-SCR Power Stage
-    ↓ (Controlled AC power)
-Low-Pass Filter (120-180 Hz)
-    ↓ (Filtered power)
-Isolation Transformer
-    ↓ (5V/20A to klystron)
-Klystron Cathode Heater
-    ↑ (Feedback signals)
-RMS Monitoring System
+                        SPEAR3 KLYSTRON HEATER UPGRADE ARCHITECTURE
+                              (SCR-Based Replacement Design)
+
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                              CONTROL LAYER                                          │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐                 │
+│  │ EPICS IOC       │    │ Python          │    │ Operator        │                 │
+│  │ Process         │◄──►│ Coordinator     │◄──►│ Interface       │                 │
+│  │ Variables       │    │ Automated       │    │ (CSS/EDM)       │                 │
+│  │ (PV Database)   │    │ Sequences       │    │                 │                 │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘                 │
+│           │                       │                       │                        │
+└───────────┼───────────────────────┼───────────────────────┼────────────────────────┘
+            │ (Ethernet/EPICS)      │                       │
+            ▼                       ▼                       ▼
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                             POWER CONTROL LAYER                                     │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐                 │
+│  │ SCR Controller  │    │ Gate Drive      │    │ Zero-Crossing   │                 │
+│  │ Microcontroller │───►│ Optoisolators   │───►│ Detection       │                 │
+│  │ (ARM Cortex-M4) │    │ (MOC3021)       │    │ Logic           │                 │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘                 │
+│           │                       │                       │                        │
+│           ▼                       ▼                       ▼                        │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐                 │
+│  │ Safety          │    │ SCR Power       │    │ Current/Voltage │                 │
+│  │ Interlocks      │    │ Stage           │    │ Monitoring      │                 │
+│  │ (Hardware)      │    │ (BTA20-600B)    │    │ (Hall Effect)   │                 │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘                 │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+                                   │
+                                   ▼ (Controlled AC Power)
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                              POWER CONDITIONING                                     │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐                 │
+│  │ 120 VAC         │    │ LC Low-Pass     │    │ Isolation       │                 │
+│  │ Input           │───►│ Filter          │───►│ Transformer     │                 │
+│  │ (Phase C)       │    │ (120-180 Hz     │    │ (Retained from  │                 │
+│  │                 │    │ Cutoff)         │    │ Legacy Design)  │                 │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘                 │
+│                                   │                       │                        │
+│                                   ▼                       ▼                        │
+│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐                 │
+│  │ Harmonic        │    │ True RMS        │    │ 5V/20A Output  │                 │
+│  │ Analysis        │    │ Monitoring      │    │ to Klystron     │                 │
+│  │ (Spectrum)      │    │ (AD637)         │    │ Cathode         │                 │
+│  └─────────────────┘    └─────────────────┘    └─────────────────┘                 │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+                              UPGRADE ADVANTAGES
+    
+    Response Time:    <100ms (vs. seconds for variac)
+    Regulation:       ±0.1% (vs. ±1-2% for variac)  
+    Reliability:      Solid-state (vs. mechanical wear)
+    Integration:      Full EPICS (vs. limited monitoring)
+    Maintenance:      Minimal (vs. regular mechanical service)
 ```
 
 ### 3.2 SCR Controller Specifications
@@ -198,16 +288,66 @@ Insertion Loss: <0.5 dB at 60 Hz
 
 **Recommended Filter Topology - LC Low-Pass (2nd Order)**:
 ```
-L1 = 10 mH (air core, 25A rating)
-C1 = 100 μF (250V, low ESR)
-Cutoff frequency: fc = 1/(2π√LC) ≈ 159 Hz
-```
+                        SCR HARMONIC FILTER DESIGN
+                           (120-180 Hz Cutoff)
 
-**Alternative Multi-Stage Filter**:
+    SCR Output                                                    To Isolation
+    (Harmonics)                                                   Transformer
+         │                                                             │
+         ▼                                                             ▼
+    ┌─────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+    │ SCR     │    │ L1 = 10 mH  │    │ C1 = 100 μF │    │ Clean AC    │
+    │ Power   │───►│ Air Core    │───►│ 250V Rating │───►│ to Klystron │
+    │ Stage   │    │ 25A Rating  │    │ Low ESR     │    │ Heater      │
+    └─────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+                           │                   │
+                           └─────────┬─────────┘
+                                     │
+                                     ▼
+                              fc = 1/(2π√LC) ≈ 159 Hz
+
+                        FREQUENCY RESPONSE ANALYSIS
+    
+    Attenuation vs. Frequency:
+    ┌─────────────────────────────────────────────────────────────┐
+    │  0 dB ┤                                                     │
+    │       │ ████████████                                        │
+    │ -10 dB┤             ████                                    │
+    │       │                 ████                                │
+    │ -20 dB┤                     ████ ← 120 Hz (>20 dB)         │
+    │       │                         ████                        │
+    │ -30 dB┤                             ████                    │
+    │       │                                 ████                │
+    │ -40 dB┤                                     ████ ← 240 Hz   │
+    │       │                                         ████        │
+    │ -50 dB┤                                             ████    │
+    │       └┬────┬────┬────┬────┬────┬────┬────┬────┬────┬───    │
+    │        60  120  180  240  300  360  420  480  540  600 Hz  │
+    └─────────────────────────────────────────────────────────────┘
+
+**Alternative Multi-Stage Filter** (Higher Performance):
 ```
-Stage 1: L1 = 5 mH, C1 = 200 μF (fc ≈ 159 Hz)
-Stage 2: L2 = 2 mH, C2 = 50 μF (fc ≈ 225 Hz)
-Overall response: Sharper rolloff, >60 dB attenuation at 240 Hz
+                        DUAL-STAGE LC FILTER DESIGN
+                         (Enhanced Harmonic Rejection)
+
+    SCR Output                                                    To Isolation
+    (Harmonics)                                                   Transformer
+         │                                                             │
+         ▼                                                             ▼
+    ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────────┐
+    │ SCR     │  │L1=5 mH  │  │C1=200μF │  │L2=2 mH  │  │ Ultra-Clean │
+    │ Power   │─►│Air Core │─►│250V     │─►│Air Core │─►│ AC Output   │
+    │ Stage   │  │25A      │  │Low ESR  │  │25A      │  │ <1% THD     │
+    └─────────┘  └─────────┘  └─────────┘  └─────────┘  └─────────────┘
+                      │           │           │
+                      └─────┬─────┘           │
+                            │                 │
+                     Stage 1: fc ≈ 159 Hz     │
+                                              │
+                                       Stage 2: fc ≈ 225 Hz
+                                       
+    Overall Response: >60 dB attenuation at 240 Hz
+    Sharper rolloff, better harmonic suppression
 ```
 
 **Component Specifications**:
@@ -673,4 +813,3 @@ This upgrade represents a critical modernization of the SPEAR3 RF system infrast
 - **Next Review**: June 2026
 - **Distribution**: LLRF Upgrade Team, SPEAR3 Operations, Engineering Management
 - **Classification**: Internal Technical Document
-
