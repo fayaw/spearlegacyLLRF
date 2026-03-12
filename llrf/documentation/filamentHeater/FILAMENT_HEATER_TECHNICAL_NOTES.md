@@ -24,16 +24,18 @@ The system was originally designed for the PEP-II B-Factory program at SLAC (cir
 - Remote control interface via Allen-Bradley (A/B) PLC digital/analog I/O
 - Front-panel indicators (DS1, DS2 green LEDs) and local metering
 
-**Nominal Operating Point**:
+**Power Supply Capabilities**:
 | Parameter | Value |
 |-----------|-------|
 | AC Input | 120 VAC, 60 Hz |
-| Variac Rating | 1.00 KVA |
+| Maximum Power Rating | ~1 kW (1000 W) |
+| Nominal Operating Power | ~500 W (actual sustained operation) |
+| Nominal Operating Voltage | 68 V (AC, pre-transformer) |
+| Nominal Operating Current | 7.3 A |
 | Transformer Ratio | 10:1 step-down |
-| Expected Secondary Voltage | ~4.84 V RMS |
-| Maximum Secondary Voltage | ~14.0 V RMS |
-| Maximum Secondary Current | ~71 A (at 1 KVA, 14 V) |
-| Typical Operating Current | ~20 A |
+| Secondary Output (Post-Transformer) | ~6.8 V RMS at 7.3 A |
+| Maximum Rating | 14.0 V RMS @ 71 A |
+| Thermal Headroom | 2:1 (500W nom / 1000W max) |
 
 ---
 
@@ -76,7 +78,7 @@ The SPEAR3 RF station provides 476 MHz RF power to the storage ring via a single
     │           ▼              ▼               ▼                       │
     │  ┌─────────────────┐  ┌─────────────┐ ┌─────────────────┐       │
     │  │ Interface       │  │ Kly MPS     │ │ **CATHODE       │       │
-    │  │ Chassis         │  │ (Machine    │ │ HEATER**        │◄──────┤
+    │  │ Chassis         │  │ (Machine    │ │ HEATER**        │       │
     │  │ (Upgrade)       │  │ Protection) │ │ (This Document) │       │
     │  └─────────────────┘  └─────────────┘ └─────────────────┘       │
     │           │                      │               │               │
@@ -91,7 +93,8 @@ The SPEAR3 RF station provides 476 MHz RF power to the storage ring via a single
                               CRITICAL DEPENDENCIES
     
     Startup Sequence:  Heater → HVPS → RF Drive → Klystron → Cavities
-    Shutdown Sequence: RF Off → HVPS Off → Heater Cooldown
+    Normal Shutdown: RF Off → HVPS Off → Heater REMAINS ON (for quick recovery)
+    Maintenance Shutdown: RF Off → HVPS Off → Heater Cooldown (extended outages only)
     Protection Chain:  Any fault → MPS → Emergency shutdown of all systems
 ```
 
@@ -99,7 +102,7 @@ The SPEAR3 RF station provides 476 MHz RF power to the storage ring via a single
 
 The filament heater plays a critical role in the klystron startup/shutdown sequence:
 
-1. **Pre-Heat** (Cold Start): Filament heater energized; cathode temperature ramps to ~1000°C over 3–5 minutes
+1. **Pre-Heat** (Cold Start): Filament heater energized; cathode temperature ramps to ~1000°C over 30 minutes
 2. **Ready State**: Heater at nominal power; "FILAMENT ON" status reported to MPS
 3. **HVPS Enable**: Only permitted when heater status = READY (MPS interlock)
 4. **Normal Operation**: Heater maintains cathode temperature during RF operation
