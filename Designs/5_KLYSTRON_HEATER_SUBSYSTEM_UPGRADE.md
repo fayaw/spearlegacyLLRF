@@ -1,11 +1,11 @@
 # Klystron Heater Subsystem Upgrade Technical Note
 
-**Document ID**: SPEAR3-LLRF-TN-004  
-**Title**: SCR-Based Klystron Cathode Heater Control System Upgrade  
-**Author**: LLRF Upgrade Team  
-**Date**: March 2026  
-**Version**: 1.0  
-**Status**: Design Phase  
+**Document ID**: SPEAR3-LLRF-TN-004
+**Title**: SCR-Based Klystron Cathode Heater Control System Upgrade
+**Author**: LLRF Upgrade Team
+**Date**: March 2026
+**Version**: 1.0
+**Status**: Design Phase
 
 ---
 
@@ -15,7 +15,7 @@ This technical note documents the design and implementation requirements for upg
 
 **Key Upgrade Features**:
 - SCR-based heater power control with <100ms response time
-- Low-pass filter (120-180 Hz cutoff) for harmonic suppression  
+- Low-pass filter (120-180 Hz cutoff) for harmonic suppression
 - True RMS voltage and current monitoring
 - Full EPICS integration with automated control sequences
 - Enhanced safety features and fault protection
@@ -71,7 +71,7 @@ The current klystron heater control system is inherited from the PEP-II era and 
 └─────────────────────────────────────────────┘    └─────────────────────────────────────────────┘
 
         PERFORMANCE COMPARISON
-        
+
 Response Time:     Seconds to Minutes          vs.         <100 milliseconds
 Regulation:        ±1-2% (mechanical)          vs.         ±0.1% (digital)
 Reliability:       Mechanical wear             vs.         Solid-state
@@ -210,9 +210,9 @@ Response Time: <100ms (vs. seconds for variac)
 └─────────────────────────────────────────────────────────────────────────────────────┘
 
                               UPGRADE ADVANTAGES
-    
+
     Response Time:    <100ms (vs. seconds for variac)
-    Regulation:       ±0.1% (vs. ±1-2% for variac)  
+    Regulation:       ±0.1% (vs. ±1-2% for variac)
     Reliability:      Solid-state (vs. mechanical wear)
     Integration:      Full EPICS (vs. limited monitoring)
     Maintenance:      Minimal (vs. regular mechanical service)
@@ -239,7 +239,7 @@ Efficiency: >95% (solid-state switching)
 
 **Zero Crossing Control Characteristics**:
 - 25% output: 1 cycle ON, 3 cycles OFF
-- 50% output: 1 cycle ON, 1 cycle OFF  
+- 50% output: 1 cycle ON, 1 cycle OFF
 - 75% output: 3 cycles ON, 1 cycle OFF
 - 100% output: All cycles ON
 - Resolution: ~1.6% (1/60 cycle control)
@@ -301,7 +301,7 @@ Insertion Loss: <0.5 dB at 60 Hz
     ┌─────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
     │ SCR     │    │ L1 = 10 mH  │    │ C1 = 100 μF │    │ Clean AC    │
     │ Power   │───►│ Air Core    │───►│ 250V Rating │───►│ to Klystron │
-    │ Stage   │    │ 25A Rating  │    │ Low ESR     │    │ Heater      │
+    │ Stage   │    │ 100A Rating  │    │ Low ESR     │    │ Heater      │
     └─────────┘    └─────────────┘    └─────────────┘    └─────────────┘
                            │                   │
                            └─────────┬─────────┘
@@ -310,7 +310,7 @@ Insertion Loss: <0.5 dB at 60 Hz
                               fc = 1/(2π√LC) ≈ 159 Hz
 
                         FREQUENCY RESPONSE ANALYSIS
-    
+
     Attenuation vs. Frequency:
     ┌─────────────────────────────────────────────────────────────┐
     │  0 dB ┤                                                     │
@@ -340,7 +340,7 @@ Insertion Loss: <0.5 dB at 60 Hz
     ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────────┐
     │ SCR     │  │L1=5 mH  │  │C1=200μF │  │L2=2 mH  │  │ Ultra-Clean │
     │ Power   │─►│Air Core │─►│250V     │─►│Air Core │─►│ AC Output   │
-    │ Stage   │  │25A      │  │Low ESR  │  │25A      │  │ <1% THD     │
+    │ Stage   │  │100A      │  │Low ESR  │  │100A      │  │ <1% THD     │
     └─────────┘  └─────────┘  └─────────┘  └─────────┘  └─────────────┘
                       │           │           │
                       └─────┬─────┘           │
@@ -348,7 +348,7 @@ Insertion Loss: <0.5 dB at 60 Hz
                      Stage 1: fc ≈ 159 Hz     │
                                               │
                                        Stage 2: fc ≈ 225 Hz
-                                       
+
     Overall Response: >60 dB attenuation at 240 Hz
     Sharper rolloff, better harmonic suppression
 ```
@@ -378,7 +378,7 @@ Insertion Loss: <0.5 dB at 60 Hz
 **Monitoring Specifications**:
 ```
 RMS Voltage: 0-10V range, ±0.1% accuracy
-RMS Current: 0-25A range, ±0.1% accuracy  
+RMS Current: 0-100A range, ±0.1% accuracy
 Power Calculation: V × I with <1% total error
 Update Rate: 10 Hz for EPICS integration
 Resolution: 16-bit ADC (0.0015% of full scale)
@@ -398,10 +398,10 @@ Isolation: Transformer coupled for HV safety
 **Current Measurement**:
 ```
 Sensor: Hall effect current transducer (LEM HAS 50-S)
-Range: ±25A, 1:1000 ratio
-Output: ±25mA proportional to input current
+Range: ±100A, 1:1000 ratio
+Output: ±100mA proportional to input current
 RMS Converter: AD637 with current-to-voltage conversion
-ADC: 16-bit, ±25mA range
+ADC: 16-bit, ±100mA range
 ```
 
 **Power Calculation**:
@@ -417,7 +417,7 @@ Update Rate: 10 Hz synchronized with EPICS
 **Process Variable Database**:
 ```
 SRF1:KLYS:HEATER:VOLT:RMS      # RMS voltage readback (V)
-SRF1:KLYS:HEATER:CURR:RMS      # RMS current readback (A)  
+SRF1:KLYS:HEATER:CURR:RMS      # RMS current readback (A)
 SRF1:KLYS:HEATER:PWR:RMS       # Calculated power (W)
 SRF1:KLYS:HEATER:CTRL:SP       # Power setpoint (0-100%)
 SRF1:KLYS:HEATER:CTRL:RB       # Power readback (%)
@@ -517,11 +517,11 @@ def startup_sequence():
     # Phase 1: Enable system
     set_mode("STANDBY")
     wait_for_stable(30)  # 30 second stabilization
-    
+
     # Phase 2: Begin warmup
     set_mode("WARMUP")
     ramp_power(125, 500, rate=75)  # 125W to 500W at 75W/min
-    
+
     # Phase 3: Verify operation
     if heater_stable() and temp_in_range():
         set_mode("OPERATING")
@@ -537,11 +537,11 @@ def shutdown_sequence():
     # Phase 1: Begin cooldown
     set_mode("COOLDOWN")
     ramp_power(500, 125, rate=125)  # 500W to 125W at 125W/min
-    
+
     # Phase 2: Standby period
     set_mode("STANDBY")
     wait_for_stable(60)  # 1 minute cooldown
-    
+
     # Phase 3: Complete shutdown
     set_mode("OFF")
     log_event("Heater shutdown complete")
@@ -554,11 +554,11 @@ def emergency_shutdown():
     disable_scr_gates()
     set_power_setpoint(0)
     set_mode("OFF")
-    
+
     # Log emergency event
     log_fault("Emergency shutdown activated")
     send_alarm("HEATER_EMERGENCY_SHUTDOWN")
-    
+
     # Require manual reset
     require_manual_reset()
 ```
@@ -611,7 +611,7 @@ LLRF9 System Coordinator (Python/EPICS)
 **Electrical Performance**:
 ```
 Voltage Regulation: ±0.1% (improvement from ±0.3%)
-Current Regulation: ±0.1% 
+Current Regulation: ±0.1%
 Power Stability: ±0.2% over 8 hours
 Response Time: <100ms (vs. seconds for variac)
 Efficiency: >95% (SCR switching + filter losses)
@@ -818,6 +818,12 @@ This upgrade represents a critical modernization of the SPEAR3 RF system infrast
   - Added component specifications: 1.00 KVA variac, 10:1 transformer
   - Corrected power rating: 500W actual (vs. 100W theoretical)
 - **Revision 1.2**: Comprehensive second-round review - corrected ALL remaining inconsistencies
+- **Revision 1.3**: Fixed formatting issues and remaining current sensor specifications
+  - Removed all trailing spaces throughout the document (major formatting cleanup)
+  - Updated RMS monitoring current range: 0-25A → 0-100A range for 73A operation
+  - Corrected current sensor specifications: ±25A → ±100A input range
+  - Updated sensor output: ±25mA → ±100mA proportional output
+  - Fixed ASCII table current ratings: 25A → 100A in component specifications
   - Fixed Heater Requirements section: 6.8V actual operational, 73A actual, 500W actual
   - Updated Industry Standard Comparison table with actual SPEAR3 values
   - Corrected SCR component specifications: 130A rating, BTA100-600B/VS-100TTS12
@@ -829,7 +835,7 @@ This upgrade represents a critical modernization of the SPEAR3 RF system infrast
 
 **Document Control**:
 - **Created**: March 2026
-- **Last Modified**: March 2026  
+- **Last Modified**: March 2026
 - **Next Review**: June 2026
 - **Distribution**: LLRF Upgrade Team, SPEAR3 Operations, Engineering Management
 - **Classification**: Internal Technical Document
