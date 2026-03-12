@@ -45,7 +45,7 @@ The system was originally designed for the PEP-II B-Factory program at SLAC (cir
 
 The SPEAR3 RF station provides 476 MHz RF power to the storage ring via a single high-power klystron operating at approximately 1 MW. The klystron cathode heater is an essential auxiliary system that must be energized and at operating temperature **before** the High Voltage Power Supply (HVPS) can be enabled.
 
-**System Hierarchy**:
+**System Hierarchy (CURRENT LEGACY SYSTEM)**:
 ```
                            SPEAR3 RF STATION ARCHITECTURE
                               (476 MHz, ~1 MW Output)
@@ -62,7 +62,7 @@ The SPEAR3 RF station provides 476 MHz RF power to the storage ring via a single
     │  ┌─────────────────┐    ┌──────▼──────┐    ┌─────────────────┐   │
     │  │ LLRF Controller │    │ Klystron    │    │ Waveguide       │   │
     │  │ (VXI Legacy)    │───►│ ~1 MW       │───►│ Distribution    │   │
-    │  │ (Legacy VXI) │    │ 476 MHz     │    │ Network         │   │
+    │  │                 │    │ 476 MHz     │    │ Network         │   │
     │  └─────────────────┘    └─────────────┘    └─────────────────┘   │
     │           │                      ▲                               │
     │           │                      │                               │
@@ -77,16 +77,16 @@ The SPEAR3 RF station provides 476 MHz RF power to the storage ring via a single
     │           │              │               │                       │
     │           ▼              ▼               ▼                       │
     │  ┌─────────────────┐  ┌─────────────┐ ┌─────────────────┐       │
-    │  │ Interface       │  │ Kly MPS     │ │ **CATHODE       │       │
-    │  │ Chassis         │  │ (Machine    │ │ HEATER**        │       │
-    │  │ (Upgrade)       │  │ Protection) │ │ (This Document) │       │
+    │  │ Allen-Bradley   │  │ Kly MPS     │ │ **CATHODE       │       │
+    │  │ PLC System      │  │ (Machine    │ │ HEATER**        │       │
+    │  │ (B118)          │  │ Protection) │ │ (This Document) │       │
     │  └─────────────────┘  └─────────────┘ └─────────────────┘       │
-    │           │                      │               │               │
-    │           ▼                      ▼               ▼               │
+    │           │                      │                               │
+    │           ▼                      ▼                               │
     │  ┌─────────────────┐    ┌─────────────────┐ ┌─────────────────┐ │
-    │  │ Waveform Buffer │    │ Arc Detection   │ │ Cavity Tuner    │ │
-    │  │ System          │    │ System          │ │ Controllers     │ │
-    │  │ (Upgrade)       │    │ (Optical)       │ │ (4 Cavities)    │ │
+    │  │ Fiber Optic     │    │ Arc Detection   │ │ Cavity Tuner    │ │
+    │  │ Interface       │    │ System          │ │ Controllers     │ │
+    │  │ (B118 ↔ B132)   │    │ (Optical)       │ │ (4 Cavities)    │ │
     │  └─────────────────┘    └─────────────────┘ └─────────────────┘ │
     └─────────────────────────────────────────────────────────────────┘
 
@@ -95,7 +95,7 @@ The SPEAR3 RF station provides 476 MHz RF power to the storage ring via a single
     Startup Sequence:  Heater → HVPS → RF Drive → Klystron → Cavities
     Normal Shutdown: RF Off → HVPS Off → Heater REMAINS ON (for quick recovery)
     Maintenance Shutdown: RF Off → HVPS Off → Heater Cooldown (extended outages only)
-    Protection Chain:  Any fault → MPS → Emergency shutdown of all systems
+    Protection Chain:  System Fault → MPS → Emergency shutdown (heater may trip independently)
 ```
 
 ### 2.2 Operational Sequence
