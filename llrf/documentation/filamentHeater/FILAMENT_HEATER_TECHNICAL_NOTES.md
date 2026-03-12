@@ -30,10 +30,10 @@ The system was originally designed for the PEP-II B-Factory program at SLAC (cir
 | AC Input | 120 VAC, 60 Hz |
 | Maximum Power Rating | ~1 kW (1000 W) |
 | Nominal Operating Power | ~500 W (actual sustained operation) |
-| Nominal Operating Voltage | 68 V (AC, pre-transformer) |
+| Nominal Operating Voltage | 68 V (AC, at transformer input) |
 | Nominal Operating Current | 7.3 A |
 | Transformer Ratio | 10:1 step-down |
-| Secondary Output (Post-Transformer) | ~6.8 V RMS at 7.3 A |
+| Secondary Output (Post-Transformer) | ~6.8 V RMS at 73 A |
 | Maximum Rating | 14.0 V RMS @ 71 A |
 | Thermal Headroom | 2:1 (500W nom / 1000W max) |
 
@@ -62,7 +62,7 @@ The SPEAR3 RF station provides 476 MHz RF power to the storage ring via a single
     │  ┌─────────────────┐    ┌──────▼──────┐    ┌─────────────────┐   │
     │  │ LLRF Controller │    │ Klystron    │    │ Waveguide       │   │
     │  │ (VXI Legacy)    │───►│ ~1 MW       │───►│ Distribution    │   │
-    │  │ (LLRF9 Upgrade) │    │ 476 MHz     │    │ Network         │   │
+    │  │ (Legacy VXI) │    │ 476 MHz     │    │ Network         │   │
     │  └─────────────────┘    └─────────────┘    └─────────────────┘   │
     │           │                      ▲                               │
     │           │                      │                               │
@@ -140,8 +140,8 @@ Facility Power                                                    Klystron Catho
                                                           ┌─────────────┐    ┌─────────────┐
                                                           │ Motor M1    │    │ Filament    │
                                                           │ UP/DOWN     │    │ Output      │
-                                                          │ Limit SW    │    │ ~4.84 V RMS │
-                                                          │ (A/B PLC)   │    │ ~20 A       │
+                                                          │ Limit SW    │    │ ~6.8 V RMS  │
+                                                          │ (A/B PLC)   │    │ ~73 A       │
                                                           └─────────────┘    │ to Cathode  │
                                                                              └─────────────┘
                                                                                     │
@@ -151,6 +151,22 @@ Facility Power                                                    Klystron Catho
                                                                              │ Monitoring  │
                                                                              │ (Texmate CT)│
                                                                              └─────────────┘
+
+MONITORING POINTS (per PDF schematic):
+┌─────────────┐                                          ┌─────────────┐
+│ [V] Voltage │◄─── Measured at transformer input ──────│ 68V @ 7.3A  │
+│ Monitor     │     (variac output)                      │ (nominal)   │
+│ (via J1)    │                                          │             │
+└─────────────┘                                          └─────────────┘
+                                                                │
+                                                                ▼
+                                                         ┌─────────────┐
+                                                         │ [A] Current │
+                                                         │ Monitor     │
+                                                         │ (Texmate CT)│
+                                                         │ ~73A sec    │
+                                                         │ (via J1)    │
+                                                         └─────────────┘
 ```
 
 **Signal Flow Summary**:
