@@ -57,8 +57,8 @@ The current klystron heater control system is inherited from the PEP-II era and 
 │           │                    │            │    │           │                    │            │
 │           ▼                    ▼            │    │           ▼                    ▼            │
 │  ┌─────────────────┐  ┌─────────────────┐   │    │  ┌─────────────────┐  ┌─────────────────┐   │
-│  │ Motor M1        │  │ ~4.84 V RMS     │   │    │  │ True RMS        │  │ 5V/20A Output  │   │
-│  │ UP/DOWN         │  │ ~20 A           │   │    │  │ Monitoring      │  │ Precise         │   │
+│  │ Motor M1        │  │ ~6.8 V RMS     │   │    │  │ True RMS        │  │ 6.8V/73A Output  │   │
+│  │ UP/DOWN         │  │ ~73 A           │   │    │  │ Monitoring      │  │ Precise         │   │
 │  │ Limit Switches  │  │ to Cathode      │   │    │  │ (AD637)         │  │ Regulation      │   │
 │  └─────────────────┘  └─────────────────┘   │    │  └─────────────────┘  └─────────────────┘   │
 │                                             │    │                                             │
@@ -81,13 +81,16 @@ Harmonics:         Clean (variac)              vs.         Filtered (LC filter)
 Safety:            Basic protection            vs.         Comprehensive interlocks
 ```
 
-**Current Specifications** (from system documentation):
+**Current Specifications** (from comprehensive system analysis - SD-349-311-20):
 ```
-Input Power: 120VAC, Phase C (from Hoffman box wiring)
-Output: 5V/20A maximum (from legacy Kepko PS-2 or variac system)
-Power Rating: ~100W typical operation
+Input Power: 120VAC, Phase C (from Hoffman Box B118)
+Output: ~6.8V RMS / ~73A actual operational (vs. 4.84V theoretical)
+Power Rating: ~500W actual operation (vs. ~100W theoretical)
 Isolation: Transformer isolated for HV safety (up to 90 kV)
-Control: Manual variac adjustment via motor drive (A/B PLC interface)
+Control: J1 connector → Fiber Optic → Allen-Bradley PLC → EPICS
+Variac: 1.00 KVA, 0-140 VAC motor-driven (V1)
+Transformer: 10:1 ratio, 3-turn primary toroidal (T1)
+Monitoring: Texmate CT, voltage divider, front panel meters
 ```
 
 ### 1.2 System Limitations
@@ -119,8 +122,8 @@ Control: Manual variac adjustment via motor drive (A/B PLC interface)
 **SPEAR3 Klystron Heater Requirements** (based on current system analysis):
 ```
 Heater Voltage: 5V nominal (0-6V range)
-Heater Current: 20A maximum
-Power Rating: 100W typical, 120W maximum
+Heater Current: 73A actual operational (20A theoretical)
+Power Rating: 500W actual operational (100W theoretical)
 Regulation: ±0.1% (improved from current ±0.3%)
 Isolation: Up to 90 kV (HVPS cathode voltage)
 Response Time: <100ms (vs. seconds for variac)
@@ -796,6 +799,10 @@ This upgrade represents a critical modernization of the SPEAR3 RF system infrast
 
 ## References
 
+9. SPEAR3 LLRF Team, "Comprehensive SPEAR3 Klystron Filament Heater System Technical Documentation," llrf/documentation/filamentHeater/FILAMENT_HEATER_TECHNICAL_NOTES.md, March 2026
+   - Complete schematic analysis of SD-349-311-20
+   - Operational measurements and component specifications
+   - System hierarchy and signal routing documentation
 1. DESY/Budker INP, "Klystron Cathode Heater Power Supply System Based on the High-Voltage Gap Transformer," 2019
 2. Analog Devices, "AD637 High Precision, Wideband RMS-to-DC Converter," Datasheet
 3. STMicroelectronics, "BTA20-600B Triacs," Datasheet and Application Notes
@@ -806,6 +813,11 @@ This upgrade represents a critical modernization of the SPEAR3 RF system infrast
 8. Firmansyah, A., "Harmonic Content of Zero Cycling Thyristor Controlled Heater," LinkedIn Technical Article, 2022
 
 ---
+- **Revision 1.1**: Corrected legacy system specifications based on comprehensive schematic analysis
+  - Updated operational values: 6.8V RMS / 73A (vs. 4.84V / 20A theoretical)
+  - Added component specifications: 1.00 KVA variac, 10:1 transformer
+  - Corrected power rating: 500W actual (vs. 100W theoretical)
+  - Updated control signal path: J1 → Fiber Optic → A/B PLC → EPICS
 
 **Document Control**:
 - **Created**: March 2026
