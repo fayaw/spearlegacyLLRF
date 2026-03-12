@@ -137,8 +137,12 @@ The software is organized into four layers, from hardware-facing (bottom) to ope
 │  │ (x2 units)     │  │                │  │                │            │
 │  └────────┬───────┘  └────────┬───────┘  └────────┬───────┘            │
 │  ┌────────┴───────┐  ┌────────┴───────┐  ┌────────┴───────┐            │
-│  │ MotorInterface │  │ WaveformBuf    │  │ HeaterInterface│            │
-│  │ (Galil x4)     │  │ Interface      │  │                │            │
+│  │InterfaceChassis│  │ArcDetection    │  │ MotorInterface │            │
+│  │Interface       │  │Interface       │  │ (Galil x4)     │            │
+│  └────────────────┘  └────────────────┘  └────────────────┘            │
+│  ┌────────┴───────┐  ┌────────┴───────┐  ┌────────┴───────┐            │
+│  │ WaveformBuf    │  │ HeaterInterface│  │                │            │
+│  │ Interface      │  │                │  │                │            │
 │  └────────────────┘  └────────────────┘  └────────────────┘            │
 └──────────────────────────────────┬──────────────────────────────────────┘
                                    │ EPICS Channel Access
@@ -1474,6 +1478,8 @@ WantedBy=multi-user.target
 | `LLRF2:ILOCK:` | LLRF9 Unit 2, Interlocks | LLRF9 IOC | B132 |
 | `SRF1:HVPS:` | HVPS CompactLogix PLC | EPICS gateway | B118 |
 | `SRF1:MPS:` | Kly MPS ControlLogix PLC | EPICS gateway | B132 |
+| `SRF1:MPS:IC:` | Interface Chassis (via MPS PLC) | EPICS gateway | B132 |
+| `SRF1:MPS:ARC:` | Arc Detection System (via MPS PLC) | EPICS gateway | B132 |
 | `SRF1:MTR:C1` | Cavity 1 tuner motor | Motor record IOC | B132 |
 | `SRF1:MTR:C2` | Cavity 2 tuner motor | Motor record IOC | B132 |
 | `SRF1:MTR:C3` | Cavity 3 tuner motor | Motor record IOC | B132 |
@@ -1493,9 +1499,11 @@ WantedBy=multi-user.target
 | 8. Load Angle | PDR-001 Section 10.4; `rf_tuner_loop.st` | Load angle offset loop |
 | 9. Fault Manager | PDR-001 Section 17; Interface Chassis Design | Protection chain architecture |
 | 10. Waveform Buffer | PDR-001 Section 11 | Waveform Buffer System |
-| 11. Heater Controller | Heater Subsystem Upgrade | Sections 7-8 |
-| 12. Calibration | LLRF9 System Report Section 10 | MATLAB toolkit algorithms |
-| 15. PV Contracts | LLRF9 System Report Sections 3, 15 | PV architecture and catalog |
+| 13. Heater Controller | Heater Subsystem Upgrade | Sections 7-8 |
+| 11. Interface Chassis Interface | Physical Design Report Section 8; Interface Chassis Design | IC status and control functions |
+| 12. Arc Detection Interface | Physical Design Report Section 12 | Arc detection system monitoring |
+| 14. Calibration | LLRF9 System Report Section 10 | MATLAB toolkit algorithms |
+| 17. PV Contracts | LLRF9 System Report Sections 3, 15 | PV architecture and catalog |
 | Interface Chassis | Interface Chassis Design Report | All sections |
 | PPS Interface | HVPS-PPS Interface Technical Document | Sections 8-9 |
 
