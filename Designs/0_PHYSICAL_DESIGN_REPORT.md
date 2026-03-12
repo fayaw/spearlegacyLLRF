@@ -1123,7 +1123,7 @@ This matrix summarizes all physical and logical interfaces between subsystems in
 | **Arc Detect** | — | — | — | — | Permit + Latching | — | — | — | — | — |
 | **Motor Ctrl** | — | — | — | — | — | — | — | — | — | EPICS (Ethernet) |
 | **Heater Ctrl** | — | — | — | — | — | — | — | — | — | EPICS (Ethernet) |
-| **Python Coord** | EPICS (Ethernet) | EPICS (Ethernet) | EPICS (Ethernet) | EPICS (Ethernet) | Monitoring only | EPICS (Ethernet) | — | EPICS (Ethernet) | EPICS (Ethernet) | — |
+| **Python Coord** | EPICS (Ethernet) | EPICS (Ethernet) | EPICS (Ethernet) | EPICS (Ethernet) | EPICS | EPICS (Ethernet) | — | EPICS (Ethernet) | EPICS (Ethernet) | — |
 | **External (SPEAR MPS, Orbit)** | — | — | — | — | 24V permits | — | — | — | — | — |
 
 ### Interface Signal Types Summary
