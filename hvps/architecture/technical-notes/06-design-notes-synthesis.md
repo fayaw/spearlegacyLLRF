@@ -941,7 +941,7 @@ Errors identified across the design notes that should be corrected in future dra
 
 ---
 
-## 12. Component Obsolescence Notes
+## 17. Component Obsolescence Notes
 
 | Component | Function | Status | Recommended Replacement |
 |---|---|---|---|
@@ -956,7 +956,7 @@ Errors identified across the design notes that should be corrected in future dra
 
 ---
 
-## 13. Source Document Cross-Reference
+## 18. Source Document Cross-Reference
 
 | Document | Primary Topics | Key Drawings Referenced |
 |---|---|---|
