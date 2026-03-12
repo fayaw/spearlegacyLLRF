@@ -84,8 +84,8 @@ The SPEAR3 LLRF Upgrade software provides comprehensive control and coordination
 │                                                                                 │
 │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ │
 │ │Tuner Motors │ │Waveform     │ │Arc Detection│ │Heater Ctrl  │ │PPS Interface│ │
-│ │(SRF1:MTR:)  │ │Buffer       │ │(SRF1:ARC:)  │ │(SRF1:KLYS:  │ │(SRF1:PPS:)  │ │
-│ │Motor IOC    │ │(SRF1:WFBUF:)│ │Dedicated IOC│ │HEATER:)     │ │Dedicated IOC│ │
+│ │(SRF1:MTR:)  │ │Buffer       │ │**Via IC**   │ │(SRF1:KLYS:  │ │**Hardware** │ │
+│ │Motor IOC    │ │(SRF1:WFBUF:)│ │**No IOC**   │ │HEATER:)     │ │**Only**     │ │
 │ └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                        │ Hardware Interfaces
@@ -150,11 +150,12 @@ The software integrates with **10 EPICS IOCs** providing comprehensive monitorin
 | **Interface Chassis** | **Dedicated IOC** | `SRF1:IC:` | ~20 | **10 Hz** | **Direct EPICS CA** |
 | **Tuner Motors** | Motor Record IOC | `SRF1:MTR:` | ~40 | On demand | EPICS Motor Records |
 | **Waveform Buffer** | Dedicated IOC | `SRF1:WFBUF:` | ~35 | 1 Hz/event | Direct EPICS CA |
-| **Arc Detection** | Dedicated IOC | `SRF1:ARC:` | ~15 | 10 Hz | Direct EPICS CA |
+| **Arc Detection** | **Via Interface Chassis** | `SRF1:IC:ARC:*` | ~5 | **Via IC IOC** | **Via Interface Chassis** |
 | **Heater Controller** | Dedicated IOC | `SRF1:KLYS:HEATER:` | ~20 | 10 Hz | Direct EPICS CA |
+| **PPS Interface** | **Hardware Only** | **No PVs** | **0** | **N/A** | **Hardware Safety Only** |
 | **Python Coordinator** | caproto Server | `SRF1:COORD:` | ~30 | 1 Hz | EPICS PV Server |
 
-**Total EPICS PVs**: ~1,315 PVs across all subsystems
+**Total EPICS PVs**: ~1,280 PVs across all subsystems
 
 ### 2.2 Interface Chassis Direct EPICS Interface
 
@@ -256,9 +257,9 @@ class SubsystemInterface(ABC):
 | **Interface Chassis** | `InterfaceChassisInterface` | **Direct EPICS monitoring** | `SRF1:IC:PERMIT:SUMMARY`, `SRF1:IC:FIRST:FAULT` |
 | **Tuner Motors** | `TunerInterface` | Position control, motor status | `SRF1:MTR:C1.RBV` through `SRF1:MTR:C4.RBV` |
 | **Waveform Buffer** | `WaveformBufferInterface` | Data acquisition, collector protection | `SRF1:WFBUF:COLLECTOR:POWER` |
-| **Arc Detection** | `ArcDetectionInterface` | Arc monitoring, permit status | `SRF1:ARC:PERMIT:SUMMARY` |
+| **Arc Detection** | `ArcDetectionInterface` | **Arc monitoring via Interface Chassis** | `SRF1:IC:ARC:PERMIT`, `SRF1:IC:ARC:STATUS` |
 | **Heater Controller** | `HeaterInterface` | Temperature control, operating modes | `SRF1:KLYS:HEATER:STATUS` |
-| **PPS Interface** | `PPSInterface` | Safety system coordination | `SRF1:PPS:PERMIT:SUMMARY` |
+| **PPS Interface** | `PPSInterface` | **Hardware-only safety system** | **No EPICS PVs - Hardware Only** |
 
 ---
 
@@ -301,9 +302,18 @@ class InterfaceChassisInterface:
             'hvps_status': f"{self.pv_prefix}HVPS:STATUS", 
             'spear_mps': f"{self.pv_prefix}SPEAR:MPS",
             'orbit_intlck': f"{self.pv_prefix}ORBIT:INTLCK",
-            'arc_permit': f"{self.pv_prefix}ARC:PERMIT",
+            'arc_permit': f"{self.pv_prefix}ARC:PERMIT",        # Arc Detection via IC
             'wfbuf_permit': f"{self.pv_prefix}WFBUF:PERMIT",
             'manual_reset': f"{self.pv_prefix}MANUAL:RESET"
+        }
+        
+        # Arc Detection status PVs (5 sensors via Interface Chassis)
+        self.arc_status_pvs = {
+            'arc_cav_a': f"{self.pv_prefix}ARC:CAV:A",          # Cavity A arc sensor
+            'arc_cav_b': f"{self.pv_prefix}ARC:CAV:B",          # Cavity B arc sensor  
+            'arc_cav_c': f"{self.pv_prefix}ARC:CAV:C",          # Cavity C arc sensor
+            'arc_cav_d': f"{self.pv_prefix}ARC:CAV:D",          # Cavity D arc sensor
+            'arc_klystron': f"{self.pv_prefix}ARC:KLYSTRON"     # Klystron arc sensor
         }
         
         # Output status PVs (3 outputs)
@@ -313,7 +323,7 @@ class InterfaceChassisInterface:
             'hvps_crowbar': f"{self.pv_prefix}HVPS:CROWBAR"
         }
         
-        # Control and diagnostics PVs (4 PVs)
+        # Control and diagnostics PVs (10 PVs)
         self.control_pvs = {
             'first_fault': f"{self.pv_prefix}FIRST:FAULT",
             'reset_cmd': f"{self.pv_prefix}RESET:CMD",
@@ -325,7 +335,7 @@ class InterfaceChassisInterface:
         """Initialize Interface Chassis monitoring"""
         try:
             # Verify all PVs are accessible
-            all_pvs = {**self.input_pvs, **self.output_pvs, **self.control_pvs}
+            all_pvs = {**self.input_pvs, **self.arc_status_pvs, **self.output_pvs, **self.control_pvs}
             for name, pv in all_pvs.items():
                 if not await self.epics.verify_connection(pv):
                     logger.error(f"Interface Chassis PV not accessible: {pv}")
@@ -348,13 +358,17 @@ class InterfaceChassisInterface:
         """Get complete Interface Chassis status"""
         try:
             # Batch read all status PVs
-            all_pvs = {**self.input_pvs, **self.output_pvs, **self.control_pvs}
+            all_pvs = {**self.input_pvs, **self.arc_status_pvs, **self.output_pvs, **self.control_pvs}
             values = await self.epics.batch_get(list(all_pvs.values()))
             
             return {
                 'inputs': {
                     name: values.get(pv, None) 
                     for name, pv in self.input_pvs.items()
+                },
+                'arc_status': {
+                    name: values.get(pv, None) 
+                    for name, pv in self.arc_status_pvs.items()
                 },
                 'outputs': {
                     name: values.get(pv, None) 
@@ -654,16 +668,23 @@ class FaultManager:
 
 **Complete EPICS PV namespace for all 10 subsystems** (~1,315 total PVs):
 
-#### Interface Chassis (SRF1:IC:) - ~20 PVs **[Direct EPICS Interface]**
+#### Interface Chassis (SRF1:IC:) - ~25 PVs **[Direct EPICS Interface]**
 ```
 # Input Status (7 PVs)
 SRF1:IC:LLRF9:STATUS            # LLRF9 status input
 SRF1:IC:HVPS:STATUS             # HVPS status input
 SRF1:IC:SPEAR:MPS               # SPEAR MPS permit input
 SRF1:IC:ORBIT:INTLCK            # Orbit interlock input
-SRF1:IC:ARC:PERMIT              # Arc detection permit input
+SRF1:IC:ARC:PERMIT              # Arc detection permit input (from Microstep-MIS)
 SRF1:IC:WFBUF:PERMIT            # Waveform buffer permit input
 SRF1:IC:MANUAL:RESET            # Manual reset input
+
+# Arc Detection Status (5 PVs) - **Via Interface Chassis**
+SRF1:IC:ARC:CAV:A               # Cavity A arc sensor status
+SRF1:IC:ARC:CAV:B               # Cavity B arc sensor status  
+SRF1:IC:ARC:CAV:C               # Cavity C arc sensor status
+SRF1:IC:ARC:CAV:D               # Cavity D arc sensor status
+SRF1:IC:ARC:KLYSTRON            # Klystron arc sensor status
 
 # Output Status (3 PVs)
 SRF1:IC:LLRF9:ENABLE            # LLRF9 enable output
