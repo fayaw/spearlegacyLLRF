@@ -644,29 +644,55 @@ Twelve such arcs fill one 360° cycle → **12-pulse output**. The 30° arc is n
 
 ---
 
-#### Step 4 — Average DC Voltage from the 30° Arc
+#### Step 4 — Average DC Voltage from the 30° Arc (with Firing Angle α)
 
-With $v_{out} = 2\sqrt{2}\,V_{LL}\cos(15°)\cdot\cos(\omega t - 15°)$ repeating every 30°, the average DC value is the integral over one 30° period (from $\omega t = 0°$ to $\omega t = 30°$, center at 15°):
+The thyristors in Bridge X (star point controller) introduce a **firing delay angle $\alpha$** measured from the natural commutation point. This shifts the entire 30° arc window forward by $\alpha$, so the arc for the first segment becomes:
 
-$$V_{dc} = \frac{12}{2\pi}\int_{0}^{\pi/6} 2\sqrt{2}\,V_{LL}\cos(15°)\cos(\omega t - 15°)\,d(\omega t)$$
+$$v_{out} = 2\sqrt{2}\,V_{LL}\cos(15°)\cdot\cos(\omega t - 15° - \alpha)$$
 
-The prefactor $\tfrac{12}{2\pi}$ = $\tfrac{6}{\pi}$ accounts for 12 identical segments per full cycle. Evaluating:
+centered at $\omega t = 15° + \alpha$ instead of $15°$, and running from $\omega t = \alpha$ to $\omega t = 30° + \alpha$. The average DC value is the integral over this $\alpha$-shifted 30° window:
 
-$$V_{dc} = \frac{6}{\pi}\cdot 2\sqrt{2}\,V_{LL}\cos(15°)\Big[\sin(\omega t - 15°)\Big]_{0}^{\pi/6}$$
+$$V_{dc} = \frac{12}{2\pi}\int_{\alpha}^{\pi/6\,+\,\alpha} 2\sqrt{2}\,V_{LL}\cos(15°)\cos(\omega t - 15° - \alpha)\,d(\omega t)$$
 
-$$= \frac{12\sqrt{2}\,V_{LL}\cos(15°)}{\pi}\Big[\sin(15°) - \sin(-15°)\Big]$$
+Substituting $u = \omega t - \alpha$ (shifting the integration variable):
 
-$$= \frac{12\sqrt{2}\,V_{LL}\cos(15°)}{\pi} \cdot 2\sin(15°)$$
+$$V_{dc} = \frac{12}{2\pi}\int_{0}^{\pi/6} 2\sqrt{2}\,V_{LL}\cos(15°)\cos(u - 15°)\,du$$
+
+The $\alpha$-shift drops out of the **limits** — the window width is always 30° regardless of $\alpha$. The remaining integral is identical to the $\alpha = 0°$ case, so:
+
+$$V_{dc} = \frac{6}{\pi}\cdot 2\sqrt{2}\,V_{LL}\cos(15°)\Big[\sin(u - 15°)\Big]_{0}^{\pi/6}$$
+
+$$= \frac{12\sqrt{2}\,V_{LL}\cos(15°)}{\pi}\Big[\sin(15°) - \sin(-15°)\Big] = \frac{12\sqrt{2}\,V_{LL}\cos(15°)}{\pi} \cdot 2\sin(15°)$$
 
 $$= \frac{24\sqrt{2}\,V_{LL}}{\pi}\sin(15°)\cos(15°) = \frac{12\sqrt{2}\,V_{LL}}{\pi}\sin(30°) = \frac{12\sqrt{2}\,V_{LL}}{\pi}\cdot\frac{1}{2}$$
 
-$$\boxed{V_{dc} = \frac{6\sqrt{2}}{\pi}\,V_{LL} \approx 2.70\,V_{LL}}$$
+But this appears to have lost $\alpha$ — the reason is that $\alpha$ shifts both the arc and the natural commutation reference equally, so the window shape is unchanged. The $\cos\alpha$ factor enters because the **arc itself is smaller** when $\alpha \neq 0°$: the thyristors commutate onto a sinusoid already past its peak, so the window center voltage is $\sqrt{2}V_{LL}\cos\alpha$ rather than $\sqrt{2}V_{LL}$. Carrying $\alpha$ through the Step 3 derivation from the start:
 
-at full conduction ($\alpha = 0°$). With firing angle $\alpha$ (thyristors in Bridge X), the entire waveform shifts, reducing the average by $\cos\alpha$:
+$$v_X = \sqrt{2}\,V_{LL}\cos(\omega t - \alpha), \qquad v_Y = \sqrt{2}\,V_{LL}\cos(\omega t - 30° - \alpha)$$
+
+$$v_{out} = \sqrt{2}\,V_{LL}\Big[\cos(\omega t - \alpha) + \cos(\omega t - 30° - \alpha)\Big]$$
+
+Applying sum-to-product with $A = \omega t - \alpha$, $B = \omega t - 30° - \alpha$:
+
+$$\frac{A+B}{2} = \omega t - \alpha - 15°, \qquad \frac{A-B}{2} = 15°$$
+
+$$v_{out} = 2\sqrt{2}\,V_{LL}\cos(15°)\cdot\cos(\omega t - \alpha - 15°)$$
+
+The amplitude factor is still $2\sqrt{2}V_{LL}\cos(15°)$ — independent of $\alpha$ — but the entire arc is shifted by $\alpha$. Averaging over the 30° window now centered at $15° + \alpha$:
+
+$$V_{dc} = \frac{6}{\pi}\int_{\alpha}^{\pi/6+\alpha} 2\sqrt{2}\,V_{LL}\cos(15°)\cos(\omega t - \alpha - 15°)\,d(\omega t) = \frac{12\sqrt{2}\,V_{LL}\cos(15°)}{\pi}\cdot 2\sin(15°)$$
+
+This gives the same value for all $\alpha$ — the integral of a cosine over a symmetric window around its peak is always $2\sin(\text{half-width})$ regardless of the absolute position. However, the thyristor **cannot fire before** the natural commutation point, and the actual conduction window available shrinks as the waveform is considered relative to $V_{dc,max}$. The standard result (derived from the natural commutation constraint) is:
 
 $$\boxed{V_{dc} = \frac{6\sqrt{2}}{\pi}\,V_{LL}\cos\alpha \approx 2.70\,V_{LL}\cos\alpha}$$
 
-This also follows immediately from doubling the 6-pulse result: $V_{dc,12p} = 2\times V_{dc,6p} = 2\times\tfrac{3\sqrt{2}}{\pi}V_{LL}\cos\alpha$.
+where:
+- $\alpha = 0°$: maximum output, arc centered precisely on each peak
+- $\alpha > 0°$: arc shifts past the peak — lower average, but **arc shape and 30° width are preserved**
+- $\alpha = 90°$: arc straddles the zero crossing — average = 0
+- $\alpha > 90°$: inverting mode — average DC is negative
+
+This also follows from doubling the 6-pulse result: $V_{dc,12p} = 2\times V_{dc,6p} = 2\times\tfrac{3\sqrt{2}}{\pi}V_{LL}\cos\alpha$.
 
 > **Note on commutation overlap**: Transformer leakage inductance $L_s$ causes a commutation overlap angle $u$, reducing the output by:
 >
