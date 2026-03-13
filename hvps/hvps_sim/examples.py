@@ -23,7 +23,7 @@ from hvps.hvps_sim.config import HVPSConfig
 from hvps.hvps_sim.simulator import HVPSSimulator
 
 
-def run_normal_operation(duration: float = 5.0, voltage_kv: float = 77.0,
+def run_normal_operation(duration: float = 10.0, voltage_kv: float = 77.0,
                          plot: bool = True, save_prefix: str = ""):
     """Scenario 1: Normal steady-state operation.
 

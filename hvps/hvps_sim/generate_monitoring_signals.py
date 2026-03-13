@@ -49,7 +49,7 @@ def generate_all_monitoring_signals():
         
         # Run the simulation
         if scenario_name == "Normal Operation":
-            result = run_func(duration=5.0, plot=False)
+            result = run_func(duration=10.0, plot=False)  # Extended for stabilization
         elif scenario_name == "Startup Sequence":
             result = run_func(duration=12.0, plot=False)
         elif scenario_name == "Arc Fault Response":
@@ -72,29 +72,7 @@ def generate_all_monitoring_signals():
         
         print()
     
-    # Generate comprehensive monitoring signals plot using normal operation
-    print("🔍 Generating comprehensive monitoring signals overview")
-    print("-" * 60)
-    
-    # Use normal operation for the comprehensive view
-    result = run_normal_operation(duration=5.0, plot=False)
-    
-    # Generate comprehensive monitoring signals plot
-    comprehensive_path = f"{results_dir}/hvps_monitoring_signals.png"
-    plot_hvps_monitoring_signals(
-        result,
-        save_path=comprehensive_path,
-        zoom_duration=0.1
-    )
-    
-    print(f"✅ Generated: {comprehensive_path}")
-    
-    # Check for zoom file
-    zoom_path = f"{results_dir}/hvps_monitoring_signals_zoom.png"
-    if os.path.exists(zoom_path):
-        print(f"✅ Generated: {zoom_path}")
-    
-    print()
+
     print("=" * 80)
     print("   4-Channel Waveform Buffer System Monitoring Signals Complete!")
     print("=" * 80)
@@ -112,4 +90,3 @@ def generate_all_monitoring_signals():
 
 if __name__ == "__main__":
     generate_all_monitoring_signals()
-
