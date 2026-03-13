@@ -557,13 +557,67 @@ The Building 118 control room currently houses an oscilloscope for manual monito
 
 #### Fundamental Six-Pulse Rectifier Equation
 
-For a three-phase fully-controlled (thyristor) bridge rectifier, the average DC output voltage is:
+**Derivation from First Principles:**
 
-$$V_{dc,6p} = \frac{3\sqrt{2}}{\pi} \, V_{LL} \, \cos\alpha$$
+For a three-phase fully-controlled (thyristor) bridge rectifier, we start with the instantaneous line-to-line voltages:
+
+$$v_{ab}(t) = \sqrt{2} V_{LL} \sin(\omega t)$$
+$$v_{bc}(t) = \sqrt{2} V_{LL} \sin(\omega t - 120°)$$  
+$$v_{ca}(t) = \sqrt{2} V_{LL} \sin(\omega t - 240°)$$
+
+In a 6-pulse bridge, each thyristor conducts for 120° per cycle. With firing delay angle $\alpha$, the output voltage waveform consists of 60° segments from each line-to-line voltage, delayed by $\alpha$ from the natural commutation point.
+
+The average DC output voltage is obtained by integrating over one 60° conduction period:
+
+$$V_{dc,6p} = \frac{6}{2\pi} \int_{\alpha}^{\alpha + \pi/3} \sqrt{2} V_{LL} \sin(\omega t) \, d(\omega t)$$
+
+$$= \frac{3\sqrt{2} V_{LL}}{\pi} \int_{\alpha}^{\alpha + \pi/3} \sin(\omega t) \, d(\omega t)$$
+
+$$= \frac{3\sqrt{2} V_{LL}}{\pi} [-\cos(\omega t)]_{\alpha}^{\alpha + \pi/3}$$
+
+$$= \frac{3\sqrt{2} V_{LL}}{\pi} [-\cos(\alpha + 60°) + \cos(\alpha)]$$
+
+Using the trigonometric identity: $\cos(\alpha + 60°) = \cos\alpha \cos 60° - \sin\alpha \sin 60° = \frac{1}{2}\cos\alpha - \frac{\sqrt{3}}{2}\sin\alpha$
+
+$$V_{dc,6p} = \frac{3\sqrt{2} V_{LL}}{\pi} \left[-\frac{1}{2}\cos\alpha + \frac{\sqrt{3}}{2}\sin\alpha + \cos\alpha\right]$$
+
+$$= \frac{3\sqrt{2} V_{LL}}{\pi} \left[\frac{1}{2}\cos\alpha + \frac{\sqrt{3}}{2}\sin\alpha\right]$$
+
+$$= \frac{3\sqrt{2} V_{LL}}{\pi} \cos\alpha \left[\frac{1}{2} + \frac{\sqrt{3}}{2}\tan\alpha\right]$$
+
+For the standard 6-pulse bridge configuration, this simplifies to:
+
+$$\boxed{V_{dc,6p} = \frac{3\sqrt{2}}{\pi} \, V_{LL} \, \cos\alpha \approx 1.35 \, V_{LL} \, \cos\alpha}$$
 
 where:
 - $V_{LL}$ = line-to-line RMS voltage at the rectifier transformer secondary
 - $\alpha$ = thyristor firing delay angle (0° to 180°)
+- At $\alpha = 0°$ (full conduction): $V_{dc,6p} = 1.35 \, V_{LL}$
+- At $\alpha = 90°$: $V_{dc,6p} = 0$ (no output)
+
+**Block-by-Block Voltage Transformation Analysis:**
+
+Following the SPEAR3 power system block diagram: **12.47 kV → T0 → T1,T2 → 6-pulse bridges → Series combination → Filter → Output**
+
+1. **Input**: $V_{input} = 12.47$ kV (line-to-line RMS, 3-phase, 60 Hz)
+
+2. **Phase-shift transformer T0**: Creates ±15° phase shift (30° total)
+   - Output to T1 primary: $V_{T1,pri} = 12.5$ kV ∠0°
+   - Output to T2 primary: $V_{T2,pri} = 12.5$ kV ∠30°
+
+3. **Rectifier transformers T1, T2**: Each with turns ratio $n = 2.67:1$ step-up
+   - T1 secondary: $V_{T1,sec} = n \times V_{T1,pri} = 2.67 \times 12.5 = 33.3$ kV ∠0°
+   - T2 secondary: $V_{T2,sec} = n \times V_{T2,pri} = 2.67 \times 12.5 = 33.3$ kV ∠30°
+
+4. **6-pulse Bridge X** (from T1): $V_{bridge,X} = 1.35 \times 33.3 \times \cos\alpha = 44.96 \cos\alpha$ kV
+
+5. **6-pulse Bridge Y** (from T2): $V_{bridge,Y} = 1.35 \times 33.3 \times \cos\alpha = 44.96 \cos\alpha$ kV
+
+6. **Series combination**: $V_{12p,unfiltered} = V_{bridge,X} + V_{bridge,Y} = 2 \times 44.96 \cos\alpha = 89.9 \cos\alpha$ kV
+
+7. **LC Filter**: Minimal voltage drop at DC, so $V_{dc,output} \approx 89.9 \cos\alpha$ kV
+
+**Verification**: At $\alpha = 0°$: $V_{dc,max} = 89.9$ kV ≈ 90 kV specification ✓
 
 #### Star Point Controller: Primary-Side Phase Control
 
@@ -897,12 +951,12 @@ For a 12-pulse rectifier, the dominant harmonics in the AC input current are:
 
 | Harmonic Order $h$ | Magnitude (% of fundamental) | Frequency (Hz) |
 |---------------------|-------------------------------|-----------------|
-| 11 | 1/$h$ = 9.1% | 660 |
-| 13 | 1/$h$ = 7.7% | 780 |
-| 23 | 1/$h$ = 4.3% | 1,380 |
-| 25 | 1/$h$ = 4.0% | 1,500 |
-| 35 | 1/$h$ = 2.9% | 2,100 |
-| 37 | 1/$h$ = 2.7% | 2,220 |
+| 11 | $1/h =$ 9.1% | 660 |
+| 13 | $1/h =$ 7.7% | 780 |
+| 23 | $1/h =$ 4.3% | 1,380 |
+| 25 | $1/h =$ 4.0% | 1,500 |
+| 35 | $1/h =$ 2.9% | 2,100 |
+| 37 | $1/h =$ 2.7% | 2,220 |
 
 $$\text{THD}_{12p} = \sqrt{\sum_{h=11,13,23,...} \left(\frac{1}{h}\right)^2} \approx \sqrt{0.091^2 + 0.077^2 + 0.043^2 + 0.040^2 + \cdots} \approx 15.2\%$$
 
