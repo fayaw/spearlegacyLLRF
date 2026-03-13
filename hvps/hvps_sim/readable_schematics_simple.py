@@ -14,7 +14,7 @@ def generate_readable_lc_filter():
     print("🔧 Generating Readable LC Filter...")
     
     with schemdraw.Drawing(show=False) as d:
-        d.config(fontsize=16)  # Larger font
+        d.config(fontsize=16, bgcolor='white')  # Larger font + white background
         
         # Input
         d += elm.Gap().label('From 12-Pulse\nRectifier\n0.5% ripple @ 720Hz')
@@ -69,7 +69,7 @@ def generate_readable_12pulse():
     print("🔧 Generating Readable 12-Pulse Rectifier...")
     
     with schemdraw.Drawing(show=False) as d:
-        d.config(fontsize=16)
+        d.config(fontsize=16, bgcolor='white')  # White background for readability
         
         # Input
         d += elm.SourceSin().label('12.47kV\n3φ 60Hz')
@@ -116,7 +116,7 @@ def generate_readable_system_overview():
     print("🔧 Generating Readable System Overview...")
     
     with schemdraw.Drawing(show=False) as d:
-        d.config(fontsize=14)
+        d.config(fontsize=14, bgcolor='white')  # White background for readability
         
         # Power flow
         d += elm.Gap().label('INPUT\n12.47kV 3φ\n2.5MVA max')

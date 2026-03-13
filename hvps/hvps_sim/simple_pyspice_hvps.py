@@ -213,7 +213,7 @@ class SimpleHVPSSimulation:
         time_ms = results['time'] * 1000
         
         # Main results plot
-        plt.figure(figsize=(15, 10))
+        plt.figure(figsize=(15, 10), facecolor='white')
         
         # Input voltages
         plt.subplot(2, 3, 1)
@@ -306,7 +306,7 @@ for comparison with real system
         plt.close()
         
         # Dedicated T1 current comparison plot
-        plt.figure(figsize=(12, 8))
+        plt.figure(figsize=(12, 8), facecolor='white')
         
         plt.subplot(2, 1, 1)
         plt.plot(time_ms[:detail_samples], results['t1_ac_current'][:detail_samples], 
