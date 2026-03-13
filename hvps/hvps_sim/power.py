@@ -201,10 +201,16 @@ class SixPulseBridge:
         if v_avg <= 0:
             return 0.0
         alpha_rad = np.radians(alpha_deg)
-        # Ripple amplitude for 6-pulse: further reduced for better realism
-        ripple_factor = 0.008 * (1.0 + 0.2 * abs(np.sin(alpha_rad)))
+        # Ripple amplitude for 6-pulse: ultra-low for realistic filtering
+        # Real HVPS has elaborate LC filtering achieving <1% ripple
+        ripple_factor = 0.003 * (1.0 + 0.1 * abs(np.sin(alpha_rad)))
         omega_ripple = 2 * np.pi * 6 * f_line
-        ripple = v_avg * ripple_factor * np.cos(omega_ripple * t)
+        # Add multiple harmonics for more realistic ripple shape
+        ripple = v_avg * ripple_factor * (
+            np.cos(omega_ripple * t) + 
+            0.3 * np.cos(2 * omega_ripple * t) +
+            0.1 * np.cos(3 * omega_ripple * t)
+        )
         return v_avg + ripple
 
     def turn_off(self):

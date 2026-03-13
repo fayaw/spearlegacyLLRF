@@ -454,16 +454,17 @@ def plot_plc_registers(result, save_path: Optional[str] = None,
 
 
 def plot_hvps_monitoring_signals(result, save_path: Optional[str] = None,
-                                 figsize: Tuple[float, float] = (14, 12)):
+                                 figsize: Tuple[float, float] = (14, 12),
+                                 zoom_duration: float = 0.1):
     """Plot the 4 HVPS monitoring signals from the Waveform Buffer System.
     
     These are the 4 constantly monitored HVPS signals as specified in the
-    technical documentation (Section 14.6):
+    technical documentation:
     
-    Channel 1: HVPS Voltage (regulation monitoring)
-    Channel 2: HVPS Current (load monitoring) 
-    Channel 3: Inductor 1 Voltage (firing circuit health)
-    Channel 4: Inductor 2 Voltage (firing circuit health)
+    Channel 1: HVPS DC Voltage (0 to -90 kV DC)
+    Channel 2: HVPS DC Current (0 to 30 A DC) 
+    Channel 3: Inductor 2 (T2) Sawtooth voltage (firing circuit timing)
+    Channel 4: Transformer 1 AC Phase Current (firing circuit health)
     
     Parameters
     ----------
@@ -519,37 +520,82 @@ def plot_hvps_monitoring_signals(result, save_path: Optional[str] = None,
                 transform=axes[1].transAxes, verticalalignment='top',
                 bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     
-    # Channel 3: Inductor 1 Voltage Monitor
-    axes[2].plot(t, result.inductor1_voltage_monitor_kv, 'g-', linewidth=1.5, label='L1 Voltage')
+    # Channel 3: Inductor 2 (T2) Sawtooth Voltage Monitor
+    axes[2].plot(t, result.inductor2_sawtooth_monitor_kv, 'g-', linewidth=1.5, label='T2 Sawtooth')
     axes[2].set_ylabel('Voltage (kV)', fontweight='bold')
-    axes[2].set_title('Channel 3: Inductor 1 Voltage Monitor (Firing Circuit Health)', fontweight='bold')
+    axes[2].set_title('Channel 3: Inductor 2 (T2) Sawtooth - Firing Circuit Timing', fontweight='bold')
     axes[2].grid(True, alpha=0.3)
     axes[2].legend()
     
     # Add statistics
-    l1_mean = np.mean(result.inductor1_voltage_monitor_kv)
-    l1_std = np.std(result.inductor1_voltage_monitor_kv)
-    l1_pp = np.max(result.inductor1_voltage_monitor_kv) - np.min(result.inductor1_voltage_monitor_kv)
-    axes[2].text(0.02, 0.95, f'Mean: {l1_mean:.1f} kV\nStd: {l1_std:.2f} kV\nP-P: {l1_pp:.2f} kV', 
+    t2_mean = np.mean(result.inductor2_sawtooth_monitor_kv)
+    t2_std = np.std(result.inductor2_sawtooth_monitor_kv)
+    t2_pp = np.max(result.inductor2_sawtooth_monitor_kv) - np.min(result.inductor2_sawtooth_monitor_kv)
+    axes[2].text(0.02, 0.95, f'Mean: {t2_mean:.1f} kV\nStd: {t2_std:.2f} kV\nP-P: {t2_pp:.2f} kV', 
                 transform=axes[2].transAxes, verticalalignment='top',
                 bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     
-    # Channel 4: Inductor 2 Voltage Monitor
-    axes[3].plot(t, result.inductor2_voltage_monitor_kv, 'm-', linewidth=1.5, label='L2 Voltage')
-    axes[3].set_ylabel('Voltage (kV)', fontweight='bold')
+    # Channel 4: Transformer 1 AC Phase Current Monitor
+    axes[3].plot(t, result.transformer1_current_monitor_a, 'm-', linewidth=1.5, label='T1 AC Current')
+    axes[3].set_ylabel('Current (A)', fontweight='bold')
     axes[3].set_xlabel('Time (s)', fontweight='bold')
-    axes[3].set_title('Channel 4: Inductor 2 Voltage Monitor (Firing Circuit Health)', fontweight='bold')
+    axes[3].set_title('Channel 4: Transformer 1 AC Phase Current - Firing Circuit Health', fontweight='bold')
     axes[3].grid(True, alpha=0.3)
     axes[3].legend()
     
     # Add statistics
-    l2_mean = np.mean(result.inductor2_voltage_monitor_kv)
-    l2_std = np.std(result.inductor2_voltage_monitor_kv)
-    l2_pp = np.max(result.inductor2_voltage_monitor_kv) - np.min(result.inductor2_voltage_monitor_kv)
-    axes[3].text(0.02, 0.95, f'Mean: {l2_mean:.1f} kV\nStd: {l2_std:.2f} kV\nP-P: {l2_pp:.2f} kV', 
+    t1_mean = np.mean(result.transformer1_current_monitor_a)
+    t1_std = np.std(result.transformer1_current_monitor_a)
+    t1_pp = np.max(result.transformer1_current_monitor_a) - np.min(result.transformer1_current_monitor_a)
+    axes[3].text(0.02, 0.95, f'Mean: {t1_mean:.1f} A\nStd: {t1_std:.2f} A\nP-P: {t1_pp:.2f} A', 
                 transform=axes[3].transAxes, verticalalignment='top',
                 bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     
+    # Add zoom-in subplot for final stabilized period if requested
+    if zoom_duration > 0 and len(t) > 0:
+        # Find the last zoom_duration seconds of data
+        t_max = t[-1]
+        zoom_start = max(0, t_max - zoom_duration)
+        zoom_mask = t >= zoom_start
+        
+        if np.sum(zoom_mask) > 10:  # Only if we have enough data points
+            # Create a second figure for zoom-in view
+            fig_zoom, axes_zoom = plt.subplots(4, 1, figsize=(14, 12), sharex=True)
+            fig_zoom.suptitle(f'HVPS Monitoring Signals - Final {zoom_duration*1000:.0f} ms (Stabilized)', 
+                             fontsize=16, fontweight='bold')
+            
+            t_zoom = t[zoom_mask]
+            
+            # Channel 1 zoom
+            axes_zoom[0].plot(t_zoom, result.hvps_voltage_monitor_kv[zoom_mask], 'b-', linewidth=1.5)
+            axes_zoom[0].set_ylabel('Voltage (kV)', fontweight='bold')
+            axes_zoom[0].set_title('Channel 1: HVPS Voltage (Stabilized)', fontweight='bold')
+            axes_zoom[0].grid(True, alpha=0.3)
+            
+            # Channel 2 zoom
+            axes_zoom[1].plot(t_zoom, result.hvps_current_monitor_a[zoom_mask], 'r-', linewidth=1.5)
+            axes_zoom[1].set_ylabel('Current (A)', fontweight='bold')
+            axes_zoom[1].set_title('Channel 2: HVPS Current (Stabilized)', fontweight='bold')
+            axes_zoom[1].grid(True, alpha=0.3)
+            
+            # Channel 3 zoom
+            axes_zoom[2].plot(t_zoom, result.inductor2_sawtooth_monitor_kv[zoom_mask], 'g-', linewidth=1.5)
+            axes_zoom[2].set_ylabel('Voltage (kV)', fontweight='bold')
+            axes_zoom[2].set_title('Channel 3: T2 Sawtooth (Stabilized)', fontweight='bold')
+            axes_zoom[2].grid(True, alpha=0.3)
+            
+            # Channel 4 zoom
+            axes_zoom[3].plot(t_zoom, result.transformer1_current_monitor_a[zoom_mask], 'm-', linewidth=1.5)
+            axes_zoom[3].set_ylabel('Current (A)', fontweight='bold')
+            axes_zoom[3].set_xlabel('Time (s)', fontweight='bold')
+            axes_zoom[3].set_title('Channel 4: T1 AC Current (Stabilized)', fontweight='bold')
+            axes_zoom[3].grid(True, alpha=0.3)
+            
+            plt.tight_layout()
+            if save_path:
+                zoom_path = save_path.replace('.png', '_zoom.png')
+                fig_zoom.savefig(zoom_path, dpi=150, bbox_inches='tight')
+
     plt.tight_layout()
     if save_path:
         plt.savefig(save_path, dpi=150, bbox_inches='tight')
