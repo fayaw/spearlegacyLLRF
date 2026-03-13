@@ -75,6 +75,12 @@ class SystemState:
     v_filtered_kv: float = 0.0
     ripple_pp_pct: float = 0.0
     ripple_rms_pct: float = 0.0
+    
+    # Monitor channels
+    hvps_voltage_monitor_kv: float = 0.0
+    hvps_current_monitor_a: float = 0.0
+    inductor2_sawtooth_monitor_kv: float = 0.0
+    transformer1_current_monitor_a: float = 0.0
 
 
 @dataclass
@@ -104,6 +110,12 @@ class SimulationResult:
     v_filtered_kv: np.ndarray = field(default_factory=lambda: np.array([]))
     ripple_pp_pct: np.ndarray = field(default_factory=lambda: np.array([]))
     ripple_rms_pct: np.ndarray = field(default_factory=lambda: np.array([]))
+    
+    # HVPS Monitoring Signals (4 channels from Waveform Buffer System)
+    hvps_voltage_monitor_kv: np.ndarray = field(default_factory=lambda: np.array([]))      # Channel 1: DC Voltage
+    hvps_current_monitor_a: np.ndarray = field(default_factory=lambda: np.array([]))       # Channel 2: DC Current  
+    inductor2_sawtooth_monitor_kv: np.ndarray = field(default_factory=lambda: np.array([]))  # Channel 3: T2 Sawtooth
+    transformer1_current_monitor_a: np.ndarray = field(default_factory=lambda: np.array([]))  # Channel 4: T1 AC Current
     
     def summary(self) -> str:
         """Return a human-readable summary of the simulation results."""
@@ -292,6 +304,45 @@ class PySpiceCircuitModel:
         ripple_pp_pct = (ripple_pp_v / abs(v_output)) * 100.0 if v_output != 0 else 0
         ripple_rms_pct = ripple_pp_pct / 2.83  # Approximate RMS for sinusoidal
         
+        # Calculate 4 monitor channels (matching original hvps_sim)
+        
+        # Channel 1: HVPS DC Voltage (0 to -90 kV DC, voltage divider 1000:1)
+        hvps_voltage_monitor = v_output  # Same as main output
+        
+        # Channel 2: HVPS DC Current (0 to 30 A DC, Danfysik DC-CT sensor)
+        hvps_current_monitor = i_output  # Same as main output
+        
+        # Channel 3: Inductor 2 (T2) Sawtooth voltage (firing circuit timing diagnosis)
+        # Real SPEAR3: Bipolar asymmetric sawtooth with INVERTED direction
+        omega = 2 * np.pi * 60  # 60 Hz AC frequency
+        cycle_phase = (omega * t) % (2 * np.pi)
+        
+        # Generate bipolar asymmetric sawtooth (INVERTED from original)
+        if cycle_phase < np.pi:
+            # Charging phase (slower rise) - INVERTED: now goes negative
+            sawtooth_base = -5.0 * (cycle_phase / np.pi)  # 0 to -5 kV
+        else:
+            # Discharging phase (faster fall) - INVERTED: now goes positive  
+            sawtooth_base = -5.0 + 10.0 * ((cycle_phase - np.pi) / np.pi)  # -5 to +5 kV
+        
+        # Add firing spikes at thyristor gate pulses (simplified)
+        firing_spike = 2.0 if abs(cycle_phase - np.pi/6) < 0.1 else 0.0  # Simplified gating pulse
+        inductor2_sawtooth_monitor = sawtooth_base + firing_spike
+        
+        # Channel 4: Transformer 1 AC Phase Current (firing circuit health)
+        # Real SPEAR3: Bipolar asymmetric SQUARE PULSES (not sinusoidal)
+        pulse_width_deg = 60.0  # Each thyristor pair conducts for ~60° in 12-pulse system
+        phase_angle_deg = ((omega * t) % (2 * np.pi)) * 180.0 / np.pi
+        
+        # Generate square pulse pattern based on thyristor conduction windows
+        pulse_current = 0.0
+        for pulse_start in [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]:  # 12-pulse pattern
+            if pulse_start <= phase_angle_deg < (pulse_start + pulse_width_deg):
+                pulse_current = 15.0 * (1 if pulse_start < 180 else -1)  # Bipolar square pulses
+                break
+        
+        transformer1_current_monitor = pulse_current
+        
         return {
             'v_output': v_output,
             'i_output': i_output,
@@ -299,7 +350,12 @@ class PySpiceCircuitModel:
             'v_unfiltered': v_dc_with_ripple,
             'v_filtered': -abs(self.v_capacitor),
             'ripple_pp_pct': ripple_pp_pct,
-            'ripple_rms_pct': ripple_rms_pct
+            'ripple_rms_pct': ripple_rms_pct,
+            # Monitor channels
+            'hvps_voltage_monitor': hvps_voltage_monitor,
+            'hvps_current_monitor': hvps_current_monitor,
+            'inductor2_sawtooth_monitor': inductor2_sawtooth_monitor,
+            'transformer1_current_monitor': transformer1_current_monitor
         }
     
     def reset(self):
@@ -399,6 +455,12 @@ class SPEAR3SystemSimulator:
                 self.current_state.ripple_pp_pct = circuit_results['ripple_pp_pct']
                 self.current_state.ripple_rms_pct = circuit_results['ripple_rms_pct']
                 
+                # Monitor channels
+                self.current_state.hvps_voltage_monitor_kv = circuit_results['hvps_voltage_monitor'] / 1000.0
+                self.current_state.hvps_current_monitor_a = circuit_results['hvps_current_monitor']
+                self.current_state.inductor2_sawtooth_monitor_kv = circuit_results['inductor2_sawtooth_monitor']
+                self.current_state.transformer1_current_monitor_a = circuit_results['transformer1_current_monitor']
+                
                 # Transition to regulating mode
                 if (self.mode == SystemMode.STARTUP and 
                     ctrl_signals['soft_start_pct'] >= 95.0):  # Earlier transition
@@ -432,6 +494,13 @@ class SPEAR3SystemSimulator:
         result.v_filtered_kv = np.zeros(n_steps)
         result.ripple_pp_pct = np.zeros(n_steps)
         result.ripple_rms_pct = np.zeros(n_steps)
+        
+        # Monitor channels
+        result.hvps_voltage_monitor_kv = np.zeros(n_steps)
+        result.hvps_current_monitor_a = np.zeros(n_steps)
+        result.inductor2_sawtooth_monitor_kv = np.zeros(n_steps)
+        result.transformer1_current_monitor_a = np.zeros(n_steps)
+        
         result.mode = ["OFF"] * n_steps
         return result
     
@@ -450,6 +519,12 @@ class SPEAR3SystemSimulator:
         result.v_filtered_kv[i] = state.v_filtered_kv
         result.ripple_pp_pct[i] = state.ripple_pp_pct
         result.ripple_rms_pct[i] = state.ripple_rms_pct
+        
+        # Monitor channels
+        result.hvps_voltage_monitor_kv[i] = state.hvps_voltage_monitor_kv
+        result.hvps_current_monitor_a[i] = state.hvps_current_monitor_a
+        result.inductor2_sawtooth_monitor_kv[i] = state.inductor2_sawtooth_monitor_kv
+        result.transformer1_current_monitor_a[i] = state.transformer1_current_monitor_a
 
 
 def main():

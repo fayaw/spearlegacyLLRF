@@ -56,6 +56,7 @@ def plot_system_overview(result, save_path: Optional[str] = None,
     ax1.set_title('Output Voltage')
     ax1.legend(loc='upper right', fontsize=8)
     ax1.grid(True, alpha=0.3)
+    ax1.set_ylim(-85, 5)  # Updated for correct voltage range
     
     # Add startup indicator
     startup_indices = [i for i, mode in enumerate(result.mode) if mode == 'STARTUP']
@@ -69,6 +70,7 @@ def plot_system_overview(result, save_path: Optional[str] = None,
     ax2.set_ylabel('Current (A)')
     ax2.set_title('Output Current')
     ax2.grid(True, alpha=0.3)
+    ax2.set_ylim(-2, 32)  # Updated for correct current range
 
     # 3. Power
     ax3 = fig.add_subplot(gs[2], sharex=ax1)
@@ -76,6 +78,7 @@ def plot_system_overview(result, save_path: Optional[str] = None,
     ax3.set_ylabel('Power (MW)')
     ax3.set_title('Output Power')
     ax3.grid(True, alpha=0.3)
+    ax3.set_ylim(-0.1, 2.0)  # Updated for correct power range
 
     # 4. Firing angle
     ax4 = fig.add_subplot(gs[3], sharex=ax1)
@@ -342,9 +345,193 @@ def add_plot_methods_to_result():
         SimulationResult.plot_startup_sequence = plot_startup_sequence_method
         SimulationResult.plot_control_response = plot_control_response_method
         SimulationResult.plot_ripple_analysis = plot_ripple_analysis_method
-        print("✅ Added plotting methods to SimulationResult")
+        SimulationResult.plot_monitor_channels = plot_monitor_channels_method
+        SimulationResult.plot_all_signals = plot_all_signals_method
+        print("✅ Added plotting methods to SimulationResult (including monitor channels)")
     except ImportError:
         print("⚠️ Could not add plotting methods to SimulationResult")
+
+
+def plot_monitor_channels(result, filename='monitor_channels.png', title_prefix='Enhanced PySpice'):
+    """Plot the 4 HVPS monitor channels matching original hvps_sim style."""
+    
+    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    fig.suptitle(f'{title_prefix} - HVPS Monitor Channels (4-Channel Waveform Buffer)', 
+                 fontsize=16, fontweight='bold')
+    
+    # Channel 1: HVPS DC Voltage Monitor
+    ax1 = axes[0, 0]
+    ax1.plot(result.time, result.hvps_voltage_monitor_kv, 'b-', linewidth=2, label='HVPS Voltage')
+    ax1.set_xlabel('Time (s)')
+    ax1.set_ylabel('Voltage (kV)')
+    ax1.set_title('Channel 1: HVPS DC Voltage Monitor\n(0 to -90 kV DC, Voltage Divider 1000:1)', fontweight='bold')
+    ax1.grid(True, alpha=0.3)
+    ax1.legend()
+    ax1.set_ylim(-85, 5)
+    
+    # Channel 2: HVPS DC Current Monitor
+    ax2 = axes[0, 1]
+    ax2.plot(result.time, result.hvps_current_monitor_a, 'r-', linewidth=2, label='HVPS Current')
+    ax2.set_xlabel('Time (s)')
+    ax2.set_ylabel('Current (A)')
+    ax2.set_title('Channel 2: HVPS DC Current Monitor\n(0 to 30 A DC, Danfysik DC-CT Sensor)', fontweight='bold')
+    ax2.grid(True, alpha=0.3)
+    ax2.legend()
+    ax2.set_ylim(-2, 32)
+    
+    # Channel 3: Inductor 2 (T2) Sawtooth Monitor
+    ax3 = axes[1, 0]
+    ax3.plot(result.time, result.inductor2_sawtooth_monitor_kv, 'g-', linewidth=2, label='T2 Sawtooth')
+    ax3.set_xlabel('Time (s)')
+    ax3.set_ylabel('Voltage (kV)')
+    ax3.set_title('Channel 3: Inductor 2 (T2) Sawtooth Voltage\n(Firing Circuit Timing Diagnosis)', fontweight='bold')
+    ax3.grid(True, alpha=0.3)
+    ax3.legend()
+    ax3.set_ylim(-8, 8)
+    
+    # Channel 4: Transformer 1 AC Phase Current Monitor
+    ax4 = axes[1, 1]
+    ax4.plot(result.time, result.transformer1_current_monitor_a, 'm-', linewidth=2, label='T1 AC Current')
+    ax4.set_xlabel('Time (s)')
+    ax4.set_ylabel('Current (A)')
+    ax4.set_title('Channel 4: Transformer 1 AC Phase Current\n(Firing Circuit Health Monitor)', fontweight='bold')
+    ax4.grid(True, alpha=0.3)
+    ax4.legend()
+    ax4.set_ylim(-20, 20)
+    
+    plt.tight_layout()
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"📊 Monitor channels plot saved to: {filename}")
+
+
+def plot_all_signals(result, filename='complete_system_overview.png', title_prefix='Enhanced PySpice'):
+    """Plot comprehensive system overview with all signals including monitor channels."""
+    
+    fig, axes = plt.subplots(3, 3, figsize=(20, 16))
+    fig.suptitle(f'{title_prefix} - Complete HVPS System Overview with Monitor Channels', 
+                 fontsize=18, fontweight='bold')
+    
+    # Main system signals (top row)
+    # Voltage
+    ax1 = axes[0, 0]
+    ax1.plot(result.time, result.voltage_kv, 'b-', linewidth=2, label='HVPS Output')
+    ax1.set_xlabel('Time (s)')
+    ax1.set_ylabel('Voltage (kV)')
+    ax1.set_title('HVPS Output Voltage', fontweight='bold')
+    ax1.grid(True, alpha=0.3)
+    ax1.legend()
+    ax1.set_ylim(-85, 5)
+    
+    # Current
+    ax2 = axes[0, 1]
+    ax2.plot(result.time, result.current_a, 'r-', linewidth=2, label='HVPS Current')
+    ax2.set_xlabel('Time (s)')
+    ax2.set_ylabel('Current (A)')
+    ax2.set_title('HVPS Output Current', fontweight='bold')
+    ax2.grid(True, alpha=0.3)
+    ax2.legend()
+    ax2.set_ylim(-2, 32)
+    
+    # Power
+    ax3 = axes[0, 2]
+    ax3.plot(result.time, result.power_mw, 'purple', linewidth=2, label='HVPS Power')
+    ax3.set_xlabel('Time (s)')
+    ax3.set_ylabel('Power (MW)')
+    ax3.set_title('HVPS Output Power', fontweight='bold')
+    ax3.grid(True, alpha=0.3)
+    ax3.legend()
+    ax3.set_ylim(-0.1, 2.0)
+    
+    # Control signals (middle row)
+    # Firing angle
+    ax4 = axes[1, 0]
+    ax4.plot(result.time, result.firing_angle_deg, 'orange', linewidth=2, label='Firing Angle')
+    ax4.set_xlabel('Time (s)')
+    ax4.set_ylabel('Angle (degrees)')
+    ax4.set_title('SCR Firing Angle Control', fontweight='bold')
+    ax4.grid(True, alpha=0.3)
+    ax4.legend()
+    ax4.set_ylim(25, 155)
+    
+    # Ripple performance
+    ax5 = axes[1, 1]
+    ax5.plot(result.time, result.ripple_pp_pct, 'brown', linewidth=2, label='Ripple P-P')
+    ax5.axhline(y=1.0, color='red', linestyle='--', alpha=0.7, label='1% Target')
+    ax5.set_xlabel('Time (s)')
+    ax5.set_ylabel('Ripple (%)')
+    ax5.set_title('Ripple Performance', fontweight='bold')
+    ax5.grid(True, alpha=0.3)
+    ax5.legend()
+    ax5.set_ylim(0, 2)
+    
+    # System mode
+    ax6 = axes[1, 2]
+    mode_colors = {'OFF': 0, 'STARTUP': 1, 'REGULATING': 2}
+    mode_values = [mode_colors.get(mode, 0) for mode in result.mode]
+    ax6.plot(result.time, mode_values, 'k-', linewidth=3, label='System Mode')
+    ax6.set_xlabel('Time (s)')
+    ax6.set_ylabel('Mode')
+    ax6.set_title('System Operating Mode', fontweight='bold')
+    ax6.set_yticks([0, 1, 2])
+    ax6.set_yticklabels(['OFF', 'STARTUP', 'REGULATING'])
+    ax6.grid(True, alpha=0.3)
+    ax6.legend()
+    
+    # Monitor channels (bottom row)
+    # Channel 3: T2 Sawtooth (most interesting)
+    ax7 = axes[2, 0]
+    ax7.plot(result.time, result.inductor2_sawtooth_monitor_kv, 'g-', linewidth=2, label='T2 Sawtooth')
+    ax7.set_xlabel('Time (s)')
+    ax7.set_ylabel('Voltage (kV)')
+    ax7.set_title('Monitor Ch3: T2 Sawtooth', fontweight='bold')
+    ax7.grid(True, alpha=0.3)
+    ax7.legend()
+    ax7.set_ylim(-8, 8)
+    
+    # Channel 4: T1 AC Current (most interesting)
+    ax8 = axes[2, 1]
+    ax8.plot(result.time, result.transformer1_current_monitor_a, 'm-', linewidth=2, label='T1 AC Current')
+    ax8.set_xlabel('Time (s)')
+    ax8.set_ylabel('Current (A)')
+    ax8.set_title('Monitor Ch4: T1 AC Current', fontweight='bold')
+    ax8.grid(True, alpha=0.3)
+    ax8.legend()
+    ax8.set_ylim(-20, 20)
+    
+    # Performance summary
+    ax9 = axes[2, 2]
+    ax9.text(0.1, 0.8, f'Final Voltage: {result.voltage_kv[-1]:.2f} kV', fontsize=12, fontweight='bold')
+    ax9.text(0.1, 0.7, f'Final Current: {result.current_a[-1]:.2f} A', fontsize=12, fontweight='bold')
+    ax9.text(0.1, 0.6, f'Final Power: {result.power_mw[-1]:.3f} MW', fontsize=12, fontweight='bold')
+    ax9.text(0.1, 0.5, f'Final Ripple: {result.ripple_pp_pct[-1]:.3f}%', fontsize=12, fontweight='bold')
+    ax9.text(0.1, 0.4, f'Target Achievement:', fontsize=12, fontweight='bold')
+    voltage_status = '✅ PASS' if abs(result.voltage_kv[-1]) > 75 else '❌ FAIL'
+    ripple_status = '✅ PASS' if result.ripple_pp_pct[-1] < 1.0 else '❌ FAIL'
+    ax9.text(0.1, 0.3, f'Voltage (>75kV): {voltage_status}', fontsize=11)
+    ax9.text(0.1, 0.2, f'Ripple (<1%): {ripple_status}', fontsize=11)
+    ax9.set_xlim(0, 1)
+    ax9.set_ylim(0, 1)
+    ax9.set_title('Performance Summary', fontweight='bold')
+    ax9.axis('off')
+    
+    plt.tight_layout()
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"📊 Complete system overview saved to: {filename}")
+
+
+# Method wrappers for SimulationResult class
+def plot_monitor_channels_method(self, filename='monitor_channels.png', title_prefix='Enhanced PySpice'):
+    """Plot monitor channels method for SimulationResult."""
+    return plot_monitor_channels(self, filename, title_prefix)
+
+def plot_all_signals_method(self, filename='complete_system_overview.png', title_prefix='Enhanced PySpice'):
+    """Plot all signals method for SimulationResult."""
+    return plot_all_signals(self, filename, title_prefix)
+
+
+
 
 
 # Auto-add methods when module is imported
