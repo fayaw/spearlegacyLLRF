@@ -555,140 +555,208 @@ The Building 118 control room currently houses an oscilloscope for manual monito
 
 ### **12-Pulse Controlled Rectifier Output Voltage**
 
-#### Fundamental Six-Pulse Rectifier Equation
+> **Derivation roadmap**: The following five steps trace the complete signal path from the raw 3-phase AC input to the final DC output waveform, deriving the 30° output arc algebraically and then computing the average DC voltage and ripple directly from that arc.
+>
+> ```
+> Step 1          Step 2              Step 3               Step 4          Step 5
+> 3-phase    →   6 L-L cosines   →   60° arc          →   30° arc    →   DC average
+> input          spaced 60° apart    (single bridge)       (combined)      + ripple
+> v_a,v_b,v_c    sum-to-product      crossover proof       sum-to-product  integral
+> ```
 
-**Derivation from First Principles:**
+---
 
-For a three-phase fully-controlled (thyristor) bridge rectifier, the phase voltages are defined as:
+#### Step 1 — Three Phase Voltages → Six Line-to-Line Voltages
 
-$$v_a(t) = \sqrt{2}\,V_{ph}\sin(\omega t)$$
-$$v_b(t) = \sqrt{2}\,V_{ph}\sin(\omega t - 120°)$$
-$$v_c(t) = \sqrt{2}\,V_{ph}\sin(\omega t - 240°)$$
+Starting from the 3-phase AC supply at the secondary of rectifier transformers T1/T2 (33.3 kV line-to-line, 60 Hz), the three phase voltages are:
 
-The corresponding line-to-line voltages (e.g. $v_{ab} = v_a - v_b$) are:
+$$v_a = V_m\sin(\omega t), \quad v_b = V_m\sin(\omega t - 120°), \quad v_c = V_m\sin(\omega t + 120°)$$
 
-$$v_{ab}(t) = \sqrt{2}\,V_{LL}\sin(\omega t + 30°)$$
-$$v_{bc}(t) = \sqrt{2}\,V_{LL}\sin(\omega t - 90°)$$
-$$v_{ca}(t) = \sqrt{2}\,V_{LL}\sin(\omega t - 210°)$$
+where $V_m = \sqrt{2}\,V_{ph}$ is the peak phase voltage. A diode/thyristor bridge does not use phase voltages directly — it selects from the six **line-to-line** voltages. Compute $v_{ab} = v_a - v_b$ using the sum-to-product identity $\sin A - \sin B = 2\cos\!\tfrac{A+B}{2}\sin\!\tfrac{A-B}{2}$:
 
-where $V_{LL} = \sqrt{3}\,V_{ph}$. Each line-to-line voltage leads its corresponding phase voltage by 30°. The three negative combinations $v_{ba}, v_{cb}, v_{ac}$ are shifted by a further 180° and are equally important — the fully-controlled bridge uses all six segments.
+$$v_{ab} = V_m\!\left[\sin(\omega t) - \sin(\omega t - 120°)\right] = V_m \cdot 2\cos\!\left(\omega t - 60°\right)\sin(60°) = \sqrt{3}\,V_m\cos(\omega t - 60°)$$
 
-**Integration Setup:**
+Since $V_{LL} = \sqrt{3}\,V_{ph}$ and $V_m = \sqrt{2}\,V_{ph}$, we get $\sqrt{3}V_m = \sqrt{2}V_{LL}$, so:
 
-In a 6-pulse bridge, each thyristor conducts for 120° per cycle, but the output waveform is composed of 60° segments, one from each of the six line-to-line voltages in sequence. The natural commutation point (NCP) for $v_{ab}$ occurs at $\omega t = 90°$ (its positive peak crossing relative to the segment boundary). With firing delay angle $\alpha$, integration runs from the NCP plus $\alpha$:
+$$v_{ab} = \sqrt{2}\,V_{LL}\cos(\omega t - 60°)$$
 
-$$V_{dc,6p} = \frac{6}{2\pi}\int_{\pi/3\,+\,\alpha}^{2\pi/3\,+\,\alpha} \sqrt{2}\,V_{LL}\sin(\omega t)\,d(\omega t)$$
+Applying the same identity to all six combinations yields:
 
-The prefactor $\frac{6}{2\pi}$ accounts for 6 identical 60° ($\pi/3$) segments per full cycle. For clarity, substituting $u = \omega t$:
+$$\boxed{v_k = \sqrt{2}\,V_{LL}\cos(\omega t - 60°\cdot k), \quad k = 0,1,2,3,4,5}$$
 
-$$V_{dc,6p} = \frac{3}{\pi}\int_{\pi/3\,+\,\alpha}^{2\pi/3\,+\,\alpha} \sqrt{2}\,V_{LL}\sin(u)\,du$$
+| $k$ | Voltage | Expression | Peak at $\omega t$ |
+|-----|---------|-----------|---------------------|
+| 0 | $v_{cb}$ | $\sqrt{2}V_{LL}\cos(\omega t)$ | 0° |
+| 1 | $v_{ab}$ | $\sqrt{2}V_{LL}\cos(\omega t - 60°)$ | 60° |
+| 2 | $v_{ac}$ | $\sqrt{2}V_{LL}\cos(\omega t - 120°)$ | 120° |
+| 3 | $v_{bc}$ | $\sqrt{2}V_{LL}\cos(\omega t - 180°)$ | 180° |
+| 4 | $v_{ba}$ | $\sqrt{2}V_{LL}\cos(\omega t - 240°)$ | 240° |
+| 5 | $v_{ca}$ | $\sqrt{2}V_{LL}\cos(\omega t - 300°)$ | 300° |
 
-**Evaluation of the Integral:**
+**Key result**: all six are sinusoids of **identical amplitude** $\sqrt{2}V_{LL}$, with peaks uniformly spaced **60° apart**. This 60° spacing is the geometric origin of everything that follows.
 
-$$V_{dc,6p} = \frac{3\sqrt{2}\,V_{LL}}{\pi}\Big[-\cos(u)\Big]_{\pi/3\,+\,\alpha}^{2\pi/3\,+\,\alpha}$$
+---
 
-$$= \frac{3\sqrt{2}\,V_{LL}}{\pi}\Big[-\cos\!\left(\tfrac{2\pi}{3}+\alpha\right)+\cos\!\left(\tfrac{\pi}{3}+\alpha\right)\Big]$$
+#### Step 2 — Single Bridge Output: The 60° Arc
 
-Expanding each term using the angle addition identity $\cos(A+B)=\cos A\cos B - \sin A\sin B$:
+A diode/thyristor bridge output equals the **highest** line-to-line voltage at every instant. Voltage $v_k$ is highest in the 60° window centered on its peak. The crossover between adjacent voltages $v_0$ and $v_1$ occurs where they are equal. Solving $v_0 = v_1$:
 
-$$\cos\!\left(\frac{\pi}{3}+\alpha\right) = \frac{1}{2}\cos\alpha - \frac{\sqrt{3}}{2}\sin\alpha$$
+$$\sqrt{2}V_{LL}\cos(\omega t) = \sqrt{2}V_{LL}\cos(\omega t - 60°)$$
 
-$$\cos\!\left(\frac{2\pi}{3}+\alpha\right) = -\frac{1}{2}\cos\alpha - \frac{\sqrt{3}}{2}\sin\alpha$$
+$$\cos(\omega t) = \cos(\omega t - 60°) \implies \omega t = 30° \quad \checkmark$$
 
-Substituting:
+This can be verified directly: $\cos(30°) = \cos(-30°) = \tfrac{\sqrt{3}}{2}$. By symmetry, successive crossovers occur at $30°, 90°, 150°, \ldots$ — every 60°. Therefore, **Bridge X output** (fed by T1 at 0° reference) is:
 
-$$V_{dc,6p} = \frac{3\sqrt{2}\,V_{LL}}{\pi}\left[-\left(-\frac{1}{2}\cos\alpha - \frac{\sqrt{3}}{2}\sin\alpha\right) + \left(\frac{1}{2}\cos\alpha - \frac{\sqrt{3}}{2}\sin\alpha\right)\right]$$
+$$\boxed{v_X(\omega t) = \sqrt{2}\,V_{LL}\cos(\omega t - 60°k) \quad \text{for } (60°k - 30°) < \omega t < (60°k + 30°), \quad k = 0\ldots5}$$
 
-$$= \frac{3\sqrt{2}\,V_{LL}}{\pi}\left[\frac{1}{2}\cos\alpha + \frac{\sqrt{3}}{2}\sin\alpha + \frac{1}{2}\cos\alpha - \frac{\sqrt{3}}{2}\sin\alpha\right]$$
+This is a **60° arc of a cosine**, spanning ±30° about each peak. Six such arcs fit in one 360° cycle → the single bridge produces a **6-pulse** output.
 
-$$= \frac{3\sqrt{2}\,V_{LL}}{\pi}\left[\cos\alpha\right]$$
+---
 
-**Result:**
+#### Step 3 — Two Bridges in Series: The 30° Arc (Algebraic Derivation)
 
-$$\boxed{V_{dc,6p} = \frac{3\sqrt{2}}{\pi}\,V_{LL}\cos\alpha \approx 1.3505\,V_{LL}\cos\alpha}$$
+T0 delivers +15° to T1 and −15° to T2, giving Bridge X and Bridge Y a **30° relative phase difference**. Bridge Y's peaks land at 30°, 90°, 150°, 210°, 270°, 330° — filling the gaps between Bridge X's peaks.
 
-where:
-- $V_{LL}$ = line-to-line RMS voltage at the rectifier transformer secondary
-- $\alpha$ = thyristor firing delay angle, ranging from 0° to 180°
-- At $\alpha = 0°$: $V_{dc} = \frac{3\sqrt{2}}{\pi}V_{LL} \approx 1.35\,V_{LL}$ (maximum rectified output)
-- At $\alpha = 90°$: $V_{dc} = 0$ (average output is zero; inverter boundary)
-- At $\alpha > 90°$: $V_{dc} < 0$ (inverting mode; energy returns to AC supply)
+The two 6-pulse DC outputs are connected in **series** (secondary diode bridges stack their voltages). Focus on the window $0° < \omega t < 30°$, where Bridge X is descending from its peak at 0° and Bridge Y is ascending toward its peak at 30°:
 
-**Block-by-Block Voltage Transformation Analysis:**
+$$v_X = \sqrt{2}\,V_{LL}\cos(\omega t)$$
+$$v_Y = \sqrt{2}\,V_{LL}\cos(\omega t - 30°)$$
 
-Following the SPEAR3 power system block diagram: **12.47 kV → T0 → T1,T2 → 6-pulse bridges → Series combination → Filter → Output**
+**Sum using the product-to-sum identity** $\cos A + \cos B = 2\cos\!\tfrac{A+B}{2}\cos\!\tfrac{A-B}{2}$:
 
-1. **Input**: $V_{input} = 12.47$ kV (line-to-line RMS, 3-phase, 60 Hz)
+$$A = \omega t, \quad B = \omega t - 30° \implies \frac{A+B}{2} = \omega t - 15°, \quad \frac{A-B}{2} = 15°$$
 
-2. **Phase-shift transformer T0**: Creates ±15° phase shift (30° total)
-   - Output to T1 primary: $V_{T1,pri} = 12.5$ kV ∠0°
-   - Output to T2 primary: $V_{T2,pri} = 12.5$ kV ∠30°
+$$v_{out} = v_X + v_Y = \sqrt{2}\,V_{LL}\Big[\cos(\omega t) + \cos(\omega t - 30°)\Big]$$
 
-3. **Rectifier transformers T1, T2**: Each with turns ratio $n = 2.67:1$ step-up
-   - T1 secondary: $V_{T1,sec} = n \times V_{T1,pri} = 2.67 \times 12.5 = 33.3$ kV ∠0°
-   - T2 secondary: $V_{T2,sec} = n \times V_{T2,pri} = 2.67 \times 12.5 = 33.3$ kV ∠30°
+$$\boxed{v_{out} = 2\sqrt{2}\,V_{LL}\cos(15°)\cdot\cos(\omega t - 15°)}$$
 
-4. **6-pulse Bridge X** (from T1): $V_{bridge,X} = 1.35 \times 33.3 \times \cos\alpha = 44.96 \cos\alpha$ kV
+This is a **cosine centered at $\omega t = 15°$**, the midpoint of the 0°–30° window. It spans ±15° around its peak — a **30° arc** of a cosine. By repeating this for every successive 30° window (shifting the center by 30° each time), the combined output is:
 
-5. **6-pulse Bridge Y** (from T2): $V_{bridge,Y} = 1.35 \times 33.3 \times \cos\alpha = 44.96 \cos\alpha$ kV
+| Window | 12-pulse output waveform |
+|--------|---------------------------|
+| $0° \to 30°$ | $2\sqrt{2}V_{LL}\cos(15°)\cdot\cos(\omega t - 15°)$ |
+| $30° \to 60°$ | $2\sqrt{2}V_{LL}\cos(15°)\cdot\cos(\omega t - 45°)$ |
+| $60° \to 90°$ | $2\sqrt{2}V_{LL}\cos(15°)\cdot\cos(\omega t - 75°)$ |
+| $\vdots$ | $\vdots$ |
+| $330° \to 360°$ | $2\sqrt{2}V_{LL}\cos(15°)\cdot\cos(\omega t - 345°)$ |
 
-6. **Series combination**: $V_{12p,unfiltered} = V_{bridge,X} + V_{bridge,Y} = 2 \times 44.96 \cos\alpha = 89.9 \cos\alpha$ kV
+Twelve such arcs fill one 360° cycle → **12-pulse output**. The 30° arc is not an approximation — it is an exact algebraic consequence of summing two 60° cosine arcs offset by 30°.
 
-7. **LC Filter**: Minimal voltage drop at DC, so $V_{dc,output} \approx 89.9 \cos\alpha$ kV
+---
 
-**Verification**: At $\alpha = 0°$: $V_{dc,max} = 89.9$ kV ≈ 90 kV specification ✓
+#### Step 4 — Average DC Voltage from the 30° Arc
 
-#### Star Point Controller: Primary-Side Phase Control
+With $v_{out} = 2\sqrt{2}\,V_{LL}\cos(15°)\cdot\cos(\omega t - 15°)$ repeating every 30°, the average DC value is the integral over one 30° period (from $\omega t = 0°$ to $\omega t = 30°$, center at 15°):
 
-The SPEAR3 HVPS uses a **star point controller** topology where 12 SCR stacks on the *primary side* of the rectifier transformers T1 and T2 control the effective voltage delivered to the secondary. The floating neutral of the open-wye primary windings is controlled by the SCRs to regulate the fraction of the AC waveform that is magnetically coupled to the secondary.
+$$V_{dc} = \frac{12}{2\pi}\int_{0}^{\pi/6} 2\sqrt{2}\,V_{LL}\cos(15°)\cos(\omega t - 15°)\,d(\omega t)$$
 
-Each 6-pulse bridge group (Bridge X from T1, Bridge Y from T2) produces:
+The prefactor $\tfrac{12}{2\pi}$ = $\tfrac{6}{\pi}$ accounts for 12 identical segments per full cycle. Evaluating:
 
-$$V_{dc,\text{bridge}} = \frac{3\sqrt{2}}{\pi} \, V_{sec,LL} \, \cos\alpha$$
+$$V_{dc} = \frac{6}{\pi}\cdot 2\sqrt{2}\,V_{LL}\cos(15°)\Big[\sin(\omega t - 15°)\Big]_{0}^{\pi/6}$$
 
-where $V_{sec,LL}$ is the secondary line-to-line voltage of each rectifier transformer.
+$$= \frac{12\sqrt{2}\,V_{LL}\cos(15°)}{\pi}\Big[\sin(15°) - \sin(-15°)\Big]$$
 
-#### Twelve-Pulse Combination
+$$= \frac{12\sqrt{2}\,V_{LL}\cos(15°)}{\pi} \cdot 2\sin(15°)$$
 
-The two 6-pulse bridges are phase-shifted by 30° (±15° from the phase-shifting transformer T0) and their DC outputs are combined in series through the secondary diode rectifiers. The combined 12-pulse average output voltage is:
+$$= \frac{24\sqrt{2}\,V_{LL}}{\pi}\sin(15°)\cos(15°) = \frac{12\sqrt{2}\,V_{LL}}{\pi}\sin(30°) = \frac{12\sqrt{2}\,V_{LL}}{\pi}\cdot\frac{1}{2}$$
 
-$$\boxed{V_{dc} = \frac{6\sqrt{2}}{\pi} \, V_{sec,LL} \, \cos\alpha \approx 2.70 \, V_{sec,LL} \, \cos\alpha}$$
+$$\boxed{V_{dc} = \frac{6\sqrt{2}}{\pi}\,V_{LL} \approx 2.70\,V_{LL}}$$
 
-> **Note on commutation overlap**: In practice, the transformer leakage inductance causes commutation overlap angle $u$, which reduces the output voltage by:
+at full conduction ($\alpha = 0°$). With firing angle $\alpha$ (thyristors in Bridge X), the entire waveform shifts, reducing the average by $\cos\alpha$:
+
+$$\boxed{V_{dc} = \frac{6\sqrt{2}}{\pi}\,V_{LL}\cos\alpha \approx 2.70\,V_{LL}\cos\alpha}$$
+
+This also follows immediately from doubling the 6-pulse result: $V_{dc,12p} = 2\times V_{dc,6p} = 2\times\tfrac{3\sqrt{2}}{\pi}V_{LL}\cos\alpha$.
+
+> **Note on commutation overlap**: Transformer leakage inductance $L_s$ causes a commutation overlap angle $u$, reducing the output by:
 >
 > $$\Delta V_{u} = \frac{3}{\pi} \, \omega \, L_s \, I_{dc}$$
 >
-> where $L_s$ is the per-phase commutation (leakage) inductance and $I_{dc}$ is the DC load current. For typical transformer designs at the operating current of 22 A, this voltage drop is on the order of 1–3%.
+> At 22 A operating current, this voltage drop is on the order of 1–3%.
 
-#### Numerical Estimate: Transformer Turns Ratio
+---
 
-**Given:**
-- Input to phase-shift transformer T0: $V_{in} = 12.47$ kV (line-to-line RMS)
-- T0 secondary delivers two sets at ±15° phase shift to T1 and T2 primaries
-- Each rectifier transformer (T1, T2) primary: $V_{pri} \approx 12.5$ kV
-- Maximum required DC output: $|V_{dc,max}| = 90$ kV at $\alpha \approx 0°$
+#### Step 5 — Ripple Derived Directly from the 30° Arc Geometry
 
-From the 12-pulse equation at full conduction ($\alpha = 0°$):
+The 30° arc closes the loop cleanly. Within each arc $v_{out} = V_{peak}\cos(\omega t - \phi)$:
 
-$$V_{dc,max} = \frac{6\sqrt{2}}{\pi} \, V_{sec,LL}$$
+- **Maximum** occurs at the arc center (cosine argument = 0): $V_{max} = 2\sqrt{2}\,V_{LL}\cos(15°)$
+- **Minimum** occurs at the arc edges (cosine argument = ±15°): $V_{min} = 2\sqrt{2}\,V_{LL}\cos^2(15°)$
 
-Solving for the required secondary voltage:
+Therefore the **unfiltered peak-to-peak ripple** is:
+
+$$\frac{\Delta V_{pp}}{V_{max}} = \frac{V_{max} - V_{min}}{V_{max}} = 1 - \cos(15°) = 1 - \cos\!\left(\frac{\pi}{12}\right)$$
+
+$$\boxed{\frac{\Delta V_{pp}}{V_{dc}} = 1 - \cos(15°) = 3.41\%}$$
+
+The **15° half-angle is algebraically identical to the ±15° T0 phase shift** — both expressions arise because the arc half-width equals half the interleave angle (30°/2 = 15°). This is not a coincidence; the ripple formula is a direct geometric consequence of the T0 design choice.
+
+---
+
+#### Block-by-Block Numerical Transformation (SPEAR3 Values)
+
+Following the complete power path **12.47 kV → T0 → T1,T2 → Bridge X,Y → Series Sum → Filter → Output**:
+
+1. **Input**: $V_{in} = 12.47$ kV (line-to-line RMS, 3-phase, 60 Hz)
+
+2. **T0 phase-shift transformer**: Splits into two sets ±15° apart
+   - T1 primary: $V_{T1,pri} = 12.5$ kV ∠**0°**
+   - T2 primary: $V_{T2,pri} = 12.5$ kV ∠**30°** ← the 30° that creates 12-pulse
+
+3. **T1, T2 rectifier transformers** (turns ratio $n = 2.67:1$ step-up):
+   - T1 secondary: $33.3$ kV ∠0° — feeds **Bridge X**
+   - T2 secondary: $33.3$ kV ∠30° — feeds **Bridge Y**
+
+4. **Bridge X output** (6-pulse, 60° arcs at 0°, 60°, 120°, …): each arc peak = $\sqrt{2}\times 33.3 = 47.1$ kV  
+   Average: $V_{X} = \tfrac{3\sqrt{2}}{\pi}\times 33.3\times\cos\alpha = 45.0\cos\alpha$ kV
+
+5. **Bridge Y output** (6-pulse, 60° arcs at 30°, 90°, 150°, …): same amplitude, 30° shifted  
+   Average: $V_{Y} = 45.0\cos\alpha$ kV
+
+6. **Series combination** → 12-pulse, 30° arcs:
+   $$V_{12p} = V_X + V_Y = 2\times\frac{3\sqrt{2}}{\pi}\times 33.3\cos\alpha = \frac{6\sqrt{2}}{\pi}\times 33.3\cos\alpha = 90.0\cos\alpha \text{ kV}$$
+
+7. **LC Filter**: negligible DC voltage drop → $V_{dc,output} \approx 90.0\cos\alpha$ kV
+
+| Operating Point | $\cos\alpha$ | $\alpha$ | $V_{dc}$ |
+|----------------|-------------|---------|----------|
+| Maximum ($\alpha = 0°$) | 1.000 | 0° | **90.0 kV** ✓ |
+| Nominal | 0.856 | 31.1° | **77.0 kV** ✓ |
+| Measured (June 2020) | 0.801 | 36.8° | **72.1 kV** ✓ |
+
+---
+
+#### Star Point Controller: Primary-Side Phase Control
+
+The SPEAR3 HVPS uses a **star point controller** topology where 12 SCR stacks on the *primary side* of T1 and T2 control the effective voltage coupled to the secondary. The floating neutral of the open-wye primary windings is controlled by the SCRs to regulate the fraction of the AC waveform magnetically coupled to the secondary.
+
+The phase control law at the primary replicates as an effective firing angle $\alpha$ at the secondary bridge. Each 6-pulse bridge group therefore produces:
+
+$$V_{dc,\text{bridge}} = \frac{3\sqrt{2}}{\pi} \, V_{sec,LL} \, \cos\alpha$$
+
+and the combined 12-pulse output is:
+
+$$\boxed{V_{dc} = \frac{6\sqrt{2}}{\pi} \, V_{sec,LL} \, \cos\alpha \approx 2.70 \, V_{sec,LL} \, \cos\alpha}$$
+
+---
+
+#### Transformer Turns Ratio
+
+**Requirement**: maximum DC output $|V_{dc,max}| = 90$ kV at $\alpha = 0°$, T1/T2 primary at $V_{pri} = 12.5$ kV.
+
+From the 12-pulse equation at full conduction:
 
 $$V_{sec,LL} = \frac{\pi \, V_{dc,max}}{6\sqrt{2}} = \frac{\pi \times 90{,}000}{6\sqrt{2}} \approx 33.3 \text{ kV (line-to-line RMS)}$$
 
-The turns ratio of each rectifier transformer (T1, T2) is therefore:
+$$\boxed{n = \frac{V_{sec,LL}}{V_{pri}} = \frac{33.3}{12.5} \approx 2.67 : 1 \quad \text{(step-up)}}$$
 
-$$n = \frac{V_{sec,LL}}{V_{pri}} = \frac{33.3}{12.5} \approx 2.67 : 1 \quad \text{(step-up)}$$
+**Verification**:
 
-**Verification at nominal operating point (77 kV):**
+$$\cos\alpha_{nom} = \frac{77}{90} = 0.856 \implies \alpha \approx 31.1° \qquad \text{(nominal 77 kV)}$$
 
-$$\cos\alpha = \frac{V_{dc,nom}}{V_{dc,max}} = \frac{77}{90} = 0.856 \implies \alpha \approx 31.1°$$
+$$\cos\alpha_{meas} = \frac{72.08}{90} = 0.801 \implies \alpha \approx 36.8° \qquad \text{(June 2020 measured)}$$
 
-**Verification at measured operating point (72.08 kV, June 2020):**
-
-$$\cos\alpha = \frac{72.08}{90} = 0.801 \implies \alpha \approx 36.8°$$
-
-The corresponding Enerpro SIG HI control voltage of 4.40 VDC maps to this firing angle through the PLL-based phase control.
+The Enerpro SIG HI control voltage of 4.40 VDC maps to the 36.8° firing angle through the PLL-based phase control on the FCOG1200 board.
 
 ### **SCR Voltage Stress Analysis**
 
@@ -761,9 +829,11 @@ $$\omega_{ripple} = 2\pi \times 720 = 4{,}524 \text{ rad/s}$$
 
 #### Unfiltered Ripple Voltage
 
-The peak-to-peak ripple voltage of an ideal 12-pulse rectifier (before filtering) is:
+The 30° arc derivation in Step 5 above gives the ripple directly from the arc geometry — no separate derivation is needed. Each arc $v_{out} = 2\sqrt{2}\,V_{LL}\cos(15°)\cdot\cos(\omega t - \phi)$ has its minimum at the arc edges (cosine argument = ±15° from center), giving:
 
-$$\frac{\Delta V_{pp}}{V_{dc}} = 1 - \cos\!\left(\frac{\pi}{12}\right) = 1 - \cos(15°) = 1 - 0.9659 = 3.41\%$$
+$$\frac{\Delta V_{pp}}{V_{dc}} = 1 - \cos(15°) = 1 - \cos\!\left(\frac{\pi}{12}\right) = 1 - 0.9659 = 3.41\%$$
+
+The 15° angle here is exactly the half-width of the 30° output arc, which equals half the ±15° T0 phase shift — a direct geometric connection between the transformer design and the ripple performance.
 
 At the nominal 77 kV output:
 
