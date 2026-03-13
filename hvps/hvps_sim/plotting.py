@@ -595,8 +595,9 @@ def plot_hvps_monitoring_signals(result, save_path: Optional[str] = None,
             if save_path:
                 zoom_path = save_path.replace('.png', '_zoom.png')
                 fig_zoom.savefig(zoom_path, dpi=150, bbox_inches='tight')
+                plt.close(fig_zoom)  # Close zoom figure to free memory
 
     plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+        fig.savefig(save_path, dpi=150, bbox_inches='tight')  # Explicitly save main figure
     return fig

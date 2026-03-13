@@ -538,21 +538,61 @@ class HVPSSimulator:
         # Channel 2: HVPS DC Current (0 to 30 A DC, Danfysik DC-CT sensor)  
         result.hvps_current_monitor_a[i] = ps.i_out  # Same as main output
         # Channel 3: Inductor 2 (T2) Sawtooth voltage (firing circuit timing diagnosis)
-        # Generate sawtooth based on actual thyristor gating pulses
+        # Real SPEAR3: Bipolar asymmetric sawtooth with INVERTED direction
+        omega = 2 * np.pi * 60  # 60 Hz AC frequency
+        cycle_phase = (omega * t) % (2 * np.pi)
+        
+        # Generate bipolar asymmetric sawtooth (INVERTED from original)
+        # Real system shows inverted polarity compared to theoretical model
+        if cycle_phase < np.pi:
+            # Charging phase (slower rise) - INVERTED: now goes negative
+            sawtooth_base = -5.0 * (cycle_phase / np.pi)  # 0 to -5 kV
+        else:
+            # Discharging phase (faster fall) - INVERTED: now goes positive  
+            sawtooth_base = -5.0 + 10.0 * ((cycle_phase - np.pi) / np.pi)  # -5 to +5 kV
+        
+        # Add firing spikes at thyristor gate pulses (real system characteristic)
         gating_pulses = self.thyristor_rectifier.generate_gating_pulses(
             np.array([t]), cs.firing_angle_deg
         )
-        omega = 2 * np.pi * 60  # 60 Hz AC frequency
-        sawtooth_base = 5.0 * (2 * (omega * t % (2 * np.pi)) / (2 * np.pi) - 1)  # ±5 kV sawtooth
-        firing_spike = 2.0 * gating_pulses[0] if len(gating_pulses) > 0 else 0.0  # Real firing spike
+        firing_spike = 2.0 * gating_pulses[0] if len(gating_pulses) > 0 else 0.0
         result.inductor2_sawtooth_monitor_kv[i] = sawtooth_base + firing_spike
         
-        # Channel 4: Transformer 1 AC Phase Current (thyristor commutation physics)
-        # Generate square-wave current with commutation spikes using physics model
-        transformer_current = self.thyristor_rectifier.generate_transformer_ac_current(
-            np.array([t]), cs.firing_angle_deg, load_current_avg=15.0
-        )
-        result.transformer1_current_monitor_a[i] = transformer_current[0] if len(transformer_current) > 0 else 0.0
+        # Channel 4: Transformer 1 AC Phase Current (firing circuit health)
+        # Real SPEAR3: Bipolar asymmetric SQUARE PULSES (not sinusoidal)
+        # 12-pulse rectifier creates discrete switching events, not continuous AC
+        
+        # Generate square pulse pattern based on thyristor conduction windows
+        pulse_current = 0.0
+        pulse_width_deg = 60.0  # Each thyristor pair conducts for ~60° in 12-pulse system
+        
+        # Calculate which thyristor should be conducting
+        phase_angle_deg = ((omega * t) % (2 * np.pi)) * 180.0 / np.pi
+        firing_angle_adjusted = (cs.firing_angle_deg + phase_angle_deg) % 360.0
+        
+        # Create bipolar asymmetric square pulses
+        for pulse_start in range(0, 360, 30):  # 12 pulses per cycle (every 30°)
+            pulse_end = pulse_start + pulse_width_deg
+            if pulse_start <= firing_angle_adjusted < pulse_end:
+                # Asymmetric: positive and negative pulses have different characteristics
+                if (pulse_start // 60) % 2 == 0:
+                    pulse_current = 15.0  # Positive pulse
+                else:
+                    pulse_current = -12.0  # Negative pulse (asymmetric amplitude)
+                break
+        
+        # Add commutation spikes (sharp transients during thyristor switching)
+        commutation_spike = 0.0
+        for spike_angle in range(0, 360, 30):  # Spikes at each thyristor switching
+            angle_diff = abs(firing_angle_adjusted - spike_angle)
+            if angle_diff > 180.0:
+                angle_diff = 360.0 - angle_diff
+            if angle_diff < 5.0:  # Within 5° of switching event
+                spike_amplitude = 8.0 * np.exp(-(angle_diff / 2.0)**2)  # Sharp spike
+                commutation_spike = spike_amplitude if (spike_angle // 60) % 2 == 0 else -spike_amplitude
+                break
+        
+        result.transformer1_current_monitor_a[i] = pulse_current + commutation_spike
 
         # Protection
         result.protection_state[i] = prot.state.name

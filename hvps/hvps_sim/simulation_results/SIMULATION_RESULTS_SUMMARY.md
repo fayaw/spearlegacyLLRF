@@ -183,14 +183,16 @@ The simulation generates the **exact same 4 monitoring signals** that are availa
 **Channel 3: Inductor 2 (T2) Sawtooth Voltage Monitor**
 - Signal: `inductor2_sawtooth_monitor_kv`
 - Purpose: Firing circuit timing diagnosis
-- Pattern: Sawtooth with firing spikes every thyristor gate pulse
+- Pattern: **Bipolar asymmetric sawtooth with INVERTED direction** (matches real SPEAR3)
 - Real system: Indicates thyristor firing quality and timing
+- Characteristics: Asymmetric charge/discharge slopes, inverted polarity from theoretical model
 
 **Channel 4: Transformer 1 AC Phase Current Monitor**
 - Signal: `transformer1_current_monitor_a` 
 - Purpose: Firing circuit health and 12-pulse rectifier operation
-- Pattern: AC waveform with thyristor commutation spikes
-- Real system: Validates 12-pulse rectifier physics
+- Pattern: **Bipolar asymmetric SQUARE PULSES** (not sinusoidal, matches real SPEAR3)
+- Real system: Validates 12-pulse rectifier discrete switching behavior
+- Characteristics: Square pulse pattern with commutation spikes, asymmetric positive/negative amplitudes
 
 ### 🎯 **Direct Real System Comparison Capability**
 
