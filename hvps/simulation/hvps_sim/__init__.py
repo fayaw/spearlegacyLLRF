@@ -23,6 +23,6 @@ examples    -- Runnable demonstration scenarios
 __version__ = "0.1.0"
 __author__ = "SSRL/SLAC Engineering"
 
-from hvps.hvps_sim.config import HVPSConfig
-from hvps.hvps_sim.simulator import HVPSSimulator, SimulationResult
+from hvps.simulation.hvps_sim.config import HVPSConfig
+from hvps.simulation.hvps_sim.simulator import HVPSSimulator, SimulationResult
 

@@ -31,7 +31,7 @@ def main():
     print(f"   Final ripple: {result.ripple_pp_pct[-1]:.3f}%")
     
     # Create results directory
-    results_dir = "hvps/pyspice_sim/simulation_results"
+    results_dir = "hvps/simulation/pyspice_sim/simulation_results"
     os.makedirs(results_dir, exist_ok=True)
     
     print(f"\n📊 Generating all plots...")

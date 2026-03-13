@@ -19,8 +19,8 @@ import os
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from hvps.hvps_sim.examples import run_normal_operation, run_startup_sequence, run_arc_fault
-from hvps.hvps_sim.plotting import plot_hvps_monitoring_signals
+from hvps.simulation.hvps_sim.examples import run_normal_operation, run_startup_sequence, run_arc_fault
+from hvps.simulation.hvps_sim.plotting import plot_hvps_monitoring_signals
 
 
 def generate_all_monitoring_signals():

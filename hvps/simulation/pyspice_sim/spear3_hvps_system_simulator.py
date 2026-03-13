@@ -15,7 +15,7 @@ Architecture:
     PySpice Circuit Model + Control System Models + System State Machine
     
 Usage:
-    from hvps.pyspice_sim import SPEAR3SystemSimulator
+    from hvps.simulation.pyspice_sim import SPEAR3SystemSimulator
     
     sim = SPEAR3SystemSimulator()
     result = sim.run_startup(target_kv=77.0, duration=10.0)

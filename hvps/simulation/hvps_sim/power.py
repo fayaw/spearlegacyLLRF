@@ -24,7 +24,7 @@ import numpy as np
 from dataclasses import dataclass, field
 from typing import Optional
 
-from hvps.hvps_sim.config import HVPSConfig
+from hvps.simulation.hvps_sim.config import HVPSConfig
 
 
 @dataclass

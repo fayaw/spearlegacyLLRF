@@ -26,7 +26,7 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Optional, List
 
-from hvps.hvps_sim.config import HVPSConfig
+from hvps.simulation.hvps_sim.config import HVPSConfig
 
 
 class FaultType(Enum):

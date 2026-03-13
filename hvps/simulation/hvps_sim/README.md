@@ -35,7 +35,7 @@ hvps_sim/
 ## Quick Start
 
 ```python
-from hvps.hvps_sim import HVPSSimulator, HVPSConfig
+from hvps.simulation.hvps_sim import HVPSSimulator, HVPSConfig
 
 # Create simulator with default configuration
 sim = HVPSSimulator()
@@ -51,7 +51,7 @@ result.plot()
 ## Example Scenarios
 
 ```python
-from hvps.hvps_sim.examples import (
+from hvps.simulation.hvps_sim.examples import (
     run_normal_operation,    # Steady-state at -77 kV / 22 A
     run_startup_sequence,    # Full startup with soft-start ramp
     run_arc_fault,           # Klystron arc with crowbar response
@@ -103,7 +103,7 @@ results = run_all(plot=True)
 All parameters come from the legacy system documentation:
 
 ```python
-from hvps.hvps_sim.config import HVPSConfig
+from hvps.simulation.hvps_sim.config import HVPSConfig
 
 config = HVPSConfig()
 print(config.summary())

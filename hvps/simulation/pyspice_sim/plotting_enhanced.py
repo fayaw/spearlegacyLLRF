@@ -340,7 +340,7 @@ def add_plot_methods_to_result():
     
     # Import the SimulationResult class and add methods
     try:
-        from hvps.pyspice_sim.spear3_hvps_system_simulator import SimulationResult
+        from hvps.simulation.pyspice_sim.spear3_hvps_system_simulator import SimulationResult
         SimulationResult.plot_system_overview = plot_system_overview_method
         SimulationResult.plot_startup_sequence = plot_startup_sequence_method
         SimulationResult.plot_control_response = plot_control_response_method

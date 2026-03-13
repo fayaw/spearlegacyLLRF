@@ -15,12 +15,12 @@ Scenarios:
 Usage:
     python -m hvps.hvps_sim.examples
     or:
-    from hvps.hvps_sim.examples import run_all
+    from hvps.simulation.hvps_sim.examples import run_all
     run_all()
 """
 
-from hvps.hvps_sim.config import HVPSConfig
-from hvps.hvps_sim.simulator import HVPSSimulator
+from hvps.simulation.hvps_sim.config import HVPSConfig
+from hvps.simulation.hvps_sim.simulator import HVPSSimulator
 
 
 def run_normal_operation(duration: float = 10.0, voltage_kv: float = 77.0,
@@ -87,7 +87,7 @@ def run_startup_sequence(target_kv: float = 77.0, duration: float = 12.0,
         try:
             result.plot(save_path=f"{save_prefix}startup_sequence.png"
                         if save_prefix else None)
-            from hvps.hvps_sim.plotting import plot_control_response
+            from hvps.simulation.hvps_sim.plotting import plot_control_response
             plot_control_response(
                 result,
                 save_path=f"{save_prefix}startup_control.png"
@@ -137,7 +137,7 @@ def run_arc_fault(voltage_kv: float = 77.0, arc_time: float = 4.0,
         try:
             result.plot(save_path=f"{save_prefix}arc_fault.png"
                         if save_prefix else None)
-            from hvps.hvps_sim.plotting import plot_protection_event
+            from hvps.simulation.hvps_sim.plotting import plot_protection_event
             plot_protection_event(
                 result, event_time=arc_time, window_s=0.3,
                 save_path=f"{save_prefix}arc_detail.png"
@@ -186,7 +186,7 @@ def run_step_response(v_initial_kv: float = 60.0,
         try:
             result.plot(save_path=f"{save_prefix}step_response.png"
                         if save_prefix else None)
-            from hvps.hvps_sim.plotting import plot_control_response
+            from hvps.simulation.hvps_sim.plotting import plot_control_response
             plot_control_response(
                 result,
                 save_path=f"{save_prefix}step_control.png"
@@ -226,7 +226,7 @@ def run_power_quality_analysis(voltage_kv: float = 77.0,
 
     if plot:
         try:
-            from hvps.hvps_sim.plotting import plot_power_quality
+            from hvps.simulation.hvps_sim.plotting import plot_power_quality
             plot_power_quality(
                 result,
                 save_path=f"{save_prefix}power_quality.png"
@@ -273,7 +273,7 @@ def run_crowbar_test(voltage_kv: float = 77.0,
         try:
             result.plot(save_path=f"{save_prefix}crowbar_test.png"
                         if save_prefix else None)
-            from hvps.hvps_sim.plotting import plot_protection_event
+            from hvps.simulation.hvps_sim.plotting import plot_protection_event
             plot_protection_event(
                 result, event_time=crowbar_time,
                 save_path=f"{save_prefix}crowbar_detail.png"
@@ -326,7 +326,7 @@ def run_all(plot: bool = True, save_prefix: str = ""):
         print()
         
         try:
-            from hvps.hvps_sim.plotting import plot_hvps_monitoring_signals
+            from hvps.simulation.hvps_sim.plotting import plot_hvps_monitoring_signals
             
             # Generate monitoring signals for each scenario
             scenarios = [

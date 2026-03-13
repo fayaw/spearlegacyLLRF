@@ -10,7 +10,7 @@ System operating modes:
     OFF → STARTUP → REGULATING → (FAULT → RECOVERY →) REGULATING → SHUTDOWN → OFF
 
 Usage:
-    from hvps.hvps_sim import HVPSSimulator, HVPSConfig
+    from hvps.simulation.hvps_sim import HVPSSimulator, HVPSConfig
 
     sim = HVPSSimulator()
     result = sim.run(duration=10.0, voltage_kv=77.0)
@@ -22,14 +22,14 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Optional, Dict, List, Callable
 
-from hvps.hvps_sim.config import HVPSConfig
-from hvps.hvps_sim.power import PowerConversionChain, PowerState
-from hvps.hvps_sim.controls import ControlSystem, ControlState
-from hvps.hvps_sim.protection import (
+from hvps.simulation.hvps_sim.config import HVPSConfig
+from hvps.simulation.hvps_sim.power import PowerConversionChain, PowerState
+from hvps.simulation.hvps_sim.controls import ControlSystem, ControlState
+from hvps.simulation.hvps_sim.protection import (
     ProtectionManager, ProtectionStatus, ProtectionState, FaultType
 )
-from hvps.hvps_sim.filtering import LCFilter, TwelvePulseRippleGenerator, FilterComponents
-from hvps.hvps_sim.thyristor_physics import TwelvePulseThyristorRectifier
+from hvps.simulation.hvps_sim.filtering import LCFilter, TwelvePulseRippleGenerator, FilterComponents
+from hvps.simulation.hvps_sim.thyristor_physics import TwelvePulseThyristorRectifier
 
 
 class SystemMode(Enum):
@@ -148,7 +148,7 @@ class SimulationResult:
 
     def plot(self, save_path: Optional[str] = None):
         """Generate standard overview plots. Requires matplotlib."""
-        from hvps.hvps_sim.plotting import plot_system_overview
+        from hvps.simulation.hvps_sim.plotting import plot_system_overview
         return plot_system_overview(self, save_path=save_path)
 
 

@@ -15,7 +15,7 @@ Date: March 13, 2026
 
 import numpy as np
 import matplotlib.pyplot as plt
-from hvps.hvps_sim import HVPSSimulator
+from hvps.simulation.hvps_sim import HVPSSimulator
 import os
 import sys
 
@@ -136,7 +136,7 @@ def validate_filter_performance():
     """Validate LC filter performance."""
     print("\n🔧 Validating LC Filter Performance...")
     
-    from hvps.hvps_sim.filtering import LCFilter, FilterComponents
+    from hvps.simulation.hvps_sim.filtering import LCFilter, FilterComponents
     
     filter_components = FilterComponents()
     lc_filter = LCFilter(filter_components)
