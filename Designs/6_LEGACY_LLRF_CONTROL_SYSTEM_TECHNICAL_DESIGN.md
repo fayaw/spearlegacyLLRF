@@ -60,8 +60,8 @@ The RF system operates at **476 MHz** with a single high-power klystron driving 
 | Cavity Gap Voltage | V_gap | ~800 kV | Per cavity |
 | Total Gap Voltage | V_total | ~3.2 MV | Four cavities |
 | DAC Resolution | — | 12-bit (±2048 counts) | DAC Loop |
-| DAC Loop Period | T_DAC | ~0.5 s | DAC Loop |
-| HVPS Loop Period | T_HVPS | ~0.5 s | HVPS Loop |
+| DAC Loop Period | T_DAC | ~0.5 s | DAC Loop (EPICS database) |
+| HVPS Loop Period | T_HVPS | ~0.5 s | HVPS Loop (EPICS database) |
 | Maximum Loop Idle | T_max | 10.0 s | All supervisory loops |
 | HVPS Voltage Tolerance Count | N_tol | 10 cycles | HVPS Loop |
 | Tuner Motor Deadband | RDBD | Configurable (mm) | Tuner Loop |
@@ -497,7 +497,52 @@ $$|\Delta N(k)| > \Delta N_{\text{min}} = 0.5 \text{ counts}$$
 
 If the delta is below this threshold AND neither the phase has changed nor the control mode has changed, no update is written to hardware.
 
-### 6.5 Control Path Selection Logic
+### 6.5 DAC Loop Operating Modes
+
+The DAC loop operates in **three distinct modes** based on station state and direct loop status:
+
+#### Mode 1: TUNE Mode (Drive Power Control)
+- **Station State**: `STATION_TUNE`
+- **Control Target**: Drive power regulation
+- **DAC Target**: `tune_counts` (RFP module)
+- **Delta Source**: `tune_delta_counts` (external subroutine record)
+- **Status Codes**: `DAC_LOOP_STATUS_TUNE` (good) / `DAC_LOOP_STATUS_TUNE_OFF` (disabled)
+
+#### Mode 2: ON_CW Mode with Direct Loop OFF (Drive Power Control)
+- **Station State**: `STATION_ON_CW` AND `direct_loop == LOOP_CONTROL_OFF`
+- **Module Selection Logic**:
+  ```c
+  if (LOOP_INVALID_SEVERITY(pvSeverity(gvf_module_sevr))):
+      // GVF module unavailable → use RFP module
+      Control: on_counts (RFP)
+      Delta:   on_rfp_delta_counts
+  else:
+      // GVF module available → use GFF module  
+      Control: gff_counts (GFF)
+      Delta:   on_gff_delta_counts
+  ```
+
+#### Mode 3: ON_CW Mode with Direct Loop ON (Gap Voltage Control)
+- **Station State**: `STATION_ON_CW` AND `direct_loop == LOOP_CONTROL_ON`
+- **Module Selection Logic**:
+  ```c
+  if (LOOP_INVALID_SEVERITY(pvSeverity(gvf_module_sevr))):
+      // GVF module unavailable → use RFP module
+      Control: on_counts (RFP)
+      Delta:   on_delta_counts
+  else:
+      // GVF module available → use GFF module
+      Control: gff_counts (GFF) 
+      Delta:   gff_delta_counts
+  ```
+
+**Key Implementation Details**:
+- **External Delta Calculation**: All `*_delta_counts` values are computed by EPICS subroutine records, not within the SNL code
+- **Module Validity Checking**: Uses `pvSeverity()` checks to determine if GVF module is available
+- **Automatic Fallback**: If GVF module fails, automatically switches to RFP module control
+- **Mode Transition Handling**: `prev_*_ctrl` variables prevent spurious "DAC being controlled by others" messages during mode changes
+
+### 6.6 Control Path Selection Logic
 
 The DAC loop selects the appropriate control path based on three conditions:
 
@@ -523,14 +568,14 @@ else (direct_loop == ON):
         Delta PV:  {STN}:STNVOLT:DAC:DELTA
 ```
 
-### 6.6 Drive Power Limiting Protection
+### 6.7 Drive Power Limiting Protection
 
 When the drive power is already high and the gap voltage needs to increase, the controller prevents further increase to protect the klystron:
 
 $$\text{if } \left(\text{LOLO}(P_{\text{gap,error}}) \text{ OR } \text{INVALID}(P_{\text{drive}}) \right) \text{ AND } \Delta N > \Delta N_{\text{min}}:$$
 $$\quad \text{status} \leftarrow \text{DRIV\\_HIGH (no gap voltage increase)}$$
 
-### 6.7 Transfer Function Analysis
+### 6.8 Transfer Function Analysis
 
 The DAC loop, combined with the cavity plant dynamics, forms a Type-1 servo. The open-loop discrete-time transfer function is:
 
@@ -544,7 +589,7 @@ $$G_{\text{CL}}(z) = \frac{G_{\text{OL}}(z)}{1 + G_{\text{OL}}(z)}$$
 
 For stability, the Nyquist criterion requires that the phase margin at the unity-gain crossover frequency exceeds ~45°. Given the slow update rate (~0.5s) compared to the cavity bandwidth (~150 kHz), the plant appears essentially static to this loop, and stability is guaranteed for moderate gains K_i.
 
-### 6.8 Ripple Loop Integration
+### 6.9 Ripple Loop Integration
 
 The ripple loop operates at a slower rate and provides AC line frequency (60 Hz) rejection. Its amplitude setpoint is loaded via:
 
@@ -582,9 +627,16 @@ The voltage step sizes Δ V_down and Δ V_up are independently configurable via 
 
 ### 7.3 ON Mode — Operational Regulation
 
-In ON mode, the HVPS loop maintains steady-state operating conditions. The control action depends on the station state and direct loop:
+In ON mode, the HVPS loop maintains steady-state operating conditions. The control action depends on the station state and direct loop status. **All delta voltage calculations are performed externally by EPICS subroutine records**, not within the SNL code.
 
 **Case 1: ON_CW with direct loop ON** (drive power control):
+
+```c
+if ((station_state == STATION_ON_CW) && (direct_loop != LOOP_CONTROL_OFF)) {
+    pvGet(delta_on_voltage);
+    delta_hvps_voltage = -delta_on_voltage;  // Note: negative sign
+}
+```
 
 $$\Delta V_{\text{HVPS}}(k) = -\Delta V_{\text{on}}(k)$$
 
@@ -594,9 +646,22 @@ The delta is computed externally and read from: `{STN}:KLYSDRIVFRWD:HVPS:DELTA`
 
 **Case 2: TUNE or ON_CW with direct loop OFF** (gap voltage control):
 
+```c
+else {
+    pvGet(delta_tune_voltage);
+    delta_hvps_voltage = delta_tune_voltage;  // Direct relationship
+}
+```
+
 $$\Delta V_{\text{HVPS}}(k) = \Delta V_{\text{tune}}(k)$$
 
 Read from: `{STN}:STNVOLT:HVPS:DELTA`
+
+**State-Dependent Behavior Summary**:
+- **TUNE mode**: Always uses `delta_tune_voltage` for gap voltage control
+- **ON_CW + direct loop OFF**: Uses `delta_tune_voltage` for gap voltage control  
+- **ON_CW + direct loop ON**: Uses `delta_on_voltage` (negated) for drive power control
+- **All other states**: HVPS loop is OFF or in PROCESS mode
 
 ### 7.4 Voltage Clamping and Safety
 
@@ -1288,22 +1353,22 @@ The legacy design includes several robustness features:
 
 | Code | Value | Description |
 |------|-------|-------------|
-| UNKNOWN | 0 | Unknown |
-| GOOD | 1 | Good |
+| UNKNOWN | 0 | HVPS loop in unknown status |
+| GOOD | 1 | HVPS loop reporting good status |
 | RFP_BAD | 2 | RF Processor bad |
 | CAVV_LIM | 3 | Cavity voltage above limit |
-| OFF | 4 | Loop off |
+| OFF | 4 | HVPS loop is off |
 | VACM_BAD | 5 | Bad vacuum |
 | POWR_BAD | 6 | Klystron forward power bad |
 | GAPV_BAD | 7 | Gap voltage bad |
 | GAPV_TOL | 8 | Gap voltage out of tolerance |
-| VOLT_LIM | 9 | HVPS at voltage limit |
-| STN_OFF | 10 | Station OFF/PARK |
-| VOLT_TOL | 11 | Readback ≠ requested |
-| VOLT_BAD | 12 | Readback invalid |
-| DRIV_BAD | 13 | Klystron drive bad |
-| ON_FM | 14 | Station in ON_FM |
-| DRIV_TOL | 15 | Drive power out of tolerance |
+| VOLT_LIM | 9 | HVPS loop at HVPS voltage limit |
+| STN_OFF | 10 | Station is OFF or PARKed |
+| VOLT_TOL | 11 | Readback voltage differs from Requested |
+| VOLT_BAD | 12 | Readback HVPS voltage invalid |
+| DRIV_BAD | 13 | Klystron Drive Power is bad |
+| ON_FM | 14 | Station in ON_FM mode |
+| DRIV_TOL | 15 | Klystron Drive Power out of tolerance |
 
 ### B.4 Tuner Loop Status Codes
 
