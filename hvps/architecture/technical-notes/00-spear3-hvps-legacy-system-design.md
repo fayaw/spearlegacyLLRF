@@ -557,35 +557,62 @@ The Building 118 control room currently houses an oscilloscope for manual monito
 
 #### Fundamental Six-Pulse Rectifier Equation
 
-**Mathematical Background:**
+**Derivation from First Principles:**
 
-The standard result for a three-phase fully-controlled (thyristor) bridge rectifier is:
+For a three-phase fully-controlled (thyristor) bridge rectifier, the phase voltages are defined as:
 
-$$\boxed{V_{dc,6p} = \frac{3\sqrt{2}}{\pi} \, V_{LL} \, \cos\alpha \approx 1.35 \, V_{LL} \, \cos\alpha}$$
+$$v_a(t) = \sqrt{2}\,V_{ph}\sin(\omega t)$$
+$$v_b(t) = \sqrt{2}\,V_{ph}\sin(\omega t - 120°)$$
+$$v_c(t) = \sqrt{2}\,V_{ph}\sin(\omega t - 240°)$$
 
-**Derivation Approach:**
+The corresponding line-to-line voltages (e.g. $v_{ab} = v_a - v_b$) are:
 
-In a 6-pulse bridge rectifier, the output voltage follows the envelope of the line-to-line voltages. At any instant, one thyristor from the upper group (S1, S3, S5) and one from the lower group (S2, S4, S6) conduct, creating a path for current flow.
+$$v_{ab}(t) = \sqrt{2}\,V_{LL}\sin(\omega t + 30°)$$
+$$v_{bc}(t) = \sqrt{2}\,V_{LL}\sin(\omega t - 90°)$$
+$$v_{ca}(t) = \sqrt{2}\,V_{LL}\sin(\omega t - 210°)$$
 
-The key insight is that the output voltage waveform consists of 60° segments from the line-to-line voltage envelope, with each segment delayed by the firing angle α from its natural commutation point.
+where $V_{LL} = \sqrt{3}\,V_{ph}$. Each line-to-line voltage leads its corresponding phase voltage by 30°. The three negative combinations $v_{ba}, v_{cb}, v_{ac}$ are shifted by a further 180° and are equally important — the fully-controlled bridge uses all six segments.
 
-For a controlled rectifier with firing angle α, the conduction of each thyristor pair is delayed by α degrees from the natural (diode) commutation point. The average DC voltage is calculated by integrating the output voltage waveform over one complete cycle.
+**Integration Setup:**
 
-The mathematical derivation involves:
-1. **Identifying the conduction intervals**: Each thyristor pair conducts for 60° per cycle
-2. **Applying the firing delay**: Each conduction interval starts α degrees after the natural commutation point  
-3. **Integration over the cycle**: The average value is found by integrating the line-to-line voltage segments
+In a 6-pulse bridge, each thyristor conducts for 120° per cycle, but the output waveform is composed of 60° segments, one from each of the six line-to-line voltages in sequence. The natural commutation point (NCP) for $v_{ab}$ occurs at $\omega t = 90°$ (its positive peak crossing relative to the segment boundary). With firing delay angle $\alpha$, integration runs from the NCP plus $\alpha$:
 
-The result $\frac{3\sqrt{2}}{\pi} \cos\alpha$ applies for **all values of α** from 0° to 180°, where:
-- At α = 0° (natural commutation): Maximum output = $1.35 \, V_{LL}$
-- At α = 90°: Zero output (thyristors fire at voltage zero-crossings)
-- At α = 180°: Maximum negative output (inversion mode)
+$$V_{dc,6p} = \frac{6}{2\pi}\int_{\pi/3\,+\,\alpha}^{2\pi/3\,+\,\alpha} \sqrt{2}\,V_{LL}\sin(\omega t)\,d(\omega t)$$
+
+The prefactor $\frac{6}{2\pi}$ accounts for 6 identical 60° ($\pi/3$) segments per full cycle. For clarity, substituting $u = \omega t$:
+
+$$V_{dc,6p} = \frac{3}{\pi}\int_{\pi/3\,+\,\alpha}^{2\pi/3\,+\,\alpha} \sqrt{2}\,V_{LL}\sin(u)\,du$$
+
+**Evaluation of the Integral:**
+
+$$V_{dc,6p} = \frac{3\sqrt{2}\,V_{LL}}{\pi}\Big[-\cos(u)\Big]_{\pi/3\,+\,\alpha}^{2\pi/3\,+\,\alpha}$$
+
+$$= \frac{3\sqrt{2}\,V_{LL}}{\pi}\Big[-\cos\!\left(\tfrac{2\pi}{3}+\alpha\right)+\cos\!\left(\tfrac{\pi}{3}+\alpha\right)\Big]$$
+
+Expanding each term using the angle addition identity $\cos(A+B)=\cos A\cos B - \sin A\sin B$:
+
+$$\cos\!\left(\frac{\pi}{3}+\alpha\right) = \frac{1}{2}\cos\alpha - \frac{\sqrt{3}}{2}\sin\alpha$$
+
+$$\cos\!\left(\frac{2\pi}{3}+\alpha\right) = -\frac{1}{2}\cos\alpha - \frac{\sqrt{3}}{2}\sin\alpha$$
+
+Substituting:
+
+$$V_{dc,6p} = \frac{3\sqrt{2}\,V_{LL}}{\pi}\left[-\left(-\frac{1}{2}\cos\alpha - \frac{\sqrt{3}}{2}\sin\alpha\right) + \left(\frac{1}{2}\cos\alpha - \frac{\sqrt{3}}{2}\sin\alpha\right)\right]$$
+
+$$= \frac{3\sqrt{2}\,V_{LL}}{\pi}\left[\frac{1}{2}\cos\alpha + \frac{\sqrt{3}}{2}\sin\alpha + \frac{1}{2}\cos\alpha - \frac{\sqrt{3}}{2}\sin\alpha\right]$$
+
+$$= \frac{3\sqrt{2}\,V_{LL}}{\pi}\left[\cos\alpha\right]$$
+
+**Result:**
+
+$$\boxed{V_{dc,6p} = \frac{3\sqrt{2}}{\pi}\,V_{LL}\cos\alpha \approx 1.3505\,V_{LL}\cos\alpha}$$
 
 where:
 - $V_{LL}$ = line-to-line RMS voltage at the rectifier transformer secondary
-- $\alpha$ = thyristor firing delay angle (0° to 180°)
-- At $\alpha = 0°$ (full conduction): $V_{dc,6p} = 1.35 \, V_{LL}$
-- At $\alpha = 90°$: $V_{dc,6p} = 0$ (no output)
+- $\alpha$ = thyristor firing delay angle, ranging from 0° to 180°
+- At $\alpha = 0°$: $V_{dc} = \frac{3\sqrt{2}}{\pi}V_{LL} \approx 1.35\,V_{LL}$ (maximum rectified output)
+- At $\alpha = 90°$: $V_{dc} = 0$ (average output is zero; inverter boundary)
+- At $\alpha > 90°$: $V_{dc} < 0$ (inverting mode; energy returns to AC supply)
 
 **Block-by-Block Voltage Transformation Analysis:**
 
