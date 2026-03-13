@@ -74,6 +74,12 @@ class SimulationResult:
     i_inductor1_a: np.ndarray = field(default_factory=lambda: np.array([]))
     i_inductor2_a: np.ndarray = field(default_factory=lambda: np.array([]))
     filter_energy_j: np.ndarray = field(default_factory=lambda: np.array([]))
+    
+    # HVPS Monitoring Signals (4 channels from Waveform Buffer System)
+    hvps_voltage_monitor_kv: np.ndarray = field(default_factory=lambda: np.array([]))  # Channel 1
+    hvps_current_monitor_a: np.ndarray = field(default_factory=lambda: np.array([]))   # Channel 2  
+    inductor1_voltage_monitor_kv: np.ndarray = field(default_factory=lambda: np.array([]))  # Channel 3
+    inductor2_voltage_monitor_kv: np.ndarray = field(default_factory=lambda: np.array([]))  # Channel 4
 
     # Protection
     protection_state: List[str] = field(default_factory=list)
@@ -461,6 +467,12 @@ class HVPSSimulator:
         result.i_inductor1_a = np.zeros(n_steps)
         result.i_inductor2_a = np.zeros(n_steps)
         result.filter_energy_j = np.zeros(n_steps)
+        
+        # HVPS Monitoring Signals (4 channels)
+        result.hvps_voltage_monitor_kv = np.zeros(n_steps)
+        result.hvps_current_monitor_a = np.zeros(n_steps)
+        result.inductor1_voltage_monitor_kv = np.zeros(n_steps)
+        result.inductor2_voltage_monitor_kv = np.zeros(n_steps)
         result.crowbar_active = np.zeros(n_steps)
         result.arc_energy_j = np.zeros(n_steps)
         result.v_ac_a_kv = np.zeros(n_steps)
@@ -500,6 +512,18 @@ class HVPSSimulator:
         result.i_inductor1_a[i] = ps.i_l1
         result.i_inductor2_a[i] = ps.i_l2
         result.filter_energy_j[i] = self.power.lc_filter.stored_energy()
+        
+        # HVPS Monitoring Signals (4 channels from Waveform Buffer System)
+        # Channel 1: HVPS Voltage (with voltage divider conditioning)
+        result.hvps_voltage_monitor_kv[i] = ps.v_out / 1000.0  # Same as main output
+        # Channel 2: HVPS Current (with current transformer conditioning)  
+        result.hvps_current_monitor_a[i] = ps.i_out  # Same as main output
+        # Channel 3: Inductor 1 Voltage (L1 voltage drop for firing circuit health)
+        v_l1 = ps.v_bridge1 - ps.v_cap  # Voltage across L1
+        result.inductor1_voltage_monitor_kv[i] = v_l1 / 1000.0
+        # Channel 4: Inductor 2 Voltage (L2 voltage drop for firing circuit health)
+        v_l2 = ps.v_bridge2 - ps.v_cap  # Voltage across L2
+        result.inductor2_voltage_monitor_kv[i] = v_l2 / 1000.0
 
         # Protection
         result.protection_state[i] = prot.state.name
@@ -513,4 +537,3 @@ class HVPSSimulator:
         # Temperatures
         result.temp_phase_upper[i] = prot.temp_phase_upper_c
         result.temp_crowbar[i] = prot.temp_crowbar_c
-

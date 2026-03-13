@@ -201,8 +201,8 @@ class SixPulseBridge:
         if v_avg <= 0:
             return 0.0
         alpha_rad = np.radians(alpha_deg)
-        # Ripple amplitude for 6-pulse: reduced for better realism
-        ripple_factor = 0.015 * (1.0 + 0.3 * abs(np.sin(alpha_rad)))
+        # Ripple amplitude for 6-pulse: further reduced for better realism
+        ripple_factor = 0.008 * (1.0 + 0.2 * abs(np.sin(alpha_rad)))
         omega_ripple = 2 * np.pi * 6 * f_line
         ripple = v_avg * ripple_factor * np.cos(omega_ripple * t)
         return v_avg + ripple

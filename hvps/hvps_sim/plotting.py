@@ -452,3 +452,105 @@ def plot_plc_registers(result, save_path: Optional[str] = None,
         plt.savefig(save_path, dpi=150, bbox_inches='tight')
     return fig
 
+
+def plot_hvps_monitoring_signals(result, save_path: Optional[str] = None,
+                                 figsize: Tuple[float, float] = (14, 12)):
+    """Plot the 4 HVPS monitoring signals from the Waveform Buffer System.
+    
+    These are the 4 constantly monitored HVPS signals as specified in the
+    technical documentation (Section 14.6):
+    
+    Channel 1: HVPS Voltage (regulation monitoring)
+    Channel 2: HVPS Current (load monitoring) 
+    Channel 3: Inductor 1 Voltage (firing circuit health)
+    Channel 4: Inductor 2 Voltage (firing circuit health)
+    
+    Parameters
+    ----------
+    result : SimulationResult
+        Simulation results containing the monitoring signals.
+    save_path : str, optional
+        File path to save the figure.
+    figsize : tuple
+        Figure size (width, height) in inches.
+        
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The created figure object.
+    """
+    if not _check_matplotlib():
+        return None
+        
+    import matplotlib.pyplot as plt
+    
+    fig, axes = plt.subplots(4, 1, figsize=figsize, sharex=True)
+    fig.suptitle('HVPS Monitoring Signals (Waveform Buffer System)', fontsize=16, fontweight='bold')
+    
+    t = result.time
+    
+    # Channel 1: HVPS Voltage Monitor
+    axes[0].plot(t, result.hvps_voltage_monitor_kv, 'b-', linewidth=1.5, label='HVPS Voltage')
+    axes[0].set_ylabel('Voltage (kV)', fontweight='bold')
+    axes[0].set_title('Channel 1: HVPS Voltage Monitor (Regulation)', fontweight='bold')
+    axes[0].grid(True, alpha=0.3)
+    axes[0].legend()
+    
+    # Add statistics
+    v_mean = np.mean(result.hvps_voltage_monitor_kv)
+    v_std = np.std(result.hvps_voltage_monitor_kv)
+    v_pp = np.max(result.hvps_voltage_monitor_kv) - np.min(result.hvps_voltage_monitor_kv)
+    axes[0].text(0.02, 0.95, f'Mean: {v_mean:.1f} kV\nStd: {v_std:.2f} kV\nP-P: {v_pp:.2f} kV', 
+                transform=axes[0].transAxes, verticalalignment='top',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    
+    # Channel 2: HVPS Current Monitor  
+    axes[1].plot(t, result.hvps_current_monitor_a, 'r-', linewidth=1.5, label='HVPS Current')
+    axes[1].set_ylabel('Current (A)', fontweight='bold')
+    axes[1].set_title('Channel 2: HVPS Current Monitor (Load)', fontweight='bold')
+    axes[1].grid(True, alpha=0.3)
+    axes[1].legend()
+    
+    # Add statistics
+    i_mean = np.mean(result.hvps_current_monitor_a)
+    i_std = np.std(result.hvps_current_monitor_a)
+    i_pp = np.max(result.hvps_current_monitor_a) - np.min(result.hvps_current_monitor_a)
+    axes[1].text(0.02, 0.95, f'Mean: {i_mean:.1f} A\nStd: {i_std:.2f} A\nP-P: {i_pp:.2f} A', 
+                transform=axes[1].transAxes, verticalalignment='top',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    
+    # Channel 3: Inductor 1 Voltage Monitor
+    axes[2].plot(t, result.inductor1_voltage_monitor_kv, 'g-', linewidth=1.5, label='L1 Voltage')
+    axes[2].set_ylabel('Voltage (kV)', fontweight='bold')
+    axes[2].set_title('Channel 3: Inductor 1 Voltage Monitor (Firing Circuit Health)', fontweight='bold')
+    axes[2].grid(True, alpha=0.3)
+    axes[2].legend()
+    
+    # Add statistics
+    l1_mean = np.mean(result.inductor1_voltage_monitor_kv)
+    l1_std = np.std(result.inductor1_voltage_monitor_kv)
+    l1_pp = np.max(result.inductor1_voltage_monitor_kv) - np.min(result.inductor1_voltage_monitor_kv)
+    axes[2].text(0.02, 0.95, f'Mean: {l1_mean:.1f} kV\nStd: {l1_std:.2f} kV\nP-P: {l1_pp:.2f} kV', 
+                transform=axes[2].transAxes, verticalalignment='top',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    
+    # Channel 4: Inductor 2 Voltage Monitor
+    axes[3].plot(t, result.inductor2_voltage_monitor_kv, 'm-', linewidth=1.5, label='L2 Voltage')
+    axes[3].set_ylabel('Voltage (kV)', fontweight='bold')
+    axes[3].set_xlabel('Time (s)', fontweight='bold')
+    axes[3].set_title('Channel 4: Inductor 2 Voltage Monitor (Firing Circuit Health)', fontweight='bold')
+    axes[3].grid(True, alpha=0.3)
+    axes[3].legend()
+    
+    # Add statistics
+    l2_mean = np.mean(result.inductor2_voltage_monitor_kv)
+    l2_std = np.std(result.inductor2_voltage_monitor_kv)
+    l2_pp = np.max(result.inductor2_voltage_monitor_kv) - np.min(result.inductor2_voltage_monitor_kv)
+    axes[3].text(0.02, 0.95, f'Mean: {l2_mean:.1f} kV\nStd: {l2_std:.2f} kV\nP-P: {l2_pp:.2f} kV', 
+                transform=axes[3].transAxes, verticalalignment='top',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    
+    plt.tight_layout()
+    if save_path:
+        plt.savefig(save_path, dpi=150, bbox_inches='tight')
+    return fig
