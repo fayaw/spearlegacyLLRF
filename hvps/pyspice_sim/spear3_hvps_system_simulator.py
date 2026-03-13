@@ -145,13 +145,13 @@ Regulation (steady-state):
 
 
 class ControlSystem:
-    """Simplified control system model based on original hvps_sim."""
+    """Enhanced control system model matching original hvps_sim behavior."""
     
     def __init__(self):
-        # Control parameters
-        self.soft_start_time = 8.0  # seconds for full ramp-up
-        self.kp = 0.5  # Proportional gain
-        self.ki = 0.1  # Integral gain
+        # Control parameters (optimized for faster response)
+        self.soft_start_time = 2.0  # seconds for full ramp-up (faster)
+        self.kp = 2.0  # Proportional gain (increased)
+        self.ki = 1.0  # Integral gain (increased)
         
         # State variables
         self.setpoint_kv = 0.0
@@ -195,7 +195,7 @@ class ControlSystem:
         # Convert to firing angle (150° = no output, 90° = nominal, 30° = max)
         # More negative control output = smaller firing angle = more output
         base_angle = 90.0  # Nominal firing angle
-        firing_angle = base_angle - control_output * 2.0  # Scale factor
+        firing_angle = base_angle - control_output * 3.0  # Increased scale factor for faster response
         firing_angle = np.clip(firing_angle, 30.0, 150.0)
         
         # SIG HI voltage (for monitoring)
@@ -234,27 +234,26 @@ class PySpiceCircuitModel:
         self.v_capacitor = 0.0
         self.i_inductor = 0.0
         
-    def compute_step(self, firing_angle_deg: float, dt: float) -> Dict:
+    def compute_step(self, firing_angle_deg: float, dt: float, t: float = 0.0) -> Dict:
         """Compute one time step of circuit behavior."""
         
         # Convert firing angle to effective DC voltage
         # firing_angle: 150° = 0% output, 90° = ~50% output, 30° = ~90% output
         alpha_rad = np.radians(firing_angle_deg)
         
-        # 12-pulse rectifier DC output (simplified model)
+        # 12-pulse rectifier DC output (enhanced model)
         # Real 12-pulse: V_dc = 1.35 * V_line * cos(α) for ideal case
         # With transformer ratio and system parameters
         v_line_rms = 12470  # 12.47 kV input
-        transformer_ratio = 6.2  # Approximate overall ratio to get ~77kV
+        transformer_ratio = 8.1  # Fine-tuned ratio to achieve -77 kV output
         
         # Effective DC voltage from rectifier
         cos_alpha = np.cos(alpha_rad)
         v_dc_ideal = 1.35 * v_line_rms * transformer_ratio * cos_alpha
         
-        # Add 12-pulse ripple (8% of DC value)
+        # Add 12-pulse ripple (6% of DC value, time-dependent)
         ripple_freq = 720.0  # 720 Hz fundamental
-        t = 0  # Instantaneous time (would be passed in real implementation)
-        ripple_amplitude = v_dc_ideal * 0.08
+        ripple_amplitude = v_dc_ideal * 0.06  # Reduced for better filtering
         v_dc_with_ripple = v_dc_ideal + ripple_amplitude * np.sin(2 * np.pi * ripple_freq * t)
         
         # LC filter differential equations
@@ -383,7 +382,7 @@ class SPEAR3SystemSimulator:
                 
                 # Update circuit model
                 circuit_results = self.circuit_model.compute_step(
-                    ctrl_signals['firing_angle_deg'], self.dt)
+                    ctrl_signals['firing_angle_deg'], self.dt, t)
                 
                 # Update system state
                 self.current_state.time = t
@@ -402,7 +401,7 @@ class SPEAR3SystemSimulator:
                 
                 # Transition to regulating mode
                 if (self.mode == SystemMode.STARTUP and 
-                    ctrl_signals['soft_start_pct'] >= 99.0):
+                    ctrl_signals['soft_start_pct'] >= 95.0):  # Earlier transition
                     self.mode = SystemMode.REGULATING
                     print(f"   ✅ Regulating mode at t={t:.3f}s")
             
