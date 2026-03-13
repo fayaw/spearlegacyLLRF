@@ -51,7 +51,10 @@ def main():
     # 5. NEW: Monitor channels (4-channel waveform buffer)
     plotting_enhanced.plot_monitor_channels(result, f'{results_dir}/monitor_channels.png')
     
-    # 6. NEW: Complete system overview with all signals
+    # 6. NEW: Monitor channels zoom (last 100ms detail view)
+    plotting_enhanced.plot_monitor_channels_zoom(result, f'{results_dir}/monitor_channels_zoom.png')
+    
+    # 7. NEW: Complete system overview with all signals
     plotting_enhanced.plot_all_signals(result, f'{results_dir}/complete_system_overview.png')
     
     print(f"\n🎯 Monitor Channel Summary:")
@@ -60,7 +63,7 @@ def main():
     print(f"   Channel 3 (T2 Sawtooth): {result.inductor2_sawtooth_monitor_kv[-1]:.2f} kV")
     print(f"   Channel 4 (T1 AC Current): {result.transformer1_current_monitor_a[-1]:.2f} A")
     
-    print(f"\n✅ All plots generated successfully!")
+    print(f"\n✅ All 7 plots generated successfully!")
     print(f"📁 Results saved to: {results_dir}")
     
     # Print detailed summary

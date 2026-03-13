@@ -346,6 +346,7 @@ def add_plot_methods_to_result():
         SimulationResult.plot_control_response = plot_control_response_method
         SimulationResult.plot_ripple_analysis = plot_ripple_analysis_method
         SimulationResult.plot_monitor_channels = plot_monitor_channels_method
+        SimulationResult.plot_monitor_channels_zoom = plot_monitor_channels_zoom_method
         SimulationResult.plot_all_signals = plot_all_signals_method
         print("✅ Added plotting methods to SimulationResult (including monitor channels)")
     except ImportError:
@@ -403,6 +404,77 @@ def plot_monitor_channels(result, filename='monitor_channels.png', title_prefix=
     plt.savefig(filename, dpi=300, bbox_inches='tight')
     plt.close()
     print(f"📊 Monitor channels plot saved to: {filename}")
+
+
+def plot_monitor_channels_zoom(result, filename='monitor_channels_zoom.png', title_prefix='Enhanced PySpice', zoom_duration=0.1):
+    """Plot the 4 HVPS monitor channels with zoom to last 100ms for detailed view."""
+    
+    # Find the time range for the last 100ms (or specified zoom_duration)
+    max_time = result.time[-1]
+    start_time = max_time - zoom_duration
+    
+    # Find indices for the zoom window
+    zoom_indices = (result.time >= start_time) & (result.time <= max_time)
+    time_zoom = result.time[zoom_indices]
+    
+    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    fig.suptitle(f'{title_prefix} - Monitor Channels Detail View (Last {zoom_duration*1000:.0f}ms)', 
+                 fontsize=16, fontweight='bold')
+    
+    # Channel 1: HVPS DC Voltage Monitor (zoomed)
+    ax1 = axes[0, 0]
+    voltage_zoom = result.hvps_voltage_monitor_kv[zoom_indices]
+    ax1.plot(time_zoom, voltage_zoom, 'b-', linewidth=2, label='HVPS Voltage')
+    ax1.set_xlabel('Time (s)')
+    ax1.set_ylabel('Voltage (kV)')
+    ax1.set_title('Channel 1: HVPS DC Voltage (Detail)\nRipple and Regulation Detail', fontweight='bold')
+    ax1.grid(True, alpha=0.3)
+    ax1.legend()
+    # Auto-scale for better detail view
+    v_min, v_max = voltage_zoom.min(), voltage_zoom.max()
+    v_range = v_max - v_min
+    ax1.set_ylim(v_min - 0.1*v_range, v_max + 0.1*v_range)
+    
+    # Channel 2: HVPS DC Current Monitor (zoomed)
+    ax2 = axes[0, 1]
+    current_zoom = result.hvps_current_monitor_a[zoom_indices]
+    ax2.plot(time_zoom, current_zoom, 'r-', linewidth=2, label='HVPS Current')
+    ax2.set_xlabel('Time (s)')
+    ax2.set_ylabel('Current (A)')
+    ax2.set_title('Channel 2: HVPS DC Current (Detail)\nCurrent Ripple Detail', fontweight='bold')
+    ax2.grid(True, alpha=0.3)
+    ax2.legend()
+    # Auto-scale for better detail view
+    i_min, i_max = current_zoom.min(), current_zoom.max()
+    i_range = i_max - i_min
+    ax2.set_ylim(i_min - 0.1*i_range, i_max + 0.1*i_range)
+    
+    # Channel 3: Inductor 2 (T2) Sawtooth Monitor (zoomed)
+    ax3 = axes[1, 0]
+    sawtooth_zoom = result.inductor2_sawtooth_monitor_kv[zoom_indices]
+    ax3.plot(time_zoom, sawtooth_zoom, 'g-', linewidth=2, label='T2 Sawtooth')
+    ax3.set_xlabel('Time (s)')
+    ax3.set_ylabel('Voltage (kV)')
+    ax3.set_title('Channel 3: T2 Sawtooth (Detail)\nFiring Circuit Timing', fontweight='bold')
+    ax3.grid(True, alpha=0.3)
+    ax3.legend()
+    ax3.set_ylim(-8, 8)
+    
+    # Channel 4: Transformer 1 AC Phase Current Monitor (zoomed)
+    ax4 = axes[1, 1]
+    ac_current_zoom = result.transformer1_current_monitor_a[zoom_indices]
+    ax4.plot(time_zoom, ac_current_zoom, 'm-', linewidth=2, label='T1 AC Current')
+    ax4.set_xlabel('Time (s)')
+    ax4.set_ylabel('Current (A)')
+    ax4.set_title('Channel 4: T1 AC Current (Detail)\n12-Pulse Pattern Detail', fontweight='bold')
+    ax4.grid(True, alpha=0.3)
+    ax4.legend()
+    ax4.set_ylim(-20, 20)
+    
+    plt.tight_layout()
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"📊 Monitor channels zoom plot saved to: {filename}")
 
 
 def plot_all_signals(result, filename='complete_system_overview.png', title_prefix='Enhanced PySpice'):
@@ -525,6 +597,10 @@ def plot_all_signals(result, filename='complete_system_overview.png', title_pref
 def plot_monitor_channels_method(self, filename='monitor_channels.png', title_prefix='Enhanced PySpice'):
     """Plot monitor channels method for SimulationResult."""
     return plot_monitor_channels(self, filename, title_prefix)
+
+def plot_monitor_channels_zoom_method(self, filename='monitor_channels_zoom.png', title_prefix='Enhanced PySpice', zoom_duration=0.1):
+    """Plot monitor channels zoom method for SimulationResult."""
+    return plot_monitor_channels_zoom(self, filename, title_prefix, zoom_duration)
 
 def plot_all_signals_method(self, filename='complete_system_overview.png', title_prefix='Enhanced PySpice'):
     """Plot all signals method for SimulationResult."""
