@@ -46,13 +46,19 @@ The LLRF control system is implemented as a set of six concurrent EPICS State No
 - **Octal DAC calibration** — automated offset nulling and IQ matrix calibration
 - **Diagnostic logging** — fault recording, message logging, and TAXI error recovery
 
-The RF system operates at **476 MHz** with a single high-power klystron driving one or more superconducting RF cavities. The control system maintains the cavity accelerating voltage at the required setpoint while managing beam loading, detuning, and hardware protection.
+The RF system operates at **476 MHz** with a single high-power klystron driving four single-cell normal conducting RF cavities. The control system maintains the cavity accelerating voltage at the required setpoint while managing beam loading, detuning, and hardware protection.
 
 **Key Control Parameters:**
 
 | Parameter | Symbol | Typical Value | Control Loop |
 |-----------|--------|---------------|--------------|
-| RF Frequency | f_RF | 476.000 MHz | Fixed reference |
+| RF Frequency | f_RF | 476.3 MHz | Fixed reference |
+| Beam Energy | E_beam | 3.0 GeV | Storage ring |
+| Beam Current | I_beam | 500 mA | Storage ring |
+| Cavity Shunt Impedance | R_s | 3.9 MΩ | Per cavity |
+| Cavity Loaded Q | Q_L | 6,700 | Per cavity |
+| Cavity Gap Voltage | V_gap | ~800 kV | Per cavity |
+| Total Gap Voltage | V_total | ~3.2 MV | Four cavities |
 | DAC Resolution | — | 12-bit (±2048 counts) | DAC Loop |
 | DAC Loop Period | T_DAC | ~0.5 s | DAC Loop |
 | HVPS Loop Period | T_HVPS | ~0.5 s | HVPS Loop |
@@ -168,13 +174,15 @@ where the separation must be at least one decade to avoid inter-loop coupling in
 
 ### 3.1 Cavity Equivalent Circuit
 
-A superconducting RF cavity can be modeled as a parallel RLC resonator. The impedance of the loaded cavity at the RF driving frequency ω is:
+A normal conducting RF cavity can be modeled as a parallel RLC resonator. The impedance of the loaded cavity at the RF driving frequency ω is:
 
 $$Z_{\text{cav}}(\omega) = \frac{R_s}{1 + j Q_L \left(\frac{\omega}{\omega_0} - \frac{\omega_0}{\omega}\right)}$$
 
 where:
-- **R_s** = shunt impedance (typically 1–5 MΩ for a SPEAR3 cavity)
-- **Q_L** = loaded quality factor (including external coupling and beam loading)
+- **R_s** = shunt impedance = 3.9 MΩ (from PEP-II cavity specifications, SLAC-PUB-10083)
+- **Q_L** = loaded quality factor = 6,700 (from PEP-II cavity specifications, SLAC-PUB-10083)
+- **Q_0** = unloaded quality factor = 33,500 (from PEP-II cavity specifications)
+- **β** = coupling factor = 4.0 (where β = Q_0/Q_L - 1)
 - **ω₀** = 2π × 476 MHz = angular resonant frequency
 
 For small detuning Δω = ω - ω₀ ≪ ω₀, this simplifies to:
@@ -197,17 +205,18 @@ The cavity time constant (half-bandwidth) is:
 
 $$\tau_{\text{cav}} = \frac{2 Q_L}{\omega_0}$$
 
-For a typical SPEAR3 cavity with Q_L ~ 10,000 at 476 MHz:
+For a SPEAR3 cavity with Q_L = 6,700 at 476 MHz:
 
-$$\tau_{\text{cav}} = \frac{2 \times 10{,}000}{2\pi \times 476 \times 10^6} \approx 6.7 \, \mu\text{s}$$
+$$\tau_{\text{cav}} = \frac{2 \times 6{,}700}{2\pi \times 476 \times 10^6} \approx 4.5 \, \mu\text{s}$$
 
 ### 3.3 Beam Loading
 
-The beam current generates a voltage component in the cavity. For a stored beam with DC current I_b and a Gaussian bunch distribution, the fundamental component of beam loading at the RF frequency is:
+The beam current generates a voltage component in the cavity. For a stored beam with DC current I_b = 500 mA (SPEAR3 nominal) and a Gaussian bunch distribution, the fundamental component of beam loading at the RF frequency is:
 
 $$\tilde{I}_{b,\text{RF}} = 2 I_b \, F_b \, e^{j\phi_s}$$
 
 where:
+- **I_b** = 500 mA = 0.5 A (SPEAR3 nominal beam current)
 - **F_b** = beam form factor (bunch shape dependent, typically ≈ 1 for short bunches)
 - **φ_s** = synchronous phase angle
 
@@ -519,7 +528,7 @@ else (direct_loop == ON):
 When the drive power is already high and the gap voltage needs to increase, the controller prevents further increase to protect the klystron:
 
 $$\text{if } \left(\text{LOLO}(P_{\text{gap,error}}) \text{ OR } \text{INVALID}(P_{\text{drive}}) \right) \text{ AND } \Delta N > \Delta N_{\text{min}}:$$
-$$\quad \text{status} \leftarrow \text{DRIV\_HIGH (no gap voltage increase)}$$
+$$\quad \text{status} \leftarrow \text{DRIV\\_HIGH (no gap voltage increase)}$$
 
 ### 6.7 Transfer Function Analysis
 
@@ -539,7 +548,7 @@ For stability, the Nyquist criterion requires that the phase margin at the unity
 
 The ripple loop operates at a slower rate and provides AC line frequency (60 Hz) rejection. Its amplitude setpoint is loaded via:
 
-$$A_{\text{ripple}} \leftarrow \text{pvPut(ripple\_loop\_load)}$$
+$$A_{\text{ripple}} \leftarrow \text{pvPut(ripple\\_loop\\_load)}$$
 
 This is only updated when the ripple loop ready flag is set and the amplitude has changed, preventing unnecessary hardware writes.
 
@@ -618,9 +627,9 @@ After N_tol exceeds 10 consecutive violations, the status changes to VOLT_TOL. T
 
 When increasing HVPS voltage would cause any cavity voltage to exceed its maximum limit:
 
-$$\text{if MAJOR\_SEVERITY}(V_{\text{gap,check}}) \text{ AND } \Delta V > 0:$$
-$$\quad \text{cavv\_lim\_count} \leftarrow \text{cavv\_lim\_count} + 1$$
-$$\quad \text{if cavv\_lim\_count} > 10: \text{status} \leftarrow \text{CAVV\_LIM}$$
+$$\text{if MAJOR\\_SEVERITY}(V_{\text{gap,check}}) \text{ AND } \Delta V > 0:$$
+$$\quad \text{cavv\\_lim\\_count} \leftarrow \text{cavv\\_lim\\_count} + 1$$
+$$\quad \text{if cavv\\_lim\\_count} > 10: \text{status} \leftarrow \text{CAVV\\_LIM}$$
 
 ### 7.7 Transfer Function
 
@@ -699,7 +708,7 @@ This ensures the load angle measurement reflects the actual tuner position, not 
 The tuner loop requires minimum klystron forward power to function:
 
 $$\text{if } P_{\text{kly,fwd}} < P_{\text{kly,fwd,min}} \text{ OR INVALID}(P_{\text{kly,fwd}}):$$
-$$\quad \text{status} \leftarrow \text{POWR\_LOW\_STATUS}$$
+$$\quad \text{status} \leftarrow \text{POWR\\_LOW\\_STATUS}$$
 
 This prevents the tuner from acting on noise when the klystron is not producing meaningful RF power.
 
@@ -724,7 +733,7 @@ for attempt = 0 to LOOP_RESET_COUNT-1:
 
 The tolerance for homing is:
 
-$$\text{tolerance} = \text{LOOP\_RESET\_TOLS} \times \text{MDEL} = 2 \times \text{MDEL}$$
+$$\text{tolerance} = \text{LOOP\\_RESET\\_TOLS} \times \text{MDEL} = 2 \times \text{MDEL}$$
 
 where MDEL is the monitor deadband of the position PV (minimum detectable position change).
 
@@ -821,7 +830,7 @@ The comb loop gain is ramped identically to the direct loop (Section 5.6), with:
 
 The comb loop requires the direct loop to be ON before it can be activated:
 
-$$\text{Precondition: } G_{\text{direct}} > 0 \text{ AND station\_state} = \text{ON\_CW}$$
+$$\text{Precondition: } G_{\text{direct}} > 0 \text{ AND station\\_state} = \text{ON\\_CW}$$
 
 The rf_statesLP sequence enforces this through event flag checking.
 
