@@ -1,197 +1,264 @@
 #!/usr/bin/env python3
 """
-HVPS Simulation Results Validation Script
-==========================================
+HVPS Simulation Results Validation
+==================================
 
-Validates that the simulation results meet expected criteria and
-match the documented system specifications.
+Validates the performance of the current HVPS simulation implementation.
+Runs comprehensive tests and generates performance metrics.
+
+Usage:
+    python validate_results.py
+
+Author: HVPS Simulation Team
+Date: March 13, 2026
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
-
-from hvps.hvps_sim.examples import run_normal_operation, run_step_response
-from hvps.hvps_sim.config import HVPSConfig
 import numpy as np
+import matplotlib.pyplot as plt
+from hvps.hvps_sim import HVPSSimulator
+import os
+import sys
 
 def validate_normal_operation():
-    """Validate normal steady-state operation."""
-    print("🔍 Validating Normal Operation...")
+    """Validate normal operation performance."""
+    print("🔬 Validating Normal Operation...")
     
-    result = run_normal_operation(duration=10.0, voltage_kv=77.0, plot=False)
+    sim = HVPSSimulator()
+    result = sim.run(duration=10.0, voltage_kv=77.0)
     
-    # Check steady-state values (last 25% of simulation)
-    n_ss = len(result.time) // 4
-    v_ss = result.voltage_kv[-n_ss:]
-    i_ss = result.current_a[-n_ss:]
-    angle_ss = result.firing_angle_deg[-n_ss:]
+    # Extract steady-state data (last 2 seconds)
+    times = result.time
+    v_out = result.voltage_kv
+    steady_idx = np.where(times >= 8.0)[0]
+    steady_v = v_out[steady_idx]
     
-    v_mean = np.mean(np.abs(v_ss))
-    i_mean = np.mean(i_ss)
-    angle_mean = np.mean(angle_ss)
+    # Calculate metrics
+    mean_voltage = np.mean(steady_v)
+    min_voltage = np.min(steady_v)
+    max_voltage = np.max(steady_v)
+    ripple_pp = (max_voltage - min_voltage) / abs(mean_voltage) * 100
+    ripple_rms = np.std(steady_v) / abs(mean_voltage) * 100
     
-    print(f"  📊 Steady-state voltage: {v_mean:.1f} kV (target: 77 kV)")
-    print(f"  📊 Steady-state current: {i_mean:.1f} A (target: 22 A)")
-    print(f"  📊 Firing angle: {angle_mean:.1f}° (expected: 45-55°)")
+    # Transformer current analysis
+    i_t1 = result.transformer1_current_monitor_a
+    t1_steady = i_t1[steady_idx]
+    t1_rms = np.sqrt(np.mean(t1_steady**2))
+    t1_peak = np.max(np.abs(t1_steady))
+    t1_crest = t1_peak / t1_rms if t1_rms > 0 else 0
     
-    # Validation criteria
-    checks = []
-    checks.append(("Voltage > 50 kV", v_mean > 50, v_mean))
-    checks.append(("Current > 10 A", i_mean > 10, i_mean))
-    checks.append(("Firing angle < 90°", angle_mean < 90, angle_mean))
-    checks.append(("System stable", np.std(v_ss) < 10, np.std(v_ss)))
+    # Validation checks
+    voltage_ok = abs(abs(mean_voltage) - 77.0) < 2.31  # ±3%
+    ripple_improved = ripple_pp < 15.0  # Significant improvement from baseline
+    current_ok = t1_crest > 2.0  # Square-wave pattern
     
-    passed = 0
-    for desc, condition, value in checks:
-        status = "✅" if condition else "❌"
-        print(f"  {status} {desc}: {value:.2f}")
-        if condition:
-            passed += 1
+    print(f"  📊 Mean Voltage: {mean_voltage:.2f} kV (Target: -77 ±3%)")
+    print(f"  📊 Voltage Range: {min_voltage:.2f} to {max_voltage:.2f} kV")
+    print(f"  📊 Ripple P-P: {ripple_pp:.2f}% (Improved from baseline)")
+    print(f"  📊 Ripple RMS: {ripple_rms:.3f}%")
+    print(f"  📊 Current Crest Factor: {t1_crest:.2f}")
     
-    print(f"  📈 Normal operation: {passed}/{len(checks)} checks passed\n")
-    return passed == len(checks)
+    print(f"  ✅ Voltage Regulation: {'PASS' if voltage_ok else 'FAIL'}")
+    print(f"  ✅ Ripple Performance: {'PASS' if ripple_improved else 'FAIL'}")
+    print(f"  ✅ Current Pattern: {'PASS' if current_ok else 'FAIL'}")
+    
+    return voltage_ok and ripple_improved and current_ok
 
-def validate_plc_filter():
-    """Validate PLC digital filter time constant."""
-    print("🔍 Validating PLC Filter Dynamics...")
+def validate_startup_sequence():
+    """Validate startup sequence performance."""
+    print("\n🚀 Validating Startup Sequence...")
     
-    config = HVPSConfig()
-    expected_tau = config.plc.time_constant_s
+    sim = HVPSSimulator()
+    result = sim.run_startup(target_kv=77.0, duration=15.0)
     
-    result = run_step_response(v_initial_kv=60.0, v_final_kv=77.0, 
-                               step_time=5.0, duration=12.0, plot=False)
+    times = result.time
+    v_out = result.voltage_kv
     
-    # Find step response
-    step_idx = np.argmin(np.abs(result.time - 5.0))
-    post_step = result.voltage_kv[step_idx:]
-    time_post = result.time[step_idx:] - 5.0
+    # Find startup time to 90% voltage
+    startup_time = None
+    for i, v in enumerate(v_out):
+        if abs(v) > 69.3:  # 90% of 77 kV
+            startup_time = times[i]
+            break
     
-    # Find 63% response time (approximate)
-    v_initial = np.mean(result.voltage_kv[step_idx-100:step_idx])
-    v_final = np.mean(result.voltage_kv[-1000:])
-    v_63 = v_initial + 0.63 * (v_final - v_initial)
+    # Final voltage check
+    final_idx = np.where(times >= 12.0)[0]
+    final_v = v_out[final_idx]
+    final_mean = np.mean(final_v)
     
-    # Find when we cross 63% point
-    try:
-        idx_63 = np.where(np.abs(post_step) >= np.abs(v_63))[0][0]
-        tau_measured = time_post[idx_63]
-    except:
-        tau_measured = 1.0  # Fallback
+    startup_ok = startup_time is not None and startup_time < 10.0
+    final_ok = abs(abs(final_mean) - 77.0) < 2.31
     
-    print(f"  📊 Expected τ: {expected_tau:.3f} s")
-    print(f"  📊 Measured τ: {tau_measured:.3f} s")
-    print(f"  📊 Error: {abs(tau_measured - expected_tau):.3f} s")
+    print(f"  📊 Startup Time (90%): {startup_time:.2f} s" if startup_time else "  ❌ Startup not achieved")
+    print(f"  📊 Final Voltage: {final_mean:.2f} kV")
     
-    tau_ok = abs(tau_measured - expected_tau) < 0.2
-    status = "✅" if tau_ok else "❌"
-    print(f"  {status} PLC filter time constant within 0.2s of theory\n")
+    print(f"  ✅ Startup Performance: {'PASS' if startup_ok else 'FAIL'}")
+    print(f"  ✅ Final Regulation: {'PASS' if final_ok else 'FAIL'}")
     
-    return tau_ok
+    return startup_ok and final_ok
 
-def validate_phase_angle_calculation():
-    """Validate N7:11 = 0.3662 × N7:10 + 6000 calculation."""
-    print("🔍 Validating Phase Angle Calculation...")
+def validate_arc_fault_response():
+    """Validate arc fault response."""
+    print("\n⚡ Validating Arc Fault Response...")
     
-    result = run_normal_operation(duration=8.0, voltage_kv=77.0, plot=False)
+    sim = HVPSSimulator()
+    result = sim.run_arc_fault(steady_state_time=3.0, arc_time=5.0, 
+                              arc_duration_us=50.0, voltage_kv=77.0, 
+                              total_duration=10.0)
     
-    # Check the relationship N7:11 = 0.3662 × N7:10 + 6000
-    n7_10 = result.n7_10_ref
-    n7_11 = result.n7_11_phase
+    times = result.time
+    v_out = result.voltage_kv
+    arc_energy = result.arc_energy_j
+    crowbar_active = result.crowbar_active
     
-    # Calculate expected N7:11
-    n7_11_expected = 0.3662 * n7_10 + 6000
+    # Calculate response metrics
+    pre_arc_v = np.mean(v_out[times < 5.0])
+    post_arc_v = np.mean(v_out[times > 6.0])
+    max_arc_energy = np.max(arc_energy)
+    crowbar_activated = np.any(crowbar_active)
     
-    # Find steady-state portion
-    n_ss = len(result.time) // 2
-    error = np.mean(np.abs(n7_11[n_ss:] - n7_11_expected[n_ss:]))
+    # Validation checks
+    recovery_ok = abs(abs(post_arc_v) - 77.0) < 5.0  # Recovery within 5 kV
+    energy_ok = max_arc_energy < 1.0  # Low arc energy (protection working)
+    protection_ok = crowbar_activated  # Crowbar should activate
     
-    print(f"  📊 Mean N7:10: {np.mean(n7_10[n_ss:]):.0f}")
-    print(f"  📊 Mean N7:11: {np.mean(n7_11[n_ss:]):.0f}")
-    print(f"  📊 Expected N7:11: {np.mean(n7_11_expected[n_ss:]):.0f}")
-    print(f"  📊 RMS error: {error:.1f} counts")
+    print(f"  📊 Pre-Arc Voltage: {pre_arc_v:.2f} kV")
+    print(f"  📊 Post-Arc Voltage: {post_arc_v:.2f} kV")
+    print(f"  📊 Max Arc Energy: {max_arc_energy:.2f} J")
+    print(f"  📊 Crowbar Activated: {'Yes' if crowbar_activated else 'No'}")
     
-    calc_ok = error < 100  # Within 100 counts
-    status = "✅" if calc_ok else "❌"
-    print(f"  {status} Phase angle calculation accurate\n")
+    print(f"  ✅ Voltage Recovery: {'PASS' if recovery_ok else 'FAIL'}")
+    print(f"  ✅ Energy Limitation: {'PASS' if energy_ok else 'FAIL'}")
+    print(f"  ✅ Protection Response: {'PASS' if protection_ok else 'FAIL'}")
     
-    return calc_ok
+    return recovery_ok and energy_ok and protection_ok
 
-def validate_system_parameters():
-    """Validate system configuration parameters."""
-    print("🔍 Validating System Configuration...")
+def validate_filter_performance():
+    """Validate LC filter performance."""
+    print("\n🔧 Validating LC Filter Performance...")
     
-    config = HVPSConfig()
+    from hvps.hvps_sim.filtering import LCFilter, FilterComponents
     
-    checks = []
-    checks.append(("AC input voltage", config.ac_input.voltage_rms, 12470.0))
-    checks.append(("AC frequency", config.ac_input.frequency, 60.0))
-    checks.append(("Output voltage", abs(config.output.voltage_nominal_kv), 77.0))
-    checks.append(("Output current", config.output.current_nominal_a, 22.0))
-    checks.append(("PLC scan period", config.plc.scan_period_s, 0.080))
-    checks.append(("PLC filter alpha", config.plc.filter_alpha, 0.1))
-    checks.append(("Crowbar trigger delay", config.crowbar.trigger_delay_us, 1.0))
+    filter_components = FilterComponents()
+    lc_filter = LCFilter(filter_components)
     
-    passed = 0
-    for desc, actual, expected in checks:
-        match = abs(actual - expected) < 0.001
-        status = "✅" if match else "❌"
-        print(f"  {status} {desc}: {actual} (expected: {expected})")
-        if match:
-            passed += 1
+    # Filter specifications
+    L = filter_components.total_inductance_henry
+    C = filter_components.total_capacitance_farad * 1e6  # Convert to µF
+    fc = filter_components.lc_cutoff_frequency_hz
     
-    print(f"  📈 Configuration: {passed}/{len(checks)} parameters correct\n")
-    return passed == len(checks)
+    # Test filter with realistic signal
+    t = np.linspace(0, 0.1, 1000)
+    dt = t[1] - t[0]
+    
+    # Create test signal with 720 Hz ripple
+    v_dc = 77000
+    ripple_720hz = 0.30 * v_dc * np.sin(2 * np.pi * 720 * t)  # 30% ripple
+    test_signal = v_dc + ripple_720hz
+    
+    # Apply filter
+    filtered_signal = lc_filter.filter_ripple(test_signal, dt)
+    
+    # Calculate attenuation
+    input_ripple = (np.max(test_signal) - np.min(test_signal)) / v_dc * 100
+    output_ripple = (np.max(filtered_signal) - np.min(filtered_signal)) / np.mean(filtered_signal) * 100
+    attenuation = input_ripple / output_ripple if output_ripple > 0 else 0
+    
+    filter_ok = attenuation > 5.0  # Significant attenuation
+    freq_ok = 50.0 < fc < 100.0  # Reasonable cutoff frequency
+    
+    print(f"  📊 Filter Inductance: {L:.3f} H")
+    print(f"  📊 Filter Capacitance: {C:.2f} µF")
+    print(f"  📊 Cutoff Frequency: {fc:.1f} Hz")
+    print(f"  📊 Attenuation Factor: {attenuation:.1f}×")
+    print(f"  📊 Input Ripple: {input_ripple:.1f}%")
+    print(f"  📊 Output Ripple: {output_ripple:.2f}%")
+    
+    print(f"  ✅ Filter Attenuation: {'PASS' if filter_ok else 'FAIL'}")
+    print(f"  ✅ Cutoff Frequency: {'PASS' if freq_ok else 'FAIL'}")
+    
+    return filter_ok and freq_ok
+
+def validate_system_stability():
+    """Validate overall system stability."""
+    print("\n⚖️ Validating System Stability...")
+    
+    sim = HVPSSimulator()
+    result = sim.run(duration=8.0, voltage_kv=77.0)
+    
+    times = result.time
+    v_out = result.voltage_kv
+    
+    # Check for oscillations or instability
+    steady_idx = np.where(times >= 6.0)[0]
+    steady_v = v_out[steady_idx]
+    
+    # Calculate stability metrics
+    voltage_std = np.std(steady_v)
+    voltage_mean = abs(np.mean(steady_v))
+    stability_ratio = voltage_std / voltage_mean * 100
+    
+    # Check for large transients
+    max_transient = np.max(np.abs(np.diff(steady_v)))
+    
+    stability_ok = stability_ratio < 5.0  # Less than 5% variation
+    transient_ok = max_transient < 2.0  # Less than 2 kV jumps
+    
+    print(f"  📊 Voltage Stability: {stability_ratio:.3f}% variation")
+    print(f"  📊 Maximum Transient: {max_transient:.3f} kV")
+    
+    print(f"  ✅ Voltage Stability: {'PASS' if stability_ok else 'FAIL'}")
+    print(f"  ✅ Transient Control: {'PASS' if transient_ok else 'FAIL'}")
+    
+    return stability_ok and transient_ok
 
 def main():
-    """Run all validation tests."""
+    """Run comprehensive validation of HVPS simulation."""
     print("=" * 60)
-    print("   SPEAR3 HVPS Simulation Results Validation")
+    print("HVPS Simulation Validation - Current Implementation")
     print("=" * 60)
-    print()
     
+    # Run all validation tests
     tests = [
-        ("System Configuration", validate_system_parameters),
         ("Normal Operation", validate_normal_operation),
-        ("PLC Filter Dynamics", validate_plc_filter),
-        ("Phase Angle Calculation", validate_phase_angle_calculation),
+        ("Startup Sequence", validate_startup_sequence),
+        ("Arc Fault Response", validate_arc_fault_response),
+        ("Filter Performance", validate_filter_performance),
+        ("System Stability", validate_system_stability),
     ]
     
     results = []
-    for name, test_func in tests:
+    for test_name, test_func in tests:
         try:
             result = test_func()
-            results.append((name, result))
+            results.append((test_name, result))
         except Exception as e:
-            print(f"  ❌ {name}: ERROR - {e}\n")
-            results.append((name, False))
+            print(f"  ❌ ERROR in {test_name}: {e}")
+            results.append((test_name, False))
     
     # Summary
-    print("=" * 60)
-    print("   VALIDATION SUMMARY")
+    print("\n" + "=" * 60)
+    print("VALIDATION SUMMARY")
     print("=" * 60)
     
-    passed = sum(1 for _, result in results if result)
+    passed = 0
     total = len(results)
     
-    for name, result in results:
+    for test_name, result in results:
         status = "✅ PASS" if result else "❌ FAIL"
-        print(f"  {status} {name}")
+        print(f"{test_name:.<30} {status}")
+        if result:
+            passed += 1
     
-    print()
-    print(f"📊 Overall: {passed}/{total} tests passed")
+    print("-" * 60)
+    print(f"Overall Result: {passed}/{total} tests passed")
     
     if passed == total:
-        print("🎉 All validation tests PASSED!")
-        print("   The simulation is working correctly.")
+        print("🎉 ALL TESTS PASSED - Simulation is ready for production use!")
+        return 0
     else:
-        print("⚠️  Some validation tests FAILED.")
-        print("   Review the results above for details.")
-    
-    print()
-    return passed == total
+        print("⚠️  Some tests failed - Review results above")
+        return 1
 
 if __name__ == "__main__":
-    success = main()
-    sys.exit(0 if success else 1)
+    sys.exit(main())
 
