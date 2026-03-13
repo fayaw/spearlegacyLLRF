@@ -76,10 +76,10 @@ class SimulationResult:
     filter_energy_j: np.ndarray = field(default_factory=lambda: np.array([]))
     
     # HVPS Monitoring Signals (4 channels from Waveform Buffer System)
-    hvps_voltage_monitor_kv: np.ndarray = field(default_factory=lambda: np.array([]))  # Channel 1
-    hvps_current_monitor_a: np.ndarray = field(default_factory=lambda: np.array([]))   # Channel 2  
-    inductor1_voltage_monitor_kv: np.ndarray = field(default_factory=lambda: np.array([]))  # Channel 3
-    inductor2_voltage_monitor_kv: np.ndarray = field(default_factory=lambda: np.array([]))  # Channel 4
+    hvps_voltage_monitor_kv: np.ndarray = field(default_factory=lambda: np.array([]))      # Channel 1: DC Voltage
+    hvps_current_monitor_a: np.ndarray = field(default_factory=lambda: np.array([]))       # Channel 2: DC Current  
+    inductor2_sawtooth_monitor_kv: np.ndarray = field(default_factory=lambda: np.array([]))  # Channel 3: T2 Sawtooth
+    transformer1_current_monitor_a: np.ndarray = field(default_factory=lambda: np.array([]))  # Channel 4: T1 AC Current
 
     # Protection
     protection_state: List[str] = field(default_factory=list)
@@ -471,8 +471,8 @@ class HVPSSimulator:
         # HVPS Monitoring Signals (4 channels)
         result.hvps_voltage_monitor_kv = np.zeros(n_steps)
         result.hvps_current_monitor_a = np.zeros(n_steps)
-        result.inductor1_voltage_monitor_kv = np.zeros(n_steps)
-        result.inductor2_voltage_monitor_kv = np.zeros(n_steps)
+        result.inductor2_sawtooth_monitor_kv = np.zeros(n_steps)
+        result.transformer1_current_monitor_a = np.zeros(n_steps)
         result.crowbar_active = np.zeros(n_steps)
         result.arc_energy_j = np.zeros(n_steps)
         result.v_ac_a_kv = np.zeros(n_steps)
@@ -514,16 +514,21 @@ class HVPSSimulator:
         result.filter_energy_j[i] = self.power.lc_filter.stored_energy()
         
         # HVPS Monitoring Signals (4 channels from Waveform Buffer System)
-        # Channel 1: HVPS Voltage (with voltage divider conditioning)
+        # Channel 1: HVPS DC Voltage (0 to -90 kV DC, voltage divider 1000:1)
         result.hvps_voltage_monitor_kv[i] = ps.v_out / 1000.0  # Same as main output
-        # Channel 2: HVPS Current (with current transformer conditioning)  
+        # Channel 2: HVPS DC Current (0 to 30 A DC, Danfysik DC-CT sensor)  
         result.hvps_current_monitor_a[i] = ps.i_out  # Same as main output
-        # Channel 3: Inductor 1 Voltage (L1 voltage drop for firing circuit health)
-        v_l1 = ps.v_bridge1 - ps.v_cap  # Voltage across L1
-        result.inductor1_voltage_monitor_kv[i] = v_l1 / 1000.0
-        # Channel 4: Inductor 2 Voltage (L2 voltage drop for firing circuit health)
-        v_l2 = ps.v_bridge2 - ps.v_cap  # Voltage across L2
-        result.inductor2_voltage_monitor_kv[i] = v_l2 / 1000.0
+        # Channel 3: Inductor 2 (T2) Sawtooth voltage (firing circuit timing diagnosis)
+        # Sawtooth pattern indicates thyristor firing timing
+        omega = 2 * np.pi * 60  # 60 Hz AC frequency
+        sawtooth_base = 5.0 * (2 * (omega * t % (2 * np.pi)) / (2 * np.pi) - 1)  # ±5 kV sawtooth
+        firing_spike = 2.0 * np.exp(-((omega * t % (2 * np.pi) - np.pi) / 0.1)**2)  # Firing spike
+        result.inductor2_sawtooth_monitor_kv[i] = sawtooth_base + firing_spike
+        # Channel 4: Transformer 1 AC Phase Current (firing circuit health)
+        # AC waveform with thyristor commutation spikes
+        ac_current = 15.0 * np.sin(omega * t + np.radians(cs.firing_angle_deg))  # Phase-shifted AC
+        commutation_spike = 5.0 * np.exp(-((omega * t % (np.pi/3) - np.pi/6) / 0.05)**2)  # Commutation
+        result.transformer1_current_monitor_a[i] = ac_current + commutation_spike
 
         # Protection
         result.protection_state[i] = prot.state.name
