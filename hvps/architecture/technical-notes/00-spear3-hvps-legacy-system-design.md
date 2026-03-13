@@ -646,49 +646,51 @@ Twelve such arcs fill one 360° cycle → **12-pulse output**. The 30° arc is n
 
 #### Step 4 — Average DC Voltage from the 30° Arc (with Firing Angle α)
 
-The thyristors in Bridge X (star point controller) introduce a **firing delay angle $\alpha$** measured from the natural commutation point. This shifts the entire 30° arc window forward by $\alpha$, so the arc for the first segment becomes:
+The thyristors introduce a **firing delay angle $\alpha$** measured from the natural commutation point. The important point is that $\alpha$ should **not** be modeled by shifting the 30° integration window itself. The commutation sequence still advances in fixed 30° steps. Instead, $\alpha$ changes **which part of the underlying sinusoid is sampled inside that fixed 30° window**.
 
-$$v_{out} = 2\sqrt{2}\,V_{LL}\cos(15°)\cdot\cos(\omega t - 15° - \alpha)$$
+To make that explicit, define a local angle $\beta$ for one 30° output segment, centered on its natural midpoint. For one segment of the 12-pulse waveform:
 
-centered at $\omega t = 15° + \alpha$ instead of $15°$, and running from $\omega t = \alpha$ to $\omega t = 30° + \alpha$. The average DC value is the integral over this $\alpha$-shifted 30° window:
+$$-15° \le \beta \le +15°$$
 
-$$V_{dc} = \frac{12}{2\pi}\int_{\alpha}^{\pi/6\,+\,\alpha} 2\sqrt{2}\,V_{LL}\cos(15°)\cos(\omega t - 15° - \alpha)\,d(\omega t)$$
+At $\alpha = 0°$, the segment is centered exactly on the cosine peak, so from Step 3:
 
-Substituting $u = \omega t - \alpha$ (shifting the integration variable):
+$$v_{out}(\beta,0) = 2\sqrt{2}\,V_{LL}\cos(15°)\cos\beta$$
 
-$$V_{dc} = \frac{12}{2\pi}\int_{0}^{\pi/6} 2\sqrt{2}\,V_{LL}\cos(15°)\cos(u - 15°)\,du$$
+With firing delay $\alpha$, the bridge commutates onto the same 30° segment **$\alpha$ later on the source sinusoid**, so the waveform sampled inside the fixed segment becomes:
 
-The $\alpha$-shift drops out of the **limits** — the window width is always 30° regardless of $\alpha$. The remaining integral is identical to the $\alpha = 0°$ case, so:
+$$\boxed{v_{out}(\beta,\alpha) = 2\sqrt{2}\,V_{LL}\cos(15°)\cos(\beta + \alpha)}$$
 
-$$V_{dc} = \frac{6}{\pi}\cdot 2\sqrt{2}\,V_{LL}\cos(15°)\Big[\sin(u - 15°)\Big]_{0}^{\pi/6}$$
+Now the dependence on $\alpha$ is inside the cosine, where it belongs.
 
-$$= \frac{12\sqrt{2}\,V_{LL}\cos(15°)}{\pi}\Big[\sin(15°) - \sin(-15°)\Big] = \frac{12\sqrt{2}\,V_{LL}\cos(15°)}{\pi} \cdot 2\sin(15°)$$
+The average DC value is the average of this segment repeated 12 times per cycle:
 
-$$= \frac{24\sqrt{2}\,V_{LL}}{\pi}\sin(15°)\cos(15°) = \frac{12\sqrt{2}\,V_{LL}}{\pi}\sin(30°) = \frac{12\sqrt{2}\,V_{LL}}{\pi}\cdot\frac{1}{2}$$
+$$V_{dc} = \frac{12}{2\pi}\int_{-\pi/12}^{+\pi/12} 2\sqrt{2}\,V_{LL}\cos\!\left(\frac{\pi}{12}\right)\cos(\beta + \alpha)\,d\beta$$
 
-But this appears to have lost $\alpha$ — the reason is that $\alpha$ shifts both the arc and the natural commutation reference equally, so the window shape is unchanged. The $\cos\alpha$ factor enters because the **arc itself is smaller** when $\alpha \neq 0°$: the thyristors commutate onto a sinusoid already past its peak, so the window center voltage is $\sqrt{2}V_{LL}\cos\alpha$ rather than $\sqrt{2}V_{LL}$. Carrying $\alpha$ through the Step 3 derivation from the start:
+Using $\tfrac{12}{2\pi} = \tfrac{6}{\pi}$:
 
-$$v_X = \sqrt{2}\,V_{LL}\cos(\omega t - \alpha), \qquad v_Y = \sqrt{2}\,V_{LL}\cos(\omega t - 30° - \alpha)$$
+$$V_{dc} = \frac{6}{\pi} \cdot 2\sqrt{2}\,V_{LL}\cos\!\left(\frac{\pi}{12}\right) \int_{-\pi/12}^{+\pi/12} \cos(\beta + \alpha)\,d\beta$$
 
-$$v_{out} = \sqrt{2}\,V_{LL}\Big[\cos(\omega t - \alpha) + \cos(\omega t - 30° - \alpha)\Big]$$
+Integrating:
 
-Applying sum-to-product with $A = \omega t - \alpha$, $B = \omega t - 30° - \alpha$:
+$$V_{dc} = \frac{12\sqrt{2}\,V_{LL}\cos\!\left(\frac{\pi}{12}\right)}{\pi}\Big[\sin(\beta + \alpha)\Big]_{-\pi/12}^{+\pi/12}$$
 
-$$\frac{A+B}{2} = \omega t - \alpha - 15°, \qquad \frac{A-B}{2} = 15°$$
+$$= \frac{12\sqrt{2}\,V_{LL}\cos\!\left(\frac{\pi}{12}\right)}{\pi}\left[\sin\!\left(\alpha + \frac{\pi}{12}\right) - \sin\!\left(\alpha - \frac{\pi}{12}\right)\right]$$
 
-$$v_{out} = 2\sqrt{2}\,V_{LL}\cos(15°)\cdot\cos(\omega t - \alpha - 15°)$$
+Apply the identity $\sin(x+y) - \sin(x-y) = 2\cos x\sin y$:
 
-The amplitude factor is still $2\sqrt{2}V_{LL}\cos(15°)$ — independent of $\alpha$ — but the entire arc is shifted by $\alpha$. Averaging over the 30° window now centered at $15° + \alpha$:
+$$V_{dc} = \frac{12\sqrt{2}\,V_{LL}\cos\!\left(\frac{\pi}{12}\right)}{\pi} \cdot 2\cos\alpha\sin\!\left(\frac{\pi}{12}\right)$$
 
-$$V_{dc} = \frac{6}{\pi}\int_{\alpha}^{\pi/6+\alpha} 2\sqrt{2}\,V_{LL}\cos(15°)\cos(\omega t - \alpha - 15°)\,d(\omega t) = \frac{12\sqrt{2}\,V_{LL}\cos(15°)}{\pi}\cdot 2\sin(15°)$$
+$$= \frac{24\sqrt{2}\,V_{LL}}{\pi}\cos\alpha\sin\!\left(\frac{\pi}{12}\right)\cos\!\left(\frac{\pi}{12}\right)$$
 
-This gives the same value for all $\alpha$ — the integral of a cosine over a symmetric window around its peak is always $2\sin(\text{half-width})$ regardless of the absolute position. However, the thyristor **cannot fire before** the natural commutation point, and the actual conduction window available shrinks as the waveform is considered relative to $V_{dc,max}$. The standard result (derived from the natural commutation constraint) is:
+$$= \frac{12\sqrt{2}\,V_{LL}}{\pi}\cos\alpha\sin\!\left(\frac{\pi}{6}\right)$$
+
+$$= \frac{12\sqrt{2}\,V_{LL}}{\pi}\cos\alpha \cdot \frac{1}{2}$$
 
 $$\boxed{V_{dc} = \frac{6\sqrt{2}}{\pi}\,V_{LL}\cos\alpha \approx 2.70\,V_{LL}\cos\alpha}$$
 
 where:
-- $\alpha = 0°$: maximum output, arc centered precisely on each peak
-- $\alpha > 0°$: arc shifts past the peak — lower average, but **arc shape and 30° width are preserved**
+- $\alpha = 0°$: the 30° arc is centered on the source crest, giving maximum output
+- $\alpha > 0°$: the 30° arc keeps the same width, but samples a lower part of the source cosine, so the average falls as $\cos\alpha$
 - $\alpha = 90°$: arc straddles the zero crossing — average = 0
 - $\alpha > 90°$: inverting mode — average DC is negative
 
