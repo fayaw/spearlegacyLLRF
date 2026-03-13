@@ -313,10 +313,13 @@ class LCFilter:
         tuple : (v_out, i_total)
             Output voltage (V) and total inductor current (A).
         """
-        # Inductor 1: di_L1/dt = (v_bridge1 - v_C) / L
-        di_L1 = (v_bridge1 - self.v_C) / self.L * dt
-        # Inductor 2: di_L2/dt = (v_bridge2 - v_C) / L
-        di_L2 = (v_bridge2 - self.v_C) / self.L * dt
+        # Add inductor resistance for stability (typical 0.1-1 Ω for large inductors)
+        R_L = 0.5  # Ω per inductor (estimated from real system)
+        
+        # Inductor 1: di_L1/dt = (v_bridge1 - v_C - R_L*i_L1) / L
+        di_L1 = (v_bridge1 - self.v_C - R_L * self.i_L1) / self.L * dt
+        # Inductor 2: di_L2/dt = (v_bridge2 - v_C - R_L*i_L2) / L  
+        di_L2 = (v_bridge2 - self.v_C - R_L * self.i_L2) / self.L * dt
 
         self.i_L1 += di_L1
         self.i_L2 += di_L2

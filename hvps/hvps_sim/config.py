@@ -82,7 +82,7 @@ class FilterConfig:
     inductor_current_rating: float = 85.0  # A
     inductor_stored_energy_j: float = 1084.0  # J each at rated current
     # Secondary filter capacitor bank
-    capacitor_uf: float = 8.0           # µF total (30 nF per doc variant)
+    capacitor_uf: float = 8.0           # µF total (confirmed from SPEAR3 docs)
     capacitor_voltage_rating: float = 100_000.0  # V
     # Isolation resistors (PEP-II design)
     isolation_resistance: float = 500.0  # Ω
@@ -303,4 +303,3 @@ class HVPSConfig:
             f"Arc Energy:  <{self.output.arc_energy_with_crowbar_j} J (with crowbar)",
         ]
         return "\n".join(lines)
-
