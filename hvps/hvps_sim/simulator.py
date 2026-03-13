@@ -525,10 +525,78 @@ class HVPSSimulator:
         firing_spike = 2.0 * np.exp(-((omega * t % (2 * np.pi) - np.pi) / 0.1)**2)  # Firing spike
         result.inductor2_sawtooth_monitor_kv[i] = sawtooth_base + firing_spike
         # Channel 4: Transformer 1 AC Phase Current (firing circuit health)
-        # AC waveform with thyristor commutation spikes
-        ac_current = 15.0 * np.sin(omega * t + np.radians(cs.firing_angle_deg))  # Phase-shifted AC
-        commutation_spike = 5.0 * np.exp(-((omega * t % (np.pi/3) - np.pi/6) / 0.05)**2)  # Commutation
-        result.transformer1_current_monitor_a[i] = ac_current + commutation_spike
+        # In a 6-pulse thyristor bridge with large DC inductor (0.3H), the
+        # transformer primary current is a QUASI-SQUARE WAVE, not sinusoidal.
+        # Each phase conducts for ~120° per half-cycle as flat-topped blocks.
+        # The large inductor keeps DC current nearly constant, so reflected
+        # AC current forms rectangular pulses.
+        #
+        # For phase A of a 6-pulse bridge with firing angle α:
+        #   Positive conduction: θ ∈ [α + 30°, α + 150°]  (120° block)
+        #   Negative conduction: θ ∈ [α + 210°, α + 330°] (120° block)
+        #   Zero current outside these intervals
+        #
+        # Commutation transitions are sharp (~3-5° overlap angle μ)
+        alpha_rad = np.radians(cs.firing_angle_deg)
+        theta = (omega * t) % (2 * np.pi)  # Electrical angle [0, 2π)
+        
+        # Current amplitude scales with actual DC output current
+        # T1 primary current ≈ I_dc reflected through transformer
+        i_dc = ps.i_out if ps.i_out > 0.1 else 0.0
+        i_amplitude = i_dc * 0.82  # Scale factor for transformer ratio and waveform
+        
+        # Commutation overlap angle (source impedance effect, typically 3-5°)
+        mu_rad = np.radians(3.0)
+        
+        # Calculate conduction intervals for phase A
+        # Positive block: [α + π/6, α + 5π/6]  (i.e., α+30° to α+150°)
+        pos_start = alpha_rad + np.pi / 6
+        pos_end = alpha_rad + 5 * np.pi / 6
+        # Negative block: [α + 7π/6, α + 11π/6] (i.e., α+210° to α+330°)
+        neg_start = alpha_rad + 7 * np.pi / 6
+        neg_end = alpha_rad + 11 * np.pi / 6
+        
+        # Normalize all angles to [0, 2π)
+        pos_start_n = pos_start % (2 * np.pi)
+        pos_end_n = pos_end % (2 * np.pi)
+        neg_start_n = neg_start % (2 * np.pi)
+        neg_end_n = neg_end % (2 * np.pi)
+        
+        # Determine current value based on conduction state
+        def _in_interval(angle, start, end):
+            """Check if angle is within [start, end] on circular [0, 2π)."""
+            if start <= end:
+                return start <= angle <= end
+            else:  # Wraps around 2π
+                return angle >= start or angle <= end
+        
+        ac_current = 0.0
+        
+        # Check positive conduction with commutation ramps
+        if _in_interval(theta, pos_start_n, pos_end_n):
+            # Inside positive conduction block
+            # Rising edge commutation (ramp up over μ degrees)
+            dist_from_start = (theta - pos_start_n) % (2 * np.pi)
+            dist_from_end = (pos_end_n - theta) % (2 * np.pi)
+            if dist_from_start < mu_rad:
+                ac_current = i_amplitude * (dist_from_start / mu_rad)  # Ramp up
+            elif dist_from_end < mu_rad:
+                ac_current = i_amplitude * (dist_from_end / mu_rad)    # Ramp down
+            else:
+                ac_current = i_amplitude  # Flat top
+        elif _in_interval(theta, neg_start_n, neg_end_n):
+            # Inside negative conduction block
+            dist_from_start = (theta - neg_start_n) % (2 * np.pi)
+            dist_from_end = (neg_end_n - theta) % (2 * np.pi)
+            if dist_from_start < mu_rad:
+                ac_current = -i_amplitude * (dist_from_start / mu_rad)  # Ramp down
+            elif dist_from_end < mu_rad:
+                ac_current = -i_amplitude * (dist_from_end / mu_rad)    # Ramp up
+            else:
+                ac_current = -i_amplitude  # Flat bottom
+        # else: ac_current = 0.0 (non-conducting interval)
+        
+        result.transformer1_current_monitor_a[i] = ac_current
 
         # Protection
         result.protection_state[i] = prot.state.name
