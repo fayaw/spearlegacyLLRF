@@ -557,37 +557,29 @@ The Building 118 control room currently houses an oscilloscope for manual monito
 
 #### Fundamental Six-Pulse Rectifier Equation
 
-**Derivation from First Principles:**
+**Mathematical Background:**
 
-For a three-phase fully-controlled (thyristor) bridge rectifier, we start with the instantaneous line-to-line voltages:
-
-$$v_{ab}(t) = \sqrt{2} V_{LL} \sin(\omega t)$$
-$$v_{bc}(t) = \sqrt{2} V_{LL} \sin(\omega t - 120°)$$  
-$$v_{ca}(t) = \sqrt{2} V_{LL} \sin(\omega t - 240°)$$
-
-In a 6-pulse bridge, each thyristor conducts for 120° per cycle. With firing delay angle $\alpha$, the output voltage waveform consists of 60° segments from each line-to-line voltage, delayed by $\alpha$ from the natural commutation point.
-
-The average DC output voltage is obtained by integrating over one 60° conduction period:
-
-$$V_{dc,6p} = \frac{6}{2\pi} \int_{\alpha}^{\alpha + \pi/3} \sqrt{2} V_{LL} \sin(\omega t) \, d(\omega t)$$
-
-$$= \frac{3\sqrt{2} V_{LL}}{\pi} \int_{\alpha}^{\alpha + \pi/3} \sin(\omega t) \, d(\omega t)$$
-
-$$= \frac{3\sqrt{2} V_{LL}}{\pi} [-\cos(\omega t)]_{\alpha}^{\alpha + \pi/3}$$
-
-$$= \frac{3\sqrt{2} V_{LL}}{\pi} [-\cos(\alpha + 60°) + \cos(\alpha)]$$
-
-Using the trigonometric identity: $\cos(\alpha + 60°) = \cos\alpha \cos 60° - \sin\alpha \sin 60° = \frac{1}{2}\cos\alpha - \frac{\sqrt{3}}{2}\sin\alpha$
-
-$$V_{dc,6p} = \frac{3\sqrt{2} V_{LL}}{\pi} \left[-\frac{1}{2}\cos\alpha + \frac{\sqrt{3}}{2}\sin\alpha + \cos\alpha\right]$$
-
-$$= \frac{3\sqrt{2} V_{LL}}{\pi} \left[\frac{1}{2}\cos\alpha + \frac{\sqrt{3}}{2}\sin\alpha\right]$$
-
-$$= \frac{3\sqrt{2} V_{LL}}{\pi} \cos\alpha \left[\frac{1}{2} + \frac{\sqrt{3}}{2}\tan\alpha\right]$$
-
-For the standard 6-pulse bridge configuration, this simplifies to:
+The standard result for a three-phase fully-controlled (thyristor) bridge rectifier is:
 
 $$\boxed{V_{dc,6p} = \frac{3\sqrt{2}}{\pi} \, V_{LL} \, \cos\alpha \approx 1.35 \, V_{LL} \, \cos\alpha}$$
+
+**Derivation Approach:**
+
+In a 6-pulse bridge rectifier, the output voltage follows the envelope of the line-to-line voltages. At any instant, one thyristor from the upper group (S1, S3, S5) and one from the lower group (S2, S4, S6) conduct, creating a path for current flow.
+
+The key insight is that the output voltage waveform consists of 60° segments from the line-to-line voltage envelope, with each segment delayed by the firing angle α from its natural commutation point.
+
+For a controlled rectifier with firing angle α, the conduction of each thyristor pair is delayed by α degrees from the natural (diode) commutation point. The average DC voltage is calculated by integrating the output voltage waveform over one complete cycle.
+
+The mathematical derivation involves:
+1. **Identifying the conduction intervals**: Each thyristor pair conducts for 60° per cycle
+2. **Applying the firing delay**: Each conduction interval starts α degrees after the natural commutation point  
+3. **Integration over the cycle**: The average value is found by integrating the line-to-line voltage segments
+
+The result $\frac{3\sqrt{2}}{\pi} \cos\alpha$ applies for **all values of α** from 0° to 180°, where:
+- At α = 0° (natural commutation): Maximum output = $1.35 \, V_{LL}$
+- At α = 90°: Zero output (thyristors fire at voltage zero-crossings)
+- At α = 180°: Maximum negative output (inversion mode)
 
 where:
 - $V_{LL}$ = line-to-line RMS voltage at the rectifier transformer secondary
