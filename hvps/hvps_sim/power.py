@@ -252,9 +252,9 @@ class TwelvePulseRectifier:
         in the transformer secondaries, resulting in 720 Hz ripple frequency
         with much lower amplitude than 6-pulse.
         """
-        # Get average DC output from both transformers
-        v_dc_avg = self.output_voltage(v_ll_peak_t1, alpha_deg) / 2 + \
-                   self.output_voltage(v_ll_peak_t2, alpha_deg) / 2
+        # Get combined DC output from both transformers (series connection)
+        v_dc_avg = (self.bridge1.output_voltage(v_ll_peak_t1, alpha_deg) + 
+                    self.bridge2.output_voltage(v_ll_peak_t2, alpha_deg))
         
         if v_dc_avg <= 0:
             return 0.0
