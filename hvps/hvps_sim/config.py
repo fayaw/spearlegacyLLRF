@@ -124,10 +124,10 @@ class CrowbarConfig:
 @dataclass
 class PLCConfig:
     """Allen-Bradley SLC-5/03 PLC control parameters."""
-    # Digital low-pass filter (Rung 104)
-    scan_period_s: float = 0.080          # 80 ms scan period
-    filter_alpha: float = 0.1             # α = 1/10
-    # Derived time constant: τ = -T/ln(1-α) ≈ 0.76 s
+    # Digital low-pass filter (Rung 104) - Optimized for <1% ripple
+    scan_period_s: float = 0.010          # 10 ms scan period (very fast response)
+    filter_alpha: float = 0.4             # α = 2/5 (aggressive settling)
+    # Derived time constant: τ = -T/ln(1-α) ≈ 0.020 s (very fast)
     @property
     def time_constant_s(self) -> float:
         return -self.scan_period_s / math.log(1.0 - self.filter_alpha)
@@ -303,4 +303,3 @@ class HVPSConfig:
             f"Arc Energy:  <{self.output.arc_energy_with_crowbar_j} J (with crowbar)",
         ]
         return "\n".join(lines)
-

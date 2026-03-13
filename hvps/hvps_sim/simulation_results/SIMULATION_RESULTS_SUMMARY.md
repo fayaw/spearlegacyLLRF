@@ -15,10 +15,7 @@ The SPEAR3 HVPS simulation demonstrates excellent performance with advanced LC f
 2. **Startup Sequence** - System initialization process for bringing HVPS online
 3. **Arc Fault Response** - Critical protection scenario during actual operations
 
-### ❌ **Removed Unrealistic Test/Analysis Modes**
-- **Step Response** - Control system characterization test (not operational)
-- **Power Quality Analysis** - Diagnostic analysis mode (not operational)
-- **Crowbar Test** - Protection system test (not operational fault scenario)
+
 
 ## Key Performance Results
 
@@ -162,11 +159,11 @@ Quality Factor:        Q = 1.08 (well-damped)
 | Arc Protection | <100 µs response | Immediate | ✅ **MET** |
 | System Stability | No oscillations | 2.088% variation | ✅ **MET** |
 
-## 4-Channel Waveform Buffer System Monitoring Signals
+## 4-Channel HVPS Monitoring Signals
 
 ### Real SPEAR3 System Monitoring Capability
 
-The simulation generates the **exact same 4 monitoring signals** that are available in the real SPEAR3 HVPS system:
+The simulation generates the **exact same 4 monitoring signals** that are currently monitored by oscilloscope in the real SPEAR3 HVPS system. Note: The 4-channel waveform buffer system is planned for future upgrade - current monitoring uses oscilloscope observation.
 
 **Channel 1: HVPS DC Voltage Monitor**
 - Signal: `hvps_voltage_monitor_kv` 
