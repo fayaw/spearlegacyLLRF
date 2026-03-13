@@ -212,9 +212,16 @@ def validate_system_stability():
     return stability_ok and transient_ok
 
 def main():
-    """Run comprehensive validation of HVPS simulation."""
+    """Run comprehensive validation of HVPS simulation - Realistic Operational Modes Only."""
     print("=" * 60)
-    print("HVPS Simulation Validation - Current Implementation")
+    print("HVPS Simulation Validation - Realistic Operational Modes")
+    print("=" * 60)
+    print("Testing only scenarios that represent actual SPEAR3 system operation:")
+    print("• Normal Operation (primary operating mode)")
+    print("• Startup Sequence (system initialization)")
+    print("• Arc Fault Response (actual protection scenario)")
+    print("• Filter Performance (advanced LC filtering)")
+    print("• System Stability (overall system behavior)")
     print("=" * 60)
     
     # Run all validation tests
@@ -261,4 +268,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-

@@ -285,7 +285,17 @@ def run_crowbar_test(voltage_kv: float = 77.0,
 
 
 def run_all(plot: bool = True, save_prefix: str = ""):
-    """Run all example scenarios.
+    """Run all realistic operational scenarios for SPEAR3 HVPS.
+    
+    Only includes scenarios that represent actual system operation:
+    - Normal steady-state operation (primary operating mode)
+    - Startup sequence (system initialization)
+    - Arc fault response (actual protection scenario)
+    
+    Removed unrealistic test/analysis modes:
+    - Step response (control system test)
+    - Power quality analysis (diagnostic mode)
+    - Crowbar test (protection system test)
 
     Parameters
     ----------
@@ -295,7 +305,7 @@ def run_all(plot: bool = True, save_prefix: str = ""):
         Prefix for saved plot files (e.g., 'results/').
     """
     print("\n" + "=" * 70)
-    print("   SPEAR3 HVPS Legacy System Simulation — All Scenarios")
+    print("   SPEAR3 HVPS Legacy System Simulation — Operational Scenarios")
     print("=" * 70 + "\n")
 
     results = {}
@@ -307,15 +317,6 @@ def run_all(plot: bool = True, save_prefix: str = ""):
     print()
 
     results['arc'] = run_arc_fault(plot=plot, save_prefix=save_prefix)
-    print()
-
-    results['step'] = run_step_response(plot=plot, save_prefix=save_prefix)
-    print()
-
-    results['quality'] = run_power_quality_analysis(plot=plot, save_prefix=save_prefix)
-    print()
-
-    results['crowbar'] = run_crowbar_test(plot=plot, save_prefix=save_prefix)
     print()
 
     print("=" * 70)
@@ -342,4 +343,3 @@ def quick_test():
 
 if __name__ == "__main__":
     quick_test()
-
