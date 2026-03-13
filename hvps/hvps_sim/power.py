@@ -192,24 +192,28 @@ class SixPulseBridge:
         return max(v_dc, 0.0)
 
     def output_with_ripple(self, v_ll_peak: float, alpha_deg: float,
-                           t: float, f_line: float) -> float:
+                           t: float, f_line: float, phase_offset_deg: float = 0.0) -> float:
         """Calculate instantaneous output including 6-pulse ripple.
 
-        Adds a 6×f_line ripple component on top of the average DC.
+        For 12-pulse operation, bridge1 uses phase_offset=0°, bridge2 uses phase_offset=30°.
+        This creates proper 12-pulse ripple cancellation when combined.
         """
         v_avg = self.output_voltage(v_ll_peak, alpha_deg)
         if v_avg <= 0:
             return 0.0
         alpha_rad = np.radians(alpha_deg)
-        # Ripple amplitude for 6-pulse: ultra-low for realistic filtering
-        # Real HVPS has elaborate LC filtering achieving <1% ripple
-        ripple_factor = 0.003 * (1.0 + 0.1 * abs(np.sin(alpha_rad)))
+        phase_rad = np.radians(phase_offset_deg)
+        
+        # 6-pulse ripple amplitude (before 12-pulse cancellation)
+        # Real 6-pulse rectifier has ~4% ripple before filtering
+        ripple_factor = 0.04 * (1.0 + 0.1 * abs(np.sin(alpha_rad)))
         omega_ripple = 2 * np.pi * 6 * f_line
-        # Add multiple harmonics for more realistic ripple shape
+        
+        # 6-pulse ripple with phase offset for 12-pulse operation
         ripple = v_avg * ripple_factor * (
-            np.cos(omega_ripple * t) + 
-            0.3 * np.cos(2 * omega_ripple * t) +
-            0.1 * np.cos(3 * omega_ripple * t)
+            np.cos(omega_ripple * t + phase_rad) + 
+            0.3 * np.cos(2 * omega_ripple * t + 2 * phase_rad) +
+            0.1 * np.cos(3 * omega_ripple * t + 3 * phase_rad)
         )
         return v_avg + ripple
 
@@ -240,15 +244,36 @@ class TwelvePulseRectifier:
         v2 = self.bridge2.output_voltage(v_ll_peak, alpha_deg)
         return v1 + v2
 
-    def output_with_ripple(self, v_ll_peak: float, alpha_deg: float,
-                           t: float, f_line: float) -> float:
-        """Combined output with 12-pulse ripple pattern."""
-        v1 = self.bridge1.output_with_ripple(v_ll_peak, alpha_deg, t, f_line)
-        # Bridge 2 is shifted by 30° (half of 60° = 1/12 period)
-        phase_shift = 1.0 / (12.0 * f_line)
-        v2 = self.bridge2.output_with_ripple(v_ll_peak, alpha_deg,
-                                              t + phase_shift, f_line)
-        return v1 + v2
+    def output_with_ripple(self, v_ll_peak_t1: float, v_ll_peak_t2: float,
+                           alpha_deg: float, t: float, f_line: float) -> float:
+        """Combined output with proper 12-pulse ripple characteristics.
+        
+        Real 12-pulse rectifier has harmonic cancellation due to ±15° phase shift
+        in the transformer secondaries, resulting in 720 Hz ripple frequency
+        with much lower amplitude than 6-pulse.
+        """
+        # Get average DC output from both transformers
+        v_dc_avg = self.output_voltage(v_ll_peak_t1, alpha_deg) / 2 + \
+                   self.output_voltage(v_ll_peak_t2, alpha_deg) / 2
+        
+        if v_dc_avg <= 0:
+            return 0.0
+            
+        alpha_rad = np.radians(alpha_deg)
+        
+        # True 12-pulse ripple: 720 Hz fundamental with low amplitude
+        # Harmonic cancellation reduces ripple to ~0.5% before filtering
+        ripple_factor = 0.005 * (1.0 + 0.2 * abs(np.sin(alpha_rad)))
+        omega_12pulse = 2 * np.pi * 12 * f_line  # 720 Hz
+        
+        # 12-pulse ripple with higher harmonics (24th, 36th, etc.)
+        ripple = v_dc_avg * ripple_factor * (
+            np.cos(omega_12pulse * t) + 
+            0.15 * np.cos(2 * omega_12pulse * t) +  # 24th harmonic
+            0.05 * np.cos(3 * omega_12pulse * t)    # 36th harmonic
+        )
+        
+        return v_dc_avg + ripple
 
     def turn_off_all(self):
         """Emergency turn-off of all thyristors."""
@@ -513,12 +538,17 @@ class PowerConversionChain:
                            abs(v_t2[1] - v_t2[2]),
                            abs(v_t2[2] - v_t2[0]))
 
-        # 4. 12-pulse rectifier
+        # 4. 12-pulse rectifier with proper harmonic cancellation
         f_line = self.config.ac_input.frequency
-        v_b1 = self.rectifier.bridge1.output_with_ripple(
-            v_ll_peak_t1, firing_angle_deg, t, f_line)
-        v_b2 = self.rectifier.bridge2.output_with_ripple(
-            v_ll_peak_t2, firing_angle_deg, t, f_line)
+        
+        # Use the improved 12-pulse rectifier model
+        v_12pulse = self.rectifier.output_with_ripple(
+            v_ll_peak_t1, v_ll_peak_t2, firing_angle_deg, t, f_line)
+        
+        # For tracking, split the 12-pulse output between the two bridges
+        # (In reality, they're in series and both contribute to the total)
+        v_b1 = v_12pulse / 2
+        v_b2 = v_12pulse / 2
         state.v_bridge1, state.v_bridge2 = v_b1, v_b2
 
         # 5. LC filter
@@ -539,8 +569,7 @@ class PowerConversionChain:
         # Track arc energy
         self.klystron.accumulate_arc_energy(v_filtered, i_load, dt)
 
-        # Estimate ripple
-        v_12pulse = v_b1 + v_b2
+        # Store 12-pulse voltage for analysis
         state.v_12pulse = v_12pulse
         if v_filtered > 0:
             state.ripple_pp_v = abs(v_12pulse - v_filtered)
