@@ -428,32 +428,30 @@ These methods provide **redundant protection layers** with fail-safe design prin
 - **Alarm Levels**: Low level alarm, critically low level trip
 - **Indication**: Local and remote indication via PLC
 
-### **B118 Waveform Buffer System**
+### **B118 Oscilloscope Monitoring**
 
-**Advanced Signal Acquisition (4 Channels):**
-The Building 118 control room houses an oscilloscope and waveform buffer system that monitors 4 critical HVPS signals for upgraded design integration and system diagnostics:
 
-| **Channel** | **Signal Source** | **Signal Type** | **Purpose** | **Specifications** |
-|-------------|------------------|-----------------|-------------|-------------------|
-| **Channel 1** | HVPS output | DC Voltage | Primary power monitoring | 0 to −90 kV DC, voltage divider (1000:1 ratio) |
-| **Channel 2** | HVPS output | DC Current | Load current monitoring | 0 to 30 A DC nominal (22 A typical), Danfysik DC-CT sensor with ±10V output |
-| **Channel 3** | Inductor 2 (T2) | Sawtooth voltage | T2 firing circuit timing diagnosis | Sawtooth pattern indicates thyristor firing |
-| **Channel 4** | Transformer 1 | AC Phase Current | T1 firing circuit health | AC waveform with thyristor commutation spikes |
+**Current Signal Monitoring:**
+The Building 118 control room currently houses an oscilloscope for manual monitoring and troubleshooting of critical HVPS signals:
 
-**System Capabilities:**
-- **Real-time Monitoring**: Continuous 100 ms rolling buffer of all 4 channels
-- **Event Recording**: Automatic capture triggered on voltage loss or fault conditions
-- **Waveform Analysis**: Post-event detailed analysis of causal events leading to faults
-- **Integration**: Designed for upgraded control system and LLRF integration
-- **Data Storage**: Historical waveform data for trend analysis and component degradation detection
-- **Remote Access**: Network connectivity for remote monitoring and archive
+| **Available Signals** | **Signal Type** | **Purpose** | **Specifications** |
+|-------------|-----------------|-------------|-------------------|
+| **HVPS Output (DC Voltage)** | DC Voltage | Primary power monitoring | 0 to −90 kV DC, voltage divider (1000:1 ratio) |
+| **HVPS Output (DC Current)** | DC Current | Load current monitoring | 0 to 30 A DC nominal (22 A typical), Danfysik DC-CT sensor with ±10V output |
+| **Inductor 2 (T2)** | Sawtooth voltage | T2 firing circuit timing diagnosis | Sawtooth pattern indicates thyristor firing |
+| **Transformer 1** | AC Phase Current | T1 firing circuit health | AC waveform with thyristor commutation spikes |
+
+**Current Capabilities:**
+- **Manual Monitoring**: Operator-initiated signal observation during troubleshooting
+- **Real-time Display**: Live waveform visualization for immediate fault diagnosis
+- **Signal Verification**: Confirmation of proper system operation during maintenance
+- **Troubleshooting Support**: Visual analysis of system behavior during fault conditions
 
 **Applications:**
-- **Arc Event Analysis**: Detailed waveform capture during klystron arcs
-- **System Performance**: Monitoring voltage regulation and current stability
-- **Protection Verification**: Crowbar system response time measurement
-- **Predictive Maintenance**: Trend analysis for component degradation
-- **System Optimization**: Performance tuning and efficiency analysis
+- **Arc Event Analysis**: Manual capture and analysis during klystron arc events
+- **System Troubleshooting**: Real-time waveform analysis for fault diagnosis
+- **Protection Verification**: Visual confirmation of crowbar system operation
+- **Maintenance Support**: Signal verification during component replacement or adjustment
 
 
 ### **EPICS Process Variables and Diagnostic Capabilities**
