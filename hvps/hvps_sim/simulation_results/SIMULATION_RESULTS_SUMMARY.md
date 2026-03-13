@@ -162,6 +162,44 @@ Quality Factor:        Q = 1.08 (well-damped)
 | Arc Protection | <100 µs response | Immediate | ✅ **MET** |
 | System Stability | No oscillations | 2.088% variation | ✅ **MET** |
 
+## 4-Channel Waveform Buffer System Monitoring Signals
+
+### Real SPEAR3 System Monitoring Capability
+
+The simulation generates the **exact same 4 monitoring signals** that are available in the real SPEAR3 HVPS system:
+
+**Channel 1: HVPS DC Voltage Monitor**
+- Signal: `hvps_voltage_monitor_kv` 
+- Range: 0 to -90 kV DC
+- Purpose: Voltage regulation monitoring
+- Real system: Voltage divider 1000:1 measurement
+
+**Channel 2: HVPS DC Current Monitor**  
+- Signal: `hvps_current_monitor_a`
+- Range: 0 to 30 A DC
+- Purpose: Load current monitoring  
+- Real system: Danfysik DC-CT sensor measurement
+
+**Channel 3: Inductor 2 (T2) Sawtooth Voltage Monitor**
+- Signal: `inductor2_sawtooth_monitor_kv`
+- Purpose: Firing circuit timing diagnosis
+- Pattern: Sawtooth with firing spikes every thyristor gate pulse
+- Real system: Indicates thyristor firing quality and timing
+
+**Channel 4: Transformer 1 AC Phase Current Monitor**
+- Signal: `transformer1_current_monitor_a` 
+- Purpose: Firing circuit health and 12-pulse rectifier operation
+- Pattern: AC waveform with thyristor commutation spikes
+- Real system: Validates 12-pulse rectifier physics
+
+### 🎯 **Direct Real System Comparison Capability**
+
+These monitoring signals enable **direct comparison** between simulation results and actual recorded data from the real SPEAR3 system:
+- Same signal names and ranges as real system
+- Same statistical data (Mean, Standard Deviation, Peak-to-Peak)
+- Same waveform patterns and characteristics
+- Can overlay simulation data with real facility recordings
+
 ## Simulation Files Generated
 
 ### Realistic Operational Scenarios
@@ -170,11 +208,18 @@ Quality Factor:        Q = 1.08 (well-damped)
 - `startup_control.png` - Startup control system response details
 - `arc_fault.png` - Arc fault response with protection system validation
 - `arc_detail.png` - Detailed arc fault analysis and recovery
-- `hvps_monitoring_signals.png` - Comprehensive monitoring signals display
+
+### 4-Channel Monitoring Signals (Real System Comparison)
+- `hvps_monitoring_signals.png` - Comprehensive 4-channel monitoring overview
+- `normal_monitoring_signals.png` - Normal operation monitoring signals
+- `startup_monitoring_signals.png` - Startup sequence monitoring signals  
+- `arc_fault_monitoring_signals.png` - Arc fault response monitoring signals
+- `*_monitoring_signals_zoom.png` - 100ms stabilized period detail views
 
 ### Analysis Tools
 - `SIMULATION_RESULTS_SUMMARY.md` - This comprehensive performance summary
 - `validate_results.py` - Automated validation and testing script
+- `generate_monitoring_signals.py` - Script to generate all monitoring signals plots
 
 ## Validation Results
 
@@ -204,4 +249,3 @@ The simulation provides exceptional value for understanding, analyzing, and opti
 **Contact:** SPEAR3 Engineering Team  
 **Last Updated:** March 13, 2026  
 **Operational Focus:** Real SPEAR3 system scenarios only
-

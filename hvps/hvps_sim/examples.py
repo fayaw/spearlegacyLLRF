@@ -319,8 +319,42 @@ def run_all(plot: bool = True, save_prefix: str = ""):
     results['arc'] = run_arc_fault(plot=plot, save_prefix=save_prefix)
     print()
 
+    # Generate 4-channel monitoring signals plots for real system comparison
+    if plot:
+        print("🔍 Generating 4-Channel Waveform Buffer System monitoring signals...")
+        print("   (These signals are available in the real SPEAR3 system for comparison)")
+        print()
+        
+        try:
+            from hvps.hvps_sim.plotting import plot_hvps_monitoring_signals
+            
+            # Generate monitoring signals for each scenario
+            scenarios = [
+                ("normal", results['normal'], "Normal Operation"),
+                ("startup", results['startup'], "Startup Sequence"), 
+                ("arc", results['arc'], "Arc Fault Response")
+            ]
+            
+            for key, result, name in scenarios:
+                if result is not None:
+                    monitoring_path = f"{save_prefix}{key}_monitoring_signals.png" if save_prefix else None
+                    plot_hvps_monitoring_signals(result, save_path=monitoring_path, zoom_duration=0.1)
+                    print(f"✅ Generated monitoring signals: {name}")
+            
+            # Generate comprehensive overview using normal operation
+            if results['normal'] is not None:
+                overview_path = f"{save_prefix}hvps_monitoring_signals.png" if save_prefix else None
+                plot_hvps_monitoring_signals(results['normal'], save_path=overview_path, zoom_duration=0.1)
+                print(f"✅ Generated comprehensive monitoring signals overview")
+                
+        except Exception as e:
+            print(f"⚠️  Monitoring signals generation skipped: {e}")
+        
+        print()
+
     print("=" * 70)
-    print("   All scenarios complete!")
+    print("   All realistic operational scenarios complete!")
+    print("   4-Channel monitoring signals ready for real system comparison!")
     print("=" * 70)
 
     return results
