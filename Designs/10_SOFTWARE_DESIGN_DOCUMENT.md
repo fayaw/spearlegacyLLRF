@@ -70,8 +70,8 @@ The Python coordinator sits at **Layer 4** of the protection hierarchy and commu
 | LLRF9 Unit 2 | Built-in Linux IOC | `LLRF2:` | 10 Hz scalars | EPICS CA |
 | HVPS CompactLogix | External gateway | `SRF1:HVPS:` | ~1 Hz | EPICS CA |
 | Kly MPS ControlLogix | External gateway | `SRF1:MPS:` | ~1 Hz | EPICS CA |
-| **Interface Chassis** | **Via MPS PLC gateway** | **`SRF1:MPS:IC:`** | **~1 Hz** | **EPICS CA** |
-| **Arc Detection System** | **Via MPS PLC gateway** | **`SRF1:MPS:ARC:`** | **~1 Hz / event** | **EPICS CA** |
+| **Interface Chassis** | **Dedicated IOC** | **`SRF1:IC:`** | **~1 Hz** | **EPICS CA** |
+| **Arc Detection System** | **Via IC dedicated IOC** | **`SRF1:IC:ARC:`** | **~1 Hz / event** | **EPICS CA** |
 | Motion Controller (Galil) | Motor record IOC | `SRF1:MTR:` | On demand | EPICS CA |
 | Waveform Buffer | Dedicated IOC | `SRF1:WFBUF:` | ~1 Hz / event | EPICS CA |
 | Heater Controller | Dedicated IOC | `SRF1:HTR:` | 10 Hz | EPICS CA |
@@ -105,7 +105,7 @@ The Python coordinator sits at **Layer 4** of the protection hierarchy and commu
 
 ### 2.1 Layered Architecture
 
-The software is organized into four layers, from hardware-facing (bottom) to operator-facing (top):
+The software is organized into five layers, from physical hardware (bottom) to operator-facing (top):
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -116,45 +116,77 @@ The software is organized into four layers, from hardware-facing (bottom) to ope
 ┌──────────────────────────────────┴──────────────────────────────────────┐
 │                      LAYER 3: COORDINATION                              │
 │                                                                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────┐  │
-│  │ Station      │  │ HVPS         │  │ Tuner        │  │ Load Angle │  │
-│  │ State Machine│  │ Controller   │  │ Manager (x4) │  │ Controller │  │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └─────┬──────┘  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────┐   │
+│  │ Station      │  │ HVPS         │  │ Tuner        │  │ Load Angle │   │
+│  │ State Machine│  │ Controller   │  │ Manager (x4) │  │ Controller │   │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └─────┬──────┘   │
 │         │                 │                 │                │          │
 │  ┌──────┴─────────────────┴─────────────────┴────────────────┴───────┐  │
 │  │                    Fault Manager (Event Bus)                      │  │
 │  └──────┬─────────────────┬─────────────────┬────────────────┬───────┘  │
 │         │                 │                 │                │          │
-│  ┌──────┴───────┐  ┌──────┴───────┐  ┌──────┴───────┐  ┌────┴───────┐  │
-│  │ Waveform Buf │  │ Heater Ctrl  │  │ Calibration  │  │ Config Mgr │  │
-│  │ Interface    │  │ Interface    │  │ System       │  │            │  │
-│  └──────────────┘  └──────────────┘  └──────────────┘  └────────────┘  │
+│  ┌──────┴───────┐  ┌──────┴───────┐  ┌──────┴───────┐  ┌─────┴──────┐   │
+│  │ Waveform Buf │  │ Heater Ctrl  │  │ Calibration  │  │ Config Mgr │   │
+│  │ Interface    │  │ Interface    │  │ System       │  │            │   │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └────────────┘   │
 └──────────────────────────────────┬──────────────────────────────────────┘
                                    │ Internal API calls
 ┌──────────────────────────────────┴──────────────────────────────────────┐
 │                    LAYER 2: HARDWARE ABSTRACTION                        │
 │                                                                         │
-│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐            │
-│  │ LLRF9Interface │  │ HVPSInterface  │  │ MPSInterface   │            │
-│  │ (x2 units)     │  │                │  │                │            │
-│  └────────────────┘  └────────────────┘  └────────────────┘            │
-│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐            │
-│  │InterfaceChassis│  │ArcDetection    │  │ MotorInterface │            │
-│  │Interface       │  │Interface       │  │ (Galil x4)     │            │
-│  └────────────────┘  └────────────────┘  └────────────────┘            │
-│  ┌────────────────┐  ┌────────────────┐                              │
-│  │ WaveformBuf    │  │ HeaterInterface│                            │
-│  │ Interface      │  │                │                            │
-│  └────────────────┘  └────────────────┘                            │
+│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐             │
+│  │ LLRF9Interface │  │ HVPSInterface  │  │ MPSInterface   │             │
+│  │ (x2 units)     │  │                │  │                │             │
+│  └────────────────┘  └────────────────┘  └────────────────┘             │
+│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐             │
+│  │InterfaceChassis│  │ArcDetection    │  │ MotorInterface │             │
+│  │Interface       │  │Interface       │  │ (Galil x4)     │             │
+│  └────────────────┘  └────────────────┘  └────────────────┘             │
+│  ┌────────────────┐  ┌────────────────┐                                 │
+│  │ WaveformBuf    │  │ HeaterInterface│                                 │
+│  │ Interface      │  │                │                                 │
+│  └────────────────┘  └────────────────┘                                 │
 └──────────────────────────────────┬──────────────────────────────────────┘
-                                   │ EPICS Channel Access
+                                   │ EPICS Channel Access (TCP/UDP, ports 5064/5065)
 ┌──────────────────────────────────┴──────────────────────────────────────┐
 │                     LAYER 1: EPICS COMMUNICATION                        │
 │                                                                         │
-│  ┌────────────────────────────────────────────────────────────────────┐  │
-│  │ EPICSBridge: PV connection management, monitor subscriptions,     │  │
-│  │              batch reads/writes, timeout handling, reconnection    │  │
-│  └────────────────────────────────────────────────────────────────────┘  │
+│  ┌────────────────────────────────────────────────────────────────────┐ │
+│  │ EPICSBridge: PV connection management, monitor subscriptions,      │ │
+│  │              batch reads/writes, timeout handling, reconnection    │ │
+│  └────────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────┬──────────────────────────────────────┘
+                                   │ EPICS Channel Access (Ethernet)
+┌──────────────────────────────────┴──────────────────────────────────────┐
+│              LAYER 0: HARDWARE IOCs  (EPICS Servers)                    │
+│  Each device runs its own IOC that owns its PV namespace and            │
+│  publishes live values onto the network. The Python coordinator         │
+│  is a pure CA client — it never talks to hardware directly.             │
+│                                                                         │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────┐  │
+│  │ LLRF9 Unit 1    │  │ LLRF9 Unit 2    │  │ HVPS CompactLogix       │  │
+│  │ Built-in Linux  │  │ Built-in Linux  │  │ EtherNet/IP→EPICS       │  │
+│  │ IOC (EPICS 3.14)│  │ IOC (EPICS 3.14)│  │ gateway                 │  │
+│  │ LLRF1:          │  │ LLRF2:          │  │ SRF1:HVPS:              │  │
+│  │ 10 Hz scalars   │  │ 10 Hz scalars   │  │ ~1 Hz                   │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────────────┘  │
+│                                                                         │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────┐  │
+│  │ Kly MPS         │  │ Interface       │  │ Galil DMC-4143          │  │
+│  │ ControlLogix    │  │ Chassis         │  │ EPICS motor record      │  │
+│  │ EtherNet/IP→    │  │ Dedicated sot   │  │ IOC                     │  │
+│  │ EPICS gateway   │  │ IOC             │  │ SRF1:MTR:               │  │
+│  │ SRF1:MPS:       │  │ SRF1:IC:        │  │ on demand               │  │
+│  │ ~1 Hz           │  │ ~1 Hz / event   │  │                         │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────────────────┘  │
+│                                                                         │
+│  ┌─────────────────┐  ┌──────────────────┐                              │
+│  │ Waveform Buffer │  │ Heater Controller│                              │
+│  │ Dedicated soft  │  │ Dedicated soft   │                              │
+│  │ IOC             │  │ IOC              │                              │
+│  │ SRF1:WFBUF:     │  │ SRF1:HTR:        │                              │
+│  │ ~1 Hz / event   │  │ 10 Hz            │                              │
+│  └─────────────────┘  └──────────────────┘                              │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -213,8 +245,8 @@ spear3_llrf/
 │   ├── llrf9_interface.py      # LLRF9 unit hardware abstraction
 │   ├── hvps_interface.py       # HVPS CompactLogix PLC interface
 │   ├── mps_interface.py        # Kly MPS ControlLogix PLC interface
-│   ├── interface_chassis_interface.py  # Interface Chassis status via MPS PLC
-│   ├── arc_detection_interface.py      # Arc detection system via MPS PLC
+│   ├── interface_chassis_interface.py  # Interface Chassis status via dedicated IC IOC
+│   ├── arc_detection_interface.py      # Arc detection system via IC dedicated IOC
 │   ├── motor_interface.py      # Galil DMC-4143 motor record interface
 │   ├── waveform_buf_interface.py  # Waveform Buffer System interface
 │   └── heater_interface.py     # Klystron heater SCR controller interface
@@ -653,7 +685,7 @@ async def recovery_sequence(self):
     await asyncio.sleep(1.0)  # Wait for latch clear propagation
     
     # Step 3: Verify Interface Chassis permits restored
-    assert self.mps.get_interface_chassis_status()["all_permits_ok"]
+    assert self.ic.get_status()["all_permits_ok"]
     
     # Step 4: Command HVPS PLC to ready state
     self.hvps.set_ready()
@@ -791,7 +823,7 @@ The Fault Manager is the central fault detection, logging, and recovery coordina
 
 | Source | Detection Method | Severity | Response |
 |--------|-----------------|----------|----------|
-| Interface Chassis trip | MPS PV monitor | CRITICAL | Immediate FAULT state |
+| Interface Chassis trip | IC IOC PV monitor | CRITICAL | Immediate FAULT state |
 | MPS permit lost | `SRF1:MPS:PERMIT` monitor | CRITICAL | Immediate FAULT state |
 | LLRF9 interlock trip | `LLRF1:ILOCK:ALL` monitor | CRITICAL | Immediate FAULT state |
 | HVPS fault | `SRF1:HVPS:STATUS:READY` → 0 | CRITICAL | Immediate FAULT state |
@@ -810,11 +842,11 @@ class FaultManager(BaseController):
     def handle_interlock_trip(self, event: Event):
         """Process an Interface Chassis interlock trip."""
         
-        # 1. Read first-fault register from MPS
-        first_fault = self.mps.get_first_fault()
+        # 1. Read first-fault register from IC IOC
+        first_fault = self.ic.get_first_fault()
         
         # 2. Read all Interface Chassis input states
-        ic_status = self.mps.get_interface_chassis_status()
+        ic_status = self.ic.get_status()
         
         # 3. Identify primary fault vs. consequential faults
         #    (LLRF9 Status and HVPS STATUS going low after IC removes
@@ -894,7 +926,7 @@ Provides the Python coordinator's interface to the Waveform Buffer System. Reads
 
 ### 11.1 Purpose
 
-The Interface Chassis Interface provides the Python coordinator's access to the Interface Chassis status and control functions. Since the Interface Chassis communicates via hardwired digital signals to the MPS PLC, this interface accesses IC data **indirectly** through the MPS PLC EPICS gateway.
+The Interface Chassis Interface provides the Python coordinator's access to the Interface Chassis status and control functions. The Interface Chassis has its own **dedicated IOC** (PV prefix `SRF1:IC:`) that directly publishes all input permit states, output states, first-fault register, and arc detection status. This is analogous to the Heater Controller's dedicated IOC.
 
 **Key capabilities**:
 - Read all Interface Chassis input permit states
@@ -904,22 +936,22 @@ The Interface Chassis Interface provides the Python coordinator's access to the 
 - Coordinate recovery sequences with IC state
 - Support diagnostic analysis of interlock cascades
 
-### 11.2 Key PVs (via MPS PLC)
+### 11.2 Key PVs (via IC dedicated IOC)
 
 | PV | Type | Description |
 |----|------|-------------|
-| `SRF1:MPS:IC:LLRF9_STATUS` | Binary | LLRF9 status input to IC |
-| `SRF1:MPS:IC:HVPS_STATUS` | Binary | HVPS STATUS fiber input to IC |
-| `SRF1:MPS:IC:MPS_PERMIT` | Binary | MPS RF Summary Permit input to IC |
-| `SRF1:MPS:IC:SPEAR_MPS_PERMIT` | Binary | SPEAR MPS permit input to IC |
-| `SRF1:MPS:IC:ORBIT_INTERLOCK` | Binary | Orbit interlock permit input to IC |
-| `SRF1:MPS:IC:ARC_DETECTION` | Binary | Arc detection summary permit to IC |
-| `SRF1:MPS:IC:POWER_MONITORING` | Binary | Waveform Buffer power monitoring permit to IC |
-| `SRF1:MPS:IC:LLRF9_ENABLE` | Binary | IC output: LLRF9 Enable |
-| `SRF1:MPS:IC:HVPS_SCR_ENABLE` | Binary | IC output: HVPS SCR ENABLE (fiber) |
-| `SRF1:MPS:IC:FIRST_FAULT_REG` | Integer | First-fault register bit field |
-| `SRF1:MPS:IC:FIRST_FAULT_TIME` | String | Timestamp of first fault |
-| `SRF1:MPS:IC:RECOVERY_ACTIVE` | Binary | IC recovery sequence in progress |
+| `SRF1:IC:LLRF9_STATUS` | Binary | LLRF9 status input to IC |
+| `SRF1:IC:HVPS_STATUS` | Binary | HVPS STATUS fiber input to IC |
+| `SRF1:IC:MPS_PERMIT` | Binary | MPS RF Summary Permit input to IC |
+| `SRF1:IC:SPEAR_MPS_PERMIT` | Binary | SPEAR MPS permit input to IC |
+| `SRF1:IC:ORBIT_INTERLOCK` | Binary | Orbit interlock permit input to IC |
+| `SRF1:IC:ARC_DETECTION` | Binary | Arc detection summary permit to IC |
+| `SRF1:IC:POWER_MONITORING` | Binary | Waveform Buffer power monitoring permit to IC |
+| `SRF1:IC:LLRF9_ENABLE` | Binary | IC output: LLRF9 Enable |
+| `SRF1:IC:HVPS_SCR_ENABLE` | Binary | IC output: HVPS SCR ENABLE (fiber) |
+| `SRF1:IC:FIRST_FAULT_REG` | Integer | First-fault register bit field |
+| `SRF1:IC:FIRST_FAULT_TIME` | String | Timestamp of first fault |
+| `SRF1:IC:RECOVERY_ACTIVE` | Binary | IC recovery sequence in progress |
 
 ---
 
@@ -927,22 +959,22 @@ The Interface Chassis Interface provides the Python coordinator's access to the 
 
 ### 12.1 Purpose
 
-The Arc Detection Interface provides access to the arc detection system status through the Interface Chassis → MPS PLC → EPICS path. It monitors the 5 optical arc sensors (4 cavity windows + 1 klystron window) and provides per-sensor diagnostic information.
+The Arc Detection Interface provides access to the arc detection system status through the Interface Chassis dedicated IOC. The 5 optical arc sensors (4 cavity windows + 1 klystron window) connect hardwired to the Interface Chassis, which exposes per-sensor trip status and the 5-bit fired-detector register directly via its own IOC (PV prefix `SRF1:IC:ARC:`).
 
-### 12.2 Key PVs (via MPS PLC)
+### 12.2 Key PVs (via IC dedicated IOC)
 
 | PV | Type | Description |
 |----|------|-------------|
-| `SRF1:MPS:ARC:CAV_A_TRIP` | Binary | Cavity A arc sensor trip status |
-| `SRF1:MPS:ARC:CAV_B_TRIP` | Binary | Cavity B arc sensor trip status |
-| `SRF1:MPS:ARC:CAV_C_TRIP` | Binary | Cavity C arc sensor trip status |
-| `SRF1:MPS:ARC:CAV_D_TRIP` | Binary | Cavity D arc sensor trip status |
-| `SRF1:MPS:ARC:KLY_TRIP` | Binary | Klystron arc sensor trip status |
-| `SRF1:MPS:ARC:SUMMARY_TRIP` | Binary | Any arc detected (OR of all 5 sensors) |
-| `SRF1:MPS:ARC:PERMIT` | Binary | Arc detection permit to Interface Chassis |
-| `SRF1:MPS:ARC:FIRED_ID_REG` | Integer | 5-bit register identifying which sensor(s) fired |
-| `SRF1:MPS:ARC:EVENT_COUNT` | Integer | Total arc events since startup |
-| `SRF1:MPS:ARC:LAST_EVENT_TIME` | String | Timestamp of last arc event |
+| `SRF1:IC:ARC:CAV_A_TRIP` | Binary | Cavity A arc sensor trip status |
+| `SRF1:IC:ARC:CAV_B_TRIP` | Binary | Cavity B arc sensor trip status |
+| `SRF1:IC:ARC:CAV_C_TRIP` | Binary | Cavity C arc sensor trip status |
+| `SRF1:IC:ARC:CAV_D_TRIP` | Binary | Cavity D arc sensor trip status |
+| `SRF1:IC:ARC:KLY_TRIP` | Binary | Klystron arc sensor trip status |
+| `SRF1:IC:ARC:SUMMARY_TRIP` | Binary | Any arc detected (OR of all 5 sensors) |
+| `SRF1:IC:ARC:PERMIT` | Binary | Arc detection permit to Interface Chassis |
+| `SRF1:IC:ARC:FIRED_ID_REG` | Integer | 5-bit register identifying which sensor(s) fired |
+| `SRF1:IC:ARC:EVENT_COUNT` | Integer | Total arc events since startup |
+| `SRF1:IC:ARC:LAST_EVENT_TIME` | String | Timestamp of last arc event |
 
 ---
 

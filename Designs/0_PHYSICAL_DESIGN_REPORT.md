@@ -56,8 +56,8 @@ The LLRF Upgrade Project replaces the entire control electronics chain — not m
 | Cavity Gap Voltage | ~800 kV each |
 | Klystron Power | ~1.5 MW rated, ~1 MW typical operating |
 | HVPS Voltage | up to ~90 kV (negative polarity) |
-| HVPS Operating Voltage | ~74.7 kV at 500 mA beam |
-| Drive Power | ~50 W nominal |
+| HVPS Operating Voltage | ~74.5 kV at 500 mA beam |
+| Drive Power | ~29 W nominal |
 | Number of Cavities | 4 (single-cell, individual tuners) |
 | LLRF9 Units | 2 active, 2 spare (4 purchased) |
 
@@ -1211,6 +1211,7 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 | LLRF9 Unit 2 | TBD | Built-in Linux IOC | `LLRF2:` | 10 Hz (scalars) |
 | HVPS CompactLogix | TBD | External EPICS gateway | `SRF1:HVPS:` | ~1 Hz |
 | KLY MPS ControlLogix | TBD | External EPICS gateway | `SRF1:MPS:` | ~1 Hz |
+| Interface Chassis | TBD | Dedicated IOC | `SRF1:IC:` | ~1 Hz / event |
 | Motion Controller | TBD | EPICS motor record IOC | `SRF1:MTR:` | On demand |
 | Waveform Buffer | TBD | Dedicated IOC | `SRF1:WFBUF:` | ~1 Hz / event |
 | Heater Controller | TBD | Dedicated IOC | `SRF1:HTR:` | 10 Hz |

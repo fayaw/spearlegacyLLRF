@@ -307,7 +307,7 @@ This sequencing logic represents a significant increase in complexity compared t
 | HVPS Controller | HVPS → IC | STATUS (fiber) | Fiber-optic (ST) |
 | HVPS Controller | IC → HVPS | SCR ENABLE (fiber), CROWBAR (fiber) | Fiber-optic (ST) |
 | MPS PLC | MPS → IC | Summary Permit, Heartbeat, Reset | Multi-conductor cable |
-| MPS PLC | IC → MPS | Status Lines, First-Fault | Multi-conductor cable |
+| IC IOC | IC → Network | All status, first-fault register, arc trip data | EPICS CA (Ethernet) |
 | Arc Detectors | Arc → IC | Permit (dry contact/TTL) | Wire pairs |
 | Waveform Buffer | WB → IC | Power Signal Permit (TTL) | Wire pairs |
 | SPEAR MPS | SPEAR → IC | Permit (24V) | Wire pair |
@@ -317,31 +317,72 @@ This sequencing logic represents a significant increase in complexity compared t
 
 ---
 
-## 9. Implementation Status and Next Steps
+## 9. EPICS IOC Interface
 
-### 9.1 Current Status
+The Interface Chassis has a **dedicated EPICS IOC** (analogous to the Heater Controller and Waveform Buffer IOCs) that publishes all IC status data directly onto the EPICS network. The Python coordinator accesses the IC entirely through this IOC — there is no indirect path through the MPS PLC for IC or arc detection data.
+
+**PV prefix**: `SRF1:IC:`
+
+### 9.1 Published PVs
+
+| PV | Type | Description |
+|----|------|-------------|
+| `SRF1:IC:LLRF9_STATUS` | Binary | LLRF9 status input to IC |
+| `SRF1:IC:HVPS_STATUS` | Binary | HVPS STATUS fiber input to IC |
+| `SRF1:IC:MPS_PERMIT` | Binary | MPS RF Summary Permit input to IC |
+| `SRF1:IC:SPEAR_MPS_PERMIT` | Binary | SPEAR MPS permit input to IC |
+| `SRF1:IC:ORBIT_INTERLOCK` | Binary | Orbit interlock permit input to IC |
+| `SRF1:IC:ARC_DETECTION` | Binary | Arc detection summary permit to IC |
+| `SRF1:IC:POWER_MONITORING` | Binary | Waveform Buffer power monitoring permit to IC |
+| `SRF1:IC:LLRF9_ENABLE` | Binary | IC output: LLRF9 Enable |
+| `SRF1:IC:HVPS_SCR_ENABLE` | Binary | IC output: HVPS SCR ENABLE (fiber) |
+| `SRF1:IC:FIRST_FAULT_REG` | Integer | First-fault register bit field |
+| `SRF1:IC:FIRST_FAULT_TIME` | String | Timestamp of first fault |
+| `SRF1:IC:RECOVERY_ACTIVE` | Binary | IC recovery sequence in progress |
+| `SRF1:IC:ARC:CAV_A_TRIP` | Binary | Cavity A arc sensor trip status |
+| `SRF1:IC:ARC:CAV_B_TRIP` | Binary | Cavity B arc sensor trip status |
+| `SRF1:IC:ARC:CAV_C_TRIP` | Binary | Cavity C arc sensor trip status |
+| `SRF1:IC:ARC:CAV_D_TRIP` | Binary | Cavity D arc sensor trip status |
+| `SRF1:IC:ARC:KLY_TRIP` | Binary | Klystron arc sensor trip status |
+| `SRF1:IC:ARC:SUMMARY_TRIP` | Binary | Any arc detected (OR of all 5 sensors) |
+| `SRF1:IC:ARC:FIRED_ID_REG` | Integer | 5-bit register identifying which sensor(s) fired |
+| `SRF1:IC:ARC:EVENT_COUNT` | Integer | Total arc events since startup |
+| `SRF1:IC:ARC:LAST_EVENT_TIME` | String | Timestamp of last arc event |
+
+**Note**: Arc detection PVs are published by the IC IOC because the arc detectors connect hardwired (dry relay contacts) directly to the Interface Chassis hardware.
+
+**Safety invariant**: The IOC is a read-only diagnostic and monitoring interface. The IOC crash or loss of Ethernet does not affect the IC hardware permit logic, which operates autonomously at <1 μs in hardware.
+
+---
+
+## 10. Implementation Status and Next Steps
+
+### 10.1 Current Status
 
 - **Interface specification**: ✅ Complete (J. Sebek, `llrf/architecture/llrfInterfaceChassis.docx`)
 - **Chassis mechanical design**: ❌ Not started
 - **PCB design**: ❌ Not started  
 - **Fabrication**: ❌ Not started
+- **EPICS IOC development**: ❌ Not started
 - **Testing**: ❌ Not started
 
-### 9.2 Critical Path Items
+### 10.2 Critical Path Items
 
 1. **Chassis mechanical design** — 19-inch rack-mount enclosure with front-panel indicators
 2. **PCB design** — Mixed-voltage optocoupler circuits, fiber-optic transceiver mounting, first-fault logic
 3. **Component procurement** — Long-lead items: optocouplers, fiber-optic transceivers, connectors
 4. **Fabrication and assembly** — PCB fabrication, chassis assembly, cable harnesses
-5. **Factory testing** — Bench testing of all input/output interfaces and logic functions
-6. **Integration testing** — Testing with actual LLRF9, HVPS, and MPS hardware
+5. **EPICS IOC development** — Soft IOC reading IC digital I/O and publishing `SRF1:IC:` PVs
+6. **Factory testing** — Bench testing of all input/output interfaces and logic functions
+7. **Integration testing** — Testing with actual LLRF9, HVPS, and MPS hardware
 
-### 9.3 Open Questions
+### 10.3 Open Questions
 
 1. **Physical location**: Inside existing Hoffman Box, separate enclosure, or 19-inch rack mount?
 2. **Power supply**: AC mains or DC from equipment rack?
 3. **Front-panel indicators**: LEDs for each input/output state and first-fault register?
 4. **Connector types**: D-sub, terminal blocks, or modular connectors for digital I/O?
 5. **Cable routing**: Conduit paths from Interface Chassis to all connected subsystems?
+6. **IOC host**: Embedded SBC inside IC chassis, or soft IOC on the control room PC?
 
 **Note**: The Interface Chassis is on the critical path for system integration. All other subsystems (LLRF9, HVPS, MPS PLC) are waiting for the Interface Chassis to coordinate their interlock signals.
