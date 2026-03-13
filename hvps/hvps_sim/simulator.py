@@ -28,6 +28,8 @@ from hvps.hvps_sim.controls import ControlSystem, ControlState
 from hvps.hvps_sim.protection import (
     ProtectionManager, ProtectionStatus, ProtectionState, FaultType
 )
+from hvps.hvps_sim.filtering import LCFilter, TwelvePulseRippleGenerator, FilterComponents
+from hvps.hvps_sim.thyristor_physics import TwelvePulseThyristorRectifier
 
 
 class SystemMode(Enum):
@@ -200,6 +202,11 @@ class HVPSSimulator:
         self.power = PowerConversionChain(self.config)
         self.controls = ControlSystem(self.config)
         self.protection = ProtectionManager(self.config)
+        
+        # New filtering and thyristor physics models
+        self.lc_filter = LCFilter(FilterComponents())
+        self.ripple_generator = TwelvePulseRippleGenerator()
+        self.thyristor_rectifier = TwelvePulseThyristorRectifier()
 
         # System state
         self._mode = SystemMode.OFF
@@ -424,6 +431,22 @@ class HVPSSimulator:
 
         # 3. Power chain update
         power_state = self.power.compute(t, firing_angle, dt)
+        
+        # TODO: Apply LC filtering to reduce ripple from 6.91% to <1%
+        # Temporarily disabled to debug voltage issue
+        # # Generate unfiltered 12-pulse rectifier voltage with realistic ripple
+        # unfiltered_voltage = self.ripple_generator.generate_unfiltered_ripple(
+        #     power_state.v_out, np.array([t]), firing_angle
+        # )
+        # 
+        # # Apply LC filter to achieve <1% ripple specification
+        # filtered_voltage = self.lc_filter.filter_ripple(unfiltered_voltage, dt)
+        # 
+        # # Update power state with filtered voltage
+        # if len(filtered_voltage) > 0:
+        #     power_state.v_out = filtered_voltage[0]
+        #     # Also update the internal LC filter state for consistency
+        #     self.power.lc_filter.v_C = filtered_voltage[0]
 
         # If crowbar is active, modify the output
         if prot_status.crowbar_active:
@@ -519,16 +542,21 @@ class HVPSSimulator:
         # Channel 2: HVPS DC Current (0 to 30 A DC, Danfysik DC-CT sensor)  
         result.hvps_current_monitor_a[i] = ps.i_out  # Same as main output
         # Channel 3: Inductor 2 (T2) Sawtooth voltage (firing circuit timing diagnosis)
-        # Sawtooth pattern indicates thyristor firing timing
+        # Generate sawtooth based on actual thyristor gating pulses
+        gating_pulses = self.thyristor_rectifier.generate_gating_pulses(
+            np.array([t]), cs.firing_angle_deg
+        )
         omega = 2 * np.pi * 60  # 60 Hz AC frequency
         sawtooth_base = 5.0 * (2 * (omega * t % (2 * np.pi)) / (2 * np.pi) - 1)  # ±5 kV sawtooth
-        firing_spike = 2.0 * np.exp(-((omega * t % (2 * np.pi) - np.pi) / 0.1)**2)  # Firing spike
+        firing_spike = 2.0 * gating_pulses[0] if len(gating_pulses) > 0 else 0.0  # Real firing spike
         result.inductor2_sawtooth_monitor_kv[i] = sawtooth_base + firing_spike
-        # Channel 4: Transformer 1 AC Phase Current (firing circuit health)
-        # AC waveform with thyristor commutation spikes
-        ac_current = 15.0 * np.sin(omega * t + np.radians(cs.firing_angle_deg))  # Phase-shifted AC
-        commutation_spike = 5.0 * np.exp(-((omega * t % (np.pi/3) - np.pi/6) / 0.05)**2)  # Commutation
-        result.transformer1_current_monitor_a[i] = ac_current + commutation_spike
+        
+        # Channel 4: Transformer 1 AC Phase Current (thyristor commutation physics)
+        # Generate square-wave current with commutation spikes using physics model
+        transformer_current = self.thyristor_rectifier.generate_transformer_ac_current(
+            np.array([t]), cs.firing_angle_deg, load_current_avg=15.0
+        )
+        result.transformer1_current_monitor_a[i] = transformer_current[0] if len(transformer_current) > 0 else 0.0
 
         # Protection
         result.protection_state[i] = prot.state.name
