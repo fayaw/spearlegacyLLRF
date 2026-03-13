@@ -27,8 +27,8 @@ class FilterComponents:
     L2_henry: float = 0.3  # Filter inductor 2
     
     # Filter Capacitors (from technical documentation)
-    # Adjusted to achieve fc ≈ 159 Hz as specified in documentation
-    main_filter_capacitors_uf: float = 1.6  # Effective filtering capacitance
+    # Increased to achieve <1% ripple specification (was 1.6 µF)
+    main_filter_capacitors_uf: float = 8.0  # Effective filtering capacitance (matches 8 µF from config)
     output_capacitor_uf: float = 0.22  # Additional output filtering
     
     # Series Resistors (current limiting to filter caps)

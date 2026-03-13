@@ -432,21 +432,17 @@ class HVPSSimulator:
         # 3. Power chain update
         power_state = self.power.compute(t, firing_angle, dt)
         
-        # TODO: Apply LC filtering to reduce ripple from 6.91% to <1%
-        # Temporarily disabled to debug voltage issue
-        # # Generate unfiltered 12-pulse rectifier voltage with realistic ripple
-        # unfiltered_voltage = self.ripple_generator.generate_unfiltered_ripple(
-        #     power_state.v_out, np.array([t]), firing_angle
-        # )
-        # 
-        # # Apply LC filter to achieve <1% ripple specification
-        # filtered_voltage = self.lc_filter.filter_ripple(unfiltered_voltage, dt)
-        # 
-        # # Update power state with filtered voltage
-        # if len(filtered_voltage) > 0:
-        #     power_state.v_out = filtered_voltage[0]
-        #     # Also update the internal LC filter state for consistency
-        #     self.power.lc_filter.v_C = filtered_voltage[0]
+        # Apply additional LC filtering to reduce ripple from ~29% to <1%
+        # This supplements the existing power chain filtering
+        if abs(power_state.v_out) > 5000.0:  # > 5 kV (well into operation)
+            # The existing power_state.v_out already has some ripple
+            # Apply our LC filter to further reduce it
+            unfiltered_array = np.array([abs(power_state.v_out)])
+            filtered_voltage = self.lc_filter.filter_ripple(unfiltered_array, dt)
+            
+            # Update power state with additional filtering (maintain negative polarity)
+            if len(filtered_voltage) > 0:
+                power_state.v_out = -filtered_voltage[0]  # Negative for klystron cathode
 
         # If crowbar is active, modify the output
         if prot_status.crowbar_active:
