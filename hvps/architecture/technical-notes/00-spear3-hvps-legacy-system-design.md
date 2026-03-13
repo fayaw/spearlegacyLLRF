@@ -859,13 +859,17 @@ $$\omega_{ripple} = 2\pi \times 720 = 4{,}524 \text{ rad/s}$$
 
 The 30° arc derivation in Step 5 above gives the ripple directly from the arc geometry — no separate derivation is needed. Each arc $v_{out} = 2\sqrt{2}\,V_{LL}\cos(15°)\cdot\cos(\omega t - \phi)$ has its minimum at the arc edges (cosine argument = ±15° from center), giving:
 
-$$\frac{\Delta V_{pp}}{V_{dc}} = 1 - \cos(15°) = 1 - \cos\!\left(\frac{\pi}{12}\right) = 1 - 0.9659 = 3.41\%$$
+$$\frac{\Delta V_{pp}}{V_{max}} = 1 - \cos(15°) = 1 - \cos\!\left(\frac{\pi}{12}\right) = 1 - 0.9659 = 3.41\%$$
+
+Relative to the **average DC level** from Step 4:
+
+$$\frac{\Delta V_{pp}}{V_{dc}} = \frac{2\sqrt{2}V_{LL}\cos(15°)\left[1-\cos(15°)\right]}{\left(6\sqrt{2}/\pi\right)V_{LL}} \approx 3.44\%$$
 
 The 15° angle here is exactly the half-width of the 30° output arc, which equals half the ±15° T0 phase shift — a direct geometric connection between the transformer design and the ripple performance.
 
 At the nominal 77 kV output:
 
-$$\Delta V_{pp,unfiltered} = 0.0341 \times 77{,}000 = 2{,}626 \text{ V (peak-to-peak)}$$
+$$\Delta V_{pp,unfiltered} \approx 0.0344 \times 77{,}000 \approx 2{,}650 \text{ V (peak-to-peak)}$$
 
 #### LC Filter Attenuation
 
@@ -887,7 +891,7 @@ $$\text{Attenuation} = \left(\frac{f_{ripple}}{f_0}\right)^2 = \left(\frac{720}{
 
 The filtered ripple voltage is:
 
-$$\Delta V_{pp,filtered} = \frac{\Delta V_{pp,unfiltered}}{\text{Attenuation}} = \frac{2{,}626}{175} \approx 15 \text{ V peak-to-peak}$$
+$$\Delta V_{pp,filtered} = \frac{\Delta V_{pp,unfiltered}}{\text{Attenuation}} = \frac{2{,}650}{175} \approx 15.1 \text{ V peak-to-peak}$$
 
 $$\frac{\Delta V_{pp,filtered}}{V_{dc}} = \frac{15}{77{,}000} = 0.019\% \quad \text{(well within <1\% spec)}$$
 
@@ -915,40 +919,42 @@ $$E_{cap} = \frac{1}{2} C V_{dc}^2 = \frac{1}{2} \times 8 \times 10^{-6} \times 
 | 80 | 25,600 | 25.6 |
 | 90 | 32,400 | 32.4 |
 
-#### Arc Current Through 500 Ω Isolation Resistors
+#### RC Branch Discharge Through the 500 Ω Isolation Path
 
-During a klystron arc, the filter capacitor discharges through the 500 Ω isolation resistor. The initial (peak) arc current is:
+The simple $R$-$C$ model below estimates the **current and energy released from the capacitor bank into a 500 Ω isolation path**. It is a useful first-order check for time constant and stored-energy release, but it is **not identical to the actual current or energy delivered to the klystron arc**, because the real system includes distributed bridge sections, inductors, cable impedance, and crowbar diversion.
 
-$$I_{arc,peak} = \frac{V_{dc}}{R_{iso}} = \frac{77{,}000}{500} = 154 \text{ A}$$
+Using the lumped 500 Ω path, the initial branch current is:
+
+$$I_{branch,peak} = \frac{V_{dc}}{R_{iso}} = \frac{77{,}000}{500} = 154 \text{ A}$$
 
 The RC discharge time constant is:
 
 $$\tau_{RC} = R_{iso} \times C = 500 \times 8 \times 10^{-6} = 4 \text{ ms}$$
 
-The arc current decays exponentially:
+The branch current decays exponentially:
 
-$$I_{arc}(t) = I_{arc,peak} \, e^{-t/\tau_{RC}} = 154 \, e^{-t/0.004}$$
+$$I_{branch}(t) = I_{branch,peak} \, e^{-t/\tau_{RC}} = 154 \, e^{-t/0.004}$$
 
-The energy delivered to the arc during time $t$ is:
+The capacitor-bank energy released into this lumped branch by time $t$ is:
 
-$$E_{arc}(t) = \frac{1}{2} C V_{dc}^2 \left(1 - e^{-2t/\tau_{RC}}\right)$$
+$$E_{released}(t) = \frac{1}{2} C V_{dc}^2 \left(1 - e^{-2t/\tau_{RC}}\right)$$
 
-**Critical timing for arc energy:**
+**Critical timing for the lumped RC branch model:**
 
-| Time (ms) | $I_{arc}$ (A) | $E_{arc}$ (J) | Fraction of $E_{cap}$ |
-|-----------|---------------|---------------|----------------------|
-| 0.001 (1 µs crowbar) | 153.6 | 23.7 | 0.10% |
-| 0.01 (10 µs) | 153.2 | 237 | 1.0% |
-| 0.1 | 150.2 | 1,153 | 4.9% |
-| 1.0 | 118.5 | 9,124 | 38.5% |
-| 2.0 | 91.3 | 14,959 | 63.1% |
-| 4.0 ($\tau$) | 56.6 | 20,613 | 86.9% |
+| Time (ms) | $I_{branch}$ (A) | $E_{released}$ (J) | Fraction of $E_{cap}$ |
+|-----------|------------------|--------------------|----------------------|
+| 0.001 (1 µs) | 154.0 | 11.9 | 0.05% |
+| 0.01 (10 µs) | 153.6 | 118 | 0.50% |
+| 0.1 | 150.2 | 1,157 | 4.9% |
+| 1.0 | 120.0 | 9,332 | 39.4% |
+| 2.0 | 93.4 | 14,992 | 63.2% |
+| 4.0 ($\tau$) | 56.6 | 20,511 | 86.5% |
 
-> **With crowbar active (~1 µs response):** The crowbar shorts the output, clamping the arc voltage to near zero. The energy delivered to the arc in ~1 µs is:
+> **With crowbar active (~1 µs response):** this lumped model indicates that only about 11.9 J is released from the capacitor bank before the crowbar diverts the fault current path:
 >
-> $$E_{arc,crowbar} \approx \frac{V_{dc}^2}{R_{iso}} \times \Delta t = \frac{(77{,}000)^2}{500} \times 1 \times 10^{-6} = 11.9 \text{ J}$$
+> $$E_{released}(1\,\mu s) = \frac{1}{2} C V_{dc}^2 \left(1 - e^{-2 \times 10^{-6}/0.004}\right) \approx 11.9 \text{ J}$$
 >
-> This is well within the <40 J design target and the 60 J klystron tolerance.
+> The actual energy deposited in the klystron arc is lower than this branch-release estimate because the crowbar rapidly collapses the arc voltage and diverts current away from the tube.
 
 #### Layer 2: Filter Inductor Stored Energy
 
@@ -972,11 +978,11 @@ The crowbar must safely absorb the fault current. The $I^2t$ rating determines t
 
 $$I^2 t = \int_0^{t_{clear}} I_{fault}^2(t) \, dt$$
 
-For the capacitor discharge through the 500 Ω resistor during crowbar operation:
+Using the same lumped 500 Ω RC branch model as an upper-bound first-order estimate:
 
 $$I^2 t = \int_0^{\infty} \left(\frac{V_{dc}}{R_{iso}}\right)^2 e^{-2t/\tau} \, dt = \frac{V_{dc}^2}{R_{iso}^2} \times \frac{\tau}{2} = \frac{(77{,}000)^2}{(500)^2} \times \frac{0.004}{2} = 47.4 \text{ A}^2\text{s}$$
 
-For the crowbar SCR stacks rated at 100 kV and 80 A, this $I^2t$ is within their safe operating area.
+This provides an order-of-magnitude check on crowbar thermal stress. The actual current sharing through the crowbar stack depends on distributed impedance and trigger timing, so detailed hardware verification should use the measured discharge waveform rather than the lumped RC model alone.
 
 #### Layer 4: Cable Termination Inductors
 
@@ -1091,11 +1097,11 @@ $$\text{THD}_{12p} = \sqrt{\sum_{h=11,13,23,...} \left(\frac{1}{h}\right)^2} \ap
 | Klystron Power | $P = V \times I$ | 1.65 MW | 1.7 MW nominal | ~3% |
 | Filter Resonance | $f_0 = 1/(2\pi\sqrt{LC})$ | 54.4 Hz | — | — |
 | Ripple Attenuation | $(f_{rip}/f_0)^2$ | 175× (44.9 dB) | — | — |
-| Ripple (p-p) | $\Delta V / \text{atten.}$ | 0.019% | <1% p-p | 50× margin |
+| Ripple (p-p) | $\Delta V_{pp,filtered} / V_{dc}$ | 0.019% | <1% p-p | 50× margin |
 | Ripple (RMS) | $V_{rms} / V_{dc}$ | 0.007% | <0.2% RMS | 29× margin |
 | Capacitor Energy | $\frac{1}{2}CV^2$ | 23.7 kJ | — | — |
-| Arc Energy (crowbar) | $V^2/R \times \Delta t$ | ~12 J (1 µs) | <40 J | 3.3× margin |
-| Arc Energy (no crowbar) | $\frac{1}{2}CV^2(1-e^{-2t/\tau})$ | ~9.1 kJ (1 ms) | <60 J (klystron) | Protection critical |
+| RC Branch Energy Released (1 µs) | $\frac{1}{2}CV^2(1-e^{-2t/\tau})$ | 11.9 J | — | Lumped branch model |
+| RC Branch Energy Released (1 ms) | $\frac{1}{2}CV^2(1-e^{-2t/\tau})$ | 9.3 kJ | — | Not equal to tube arc energy |
 | Inductor Energy | $\frac{1}{2}LI^2$ | 1,388 J total | — | Bypassed by controller |
 | Power Factor | $\cos\alpha \times 0.989$ | 0.85 (nom.) | >0.95 (full load) | See note above |
 | Regulation Gain | $dV/d\alpha$ | 807 V/degree | — | — |
