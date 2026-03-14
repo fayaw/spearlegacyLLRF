@@ -572,26 +572,13 @@ Starting from the 3-phase AC supply at the secondary of rectifier transformers T
 
 $$v_a = V_m\sin(\omega t), \quad v_b = V_m\sin(\omega t - 120°), \quad v_c = V_m\sin(\omega t + 120°)$$
 
-where $V_m = \sqrt{2}\,V_{ph}$ is the peak phase voltage. A diode/thyristor bridge does not use phase voltages directly — it selects from the six **line-to-line** voltages. Compute $v_{ab} = v_a - v_b$ using the sum-to-product identity $\sin A - \sin B = 2\cos\!\tfrac{A+B}{2}\sin\!\tfrac{A-B}{2}$:
-
-$$v_{ab} = V_m\!\left[\sin(\omega t) - \sin(\omega t - 120°)\right] = V_m \cdot 2\cos\!\left(\omega t - 60°\right)\sin(60°) = \sqrt{3}\,V_m\cos(\omega t - 60°)$$
-
-Since $V_{LL} = \sqrt{3}\,V_{ph}$ and $V_m = \sqrt{2}\,V_{ph}$, we get $\sqrt{3}V_m = \sqrt{2}V_{LL}$, so:
+where $V_m = \sqrt{2}\,V_{ph}$ is the peak phase voltage. A diode/thyristor bridge does not use phase voltages directly — it selects from the six **line-to-line** voltages. Compute $v_{ab} = v_a - v_b$ using  $V_{LL} = \sqrt{3}\,V_{ph}$, we get $\sqrt{3}V_m = \sqrt{2}V_{LL}$, so:
 
 $$v_{ab} = \sqrt{2}\,V_{LL}\cos(\omega t - 60°)$$
 
 Applying the same identity to all six combinations yields:
 
 $$\boxed{v_k = \sqrt{2}\,V_{LL}\cos(\omega t - 60°\cdot k), \quad k = 0,1,2,3,4,5}$$
-
-| $k$ | Voltage | Expression | Peak at $\omega t$ |
-|-----|---------|-----------|---------------------|
-| 0 | $v_{cb}$ | $\sqrt{2}V_{LL}\cos(\omega t)$ | 0° |
-| 1 | $v_{ab}$ | $\sqrt{2}V_{LL}\cos(\omega t - 60°)$ | 60° |
-| 2 | $v_{ac}$ | $\sqrt{2}V_{LL}\cos(\omega t - 120°)$ | 120° |
-| 3 | $v_{bc}$ | $\sqrt{2}V_{LL}\cos(\omega t - 180°)$ | 180° |
-| 4 | $v_{ba}$ | $\sqrt{2}V_{LL}\cos(\omega t - 240°)$ | 240° |
-| 5 | $v_{ca}$ | $\sqrt{2}V_{LL}\cos(\omega t - 300°)$ | 300° |
 
 **Key result**: all six are sinusoids of **identical amplitude** $\sqrt{2}V_{LL}$, with peaks uniformly spaced **60° apart**. This 60° spacing is the geometric origin of everything that follows.
 
@@ -603,9 +590,8 @@ A diode/thyristor bridge output equals the **highest** line-to-line voltage at e
 
 $$\sqrt{2}V_{LL}\cos(\omega t) = \sqrt{2}V_{LL}\cos(\omega t - 60°)$$
 
-$$\cos(\omega t) = \cos(\omega t - 60°) \implies \omega t = 30° \quad \checkmark$$
-
-This can be verified directly: $\cos(30°) = \cos(-30°) = \tfrac{\sqrt{3}}{2}$. By symmetry, successive crossovers occur at $30°, 90°, 150°, \ldots$ — every 60°. Therefore, **Bridge X output** (fed by T1 at 0° reference) is:
+Therefore $$\omega t = 30° $$
+By symmetry, successive crossovers occur at $30°, 90°, 150°, \ldots$ — every 60°Therefore, **Bridge X output** (fed by T1 at 0° reference) is:
 
 $$\boxed{v_X(\omega t) = \sqrt{2}\,V_{LL}\cos(\omega t - 60°k) \quad \text{for } (60°k - 30°) < \omega t < (60°k + 30°), \quad k = 0\ldots5}$$
 
@@ -622,13 +608,9 @@ The two 6-pulse DC outputs are connected in **series** (secondary diode bridges 
 $$v_X = \sqrt{2}\,V_{LL}\cos(\omega t)$$
 $$v_Y = \sqrt{2}\,V_{LL}\cos(\omega t - 30°)$$
 
-**Sum using the product-to-sum identity** $\cos A + \cos B = 2\cos\!\tfrac{A+B}{2}\cos\!\tfrac{A-B}{2}$:
+$$v_{out} = v_X + v_Y = \sqrt{2}\,V_{LL}\Big[\cos(\omega t) + \cos(\omega t - 30° )\Big]$$
 
-$$A = \omega t, \quad B = \omega t - 30° \implies \frac{A+B}{2} = \omega t - 15°, \quad \frac{A-B}{2} = 15°$$
-
-$$v_{out} = v_X + v_Y = \sqrt{2}\,V_{LL}\Big[\cos(\omega t) + \cos(\omega t - 30°)\Big]$$
-
-$$\boxed{v_{out} = 2\sqrt{2}\,V_{LL}\cos(15°)\cdot\cos(\omega t - 15°)}$$
+$$\boxed{v_{out} = 2\sqrt{2}\,V_{LL}\cos(15°)\cdot\cos(\omega t - 15° )} $$
 
 This is a **cosine centered at $\omega t = 15°$**, the midpoint of the 0°–30° window. It spans ±15° around its peak — a **30° arc** of a cosine. By repeating this for every successive 30° window (shifting the center by 30° each time), the combined output is:
 
@@ -646,15 +628,11 @@ Twelve such arcs fill one 360° cycle → **12-pulse output**. The 30° arc is n
 
 #### Step 4 — Average DC Voltage from the 30° Arc (with Firing Angle α)
 
-The thyristors introduce a **firing delay angle $\alpha$** measured from the natural commutation point. The important point is that $\alpha$ should **not** be modeled by shifting the 30° integration window itself. The commutation sequence still advances in fixed 30° steps. Instead, $\alpha$ changes **which part of the underlying sinusoid is sampled inside that fixed 30° window**.
+The thyristors introduce a **firing delay angle $\alpha$** measured from the natural commutation point.$\alpha$ changes **which part of the underlying sinusoid is sampled inside that fixed 30° window**.
 
 To make that explicit, define a local angle $\beta$ for one 30° output segment, centered on its natural midpoint. For one segment of the 12-pulse waveform:
 
 $$-15° \le \beta \le +15°$$
-
-At $\alpha = 0°$, the segment is centered exactly on the cosine peak, so from Step 3:
-
-$$v_{out}(\beta,0) = 2\sqrt{2}\,V_{LL}\cos(15°)\cos\beta$$
 
 With firing delay $\alpha$, the bridge commutates onto the same 30° segment **$\alpha$ later on the source sinusoid**, so the waveform sampled inside the fixed segment becomes:
 
@@ -666,26 +644,6 @@ The average DC value is the average of this segment repeated 12 times per cycle:
 
 $$V_{dc} = \frac{12}{2\pi}\int_{-\pi/12}^{+\pi/12} 2\sqrt{2}\,V_{LL}\cos\!\left(\frac{\pi}{12}\right)\cos(\beta + \alpha)\,d\beta$$
 
-Using $\tfrac{12}{2\pi} = \tfrac{6}{\pi}$:
-
-$$V_{dc} = \frac{6}{\pi} \cdot 2\sqrt{2}\,V_{LL}\cos\!\left(\frac{\pi}{12}\right) \int_{-\pi/12}^{+\pi/12} \cos(\beta + \alpha)\,d\beta$$
-
-Integrating:
-
-$$V_{dc} = \frac{12\sqrt{2}\,V_{LL}\cos\!\left(\frac{\pi}{12}\right)}{\pi}\Big[\sin(\beta + \alpha)\Big]_{-\pi/12}^{+\pi/12}$$
-
-$$= \frac{12\sqrt{2}\,V_{LL}\cos\!\left(\frac{\pi}{12}\right)}{\pi}\left[\sin\!\left(\alpha + \frac{\pi}{12}\right) - \sin\!\left(\alpha - \frac{\pi}{12}\right)\right]$$
-
-Apply the identity $\sin(x+y) - \sin(x-y) = 2\cos x\sin y$:
-
-$$V_{dc} = \frac{12\sqrt{2}\,V_{LL}\cos\!\left(\frac{\pi}{12}\right)}{\pi} \cdot 2\cos\alpha\sin\!\left(\frac{\pi}{12}\right)$$
-
-$$= \frac{24\sqrt{2}\,V_{LL}}{\pi}\cos\alpha\sin\!\left(\frac{\pi}{12}\right)\cos\!\left(\frac{\pi}{12}\right)$$
-
-$$= \frac{12\sqrt{2}\,V_{LL}}{\pi}\cos\alpha\sin\!\left(\frac{\pi}{6}\right)$$
-
-$$= \frac{12\sqrt{2}\,V_{LL}}{\pi}\cos\alpha \cdot \frac{1}{2}$$
-
 $$\boxed{V_{dc} = \frac{6\sqrt{2}}{\pi}\,V_{LL}\cos\alpha \approx 2.70\,V_{LL}\cos\alpha}$$
 
 where:
@@ -693,8 +651,6 @@ where:
 - $\alpha > 0°$: the 30° arc keeps the same width, but samples a lower part of the source cosine, so the average falls as $\cos\alpha$
 - $\alpha = 90°$: arc straddles the zero crossing — average = 0
 - $\alpha > 90°$: inverting mode — average DC is negative
-
-This also follows from doubling the 6-pulse result: $V_{dc,12p} = 2\times V_{dc,6p} = 2\times\tfrac{3\sqrt{2}}{\pi}V_{LL}\cos\alpha$.
 
 > **Note on commutation overlap**: Transformer leakage inductance $L_s$ causes a commutation overlap angle $u$, reducing the output by:
 >
@@ -716,8 +672,6 @@ Therefore the **unfiltered peak-to-peak ripple** is:
 $$\frac{\Delta V_{pp}}{V_{max}} = \frac{V_{max} - V_{min}}{V_{max}} = 1 - \cos(15°) = 1 - \cos\!\left(\frac{\pi}{12}\right)$$
 
 $$\boxed{\frac{\Delta V_{pp}}{V_{dc}} = 1 - \cos(15°) = 3.41\%}$$
-
-The **15° half-angle is algebraically identical to the ±15° T0 phase shift** — both expressions arise because the arc half-width equals half the interleave angle (30°/2 = 15°). This is not a coincidence; the ripple formula is a direct geometric consequence of the T0 design choice.
 
 ---
 
