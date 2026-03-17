@@ -4,13 +4,16 @@
 **Title**: Interface Chassis — Central Interlock Coordination Hub with First-Fault Detection and Electrical Isolation
 **Author**: LLRF Upgrade Team
 **Date**: March 2026
-**Version**: 1.0
-**Status**: Interfaces Fully Specified (J. Sebek) — Chassis Design and Fabrication Pending
+**Version**: 1.1
+**Status**: Updated with PDR Integration — Chassis Design and Fabrication Pending
 
 **Reference Documents**:
 | Document | Location | Content |
 |----------|----------|---------|
+| **SPEAR3 LLRF PDR** | `Designs/docx/SPEAR3_LLRF_PDR_R1.docx` | Physical Design Report Rev 1 - System architecture and upgrade overview |
 | **Primary Interface Chassis Specification** | `llrf/architecture/llrfInterfaceChassis.docx` | J. Sebek complete interface specification |
+| **LLRF9 System Report** | Referenced in PDR | Dual LLRF9/476 unit configuration and interlock topology |
+| **HVPS PPS Interface Technical Document** | Referenced in PDR | CompactLogix HVPS controller upgrade specifications |
 | **HVPS Fiber-Optic Connections** | `hvps/architecture/designNotes/controllerFiberOpticConnections.docx` | Detailed HVPS fiber-optic circuit behavior |
 | **Inter-Controller Interfaces** | `hvps/architecture/designNotes/interfacesBetweenRFSystemControllers.docx` | Standard optocoupler specifications |
 | **RF System MPS Requirements** | `hvps/architecture/designNotes/RFSystemMPSRequirements.docx` | Protection philosophy and MPS requirements |
@@ -24,26 +27,28 @@
 
 1. [Executive Summary](#1-executive-summary)
 2. [System Purpose and Role](#2-system-purpose-and-role)
-3. [Design Requirements](#3-design-requirements)
-4. [Input Signal Specifications](#4-input-signal-specifications)
-5. [Output Signal Specifications](#5-output-signal-specifications)
-6. [Electrical Isolation Design](#6-electrical-isolation-design)
-7. [First-Fault Detection Circuit](#7-first-fault-detection-circuit)
-8. [Fault Latching and Reset Logic](#8-fault-latching-and-reset-logic)
-9. [Permit Logic Implementation](#9-permit-logic-implementation)
-10. [LLRF9-HVPS Feedback Loop Analysis](#10-llrf9-hvps-feedback-loop-analysis)
-11. [Signal Conditioning Details](#11-signal-conditioning-details)
-12. [Integration with All Subsystems](#12-integration-with-all-subsystems)
-13. [Physical Implementation](#13-physical-implementation)
-14. [Commissioning and Testing Plan](#14-commissioning-and-testing-plan)
-15. [Open Questions and Required Decisions](#15-open-questions-and-required-decisions)
-16. [Implementation Status and Next Steps](#16-implementation-status-and-next-steps)
+3. [System Architecture Integration](#3-system-architecture-integration)
+4. [Design Requirements](#4-design-requirements)
+5. [Input Signal Specifications](#5-input-signal-specifications)
+6. [Output Signal Specifications](#6-output-signal-specifications)
+7. [Permit Logic Implementation](#7-permit-logic-implementation)
+8. [LLRF9-HVPS Feedback Loop Analysis](#8-llrf9-hvps-feedback-loop-analysis)
+9. [Integration Summary](#9-integration-summary)
+10. [EPICS IOC Interface](#10-epics-ioc-interface)
+11. [Critical Path Risk Analysis](#11-critical-path-risk-analysis)
+12. [Implementation Status and Next Steps](#12-implementation-status-and-next-steps)
 
 ---
 
 ## 1. Executive Summary
 
-The Interface Chassis is a **new, custom-designed hardware subsystem** that serves as the central interlock coordination hub for the entire SPEAR3 RF system upgrade. It connects the LLRF9 controllers, HVPS controller, MPS PLC, arc detection system, Waveform Buffer System, and external safety systems (SPEAR MPS, orbit interlocks) through a single, electrically isolated, hardware-speed interlock logic chassis.
+The Interface Chassis is a **new, custom-designed hardware subsystem** that serves as the central interlock coordination hub for the entire SPEAR3 RF system upgrade, as specified in the SPEAR3 LLRF PDR (Rev 1). It connects the dual LLRF9/476 controllers, CompactLogix HVPS controller, ControlLogix RF MPS PLC, MicroStep-MIS arc detection system, Waveform Buffer System, and external safety systems (SPEAR MPS, orbit interlocks) through a single, electrically isolated, hardware-speed interlock logic chassis.
+
+**System Context**: The Interface Chassis enables the transition from the legacy VXI-based analog RF Processor and distributed PLC interlock logic to a modern EPICS-based architecture. It centralizes interlock coordination that was previously distributed across the VXI Arc Interface Module, Local Control Chassis, and Fast Interlock Chassis, while maintaining hardware-speed safety interlocks.
+
+**Physical Location**: Building B132 (main control electronics), adjacent to the LLRF9/476 units, ControlLogix RF MPS PLC, Galil motion controller, Waveform Buffer, and Arc Detector chassis.
+
+**Critical Path Status**: ⚠️ **The Interface Chassis represents the highest risk item in the SPEAR3 LLRF upgrade project.** All other upgraded subsystems (LLRF9, HVPS controller, RF MPS) are waiting for Interface Chassis completion to enable system integration and commissioning.
 
 **Key capabilities**:
 1. **First-fault detection**: Hardware-latched register identifying the initiating fault when multiple faults cascade
@@ -52,8 +57,9 @@ The Interface Chassis is a **new, custom-designed hardware subsystem** that serv
 4. **Status reporting**: All input and output states plus first-fault status reported to MPS via digital lines
 5. **Electrical isolation**: All external signals isolated from chassis digital ground using optocouplers and fiber-optic transceivers
 6. **Fast permit logic**: Microsecond-scale combinational logic for all permit decisions
+7. **LLRF9-HVPS coordination**: Implements 5-step recovery sequence for bidirectional feedback loop management
 
-**Status**: Interfaces fully specified by J. Sebek. No chassis design or fabrication has started.
+**Status**: Interfaces fully specified by J. Sebek. **Zero physical implementation progress** - no chassis design, PCB design, fabrication, or EPICS IOC development has started.
 
 ---
 
@@ -73,7 +79,59 @@ In the legacy system, interlock signals were routed directly between subsystems 
 
 ---
 
-## 3. Design Requirements
+## 3. System Architecture Integration
+
+### 3.1 Legacy vs. Upgraded System Context
+
+**Legacy System Architecture**: The original SPEAR3 LLRF system used distributed interlock logic across multiple subsystems:
+- VXI Arc Interface Module handled arc detection coordination
+- Local Control Chassis provided basic permit logic
+- Fast Interlock Chassis managed high-speed interlocks
+- Direct wiring between VXI modules, PLCs (PLC-5, SLC-500), and LLRF controllers
+- Independent subsystem operation with minimal coordination
+
+**Upgraded System Architecture**: The SPEAR3 LLRF upgrade centralizes all interlock coordination in the Interface Chassis:
+- Replaces VXI-based analog RF Processor with dual LLRF9/476 units
+- Upgrades PLC-5 to ControlLogix RF MPS PLC
+- Upgrades SLC-500 to CompactLogix HVPS Controller with Enerpro SCR gate driver boards
+- Centralizes all interlock logic in Interface Chassis
+- Enables EPICS-based monitoring while maintaining hardware-speed safety interlocks
+
+### 3.2 Physical System Layout
+
+**Building B132 (Main Control Electronics)**:
+- 2x LLRF9/476 units (active) + 2 spares: Dimtel LLRF9/476 controllers
+- ControlLogix RF MPS PLC (upgraded from PLC-5)
+- **Interface Chassis** (central interlock coordination hub)
+- Galil DMC-4143 motion controller for tuner control
+- Waveform Buffer System (8 RF + 4 HVPS channels)
+- MicroStep-MIS Arc Detector chassis
+- Dedicated EPICS IOC for Interface Chassis
+
+**Building B118 (HVPS Control)**:
+- CompactLogix HVPS Controller in Hoffman Box (upgraded from SLC-500)
+
+**SPEAR3 Storage Ring Tunnel**:
+- 4 single-cell cavities with total gap voltage ~2.85 MV
+- 12 MicroStep-MIS optical arc detection sensors (4 cavity windows, 1 klystron window, 1 circulator, process chassis)
+- Waveguide distribution system
+- Tuner mechanical assemblies
+
+### 3.3 Interface Chassis Role in System Integration
+
+The Interface Chassis serves 5 critical roles in the upgraded system:
+
+1. **Centralizes Safety Interlocks**: Consolidates interlock logic previously distributed across VXI modules and separate chassis
+2. **Implements Complex Recovery Sequences**: Manages 5-step LLRF9-HVPS recovery sequence not present in legacy system
+3. **Provides First-Fault Detection**: Hardware-latched register for diagnostics (critical for cascading fault analysis)
+4. **Bridges Hardware-Speed Logic with EPICS Monitoring**: Maintains microsecond interlock response while enabling modern monitoring
+5. **Provides Expansion Capability**: 4 expansion ports for future subsystem integration
+
+**Critical Path Status**: ⚠️ **All other upgraded subsystems are waiting for Interface Chassis completion.** The LLRF9 units, HVPS controller, and RF MPS PLC cannot complete integration without the Interface Chassis providing interlock coordination.
+
+---
+
+## 4. Design Requirements
 
 ### 3.1 Functional Requirements
 
