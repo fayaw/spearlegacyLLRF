@@ -43,7 +43,7 @@ This document is intended to serve as the entry point for the detailed engineeri
 
 ## 1. Executive Summary
 
-The SPEAR3 RF station provides 476 MHz RF power to the SPEAR3 storage ring at the Stanford Synchrotron Radiation Lightsource (SSRL). A single klystron, driven at approximately 800 kW, feeds four single-cell RF cavities through a waveguide distribution network. The combined cavity gap voltage is approximately 2.85 MV.
+The SPEAR3 RF station provides 476.3 MHz RF power to the SPEAR3 storage ring at the Stanford Synchrotron Radiation Lightsource (SSRL). A single klystron, driven at approximately 800 kW, feeds four single-cell RF cavities through a waveguide distribution network. The combined cavity gap voltage is approximately 2.85 MV.
 
 The LLRF Upgrade Project replaces the entire control electronics chain — not merely the low-level RF controller, but also the RF machine protection system (RF MPS), HVPS controller, tuner motor controllers, and supporting infrastructure. The project also introduces several new subsystems that did not exist in the legacy system: an Interface Chassis for centralized hardware interlock coordination, a Waveform Buffer System for extended signal monitoring and klystron collector protection, an optical arc detection system, and a modernized klystron cathode heater controller.
 
@@ -196,7 +196,7 @@ The SPEAR3 RF station spans multiple buildings and locations at SSRL:
 | **Building B118** (Power Supply Room) | HVPS Controller (Hoffman Box) | HVPS control location |
 | **Building B514** (HVPS Substation) | HVPS Main Tank (transformer, rectifier, inductor, filter caps), Phase Tank (12 thyristor stacks), Crowbar Tank (4 thyristor stacks, output V-divider) | High-voltage power section; FR3 oil-filled, N₂ blanket |
 | **Contactor Disconnect Panel** (Switchgear, adjacent to B514) | Vacuum contactor (Ross HQ3), Contactor controller (Ross HCA-1-A), K4/MX/RR/L1 relays, S5 auxiliary contact | 12.47 kV AC switchgear |
-| **Termination Tank** (near klystron) | HV cable termination, Ross Engineering HV relay, Danfysik DC-CT, Pearson CT-110 | Mineral oil filled |
+| **Termination Tank** (B132, near klystron) | HV cable termination, Ross Engineering HV relay, Danfysik DC-CT, Pearson CT-110 | Mineral oil filled |
 | **Switch-over Tank** (adjacent B514) | HV cable connections between HVPS1/HVPS2 and klystron | FR3 oil filled |
 | **Building B132** (Klystron ) | Klystron, drive amplifier, LLRF9 units, RF MPS PLC, Interface Chassis, Waveform Buffer, Motion Controller, Arc Detector Chassis, soft IOC (may be in B137 — TBD confirmed with controls) | Main control electronics location |
 | **SPEAR3 Storage Ring Tunnel** | 4 RF cavities, waveguide distribution, tuner assemblies, arc detection sensors | Radiation area |
@@ -206,7 +206,7 @@ The SPEAR3 RF station spans multiple buildings and locations at SSRL:
 | Cable Run | Cable Type | Conductors | Route |
 |-----------|-----------|------------|-------|
 | B118 → Switchgear (Contactor) | Belden 83715 | 15C #16 Teflon | TS-5 to contactor controller |
-| B118 → Termination Tank (Grounding) | Belden 83709 + Belden 83715 | 9C + 15C #16 Teflon | TS-6 to grounding tank |
+| B118 → Termination Tank (B132, Grounding) | Belden 83709 + Belden 83715 | 9C + 15C #16 Teflon | TS-6 to grounding tank |
 | B118 → B514 (HVPS) | Electrical cable pairs | SCR trigger cables (12 pairs) | Controller to Phase Tank thyristor stacks |
 | B118 → B514 (HVPS) | Fiber optic | SCR ENABLE, CROWBAR, STATUS | Controller to HVPS (upgrade: via Interface Chassis) |
 | B132 → Tunnel | Coax cables | RF signals (forward, reflected, probe). Similar forward, reflected power from klystron and circulator load with B132 | LLRF inputs from cavities |
