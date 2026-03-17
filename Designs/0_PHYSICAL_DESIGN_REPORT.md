@@ -265,16 +265,18 @@ The amplitudes of the RF data need to be acquired. The RF signals that are curre
 #### RF Plant Signal Flow
 
 ```
-  (6) Station Ref ────────────────────────────────────────────────────────────────────────────────────────
+                                    RF SIGNAL DISTRIBUTION
+                                    
+  (6) Station Ref ──────────────────────────────────────────────────────────────────────────────────────────────────────
   (5) Kly Drive ──► [Drive Amp] ──► [KLYSTRON] ──(1)Fwd──► [CIRCULATOR] ──(3,4)──► [CIRC LOAD]
-                                      (2) Refl ◄──────────  P1=kly  P2→waveguide
+                                      (2) Refl ◄──────────────  P1=kly  P2→waveguide
                                                                       │
                                                                       ▼
                                                             [MAGIC TEE 1]  (1st split: half power each side)
                                                                P2│       P3│       P4│
                                                                  │         │         └──► [WG LOAD 1] (7,8)
                                                                  │         │
-                                              ───────────────────┘         └───────────────────────
+                                              ──────────────────┘         └─────────────────────────────
                                              │                                                     │
                                              ▼                                                     ▼
                                     [MAGIC TEE 2]  (2nd split)                          [MAGIC TEE 3]  (2nd split)
@@ -286,6 +288,9 @@ The amplitudes of the RF data need to be acquired. The RF signals that are curre
                                    Fwd (9)  Fwd (11)                                   Fwd (17) Fwd (19)
                                   Refl (10) Refl (12)                                 Refl (18) Refl (20)
                                  Probe (13) Probe (14)                               Probe (21) Probe (22)
+
+Signal Numbers: (1) Kly Fwd, (2) Kly Refl, (3) Circ Load Fwd, (4) Circ Load Refl, (5) Kly Drive, (6) Station Ref
+                (7) WG Load 1 Fwd, (8) WG Load 1 Refl, (9-14) Cav A/B signals, (15-16) WG Load 2, (17-22) Cav C/D signals, (23-24) WG Load 3
 ```
 
 > **Figure 2 — RF Signal Distribution** (see `Designs/docx/drawings/PRD_drawings.vsdx`, page Fig2_RF signals)
@@ -435,11 +440,45 @@ The HVPS converts 12.47 kV RMS 3-phase AC to regulated DC high voltage for the k
 
 **Power chain**:
 ```
-12.47 kV 3φ → Phase-Shift Xfmr (3.5 MVA, ±15°) → 2 Rectifier Xfmrs (1.5 MVA each)
-→ 12-Pulse Thyristor Bridges (12 stacks × 14 Powerex T8K7 each)
-→ Filter Inductors (2 × 0.3 H) → 4 Secondary Rectifiers (series)
-→ Crowbar Tank (4 thyristor stacks, fiber-optic triggered)
-→ −90 kV DC → Klystron
+                    12.47 kV 3-Phase AC Input
+                              │
+                              ▼
+                    ┌─────────────────────┐
+                    │   Phase-Shift       │
+                    │   Transformer       │
+                    │   (3.5 MVA, ±15°)   │
+                    └─────────┬───────────┘
+                              │
+                    ┌─────────▼───────────┐
+                    │  2 Rectifier Xfmrs  │
+                    │   (1.5 MVA each)    │
+                    └─────────┬───────────┘
+                              │
+                    ┌─────────▼───────────┐
+                    │  12-Pulse Thyristor │
+                    │     Bridges         │
+                    │ (12 stacks × 14     │
+                    │  Powerex T8K7)      │
+                    └─────────┬───────────┘
+                              │
+                    ┌─────────▼───────────┐
+                    │  Filter Inductors   │
+                    │    (2 × 0.3 H)      │
+                    └─────────┬───────────┘
+                              │
+                    ┌─────────▼───────────┐
+                    │ 4 Secondary         │
+                    │ Rectifiers (series) │
+                    └─────────┬───────────┘
+                              │
+                    ┌─────────▼───────────┐
+                    │   Crowbar Tank      │
+                    │ (4 thyristor stacks,│
+                    │ fiber-optic trigger)│
+                    └─────────┬───────────┘
+                              │
+                              ▼
+                        −90 kV DC → Klystron
 ```
 
 > **Figure 3 — HVPS Architecture** (see `Designs/docx/drawings/PRD_drawings.vsdx`, page Fig3_HPVS)
@@ -974,8 +1013,42 @@ The system was originally designed for the PEP-II B-Factory program at SLAC by P
 
 **Upgraded system architecture**:
 ```
-EPICS Coordinator → RF MPS PLC (CtrlLogix 1756)
-→ Programmable AC Supply (TDK/Lambda etc.) → Isolation Transformer → Klystron Cathode Heater
+                    ┌─────────────────────┐
+                    │  EPICS Coordinator  │
+                    │   (Soft IOC)        │
+                    └─────────┬───────────┘
+                              │ EPICS Channel Access
+                              ▼
+                    ┌─────────────────────┐
+                    │    RF MPS PLC       │
+                    │  (CtrlLogix 1756)   │
+                    │                     │
+                    │ • Setpoint Control  │
+                    │ • RMS Monitoring    │
+                    │ • Permit Logic      │
+                    └─────────┬───────────┘
+                              │ Analog/Ethernet
+                              ▼
+                    ┌─────────────────────┐
+                    │ Programmable AC     │
+                    │ Supply (COTS)       │
+                    │                     │
+                    │ TDK/Lambda, Ametek, │
+                    │ Chroma, etc.        │
+                    └─────────┬───────────┘
+                              │ Clean 60 Hz AC
+                              ▼
+                    ┌─────────────────────┐
+                    │ Isolation           │
+                    │ Transformer         │
+                    │ (10:1 step-down)    │
+                    └─────────┬───────────┘
+                              │ 5V/20A (~500W)
+                              ▼
+                    ┌─────────────────────┐
+                    │  Klystron Cathode   │
+                    │      Heater         │
+                    └─────────────────────┘
 ```
 
 > **Figure 5 — Heater Controller Architecture** (see `Designs/docx/drawings/PRD_drawings.vsdx`, page Fig5_heater)
@@ -1160,6 +1233,31 @@ The upgraded system implements a layered protection architecture:
 
 > **Figure 6 — Fault Propagation: RF Arc Event** (see `Designs/docx/drawings/PRD_drawings.vsdx`, page Fig6_fault)
 
+
+**Fault Propagation Timeline**:
+```
+Time:    0 μs        <1 μs         ~1 μs         ~ms          ~s           manual
+         │            │             │             │            │             │
+Arc ────►│            │             │             │            │             │
+Light    │            │             │             │            │             │
+         │            │             │             │            │             │
+Detector │────────────►│             │             │            │             │
+Relay    │            │             │             │            │             │
+         │            │             │             │            │             │
+Interface│            │─────────────►│             │            │             │
+Chassis  │            │             │             │            │             │
+         │            │             │             │            │             │
+LLRF9    │            │             │─────────────►│            │             │
+Waveform │            │             │             │            │             │
+         │            │             │             │            │             │
+MPS PLC  │            │             │             │────────────►│             │
+Logging  │            │             │             │            │             │
+         │            │             │             │            │             │
+EPICS    │            │             │             │            │─────────────►│
+Reset    │            │             │             │            │             │
+```
+
+**Detailed Fault Sequence**:
 ```
 1. Arc occurs in cavity window
    ↓ (light flash, μs)
