@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800">
+  <title>Interface Chassis Signal Flow</title>
+  <rect width="1200" height="800" fill="white" />
+  <text x="600" y="30" font-family="Arial" font-size="24" fill="black" text-anchor="middle">Interface Chassis — Signal Flow Detail</text>
+  <text x="600" y="60" font-family="Arial" font-size="16" fill="#666" text-anchor="middle">Central Interlock Hub for All Subsystems</text>
+  <rect x="450" y="300" width="300" height="200" fill="#fff2cc" stroke="black" stroke-width="3" rx="5" />
+  <text x="600" y="330" font-family="Arial" font-size="18" fill="black" text-anchor="middle">Interface Chassis</text>
+  <text x="600" y="360" font-family="Arial" font-size="14" fill="#333" text-anchor="middle">Central Interlock Hub</text>
+  <text x="600" y="380" font-family="Arial" font-size="12" fill="#666" text-anchor="middle">&lt; 1 μs Response</text>
+  <rect x="50" y="150" width="150" height="60" fill="#dae8fc" stroke="black" stroke-width="2" rx="5" />
+  <text x="125" y="185" font-family="Arial" font-size="12" fill="black" text-anchor="middle">LLRF9 Units</text>
+  <line x1="200" y1="180" x2="450" y2="400" stroke="#666" stroke-width="2" />
+  <polygon points="450,400 446.63680344418606,391.7121227731728 441.3517802850498,397.71783090855484" fill="#666" stroke="#666" />
+  <rect x="50" y="230" width="150" height="60" fill="#dae8fc" stroke="black" stroke-width="2" rx="5" />
+  <text x="125" y="265" font-family="Arial" font-size="12" fill="black" text-anchor="middle">HVPS Controller</text>
+  <line x1="200" y1="260" x2="450" y2="400" stroke="#666" stroke-width="2" />
+  <polygon points="450,400 444.97436534812965,392.6011489847464 441.06553839667487,399.58119711234417" fill="#666" stroke="#666" />
+  <rect x="50" y="310" width="150" height="60" fill="#fce4ec" stroke="black" stroke-width="2" rx="5" />
+  <text x="125" y="345" font-family="Arial" font-size="12" fill="black" text-anchor="middle">Kly MPS</text>
+  <line x1="200" y1="340" x2="450" y2="400" stroke="#666" stroke-width="2" />
+  <polygon points="450,400 443.15439339405714,394.24346717227536 441.28740977425457,402.0225655881195" fill="#666" stroke="#666" />
+  <rect x="50" y="390" width="150" height="60" fill="#ffebee" stroke="black" stroke-width="2" rx="5" />
+  <text x="125" y="425" font-family="Arial" font-size="12" fill="black" text-anchor="middle">Arc Detection</text>
+  <line x1="200" y1="420" x2="450" y2="400" stroke="#666" stroke-width="2" />
+  <polygon points="450,400 441.7064968825794,396.65070066411863 442.3444586608426,404.6252228924076" fill="#666" stroke="#666" />
+  <rect x="50" y="470" width="150" height="60" fill="#f3e5f5" stroke="black" stroke-width="2" rx="5" />
+  <text x="125" y="505" font-family="Arial" font-size="12" fill="black" text-anchor="middle">Waveform Buffer</text>
+  <line x1="200" y1="500" x2="450" y2="400" stroke="#666" stroke-width="2" />
+  <polygon points="450,400 441.08662376750146,399.2572186472918 444.05774917833435,406.6850321743739" fill="#666" stroke="#666" />
+  <rect x="1000" y="200" width="150" height="60" fill="#d5e8d4" stroke="black" stroke-width="2" rx="5" />
+  <text x="1075" y="235" font-family="Arial" font-size="12" fill="black" text-anchor="middle">RF Permit</text>
+  <line x1="750" y1="400" x2="1000" y2="230" stroke="#666" stroke-width="2" />
+  <polygon points="1000,230 991.1353478978147,231.19077416298012 995.6338280690729,237.80618617953633" fill="#666" stroke="#666" />
+  <rect x="1000" y="280" width="150" height="60" fill="#d5e8d4" stroke="black" stroke-width="2" rx="5" />
+  <text x="1075" y="315" font-family="Arial" font-size="12" fill="black" text-anchor="middle">HVPS Enable</text>
+  <line x1="750" y1="400" x2="1000" y2="310" stroke="#666" stroke-width="2" />
+  <polygon points="1000,310 991.1180228319593,308.946206098707 993.8277785781411,316.47330539365686" fill="#666" stroke="#666" />
+  <rect x="1000" y="360" width="150" height="60" fill="#d5e8d4" stroke="black" stroke-width="2" rx="5" />
+  <text x="1075" y="395" font-family="Arial" font-size="12" fill="black" text-anchor="middle">Heater Control</text>
+  <line x1="750" y1="400" x2="1000" y2="390" stroke="#666" stroke-width="2" />
+  <polygon points="1000,390 991.8465201768303,386.32294047190385 992.1662644836211,394.31654814167814" fill="#666" stroke="#666" />
+  <rect x="1000" y="440" width="150" height="60" fill="#d5e8d4" stroke="black" stroke-width="2" rx="5" />
+  <text x="1075" y="475" font-family="Arial" font-size="12" fill="black" text-anchor="middle">MPS Signals</text>
+  <line x1="750" y1="400" x2="1000" y2="470" stroke="#666" stroke-width="2" />
+  <polygon points="1000,470 993.3748075443665,463.9911045169835 991.2177681402067,471.69481667469694" fill="#666" stroke="#666" />
+  <text x="600" y="550" font-family="Arial" font-size="16" fill="black" text-anchor="middle">Signal Types</text>
+  <text x="600" y="580" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">• Interlock permits and faults</text>
+  <text x="600" y="600" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">• RF power enable/disable</text>
+  <text x="600" y="620" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">• Emergency stop propagation</text>
+  <text x="600" y="640" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">• Status monitoring and logging</text>
+</svg>
