@@ -334,36 +334,33 @@ configureSCRBridge(blk, P);
 %  ========================================================================
 %
 %  The block library path for the thyristor pulse generator varies by
-%  MATLAB version.  We try multiple known paths in order of preference:
+%  MATLAB version.  MathWorks has moved/hidden/removed this block across
+%  releases:
+%    - R2016 and earlier: powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator
+%    - R2013a–R2024b: powerlib/Power Electronics/Power Electronics Control/Pulse Generator (Thyristor)
+%    - R2025a: Removed, then partially restored as sps_lib (hidden)
+%    - R2025b+: SPS hidden from Library Browser; use sps_lib command
+%    - Simscape Electrical: ee_lib/Control/Pulse Width Modulation/Thyristor 6-Pulse Generator
+%    - R2026a: SPS scheduled for permanent removal
 %
-%   1. Synchronized 6-Pulse Generator (legacy, powerlib_extras)
-%      Inputs:  alpha_deg, Vab, Vbc, Vca, block
-%      Output:  6-element pulse vector
-%      Params:  'Frequency', 'PulseWidth', 'DoublePulsing'
+%  Strategy (3-tier fallback):
+%    Tier 1: Dynamic discovery — load_system each library, find_system for the block
+%    Tier 2: Hardcoded path list — expanded with all known path variants
+%    Tier 3: Build from primitives — MATLAB Function block with pure math
+%            (works on ANY MATLAB version with Simulink, no toolbox needed)
 %
-%   2. Pulse Generator (Thyristor) — modern SPS replacement (R2013a+)
-%      Inputs:  alpha (deg), wt (PLL angle rad)
-%      Outputs: PY (6-pulse for Y bridge), PD (6-pulse for D bridge)
-%      Params:  'GeneratorType','PulseWidth','DoublePulsing','SampleTime'
-%
-%  The script records which type was found so downstream wiring adapts.
+%  $$\text{Gate}_{k}(t) = \begin{cases} 1 & \text{if } \phi_k + \alpha \leq \theta(t) < \phi_k + \alpha + w \\ 0 & \text{otherwise} \end{cases}$$
+%  where $\phi_k = (k-1) \times 60°$ for k = 1..6 (natural commutation order)
 
-PULSE_GEN_PATHS = { ...
-    'powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', ...    % legacy
-    'powerlib/Power Electronics/Power Electronics Control/Pulse Generator (Thyristor)', ... % modern SPS
-    'sps_lib/Power Electronics/Pulse Generator (Thyristor)', ...            % alt prefix
-    'ee_lib/Control/Pulse Width Modulation/Thyristor 6-Pulse Generator' ... % Simscape Elec
-};
-
-% --- Helper: add pulse generator block with fallback ---
-pulse_gen_type = '';   % 'legacy' | 'modern_sps' | 'simscape'
+% --- Helper: add pulse generator block with 3-tier fallback ---
+pulse_gen_type = '';   % 'legacy' | 'modern_sps' | 'simscape' | 'primitive'
 
 blk = [modelName '/PulseGen1'];
-[pulse_gen_type] = addPulseGenBlock(blk, PULSE_GEN_PATHS, [560 100 660 180]);
+[pulse_gen_type] = addPulseGenBlock(blk, modelName, [560 100 660 180]);
 configurePulseGen(blk, pulse_gen_type, P);
 
 blk = [modelName '/PulseGen2'];
-addPulseGenBlock(blk, PULSE_GEN_PATHS, [560 490 660 570]);
+addPulseGenBlock(blk, modelName, [560 490 660 570]);
 configurePulseGen(blk, pulse_gen_type, P);
 
 fprintf('  Pulse generator type: %s\n', pulse_gen_type);
@@ -987,80 +984,206 @@ function configureSCRBridge(blk, P)
         num2str(P.scr_snubber_C));
 end
 
-function [pgType] = addPulseGenBlock(destPath, libraryPaths, pos)
-%ADDPULSEGENBLOCK Add a thyristor pulse generator from multiple library paths
+function [pgType] = addPulseGenBlock(destPath, modelName, pos)
+%ADDPULSEGENBLOCK Add a thyristor pulse generator with 3-tier fallback
 %
-%  [pgType] = addPulseGenBlock(destPath, libraryPaths, pos)
+%  [pgType] = addPulseGenBlock(destPath, modelName, pos)
 %
-%  Tries each library path in 'libraryPaths' until one succeeds.
-%  Returns a tag identifying which block type was found:
-%    'legacy'      — Synchronized 6-Pulse Generator (powerlib_extras)
-%    'modern_sps'  — Pulse Generator (Thyristor) from SPS
-%    'simscape'    — Thyristor 6-Pulse Generator from Simscape Electrical
-%    ''            — none found (error thrown)
+%  Tier 1: Dynamic discovery — load known SPS/Simscape libraries, then
+%          use find_system to locate pulse generator blocks.
+%  Tier 2: Hardcoded paths — expanded list of all known library paths.
+%  Tier 3: Build from primitives — MATLAB Function block with pure math
+%          (works on ANY MATLAB version with Simulink, no toolbox needed).
+%
+%  Returns a tag: 'legacy' | 'modern_sps' | 'simscape' | 'primitive'
 
     pgType = '';
-    for i = 1:length(libraryPaths)
+
+    % ---- TIER 1: Dynamic discovery via load_system + find_system ----
+    fprintf('  [Tier 1] Dynamic library discovery...\n');
+    libs = {'powerlib', 'powerlib_extras', 'sps_lib', 'ee_lib'};
+    searchTerms = {'*6-Pulse*', '*Pulse*Thyristor*', '*Thyristor*Pulse*', ...
+                   '*Synchronized*Pulse*'};
+
+    for li = 1:length(libs)
+        libName = libs{li};
         try
-            add_block(libraryPaths{i}, destPath, 'Position', pos);
-            % Tag the type based on which path matched
-            pth = libraryPaths{i};
-            if contains(pth, 'Synchronized')
-                pgType = 'legacy';
-            elseif contains(pth, 'ee_lib')
-                pgType = 'simscape';
-            else
-                pgType = 'modern_sps';
+            load_system(libName);
+            fprintf('    Loaded library: %s\n', libName);
+            for si = 1:length(searchTerms)
+                try
+                    results = find_system(libName, 'SearchDepth', 6, ...
+                        'FollowLinks', 'on', 'LookUnderMasks', 'all', ...
+                        'Name', searchTerms{si});
+                    if ~isempty(results)
+                        for ri = 1:length(results)
+                            foundPath = results{ri};
+                            if strcmp(foundPath, libName); continue; end
+                            try
+                                add_block(foundPath, destPath, 'Position', pos);
+                                pgType = classifyPGPath(foundPath);
+                                fprintf('  OK [Tier 1] Found: %s\n', foundPath);
+                                return;
+                            catch; end
+                        end
+                    end
+                catch; end
             end
-            fprintf('  ✓ Pulse generator added from: %s\n', pth);
-            return;
         catch
-            fprintf('    ✗ Not found: %s\n', libraryPaths{i});
+            fprintf('    Library not available: %s\n', libName);
         end
     end
+    fprintf('    Tier 1: No block found via dynamic discovery.\n');
 
-    % All paths failed — fatal (cannot build gating without this block)
-    error(['SPEAR3_HVPS:PulseGenNotFound', ...
-        '\n\nCould not find a thyristor pulse generator block at any known path.\n', ...
-        'Tried:\n  %s\n\n', ...
-        'Your MATLAB version may need a different library prefix.\n', ...
-        'Run:\n  find_system(''Simulink'', ''SearchDepth'', 0)\n', ...
-        '  find_system(''powerlib'', ''SearchDepth'', 4, ''Name'', ''*Pulse*'')\n', ...
-        'to discover the correct path, then add it to PULSE_GEN_PATHS.\n'], ...
-        strjoin(libraryPaths, '\n  '));
+    % ---- TIER 2: Hardcoded paths (expanded) ----
+    fprintf('  [Tier 2] Trying hardcoded library paths...\n');
+    PATHS = { ...
+        'powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', ...
+        'powerlib/Power Electronics/Power Electronics Control/Pulse Generator (Thyristor)', ...
+        'powerlib/Power Electronics/Pulse Generator (Thyristor)', ...
+        'powerlib/Power Electronics Control/Pulse Generator (Thyristor)', ...
+        'powerlib/Control Blocks/Pulse Generator (Thyristor)', ...
+        'powerlib/Control Blocks/Synchronized 6-Pulse Generator', ...
+        'sps_lib/Power Electronics/Pulse Generator (Thyristor)', ...
+        'sps_lib/Power Electronics/Power Electronics Control/Pulse Generator (Thyristor)', ...
+        'sps_lib/Control Blocks/Synchronized 6-Pulse Generator', ...
+        'sps_lib/Control Blocks/Pulse Generator (Thyristor)', ...
+        'ee_lib/Control/Pulse Width Modulation/Thyristor 6-Pulse Generator', ...
+        'ee_lib/Control/Pulse Width Modulation/Thyristor 12-Pulse Generator', ...
+        'nesl_utility/Thyristor 6-Pulse Generator', ...
+        'elec_lib/Control/Pulse Width Modulation/Thyristor 6-Pulse Generator' ...
+    };
+    for i = 1:length(PATHS)
+        try
+            add_block(PATHS{i}, destPath, 'Position', pos);
+            pgType = classifyPGPath(PATHS{i});
+            fprintf('  OK [Tier 2] Added from: %s\n', PATHS{i});
+            return;
+        catch
+            fprintf('    X %s\n', PATHS{i});
+        end
+    end
+    fprintf('    Tier 2: No hardcoded path worked.\n');
+
+    % ---- TIER 3: Build from primitives (MATLAB Function block) ----
+    fprintf('  [Tier 3] Building 6-pulse generator from MATLAB Function block...\n');
+    pgType = 'primitive';
+    build6PulseFromPrimitives(destPath, modelName, pos);
+    fprintf('  OK [Tier 3] 6-pulse generator built (no SPS needed).\n');
+end
+
+function pgType = classifyPGPath(pth)
+%CLASSIFYPGPATH Determine the type tag from a library path string.
+    if contains(pth, 'Synchronized')
+        pgType = 'legacy';
+    elseif contains(pth, 'ee_lib') || contains(pth, 'elec_lib')
+        pgType = 'simscape';
+    else
+        pgType = 'modern_sps';
+    end
+end
+
+function build6PulseFromPrimitives(destPath, modelName, pos)
+%BUILD6PULSEFROMPRIMTIVES Create MATLAB Function block for 6-pulse gating.
+%
+%  Inputs:  wt (rad, [0,2*pi]),  alpha_deg (firing angle in degrees)
+%  Output:  P  (6-element gate pulse vector)
+%
+%  Uses natural commutation order: T1(0), T2(60), T3(120), T4(180),
+%  T5(240), T6(300).  Pulse width = 60 deg (single-pulsing).
+
+    % Add MATLAB Function block
+    add_block('simulink/User-Defined Functions/MATLAB Function', destPath, ...
+        'Position', pos);
+
+    % MATLAB function source code
+    fcnCode = sprintf([...
+        'function P = thyristor_6pulse(wt, alpha_deg)\n' ...
+        '%%THYRISTOR_6PULSE  6 gate pulses for a thyristor bridge.\n' ...
+        '%%  wt        - synchronization angle [0, 2*pi] (rad)\n' ...
+        '%%  alpha_deg - firing angle (degrees)\n' ...
+        '%%  P         - 6-element pulse vector [g1..g6]\n' ...
+        '\n' ...
+        'theta = mod(wt * (180/pi), 360);\n' ...
+        'alpha = mod(alpha_deg, 360);\n' ...
+        'pw = 60;  %% pulse width (degrees)\n' ...
+        '\n' ...
+        '%% Phase offsets: natural commutation order\n' ...
+        'offsets = [0, 60, 120, 180, 240, 300];\n' ...
+        '\n' ...
+        'P = zeros(1, 6);\n' ...
+        'for k = 1:6\n' ...
+        '    fs = mod(offsets(k) + alpha, 360);\n' ...
+        '    fe = mod(fs + pw, 360);\n' ...
+        '    if fe > fs\n' ...
+        '        P(k) = double(theta >= fs && theta < fe);\n' ...
+        '    else\n' ...
+        '        P(k) = double(theta >= fs || theta < fe);\n' ...
+        '    end\n' ...
+        'end\n' ...
+    ]);
+
+    % Set the function code via Stateflow API
+    try
+        rt = sfroot;
+        chart = rt.find('-isa', 'Stateflow.EMChart', 'Path', destPath);
+        if ~isempty(chart)
+            chart.Script = fcnCode;
+            fprintf('    MATLAB Function block code set successfully.\n');
+        else
+            charts = rt.find('-isa', 'Stateflow.EMChart');
+            found = false;
+            for ci = 1:length(charts)
+                if strcmp(charts(ci).Path, destPath)
+                    charts(ci).Script = fcnCode;
+                    fprintf('    MATLAB Function block code set via search.\n');
+                    found = true;
+                    break;
+                end
+            end
+            if ~found
+                warning('Could not set MATLAB Function code for %s.', destPath);
+                fprintf('    NOTE: Double-click the block and paste the function.\n');
+            end
+        end
+    catch ME
+        warning('Stateflow API: %s', ME.message);
+        fprintf('    NOTE: Double-click %s and paste:\n', destPath);
+        fprintf('%s', fcnCode);
+    end
 end
 
 function configurePulseGen(blk, pgType, P)
-%CONFIGUREPULSEGEN Set parameters on the pulse generator block
-%
-%  configurePulseGen(blk, pgType, P)
-%
+%CONFIGUREPULSEGEN Set parameters on the pulse generator block.
 %  Adapts parameter names to the block type found by addPulseGenBlock().
 
     switch pgType
         case 'legacy'
-            % Synchronized 6-Pulse Generator
             trySP(blk, 'Frequency', num2str(P.ac_frequency));
             trySP(blk, 'PulseWidth', '60');
             trySP(blk, 'DoublePulsing', 'on');
 
         case 'modern_sps'
-            % Pulse Generator (Thyristor) — SPS block (R2013a+)
             trySP(blk, 'GeneratorType', '6-pulse');
-            setParamMultiCandidate(blk, ...
-                {'PulseWidth', 'Pulse_width'}, '60');
-            setParamMultiCandidate(blk, ...
-                {'DoublePulsing', 'Double_pulsing'}, 'on');
-            trySP(blk, 'SampleTime', '0');  % continuous
+            setParamMultiCandidate(blk, {'PulseWidth', 'Pulse_width'}, '60');
+            setParamMultiCandidate(blk, {'DoublePulsing', 'Double_pulsing'}, 'on');
+            trySP(blk, 'SampleTime', '0');
 
         case 'simscape'
-            % Thyristor 6-Pulse Generator (Simscape Electrical)
-            trySP(blk, 'Pulse_width', '60');
+            % Simscape Electrical uses radians for pulse width
+            trySP(blk, 'Pulse_width', num2str(60 * pi / 180));
+            trySP(blk, 'SampleTime', '1e-5');
+
+        case 'primitive'
+            % MATLAB Function block: no mask parameters to set.
+            % Inputs (wt, alpha_deg) come from upstream blocks.
+            fprintf('  Primitive pulse gen: inputs=wt(rad),alpha(deg); output=P(1x6)\n');
 
         otherwise
             warning('Unknown pulse generator type: %s', pgType);
     end
 end
+
 
 function discover_block_params(blockPath)
 %DISCOVER_BLOCK_PARAMS List valid mask parameters for a Simulink block
@@ -1163,25 +1286,43 @@ function run_parameter_discovery()
         fprintf('Could not add Transformer: %s\n', ME.message);
     end
 
-    % --- Pulse Generator library search ---
+    % --- Pulse Generator library search (dynamic + hardcoded) ---
     fprintf('=== Pulse Generator Library Search ===\n');
+    fprintf('  --- Dynamic discovery ---\n');
+    dlibs = {'powerlib', 'powerlib_extras', 'sps_lib', 'ee_lib'};
+    for dli = 1:length(dlibs)
+        try
+            load_system(dlibs{dli});
+            fprintf('  Loaded: %s\n', dlibs{dli});
+            dr = find_system(dlibs{dli}, 'SearchDepth', 6, ...
+                'FollowLinks', 'on', 'LookUnderMasks', 'all', 'Name', '*Pulse*');
+            for dri = 1:length(dr); fprintf('    Found: %s\n', dr{dri}); end
+        catch
+            fprintf('  Not available: %s\n', dlibs{dli});
+        end
+    end
+    fprintf('  --- Hardcoded path tests ---\n');
     pulse_paths = { ...
         'powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', ...
         'powerlib/Power Electronics/Power Electronics Control/Pulse Generator (Thyristor)', ...
+        'powerlib/Power Electronics/Pulse Generator (Thyristor)', ...
         'sps_lib/Power Electronics/Pulse Generator (Thyristor)', ...
-        'ee_lib/Control/Pulse Width Modulation/Thyristor 6-Pulse Generator' ...
+        'sps_lib/Power Electronics/Power Electronics Control/Pulse Generator (Thyristor)', ...
+        'sps_lib/Control Blocks/Synchronized 6-Pulse Generator', ...
+        'ee_lib/Control/Pulse Width Modulation/Thyristor 6-Pulse Generator', ...
+        'ee_lib/Control/Pulse Width Modulation/Thyristor 12-Pulse Generator', ...
+        'elec_lib/Control/Pulse Width Modulation/Thyristor 6-Pulse Generator' ...
     };
     for i = 1:length(pulse_paths)
         try
             add_block(pulse_paths{i}, [tmp '/PG']);
-            fprintf('  ✓ FOUND: %s\n', pulse_paths{i});
+            fprintf('  OK: %s\n', pulse_paths{i});
             discover_block_params([tmp '/PG']);
-            delete_block([tmp '/PG']);  % remove so next path can try
+            delete_block([tmp '/PG']);
         catch
-            fprintf('  ✗ NOT FOUND: %s\n', pulse_paths{i});
+            fprintf('  X: %s\n', pulse_paths{i});
         end
     end
-
     % --- Series RLC Branch ---
     try
         add_block('powerlib/Elements/Series RLC Branch', [tmp '/RLC']);
