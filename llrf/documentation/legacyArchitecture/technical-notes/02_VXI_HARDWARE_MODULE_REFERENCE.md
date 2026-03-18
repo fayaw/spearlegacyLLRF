@@ -157,12 +157,21 @@ From `rf_states.st` and `rf_msgs.st`:
 **Fault file capability** (from Corredoura):
 > "In the event of a fault, fast history buffers throughout the system write selected rf signals to disk files which can be viewed later to help diagnose problems."
 
-Fault file types (from `rf_states.st`):
+Fault file types (13 channels, from `rf_states.st`):
 ```
-/dat/FAULTI_        — I-channel history
-/dat/FAULTQ_        — Q-channel history
-/dat/FAULTCmbI_     — Comb filter I history
-/dat/FAULTCmbQ_     — Comb filter Q history
+/dat/FAULTRfpSI_    — RFP station I-channel history
+/dat/FAULTRfpSQ_    — RFP station Q-channel history
+/dat/FAULTRfpCI_    — RFP comb I-channel history
+/dat/FAULTRfpCQ_    — RFP comb Q-channel history
+/dat/FAULTCf2I_     — Comb filter 2 I-channel history
+/dat/FAULTCf2Q_     — Comb filter 2 Q-channel history
+/dat/FAULTCmbI_     — Comb I-channel history
+/dat/FAULTCmbQ_     — Comb Q-channel history
+/dat/FAULTIqa1Amp_  — IQA module 1 amplitude history
+/dat/FAULTIqa2Amp_  — IQA module 2 amplitude history
+/dat/FAULTIqa3Amp_  — IQA module 3 amplitude history
+/dat/FAULTGvf_      — GVF module history
+/dat/FAULTAim_      — AIM module history
 ```
 
 ---

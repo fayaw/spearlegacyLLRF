@@ -74,12 +74,12 @@
 
 | File | Lines | Primary Function | Related Loops |
 |------|-------|-----------------|---------------|
-| `rf_states.st` | ~2500 | Master state machine (OFF→PARK→TUNE→ON_FM→ON_CW) | All loops |
-| `rf_dac_loop.st` | ~1200 | DAC setpoint control, gap voltage / drive power | DAC, ripple |
-| `rf_hvps_loop.st` | ~1100 | Klystron voltage regulation | HVPS |
-| `rf_tuner_loop.st` | ~1200 | Cavity tuner motor control (per-cavity) | Tuner |
-| `rf_calib.st` | ~2800 | Automated calibration sequences | All (Octal DAC, comb, offsets) |
-| `rf_msgs.st` | ~1000 | Message logging, TAXI recovery, filament | GVF (TAXI) |
+| `rf_states.st` | 2227 | Master state machine (OFF→PARK→TUNE→ON_FM→ON_CW) | All loops |
+| `rf_dac_loop.st` | 290 (+426 in headers) | DAC setpoint control, gap voltage / drive power | DAC, ripple |
+| `rf_hvps_loop.st` | 343 (+351 in headers) | Klystron voltage regulation | HVPS |
+| `rf_tuner_loop.st` | 555 (+306 in headers) | Cavity tuner motor control (per-cavity) | Tuner |
+| `rf_calib.st` | 3345 | Automated calibration sequences | All (Octal DAC, comb, offsets) |
+| `rf_msgs.st` | 352 | Message logging, TAXI recovery, filament | GVF (TAXI) |
 
 Supporting files:
 - `rf_loop_defs.h` — Common definitions

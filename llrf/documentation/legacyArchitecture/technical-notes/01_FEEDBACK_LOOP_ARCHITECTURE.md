@@ -293,7 +293,7 @@ At zero beam current, the cavity should be tuned to resonance (Δf = 0). As beam
 
 **Control**: EPICS sequence `rf_tuner_loop.st` running per-cavity instances (via `CAV` macro).
 
-**States**: `loop_init` → `loop_unknown` → `loop_reset` / `loop_on`
+**States**: `loop_init` → `loop_unknown` → `loop_off` / `loop_on` / `loop_reset`
 
 **Key logic** (from source code analysis):
 - Monitors phase angle between forward power and cavity voltage
@@ -393,7 +393,7 @@ From `rf_hvps_loop_defs.h`:
 - Maximum loop idle interval: 10 seconds
 - Voltage tolerance count: 10 cycles before declaring out-of-tolerance
 - HVPS states: OFF (0), PROC (1), ON (2)
-- Loop controls: OFF (0), ON (1), PROC (2)
+- Loop controls: OFF (0), PROC (1), ON (2)
 
 **Cross-ref PDF**: `ps3403305400.pdf` (2 pages) — likely HVPS loop specification.
 **Cross-ref source**: `rf_hvps_loop.st`, `rf_hvps_loop_defs.h`, `rf_hvps_loop_macs.h`, `rf_hvps_loop_pvs.h`

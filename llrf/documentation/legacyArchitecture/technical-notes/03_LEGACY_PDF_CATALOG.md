@@ -35,28 +35,28 @@ The group `3403` corresponds to the PEP-II RF/LLRF system documentation.
 
 | # | Filename | Type | Pages | File Size | Inferred Content | Priority |
 |---|----------|------|-------|-----------|-----------------|----------|
-| 1 | `bd3403300000.pdf` | Block Diagram | 1 | 108 KB | **Top-level LLRF system block diagram** — overall RF station architecture | ★★★ |
-| 2 | `bd3403300100.pdf` | Block Diagram | 1 | 92 KB | **Subsystem block diagram** — VXI module interconnection or signal routing | ★★★ |
-| 3 | `blockDiagrambd3403290100-1.pdf` | Block Diagram | 1 | 103 KB | **Additional block diagram** — possibly RF power chain or cavity layout (note: drawing group 3290 vs 3300) | ★★☆ |
-| 4 | `feedbackLoopDescriptionps3403305200.pdf` | Process Spec | 8 | 832 KB | **Feedback loop description** — detailed explanation of all feedback loops (CRITICAL document, reconstructed in `01_FEEDBACK_LOOP_ARCHITECTURE.md`) | ★★★ |
-| 5 | `ps3403305100.pdf` | Process Spec | 11 | 612 KB | **Main LLRF system specification** — RFP module details, signal processing architecture, IQ baseband scheme | ★★★ |
-| 6 | `ps3403305200.pdf` | Process Spec | 8 | 833 KB | **Feedback loop description** (likely same as #4 or different revision) | ★★★ |
-| 7 | `ps3403305300.pdf` | Process Spec | 4 | 189 KB | **DAC loop specification** — drive power / gap voltage DAC control loop | ★★☆ |
-| 8 | `ps3403305400.pdf` | Process Spec | 2 | 117 KB | **HVPS loop specification** — klystron voltage regulation loop | ★★☆ |
-| 9 | `ps3403305503.pdf` | Process Spec | 4 | 226 KB | **Drive chain specification** — baseband modulator, gain stage, limiting circuits (Rev 03) | ★★★ |
-| 10 | `ps3403305600.pdf` | Process Spec | 4 | 352 KB | **Comb filter module specification** — digital comb loop implementation | ★★☆ |
-| 11 | `ps3403305700.pdf` | Process Spec | 2 | 130 KB | **Lead/integral compensation specification** — analog compensation networks | ★★☆ |
-| 12 | `ps3403305800.pdf` | Process Spec | 4 | 215 KB | **Ripple loop specification** — HVPS ripple cancellation | ★★☆ |
-| 13 | `ps3403305900.pdf` | Process Spec | 7 | 1208 KB | **GVF module specification** — gap voltage feed-forward, LFB woofer, fiber optic interface (largest PS doc) | ★★★ |
-| 14 | `ps3403306001.pdf` | Process Spec | 5 | 309 KB | **Tuner loop specification** — cavity mechanical tuner control (Rev 01) | ★★☆ |
-| 15 | `ps3403306102.pdf` | Process Spec | 13 | 970 KB | **System test/commissioning procedure** — calibration steps, loop configuration, acceptance criteria (Rev 02, longest PS doc) | ★★★ |
+| 1 | `bd3403300000.pdf` | Block Diagram | 1 | 105 KB | **Top-level LLRF system block diagram** — overall RF station architecture | ★★★ |
+| 2 | `bd3403300100.pdf` | Block Diagram | 1 | 90 KB | **Subsystem block diagram** — VXI module interconnection or signal routing | ★★★ |
+| 3 | `blockDiagrambd3403290100-1.pdf` | Block Diagram | 1 | 100 KB | **Additional block diagram** — possibly RF power chain or cavity layout (note: drawing group 3290 vs 3300) | ★★☆ |
+| 4 | `feedbackLoopDescriptionps3403305200.pdf` | Process Spec | 8 | 812 KB | **Feedback loop description** — detailed explanation of all feedback loops (CRITICAL document, reconstructed in `01_FEEDBACK_LOOP_ARCHITECTURE.md`) | ★★★ |
+| 5 | `ps3403305100.pdf` | Process Spec | 11 | 597 KB | **Main LLRF system specification** — RFP module details, signal processing architecture, IQ baseband scheme | ★★★ |
+| 6 | `ps3403305200.pdf` | Process Spec | 8 | 813 KB | **Feedback loop description** (likely same as #4 or different revision) | ★★★ |
+| 7 | `ps3403305300.pdf` | Process Spec | 4 | 184 KB | **DAC loop specification** — drive power / gap voltage DAC control loop | ★★☆ |
+| 8 | `ps3403305400.pdf` | Process Spec | 2 | 114 KB | **HVPS loop specification** — klystron voltage regulation loop | ★★☆ |
+| 9 | `ps3403305503.pdf` | Process Spec | 4 | 220 KB | **Drive chain specification** — baseband modulator, gain stage, limiting circuits (Rev 03) | ★★★ |
+| 10 | `ps3403305600.pdf` | Process Spec | 4 | 343 KB | **Comb filter module specification** — digital comb loop implementation | ★★☆ |
+| 11 | `ps3403305700.pdf` | Process Spec | 2 | 126 KB | **Lead/integral compensation specification** — analog compensation networks | ★★☆ |
+| 12 | `ps3403305800.pdf` | Process Spec | 4 | 209 KB | **Ripple loop specification** — HVPS ripple cancellation | ★★☆ |
+| 13 | `ps3403305900.pdf` | Process Spec | 7 | 1179 KB | **GVF module specification** — gap voltage feed-forward, LFB woofer, fiber optic interface (largest PS doc) | ★★★ |
+| 14 | `ps3403306001.pdf` | Process Spec | 5 | 301 KB | **Tuner loop specification** — cavity mechanical tuner control (Rev 01) | ★★☆ |
+| 15 | `ps3403306102.pdf` | Process Spec | 13 | 947 KB | **System test/commissioning procedure** — calibration steps, loop configuration, acceptance criteria (Rev 02, longest PS doc) | ★★★ |
 
 ### 2.2 Document Characteristics
 
 - **All PDFs are image-based** (scanned engineering drawings/typewritten documents)
 - **No extractable text** — OCR required for full digitization
 - **Total pages**: 75 pages across 15 documents
-- **Total size**: ~6.3 MB
+- **Total size**: ~6.0 MB
 - **Drawing date**: Estimated 1996-2005 based on source code dates and PEP-II timeline
 
 ### 2.3 Digitization Priority
@@ -115,7 +115,7 @@ The group `3403` corresponds to the PEP-II RF/LLRF system documentation.
 
 ### 3.4 MPS Wiring Diagrams (`mpsWiringDiagrams/`)
 
-35 wiring diagram PDFs: `wd3403300200.pdf` through `wd3403303400.pdf`
+33 wiring diagram PDFs: `wd3403300200.pdf` through `wd3403303400.pdf`
 These document the Machine Protection System wiring for the RF station.
 
 ### 3.5 Filament Heater (`filamentHeater/`)

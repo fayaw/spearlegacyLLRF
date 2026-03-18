@@ -32,11 +32,11 @@ This directory contains a comprehensive technical documentation package reconstr
 
 ### Legacy PDFs (15 files, image-based)
 Located in: `llrf/documentation/legacyArchitecture/`
-Total: 75 pages, ~6.3 MB
+Total: 75 pages, ~6.0 MB
 
-### Legacy Source Code (6 SNL programs)
+### Legacy Source Code (6 SNL programs + 11 header files)
 Located in: `llrf/legacyLLRF/`
-Total: ~10,800 lines of State Notation Language code
+Total: 7,112 lines of SNL code (.st files) + 1,111 lines in supporting headers (.h files) = 8,223 lines
 
 ### Published Literature (10 key papers)
 See `05_CROSS_REFERENCE_INDEX.md` §3 for full citations.
