@@ -640,115 +640,421 @@ add_block('simulink/Sinks/To Workspace', [modelName '/WS_Alpha_deg'], ...
     'SampleTime', '-1');
 
 %% ========================================================================
-%  SECTION 13: TOP-LEVEL WIRING (POWER PATH)
+%  SECTION 13: TOP-LEVEL WIRING (POWER & SIGNAL PATHS)
 %  ========================================================================
 %
-%  Specialized Power Systems blocks use conserving (physical) ports.
-%  Port names for SPS blocks:
-%    Three-Phase Source:      A, B, C (output ports = LConn1, LConn2, LConn3)
-%    Three-Phase Xfmr (2W):  A,B,C (pri=LConn1..3), a,b,c (sec=RConn1..3)
-%    Universal Bridge:        A,B,C (AC=LConn1..3), +,- (DC=RConn1,RConn2)
-%    Series RLC Branch:       +,- (LConn1, RConn1)
-%    Voltage Measurement:     +,- (LConn1, RConn1)  output: Simulink signal
-%    Current Measurement:     +,- (LConn1, RConn1)  output: Simulink signal
+%  12-pulse series-connected rectifier topology (from Python sim & docs):
 %
-%  Note: Port naming uses 'LConn' and 'RConn' for physical (conserving)
-%  ports on SPS blocks. Actual port numbering may vary by MATLAB version.
-%  Connections wrapped in try-catch for version compatibility.
+%    Bridge1_DC+ --> L1 --+--> L3 --> I_meas --> Klystron --+
+%                         |                                  |
+%                         +--> C_filter --+                  |
+%                         |               |                  |
+%                         +--> R_damping -+------------------+
+%                                                            |
+%    Bridge1_DC- --> Bridge2_DC+ (series junction)           |
+%                                                            |
+%    Bridge2_DC- --> L2 -------------------------------------+
+%
+%  V_Measure across Klystron; Crowbar across DC output bus.
+%
+%  SPS physical ports use LConn/RConn naming.
+%  Port map:
+%    Three-Phase Source:      LConn1/2/3 = A/B/C
+%    Three-Phase Xfmr (2W):  LConn1/2/3 = pri A/B/C ; RConn1/2/3 = sec a/b/c
+%    Universal Bridge:        LConn1/2/3 = AC A/B/C  ; RConn1/2 = DC+/-
+%    Series RLC Branch:       LConn1 = + ; RConn1 = -
+%    Voltage Measurement:     LConn1 = + ; RConn1 = -  ; port 1 out = signal
+%    Current Measurement:     LConn1 = + ; RConn1 = -  ; port 1 out = signal
+%    Breaker:                 LConn1 = + ; RConn1 = -  ; port 1 in  = ctrl
+%
+%  Each connection group is wrapped in try-catch so the model still
+%  builds even if port names differ across MATLAB versions.  Check the
+%  console output for "MANUAL WIRING NEEDED" messages.
+%
+%  Branch nodes (where 3+ components share a physical node) use the
+%  line-handle branching technique:
+%    h = add_line(mdl, src, dst);            % first connection
+%    ph = get_param(block, 'PortHandles');
+%    add_line(mdl, h, ph.LConn(1));          % branch from existing line
 
-fprintf('\n--- Wiring Power Path ---\n');
+fprintf('\n--- Wiring Power & Signal Paths ---\n');
 fprintf('NOTE: SPS port names vary by MATLAB version.\n');
 fprintf('If wiring errors occur, check get_param(block,''PortConnectivity'')\n\n');
 
-% AC Source -> T0a primary (ABC -> ABC)
-try
-    add_line(modelName, 'AC_Source_12kV/LConn1', 'T0a_Plus30deg/LConn1', 'autorouting', 'on');
-    add_line(modelName, 'AC_Source_12kV/LConn2', 'T0a_Plus30deg/LConn2', 'autorouting', 'on');
-    add_line(modelName, 'AC_Source_12kV/LConn3', 'T0a_Plus30deg/LConn3', 'autorouting', 'on');
-    fprintf('  AC -> T0a: OK\n');
-catch ME, fprintf('  AC -> T0a: MANUAL WIRING NEEDED (%s)\n', ME.message); end
+wireOK  = 0;  % successful connection counter
+wireFAIL = 0; % failed connection counter
 
-% AC Source -> T0b primary (ABC -> ABC)
-try
-    add_line(modelName, 'AC_Source_12kV/LConn1', 'T0b_Zero_deg/LConn1', 'autorouting', 'on');
-    add_line(modelName, 'AC_Source_12kV/LConn2', 'T0b_Zero_deg/LConn2', 'autorouting', 'on');
-    add_line(modelName, 'AC_Source_12kV/LConn3', 'T0b_Zero_deg/LConn3', 'autorouting', 'on');
-    fprintf('  AC -> T0b: OK\n');
-catch ME, fprintf('  AC -> T0b: MANUAL WIRING NEEDED (%s)\n', ME.message); end
+% ---- Helper: safe add_line that counts successes/failures ----
+%  (defined at bottom of file, but we use inline try-catch here)
 
-% T0a secondary -> T1 primary
+% =====================================================================
+% (A) AC Source --> Phase-Shift Transformers T0a, T0b
+%     AC has 3 physical outputs; both transformers share the same source.
+%     The first set of add_line creates the lines; the second set
+%     branches from the AC source ports to the second transformer.
+% =====================================================================
 try
-    add_line(modelName, 'T0a_Plus30deg/RConn1', 'T1_Rectifier_Xfmr/LConn1', 'autorouting', 'on');
-    add_line(modelName, 'T0a_Plus30deg/RConn2', 'T1_Rectifier_Xfmr/LConn2', 'autorouting', 'on');
-    add_line(modelName, 'T0a_Plus30deg/RConn3', 'T1_Rectifier_Xfmr/LConn3', 'autorouting', 'on');
-    fprintf('  T0a -> T1: OK\n');
-catch ME, fprintf('  T0a -> T1: MANUAL WIRING NEEDED (%s)\n', ME.message); end
+    add_line(modelName, 'AC_Source_12kV/LConn1', 'T0a_Plus30deg/LConn1', 'autorouting','on');
+    add_line(modelName, 'AC_Source_12kV/LConn2', 'T0a_Plus30deg/LConn2', 'autorouting','on');
+    add_line(modelName, 'AC_Source_12kV/LConn3', 'T0a_Plus30deg/LConn3', 'autorouting','on');
+    wireOK = wireOK + 3;
+    fprintf('  [OK] AC -> T0a (3-phase)\n');
+catch ME, wireFAIL = wireFAIL+3; fprintf('  [!!] AC -> T0a: %s\n', ME.message); end
 
-% T0b secondary -> T2 primary
 try
-    add_line(modelName, 'T0b_Zero_deg/RConn1', 'T2_Rectifier_Xfmr/LConn1', 'autorouting', 'on');
-    add_line(modelName, 'T0b_Zero_deg/RConn2', 'T2_Rectifier_Xfmr/LConn2', 'autorouting', 'on');
-    add_line(modelName, 'T0b_Zero_deg/RConn3', 'T2_Rectifier_Xfmr/LConn3', 'autorouting', 'on');
-    fprintf('  T0b -> T2: OK\n');
-catch ME, fprintf('  T0b -> T2: MANUAL WIRING NEEDED (%s)\n', ME.message); end
+    % Branch from AC source to T0b — get port handles to branch
+    phAC = get_param([modelName '/AC_Source_12kV'], 'PortHandles');
+    phT0b = get_param([modelName '/T0b_Zero_deg'], 'PortHandles');
+    add_line(modelName, phAC.LConn(1), phT0b.LConn(1), 'autorouting','on');
+    add_line(modelName, phAC.LConn(2), phT0b.LConn(2), 'autorouting','on');
+    add_line(modelName, phAC.LConn(3), phT0b.LConn(3), 'autorouting','on');
+    wireOK = wireOK + 3;
+    fprintf('  [OK] AC -> T0b (3-phase, branched)\n');
+catch ME
+    % Fallback: try named ports (in case branching via handles fails)
+    try
+        add_line(modelName, 'AC_Source_12kV/LConn1', 'T0b_Zero_deg/LConn1', 'autorouting','on');
+        add_line(modelName, 'AC_Source_12kV/LConn2', 'T0b_Zero_deg/LConn2', 'autorouting','on');
+        add_line(modelName, 'AC_Source_12kV/LConn3', 'T0b_Zero_deg/LConn3', 'autorouting','on');
+        wireOK = wireOK + 3;
+        fprintf('  [OK] AC -> T0b (3-phase, named ports)\n');
+    catch ME2, wireFAIL = wireFAIL+3; fprintf('  [!!] AC -> T0b: %s\n', ME2.message); end
+end
 
-% T1 secondary -> Bridge1 AC inputs
+% =====================================================================
+% (B) Phase-Shift Xfmrs --> Rectifier Xfmrs (T0a->T1, T0b->T2)
+% =====================================================================
 try
-    add_line(modelName, 'T1_Rectifier_Xfmr/RConn1', 'Bridge1_SCR/LConn1', 'autorouting', 'on');
-    add_line(modelName, 'T1_Rectifier_Xfmr/RConn2', 'Bridge1_SCR/LConn2', 'autorouting', 'on');
-    add_line(modelName, 'T1_Rectifier_Xfmr/RConn3', 'Bridge1_SCR/LConn3', 'autorouting', 'on');
-    fprintf('  T1 -> Bridge1: OK\n');
-catch ME, fprintf('  T1 -> Bridge1: MANUAL WIRING NEEDED (%s)\n', ME.message); end
+    add_line(modelName, 'T0a_Plus30deg/RConn1', 'T1_Rectifier_Xfmr/LConn1', 'autorouting','on');
+    add_line(modelName, 'T0a_Plus30deg/RConn2', 'T1_Rectifier_Xfmr/LConn2', 'autorouting','on');
+    add_line(modelName, 'T0a_Plus30deg/RConn3', 'T1_Rectifier_Xfmr/LConn3', 'autorouting','on');
+    wireOK = wireOK + 3;
+    fprintf('  [OK] T0a sec -> T1 pri (3-phase)\n');
+catch ME, wireFAIL = wireFAIL+3; fprintf('  [!!] T0a -> T1: %s\n', ME.message); end
 
-% T2 secondary -> Bridge2 AC inputs
 try
-    add_line(modelName, 'T2_Rectifier_Xfmr/RConn1', 'Bridge2_SCR/LConn1', 'autorouting', 'on');
-    add_line(modelName, 'T2_Rectifier_Xfmr/RConn2', 'Bridge2_SCR/LConn2', 'autorouting', 'on');
-    add_line(modelName, 'T2_Rectifier_Xfmr/RConn3', 'Bridge2_SCR/LConn3', 'autorouting', 'on');
-    fprintf('  T2 -> Bridge2: OK\n');
-catch ME, fprintf('  T2 -> Bridge2: MANUAL WIRING NEEDED (%s)\n', ME.message); end
+    add_line(modelName, 'T0b_Zero_deg/RConn1', 'T2_Rectifier_Xfmr/LConn1', 'autorouting','on');
+    add_line(modelName, 'T0b_Zero_deg/RConn2', 'T2_Rectifier_Xfmr/LConn2', 'autorouting','on');
+    add_line(modelName, 'T0b_Zero_deg/RConn3', 'T2_Rectifier_Xfmr/LConn3', 'autorouting','on');
+    wireOK = wireOK + 3;
+    fprintf('  [OK] T0b sec -> T2 pri (3-phase)\n');
+catch ME, wireFAIL = wireFAIL+3; fprintf('  [!!] T0b -> T2: %s\n', ME.message); end
 
-% Gate pulses to bridges (Simulink signal -> Universal Bridge 'g' port)
+% =====================================================================
+% (C) Rectifier Xfmrs --> SCR Bridges (AC side)
+% =====================================================================
 try
-    add_line(modelName, 'PulseGen1/1', 'Bridge1_SCR/1');
-    add_line(modelName, 'PulseGen2/1', 'Bridge2_SCR/1');
-    fprintf('  PulseGen -> Bridges: OK\n');
-catch ME, fprintf('  PulseGen -> Bridges: MANUAL WIRING NEEDED (%s)\n', ME.message); end
+    add_line(modelName, 'T1_Rectifier_Xfmr/RConn1', 'Bridge1_SCR/LConn1', 'autorouting','on');
+    add_line(modelName, 'T1_Rectifier_Xfmr/RConn2', 'Bridge1_SCR/LConn2', 'autorouting','on');
+    add_line(modelName, 'T1_Rectifier_Xfmr/RConn3', 'Bridge1_SCR/LConn3', 'autorouting','on');
+    wireOK = wireOK + 3;
+    fprintf('  [OK] T1 sec -> Bridge1 AC (3-phase)\n');
+catch ME, wireFAIL = wireFAIL+3; fprintf('  [!!] T1 -> Bridge1: %s\n', ME.message); end
 
-% Control -> Pulse generators (alpha input)
 try
-    add_line(modelName, 'Control_System/1', 'PulseGen1/1');
-    add_line(modelName, 'Control_System/1', 'PulseGen2/1');
-    fprintf('  Control -> PulseGens: OK\n');
-catch ME, fprintf('  Control -> PulseGens: MANUAL WIRING NEEDED (%s)\n', ME.message); end
+    add_line(modelName, 'T2_Rectifier_Xfmr/RConn1', 'Bridge2_SCR/LConn1', 'autorouting','on');
+    add_line(modelName, 'T2_Rectifier_Xfmr/RConn2', 'Bridge2_SCR/LConn2', 'autorouting','on');
+    add_line(modelName, 'T2_Rectifier_Xfmr/RConn3', 'Bridge2_SCR/LConn3', 'autorouting','on');
+    wireOK = wireOK + 3;
+    fprintf('  [OK] T2 sec -> Bridge2 AC (3-phase)\n');
+catch ME, wireFAIL = wireFAIL+3; fprintf('  [!!] T2 -> Bridge2: %s\n', ME.message); end
 
-% Bridge DC outputs -> filter inductors
-% Bridge+ -> L_filter -> common bus -> C_filter -> L3 -> Klystron -> return
+% =====================================================================
+% (D) DC POWER PATH  —  Series 12-pulse Rectifier Topology
+%
+%     Main current loop (series):
+%       Bridge1 DC+ --> L1 --> [NodeA] --> L3 --> I_meas --> Klystron --> [NodeB] --> L2 --> Bridge2 DC-
+%
+%     Series junction:
+%       Bridge1 DC- --> Bridge2 DC+
+%
+%     Parallel filter branches between NodeA and NodeB:
+%       NodeA --> C_Filter_Bank --> NodeB
+%       NodeA --> R_Damping     --> NodeB
+%
+%     V_Measure_DC across Klystron (NodeA side to NodeB side)
+%     Crowbar_SCR across DC output (connected at NodeA and NodeB)
+%
+%     Node branching uses line-handle technique (see header).
+% =====================================================================
+fprintf('\n  --- DC Power Path ---\n');
+
+% Bridge1 DC+ --> L1
 try
-    add_line(modelName, 'Bridge1_SCR/RConn1', 'L1_Filter/LConn1', 'autorouting', 'on');
-    add_line(modelName, 'Bridge2_SCR/RConn1', 'L2_Filter/LConn1', 'autorouting', 'on');
-    fprintf('  Bridge+ -> L_filter: OK\n');
-catch ME, fprintf('  Bridge+ -> L_filter: MANUAL WIRING NEEDED (%s)\n', ME.message); end
+    add_line(modelName, 'Bridge1_SCR/RConn1', 'L1_Filter/LConn1', 'autorouting','on');
+    wireOK = wireOK + 1; fprintf('  [OK] Bridge1 DC+ -> L1\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] Bridge1+ -> L1: %s\n', ME.message); end
 
-% Measurement -> Divider -> kV -> Control feedback
+% L1 --> L3 (main series path, creating NodeA line)
+try
+    hNodeA = add_line(modelName, 'L1_Filter/RConn1', 'L3_Cable_Term/LConn1', 'autorouting','on');
+    wireOK = wireOK + 1; fprintf('  [OK] L1 -> L3 (NodeA main)\n');
+
+    % Branch NodeA to C_Filter_Bank
+    try
+        phCF = get_param([modelName '/C_Filter_Bank'], 'PortHandles');
+        add_line(modelName, hNodeA, phCF.LConn(1), 'autorouting','on');
+        wireOK = wireOK + 1; fprintf('  [OK] NodeA -> C_Filter (branch)\n');
+    catch ME2
+        wireFAIL = wireFAIL+1;
+        fprintf('  [!!] NodeA -> C_Filter branch: %s\n', ME2.message);
+    end
+
+    % Branch NodeA to R_Damping
+    try
+        phRD = get_param([modelName '/R_Damping'], 'PortHandles');
+        add_line(modelName, hNodeA, phRD.LConn(1), 'autorouting','on');
+        wireOK = wireOK + 1; fprintf('  [OK] NodeA -> R_Damping (branch)\n');
+    catch ME2
+        wireFAIL = wireFAIL+1;
+        fprintf('  [!!] NodeA -> R_Damping branch: %s\n', ME2.message);
+    end
+
+    % Branch NodeA to V_Measure_DC positive terminal
+    try
+        phVM = get_param([modelName '/V_Measure_DC'], 'PortHandles');
+        add_line(modelName, hNodeA, phVM.LConn(1), 'autorouting','on');
+        wireOK = wireOK + 1; fprintf('  [OK] NodeA -> V_Measure+ (branch)\n');
+    catch ME2
+        wireFAIL = wireFAIL+1;
+        fprintf('  [!!] NodeA -> V_Measure+: %s\n', ME2.message);
+    end
+
+    % Branch NodeA to Crowbar positive terminal
+    try
+        phCB = get_param([modelName '/Crowbar_SCR'], 'PortHandles');
+        add_line(modelName, hNodeA, phCB.LConn(1), 'autorouting','on');
+        wireOK = wireOK + 1; fprintf('  [OK] NodeA -> Crowbar+ (branch)\n');
+    catch ME2
+        wireFAIL = wireFAIL+1;
+        fprintf('  [!!] NodeA -> Crowbar+: %s\n', ME2.message);
+    end
+
+catch ME
+    wireFAIL = wireFAIL+1;
+    fprintf('  [!!] L1 -> L3: %s\n', ME.message);
+    fprintf('       (NodeA branches not attempted)\n');
+end
+
+% L3 --> I_Measure_DC --> Klystron (series path continues)
+try
+    add_line(modelName, 'L3_Cable_Term/RConn1', 'I_Measure_DC/LConn1', 'autorouting','on');
+    wireOK = wireOK + 1; fprintf('  [OK] L3 -> I_Measure\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] L3 -> I_Measure: %s\n', ME.message); end
+
+try
+    add_line(modelName, 'I_Measure_DC/RConn1', 'Klystron_Load/LConn1', 'autorouting','on');
+    wireOK = wireOK + 1; fprintf('  [OK] I_Measure -> Klystron\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] I_Measure -> Klystron: %s\n', ME.message); end
+
+% Klystron --> L2 (creating NodeB line)
+try
+    hNodeB = add_line(modelName, 'Klystron_Load/RConn1', 'L2_Filter/LConn1', 'autorouting','on');
+    wireOK = wireOK + 1; fprintf('  [OK] Klystron -> L2 (NodeB main)\n');
+
+    % Branch NodeB to C_Filter_Bank return
+    try
+        phCF = get_param([modelName '/C_Filter_Bank'], 'PortHandles');
+        add_line(modelName, hNodeB, phCF.RConn(1), 'autorouting','on');
+        wireOK = wireOK + 1; fprintf('  [OK] NodeB -> C_Filter return (branch)\n');
+    catch ME2
+        wireFAIL = wireFAIL+1;
+        fprintf('  [!!] NodeB -> C_Filter return: %s\n', ME2.message);
+    end
+
+    % Branch NodeB to R_Damping return
+    try
+        phRD = get_param([modelName '/R_Damping'], 'PortHandles');
+        add_line(modelName, hNodeB, phRD.RConn(1), 'autorouting','on');
+        wireOK = wireOK + 1; fprintf('  [OK] NodeB -> R_Damping return (branch)\n');
+    catch ME2
+        wireFAIL = wireFAIL+1;
+        fprintf('  [!!] NodeB -> R_Damping return: %s\n', ME2.message);
+    end
+
+    % Branch NodeB to V_Measure_DC negative terminal
+    try
+        phVM = get_param([modelName '/V_Measure_DC'], 'PortHandles');
+        add_line(modelName, hNodeB, phVM.RConn(1), 'autorouting','on');
+        wireOK = wireOK + 1; fprintf('  [OK] NodeB -> V_Measure- (branch)\n');
+    catch ME2
+        wireFAIL = wireFAIL+1;
+        fprintf('  [!!] NodeB -> V_Measure-: %s\n', ME2.message);
+    end
+
+    % Branch NodeB to Crowbar negative terminal
+    try
+        phCB = get_param([modelName '/Crowbar_SCR'], 'PortHandles');
+        add_line(modelName, hNodeB, phCB.RConn(1), 'autorouting','on');
+        wireOK = wireOK + 1; fprintf('  [OK] NodeB -> Crowbar- (branch)\n');
+    catch ME2
+        wireFAIL = wireFAIL+1;
+        fprintf('  [!!] NodeB -> Crowbar-: %s\n', ME2.message);
+    end
+
+catch ME
+    wireFAIL = wireFAIL+1;
+    fprintf('  [!!] Klystron -> L2: %s\n', ME.message);
+    fprintf('       (NodeB branches not attempted)\n');
+end
+
+% L2 --> Bridge2 DC- (closes the series loop)
+try
+    add_line(modelName, 'L2_Filter/RConn1', 'Bridge2_SCR/RConn2', 'autorouting','on');
+    wireOK = wireOK + 1; fprintf('  [OK] L2 -> Bridge2 DC-\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] L2 -> Bridge2-: %s\n', ME.message); end
+
+% Bridge1 DC- --> Bridge2 DC+ (series junction)
+try
+    add_line(modelName, 'Bridge1_SCR/RConn2', 'Bridge2_SCR/RConn1', 'autorouting','on');
+    wireOK = wireOK + 1; fprintf('  [OK] Bridge1 DC- -> Bridge2 DC+ (series)\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] Series junction: %s\n', ME.message); end
+
+% =====================================================================
+% (E) GATE PULSE WIRING (Pulse Generator <-> Bridge gate ports)
+%
+%     For SPS pulse generators (legacy/modern_sps/simscape):
+%       PulseGen has 1 input (alpha) and 1 output (pulses)
+%       Control_System/1 --> PulseGen/1 (input: alpha)
+%       PulseGen/1 --> Bridge/1 (output: pulses to gate)
+%
+%     For primitive MATLAB Function block:
+%       PulseGen has 2 inputs: (1)=wt, (2)=alpha_deg
+%       Need wt generator: Clock -> gain(2*pi*f) -> mod -> PulseGen/1
+%       Control_System/1 --> PulseGen/2 (input: alpha)
+%       PulseGen/1 --> Bridge/1 (output: pulses to gate)
+% =====================================================================
+fprintf('\n  --- Gate Pulse Wiring ---\n');
+
+if strcmp(pulse_gen_type, 'primitive')
+    % --- PRIMITIVE MODE: need wt generator ---
+    fprintf('  Primitive pulse gen: adding wt (omega*t) generator blocks...\n');
+    try
+        % Clock block for simulation time
+        add_block('simulink/Sources/Clock', [modelName '/SimClock'], ...
+            'Position', [380 120 410 140]);
+
+        % Gain: t * 2*pi*f = omega*t
+        add_block('simulink/Math Operations/Gain', [modelName '/Omega_Gain'], ...
+            'Position', [430 120 470 140], ...
+            'Gain', num2str(2*pi*P.ac_frequency));
+
+        % Math Function: mod(wt, 2*pi) to keep in [0, 2*pi]
+        add_block('simulink/Math Operations/Math Function', [modelName '/Mod_2pi'], ...
+            'Position', [490 115 530 145], ...
+            'Operator', 'mod');
+        add_block('simulink/Sources/Constant', [modelName '/TwoPi_Const'], ...
+            'Position', [460 150 490 170], ...
+            'Value', num2str(2*pi));
+
+        % Wire the wt generator chain
+        add_line(modelName, 'SimClock/1', 'Omega_Gain/1');
+        add_line(modelName, 'Omega_Gain/1', 'Mod_2pi/1');
+        add_line(modelName, 'TwoPi_Const/1', 'Mod_2pi/2');
+
+        % wt -> PulseGen input 1
+        add_line(modelName, 'Mod_2pi/1', 'PulseGen1/1');
+        add_line(modelName, 'Mod_2pi/1', 'PulseGen2/1');
+
+        % alpha -> PulseGen input 2
+        add_line(modelName, 'Control_System/1', 'PulseGen1/2');
+        add_line(modelName, 'Control_System/1', 'PulseGen2/2');
+
+        % PulseGen output -> Bridge gate
+        add_line(modelName, 'PulseGen1/1', 'Bridge1_SCR/1');
+        add_line(modelName, 'PulseGen2/1', 'Bridge2_SCR/1');
+
+        wireOK = wireOK + 10; fprintf('  [OK] Primitive gate wiring (wt gen + alpha + pulses)\n');
+    catch ME
+        wireFAIL = wireFAIL + 1;
+        fprintf('  [!!] Primitive gate wiring: %s\n', ME.message);
+    end
+else
+    % --- SPS PULSE GENERATOR MODE ---
+    try
+        % Control alpha -> PulseGen input
+        add_line(modelName, 'Control_System/1', 'PulseGen1/1');
+        add_line(modelName, 'Control_System/1', 'PulseGen2/1');
+        % PulseGen output -> Bridge gate
+        add_line(modelName, 'PulseGen1/1', 'Bridge1_SCR/1');
+        add_line(modelName, 'PulseGen2/1', 'Bridge2_SCR/1');
+        wireOK = wireOK + 4; fprintf('  [OK] SPS gate wiring (alpha -> PG -> bridge)\n');
+    catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] SPS gate wiring: %s\n', ME.message); end
+end
+
+% =====================================================================
+% (F) SIGNAL-LEVEL FEEDBACK & INSTRUMENTATION
+%     V_Measure -> V_Divider -> V_to_kV -> Control / WS / Scopes
+%     I_Measure -> Control / WS / Scopes
+%     Control alpha -> WS / Scopes
+% =====================================================================
+fprintf('\n  --- Signal Feedback & Instrumentation ---\n');
+
+% Crowbar trigger signal -> Breaker control input
+try
+    add_line(modelName, 'Crowbar_Trigger/1', 'Crowbar_SCR/1');
+    wireOK = wireOK + 1; fprintf('  [OK] Crowbar_Trigger -> Crowbar_SCR\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] Crowbar trigger: %s\n', ME.message); end
+
+% Voltage measurement chain: V_Measure -> V_Divider -> V_to_kV
 try
     add_line(modelName, 'V_Measure_DC/1', 'V_Divider/1');
     add_line(modelName, 'V_Divider/1', 'V_to_kV/1');
-    add_line(modelName, 'V_to_kV/1', 'Control_System/1');
-    add_line(modelName, 'V_to_kV/1', 'WS_Voltage_kV/1');
-    add_line(modelName, 'I_Measure_DC/1', 'Control_System/2');
-    add_line(modelName, 'I_Measure_DC/1', 'WS_Current_A/1');
-    add_line(modelName, 'Control_System/1', 'WS_Alpha_deg/1');
-    fprintf('  Feedback wiring: OK\n');
-catch ME, fprintf('  Feedback: MANUAL WIRING NEEDED (%s)\n', ME.message); end
+    wireOK = wireOK + 2; fprintf('  [OK] V_Measure -> V_Divider -> V_to_kV\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] Voltage chain: %s\n', ME.message); end
 
-% Crowbar trigger
+% V_to_kV -> Control System input 1 (voltage feedback)
 try
-    add_line(modelName, 'Crowbar_Trigger/1', 'Crowbar_SCR/1');
-    fprintf('  Crowbar trigger: OK\n');
-catch ME, fprintf('  Crowbar: MANUAL WIRING NEEDED (%s)\n', ME.message); end
+    add_line(modelName, 'V_to_kV/1', 'Control_System/1');
+    wireOK = wireOK + 1; fprintf('  [OK] V_to_kV -> Control (V feedback)\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] V feedback: %s\n', ME.message); end
 
-fprintf('\nWiring complete. Check messages above for any manual adjustments.\n');
+% I_Measure -> Control System input 2 (current feedback)
+try
+    add_line(modelName, 'I_Measure_DC/1', 'Control_System/2');
+    wireOK = wireOK + 1; fprintf('  [OK] I_Measure -> Control (I feedback)\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] I feedback: %s\n', ME.message); end
+
+% To Workspace blocks
+try
+    add_line(modelName, 'V_to_kV/1', 'WS_Voltage_kV/1');
+    wireOK = wireOK + 1; fprintf('  [OK] V_to_kV -> WS_Voltage_kV\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] WS voltage: %s\n', ME.message); end
+
+try
+    add_line(modelName, 'I_Measure_DC/1', 'WS_Current_A/1');
+    wireOK = wireOK + 1; fprintf('  [OK] I_Measure -> WS_Current_A\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] WS current: %s\n', ME.message); end
+
+try
+    add_line(modelName, 'Control_System/1', 'WS_Alpha_deg/1');
+    wireOK = wireOK + 1; fprintf('  [OK] Control -> WS_Alpha_deg\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] WS alpha: %s\n', ME.message); end
+
+% Scopes
+% Scope_Output: 3 inputs = Voltage(kV), Current(A), Power proxy
+% Scope_Control: 2 inputs = firing angle, SIG HI (alpha_deg)
+try
+    add_line(modelName, 'V_to_kV/1', 'Scope_Output/1');
+    add_line(modelName, 'I_Measure_DC/1', 'Scope_Output/2');
+    add_line(modelName, 'Control_System/1', 'Scope_Output/3');
+    wireOK = wireOK + 3; fprintf('  [OK] Scopes -> Scope_Output (V, I, alpha)\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] Scope_Output: %s\n', ME.message); end
+
+try
+    add_line(modelName, 'Control_System/1', 'Scope_Control/1');
+    add_line(modelName, 'V_to_kV/1', 'Scope_Control/2');
+    wireOK = wireOK + 2; fprintf('  [OK] Scopes -> Scope_Control (alpha, V_kV)\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] Scope_Control: %s\n', ME.message); end
+
+fprintf('\n--- Wiring Summary: %d OK, %d FAILED ---\n', wireOK, wireFAIL);
+if wireFAIL > 0
+    fprintf('Check MANUAL WIRING messages above.  Use:\n');
+    fprintf('  ph = get_param(''%s/<Block>'', ''PortHandles'')\n', modelName);
+    fprintf('  get_param(''%s/<Block>'', ''PortConnectivity'')\n', modelName);
+    fprintf('to discover correct port names for your MATLAB version.\n');
+end
+fprintf('\n');
 
 %% ========================================================================
 %  SECTION 14: SAVE MODEL
