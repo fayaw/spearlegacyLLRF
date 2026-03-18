@@ -199,5 +199,99 @@ F. Pedersen's SLAC-400 report (1992) provides the theoretical foundation for the
 
 ---
 
+## 9. Operational Insights from SPEAR3 System Documentation
+
+> **Source**: `llrf/documentation/LLRFOperation_jims.docx` (J. Sebek — SPEAR3 RF Station Operation); `llrf/documentation/fiberOpticCableSignalControlRev3.docx`
+
+### 9.1 Control Hierarchy and Modes
+
+The SPEAR3 LLRF system operates in four modes: **ON_CW** (normal), **TUNE** (testing), **PARK** (unused, PEP-II heritage), and **ON_FM** (cavity processing, never used at SPEAR3).
+
+**Normal operation (ON_CW)** involves three nested control loops:
+
+1. **Fast analog control** (RFP module, ~MHz bandwidth): IQ decomposition of 4 cavity probe signals, error correction, RF drive reconstruction — almost entirely analog signal processing
+2. **DAC Control Loop** (VxWorks, ~1 Hz update): Monitors total gap voltage (sum of 4 cavities), adjusts `SRF1:STN:ON:IQ` to control RFP output amplitude. Ultimate goal: maintain total gap voltage at setpoint.
+3. **HVPS Loop** (VxWorks, ~0.5 Hz update): Monitors `SRF1:KLYSDRIVFRWD:POWER`. When drive power exceeds setpoint (e.g., `SRF1:KLYSDRIVFRWD:POWER:ON`), increases `SRF1:HVPS:VOLT:CTRL.VAL` to raise klystron gain and reduce required drive power.
+
+**TUNE mode** disables the DAC control loop and most feedback loops. Used for bringing up the system after klystron replacement or HVPS refurbishment. Key step: may need to adjust `SRF1:STNDIRECT:LOOP:PHASE.C` to compensate for phase differences between old and new klystrons.
+
+### 9.2 RF Station Turn-On Sequence
+
+From Jim Sebek's operational notes, the turn-on sequence proceeds:
+
+1. **Tuners positioned**: Move to `SRF1:CAV1TUNR:POSN:ONHOME` (TUNE/ON Home position)
+2. **HVPS powered**: Set to Turn-On Voltage `SRF1:HVPS:VOLT:MIN` (typically 50 kV)
+3. **DAC initialized**: Set to `SRF1:STN:ONFAST:INIT` (typically 100 counts) → few watts of drive power → few hundred kV gap voltage
+4. **Tuner feedback starts**: Phase difference between forward power and cavity probe now measurable → tuner loop can regulate
+5. **DAC increases to ~200**: Slightly raises drive power
+6. **Direct loop closed**: Analog integrator switch engaged → causes transient (drive power spikes to ~45 W before settling to ~10 W). This is done at low HVPS voltage so klystron output peaks at only ~50 kW (safe level)
+7. **Slow loops activated**: DAC and HVPS control loops start ramping over 10–20 seconds
+8. **Steady-state reached**: Gap voltage at setpoint, drive power at setpoint, HVPS voltage adjusted for operating point
+
+**Critical parameters during turn-on**:
+- `SRF1:STNDIRECT:LOOP:COUNTS.A` — Loop Gain (amplitude feedback)
+- `SRF1:STNDIRECT:LOOP:PHASE.C` — Loop Phase (compensates electronic delays)
+
+### 9.3 Tuner Operation Details
+
+The cavity tuner system keeps each cavity resonant at the desired frequency (slightly below f_RF for Robinson stability). Key operational characteristics:
+
+- **Sensing**: Phase difference between forward power coupler signal and cavity probe signal
+- **Total tuner travel**: ~2.5 mm from home to ON position (1 revolution of lead screw = 2 motor revolutions)
+- **Normal operation motion**: ~0.2 mm (fine adjustments due to thermal drift, beam current changes)
+- **Position sensing**: Linear potentiometers provide approximate position readback (not in any feedback loop)
+- **"Stop and init" feature**: Aligns internal step counter with potentiometer reading without moving tuner
+- **No encoders**: Legacy system has no absolute position feedback — relies on step counting from a reference position
+
+### 9.4 HVPS Protection Philosophy
+
+From `fiberOpticCableSignalControlRev3.docx`, the HVPS protection design philosophy is:
+
+1. **Primary protection**: Inhibit SCR triggers (removes power source) — response time ~100 ms to <10% power
+2. **Secondary protection**: Fire crowbar (dissipates stored energy in capacitors) — needed only for arc conditions
+3. **Passive protection**: 2Ω series resistors on output capacitors + series inductors in termination tank limit peak fault currents to safe levels even without crowbar
+
+**Key insight**: The PEP-II HVPS was designed with sufficient passive protection that the klystron is safe even if the crowbar completely fails. The crowbar reduces delivered energy from ~16 J to ~4 J, both well below the 20 J damage threshold. This defense-in-depth approach provides very high reliability for klystron protection.
+
+### 9.5 Known Limitations and Design Compromises
+
+1. **Tuner reliability**: Stepper motors (M093-FC11) and PWM drivers (SS2000MD4-M) are obsolete. No encoders means position knowledge depends on step counting — any lost steps accumulate as error.
+2. **Communication bottleneck**: All AB communication passes through a single serial chain. Failure of any DCM module can isolate downstream controllers.
+3. **Arc detection**: Original PEP-II fiber optic arc detectors were never commissioned. System has operated for 20+ years without waveguide arc protection.
+4. **Collector power protection**: Current software-based monitoring (~1 Hz in EPICS) is much slower than the thermal time constant of collector damage. The LLRF9 + Waveform Buffer upgrade addresses this with hardware-speed monitoring.
+
+---
+
+## 10. Published Literature Reference List
+
+### 10.1 Primary PEP-II LLRF References
+
+| Ref | Authors | Title | Source | Year |
+|-----|---------|-------|--------|------|
+| [1] | Corredoura, P.L. | Architecture and Performance of the PEP-II Low-Level RF System | SLAC-PUB-8498 | 1999 |
+| [2] | Corredoura et al. | Experience with the PEP-II RF System at High Beam Currents | arXiv:physics/0007029 | 2000 |
+| [3] | Fox, J. et al. | Lessons Learned from PEP-II LLRF and Longitudinal Feedback | Phys. Rev. ST Accel. Beams 13, 052802 | 2010 |
+| [4] | Rivetta, C. et al. | Modeling and Simulation of Longitudinal Dynamics for LER-HER at PEP-II | Phys. Rev. ST Accel. Beams 10, 022801 | 2007 |
+| [5] | Teytelman, D. | Beam Loading Compensation for Super B-Factories | PAC 2005, TOAC002 | 2005 |
+| [6] | Cassel, R. & Nguyen, M. | A Unique Power Supply for the PEP-II Klystron at SLAC | SLAC-PUB-7591 | 1997 |
+
+### 10.2 Foundational Theory
+
+| Ref | Authors | Title | Source | Year |
+|-----|---------|-------|--------|------|
+| [7] | Robinson, K.W. | Stability of Beam in Radiofrequency System | CEA-11, Cambridge Electron Accelerator | 1964 |
+| [8] | Wilson, P.B. | Fundamental-Mode RF Design in e+e- Storage Ring Factories | SLAC-PUB-6062 | 1993 |
+
+### 10.3 SPEAR3 System References
+
+| Ref | Authors | Title | Source | Year |
+|-----|---------|-------|--------|------|
+| [9] | McIntosh, P. | The SPEAR3 RF System | SLAC-PUB-11017 | 2005 |
+| [10] | Hettel, R. et al. | SPEAR 3 Design Report | SLAC-R-609 | 2002 |
+| [11] | Park, S. & Corbett, J. | Booster Synchrotron RF System Upgrade for SPEAR3 | IPAC 2010 | 2010 |
+
+---
+
 *See also: `00_PEP-II_SPEAR3_LLRF_SYSTEM_REFERENCE.md` for system overview.*
-*See also: `01_FEEDBACK_LOOP_ARCHITECTURE.md` for loop details.*
+*See also: `01_FEEDBACK_LOOP_ARCHITECTURE.md` for loop details and mathematical framework.*
+*See also: `02_VXI_HARDWARE_MODULE_REFERENCE.md` for hardware architecture including upgrade subsystems.*

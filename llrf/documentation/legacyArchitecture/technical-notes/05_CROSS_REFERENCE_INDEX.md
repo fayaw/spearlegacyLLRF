@@ -136,6 +136,72 @@ Supporting files:
 | VXI | VMEbus eXtensions for Instrumentation — modular instrument bus standard |
 | Woofer | Low-frequency damping via RF station, driven by LFB system |
 
+| LLRF9 | Dimtel LLRF9/476 — FPGA-based LLRF controller replacing VXI system |
+| Interface Chassis | New centralized hardware interlock hub (microsecond response) |
+| DMC-4143 | Galil 4-axis motion controller — replaces AB 1746-HSTP1 for tuner control |
+| PDR | Physical Design Report — `Designs/0_PHYSICAL_DESIGN_REPORT.md` |
+| Waveform Buffer | New subsystem for slow RF + HVPS signal monitoring (8 RF + 4 HVPS channels) |
+| HCPL-2400 | Broadcom optocoupler used in Interface Chassis (1 μs propagation) |
+| HFBR-1412/2412 | Broadcom fiber optic transceivers for HVPS controller link |
+| Enerpro FCOG6100 | HVPS SCR firing circuit board (VCO-based trigger generation) |
+| Microstep-MIS | Commercial waveguide arc detector (replacing non-functional PEP-II design) |
+| ZX47 | Mini-Circuits RF power detector used in Waveform Buffer |
+
 ---
 
-*This cross-reference index is designed for AI retrieval. Query any topic above to find its authoritative sources across legacy documents, published papers, and source code.*
+## 5. Document Source Matrix (Version 2.0)
+
+### 5.1 Engineering Design Documents (docx)
+
+| Source File | Location | Author/Date | Content | Used In |
+|-------------|----------|-------------|---------|---------|
+| LLRFOperation_jims.docx | llrf/documentation/ | J. Sebek | Turn-on procedure, control hierarchy, tuner mechanics | Doc 01 §2.9, Doc 04 §9.1–9.3 |
+| LLRFUpgradeTaskListRev3.docx | llrf/documentation/ | — | Project task list, procurement status | Doc 00 §1.3 |
+| LLRFDocumentationNotesR2.docx | llrf/documentation/ | J. Sebek, Nov 2021 | AB communication chain, Local Panel, Fast Interlock Chassis | Doc 02 §5.1–5.2 |
+| fiberOpticCableSignalControlRev3.docx | llrf/documentation/ | Rev 3, Jun 2022 | Three fiber optic signals, crowbar energy analysis, HVPS protection | Doc 02 §5.3, Doc 04 §9.4 |
+| llrfInterfaceChassis.docx | llrf/architecture/ | — | Complete Interface Chassis specification | Doc 02 §6.1–6.4 |
+| WaveformBuffersforLLRFUpgrade.docx | llrf/architecture/ | J. Sebek, Jan 2026 | Waveform buffer design, 24 RF signal distribution, magic tee loads | Doc 02 §8.1–8.2 |
+| arcDetectorHardwareOptions.docx | llrf/architecture/ | — | Microstep-MIS sensor selection, MDC-45300 viewport mounting | Doc 02 §9.1–9.3 |
+| rfPowerDetector.docx | llrf/architecture/ | — | Mini-Circuits ZX47 power detector specifications | Doc 02 §8.3 |
+| analogDesignComponents.docx | llrf/architecture/ | — | OPA189, BUF634A, optocoupler selection | Doc 02 §10.1 |
+| RFSystemMPSRequirements.docx | hvps/architecture/designNotes/ | — | Protection philosophy, 5 crowbar trigger sources | Doc 02 §7.2, Doc 04 §9.4 |
+| interfacesBetweenRFSystemControllers.docx | hvps/architecture/designNotes/ | — | Interface Chassis interfaces, optocoupler specs (HCPL-2400) | Doc 02 §6.1–6.3 |
+| controllerFiberOpticConnections.docx | hvps/architecture/designNotes/ | J. Sebek, May 2022 | Enerpro trigger chain, driver board analysis, COMMANDS bus | Doc 02 §7.1–7.3 |
+
+### 5.2 Spreadsheet Data Sources (xlsx)
+
+| Source File | Location | Content | Used In |
+|-------------|----------|---------|---------|
+| RfSystemDocumentIndexR3.xlsx | llrf/documentation/ | 62 LLRF + 33 HVPS document entries with descriptions | Doc 02 §11.1–11.2 |
+| LocalPanelToXConnectMapping.xlsx | llrf/documentation/ | Pin-by-pin J2/J3 connector mapping to cross-connect X530 | Doc 02 §5.2 |
+
+### 5.3 Physical Design Report
+
+| Source File | Location | Content | Used In |
+|-------------|----------|---------|---------|
+| 0_PHYSICAL_DESIGN_REPORT.md | Designs/ | Complete SPEAR3 LLRF upgrade design (Rev 1, ~1400 lines) | Doc 00 §1.3/1.5, Doc 01 §2.8/2.9, Doc 02 §6–9, Doc 04 §9.5 |
+
+### 5.4 Legacy PDFs (legacyArchitecture/)
+
+| PDF File | Document Number | Content | Used In |
+|----------|----------------|---------|---------|
+| bd3403300000.pdf | BD-340-330-00 | Overall block diagram | Doc 02 §5.1, Doc 05 §5.1 |
+| bd3403300100.pdf | BD-340-330-01 | LLRF block diagram | Doc 00 §1.2 |
+| feedbackLoopDescriptionps3403305200.pdf | PS-340-330-52-R0 | Feedback loop description | Doc 01 §3–10 |
+| ps3403305100.pdf | PS-340-330-51-R0 | RF system description | Doc 00 §1.1 |
+| ps3403305300.pdf | PS-340-330-53-R0 | Cavity calibration procedure | Doc 03 |
+| ps3403305503.pdf | PS-340-330-55-R3 | Safety survey | Doc 03 |
+| ps3403305600.pdf | PS-340-330-56-R0 | Coupling & cable calibration | Doc 03 |
+| ps3403305700.pdf | PS-340-330-57-R0 | Full power test | Doc 03 |
+| ps3403305800.pdf | PS-340-330-58-R0 | Cavity phasing | Doc 03 |
+| ps3403305900.pdf | PS-340-330-59-R0 | Turn-on procedure | Doc 03 |
+| ps3403306001.pdf | PS-340-330-60-R1 | Bellow cavity phasing | Doc 03 |
+| ps3403306102.pdf | PS-340-330-61-R2 | Non-ionizing radiation safety | Doc 03 |
+
+### 5.5 Published Literature
+
+See Doc 04, Section 10 for the complete bibliography with DOIs and OSTI identifiers.
+
+---
+
+*This cross-reference index is designed for AI retrieval. Query any topic above to find its authoritative sources across legacy documents, published papers, source code, and extracted engineering notes.*

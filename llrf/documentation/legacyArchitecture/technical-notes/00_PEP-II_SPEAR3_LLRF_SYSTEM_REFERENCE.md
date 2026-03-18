@@ -1,10 +1,12 @@
 # PEP-II / SPEAR3 LLRF System — Comprehensive Technical Reference
 
 **Document Number**: LLRF-REF-001
-**Version**: 1.0
+**Version**: 2.0
 **Date**: 2026-03-18
 **Classification**: Engineering Technical Reference — AI-Ready Documentation Package
-**Companion Document**: `Designs/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md` (source code analysis)
+**Companion Documents**:
+- `Designs/0_PHYSICAL_DESIGN_REPORT.md` — SPEAR3 LLRF Upgrade PDR (Rev 1, March 2026)
+- `Designs/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md` — Source code analysis
 
 ---
 
@@ -62,7 +64,32 @@ In 2003, SPEAR (Stanford Positron Electron Asymmetric Ring) was upgraded to **SP
 
 The SPEAR3 LLRF system is a **single-station** implementation of the PEP-II LLRF design, driving 4 cavities from one klystron. The control software (SNL/EPICS sequences) was adapted from PEP-II with station-specific macro substitutions.
 
-### 1.3 System Operating Parameters (SPEAR3)
+**Source**: McIntosh, P., "The SPEAR3 RF System," SLAC-PUB-11017, January 2005; Sebek, J., "SPEAR3 RF Station Operation," `llrf/documentation/LLRFOperation_jims.docx`
+
+### 1.3 SPEAR3 LLRF Upgrade Context (2022–present)
+
+As of 2026, the SPEAR3 LLRF system is undergoing a comprehensive upgrade (documented in `Designs/0_PHYSICAL_DESIGN_REPORT.md`, Rev 1, March 2026). The upgrade replaces **all control electronics** while retaining the RF plant physical infrastructure. Key drivers:
+
+- **Hardware obsolescence** — Custom SLAC VXI modules, PLC-5/SLC-500 controllers, and Slo-Syn stepper motor drivers are all end-of-life and unsupported
+- **PPS compliance** — Legacy design routes Personnel Protection System wiring through the HVPS controller and places a PLC in the safety chain
+- **Performance improvement** — FPGA-based feedback (270 ns loop delay) replaces analog processing
+- **Diagnostics** — 16,384-sample waveform capture + circular buffers + first-fault detection
+
+**What is retained**: Klystron, 4 RF cavities, waveguide distribution network, HVPS power section (transformers, rectifiers, crowbar), stepper motors and mechanical tuner assemblies, field cabling.
+
+**What is replaced**: LLRF controller (VXI → Dimtel LLRF9/476 × 2), RF MPS (PLC-5 → ControlLogix 1756), HVPS controller (SLC-500 → CompactLogix), tuner controller (AB 1746-HSTP1 → Galil DMC-4143), control software (SNL/VxWorks → EPICS/Python/MATLAB).
+
+**What is new**: Interface Chassis (central hardware interlock hub), Waveform Buffer System (8 RF + 4 HVPS monitoring channels), Arc Detection System (6 Microstep-MIS optical sensors), PPS Interface Box (dedicated, PLC-independent).
+
+**Eliminated PEP-II feedback loops**: The following legacy analog loops are no longer needed in the LLRF9 architecture:
+- **Comb filter loop** — Used for PEP-II multi-bunch stabilization; not applicable to SPEAR3 single-station configuration
+- **Gap voltage feedback (GVF)** — PEP-II cavity field stabilization; now handled by LLRF9 vector-sum feedback
+- **Ripple rejection loop** — LLRF9 digital feedback inherently rejects power-line ripple
+- **4-way DAC branching** — LLRF9 controls via single vector sum output
+
+> **Source**: `Designs/0_PHYSICAL_DESIGN_REPORT.md`, Section 15.7; `llrf/documentation/LLRFUpgradeTaskListRev3.docx`
+
+### 1.4 System Operating Parameters (SPEAR3)
 
 | Parameter | Symbol | Value | Notes |
 |-----------|--------|-------|-------|
@@ -83,7 +110,38 @@ The SPEAR3 LLRF system is a **single-station** implementation of the PEP-II LLRF
 | IF Frequency (LLRF) | f_IF | 4.9 MHz | 476 - 471.1 MHz LO |
 | LO Frequency | f_LO | 471.1 MHz | |
 
-### 1.4 Fundamental Design Challenge: Beam Loading
+### 1.5 LLRF9/476 Key Specifications (Upgrade System)
+
+The LLRF9/476 from Dimtel is the replacement for the entire VXI-based LLRF system. Two active units (of 4 purchased) replace the RFP, Clock, IQA, Comb Filter, and GVF modules:
+
+| Parameter | Value | Source |
+|-----------|-------|--------|
+| Hardware per unit | 3 × LLRF4.6 boards (Xilinx FPGA + 4 ADC + 2 DAC + 3 RF ch) | PDR §5.2 |
+| Direct loop delay | 270 ns | PDR §5.4 |
+| RF input range | +2 dBm full-scale, 12-bit ADC | PDR §5.4 |
+| Setpoint profiles | 512 points, 70 μs – 37 ms per step | PDR §5.4 |
+| Waveform capture | 16,384 samples/channel | PDR §5.4 |
+| Scalar readback rate | 10 Hz | PDR §5.4 |
+| Interlock timestamp | ±17.4 ns resolution | PDR §5.4 |
+| Thermal stabilization | 3 TEC modules on BRD1, BRD2 (PID controlled) | PDR §5.2 |
+
+**LO Frequency Plan** (LLRF9/476, nominal f_RF = 476.3052 MHz):
+
+| Signal | Ratio to f_RF | Frequency (MHz) |
+|--------|--------------|-----------------|
+| RF Reference | 1 | 476.3052 |
+| IF | 1/12 | 39.6921 |
+| Local Oscillator | 11/12 | 436.6131 |
+| ADC Clock | 11/48 | 109.1533 |
+| DAC Clock | 11/24 | 218.3065 |
+
+**Two-unit SPEAR3 configuration**:
+- **Unit 1** (Field Control & Tuner): BRD1 outputs klystron drive (thermally stabilized); monitors cavity probes A/B with PI control. BRD2 monitors probes C/D with integral control. BRD3 monitors circulator/load forward powers.
+- **Unit 2** (Monitoring & Interlocks): BRD1 monitors cavity D probe + drive forward. BRD2 monitors klystron reflected/forward. BRD3 monitors all 4 cavity reflected powers. Interlock output to Interface Chassis on reflected power events.
+
+> **Source**: `Designs/0_PHYSICAL_DESIGN_REPORT.md`, Sections 5.2–5.5
+
+### 1.6 Fundamental Design Challenge: Beam Loading
 
 The dominant design driver for the PEP-II LLRF system is **heavy beam loading**. At high beam currents, the beam-induced voltage in the cavity can exceed the generator-supplied voltage, creating:
 
@@ -97,7 +155,7 @@ The LLRF feedback system addresses these by:
 - **Compensating klystron gain/phase variations** as power demand changes (baseband modulator / gain tracking)
 - **Canceling power supply ripple** that modulates klystron output (ripple loop)
 
-### 1.5 Signal Processing Philosophy: IQ Baseband
+### 1.7 Signal Processing Philosophy: IQ Baseband
 
 The PEP-II LLRF system uses **In-phase / Quadrature (IQ) baseband signal processing** throughout. All RF signals at 476 MHz are heterodyned down to baseband using a common Local Oscillator at 471.1 MHz (PEP-II) or equivalent frequency, producing IQ signal pairs that represent the amplitude and phase of each RF signal.
 
