@@ -1,8 +1,8 @@
 # SPEAR3 LLRF Upgrade System — Physical Design Report
 
-**Document ID**: SPEAR3-LLRF-PDR-001
-**Revision**: R0
-**Date**: March 3 2026
+**Document ID**: SPEAR3-LLRF-PDR-001 Rev 1
+**Revision**: R1
+**Date**: March 17, 2026
 **Author**: RF Department, SSRL/Accelerator
 **Classification**: Top-Level System Design Reference
 
@@ -24,7 +24,7 @@ This document is intended to serve as the entry point for the detailed engineeri
 4. [RF Plant — Retained Physical Infrastructure](#4-rf-plant--retained-physical-infrastructure)
 5. [Subsystem 1: LLRF Controller](#5-subsystem-1-llrf-controller)
 6. [Subsystem 2: High Voltage Power Supply (HVPS)](#6-subsystem-2-high-voltage-power-supply-hvps)
-7. [Subsystem 3: Klystron Machine Protection System (Kly MPS)](#7-subsystem-3-klystron-machine-protection-system-kly-mps)
+7. [Subsystem 3: RF Machine Protection System (RF MPS)](#7-subsystem-3-rf-machine-protection-system-rf-mps)
 8. [Subsystem 4: Interface Chassis](#8-subsystem-4-interface-chassis)
 9. [Subsystem 5: Personnel Protection System (PPS) Interface](#9-subsystem-5-personnel-protection-system-pps-interface)
 10. [Subsystem 6: Tuner Control System](#10-subsystem-6-tuner-control-system)
@@ -43,25 +43,25 @@ This document is intended to serve as the entry point for the detailed engineeri
 
 ## 1. Executive Summary
 
-The SPEAR3 RF station provides 476 MHz RF power to the SPEAR3 storage ring at the Stanford Synchrotron Radiation Lightsource (SSRL). A single klystron, driven at approximately 1 MW, feeds four single-cell RF cavities through a waveguide distribution network. The combined cavity gap voltage is approximately 3.2 MV.
+The SPEAR3 RF station provides 476.3 MHz RF power to the SPEAR3 storage ring at the Stanford Synchrotron Radiation Lightsource (SSRL). A single klystron, driven at approximately 800 kW, feeds four single-cell RF cavities through a waveguide distribution network. The combined cavity gap voltage is approximately 2.85 MV.
 
-The LLRF Upgrade Project replaces the entire control electronics chain — not merely the low-level RF controller, but also the klystron machine protection system (Kly MPS), HVPS controller, tuner motor controllers, and supporting infrastructure. The project also introduces several new subsystems that did not exist in the legacy system: an Interface Chassis for centralized hardware interlock coordination, a Waveform Buffer System for extended signal monitoring and klystron collector protection, an optical arc detection system, and a modernized klystron cathode heater controller.
+The LLRF Upgrade Project replaces the entire control electronics chain — not merely the low-level RF controller, but also the RF machine protection system (RF MPS), HVPS controller, tuner motor controllers, and supporting infrastructure. The project also introduces several new subsystems that did not exist in the legacy system: an Interface Chassis for centralized hardware interlock coordination, a Waveform Buffer System for extended signal monitoring and klystron collector protection, an optical arc detection system, and a modernized klystron cathode heater controller.
 
 ### Key System Parameters
 
 | Parameter | Value |
 |-----------|-------|
 | RF Frequency | ~476.3 MHz |
-| Total Gap Voltage | ~3.2 MV (sum of 4 cavities) |
-| Cavity Gap Voltage | ~800 kV each |
-| Klystron Power | ~1.5 MW rated, ~1 MW typical operating |
+| Total Gap Voltage | ~2.85 MV (sum of 4 cavities) |
+| Cavity Gap Voltage | ~712 kV each |
+| Klystron Power | ~1.5 MW rated, ~800 kW typical operating |
 | HVPS Voltage | up to ~90 kV (negative polarity) |
-| HVPS Operating Voltage | ~74.5 kV at 500 mA beam |
+| HVPS Operating Voltage | ~74 kV at 500 mA beam |
 | Drive Power | ~29 W nominal |
 | Number of Cavities | 4 (single-cell, individual tuners) |
 | LLRF9 Units | 2 active, 2 spare (4 purchased) |
 
-> **Source**: Gap voltage and beam current data from LLRF9 commissioning measurements (`llrf/tests/llrf9Tests.tex`, J. Sebek, 2021). Klystron rated power from HVPS hazard documentation (`hvps/documentation/procedures/spear3HvpsHazards.tex`).
+> **Source**: Gap voltage and beam current data from LLRF9 commissioning measurements (`llrf/tests/llrf9Tests.pdf`, J. Sebek, 2021). Klystron rated power from HVPS hazard documentation (`hvps/documentation/procedures/spear3HvpsHazards.tex`).
 
 ### Upgrade Drivers
 
@@ -69,7 +69,7 @@ The LLRF Upgrade Project replaces the entire control electronics chain — not m
 2. **PPS compliance** — Legacy design routes PPS wiring through HVPS controller and has PLC in the safety chain
 3. **Performance improvement** — Digital FPGA-based feedback (270 ns loop delay) replaces analog processing
 4. **Diagnostics** — 16k-sample waveform capture, circular buffers, first-fault detection, and collector protection
-5. **Maintainability** — Modern hardware, comprehensive documentation, Python/EPICS software
+5. **Maintainability** — Modern hardware, comprehensive documentation, EPICS/MATLAB software
 
 
 ---
@@ -95,7 +95,7 @@ The legacy SPEAR3 LLRF system was originally designed for the PEP-II B-Factory (
   - See: `llrf/legacyLLRF/Makefile`, `llrf/legacyLLRF/rf_dac_loop_pvs.h`
 - **HVPS Controller**: Allen-Bradley SLC-500 PLC (processor: AB-1747-L532, scanner: AB-1747-DCM) with Enerpro SCR gate driver boards, housed in a Hoffman NEMA enclosure in Building B118
   - See: `pps/HoffmanBoxPPSWiring.docx`
-- **Klystron Machine Protection System (Kly MPS)**: Allen-Bradley PLC-5 (1771 series), since converted to ControlLogix 1756 (hardware assembled, software written, tested without RF power). Scope: klystron/RF station equipment protection only — distinct from the facility-wide SPEAR MPS which provides an external permit input.
+- **RF Machine Protection System (RF MPS)**: Allen-Bradley PLC-5 (1771 series), since converted to ControlLogix 1756 (hardware assembled, software written, tested without RF power). Scope: klystron/RF station equipment protection only — distinct from the facility-wide SPEAR MPS which provides an external permit input.
   - See: `llrf/documentation/mpsWiringDiagrams/`, `hvps/architecture/designNotes/RFSystemMPSRequirements.docx`
 - **Tuner Motor Controllers**: Allen-Bradley 1746-HSTP1 stepper modules with Superior Electric SS2000MD4-M Slo-Syn PWM drivers (obsolete); stepper motors are Superior Electric Slo-Syn M093-FC11 (NEMA 34D)
   - See: `llrf/tuners/SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf`, `llrf/tuners/SLO-SYN.pdf`
@@ -114,7 +114,7 @@ The upgraded system replaces all control electronics while retaining the RF plan
                  └───────────────────────────────┬───────────────────────────────┘
                                                  │ EPICS Channel Access
                  ┌───────────────────────────────┴───────────────────────────────┐
-                 │                  PYTHON/EPICS COORDINATOR                     │
+                 │                  EPICS (Soft IOC) COORDINATOR                     │
                  │  State Machine │ HVPS Loop │ Tuner Mgr │ Fault Mgr │ Diag     │
                  └───────────────────────────────┬───────────────────────────────┘
                                                  │ EPICS CA (~1 Hz supervisory)
@@ -122,7 +122,7 @@ The upgraded system replaces all control electronics while retaining the RF plan
 │                     Control HARDWARE SUBSYSTEMS                       │  │              HVPS                 │
 │                                                                       │  │   (High Voltage Power Supply:     │
 │  ┌──────────┐  ┌──────────┐  ┌─────────────────┐  ┌─────────────┐     │  │    transformer, rectifier,        │
-│  │ LLRF9 #1 │  │ LLRF9 #2 │  │   KLY MPS PLC   │  │  HVPS PLC   ├─────│─►│  crowbar, thyristor stacks,       │
+│  │ LLRF9 #1 │  │ LLRF9 #2 │  │   RF MPS PLC   │  │  HVPS PLC   ├─────│─►│  crowbar, thyristor stacks,       │
 │  │ (Field   │  │ (Monitor │  │  CtrlLogix 1756 │  │ CompactLogix│     │  |  grounding tank, Ross switch)     │
 │  │  Control │  │  + Intlk)│  │                 │  │             │     │  └────────────────┬──────────────────┘
 │  │  + Tuner)│  │          │  └────────┬────────┘  └──────┬──────┘     │                   │ PPS interlock signals
@@ -136,7 +136,7 @@ The upgraded system replaces all control electronics while retaining the RF plan
 │  ┌────┴─────┐  ┌─────┴───┐  ┌───────┴────┐  ┌──────────┴─────┐        │  └────────────────┬──────────────────┘
 │  │ Waveform │  │   Arc   │  │   Motor    │  │    Heater      │        │                   │ PPS chain signals
 │  │ Buffer   │  │ Detect. │  │    Ctrl    │  │   Controller   │        │                   ▼
-│  │ System   │  │         │  │  (4-axis)  │  │  (SCR-based)   │        │  ┌───────────────────────────────────┐
+│  │ System   │  │         │  │  (4-axis)  │  │  (Prog. AC supply)   │        │  ┌───────────────────────────────────┐
 │  └──────────┘  └─────────┘  └────────────┘  └────────────────┘        │  │           SPEAR PPS               │
 └──────────────────────────────┬────────────────────────────────────────┘  │  (Personnel Protection System)    │
                                │ machine protection interlock signals      └───────────────────────────────────┘
@@ -148,9 +148,9 @@ The upgraded system replaces all control electronics while retaining the RF plan
 ```
 
 
-**Key Architectural Principle**: The Interface Chassis implements **machine/equipment protection and operational interlocks** (LLRF/HVPS/Kly MPS coordination), while personnel safety (PPS) functions are implemented exclusively in a completely separate, dedicated **PPS Interface Box**. These two safety-related subsystems are architecturally independent:
+**Key Architectural Principle**: The Interface Chassis implements **machine/equipment protection and operational interlocks** (LLRF/HVPS/RF MPS coordination), while personnel safety (PPS) functions are implemented exclusively in a completely separate, dedicated **PPS Interface Box**. These two safety-related subsystems are architecturally independent:
 
-- **Interface Chassis (Machine/Equipment Protection)**: First-fault detection, optocoupler isolation, fiber I/O for LLRF9/HVPS/Kly MPS/orbit coordination and other machine-protection interlocks
+- **Interface Chassis (Machine/Equipment Protection)**: First-fault detection, optocoupler isolation, fiber I/O for LLRF9/HVPS/RF MPS/orbit coordination and other machine-protection interlocks
 - **PPS Interface Box (Personnel Safety / PPS)**: Separate Bud enclosure with 4 relays, status LEDs, PPS-lockable connector for K4 relay and Ross switch control
 
 ### 2.3 What Stays, What Changes, What Is New
@@ -167,22 +167,22 @@ The upgraded system replaces all control electronics while retaining the RF plan
 
 **Replaced / Upgraded**:
 - LLRF Controller: Analog RFP → Dimtel LLRF9/476 (×2 units)
-- Kly MPS: PLC-5 1771 → ControlLogix 1756
-- HVPS Controller: SLC-500 → CompactLogix PLC + new Enerpro boards + redesigned analog regulator
+- RF MPS: PLC-5 1771 → ControlLogix 1756
+- HVPS Controller: SLC-500 → CompactLogix PLC + new Enerpro board + redesigned analog regulator
 - Tuner Motor Controllers: AB 1746-HSTP1 + Slo-Syn → Galil DMC-4143 Rev 1.3h 4-axis motion controller (commissioned August 2025, operational)
   - See: `llrf/tuners/galil/functioningGalil20250825SwapABToManual.txt`, `llrf/tuners/galil/firstMotion2024.txt`
-- Control Software: SNL/VxWorks → Python/PyEPICS + LLRF9 internal EPICS IOC
+- Control Software: SNL/VxWorks → EPICS + LLRF9 internal EPICS IOC + MATLAB applications
 - Operator Interface: Legacy EDM panels → modernized panels
 
 **New Subsystems** (did not exist in legacy):
 - Interface Chassis — central hardware interlock coordination hub
 - Waveform Buffer System — 8 RF + 4 HVPS channel extended monitoring
-- Arc Detection — total 10 of Microstep-MIS optical sensors on 4 cavity windows and 1 klystron windown, process chassis
+- Arc Detection — total 12 Microstep-MIS optical sensors: 4 cavity windows, 1 klystron window, 1 circulator, process chassis
 - PPS interface Box
 
 **Enhanced Subsystems** (upgraded from legacy):
-- Klystron Heater Controller — Motor-driven variac → SCR-based with EPICS integration
-- Collector Power Protection — Forward power proxy → Direct DC-RF power calculation in Waveform Buffer System
+- Klystron Heater Controller — Motor-driven variac → Commercial programmable AC supply with EPICS integration via RF MPS
+- Collector Power Protection — Forward power proxy → Waveform Buffer System measures HVPS voltage and current and klystron forward power → Collector power calculation performed in RF MPS
 
 
 ---
@@ -194,11 +194,11 @@ The SPEAR3 RF station spans multiple buildings and locations at SSRL:
 | Location | Equipment | Notes |
 |----------|-----------|-------|
 | **Building B118** (Power Supply Room) | HVPS Controller (Hoffman Box) | HVPS control location |
-| **Building B514** (HVPS Vault) | HVPS Main Tank (transformer, rectifier, inductor, filter caps), Phase Tank (12 thyristor stacks), Crowbar Tank (4 thyristor stacks, output V-divider), Grounding Tank (Danfysik DC-CT, Pearson CT-110, Ross switch) | High-voltage power section; FR3 oil-filled, N₂ blanket |
+| **Building B514** (HVPS Substation) | HVPS Main Tank (transformer, rectifier, inductor, filter caps), Phase Tank (12 thyristor stacks), Crowbar Tank (4 thyristor stacks, output V-divider) | High-voltage power section; FR3 oil-filled, N₂ blanket |
 | **Contactor Disconnect Panel** (Switchgear, adjacent to B514) | Vacuum contactor (Ross HQ3), Contactor controller (Ross HCA-1-A), K4/MX/RR/L1 relays, S5 auxiliary contact | 12.47 kV AC switchgear |
-| **Termination Tank** (near klystron) | HV cable termination, Ross Engineering HV relay | Mineral oil filled |
+| **Termination Tank** (B132, near klystron) | HV cable termination, Ross Engineering HV relay, Danfysik DC-CT, Pearson CT-110 | Mineral oil filled |
 | **Switch-over Tank** (adjacent B514) | HV cable connections between HVPS1/HVPS2 and klystron | FR3 oil filled |
-| **Building B132** (Klystron ) | Klystron, drive amplifier, LLRF9 units, Kly MPS PLC, Interface Chassis, Waveform Buffer, Motion Controller, Arc Detector Chassis, Python coordinator server | Main control electronics location |
+| **Building B132** (Klystron ) | Klystron, drive amplifier, LLRF9 units, RF MPS PLC, Interface Chassis, Waveform Buffer, Motion Controller, Arc Detector Chassis, soft IOC (may be in B137 — TBD confirmed with controls) | Main control electronics location |
 | **SPEAR3 Storage Ring Tunnel** | 4 RF cavities, waveguide distribution, tuner assemblies, arc detection sensors | Radiation area |
 
 ### Cabling Between Locations
@@ -206,10 +206,10 @@ The SPEAR3 RF station spans multiple buildings and locations at SSRL:
 | Cable Run | Cable Type | Conductors | Route |
 |-----------|-----------|------------|-------|
 | B118 → Switchgear (Contactor) | Belden 83715 | 15C #16 Teflon | TS-5 to contactor controller |
-| B118 → Termination Tank (Grounding) | Belding 83709 + Belden 83715 | 9C + 15C #16 Teflon | TS-6 to grounding tank |
+| B118 → Termination Tank (B132, Grounding) | Belden 83709 + Belden 83715 | 9C + 15C #16 Teflon | TS-6 to grounding tank |
 | B118 → B514 (HVPS) | Electrical cable pairs | SCR trigger cables (12 pairs) | Controller to Phase Tank thyristor stacks |
 | B118 → B514 (HVPS) | Fiber optic | SCR ENABLE, CROWBAR, STATUS | Controller to HVPS (upgrade: via Interface Chassis) |
-| B132 → Tunnel | Coax cables | RF signals (forward, reflected, probe) | LLRF inputs from cavities |
+| B132 → Tunnel | Coax cables | RF signals (forward, reflected, probe). Similar forward, reflected power from klystron and circulator load with B132 | LLRF inputs from cavities |
 | B132 → Tunnel | Multi-conductor | Motor power + encoder signals | To tuner assemblies |
 
 ---
@@ -220,7 +220,7 @@ The RF plant is the physical chain that delivers 476 MHz RF power from the klyst
 
 ### 4.1 Klystron
 
-The single klystron is located in Building B132 and operates at approximately 1 MW output power, driven at ~50 W input from the drive amplifier. The klystron cathode is powered by the HVPS at up to ~90 kV (nominal ~74.7 kV at 500 mA beam current). It has a non-full-power collector requiring dedicated protection (see Section 11.3 for upgrade and current implementation in Section 4.5).
+The single klystron is located in Building B132 and operates at approximately 800 kW output power, driven at ~29 W input from the drive amplifier. The klystron cathode is powered by the HVPS at up to ~90 kV (nominal ~74 kV at 500 mA beam current). It has a non-full-power collector requiring dedicated protection (see Section 11.3 for upgrade and current implementation in Section 4.5).
 
 ### 4.2 Waveguide Distribution
 
@@ -231,7 +231,7 @@ The klystron output feeds a waveguide network consisting of:
 
 ### 4.3 RF Cavities
 
-Four single-cell cavities at 476 MHz, each contributing ~800 kV gap voltage for a total of ~3.2 MV. Each cavity has:
+Four single-cell cavities at 476 MHz, each contributing ~712 kV gap voltage for a total of ~2.85 MV. Each cavity has:
 - A cavity probe (monitors internal field amplitude and phase)
 - A forward power coupler
 - A reflected power coupler
@@ -240,7 +240,7 @@ Four single-cell cavities at 476 MHz, each contributing ~800 kV gap voltage for 
 
 ### 4.4 Drive Amplifier
 
-The drive amplifier is located in Building B132 near the klystron and boosts the LLRF9 output signal (~0 dBm) to ~50 W to drive the klystron input. In the upgrade, the LLRF9 Unit 1 output (from the thermally stabilized output chain on Board 1 or Board 2) connects to the drive amplifier input via coax cable. A KAW2051M12 amplifier datasheet is available in `llrf/driveAmp/`.
+The drive amplifier is located in Building B132 near the klystron and boosts the LLRF9 output signal (~0 dBm) to ~29 W to drive the klystron input. In the upgrade, the LLRF9 Unit 1 output (from the thermally stabilized output chain on Board 1 or Board 2) connects to the drive amplifier input via coax cable. A KAW2051M12 amplifier datasheet is available in `llrf/driveAmp/`.
 
 ### 4.5 Legacy Collector Power Protection
 
@@ -265,16 +265,18 @@ The amplitudes of the RF data need to be acquired. The RF signals that are curre
 #### RF Plant Signal Flow
 
 ```
-  (6) Station Ref ────────────────────────────────────────────────────────────────────────────────────────
+                                    RF SIGNAL DISTRIBUTION
+                                    
+  (6) Station Ref ──────────────────────────────────────────────────────────────────────────────────────────────────────
   (5) Kly Drive ──► [Drive Amp] ──► [KLYSTRON] ──(1)Fwd──► [CIRCULATOR] ──(3,4)──► [CIRC LOAD]
-                                      (2) Refl ◄──────────  P1=kly  P2→waveguide
+                                      (2) Refl ◄──────────────  P1=kly  P2→waveguide
                                                                       │
                                                                       ▼
                                                             [MAGIC TEE 1]  (1st split: half power each side)
                                                                P2│       P3│       P4│
                                                                  │         │         └──► [WG LOAD 1] (7,8)
                                                                  │         │
-                                              ───────────────────┘         └───────────────────────
+                                              ──────────────────┘         └─────────────────────────────
                                              │                                                     │
                                              ▼                                                     ▼
                                     [MAGIC TEE 2]  (2nd split)                          [MAGIC TEE 3]  (2nd split)
@@ -286,7 +288,12 @@ The amplitudes of the RF data need to be acquired. The RF signals that are curre
                                    Fwd (9)  Fwd (11)                                   Fwd (17) Fwd (19)
                                   Refl (10) Refl (12)                                 Refl (18) Refl (20)
                                  Probe (13) Probe (14)                               Probe (21) Probe (22)
+
+Signal Numbers: (1) Kly Fwd, (2) Kly Refl, (3) Circ Load Fwd, (4) Circ Load Refl, (5) Kly Drive, (6) Station Ref
+                (7) WG Load 1 Fwd, (8) WG Load 1 Refl, (9-14) Cav A/B signals, (15-16) WG Load 2, (17-22) Cav C/D signals, (23-24) WG Load 3
 ```
+
+> **Figure 2 — RF Signal Distribution** (see `Designs/docx/drawings/PRD_drawings.vsdx`, page Fig2_RF signals)
 
 > **Note on waveguide loads**: By the magic-tee symmetry, equal reflected power from the two cavities feeding a magic tee exits port 4 into the attached waveguide load, not back toward the klystron. The circulator load absorbs power that the circulator does not properly direct to the cavities along with any net reflection returning from the first magic tee.
 
@@ -296,15 +303,15 @@ The amplitudes of the RF data need to be acquired. The RF signals that are curre
 |---|--------|--------------|-------|
 | 1 | Klystron Output Forward Power | LLRF9 Unit 2 BRD2 | RF power at the klystron output traveling toward the circulator; primary measure of station RF output level. |
 | 2 | Klystron Output Reflected Power | LLRF9 Unit 2 BRD2 | RF power reflected back into the klystron output port from the load chain; should be near zero; used for klystron protection. |
-| 3 | Circulator Load Forward Power | Waveform Buffer Ch1 | Power delivered to the circulator load (circulator port 3); absorbs power the circulator does not properly direct to the cavities plus any net reflection returning from the waveguide network. |
+| 3 | Circulator Load Forward Power | LLRF9 Unit 1 BRD3 | Power delivered to the circulator load (circulator port 3); absorbs power the circulator does not properly direct to the cavities plus any net reflection returning from the waveguide network. |
 | 4 | Circulator Load Reflected Power | Waveform Buffer Ch2 | Power reflected from the circulator load back into the circulator; indicates load match quality. |
 | 5 | Klystron Drive Power | LLRF9 Unit 2 BRD1 | Input drive signal level to the klystron from the drive amplifier; sets the klystron gain and operating point. |
 | 6 | Station Reference Power | Waveform Buffer Ch3 | Monitor of the 476 MHz reference signal level distributed to the LLRF system; loss of this signal indicates a reference chain fault. |
-| 7 | Waveguide Load 1 Forward Power | LLRF9 Unit 1 BRD3 | Power entering WG Load 1 at port 4 of Magic Tee 1; absorbs the combined out-of-phase reflections from the two second-layer magic tees that make it back to Magic Tee 1. |
+| 7 | Waveguide Load 1 Forward Power | Waveform Buffer (slow) | Power entering WG Load 1 at port 4 of Magic Tee 1. Rarely exceeds 2 kW — suitable for slow monitoring only. |
 | 8 | Waveguide Load 1 Reflected Power | Waveform Buffer Ch4 | Power reflected from WG Load 1 back into Magic Tee 1; indicates load match quality. |
-| 9 | Cavity A Forward Power | LLRF9 Unit 1 BRD1 | RF power traveling into Cavity A from Magic Tee 2; used to monitor power distribution balance across cavities. |
+| 9 | Cavity A Forward Power | LLRF9 Unit 1 BRD1 | RF power traveling into Cavity A from Magic Tee 2; used to monitor power distribution balance and provide reference phase for cavity probe phase measurement. |
 | 10 | Cavity A Reflected Power | LLRF9 Unit 2 BRD3 | Power reflected from Cavity A back into the waveguide; elevated reflection indicates cavity detuning or mismatch. |
-| 11 | Cavity B Forward Power | LLRF9 Unit 1 BRD2 | RF power traveling into Cavity B from Magic Tee 2; compared with Cavity A forward to verify magic-tee balance. |
+| 11 | Cavity B Forward Power | LLRF9 Unit 1 BRD2 | RF power traveling into Cavity B from Magic Tee 2; compared with Cavity A forward to verify magic-tee balance and provide reference phase for cavity probe phase measurement. |
 | 12 | Cavity B Reflected Power | LLRF9 Unit 2 BRD3 | Power reflected from Cavity B; monitored for detuning and arc detection. |
 | 13 | Cavity A Probe Signal | LLRF9 Unit 1 BRD1 | Electric field sampled by Cavity A's internal pickup probe; direct measure of the accelerating voltage amplitude and phase; primary LLRF fast feedback and tuner control input for Cavity A. |
 | 14 | Cavity B Probe Signal | LLRF9 Unit 1 BRD1 | Electric field from Cavity B's internal probe; used in the LLRF vector-sum feedback and Cavity B tuner control. |
@@ -349,11 +356,11 @@ Two Dimtel LLRF9/476 units replace the entire VXI-based LLRF system (four units 
 
 | Signal | Ratio to f_rf | Frequency (MHz) |
 |--------|--------------|------------------|
-| Reference (f_rf) | 1 | 476.000 |
-| IF | 1/12 | 39.667 |
-| Local Oscillator | 11/12 | 436.333 |
-| ADC Clock | 11/48 | 109.083 |
-| DAC Clock | 11/24 | 218.167 |
+| Reference (f_rf) | 1 | 476.3052 |
+| IF | 1/12 | 39.6921 |
+| Local Oscillator | 11/12 | 436.6131 |
+| ADC Clock | 11/48 | 109.1533 |
+| DAC Clock | 11/24 | 218.3065 |
 
 **Auxiliary I/O per unit**:
 - 8 slow ADC channels (12-bit, selectable ranges, galvanically isolated)
@@ -433,23 +440,59 @@ The HVPS converts 12.47 kV RMS 3-phase AC to regulated DC high voltage for the k
 
 **Power chain**:
 ```
-12.47 kV 3φ → Phase-Shift Xfmr (3.5 MVA, ±15°) → 2 Rectifier Xfmrs (1.5 MVA each)
-→ 12-Pulse Thyristor Bridges (12 stacks × 14 Powerex T8K7 each)
-→ Filter Inductors (2 × 0.3 H) → 4 Secondary Rectifiers (series)
-→ Crowbar Tank (4 thyristor stacks, fiber-optic triggered)
-→ −90 kV DC → Klystron
+                    12.47 kV 3-Phase AC Input
+                              │
+                              ▼
+                    ┌─────────────────────┐
+                    │   Phase-Shift       │
+                    │   Transformer       │
+                    │   (3.5 MVA, ±15°)   │
+                    └─────────┬───────────┘
+                              │
+                    ┌─────────▼───────────┐
+                    │  2 Rectifier Xfmrs  │
+                    │   (1.5 MVA each)    │
+                    └─────────┬───────────┘
+                              │
+                    ┌─────────▼───────────┐
+                    │  12-Pulse Thyristor │
+                    │     Bridges         │
+                    │ (12 stacks × 14     │
+                    │  Powerex T8K7)      │
+                    └─────────┬───────────┘
+                              │
+                    ┌─────────▼───────────┐
+                    │  Filter Inductors   │
+                    │    (2 × 0.3 H)      │
+                    └─────────┬───────────┘
+                              │
+                    ┌─────────▼───────────┐
+                    │ 4 Secondary         │
+                    │ Rectifiers (series) │
+                    └─────────┬───────────┘
+                              │
+                    ┌─────────▼───────────┐
+                    │   Crowbar Tank      │
+                    │ (4 thyristor stacks,│
+                    │ fiber-optic trigger)│
+                    └─────────┬───────────┘
+                              │
+                              ▼
+                        −90 kV DC → Klystron
 ```
+
+> **Figure 3 — HVPS Architecture** (see `Designs/docx/drawings/PRD_drawings.vsdx`, page Fig3_HPVS)
 
 | Parameter | Value |
 |-----------|-------|
 | Maximum output voltage | −90 kV DC |
 | Maximum output current | 27 A |
 | Maximum output power | 2.5 MW |
-| Nominal operating voltage | −74.7 kV |
+| Nominal operating voltage | −74.4 kV |
 | Nominal operating current | 22.0 A |
 | Rectifier topology | 12-pulse, thyristor phase-controlled |
 | Number of HVPSs | 2 (SPEAR1 active, SPEAR2 warm spare) |
-- **Nominal operatiing beam current**: 500 mA
+- **Nominal operating beam current**: 500 mA
 
 The power section, including transformers, thyristor stacks, filter inductors, secondary rectifiers, crowbar, oil system, and all power cabling, is retained unchanged.
 
@@ -520,7 +563,7 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
 | Klystron Arc | Grounding tank + LHS trigger board detection | BNC-12 input |
 | Transformer Arc | HVPS + RHS trigger board detection | BNC-0 input |
 | Crowbar Status | Thyristor pulse detection | Enerpro board |
-| PPS Chain Status | PPS 1 and PPS 2 availability | Slot-6 IN14/IN15 |
+| PPS Chain Status | PPS 1 and PPS 2 availability (upgraded: both chains via relay aux contact) | Slot-6 IN14/IN15 |
 | SCR 1/2 Firing | Left/right side thyristor trigger status | Enerpro monitoring |
 | AC Current | Input current measurement | Transformer monitoring |
 | Temperature/Oil | SCR/air/transformer temperatures, oil level | Slot-3 thermocouples |
@@ -545,18 +588,18 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
 > **Protection philosophy**: Any single source can disable SCR triggers or fire crowbar; redundancy ensures protection even with single-point failures. Filter inductor stored energy is safely discharged through Enerpro logic and secondary rectifiers.
 > 
 > **Source**: `hvps/architecture/designNotes/RFSystemMPSRequirements.docx`
-- **Python Coordinator** (EPICS/Ethernet): Voltage setpoint, readbacks, fault status
+- **EPICS/MATLAB Coordinator** (EPICS/Ethernet): Voltage setpoint, readbacks, fault status
 - **Waveform Buffer System**: HVPS voltage, current, inductor voltages monitored on 4 dedicated channels
 - **Switchgear**: Existing field cables to vacuum contactor controller and grounding tank
 
 ---
-## 7. Subsystem 3: Klystron Machine Protection System (Kly MPS)
+## 7. Subsystem 3: RF Machine Protection System (RF MPS)
 
-> **Scope clarification**: The Kly MPS is the klystron/RF station equipment protection PLC. It is distinct from the facility-wide **SPEAR MPS**, which is an external system that provides a permit input signal to the Kly MPS via the Interface Chassis.
+> **Scope clarification**: The RF MPS is the klystron/RF station equipment protection PLC. It is distinct from the facility-wide **SPEAR MPS**, which is an external system that provides a permit input signal to the RF MPS via the Interface Chassis.
 
 ### 7.1 Purpose and Protection Philosophy
 
-The Klystron Machine Protection System (Kly MPS) is the subsystem-level protection controller for the SPEAR3 RF station. Its purpose is to aggregate fault status from all RF subsystems and external safety systems (including the SPEAR MPS permit), manage the overall klystron/RF permit, and coordinate fault recovery.
+The RF Machine Protection System (RF MPS) is the subsystem-level protection controller for the SPEAR3 RF station. Its purpose is to aggregate fault status from all RF subsystems and external safety systems (including the SPEAR MPS permit), manage the overall klystron/RF permit, and coordinate fault recovery.
 
 The protection philosophy, as defined in the RF system MPS requirements (`hvps/architecture/designNotes/RFSystemMPSRequirements.docx`), is:
 
@@ -565,37 +608,37 @@ The protection philosophy, as defined in the RF system MPS requirements (`hvps/a
 3. **Fail-safe design** — all permits are active-high so that a broken cable or lost signal removes the permit.
 4. **Graceful shutdown** — when upstream elements trip, downstream elements are notified so they can shut down in an orderly fashion.
 
-The Kly MPS does **not** directly control the LLRF9 or HVPS hardware. Instead, it provides permit and control signals to the **Interface Chassis** (Section 8), which performs the fast hardware AND-logic and drives the actual interlock outputs to the LLRF9 and HVPS controller. This separation ensures that hardware interlock response times remain at the microsecond scale (Interface Chassis), while the Kly MPS operates at PLC scan rates (~milliseconds) for fault aggregation, logging, and coordination.
+The RF MPS does **not** directly control the LLRF9 or HVPS hardware. Instead, it provides permit and control signals to the **Interface Chassis** (Section 8), which performs the fast hardware AND-logic and drives the actual interlock outputs to the LLRF9 and HVPS controller. This separation ensures that hardware interlock response times remain at the microsecond scale (Interface Chassis), while the RF MPS operates at PLC scan rates (~milliseconds) for fault aggregation, logging, and coordination.
 
 ### 7.2 Legacy System
 
-The legacy Kly MPS uses an **Allen-Bradley PLC-5** processor with **1771-series I/O modules**. It aggregates interlock signals from the RF system (via distributed analog modules and direct wiring), the HVPS, and external sources (SPEAR MPS permit, orbit interlock), and manages the RF permit chain.
+The legacy RF MPS uses an **Allen-Bradley PLC-5** processor with **1771-series I/O modules**. It aggregates interlock signals from the RF system (via distributed analog modules and direct wiring), the HVPS, and external sources (SPEAR MPS permit, orbit interlock), and manages the RF permit chain.
 
 In the legacy system, interlock coordination was distributed across analog modules, PLC I/O, and direct point-to-point wiring with no central coordination point. The PLC-5 communicated with the EPICS control system via a 1771-DCM scanner module.
 
-> **Legacy Kly MPS wiring diagrams**: 33 sheets in `llrf/documentation/mpsWiringDiagrams/` (drawings wd3403300200 through wd3403303400).
+> **Legacy RF MPS wiring diagrams**: 33 sheets in `llrf/documentation/mpsWiringDiagrams/` (drawings wd3403300200 through wd3403303400).
 
 ### 7.3 Upgraded System — ControlLogix 1756
 
-The Kly MPS PLC is upgraded from PLC-5 to **Allen-Bradley ControlLogix 1756** platform using a Rockwell Automation conversion kit. The ControlLogix platform provides modern Ethernet/IP communication, faster scan times, and long-term vendor support.
+The RF MPS PLC is upgraded from PLC-5 to **Allen-Bradley ControlLogix 1756** platform using a Rockwell Automation conversion kit. The ControlLogix platform provides modern Ethernet/IP communication, faster scan times, and long-term vendor support.
 
 **Status**: Hardware assembled, software written, tested on SPEAR3 without RF power. Ready for EPICS IOC development and system integration.
 
-### 7.4 Kly MPS Outputs to Interface Chassis
+### 7.4 RF MPS Outputs to Interface Chassis
 
-In the upgraded system, the Kly MPS communicates with the Interface Chassis via digital signals. These are the **only** direct hardware outputs from the Kly MPS PLC to the interlock system:
+In the upgraded system, the RF MPS communicates with the Interface Chassis via digital signals. These are the **only** direct hardware outputs from the RF MPS PLC to the interlock system:
 
 | Output Signal | Type | Description |
 |---------------|------|-------------|
-| Kly MPS Summary Permit | Digital | Global RF permit from the Kly MPS. One of several AND-gate inputs in the Interface Chassis. When removed, the Interface Chassis removes LLRF9 Enable and HVPS SCR ENABLE. |
-| Kly MPS Heartbeat | Digital | Watchdog signal. If the Interface Chassis stops receiving the heartbeat (indicating Kly MPS PLC failure or communication loss), it removes all output permits. |
-| Kly MPS Reset | Digital | Clears all latched faults in the Interface Chassis first-fault register simultaneously. Required to restore system permits after a fault. |
+| RF MPS Summary Permit | Digital | Global RF permit from the RF MPS. One of several AND-gate inputs in the Interface Chassis. When removed, the Interface Chassis removes LLRF9 Enable and HVPS SCR ENABLE. |
+| RF MPS Heartbeat | Digital | Watchdog signal. If the Interface Chassis stops receiving the heartbeat (indicating RF MPS PLC failure or communication loss), it removes all output permits. |
+| RF MPS Reset | Digital | Clears all latched faults in the Interface Chassis first-fault register simultaneously. Required to restore system permits after a fault. |
 
-**Important**: The Kly MPS does **not** directly drive the LLRF9 Enable, HVPS SCR ENABLE, or HVPS KLYSTRON CROWBAR signals. Those are Interface Chassis outputs, driven by the AND-logic of all input permits (see Section 8). The Kly MPS contributes its Summary Permit as one input to that AND gate.
+**Important**: The RF MPS does **not** directly drive the LLRF9 Enable, HVPS SCR ENABLE, or HVPS KLYSTRON CROWBAR signals. Those are Interface Chassis outputs, driven by the AND-logic of all input permits (see Section 8). The RF MPS contributes its Summary Permit as one input to that AND gate.
 
-### 7.5 Kly MPS Inputs from Interface Chassis
+### 7.5 RF MPS Inputs from Interface Chassis
 
-The Kly MPS receives comprehensive status from the Interface Chassis via a multi-conductor digital cable:
+The RF MPS receives comprehensive status from the Interface Chassis via a multi-conductor digital cable:
 
 | Input Signal | Description |
 |--------------|-------------|
@@ -603,35 +646,35 @@ The Kly MPS receives comprehensive status from the Interface Chassis via a multi
 | All output permit states | Status of every Interface Chassis output (LLRF9 Enable, HVPS SCR ENABLE, HVPS CROWBAR) |
 | First-fault register | Identifies the initiating fault source when multiple faults cascade. Hardware-latched at the moment of initial fault detection. |
 
-This information allows the Kly MPS to:
+This information allows the RF MPS to:
 - Determine which subsystem caused a trip
 - Log complete fault histories with timestamps
-- Report detailed status to the Python/EPICS coordinator for operator diagnostics
+- Report detailed status to the EPICS/MATLAB coordinator for operator diagnostics
 
-### 7.6 Kly MPS Role in the Protection Chain
+### 7.6 RF MPS Role in the Protection Chain
 
-The RF system implements a layered protection architecture. The Kly MPS operates at **Layer 3** (PLC scan rate, ~milliseconds):
+The RF system implements a layered protection architecture. The RF MPS operates at **Layer 3** (PLC scan rate, ~milliseconds):
 
 | Protection Layer | Subsystem | Response Time | Function |
 |------------------|-----------|---------------|----------|
 | Layer 1 | LLRF9 FPGA | <1 μs | RF overvoltage interlocks, baseband window comparators, DAC zeroing, RF switch |
 | Layer 2 | Interface Chassis | <1 μs | Hardware AND-logic, first-fault latching, HVPS fiber-optic control, LLRF9 enable |
-| Layer 3 | **Kly MPS PLC** | **~ms (PLC scan)** | **Fault aggregation, permit management, reset coordination, event logging** |
-| Layer 4 | Python coordinator | ~1 Hz | State machine, supervisory control, operator interface, auto-recovery |
+| Layer 3 | **RF MPS PLC** | **~ms (PLC scan)** | **Fault aggregation, permit management, reset coordination, event logging** |
+| Layer 4 | EPICS/MATLAB coordinator | ~1 Hz | State machine, supervisory control, operator interface, auto-recovery |
 
-The Kly MPS functions include:
+The RF MPS functions include:
 - Aggregating fault status from all RF station subsystems (via Interface Chassis digital status lines)
 - Receiving the SPEAR MPS permit as one of the AND-gate inputs via the Interface Chassis
-- Providing the Kly MPS Summary Permit to the Interface Chassis AND-gate
+- Providing the RF MPS Summary Permit to the Interface Chassis AND-gate
 - Sending the heartbeat watchdog signal to the Interface Chassis
 - Issuing the reset signal to the Interface Chassis to clear latched faults after a trip
 - Logging fault events with timestamps for post-mortem analysis
-- Providing redundant collector power calculation (from Waveform Buffer System data sent to Kly MPS for independent verification)
-- Reporting complete system status to the Python/EPICS coordinator
+- Providing redundant collector power calculation (from Waveform Buffer System data sent to RF MPS for independent verification)
+- Reporting complete system status to the EPICS/MATLAB coordinator
 
 ### 7.7 EPICS Interface
 
-The Kly MPS ControlLogix PLC will provide an EPICS interface for operator monitoring and diagnostics. The PV namespace is `SRF1:MPS:`. Key PVs include:
+The RF MPS ControlLogix PLC will provide an EPICS interface for operator monitoring and diagnostics. The PV namespace is `SRF1:MPS:`. Key PVs include:
 
 | PV | Type | Description |
 |----|------|-------------|
@@ -640,7 +683,7 @@ The Kly MPS ControlLogix PLC will provide an EPICS interface for operator monito
 | `SRF1:MPS:FAULTS:FIRST` | ENUM | First-fault identification (from Interface Chassis) |
 | `SRF1:MPS:FAULTS:COUNT` | INTEGER | Accumulated fault event count |
 
-The Python coordinator reads these PVs to:
+The EPICS/MATLAB coordinator reads these PVs to:
 - Determine whether the MPS permit is active before allowing state transitions (e.g., OFF → STANDBY → ON)
 - Force a transition to OFF state if MPS permit is lost during operation
 - Display fault summaries and first-fault information to operators
@@ -649,9 +692,9 @@ The Python coordinator reads these PVs to:
 
 | Interface Partner | Signal Direction | Signals | Medium |
 |-------------------|-----------------|---------|--------|
-| **Interface Chassis** | KLY MPS → IC | Summary Permit, Heartbeat, Reset | Digital (multi-conductor cable) |
+| **Interface Chassis** | RF MPS → IC | Summary Permit, Heartbeat, Reset | Digital (multi-conductor cable) |
 | **Interface Chassis** | IC → MPS | All input/output states, first-fault register | Digital (multi-conductor cable) |
-| **Python Coordinator** | Bidirectional | Permit status, fault history, reset commands | EPICS Channel Access (Ethernet) |
+| **EPICS/MATLAB Coordinator** | Bidirectional | Permit status, fault history, reset commands | EPICS Channel Access (Ethernet) |
 
 **Note**: External safety systems (SPEAR MPS permit, orbit interlock) connect to the **Interface Chassis** directly, not to the MPS PLC. The MPS receives their status indirectly via the Interface Chassis digital status lines. This design ensures that external safety permits participate in the fast hardware AND-logic (<1 μs) within the Interface Chassis, rather than being limited to PLC scan rates.
 
@@ -793,7 +836,7 @@ The tuner motor controller is being replaced with a modern motion controller. Th
 
 **Upgraded tuner control loop**:
 1. LLRF9 measures cavity probe phase relative to station reference (10 Hz, sub-degree resolution)
-2. Python coordinator processes phase data and computes motor commands
+2. EPICS/MATLAB coordinator processes phase data and computes motor commands
 3. Motor commands sent via EPICS motor records to motion controller
 4. Motion controller drives stepper motors
 
@@ -816,7 +859,7 @@ The load angle offset loop is a supervisory function that balances gap voltage a
 - **LLRF9 Unit 1**: Provides 10 Hz phase measurements for all 4 cavities (BRD1: Cav 1,2; BRD2: Cav 3,4)
 - **Motion Controller**: EPICS motor records via Ethernet
 - **Stepper Motors**: Power and encoder cables to tunnel (existing field cabling)
-- **Python Coordinator**: Tuner manager module processes phase data, commands motor moves, manages load angle
+- **EPICS/MATLAB Coordinator**: Tuner manager module processes phase data, commands motor moves, manages load angle
 
 ### 10.6 Risk Note
 
@@ -844,7 +887,7 @@ The two LLRF9 units together cover 18 of the 24 monitored RF signals (see [Secti
 
 | Channel | Signal # | Signal | Purpose |
 |---------|----------|---------|---------|
-| 1 | 3 | Circulator Load Forward Power | Monitors power dissipated in circulator load; cross-check of circulator isolation |
+| 1 | 3 | Circulator Load Forward Power | Power delivered to the circulator load (circulator port 3); absorbs power the circulator does not properly direct to the cavities plus any net reflection returning from the waveguide network. Sits at ~20 kW, increases to ~40 kW at full power with no beam — more significant signal than WG Load 1 Fwd. |
 | 2 | 4 | Circulator Load Reflected Power | Indicates circulator load match quality |
 | 3 | 6 | Station Reference Power | Monitors 476 MHz reference level; loss of reference triggers fault |
 | 4 | 8 | Waveguide Load 1 Reflected Power | Monitors WG Load 1 match quality |
@@ -880,7 +923,7 @@ The two LLRF9 units together cover 18 of the 24 monitored RF signals (see [Secti
 - **RF signal inputs**: RF detectors on cavity forward/reflected couplers (signal conditioned)
 - **HVPS signal inputs**: Voltage dividers and current transformers from HVPS
 - **Interface Chassis**: Comparator trip outputs (digital) feed into Interface Chassis permit logic
-- **Python Coordinator** (EPICS): Waveform readout, configuration, collector power trend monitoring
+- **EPICS/MATLAB Coordinator** (EPICS): Waveform readout, configuration, collector power trend monitoring
 
 
 ---
@@ -901,102 +944,126 @@ The arc detection system is a new subsystem that provides optical monitoring of 
 
 ### 12.3 Installation
 
-There are **5 sensors** total:
-- 8 sensors mounted on cavity window viewports (one per cavity: Cav A, B, C, D)
+There are **6 sensors** total (updated from original design):
+- 4 sensors mounted on cavity window viewports (one per cavity: Cav A, B, C, D)
 - 1 sensor mounted on the klystron window
+- 1 sensor monitoring the circulator
 
 Mechanical mounting requires custom adapters for the existing CF flange viewports (see `llrf/arcDetector/Mechanical/Reference/` for viewport specifications). Sensor fibers run to the Microstep-MIS controller unit located in B132.
 
 ### 12.4 Signal Path and Design
 
-The Arc Detection Chassis routes both paths to the Interface Chassis — the fast trip permit on one wire, and the 5-bit fired-detector identification on five separate status lines. This centralizes all arc signal handling in the Interface Chassis, consistent with its role as the hub for all protection signals.
+The Arc Detection Chassis routes both paths to the Interface Chassis — the fast trip permit on one wire, and the 6-bit fired-detector identification on five separate status lines. This centralizes all arc signal handling in the Interface Chassis, consistent with its role as the hub for all protection signals.
 
 ```
-[Cav A sensor] ──┐                               ┌── OR gate ──────► PERMIT input         ─┐
-[Cav B sensor] ──┤                               │   (1 wire,          (fast trip)         │
-[Cav C sensor] ──┼─► [Microstep-MIS Controller] ─┤    hardware)                            ├─► [Interface Chassis]
-[Cav D sensor] ──┤   (5 relay outputs)           │                                         │
-[Kly sensor]  ───┘                               └── 5-bit latch ──► 5 status inputs  ─────┘
-                                                      (latching)       (diagnostic)
+[Cav A sensor]  ───┐                               ┌── OR gate ──────► PERMIT input         ──┐
+[Cav B sensor]  ───┤                               │   (1 wire,          (fast trip)         │
+[Cav C sensor]  ───┼──► [Microstep-MIS Controller] ──┤    hardware)                            ├─► [Interface Chassis]
+[Cav D sensor]  ───┤   (6 relay outputs)           │                                         │
+[Kly sensor]   ───┤                               └── 6-bit latch ──► 6 status inputs  ─────┘
+[Circulator]   ───┘                                    (latching)       (diagnostic)
+                                                Also: Test + Reset signals from Interface Chassis → Arc Detect
 ```
 
-**Fast trip path**: The 5 relay outputs are OR-ed in the Arc Detection Chassis into a single active-high permit signal. Any arc event immediately de-asserts it, entering the Interface Chassis AND-gate alongside all other permits. This path is purely hardware with no encoding latency.
+> **Figure 4 — Arc Detection Signal Path** (see `Designs/docx/drawings/PRD_drawings.vsdx`, page Fig4_arc)
 
-**Diagnostic identification path**: The same 5 relay outputs simultaneously set individual bits in a 5-bit latching register inside the Arc Detection Chassis. All 5 bits are wired as separate status inputs to the Interface Chassis. The Interface Chassis includes these bits in its fault status word, which the Kly MPS PLC reads to determine which sensor fired. The latch holds state until explicitly reset, preserving identity through the fault response sequence.
 
-Routing both paths to the Interface Chassis is cleaner than wiring the diagnostic path directly to the Kly MPS: all arc-related signals are centralized in one place, no extra wiring runs to the MPS PLC are needed, and the Interface Chassis first-fault register can incorporate arc identification alongside all other fault sources.
+**Fast trip path**: The 6 relay outputs are OR-ed in the Arc Detection Chassis into a single active-high permit signal. Any arc event immediately de-asserts it, entering the Interface Chassis AND-gate alongside all other permits. This path is purely hardware with no encoding latency.
+
+**Diagnostic identification path**: The same 6 relay outputs simultaneously set individual bits in a 6-bit latching register inside the Arc Detection Chassis. All 6 bits are wired as separate status inputs to the Interface Chassis. The Interface Chassis includes these bits in its fault status word, which the RF MPS PLC reads to determine which sensor fired. The latch holds state until explicitly reset, preserving identity through the fault response sequence.
+
+Routing both paths to the Interface Chassis is cleaner than wiring the diagnostic path directly to the RF MPS: all arc-related signals are centralized in one place, no extra wiring runs to the MPS PLC are needed, and the Interface Chassis first-fault register can incorporate arc identification alongside all other fault sources.
 
 ### 12.5 Permit Logic
 
 - The single arc permit output is **active-high** (permit present = no arc); any arc event drives it low — consistent with fail-safe convention throughout the Interface Chassis
 - The Interface Chassis removes the RF permit immediately upon any arc event
-- The 5 identification bits in the Interface Chassis fault status word indicate which sensor(s) fired; the latch holds until reset
+- The 6 identification bits in the Interface Chassis fault status word indicate which sensor(s) fired; the latch holds until reset
 - If multiple sensors fire simultaneously, all corresponding bits are set
-- Reset of the latch requires an explicit EPICS command via the Kly MPS after the fault is acknowledged
+- Reset of the latch requires an explicit EPICS command via the RF MPS after the fault is acknowledged
 
 ### 12.6 Interfaces
 
-- **Arc Detection Chassis → Interface Chassis**: 1 permit signal (OR of all 5 sensors, fail-safe active-high) + 5 latched status bits (one per sensor)
-- **Interface Chassis → Kly MPS PLC**: Arc permit state and 5-bit fired-detector ID included in the Interface Chassis fault status word
-- **Kly MPS / EPICS**: Per-sensor trip status PVs, fired-detector identification, event count, latch reset command
-- **Python Coordinator**: Reads arc fault status for operator displays and state machine fault handling
+- **Arc Detection Chassis → Interface Chassis**: 1 permit signal (OR of all 6 sensors, fail-safe active-high) + 6 latched status bits (one per sensor)
+- **Interface Chassis → RF MPS PLC**: Arc permit state and 6-bit fired-detector ID included in the Interface Chassis fault status word
+- **RF MPS / EPICS**: Per-sensor trip status PVs, fired-detector identification, event count, latch reset command
+- **EPICS/MATLAB Coordinator**: Reads arc fault status for operator displays and state machine fault handling
 
 ---
 
 ## 13. Subsystem 9: Klystron Cathode Heater
 
+> **Detailed reference**: `llrf/filamentHeater/sd3403110002.pdf`
 
 ### 13.1 Legacy System
 
-The current klystron heater control system is inherited from the PEP-II era and consists of a motor-driven variac for voltage adjustment, feeding a Kepko 5V/20A power supply (PS-2).
+The system was originally designed for the PEP-II B-Factory program at SLAC by P. Corredoura and the PEP-II LLRF group, and was subsequently adapted for use in the SPEAR3 storage ring RF system at SSRL. It has been in continuous service for over 25 years.
 
-**Current System Architecture**:
-- **Input Power**: 120VAC, Phase C (from Hoffman box wiring)
-- **Control Method**: Motor-driven variac for voltage adjustment
-- **Power Supply**: Kepko 5V/20A (PS-2) with transformer isolation for HV safety
-- **Output**: 5V/20A maximum (~100W typical operation)
-- **Control Interface**: Manual or slow automatic adjustment
-- **EPICS Integration**: Limited monitoring capabilities
+**Key Design Characteristics**:
+- Motor-driven variac providing continuously variable AC voltage
+- 10:1 step-down toroidal isolation transformer (T1)
+- Solid-state relay (SSR) for on/off switching
+- Comprehensive monitoring: AC voltmeter, AC ammeter, current transformer (Texmate CT), and elapsed-time meter
+- Remote control interface via Allen-Bradley (A/B) PLC digital/analog I/O
+- Front-panel indicators (DS1, DS2 green LEDs) and local metering
 
-**System Limitations**:
-- **Slow Response**: Motor-driven variac requires seconds to minutes for adjustment
-- **Limited Precision**: Mechanical variac resolution ~1-2% of full scale
-- **Aging Components**: 25+ year old system with increasing failure rates
-- **Manual Operation**: Requires operator intervention for power adjustments
-- **Poor EPICS Integration**: Limited monitoring and control capabilities
-- **No Automated Sequences**: Manual warm-up and cool-down procedures
-- **Minimal Diagnostics**: No real-time power, voltage, or current monitoring
-- **Maintenance Issues**: Mechanical wear, obsolete parts, calibration drift
+### 13.2 Upgraded System
 
-### 13.2 Upgraded System — SCR-Based Control
-
-The upgrade replaces the variac/motor system with a solid-state SCR controller:
-
-| Parameter | Legacy | Upgraded |
-|-----------|--------|----------|
-| Control method | Motor-driven variac | SCR zero-crossing switching |
-| Response time | Seconds–minutes | <100 ms |
-| Voltage regulation | ±1%? | ±0.1% |
-| Reliability | Mechanical wear | Solid-state (>50,000 hr MTBF) |
-| EPICS integration | Limited | Full (automated sequences) |
+> **Note**: Tony and Ben have advised buying a programmable AC supply from TDK/Lambda, Ametek, Chroma, etc. The parts cost is higher but there is no fabrication cost or effort — a fully COTS solution.
 
 **Upgraded system architecture**:
 ```
-Python/EPICS Coordinator → SCR Controller → Low-Pass Filter (120–180 Hz)
-→ Isolation Transformer → Klystron Cathode Heater (5V/20A)
+                    ┌─────────────────────┐
+                    │  EPICS Coordinator  │
+                    │   (Soft IOC)        │
+                    └─────────┬───────────┘
+                              │ EPICS Channel Access
+                              ▼
+                    ┌─────────────────────┐
+                    │    RF MPS PLC       │
+                    │  (CtrlLogix 1756)   │
+                    │                     │
+                    │ • Setpoint Control  │
+                    │ • RMS Monitoring    │
+                    │ • Permit Logic      │
+                    └─────────┬───────────┘
+                              │ Analog/Ethernet
+                              ▼
+                    ┌─────────────────────┐
+                    │ Programmable AC     │
+                    │ Supply (COTS)       │
+                    │                     │
+                    │ TDK/Lambda, Ametek, │
+                    │ Chroma, etc.        │
+                    └─────────┬───────────┘
+                              │ Clean 60 Hz AC
+                              ▼
+                    ┌─────────────────────┐
+                    │ Isolation           │
+                    │ Transformer         │
+                    │ (10:1 step-down)    │
+                    └─────────┬───────────┘
+                              │ 5V/20A (~500W)
+                              ▼
+                    ┌─────────────────────┐
+                    │  Klystron Cathode   │
+                    │      Heater         │
+                    └─────────────────────┘
 ```
 
-**Key design features**:
-- Zero-crossing SCR switching minimizes harmonic generation
-- LC low-pass filter (fc ≈ 159 Hz) attenuates switching harmonics
-- True RMS voltage/current monitoring (AD637 RMS-to-DC converters)
-- Automated warm-up, standby, and cool-down sequences
+> **Figure 5 — Heater Controller Architecture** (see `Designs/docx/drawings/PRD_drawings.vsdx`, page Fig5_heater)
+
+**Key design considerations**:
+- Commercial programmable AC supply produces clean sine waves; no custom fabrication required
+- True RMS voltage/current monitoring — independent RMS meters monitored by RF MPS, or values read over Ethernet by IOC and written to PLC (TBD)
+- Automated warm-up, standby, and cool-down sequences via EPICS
+- Heater controller is part of RF MPS — klystron does not receive a permit to operate unless the heater has reached power level and timed out. EPICS system provides an override to allow the system expert to bypass the timeout in the event of a short power dip.
 
 ### 13.3 Interfaces
 
-- **Python Coordinator** (EPICS): Setpoint control, RMS readbacks, status, automated sequences
+- **RF MPS / EPICS Coordinator**: Setpoint control via analog amplitude control (PLC) and/or Ethernet (IOC sets 60 Hz output frequency). Supply is voltage-controlled, ramped to ~500 W output while keeping current below maximum. RMS monitoring: TBD — either independent RMS meters monitored by RF MPS hardware, or IOC reads values over Ethernet and writes to PLC.
 - **HVPS coordination**: Heater must be at operating temperature before HVPS enable; HVPS must be off before heater cooldown
-- **MPS**: Heater "ready" status required for RF permit
+- **RF MPS**: Heater "ready" status required for RF permit. Hardware heater current and voltage monitored by MPS.
 
 ---
 
@@ -1017,9 +1084,11 @@ The legacy control software consists of SNL (State Notation Language) programs r
 | `rf_calib.st` | 2,800+ | Calibration (analog offset nulling, coefficient calibration, ~20 min) |
 | `rf_msgs.st` | 352 | Message logging, HVPS faults, TAXI error detection |
 
-### 14.2 Upgraded Software — Python/EPICS Coordinator
+### 14.2 Upgraded Software — EPICS/MATLAB Coordinator
 
-The upgrade replaces all SNL code with a Python/PyEPICS coordinator application that operates as a supervisory control layer at ~1 Hz. It is NOT in the fast safety path.
+> **Note**: Much of the new software functionality will already be in the LLRF9 internal EPICS IOC (written by Dmitry). Additional supervisory software will be in EPICS/Python/MATLAB as needed.
+
+The upgrade replaces all SNL code with an EPICS/MATLAB coordinator application that operates as a supervisory control layer at ~1 Hz. It is NOT in the fast safety path.
 
 ### 14.3 Key Design Principles
 
@@ -1029,7 +1098,7 @@ The upgrade replaces all SNL code with a Python/PyEPICS coordinator application 
 - **Fault tolerance**: Graceful degradation when subsystems are unavailable
 - **Diagnostics**: Structured event logging, LLRF9 + waveform buffer readout, system performance metrics, and logging
 - **Testability**: Mock interfaces for all hardware dependencies
-- **Safety delegation**: Hardware safety handled by Interface Chassis; Python handles sequencing and coordination only
+- **Safety delegation**: Hardware safety handled by Interface Chassis; software handles sequencing and coordination only
 
 
 ---
@@ -1048,7 +1117,7 @@ This section maps the control loops in the system, identifying which hardware su
 | Actuator | DAC driving klystron input | LLRF9 DAC → drive amplifier → klystron |
 | Safety | Analog limits | LLRF9 RF interlocks (overvoltage, 9 per board) + baseband window comparators (8 per unit) |
 
-This is the fastest loop in the system and is entirely closed inside the LLRF9 FPGA. The Python coordinator does NOT participate.
+This is the fastest loop in the system and is entirely closed inside the LLRF9 FPGA. The EPICS/MATLAB coordinator does NOT participate.
 
 ### 15.2 HVPS Supervisory Loop (~1 Hz)
 
@@ -1060,7 +1129,7 @@ This is the fastest loop in the system and is entirely closed inside the LLRF9 F
 | Setpoint | HVPS voltage via field bus | HVPS voltage via EPICS to CompactLogix PLC |
 | Purpose | Maintain drive power within target range by adjusting klystron voltage | Same |
 
-The PLC handles low-level voltage regulation; the Python coordinator provides supervisory setpoint management.
+The PLC handles low-level voltage regulation; the EPICS/MATLAB coordinator provides supervisory setpoint management.
 
 ### 15.3 Tuner Control Loops (×4, ~1 Hz)
 
@@ -1084,7 +1153,7 @@ The PLC handles low-level voltage regulation; the Python coordinator provides su
 
 | Aspect | Legacy | Upgraded |
 |--------|--------|----------|
-| Implementation | SNL `rf_states.st` (2,227 lines) | Python `state_machine.py` |
+| Implementation | SNL `rf_states.st` (2,227 lines) | EPICS/Python `state_machine.py` |
 | States | OFF, STANDBY, PARK, TUNE, ON_CW, ON_FM (unused), FAULT | OFF, PARK, TUNE, ON_CW, FAULT |
 | Turn-on sequence | Multi-step with manual fast-on values | LLRF9 setpoint profiles (512 pts, 70 μs–37 ms/step) |
 | Safety | Software-based fault handling | Hardware safety delegated to Interface Chassis; software handles sequencing |
@@ -1093,7 +1162,7 @@ The PLC handles low-level voltage regulation; the Python coordinator provides su
 
 | Aspect | Legacy | Upgraded |
 |--------|--------|----------|
-| Implementation | SNL `rf_calib.st` (2,800+ lines, ~20 min) | Python `rf_calib.py` + LLRF9 built-in digital calibration |
+| Implementation | SNL `rf_calib.st` (2,800+ lines, ~20 min) | Python/EPICS `rf_calib.py` + LLRF9 built-in digital calibration |
 | Scope | Analog offset nulling, coefficient calibration for RFP module | Factory + installation calibration stored in EEPROM |
 | Duration | ~20 minutes | Minutes (digital, no analog drift) |
 
@@ -1112,18 +1181,18 @@ The following legacy loops are eliminated in the upgrade because the LLRF9's dig
 
 This matrix summarizes all physical and logical interfaces between subsystems in the upgraded system.
 
-| From \ To | LLRF9 #1 | LLRF9 #2 | HVPS PLC | Kly MPS PLC | Interface Chassis | Waveform Buffer | Arc Detect | Motor Ctrl | Heater Ctrl | Python Coord |
+| From \ To | LLRF9 #1 | LLRF9 #2 | HVPS PLC | RF MPS PLC | Interface Chassis | Waveform Buffer | Arc Detect | Motor Ctrl | Heater Ctrl | EPICS Coord |
 |-----------|----------|----------|----------|---------|-------------------|-----------------|------------|------------|-------------|------------|
 | **LLRF9 #1** | — | Interlock daisy (LEMO) | — | — | Status (5V digital) | — | — | — | — | EPICS (Ethernet) |
 | **LLRF9 #2** | Interlock daisy (LEMO) | — | — | — | Status (5V digital) | — | — | — | — | EPICS (Ethernet) |
 | **HVPS PLC** | — | — | — | — | STATUS (fiber), SCR EN (fiber), CROWBAR (fiber) | — | — | — | — | EPICS (Ethernet) |
-| **KLY MPS PLC** | — | — | — | — | Summary, Heartbeat, Reset (digital) | — | — | — | — | EPICS (Ethernet) |
+| **RF MPS PLC** | — | — | — | — | Summary, Heartbeat, Reset (digital) | — | — | — | — | EPICS (Ethernet) |
 | **Interface Chassis** | Enable (3.2V) | Enable (3.2V) | SCR EN, CROWBAR (fiber) | Fault status (digital) | — | — | — | — | — | — |
 | **Waveform Buffer** | — | — | — | — | Comparator trips (digital) | — | — | — | — | EPICS (Ethernet) |
 | **Arc Detect** | — | — | — | — | Permit + Latching | — | — | — | — | — |
 | **Motor Ctrl** | — | — | — | — | — | — | — | — | — | EPICS (Ethernet) |
 | **Heater Ctrl** | — | — | — | — | — | — | — | — | — | EPICS (Ethernet) |
-| **Python Coord** | EPICS (Ethernet) | EPICS (Ethernet) | EPICS (Ethernet) | EPICS (Ethernet) | EPICS | EPICS (Ethernet) | — | EPICS (Ethernet) | EPICS (Ethernet) | — |
+| **EPICS Coord** | EPICS (Ethernet) | EPICS (Ethernet) | EPICS (Ethernet) | EPICS (Ethernet) | EPICS | EPICS (Ethernet) | — | EPICS (Ethernet) | EPICS (Ethernet) | — |
 | **External (SPEAR MPS, Orbit)** | — | — | — | — | 24V permits | — | — | — | — | — |
 
 ### Interface Signal Types Summary
@@ -1131,7 +1200,7 @@ This matrix summarizes all physical and logical interfaces between subsystems in
 | Signal Type | Examples | Medium | Speed |
 |-------------|----------|--------|-------|
 | **EPICS Channel Access** | PV reads/writes, setpoints, readbacks | Ethernet (TCP/UDP) | ~1–10 Hz |
-| **Hardware interlock (digital)** | LLRF9 status, Kly MPS summary, comparator trips | Optocoupled wire | <1 μs |
+| **Hardware interlock (digital)** | LLRF9 status, RF MPS summary, comparator trips | Optocoupled wire | <1 μs |
 | **Fiber-optic interlock** | HVPS SCR ENABLE, CROWBAR, STATUS | HFBR fiber | <1 μs |
 | **RF signals** | Cavity probes, forward, reflected | 50 Ω coax (SMA) | 476 MHz analog |
 | **Motor control** | Step/direction pulses, encoder signals | Shielded cable | kHz pulse |
@@ -1142,7 +1211,7 @@ This matrix summarizes all physical and logical interfaces between subsystems in
 
 | # | Question | Subsystems Affected | Impact |
 |---|----------|---------------------|--------|
-| 1 | **Does the Heater Controller require a fast interlock connection to the Kly MPS PLC or Interface Chassis?** The current design routes Heater Ctrl only through EPICS (slow, ~1 Hz). If a heater overcurrent or overvoltage fault requires sub-second trip action on the klystron, a hardware interlock path would be needed. | Heater Ctrl, Interface Chassis, Kly MPS PLC | If yes: add Heater Ctrl permit input to Interface Chassis and/or digital I/O line to Kly MPS PLC; update interface matrix row accordingly. |
+| 1 | **Does the Heater Controller require a fast interlock connection to the RF MPS PLC or Interface Chassis?** The current design routes Heater Ctrl only through EPICS (slow, ~1 Hz). If a heater overcurrent or overvoltage fault requires sub-second trip action on the klystron, a hardware interlock path would be needed. | Heater Ctrl, Interface Chassis, RF MPS PLC | If yes: add Heater Ctrl permit input to Interface Chassis and/or digital I/O line to RF MPS PLC; update interface matrix row accordingly. |
 
 ---
 
@@ -1156,12 +1225,39 @@ The upgraded system implements a layered protection architecture:
 
 2. **Layer 2 — Interface Chassis hardware** (<1 μs from input change): Aggregates all permit signals and coordinates system-wide protection. All signals are optocoupler-isolated or fiber-optic. First-fault detection identifies the initiating event.
 
-3. **Layer 3 — KLY MPS PLC** (~ms): Aggregates RF interlock status with external safety systems (SPEAR MPS, orbit interlock). Provides reset signal to Interface Chassis.
+3. **Layer 3 — RF MPS PLC** (~ms): Aggregates RF interlock status with external safety systems (SPEAR MPS, orbit interlock). Provides reset signal to Interface Chassis.
 
-4. **Layer 4 — Python Coordinator** (~1 s): Supervisory monitoring, logging, fault analysis, and recovery sequencing. NOT in the fast safety path.
+4. **Layer 4 — EPICS/MATLAB Coordinator** (~1 s): Supervisory monitoring, logging, fault analysis, and recovery sequencing. NOT in the fast safety path.
 
 ### 17.2 Fault Propagation Example — RF Arc Event
 
+> **Figure 6 — Fault Propagation: RF Arc Event** (see `Designs/docx/drawings/PRD_drawings.vsdx`, page Fig6_fault)
+
+
+**Fault Propagation Timeline**:
+```
+Time:    0 μs        <1 μs         ~1 μs         ~ms          ~s           manual
+         │            │             │             │            │             │
+Arc ────►│            │             │             │            │             │
+Light    │            │             │             │            │             │
+         │            │             │             │            │             │
+Detector │────────────►│             │             │            │             │
+Relay    │            │             │             │            │             │
+         │            │             │             │            │             │
+Interface│            │─────────────►│             │            │             │
+Chassis  │            │             │             │            │             │
+         │            │             │             │            │             │
+LLRF9    │            │             │─────────────►│            │             │
+Waveform │            │             │             │            │             │
+         │            │             │             │            │             │
+MPS PLC  │            │             │             │────────────►│             │
+Logging  │            │             │             │            │             │
+         │            │             │             │            │             │
+EPICS    │            │             │             │            │─────────────►│
+Reset    │            │             │             │            │             │
+```
+
+**Detailed Fault Sequence**:
 ```
 1. Arc occurs in cavity window
    ↓ (light flash, μs)
@@ -1177,7 +1273,7 @@ The upgraded system implements a layered protection architecture:
    ↓ (~ms)
 5. MPS PLC receives fault status from Interface Chassis → logs event
    ↓ (~s)
-6. Python coordinator detects fault → logs structured event → enters FAULT state
+6. EPICS/MATLAB coordinator detects fault → logs structured event → enters FAULT state
    Operator notified; waveform data available for analysis
    ↓ (manual or auto)
 7. MPS issues reset → Interface Chassis clears latches → system ready for restart
@@ -1193,7 +1289,7 @@ All critical subsystems are designed to fail safe:
 | LLRF9 power loss | Interlock status goes low | Interface Chassis removes permits |
 | HVPS PLC failure | STATUS signal lost | Interface Chassis removes permits |
 | MPS PLC failure | Heartbeat lost | Interface Chassis removes permits |
-| Python coordinator crash | No effect on safety | Hardware protection continues; supervisory control paused |
+| EPICS/MATLAB coordinator crash | No effect on safety | Hardware protection continues; supervisory control paused |
 | Ethernet failure | No effect on safety | Hardware protection continues; supervisory control paused |
 
 
@@ -1210,12 +1306,10 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 | LLRF9 Unit 1 | TBD | Built-in Linux IOC | `LLRF1:` | 10 Hz (scalars) |
 | LLRF9 Unit 2 | TBD | Built-in Linux IOC | `LLRF2:` | 10 Hz (scalars) |
 | HVPS CompactLogix | TBD | External EPICS gateway | `SRF1:HVPS:` | ~1 Hz |
-| KLY MPS ControlLogix | TBD | External EPICS gateway | `SRF1:MPS:` | ~1 Hz |
-| Interface Chassis | TBD | Dedicated IOC | `SRF1:IC:` | ~1 Hz / event |
+| RF MPS ControlLogix | TBD | External EPICS gateway | `SRF1:MPS:` | ~1 Hz |
 | Motion Controller | TBD | EPICS motor record IOC | `SRF1:MTR:` | On demand |
 | Waveform Buffer | TBD | Dedicated IOC | `SRF1:WFBUF:` | ~1 Hz / event |
-| Heater Controller | TBD | Dedicated IOC | `SRF1:HTR:` | 10 Hz |
-| Python Coordinator | TBD | caproto / PyEPICS client | Various | ~1 Hz |
+| EPICS/MATLAB Coordinator | TBD | caproto / PyEPICS / MATLAB client | Various | ~1 Hz |
 
 ### 18.2 Non-EPICS Communication Paths
 
@@ -1224,7 +1318,7 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 | Interface Chassis ↔ all hardware | Hardwired digital/fiber | Safety interlocks (no network dependency) |
 | LLRF9 Unit 1 ↔ Unit 2 | LEMO interlock daisy-chain | Fast interlock propagation |
 | PPS ↔ PPS Interface Box | Hardwired (GOB12-88PNE) | Personnel safety (no network dependency) |
-| Arc Detection → Interface Chassis | Dry contact relay | Arc interlock (no network dependency) |
+| Arc Detection → Interface Chassis | Dry contact relay and/or semiconductor switches | Arc interlock (no network dependency) |
 
 **Critical design principle**: All safety-critical communication paths are hardwired. No safety function depends on the Ethernet network or EPICS Channel Access. Network loss pauses supervisory control but does not compromise protection.
 
@@ -1247,7 +1341,7 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 - **Software Framework**: Develop with simulated interfaces where live hardware unavailable
 - **Tuner Testing**: Test Galil controller with Booster RF cavity
 - **LLRF9 Installation**: Install both units, connect RF signals, and bring them online
-- **Kly MPS Online**: Bring Kly MPS online for EPICS interface development
+- **RF MPS Online**: Bring RF MPS online for EPICS interface development
 - **HVPS PLC Online**: Enables EPICS software development
 - **Waveform Buffer Assembly**: Complete assembly and standalone testing
 - **Interface Chassis Design/Fab**: Complete design and fabrication
@@ -1259,8 +1353,8 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 #### Phase 2: Incremental Subsystem Integration
 
 - **Tuner Test with SPEAR Cavity**
-- **HVPS Integration**: Integrate HVPS PLC with Python/EPICS (test at test stand T18)
-- **Kly MPS Integration**: Integrate Kly MPS with LLRF9, waveform buffer, arc detector, HVPS PLC, interface chassis, and software coordinator with existing RF signals
+- **HVPS Integration**: Integrate HVPS PLC with EPICS (test at test stand T18)
+- **RF MPS Integration**: Integrate RF MPS with LLRF9, waveform buffer, arc detector, HVPS PLC, interface chassis, and software coordinator with existing RF signals
 
 #### Phase 3: Critical Path Integration
 
@@ -1281,13 +1375,13 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 | Item | Status | Notes |
 |------|--------|---------------|
 | LLRF9 (4 units) | Complete | — |
-| Kly MPS PLC modules | Complete | — |
+| RF MPS PLC modules | Complete | — |
 | HVPS PLC modules | Complete (HVPS1, HVPS2, B44 Test Stand) | — |
 | Enerpro FCOG1200 boards | Needed |5 boards |
 | Arc detection (Microstep-MIS) | Needed | 10 sensors and 5 process, + 1 sensor & 1 process for spare |
 | Waveform Buffer System | Needed | Designed |
 | Interface Chassis | Needed | - |
-| Heater SCR controller | Needed | - |
+| Heater Controller (programmable AC supply) | Needed | — |
 | PPS Interface Box | Needed |  |
 | Software | Needed |  |
 
@@ -1300,9 +1394,9 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 | PPS Interface approval delays | High | In progress | Engage protection managers early; provide complete documentation |
 | Interface Chassis logic design (LLRF9/HVPS feedback loop) | High | Not started | Design and simulate before fabrication; careful sequencing logic |
 | Waveform Buffer System (new custom hardware) | Medium | Not started | Staged development: PCB design → assembly → testing → integration |
-| **Python/EPICS Coordinator software** | **Critical** | **Not started** | Largest untouched software scope: state machine, fault handling, auto-recovery sequences, operator interface, and integration with all subsystem IOCs. Must be developed in parallel with hardware integration; delays directly block Phase 3 and Phase 4. Mitigation: begin framework and simulated-interface development immediately; define PV naming conventions and state machine design before hardware is ready. |
-| **Kly MPS PLC software integration** | **High** | **Not started** | MPS hardware is assembled and tested standalone, but EPICS IOC development and integration with Interface Chassis fault status, first-fault logic, and reset sequencing has not begun. Mitigation: start IOC development using simulated Interface Chassis I/O; define fault status word bit assignments early. |
-| Arc Detection Chassis firmware/logic | Low | Not started | OR-gate and 5-bit latch logic for Arc Detection Chassis not yet designed. Chassis is a prerequisite for arc interlock integration. Mitigation: design is straightforward (combinational logic + latches); prioritize as part of Interface Chassis design phase. |
+| **EPICS/MATLAB Coordinator software** | **Critical** | **Not started** | Largest untouched software scope: state machine, fault handling, auto-recovery sequences, operator interface, and integration with all subsystem IOCs. Must be developed in parallel with hardware integration; delays directly block Phase 3 and Phase 4. Mitigation: begin framework and simulated-interface development immediately; define PV naming conventions and state machine design before hardware is ready. |
+| **RF MPS PLC software integration** | **High** | **Not started** | MPS hardware is assembled and tested standalone, but EPICS IOC development and integration with Interface Chassis fault status, first-fault logic, and reset sequencing has not begun. Mitigation: start IOC development using simulated Interface Chassis I/O; define fault status word bit assignments early. |
+| Arc Detection Chassis firmware/logic | Low | Not started | OR-gate and 6-bit latch logic for Arc Detection Chassis not yet designed. Chassis is a prerequisite for arc interlock integration. Mitigation: design is straightforward (combinational logic + latches); prioritize as part of Interface Chassis design phase. |
 | Communication latency (Ethernet/EPICS for ~1 Hz control) | Low | Validated | Proven in LLRF9 prototype commissioning |
 
 ### 19.4 Success Criteria
