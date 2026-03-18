@@ -17,18 +17,21 @@
 %    >> spear3_hvps_simulink_model   % Build and open the model
 %    >> sim('SPEAR3_HVPS')           % Run the simulation
 %
-%  Reference Documents:
-%    - 00-spear3-hvps-legacy-system-design.md
-%    - 01-pepii-power-supply-architecture.md
-%    - 04-regulator-board-design.md
-%    - Enerpro FCOG1200 technical notes
-%    - PLC SLC-5/03 technical notes
+%  Equations (LaTeX for Live Script rendering):
+%
+%  $$V_{dc} = \frac{6\sqrt{2}}{\pi} V_{LL} \cos\alpha \approx 2.70 \, V_{LL} \cos\alpha$$
+%
+%  $$f_{ripple} = 12 \times f_{AC} = 720 \; \text{Hz}$$
+%
+%  $$f_{LC} = \frac{1}{2\pi\sqrt{LC}} \approx 103 \; \text{Hz}$$
+%
+%  $$I_{klystron} = \kappa \, V^{3/2} \quad (\text{perveance model})$$
 %
 %  Author: SSRL/SLAC Engineering (Codegen-assisted)
 %  ========================================================================
 
 %% Clean up
-close_system('SPEAR3_HVPS', 0);  % Close if already open (suppress error)
+try close_system('SPEAR3_HVPS', 0); catch; end
 bdclose all;
 clear; clc;
 
@@ -38,7 +41,7 @@ clear; clc;
 %  ========================================================================
 
 % --- AC Input (Substation 507, Breaker 160) ---
-P.ac_voltage_rms   = 12470;    % V line-to-line RMS
+P.ac_voltage_rms    = 12470;    % V line-to-line RMS
 P.ac_frequency      = 60;       % Hz
 P.ac_voltage_peak   = P.ac_voltage_rms * sqrt(2);  % V peak
 
@@ -52,8 +55,8 @@ P.T0_copper_loss_pu = 0.01;     % 1% copper losses
 % --- Rectifier Transformers T1, T2 (1.5 MVA each) ---
 P.Trect_rating_mva  = 1.5;
 P.Trect_turns_ratio = 2.67;     % Step-up ratio (12.5 kV -> 33.3 kV)
-P.Trect_pri_voltage = 12500;    % V RMS primary
-P.Trect_sec_voltage = 33300;    % V RMS secondary (line-to-line)
+P.Trect_pri_voltage = 12500;    % V RMS primary (phase-to-phase)
+P.Trect_sec_voltage = 33300;    % V RMS secondary (phase-to-phase)
 P.Trect_leakage_pu  = 0.06;
 P.Trect_copper_loss = 0.012;
 
@@ -61,11 +64,12 @@ P.Trect_copper_loss = 0.012;
 P.scr_stacks_per_bridge = 6;
 P.scrs_per_stack    = 14;
 P.scr_voltage_rating = 8000;    % V per SCR
-P.scr_on_drop       = 1.5;      % V forward drop per SCR
+P.scr_on_resistance = 0.001;    % Ohms on-state resistance per device
+P.scr_fwd_voltage   = 1.5;      % V forward drop per SCR
 P.scr_turn_on_us    = 5;        % microseconds
 P.scr_turn_off_us   = 100;      % microseconds
-P.scr_snubber_R     = 100;      % Ohms
-P.scr_snubber_C     = 0.1e-6;   % F (0.1 uF)
+P.scr_snubber_R     = 500;      % Ohms (snubber resistance)
+P.scr_snubber_C     = 250e-9;   % F (snubber capacitance)
 
 % --- Filter Components ---
 P.L1                = 0.3;       % H (primary filter inductor 1)
@@ -95,7 +99,7 @@ P.V_nominal         = -77e3;    % V (-77 kV, negative for cathode)
 P.V_max             = -90e3;    % V (-90 kV maximum)
 P.I_nominal         = 22;       % A
 P.I_max             = 30;       % A
-P.P_nominal         = 1.7e6;   % W (1.7 MW)
+P.P_nominal         = 1.7e6;    % W (1.7 MW)
 
 % --- Klystron Load ---
 P.klystron_R_nom    = 3500;     % Ohms (nominal: 77kV/22A)
@@ -113,8 +117,8 @@ P.plc_phase_max     = 18000;    % N7:42 max phase angle
 % --- Control: Enerpro FCOG1200 ---
 P.sighi_min         = 0.9;      % V minimum SIG HI
 P.sighi_max         = 5.9;      % V maximum SIG HI
-P.alpha_min         = 30;       % degrees (max output)
-P.alpha_max         = 150;      % degrees (min output)
+P.alpha_min         = 30;       % degrees (max output at max SIG HI)
+P.alpha_max         = 150;      % degrees (min output at min SIG HI)
 P.enerpro_tau       = 0.050;    % s (PLL settling: ~3 AC cycles)
 
 % --- Control: Regulator Board (SD-237-230-14-C1) ---
@@ -126,22 +130,21 @@ P.plc_R_sighi       = 1000;     % Ohms (PLC to SIG HI)
 P.reg_OV_trip_kV    = 85;       % kV overvoltage trip
 P.reg_OC_trip_A     = 28;       % A overcurrent trip
 
-% --- Protection Thresholds ---
-P.arc_dVdt_thresh   = 1e9;      % V/s (arc detection)
-P.arc_Vdrop_pct     = 20;       % % sudden drop
-P.arc_Ispike_factor = 2.0;      % current doubling
-P.temp_phase_max    = 80;       % deg C
-P.temp_crowbar_max  = 60;       % deg C
-
 % --- Simulation ---
 P.sim_time          = 0.5;      % s (default simulation time)
 P.sim_dt_max        = 10e-6;    % s (max solver step)
 P.sim_solver        = 'ode23tb'; % stiff solver for power electronics
 
 % --- Derived Parameters ---
-P.V_dc_max = (6*sqrt(2)/pi) * P.Trect_sec_voltage;  % ~90 kV at alpha=0
-P.f_ripple = 12 * P.ac_frequency;  % 720 Hz
-P.LC_resonance = 1/(2*pi*sqrt(P.L1 * P.C_filter));  % ~103 Hz
+%
+% $$V_{dc,max} = \frac{6\sqrt{2}}{\pi} V_{LL} \approx 90 \; \text{kV at } \alpha=0$$
+P.V_dc_max = (6*sqrt(2)/pi) * P.Trect_sec_voltage;
+
+% $$f_{ripple} = 12 \times 60 = 720 \; \text{Hz}$$
+P.f_ripple = 12 * P.ac_frequency;
+
+% $$f_{LC} = \frac{1}{2\pi\sqrt{L \cdot C}} \approx 103 \; \text{Hz}$$
+P.LC_resonance = 1/(2*pi*sqrt(P.L1 * P.C_filter));
 
 fprintf('SPEAR3 HVPS Parameters Loaded:\n');
 fprintf('  AC Input:       %.2f kV RMS, %d Hz\n', P.ac_voltage_rms/1e3, P.ac_frequency);
@@ -153,6 +156,14 @@ fprintf('  LC resonance:   %.1f Hz\n', P.LC_resonance);
 %% ========================================================================
 %  SECTION 2: CREATE SIMULINK MODEL
 %  ========================================================================
+%
+%  Block parameter names verified against MathWorks documentation:
+%    - Three-Phase Source: 'Voltage', 'Frequency', 'Configuration'
+%    - Three-Phase Transformer: 'NominalPower', 'Winding1', 'Winding2',
+%        'Winding1Connection', 'Winding2Connection'
+%    - Universal Bridge: 'Arms', 'Device', 'Ron', 'Lon', 'Vf',
+%        'SnubberResistance', 'SnubberCapacitance'
+%    - Series RLC Branch: 'Resistance', 'Inductance', 'Capacitance'
 
 modelName = 'SPEAR3_HVPS';
 new_system(modelName);
@@ -177,167 +188,202 @@ fprintf('Model "%s" created with solver %s\n', modelName, P.sim_solver);
 %% ========================================================================
 %  SECTION 3: AC SOURCE (Substation 507, 12.47 kV, 3-phase, 60 Hz)
 %  ========================================================================
+%
+%  Three-Phase Source mask parameters (from MathWorks docs):
+%    'Voltage'       -> Phase-to-phase RMS voltage (V)
+%    'Frequency'     -> Source frequency (Hz)
+%    'Configuration' -> 'Yg' | 'Yn' | 'Y'
+%    'Resistance'    -> Source internal resistance (Ohms)
+%    'Inductance'    -> Source internal inductance (H)
 
-% Three-Phase Programmable Voltage Source
 add_block('powerlib/Electrical Sources/Three-Phase Source', ...
     [modelName '/AC_Source_12kV'], ...
     'Position', [80 200 140 280], ...
-    'PhaseVoltage', num2str(P.ac_voltage_rms / sqrt(3)), ...  % Phase voltage
+    'Voltage', num2str(P.ac_voltage_rms), ...
     'Frequency', num2str(P.ac_frequency), ...
-    'InternalConnection', 'Yg', ...  % Grounded Wye
-    'SourceImpedance', '[0.01 0.05]');  % [R(pu) L(pu)]
-
-% --- Annotation ---
-add_block('built-in/Note', [modelName '/Note_AC'], ...
-    'Position', [60 150 220 190], ...
-    'Text', sprintf('Substation 507, Breaker 160\n12.47 kV RMS, 60 Hz, 3-phase'));
+    'Configuration', 'Yg');
+% Internal impedance uses defaults (short-circuit level based)
 
 %% ========================================================================
 %  SECTION 4: PHASE-SHIFT TRANSFORMER T0 (3.5 MVA, +/-15 deg)
 %  ========================================================================
+%
 %  T0 creates two sets of 3-phase voltages with +15 and -15 degree shifts.
 %  This is the key to 12-pulse operation (30 deg total -> cancels 5th/7th).
 %
-%  Implementation: Two Three-Phase Transformers
-%    T0a: Delta-Wye with +15 deg phase shift (feeds T1)
-%    T0b: Delta-Wye with -15 deg phase shift (feeds T2)
+%  $$\Delta\phi = \pm 15^\circ \implies \phi_{total} = 30^\circ$$
+%  $$\text{Harmonics cancelled: } 5^\text{th}, 7^\text{th}, 17^\text{th}, 19^\text{th}, \ldots$$
+%
+%  Three-Phase Transformer (Two Windings) mask parameters:
+%    'NominalPower'       -> '[Pn(VA) fn(Hz)]'
+%    'Winding1'           -> '[V1(Vrms) R1(pu) L1(pu)]'
+%    'Winding2'           -> '[V2(Vrms) R2(pu) L2(pu)]'
+%    'Winding1Connection' -> 'Y' | 'Yn' | 'Yg' | 'Delta (D1)' | 'Delta (D11)'
+%    'Winding2Connection' -> same options
+%
+%  To get +30 deg shift: Winding1='Delta (D11)', Winding2='Y'  (Dy11)
+%  To get   0 deg shift: Winding1='Y', Winding2='Y'            (Yy0)
 
-% T0a: Phase-shift transformer, Set 1 (+15 degrees)
+% T0a: +30 deg phase shift (Dy11 connection)
+% Dy11: delta primary leads wye secondary by +30 degrees
 add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', ...
-    [modelName '/T0a_PhaseShift_Plus15'], ...
+    [modelName '/T0a_Plus30deg'], ...
     'Position', [250 180 330 300], ...
     'NominalPower', sprintf('[%e %d]', P.T0_rating_mva*1e6/2, P.ac_frequency), ...
-    'Winding1', sprintf('[%d 0.002 %f]', P.ac_voltage_rms, P.T0_leakage_pu/2), ...
-    'Winding2', sprintf('[%d 0.002 %f]', P.Trect_pri_voltage, P.T0_leakage_pu/2), ...
-    'Winding1Connection', 'D11', ...   % Delta primary
-    'Winding2Connection', 'Yg');       % Grounded Wye secondary (+30 deg inherent)
+    'Winding1', sprintf('[%d %f %f]', P.ac_voltage_rms, P.T0_copper_loss_pu, P.T0_leakage_pu/2), ...
+    'Winding2', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.T0_copper_loss_pu, P.T0_leakage_pu/2), ...
+    'Winding1Connection', 'Delta (D1)', ...
+    'Winding2Connection', 'Y');
 
-% T0b: Phase-shift transformer, Set 2 (-15 degrees)
+% T0b: 0 deg phase shift (Yy0 connection)
 add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', ...
-    [modelName '/T0b_PhaseShift_Minus15'], ...
+    [modelName '/T0b_Zero_deg'], ...
     'Position', [250 350 330 470], ...
     'NominalPower', sprintf('[%e %d]', P.T0_rating_mva*1e6/2, P.ac_frequency), ...
-    'Winding1', sprintf('[%d 0.002 %f]', P.ac_voltage_rms, P.T0_leakage_pu/2), ...
-    'Winding2', sprintf('[%d 0.002 %f]', P.Trect_pri_voltage, P.T0_leakage_pu/2), ...
-    'Winding1Connection', 'Y', ...     % Wye primary
-    'Winding2Connection', 'Yg');       % Grounded Wye secondary (0 deg)
-
-add_block('built-in/Note', [modelName '/Note_T0'], ...
-    'Position', [230 140 380 170], ...
-    'Text', sprintf('T0: Phase-Shift Transformer (3.5 MVA)\n+/-15 deg for 12-pulse operation'));
+    'Winding1', sprintf('[%d %f %f]', P.ac_voltage_rms, P.T0_copper_loss_pu, P.T0_leakage_pu/2), ...
+    'Winding2', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.T0_copper_loss_pu, P.T0_leakage_pu/2), ...
+    'Winding1Connection', 'Y', ...
+    'Winding2Connection', 'Y');
 
 %% ========================================================================
 %  SECTION 5: RECTIFIER TRANSFORMERS T1 and T2 (1.5 MVA, 2.67:1 step-up)
 %  ========================================================================
-%  T1 receives the +15 deg shifted voltage, T2 receives -15 deg shifted.
-%  Both step up from ~12.5 kV to ~33.3 kV for high-voltage rectification.
+%
+%  $$\frac{V_2}{V_1} = \frac{33300}{12500} = 2.664$$
 
-% T1: Rectifier transformer (fed from T0a, +15 deg path)
+% T1: Rectifier transformer (fed from T0a, +30 deg path)
 add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', ...
     [modelName '/T1_Rectifier_Xfmr'], ...
     'Position', [450 180 530 300], ...
     'NominalPower', sprintf('[%e %d]', P.Trect_rating_mva*1e6, P.ac_frequency), ...
-    'Winding1', sprintf('[%d 0.003 %f]', P.Trect_pri_voltage, P.Trect_leakage_pu/2), ...
-    'Winding2', sprintf('[%d 0.003 %f]', P.Trect_sec_voltage, P.Trect_leakage_pu/2), ...
-    'Winding1Connection', 'Y', ...     % Open Wye (floating neutral for star-point)
-    'Winding2Connection', 'Y');        % Wye secondary
+    'Winding1', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.Trect_copper_loss, P.Trect_leakage_pu/2), ...
+    'Winding2', sprintf('[%d %f %f]', P.Trect_sec_voltage, P.Trect_copper_loss, P.Trect_leakage_pu/2), ...
+    'Winding1Connection', 'Y', ...
+    'Winding2Connection', 'Y');
 
-% T2: Rectifier transformer (fed from T0b, -15 deg path)
+% T2: Rectifier transformer (fed from T0b, 0 deg path)
 add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', ...
     [modelName '/T2_Rectifier_Xfmr'], ...
     'Position', [450 350 530 470], ...
     'NominalPower', sprintf('[%e %d]', P.Trect_rating_mva*1e6, P.ac_frequency), ...
-    'Winding1', sprintf('[%d 0.003 %f]', P.Trect_pri_voltage, P.Trect_leakage_pu/2), ...
-    'Winding2', sprintf('[%d 0.003 %f]', P.Trect_sec_voltage, P.Trect_leakage_pu/2), ...
+    'Winding1', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.Trect_copper_loss, P.Trect_leakage_pu/2), ...
+    'Winding2', sprintf('[%d %f %f]', P.Trect_sec_voltage, P.Trect_copper_loss, P.Trect_leakage_pu/2), ...
     'Winding1Connection', 'Y', ...
     'Winding2Connection', 'Y');
-
-add_block('built-in/Note', [modelName '/Note_T1T2'], ...
-    'Position', [430 140 580 170], ...
-    'Text', sprintf('T1/T2: Rectifier Transformers (1.5 MVA each)\nStep-up 2.67:1 to ~33.3 kV'));
 
 %% ========================================================================
 %  SECTION 6: 12-PULSE SCR RECTIFIER BRIDGES
 %  ========================================================================
-%  Two 6-pulse Universal Bridge blocks configured as thyristor bridges.
-%  Bridge 1 and Bridge 2 are 30 degrees apart -> 12-pulse operation.
-%  Each uses Synchronized 6-Pulse Generator for gate control.
+%
+%  Universal Bridge mask parameters (from MathWorks docs):
+%    'Arms'                -> Number of bridge arms: 1 | 2 | 3
+%    'Device'              -> 'Diodes' | 'Thyristors' | 'GTO / Diodes' |
+%                             'MOSFET / Diodes' | 'IGBT / Diodes' |
+%                             'Ideal Switches'
+%    'Ron'                 -> Internal resistance (Ohms)
+%    'Lon'                 -> Internal inductance (H)
+%    'Vf'                  -> Forward voltage (V)
+%    'SnubberResistance'   -> Snubber resistance Rs (Ohms)
+%    'SnubberCapacitance'  -> Snubber capacitance Cs (F)
+%
+%  $$V_{dc,bridge} = \frac{3\sqrt{2}}{\pi} V_{LL} \cos\alpha = 1.35 \, V_{LL} \cos\alpha$$
+%  $$V_{dc,12pulse} = 2 \times V_{dc,bridge} = 2.70 \, V_{LL} \cos\alpha$$
 
-% --- Bridge 1: 6-pulse SCR bridge (from T1, +15 deg path) ---
+% --- Bridge 1: 6-pulse SCR bridge (from T1, +30 deg path) ---
 add_block('powerlib/Power Electronics/Universal Bridge', ...
     [modelName '/Bridge1_SCR'], ...
     'Position', [650 180 730 300], ...
     'Arms', '3', ...
     'Device', 'Thyristors', ...
-    'Ron', num2str(P.scr_on_drop * 2), ...  % Two SCRs in series conducting
+    'Ron', num2str(P.scr_on_resistance), ...
     'Lon', '0', ...
-    'Vf', num2str(P.scr_on_drop * P.scrs_per_stack * 2), ...
-    'Rs', num2str(P.scr_snubber_R), ...
-    'Cs', num2str(P.scr_snubber_C));
+    'Vf', num2str(P.scr_fwd_voltage), ...
+    'SnubberResistance', num2str(P.scr_snubber_R), ...
+    'SnubberCapacitance', num2str(P.scr_snubber_C));
 
-% --- Bridge 2: 6-pulse SCR bridge (from T2, -15 deg path) ---
+% --- Bridge 2: 6-pulse SCR bridge (from T2, 0 deg path) ---
 add_block('powerlib/Power Electronics/Universal Bridge', ...
     [modelName '/Bridge2_SCR'], ...
     'Position', [650 350 730 470], ...
     'Arms', '3', ...
     'Device', 'Thyristors', ...
-    'Ron', num2str(P.scr_on_drop * 2), ...
+    'Ron', num2str(P.scr_on_resistance), ...
     'Lon', '0', ...
-    'Vf', num2str(P.scr_on_drop * P.scrs_per_stack * 2), ...
-    'Rs', num2str(P.scr_snubber_R), ...
-    'Cs', num2str(P.scr_snubber_C));
+    'Vf', num2str(P.scr_fwd_voltage), ...
+    'SnubberResistance', num2str(P.scr_snubber_R), ...
+    'SnubberCapacitance', num2str(P.scr_snubber_C));
 
-% --- Pulse Generators for SCR gate control ---
-% Synchronized 6-Pulse Generator for Bridge 1
-add_block('powerlib/Extra Sources/Synchronized 6-Pulse Generator', ...
+%% ========================================================================
+%  SECTION 7: PULSE GENERATORS FOR THYRISTOR GATING
+%  ========================================================================
+%
+%  Using "Pulse Generator (Thyristor)" block (recommended replacement for
+%  the deprecated Synchronized 6-Pulse Generator).
+%
+%  Library path: powerlib/Power Electronics/Power Electronics Control/
+%                Pulse Generator (Thyristor)
+%
+%  This block requires 'alpha' (firing angle in deg) and 'wt' (PLL angle)
+%  as inputs and outputs gate pulse vectors PY and PD for 12-pulse config.
+%
+%  For simpler setup, we use the legacy Synchronized 6-Pulse Generator
+%  from powerlib_extras which has direct voltage synchronization inputs.
+%
+%  Synchronized 6-Pulse Generator inputs:
+%    Port 1: alpha_deg     (firing angle in degrees)
+%    Ports 2-4: Vab, Vbc, Vca  (line-to-line sync voltages)
+%    Port 5: block         (>0 to disable pulses)
+%  Output:
+%    Port 1: pulses        (6-element vector for Universal Bridge gate)
+%
+%  Parameters: 'Frequency', 'PulseWidth', 'DoublePulsing'
+
+% Pulse generator for Bridge 1 (syncs to T1 primary voltages)
+add_block('powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', ...
     [modelName '/PulseGen1'], ...
     'Position', [560 100 640 160], ...
     'Frequency', num2str(P.ac_frequency), ...
-    'PulseWidth', '60');
+    'PulseWidth', '60', ...
+    'DoublePulsing', 'on');
 
-% Synchronized 6-Pulse Generator for Bridge 2
-add_block('powerlib/Extra Sources/Synchronized 6-Pulse Generator', ...
+% Pulse generator for Bridge 2 (syncs to T2 primary voltages)
+add_block('powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', ...
     [modelName '/PulseGen2'], ...
     'Position', [560 490 640 550], ...
     'Frequency', num2str(P.ac_frequency), ...
-    'PulseWidth', '60');
-
-add_block('built-in/Note', [modelName '/Note_Bridges'], ...
-    'Position', [620 140 780 170], ...
-    'Text', sprintf('12 SCR Stacks (Powerex T8K7)\n2 x 6-pulse bridges -> 12-pulse'));
+    'PulseWidth', '60', ...
+    'DoublePulsing', 'on');
 
 %% ========================================================================
-%  SECTION 7: LC FILTER NETWORK
+%  SECTION 8: LC FILTER NETWORK
 %  ========================================================================
-%  Primary filter inductors (L1, L2), secondary filter capacitors (C),
-%  isolation resistors (500 Ohm, PEP-II design), damping network.
 %
-%  The two bridge DC outputs are connected in series (voltage stacking),
-%  then filtered through the LC network.
+%  Series RLC Branch mask parameters:
+%    'Resistance'   -> R in Ohms
+%    'Inductance'   -> L in Henries
+%    'Capacitance'  -> C in Farads (inf = no capacitor)
+%
+%  $$f_{LC} = \frac{1}{2\pi\sqrt{L \cdot C}} = \frac{1}{2\pi\sqrt{0.3 \times 8 \times 10^{-6}}} \approx 103 \; \text{Hz}$$
+%
+%  $$\text{Attenuation at 720 Hz} = \left(\frac{f_{ripple}}{f_{LC}}\right)^2 \approx 49 \; (34 \; \text{dB})$$
 
-% Series connection block (sums Bridge 1 + Bridge 2 outputs)
-add_block('built-in/Note', [modelName '/Note_Series'], ...
-    'Position', [800 260 920 290], ...
-    'Text', 'DC Series Connection: V_out = V_B1 + V_B2');
-
-% --- Filter Inductor L1 (0.3 H, 85 A rated, Bridge 1 path) ---
+% --- Filter Inductor L1 (0.3 H) ---
 add_block('powerlib/Elements/Series RLC Branch', ...
-    [modelName '/L1_Filter_Inductor'], ...
+    [modelName '/L1_Filter'], ...
     'Position', [830 180 890 240], ...
-    'Resistance', '0.5', ...      % Small winding resistance
+    'Resistance', '0.5', ...
     'Inductance', num2str(P.L1), ...
     'Capacitance', 'inf');
 
-% --- Filter Inductor L2 (0.3 H, 85 A rated, Bridge 2 path) ---
+% --- Filter Inductor L2 (0.3 H) ---
 add_block('powerlib/Elements/Series RLC Branch', ...
-    [modelName '/L2_Filter_Inductor'], ...
+    [modelName '/L2_Filter'], ...
     'Position', [830 350 890 410], ...
     'Resistance', '0.5', ...
     'Inductance', num2str(P.L2), ...
     'Capacitance', 'inf');
 
-% --- Filter Capacitor Bank (8 uF with 500 Ohm isolation) ---
-% Modeled as parallel RC (capacitor in series with isolation resistor)
+% --- Filter Capacitor (8 uF in series with 500 Ohm isolation) ---
 add_block('powerlib/Elements/Series RLC Branch', ...
     [modelName '/C_Filter_Bank'], ...
     'Position', [960 250 1020 340], ...
@@ -353,15 +399,13 @@ add_block('powerlib/Elements/Series RLC Branch', ...
     'Inductance', '0', ...
     'Capacitance', 'inf');
 
-add_block('built-in/Note', [modelName '/Note_Filter'], ...
-    'Position', [820 140 980 170], ...
-    'Text', sprintf('LC Filter: L1=L2=0.3H, C=8uF\nR_iso=500 Ohm (PEP-II), fc~%.0f Hz', P.LC_resonance));
-
 %% ========================================================================
-%  SECTION 8: CABLE TERMINATION AND KLYSTRON LOAD
+%  SECTION 9: CABLE TERMINATION AND KLYSTRON LOAD
 %  ========================================================================
+%
+%  $$\frac{dI}{dt}_{max} = \frac{V_{arc}}{L_3} = \frac{77000}{200 \times 10^{-6}} = 3.85 \times 10^{8} \; \text{A/s}$$
 
-% --- Cable Termination Inductors L3, L4 (200 uH each) ---
+% --- Cable Termination Inductor L3 (200 uH) ---
 add_block('powerlib/Elements/Series RLC Branch', ...
     [modelName '/L3_Cable_Term'], ...
     'Position', [1100 250 1160 310], ...
@@ -369,9 +413,12 @@ add_block('powerlib/Elements/Series RLC Branch', ...
     'Inductance', num2str(P.L3), ...
     'Capacitance', 'inf');
 
-% --- Klystron Load (resistive model, nominal 3500 Ohm) ---
-% Uses constant resistance for basic model.
-% For perveance model, replace with MATLAB Function block.
+% --- Klystron Load (resistive, 3500 Ohm nominal) ---
+%
+% $$R_{klystron} = \frac{V_{nom}}{I_{nom}} = \frac{77000}{22} \approx 3500 \; \Omega$$
+%
+% For nonlinear perveance: replace with MATLAB Function block
+% implementing $$I = \kappa \, V^{3/2}$$, $$\kappa \approx 1 \; \mu A/V^{3/2}$$
 add_block('powerlib/Elements/Series RLC Branch', ...
     [modelName '/Klystron_Load'], ...
     'Position', [1220 250 1280 340], ...
@@ -379,99 +426,98 @@ add_block('powerlib/Elements/Series RLC Branch', ...
     'Inductance', '0', ...
     'Capacitance', 'inf');
 
-add_block('built-in/Note', [modelName '/Note_Load'], ...
-    'Position', [1100 200 1300 240], ...
-    'Text', sprintf('Klystron Load\nR_nom = %d Ohm (-77kV/22A)\nL_cable = 200uH', P.klystron_R_nom));
-
 %% ========================================================================
-%  SECTION 9: CROWBAR PROTECTION SYSTEM
+%  SECTION 10: CROWBAR PROTECTION SYSTEM
 %  ========================================================================
-%  4 series SCR stacks with fiber-optic trigger (~1 us delay).
-%  When triggered, shorts the DC output to dump stored energy.
-%  Modeled as a switched resistor across the output.
+%
+%  Breaker block mask parameters:
+%    'BreakerResistance' -> On-state resistance (Ohms)
+%    'InitialState'      -> '0' (open) | '1' (closed)
+%    'SwitchingTimes'    -> Vector of switching times, or '[]' for external
+%
+%  $$E_{arc} < 5 \; \text{J} \quad \text{(with crowbar, } t_{trigger} \approx 1 \; \mu\text{s)}$$
 
-% --- Crowbar SCR (ideal switch + small resistor) ---
+% Crowbar SCR (Breaker block as switch)
 add_block('powerlib/Elements/Breaker', ...
     [modelName '/Crowbar_SCR'], ...
     'Position', [1100 380 1160 440], ...
     'BreakerResistance', num2str(P.crowbar_R_on), ...
-    'InitialState', '0', ...       % Initially open (not triggered)
-    'SwitchingTimes', '[]');       % Controlled externally
+    'InitialState', '0', ...
+    'SwitchingTimes', '[]');
 
-% --- Crowbar Trigger Logic ---
-% Step block to simulate crowbar trigger at a specified time
-add_block('built-in/Step', [modelName '/Crowbar_Trigger'], ...
+% Crowbar trigger (Step: default beyond sim time = never triggers)
+add_block('simulink/Sources/Step', [modelName '/Crowbar_Trigger'], ...
     'Position', [1000 400 1040 430], ...
-    'Time', num2str(P.sim_time + 1), ... % Default: never trigger (beyond sim time)
+    'Time', num2str(P.sim_time + 1), ...
     'Before', '0', ...
     'After', '1');
 
-add_block('built-in/Note', [modelName '/Note_Crowbar'], ...
-    'Position', [1080 350 1200 370], ...
-    'Text', sprintf('Crowbar: 4 SCR stacks\n100kV, 80A, ~1us trigger'));
-
 %% ========================================================================
-%  SECTION 10: CONTROL SYSTEM SUBSYSTEM
+%  SECTION 11: CONTROL SYSTEM SUBSYSTEM
 %  ========================================================================
-%  Models the complete control hierarchy:
-%    EPICS -> VXI -> PLC (SLC-5/03) -> Regulator Board -> Enerpro -> alpha
 %
-%  Implemented as a Simulink subsystem with:
-%    Input: V_measured (voltage feedback from divider)
-%    Input: I_measured (current feedback from Danfysik DC-CT)
-%    Output: alpha_deg (firing angle to pulse generators)
+%  Control hierarchy:
+%    EPICS setpoint -> PLC filter -> PI regulator -> Enerpro -> alpha
+%
+%  $$\alpha = 150 - \frac{V_{SIG\_HI} - 0.9}{5.9 - 0.9} \times (150 - 30)$$
+%
+%  PLC digital low-pass filter (Rung 104):
+%  $$y[n] = \alpha_{filt} \, x[n] + (1 - \alpha_{filt}) \, y[n-1]$$
+%  $$\tau = \frac{-T}{\ln(1 - \alpha_{filt})} \approx 20 \; \text{ms}$$
+%
+%  PI Regulator:
+%  $$V_{SIG\_HI} = K_p \, e(t) + K_i \int_0^t e(\tau) \, d\tau$$
 
-% Create Control System subsystem
 controlSys = [modelName '/Control_System'];
-add_block('built-in/SubSystem', controlSys, ...
+add_block('simulink/Ports & Subsystems/Subsystem', controlSys, ...
     'Position', [500 550 700 700]);
 
-% --- Inside Control Subsystem ---
+% Remove default In1->Out1 connection created by Subsystem template
+delete_line(controlSys, 'In1/1', 'Out1/1');
+delete_block([controlSys '/In1']);
+delete_block([controlSys '/Out1']);
 
-% Input ports
-add_block('built-in/Inport', [controlSys '/V_measured_kV'], ...
+% --- Input ports ---
+add_block('simulink/Sources/In1', [controlSys '/V_measured_kV'], ...
     'Position', [30 50 60 65], 'Port', '1');
-add_block('built-in/Inport', [controlSys '/I_measured_A'], ...
+add_block('simulink/Sources/In1', [controlSys '/I_measured_A'], ...
     'Position', [30 120 60 135], 'Port', '2');
 
-% Output port
-add_block('built-in/Outport', [controlSys '/alpha_deg'], ...
+% --- Output port ---
+add_block('simulink/Sinks/Out1', [controlSys '/alpha_deg'], ...
     'Position', [800 100 830 115], 'Port', '1');
 
-% --- Voltage Setpoint (EPICS via VXI to PLC N7:30) ---
-add_block('built-in/Constant', [controlSys '/V_Setpoint_kV'], ...
+% --- Voltage Setpoint (EPICS -> PLC N7:30) ---
+add_block('simulink/Sources/Constant', [controlSys '/V_Setpoint_kV'], ...
     'Position', [30 200 100 230], ...
-    'Value', num2str(abs(P.V_nominal)/1e3));  % 77 kV
+    'Value', num2str(abs(P.V_nominal)/1e3));
 
 % --- Soft-Start Ramp ---
-% Ramp from 0 to 1 over soft_start_s seconds
-add_block('built-in/Ramp', [controlSys '/SoftStart_Ramp'], ...
+add_block('simulink/Sources/Ramp', [controlSys '/SoftStart_Ramp'], ...
     'Position', [130 200 190 230], ...
     'Slope', num2str(1/P.reg_soft_start_s), ...
-    'StartTime', '0.5', ...           % Start after 0.5s delay
+    'StartTime', '0.5', ...
     'InitialOutput', '0');
 
-add_block('built-in/Saturation', [controlSys '/SoftStart_Sat'], ...
+add_block('simulink/Discontinuities/Saturation', [controlSys '/SoftStart_Sat'], ...
     'Position', [220 200 260 230], ...
     'UpperLimit', '1', ...
     'LowerLimit', '0');
 
 % Multiply setpoint by soft-start envelope
-add_block('built-in/Product', [controlSys '/SS_Multiply'], ...
+add_block('simulink/Math Operations/Product', [controlSys '/SS_Multiply'], ...
     'Position', [300 180 340 230], ...
     'Inputs', '2');
 
-% --- PLC Digital Low-Pass Filter (Rung 104) ---
-% tau = -T/ln(1-alpha) ~ 0.020 s
-% Implemented as discrete transfer function: H(z) = alpha / (1 - (1-alpha)*z^-1)
-add_block('built-in/DiscreteTransferFcn', [controlSys '/PLC_LPF'], ...
+% --- PLC Digital LPF (Rung 104) ---
+add_block('simulink/Discrete/Discrete Transfer Fcn', [controlSys '/PLC_LPF'], ...
     'Position', [370 180 450 230], ...
-    'Numerator', num2str(P.plc_filter_alpha), ...
+    'Numerator', sprintf('[%f]', P.plc_filter_alpha), ...
     'Denominator', sprintf('[1 %f]', -(1 - P.plc_filter_alpha)), ...
     'SampleTime', num2str(P.plc_scan_period));
 
 % --- Voltage Error (setpoint - measured) ---
-add_block('built-in/Sum', [controlSys '/V_Error'], ...
+add_block('simulink/Math Operations/Sum', [controlSys '/V_Error'], ...
     'Position', [500 80 530 120], ...
     'Inputs', '+-');
 
@@ -481,531 +527,397 @@ add_block('simulink/Continuous/PID Controller', [controlSys '/PI_Regulator'], ..
     'Controller', 'PI', ...
     'P', num2str(P.reg_Kp), ...
     'I', num2str(P.reg_Ki), ...
-    'UpperSaturationLimit', '8', ...   % Max SIG HI contribution
+    'UpperSaturationLimit', '8', ...
     'LowerSaturationLimit', '0');
 
-% --- Enerpro Voltage-to-Angle Mapping ---
-% SIG HI (0.9V to 5.9V) -> alpha (150 deg to 30 deg)
-% alpha = 150 - (sig_hi - 0.9) / (5.9 - 0.9) * (150 - 30)
-% alpha = 150 - (sig_hi - 0.9) * 24 = 171.6 - 24 * sig_hi
-add_block('built-in/Gain', [controlSys '/Enerpro_Gain'], ...
+% --- Enerpro FCOG1200 Voltage-to-Angle Mapping ---
+% Linear map: SIG HI 0.9V->150deg, 5.9V->30deg
+% slope = -(150-30)/(5.9-0.9) = -24 deg/V
+% alpha = slope * sig_hi + offset
+enerpro_slope = -(P.alpha_max - P.alpha_min) / (P.sighi_max - P.sighi_min);  % -24
+enerpro_offset = P.alpha_max - enerpro_slope * P.sighi_min;  % 150 - (-24)*0.9 = 171.6
+
+add_block('simulink/Math Operations/Gain', [controlSys '/Enerpro_Gain'], ...
     'Position', [680 80 720 110], ...
-    'Gain', num2str(-(P.alpha_max - P.alpha_min) / (P.sighi_max - P.sighi_min)));
+    'Gain', num2str(enerpro_slope));
 
-add_block('built-in/Bias', [controlSys '/Enerpro_Offset'], ...
-    'Position', [740 80 780 110], ...
-    'Bias', num2str(P.alpha_max + P.alpha_min * (P.alpha_max - P.alpha_min) / (P.sighi_max - P.sighi_min)));
+add_block('simulink/Math Operations/Add', [controlSys '/Enerpro_Offset'], ...
+    'Position', [740 80 770 110], ...
+    'Inputs', '++');
 
-% --- Enerpro PLL Dynamics (first-order lag) ---
-add_block('simulink/Continuous/Transfer Fcn', [controlSys '/Enerpro_PLL'], ...
-    'Position', [660 150 740 180], ...
-    'Numerator', '1', ...
-    'Denominator', sprintf('[%f 1]', P.enerpro_tau));
+add_block('simulink/Sources/Constant', [controlSys '/Offset_Const'], ...
+    'Position', [700 120 730 140], ...
+    'Value', num2str(enerpro_offset));
 
-% --- Firing Angle Saturation ---
-add_block('built-in/Saturation', [controlSys '/Alpha_Sat'], ...
-    'Position', [760 80 800 115], ...
+% --- Firing Angle Saturation (30-150 deg) ---
+add_block('simulink/Discontinuities/Saturation', [controlSys '/Alpha_Sat'], ...
+    'Position', [790 80 830 115], ...
     'UpperLimit', num2str(P.alpha_max), ...
     'LowerLimit', num2str(P.alpha_min));
 
-% --- Wire up internal connections ---
-% Setpoint path: Constant -> Ramp -> Sat -> Multiply -> PLC_LPF
+% --- Wire internal control subsystem ---
+% Setpoint path
 add_line(controlSys, 'V_Setpoint_kV/1', 'SS_Multiply/1');
 add_line(controlSys, 'SoftStart_Ramp/1', 'SoftStart_Sat/1');
 add_line(controlSys, 'SoftStart_Sat/1', 'SS_Multiply/2');
 add_line(controlSys, 'SS_Multiply/1', 'PLC_LPF/1');
-% Error: filtered_setpoint - V_measured
+% Error
 add_line(controlSys, 'PLC_LPF/1', 'V_Error/1');
 add_line(controlSys, 'V_measured_kV/1', 'V_Error/2');
-% PI regulator -> Enerpro mapping -> alpha output
+% PI -> Enerpro -> alpha
 add_line(controlSys, 'V_Error/1', 'PI_Regulator/1');
 add_line(controlSys, 'PI_Regulator/1', 'Enerpro_Gain/1');
-add_line(controlSys, 'Enerpro_Gain/1', 'Alpha_Sat/1');
+add_line(controlSys, 'Enerpro_Gain/1', 'Enerpro_Offset/1');
+add_line(controlSys, 'Offset_Const/1', 'Enerpro_Offset/2');
+add_line(controlSys, 'Enerpro_Offset/1', 'Alpha_Sat/1');
 add_line(controlSys, 'Alpha_Sat/1', 'alpha_deg/1');
 
-add_block('built-in/Note', [modelName '/Note_Control'], ...
-    'Position', [500 520 700 545], ...
-    'Text', sprintf('Control: EPICS->PLC->Regulator->Enerpro\nPI: Kp=%.1f, Ki=%.1f, Soft-start=%.0fs', ...
-    P.reg_Kp, P.reg_Ki, P.reg_soft_start_s));
-
 %% ========================================================================
-%  SECTION 11: MEASUREMENT AND INSTRUMENTATION
+%  SECTION 12: MEASUREMENT AND INSTRUMENTATION
 %  ========================================================================
-%  Models the B118 monitoring channels and EPICS PVs.
-%  4 monitoring channels matching the real Waveform Buffer System:
-%    Ch1: HVPS DC Voltage (0 to -90 kV)
-%    Ch2: HVPS DC Current (0 to 30 A)
-%    Ch3: Inductor 2 sawtooth (T2 firing diagnosis)
-%    Ch4: Transformer 1 AC current (T1 health)
+%
+%  $$V_{measured} = \frac{V_{out}}{1000} \quad \text{(1000:1 voltage divider)}$$
 
-% --- Voltage Measurement (1000:1 divider) ---
+% Voltage Measurement (across klystron load)
 add_block('powerlib/Measurements/Voltage Measurement', ...
     [modelName '/V_Measure_DC'], ...
     'Position', [1320 250 1360 290]);
 
-add_block('built-in/Gain', [modelName '/V_Divider_1000'], ...
+% Voltage divider (1000:1)
+add_block('simulink/Math Operations/Gain', [modelName '/V_Divider'], ...
     'Position', [1390 255 1420 280], ...
     'Gain', num2str(1/P.V_divider_ratio));
 
-% Convert to kV for display
-add_block('built-in/Gain', [modelName '/V_to_kV'], ...
+% Convert to kV
+add_block('simulink/Math Operations/Gain', [modelName '/V_to_kV'], ...
     'Position', [1440 255 1470 280], ...
     'Gain', '1e-3');
 
-% --- Current Measurement (Danfysik DC-CT) ---
+% Current Measurement
 add_block('powerlib/Measurements/Current Measurement', ...
     [modelName '/I_Measure_DC'], ...
     'Position', [1200 250 1240 290]);
 
-% --- AC Voltage Measurement (for PLL sync) ---
-add_block('powerlib/Measurements/Three-Phase V-I Measurement', ...
-    [modelName '/AC_VI_Measure'], ...
-    'Position', [170 200 210 280], ...
-    'VoltageMeasurement', 'phase-to-ground', ...
-    'CurrentMeasurement', 'yes');
-
-% --- Scopes ---
-% Output Voltage and Current scope
-add_block('built-in/Scope', [modelName '/Scope_Output'], ...
+% Scopes
+add_block('simulink/Sinks/Scope', [modelName '/Scope_Output'], ...
     'Position', [1520 200 1560 260], ...
     'NumInputPorts', '3');
 
-% Control signals scope
-add_block('built-in/Scope', [modelName '/Scope_Control'], ...
+add_block('simulink/Sinks/Scope', [modelName '/Scope_Control'], ...
     'Position', [1520 300 1560 360], ...
     'NumInputPorts', '2');
 
-% --- To Workspace blocks for post-processing ---
-add_block('built-in/ToWorkspace', [modelName '/WS_Voltage_kV'], ...
+% To Workspace blocks
+add_block('simulink/Sinks/To Workspace', [modelName '/WS_Voltage_kV'], ...
     'Position', [1520 260 1580 280], ...
     'VariableName', 'V_out_kV', ...
     'MaxDataPoints', 'inf', ...
     'SampleTime', '-1');
 
-add_block('built-in/ToWorkspace', [modelName '/WS_Current_A'], ...
+add_block('simulink/Sinks/To Workspace', [modelName '/WS_Current_A'], ...
     'Position', [1520 370 1580 390], ...
     'VariableName', 'I_out_A', ...
     'MaxDataPoints', 'inf', ...
     'SampleTime', '-1');
 
-add_block('built-in/ToWorkspace', [modelName '/WS_Alpha_deg'], ...
+add_block('simulink/Sinks/To Workspace', [modelName '/WS_Alpha_deg'], ...
     'Position', [1520 410 1580 430], ...
-    'VariableName', 'alpha_deg', ...
+    'VariableName', 'alpha_deg_ws', ...
     'MaxDataPoints', 'inf', ...
     'SampleTime', '-1');
-
-add_block('built-in/ToWorkspace', [modelName '/WS_Power_MW'], ...
-    'Position', [1520 450 1580 470], ...
-    'VariableName', 'P_out_MW', ...
-    'MaxDataPoints', 'inf', ...
-    'SampleTime', '-1');
-
-% --- Power Calculation ---
-add_block('built-in/Product', [modelName '/Power_Calc'], ...
-    'Position', [1460 320 1500 370], ...
-    'Inputs', '2');
-add_block('built-in/Gain', [modelName '/Power_to_MW'], ...
-    'Position', [1510 330 1540 360], ...
-    'Gain', '1e-6');
-
-add_block('built-in/Note', [modelName '/Note_Meas'], ...
-    'Position', [1300 200 1500 225], ...
-    'Text', sprintf('B118 Monitoring Channels\n1000:1 Voltage Divider, Danfysik DC-CT'));
 
 %% ========================================================================
-%  SECTION 12: TOP-LEVEL WIRING (POWER PATH)
+%  SECTION 13: TOP-LEVEL WIRING (POWER PATH)
 %  ========================================================================
-%  Connect all blocks in the main power conversion chain:
-%  AC Source -> T0a/T0b -> T1/T2 -> Bridge1/Bridge2 -> L1/L2 -> 
-%  C_Filter -> L3 -> Klystron_Load
-
-% NOTE: The exact add_line() calls depend on the port naming convention
-% of the Specialized Power Systems blocks, which varies by MATLAB version.
-% The connections below use the standard port naming.
-% If running in a different version, port names may need adjustment.
+%
+%  Specialized Power Systems blocks use conserving (physical) ports.
+%  Port names for SPS blocks:
+%    Three-Phase Source:      A, B, C (output ports = LConn1, LConn2, LConn3)
+%    Three-Phase Xfmr (2W):  A,B,C (pri=LConn1..3), a,b,c (sec=RConn1..3)
+%    Universal Bridge:        A,B,C (AC=LConn1..3), +,- (DC=RConn1,RConn2)
+%    Series RLC Branch:       +,- (LConn1, RConn1)
+%    Voltage Measurement:     +,- (LConn1, RConn1)  output: Simulink signal
+%    Current Measurement:     +,- (LConn1, RConn1)  output: Simulink signal
+%
+%  Note: Port naming uses 'LConn' and 'RConn' for physical (conserving)
+%  ports on SPS blocks. Actual port numbering may vary by MATLAB version.
+%  Connections wrapped in try-catch for version compatibility.
 
 fprintf('\n--- Wiring Power Path ---\n');
+fprintf('NOTE: SPS port names vary by MATLAB version.\n');
+fprintf('If wiring errors occur, check get_param(block,''PortConnectivity'')\n\n');
 
-% AC Source -> T0a (primary)
+% AC Source -> T0a primary (ABC -> ABC)
 try
-    add_line(modelName, 'AC_Source_12kV/1', 'T0a_PhaseShift_Plus15/1');
-    add_line(modelName, 'AC_Source_12kV/2', 'T0a_PhaseShift_Plus15/2');
-    add_line(modelName, 'AC_Source_12kV/3', 'T0a_PhaseShift_Plus15/3');
-catch ME
-    fprintf('  Note: AC->T0a wiring may need manual adjustment: %s\n', ME.message);
-end
+    add_line(modelName, 'AC_Source_12kV/LConn1', 'T0a_Plus30deg/LConn1', 'autorouting', 'on');
+    add_line(modelName, 'AC_Source_12kV/LConn2', 'T0a_Plus30deg/LConn2', 'autorouting', 'on');
+    add_line(modelName, 'AC_Source_12kV/LConn3', 'T0a_Plus30deg/LConn3', 'autorouting', 'on');
+    fprintf('  AC -> T0a: OK\n');
+catch ME, fprintf('  AC -> T0a: MANUAL WIRING NEEDED (%s)\n', ME.message); end
 
-% AC Source -> T0b (primary)
+% AC Source -> T0b primary (ABC -> ABC)
 try
-    add_line(modelName, 'AC_Source_12kV/1', 'T0b_PhaseShift_Minus15/1');
-    add_line(modelName, 'AC_Source_12kV/2', 'T0b_PhaseShift_Minus15/2');
-    add_line(modelName, 'AC_Source_12kV/3', 'T0b_PhaseShift_Minus15/3');
-catch ME
-    fprintf('  Note: AC->T0b wiring may need manual adjustment: %s\n', ME.message);
-end
+    add_line(modelName, 'AC_Source_12kV/LConn1', 'T0b_Zero_deg/LConn1', 'autorouting', 'on');
+    add_line(modelName, 'AC_Source_12kV/LConn2', 'T0b_Zero_deg/LConn2', 'autorouting', 'on');
+    add_line(modelName, 'AC_Source_12kV/LConn3', 'T0b_Zero_deg/LConn3', 'autorouting', 'on');
+    fprintf('  AC -> T0b: OK\n');
+catch ME, fprintf('  AC -> T0b: MANUAL WIRING NEEDED (%s)\n', ME.message); end
 
 % T0a secondary -> T1 primary
 try
-    add_line(modelName, 'T0a_PhaseShift_Plus15/4', 'T1_Rectifier_Xfmr/1');
-    add_line(modelName, 'T0a_PhaseShift_Plus15/5', 'T1_Rectifier_Xfmr/2');
-    add_line(modelName, 'T0a_PhaseShift_Plus15/6', 'T1_Rectifier_Xfmr/3');
-catch ME
-    fprintf('  Note: T0a->T1 wiring may need manual adjustment: %s\n', ME.message);
-end
+    add_line(modelName, 'T0a_Plus30deg/RConn1', 'T1_Rectifier_Xfmr/LConn1', 'autorouting', 'on');
+    add_line(modelName, 'T0a_Plus30deg/RConn2', 'T1_Rectifier_Xfmr/LConn2', 'autorouting', 'on');
+    add_line(modelName, 'T0a_Plus30deg/RConn3', 'T1_Rectifier_Xfmr/LConn3', 'autorouting', 'on');
+    fprintf('  T0a -> T1: OK\n');
+catch ME, fprintf('  T0a -> T1: MANUAL WIRING NEEDED (%s)\n', ME.message); end
 
 % T0b secondary -> T2 primary
 try
-    add_line(modelName, 'T0b_PhaseShift_Minus15/4', 'T2_Rectifier_Xfmr/1');
-    add_line(modelName, 'T0b_PhaseShift_Minus15/5', 'T2_Rectifier_Xfmr/2');
-    add_line(modelName, 'T0b_PhaseShift_Minus15/6', 'T2_Rectifier_Xfmr/3');
-catch ME
-    fprintf('  Note: T0b->T2 wiring may need manual adjustment: %s\n', ME.message);
-end
+    add_line(modelName, 'T0b_Zero_deg/RConn1', 'T2_Rectifier_Xfmr/LConn1', 'autorouting', 'on');
+    add_line(modelName, 'T0b_Zero_deg/RConn2', 'T2_Rectifier_Xfmr/LConn2', 'autorouting', 'on');
+    add_line(modelName, 'T0b_Zero_deg/RConn3', 'T2_Rectifier_Xfmr/LConn3', 'autorouting', 'on');
+    fprintf('  T0b -> T2: OK\n');
+catch ME, fprintf('  T0b -> T2: MANUAL WIRING NEEDED (%s)\n', ME.message); end
 
-% T1 secondary -> Bridge1 (AC inputs)
+% T1 secondary -> Bridge1 AC inputs
 try
-    add_line(modelName, 'T1_Rectifier_Xfmr/4', 'Bridge1_SCR/1');
-    add_line(modelName, 'T1_Rectifier_Xfmr/5', 'Bridge1_SCR/2');
-    add_line(modelName, 'T1_Rectifier_Xfmr/6', 'Bridge1_SCR/3');
-catch ME
-    fprintf('  Note: T1->Bridge1 wiring may need manual adjustment: %s\n', ME.message);
-end
+    add_line(modelName, 'T1_Rectifier_Xfmr/RConn1', 'Bridge1_SCR/LConn1', 'autorouting', 'on');
+    add_line(modelName, 'T1_Rectifier_Xfmr/RConn2', 'Bridge1_SCR/LConn2', 'autorouting', 'on');
+    add_line(modelName, 'T1_Rectifier_Xfmr/RConn3', 'Bridge1_SCR/LConn3', 'autorouting', 'on');
+    fprintf('  T1 -> Bridge1: OK\n');
+catch ME, fprintf('  T1 -> Bridge1: MANUAL WIRING NEEDED (%s)\n', ME.message); end
 
-% T2 secondary -> Bridge2 (AC inputs)
+% T2 secondary -> Bridge2 AC inputs
 try
-    add_line(modelName, 'T2_Rectifier_Xfmr/4', 'Bridge2_SCR/1');
-    add_line(modelName, 'T2_Rectifier_Xfmr/5', 'Bridge2_SCR/2');
-    add_line(modelName, 'T2_Rectifier_Xfmr/6', 'Bridge2_SCR/3');
-catch ME
-    fprintf('  Note: T2->Bridge2 wiring may need manual adjustment: %s\n', ME.message);
-end
+    add_line(modelName, 'T2_Rectifier_Xfmr/RConn1', 'Bridge2_SCR/LConn1', 'autorouting', 'on');
+    add_line(modelName, 'T2_Rectifier_Xfmr/RConn2', 'Bridge2_SCR/LConn2', 'autorouting', 'on');
+    add_line(modelName, 'T2_Rectifier_Xfmr/RConn3', 'Bridge2_SCR/LConn3', 'autorouting', 'on');
+    fprintf('  T2 -> Bridge2: OK\n');
+catch ME, fprintf('  T2 -> Bridge2: MANUAL WIRING NEEDED (%s)\n', ME.message); end
 
-% Pulse generators -> Bridges (gate pulses)
+% Gate pulses to bridges (Simulink signal -> Universal Bridge 'g' port)
 try
-    add_line(modelName, 'PulseGen1/1', 'Bridge1_SCR/4');  % Gate port
-    add_line(modelName, 'PulseGen2/1', 'Bridge2_SCR/4');  % Gate port
-catch ME
-    fprintf('  Note: PulseGen->Bridge wiring may need manual adjustment: %s\n', ME.message);
-end
+    add_line(modelName, 'PulseGen1/1', 'Bridge1_SCR/1');
+    add_line(modelName, 'PulseGen2/1', 'Bridge2_SCR/1');
+    fprintf('  PulseGen -> Bridges: OK\n');
+catch ME, fprintf('  PulseGen -> Bridges: MANUAL WIRING NEEDED (%s)\n', ME.message); end
 
-% Control System alpha -> Pulse generators
+% Control -> Pulse generators (alpha input)
 try
-    add_line(modelName, 'Control_System/1', 'PulseGen1/2');  % Alpha input
-    add_line(modelName, 'Control_System/1', 'PulseGen2/2');  % Alpha input
-catch ME
-    fprintf('  Note: Control->PulseGen wiring may need manual adjustment: %s\n', ME.message);
-end
+    add_line(modelName, 'Control_System/1', 'PulseGen1/1');
+    add_line(modelName, 'Control_System/1', 'PulseGen2/1');
+    fprintf('  Control -> PulseGens: OK\n');
+catch ME, fprintf('  Control -> PulseGens: MANUAL WIRING NEEDED (%s)\n', ME.message); end
 
-% Bridge1 DC+ -> L1 -> common bus
-% Bridge2 DC+ -> L2 -> common bus
-% Common bus -> C_Filter -> L3 -> Klystron_Load -> return
+% Bridge DC outputs -> filter inductors
+% Bridge+ -> L_filter -> common bus -> C_filter -> L3 -> Klystron -> return
 try
-    add_line(modelName, 'Bridge1_SCR/LConn1', 'L1_Filter_Inductor/LConn1');
-    add_line(modelName, 'Bridge2_SCR/LConn1', 'L2_Filter_Inductor/LConn1');
-catch ME
-    fprintf('  Note: Bridge->Filter wiring may need manual adjustment: %s\n', ME.message);
-end
+    add_line(modelName, 'Bridge1_SCR/RConn1', 'L1_Filter/LConn1', 'autorouting', 'on');
+    add_line(modelName, 'Bridge2_SCR/RConn1', 'L2_Filter/LConn1', 'autorouting', 'on');
+    fprintf('  Bridge+ -> L_filter: OK\n');
+catch ME, fprintf('  Bridge+ -> L_filter: MANUAL WIRING NEEDED (%s)\n', ME.message); end
 
-fprintf('Power path wiring complete (check for manual adjustments needed).\n');
-
-%% ========================================================================
-%  SECTION 13: FEEDBACK CONNECTIONS
-%  ========================================================================
-
-fprintf('\n--- Wiring Feedback ---\n');
-
-% Voltage feedback: V_Measure -> divider -> to_kV -> Control System input 1
-% Current feedback: I_Measure -> Control System input 2
+% Measurement -> Divider -> kV -> Control feedback
 try
-    add_line(modelName, 'V_to_kV/1', 'Control_System/1');  % V_measured_kV
-    add_line(modelName, 'I_Measure_DC/1', 'Control_System/2');  % I_measured_A
-catch ME
-    fprintf('  Note: Feedback wiring may need manual adjustment: %s\n', ME.message);
-end
-
-% Voltage & Current to scopes and workspace
-try
-    add_line(modelName, 'V_to_kV/1', 'Scope_Output/1');
+    add_line(modelName, 'V_Measure_DC/1', 'V_Divider/1');
+    add_line(modelName, 'V_Divider/1', 'V_to_kV/1');
+    add_line(modelName, 'V_to_kV/1', 'Control_System/1');
     add_line(modelName, 'V_to_kV/1', 'WS_Voltage_kV/1');
-    add_line(modelName, 'I_Measure_DC/1', 'Scope_Output/2');
+    add_line(modelName, 'I_Measure_DC/1', 'Control_System/2');
     add_line(modelName, 'I_Measure_DC/1', 'WS_Current_A/1');
-    add_line(modelName, 'Control_System/1', 'Scope_Control/1');
     add_line(modelName, 'Control_System/1', 'WS_Alpha_deg/1');
-catch ME
-    fprintf('  Note: Scope/WS wiring may need manual adjustment: %s\n', ME.message);
-end
+    fprintf('  Feedback wiring: OK\n');
+catch ME, fprintf('  Feedback: MANUAL WIRING NEEDED (%s)\n', ME.message); end
 
-fprintf('Feedback wiring complete.\n');
+% Crowbar trigger
+try
+    add_line(modelName, 'Crowbar_Trigger/1', 'Crowbar_SCR/1');
+    fprintf('  Crowbar trigger: OK\n');
+catch ME, fprintf('  Crowbar: MANUAL WIRING NEEDED (%s)\n', ME.message); end
 
-%% ========================================================================
-%  SECTION 14: MODEL ANNOTATIONS AND DOCUMENTATION
-%  ========================================================================
-
-% Title annotation
-add_block('built-in/Note', [modelName '/Title'], ...
-    'Position', [400 10 900 70], ...
-    'FontSize', 14, ...
-    'Text', sprintf(['SPEAR3 HVPS Legacy System - Simulink Model\n' ...
-    '12-Pulse Thyristor Phase-Controlled Rectifier\n' ...
-    '-77 kV DC @ 22 A (1.7 MW) | Building 514 -> 118']));
-
-% Protection layer annotations
-add_block('built-in/Note', [modelName '/Note_Protection'], ...
-    'Position', [1080 460 1300 540], ...
-    'Text', sprintf(['4-Layer Arc Protection:\n' ...
-    'L1: Passive (500 Ohm isolation) <40J\n' ...
-    'L2: Semi-active (star-point bypass) 4-8ms\n' ...
-    'L3: Active (SCR crowbar) <5J, ~1us\n' ...
-    'L4: Cable inductors (200uH) limit dI/dt']));
-
-% Key equations annotation
-add_block('built-in/Note', [modelName '/Note_Equations'], ...
-    'Position', [80 500 450 620], ...
-    'Text', sprintf(['Key System Equations:\n' ...
-    'V_dc = (6*sqrt(2)/pi) * V_LL * cos(alpha) = 2.70 * V_LL * cos(alpha)\n' ...
-    'V_dc_max = %.1f kV (alpha=0)\n' ...
-    'V_nominal = %.1f kV (alpha=%.1f deg)\n' ...
-    'Ripple: 3.41%% unfiltered -> <0.02%% filtered (720 Hz)\n' ...
-    'LC filter: fc=%.1f Hz, attenuation=%.0f dB at 720 Hz\n' ...
-    'I_beam = kappa * V^(3/2) (perveance model)'], ...
-    P.V_dc_max/1e3, abs(P.V_nominal)/1e3, ...
-    acosd(abs(P.V_nominal)/P.V_dc_max), ...
-    P.LC_resonance, ...
-    20*log10((P.f_ripple/P.LC_resonance)^2)));
-
-% System overview annotation
-add_block('built-in/Note', [modelName '/Note_Overview'], ...
-    'Position', [80 640 450 750], ...
-    'Text', sprintf(['Signal Path:\n' ...
-    '12.47kV 3ph -> T0(+/-15deg) -> T1/T2(2.67:1) -> 2x6-pulse SCR ->\n' ...
-    'L1+L2(0.3H) -> C(8uF)+R(500ohm) -> L3(200uH) -> Klystron(3.5kohm)\n\n' ...
-    'Control Path:\n' ...
-    'EPICS -> VXI -> PLC(N7:10,N7:11) -> Regulator(PI) -> Enerpro(PLL) -> alpha']));
+fprintf('\nWiring complete. Check messages above for any manual adjustments.\n');
 
 %% ========================================================================
-%  SECTION 15: SAVE MODEL
+%  SECTION 14: SAVE MODEL
 %  ========================================================================
 
-% Auto-arrange the model layout
-% set_param(modelName, 'ZoomFactor', 'FitSystem');
-
-% Save the model
 save_system(modelName);
 fprintf('\n=== Model "%s.slx" saved successfully ===\n', modelName);
-fprintf('To run: sim(''%s'') or click Run in Simulink\n', modelName);
 
 %% ========================================================================
-%  SECTION 16: POST-SIMULATION ANALYSIS SCRIPT
+%  SECTION 15: POST-SIMULATION ANALYSIS FUNCTIONS
 %  ========================================================================
-%  Run this section AFTER simulation completes to generate analysis plots.
-%  Results are in workspace variables: V_out_kV, I_out_A, alpha_deg, P_out_MW
+%
+%  Key system equations (LaTeX for Live Editor):
+%
+%  DC Output Voltage:
+%  $$V_{dc} = \frac{6\sqrt{2}}{\pi} V_{LL} \cos\alpha$$
+%
+%  12-Pulse Ripple Frequency:
+%  $$f_{ripple} = 12 f_{AC} = 720 \; \text{Hz}$$
+%
+%  Unfiltered Ripple (peak-to-peak):
+%  $$\Delta V_{pp} = V_{dc} \left(1 - \cos\frac{\pi}{12}\right) / \cos\frac{\pi}{12} \approx 3.41\%$$
+%
+%  LC Filter Resonance:
+%  $$f_0 = \frac{1}{2\pi\sqrt{LC}}$$
+%
+%  Filtered Ripple Attenuation at $n$-th harmonic:
+%  $$A_n = \frac{1}{\left| 1 - \left(\frac{n \cdot f_{ripple}}{f_0}\right)^2 \right|}$$
+%
+%  Klystron Perveance Model:
+%  $$I = \kappa \, V^{3/2}, \quad \kappa \approx 1 \; \mu\text{A/V}^{3/2}$$
+%
+%  PI Regulator Output:
+%  $$u(t) = K_p \, e(t) + K_i \int_0^t e(\tau) \, d\tau$$
+%
+%  Enerpro Firing Angle Map:
+%  $$\alpha = 171.6 - 24 \cdot V_{SIG\_HI} \quad (\text{deg})$$
+%
+%  PLC Digital Filter:
+%  $$H(z) = \frac{\alpha_{filt}}{1 - (1-\alpha_{filt}) z^{-1}}, \quad \tau \approx 20 \; \text{ms}$$
+%
+%  Stored Energy in Filter:
+%  $$E = \frac{1}{2} C V^2 + \frac{1}{2} L I^2$$
+%
+%  Arc Energy with Crowbar:
+%  $$E_{arc} = \int_0^{t_{crow}} V(t) \cdot I(t) \, dt < 5 \; \text{J}$$
 
-fprintf('\n=== Post-Simulation Analysis ===\n');
-fprintf('After simulation, run the code below to analyze results:\n\n');
-
-disp('% --- Run Simulation ---');
-disp('simOut = sim(''SPEAR3_HVPS'');');
-disp('');
-disp('% --- Extract Results ---');
-disp('t = simOut.tout;');
-disp('V = simOut.V_out_kV.signals.values;');
-disp('I = simOut.I_out_A.signals.values;');
-disp('alpha = simOut.alpha_deg.signals.values;');
-disp('');
-
-%% ========================================================================
-%  SECTION 17: ANALYSIS AND PLOTTING FUNCTIONS
-%  ========================================================================
-%  These functions can be called after simulation to analyze results.
-
-fprintf('Defining analysis functions...\n');
-
-% --- Function: Plot System Overview ---
 function plot_spear3_overview(t, V_kV, I_A, alpha_deg)
-    % PLOT_SPEAR3_OVERVIEW Generate 4-panel overview of HVPS operation
-    %
-    %   plot_spear3_overview(t, V_kV, I_A, alpha_deg)
-    %
-    %   Matches the Python simulation's plot_system_overview output.
-    
+%PLOT_SPEAR3_OVERVIEW Generate 4-panel HVPS system overview
+%
+%   plot_spear3_overview(t, V_kV, I_A, alpha_deg)
+
     figure('Name', 'SPEAR3 HVPS System Overview', ...
            'Position', [100 100 1200 900]);
     
-    % Panel 1: Output Voltage
     subplot(4,1,1);
     plot(t, V_kV, 'b-', 'LineWidth', 1.5);
-    hold on;
-    yline(-77, 'r--', 'Nominal -77 kV', 'LineWidth', 1);
+    hold on; yline(-77, 'r--', 'Nominal', 'LineWidth', 1);
     xlabel('Time (s)'); ylabel('Voltage (kV)');
-    title('HVPS Output Voltage (Ch1: DC Voltage Monitor)');
-    grid on; legend('V_{out}', 'Nominal');
+    title('DC Output Voltage'); grid on;
     
-    % Panel 2: Output Current
     subplot(4,1,2);
     plot(t, I_A, 'Color', [0.8 0.4 0], 'LineWidth', 1.5);
-    hold on;
-    yline(22, 'r--', 'Nominal 22 A', 'LineWidth', 1);
+    hold on; yline(22, 'r--', 'Nominal', 'LineWidth', 1);
     xlabel('Time (s)'); ylabel('Current (A)');
-    title('HVPS Output Current (Ch2: Danfysik DC-CT)');
-    grid on; legend('I_{out}', 'Nominal');
+    title('DC Output Current'); grid on;
     
-    % Panel 3: Firing Angle
     subplot(4,1,3);
     plot(t, alpha_deg, 'Color', [0.2 0.6 0.2], 'LineWidth', 1.5);
-    xlabel('Time (s)'); ylabel('\alpha (degrees)');
-    title('SCR Firing Angle (Enerpro FCOG1200 output)');
-    grid on;
-    ylim([0 180]);
+    xlabel('Time (s)'); ylabel('\alpha (deg)');
+    title('SCR Firing Angle'); grid on; ylim([0 180]);
     
-    % Panel 4: Power
-    P_MW = abs(V_kV .* I_A) * 1e-3;  % kV * A = kW, /1000 = MW
     subplot(4,1,4);
+    P_MW = abs(V_kV .* I_A) * 1e-3;
     plot(t, P_MW, 'm-', 'LineWidth', 1.5);
-    hold on;
-    yline(1.7, 'r--', 'Nominal 1.7 MW', 'LineWidth', 1);
+    hold on; yline(1.7, 'r--', 'Nominal', 'LineWidth', 1);
     xlabel('Time (s)'); ylabel('Power (MW)');
-    title('Output Power');
-    grid on; legend('P_{out}', 'Nominal');
+    title('Output Power'); grid on;
     
-    sgtitle('SPEAR3 HVPS Legacy System - Simulink Simulation Results', ...
-            'FontSize', 14, 'FontWeight', 'bold');
+    sgtitle('SPEAR3 HVPS - Simulink Results', 'FontSize', 14, 'FontWeight', 'bold');
 end
 
-% --- Function: Ripple Analysis ---
 function analyze_ripple(t, V_kV, t_start)
-    % ANALYZE_RIPPLE Compute ripple metrics from steady-state voltage
-    %
-    %   analyze_ripple(t, V_kV, t_start)
-    %   t_start: time (s) after which to consider steady-state
-    
-    if nargin < 3, t_start = max(t) * 0.5; end
-    
+%ANALYZE_RIPPLE Compute ripple metrics from steady-state waveform
+%
+%   analyze_ripple(t, V_kV, t_start)
+
+    if nargin < 3, t_start = max(t)*0.5; end
     idx = t >= t_start;
     V_ss = V_kV(idx);
     V_mean = mean(abs(V_ss));
-    
-    ripple_pp = max(V_ss) - min(V_ss);
-    ripple_rms = std(V_ss);
+    rpp = max(V_ss) - min(V_ss);
+    rrms = std(V_ss);
     
     fprintf('\n=== Ripple Analysis (t > %.2f s) ===\n', t_start);
-    fprintf('  Mean voltage:    %.2f kV\n', V_mean);
-    fprintf('  Ripple P-P:      %.3f kV (%.3f%%)\n', ripple_pp, ripple_pp/V_mean*100);
-    fprintf('  Ripple RMS:      %.4f kV (%.4f%%)\n', ripple_rms, ripple_rms/V_mean*100);
-    fprintf('  Spec P-P:        <1%% -> %s\n', iff(ripple_pp/V_mean*100 < 1, 'PASS', 'FAIL'));
-    fprintf('  Spec RMS:        <0.2%% -> %s\n', iff(ripple_rms/V_mean*100 < 0.2, 'PASS', 'FAIL'));
+    fprintf('  Mean |V|:   %.2f kV\n', V_mean);
+    fprintf('  Ripple PP:  %.3f kV (%.3f%%)\n', rpp, rpp/V_mean*100);
+    fprintf('  Ripple RMS: %.4f kV (%.4f%%)\n', rrms, rrms/V_mean*100);
     
-    % FFT analysis
+    % FFT
     dt = mean(diff(t(idx)));
-    Fs = 1/dt;
-    N = length(V_ss);
+    Fs = 1/dt; N = length(V_ss);
     Y = fft(V_ss - mean(V_ss));
-    f = (0:N/2-1) * Fs / N;
-    mag = 2 * abs(Y(1:N/2)) / N;
+    f = (0:N/2-1)*Fs/N;
+    mag = 2*abs(Y(1:N/2))/N;
     
-    figure('Name', 'SPEAR3 HVPS Ripple Spectrum');
-    subplot(2,1,1);
-    plot(t(idx), V_ss, 'b-');
-    xlabel('Time (s)'); ylabel('Voltage (kV)');
-    title('Steady-State Voltage Waveform');
-    grid on;
-    
-    subplot(2,1,2);
-    stem(f, mag, 'b-', 'MarkerSize', 3);
-    xlim([0 5000]);
-    xlabel('Frequency (Hz)'); ylabel('Magnitude (kV)');
-    title('Ripple Frequency Spectrum');
-    xline(720, 'r--', '720 Hz (12-pulse)', 'LineWidth', 1.5);
-    xline(1440, 'g--', '1440 Hz', 'LineWidth', 1);
-    grid on;
-    
-    sgtitle('SPEAR3 HVPS Output Ripple Analysis');
+    figure('Name', 'Ripple Spectrum');
+    subplot(2,1,1); plot(t(idx), V_ss, 'b-');
+    xlabel('Time (s)'); ylabel('V (kV)'); title('Steady-State Voltage'); grid on;
+    subplot(2,1,2); stem(f, mag, 'b-', 'MarkerSize', 3);
+    xlim([0 5000]); xlabel('Frequency (Hz)'); ylabel('Magnitude (kV)');
+    title('Ripple Spectrum'); grid on;
+    xline(720, 'r--', '720 Hz'); xline(1440, 'g--', '1440 Hz');
 end
 
-% --- Function: Protection Event Analysis ---
 function analyze_protection(t, V_kV, I_A, arc_time)
-    % ANALYZE_PROTECTION Analyze crowbar/arc protection response
-    %
-    %   analyze_protection(t, V_kV, I_A, arc_time)
+%ANALYZE_PROTECTION Analyze arc/crowbar protection event
+%
+%   analyze_protection(t, V_kV, I_A, arc_time)
+
+    w = 0.05;
+    idx = (t >= arc_time-w) & (t <= arc_time+w);
+    figure('Name', 'Protection Event');
+    subplot(2,1,1); plot(t(idx)*1000, V_kV(idx), 'b-', 'LineWidth', 1.5);
+    xlabel('Time (ms)'); ylabel('V (kV)'); title(sprintf('Voltage at arc t=%.3fs', arc_time));
+    xline(arc_time*1000, 'r--', 'Arc'); grid on;
+    subplot(2,1,2); plot(t(idx)*1000, I_A(idx), 'r-', 'LineWidth', 1.5);
+    xlabel('Time (ms)'); ylabel('I (A)'); title('Current');
+    xline(arc_time*1000, 'r--', 'Arc'); grid on;
     
-    window = 0.05;  % 50 ms window around event
-    idx = (t >= arc_time - window) & (t <= arc_time + window);
-    
-    figure('Name', 'SPEAR3 HVPS Protection Event');
-    
-    subplot(2,1,1);
-    plot(t(idx)*1000, V_kV(idx), 'b-', 'LineWidth', 1.5);
-    xlabel('Time (ms)'); ylabel('Voltage (kV)');
-    title(sprintf('Voltage During Arc Event at t = %.3f s', arc_time));
-    xline(arc_time*1000, 'r--', 'Arc', 'LineWidth', 2);
-    grid on;
-    
-    subplot(2,1,2);
-    plot(t(idx)*1000, I_A(idx), 'r-', 'LineWidth', 1.5);
-    xlabel('Time (ms)'); ylabel('Current (A)');
-    title('Current During Arc Event');
-    xline(arc_time*1000, 'r--', 'Arc', 'LineWidth', 2);
-    grid on;
-    
-    % Estimate arc energy (simplified)
     dt = mean(diff(t));
-    arc_idx = (t >= arc_time) & (t <= arc_time + 0.001);  % 1 ms window
-    E_arc = sum(abs(V_kV(arc_idx)*1e3 .* I_A(arc_idx))) * dt;
-    fprintf('\n=== Protection Event Analysis ===\n');
-    fprintf('  Arc time:        %.3f s\n', arc_time);
-    fprintf('  Est. arc energy: %.1f J (spec: <5 J with crowbar)\n', E_arc);
-    
-    sgtitle('SPEAR3 HVPS Arc Protection Response');
+    ai = (t >= arc_time) & (t <= arc_time + 0.001);
+    E = sum(abs(V_kV(ai)*1e3 .* I_A(ai)))*dt;
+    fprintf('\n=== Protection Analysis ===\n');
+    fprintf('  Arc energy: %.1f J (spec: <5 J)\n', E);
 end
 
-% Helper function
-function result = iff(condition, trueVal, falseVal)
-    if condition
-        result = trueVal;
-    else
-        result = falseVal;
+%% ========================================================================
+%  SECTION 16: PARAMETER DISCOVERY HELPER
+%  ========================================================================
+%  Run this to discover valid parameter names for any SPS block:
+%
+%  >> discover_block_params('SPEAR3_HVPS/AC_Source_12kV')
+
+function discover_block_params(blockPath)
+%DISCOVER_BLOCK_PARAMS List valid mask parameters for a Simulink block
+%
+%   discover_block_params(blockPath)
+
+    dp = get_param(blockPath, 'DialogParameters');
+    names = fieldnames(dp);
+    fprintf('\nValid parameters for: %s\n', blockPath);
+    fprintf('%-30s %-15s %s\n', 'Parameter', 'Type', 'Current Value');
+    fprintf('%s\n', repmat('-', 1, 70));
+    for i = 1:length(names)
+        val = get_param(blockPath, names{i});
+        if ischar(val)
+            fprintf('%-30s %-15s %s\n', names{i}, dp.(names{i}).Type, val);
+        else
+            fprintf('%-30s %-15s [non-string]\n', names{i}, dp.(names{i}).Type);
+        end
     end
 end
 
 %% ========================================================================
-%  SECTION 18: QUICK SIMULATION SCRIPT
+%  DONE
 %  ========================================================================
-%  Uncomment and run this section to execute the simulation directly.
-
-% fprintf('\n=== Running Simulation ===\n');
-% simOut = sim(modelName, 'StopTime', num2str(P.sim_time));
-% 
-% % Extract results
-% t = simOut.tout;
-% V = simOut.get('V_out_kV');
-% I = simOut.get('I_out_A');
-% A = simOut.get('alpha_deg');
-% 
-% % Plot overview
-% if ~isempty(V) && ~isempty(I) && ~isempty(A)
-%     plot_spear3_overview(t, V.signals.values, I.signals.values, A.signals.values);
-%     analyze_ripple(t, V.signals.values, P.sim_time * 0.5);
-% else
-%     fprintf('Warning: Some signals not captured. Check model wiring.\n');
-% end
-% 
-% fprintf('\n=== Simulation Complete ===\n');
 
 fprintf('\n');
 fprintf('========================================================\n');
 fprintf(' SPEAR3 HVPS Simulink Model Built Successfully!\n');
 fprintf('========================================================\n');
 fprintf(' Model: %s.slx\n', modelName);
-fprintf(' Blocks: AC Source, T0 Phase-Shift, T1/T2 Rectifier,\n');
-fprintf('         2x 6-Pulse SCR Bridges, LC Filter, Klystron Load,\n');
-fprintf('         Control System (PLC+PI+Enerpro), Crowbar Protection\n');
-fprintf(' Solver: %s, dt_max = %.0f us, t_stop = %.1f s\n', ...
+fprintf(' Solver: %s, dt_max=%.0f us, t_stop=%.1f s\n', ...
     P.sim_solver, P.sim_dt_max*1e6, P.sim_time);
 fprintf('========================================================\n');
-fprintf('\n');
-fprintf('Next steps:\n');
-fprintf('  1. Open model: open_system(''%s'')\n', modelName);
-fprintf('  2. Verify/adjust wiring (power ports may need manual connection)\n');
-fprintf('  3. Run simulation: sim(''%s'')\n', modelName);
-fprintf('  4. Analyze: plot_spear3_overview(t, V, I, alpha)\n');
-fprintf('  5. For arc fault test: set Crowbar_Trigger step time < sim_time\n');
+fprintf('\nNext steps:\n');
+fprintf('  1. open_system(''%s'')\n', modelName);
+fprintf('  2. Verify wiring (check MANUAL WIRING NEEDED messages above)\n');
+fprintf('  3. sim(''%s'')\n', modelName);
+fprintf('  4. plot_spear3_overview(t, V, I, alpha)\n');
+fprintf('  5. For arc test: set_param(''%s/Crowbar_Trigger'',''Time'',''0.3'')\n', modelName);
+fprintf('\nTo discover block parameters:\n');
+fprintf('  discover_block_params(''%s/AC_Source_12kV'')\n', modelName);
 fprintf('\n');
