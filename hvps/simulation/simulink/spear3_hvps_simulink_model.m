@@ -40,6 +40,24 @@ global SPS_PARAM_WARNINGS;
 SPS_PARAM_WARNINGS = {};
 
 %% ========================================================================
+%  OPTIONAL: PARAMETER DISCOVERY MODE
+%  ========================================================================
+%  Set to true to create a temporary model and dump every SPS block's
+%  actual mask variable names.  Run this FIRST on a new MATLAB install to
+%  learn the correct names before building the full model.
+%
+%  >> DEBUG_PARAMETER_DISCOVERY = true;
+%  >> spear3_hvps_simulink_model
+%  (prints parameter tables then exits)
+%
+DEBUG_PARAMETER_DISCOVERY = false;      % <<< flip to true to discover
+
+if DEBUG_PARAMETER_DISCOVERY
+    run_parameter_discovery();
+    return;
+end
+
+%% ========================================================================
 %  SECTION 1: SYSTEM PARAMETERS
 %  All values from hvps/simulation/hvps_sim/config.py and technical docs
 %  ========================================================================
@@ -281,16 +299,20 @@ trySP(blk, 'Winding2Connection', 'Y');
 %  SECTION 6: 12-PULSE SCR RECTIFIER BRIDGES
 %  ========================================================================
 %
-%  Universal Bridge mask parameters (from MathWorks docs):
-%    'Arms'                -> Number of bridge arms: 1 | 2 | 3
-%    'Device'              -> 'Diodes' | 'Thyristors' | 'GTO / Diodes' |
-%                             'MOSFET / Diodes' | 'IGBT / Diodes' |
-%                             'Ideal Switches'
-%    'Ron'                 -> Internal resistance (Ohms)
-%    'Lon'                 -> Internal inductance (H)
-%    'Vf'                  -> Forward voltage (V)
-%    'SnubberResistance'   -> Snubber resistance Rs (Ohms)
-%    'SnubberCapacitance'  -> Snubber capacitance Cs (F)
+%  IMPORTANT — Universal Bridge mask variable names:
+%    The MathWorks docs show DISPLAY LABELS (e.g. "Snubber resistance
+%    Rs (Ohms)") but the actual programmatic mask variable names differ
+%    and vary across MATLAB versions.  The code below uses
+%    setParamMultiCandidate() to try several candidate names and accept
+%    the first that works.
+%
+%  Verified working (from user runtime R2024+):
+%    'Ron', 'Lon'  — confirmed working (short names)
+%
+%  CRITICAL: 'Device' must be set FIRST because 'Vf' is a conditional
+%  parameter that only exists when Device = 'Diodes' or 'Thyristors'.
+%  After setting Device we force a mask refresh via get_param before
+%  attempting to set Vf.
 %
 %  $$V_{dc,bridge} = \frac{3\sqrt{2}}{\pi} V_{LL} \cos\alpha = 1.35 \, V_{LL} \cos\alpha$$
 %  $$V_{dc,12pulse} = 2 \times V_{dc,bridge} = 2.70 \, V_{LL} \cos\alpha$$
@@ -299,66 +321,52 @@ trySP(blk, 'Winding2Connection', 'Y');
 blk = [modelName '/Bridge1_SCR'];
 add_block('powerlib/Power Electronics/Universal Bridge', blk, ...
     'Position', [650 180 730 300]);
-trySP(blk, 'Arms', '3');
-trySP(blk, 'Device', 'Thyristors');
-trySP(blk, 'Ron', num2str(P.scr_on_resistance));
-trySP(blk, 'Lon', '0');
-trySP(blk, 'Vf', num2str(P.scr_fwd_voltage));
-trySP(blk, 'SnubberResistance', num2str(P.scr_snubber_R));
-trySP(blk, 'SnubberCapacitance', num2str(P.scr_snubber_C));
+configureSCRBridge(blk, P);
 
 % --- Bridge 2: 6-pulse SCR bridge (from T2, 0 deg path) ---
 blk = [modelName '/Bridge2_SCR'];
 add_block('powerlib/Power Electronics/Universal Bridge', blk, ...
     'Position', [650 350 730 470]);
-trySP(blk, 'Arms', '3');
-trySP(blk, 'Device', 'Thyristors');
-trySP(blk, 'Ron', num2str(P.scr_on_resistance));
-trySP(blk, 'Lon', '0');
-trySP(blk, 'Vf', num2str(P.scr_fwd_voltage));
-trySP(blk, 'SnubberResistance', num2str(P.scr_snubber_R));
-trySP(blk, 'SnubberCapacitance', num2str(P.scr_snubber_C));
+configureSCRBridge(blk, P);
 
 %% ========================================================================
 %  SECTION 7: PULSE GENERATORS FOR THYRISTOR GATING
 %  ========================================================================
 %
-%  Using "Pulse Generator (Thyristor)" block (recommended replacement for
-%  the deprecated Synchronized 6-Pulse Generator).
+%  The block library path for the thyristor pulse generator varies by
+%  MATLAB version.  We try multiple known paths in order of preference:
 %
-%  Library path: powerlib/Power Electronics/Power Electronics Control/
-%                Pulse Generator (Thyristor)
+%   1. Synchronized 6-Pulse Generator (legacy, powerlib_extras)
+%      Inputs:  alpha_deg, Vab, Vbc, Vca, block
+%      Output:  6-element pulse vector
+%      Params:  'Frequency', 'PulseWidth', 'DoublePulsing'
 %
-%  This block requires 'alpha' (firing angle in deg) and 'wt' (PLL angle)
-%  as inputs and outputs gate pulse vectors PY and PD for 12-pulse config.
+%   2. Pulse Generator (Thyristor) — modern SPS replacement (R2013a+)
+%      Inputs:  alpha (deg), wt (PLL angle rad)
+%      Outputs: PY (6-pulse for Y bridge), PD (6-pulse for D bridge)
+%      Params:  'GeneratorType','PulseWidth','DoublePulsing','SampleTime'
 %
-%  For simpler setup, we use the legacy Synchronized 6-Pulse Generator
-%  from powerlib_extras which has direct voltage synchronization inputs.
-%
-%  Synchronized 6-Pulse Generator inputs:
-%    Port 1: alpha_deg     (firing angle in degrees)
-%    Ports 2-4: Vab, Vbc, Vca  (line-to-line sync voltages)
-%    Port 5: block         (>0 to disable pulses)
-%  Output:
-%    Port 1: pulses        (6-element vector for Universal Bridge gate)
-%
-%  Parameters: 'Frequency', 'PulseWidth', 'DoublePulsing'
+%  The script records which type was found so downstream wiring adapts.
 
-% Pulse generator for Bridge 1 (syncs to T1 primary voltages)
+PULSE_GEN_PATHS = { ...
+    'powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', ...    % legacy
+    'powerlib/Power Electronics/Power Electronics Control/Pulse Generator (Thyristor)', ... % modern SPS
+    'sps_lib/Power Electronics/Pulse Generator (Thyristor)', ...            % alt prefix
+    'ee_lib/Control/Pulse Width Modulation/Thyristor 6-Pulse Generator' ... % Simscape Elec
+};
+
+% --- Helper: add pulse generator block with fallback ---
+pulse_gen_type = '';   % 'legacy' | 'modern_sps' | 'simscape'
+
 blk = [modelName '/PulseGen1'];
-add_block('powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', blk, ...
-    'Position', [560 100 640 160]);
-trySP(blk, 'Frequency', num2str(P.ac_frequency));
-trySP(blk, 'PulseWidth', '60');
-trySP(blk, 'DoublePulsing', 'on');
+[pulse_gen_type] = addPulseGenBlock(blk, PULSE_GEN_PATHS, [560 100 660 180]);
+configurePulseGen(blk, pulse_gen_type, P);
 
-% Pulse generator for Bridge 2 (syncs to T2 primary voltages)
 blk = [modelName '/PulseGen2'];
-add_block('powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', blk, ...
-    'Position', [560 490 640 550]);
-trySP(blk, 'Frequency', num2str(P.ac_frequency));
-trySP(blk, 'PulseWidth', '60');
-trySP(blk, 'DoublePulsing', 'on');
+addPulseGenBlock(blk, PULSE_GEN_PATHS, [560 490 660 570]);
+configurePulseGen(blk, pulse_gen_type, P);
+
+fprintf('  Pulse generator type: %s\n', pulse_gen_type);
 
 %% ========================================================================
 %  SECTION 8: LC FILTER NETWORK
@@ -905,6 +913,155 @@ function trySP(blk, paramName, paramValue)
     end
 end
 
+function ok = setParamMultiCandidate(blk, candidates, value)
+%SETPARAMMULTICANDIDATE Try multiple candidate parameter names
+%  ok = setParamMultiCandidate(blk, candidates, value)
+%
+%  Iterates through a cell array of candidate parameter names and sets
+%  the first one that works.  Returns true if any candidate succeeded.
+%
+%  This handles the common SPS problem where the mask variable name
+%  varies across MATLAB versions (e.g. 'Rs' vs 'SnubberResistance').
+
+    global SPS_PARAM_WARNINGS;
+    ok = false;
+    for i = 1:length(candidates)
+        try
+            set_param(blk, candidates{i}, value);
+            ok = true;
+            return;  % first success wins
+        catch
+            % try next candidate
+        end
+    end
+
+    % All candidates failed — record a warning
+    warnMsg = sprintf('  WARNING: %s — none of [%s] accepted value ''%s''', ...
+        blk, strjoin(candidates, ', '), value);
+    fprintf('%s\n', warnMsg);
+    fprintf('    FIX: Run discover_block_params(''%s'') to find the correct name.\n', blk);
+    SPS_PARAM_WARNINGS{end+1} = warnMsg;
+end
+
+function configureSCRBridge(blk, P)
+%CONFIGURESCR_BRIDGE Configure a Universal Bridge block as thyristor SCR
+%
+%  configureSCRBridge(blk, P) sets all parameters on the Universal Bridge
+%  block at path 'blk' using the parameters in struct P.
+%
+%  Uses multi-candidate approach to handle mask name variations.
+%  Device type is set FIRST to enable conditional parameters (Vf).
+
+    % --- Step 1: Set device type FIRST (enables conditional params) ---
+    % MathWorks docs say the value is 'Thyristors' (plural).
+    setParamMultiCandidate(blk, ...
+        {'Device', 'PowerElectronicDevice'}, 'Thyristors');
+
+    % Force the mask to re-evaluate after Device change.
+    % Reading MaskNames triggers the mask initialization callback.
+    try get_param(blk, 'MaskNames'); catch; end    %#ok<SEPEX>
+
+    % --- Step 2: Number of bridge arms ---
+    setParamMultiCandidate(blk, ...
+        {'Arms', 'NumberOfBridgeArms', 'Narms'}, '3');
+
+    % --- Step 3: On-state resistance and inductance (confirmed short names) ---
+    trySP(blk, 'Ron', num2str(P.scr_on_resistance));
+    trySP(blk, 'Lon', '0');
+
+    % --- Step 4: Forward voltage (conditional — Thyristors/Diodes only) ---
+    %  'Vf' is the documented symbol, but the mask variable could be any of
+    %  these depending on the MATLAB version:
+    setParamMultiCandidate(blk, ...
+        {'Vf', 'ForwardVoltage', 'Vfd', 'ForwardVoltages'}, ...
+        num2str(P.scr_fwd_voltage));
+
+    % --- Step 5: Snubber parameters ---
+    %  If Ron/Lon are short names, snubbers likely are too (Rs, Cs).
+    setParamMultiCandidate(blk, ...
+        {'Rs', 'SnubberResistance', 'Snubber_resistance'}, ...
+        num2str(P.scr_snubber_R));
+
+    setParamMultiCandidate(blk, ...
+        {'Cs', 'SnubberCapacitance', 'Snubber_capacitance'}, ...
+        num2str(P.scr_snubber_C));
+end
+
+function [pgType] = addPulseGenBlock(destPath, libraryPaths, pos)
+%ADDPULSEGENBLOCK Add a thyristor pulse generator from multiple library paths
+%
+%  [pgType] = addPulseGenBlock(destPath, libraryPaths, pos)
+%
+%  Tries each library path in 'libraryPaths' until one succeeds.
+%  Returns a tag identifying which block type was found:
+%    'legacy'      — Synchronized 6-Pulse Generator (powerlib_extras)
+%    'modern_sps'  — Pulse Generator (Thyristor) from SPS
+%    'simscape'    — Thyristor 6-Pulse Generator from Simscape Electrical
+%    ''            — none found (error thrown)
+
+    pgType = '';
+    for i = 1:length(libraryPaths)
+        try
+            add_block(libraryPaths{i}, destPath, 'Position', pos);
+            % Tag the type based on which path matched
+            pth = libraryPaths{i};
+            if contains(pth, 'Synchronized')
+                pgType = 'legacy';
+            elseif contains(pth, 'ee_lib')
+                pgType = 'simscape';
+            else
+                pgType = 'modern_sps';
+            end
+            fprintf('  ✓ Pulse generator added from: %s\n', pth);
+            return;
+        catch
+            fprintf('    ✗ Not found: %s\n', libraryPaths{i});
+        end
+    end
+
+    % All paths failed — fatal (cannot build gating without this block)
+    error(['SPEAR3_HVPS:PulseGenNotFound', ...
+        '\n\nCould not find a thyristor pulse generator block at any known path.\n', ...
+        'Tried:\n  %s\n\n', ...
+        'Your MATLAB version may need a different library prefix.\n', ...
+        'Run:\n  find_system(''Simulink'', ''SearchDepth'', 0)\n', ...
+        '  find_system(''powerlib'', ''SearchDepth'', 4, ''Name'', ''*Pulse*'')\n', ...
+        'to discover the correct path, then add it to PULSE_GEN_PATHS.\n'], ...
+        strjoin(libraryPaths, '\n  '));
+end
+
+function configurePulseGen(blk, pgType, P)
+%CONFIGUREPULSEGEN Set parameters on the pulse generator block
+%
+%  configurePulseGen(blk, pgType, P)
+%
+%  Adapts parameter names to the block type found by addPulseGenBlock().
+
+    switch pgType
+        case 'legacy'
+            % Synchronized 6-Pulse Generator
+            trySP(blk, 'Frequency', num2str(P.ac_frequency));
+            trySP(blk, 'PulseWidth', '60');
+            trySP(blk, 'DoublePulsing', 'on');
+
+        case 'modern_sps'
+            % Pulse Generator (Thyristor) — SPS block (R2013a+)
+            trySP(blk, 'GeneratorType', '6-pulse');
+            setParamMultiCandidate(blk, ...
+                {'PulseWidth', 'Pulse_width'}, '60');
+            setParamMultiCandidate(blk, ...
+                {'DoublePulsing', 'Double_pulsing'}, 'on');
+            trySP(blk, 'SampleTime', '0');  % continuous
+
+        case 'simscape'
+            % Thyristor 6-Pulse Generator (Simscape Electrical)
+            trySP(blk, 'Pulse_width', '60');
+
+        otherwise
+            warning('Unknown pulse generator type: %s', pgType);
+    end
+end
+
 function discover_block_params(blockPath)
 %DISCOVER_BLOCK_PARAMS List valid mask parameters for a Simulink block
 %  discover_block_params(blockPath) prints all settable parameter names
@@ -954,6 +1111,103 @@ function discover_block_params(blockPath)
     fprintf('\n');
 end
 
+function run_parameter_discovery()
+%RUN_PARAMETER_DISCOVERY Create temp model and dump SPS block parameters
+%  Useful to discover the correct mask variable names for your MATLAB
+%  version before building the full model.
+
+    fprintf('\n');
+    fprintf('==============================================================\n');
+    fprintf('  PARAMETER DISCOVERY MODE\n');
+    fprintf('  Creating temporary model to inspect SPS block parameters...\n');
+    fprintf('==============================================================\n\n');
+
+    tmp = 'SPS_param_discovery_tmp';
+    try close_system(tmp, 0); catch; end
+    new_system(tmp);
+
+    % --- Universal Bridge ---
+    try
+        add_block('powerlib/Power Electronics/Universal Bridge', [tmp '/UB']);
+        fprintf('=== Universal Bridge (default state) ===\n');
+        discover_block_params([tmp '/UB']);
+
+        % Now set Device to Thyristors and re-inspect
+        % (conditional params like Vf only appear after this)
+        try
+            set_param([tmp '/UB'], 'Device', 'Thyristors');
+        catch
+            try set_param([tmp '/UB'], 'PowerElectronicDevice', 'Thyristors'); catch; end
+        end
+        fprintf('=== Universal Bridge (after Device=Thyristors) ===\n');
+        discover_block_params([tmp '/UB']);
+    catch ME
+        fprintf('Could not add Universal Bridge: %s\n', ME.message);
+    end
+
+    % --- Three-Phase Source ---
+    try
+        add_block('powerlib/Electrical Sources/Three-Phase Source', [tmp '/Src']);
+        fprintf('=== Three-Phase Source ===\n');
+        discover_block_params([tmp '/Src']);
+    catch ME
+        fprintf('Could not add Three-Phase Source: %s\n', ME.message);
+    end
+
+    % --- Three-Phase Transformer ---
+    try
+        add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', [tmp '/Xfmr']);
+        fprintf('=== Three-Phase Transformer (Two Windings) ===\n');
+        discover_block_params([tmp '/Xfmr']);
+    catch ME
+        fprintf('Could not add Transformer: %s\n', ME.message);
+    end
+
+    % --- Pulse Generator library search ---
+    fprintf('=== Pulse Generator Library Search ===\n');
+    pulse_paths = { ...
+        'powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', ...
+        'powerlib/Power Electronics/Power Electronics Control/Pulse Generator (Thyristor)', ...
+        'sps_lib/Power Electronics/Pulse Generator (Thyristor)', ...
+        'ee_lib/Control/Pulse Width Modulation/Thyristor 6-Pulse Generator' ...
+    };
+    for i = 1:length(pulse_paths)
+        try
+            add_block(pulse_paths{i}, [tmp '/PG']);
+            fprintf('  ✓ FOUND: %s\n', pulse_paths{i});
+            discover_block_params([tmp '/PG']);
+            delete_block([tmp '/PG']);  % remove so next path can try
+        catch
+            fprintf('  ✗ NOT FOUND: %s\n', pulse_paths{i});
+        end
+    end
+
+    % --- Series RLC Branch ---
+    try
+        add_block('powerlib/Elements/Series RLC Branch', [tmp '/RLC']);
+        fprintf('=== Series RLC Branch ===\n');
+        discover_block_params([tmp '/RLC']);
+    catch ME
+        fprintf('Could not add Series RLC Branch: %s\n', ME.message);
+    end
+
+    % --- Breaker ---
+    try
+        add_block('powerlib/Elements/Breaker', [tmp '/Brk']);
+        fprintf('=== Breaker ===\n');
+        discover_block_params([tmp '/Brk']);
+    catch ME
+        fprintf('Could not add Breaker: %s\n', ME.message);
+    end
+
+    close_system(tmp, 0);
+
+    fprintf('\n==============================================================\n');
+    fprintf('  Discovery complete.\n');
+    fprintf('  Set DEBUG_PARAMETER_DISCOVERY = false to build the model.\n');
+    fprintf('==============================================================\n\n');
+end
+
 %% ========================================================================
 %  DONE
 %  ========================================================================
@@ -991,4 +1245,6 @@ fprintf('  4. plot_spear3_overview(t, V, I, alpha)\n');
 fprintf('  5. For arc test: set_param(''%s/Crowbar_Trigger'',''Time'',''0.3'')\n', modelName);
 fprintf('\nTo discover block parameters:\n');
 fprintf('  discover_block_params(''%s/AC_Source_12kV'')\n', modelName);
+fprintf('\nFor full parameter discovery (set DEBUG_PARAMETER_DISCOVERY=true):\n');
+fprintf('  Dumps every SPS block''s mask variable names for your MATLAB version.\n');
 fprintf('\n');
