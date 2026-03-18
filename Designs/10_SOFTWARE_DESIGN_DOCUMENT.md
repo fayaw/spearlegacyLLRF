@@ -1,21 +1,21 @@
 # SPEAR3 LLRF Upgrade — Software Design Document
 
 **Document ID**: SPEAR3-LLRF-SDD-001
-**Revision**: R0
-**Date**: March 12, 2026
+**Revision**: R1
+**Date**: March 18, 2026
 **Author**: LLRF Upgrade Software Team
 **Classification**: Software Architecture & Detailed Design Reference
-**Status**: Initial Draft
+**Status**: Updated to align with Physical Design Report R1 (SPEAR3-LLRF-PDR-001 R1, March 17, 2026)
 
 ---
 
 ## Purpose and Scope
 
-This Software Design Document (SDD) defines the complete software architecture for the SPEAR3 LLRF Upgrade Project. It specifies the Python/PyEPICS coordinator application that replaces the six legacy SNL (State Notation Language) programs running on VxWorks with a modern, maintainable, and testable Python application communicating via EPICS Channel Access.
+This Software Design Document (SDD) defines the complete software architecture for the SPEAR3 LLRF Upgrade Project. It specifies the Python/PyEPICS/MATLAB coordinator application that replaces the six legacy SNL (State Notation Language) programs running on VxWorks with a modern, maintainable, and testable control system communicating via EPICS Channel Access.
 
 This document is derived from the Physical Design Report (SPEAR3-LLRF-PDR-001), the LLRF9 System & Software Report, the HVPS Engineering Technical Note, the Interface Chassis Design Report, the Klystron Heater Subsystem Upgrade, and the HVPS-PPS Interface Technical Document.
 
-**Key Principle**: The Python coordinator is a **supervisory control layer** operating at ~1 Hz. It is explicitly **NOT** in any fast safety path. All safety-critical protection is handled by hardware: the LLRF9 FPGA interlocks (<1 μs), the Interface Chassis hardware AND-logic (<1 μs), and the Kly MPS PLC (~ms). The Python coordinator handles sequencing, coordination, diagnostics, and operator interface.
+**Key Principle**: The Python/MATLAB coordinator is a **supervisory control layer** operating at ~1 Hz. It is explicitly **NOT** in any fast safety path. All safety-critical protection is handled by hardware: the LLRF9 FPGA interlocks (<1 μs), the Interface Chassis hardware AND-logic (<1 μs), and the RF MPS PLC (~ms). The Python/MATLAB coordinator handles sequencing, coordination, diagnostics, and operator interface. MATLAB tools (written by Dmitry for the LLRF9, and in-house for other systems) complement the Python coordinator for expert-level diagnostics and tuning.
 
 ---
 
@@ -57,7 +57,7 @@ The Python coordinator sits at **Layer 4** of the protection hierarchy and commu
 |------------------|-----------|---------------|---------------|
 | Layer 1 | LLRF9 FPGA | <1 μs | None (autonomous hardware) |
 | Layer 2 | Interface Chassis | <1 μs | None (autonomous hardware) |
-| Layer 3 | Kly MPS PLC | ~ms | Monitor only (reads PVs) |
+| Layer 3 | RF MPS PLC | ~ms | Monitor only (reads PVs) |
 | **Layer 4** | **Python Coordinator** | **~1 s** | **Supervisory control, sequencing, diagnostics** |
 
 **Invariant**: If the Python coordinator crashes, Ethernet fails, or any software component hangs, all hardware protection continues to function. The system enters a safe, stable state (RF drive disabled, HVPS inhibited) and waits for operator intervention.
@@ -68,13 +68,13 @@ The Python coordinator sits at **Layer 4** of the protection hierarchy and commu
 |-----------|----------|-----------|-------------|----------|
 | LLRF9 Unit 1 | Built-in Linux IOC | `LLRF1:` | 10 Hz scalars | EPICS CA |
 | LLRF9 Unit 2 | Built-in Linux IOC | `LLRF2:` | 10 Hz scalars | EPICS CA |
-| HVPS CompactLogix | External gateway | `SRF1:HVPS:` | ~1 Hz | EPICS CA |
-| Kly MPS ControlLogix | External gateway | `SRF1:MPS:` | ~1 Hz | EPICS CA |
+| HVPS CompactLogix (+ Enerpro FCOG1200, redesigned analog regulator) | External gateway | `SRF1:HVPS:` | ~1 Hz | EPICS CA |
+| RF MPS ControlLogix | External gateway | `SRF1:MPS:` | ~1 Hz | EPICS CA |
 | **Interface Chassis** | **Dedicated IOC** | **`SRF1:IC:`** | **~1 Hz** | **EPICS CA** |
 | **Arc Detection System** | **Via IC dedicated IOC** | **`SRF1:IC:ARC:`** | **~1 Hz / event** | **EPICS CA** |
-| Motion Controller (Galil) | Motor record IOC | `SRF1:MTR:` | On demand | EPICS CA |
+| Motion Controller (Galil DMC-4143 Rev 1.3h) | Motor record IOC | `SRF1:MTR:` | On demand | EPICS CA |
 | Waveform Buffer | Dedicated IOC | `SRF1:WFBUF:` | ~1 Hz / event | EPICS CA |
-| Heater Controller | Dedicated IOC | `SRF1:HTR:` | 10 Hz | EPICS CA |
+| Heater Controller (Programmable AC Supply) | Dedicated IOC | `SRF1:HTR:` | 10 Hz | EPICS CA |
 
 ### 1.3 Design Constraints
 
@@ -172,9 +172,9 @@ The software is organized into five layers, from physical hardware (bottom) to o
 │  └─────────────────┘  └─────────────────┘  └─────────────────────────┘  │
 │                                                                         │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────┐  │
-│  │ Kly MPS         │  │ Interface       │  │ Galil DMC-4143          │  │
+│  │ RF MPS         │  │ Interface       │  │ Galil DMC-4143          │  │
 │  │ ControlLogix    │  │ Chassis         │  │ EPICS motor record      │  │
-│  │ EtherNet/IP→    │  │ Dedicated sot   │  │ IOC                     │  │
+│  │ EtherNet/IP→    │  │ Dedicated soft   │  │ IOC                     │  │
 │  │ EPICS gateway   │  │ IOC             │  │ SRF1:MTR:               │  │
 │  │ SRF1:MPS:       │  │ SRF1:IC:        │  │ on demand               │  │
 │  │ ~1 Hz           │  │ ~1 Hz / event   │  │                         │  │
@@ -210,6 +210,7 @@ The software is organized into five layers, from physical hardware (bottom) to o
 | Logging | Python `logging` + structured JSON | Standard library, archiver-compatible |
 | Testing | pytest + unittest.mock | Standard Python testing, excellent mock support |
 | Process Management | systemd | Standard Linux service management |
+| MATLAB Integration | MATLAB (Dmitry's LLRF9 toolkit + in-house tools) | Expert-level diagnostics, vector sum setup, LLRF9 tuning |
 | Documentation | Sphinx + autodoc | Auto-generated API docs from docstrings |
 
 ---
@@ -244,12 +245,12 @@ spear3_llrf/
 │   ├── __init__.py
 │   ├── llrf9_interface.py      # LLRF9 unit hardware abstraction
 │   ├── hvps_interface.py       # HVPS CompactLogix PLC interface
-│   ├── mps_interface.py        # Kly MPS ControlLogix PLC interface
+│   ├── mps_interface.py        # RF MPS ControlLogix PLC interface
 │   ├── interface_chassis_interface.py  # Interface Chassis status via dedicated IC IOC
 │   ├── arc_detection_interface.py      # Arc detection system via IC dedicated IOC
 │   ├── motor_interface.py      # Galil DMC-4143 motor record interface
 │   ├── waveform_buf_interface.py  # Waveform Buffer System interface
-│   └── heater_interface.py     # Klystron heater SCR controller interface
+│   └── heater_interface.py     # Klystron heater programmable AC supply interface
 ├── controllers/
 │   ├── __init__.py
 │   ├── state_machine.py        # Station state machine (replaces rf_states.st)
@@ -655,6 +656,8 @@ class HVPSController(BaseController):
             self.hvps.set_voltage(new_setpoint)
         
         # 4. Collector power protection check (enhanced from legacy)
+        #    Note: RF MPS also performs redundant collector power calculation
+        #    from Waveform Buffer System data (PDR-001 R1 Section 7.6)
         collector_power = hvps_readback.voltage * hvps_readback.current - kly_fwd_power
         if collector_power > self.config["max_collector_power"]:
             self.event_bus.publish_fault("HVPSController", "COLLECTOR_POWER_HIGH",
@@ -671,7 +674,7 @@ class HVPSController(BaseController):
 
 ### 6.3 HVPS Recovery Sequence
 
-After a fault, the HVPS requires a specific recovery sequence coordinated with the Interface Chassis (see Section 7 of Interface Chassis Design Report):
+After a fault, the HVPS requires a specific recovery sequence coordinated with the Interface Chassis (see PDR-001 R1 Section 8). **Critical**: The Interface Chassis creates a bidirectional feedback loop between LLRF9 and HVPS that requires careful recovery sequencing logic:
 
 ```python
 async def recovery_sequence(self):
@@ -830,7 +833,7 @@ The Fault Manager is the central fault detection, logging, and recovery coordina
 | EPICS connection lost | EPICSBridge connection monitor | WARNING | Graceful degradation |
 | Tuner phase error | Phase exceeds limit for > N cycles | WARNING | Auto-retry, then FAULT |
 | Collector power high | Waveform Buffer calculation | CRITICAL | HVPS voltage reduction |
-| Arc detection | Interface Chassis arc status bits | CRITICAL | Immediate FAULT state |
+| Arc detection (6 sensors) | Interface Chassis arc status bits (6-bit fired-detector ID) | CRITICAL | Immediate FAULT state |
 | Heater fault | `SRF1:HTR:FAULT` monitor | WARNING | Prevent HVPS enable |
 
 ### 9.3 First-Fault Analysis
@@ -932,7 +935,7 @@ The Interface Chassis Interface provides the Python coordinator's access to the 
 - Read all Interface Chassis input permit states
 - Read Interface Chassis output permit states  
 - Access first-fault register for root cause analysis
-- Monitor arc detection system status (5-bit fired-detector ID)
+- Monitor arc detection system status (6-bit fired-detector ID)
 - Coordinate recovery sequences with IC state
 - Support diagnostic analysis of interlock cascades
 
@@ -959,7 +962,7 @@ The Interface Chassis Interface provides the Python coordinator's access to the 
 
 ### 12.1 Purpose
 
-The Arc Detection Interface provides access to the arc detection system status through the Interface Chassis dedicated IOC. The 5 optical arc sensors (4 cavity windows + 1 klystron window) connect hardwired to the Interface Chassis, which exposes per-sensor trip status and the 5-bit fired-detector register directly via its own IOC (PV prefix `SRF1:IC:ARC:`).
+The Arc Detection Interface provides access to the arc detection system status through the Interface Chassis dedicated IOC. The 6 optical arc sensors (4 cavity windows + 1 klystron window + 1 circulator) connect hardwired to the Interface Chassis, which exposes per-sensor trip status and the 6-bit fired-detector register directly via its own IOC (PV prefix `SRF1:IC:ARC:`).
 
 ### 12.2 Key PVs (via IC dedicated IOC)
 
@@ -970,9 +973,10 @@ The Arc Detection Interface provides access to the arc detection system status t
 | `SRF1:IC:ARC:CAV_C_TRIP` | Binary | Cavity C arc sensor trip status |
 | `SRF1:IC:ARC:CAV_D_TRIP` | Binary | Cavity D arc sensor trip status |
 | `SRF1:IC:ARC:KLY_TRIP` | Binary | Klystron arc sensor trip status |
-| `SRF1:IC:ARC:SUMMARY_TRIP` | Binary | Any arc detected (OR of all 5 sensors) |
+| `SRF1:IC:ARC:CIRC_TRIP` | Binary | Circulator arc sensor trip status |
+| `SRF1:IC:ARC:SUMMARY_TRIP` | Binary | Any arc detected (OR of all 6 sensors) |
 | `SRF1:IC:ARC:PERMIT` | Binary | Arc detection permit to Interface Chassis |
-| `SRF1:IC:ARC:FIRED_ID_REG` | Integer | 5-bit register identifying which sensor(s) fired |
+| `SRF1:IC:ARC:FIRED_ID_REG` | Integer | 6-bit register identifying which sensor(s) fired |
 | `SRF1:IC:ARC:EVENT_COUNT` | Integer | Total arc events since startup |
 | `SRF1:IC:ARC:LAST_EVENT_TIME` | String | Timestamp of last arc event |
 
@@ -983,7 +987,7 @@ The Arc Detection Interface provides access to the arc detection system status t
 
 ### 13.1 Purpose
 
-Coordinates the klystron cathode heater SCR controller with the station state machine. Manages warm-up and cool-down sequences, ensuring the heater is at operating temperature before allowing HVPS enable.
+Coordinates the klystron cathode heater controller with the station state machine. The upgraded heater uses a commercial programmable AC supply (e.g., TDK/Lambda, Ametek, Chroma) replacing the legacy motor-driven variac. Manages warm-up and cool-down sequences, ensuring the heater is at operating temperature before allowing HVPS enable.
 
 ### 13.2 Coordination Logic
 
@@ -1007,7 +1011,14 @@ class HeaterController(BaseController):
                 self.heater.set_mode("OFF")
     
     def is_ready_for_hvps(self) -> bool:
-        """Check if heater is at operating temperature."""
+        """Check if heater is at operating temperature.
+        
+        Note: The heater controller is part of the RF MPS subsystem.
+        The klystron does not receive a permit to operate unless the
+        heater has reached operating power level and timed out.
+        The EPICS coordinator provides an override to bypass the timeout
+        in the event of a short power dip (PDR-001 R1 Section 13.2).
+        """
         return self.heater.get_mode() == HeaterMode.OPERATING
 ```
 
@@ -1026,11 +1037,11 @@ class HeaterController(BaseController):
 
 ## 14. Calibration System
 
-### 12.1 Purpose
+### 14.1 Purpose
 
 Replaces `rf_calib.st` (2,800+ lines). The scope is significantly reduced because the LLRF9's digital signal processing eliminates the need for analog offset nulling and coefficient calibration that dominated the legacy system.
 
-### 12.2 Remaining Calibration Tasks
+### 14.2 Remaining Calibration Tasks
 
 | Task | Method | Frequency |
 |------|--------|-----------|
@@ -1040,7 +1051,7 @@ Replaces `rf_calib.st` (2,800+ lines). The scope is significantly reduced becaus
 | **Tuner position cal** | Map motor steps to mm using potentiometer reference | Installation |
 | **HVPS voltage cal** | Verify PLC ADC against external measurement | Annual |
 
-### 12.3 Vector Sum Setup Algorithm
+### 14.3 Vector Sum Setup Algorithm
 
 ```python
 def configure_vector_sum(self, unit: LLRF9Interface, board: str = "BRD1"):
@@ -1095,7 +1106,7 @@ def configure_vector_sum(self, unit: LLRF9Interface, board: str = "BRD1"):
 
 ## 15. Configuration Management
 
-### 13.1 Configuration File Structure
+### 15.1 Configuration File Structure
 
 All operational parameters are stored in YAML configuration files, version-controlled alongside the source code.
 
@@ -1164,7 +1175,7 @@ tuners:
     balance_deadband: 0.02  # normalized amplitude units
 ```
 
-### 13.2 Configuration Save/Restore
+### 15.2 Configuration Save/Restore
 
 The coordinator wraps the LLRF9 native CWget/CWput mechanism with versioning:
 
@@ -1206,7 +1217,7 @@ class ConfigManager:
 
 ## 16. Operator Interface
 
-### 14.1 Coordinator PV Server
+### 16.1 Coordinator PV Server
 
 The Python coordinator publishes its internal state as EPICS PVs using caproto, making all coordinator data available to EDM panels, the EPICS Archiver, and alarm handlers.
 
@@ -1231,7 +1242,7 @@ The Python coordinator publishes its internal state as EPICS PVs using caproto, 
 | `SRF1:COORD:CYCLE:TIME` | Float | Last main loop cycle time (ms) |
 | `SRF1:COORD:VERSION` | String | Software version |
 
-### 14.2 EDM Panel Integration
+### 16.2 EDM Panel Integration
 
 EDM panels access the coordinator PVs alongside direct LLRF9, HVPS, and MPS PVs. The upgrade preserves compatibility with the existing EDM panel infrastructure while adding new panels for coordinator-specific views.
 
@@ -1250,7 +1261,7 @@ EDM panels access the coordinator PVs alongside direct LLRF9, HVPS, and MPS PVs.
 
 ## 17. EPICS PV Contract Reference
 
-### 15.1 PV Namespaces
+### 17.1 PV Namespaces
 
 | Namespace | Owner | Count | Description |
 |-----------|-------|-------|-------------|
@@ -1260,10 +1271,10 @@ EDM panels access the coordinator PVs alongside direct LLRF9, HVPS, and MPS PVs.
 | `SRF1:MPS:` | ControlLogix PLC | ~20 | MPS permit, faults, first-fault, Interface Chassis status |
 | `SRF1:MTR:` | Motor record IOC | ~40 | 4 motor records (position, velocity, limits) |
 | `SRF1:WFBUF:` | Waveform Buffer IOC | ~30 | Waveform data, comparator thresholds, collector power |
-| `SRF1:HTR:` | Heater Controller IOC | ~15 | Heater voltage, current, mode, faults |
+| `SRF1:HTR:` | Heater Controller IOC (programmable AC supply) | ~15 | Heater voltage, current, mode, faults |
 | `SRF1:COORD:` | Python Coordinator | ~25 | Coordinator state, faults, diagnostics |
 
-### 15.2 Critical PV Read Set (Monitored at 10 Hz)
+### 17.2 Critical PV Read Set (Monitored at 10 Hz)
 
 These PVs are set up with CA monitors for real-time tracking:
 
@@ -1297,7 +1308,7 @@ SRF1:HVPS:VOLT:RBCK           # Voltage readback
 
 ## 18. Concurrency and Threading Model
 
-### 16.1 Architecture
+### 18.1 Architecture
 
 The coordinator uses a **single main thread** with cooperative scheduling via `asyncio`. This avoids threading complexity while supporting multiple control loops at different rates.
 
@@ -1325,7 +1336,7 @@ async def main_loop(coordinator):
     await asyncio.gather(*tasks)
 ```
 
-### 16.2 EPICS CA Threading
+### 18.2 EPICS CA Threading
 
 PyEPICS Channel Access callbacks execute on the CA callback thread. The design ensures thread safety by:
 
@@ -1338,7 +1349,7 @@ PyEPICS Channel Access callbacks execute on the CA callback thread. The design e
 
 ## 19. Error Handling and Recovery
 
-### 17.1 Error Categories
+### 19.1 Error Categories
 
 | Category | Example | Handling |
 |----------|---------|----------|
@@ -1348,7 +1359,7 @@ PyEPICS Channel Access callbacks execute on the CA callback thread. The design e
 | **Configuration Error** | Invalid parameter, missing file | Refuse to start; use last-known-good config |
 | **State Violation** | Invalid transition requested | Reject transition, log warning |
 
-### 17.2 Graceful Degradation
+### 19.2 Graceful Degradation
 
 | Subsystem Lost | Impact | Coordinator Behavior |
 |----------------|--------|---------------------|
@@ -1364,7 +1375,7 @@ PyEPICS Channel Access callbacks execute on the CA callback thread. The design e
 
 ## 20. Testing Strategy
 
-### 18.1 Test Pyramid
+### 20.1 Test Pyramid
 
 | Level | Tool | Coverage Target | Description |
 |-------|------|----------------|-------------|
@@ -1373,7 +1384,7 @@ PyEPICS Channel Access callbacks execute on the CA callback thread. The design e
 | **Hardware-in-Loop** | pytest + real IOCs | Critical paths | Tests against actual LLRF9/PLC IOCs on bench |
 | **System Tests** | Manual + scripts | Full commissioning | Complete system with RF power |
 
-### 18.2 Mock Architecture
+### 20.2 Mock Architecture
 
 Every hardware interface has a corresponding mock that simulates realistic IOC behavior:
 
@@ -1405,7 +1416,7 @@ class MockLLRF9(LLRF9Interface):
             self.interlock_tripped = True
 ```
 
-### 18.3 Key Test Scenarios
+### 20.3 Key Test Scenarios
 
 | Scenario | Modules Under Test | Assertion |
 |----------|-------------------|-----------|
@@ -1422,7 +1433,7 @@ class MockLLRF9(LLRF9Interface):
 
 ## 21. Deployment and Operations
 
-### 19.1 Deployment
+### 21.1 Deployment
 
 The coordinator runs as a systemd service on a Linux workstation in Building B132:
 
@@ -1444,7 +1455,7 @@ RestartSec=10
 WantedBy=multi-user.target
 ```
 
-### 19.2 Startup Sequence
+### 21.2 Startup Sequence
 
 1. Load and validate configuration files
 2. Initialize EPICS CA context with configured address list
@@ -1456,7 +1467,7 @@ WantedBy=multi-user.target
 8. Enter main event loop
 9. Set initial state to OFF
 
-### 19.3 Operational Monitoring
+### 21.3 Operational Monitoring
 
 | Metric | Source | Alert Threshold |
 |--------|--------|----------------|
@@ -1470,7 +1481,7 @@ WantedBy=multi-user.target
 
 ## 22. Legacy Code Mapping
 
-### 20.1 Detailed Function Mapping
+### 22.1 Detailed Function Mapping
 
 | Legacy Function (SNL) | Legacy File | New Module | New Function | Notes |
 |-----------------------|-------------|-----------|--------------|-------|
@@ -1494,7 +1505,7 @@ WantedBy=multi-user.target
 
 ## 23. Appendix: PV Namespace Registry
 
-### 21.1 Complete PV Prefix Allocation
+### 23.1 Complete PV Prefix Allocation
 
 | Prefix | System | Owner | Location |
 |--------|--------|-------|----------|
@@ -1511,9 +1522,9 @@ WantedBy=multi-user.target
 | `LLRF2:BRD3:` | LLRF9 Unit 2, Board 3 | LLRF9 IOC | B132 |
 | `LLRF2:ILOCK:` | LLRF9 Unit 2, Interlocks | LLRF9 IOC | B132 |
 | `SRF1:HVPS:` | HVPS CompactLogix PLC | EPICS gateway | B118 |
-| `SRF1:MPS:` | Kly MPS ControlLogix PLC | EPICS gateway | B132 |
-| `SRF1:MPS:IC:` | Interface Chassis (via MPS PLC) | EPICS gateway | B132 |
-| `SRF1:MPS:ARC:` | Arc Detection System (via MPS PLC) | EPICS gateway | B132 |
+| `SRF1:MPS:` | RF MPS ControlLogix PLC | EPICS gateway | B132 |
+| `SRF1:IC:` | Interface Chassis | Dedicated soft IOC | B132 |
+| `SRF1:IC:ARC:` | Arc Detection System (via IC dedicated IOC) | Dedicated soft IOC | B132 |
 | `SRF1:MTR:C1` | Cavity 1 tuner motor | Motor record IOC | B132 |
 | `SRF1:MTR:C2` | Cavity 2 tuner motor | Motor record IOC | B132 |
 | `SRF1:MTR:C3` | Cavity 3 tuner motor | Motor record IOC | B132 |
@@ -1522,20 +1533,20 @@ WantedBy=multi-user.target
 | `SRF1:HTR:` | Klystron heater controller | Dedicated IOC | B132 |
 | `SRF1:COORD:` | Python Coordinator | caproto server | B132 |
 
-### 21.2 Source Document Traceability
+### 23.2 Source Document Traceability
 
 | SDD Section | Source Document | Source Section |
 |-------------|----------------|----------------|
-| 1. System Context | Physical Design Report (PDR-001) | Sections 1-2, 14-18 |
-| 5. State Machine | PDR-001 Section 14; `rf_states.st` | Legacy state machine analysis |
+| 1. System Context | Physical Design Report (PDR-001 R1) | Sections 1-2, 14-18 |
+| 5. State Machine | PDR-001 R1 Section 14; `rf_states.st` | Legacy state machine analysis |
 | 6. HVPS Controller | HVPS Technical Note; `rf_hvps_loop.st` | Sections 6, 12-14 |
-| 7. Tuner Manager | PDR-001 Section 10; `rf_tuner_loop.st` | Tuner control system |
-| 8. Load Angle | PDR-001 Section 10.4; `rf_tuner_loop.st` | Load angle offset loop |
-| 9. Fault Manager | PDR-001 Section 17; Interface Chassis Design | Protection chain architecture |
-| 10. Waveform Buffer | PDR-001 Section 11 | Waveform Buffer System |
+| 7. Tuner Manager | PDR-001 R1 Section 10; `rf_tuner_loop.st` | Tuner control system |
+| 8. Load Angle | PDR-001 R1 Section 10.4; `rf_tuner_loop.st` | Load angle offset loop |
+| 9. Fault Manager | PDR-001 R1 Section 17; Interface Chassis Design | Protection chain architecture |
+| 10. Waveform Buffer | PDR-001 R1 Section 11 | Waveform Buffer System |
 | 13. Heater Controller | Heater Subsystem Upgrade | Sections 7-8 |
-| 11. Interface Chassis Interface | Physical Design Report Section 8; Interface Chassis Design | IC status and control functions |
-| 12. Arc Detection Interface | Physical Design Report Section 12 | Arc detection system monitoring |
+| 11. Interface Chassis Interface | PDR-001 R1 Section 8; Interface Chassis Design | IC status and control functions |
+| 12. Arc Detection Interface | PDR-001 R1 Section 12 (6 sensors, 6-bit ID) | Arc detection system monitoring |
 | 14. Calibration | LLRF9 System Report Section 10 | MATLAB toolkit algorithms |
 | 17. PV Contracts | LLRF9 System Report Sections 3, 15 | PV architecture and catalog |
 | Interface Chassis | Interface Chassis Design Report | All sections |
@@ -1546,3 +1557,5 @@ WantedBy=multi-user.target
 **End of Software Design Document**
 
 *This document should be reviewed and updated as hardware interfaces are finalized, particularly the Interface Chassis (on critical path), Waveform Buffer System, and Heater Controller IOC PV definitions.*
+
+*Updated R1: Aligned with Physical Design Report SPEAR3-LLRF-PDR-001 R1 (March 17, 2026). Key changes: arc detection updated to 6 sensors (added circulator) with 6-bit fired-detector register; heater controller updated to commercial programmable AC supply; RF MPS naming standardized; MATLAB integration documented; section numbering corrected; PV namespace registry aligned with dedicated IC IOC design; source traceability updated to PDR R1.*
