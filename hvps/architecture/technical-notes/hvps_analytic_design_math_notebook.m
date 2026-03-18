@@ -15,30 +15,40 @@
 %
 % Converted from hvps_analytic_design_math_notebook.ipynb (Python/Jupyter)
 % to MATLAB Live Script format (.m with %% section breaks).
-% Open this file in MATLAB Live Editor and save as .mlx to get the
-% fully formatted Live Script.
+%
+% To view rendered LaTeX equations:
+%  - Open in MATLAB Live Editor and save as .mlx, or
+%  - Run publish('hvps_analytic_design_math_notebook.m') to generate HTML/PDF
 
 %% System Overview and Governing Equations
 %
 % The legacy SPEAR3 HVPS is a 12-pulse controlled rectifier system that
 % converts 12.47 kV, 60 Hz three-phase utility power into a regulated
-% negative cathode supply for the klystron.
+% negative cathode supply for the klystron. The physical conversion chain:
 %
-% Three-phase to line-line conversion:
-%   v_a = Vm*sin(wt), v_b = Vm*sin(wt-120), v_c = Vm*sin(wt+120)
-%   v_ab = v_a - v_b = sqrt(2)*V_LL*cos(wt - 60)
+% $$12.47\;\mathrm{kV}_{LL,\;rms}\;3\phi \rightarrow T_0\;(\pm 15^\circ) \rightarrow T_1,T_2 \rightarrow 2\times 6\text{-pulse bridges} \rightarrow 12\text{-pulse DC} \rightarrow LC\;\text{filter} \rightarrow -77\;\mathrm{kV}\;\text{to klystron}$$
 %
-% Average 12-pulse DC output:
-%   Vdc = (6*sqrt(2)/pi) * V_LL * cos(alpha)  ~  2.70 * V_LL * cos(alpha)
+% *Three-phase to line-line conversion:*
 %
-% Klystron beam-current model:
-%   I_beam = Pk * V_cathode^(3/2)
+% $$v_a = V_m\sin(\omega t), \quad v_b = V_m\sin(\omega t - 120^\circ), \quad v_c = V_m\sin(\omega t + 120^\circ)$$
 %
-% Ripple and filter estimates:
-%   dV_pp / V_max = 1 - cos(15 deg),  f_ripple = 12*f_line = 720 Hz
+% $$v_{ab} = v_a - v_b = \sqrt{2}\,V_{LL}\cos(\omega t - 60^\circ)$$
 %
-% Stored-energy expressions:
-%   E_C = 0.5*C*V^2,   E_L = 0.5*L*I^2
+% *Average 12-pulse DC output:*
+%
+% $$V_{dc} = \frac{6\sqrt{2}}{\pi}\,V_{LL}\cos\alpha \approx 2.70\,V_{LL}\cos\alpha$$
+%
+% *Klystron beam-current model (Child-Langmuir perveance):*
+%
+% $$I_{beam} = P_k\,V_{cathode}^{3/2}$$
+%
+% *Ripple and filter estimates:*
+%
+% $$\frac{\Delta V_{pp}}{V_{max}} = 1 - \cos(15^\circ), \qquad f_{ripple} = 12\,f_{line} = 720\;\mathrm{Hz}$$
+%
+% *Stored-energy expressions used in the protection analysis:*
+%
+% $$E_C = \tfrac{1}{2}CV^2, \qquad E_L = \tfrac{1}{2}LI^2$$
 
 %% System Block Diagram Mapped to Equation Sections
 %
@@ -102,9 +112,13 @@ sys.power_factor_distortion_12pulse = 0.9886;
 
 %% 2. Three-Phase Input and Six Line-to-Line Voltages
 %
-% The derivation starts with the three phase voltages and constructs the
-% six line-to-line voltages that a 6-pulse bridge selects from. The plot
-% shows one electrical cycle at the 33.3 kV secondary level.
+% The derivation starts with the three phase voltages:
+%
+% $$v_a = V_m\sin(\omega t), \quad v_b = V_m\sin(\omega t - 120^\circ), \quad v_c = V_m\sin(\omega t + 120^\circ)$$
+%
+% and constructs the six line-to-line voltages that a 6-pulse bridge
+% selects from (e.g. $v_{ab} = v_a - v_b$). The plot shows one electrical
+% cycle at the 33.3 kV secondary level.
 
 theta = linspace(0, 2*pi, 4000);
 theta_deg_vec = rad2deg(theta);
@@ -136,8 +150,13 @@ legend('v_{cb}','v_{ab}','v_{ac}','v_{bc}','v_{ba}','v_{ca}'); grid on;
 %% 3. Single 6-Pulse Bridge Envelope and Two-Bridge 12-Pulse Combination
 %
 % Bridge X selects the highest of six cosine-shifted line-line waveforms,
-% creating the familiar 60-degree envelope segments. Bridge Y is shifted
-% by 30 degrees, and the two bridge outputs sum in series for 12-pulse.
+% creating the familiar $60^\circ$ envelope segments. Bridge Y is shifted
+% by $30^\circ$, and the two bridge outputs sum in series to create the
+% 12-pulse waveform:
+%
+% $$V_{bridge}(\theta) = \max_k \left\{ \sqrt{2}\,V_{LL}\cos\!\left(\theta - \frac{k\pi}{3}\right) \right\}, \quad k = 0,1,\ldots,5$$
+%
+% $$V_{12\text{-pulse}} = V_{bridge,X}(\theta) + V_{bridge,Y}(\theta - 30^\circ)$$
 
 % --- 6-pulse bridge helper (inline) ---
 % Generates six cosine waveforms and takes the max (envelope)
@@ -192,9 +211,12 @@ legend('Bridge X','Bridge Y','Series sum'); grid on;
 
 %% 4. Average DC Output Versus Firing Angle
 %
-% The report derives the 12-pulse DC average as
-%   Vdc = (6*sqrt(2)/pi) * V_LL * cos(alpha)
-% This section verifies the nominal and measured operating points.
+% The report derives the 12-pulse DC average as:
+%
+% $$V_{dc} = \frac{6\sqrt{2}}{\pi}\,V_{LL}\cos(\alpha)$$
+%
+% This section verifies the nominal and measured operating points against
+% that formula and visualizes the full firing-angle sweep.
 
 alpha_deg_vec = linspace(0, 90, 721);
 vdc_curve = (6*sqrt(2)/pi) .* sys.v_secondary_ll_rms .* cosd(alpha_deg_vec);
@@ -224,9 +246,15 @@ xlabel('Firing angle alpha (deg)'); ylabel('Average DC output (kV)'); grid on;
 
 %% 4A. System Ramp-Up From 0 kV to the 77 kV Working Point
 %
-% The control system ramps the output using a smooth commanded voltage ramp:
-%   V_cmd(t) = V_nom * s(t),  s(t) = 3*x^2 - 2*x^3,  x = clip(t/T_ramp, 0, 1)
-% From the commanded voltage, firing angle and beam current are estimated.
+% The control system ramps the output so that the cathode voltage, beam
+% current, primary current, and control angle all move in a controlled way.
+% The ramp model uses a smooth commanded voltage:
+%
+% $$V_{cmd}(t) = V_{nom}\,s(t), \qquad s(t) = 3x^2 - 2x^3, \qquad x = \mathrm{clip}\!\left(\frac{t}{T_{ramp}},\;0,\;1\right)$$
+%
+% From the commanded voltage, the implied firing angle and beam current are:
+%
+% $$\alpha(t) = \cos^{-1}\!\left(\frac{V_{cmd}(t)}{V_{dc,max}}\right), \qquad I_{beam}(t) = P_k\,V_{cmd}(t)^{3/2}$$
 
 t_ramp  = linspace(0, 30, 5000);
 T_ramp  = 20.0;
@@ -377,8 +405,13 @@ xlabel('Time (ms)'); ylabel('Voltage (kV, representative)');
 %% 5. Load Model, Beam Perveance, and Power
 %
 % The document models the klystron beam current with a Child-Langmuir style
-% perveance law using approximately 1.0e-6 A/V^(3/2). This section
-% reproduces the current, power, and effective impedance curves.
+% perveance law using approximately $1.0 \times 10^{-6}$ A/V$^{3/2}$:
+%
+% $$I_{beam} = P_k\,V_{cathode}^{3/2}, \qquad P_k \approx 1.0 \times 10^{-6}\;\mathrm{A/V}^{3/2}$$
+%
+% $$P_{beam} = V_{cathode}\,I_{beam}, \qquad R_{eff} = \frac{V_{cathode}}{I_{beam}}$$
+%
+% This section reproduces the current, power, and effective impedance curves.
 
 vdc_sweep = linspace(60e3, 90e3, 400);
 beam_current = perveance .* vdc_sweep.^1.5;
@@ -411,9 +444,13 @@ xlabel('Cathode voltage (kV)'); ylabel('Effective impedance (kOhm)');
 
 %% 6. Ripple Geometry and LC Filter Attenuation
 %
-% The report connects the unfiltered ripple to the 30-degree cosine arcs
-% and estimates attenuation using the reflected filter inductance and the
-% 8 uF capacitor bank.
+% The report connects the unfiltered ripple directly to the $30^\circ$
+% cosine arcs and then estimates attenuation using the reflected filter
+% inductance and the $8\;\mu\mathrm{F}$ capacitor bank:
+%
+% $$\frac{\Delta V_{pp}}{V_{max}} = 1 - \cos(15^\circ), \qquad f_{ripple} = 12\,f_{line} = 720\;\mathrm{Hz}$$
+%
+% $$f_0 = \frac{1}{2\pi\sqrt{L_{eff}\,C}}, \qquad \text{Attenuation} = \left(\frac{f_{ripple}}{f_0}\right)^2$$
 
 ripple_pp_fraction_geom = 1.0 - cos(15*DEG);
 ripple_pp_nominal_volts = ripple_pp_fraction_geom * sys.vdc_nominal;
@@ -460,9 +497,15 @@ legend('LC response','720 Hz ripple'); grid on;
 %% 7. Protection Energy and Discharge Models
 %
 % The analytical section distinguishes between total capacitor stored energy
-% and the simplified RC branch discharge through the 500 ohm isolation
+% and the simplified RC branch discharge through the $500\;\Omega$ isolation
 % path. It also quantifies primary inductor energy and the cable-inductor
-% current slew limit.
+% current slew limit:
+%
+% $$E_C = \tfrac{1}{2}C\,V^2, \qquad E_L = \tfrac{1}{2}L\,I^2$$
+%
+% $$i(t) = \frac{V_0}{R}\,e^{-t/\tau}, \qquad \tau = R\,C$$
+%
+% $$E_{released}(t) = E_C\left(1 - e^{-2t/\tau}\right), \qquad \frac{di}{dt}\bigg|_{max} = \frac{V_0}{L_{cable}}$$
 
 c_filter = sys.cap_filter_f;
 r_iso    = sys.isolation_res_ohm;
@@ -510,9 +553,15 @@ xlabel('Time (ms)'); ylabel('Released energy (J)');
 
 %% 8. Power Factor and Harmonic Content
 %
-% The report uses displacement power factor cos(alpha) multiplied by an
-% idealized 12-pulse distortion factor of about 0.9886. Dominant
-% non-cancelled harmonics are orders 11, 13, 23, 25, 35, 37.
+% The report uses displacement power factor $\cos(\alpha)$ multiplied by an
+% idealized 12-pulse distortion factor of about 0.9886:
+%
+% $$PF_{true} = \cos(\alpha)\times 0.9886$$
+%
+% The dominant non-cancelled harmonics for a 12-pulse rectifier are orders
+% $n = 12k \pm 1$ (i.e. 11, 13, 23, 25, 35, 37):
+%
+% $$\mathrm{THD} = \sqrt{\sum_{n}\left(\frac{1}{n}\right)^2}$$
 
 pf_curve = cosd(alpha_deg_vec) .* sys.power_factor_distortion_12pulse;
 
@@ -598,4 +647,3 @@ summary_units = {
 summary_tbl = table(summary_params, summary_values, summary_units, ...
     'VariableNames', {'Parameter','Value','Units'});
 disp(summary_tbl);
-
