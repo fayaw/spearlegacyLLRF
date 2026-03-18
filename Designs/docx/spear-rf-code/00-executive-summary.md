@@ -84,7 +84,7 @@ From PDR Section 2.2 — the upgrade replaces all control electronics:
 ```
 Layer 4: EPICS/Python/MATLAB Coordinator (~1 Hz supervisory)
          ← informed by rf_states.st, rf_hvps_loop.st, rf_tuner_loop.st
-Layer 3: RF MPS PLC (ControlLogix 1756, ~ms)
+Layer 3: RF MPS PLC (ControlLogix 1756, ~ms) & HVPS PLC
          ← new system, informed by legacy AIM interlock logic
 Layer 2: Interface Chassis (<1 µs hardware AND-gate)
          ← entirely new, no legacy equivalent
