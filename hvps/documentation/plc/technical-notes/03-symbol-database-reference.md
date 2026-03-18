@@ -212,10 +212,13 @@
 | Address | Symbol | Description |
 |---------|--------|-------------|
 | O:5/0 | CONTROL SYSTEM ENABLE | Control System / SCR Enable |
+| O:5/1 | CLOSE CONTACTOR | Close Contactor |
+| O:5/2 | CROWBAR ON | Crowbar On / Contactor Enable |
 | O:5/3 | CROWBAR FORCED ON | Crowbar Forced On |
-| O:5/4 | CROWBAR ENABLE | Crowbar Enable |
+| O:5/4 | CROWBAR ENABLE | Crowbar Enable (Crowbar Off) |
 | O:5/5 | slow start | Enerpro Slow Start |
 | O:5/6 | FAST INHIBIT | Enerpro Fast Inhibit |
+| O:5/7 | REGULATOR RESET | Regulator Reset |
 
 ---
 
@@ -247,25 +250,42 @@
 
 ## Timer Registers (T4)
 
+| Address | Symbol | Type | Time Base | Preset | Period | Description |
+|---------|--------|------|-----------|--------|--------|-------------|
+| T4:0 | MOMENTARY RESET | TON | 0.01 | 100 | 1 s | Momentary reset timer |
+| T4:1 | | | | | | |
+| T4:2 | | | | | | |
+| T4:3 | | | | | | |
+| T4:4 | | | | | | |
+| T4:5 | | TON | 0.01 | 300 | 3 s | Enable delay (B3:0/2 regulator on) |
+| T4:6 | | | | | | |
+| T4:7 | POWER UP CONTACTS | | | | | Power-up initialization contacts |
+| T4:8 | SYSTEM READY TIME DELAY | TON | 0.01 | 500 | 5 s | System ready delay |
+| T4:9 | CONTACTOR ON BUTTON | TON | 0.01 | 100 | 1 s | Contactor on button momentary |
+| T4:10 | | TON | 0.01 | 50 | 0.5 s | Remote momentary SCR on |
+| T4:11 | | TON | | | | |
+| T4:12 | | TON | 0.01 | 800 | 8 s | Crowbar off delay |
+| T4:13 | | TON | 0.01 | 10 | 0.1 s | Turn off delay |
+| T4:14 | | TOF | 0.01 | 300 | 3 s | Current trip timer-off delay |
+| T4:15 | MOMENTARY ON REMOTE | TON | 0.01 | 100 | 1 s | Panel remote on momentary |
+| T4:16 | Contactor Closed delay | TON | 0.01 | 300 | 3 s | Contactor closed delay |
+| T4:17 | OPEN LOAD DELAY | TON | 0.01 | 100 | 1 s | Open load detection delay |
+| T4:18 | | | | | | SCR off delay |
+
+### Timer Registers (T10) — Startup Sequence
+
 | Address | Symbol | Description |
 |---------|--------|-------------|
-| T4:0 | MOMENTARY RESET | Momentary reset timer |
-| T4:5 | | Enable delay (3s TON) |
-| T4:8 | SYSTEM READY TIME DELAY | System ready delay (5s TON) |
-| T4:9 | CONTACTOR ON BUTTON | Contactor on button momentary (1s TON) |
-| T4:10 | | Remote momentary SCR on (0.5s TON) |
-| T4:12 | | Crowbar off delay (8s TON) |
-| T4:13 | | Turn off delay (0.1s TON) |
-| T4:14 | | Current trip TOF (3s) |
-| T4:15 | MOMENTARY ON REMOTE | Panel remote on momentary (1s TON) |
-| T4:16 | Contactor Closed delay | Contactor closed delay (3s TON) |
-| T4:17 | OPEN LOAD DELAY | Open load detection delay (1s TON) |
-| T4:18 | | SCR off delay |
+| T10:0–T10:11 | | Sequenced startup timers (Rungs 65–70) |
+| T10:12 | | Startup sequence step |
+| T10:13 | | Startup sequence final step |
 
-### Subroutine References
+---
 
-| Address | Symbol | Description |
-|---------|--------|-------------|
-| U:3 | COPY I/O TO B3 SBR | Subroutine — copies I/O to B3 array |
-| U:4 | SCALE VALUES SBR | Subroutine — scales analog values |
+## Subroutine References
+
+| Address | Symbol | File | Description |
+|---------|--------|------|-------------|
+| U:3 | COPY I/O TO B3 SBR | LAD 3 | Copies I:2, I:6, I:7, O:2, O:5 → B3:12–B3:16 for QuickPanel |
+| U:4 | SCALE VALUES SBR | LAD 4 | Scales thermocouple N7:100–N7:103 → N7:110–N7:113 for QuickPanel |
 

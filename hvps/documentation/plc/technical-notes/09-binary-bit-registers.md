@@ -158,6 +158,149 @@
 
 ---
 
+## B3:12 — Slot 2 Input Mirror (I:2 Copy)
+
+Populated by COPY subroutine (LAD 3, Rung 0000): `COP #I:2.0 → #B3:12`
+
+| Bit | Label | Source | Normal State |
+|-----|-------|--------|-------------|
+| 0 | 120 VAC Control Power | I:2/0 | On |
+| 1 | A Phase Reference Voltage | I:2/1 | On |
+| 2 | Filter Inductor 1 | I:2/2 | Off |
+| 3 | Filter Inductor 2 | I:2/3 | Off |
+| 8 | (OSR for Rung 115) | — | Used as OSR bit for control reset |
+
+---
+
+## B3:13 — Slot 6 Input Mirror (I:6 Copy)
+
+Populated by COPY subroutine (LAD 3, Rung 0001): `COP #I:6.0 → #B3:13`
+
+| Bit | Label | Source | Normal State |
+|-----|-------|--------|-------------|
+| 0 | SCR Disable Fiber Drive | I:6/0 | Off |
+| 1 | Crowbar Enable Fiber Drive | I:6/1 | Off |
+| 2 | Crowbar Monitor | I:6/2 | On |
+| 3 | Klystron Arc Monitor | I:6/3 | On |
+| 4 | SCR Trigger 1 | I:6/4 | Off |
+| 5 | Transformer Arc Monitor | I:6/5 | On |
+| 6 | SCR Trigger 2 | I:6/6 | Off |
+| 7 | RF Crowbar | I:6/7 | On |
+| 8 | Ground Tank Oil Level | I:6/8 | On |
+| 9 | Ground Tank Switch | I:6/9 | On |
+| 10 | Crowbar Oil Level | I:6/10 | On |
+| 11 | SCR Oil Level | I:6/11 | On |
+| 12 | Key/Emergency Off Switch | I:6/12 | On |
+| 13 | Emergency Off | I:6/13 | On |
+| 14 | PPS 1 | I:6/14 | On |
+| 15 | PPS 2 | I:6/15 | On |
+
+> Referenced by touch panel interlocks as "1-B3:13/x".
+
+---
+
+## B3:14 — Slot 7 Input Mirror (I:7 Copy)
+
+Populated by COPY subroutine (LAD 3, Rung 0002): `COP #I:7.0 → #B3:14`
+
+| Bit | Label | Source | Normal State |
+|-----|-------|--------|-------------|
+| 0 | Contactor Blocking Relay | I:7/0 | Off |
+| 1 | Contactor Overcurrent Relay | I:7/1 | Off |
+| 2 | Contactor Closed | I:7/2 | On |
+| 3 | Contactor Ready | I:7/3 | Off |
+| 4 | Transformer Pressure | I:7/4 | On |
+| 5 | Transformer Vacuum | I:7/5 | On |
+| 6 | Transformer Over Temperature | I:7/6 | On |
+| 7 | Transformer Oil Level | I:7/7 | On |
+| 8 | Transformer Sudden Pressure | I:7/8 | On |
+| 9 | Oil Pump On (Flow) | I:7/9 | Off |
+| 10 | Water Flow Switch (Spare) | I:7/10 | On |
+| 11 | Enerpro Phase Loss | I:7/11 | On |
+| 12 | Regulator Current Limit | I:7/12 | Off |
+| 13 | Ground Tank Relay | I:7/13 | On |
+| 14 | Regulator Voltage Trip | I:7/14 | Off |
+| 15 | Regulator Current Trip | I:7/15 | Off |
+
+> Referenced by touch panel interlocks as "1-B3:14/x".
+
+---
+
+## B3:15 — Slot 2 Output Mirror (O:2 Copy)
+
+Populated by COPY subroutine (LAD 3, Rung 0003): `COP #O:2.0 → #B3:15`
+
+| Bit | Label | Source | Normal State |
+|-----|-------|--------|-------------|
+| 0 | AC Bias Power Supply | O:2/0 | On |
+| 1 | 120 VDC Power Supply | O:2/1 | On |
+| 2 | 240 VDC Power Supply | O:2/2 | On |
+| 3 | Ground Tank Relay Coil | O:2/3 | On |
+
+---
+
+## B3:16 — Slot 5 Output Mirror (O:5 Copy)
+
+Populated by COPY subroutine (LAD 3, Rung 0004): `COP #O:5.0 → #B3:16`
+
+| Bit | Label | Source | Normal State |
+|-----|-------|--------|-------------|
+| 0 | SCR Enable | O:5/0 | On |
+| 1 | Contactor On | O:5/1 | On |
+| 2 | Contactor Enable | O:5/2 | On |
+| 3 | Force Crowbar | O:5/3 | Off |
+| 4 | Crowbar Off | O:5/4 | On |
+| 5 | Enerpro Slow Start | O:5/5 | Off |
+| 6 | Enerpro Fast Inhibit | O:5/6 | On |
+| 7 | Regulator Reset | O:5/7 | Off |
+
+---
+
+## B3:17 — OSR Bits for Subroutine Calls
+
+| Bit | Label | Used In Rung | Period |
+|-----|-------|--------------|--------|
+| 0 | OSR for COPY subroutine call | 117 | 1280 ms (S:4/6) |
+| 1 | OSR for SCALE subroutine call | 118 | 2560 ms (S:4/7) |
+
+---
+
+## Touch Panel Interlock Cross-Reference
+
+The touch panel displays interlock status using "1-B3:xx/yy" identifiers that reference the copied I/O words (B3:12–B3:16) and control/alarm registers (B3:0–B3:5):
+
+| Indicator | B3 Address | Source Signal | Normal Display |
+|-----------|-----------|---------------|----------------|
+| AC Overcurrent Fault | B3:4/11 | Overcurrent latch | Illuminated |
+| DC Overvoltage OK | B3:3/6 | Alarm latch | Illuminated |
+| DC Overcurrent OK | B3:3/5 | Alarm latch | Illuminated |
+| Ground Tank Oil Fault | B3:13/8 | I:6/8 (oil level) | Illuminated |
+| Ground Tank E-Stop OK | B3:1/0 | Status register | Illuminated |
+| Crowbar OK | B3:1/7 | Status register | Illuminated |
+| Klystron Arc Fault | B3:4/13 | Fault latch | Illuminated |
+| Transformer Arc Fault | B3:4/15 | Fault latch | Illuminated |
+| Klystron Crowbar Fault | B3:2/4 | Interlock | Illuminated |
+| Open Load OK | B3:3/2 | Alarm latch | Illuminated |
+| H1 SCR Drivers OK | B3:3/14 | Alarm latch | Illuminated |
+| H2 SCR Drivers OK | B3:3/15 | Alarm latch | Illuminated |
+| SCR Oil Level Low | B3:13/11 | I:6/11 | Illuminated |
+| Crowbar Oil Level Low | B3:13/10 | I:6/10 | Illuminated |
+| Main Tank Oil Level Low | B3:14/7 | I:7/7 | Illuminated |
+| Oil Temperature Fault | B3:14/6 | I:7/6 | Illuminated |
+| Oil Flow Switch Fault | B3:2/7 | Interlock | Illuminated |
+| Pressure Fault | B3:14/4 | I:7/4 | Illuminated |
+| Relief Valve Fault | B3:14/8 | I:7/8 | Illuminated |
+| Vacuum Fault | B3:14/5 | I:7/5 | Illuminated |
+| Summary Not Ready | B3:0/3 | Control register | Illuminated |
+| Vacuum Fault (Latched) | B3:5/12 | Misc register | Illuminated |
+| Pressure Fault Latched | B3:4/10 | Fault latch | Illuminated |
+| Oil Temp Fault Latched | B3:4/1 | Fault latch | Illuminated |
+| SCR/Crowbar Oil Latched | B3:4/2 | Fault latch | Illuminated |
+| Main Tank Oil Latched | B3:4/3 | Fault latch | Illuminated |
+| Sudden Pressure Latched | B3:4/4 | Fault latch | Illuminated |
+
+---
+
 ## OSR Timing Cross-Reference
 
 One Shot Rising (OSR) bits use the S:4 timing register bits to gate rung execution at fixed intervals:
