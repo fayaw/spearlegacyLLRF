@@ -116,24 +116,24 @@ The upgraded system replaces all control electronics while retaining the RF plan
                  └───────────────────────────────┬───────────────────────────────┘
                                                  │ EPICS CA (~1 Hz supervisory)
 ┌────────────────────────────────────────────────┴──────────────────────┐  ┌───────────────────────────────────┐
-│                     Control HARDWARE SUBSYSTEMS                       │  │              HVPS                 │
+│                     CONTROL HARDWARE SUBSYSTEMS                       │  │              HVPS                 │
 │                                                                       │  │   (High Voltage Power Supply:     │
 │  ┌──────────┐  ┌──────────┐  ┌─────────────────┐  ┌─────────────┐     │  │    transformer, rectifier,        │
 │  │ LLRF9 #1 │  │ LLRF9 #2 │  │   RF MPS PLC   │  │  HVPS PLC   ├─────│─►│  crowbar, thyristor stacks,       │
 │  │ (Field   │  │ (Monitor │  │  CtrlLogix 1756 │  │ CompactLogix│     │  |  grounding tank, Ross switch)     │
 │  │  Control │  │  + Intlk)│  │                 │  │             │     │  └────────────────┬──────────────────┘
 │  │  + Tuner)│  │          │  └────────┬────────┘  └──────┬──────┘     │                   │ PPS interlock signals
-│  └────┬─────┘  └────┬─────┘           │                  │            │                   │ (K4 relay, Ross switch)
+│  └────┬─────┘  └────┬─────┘           │                  │            │                   │ (HVPS contactor, Ross switch)
 │       │             │                 |                  |            │                   ▼
 │  ┌────┴─────────────┴─────────────────┴──────────────────┴─────────┐  │  ┌───────────────────────────────────┐
 │  │                    INTERFACE CHASSIS (NEW)                      │  │  │       PPS INTERFACE BOX           │
 │  │       First-fault detection │ Optocoupler iso │ Fiber I/O       │  │  │  (Bud enclosure, 4 relays,        │
 │  └────┬──────────────┬──────────────┬──────────────────┬───────────┘  │  │   status LEDs, lockable conn.,    │
-│       │              │              │                  |              │  │   K4 relay + Ross switch ctrl)    │
+│       │              │              │                  |              │  │   HVPS contactor + Ross switch)   │
 │  ┌────┴─────┐  ┌─────┴───┐  ┌───────┴────┐  ┌──────────┴─────┐        │  └────────────────┬──────────────────┘
 │  │ Waveform │  │   Arc   │  │   Motor    │  │    Heater      │        │                   │ PPS chain signals
 │  │ Buffer   │  │ Detect. │  │    Ctrl    │  │   Controller   │        │                   ▼
-│  │ System   │  │         │  │  (4-axis)  │  │  (Prog. AC)    │        │  ┌───────────────────────────────────┐
+│  │ System   │  │6 sensors│  │  (4-axis)  │  │  (Prog. AC)    │        │  ┌───────────────────────────────────┐
 │  └──────────┘  └─────────┘  └────────────┘  └────────────────┘        │  │           SPEAR PPS               │
 └──────────────────────────────┬────────────────────────────────────────┘  │  (Personnel Protection System)    │
                                │ machine protection interlock signals      └───────────────────────────────────┘
@@ -141,6 +141,7 @@ The upgraded system replaces all control electronics while retaining the RF plan
                  ┌─────────────────────────────────────────────────────┐
                  │         MACHINE PROTECTION SAFETY SYSTEMS           │
                  │    SPEAR MPS │ Orbit Interlock │ External Permits   │
+│                (feed into Interface Chassis)        │
                  └─────────────────────────────────────────────────────┘
 ```
 
@@ -267,7 +268,7 @@ The amplitudes of the RF data need to be acquired. The RF signals that are curre
                                     
   (6) Station Ref ──────────────────────────────────────────────────────────────────────────────────────────────────────
   (5) Kly Drive ──► [Drive Amp] ──► [KLYSTRON] ──(1)Fwd──► [CIRCULATOR] ──(3,4)──► [CIRC LOAD]
-                                      (2) Refl ◄──────────────  P1=kly  P2→waveguide
+                                      (2) Refl ◄──────────────  P1=kly output  P2→waveguide
                                                                       │
                                                                       ▼
                                                             [MAGIC TEE 1]  (1st split: half power each side)
@@ -425,6 +426,51 @@ Two Dimtel LLRF9/476 units replace the entire VXI-based LLRF system (four units 
 Based on the proven PEP-II design architecture from 1997, this legacy system has been adapted for SPEAR3 operational requirements while maintaining the innovative star point controller topology and multi-layer arc protection system. The HVPS converts 12.47 kV RMS 3-phase AC to regulated DC high voltage for the klystron cathode. The system delivers −74 kV DC at 22 A (1.5 MW nominal) to power the SPEAR3 storage ring klystron. The power section, including transformers, thyristor stacks, filter inductors, secondary rectifiers, crowbar, oil system, and all power cabling, is retained unchanged.
 
 > **Figure 3 — HVPS Power Chain** (see `Designs/docx/drawings/PRD_drawings.vsdx`)
+
+```
+                                    BUILDING B514
+                                    
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          SWITCHGEAR & SAFETY                               │
+│  Disconnect Switch │ Fuses (3×50A) │ Vacuum Contactor                      │
+│  Ground Switch │ Interlocks                                                │
+└─────────────────────────────┬───────────────────────────────────────────────┘
+                              │ 12.47 kV delta
+                              ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    PHASE-SHIFT TRANSFORMER (T0)                            │
+│                    Extended Delta │ 350 kVA                                │
+│     Primary: 12.47 kV delta │ Secondary: Dual wye ±15° phase shift        │
+└─────────────┬───────────────────────────────────────────────┬───────────────┘
+              │ +15°                                          │ -15°
+              ▼                                               ▼
+┌─────────────────────────────┐                 ┌─────────────────────────────┐
+│    RECTIFIER XFMR T1        │                 │    RECTIFIER XFMR T2        │
+│    1.5 MVA │ +15°           │                 │    1.5 MVA │ -15°           │
+│    Primary: Open wye        │                 │    Primary: Open wye        │
+│    Secondary: Dual wye      │                 │    Secondary: Dual wye      │
+│    12.5 kV                  │                 │    12.5 kV                  │
+└─────────────┬───────────────┘                 └─────────────┬───────────────┘
+              │                                               │
+              └─────────────────┬───────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        6-PULSE BRIDGE (SCR 1-6)                            │
+│                   Phase Control Thyristor Bridge                           │
+│                   6 stacks × 14 Powerex T8K7 SCRs                         │
+└─────────────────────────────┬───────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           CROWBAR PROTECTION                               │
+│                        4 thyristor stacks                                  │
+└─────────────────────────────┬───────────────────────────────────────────────┘
+                              │ -90 kV DC (max) / -74.4 kV DC (nominal)
+                              ▼
+                        [KLYSTRON CATHODE]
+```
+
 
 | Parameter | Value |
 |-----------|-------|
@@ -1131,6 +1177,34 @@ The upgraded system implements a layered protection architecture:
 ### 17.2 Fault Propagation Example — RF Arc Event
 
 > **Figure 6 — Fault Propagation: RF Arc Event** (see `Designs/docx/drawings/PRD_drawings.vsdx`)
+```
+Step 1: Arc occurs in cavity window (or circulator window)
+        (instant)
+        │
+        ▼
+Step 2: Microstep-MIS detector closes relay contact
+        (<1 μs)
+        │
+        ▼
+Step 3: Interface Chassis: latches fault, removes all permits
+        (LLRF9 Enable removed; HVPS SCR ENABLE removed;
+         First-fault register captures Arc Detection)
+        (<1 μs)
+        │
+        ▼
+Step 4: LLRF9 captures 16k-sample waveforms
+        Waveform Buffer freezes circular buffers (pre-fault data preserved)
+        (~μs)
+        │
+        ▼
+Step 5: RF MPS PLC receives fault status from Interface Chassis - logs event
+        (~ms)
+        │
+        ▼
+Step 6: EPICS coordinator detects fault - logs event - enters FAULT state
+        (~s)
+```
+
 
 ### 17.3 Fail-Safe Design
 
