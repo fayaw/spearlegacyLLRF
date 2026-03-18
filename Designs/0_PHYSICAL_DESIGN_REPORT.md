@@ -105,44 +105,79 @@ The upgraded system replaces all control electronics while retaining the RF plan
 > **Figure 1 — Upgraded System Architecture** (see `Designs/docx/drawings/PRD_drawings.vsdx`)
 
 ```
-                 ┌───────────────────────────────────────────────────────────────┐
-                 │                       OPERATOR LAYER                          │
-                 │   EDM Panels │ Web Dashboard │ EPICS Archiver │ Logging       │
-                 └───────────────────────────────┬───────────────────────────────┘
-                                                 │ EPICS Channel Access
-                 ┌───────────────────────────────┴───────────────────────────────┐
-                 │                  EPICS (Soft IOC) COORDINATOR                  │
-                 │  State Machine │ HVPS Loop │ Tuner Mgr │ Fault Mgr │ Diag     │
-                 └───────────────────────────────┬───────────────────────────────┘
-                                                 │ EPICS CA (~1 Hz supervisory)
-┌────────────────────────────────────────────────┴──────────────────────┐  ┌───────────────────────────────────┐
-│                     CONTROL HARDWARE SUBSYSTEMS                       │  │              HVPS                 │
-│                                                                       │  │   (High Voltage Power Supply:     │
-│  ┌──────────┐  ┌──────────┐  ┌─────────────────┐  ┌─────────────┐     │  │    transformer, rectifier,        │
-│  │ LLRF9 #1 │  │ LLRF9 #2 │  │   RF MPS PLC   │  │  HVPS PLC   ├─────│─►│  crowbar, thyristor stacks,       │
-│  │ (Field   │  │ (Monitor │  │  CtrlLogix 1756 │  │ CompactLogix│     │  |  grounding tank, Ross switch)     │
-│  │  Control │  │  + Intlk)│  │                 │  │             │     │  └────────────────┬──────────────────┘
-│  │  + Tuner)│  │          │  └────────┬────────┘  └──────┬──────┘     │                   │ PPS interlock signals
-│  └────┬─────┘  └────┬─────┘           │                  │            │                   │ (HVPS contactor, Ross switch)
-│       │             │                 |                  |            │                   ▼
-│  ┌────┴─────────────┴─────────────────┴──────────────────┴─────────┐  │  ┌───────────────────────────────────┐
-│  │                    INTERFACE CHASSIS (NEW)                      │  │  │       PPS INTERFACE BOX           │
-│  │       First-fault detection │ Optocoupler iso │ Fiber I/O       │  │  │  (Bud enclosure, 4 relays,        │
-│  └────┬──────────────┬──────────────┬──────────────────┬───────────┘  │  │   status LEDs, lockable conn.,    │
-│       │              │              │                  |              │  │   HVPS contactor + Ross switch)   │
-│  ┌────┴─────┐  ┌─────┴───┐  ┌───────┴────┐  ┌──────────┴─────┐        │  └────────────────┬──────────────────┘
-│  │ Waveform │  │   Arc   │  │   Motor    │  │    Heater      │        │                   │ PPS chain signals
-│  │ Buffer   │  │ Detect. │  │    Ctrl    │  │   Controller   │        │                   ▼
-│  │ System   │  │6 sensors│  │  (4-axis)  │  │  (Prog. AC)    │        │  ┌───────────────────────────────────┐
-│  └──────────┘  └─────────┘  └────────────┘  └────────────────┘        │  │           SPEAR PPS               │
-└──────────────────────────────┬────────────────────────────────────────┘  │  (Personnel Protection System)    │
-                               │ machine protection interlock signals      └───────────────────────────────────┘
-                               ▼
-                 ┌─────────────────────────────────────────────────────┐
-                 │         MACHINE PROTECTION SAFETY SYSTEMS           │
-                 │    SPEAR MPS │ Orbit Interlock │ External Permits   │
-│                (feed into Interface Chassis)        │
-                 └─────────────────────────────────────────────────────┘
+  ┌───────────────────────────────┐                  ┌──────────────────────────────────────────────────────────────┐
+  │        OPERATOR LAYER         │                  │                        EXPERT LAYER                         │
+  │  EDM Panels | Web Dashboard   │                  │  MATLAB Tools (Dmitry/LLRF9 + in-house) | Expert EPICS      │
+  │  EPICS Archiver | Logging     │                  │  Panels | System Diagnostics                                │
+  └───────────────┬───────────────┘                  └──────────────────────────────┬───────────────────────────────┘
+                  │                                                                │
+                  └───────────────────────────┬────────────────────────────────────┘
+                                              │
+  ┌───────────────────────────────────────────┴───────────────────────────────────────────────────────────┐
+  │                                   EPICS (Soft IOC) COORDINATOR                                       │
+  │   State Machine | HVPS Loop | Tuner Mgr | Fault Mgr | Diagnostics | Heartbeat Monitoring             │
+  └──┬──────────┬──────────┬──────────────┬──────────────────────────┬──────────┬──────────┬──────────────┘
+     │          │          │              │ EPICS CA (~1 Hz supvsry) │          │          │
+     │          │          │              │                          │          │          │
+  ┌──┴───────┐┌─┴────────┐┌┴────────────┐┌┴────────────┐  ┌────────┴──┐┌──────┴───┐┌─────┴──────────┐
+  │ LLRF9 #1 ││ LLRF9 #2 ││  Motor Ctrl ││  HVPS PLC   │  │ Waveform  ││   Arc    ││  RF MPS PLC    │
+  │Field Ctrl││Field Ctrl ││Galil DMC4143││CompactLogix │  │  Buffer   ││  Detect  ││CtrlLogix 1756  │
+  │+Tunr+Intl││+Tunr+Intl││ Ethernet HB ││ V control   │  │  System   ││ 6 sensor ││Collector pwr   │
+  │Conn to IC││No IC conn ││             ││             │  │           ││          ││    calc        │
+  └──┬──┬────┘└────┬──────┘└──────┬──────┘└──┬──┬──────┘  └────┬──────┘└─────┬────┘└───┬──────┬─────┘
+     │  └──int.───┘               │          │  │STATUS         │            │         │      │
+     │                            │          │  │fiber          │            │         │   ┌──┴──────────┐
+     │                            │          │  │               │            │         │   │ Heater Ctrl │
+     │       connects to IC       │          │  │               │            │         │   │Prog. AC Sup.│
+     │       ──────────────       │          │  │               │            │         │   │Controlled by│
+     ├────────────────────────────┼──────────┤  │    ┌──────────┼────────────┼─────────┤   │  RF MPS     │
+     │  LLRF1       Motor Ctrl    │  HVPS PLC│  │    │Waveform  │ Arc Det    │ RF MPS  │   └─────────────┘
+     │                            │          │  │    │          │            │         │
+  ┌──┴────────────────────────────┴──────────┴──┴────┴──────────┴────────────┴─────────┴─────────────────┐
+  │                                   INTERFACE CHASSIS (NEW)                                            │
+  │       First-fault detection | Optocoupler/galvanic isolation | Fiber I/O | AND-gate permit logic     │
+  └──┬──────────────────────────────────────────────────────────┬──────────────────────────────────┬─────┘
+     │                                                          │                                  │
+     │  ┌────────────────────────────────────────────────────┐  │              ┌───────────────┐    │
+     │  │         MACHINE PROTECTION SAFETY SYSTEMS          │  │  3x fiber    │HVPS (Power    │    │
+     │  │  SPEAR MPS | Orbit Interlock | External Permits    │──┘  optic cable │Section)       │    │
+     │  │           (feed into Interface Chassis)            │     SCR ENABLE  │transformer,   │    │
+     │  └────────────────────────────────────────────────────┘     CROWBAR     │rectifier,     │────┘
+     │                                                             STATUS      │crowbar,       │
+     │                                                             (bypass PLC)│thyristor stks,│
+     │                                                                         │grounding tank,│
+     │                                                                         │Ross sw, filter│
+     │                                                                         └───────┬───────┘
+     │                                                                                 │
+     │                                                                    PPS interlock signals
+     │                                                                  (HVPS contactor, Ross sw)
+     │                                                                                 │
+     │                                                                         ┌───────┴────────────┐
+     │                                                                         │ PPS INTERFACE BOX   │
+     │                                                                         │Bud enclosure,       │
+     │                                                                         │4 relays, status LED,│
+     │                                                                         │lockable connector,  │
+     │                                                                         │HVPS contactor +     │
+     │                                                                         │Ross switch ctrl     │
+     │                                                                         └───────┬─────────────┘
+     │                                                                                 │
+     │                                                                         PPS chain signals
+     │                                                                                 │
+     │                                                                         ┌───────┴─────────────┐
+     │                                                                         │     SPEAR PPS       │
+     │                                                                         │Personnel Protection │
+     │                                                                         │      System         │
+     │                                                                         └─────────────────────┘
+
+  CONNECTION LEGEND:
+  ─ EPICS Soft IOC connects to ALL subsystems: LLRF1, LLRF2, Motor Ctrl, HVPS PLC, Waveform, Arc Det, RF MPS PLC
+  ─ LLRF1 ↔ LLRF2: "int." (direct interlock connection)
+  ─ Interface Chassis connects ABOVE to: LLRF1, Motor Ctrl, HVPS PLC
+  ─ Interface Chassis connects BELOW to: Waveform Buffer, Arc Detection, RF MPS PLC
+  ─ Interface Chassis → HVPS Power Section: 3x fiber optic (SCR ENABLE, CROWBAR, STATUS) bypassing PLC
+  ─ Machine Protection Safety Systems → Interface Chassis
+  ─ Heater Ctrl: controlled by RF MPS PLC (NOT connected to Interface Chassis)
+  ─ LLRF2: No IC connection (interlocked via LLRF1)
 ```
 
 **Key Architectural Principle**: The Interface Chassis implements **machine/equipment protection and operational interlocks** (LLRF/HVPS/RF MPS coordination), while personnel safety (PPS) functions are implemented exclusively in a completely separate, dedicated **PPS Interface Box**. These two safety-related subsystems are architecturally independent:
