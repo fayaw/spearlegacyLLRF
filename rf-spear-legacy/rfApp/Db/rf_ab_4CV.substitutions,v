@@ -1,0 +1,225 @@
+head	1.5;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.5
+	RF-SPEAR-R0-3-1:1.5
+	RF-SPEAR-R0-3-0:1.5
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.5
+date	2017.01.05.03.15.10;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2017.01.02.17.30.45;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2016.12.05.19.28.53;	author scondam;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2009.12.12.00.13.40;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.01.32.47;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.5
+log
+@Swap cavity C and D tuners back.
+@
+text
+@#==============================================================
+#
+# Abs:   Database template for Allen-Bradley Adapter/DCM Data
+#
+# Name:  rf_ab_4CV.substitutions
+#
+# Rem:   EPICS database tempate file for VME Allen-Bradley
+#        Scanner Adapter and DCM data
+#
+# Side:  None
+#
+# Facility: SLAC/Low-Level RF
+#
+# Auth:  02-Feb-2001,  Stephanie Allison   (SAA)
+#==============================================================
+# Mod:
+#        26-Aug-2002, K. Luchini (LUCHINI):
+#          moved allen-bradley datases from 
+#          rf_stn_4CV.template to this file.
+#
+#==============================================================
+#
+file ab_adapter.db
+{
+#	  
+#	   STN     Component Adapter      Forward Link    Scan Mechanism
+  pattern { S     ,    C   ,    A  ,              F     , SC          }
+	  {$(RRRS), HVPSDCM,    1  ,      HVPSDCM:A1C0  , ".5 second" }
+	  {$(RRRS), CAVTUNR,    2  ,      CAV1TUNR:A2C0 , ".5 second" }
+	  {$(RRRS),  STNDCM,    3  ,      STNDCM:A3C0   , ".5 second" }
+}
+file ab_adapter_card.db
+{
+#	        
+#	   STN     Component Adapter Card   Forward Link
+  pattern { S     ,    C   ,    A  ,  CD,         F      }
+	  {$(RRRS), HVPSDCM,    1  ,  0 , HVPSDCM:A1C2   }
+	  {$(RRRS), HVPSDCM,    1  ,  2 , HVPSDCM:A1C4   }
+	  {$(RRRS), HVPSDCM,    1  ,  4 , HVPSDCM:A1C6   }
+	  {$(RRRS), HVPSDCM,    1  ,  6 , HVPSDCM:A1C8   }
+	  {$(RRRS), HVPSDCM,    1  ,  8 , HVPSDCM:A1C10  }
+	  {$(RRRS), HVPSDCM,    1  , 10 , HVPSDCM:A1C12  }
+	  {$(RRRS), HVPSDCM,    1  , 12 , HVPSDCM:A1C14  }
+	  {$(RRRS), HVPSDCM,    1  , 14 , HVPSDCM:SUMY   }
+
+	  {$(RRRS), CAV1TUNR,   2  ,  0 , CAV2TUNR:A2C2  }
+	  {$(RRRS), CAV2TUNR,   2  ,  2 , CAV3TUNR:A2C4  }
+	  {$(RRRS), CAV3TUNR,   2  ,  4 , CAV4TUNR:A2C6  }
+	  {$(RRRS), CAV4TUNR,   2  ,  6 , CAVTUNR:SUMY   }
+
+	  {$(RRRS), STNDCM,     3  ,  0 , STN:DCM        }
+}
+file ab_dcm_table.db
+{
+# 
+#	   STN     TABLE     
+  pattern { S     , T   }
+	  {$(RRRS), 0   }
+	  {$(RRRS), 1   }
+	  {$(RRRS), 2   }
+	  {$(RRRS), 3   }
+	  {$(RRRS), 4   }
+	  {$(RRRS), 5   }
+	  {$(RRRS), 6   }
+	  {$(RRRS), 7   }
+}
+
+
+@
+
+
+1.4
+log
+@Correct stepper motor card 3 and 4 adaptor in FLNKs.
+@
+text
+@d47 3
+a49 3
+	  {$(RRRS), CAV2TUNR,   2  ,  2 , CAV3TUNR:A2C6  }
+	  {$(RRRS), CAV3TUNR,   2  ,  6 , CAV4TUNR:A2C4  }
+	  {$(RRRS), CAV4TUNR,   2  ,  4 , CAVTUNR:SUMY   }
+@
+
+
+1.3
+log
+@Tuner connectors C and D swapped to test tuner readback position hitting limit periodically
+@
+text
+@d47 2
+a48 2
+	  {$(RRRS), CAV2TUNR,   2  ,  2 , CAV3TUNR:A2C4  }
+	  {$(RRRS), CAV3TUNR,   2  ,  6 , CAV4TUNR:A2C6  }
+@
+
+
+1.2
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@d48 2
+a49 2
+	  {$(RRRS), CAV3TUNR,   2  ,  4 , CAV4TUNR:A2C6  }
+	  {$(RRRS), CAV4TUNR,   2  ,  6 , CAVTUNR:SUMY   }
+@
+
+
+1.1
+log
+@Allen-Bradley 4 Cavity template
+@
+text
+@d5 1
+a5 1
+# Name:  RRRS_ab_4CV.template
+d23 1
+a23 1
+file db/ab_adapter.db
+d26 5
+a30 5
+#	   STN  Component Adapter      Forward Link    Scan Mechanism
+  pattern { S  ,    C   ,    A  ,              F     , SC          }
+	  {RRRS, HVPSDCM,    1  ,      HVPSDCM:A1C0  , ".5 second" }
+	  {RRRS, CAVTUNR,    2  ,      CAV1TUNR:A2C0 , ".5 second" }
+	  {RRRS,  STNDCM,    3  ,      STNDCM:A3C0   , ".5 second" }
+d32 1
+a32 1
+file db/ab_adapter_card.db
+d35 10
+a44 10
+#	   STN  Component Adapter Card   Forward Link
+  pattern { S  ,    C   ,    A  ,  CD,         F      }
+	  {RRRS, HVPSDCM,    1  ,  0 , HVPSDCM:A1C2   }
+	  {RRRS, HVPSDCM,    1  ,  2 , HVPSDCM:A1C4   }
+	  {RRRS, HVPSDCM,    1  ,  4 , HVPSDCM:A1C6   }
+	  {RRRS, HVPSDCM,    1  ,  6 , HVPSDCM:A1C8   }
+	  {RRRS, HVPSDCM,    1  ,  8 , HVPSDCM:A1C10  }
+	  {RRRS, HVPSDCM,    1  , 10 , HVPSDCM:A1C12  }
+	  {RRRS, HVPSDCM,    1  , 12 , HVPSDCM:A1C14  }
+	  {RRRS, HVPSDCM,    1  , 14 , HVPSDCM:SUMY   }
+d46 4
+a49 4
+	  {RRRS, CAV1TUNR,   2  ,  0 , CAV2TUNR:A2C2  }
+	  {RRRS, CAV2TUNR,   2  ,  2 , CAV3TUNR:A2C4  }
+	  {RRRS, CAV3TUNR,   2  ,  4 , CAV4TUNR:A2C6  }
+	  {RRRS, CAV4TUNR,   2  ,  6 , CAVTUNR:SUMY   }
+d51 1
+a51 1
+	  {RRRS, STNDCM,     3  ,  0 , STN:DCM        }
+d53 1
+a53 1
+file db/ab_dcm_table.db
+d55 11
+a65 11
+#	        
+#	   STN  TABLE     
+  pattern { S  , T   }
+	  {RRRS, 0   }
+	  {RRRS, 1   }
+	  {RRRS, 2   }
+	  {RRRS, 3   }
+	  {RRRS, 4   }
+	  {RRRS, 5   }
+	  {RRRS, 6   }
+	  {RRRS, 7   }
+@
+

@@ -1,0 +1,88 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.08;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.08;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@-- MAX+plus II Compiler Fit File      
+-- Version 6.1 02/28/96               
+-- Compiled: 04/26/96 00:47:36        
+
+-- Copyright (c) 1996 by Altera Corporation.  All rights reserved.  This text
+-- contains proprietary, confidential information of Altera Corporation, and
+-- may be used, copied, and/or disclosed only pursuant to the terms of a
+-- valid software license agreement with Altera Corporation.  This copyright
+-- notice must be retained as part of this text at all times.
+
+CHIP "div_10"
+BEGIN
+
+    DEVICE = "EPF8282LC84";
+
+    "CLK"                          : INPUT_PIN  = 12     ;
+    "ENABLE"                       : INPUT_PIN  = 31     ;
+    "PIN_NAME"                     : OUTPUT_PIN = 56     ;
+    "|74160:1|:6"                  : LOCATION   = LC2_B1 ;  -- |74160:1.QA
+    "|74160:1|:7"                  : LOCATION   = LC3_B1 ;  -- |74160:1.QB
+    "|74160:1|:8"                  : LOCATION   = LC4_B1 ;  -- |74160:1.QC
+    "|74160:1|:9"                  : LOCATION   = LC5_B1 ;  -- |74160:1.QD
+    "|74160:1|:45"                 : LOCATION   = LC1_B1 ;  -- |74160:1.RCO
+
+END;
+
+INTERNAL_INFO "div_10"
+BEGIN
+	DEVICE = EPF8282LC84;
+	OD0     : LORAX = "OF0";
+	OD2     : LORAX = "OF2";
+	LC1_B1  : LORAX = "G4R1";
+END;
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

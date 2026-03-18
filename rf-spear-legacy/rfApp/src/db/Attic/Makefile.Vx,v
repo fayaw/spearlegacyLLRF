@@ -1,0 +1,309 @@
+head	1.9;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.9
+	RF-SPEAR-R0-1-0:1.9
+	RF-SPEAR-R0-0-3:1.9
+	RF-SPEAR-R0-0-2:1.9
+	RF-SPEAR-R0-0-0:1.9
+	RF-3-13-10:1.8.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.8
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.8
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.8
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.9
+date	2011.12.07.01.08.38;	author saa;	state dead;
+branches;
+next	1.8;
+
+1.8
+date	2008.04.23.16.24.57;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2006.01.25.23.54.19;	author lazmo;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2006.01.11.01.20.55;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2004.02.10.00.08.32;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.09.10.01.32.48;	author luchini;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.09.10.01.27.47;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.08.21.19.23.22;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.45;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.45;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.9
+log
+@Changes for 3.14.11 build.
+@
+text
+@#==============================================================
+#
+#  Abs:  Makefile for EPICS RF IOC components
+#      
+#  Name: Makefile.Vx 
+#
+#  Facility:  SLAC/PEPII
+#
+#  Auth: dd-mmm-yyyy, Stephanie Allison  (SAA)
+#  Rev:  14-Mar-2000, Kristi Luchini     (LUCHINI)
+#
+#--------------------------------------------------------------
+#  Mod:#ifdef DEBUG
+#        14-Mar-2000, K. Luchini (LUCHINI):
+#          Add $(EPICS_BASE)/include to USR_INCLUDES
+#          Add $(VX_CONFIG_DIR) to USR_INCLUDE 
+#          Add standard header
+#          Removed USR_CPPFLAGS += -I $(EPICS_BASE)/include
+#          which is no longer needed for sequences
+#
+#==============================================================
+#
+TOP = ../../../..
+WIND_BASE_BIN  = $(VX_DIR)/target/config/$(T_A)
+include $(TOP)/config/CONFIG_APP
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+TGT_DIR = $(VX_CONFIG_DIR_YES)/$(T_A)
+
+#USR_CFLAGS   += -DDBG -DDEBUG
+USR_CFLAGS += -DVXI
+USR_INCLUDES += -I. -I..
+USR_INCLUDES += -I $(EPICS_SITE)/include
+USR_INCLUDES += -I $(EPICS_BASE)/include
+USR_INCLUDES += -I $(VX_CONFIG_DIR_YES)/all
+USR_INCLUDES += -I $(TGT_DIR)
+
+ifeq ($(T_A),mv2400)
+USR_INCLUDES += -I $(TGT_DIR)/V152/Include
+endif
+ifeq ($(T_A),niCpu030)
+USR_INCLUDES += -I $(TGT_DIR)/nivxi/include
+endif
+
+# Drivers
+SRCS.c += ../drvP2RfVxi.c
+SRCS.c += ../drvEpvxi.c
+SRCS.c += ../subSysReboot.c
+
+# Subroutine record functions
+SRCS.c += ../subIQ.c
+SRCS.c += ../subSys.c
+
+# Record Support
+SRCS.c += ../p2RfCfmRecord.c
+SRCS.c += ../p2RfCf2Record.c
+SRCS.c += ../p2RfGvfRecord.c
+SRCS.c += ../p2RfIqaRecord.c
+SRCS.c += ../p2RfRfpRecord.c
+SRCS.c += ../p2RfClkRecord.c
+SRCS.c += ../p2RfAimRecord.c
+SRCS.c += ../p2RfInitClk.c
+
+# p2Rf device support
+SRCS.c += ../devP2RfCfm.c
+SRCS.c += ../devP2RfCf2.c
+SRCS.c += ../devP2RfGvf.c
+SRCS.c += ../devP2RfIqa.c
+SRCS.c += ../devP2RfRfp.c
+SRCS.c += ../devP2RfClk.c
+SRCS.c += ../devP2RfAim.c
+
+# EPICS Initialization
+SRCS.c += ../initHooks.c
+
+# library - includes all records/device/driver support
+# plus subroutines for subroutine records
+include ../rfLIBOBJS
+LIBNAME = rfLib
+
+# Command Scripts
+SCRIPTS += iocCore 
+SCRIPTS += $(EPICS_SITE_BIN)/time
+SCRIPTS += $(EPICS_SITE_BIN)/baseLib
+SCRIPTS += $(EPICS_SITE_BIN)/diagLib
+SCRIPTS += $(EPICS_SITE_BIN)/seqLib
+SCRIPTS += $(EPICS_SITE_BIN)/restoreLib
+SCRIPTS += $(EPICS_SITE_BIN)/dbrestore
+SCRIPTS += $(EPICS_SITE_BIN)/save_restore
+SCRIPTS += $(WIND_BASE_BIN)/vxWorks 
+SCRIPTS += $(WIND_BASE_BIN)/vxWorks.sym
+
+ifeq ($(T_A),mv2400) 
+  SCRIPTS += $(EPICS_SITE_BIN)/dld
+  SCRIPTS += $(EPICS_SITE_BIN)/dlt
+  SCRIPTS += $(EPICS_SITE_BIN)/mapAdx
+  SCRIPTS += $(EPICS_SITE_BIN)/memTest
+  SCRIPTS += $(EPICS_SITE_BIN)/tstMem
+  SCRIPTS += $(EPICS_SITE_BIN)/vbb
+  SCRIPTS += $(EPICS_SITE_BIN)/vxiBaseIsr.o
+  SCRIPTS += $(WIND_BASE_BIN)/V152/resman.o
+  SCRIPTS += $(WIND_BASE_BIN)/V152/nivxi.o
+  SCRIPTS += $(WIND_BASE_BIN)/V152/Resman.out
+  SCRIPTS += $(WIND_BASE_BIN)/V152/VXI_Library.out
+endif
+
+include $(TOP)/config/RULES.Vx
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+
+
+
+
+
+
+
+
+@
+
+
+1.8
+log
+@Added lines from old commonApp/src/db/Makefile.
+@
+text
+@@
+
+
+1.7
+log
+@Initial import of COMB-2 (Cf2) support.
+@
+text
+@d24 2
+a25 2
+#TARGET_ARCHS = niCpu030 mv2400
+include $(TOP)/config/CONFIG_APP.Vxi
+d81 26
+@
+
+
+1.6
+log
+@Link against individual allenBradley modules instead of library.
+This makes it easier to debug one.
+@
+text
+@d56 1
+d66 1
+@
+
+
+1.5
+log
+@Revert to original AllenBradley driver.
+@
+text
+@a47 1
+#SRCS.c += ../drvAb.c
+a73 2
+LIBOBJS += $(EPICS_SITE_BIN)/abLib
+
+@
+
+
+1.4
+log
+@Remove debug
+@
+text
+@d48 1
+a48 1
+SRCS.c += ../drvAb.c
+a74 5
+# Temporarily compile changes to Allen-Bradley driver for VXI
+ifeq ($(T_A),mv2400)
+SRCS.c += ../drvAb.c
+include ../allenBradleyLIBOBJS
+else
+a75 1
+endif
+@
+
+
+1.3
+log
+@ioc/rfApp/src/diag/Makefile.Vx
+@
+text
+@a28 2
+CD_BASE   = /afs/slac/g/cd/soft/ioc/prod
+CD_BIN    = $(CD_BASE)/bin/$(T_A)
+d30 1
+a30 1
+USR_CFLAGS   += -DDBG -DDEBUG
+a32 1
+USR_INCLUDES += -I $(CD_BASE)/include
+@
+
+
+1.2
+log
+@Modify for ppc
+@
+text
+@d29 2
+d32 1
+a32 1
+#USR_CFLAGS   += -DDBG -DDEBUG
+d35 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d78 3
+a80 1
+PROD += drvAb.o
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

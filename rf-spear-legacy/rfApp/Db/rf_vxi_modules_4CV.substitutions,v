@@ -1,0 +1,97 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2009.12.12.00.13.43;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.02.08.55;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@#==============================================================
+#
+# Abs:   Database template for extra RF VXI Modules for a 4-cavity
+#        station.
+#
+# Name:  rf_vxi_modules_4CV.substitutions
+#
+# Desc:  EPICS database template file for RF VXI Modules.
+#
+# Side:  None
+#
+# Facility: SLAC/PEPII Low-Level RF
+#
+# Auth: dd-mmm-yyyy, Stephanie Allison (SAA)
+# Rev:  dd-mmm-yyyy, First Lastname    (USERNAME)
+#==============================================================
+#
+# Mod:
+#       06-Feb-2002, K. Luchini (LUCHINI):
+#         Added standard header and obtained
+#         db files from the top level db directory
+#         instead of db. Added substitutions tobe used
+#         in the build script
+#
+#==============================================================
+#
+# RF I/Q & Amplitude Detector Module
+#
+file iqa.db
+{
+     {R=$(RRRS), M=3, S=11, RCE=0, TBL="/tbl/iqaDdf_50Hz.rpt"}
+}
+
+
+
+
+@
+
+
+1.1
+log
+@RF VXI modules 4 cavity template
+@
+text
+@d6 1
+a6 1
+# Name:  RRRS_vxi_modules_4CV.template
+d29 1
+a29 1
+file db/iqa.db
+d31 1
+a31 1
+     {R=RRRS, M=3, S=11, RCE=0, TBL="/tbl/iqaDdf_50Hz.rpt"}
+@
+

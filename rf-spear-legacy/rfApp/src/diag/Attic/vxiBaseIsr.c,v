@@ -1,0 +1,559 @@
+head	1.5;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.5
+	RF-SPEAR-R0-1-0:1.5
+	RF-SPEAR-R0-0-3:1.5
+	RF-SPEAR-R0-0-2:1.5
+	RF-SPEAR-R0-0-0:1.5
+	RF-3-13-10:1.5.0.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.5
+date	2004.01.15.23.45.02;	author saa;	state dead;
+branches;
+next	1.4;
+
+1.4
+date	2004.01.06.16.04.11;	author luchini;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.09.10.01.27.49;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.08.21.18.42.35;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.5
+log
+@Move vxiBaseIsr.c to $EPICS/site/src/diag.
+@
+text
+@/*
+=============================================================
+
+  Abs:  V152-S002 VXI Slot-0 Controller Routines
+
+  Name: vxiBaseIsr.c
+
+  Rem:  This function is used to replace the Kinetic
+        System base VXI Interrupt Service Routine
+        vxiBaseIsr(), providing diagnostic print
+        statements along the way.  The local routine
+        myIsr looks at the slot-0 controller A16 registers 
+        for interrupt status/control and interrupt level
+
+  Side:  Kinetic Systems V152 Slot-0 Controller ONLY
+
+  Proto: None
+
+  Auth: dd-mmm-yyyy, Kristi Luchini   (LUCHINI)
+  Rev : dd-mmm-yyyy, Reviewer's Name  (USERNAME)
+
+-------------------------------------------------------------
+  Mod:
+        19-Dec-2003, K. Luchini       (LUCHINI):
+           added v152_wt_iack_ctrl(),v152_rd_iack_ctrl()
+           v152_rd_int_status(),v152_getBaseAdrs
+        09-Sep-2003, K. Luchini       (LUCHINI):
+           changed #if TARGET == MV2400 to
+           #if CPU_FAMILY == PPC and added a log 
+           message when running reset_kscIsr for the
+           niCpu030
+
+=============================================================
+*/
+#include "vxWorks.h"
+#include "vxLib.h"
+#include "iv.h"
+#include "vme.h"
+#include "intLib.h"
+#include "sysLib.h"
+#include "logLib.h"
+#include "config.h"
+
+/*#include "modTypes.h" */
+
+/* Prototypes */
+void   my_vxiBaseIsr(void);
+int    reset_kscIsr(void);
+
+#if CPU_FAMILY == PPC
+
+#ifdef INCLUDE_MPIC
+#include "hawkMpic.h"
+#else
+#include "sl82565IntrCtl.h"
+#endif
+
+#include "universe.h"
+#include "kscvxi.h"  /* globals VXIintLevel, VXIintStatusId */
+
+/* Local Prototypes */
+int    v152_rd_iack_ctrl( unsigned short *pdata );
+int    v152_rd_int_status( unsigned short *pdata );
+int    v152_getBaseAdrs( void );
+int    v152_wt_iack_ctrl( unsigned short data );
+
+IMPORT INT_HANDLER_DESC * sysIntTbl [256];
+
+/* Global Prototypes */
+IMPORT void   sysPciRead32  (UINT32, UINT32 *);
+IMPORT void   sysPciWrite32 (UINT32, UINT32);
+
+/* Globals */
+IMPORT UINT32 univBaseAdrs;
+int vxi_debug = 0;
+
+/* Local variables */
+static volatile unsigned short *vxiBaseAdrs=NULL;
+
+/* Macros */
+#ifndef UNIV_IN_LONG
+# define UNIV_IN_LONG(adr,pVal) \
+  sysPciRead32((UINT32)(adr),(UINT32 *)(pVal));
+#endif
+
+#ifndef UNIV_OUT_LONG
+# define UNIV_OUT_LONG(adr,val) \
+  sysPciWrite32((UINT32)(adr),(UINT32)(val));
+#endif
+ 
+#define VXI_A16_BASE 0xc000
+
+int v152_getBaseAdrs( void )
+{
+    int  status = OK;
+    int  adrSpace = VME_AM_SUP_SHORT_IO;
+
+    status = sysBusToLocalAdrs( adrSpace,
+                               (char *)VXI_A16_BASE,
+                               (char **)&vxiBaseAdrs );
+    if ( status!=OK ) 
+      logMsg("Invalid VXI A16 Base Address 0x%x\n",
+                (int)VXI_A16_BASE,0,0,0,0,0);
+    return(status);
+}
+
+int v152_rd_int_status( unsigned short *pdata )
+{
+  int status=OK;
+  int mode = READ;
+  int bcnt = 2;
+  unsigned short cpu_int_status = 0;
+  unsigned long  adrs = 0;
+
+  if ( !vxiBaseAdrs ) v152_getBaseAdrs();
+  
+  adrs = (unsigned long)vxiBaseAdrs + 0x38;
+  status = vxMemProbe((char *)adrs,mode,bcnt,(char *)&cpu_int_status);
+  if ( status==OK ) {
+    if (vxi_debug) 
+       logMsg("V152 Interrupt Status (0x%x): 0x%x\n",
+              (int)adrs,(int)cpu_int_status,0,0,0,0);
+    *pdata = cpu_int_status;
+  }
+  else if ( vxi_debug )
+    logMsg("Failed to read CPU Interrupt Status Register 0x%x\n",
+          (int)adrs,0,0,0,0,0);
+  return(status);
+}
+
+int v152_rd_iack_ctrl( unsigned short *pdata )
+{
+  int status = OK;
+  int mode = READ;
+  int bcnt = 2;
+  unsigned short cpu_iack_ctrl=0;
+  unsigned long  adrs = 0;
+
+  if ( !vxiBaseAdrs ) v152_getBaseAdrs();
+
+  adrs = (unsigned long)vxiBaseAdrs + 0x36;
+  status = vxMemProbe((char *)adrs,mode,bcnt,(char *)&cpu_iack_ctrl);
+  if (status==OK)  {
+    if (vxi_debug)
+       logMsg("CPU IACK Control Register (0x%x): 0x%x\n",
+              (int)adrs,(int)cpu_iack_ctrl,0,0,0,0);
+    *pdata = cpu_iack_ctrl;
+  }
+  else if (vxi_debug)
+       logMsg("Failed to read CPU IACK Control Register 0x%x\n",
+             (int)adrs,0,0,0,0,0);
+  return(status);
+}
+
+int v152_wt_iack_ctrl( unsigned short data )
+{
+  int status = OK;
+  int mode = WRITE;
+  int bcnt = 2;
+  unsigned short rbk_data=0;
+  unsigned long  adrs = 0;
+
+  if ( !vxiBaseAdrs ) v152_getBaseAdrs();
+
+  adrs = (unsigned long)vxiBaseAdrs + 0x36;
+  status = vxMemProbe((char *)adrs,mode,bcnt,(char *)&data);
+  if (status==OK)  {
+    if (vxi_debug)
+     { 
+       mode = READ;
+       status = vxMemProbe((char *)adrs,mode,bcnt,(char *)&rbk_data);
+       if ((status==OK) && ((rbk_data & 0xff) != (data &0xff))) 
+          logMsg("CPU IACK Control Register (0x%x): rbk=0x%x  wt=0x%x\n",
+                  (int)adrs,(int)rbk_data,(int)data,0,0,0);
+     }
+  }
+  else
+       logMsg("Failed to write CPU IACK Control Register 0x%x\n",
+             (int)adrs,0,0,0,0,0);
+  return(status);
+}
+
+void my_vxiBaseIsr(void)
+{
+  unsigned short cpu_int_status=0;
+  unsigned long  univ_int_status=0;
+  unsigned long  univ_statid=0;
+  static volatile unsigned short *vxiBaseAdrs=NULL;
+  int           status;
+  int           level=0;
+  int           i,j;
+  int           adrSpace = VME_AM_SUP_SHORT_IO;
+  int           mode = READ;
+  int           bcnt = 2;
+  unsigned int  mask;
+  short         controller = -1;
+  unsigned long  statid=0;
+  unsigned long  adrs;
+  unsigned int  *paddr;
+  NIVXI_HVXIINT *proutine;
+  
+
+
+  /* Read the V152 Interrupt Status Id register */
+  if ( !vxiBaseAdrs ) {
+    status = sysBusToLocalAdrs( adrSpace,
+                               (char *)VXI_A16_BASE,
+                               (char **)&vxiBaseAdrs );
+    if ( status!=OK ) {
+      if (vxi_debug)
+         logMsg("Invalid VXI A16 Base Address 0x%x\n",
+                (int)VXI_A16_BASE,0,0,0,0,0);
+       return;
+    }
+  }
+
+  adrs = (unsigned long)vxiBaseAdrs + 0x38;
+  status = vxMemProbe((char *)adrs,mode,bcnt,(char *)&cpu_int_status);
+  if ( status!=OK )
+    logMsg("Failed to read CPU Interrupt Status Register 0x%x\n",
+             (int)adrs,0,0,0,0,0);
+  else if (vxi_debug==2) 
+    logMsg("V152 Interrupt Status (0x%x): 0x%x\n",
+	    (int)adrs,(int)cpu_int_status,0,0,0,0);
+
+  /* Get pending interrupt levels from Universe II chip  */  
+  UNIV_IN_LONG(UNIVERSE_LINT_STAT, &univ_int_status )
+  if (vxi_debug==2) 
+    logMsg("Universe II LINT_STAT register (0x%x): 0x%x\n",
+	 (int)UNIVERSE_ADRS(UNIVERSE_LINT_STAT),
+         (int)univ_int_status,
+         0,0,0,0);
+
+  level = univ_int_status & 0xff;
+  level >>= 1;
+  if ( level ) {  
+    for (i=0; i<7; i++) {
+      j = 6-i;
+      mask = 1 << j;
+      if ( level & mask ) {  
+        level ^= mask; /* Clear interrupt being serviced */
+     	/* 
+	 * The Universe II Chip has individual registers for the status id 
+	 * information of each interrupt level.
+	 */     
+        j++;  
+        switch( j ) {
+	case 1:
+           paddr = UNIVERSE_V1_STATID;
+           break;
+        case 2:
+           paddr = UNIVERSE_V2_STATID;
+           break;
+        case 3:
+           paddr = UNIVERSE_V3_STATID;
+           break;
+        case 4:
+           paddr = UNIVERSE_V4_STATID;
+           break;
+        case 5:
+           paddr = UNIVERSE_V5_STATID;
+           break;
+        case 6:
+           paddr = UNIVERSE_V6_STATID;
+           break;
+        case 7:
+        default:
+           paddr = UNIVERSE_V7_STATID;
+           break;
+        }/* End of SWITCH statement */
+      
+        UNIV_IN_LONG( paddr,&univ_statid );
+        if (vxi_debug)
+          logMsg("D16 IACK level=%d statid=0x%x\n",
+                (int)j,
+                (int)univ_statid,
+                0,0,0,0);
+
+        /* Call user interrupt service routine 
+         * Cause & status of interrupt is in bits 8-15
+	 * and the logical address of the interrupter is in bits 0-7.
+	 */ 
+        proutine = GetVXIintHandler( (UINT16)j );
+        if (proutine) {
+          statid |= ((UINT32)cpu_int_status & 0xffff);
+          (proutine)(controller,(UINT16)j,statid);
+	}
+        else {
+          if (vxi_debug)
+             logMsg("VXI ISR for interrupt level %d has not been set\n",j,0,0,0,0,0); 
+	}       
+      }
+    }/* End of FOR statment */
+  }
+  else {
+      if (vxi_debug)
+        logMsg("Interrupt Level is zero!!!\n",0,0,0,0,0,0);
+  }
+
+  /* Clear interrupt request in Universe chip */
+  UNIV_OUT_LONG(UNIVERSE_LINT_STAT, univ_int_status );
+}
+
+int reset_kscIsr(void)
+{
+   INT_HANDLER_DESC *currHandler = NULL;
+
+   currHandler = sysIntTbl[255];
+   if ( currHandler->vec == NULL )
+      logMsg("Interrupt Vector 255 has not been initialized yet!\n",
+             0,0,0,0,0,0);
+   else {
+      currHandler->vec = my_vxiBaseIsr;
+      logMsg("Resetting KSC Interrupt Vector at 255 to SLAC version\n",
+             0,0,0,0,0,0);
+   }
+  return OK;
+}
+#else
+
+int reset_kscIsr(void)
+{
+  logMsg("Fake ISR for niCpu030\n",0,0,0,0,0,0);
+  return OK;
+}
+
+void  my_vxiBaseIsr(void)
+{
+  return;
+}
+#endif
+
+@
+
+
+1.4
+log
+@Read new register in V152
+@
+text
+@@
+
+
+1.3
+log
+@ioc/rfApp/src/diag/Makefile.Vx
+@
+text
+@d24 3
+d61 5
+d77 3
+d90 24
+d115 67
+a181 1
+#define VXI_A16_BASE 0xc000
+a189 1
+  int           pendingIntr;
+d219 2
+a220 3
+  if ( vxi_debug ) {
+    if ( status!=OK )
+       logMsg("Failed to read CPU Interrupt Status Register 0x%x\n",
+d222 2
+a223 2
+    else 
+       logMsg("V152 Interrupt Status (0x%x): 0x%x\n",
+a224 1
+  }
+d228 1
+a228 3
+  pendingIntr = univ_int_status & LINT_STAT_INT_MASK;
+
+  if ( vxi_debug) {
+a233 4
+    logMsg("\tMask 0x%hx bits of Universe II LINT_STAT register: 0x%x\n",
+         (int)LINT_STAT_INT_MASK,(int)pendingIntr,0,0,0,0);
+  }
+
+a234 3
+  if (vxi_debug)
+    logMsg("\tLower 8-bits of Universe II LINT_STAT register: 0x%x (%d)\n",
+           (int)level,(int)level,0,0,0,0);
+a235 1
+
+d274 4
+a277 5
+          logMsg("Universe II V%d_STATID Register (0x%x): statid=0x%x level=%d\n",
+             (int)j,
+	     (int)UNIVERSE_ADRS(paddr),
+             (int)univ_statid,
+             (int)j,0,0);
+@
+
+
+1.2
+log
+@Allow empty build for other niCpu030
+@
+text
+@d24 5
+a28 2
+        dd-mmm-yyyy, Reviewer's Name  (USERNAME) 
+           comments
+d41 1
+a41 1
+#include "modTypes.h"
+d47 1
+a47 1
+#if TARGET == MV2400
+d236 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d29 10
+a38 1
+#include <vxWorks.h>
+d40 5
+a45 5
+#include "vme.h"
+#include "config.h"
+#include "vxLib.h"
+#include "logLib.h"
+#include "sysLib.h"
+d51 1
+a53 1
+#include "sysLib.h"
+d56 2
+a60 1
+void          my_vxiBaseIsr(void);
+d64 1
+a64 1
+IMPORT INT_HANDLER_DESC * sysIntTbl [256];
+a78 14
+
+int reset_kscIsr(void)
+{
+   INT_HANDLER_DESC *currHandler = NULL;
+
+   currHandler = sysIntTbl[255];
+   if ( currHandler->vec == NULL )
+      logMsg("Interrupt Vector 255 has not been initialized yet!\n",
+             0,0,0,0,0,0);
+   else
+      currHandler->vec = my_vxiBaseIsr;
+  return OK;
+}
+
+d103 3
+a105 1
+    status = sysBusToLocalAdrs( adrSpace,(char *)VXI_A16_BASE,(char **)&vxiBaseAdrs );
+d107 3
+a109 1
+       logMsg("Invalid VXI A16 Base Address 0x%x\n",(int)VXI_A16_BASE,0,0,0,0,0);
+d116 3
+a118 2
+  if ( status!=OK ) 
+     logMsg("Failed to read CPU Interrupt Status Register 0x%x\n",
+d120 2
+a121 2
+  else
+     logMsg("V152 Interrupt Status (0x%x): 0x%x\n",
+d123 1
+d128 3
+a130 1
+  logMsg("Universe II LINT_STAT (0x%x): 0x%x\n",
+d135 1
+a135 1
+  logMsg("Lower 0x%hx bits of Universe II LINT_STAT register: 0x%x\n",
+d137 1
+d140 3
+a142 2
+  logMsg("Lower 8-bits of Universe II LINT_STAT register: 0x%x (%d)\n",
+         (int)level,(int)level,0,0,0,0);
+d182 2
+a183 1
+        logMsg("Universe II V%d_STATID Register (0x%x): statid=0x%x\n",
+d187 1
+a187 1
+             0,0,0);
+d198 4
+a201 3
+        else
+          logMsg("VXI ISR for interrupt level %d has not been set\n",j,0,0,0,0,0); 
+       
+d205 4
+a208 2
+  else
+      logMsg("Interrupt Level is zero!!!\n",0,0,0,0,0,0);
+d213 29
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

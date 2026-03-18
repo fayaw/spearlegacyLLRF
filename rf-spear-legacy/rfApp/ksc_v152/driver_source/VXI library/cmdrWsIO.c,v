@@ -1,0 +1,665 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  cmdrWsFxn/cmdrWsIO.c
+
+  This module provides commander word-serial IO
+***************************************************************************/
+#define KSC_DEBUG
+#define KSC_DEBUG_WRITE
+#include <vxWorks.h>
+#include <vxLib.h>
+#include <tickLib.h>
+#include <time.h>
+
+#include <stdio.h>
+
+#include <kscvxi.h>
+
+#include <libvar.h>
+#include <vxiregs.h>
+#include <bus.h>
+
+
+/*==========================================================================
+			    PRIVATE ROUTINES
+==========================================================================*/
+
+/*==========================================================================
+  rdBuf
+==========================================================================*/
+
+static
+int rdBuf (UINT8** bufp_ptr, UINT8 *val_ptr)
+{
+  *val_ptr = *(*bufp_ptr)++;
+  return (0);
+}
+
+
+/*==========================================================================
+  wrBuf
+==========================================================================*/
+
+static
+int wrBuf (UINT8** bufp_ptr, UINT8 val)
+{
+  *(*bufp_ptr)++ = val;
+  return (0);
+}
+
+
+/*==========================================================================
+  rdFile
+==========================================================================*/
+
+static
+int rdFile (FILE** fp_ptr, UINT8* val_ptr)
+{
+  *val_ptr = (UINT8) getc (*fp_ptr);
+  return (ferror(*fp_ptr));
+}
+
+
+/*==========================================================================
+  wrFile
+==========================================================================*/
+
+static
+int wrFile (FILE** fp_ptr, UINT8 val)
+{
+  putc ((int) val, *fp_ptr);
+  return (ferror(*fp_ptr));
+}
+
+#define VXIWRITEREADYMASK 0x0200
+#define VXIDORMASK        0x2000
+#define VXIREADREADYMASK  0x0400
+
+/*==========================================================================
+  wsRead
+==========================================================================*/
+/****************************************************/
+static
+INT16 wsRead (INT16 la, UINT32 cnt, UINT16 mode, UINT32* retcnt,
+	      int (*ioFxn)(), void* ioArg)
+
+{
+    UINT32 xfer;
+    UINT8 eos;
+    UINT16 respState, respMask;
+    UINT16 sync;
+
+#ifdef KSC_DEBUG
+    printf("wsRead:In wsRead.\n");
+#endif
+    eos = mode >> 8;
+    mode ^= 0x02;
+
+    /** clear flags **/
+    vxiCmdrWsFlags [la] = 0;
+
+    *retcnt = xfer = 0;
+
+    while (xfer < cnt)
+    {
+        UINT32 tick0 = tickGet();
+        UINT32 ticks;
+        UINT16 data;
+        UINT8 val;
+        int status;
+	respState = VXIDORMASK|VXIWRITEREADYMASK;
+        respMask = VXIDORMASK|VXIWRITEREADYMASK;
+
+        /** wait to request value **/
+        while (ticks = tickGet() - tick0,  ticks <= vxiCmdrWsTimo)
+        {
+            if (status = VXIinReg (la,VXI_MB_RESPONSE,&data),  status != 0)
+	        return (WS_ERRORFLAG | WSb_RET_BERR);
+#ifdef KSC_DEBUG
+            printf("wsRead:data1 is 0x%x \n",data);
+#endif
+            if((data & 0x800)== 0){
+#ifdef KSC_DEBUG
+     printf("wsRead: VXIinReg shows an error. (0x%x) \n",WS_ERRORFLAG|WS_RET_RDERR_NSUP);
+#endif
+                  return (WS_ERRORFLAG|WS_RET_RDERR_NSUP);
+            }
+            sync = !((data ^ respState)&respMask);
+            /*if(sync) break;*/
+            if ((data & 0x2200) == 0x2200) break;
+        } /*/ end while(ticks)*/
+    
+        if (ticks > vxiCmdrWsTimo) 
+        {
+            return (WS_ERRORFLAG | WSb_RET_TIMO);
+        }
+
+        VXIoutReg (la, VXI_MB_DATA_LOW, WS_BYTERQ);
+
+        /** wait to read value **/
+        while (ticks = tickGet() - tick0,  ticks <= vxiCmdrWsTimo) 
+        {
+            if (status = VXIinReg (la,VXI_MB_RESPONSE,&data),  status != 0)
+	        return (WS_ERRORFLAG | WSb_RET_BERR);
+#ifdef KSC_DEBUG
+            printf("wsRead:data2 is 0x%x\n",data);
+#endif
+            if((data & 0x800)== 0)  return (WS_ERRORFLAG|WS_RET_RDERR_NSUP);
+
+            if (data & VXIREADREADYMASK) break;		
+         }
+        if (ticks > vxiCmdrWsTimo) 
+        {
+            return (WS_ERRORFLAG | WSb_RET_TIMO);
+        }
+
+        if (status = VXIinReg (la,VXI_MB_DATA_LOW,&data), status != 0)
+            return (WS_ERRORFLAG | WSb_RET_BERR);
+
+        if (ioFxn (&ioArg, val = data & 0x00FF)) 
+        {
+            return (WS_ERRORFLAG | WSb_RET_FwriteError);
+        }
+
+        *retcnt = ++xfer;
+
+        if (((mode & 0x02)  &&  (data & 0x0100))  ||
+	    ((mode & 0x04)  &&  (val == '\n'))    ||
+	    ((mode & 0x08)  &&  (val == '\r'))    ||
+	    ((mode & 0x10)  &&  (val == eos)))
+           return (0x03);
+    } /*/ end while(xfer < cnt)*/
+#ifdef KSC_DEBUG
+            printf("wsRead: returning successfully\n");
+#endif
+
+    return (0x05);
+}
+
+
+/*==========================================================================
+  wsWrite
+==========================================================================*/
+
+static
+INT16 wsWrite (INT16 la, UINT32 cnt, UINT16 mode, UINT32* retcnt,
+	       int (*ioFxn)(), void* ioArg)
+
+{
+   UINT32 xfer;
+   UINT16 data;
+   UINT16 cmd;
+   UINT8 val;
+
+#ifdef KSC_DEBUG_WRITE
+   printf("wsWrite:In wsWrite.\n");
+#endif
+    /** clear flags **/
+    vxiCmdrWsFlags [la] = 0;
+
+    *retcnt = xfer = 0;
+
+    while (xfer < cnt) 
+    {
+        UINT32 tick0 = tickGet();
+        UINT32 ticks;
+        int status;
+
+        /** wait to write value **/
+        while (ticks = tickGet() - tick0,  ticks <= vxiCmdrWsTimo) 
+        {
+            if (status = VXIinReg (la,VXI_MB_RESPONSE,&data),  status != 0)
+	        return (WS_ERRORFLAG | WSb_RET_BERR);
+#ifdef KSC_DEBUG_WRITE
+            printf("wsWrite:data1 is 0x%x\n",data);
+#endif
+            if((data & 0x800)== 0)  return (WS_ERRORFLAG|WS_RET_RDERR_NSUP);
+          if ((data & 0x1200) == 0x1200) break;
+/*/            if (data & 0x1000) break;*/
+        } /*/ end while(ticks)*/
+    
+        if (ticks > vxiCmdrWsTimo) 
+        {
+            return (WS_ERRORFLAG | WSb_RET_TIMO);
+        }
+
+        cmd = ((cnt == ++xfer)  &&  (mode & 0x02)) ? WS_BYTEAV_1 : WS_BYTEAV_0;
+
+        if (ioFxn (&ioArg, &val)) 
+        {
+            return (WS_ERRORFLAG | WSb_RET_FwriteError);
+        }
+
+#ifdef KSC_DEBUG_WRITE
+  /*printf("wsWrite:cmd|val = 0x%x\n",cmd|val);*/
+#endif
+        VXIoutReg (la, VXI_MB_DATA_LOW, cmd | val);
+        *retcnt = xfer;
+
+#ifdef KSC_DEBUG_WRITE
+/*            printf("wsWrite:data1 is 0x%x\n",data);*/
+#endif
+
+    } /*/ end while(xfer < cnt)*/
+#ifdef KSC_DEBUG_WRITE
+  printf("wsWrite:cmd = 0x%x, val = 0x%x, cmd|val = 0x%x\n",cmd, val, cmd|val);
+#endif
+
+    return WS_RET_IODONE;
+}
+
+
+/*==========================================================================
+			    PUBLIC ROUTINES
+==========================================================================*/
+
+/*==========================================================================
+  WSabort
+==========================================================================*/
+
+INT16 WSabort (INT16 la, UINT16 op)
+{
+  if (la < 0  ||  la > 255)
+    return (-1);
+
+  if (op < 1  ||  op > 5)
+    return (-2);
+
+  vxiCmdrWsFlags [la] |= (1 << op);
+
+return 0;
+}
+
+
+/*==========================================================================
+  WScmd
+==========================================================================*/
+
+INT16 WScmd (INT16 la, UINT16 cmd, UINT16 respflag, UINT16* response)
+{
+  unsigned long tick0 = tickGet();
+  unsigned long ticks;
+  UINT16 data;
+  int status;
+
+  /** clear flags **/
+
+  vxiCmdrWsFlags [la] = 0;
+
+  /** wait to write value **/
+
+  while (ticks = tickGet() - tick0,  ticks <= vxiCmdrWsTimo) {
+    if (status = VXIinReg (la,VXI_MB_RESPONSE,&data),  status != 0)
+      return (WS_ERRORFLAG | WS_RET_BERR);
+
+    if (data & 0x0200) break;
+  }
+
+  if (ticks > vxiCmdrWsTimo) {
+    return (WS_ERRORFLAG | WS_RET_TIMO_SEND);
+  }
+
+  /** write value **/
+
+  VXIoutReg (la,VXI_MB_DATA_LOW,cmd);
+
+
+  if (respflag) {
+    /** wait to read value **/
+
+    while (ticks = tickGet() - tick0,  ticks <= vxiCmdrWsTimo) {
+      if (status = VXIinReg (la,VXI_MB_RESPONSE,&data),  status != 0)
+	return (WS_ERRORFLAG | WS_RET_BERR);
+
+      if (data & 0x0400) break;
+    }
+
+    if (ticks > vxiCmdrWsTimo) {
+      return (WS_ERRORFLAG | WS_RET_TIMO_REC);
+    }
+
+    VXIinReg (la,VXI_MB_DATA_LOW,response);
+  }
+
+  return (WS_RET_IODONE);
+}
+
+
+/*==========================================================================
+  WSLcmd
+==========================================================================*/
+
+INT16 WSLcmd (INT16 la, UINT32 cmd, UINT16 respflag, UINT32* response)
+{
+  unsigned long tick0 = tickGet();
+  unsigned long ticks;
+  UINT16 data, dataHi;
+  int status;
+
+  /** clear flags **/
+
+  vxiCmdrWsFlags [la] = 0;
+
+  /** wait to write value **/
+
+  while (ticks = tickGet() - tick0,  ticks <= vxiCmdrWsTimo) {
+    if (status = VXIinReg (la,VXI_MB_RESPONSE,&data),  status != 0)
+      return (WS_ERRORFLAG | WS_RET_BERR);
+
+    if (data & 0x0200) break;
+  }
+
+  if (ticks > vxiCmdrWsTimo) {
+    return (WS_ERRORFLAG | WS_RET_TIMO_SEND);
+  }
+
+  /** write value **/
+
+  VXIoutReg (la,VXI_MB_DATA_HIGH, cmd >> 16);
+  VXIoutReg (la,VXI_MB_DATA_LOW, cmd & 0xFFFF);
+
+
+  if (respflag) {
+    /** wait to read value **/
+
+    while (ticks = tickGet() - tick0,  ticks <= vxiCmdrWsTimo) {
+      if (status = VXIinReg (la,VXI_MB_RESPONSE,&data),  status != 0)
+	return (WS_ERRORFLAG | WS_RET_BERR);
+
+      if (data & 0x0400) break;
+    }
+
+    if (ticks > vxiCmdrWsTimo) {
+      return (WS_ERRORFLAG | WS_RET_TIMO_REC);
+    }
+
+    VXIinReg (la,VXI_MB_DATA_LOW,&data);
+    VXIinReg (la,VXI_MB_DATA_HIGH,&dataHi);
+
+    *response = ((UINT32) dataHi << 16) | ((UINT32) data);
+  }
+
+  return (WS_RET_IODONE);
+}
+
+
+/*==========================================================================
+  WSEcmd
+==========================================================================*/
+
+INT16 WSEcmd (INT16 la, UINT16 ext, UINT32 cmd, UINT16 respflag,
+	      UINT32* response)
+{
+  unsigned long tick0 = tickGet();
+  unsigned long ticks;
+  UINT16 data, dataHi;
+  int status;
+
+  /** clear flags **/
+
+  vxiCmdrWsFlags [la] = 0;
+
+  /** wait to write value **/
+
+  while (ticks = tickGet() - tick0,  ticks <= vxiCmdrWsTimo) {
+    if (status = VXIinReg (la,VXI_MB_RESPONSE,&data),  status != 0)
+      return (WS_ERRORFLAG | WS_RET_BERR);
+
+    if (data & 0x0200) break;
+  }
+
+  if (ticks > vxiCmdrWsTimo) {
+    return (WS_ERRORFLAG | WS_RET_TIMO_SEND);
+  }
+
+  /** write value **/
+
+  VXIoutReg (la,VXI_MB_RESPONSE, ext);
+  VXIoutReg (la,VXI_MB_DATA_HIGH, cmd >> 16);
+  VXIoutReg (la,VXI_MB_DATA_LOW, cmd & 0xFFFF);
+
+
+  if (respflag) {
+    /** wait to read value **/
+
+    while (ticks = tickGet() - tick0,  ticks <= vxiCmdrWsTimo) {
+      if (status = VXIinReg (la,VXI_MB_RESPONSE,&data),  status != 0)
+	return (WS_ERRORFLAG | WS_RET_BERR);
+
+      if (data & 0x0400) break;
+    }
+
+    if (ticks > vxiCmdrWsTimo) {
+      return (WS_ERRORFLAG | WS_RET_TIMO_REC);
+    }
+
+    VXIinReg (la,VXI_MB_DATA_LOW,&data);
+    VXIinReg (la,VXI_MB_DATA_HIGH,&dataHi);
+
+    *response = ((UINT32) dataHi << 16) | ((UINT32) data);
+  }
+
+  return (WS_RET_IODONE);
+}
+
+
+/*==========================================================================
+  WSclr
+==========================================================================*/
+
+INT16 WSclr (INT16 la)
+{
+  return WScmd (la, WS_CLEAR, FALSE, 0);
+}
+
+
+/*==========================================================================
+  WStrg
+==========================================================================*/
+
+INT16 WStrg (INT16 la)
+{
+  return WScmd (la, WS_TRIGGER, FALSE, 0);
+}
+
+
+/*==========================================================================
+  WSrd
+==========================================================================*/
+
+INT16 WSrd (INT16 la, UINT8* buf, UINT32 cnt, UINT16 mode, UINT32* retcnt)
+{
+#ifdef KSC_DEBUG
+ printf("\nIn WSrd.\n");
+#endif
+  return wsRead (la,cnt,mode,retcnt,(FUNCPTR) wrBuf,buf);
+}
+
+
+/*==========================================================================
+  WSrdf
+==========================================================================*/
+
+INT16 WSrdf (INT16 la, INT8* filnam, UINT32 cnt, UINT16 mode, UINT32* retcnt)
+{
+  FILE* fp;
+  int rv;
+
+  if (fp = fopen (filnam,"wb"),  !fp)
+    return (WS_ERRORFLAG | WSb_RET_FopenError);
+
+  rv = wsRead (la,cnt,mode,retcnt,(FUNCPTR) wrFile,fp);
+  fclose (fp);
+
+  return (rv);
+}
+
+
+/*==========================================================================
+  WSsetTmo
+
+
+  ARGUMENTS
+
+  INT32 timo;			timeout in milliseconds
+  INT32* actualTimo;		realizable timeout in milliseconds
+
+
+  RETURN VALUE
+
+  INT16	 			status code
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+
+==========================================================================*/
+
+INT16 WSsetTmo (INT32 timo, INT32* actualTimo)
+{
+  INT32 sysClkPeriod = 1000.0 / sysClkRateGet();
+
+  vxiCmdrWsTimo = (timo + sysClkPeriod -1) / sysClkPeriod;
+  *actualTimo = vxiCmdrWsTimo * sysClkPeriod;
+
+  return (NIVXI_OK);
+}
+
+
+/*==========================================================================
+  WSgetTmo
+==========================================================================*/
+
+INT16 WSgetTmo (INT32* actualTimo)
+{
+  INT32 sysClkPeriod = 1000.0 / sysClkRateGet();
+
+  *actualTimo = vxiCmdrWsTimo * sysClkPeriod;
+  return (NIVXI_OK);
+}
+
+
+/*==========================================================================
+  WSwrt
+==========================================================================*/
+
+INT16 WSwrt (INT16 la, UINT8* buf, UINT32 cnt, UINT16 mode, UINT32* retcnt)
+{
+#ifdef KSC_DEBUG
+ printf("WSwrt:In WSwrt.\n");
+#endif 
+ return wsWrite (la,cnt,mode,retcnt,(FUNCPTR) rdBuf,buf); /*/ NO 5/4/98*/
+}
+
+
+/*==========================================================================
+  WSwrtf
+==========================================================================*/
+
+INT16 WSwrtf (INT16 la, INT8* filnam, UINT32 cnt, UINT16 mode, UINT32* retcnt)
+{
+  FILE* fp;
+  int rv;
+
+  if (fp = fopen (filnam,"rb"),  !fp)
+    return (WS_ERRORFLAG | WSb_RET_FopenError);
+
+  rv = wsRead (la,cnt,mode,retcnt,(FUNCPTR) rdFile,fp);
+  fclose (fp);
+
+  return (rv);
+}
+
+
+
+#ifdef SHELL_FXN
+
+/*==========================================================================
+  shell utility
+==========================================================================*/
+
+int wsCmd (int la, unsigned cmd, int respflag)
+{
+  UINT16 value;
+  int rv;
+
+  rv = WScmd (la,cmd,respflag,&value);
+ 
+  if (rv == WS_RET_IODONE && respflag)
+    printf ("[%04X], ", value);
+
+  return rv;
+}
+
+#endif /** SHELL_FXN **/
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

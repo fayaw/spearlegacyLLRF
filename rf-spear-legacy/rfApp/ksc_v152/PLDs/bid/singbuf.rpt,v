@@ -1,0 +1,486 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.56.54;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.56.54;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Project Information                                        c:\v150\singbuf.rpt
+
+MAX+plus II Compiler Report File
+Version 8.1 9/12/97
+Compiled: 10/06/98 09:03:18
+
+Copyright (C) 1991-1997 Altera Corporation
+Any megafunction design, and related net list (encrypted or decrypted),
+support information, device programming or simulation file, and any other
+associated documentation or information provided by Altera or a partner
+under Altera's Megafunction Partnership Program may be used only to
+program PLD devices (but not masked PLD devices) from Altera.  Any other
+use of such megafunction design, net list, support information, device
+programming or simulation file, or any other related documentation or
+information is prohibited for any other purpose, including, but not
+limited to modification, reverse engineering, de-compiling, or use with
+any other silicon devices, unless such use is explicitly licensed under
+a separate agreement with Altera or a megafunction partner.  Title to
+the intellectual property, including patents, copyrights, trademarks,
+trade secrets, or maskworks, embodied in any such megafunction design,
+net list, support information, device programming or simulation file, or
+any other related documentation or information provided by Altera or a
+megafunction partner, remains with Altera, the megafunction partner, or
+their respective licensors.  No other licenses, including any licenses
+needed under any third party's intellectual property, are provided herein.
+
+
+
+***** Project compilation was successful
+
+
+
+
+** DEVICE SUMMARY **
+
+Chip/                     Input   Output   Bidir         Shareable
+POF       Device          Pins    Pins     Pins     LCs  Expanders  % Utilized
+
+singbuf   EPM7096QC100-15  3        2        0      6       2           6  %
+
+User Pins:                 3        2        0  
+
+
+
+Project Information                                        c:\v150\singbuf.rpt
+
+** PROJECT COMPILATION MESSAGES **
+
+Design Doctor Warning: Logic and one or more flipflops or synchronous memories drive Preset node (ID ':37')
+Design Doctor Warning: Logic and one or more flipflops or synchronous memories drive Preset node (ID ':36')
+Design Doctor Warning: Unknown combinatorial feedback structure detected at primitive ':37'
+Design Doctor Warning: Race condition exists for flipflop 'DIS_B' on Preset -- driven by primitive ':37'
+Design Doctor Warning: Race condition exists for flipflop 'DIS_A' on Preset -- driven by primitive ':36'
+Warning: GLOBAL primitive on node 'RESET_L' feeds logic -- non-global signal usage may result
+Info: Design Doctor issued 5 warning message(s) with EPLD Rules
+
+
+Project Information                                        c:\v150\singbuf.rpt
+
+** AUTO GLOBAL SIGNALS **
+
+
+
+INFO: Signal 'RESET_L' chosen for auto global Clear
+
+
+Device-Specific Information:                               c:\v150\singbuf.rpt
+singbuf
+
+***** Logic for device 'singbuf' compiled without errors.
+
+
+
+
+Device: EPM7096QC100-15
+
+Device Options:
+    Turbo                                      = ON
+    Security                                   = OFF
+    Low-Voltage I/O                            = OFF
+
+              R R R     R R             R R     R R R  
+              E E E     E E     R       E E     E E E  
+              S S S     S S V   E       S S     S S S  
+              E E E     E E C   S       E E   V E E E  
+              R R R   N R R C   E       R R N C R R R  
+              V V V G . V V I G T G G G V V . C V V V  
+              E E E N C E E N N _ N N N E E C I E E E  
+              D D D D . D D T D L D D D D D . O D D D  
+            ------------------------------------------_ 
+           / 100  98  96  94  92  90  88  86  84  82   |_ 
+          /     99  97  95  93  91  89  87  85  83  81    | 
+RESERVED |  1                                          80 | RESERVED 
+RESERVED |  2                                          79 | RESERVED 
+RESERVED |  3                                          78 | OUTB 
+RESERVED |  4                                          77 | RESERVED 
+   VCCIO |  5                                          76 | GND 
+RESERVED |  6                                          75 | RESERVED 
+     INB |  7                                          74 | RESERVED 
+     INA |  8                                          73 | OUTA 
+    N.C. |  9                                          72 | N.C. 
+RESERVED | 10                                          71 | RESERVED 
+RESERVED | 11                                          70 | RESERVED 
+RESERVED | 12                                          69 | RESERVED 
+     GND | 13                                          68 | VCCIO 
+RESERVED | 14                                          67 | RESERVED 
+RESERVED | 15                                          66 | RESERVED 
+RESERVED | 16             EPM7096QC100-15              65 | RESERVED 
+RESERVED | 17                                          64 | RESERVED 
+RESERVED | 18                                          63 | RESERVED 
+RESERVED | 19                                          62 | RESERVED 
+   VCCIO | 20                                          61 | GND 
+RESERVED | 21                                          60 | RESERVED 
+RESERVED | 22                                          59 | RESERVED 
+RESERVED | 23                                          58 | RESERVED 
+    N.C. | 24                                          57 | N.C. 
+RESERVED | 25                                          56 | RESERVED 
+RESERVED | 26                                          55 | RESERVED 
+RESERVED | 27                                          54 | RESERVED 
+     GND | 28                                          53 | VCCIO 
+RESERVED | 29                                          52 | RESERVED 
+RESERVED | 30                                          51 | RESERVED 
+         |      32  34  36  38  40  42  44  46  48  50  _| 
+          \   31  33  35  37  39  41  43  45  47  49   | 
+           \------------------------------------------- 
+              R R R R R V N R R G V R R N G R R R R R  
+              E E E E E C . E E N C E E . N E E E E E  
+              S S S S S C C S S D C S S C D S S S S S  
+              E E E E E I . E E   I E E .   E E E E E  
+              R R R R R O   R R   N R R     R R R R R  
+              V V V V V     V V   T V V     V V V V V  
+              E E E E E     E E     E E     E E E E E  
+              D D D D D     D D     D D     D D D D D  
+
+
+N.C. = Not Connected.
+VCCINT = Dedicated power pin, which MUST be connected to VCC (5.0 volts).
+VCCIO = Dedicated power pin, which MUST be connected to VCC (5.0 or 3.3 volts).
+GND = Dedicated ground pin or unused dedicated input, which MUST be connected to GND.
+RESERVED = Unused I/O pin, which MUST be left unconnected.
+
+
+
+Device-Specific Information:                               c:\v150\singbuf.rpt
+singbuf
+
+** RESOURCE USAGE **
+
+                                                Shareable     External
+Logic Array Block     Logic Cells   I/O Pins    Expanders   Interconnect
+
+A:     LC1 - LC16     0/16(  0%)   2/12( 16%)   0/16(  0%)   0/36(  0%) 
+B:    LC17 - LC32     0/16(  0%)   0/12(  0%)   0/16(  0%)   0/36(  0%) 
+C:    LC33 - LC48     0/16(  0%)   0/12(  0%)   0/16(  0%)   0/36(  0%) 
+D:    LC49 - LC64     0/16(  0%)   0/12(  0%)   0/16(  0%)   0/36(  0%) 
+E:    LC65 - LC80     0/16(  0%)   0/12(  0%)   0/16(  0%)   0/36(  0%) 
+F:    LC81 - LC96     6/16( 37%)   2/12( 16%)   2/16( 12%)   8/36( 22%) 
+
+
+Total dedicated input pins used:                 1/4      ( 25%)
+Total I/O pins used:                             4/72     (  5%)
+Total logic cells used:                          6/96     (  6%)
+Total shareable expanders used:                  2/96     (  2%)
+Total Turbo logic cells used:                    6/96     (  6%)
+Total shareable expanders not available (n/a):   0/96     (  0%)
+Average fan-in:                                  4.33
+Total fan-in:                                    26
+
+Total input pins required:                       3
+Total output pins required:                      2
+Total bidirectional pins required:               0
+Total logic cells required:                      6
+Total flipflops required:                        2
+Total pterms required:                          15
+Total logic cells lending parallel expanders:    0
+Total shareable expanders in database:           2
+
+Synthesized logic cells:                         1/  96   (  1%)
+
+
+
+Device-Specific Information:                               c:\v150\singbuf.rpt
+singbuf
+
+** INPUTS **
+
+                                         Shareable
+                                         Expanders     Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared n/a INP  FBK  OUT  FBK  Name
+   8    (1)  (A)      INPUT               0      0   0    0    0    2    3  INA
+   7    (3)  (A)      INPUT               0      0   0    0    0    1    2  INB
+  91      -   -       INPUT               0      0   0    0    0    2    1  RESET_L
+
+
+Code:
+
+s = Synthesized pin or logic cell
+t = Turbo logic cell
++ = Synchronous flipflop
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+^ = Increased input delay
+$ = Driven by fast output logic cell
+
+
+Device-Specific Information:                               c:\v150\singbuf.rpt
+singbuf
+
+** OUTPUTS **
+
+                                         Shareable
+                                         Expanders     Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared n/a INP  FBK  OUT  FBK  Name
+  73     81    F     OUTPUT   s t         0      0   0    3    5    2    2  OUTA
+  78     86    F     OUTPUT     t         0      0   0    2    3    0    0  OUTB
+
+
+Code:
+
+s = Synthesized pin or logic cell
+t = Turbo logic cell
++ = Synchronous flipflop
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+^ = Increased input delay
+$ = Driven by fast output logic cell
+
+
+Device-Specific Information:                               c:\v150\singbuf.rpt
+singbuf
+
+** BURIED LOGIC **
+
+                                         Shareable
+                                         Expanders     Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared n/a INP  FBK  OUT  FBK  Name
+ (75)    84    F      LCELL     t        0      0   0    1    0    1    1  :83
+ (74)    83    F      LCELL     t        0      0   0    1    0    2    2  :85
+   -     82    F       DFFE     t        1      0   0    3    4    1    0  DIS_B (:86)
+ (77)    85    F       DFFE     t        1      0   0    1    2    2    1  DIS_A (:87)
+
+
+Code:
+
+s = Synthesized pin or logic cell
+t = Turbo logic cell
++ = Synchronous flipflop
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+^ = Increased input delay
+$ = Driven by fast output logic cell
+
+
+Device-Specific Information:                               c:\v150\singbuf.rpt
+singbuf
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'F':
+
+                     Logic cells placed in LAB 'F'
+        +----------- LC81 OUTA
+        | +--------- LC86 OUTB
+        | | +------- LC84 :83
+        | | | +----- LC83 :85
+        | | | | +--- LC82 DIS_B
+        | | | | | +- LC85 DIS_A
+        | | | | | | 
+        | | | | | |   Other LABs fed by signals
+        | | | | | |   that feed LAB 'F'
+LC      | | | | | | | A B C D E F |     Logic cells that feed LAB 'F':
+LC81 -> * * - - * * | - - - - - * | <-- OUTA
+LC84 -> * - - - * - | - - - - - * | <-- :83
+LC83 -> * * - - * * | - - - - - * | <-- :85
+LC82 -> * - - - - - | - - - - - * | <-- DIS_B
+LC85 -> * * - - * - | - - - - - * | <-- DIS_A
+
+Pin
+8    -> * * - * * * | - - - - - * | <-- INA
+7    -> * - * - * - | - - - - - * | <-- INB
+91   -> * * - - * - | - - - - - * | <-- RESET_L
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:                               c:\v150\singbuf.rpt
+singbuf
+
+** EQUATIONS **
+
+INA      : INPUT;
+INB      : INPUT;
+RESET_L  : INPUT;
+
+-- Node name is ':87' = 'DIS_A' 
+-- Equation name is 'DIS_A', location is LC085, type is buried.
+DIS_A    = DFFE( GND $  GND,  _EQ001, GLOBAL( RESET_L), !OUTA,  VCC);
+  _EQ001 =  _X001;
+  _X001  = EXP(!INA & !_LC083);
+
+-- Node name is ':86' = 'DIS_B' 
+-- Equation name is 'DIS_B', location is LC082, type is buried.
+DIS_B    = DFFE( GND $  GND,  _EQ002, GLOBAL( RESET_L), !_EQ003,  VCC);
+  _EQ002 =  _X002;
+  _X002  = EXP(!INB & !_LC084);
+  _EQ003 = !DIS_A & !INA & !_LC083 & !OUTA &  RESET_L;
+
+-- Node name is 'OUTA' = '~37~1' 
+-- Equation name is 'OUTA', location is LC081, type is output.
+ OUTA    = LCELL( _EQ004 $  GND);
+  _EQ004 = !DIS_B & !INB &  _LC083 & !_LC084 &  RESET_L
+         # !DIS_B &  INA & !INB & !_LC084 &  RESET_L
+         #  DIS_A & !DIS_B & !INB & !_LC084 &  RESET_L
+         # !DIS_B & !INB & !_LC084 &  OUTA &  RESET_L;
+
+-- Node name is 'OUTB' 
+-- Equation name is 'OUTB', location is LC086, type is output.
+ OUTB    = LCELL( _EQ005 $  GND);
+  _EQ005 = !DIS_A & !INA & !_LC083 & !OUTA &  RESET_L;
+
+-- Node name is ':83' 
+-- Equation name is '_LC084', type is buried 
+_LC084   = LCELL( INB $  GND);
+
+-- Node name is ':85' 
+-- Equation name is '_LC083', type is buried 
+_LC083   = LCELL( INA $  GND);
+
+
+
+--     Shareable expanders that are duplicated in multiple LABs:
+--     (none)
+
+
+
+
+Project Information                                        c:\v150\singbuf.rpt
+
+** COMPILATION SETTINGS & TIMES **
+
+Processing Menu Commands
+------------------------
+
+Design Doctor                             = on
+   Rules                                  = EPLD Rules
+
+
+Logic Synthesis:
+
+   Synthesis Type Used                    = Standard
+
+   Default Synthesis Style                = NORMAL
+
+      Logic option settings in 'NORMAL' style for 'MAX7000' family
+
+      DECOMPOSE_GATES                     = on
+      DUPLICATE_LOGIC_EXTRACTION          = on
+      MINIMIZATION                        = full
+      MULTI_LEVEL_FACTORING               = on
+      NOT_GATE_PUSH_BACK                  = on
+      PARALLEL_EXPANDERS                  = off
+      REDUCE_LOGIC                        = on
+      REFACTORIZATION                     = on
+      REGISTER_OPTIMIZATION               = on
+      RESYNTHESIZE_NETWORK                = on
+      SLOW_SLEW_RATE                      = off
+      SOFT_BUFFER_INSERTION               = on
+      SUBFACTOR_EXTRACTION                = on
+      TURBO_BIT                           = on
+      XOR_SYNTHESIS                       = on
+      IGNORE_SOFT_BUFFERS                 = off
+      USE_LPM_FOR_AHDL_OPERATORS          = off
+
+   Other logic synthesis settings:
+
+      Automatic Global Clock              = on
+      Automatic Global Clear              = on
+      Automatic Global Preset             = on
+      Automatic Global Output Enable      = on
+      Automatic Fast I/O                  = off
+      Automatic Register Packing          = off
+      Automatic Open-Drain Pins           = on
+      Automatic Implement in EAB          = off
+      One-Hot State Machine Encoding      = off
+      Optimize                            = 5
+
+Default Timing Specifications: None
+
+Cut All Bidir Feedback Timing Paths       = on
+Cut All Clear & Preset Timing Paths       = on
+
+Ignore Timing Assignments                 = off
+
+Functional SNF Extractor                  = off
+
+Linked SNF Extractor                      = off
+Timing SNF Extractor                      = on
+Optimize Timing SNF                       = off
+Generate AHDL TDO File                    = off
+Fitter Settings                           = NORMAL
+Smart Recompile                           = off
+Total Recompile                           = off
+
+Interfaces Menu Commands
+------------------------
+
+EDIF Netlist Writer                       = off
+Verilog Netlist Writer                    = off
+VHDL Netlist Writer                       = off
+
+Compilation Times
+-----------------
+
+   Compiler Netlist Extractor             00:00:00
+   Database Builder                       00:00:00
+   Logic Synthesizer                      00:00:00
+   Partitioner                            00:00:01
+   Fitter                                 00:00:00
+   Timing SNF Extractor                   00:00:00
+   Assembler                              00:00:01
+   Design Doctor                          00:00:01
+   --------------------------             --------
+   Total Time                             00:00:03
+
+
+Memory Allocated
+-----------------
+
+Peak memory allocated during compilation  = 2,934K
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

@@ -1,0 +1,173 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.01.10.23.22.42;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.42;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  GEN - General code
+**
+**  Abstract:
+**      Simple routine to display floating point numbers to converted to
+**      short integers in Q format and vice versa.
+**
+**      To compile it, do something like:
+**		gcc qCvt.c -o qCvt
+**
+**  Author:
+**      R. Claus, SLAC/PEP-II Low Level RF Project
+**
+**  History:
+**      August 25, 1997 - Created
+**
+**  Copyright:
+**                                Copyright 1997
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+#include <stdio.h>
+#include <unistd.h>
+
+#define DEFAULT_Q_VALUE  14
+
+
+int main (int    argc,
+          char **argv)
+{
+  extern char   *optarg;
+  int            c;
+  float          f;
+  long           s;
+  int            fToS;
+  int            q = DEFAULT_Q_VALUE;
+
+
+  /* Process command line arguments */
+  while ((c = getopt (argc, argv, "f:s:h")) != -1)
+  {
+    switch (c)
+    {
+      case 'f':
+        sscanf (optarg, "%f", &f);
+        fToS = 1;
+        break;
+
+      case 's':
+        sscanf (optarg, "%i", &s);
+        fToS = 0;
+        break;
+
+      case 'h':
+      default:
+        printf ("\nusage: %s [options] [Q value]\n"
+"\twhere options include:\n\n"
+"\t-f to convert a floating point number to the\n"
+"\t   corresponding short integer in Q format\n"
+"\t-s to convert a short integer  number in Q format to the\n"
+"\t   corresponding floating point\n"
+"\n\t <Q value> is the format to convert to and defaults to %i\n", argv[0], DEFAULT_Q_VALUE);
+        exit (1);
+    }
+  }
+
+  if (optind < argc)
+  {
+    sscanf (argv[optind++], "%i", &q);
+  }
+
+  if (fToS)
+  {
+    short i = (short) (f * (float) (1 << q));
+
+    if ((((f >= 0.0) && (!(i & 0x8000))) || (((f < 0.0) && (i & 0x8000)))) &&
+        (!((i == 0) && (f != 0.0))))
+    {
+      printf ("%f = 0x%0hhx = %hi\n", f, i, i);
+    }
+    else
+    {
+      printf ("%f can't be written in Q%d format\n", f, q);
+    }
+  }
+  else
+  {
+    float a = (float) ((float) s / (float) (1 << q));
+
+    printf ("%hi = 0x%04hx = %f\n", s, s, a);
+  }
+
+  exit (0);
+}
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

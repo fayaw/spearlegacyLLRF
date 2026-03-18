@@ -1,0 +1,2383 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.01.10.23.22.43;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.43;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+=============================================================
+
+  Abs:  VXI Diagnostic Routines for Low-Level RF
+
+  Name: rf_vxi_diag.c
+
+  Rem:  This function provides diagnotic functions
+        for the VXI Slot-0 controller and RF VXI
+        modules which read/write to A16 registers.
+
+  Proto: None
+ 
+  Facility: SLAC/PEPII Low-Level RF
+ 
+  Auth: dd-mmm-yyyy, Kristi Luchini   (LUCHINI)
+  Rev : dd-mmm-yyyy, Reviewer's Name  (USERNAME)
+
+-------------------------------------------------------------
+  Mod:
+        dd-mmm-yyyy, Reviewer's Name  (USERNAME)
+           comments
+
+=============================================================
+*/
+
+#include    "vxWorks.h"
+#include    "vme.h"
+#include    "vxLib.h"         /* for vxMemProbe()        */
+#include    "rebootLib.h"     /* rebootHookAdd()         */
+#include    "semLib.h"        /* semMCreate()            */
+#include    "sysLib.h"        /* for sysBusToLocalAdrs() */
+#include    "stdlib.h"
+#include    "stdio.h"
+#include    "logLib.h"
+#include    "tickLib.h"       /* tickGet()        */
+#include    "taskLib.h"       /* taskDelay()      */
+#include    "errnoLib.h"      /* for errnoGet()   */
+#include    "usrLib.h"        /* for printErrno() */
+#include    "string.h"        /* for memset()     */
+#include    "errnoLib.h"      /* for errnoGet()   */
+#include    "devLib.h"
+#include    "epvxi.h"
+#include    "vxi.h"
+#include    "dwnLib.h"        /* for DWN_ldDspExe() */
+#include    "intLib.h"        /* for intConnect()   */  
+#include    "iv.h"            /* for INUM_TO_IVEC() */
+
+
+#define INT_CTRL_ALL        0x0080      /* 0=enable, 1=disable */
+
+#define MY_INT_LEVEL        5
+#define CPU_A16_REG_WCNT    0x20
+#define CPU_A16_REG_BCNT    0x40
+
+#define CLK_VERSION         0x0e
+#define CLK_CLKCTRL         0x24
+#define CLK_V2_DLYCTRL      0x24
+#define CLK_39MHZ_PLL       0x28
+#define CLK_471MHZ_PLL      0x2a
+#define ClkConsts(r,a,m,p) ((r<<0) | (a<<4) | (m<<8) | (p<<15))
+#define CLK_39CONST        ClkConsts(0xc,0xc,0xc,0)
+#define CLK_471NORM        ClkConsts(7,6,8,0)
+
+
+/* Byte offset for slot-0 A16 read registers */
+#define CPU_ID               0x00
+#define CPU_DTYPE            0x02
+#define CPU_STATUS           0x04
+#define CPU_PROTOCOL         0x08
+#define CPU_RESPONSE         0x0a
+#define CPU_DATA_LO          0x0e
+#define CPU_SUFFIX_HI        0x20
+#define CPU_SUFFIX_LO        0x22
+#define CPU_SERNO_HI         0x24
+#define CPU_SERNO_LO         0x26
+#define CPU_MODID            0x28
+#define CPU_INT_STATUS       0x2a
+#define CPU_INT_CTRL         0x2c
+#define CPU_TRIG_INT_SRC     0x2e
+#define CPU_INT_STATUS_ID    0x38
+#define CPU_RD_SIGNAL        0x3c
+#define CPU_VERSION          0x3e
+#define CPU_NUM_RD_REGS      17
+                     
+
+typedef struct {
+        volatile UINT16 id;
+        volatile UINT16 device_type;
+        volatile UINT16 status;
+        volatile UINT16 dd06;
+        volatile UINT16 protocol;
+        volatile UINT16 response;
+        volatile UINT16 dd0c;
+        volatile UINT16 data_lo;
+        volatile UINT16 dd10;
+        volatile UINT16 dd12;
+        volatile UINT16 dd14;
+        volatile UINT16 dd16;
+        volatile UINT16 dd18;
+        volatile UINT16 dd1a;
+        volatile UINT16 dd1c;
+        volatile UINT16 dd1e;
+        volatile UINT16 suffix_hi;
+        volatile UINT16 suffix_lo;
+        volatile UINT16 serno_hi;
+        volatile UINT16 serno_lo;
+        volatile UINT16 modid;
+        volatile UINT16 int_status;
+        volatile UINT16 int_ctrl;        volatile UINT16 trig_int_src;
+        volatile UINT16 dd30;
+        volatile UINT16 dd32;
+        volatile UINT16 dd34;
+        volatile UINT16 dd36;
+        volatile UINT16 int_statusId;
+        volatile UINT16 dd3a;
+        volatile UINT16 rd_signal;
+        volatile UINT16 ver;        
+}slot0_rd_regs_ts;
+
+typedef struct {
+        volatile UINT16 la;
+        volatile UINT16 dd02;
+        volatile UINT16 ctrl;
+        volatile UINT16 dd06;
+        volatile UINT16 wt_signal;
+        volatile UINT16 dd0a;
+        volatile UINT16 dd0c;
+        volatile UINT16 data_lo;
+        volatile UINT16 dd10;
+        volatile UINT16 dd12;
+        volatile UINT16 dd14;
+        volatile UINT16 dd16;
+        volatile UINT16 dd18;
+        volatile UINT16 dd1a;
+        volatile UINT16 dd1c;
+        volatile UINT16 dd1e;
+        volatile UINT16 dd20;
+        volatile UINT16 dd22;
+        volatile UINT16 dd24;
+        volatile UINT16 dd26;
+        volatile UINT16 modid;
+        volatile UINT16 dd2a;
+        volatile UINT16 int_ctrl;
+        volatile UINT16 trig_int_mask;
+        volatile UINT16 trig_int_src_clr;
+        volatile UINT16 trig_src;
+        volatile UINT16 trig_timer_cnfg;
+        volatile UINT16 dd36;
+        volatile UINT16 sbc_slave_mode_cnfg;
+        volatile UINT16 loc_mon_int_ctrl;
+        volatile UINT16 misc_ctrl;
+        volatile UINT16 dd3e;       
+}slot0_wt_regs_ts;
+
+typedef union {
+       volatile UINT16 _a[CPU_A16_REG_WCNT];
+       slot0_rd_regs_ts rd_s;
+       slot0_wt_regs_ts wt_s;
+}slot0_regs_tu;
+
+typedef struct {
+    volatile UINT16  make;
+    volatile UINT16  model;
+    volatile UINT16  status;
+    volatile UINT16  offset;
+    volatile UINT16  attr;
+    volatile UINT16  serno_hi;
+    volatile UINT16  serno_lo;
+    volatile UINT16  ver;
+    volatile UINT16  spare_a[5];
+    volatile UINT16  intStat;
+    volatile UINT16  intCtrl;
+    volatile UINT16  subclass;
+    volatile UINT16  devCtrl;
+    volatile UINT16  devStat;
+} p2Rf_devConfig_ts;
+
+volatile typedef struct {
+      unsigned  sft_reset        :1;
+      unsigned  sysfail_inhibit  :1;
+      unsigned  passed           :1;
+      unsigned  rdy              :1;
+      unsigned                   :1;
+      unsigned  sft_int          :1;
+      unsigned                   :8;
+      unsigned  modid            :1;
+      unsigned                   :1;
+} p2Rf_status_ts;
+
+volatile typedef struct {
+      unsigned  sft_reset        :1;
+      unsigned  sysfail_inhibit  :1;
+      unsigned                   :2;
+      unsigned  sft_int_reset    :1;
+      unsigned  sft_reset_gen    :1;
+      unsigned                   :4;
+      unsigned  lead             :1;
+      unsigned  integral         :1;
+      unsigned                   :3;
+      unsigned  ext_mem          :1;  /* A24 A32 enabled bit (1=enb) */
+} p2Rf_ctrl_ts;
+
+typedef union {
+   volatile UINT16   _i;
+   volatile INT8     _a[2];
+   p2Rf_ctrl_ts      _s;
+}p2Rf_ctrl_tu;
+
+typedef union {
+    volatile UINT16 _i;
+    volatile INT8   _a[2];
+    p2Rf_status_ts  _s;
+}p2Rf_status_tu;
+
+volatile typedef  struct {
+      unsigned la      :8;
+      unsigned imsk    :8;    
+}p2Rf_int_status_ts;
+
+typedef  union {
+    p2Rf_int_status_ts _s;   
+    volatile UINT16    _i;
+    volatile char      _a[2];
+} p2Rf_int_status_tu;
+
+volatile typedef struct {
+     unsigned  fe  :1;
+     unsigned  fl  :1;
+     unsigned  p1u :1;
+     unsigned  p2u :1;
+     unsigned      :2;
+     unsigned  ia  :1;
+     unsigned  si  :1;
+}clk_int_mask_ts;
+
+volatile typedef struct {
+      unsigned no_476MHz       :1;
+      unsigned inv_st_op       :1;
+      unsigned inv_op          :1;
+      unsigned adc_overflow    :1; 
+      unsigned no_ripple_clk   :1;
+      unsigned ripple_loop_err :1;
+      unsigned dsp_msg_rdy     :1;
+      unsigned sft_int         :1;
+}rfp_int_mask_ts;
+
+typedef union {
+   volatile UINT8      _i;
+   clk_int_mask_ts  clk_s;
+   rfp_int_mask_ts  rfp_s;
+} p2Rf_int_mask_tu;
+
+volatile typedef struct {
+      unsigned                 :3;
+      unsigned irq             :3;
+      unsigned                 :1;
+      unsigned ir_ena          :1;
+      unsigned imsk            :8;
+}p2Rf_int_ctrl_ts;
+
+typedef union {
+   volatile UINT16    _i;
+   volatile INT8      _a[2];
+   p2Rf_int_ctrl_ts   _s;
+}p2Rf_int_ctrl_tu;
+
+volatile typedef struct {
+  unsigned  :8;
+  unsigned  :1;
+  unsigned  :1;
+  unsigned  :1;
+  unsigned  :1;
+  unsigned  :1;
+  unsigned  :1;
+  unsigned  :1;
+  unsigned  :1;
+}clk_trigctrl_ts;
+
+typedef union {
+   volatile UINT16   _i;
+   volatile INT8     _a[2];
+   clk_trigctrl_ts   _s;
+}clk_trigctrl_tu;
+ 
+
+typedef union {
+    unsigned long  _l;
+    unsigned short _i[2];
+    unsigned char  _a[4];
+} datatype_tu;
+
+/* Local variables */
+static char        *busAdrs_p   = (char *)VXIBASEADDR;
+static char        *localAdrs_p = NULL; 
+static UINT16       num_modules=5;
+static UINT16       vxi_a[NVXISLOTS] = {0xc8,0xc9,0xca,0xcb,0xcc};
+static UserLAEntry  devInfo_as[NVXISLOTS];  /* indexed by slot number */
+
+static const char rd_offset_a[CPU_NUM_RD_REGS]={0x00,0x02,0x04,0x08,0x0a,0x0e,
+                                          0x20,0x22,0x24,0x26,0x28,0x2a,
+                                          0x2c,0x2e,0x38,0x3c,0x3e};
+static const char *rd_name_ap[CPU_NUM_RD_REGS]={
+                                          "Identification",
+                                          "Device Type",
+                                          "Status",
+                                          "Protocol",
+                                          "Response",
+                                          "Data Low",
+                                          "Suffix High",
+                                          "Suffix Low",
+                                          "Serno High",
+                                          "Serno Low",
+                                          "Module Id",
+                                          "Int Status",
+                                          "Int Control",
+                                          "Trig Int Src",
+                                          "Int Status Id",
+                                          "Read Signal",
+                                          "Version Number"};
+
+/* Global variables */
+extern           drvVxi;
+volatile UINT16 *mycpu = (volatile UINT16 *)0xfbfffc00;
+void   myIsr(INT16 controller,UINT16 level,UINT32 statusId);
+
+/* Local prototypes */
+static int    rd_slot0_reg(UINT32 adrs);
+static char * getSlot0BaseAdrs(void);
+static int    myShutdown(void);
+
+
+
+/* Global prototypes */
+#if (CPU==PPC604)
+void vxiBaseIsr(void);
+#endif
+
+int decode_slot0_reg( UINT32 adrs,UINT16 offset );
+int decode_slot0_suffix( UINT16 hi, UINT16 lo);
+int decode_slot0_serno(  UINT16 hi, UINT16 lo);
+int decode_slot0_id( UINT16 *data_p );
+int decode_slot0_dtype( UINT16 *data_p );
+int decode_slot0_status( UINT16 *data_p );
+int decode_slot0_protocol( UINT16 *data_p );
+int decode_slot0_response( UINT16 *data_p );
+int decode_slot0_dataLo( UINT16 *data_p );
+int decode_slot0_suffixHi( UINT16 *data_p );
+int decode_slot0_suffixLo( UINT16 *data_p );
+int decode_slot0_sernoHi( UINT16 *data_p );
+int decode_slot0_sernoLo( UINT16 *data_p );
+int decode_slot0_modId( UINT16 *data_p );
+int decode_slot0_intStatus( UINT16 *data_p );
+int decode_slot0_intCtrl( UINT16 *data_p );
+int decode_slot0_trigIntSrc( UINT16 *data_p );
+int decode_slot0_statusId(UINT16 *data_p);
+int decode_slot0_rdSignal( UINT16 *data_p );
+int decode_slot0_version( UINT16 *data_p );
+
+void   mycrate(void);
+void   rf_modIntEnb(void); 
+void   rf_modIntDis(void);
+int    initClk( UINT16 slot );
+int    clkInitFields( UINT16 la );
+int    rfpInitFields( UINT16 la );
+int    rf_status( UINT16 la);
+int    rf_intStatus( UINT16 slot);
+int    rf_intCtrl( UINT16 la,UINT16 data,UINT16 type );
+int    rf_ctrl( UINT16 la,UINT16 type, UINT16 data );
+int    rf_intEnb( void );
+int    rf_clk( UINT16 la );
+int    rf_rfp( UINT16 la );
+int    rf_iqa( UINT16 la );
+int    rf_comb( UINT16 la );
+int    rf_gap( UINT16 la );
+int    rf_aim( UINT16 la );
+int    rd_module_a16( UINT16 slot );
+int    rd_reg( UINT16 la );
+int    init_veclist( void );
+int    rd_addr(UINT32 adrs,UINT16 num,int width);
+int    wt_addr(UINT32 adrs,UINT16 num,int width,UINT32 data,UINT32 mask);
+int    wt_byte_addr( UINT32 adrs, UINT16 num, UINT8  data, UINT8  mask );
+int    wt_wd_addr(   UINT32 adrs, UINT16 num, UINT16 data, UINT16 mask );
+int    wt_lwd_addr(  UINT32 adrs, UINT16 num, UINT32 data, UINT32 mask );
+int    wt_wd_test( UINT32 adrs,UINT16 num,UINT16 type,UINT8 nloop,UINT16 mask );
+int    rd_wd_test( UINT32 adrs,UINT16 num,int loop,int all );
+
+int    walk_zeros( UINT32 adrs, int num );
+int    walk_ones( UINT32 adrs, int num );
+
+
+#if (CPU==PPC604)
+
+# define EIEIO       __asm__ volatile ("eieio")
+# define EIEIO_SYNC  __asm__ volatile ("eieio;sync")
+# define SYNC        __asm__ volatile ("sync")
+
+
+short GetMyLA( void )
+{
+  return(0);
+}
+
+int init_veclist( void ) 
+{    
+   int i;
+    
+   for (i=16; i<256; i++)
+     intConnect(INUM_TO_IVEC(i),vxiBaseIsr,0); 
+   return(OK);
+}
+#else
+#define SYNC 
+#define EIEIO
+#define EIEIO_SYNC
+#endif
+
+int rd_wd_test(UINT32 adrs,UINT16 num,int loop,int all)
+{
+  int            status=OK;
+  int            i,j,nloop;
+  int            mode=VX_READ;
+  int            width=sizeof(unsigned short);
+  unsigned short rval,val;
+  unsigned short chan=0;
+  unsigned short first_chan=0;
+  unsigned short expected_chan=0;
+  unsigned short mask = 0xfff;
+  volatile char *base_p=(char *)adrs;
+
+  nloop = loop;
+  if (nloop<=0) nloop=1;
+  for (j=0; j<nloop; j++) {
+    for (i=0; (i<num) && (status==OK); i++) {
+      status = vxMemProbe((char *)base_p,mode,width,(char *)&rval);
+      if (status!=OK)
+        printf("Failed to read address %p\n",base_p);
+      else {
+        if ( i==0 ) first_chan=chan;
+        chan = rval >> 12;
+        val  = rval & mask;
+        if ( i==0 ){
+          first_chan=chan; 
+          expected_chan=first_chan;
+          if (!all)  printf("\nFirst Read: Chan=%d\n",chan);
+	}
+        else 
+          expected_chan++;      
+        
+        if ( all )
+          printf("%p (%d): Data=0x%4.4x Raw=0x%4.4x Chan: rd=%d expected=%d\n",
+                  base_p,i,val,rval,chan,expected_chan);
+        else if ( chan!=first_chan+i )          
+           printf("%p (%d):Data=0x%4.4x Raw=0x%4.4x Chan: rd=%d expected=%d\n",
+                  base_p,i,val,rval,chan,expected_chan);
+      }
+    }/* End of i FOR loop */
+    if (nloop>1) printf("Loop Test #%d\n",j); 
+  } /* End of j FOR loop */
+  return(status);
+}
+
+int rd_addr(UINT32 adrs,UINT16 num,int width)
+{
+  int            status=OK;
+  int            i;
+  int            mode=VX_READ;
+  unsigned char  bval;
+  unsigned short sval;
+  unsigned long  lval;
+  volatile char *base_p=(char *)adrs;
+
+
+  for (i=0; (i<num) && (status==OK); i++,base_p+=width) {
+    switch( width ) {
+       case 1:
+         status = vxMemProbe((char *)base_p,mode,width,(char *)&bval);
+         if (status==OK) printf("%p: 0x%2.2x\n",base_p,bval);
+         break;
+
+       case 2:
+         status = vxMemProbe((char *)base_p,mode,width,(char *)&sval);
+         if (status==OK) printf("%p: 0x%4.4x\n",base_p,sval);
+         break;
+         break;
+
+       case 4:        
+         status = vxMemProbe((char *)base_p,mode,width,(char *)&lval);
+         if (status==OK) printf("%p: 0x%8.8lx\n",base_p,lval);
+         break;
+ 
+       default:
+         printf("Invalid width (1,2,4)\n");
+         status=ERROR;
+         break;
+    }
+  }
+  return(status);
+}
+
+int wt_wd_test( UINT32 adrs, UINT16 num,UINT16 type,UINT8 nloop, UINT16 imask )
+{
+#define BASIC_PATTERNS  0
+#define BIT_WALK_ONES   1
+#define BIT_WALK_ZEROS  2
+#define BIT_WALK_LOOP   3
+#define NUM_PATTERNS    6
+  int          status=OK;
+  int          i;
+  UINT8        ntrys;
+  UINT16       mask=0xfff0;
+  UINT16       pattern_a[NUM_PATTERNS]={0xa5a5,
+                                        0x5a5a,
+                                        0xffff,
+                                        0xabcd,
+                                        0x0f0f0,
+                                        0x1234 };
+  if (mask) mask=imask;
+  switch( type ) {
+     case BASIC_PATTERNS: 
+       for (i=0; (i<NUM_PATTERNS) && (status==OK); i++) {
+	 printf("\nTesting Pattern 0x%4.4hx\n",pattern_a[i]);
+         status = wt_wd_addr(adrs,num,pattern_a[i],mask);
+       }
+       break;
+
+     case BIT_WALK_ONES:
+       ntrys = max(nloop,1); 
+       for (i=0; (i<ntrys) && (status==OK); i++) {
+         printf("\nTesting Walking Zeros - #%d\n",i+1);
+         status = walk_ones(adrs,num);
+       }
+       break;
+
+    case BIT_WALK_ZEROS:
+       ntrys = max(nloop,1); 
+       for (i=0; (i<ntrys) && (status==OK); i++) {
+         printf("\nTesting Walking Zeros - #%d\n",i+1);
+         status = walk_zeros(adrs,num);
+       }
+       break;
+
+    case BIT_WALK_LOOP:
+      ntrys = max(nloop,1); 
+      for (i=0; (i<ntrys) &&(status==OK); i++) {
+         printf("\nTesting Walking Zeros - #%d\n",i+1);
+         status = walk_ones(adrs,num);
+         if (status==OK) {
+            printf("\nTesting Walking Zeros - #%d\n",i+1);
+           status = walk_zeros(adrs,num);
+	 }
+       }
+       break;
+
+    default:
+       printf("Unknown test type\n");
+       break;
+  }
+  return(status);
+}
+
+int walk_ones( UINT32 adrs, int num  )
+{
+  int      status=OK;
+  int      i,j,range,offset;
+  UINT16   bmask=1;
+  UINT16   mask=0xfff0;
+  
+  range=max(1,num);
+  for (j=0,offset=0; (j<range) && (status==OK); j++,offset+=2) {
+    for (i=0,bmask=1; (i<16) && (status==OK); i++,bmask<<=1) {
+      status= wt_wd_addr(adrs+offset,1,bmask,mask);
+    }
+  }
+  return(status);
+}
+
+
+int walk_zeros( UINT32 adrs, int num )
+{
+  int      status=OK;
+  int      i,j,range,offset;
+  UINT16   bmask=1,val=0;
+  UINT16   mask=0xfff0;
+  
+  range=max(1,num);
+  for (j=0,offset=0; (j<range) && (status==OK); j++,offset+=2) {
+    for (i=0,bmask=1; (i<16) && (status==OK); i++,bmask<<=1) {
+       val=~bmask;
+       status= wt_wd_addr(adrs+offset,1,val,mask);
+    }
+  }
+  return(status);
+}
+
+
+int wt_wd_addr( UINT32 adrs, UINT16 num, UINT16 data, UINT16 mask )
+{
+  int             status=OK;
+  int             i,j=0;
+  UINT16          rval,mval;
+  int             width=sizeof(rval);
+  static char    *state_c[2]={"SUCCESS","FAILURE"};
+  volatile char  *base_p = (volatile char *)adrs;
+
+  for ( i=0; (i<num) && (status==OK); i++,base_p+=width ) {
+      EIEIO_SYNC;
+      status = vxMemProbe((char *)base_p,VX_WRITE,width,(char *)&data);
+      EIEIO_SYNC;
+      if (status==OK) {
+         status = vxMemProbe((char *)base_p,VX_READ,width,(char *)&rval);
+         mval = rval & mask;
+         if (mval != (data & mask)) j=1;
+         printf("%p (%d):  wt=0x%hx  rd=0x%hx (raw=0x%hx) - %s\n",
+                 base_p,i,data,mval,rval,state_c[j] ); 
+
+      }
+  }
+  return(status);
+}
+
+int wt_byte_addr( UINT32 adrs, UINT16 num, UINT8 data, UINT8 mask )
+{
+  int             status=OK;
+  int             i,j=0;
+  UINT8           rval,mval;
+  int             width=sizeof(rval);
+  static char    *state_c[2]={"SUCCESS","FAILURE"};
+  volatile char  *base_p = (volatile char *)adrs;
+
+  for (i=0; i<num && (status==OK); i++,base_p+=width ) {
+      EIEIO_SYNC;
+      status = vxMemProbe((char *)base_p,VX_WRITE,width,(char *)&data);
+      EIEIO_SYNC;
+      if (status==OK) {
+         status = vxMemProbe((char *)base_p,VX_READ,width,(char *)&rval);
+         mval = rval & mask;
+         if ( mval != (data & mask) ) j=1;
+         printf("%p (%d):  wt=0x%hx  rd=0x%hx (raw=0x%hx) - %s\n",
+                base_p,i,data,mval,rval,state_c[j] ); 
+
+      }
+  }
+  return(status);
+}
+
+
+int wt_lwd_addr( UINT32 adrs, UINT16 num, UINT32 data, UINT32 mask )
+{
+  int             status=OK;
+  int             i,j=0;
+  UINT32          rval,mval;
+  int             width=sizeof(rval);
+  static char    *state_c[2]={"SUCCESS","FAILURE"};
+  volatile char  *base_p = (volatile char *)adrs;
+
+  for (i=0; i<num && (status==OK); i++,base_p+=width ) {
+      EIEIO_SYNC;
+      status = vxMemProbe((char *)base_p,VX_WRITE,width,(char *)&data);
+      EIEIO_SYNC;
+      if (status==OK) {
+         status = vxMemProbe((char *)base_p,VX_READ,width,(char *)&rval);
+         mval = rval & mask;
+         if ( mval != (data & mask) ) j=1;
+         printf("%p (%d):  wt=0x%lx  rd=0x%lx (raw=0x%lx) - %s\n",
+                base_p,i,
+                (long unsigned int)data,
+                (long unsigned int)mval,
+                (long unsigned int)rval,state_c[j] ); 
+      }
+  }
+  return(status);
+}
+
+int wt_addr( UINT32 adrs,UINT16 num,int width,UINT32 outval,UINT32 mask )
+{
+  int             status=OK;
+  datatype_tu     data_u;
+  datatype_tu     mask_u;
+
+  data_u._l = outval;
+  mask_u._l = mask;
+  switch( width ) {
+     case 1:    
+         status = wt_byte_addr(adrs,num,data_u._a[0],mask_u._a[0] );
+         break;
+
+     case 2:
+         status = wt_wd_addr(adrs,num,data_u._i[0],mask_u._i[0] );
+         break;
+
+     case 4:
+         status = wt_wd_addr(adrs,num,data_u._l,mask_u._l );
+         break;
+  
+     default:
+         printf("Invalid width (1,2,4)\n");
+         status=ERROR;
+         break;
+
+   }/* End of switch statement */
+   return(status);
+}
+
+int myslot0(UINT16 offset)
+{
+   int    status=OK;           
+
+
+   /* Get local VME Address for base address
+    * of LA device configuration registers 
+    */
+   if ( !getSlot0BaseAdrs() ) return(ERROR);
+   if ( !offset ) 
+     status = rd_slot0_reg( (UINT32)localAdrs_p ); /* read all registers */
+   else
+     status = decode_slot0_reg( (UINT32)localAdrs_p,offset );
+   return(status);
+}
+ 
+int rd_slot0( void )
+{
+    slot0_rd_regs_ts *reg_ps;
+    unsigned short    data;
+
+    if (!getSlot0BaseAdrs()) return(ERROR);
+
+    
+    reg_ps = (slot0_rd_regs_ts *)localAdrs_p;
+    data = reg_ps->id;
+    decode_slot0_id( &data );
+
+    data = reg_ps->device_type;
+    decode_slot0_dtype( &data );
+
+    data = reg_ps->status;
+    decode_slot0_status( &data );
+
+    data = reg_ps->protocol;
+    decode_slot0_protocol( &data );
+
+    data = reg_ps->response;
+    decode_slot0_response( &data );
+
+    data = reg_ps->data_lo;
+    decode_slot0_dataLo( &data );
+
+    decode_slot0_suffix( reg_ps->suffix_hi,reg_ps->suffix_lo );
+    decode_slot0_serno( reg_ps->serno_hi,reg_ps->serno_lo );
+
+    data = reg_ps->modid;
+    decode_slot0_modId( &data );
+
+    data = reg_ps->int_status;
+    decode_slot0_intStatus( &data );
+    
+    data = reg_ps->int_ctrl;
+    decode_slot0_intCtrl( &data );
+
+    data = reg_ps->trig_int_src;
+    decode_slot0_trigIntSrc( &data );
+
+    data = reg_ps->int_statusId;
+    decode_slot0_statusId( &data );
+
+    data = reg_ps->rd_signal;
+    decode_slot0_rdSignal( &data );
+   
+    data = reg_ps->ver;
+    decode_slot0_version( &data );
+    return(OK);
+}
+
+
+static char * getSlot0BaseAdrs( void )
+{
+   int   adrsSpace=VME_AM_SUP_SHORT_IO;
+   int   status=OK;
+
+
+   if ( localAdrs_p==NULL ) {
+     status  = sysBusToLocalAdrs(adrsSpace,busAdrs_p,&localAdrs_p);
+     if ( status!=OK ) {
+       localAdrs_p = NULL;
+       printErrno(errnoGet());
+     }
+   }
+   return(localAdrs_p);
+}
+
+static int rd_slot0_reg( UINT32 adrs )
+{
+   int           status = OK;
+   char         *adrs_p;
+   short         i,j;
+   int           bcnt = sizeof(short);
+   int           mode = VX_READ;
+   volatile UINT16   data;
+
+
+   /* Read slot-0 read registers */
+   for (i=0;  (i<CPU_NUM_RD_REGS) && (status==OK); i++) {
+     j = rd_offset_a[i];              /* register byte offset    */
+     adrs_p = (char *)adrs + j;       /* A16 address of regsiter */
+     status = vxMemProbe( adrs_p,
+                          mode,
+                          bcnt,
+                          (char *)&data );  
+
+     /* 
+      * If read was successful display register data.
+      * Otherwise, return and error code.
+      */
+     if ( status==OK )
+       printf("%s (0x%8.8x): 0x%4.4x\n",
+              rd_name_ap[i],
+              (unsigned int)adrs_p,
+              data );
+   }
+   return(status);
+}   
+ 
+int decode_slot0_id( UINT16 *data_p )
+{
+   typedef struct {
+     unsigned  manuf         :12;
+     unsigned  addr_space    :2;
+     unsigned  device_class  :2;
+   }slot0_id_ts;
+   slot0_id_ts       *reg_ps;
+   static const char *space_ap[4] = {"A16/A24",
+                                     "A16/A24",
+                                     "Reserved",
+                                     "A16 Only"};
+   static const char *class_ap[4] = {"Memory",
+                                     "Extended",
+                                     "Message Based",
+                                     "Register Based"};
+
+
+   reg_ps = (slot0_id_ts *)data_p;
+   printf("Identification: 0x%4.4x\n",*data_p);
+   printf("\tManufacturer : 0x%3.3x\n",reg_ps->manuf);
+   printf("\tDevice Class : %s\n",class_ap[reg_ps->device_class]);
+   printf("\tAddress Space: %s\n",space_ap[reg_ps->addr_space]);
+   return(OK);
+}
+
+int decode_slot0_dtype( UINT16 *data_p )
+{  
+   char slot0;
+   
+   slot0 = *data_p & 0x100;  /* Is the 0x100 bit set? */
+   printf("Device Type   : 0x%4.4x\n",*data_p);
+   printf("\tMode Code: 0x%4.4x (%s)\n",*data_p,slot0 ? "Slot-0" : "non-Slot0");
+   return(OK);
+}
+
+int decode_slot0_status( UINT16 *data_p )
+{
+   typedef struct {
+     unsigned sft_rst :1;
+     unsigned sys_inh :1;
+     unsigned pass    :1;
+     unsigned rdy     :1;
+     unsigned         :10;
+     unsigned modid   :1;
+     unsigned         :1;
+   } slot0_status_ts;
+   slot0_status_ts *reg_ps;
+
+   reg_ps = (slot0_status_ts *)data_p;
+   printf("Status        : 0x%4.4x\n",*data_p);
+   printf("\tSoftware Reset : %s\n",reg_ps->sft_rst ? "Active"  : "Idle" );
+   printf("\tSYSFAIL Inhibit: %s\n",reg_ps->sys_inh ? "Yes" : "No" );
+   printf("\tPower On & Selftest: %s\n", 
+                                 reg_ps->pass     ? "Completed Successfully" : "Active/Error" );
+   printf("\tRegister Init %s\n",reg_ps->rdy      ? "Completed Successfully" : "Active/Error" );
+   printf("\tMODID Line     : %s\n",reg_ps->modid ? "Not Selected"           : "Active" );
+   return(OK);
+}
+
+int decode_slot0_protocol( UINT16 *data_p )
+{
+   typedef struct{
+     unsigned          :10;
+     unsigned shr_mem  :1;
+     unsigned fhs_fast :1;
+     unsigned intr     :1;
+     unsigned mstr     :1;
+     unsigned sgnl_reg :1;
+     unsigned cmdr     :1;
+   }slot0_protocol_ts;
+   slot0_protocol_ts  *reg_ps;
+
+   reg_ps = (slot0_protocol_ts *)data_p;
+   printf("Protocol      : 0x%4.4x\n",*data_p);
+   printf("\tShared Memory : %s\n",reg_ps->shr_mem  ? "Not Supported" : "Supported" );
+   printf("\tFast Handshake: %s\n",reg_ps->fhs_fast ? "Not Supported" : "Supported" );
+   printf("\tInterrupter   : %s\n",reg_ps->intr     ? "Not Supported" : "Supported" );
+   printf("\tVMEbus Master : %s\n",reg_ps->mstr     ? "Not Supported" : "Supported" );
+   printf("\tSignal Reg    : %s\n",reg_ps->sgnl_reg ? "Not Supported" : "Supported" );
+   printf("\tCommander     : %s\n",reg_ps->cmdr     ? "Servant Only"  : "Commander/Servant" );
+   return(OK);
+}
+
+int decode_slot0_response( UINT16 *data_p )
+{
+   typedef struct {
+     unsigned        :9;
+     unsigned wt_rdy :1;
+     unsigned rd_rdy :1;
+     unsigned err    :1;
+     unsigned        :4;
+   }slot0_response_ts;
+   slot0_response_ts  *reg_ps;
+
+   reg_ps = (slot0_response_ts *)data_p;
+   printf("Response      : 0x%4.4x\n",*data_p);
+   printf("\tWrite Ready: %s\n",reg_ps->wt_rdy ? "Waiting for XFER" : "Busy" );
+   printf("\tRead Ready : %s\n",reg_ps->rd_rdy ? "Have Data" : "Waiting" );
+   printf("\tError      : %s\n",reg_ps->err ? "ON" : "OFF" );
+   return(OK);
+}
+
+int decode_slot0_dataLo( UINT16 *data_p )
+{
+   printf("Data Low      : 0x%4.4x\n",*data_p);
+   return(OK);
+}
+
+int decode_slot0_suffixHi( UINT16 *data_p )
+{
+   printf("Suffix High   : 0x%4.4x\n",*data_p);
+   return(OK);
+}
+
+int decode_slot0_suffixLo( UINT16 *data_p )
+{
+   printf("Suffix Low    : 0x%4.4x\n",*data_p);
+   return(OK);
+}
+
+int decode_slot0_suffix( UINT16 hi, UINT16 lo )
+{
+   UINT16  data;
+
+   data = (hi << 16) | lo;
+   printf("Suffix        : 0x%4.4x\n",data);
+   return(OK);
+}
+
+
+int decode_slot0_serno( UINT16 hi, UINT16 lo )
+{
+   UINT16  data;
+
+   data = (hi << 16) | lo;
+   printf("Serial Number : 0x%4.4x\n",data);
+   return(OK);
+}
+
+int decode_slot0_sernoHi( UINT16 *data_p )
+{
+   printf("Serno Low     : 0x%4.4x\n",*data_p);
+   return(OK);
+}
+
+int decode_slot0_sernoLo( UINT16 *data_p )
+{
+   printf("Serno High    : 0x%4.4x\n",*data_p);
+   return(OK);
+}
+
+
+int decode_slot0_modId( UINT16 *data_p )
+{
+   static const unsigned short mask = 0x3fff;
+
+   printf("Module Id     : 0x%4.4x\n",*data_p & mask);
+   return(OK);
+}
+
+int decode_slot0_intStatus( UINT16 *data_p )
+{
+   typedef struct {
+     unsigned la              :8;
+     unsigned trig_in         :1;
+     unsigned loc_mon         :1;
+     unsigned                 :6;
+   }slot0_intStatus_ts;
+   slot0_intStatus_ts *reg_ps;
+
+   reg_ps = (slot0_intStatus_ts *)data_p;
+   printf("Int Status    : 0x%4.4x\n",*data_p);
+   printf("\tLogical Address  : 0x%2.2x\n",reg_ps->la );
+   printf("\tTrigger In Interrupt Source: %s\n",reg_ps->trig_in ? "Asserted" : "Off" );
+   printf("\tLocation Monitor Interrupt Source : %s\n",reg_ps->loc_mon ? "Asserted" : "Off" );
+   return(OK);
+}
+
+int decode_slot0_intCtrl( UINT16 *data_p )
+{  
+   char   level;
+   typedef struct {
+     unsigned                 :3;
+     unsigned irq             :3;
+     unsigned                 :1;
+     unsigned req             :1;
+     unsigned trig_in         :1;
+     unsigned loc_mon         :1;
+     unsigned                 :6;
+   }slot0_intCtrl_ts;
+   slot0_intCtrl_ts *reg_ps;
+
+   reg_ps = (slot0_intCtrl_ts *)data_p;
+   printf("Int Control   : 0x%4.4x\n",*data_p);
+   level = reg_ps->irq;
+   printf("\tInterrupt Level 7  : %s\n",level==0 ? "Requestd" : "Idle" );
+   printf("\tInterrupt Level 6  : %s\n",level==1 ? "Requestd" : "Idle" );
+   printf("\tInterrupt Level 5  : %s\n",level==2 ? "Requestd" : "Idle" );
+   printf("\tInterrupt Level 4  : %s\n",level==3 ? "Requestd" : "Idle" );
+   printf("\tInterrupt Level 3  : %s\n",level==4 ? "Requestd" : "Idle" );
+   printf("\tInterrupt Level 2  : %s\n",level==5 ? "Requestd" : "Idle" );
+   printf("\tInterrupt Level 1  : %s\n",level==6 ? "Requestd" : "Idle" );
+   printf("\tInterrupt Request  : %s\n",reg_ps->req      ? "Disabled" : "Enabled" );
+   printf("\tTrigger In Interrupt: %s\n",reg_ps->trig_in  ? "Disabled" : "Enabled" );
+   printf("\tLocation Monitor Interrupt (bit 9): %s\n",
+           reg_ps->loc_mon  ? "Disabled" : "Enabled" );
+   return(OK);
+}
+
+int decode_slot0_trigIntSrc( UINT16 *data_p )
+{
+   char  trig;
+   typedef struct {
+     unsigned  ttl_trig :8;
+     unsigned  ecl_trig :2;
+     unsigned  fp_trig  :2;
+     unsigned  spare    :4;
+   }slot0_trigIntSrc_ts;
+   slot0_trigIntSrc_ts *reg_ps;
+
+   reg_ps = (slot0_trigIntSrc_ts *)data_p;
+   trig   = reg_ps->ttl_trig;
+   printf("Trig Int Src  : 0x%4.4x\n",*data_p);
+   printf("\tTTL Trigger Interrupt 0: %s\n",trig & 0x1  ? "Asserted" : "Off" );
+   printf("\tTTL Trigger Interrupt 1: %s\n",trig & 0x2  ? "Asserted" : "Off" );
+   printf("\tTTL Trigger Interrupt 2: %s\n",trig & 0x4  ? "Asserted" : "Off" );
+   printf("\tTTL Trigger Interrupt 3: %s\n",trig & 0x8  ? "Asserted" : "Off" );
+   printf("\tTTL Trigger Interrupt 4: %s\n",trig & 0x10 ? "Asserted" : "Off" );
+   printf("\tTTL Trigger Interrupt 5: %s\n",trig & 0x20 ? "Asserted" : "Off" );
+   printf("\tTTL Trigger Interrupt 6: %s\n",trig & 0x40 ? "Asserted" : "Off" );
+   printf("\tTTL Trigger Interrupt 7: %s\n",trig & 0x80 ? "Asserted" : "Off" );
+   trig  = reg_ps->ecl_trig;
+   printf("\tECL Trigger Interrupt 0: %s\n",trig & 0x1  ? "Asserted" : "Off" );
+   printf("\tECL Trigger Interrupt 1: %s\n",trig & 0x2  ? "Asserted" : "Off" );
+
+   trig  = reg_ps->fp_trig;
+   printf("\tFont Panel Trigger Interrupt A:  %s\n",trig & 0x1 ? "Asserted" : "Off" );
+   printf("\tFont Panel Trigger Interrupt B:  %s\n",trig & 0x2 ? "Asserted" : "Off" );
+   return(OK);
+}
+
+int decode_slot0_statusId(UINT16 *data_p)
+{
+   typedef struct {
+     unsigned      la   :8;  /* Logical address of interrupt source */
+     unsigned      isrc :8;  /* Interrupt source                    */
+   }slot0_statusId_ts;
+   slot0_statusId_ts *reg_ps;
+         
+   reg_ps = (slot0_statusId_ts *)data_p;
+   printf("Int Status Id : 0x%4.4x\n",*data_p);
+   printf("\tLogical Address :  0x%2.2x\n",reg_ps->la );
+   printf("\tInterrupt Source:  0x%2.2x\n",reg_ps->isrc );
+   return(OK);
+}
+
+int decode_slot0_rdSignal( UINT16 *data_p )
+{
+   typedef struct {
+     unsigned   la    :8;
+     unsigned   type  :7;
+     unsigned   msb   :1;
+   }slot0_rdSignal_ts;
+   slot0_rdSignal_ts   *reg_ps;
+
+   reg_ps = (slot0_rdSignal_ts *)data_p;
+   printf("Read Signal   : 0x%4.4x\n",*data_p);
+   printf("\tLogical Address:  0x%2.2x\n",reg_ps->la );
+   printf("\t%s: 0x%2.2x\n",reg_ps->msb ? "Event" : "Response",reg_ps->type );
+   return(OK);
+}
+
+int decode_slot0_version( UINT16 *data_p )
+{
+  typedef struct {
+    unsigned hardware :8;
+    unsigned firmware :8;
+  }slot0_version_ts;
+  slot0_version_ts   *reg_ps;
+
+  reg_ps = (slot0_version_ts *)data_p;
+  printf("Version Number: 0x%4.4x\n",*data_p);
+  printf("\tHardware:  0x%2.2x\n",reg_ps->hardware );
+  printf("\tFirmware:  0x%2.2x\n",reg_ps->firmware );
+  return(OK);
+}
+
+int decode_slot0_reg( UINT32 base,UINT16 offset )
+{
+  static const UINT16  max  = CPU_A16_REG_BCNT-2;
+  UINT16  *adrs_p = (UINT16 *)base + offset;
+
+  if ( (offset%2) || (offset>max)){
+    printf("Invalid byte offset (0 to 0x%2.2x (must be on word boundry)\n",max);
+    return(ERROR);
+  }
+
+  switch( offset ) {
+     case 0:
+       decode_slot0_id(adrs_p);
+       break;
+
+     case 2:
+       decode_slot0_dtype(adrs_p);
+       break;
+
+     case 4:
+       decode_slot0_status(adrs_p);
+       break;
+
+     case 8:
+       decode_slot0_protocol(adrs_p);
+       break;
+
+     case 0xa:
+       decode_slot0_response(adrs_p);
+       break;
+
+     case 0xe:
+       decode_slot0_dataLo(adrs_p);
+       break;
+
+     case 0x20:
+       decode_slot0_sernoHi(adrs_p);
+       break;
+
+     case 0x22:
+       decode_slot0_suffixLo(adrs_p);
+       break;
+
+     case 0x24:
+       decode_slot0_sernoHi(adrs_p);
+       break;
+
+     case 0x26:
+       decode_slot0_sernoLo(adrs_p);
+       break;
+
+     case 0x28:
+       decode_slot0_modId(adrs_p);
+       break;
+
+     case 0x2a:
+       decode_slot0_intStatus(adrs_p);
+       break;
+
+     case 0x2c:
+       decode_slot0_intCtrl(adrs_p);
+       break;
+
+     case 0x2e:
+       decode_slot0_trigIntSrc(adrs_p);
+       break;
+
+     case 0x38:
+       decode_slot0_statusId(adrs_p);
+       break;
+
+     case 0x3c:
+       decode_slot0_rdSignal(adrs_p);
+       break;
+
+     case 0x3e:
+       decode_slot0_version(adrs_p);
+       break;
+
+    default: 
+       printf("(0x%8.8x): is a Reserved register\n",(unsigned int)adrs_p);
+       break;
+  }
+  return(OK);
+}
+
+
+long myResman(void)
+{
+   long      status=OK;
+   char     *adrs;
+   int       delay;
+   int       current;          
+   int       mode = VX_READ;  
+   UINT16    slot_a[NVXIADDR];
+   UINT16    nr_cards=0;
+   UINT16    slot0_la=0;
+   UINT16    model;
+   UINT16    id,type,csr,offset,attribute;
+   UINT16    sernoHi,sernoLo,ver;
+   UINT16   *device_aps[NVXIADDR];  
+   UINT16    brd,slot,la;
+   UINT16    sc_la = 256;
+   static UINT16 const  enb=1;
+   static UINT16 const  dis=0;
+  
+
+
+   delay = sysClkRateGet() * 6;
+   current = tickGet();
+   if ( current<delay ) {
+     printf("VXI Resman: waiting for selftest to complete...");
+     taskDelay(delay-current);
+     printf("\n");     
+   }
+
+   vxiinit();
+   status = InitVXIlibrary();
+   if ( status<0 ) return(status);
+
+
+   /* Get local VME Address for base address
+    * of LA device configuration registers 
+    */
+   if ( !getSlot0BaseAdrs() ) return(ERROR);
+   
+   /* Get the model number of the slot-0 controller */  
+   slot0_la = GetMyLA();
+   adrs   = localAdrs_p + 2;
+   status = vxMemProbe(adrs,mode,sizeof(model),(char *)&model);
+   if (status==OK) 
+     printf("Slot-0 Model:  0x%4.4x  la = 0x%2.2x\n",model,slot0_la);
+   else
+     return(errnoGet());
+
+   /* 
+    * Loop through slot0-controller A16 memory and 
+    * find SC devices and DC devices
+    */
+   nr_cards = 0;
+   for (la=0; la<0x100; la++) { 
+     adrs = localAdrs_p + (0x40 * la);
+
+     for ( slot=0; (slot<13); slot++ ) {
+       brd = 1<<slot;
+       status = SetMODID( enb,brd );   /* Set MODID signal for board */
+       if ( status<OK ) {
+         printf("An error occurred in SetMODID enable for brd=%d\n",brd);
+         continue;
+       }
+
+       /* 
+	* Determine if there is a module at this address
+	* by reading the status register from the configuration
+	* registers in this device block, which is 64 bytes
+	* in length.
+	*/
+       status = vxMemProbe(adrs+4,mode,sizeof(csr),(char *)&csr);
+       if ( status==OK ) {
+         /* 
+	  * Yes! Now need to determine if the module is 
+	  * statically configurable (SC) or dynamically
+	  * configurable (DC)? 
+	  * */
+         status = vxMemProbe(adrs,mode,sizeof(id),(char *)&id);  
+         if (status==OK) {
+           /* 
+	    * Since we can access the ID register it looks 
+	    * like we have a DC module?
+            */
+           status = vxMemProbe(adrs+2,mode,sizeof(type),  (char *)&type);
+           status = vxMemProbe(adrs+4,mode,sizeof(csr),   (char *)&csr);
+           status = vxMemProbe(adrs+6,mode,sizeof(offset),(char *)&offset);
+           status = vxMemProbe(adrs+8,mode,sizeof(attribute),(char *)&attribute);
+           status = vxMemProbe(adrs+0xa,mode,sizeof(sernoHi),(char *)&sernoHi);
+           status = vxMemProbe(adrs+0xc,mode,sizeof(sernoLo),(char *)&sernoLo);
+           status = vxMemProbe(adrs+0xe,mode,sizeof(ver),(char *)&ver);
+
+           /* Print out a short report for this module */
+           printf("DC Module found in ");
+           printf("slot=%d\tla=0x%4.4x\tadrs=0x%8.8x",slot,la,(UINT32)adrs);
+           printf("\tid=0x%4.4x\ttype=0x%4.4x\tcsr=0x%4.4x",id,type,csr);
+           printf("\toffs=0x%4.4x\tattr=0x%4.4x\n",offset,attribute);
+           printf("\tsernoHi=0x%4.4x\tsernoLo=0x%4.4x\tver=%hd\n",sernoHi,sernoLo,ver);
+           slot_a[nr_cards]       = la;
+           device_aps[nr_cards++] = (UINT16 *)adrs;
+	 }
+         else {
+	   /* 
+	    * No access to the ID register indicates
+	    * that this is a SC module.
+	    */
+           printf("SC Module found in ");
+           printf("\tslot=%d\tla=0x%4.4x\tadrs=0x%8.8x status=0x%4.4x",
+                   slot,sc_la,(UINT32)adrs,csr);
+           slot_a[nr_cards]       = sc_la++;
+           device_aps[nr_cards++] = (UINT16 *)adrs;
+	 }
+       }
+       status = SetMODID( dis,brd ); /* Clear MODID signal for board */
+       if ( status<OK ) 
+         printf("An error occurred in SetMODID disable for brd=%d\n",brd);
+       if (la==slot0_la) break;
+
+     }/* End of slot FOR loop */
+  }/* End of la FOR loop */
+
+   /* List all cards found */
+   printf("Number of cards found:  %d\n",nr_cards);
+   return(OK);
+}
+
+
+int mytest( UINT16 clk_slot )
+{
+   int       status;
+   UINT16    levels = 1<<(MY_INT_LEVEL-1);
+   UINT16    slot = 2;  
+   
+   if ( clk_slot ) slot = clk_slot;
+   status = initClk(slot);
+   if (status!=OK) return(status);
+  
+
+   status = rebootHookAdd(myShutdown);
+   if ( status!=OK ) 
+     printf("rebootHookAdd failed\n");
+   else {
+     status = SetVXIintHandler(levels,(NIVXI_HVXIINT *)myIsr);
+     if (status<0) 
+       printf("SetVXIintHandler failed - level=%d\n",MY_INT_LEVEL);
+     else {
+       /*       mycrate();  */   /* get logical addresses     */
+       clkInitFields(0xc8);      /* cold init of clock module */
+       rfpInitFields(0xca);
+       rf_modIntEnb();
+     } 
+   } 
+   return( status );
+}
+
+int rf_intEnb( void )
+{
+   int     status;
+   UINT16  levels     = 1<< (MY_INT_LEVEL-1);
+   UINT16  sroute     = 0;
+   INT16   controller = -1;
+
+
+   status = EnableVXIint( controller,levels);
+   if ( status!=OK ) 
+     printf("Failed to enable RF interrupt level %d (0x%2.2x)\n",
+            MY_INT_LEVEL,levels);
+   else
+     RouteVXIint( controller,sroute );
+   return(status);
+}
+
+int rf_clk( UINT16 la )
+{
+  int               status=OK,i;
+  int               j=0x20;
+  int               len  = sizeof(short);
+  int               mode = VX_READ;
+  int               num_regs=9;
+  char             *base_p;
+  char             *adrs_p;
+  UINT16            data;
+  static const char *reg_ac[]={"Trigger Control",
+                               "Harmonic Number Readback",
+                               "Delay Control",
+                               "Sync/Calibrate Commond Register",
+                               "39.3MHz PLL Constant #1",
+                               "Sync Width/39.3 MHz PLL Const #2",
+                               "471.1 MHz PLL COnstant",
+                               "Calibration PLL Constant #1",
+                               "Calibration PLL Constant #2"};
+  status = rd_reg( la );
+  if ( status!=OK ) return(status);
+
+  if (!localAdrs_p) getSlot0BaseAdrs();
+  base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+  for (i=0,adrs_p=base_p+j; (i<num_regs) && (status==OK); i+=2, adrs_p+=2) {
+     status=vxMemProbe( adrs_p,mode,len,(char *)&data );
+     if (status==OK) 
+       printf("0x%8.8x: %s Register 0x%4.4x\n",(UINT32)adrs_p,reg_ac[i],data);
+     else
+       printf("%s Register read failed at 0x%8.8x\n",reg_ac[i],(UINT32)adrs_p);
+  }
+  return(status);
+}
+
+int rf_rfp( UINT16 la )
+{
+  int               status=OK,i;
+  int               j=0x20;
+  int               len  = sizeof(short);
+  int               mode = VX_READ;
+  int               num_regs=2;
+  char             *base_p;
+  char             *adrs_p;
+  UINT16            data=0;
+  static const char *reg_ac[]={"RF Module Control",
+                               "RF Module Status"};
+
+  status = rd_reg( la );
+  if ( status!=OK ) return(status);
+
+  if (!localAdrs_p) getSlot0BaseAdrs();
+  base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+  for (i=0,adrs_p=base_p+j; (i<num_regs) && (status==OK); i++, adrs_p+=2) {
+     status=vxMemProbe( adrs_p,mode,len,(char *)&data );
+     if (status==OK) 
+       printf("0x%8.8x: %s Register 0x%4.4x\n",(UINT32)adrs_p,reg_ac[i],data);
+     else
+       printf("%s Register read failed at 0x%8.8x\n",reg_ac[i],(UINT32)adrs_p);
+  }
+  return(status);
+}
+
+int rf_iqa( UINT16 la )
+{
+  int               status=OK,i; 
+  int               j=0x20;
+  int               len  = sizeof(short);
+  int               mode = VX_READ;
+  int               num_regs=2;
+  char             *base_p;
+  char             *adrs_p;
+  UINT16            data;
+  static const char *reg_ac[]={"Trigger Control",
+                               "Fault Enable Status"};
+
+  status = rd_reg( la );
+  if ( status!=OK ) return(status);
+
+  if (!localAdrs_p) getSlot0BaseAdrs();
+  base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+  for (i=0,adrs_p=base_p+j; (i<num_regs) && (status==OK); i++, adrs_p+=2) {
+     status=vxMemProbe( adrs_p,mode,len,(char *)&data );
+     if (status==OK) 
+       printf("0x%8.8x: %s Register 0x%4.4x\n",(UINT32)adrs_p,reg_ac[i],data);
+     else
+       printf("%s Register read failed at 0x%8.8x\n",reg_ac[i],(UINT32)adrs_p);
+  }
+  return(status);
+}
+
+int rf_gap( UINT16 la )
+{
+  int               status=OK,i;
+  int               j=0x20; 
+  int               len  = sizeof(short);
+  int               mode = VX_READ;
+  int               num_regs=3;
+  char             *base_p;
+  char             *adrs_p;
+  UINT16            data;
+  static const char *reg_ac[]={"GAP Control",
+                               "GAP Status 1",
+		               "GAP Status 2"};
+
+  status = rd_reg( la );
+  if ( status!=OK ) return(status);
+
+  if (!localAdrs_p) getSlot0BaseAdrs();
+  base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+  for (i=0,adrs_p=base_p+j; (i<num_regs) && (status==OK); i++, adrs_p+=2) {
+     status=vxMemProbe( adrs_p,mode,len,(char *)&data );
+     if (status==OK) 
+       printf("0x%8.8x: %s Register 0x%4.4x\n",(UINT32)adrs_p,reg_ac[i],data);
+     else
+       printf("%s Register read failed at 0x%8.8x\n",reg_ac[i],(UINT32)adrs_p);
+  }
+  return(status);
+}
+
+int rf_comb( UINT16 la )
+{
+  int               status=OK,i; 
+  int               j=0x20;
+  int               len  = sizeof(short);
+  int               mode = VX_READ;
+  int               num_regs=2;
+  char             *base_p;
+  char             *adrs_p;
+  UINT16            data;
+  static const char *reg_ac[]={"Comb Control",
+                               "Comb Status"};
+
+  status = rd_reg( la );
+  if ( status!=OK ) return(status);
+
+  if (!localAdrs_p) getSlot0BaseAdrs();
+  base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+  for (i=0,adrs_p=base_p+j; (i<num_regs) && (status==OK); i++, adrs_p+=2) {
+     status=vxMemProbe( adrs_p,mode,len,(char *)&data );
+     if (status==OK) 
+       printf("0x%8.8x: %s Register 0x%4.4x\n",(UINT32)adrs_p,reg_ac[i],data);
+     else
+       printf("%s Register read failed at 0x%8.8x\n",reg_ac[i],(UINT32)adrs_p);
+  }
+  return(status);
+}
+
+int rf_aim( UINT16 la )
+{
+  int               status=OK,i;
+  int               j=0x20; 
+  int               len  = sizeof(short);
+  int               mode = VX_READ;
+  int               num_regs=2;
+  char             *base_p;
+  char             *adrs_p;
+  UINT16            data;
+  static const char *reg_ac[]={"AIM Control",
+                               "AIM Status"};
+
+  status = rd_reg( la );
+  if ( status!=OK ) return(status);
+
+  if (!localAdrs_p) getSlot0BaseAdrs();
+  base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+  for (i=0,adrs_p=base_p+j; (i<num_regs) && (status==OK); i++, adrs_p+=2) {
+     status=vxMemProbe( adrs_p,mode,len,(char *)&data );
+     if (status==OK) 
+       printf("0x%8.8x: %s Register 0x%4.4x\n",(UINT32)adrs_p,reg_ac[i],data);
+     else
+       printf("%s Register read failed at 0x%8.8x\n",reg_ac[i],(UINT32)adrs_p);
+  }
+  return(status);
+}
+
+
+/* This function can only be prior to resman being run */
+int rd_module_a16( UINT16 slot )
+{
+   int  status;
+   int  i;
+   UINT16 data;
+   UINT16 bcnt=sizeof(data);
+   UINT16 mask = 1;
+   UINT16 enb=1;
+   UINT16 dis=0;
+   UINT16 mode=1;   
+   UINT16 adrs = 0xffc0;
+   static const  char *reg_ac[]={ "Manuf ID",
+                                  "Status",
+                                  "Offset",
+                                  "Attributes",
+                                  "Serial Number Hi",
+                                  "Serial Number Lo",
+                                  "Version Number"}; 
+   mask <<= slot;
+   status = SetMODID(enb,mask);
+   if ( status!=OK ) 
+     printf("Failed to set MODID on slot %hd\n",slot);
+   else {
+      printf("\nReading A16 registers for module in slot %hd\n",slot);
+      for (i=0; (i<7) && (status==OK); i++, adrs+=2) {
+        
+        status = VXIin( mode,adrs,bcnt,(void *)&data );
+        if ( status==OK )
+           printf("0x%4.4x (%d): %s Register 0x%4.4hx\n",adrs,i,reg_ac[i],data);
+        else
+           printf("%s Register read failed - status=%d\n",reg_ac[i],status);
+      } /* End of FOR loop */
+      status = SetMODID(dis,mask);
+      if (status!=OK )
+        printf("Failed to clear MODID on slot %hd\n",slot);
+   }
+   return(status);
+}
+
+int rd_reg( UINT16 la )
+{
+  int               status=OK,i,j,k;
+  int               len  = sizeof(short);
+  int               mode = VX_READ;
+  int               num_regs_a[2]={7,10};
+  int               offset_a[2]  ={0,0x1a};
+  char             *base_p;
+  char             *adrs_p;
+  UINT16            data;
+  static const char *reg_ac[]={ "Manuf ID",
+                                "Device Type",
+                                "Offset",
+                                "Attributes",
+                                "Serial Number Hi ",
+                                "Serial Number Lo ",
+                                "Version Number   ",
+                                "Interrupt Status ",
+                                "Interrupt Control",
+                                "Subclass" }; 
+
+  printf("\nReading registers for LA=%hd\n",la);
+  if (!localAdrs_p) getSlot0BaseAdrs();
+  base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+
+  for (i=0,j=0,k; j<2 && (status==OK); j++) {
+    for ( k=offset_a[j]; 
+          (i<num_regs_a[j]) && (status==OK); 
+          i++, k+=2) {
+      adrs_p = base_p + k;
+      status=vxMemProbe( adrs_p,mode,len,(char *)&data );
+      if (status==OK) 
+        printf("0x%8.8x: %s Register 0x%4.4x\n",(UINT32)adrs_p,reg_ac[i],data);
+      else
+        printf("%s Register read failed at 0x%8.8x\n",reg_ac[i],(UINT32)adrs_p);
+    }/* End of FOR loop */
+  } /* ENd of FOR loop */
+  return(status);
+}
+
+int initClk( UINT16 slot )
+{
+   int    status,iss;
+   UINT16 enb=1;
+   UINT16 dis=0;
+   UINT16 mask = 1<<slot;
+   UINT32 la = 0xffc0;
+   UINT16 version;
+   UINT16 mode = 1;
+   UINT16 data;
+
+
+   vxiinit();
+   status = SetMODID(enb,mask);
+   if ( status!=OK )
+     printf("Failed to set MODID line in slot=%hd\n",slot);
+   else { 
+      /* Read hw version */
+      status = VXIin(mode,la+CLK_VERSION,sizeof(version),(void *)&version );
+      if (status !=OK )
+        printf("Failed to read CLK module version register (S=%hd)\n",slot);
+      else {
+        version &= 0xf;
+        if (version==1) {
+           data = 0x800;
+           status = VXIout(mode,la+CLK_CLKCTRL,sizeof(data),data);
+           if ( status==OK ) {
+             data = CLK_39CONST;
+             status = VXIout(mode,la+CLK_39MHZ_PLL,sizeof(data),data);
+             if (status==OK) {
+               data = CLK_471NORM;
+               status = VXIout(mode,la+CLK_471MHZ_PLL,sizeof(data),data);
+               if ( status!=OK )
+                  printf("Failed to set CLK 471 PLL register\n");
+	     }
+             else
+               printf("Failed to set CLK 39Mhz PLL register\n");
+	   }
+           else 
+             printf("Failed to set CLK ctrl register\n");
+	}
+        else {
+          data   = 0xc00;
+          status = VXIout(mode,la+CLK_V2_DLYCTRL,sizeof(data),data);
+          if (status!=OK)
+             printf("Failed to set CLK (v2) ctrl register\n");
+	} 
+      }
+        
+      iss = SetMODID(dis,mask);
+      if ( iss!=OK ) {
+        printf("Failed to clear MODID line in slot=%hd\n",slot);
+        if (status==OK) status=iss;
+      }
+      if (status==OK) printf("Successfully initialized CLK module\n");
+   }
+   return(status);   
+}
+
+void rf_modIntEnb(void)
+{
+   UINT16               mask;
+   UINT16               i,la;
+   p2Rf_devConfig_ts   *csr_ps;
+   int                  wait;
+
+
+   wait = 2*sysClkRateGet();
+   for ( i=0; i<num_modules; i++ ) {
+     la = vxi_a[i];
+     csr_ps = (p2Rf_devConfig_ts *)localAdrs_p + (la<<VXIDEVBITS);
+     printf("Enable interrupts from model 0x%3.3x\n",csr_ps->model & 0x0fff);
+     taskDelay( wait );              /* wait for msg to print out */
+     mask = INT_CTRL_ALL;
+     csr_ps->intCtrl &= ~mask;      /* enable interrupts          */
+   }/* End of FOR loop */
+   return;
+}
+
+void rf_modIntDis(void)
+{
+   UINT16               mask;
+   UINT16               i,la;
+   p2Rf_devConfig_ts   *csr_ps;
+   int                  wait;
+
+
+   wait = 2*sysClkRateGet();
+   for ( i=0; i<num_modules; i++ ) {
+     la = vxi_a[i];
+     csr_ps = (p2Rf_devConfig_ts *)localAdrs_p + (la<<VXIDEVBITS);
+     printf("Clear interrupts from 0x%3.3x\n",csr_ps->model &0x0fff);
+     taskDelay( wait );              /* wait for msg to print out */
+     mask = INT_CTRL_ALL;
+     csr_ps->intCtrl |= mask;        /* enable interrupts         */
+   }/* End of FOR loop */
+   return;
+}
+
+
+void mycrate(void)
+{
+  int          status=OK;
+  UINT16       field=0;
+  INT16        la=0; 
+  INT16        manuf     = -1;
+  INT16        model     = -1;
+  INT16        devclass  = -1;
+  INT16        slot      = -1;
+  INT16        mainframe = -1;
+  INT16        cmdla     = -1;
+  char         name_a[14];
+
+
+  num_modules = 0;
+  memset(name_a,'\0',sizeof(name_a));
+  memset(vxi_a,0,sizeof(vxi_a));
+  for (slot=1; slot<13; slot++) {
+     status = FindDevLA(name_a,
+                        manuf,
+                        model,
+                        devclass,
+                        slot,
+                        mainframe,
+                        cmdla,
+                        &la);
+     if (status==OK) {
+       vxi_a[num_modules] = la;
+       status = GetDevInfo(la,field,&devInfo_as[num_modules]);
+       if ( status<OK ) {
+         if (status==-1)
+           printf("FindDevLA falied - Device not found for LA=0x%2.2x\n",la);
+         else if (status==-2) 
+           printf("FindDevLA failed - Invalid field (%d) specified for LA=0x%2.2x\n",
+                  field,la);
+         else
+           printf("FindDevLA failed - Unknown error for LA=0x%2.2x status=%d\n",
+                  la,status);
+       }
+       else 
+         num_modules++;
+     }
+     else 
+       printf("Device not found in slot %d\n",slot);
+   }/* End of FOR loop */
+
+   return;
+}
+
+void myIsr( INT16  controller,
+                   UINT16 level,
+                   UINT32 statusId )
+{
+   UINT16                   la=statusId & 0xff;
+   static char              lock = FALSE;
+   volatile VXICSR          *csr_ps;
+   UINT16                   sftIntMask=0x0020;
+
+   if (!sysBusTas(&lock)) {
+      logMsg("ISR Interrupted w/  statusId=0x%4.4x level=0x%4.4x\n",
+              (int)statusId,(int)level,0,0,0,0);
+      return;
+   }
+
+   logMsg("I'm in the myIsr w/statusId=0x%4.4x level=0x%4.4x\n",
+           (int)statusId,(int)level,0,0,0,0);
+   
+   return;
+
+   /* Get logical address */
+   if (!localAdrs_p) getSlot0BaseAdrs(); 
+   csr_ps = (VXICSR *)localAdrs_p + (la<<VXIDEVBITS);
+   taskDelay(2*sysClkRateGet());
+
+   /*
+    * Determine what caused the interrupt.
+    * Do we have a software interrupt? 
+    */
+   if (csr_ps->dir.r.status & sftIntMask)
+     csr_ps->dir.w.control &= ~sftIntMask;   /*reset sft interrupt */  
+   lock = FALSE;
+   return;
+
+}
+
+int rfpInitFields( UINT16 la )
+{
+    int                    status = OK;
+    char                  *base_p;
+    char                  *adrs_p;
+    char                  *ext_p;
+    p2Rf_int_ctrl_tu       ictrl_u;
+    p2Rf_ctrl_tu           ctrl_u;
+    UINT16                 idata;
+    UINT16                 odata;
+    int                    len=sizeof(short);
+    UINT16                 buf[256];
+    FILE                  *fp;
+    char                  *file_c;
+    char                  *id_c;
+    register UINT16       *dsp_p;
+    register UINT16       *buf_p=buf;
+    register int           i;
+
+
+
+    if (!localAdrs_p) getSlot0BaseAdrs();
+
+    /* Base address of module A16 space */ 
+    base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+  
+    /* Reset module */
+    adrs_p = base_p + 0x4;
+    /* Clear the RF module control register */
+    odata = 0;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&odata );
+
+    /* Read the rf status register */
+    status = vxMemProbe(adrs_p,VX_READ,len,(char *)&idata ); 
+
+    /* Set the rf control register */
+    ctrl_u._i = idata & 0xfffc;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)ctrl_u._a ); 
+    ctrl_u._s.sft_reset;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)ctrl_u._a ); 
+    ctrl_u._i = 0;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)ctrl_u._a ); 
+    ctrl_u._i = idata;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)ctrl_u._a ); 
+    taskDelay(1* sysClkRateGet());
+
+     
+   /* 
+    * Set interrupt control register
+    * Enable all interrupts (imsk=0) and set the
+    * interrupt level to 5
+    */
+    ictrl_u._i = 0;
+    ictrl_u._s.irq  = MY_INT_LEVEL;
+    ictrl_u._s.imsk = 0xc5;        /* 197 decimal */
+    ictrl_u._i      = ~ictrl_u._i;
+    adrs_p = base_p + 0x1c;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)ictrl_u._a );
+    if ( status!=OK )
+      printf("Failed to set RFP module interrupt control register\n");
+    
+    /* 
+     * Set RF module control register 
+     * clear serial link error and rf fault.
+     */
+    odata  = 0x30; /* reset serial link error and rf fault latch */
+    adrs_p = base_p + 0x20;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&odata );
+ 
+    /* Now set module in to LOAD state */
+    odata   = 0x40;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&odata ); 
+    status = vxMemProbe(adrs_p,VX_READ, len,(char *)&idata ); 
+    /* Reset DSP */
+    odata  &= ~0xfffb;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&odata );
+
+    /* Load DSP (A24 space)*/
+    status = sysBusToLocalAdrs (VME_AM_STD_SUP_DATA,
+                                base_p+0x6,
+                               (char **)&ext_p);
+    file_c = "/dsp/rippleRfp";
+    status = DWN_LdDspExe(file_c,(UINT32)ext_p,FALSE,TRUE);
+    if ( status!=OK ) 
+      printf("Failed to load RFP module DSP\n");
+
+    /* Initialize octal dac's */
+    for ( i=0x8000; i<=0x806e; i++ ) {
+       ;
+    }
+
+    /* Load the DAC I table */
+    file_c = "/tbl/NOISE_I_BL_SMALL";
+    id_c  = "RFP DAC I RAM";
+    i = 0x808a;
+    dsp_p = (unsigned short *)&ext_p[i];
+    fp = fopen(file_c,"rb");
+    if ( !fp ) 
+      printf("Unable to open DAC I file %s\n",file_c);
+    else {
+      status = fread( buf,strlen(id_c),1,fp );
+      if ( status==0 )
+        printf("RFP DAC I table %s is empty\n",file_c);
+      else if (status>1)
+        printf("RFP DAC I table %s ID is too long\n",file_c); 
+      else if ( strncmp((char *)buf,id_c,strlen(id_c))!=0 ) 
+        printf("RFP DAC I table %s has unexpected ID\n",file_c);
+      else {
+        i = 0x8000/256;
+	while (i--) {
+          status = fread( buf,sizeof(short),256,fp );
+          if ( status!= 256 ) {
+            printf("RFP DAC I table %s is of improper length\n",file_c);
+            break;
+          }
+          while (buf_p < &buf[256]) {
+             *dsp_p =*buf_p++; 
+          }
+	}
+      }
+      fclose(fp); 
+      fp = NULL;
+    }
+
+    /* Load the DAC Q table */
+    file_c = "/tbl/NOISE_Q_BL_SMALL";
+    id_c   = "RFP DAC Q RAM";
+    i = 0x080c;
+    dsp_p  = (unsigned short *) &ext_p[i]; 
+    if ( !fp ) 
+      printf("Unable to open DAC Q file %s\n",file_c);
+    else {
+      status = fread(buf,strlen(id_c),1,fp );
+      if ( status==0 )
+        printf("RFP DAC Q table %s has is empty\n",file_c);
+      else if (status>1)
+        printf("RFP DAC Q table %s ID is too long\n",file_c); 
+      else if (strncmp((char *)buf,id_c,strlen(id_c))!=0)
+        printf("RFP DAC Q table %s has unexpected ID\n",file_c);
+      else {
+        i = 0x8000/256;
+	while (i--) {
+          status = fread( buf,sizeof(short),256,fp );
+          if ( status!= 256 ) {
+            printf("RFP DAC I table %s is of improper length\n",file_c);
+            break;
+          }
+          while (buf_p < &buf[256]) {
+             *dsp_p =*buf_p++; 
+          }
+	}
+      }
+      fclose(fp);
+      fp = NULL;
+    }
+
+    adrs_p = base_p + 0x20;
+    odata   = 0xf8c4;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&odata); 
+
+    /* Read the status register */
+    adrs_p = base_p + 0x04;
+    status = vxMemProbe(adrs_p,VX_READ,len,(char *)&ctrl_u._i);
+    if ( status==OK ) {
+      /* Set the control register */
+      ctrl_u._s.sft_reset = 1;
+      ctrl_u._s.sysfail_inhibit = 1; 
+      ctrl_u._s.ext_mem = 1;  
+      status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&ctrl_u._i);
+      if ( status!=OK )
+        printf("Failed RFP module Cold Init, due to control register WT error\n");
+    }
+    else {
+      printf("Failed RFP module Cold Init, due to status register RD error\n");
+    }
+    return(status);
+}
+
+int clkInitFields( UINT16 la )
+{
+  int                    status = OK;
+  char                  *base_p;
+  char                  *adrs_p;
+  p2Rf_int_ctrl_tu       ictrl_u;
+  p2Rf_ctrl_tu           ctrl_u;
+  int                    len = sizeof(short);
+  UINT16                 harmNo;
+  UINT16                 data;
+  UINT16                 ver;
+  float                  x;
+
+
+
+   if ( !localAdrs_p ) getSlot0BaseAdrs();
+
+  /* Base address of module A16 space */ 
+  base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+  
+  /* 
+   * Set interrupt control register
+   * Enable all interrupts (imsk=0) and set the
+   * interrupt level to 5
+   */ 
+  adrs_p = base_p + 0x1c;
+  ictrl_u._s.irq = MY_INT_LEVEL;
+  status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)ictrl_u._a );
+  if ( status!=OK ) {
+    printf("Failed to set CLK module interrupt control register\n");
+    return(status);
+  }
+  
+  /* Set trigger control register */
+  adrs_p = base_p + 0x20;
+  data   = 0;
+  status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&data );
+  if ( status!=OK ) {
+    printf("Failed to set CLK module trigger control register\n");
+    return(status);
+  }
+
+  /* Read harmonic number readback register */
+  adrs_p = base_p + 0x22;
+  status = vxMemProbe(adrs_p,VX_READ,len,(char *)&harmNo );
+  if ( status!=OK ) {
+    printf("Failed to read CLK module Harmonic number RBK register\n");
+    return(status);
+  }
+
+  /* Read harmonic number readback register */
+  adrs_p = base_p + 0xe;
+  status = vxMemProbe(adrs_p,VX_READ,len,(char *)&ver );
+  ver &= 0xf;
+  if (ver==1)
+     x = 2.0 * (0x10000 - harmNo); 
+  else
+     x = 2.0 * (0x10000 - harmNo + 1);
+
+  if (harmNo != 3492.0 )
+     printf("Unexpected CLK (V%d) module harmonic number readback of %f (%hd)\n",
+            ver,x,harmNo);
+
+
+  /* Set delay control register */
+  adrs_p = base_p + 0x24;
+  data   = 0xc80;
+  status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&data );
+  if ( status!=OK ) {
+    printf("Failed to set CLK module delay control register\n");
+    return(status);
+  }
+
+
+  /* Set phase-locked loop constang register */
+  if (ver==1) {
+    adrs_p = base_p + 0x28;
+    data   = CLK_39CONST;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&data );
+    if ( status!=OK ) 
+       printf("Failed to set CLK module 39.3 Mhz Phase-Locked Loop register\n");
+
+    adrs_p = base_p + 0x2c;
+    data   = CLK_471NORM;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&data );
+    if ( status!=OK ) 
+       printf("Failed to set CLK module 471.1 Mhz Phase-Locked Loop register\n");
+
+    adrs_p = base_p + 0x26;
+    data   = 0;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&data );
+    if ( status!=OK )
+       printf("Failed to set CLK module synch/calibrate register\n");
+  }
+  else {
+  /* 
+   * Set the re-synchronize command register. Writing anything to 
+   * this register causes all clocks to be re-synchronized
+   * to the external trigger.
+   */
+    adrs_p = base_p + 0x26;
+    data   = 0;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&data );
+    if ( status!=OK ) 
+      printf("Failed to set CLK codule re-synchronized command register\n");
+
+    data |= 0x10;
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&data );
+     if ( status!=OK ) 
+      printf("Failed to set CLK codule re-synchronized command register (2)\n");
+    taskDelay( sysClkRateGet()/10);
+
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&data );
+    if ( status!=OK ) 
+      printf("Failed to set CLK codule re-synchronized command register (3)\n");
+    taskDelay( sysClkRateGet()/10);
+  }
+
+  /* Read the status register */
+  adrs_p = base_p + 0x04;
+  status = vxMemProbe(adrs_p,VX_READ,len,(char *)&ctrl_u._i);
+  if ( status==OK ) {
+    /* Set the control register */
+    ctrl_u._s.sft_reset = 1;
+    ctrl_u._s.sysfail_inhibit = 1; 
+    status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)&ctrl_u._i);
+    if ( status!=OK )
+      printf("Failed CLK module Cold Init, due to control register WT error\n");
+  }
+  else 
+    printf("Failed CLK module Cold Init, due to status register RD error\n");
+  return(status);
+}
+
+
+static int myShutdown( void )
+{ 
+  rf_modIntDis();  /* Clear Rf module interrupts from the bus */
+  return(OK);
+}
+
+
+
+int rf_status( UINT16 la )
+{
+  int               status;
+  int               len  = sizeof(short);
+  int               mode = VX_READ;
+  char             *base_p;
+  char             *adrs_p;
+  p2Rf_status_tu    data_u;
+
+
+  if (!localAdrs_p) getSlot0BaseAdrs();
+
+  base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+  adrs_p = base_p + 0x4;
+  status = vxMemProbe(adrs_p,mode,len,(char *)data_u._a);
+  if (status==OK) {
+    printf("Status Register (0x%8.8x):  0x%4.4x\n",
+           (UINT32)adrs_p,data_u._i);
+    printf("\tSoftware Reset: %s\n",
+           data_u._s.sft_reset ? "RESET MODULE" : "OFF");
+    printf("\tSYSFAIL Inhibit: %s\n",
+           data_u._s.sysfail_inhibit ? "INHIBIT" : "OFF");
+    printf("\tSelftest: %s\n",
+           data_u._s.passed ? "PASSED" : "FAILED");
+    printf("\tReady: %s\n",
+           data_u._s.rdy ? "On" : "Off");
+    printf("\tSoftware Interrupt: %s\n",
+           data_u._s.sft_int ? "Interrupt" : "Off");
+    printf("\tMODID Line: %s\n",
+           data_u._s.modid ? "On" : "Off");
+  }
+  return(status);
+}
+
+int rf_ctrl( UINT16 la,UINT16 type, UINT16 data )
+{
+   int           status;
+   int           len  = sizeof(short);
+   char         *base_p;
+   char         *adrs_p;
+   p2Rf_ctrl_tu  data_u;
+
+
+   if (!localAdrs_p) getSlot0BaseAdrs();
+
+   base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+   adrs_p = base_p + 0x4;
+   status = vxMemProbe(adrs_p,VX_READ,len,(char *)data_u._a);
+   if (status==OK ) {
+     if (type==0) 
+       data_u._i &= ~data;    /* clear bits */
+     else  
+       data_u._i |= data;     /* set bits   */
+     status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)data_u._a);
+     if ( status!=OK ) {
+       printf("Failed to set CTRL register for la=0x%2.2x\n",la);
+       status = errnoGet();
+     }
+   }
+   else {
+     printf("Failed to read CTRL register for la=0x%2.2x\n",la);
+     status = errnoGet();
+   }
+   return(status);
+}
+
+
+int rf_intStatus( UINT16 la )
+{
+  int                status;
+  int                len  = sizeof(short);
+  int                mode = VX_READ;
+  char              *adrs_p;
+  char              *base_p;
+  p2Rf_int_status_tu data_u;
+  p2Rf_int_mask_tu   imsk_u;
+  UINT16             model;
+
+  if (!localAdrs_p) getSlot0BaseAdrs();
+
+  base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+  adrs_p  = base_p + 0x1a;
+  status = vxMemProbe(adrs_p,mode,len,(char *)data_u._a);
+  if ( status!=OK ) {
+    printf("Failed to read LA=0x%4.4x Interrupt Status Register\n",la);
+    return(ERROR);
+  }
+  status = vxMemProbe(base_p+0x2,mode,len,(char *)&model);
+  if (status!=OK) {
+     printf("Failed to read LA=0x%4.4x Device Type Register\n",la);
+     return(ERROR);
+  }
+  model &= 0xfff;
+  printf("LA=0x%4.4x   Model=0x%3.3x\n",la,model);
+  printf("Interrupt Status Register (0x%8.8x):  0x%4.4x\n",
+         (UINT32)adrs_p,data_u._i );
+  if (model==0x106) {
+    printf("\tLogical Address:  0x%2.2x\n",data_u._s.la );
+    printf("\tIMSK: 0x%2.2x\n",data_u._s.imsk); 
+    imsk_u._i = data_u._s.imsk;
+    if ( model==0x106) {
+      printf("\t\tFiducial counter error: %s\n",
+           imsk_u.clk_s.fl ? "COUNT ERROR" : "OK");
+
+      printf("\t\tFiducial loss of signal: %s\n",
+           imsk_u.clk_s.fl ? "LOSS OF SIGNAL" : "OK");
+
+      printf("\t\t39MHz PLL unlocked: %s\n",
+           imsk_u.clk_s.p1u ? "UNLOCKED" : "OK");
+
+      printf("\t\t471MHz PLL unlocked: %s\n",
+           imsk_u.clk_s.p2u ? "UNLOCKED" : "OK");
+
+      printf("\t\tInvalid Address: %s\n",
+           imsk_u.clk_s.ia ? "DISABLE" : "ENABLED");
+
+      printf("\t\tSoftware Interrupt: %s\n",
+           imsk_u.clk_s.si ? "DISABLE" : "ENABLED");
+    }
+    else if ( model == 0x103 ) {
+      printf("\t\tNo 479MHz RF reference detected: %s\n",
+           imsk_u.rfp_s.no_476MHz ? "no RF" : "RF On");
+
+      printf("\t\tInvalid state machine: %s\n",
+           imsk_u.rfp_s.inv_st_op ? "ERROR" : "OK");
+
+      printf("\t\tInvalid operation: %s\n",
+           imsk_u.rfp_s.inv_op ? "ERROR" : "OK");
+
+      printf("\t\tADC Overflow: %s\n",
+           imsk_u.rfp_s.adc_overflow ? "OVERFLOW" : "OK");
+
+      printf("\t\t80,40,10MHz or ripple clk not present: %s\n",
+           imsk_u.rfp_s.no_ripple_clk ? "Missing" : "OK");
+
+      printf("\t\tRipple loop serial link error: %s\n",
+           imsk_u.rfp_s.ripple_loop_err ? "Error" : "OK");
+
+      printf("\t\tMessage from DSP: %s\n",
+           imsk_u.rfp_s.dsp_msg_rdy ? "Ready" : "Idle");
+    }
+  }
+  return(status);
+}
+
+int rf_intCtrl( UINT16 la,UINT16 data,UINT16 type )
+{
+   int               status;
+   int               len  = sizeof(short);
+   char             *base_p;
+   char             *adrs_p;
+   p2Rf_int_ctrl_tu  data_u;
+
+
+
+   if (!localAdrs_p) getSlot0BaseAdrs();
+
+   base_p = (char *)(localAdrs_p + (la<<VXIDEVBITS));
+   adrs_p = base_p + 0x1c;
+   status = vxMemProbe(adrs_p,VX_READ,len,(char *)data_u._a);
+   if (status==OK ) {
+     if (type==0) 
+       data_u._i &= ~data;    /* clear bits */
+     else  
+       data_u._i |= data;     /* set bits   */
+     status = vxMemProbe(adrs_p,VX_WRITE,len,(char *)data_u._a);
+     if ( status!=OK ) {
+       printf("Failed to set Interrupt CTRL register for la=0x%2.2x\n",la);
+       status = errnoGet();
+     }
+   }
+   else {
+     printf("Failed to read Interrupt CTRL register for la=0x%2.2x\n",la);
+     status = errnoGet();
+   }
+   return(status);
+}
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

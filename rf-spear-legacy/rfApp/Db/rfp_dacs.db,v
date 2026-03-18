@@ -1,0 +1,366 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2003.02.27.01.17.16;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Rename
+@
+text
+@record(seq,"$(R):STN:TUNE:SEQ") {
+	field(DESC,"RFP Module TUNE DAC Seq")
+	field(DISS,"INVALID")
+	field(DOL1,"$(R):STN:RFP:TUNE.I NPP NMS")
+	field(LNK1,"$(R):STN:RFP:MODU.TMIS NPP NMS")
+	field(DOL2,"$(R):STN:RFP:TUNE.J NPP NMS")
+	field(LNK2,"$(R):STN:RFP:MODU.TMQS NPP NMS")
+}
+record(seq,"$(R):STN:CAV1:SEQ") {
+	field(DESC,"RFP Module CAV1 DAC Seq")
+	field(DISS,"INVALID")
+	field(DOL1,"$(R):STN:RFP:CAV1.I NPP NMS")
+	field(LNK1,"$(R):STN:RFP:MODU.C1II NPP NMS")
+	field(DOL2,"$(R):STN:RFP:CAV1.J NPP NMS")
+	field(LNK2,"$(R):STN:RFP:MODU.C1IQ NPP NMS")
+	field(DOL3,"$(R):STN:RFP:CAV1.K NPP NMS")
+	field(LNK3,"$(R):STN:RFP:MODU.C1QI NPP NMS")
+	field(DOL4,"$(R):STN:RFP:CAV1.L NPP NMS")
+	field(LNK4,"$(R):STN:RFP:MODU.C1QQ NPP NMS")
+}
+record(seq,"$(R):STN:CAV2:SEQ") {
+	field(DESC,"RFP Module CAV2 DAC Seq")
+	field(DISS,"INVALID")
+	field(DOL1,"$(R):STN:RFP:CAV2.I NPP NMS")
+	field(LNK1,"$(R):STN:RFP:MODU.C2II NPP NMS")
+	field(DOL2,"$(R):STN:RFP:CAV2.J NPP NMS")
+	field(LNK2,"$(R):STN:RFP:MODU.C2IQ NPP NMS")
+	field(DOL3,"$(R):STN:RFP:CAV2.K NPP NMS")
+	field(LNK3,"$(R):STN:RFP:MODU.C2QI NPP NMS")
+	field(DOL4,"$(R):STN:RFP:CAV2.L NPP NMS")
+	field(LNK4,"$(R):STN:RFP:MODU.C2QQ NPP NMS")
+}
+record(seq,"$(R):STN:CAV3:SEQ") {
+	field(DESC,"RFP Module CAV3 DAC Seq")
+	field(DISS,"INVALID")
+	field(DOL1,"$(R):STN:RFP:CAV3.I NPP NMS")
+	field(LNK1,"$(R):STN:RFP:MODU.C3II NPP NMS")
+	field(DOL2,"$(R):STN:RFP:CAV3.J NPP NMS")
+	field(LNK2,"$(R):STN:RFP:MODU.C3IQ NPP NMS")
+	field(DOL3,"$(R):STN:RFP:CAV3.K NPP NMS")
+	field(LNK3,"$(R):STN:RFP:MODU.C3QI NPP NMS")
+	field(DOL4,"$(R):STN:RFP:CAV3.L NPP NMS")
+	field(LNK4,"$(R):STN:RFP:MODU.C3QQ NPP NMS")
+}
+record(seq,"$(R):STN:CAV4:SEQ") {
+	field(DESC,"RFP Module CAV4 DAC Seq")
+	field(DISS,"INVALID")
+	field(DOL1,"$(R):STN:RFP:CAV4.I NPP NMS")
+	field(LNK1,"$(R):STN:RFP:MODU.C4II NPP NMS")
+	field(DOL2,"$(R):STN:RFP:CAV4.J NPP NMS")
+	field(LNK2,"$(R):STN:RFP:MODU.C4IQ NPP NMS")
+	field(DOL3,"$(R):STN:RFP:CAV4.K NPP NMS")
+	field(LNK3,"$(R):STN:RFP:MODU.C4QI NPP NMS")
+	field(DOL4,"$(R):STN:RFP:CAV4.L NPP NMS")
+	field(LNK4,"$(R):STN:RFP:MODU.C4QQ NPP NMS")
+}
+record(seq,"$(R):STN:DIRECT:SEQ") {
+	field(DESC,"RFP Module DIRECT DAC Seq")
+	field(DISS,"INVALID")
+	field(DOL1,"$(R):STN:RFP:DIRECT.I NPP NMS")
+	field(LNK1,"$(R):STN:RFP:MODU.DLII NPP NMS")
+	field(DOL2,"$(R):STN:RFP:DIRECT.J NPP NMS")
+	field(LNK2,"$(R):STN:RFP:MODU.DLIQ NPP NMS")
+	field(DOL3,"$(R):STN:RFP:DIRECT.K NPP NMS")
+	field(LNK3,"$(R):STN:RFP:MODU.DLQI NPP NMS")
+	field(DOL4,"$(R):STN:RFP:DIRECT.L NPP NMS")
+	field(LNK4,"$(R):STN:RFP:MODU.DLQQ NPP NMS")
+}
+record(seq,"$(R):STN:COMB:SEQ") {
+	field(DESC,"RFP Module COMB DAC Seq")
+	field(DISS,"INVALID")
+	field(DOL1,"$(R):STN:RFP:COMB.I NPP NMS")
+	field(LNK1,"$(R):STN:RFP:MODU.CLII NPP NMS")
+	field(DOL2,"$(R):STN:RFP:COMB.J NPP NMS")
+	field(LNK2,"$(R):STN:RFP:MODU.CLIQ NPP NMS")
+	field(DOL3,"$(R):STN:RFP:COMB.K NPP NMS")
+	field(LNK3,"$(R):STN:RFP:MODU.CLQI NPP NMS")
+	field(DOL4,"$(R):STN:RFP:COMB.L NPP NMS")
+	field(LNK4,"$(R):STN:RFP:MODU.CLQQ NPP NMS")
+}
+record(sub,"$(R):STN:RFP:TUNE") {
+	field(DESC,"RFP Module TUNE DAC Vals")
+	field(PINI,"YES")
+	field(DISS,"INVALID")
+	field(FLNK,"$(R):STN:TUNE:SEQ.VAL")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQdac")
+	field(EGU,"Counts")
+	field(HOPR,"2047")
+	field(LOPR,"-2048")
+	field(PREC,"1")
+	field(BRSV,"INVALID")
+}
+record(sub,"$(R):STN:RFP:CAV1") {
+	field(DESC,"RFP Module CAV1 DAC Vals")
+	field(PINI,"YES")
+	field(DISS,"INVALID")
+	field(FLNK,"$(R):STN:CAV1:SEQ.VAL")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQdac")
+	field(EGU,"Counts")
+	field(HOPR,"2047")
+	field(LOPR,"-2048")
+	field(PREC,"1")
+	field(BRSV,"INVALID")
+}
+record(sub,"$(R):STN:RFP:CAV2") {
+	field(DESC,"RFP Module CAV2 DAC Vals")
+	field(PINI,"YES")
+	field(DISS,"INVALID")
+	field(FLNK,"$(R):STN:CAV2:SEQ.VAL")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQdac")
+	field(EGU,"Counts")
+	field(HOPR,"2047")
+	field(LOPR,"-2048")
+	field(PREC,"1")
+	field(BRSV,"INVALID")
+}
+record(sub,"$(R):STN:RFP:CAV3") {
+	field(DESC,"RFP Module CAV3 DAC Vals")
+	field(PINI,"YES")
+	field(DISS,"INVALID")
+	field(FLNK,"$(R):STN:CAV3:SEQ.VAL")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQdac")
+	field(EGU,"Counts")
+	field(HOPR,"2047")
+	field(LOPR,"-2048")
+	field(PREC,"1")
+	field(BRSV,"INVALID")
+}
+record(sub,"$(R):STN:RFP:CAV4") {
+	field(DESC,"RFP Module CAV4 DAC Vals")
+	field(PINI,"YES")
+	field(DISS,"INVALID")
+	field(FLNK,"$(R):STN:CAV4:SEQ.VAL")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQdac")
+	field(EGU,"Counts")
+	field(HOPR,"2047")
+	field(LOPR,"-2048")
+	field(PREC,"1")
+	field(BRSV,"INVALID")
+}
+record(sub,"$(R):STN:RFP:DIRECT") {
+	field(DESC,"RFP Module DIRECT DAC Vals")
+	field(PINI,"YES")
+	field(DISS,"INVALID")
+	field(FLNK,"$(R):STN:DIRECT:SEQ.VAL")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQdac")
+	field(EGU,"Counts")
+	field(HOPR,"2047")
+	field(LOPR,"-2048")
+	field(PREC,"1")
+	field(BRSV,"INVALID")
+}
+record(sub,"$(R):STN:RFP:COMB") {
+	field(DESC,"RFP Module COMB DAC Vals")
+	field(PINI,"YES")
+	field(DISS,"INVALID")
+	field(FLNK,"$(R):STN:COMB:SEQ.VAL")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQdac")
+	field(EGU,"Counts")
+	field(HOPR,"2047")
+	field(LOPR,"-2048")
+	field(PREC,"1")
+	field(BRSV,"INVALID")
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+record(seq,"$(STN):STN:TUNE:SEQ") {
+d4 4
+a7 4
+	field(DOL1,"$(STN):STN:RFP:TUNE.I NPP NMS")
+	field(LNK1,"$(STN):STN:RFP:MODU.TMIS NPP NMS")
+	field(DOL2,"$(STN):STN:RFP:TUNE.J NPP NMS")
+	field(LNK2,"$(STN):STN:RFP:MODU.TMQS NPP NMS")
+d9 1
+a9 1
+record(seq,"$(STN):STN:CAV1:SEQ") {
+d12 8
+a19 8
+	field(DOL1,"$(STN):STN:RFP:CAV1.I NPP NMS")
+	field(LNK1,"$(STN):STN:RFP:MODU.C1II NPP NMS")
+	field(DOL2,"$(STN):STN:RFP:CAV1.J NPP NMS")
+	field(LNK2,"$(STN):STN:RFP:MODU.C1IQ NPP NMS")
+	field(DOL3,"$(STN):STN:RFP:CAV1.K NPP NMS")
+	field(LNK3,"$(STN):STN:RFP:MODU.C1QI NPP NMS")
+	field(DOL4,"$(STN):STN:RFP:CAV1.L NPP NMS")
+	field(LNK4,"$(STN):STN:RFP:MODU.C1QQ NPP NMS")
+d21 1
+a21 1
+record(seq,"$(STN):STN:CAV2:SEQ") {
+d24 8
+a31 8
+	field(DOL1,"$(STN):STN:RFP:CAV2.I NPP NMS")
+	field(LNK1,"$(STN):STN:RFP:MODU.C2II NPP NMS")
+	field(DOL2,"$(STN):STN:RFP:CAV2.J NPP NMS")
+	field(LNK2,"$(STN):STN:RFP:MODU.C2IQ NPP NMS")
+	field(DOL3,"$(STN):STN:RFP:CAV2.K NPP NMS")
+	field(LNK3,"$(STN):STN:RFP:MODU.C2QI NPP NMS")
+	field(DOL4,"$(STN):STN:RFP:CAV2.L NPP NMS")
+	field(LNK4,"$(STN):STN:RFP:MODU.C2QQ NPP NMS")
+d33 1
+a33 1
+record(seq,"$(STN):STN:CAV3:SEQ") {
+d36 8
+a43 8
+	field(DOL1,"$(STN):STN:RFP:CAV3.I NPP NMS")
+	field(LNK1,"$(STN):STN:RFP:MODU.C3II NPP NMS")
+	field(DOL2,"$(STN):STN:RFP:CAV3.J NPP NMS")
+	field(LNK2,"$(STN):STN:RFP:MODU.C3IQ NPP NMS")
+	field(DOL3,"$(STN):STN:RFP:CAV3.K NPP NMS")
+	field(LNK3,"$(STN):STN:RFP:MODU.C3QI NPP NMS")
+	field(DOL4,"$(STN):STN:RFP:CAV3.L NPP NMS")
+	field(LNK4,"$(STN):STN:RFP:MODU.C3QQ NPP NMS")
+d45 1
+a45 1
+record(seq,"$(STN):STN:CAV4:SEQ") {
+d48 8
+a55 8
+	field(DOL1,"$(STN):STN:RFP:CAV4.I NPP NMS")
+	field(LNK1,"$(STN):STN:RFP:MODU.C4II NPP NMS")
+	field(DOL2,"$(STN):STN:RFP:CAV4.J NPP NMS")
+	field(LNK2,"$(STN):STN:RFP:MODU.C4IQ NPP NMS")
+	field(DOL3,"$(STN):STN:RFP:CAV4.K NPP NMS")
+	field(LNK3,"$(STN):STN:RFP:MODU.C4QI NPP NMS")
+	field(DOL4,"$(STN):STN:RFP:CAV4.L NPP NMS")
+	field(LNK4,"$(STN):STN:RFP:MODU.C4QQ NPP NMS")
+d57 1
+a57 1
+record(seq,"$(STN):STN:DIRECT:SEQ") {
+d60 8
+a67 8
+	field(DOL1,"$(STN):STN:RFP:DIRECT.I NPP NMS")
+	field(LNK1,"$(STN):STN:RFP:MODU.DLII NPP NMS")
+	field(DOL2,"$(STN):STN:RFP:DIRECT.J NPP NMS")
+	field(LNK2,"$(STN):STN:RFP:MODU.DLIQ NPP NMS")
+	field(DOL3,"$(STN):STN:RFP:DIRECT.K NPP NMS")
+	field(LNK3,"$(STN):STN:RFP:MODU.DLQI NPP NMS")
+	field(DOL4,"$(STN):STN:RFP:DIRECT.L NPP NMS")
+	field(LNK4,"$(STN):STN:RFP:MODU.DLQQ NPP NMS")
+d69 1
+a69 1
+record(seq,"$(STN):STN:COMB:SEQ") {
+d72 8
+a79 8
+	field(DOL1,"$(STN):STN:RFP:COMB.I NPP NMS")
+	field(LNK1,"$(STN):STN:RFP:MODU.CLII NPP NMS")
+	field(DOL2,"$(STN):STN:RFP:COMB.J NPP NMS")
+	field(LNK2,"$(STN):STN:RFP:MODU.CLIQ NPP NMS")
+	field(DOL3,"$(STN):STN:RFP:COMB.K NPP NMS")
+	field(LNK3,"$(STN):STN:RFP:MODU.CLQI NPP NMS")
+	field(DOL4,"$(STN):STN:RFP:COMB.L NPP NMS")
+	field(LNK4,"$(STN):STN:RFP:MODU.CLQQ NPP NMS")
+d81 1
+a81 1
+record(sub,"$(STN):STN:RFP:TUNE") {
+d85 1
+a85 1
+	field(FLNK,"$(STN):STN:TUNE:SEQ.VAL")
+d94 1
+a94 1
+record(sub,"$(STN):STN:RFP:CAV1") {
+d98 1
+a98 1
+	field(FLNK,"$(STN):STN:CAV1:SEQ.VAL")
+d107 1
+a107 1
+record(sub,"$(STN):STN:RFP:CAV2") {
+d111 1
+a111 1
+	field(FLNK,"$(STN):STN:CAV2:SEQ.VAL")
+d120 1
+a120 1
+record(sub,"$(STN):STN:RFP:CAV3") {
+d124 1
+a124 1
+	field(FLNK,"$(STN):STN:CAV3:SEQ.VAL")
+d133 1
+a133 1
+record(sub,"$(STN):STN:RFP:CAV4") {
+d137 1
+a137 1
+	field(FLNK,"$(STN):STN:CAV4:SEQ.VAL")
+d146 1
+a146 1
+record(sub,"$(STN):STN:RFP:DIRECT") {
+d150 1
+a150 1
+	field(FLNK,"$(STN):STN:DIRECT:SEQ.VAL")
+d159 1
+a159 1
+record(sub,"$(STN):STN:RFP:COMB") {
+d163 1
+a163 1
+	field(FLNK,"$(STN):STN:COMB:SEQ.VAL")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

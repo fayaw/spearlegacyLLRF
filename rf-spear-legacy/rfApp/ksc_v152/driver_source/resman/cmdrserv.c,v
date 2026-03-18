@@ -1,0 +1,208 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  cmdrserv.c
+
+  Configures the Commander/Servant hierarchies per section C.4.1.4
+  (including C.4.1.4.1) of VXIbus System Specification VXI-1, Rev. 1.4;
+  4/21/92
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "resman.h"
+
+
+/*
+ * Entry point
+ */
+
+int rmCmdrServ( void )
+{
+   config_t *thisLA;
+   UINT16 servArea, cmdrLA;
+   int status, i;
+
+   UINT16 commander[NVXIADDR], servSize[NVXIADDR], passed[NVXIADDR];
+
+/* INITIALLY, RESOURCE MAN (V160) IS EVERYONE'S COMMANDER! */
+   for( i = 0; i < NVXIADDR; i++ )
+   {
+      commander[i] = VXI_RESMAN_LA;
+      servSize[i]  = (UINT16)(-1);
+      passed[i]    = 0;
+   }
+
+/* FIND ALL COMMANDERS BY CHECKING THE "CMDR" BIT IN THE PROTOCOL REGISTER
+ * OF EACH MESSAGE-BASED DEVICE.
+ */
+   for( thisLA = HEAD; thisLA != NULL; thisLA = thisLA->next )
+   {
+      /* GET THIS FOR ALL DEVICES, TO BE USED LATER (GRANT DEVICE PHASE) */
+      passed[thisLA->logAdr] = thisLA->passed;
+
+/*    IF IT'S MESSAGE BASED *AND* HAS PASSED */
+      if( (thisLA->devClass == DEVCL_MESSAGE) && thisLA->passed )
+      {
+         /* AND IF IT'S A COMMANDER */
+         if( (thisLA->protocol & VXICMDRMASK) == 0 )
+         {
+            /* READ ITS SERVANT AREA SIZE (USING "READ SERVANT AREA" QUERY) */
+            cmdrLA = thisLA->logAdr;
+
+	    status = WScmd (thisLA->logAdr, MBC_READ_SERVANT_AREA,
+			    1, &servArea);
+
+	    if (status != WS_RET_IODONE) {
+	      fprintf( stderr, "* Error while writing RSA command to LA %3d\n",
+		      thisLA->logAdr );
+
+               /* try the next one */
+               continue;
+            }
+
+            /* STORE ONLY THE LOW BYTE OF RESPONSE */
+            servSize[cmdrLA] = servArea & 0x00FF;
+
+         /* ENDIF CMDR */
+         }
+      /* ENDIF MB & VALID STRUCT */
+      }
+   /* ENDFOR ALL DEVICES */
+   }
+
+/* DETERMINE COMMANDER/SERVANT HIERARCHIES:
+ * "The Servant area size is an 8 bit (0-255) value selected by the user or
+ * at the factory. ... A Commander's Servant area starts at the next
+ * consecutive Logical Address after the Commander's logical address, and
+ * includes the number of contiguous Logical Addresses given by the
+ * Commander's Servant area size.  If a device is in the Servant area of a
+ * given Commander, and it is not in the Servant area of any other device
+ * within that Commander's Servant area, then it is a Servant of that
+ * Commander, and may be assigned to that Commander...." (sec C.4.1.4.1)
+ */
+   for( cmdrLA = VXI_RESMAN_LA + 1; cmdrLA < NVXIADDR; cmdrLA++ )
+   {
+      if( servSize[cmdrLA] < (UINT16)(-1) )
+      {
+         for( i = cmdrLA + 1; i < cmdrLA + servSize[cmdrLA] + 1; i++ )
+         {
+            commander[i] = cmdrLA;
+         }
+      }
+   }
+
+/* ASSIGN SERVANTS TO COMMANDERS (USING "GRANT DEVICE" COMMAND) 
+ * Per Rule C.4.10, Servant must be in PASSED state.
+ */
+   for( thisLA = HEAD; thisLA != NULL; thisLA = thisLA->next )
+   {
+/* IF IT'S MESSAGE BASED *AND* HAS A VALID MB INFO STRUCT *AND* HAS PASSED */
+      if( (thisLA->devClass == DEVCL_MESSAGE) && thisLA->passed )
+      {
+	 /* RECORD WHO ITS COMMANDER IS! */
+         thisLA->cmdrLA = commander[thisLA->logAdr];
+
+         /* AND IF IT'S A COMMANDER */
+         if( (thisLA->protocol & VXICMDRMASK) == 0 )
+         {
+            cmdrLA = thisLA->logAdr;
+            if( servSize[cmdrLA] < (UINT16)(-1) )
+            {
+               /* FOR ALL LOG ADDRS WITHIN THIS CMDR'S SERVANT AREA */
+               for( i = cmdrLA + 1; i < cmdrLA + servSize[cmdrLA] + 1; i++ )
+               {
+		  /* IF THIS DEVICE IS DIRECTLY COMMANDED BY THIS COMMANDER
+		   *  *AND* THIS DEVICE HAS PASSED
+		   */
+                  if( (commander[i] == cmdrLA) && passed[i] )
+                  {
+		    status = WScmd (cmdrLA, MBC_GRANT_DEVICE | i, 0, 0);
+
+		    if( status != WS_RET_IODONE )
+                      {
+			fprintf( stderr, "* Error while writing Grant Device "
+				"%3d command to LA %3d\n", i, cmdrLA );
+
+                         /* try the next one */
+                         continue;
+                      }  /* endif status OK */
+                  }   /* endif commanded & passed */
+               }  /* endfor all LAs in serv area */
+            }  /* endif valid serv area */
+         /* ENDIF CMDR */
+         }
+      /* ENDIF MB & VALID STRUCT */
+      }
+   /* ENDFOR ALL DEVICES */
+   }
+
+   return( 0 );
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

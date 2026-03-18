@@ -1,0 +1,801 @@
+head	1.7;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.7
+	RF-SPEAR-R0-3-1:1.7
+	RF-SPEAR-R0-3-0:1.7
+	RF-SPEAR-R0-2-0:1.7
+	RF-SPEAR-R0-1-0:1.7
+	RF-SPEAR-R0-0-3:1.7
+	RF-SPEAR-R0-0-2:1.7
+	RF-SPEAR-R0-0-1:1.7
+	RF-SPEAR-R0-0-0:1.7
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.7
+	RF-3-13-10:1.7.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.7
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.7
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.7
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.7
+date	2008.05.19.15.42.46;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2007.06.01.20.43.14;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2004.07.02.17.27.45;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.06.21.23.05.00;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.06.15.00.43.30;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2004.03.24.01.30.52;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.43;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.43;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.7
+log
+@Change Deg to deg.
+@
+text
+@grecord(ao,"$(S):$(C):BETA:CTRL") {
+	field(DESC,"$(C) Beta")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"6")
+	field(EGUF,"4.2")
+	field(EGUL,"3.7")
+	field(DRVH,"4.2")
+	field(DRVL,"3.7")
+	field(HOPR,"4.5")
+	field(LOPR,"3.5")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):$(C):Q0:CTRL") {
+	field(DESC,"$(C) Q0")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"42000")
+	field(EGUL,"30000")
+	field(DRVH,"42000")
+	field(DRVL,"30000")
+	field(HOPR,"42000")
+	field(LOPR,"30000")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):$(C):STRENGTH:CTRL") {
+	field(DESC,"$(C) Desired Strength")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"3")
+	field(EGUF,"100")
+	field(EGU,"Percent")
+	field(DRVH,"100")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):$(C)FRWD:DRCTVTY:DB") {
+	field(DESC,"$(C) Frwd Directivity dB")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"4")
+	field(EGUF,"50")
+	field(EGUL,"10")
+	field(EGU,"dB")
+	field(DRVH,"50")
+	field(DRVL,"10")
+	field(HOPR,"50")
+	field(LOPR,"10")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):$(C)FRWD:DRCTVTY:PHASE") {
+	field(DESC,"$(C) Frwd Directivity Phase")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"180")
+	field(EGUL,"-180")
+	field(EGU,"deg")
+	field(DRVH,"180")
+	field(DRVL,"-180")
+	field(HOPR,"180")
+	field(LOPR,"-180")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):$(C)REFL:DRCTVTY:DB") {
+	field(DESC,"$(C) Refl Directivity dB")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"4")
+	field(EGUF,"50")
+	field(EGUL,"10")
+	field(EGU,"dB")
+	field(DRVH,"50")
+	field(DRVL,"10")
+	field(HOPR,"50")
+	field(LOPR,"10")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):$(C)REFL:DRCTVTY:PHASE") {
+	field(DESC,"$(C) Refl Directivity Phase")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"180")
+	field(EGUL,"-180")
+	field(EGU,"deg")
+	field(DRVH,"180")
+	field(DRVL,"-180")
+	field(HOPR,"180")
+	field(LOPR,"-180")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):$(C)TUNR:POSN:CTRL") {
+	field(DESC,"$(S)$(C)SM Tuner Des Posn")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(S):$(C)TUNR:STEP:MOTOR.VAL  PP NMS")
+	field(PREC,"3")
+	field(EGUF,"51")
+	field(EGUL,"-153")
+	field(EGU,"mm")
+	field(DRVH,"18")
+	field(DRVL,"-28")
+	field(HOPR,"20")
+	field(LOPR,"-30")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):$(C)TUNR:POSN:LOOP") {
+	field(DESC,"$(C) Tuner Loop Desired Posn")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(S):$(C)TUNR:POSN:HIST.VAL  PP NMS")
+	field(PREC,"2")
+	field(EGUF,"51")
+	field(EGUL,"-153")
+	field(EGU,"mm")
+	field(DRVH,"18")
+	field(DRVL,"-29.5")
+	field(HOPR,"20")
+	field(LOPR,"-30")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):$(C)TUNR:POSN:ONHOME") {
+	field(DESC,"$(C) Tuner ON Home Posn")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"51")
+	field(EGUL,"-153")
+	field(EGU,"mm")
+	field(DRVH,"18")
+	field(DRVL,"-29.5")
+	field(HOPR,"20")
+	field(LOPR,"-30")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):$(C)TUNR:POSN:PARKHOME") {
+	field(DESC,"$(C) Tuner PARK Home Posn")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"51")
+	field(EGUL,"-153")
+	field(EGU,"mm")
+	field(DRVH,"18")
+	field(DRVL,"-29.5")
+	field(HOPR,"20")
+	field(LOPR,"-30")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(calc,"$(S):$(C)TUNR:STEP:CHCK") {
+	field(DESC,"$(C) Step Card Stat Chg")
+	field(SCAN,"1 second")
+	field(FLNK,"$(S):$(C)TUNR:STEP:CHCKINIT.VAL  PP NMS")
+	field(CALC,"(A>0)?0:(C=3)||(D>0)?0:(B=0)?1:2")
+	field(INPA,"$(S):$(C)TUNR:A2C$(M):MODU.SEVR  NPP NMS")
+	field(INPB,"$(S):$(C)TUNR:STEP:CHCK.VAL  NPP NMS")
+	field(INPC,"$(S):$(C)TUNR:POSN.SEVR  NPP NMS")
+	field(INPD,"$(S):STN$(AI):AI:MODU.SEVR  NPP NMS")
+	field(HOPR,"2")
+	field(HIHI,"1.5")
+	field(HIGH,"0.5")
+	field(HHSV,"MAJOR")
+	field(HSV,"MINOR")
+}
+grecord(calc,"$(S):$(C)TUNR:STEP:CHCKINIT") {
+	field(DESC,"$(C) Step Init Check")
+	field(FLNK,"$(S):$(C)TUNR:INIT:FANO.VAL  PP NMS")
+	field(CALC,"(A=1)||((A=2)&&(B=0))?1:2")
+	field(INPA,"$(S):$(C)TUNR:STEP:CHCK.SEVR  NPP NMS")
+	field(INPB,"$(S):$(C)TUNR:STEP:CHCKINIT.VAL  NPP NMS")
+	field(HOPR,"2")
+	field(HIHI,"1.5")
+	field(HIGH,"0.5")
+	field(HHSV,"MAJOR")
+	field(HSV,"MINOR")
+}
+grecord(calc,"$(S):$(C)TUNR:STEP:DISA") {
+	field(DESC,"$(C) Step Motor Disable")
+	field(CALC,"(A=0)||(B=-1)||(C=3)")
+	field(INPA,"$(S):$(C)TUNR:STEP:CHCK.SEVR  NPP NMS")
+	field(INPB,"$(S):$(C)TUNR:STEP:MOTOR.INIT  NPP NMS")
+	field(HOPR,"1")
+	field(LOLO,"0.5")
+	field(LOW,"0.5")
+	field(LLSV,"MAJOR")
+	field(LSV,"MINOR")
+}
+grecord(compress,"$(S):$(C):FREQ:OFFSHIST") {
+	field(DESC,"$(C) Freq Offset History")
+	field(FLNK,"$(S):$(C)TUNR:PHASEERR:HIST.VAL  PP NMS")
+	field(INP,"$(S):$(C):FREQ:OFFS.VAL  NPP NMS")
+	field(ALG,"Circular Buffer")
+	field(NSAM,"300")
+	field(N,"300")
+	field(HOPR,"10")
+	field(LOPR,"-10")
+	field(EGU,"kHz")
+}
+grecord(compress,"$(S):$(C)FRWD:PHASE:HIST") {
+	field(DESC,"$(C) Forward Phase History")
+	field(FLNK,"$(S):$(C):FREQ:OFFSHIST.VAL  PP NMS")
+	field(INP,"$(S):$(C)FRWD:PHASE.L  NPP NMS")
+	field(ALG,"Circular Buffer")
+	field(NSAM,"300")
+	field(N,"300")
+	field(HOPR,"180")
+	field(LOPR,"-180")
+	field(PREC,"2")
+	field(EGU,"deg")
+}
+grecord(compress,"$(S):$(C)LOAD:ANGLEOFFS:HIST") {
+	field(DESC,"$(C) Ld Angle Offset History")
+	field(INP,"$(S):$(C)LOAD:ANGLE:OFFS.VAL  NPP NMS")
+	field(ALG,"Circular Buffer")
+	field(NSAM,"300")
+	field(N,"300")
+	field(HOPR,"10")
+	field(LOPR,"-10")
+	field(PREC,"2")
+	field(EGU,"deg")
+}
+grecord(compress,"$(S):$(C)PROBE:PHASE:HIST") {
+	field(DESC,"$(C) Probe Phase History")
+	field(FLNK,"$(S):$(C)FRWD:PHASE:HIST.VAL  PP NMS")
+	field(INP,"$(S):$(C)PROBE:PHASE.L  NPP NMS")
+	field(ALG,"Circular Buffer")
+	field(NSAM,"300")
+	field(N,"300")
+	field(HOPR,"180")
+	field(LOPR,"-180")
+	field(PREC,"2")
+	field(EGU,"deg")
+}
+grecord(compress,"$(S):$(C)TUNR:PHASEERR:HIST") {
+	field(DESC,"$(C) Phase Error History")
+	field(FLNK,"$(S):$(C)LOAD:ANGLEOFFS:HIST.VAL  PP NMS")
+	field(INP,"$(S):$(C)TUNR:POSN:DELTA.L  NPP NMS")
+	field(ALG,"Circular Buffer")
+	field(NSAM,"300")
+	field(N,"300")
+	field(HOPR,"10")
+	field(LOPR,"-10")
+	field(PREC,"2")
+	field(EGU,"deg")
+}
+grecord(compress,"$(S):$(C)TUNR:POSN:HIST") {
+	field(DESC,"$(C) Tuner Position History")
+	field(FLNK,"$(S):$(C)PROBE:PHASE:HIST.VAL  PP NMS")
+	field(INP,"$(S):$(C)TUNR:POSN:LOOP.VAL  NPP NMS")
+	field(ALG,"Circular Buffer")
+	field(NSAM,"300")
+	field(N,"300")
+	field(HOPR,"20")
+	field(LOPR,"-30")
+	field(PREC,"2")
+	field(EGU,"mm")
+}
+grecord(event,"$(S):$(C)TUNR:LOOP:HOME") {
+	field(DESC,"$(C) Tuner Loop Home")
+	field(DTYP,"Soft Channel")
+}
+grecord(event,"$(S):$(C)TUNR:LOOP:RESET") {
+	field(DESC,"$(C) Tuner Loop Reset")
+	field(DTYP,"Soft Channel")
+}
+grecord(event,"$(S):$(C)TUNR:LOOPMEAS:READY") {
+	field(DESC,"$(C) Tuner Loop Meas Ready")
+	field(DTYP,"Soft Channel")
+}
+grecord(fanout,"$(S):$(C)TUNR:INIT:FANO") {
+	field(DESC,"$(C) Step Motor Init Fanout")
+	field(SELM,"Specified")
+	field(SELL,"$(S):$(C)TUNR:STEP:CHCKINIT.SEVR  NPP NMS")
+	field(LNK1,"$(S):$(C)TUNR:STEP:INIT.VAL  PP NMS")
+}
+grecord(mbbo,"$(S):$(C)TUNR:LOOP:STATE") {
+	field(DESC,"$(C) Tuner Loop State")
+	field(DTYP,"Soft Channel")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(ZRST,"OFF")
+	field(ONST,"PARK")
+	field(TWST,"ON")
+	field(ZRSV,"MAJOR")
+	field(UNSV,"INVALID")
+}
+grecord(mbbo,"$(S):$(C)TUNR:LOOP:STATUS") {
+	field(DESC,"$(C) Tuner Loop Status")
+	field(DTYP,"Soft Channel")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(FRVL,"4")
+	field(FVVL,"5")
+	field(SXVL,"6")
+	field(SVVL,"7")
+	field(EIVL,"8")
+	field(NIVL,"9")
+	field(TEVL,"10")
+	field(ELVL,"11")
+	field(TVVL,"12")
+	field(TTVL,"13")
+	field(FTVL,"14")
+	field(FFVL,"15")
+	field(ZRST,"UNKNOWN")
+	field(ONST,"LOOP_OFF")
+	field(TWST,"STN_OFF")
+	field(THST,"GOOD")
+	field(FRST,"ON_FM")
+	field(FVST,"SM_CTRL")
+	field(SXST,"SM_LIMIT")
+	field(SVST,"SM_BAD")
+	field(EIST,"DRV_LIMT")
+	field(NIST,"SM_MOVE")
+	field(TEST,"PHAS_BAD")
+	field(ELST,"PHASMISS")
+	field(TVST,"POWR_LOW")
+	field(TTST,"LDANGLIM")
+	field(ZRSV,"INVALID")
+	field(ONSV,"MAJOR")
+	field(FVSV,"MINOR")
+	field(SXSV,"MAJOR")
+	field(SVSV,"MAJOR")
+	field(EISV,"MINOR")
+	field(NISV,"MAJOR")
+	field(TESV,"MAJOR")
+	field(ELSV,"MAJOR")
+	field(TVSV,"MINOR")
+	field(TTSV,"MAJOR")
+	field(FTSV,"INVALID")
+	field(FFSV,"INVALID")
+	field(UNSV,"INVALID")
+}
+grecord(seq,"$(S):$(C)TUNR:STEP:INIT") {
+	field(DESC,"$(C) Step Motor Init Seq")
+	field(PREC,"3")
+	field(DOL1,"$(S):$(C)TUNR:POSN.VAL  NPP NMS")
+	field(LNK1,"$(S):$(C)TUNR:STEP:MOTOR.IVAL  NPP NMS")
+	field(DOL2,"$(S):$(C)TUNR:POSN.SEVR  NPP NMS")
+	field(LNK2,"$(S):$(C)TUNR:STEP:DISA.C  NPP NMS")
+	field(LNK3,"$(S):$(C)TUNR:STEP:MOTOR.INIT  PP NMS")
+	field(DOL4,"$(S):$(C)TUNR:POSN.VAL  NPP NMS")
+	field(LNK4,"$(S):$(C)TUNR:POSN:CTRL.VAL  PP NMS")
+}
+grecord(seq,"$(S):$(C)TUNR:STEP:STOP") {
+	field(DESC,"$(C) Step Motor Stop Seq")
+	field(DOL1,"1")
+	field(LNK1,"$(S):$(C)TUNR:POSN:CTRL.DISA  NPP NMS")
+	field(DOL2,"1")
+	field(LNK2,"$(S):$(C)TUNR:STEP:MOTOR.STOP  CA NMS")
+	field(DLY3,"1")
+	field(LNK3,"$(S):$(C)TUNR:STEP:CHCKINIT.VAL  CA NMS")
+	field(DLY4,"1")
+	field(LNK4,"$(S):$(C)TUNR:POSN:CTRL.DISA  NPP NMS")
+}
+grecord(stringout,"$(S):$(C)TUNR:LOOP:STRING") {
+	field(DESC,"$(C) Tuner Loop Stat String")
+	field(DTYP,"Soft Channel")
+	field(VAL,"Nonfunctional - unknown status")
+}
+grecord(sub,"$(S):$(C):CPLG:FACTOR") {
+	field(DESC,"$(C) Coupling Factor")
+	field(FLNK,"$(S):$(C):FREQ:OFFS.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQamplCplg")
+	field(INPA,"$(S):$(C)FRWD:POWER.I  NPP NMS")
+	field(INPB,"$(S):$(C)REFL:POWER.I  NPP NMS")
+	field(INPC,"0.0001")
+	field(INPD,"0.9999")
+	field(INPE,"$(S):$(C)FRWD:PHASE.L  NPP MS")
+	field(INPF,"$(S):$(C)REFL:PHASE.L  NPP MS")
+	field(HOPR,"10")
+	field(PREC,"2")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.01")
+	field(MDEL,"0.01")
+}
+grecord(sub,"$(S):$(C):FREQ:ERR") {
+	field(DESC,"$(C) Park Freq Phase Error")
+	field(FLNK,"$(S):$(C)LOAD:ANGLE:ERR.VAL  PP NMS")
+	field(INAM,"subSysInit")
+	field(SNAM,"subSysFreqErr")
+	field(INPA,"0.00004726891")
+#	field(INPB,"7000")
+	field(INPD,"$(S):$(C):FREQ:OFFS.VAL  NPP MS")
+	field(EGU,"deg")
+	field(HOPR,"10")
+	field(LOPR,"-10")
+	field(PREC,"2")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.01")
+	field(MDEL,"0.01")
+}
+grecord(sub,"$(S):$(C):FREQ:OFFS") {
+	field(DESC,"$(C) Frequency Offset")
+	field(FLNK,"$(S):$(C):FREQ:ERR.VAL  PP NMS")
+	field(INAM,"subSysInit")
+	field(SNAM,"subSysFreqOff")
+	field(INPF,"$(S):$(C)TUNR:POSN:ONHOME.VAL  NPP NMS")
+	field(INPG,"$(S):$(C)TUNR:POSN.VAL  NPP MS")
+	field(INPH,"$(S):$(C)PROBE:AMPL.VAL  NPP MS")
+	field(INPL,"$(S):CAV:FREQOFFS:SMOO.VAL  NPP NMS")
+	field(EGU,"kHz")
+	field(HOPR,"10")
+	field(LOPR,"-10")
+	field(PREC,"6")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.1")
+	field(MDEL,"0.1")
+}
+grecord(sub,"$(S):$(C):POWER") {
+	field(DESC,"$(C) Power")
+	field(FLNK,"$(S):$(C):CPLG:FACTOR.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQpowerNet")
+	field(INPA,"$(S):$(C)FRWD:POWER.VAL  NPP NMS")
+	field(INPB,"$(S):$(C)REFL:POWER.VAL  NPP NMS")
+	field(INPC,"$(S):$(C)FRWD:PHASE.L  NPP MS")
+	field(INPD,"$(S):$(C)REFL:PHASE.L  NPP MS")
+	field(EGU,"kW")
+	field(HOPR,"250")
+	field(PREC,"1")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.99")
+	field(MDEL,"0.1")
+}
+grecord(sub,"$(S):$(C):STRENGTH") {
+	field(DESC,"$(C) Strength")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQpowerEff")
+	field(INPA,"$(S):STN:VOLT.VAL  NPP MS")
+	field(INPB,"$(S):$(C)PROBE:AMPL.VAL  NPP MS")
+	field(INPC,"2")
+	field(EGU,"Percent")
+	field(HOPR,"100")
+	field(PREC,"2")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.1")
+	field(MDEL,"0.01")
+}
+grecord(sub,"$(S):$(C)FRWD:IQ") {
+	field(DESC,"$(C) Forward Corr IQ")
+	field(FLNK,"$(S):$(C)REFL:IQ.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQcorrected")
+	field(INPA,"1")
+	field(INPF,"1")
+	field(INPI,"$(S):$(C)FRWD:SCLIQ.J  NPP MS")
+	field(INPJ,"$(S):$(C)FRWD:SCLIQ.K  NPP MS")
+	field(INPK,"$(S):$(C)REFL:SCLIQ.J  NPP MS")
+	field(INPL,"$(S):$(C)REFL:SCLIQ.K  NPP MS")
+	field(EGU,"Volts")
+	field(PREC,"6")
+	field(BRSV,"INVALID")
+}
+grecord(sub,"$(S):$(C)LOAD:ANGLE:ERR") {
+	field(DESC,"$(C) Load Angle Phase Err")
+	field(FLNK,"$(S):$(C)TUNR:POSN:DELTA.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQphaseErr")
+	field(INPA,"$(S):$(C)PROBE:PHASE.L  NPP MS")
+	field(INPB,"$(S):$(C)FRWD:PHASE.L  NPP MS")
+	field(INPC,"$(S):$(C)LOAD:ANGLE:OFFS.VAL  NPP NMS")
+	field(EGU,"deg")
+	field(HOPR,"10")
+	field(LOPR,"-10")
+	field(HIHI,"5")
+	field(LOLO,"-5")
+	field(HIGH,"180")
+	field(LOW,"-180")
+	field(PREC,"2")
+	field(BRSV,"INVALID")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(ADEL,"0.01")
+	field(MDEL,"0.01")
+}
+grecord(sub,"$(S):$(C)LOAD:ANGLE:OFFS") {
+	field(DESC,"$(C) Load Angle Phase Offset")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQphaseOffs")
+	field(INPA,"$(S):CAVLOAD:ANGLE:CTRL.VAL  NPP NMS")
+	field(INPB,"$(S):$(C)LOAD:ANGLE:UNADOFFS.VAL  NPP NMS")
+#	field(INPC,"10")
+	field(EGU,"deg")
+	field(HOPR,"10")
+	field(LOPR,"-10")
+	field(HIHI,"180")
+	field(LOLO,"-180")
+	field(HIGH,"180")
+	field(LOW,"-180")
+	field(PREC,"2")
+	field(BRSV,"INVALID")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(ADEL,"0.01")
+	field(MDEL,"0.01")
+}
+grecord(sub,"$(S):$(C)LOAD:ANGLE:UNADOFFS") {
+	field(DESC,"$(C) Ld Ang Phase Unadj Offs")
+	field(FLNK,"$(S):$(C)LOAD:ANGLE:OFFS.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQphaseOffsU")
+	field(INPA,"$(S):CAVLOAD:ANGLE:CTRL.VAL  NPP NMS")
+	field(INPB,"$(S):CAVLDANGERR:SUMY:SEVR.SEVR  NPP NMS")
+	field(INPC,"$(S):STN:BEAM:STAT.SEVR  NPP NMS")
+	field(INPD,"$(S):STN:STATE:RBCK.VAL  NPP NMS")
+	field(INPF,"$(S):$(C):STRENGTH:CTRL.VAL  NPP NMS")
+	field(INPG,"$(S):$(C):STRENGTH.VAL  NPP NMS")
+	field(INPH,"$(S):$(C):STRENGTH.SEVR  NPP NMS")
+	field(INPI,"$(S):CAV:STRENGTH:DIFF.VAL  NPP NMS")
+	field(INPJ,"$(S):CAVLOAD:ANGLE:K.VAL  NPP NMS")
+	field(INPK,"$(S):CAVLOAD:ANGLE:FORGET.VAL  NPP NMS")
+	field(EGU,"deg")
+	field(HOPR,"10")
+	field(LOPR,"-10")
+	field(HIHI,"180")
+	field(LOLO,"-180")
+	field(HIGH,"180")
+	field(LOW,"-180")
+	field(PREC,"2")
+	field(BRSV,"INVALID")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(ADEL,"0.01")
+	field(MDEL,"0.01")
+}
+grecord(sub,"$(S):$(C)REFL:IQ") {
+	field(DESC,"$(C) Reflected Corr IQ")
+	field(FLNK,"$(S):$(C)FRWD:PHASE.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQcorrected")
+	field(INPC,"1")
+	field(INPH,"1")
+	field(INPI,"$(S):$(C)FRWD:SCLIQ.J  NPP MS")
+	field(INPJ,"$(S):$(C)FRWD:SCLIQ.K  NPP MS")
+	field(INPK,"$(S):$(C)REFL:SCLIQ.J  NPP MS")
+	field(INPL,"$(S):$(C)REFL:SCLIQ.K  NPP MS")
+	field(EGU,"Volts")
+	field(PREC,"6")
+	field(BRSV,"INVALID")
+}
+grecord(sub,"$(S):$(C)TUNR:POSN:DELTA") {
+	field(DESC,"$(C) Tuner Loop Delta Posn")
+	field(FLNK,"$(S):$(C)TUNR:LOOPMEAS:READY.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQphase2posn")
+	field(INPA,"$(S):STN:STATE:RBCK.VAL  NPP NMS")
+#	field(INPB,"0.25")
+#	field(INPC,"0.02")
+#	field(INPD,"1")
+	field(INPE,"$(S):CAVTUNR:LOOP:GAIN.VAL  NPP NMS")
+	field(INPF,"$(S):$(C)LOAD:ANGLE:ERR.VAL  NPP MS")
+	field(INPG,"$(S):$(C):FREQ:ERR.VAL  NPP MS")
+	field(EGU,"mm")
+	field(HOPR,"2")
+	field(LOPR,"-2")
+	field(PREC,"3")
+	field(BRSV,"INVALID")
+}
+grecord(steppermotor,"$(S):$(C)TUNR:STEP:MOTOR") {
+	field(DESC,"$(S)$(C)SM Tuner Step Motor")
+	field(DTYP,"AB-1746HSTP1")
+	field(DISV,"0")
+	field(SDIS,"$(S):$(C)TUNR:STEP:DISA.SEVR  PP NMS")
+	field(OUT,"#L0 A2 C$(M) S0 @@0x8413 0x0010 500")
+	field(DOL,"$(S):$(C)TUNR:POSN:CTRL.VAL  NPP NMS")
+	field(OMSL,"closed_loop")
+	field(ACCL,".5")
+	field(VELO,"3")
+	field(DIST,"0.003175")
+	field(MODE,"Position")
+	field(CMOD,"Position")
+	field(MRES,"400")
+	field(PREC,"3")
+	field(EGU,"mm")
+	field(DRVH,"18")
+	field(DRVL,"-29.5")
+	field(HOPR,"20")
+	field(LOPR,"-30")
+	field(HIHI,"0.03175")
+	field(LOLO,"-0.03175")
+	field(HIGH,"0.015875")
+	field(LOW,"-0.015875")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(HLSV,"MAJOR")
+	field(MDEL,"-1")
+	field(RDBD,"0.015875")
+}
+@
+
+
+1.6
+log
+@Change MDEL from 0.1 to 0.01 since PREC is 2.
+@
+text
+@d63 1
+a63 1
+	field(EGU,"Deg")
+d93 1
+a93 1
+	field(EGU,"Deg")
+d220 1
+a220 1
+	field(EGU,"Deg")
+d231 1
+a231 1
+	field(EGU,"Deg")
+d243 1
+a243 1
+	field(EGU,"Deg")
+d255 1
+a255 1
+	field(EGU,"Deg")
+d397 1
+a397 1
+	field(EGU,"Deg")
+d475 1
+a475 1
+	field(EGU,"Deg")
+d498 1
+a498 1
+	field(EGU,"Deg")
+d529 1
+a529 1
+	field(EGU,"Deg")
+@
+
+
+1.5
+log
+@Changed resolution of cavity powers to 0.1 kW.
+@
+text
+@d450 1
+a450 1
+	field(MDEL,"0.1")
+@
+
+
+1.4
+log
+@Add PINI's on all the soft setpoints.
+@
+text
+@d433 1
+d436 1
+a436 1
+	field(MDEL,"0.99")
+@
+
+
+1.3
+log
+@Correct cavity power HOPR.  Comment out .INP* fields that are restored.
+@
+text
+@d4 1
+d18 1
+d32 1
+d44 1
+d59 1
+d74 1
+d89 1
+d134 1
+d149 1
+@
+
+
+1.2
+log
+@Add station state as input to the load angle offset calculation.
+@
+text
+@d386 1
+a386 1
+	field(INPB,"7000")
+d423 1
+a423 1
+	field(HOPR,"500")
+d487 1
+a487 1
+	field(INPC,"10")
+d556 3
+a558 3
+	field(INPB,"0.5")
+	field(INPC,"0.02")
+	field(INPD,"2")
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d512 1
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

@@ -1,0 +1,155 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP
+**
+**  Abstract:
+**      DSP data block copy and test routines and parameters
+**      addresses are from the DSP chip's point of view.
+**
+**  Author:
+**     L.Sapozhnikov, SLAC/PEP-II Low Level RF Project
+**
+**   History:
+**    April 15, 1996 - Created
+**    July   1, 1997 - W. Ross: Updated for GVFF Revision 1 Module
+**    July  16, 1997 - W. Ross: adjustment to circ. buffer DSP_K_BUFOFFS
+**    Mar   16, 1998 - W. Ross: modfifed for additional variable in LDREF
+**				message body. DSP_K_NLDREF changed from 7 to 8  
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef GVFFMISC_H
+#define GVFFMISC_H
+
+/* Interrupt service routine vector area and context 'stack' area: */
+#define VEC_A_RESET     0x0000
+#define DSP_A_ISRSTACK	DSP_A_YBASE
+#define DSP_K_STACKLEN	0x20
+
+#define BUF_SIZE	144		/* buffer size is 144 samples */
+#define BUF_SIZE_M1	(BUF_SIZE - 1)
+#define BUF_HLF_SIZE	72		/*  1/2 buffer size, used for DO loop */
+#define BUF_SIZE_CNT	0xb9		/* 1 - BUF_HLF_SIZE */
+
+#define I_BUF_OUT_L	0x2000		/* Starting location of low I buffer */
+#define I_BUF_OUT_H	0x2100		/* Starting location of high I buffer */
+#define Q_BUF_OUT_L	0x2200		/* Starting location of low Q buffer */
+#define Q_BUF_OUT_H	0x2300		/* Starting location of high Q buffer */
+
+/* Interrupt 0 delay: When input FIFOs start to fill due to turn trigger, */
+/* interrupt 0 occurs after the input FIFOs have acquired the following   */
+/* number of words.  The DSP is expected to read out either FIFO at a     */
+/* lower rate than the sampling (filling) rate.                           */
+
+#define DSP_K_INT0_DEL	0x000a		/* delay value with int hrdw enabled */
+#define DSP_K_STT0_DEL	0x800a		/* delay value with int hrdw disabled */
+
+#define DSP_K_SIGNBIT	0x8000
+
+/* right shift factor applied to I & Q Error signals to provide guard bit(s) */
+
+#define DSP_K_PRESHIFT	0x0001
+
+/* Number of parameters expected in a LD_REF message */
+
+#define DSP_K_NLDREF	8
+
+/* Scale factor used for normalizing the 'find_dc' calculation */
+/* When AUC register is set for no shift of P, this value equals 0.00694275 */
+
+#define DSP_K_P00694	0x01c7
+
+/* The following constant is used to allign the loading of the I and Q */
+/* circular buffers to account for hardware delays. Its value MUST BE in */
+/* range [0:143] (decimal) */
+
+#define DSP_K_BUFOFFS	133
+
+/* Number of turns of IQ Error data to collect and average over: max is 3 */
+
+/* #define DSP_K_NTURNS	3 */
+#define DSP_K_NTURNS	1
+
+#endif
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

@@ -1,0 +1,142 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.04.08.23.17.46;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.46;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP - C include file
+**
+**  Abstract:
+**      This file contains various defines and prototypes
+**
+**  Author:
+**      Dmitry Teytelman
+**
+**  History:
+**      1995-02-06: Created
+**
+** --
+*/
+
+#ifndef MISC_H
+#define MISC_H
+
+/* Some OSes don't have ANSI includes (e.g. SunOs) */
+#include "stdfuncs.h"
+
+#ifndef SUCCESS
+#define SUCCESS 0
+#endif
+#ifndef FAILURE
+#define FAILURE 1
+#endif
+
+/* Normally in sys/types.h */
+#ifndef FALSE
+#define FALSE	0
+#endif
+#ifndef TRUE
+#define TRUE	1
+#endif
+
+/* Normally in math.h */
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif /* M_PI */
+
+#define MAXSTRLEN	256
+#define SWITCHAR	'-'
+#define PATH_SEPARATOR	'/'
+
+/* Let's include all files for libmisc.a */
+#include <params.h>
+#include <r250.h>
+#include <ramdata.h>
+
+/* Error codes */
+#define MISC_ERRMASK		0xffff
+#define MISC_PMASK		0xff00
+/*
+   Error types: SOFT means function still generated something useable,
+   HARD means another call with adjusted parameters is needed,
+   FATAL means system call failed, e.g. malloc
+*/
+#define MISC_ERRTYPE_SOFT	0x00010000
+#define MISC_ERRTYPE_HARD	0x00020000
+#define MISC_ERRTYPE_FATAL	0x00030000
+
+#define MISC_SOFT		MISC_ERRTYPE_SOFT>>16
+#define MISC_HARD		MISC_ERRTYPE_HARD>>16
+#define MISC_FATAL		MISC_ERRTYPE_FATAL>>16
+
+#define MISC_EPREFIX		0x0000
+#define MISC_ERR_SYS		(1|MISC_EPREFIX)
+#define MISC_ERR_UNKNOWN_OPT	(2|MISC_EPREFIX)
+#define MISC_ERR_INV_ARG	(3|MISC_EPREFIX)
+#define MISC_ERR_WRITE		(4|MISC_EPREFIX)
+#define MISC_ERR_PUZZLED	(5|MISC_EPREFIX)
+#define MISC_ERR_FOPEN		(6|MISC_EPREFIX)
+#define MISC_ERR_SYNTAX		(7|MISC_EPREFIX)
+#define MISC_ERR_UNALIGNED	(8|MISC_EPREFIX)
+#define MISC_ERR_MALLOC		(9|MISC_EPREFIX)
+#define MISC_ERR_NOVAR		(10|MISC_EPREFIX)
+
+
+typedef struct __misc_errorlist
+{
+  int err_code;
+  char *msg;
+} misc_errorlist;
+
+int misc_error(int errval, char *func);
+
+#endif /* MISC_H */
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

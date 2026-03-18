@@ -1,0 +1,123 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+  (This code was not written by DSPCon . . . So it probably works.)
+
+***************************************************************************/
+ 
+/***************************************************************************
+  lclBusFxn/lclBusIO.c
+ 
+  This module provides lo-level register IO.
+***************************************************************************/
+ 
+#include <vxWorks.h>
+#include <vxLib.h>
+#include <vme.h>
+ 
+#include <kscvxi.h>
+#include <busacc.h>
+ 
+#include <bus.h>
+
+/*==========================================================================
+  VXIinLR
+==========================================================================*/
+
+INT16 VXIinLR (UINT16 reg, UINT16 width, void* value)
+{
+   if (reg > 0x3f)
+      return -3;   /* Invalid reg */
+
+   if (width > 3 || width == 0)
+      return -4;   /* Invalid width */
+
+   if (width == 3)
+      return -9;   /* width not supported */
+
+   return VXIin(1, 0xc000 + reg, width, value);
+}
+
+/*==========================================================================
+  VXIoutLR
+==========================================================================*/
+
+INT16 VXIoutLR (UINT16 reg, UINT16 width, UINT32 value)
+{
+   if (reg > 0x3f)
+      return -3;   /* Invalid reg */
+
+   if (width > 3 || width == 0)
+      return -4;   /* Invalid width */
+
+   if (width == 3)
+      return -9;   /* width not supported */
+
+   return VXIout(1, 0xc000 + reg, width, value);
+}
+
+/*==========================================================================
+  SetMODID
+==========================================================================*/
+
+NIVXI_STATUS NIVXI_FN SetMODID(UINT16 enable, UINT16 modid)
+{
+   return VXIoutReg(0, 0x28, (enable ? M_ENABLE : 0) | (modid & 0x1fff));
+}
+
+UINT16 smb;
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

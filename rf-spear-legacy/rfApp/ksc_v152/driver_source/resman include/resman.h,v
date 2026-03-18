@@ -1,0 +1,422 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.33.04;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.33.04;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  RESMAN HEADER FILE
+***************************************************************************/
+
+#ifndef resman_DEFINED
+#define resman_DEFINED
+
+/*==========================================================================
+			  SYSTEM HEADER FILES
+==========================================================================*/
+
+#include <time.h>
+
+#include <vxWorks.h>
+#include "kscvxi.h"
+
+#include "bus.h"
+#include "buscntl.h"
+
+#include "epvxi.h"
+
+#include "portable.h"
+
+/*==========================================================================
+			    MACRO DEFINTIONS
+==========================================================================*/
+
+/* VXI STANDARD REGISTERS */
+#define  VXI_IDENT		0x00
+#define  VXI_DEV_TYPE		0x02
+#define  VXI_STAT_CTRL		0x04
+#define  VXI_OFFSET		0x06
+
+/* VXI DEVICE CLASSES */
+#define  DEVCL_MEMORY   	0
+#define  DEVCL_EXTENDED 	1
+#define  DEVCL_MESSAGE  	2
+#define  DEVCL_REGISTER 	3
+
+/* MESSAGE-BASED REGISTERS */
+#define  MB_PROTOCOL		0x08
+#define  MB_RESPONSE		0x0A
+#define  MB_DATA_HIGH   	0x0C
+#define  MB_DATA_LOW    	0x0E
+#define  MB_A24_PTR		0x10
+#define  MB_A32_PTR		0x12
+
+#define  MB_TIMEOUT  		1000    /* 1 second = 1000 ms */
+
+/* MXI WINDOW REGISTERS */
+#define  MXI_LA_WIN		0x0A
+#define  MXI_A16_WIN    	0x0C
+#define  MXI_A24_WIN    	0x0E
+#define  MXI_A32_WIN    	0x10
+
+#define  MXICSR_ACCDIR_MASK  (0x0100)   /* 10JAN96 */
+#define  MXICSR_ACCDIR_SHIFT (8)        /* 15JAN96 */
+#define  MXICSR_ACCDIR_VXI   (0)
+#define  MXICSR_ACCDIR_MXI   (1)
+
+#define  MXI_WINDOW_ENABLE   (0x4000)   /* 13JAN96 */
+#define  MXI_OUTWARD         (0)
+#define  MXI_INWARD          (0x2000)
+#define  MXI_DIRN_MSK        (0x2000)
+
+#define  MXI_INTRPT_CONFIG   (0x12)
+#define  MXI_TTLTRIG_CONFIG  (0x14)
+#define  MXI_ECLTRIG_CONFIG  (0x16)
+#define  MXI_UTILBUS_CONFIG  (0x18)
+
+/* SOME HANDY CONVERSIONS */
+#define  VXI_LA2PA(LA)    (0xC000+((LA)<<6))
+#define  VXI_LA2MODID(LA) (0xC008+((LA)<<6))
+
+#define  ROOT_MAINFRAME  0
+#define  RESMAN_LA	 0
+
+#define  KSC_NO_MXI_LA   0xFFFF
+#define  KSC_STANDALONE  0xFFFF
+#define  ERR_BUILD_CONFIG 50
+
+/* LA PRESENT ENUMS */
+#define  LA_NOT_SEEN     0x7F
+
+/* SLOT PRESENT ENUMS */
+#define  SLOT_EMPTY         0
+#define  SLOT_OCCUPIED      1
+#define  SLOT_SC_DEVICE     2
+#define  SLOT_DC_DEVICE     3
+#define  SLOT_MXI_DEVICE    4
+
+/* NAME DATABASE ENUMS */
+#define  TN_DEFAULT	    0
+#define  TN_FOUND	    1
+
+/* Trailing blank trimmer */
+#define TrimSp(str) { int i; for (i = strlen(str); --i >= 0 && \
+((str)[i] == ' ' || (str)[i] == '\t' || (str)[i] == '\n'); ) (str)[i] = '\0'; }
+
+/* Warning message leader (Note unmatched parenthesis!) */
+#define WARN fprintf(stderr, "\n* Warning:  "
+
+/*==========================================================================
+			 STRUCTURE DEFINITIONS
+==========================================================================*/
+
+typedef struct laRange {
+  unsigned short minLA;
+  unsigned short maxLA;
+} laRange_t;
+
+
+typedef struct configReg {
+  struct configReg *next;
+  unsigned short giNode;   /* 15jul96 */
+  unsigned short logAdr;
+  unsigned short mainframe;   /* 12oct95 */
+  unsigned short slot;
+  unsigned mfrID    : 12;
+  unsigned adrSpace :  2;
+  unsigned devClass :  2;
+  unsigned modelID  : 12;
+  unsigned memRqmt  :  4;
+  unsigned reset    :  1;
+  unsigned syfInhb  :  1;
+  unsigned passed   :  1;
+  unsigned ready    :  1;
+  unsigned devDepL  :  4;
+  unsigned accDir   :  1;   /* 15jan96 */
+  unsigned devDepH  :  5;
+  unsigned aXXActv  :  1;
+  unsigned short offset;
+  unsigned short memAttrib;
+  unsigned short protocol;
+  unsigned short rdProtocol;
+  unsigned char  nrHdlr;
+  unsigned char  nrIntr;
+  unsigned short wsAMCResp;
+  unsigned short wsCtrlResp;
+  unsigned short cmdrLA;
+  unsigned short subclass;
+  unsigned short intLevels;
+  unsigned short ihLevels;
+  unsigned short ctlrInfo;
+} config_t;
+
+typedef config_t *config_p;
+
+typedef struct mfrName {
+
+  struct mfrName *next;
+  char device[16];
+  char manufr[16];
+  char model[16];
+  unsigned short id_la;
+  unsigned short code_mf;
+  unsigned short slot;
+  unsigned short node;
+  unsigned short found;		/* NO */
+} mfrName_t;
+
+
+typedef struct intCfg {
+  struct intCfg *next;
+  unsigned short giNode;
+  unsigned short extndrLA;
+  unsigned short intLevels;
+  unsigned short intDirns;
+  unsigned short handler[8];
+} intCfg_t;
+
+typedef struct mxiCfg {
+ struct mxiCfg *next;
+ unsigned short extndrLA;
+ unsigned short laWinReg;
+ unsigned short a16WinReg;
+ unsigned short a24WinReg;
+ unsigned short a32WinReg;
+} mxiCfg_t;
+
+
+typedef struct utilCfg {
+  struct utilCfg *next;
+  unsigned short extndrLA;
+  unsigned short ttlTrigLines;
+  unsigned short ttlTrigDirns;
+  unsigned short eclTrigLines;
+  unsigned short eclTrigDirns;
+  unsigned short utilMode;
+} utilCfg_t;
+
+typedef struct sharedMemory { 
+  unsigned short LA;            /* unused*/
+  char device[16];              /* unused*/
+  unsigned short adrSpace;
+  unsigned long vmeAdrs;        /*/ vme address*/
+  unsigned long locAdrs;        /*/ local cpu address*/
+  unsigned long size;
+  unsigned short sysBool;
+} sharedMem_t;
+
+typedef struct nonVxi { struct nonVxi *next;
+			 unsigned short pseudoLA;
+			 char device[16];
+			 unsigned short mainframe;
+			 unsigned short slot;
+			 unsigned short mfgID;
+			 unsigned short model;
+			 unsigned short devClass;
+			 char mdlName[16];
+			 char mfgName[16];
+			 unsigned int A16Base;
+			 unsigned int A16Size;
+			 unsigned int A24Base;
+			 unsigned int A24Size;
+			 unsigned int A32Base;
+			 unsigned int A32Size;
+			 unsigned short intLevels;
+			 unsigned short hdlLevels;
+			 unsigned short sysBool;
+			 unsigned short Node;
+			 } nonVxi_t;
+typedef nonVxi_t *nonvxi_p;
+
+typedef struct block {
+  unsigned short base;
+  unsigned short size;
+  struct block  *next;
+} block_t;
+
+struct map;
+
+
+/*==========================================================================
+			   WORKING JOB OBJECT
+==========================================================================*/
+
+typedef struct job {
+  BusCntl*	j_mainBus;
+  int		j_verbose;
+
+  mfrName_t*	j_pName;
+  mfrName_t*	j_pModel;
+  mfrName_t*	j_pDevice;
+
+  config_t*	j_head;
+  config_t*	j_tail;
+
+  mxiCfg_t*	j_mxiRoot;
+
+  char		j_laPresent [NVXIADDR];
+  char		j_slotPresent [NVXISLOTS];
+} job_t;
+
+
+#define MAINBUS		rmJob.j_mainBus
+#define VERBOSE		rmJob.j_verbose
+
+#define pName		rmJob.j_pName
+#define pModel		rmJob.j_pModel
+#define pDevice		rmJob.j_pDevice
+
+#define HEAD		rmJob.j_head
+#define TAIL		rmJob.j_tail
+#define MXIROOT		rmJob.j_mxiRoot
+
+#define laPresent	rmJob.j_laPresent
+#define slotPresent	rmJob.j_slotPresent
+
+extern job_t rmJob;
+
+
+/*==========================================================================
+			  FUNCTION PROTOTYPES
+==========================================================================*/
+
+int rmShell( UINT16 sfDelay,
+             char* tblPath,
+	     int beVerbose);
+
+int rmIdentify( time_t sfDelay );
+
+int rmIdentifyAux( UINT16 mainframe,
+		   UINT16 extndrLA);
+
+int rmBuildConfig ( UINT16 la,
+		    UINT16 mainframe);
+
+int rmSelfTest( time_t sfDelay );
+
+void rmActivateSharedMem ( sharedMem_t *pSharedMem );
+int rmActivateMemory( void );
+int rmCmdrServ( void );
+int rmNormalOp( void );
+
+int rmMapMemory( unsigned short adrSpace,
+                 nonVxi_t *nonvxiroot,      /*nonvxi */
+                 sharedMem_t *pSharedMem );  /* SBC shared memory */
+
+int assignMemory( unsigned short adrSpace,
+                  unsigned short mainframe,
+                  unsigned short base );
+
+int assignSBCSharedMem( sharedMem_t *pSharedMem,
+                        config_t *root,
+                        unsigned short adrSpace );
+
+int assignNonVxiMem( nonVxi_t *nonvxi,
+		     config_t *root,
+		     unsigned short adrSpace);
+
+int joinlists (/*/ unsigned short giNode,*/
+                config_p       *head,
+                config_p       *tail,
+               /*/ unsigned short verbose,*/
+                nonVxi_t       *rootnvxi );
+
+UINT16 findFreeLAs( UINT16 from,
+		    UINT16 to,
+		    UINT16 howMany);
+
+config_t *findLAConfig( unsigned short logAdr, 
+                        config_t *root );
+
+/* Prototypes added - T Stabrawa 6/25/1999 */
+void InitMemBlocks( unsigned short base,
+                    unsigned short size );
+
+unsigned short findMemBlock( unsigned short  memRqmt,
+                             unsigned short *where );
+
+unsigned short getMemBlock( unsigned short memRqmt,
+                            unsigned short where );
+
+void BreakLargeBlocks(unsigned short size);
+
+void DestroyMemBlocks(void);
+
+void ResetMemBlockWindow (void);
+
+#if 0  /* old function's prototype */
+unsigned short findMemBlock( struct block* root, 
+                             unsigned short memRqmt, 
+                             unsigned short* where );
+#endif
+/* End of added prototype - T Stabrawa 6/25/1999 */
+
+int memRqmtCompare( const struct map* a, const struct map* b );
+
+void getMfrNames(char *, mfrName_t **);
+void getModelNames(char *, mfrName_t **);
+void getDeviceNames(char *, mfrName_t **);
+void createMfrEntry(mfrName_t **, char *, unsigned short);
+void createModelEntry(mfrName_t **, char *, char *, unsigned short);
+void createDeviceEntry(mfrName_t **, char *, char *, char *,
+	unsigned short, unsigned short, unsigned short, unsigned short);
+sharedMem_t* getsharedMem( char* path );
+void rmReadSharedMem(sharedMem_t* ptrSharedMem);
+nonVxi_t *getnonVxi(char *, mfrName_t **, mfrName_t **, mfrName_t **);
+
+UINT32 rmUnivRegRd ( UINT16 offset );
+void rmUnivRegWr ( UINT16 offset, UINT32 value );
+
+void freeConfigList ( config_t* );
+void freeNameList ( mfrName_t* );
+
+#endif /** DEFINED **/
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

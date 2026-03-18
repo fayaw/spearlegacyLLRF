@@ -1,0 +1,68 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2014.06.18.17.01.42;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@copied from /afs/slac/package/dsp1610.
+@
+text
+@/*
+ *   ld1600 info file for 32K IROM layout - MAP4 (EXM=1, PRLOW=1)
+ *
+ *		      addr			memory
+ *	X side:
+ *		0x0000 to 0x4000		empty	(ram1-ram16)
+ *		0x4000 to 0xffff		erom
+ *
+ *	Y side:	0x0000 to 0x3fff		ram	(ram1-ram16)
+ *		0x4000 to 0x40ff		io
+ *		0x4100 to 0x7fff		eramlo
+ *		0x8000 to 0xffff		eramhi
+ *
+ *	The map above represents X & Y as two parallel address spaces which is
+ *	precisely how the DSP16xx treats them.  However, the linker currently
+ *	expects one linear address space.  For that reason, the memory map
+ *	below defines X & Y as two contiguous address spaces: X from 0x0000 to
+ *	0xffff, and Y from 0x10000 to 0x1ffff.  Don't be dismayed, the linker
+ *	correctly relocates symbols in Y space within the range 0x0000 to
+ *	0xffff.
+ */
+
+MEMORY
+{
+    /* X space */
+	erom (RX):	org = 0x4000	len = 0xc000
+
+    /* Y space */
+	ram  (RW):	org = 0x10000	len = 0x4000
+	eram (RW):	org = 0x14000	len = 0xc000
+}
+
+SECTIONS
+{
+	.erom:	{ }	>erom
+
+	.ram:	{ }	>ram
+	.eram:	{ }	>eram
+}
+@

@@ -1,0 +1,557 @@
+head	1.4;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.4
+	RF-SPEAR-R0-3-1:1.4
+	RF-SPEAR-R0-3-0:1.4
+	RF-SPEAR-R0-2-0:1.4
+	RF-SPEAR-R0-1-0:1.4
+	RF-SPEAR-R0-0-3:1.4
+	RF-SPEAR-R0-0-2:1.4
+	RF-SPEAR-R0-0-1:1.4
+	RF-SPEAR-R0-0-0:1.4
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.4
+	RF-3-13-10:1.4.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.4
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.4
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.4
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.4
+date	2004.01.05.22.25.35;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.08.05.19.15.53;	author lazmo;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.11.22.26.26;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.45;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.45;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@Changes by Mike Laznovsky to change the sense of the "external MPS" bit.
+@
+text
+@/*
+** ++
+**
+**  Facility:  AIM - Arc detector/fast Interlock Module
+**
+**  Abstract:
+**      Parameter and register definitions for the Arc Detector / Fast
+**      Interlock module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II RF Project
+**
+**   History:
+**	August  5, 2003 - [lazmo] Changed _ADCMUX0 -> _ADCMUX; added _ADCCTL
+**      October 8, 2003 - [lazmo] Added support for 12-channel AIM
+**      January 6, 1997 - Created
+**
+**  Copyright:
+**                                Copyright 1997
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef P2RFAIMDEF_H
+#define P2RFAIMDEF_H
+
+#include <drvP2RfVxi.h>
+
+/* version numbers (re:SAA 2002-10-16)
+ * [2003-01-29] now looks only at bits 0-3
+ */
+#define AIM_VERSION_7CH  0x1
+#define AIM_VERSION_12CH 0x2
+
+/* macros to tell if we are working with an old (7-channel) or new (12-channel)
+ * AIM module
+ */
+#define AIM_IS7CH       (rec->verh <= AIM_VERSION_7CH)
+#define AIM_IS12CH      (rec->verh >= AIM_VERSION_12CH)
+
+#define AIM_K_MAKE       P2RF_K_MAKE
+#define AIM_K_MODEL      0x107
+#define AIM_K_NAME       "Arc Detector/Fast Interlock"
+#define AIM_K_DRAWING    "340-307"
+
+#define AIM_K_CHANCNT    (AIM_IS7CH ? 7 : 12)		/* total # of channels */
+
+
+/*****************************************************************
+ * A16 registers
+ *****************************************************************
+ */
+
+#define AIM_A_MANID       0x00                      /* ID/LA register */
+#define AIM_I_MANID       STD2IDX (AIM_A_MANID)
+
+#define AIM_A_MODELNO     0x02                      /* Device type register */
+#define AIM_I_MODELNO     STD2IDX (AIM_A_MODELNO)
+
+#define AIM_A_STATUS      0x04                      /* Status register */
+#define AIM_I_STATUS      STD2IDX (AIM_A_STATUS)
+
+#define AIM_A_CONTROL     0x04                      /* Control register */
+#define AIM_I_CONTROL     STD2IDX (AIM_A_CONTROL)
+
+#define AIM_A_OFFSET      0x06                      /* A24 offset register */
+#define AIM_I_OFFSET      STD2IDX (AIM_A_OFFSET)
+
+#define AIM_A_ATTRIBUTE   0x08                      /* Attribute register */
+#define AIM_I_ATTRIBUTE   STD2IDX (AIM_A_ATTRIBUTE)
+
+#define AIM_A_SERIALHI    0x0a                      /* Serial number high register */
+#define AIM_I_SERIALHI    STD2IDX (AIM_A_SERIALHI)
+
+#define AIM_A_SERIALLO    0x0c                      /* Serial number low register */
+#define AIM_I_SERIALLO    STD2IDX (AIM_A_SERIALLO)
+
+#define AIM_A_VERSION     0x0e                      /* Version number register */
+#define AIM_I_VERSION     STD2IDX (AIM_A_VERSION)
+
+#define AIM_A_INTSTAT     0x1a                      /* Interrupt status register */
+#define AIM_I_INTSTAT     STD2IDX (AIM_A_INTSTAT)
+
+#define AIM_A_INTCTRL     0x1c                      /* Interrupt control register */
+#define AIM_I_INTCTRL     STD2IDX (AIM_A_INTCTRL)
+
+#define AIM_A_SUBCLASS    0x1e                      /* Subclass register */
+#define AIM_I_SUBCLASS    STD2IDX (AIM_A_SUBCLASS)
+
+#define AIM_A_FICTRL      0x20                      /* Fast Interlock control register */
+#define AIM_I_FICTRL      STD2IDX (AIM_A_FICTRL)
+
+
+/*--- "spare" fault added to FISTAT reg [2003-01-29] ---*/
+
+#define AIM_A_FISTAT      0x22                      /* Fast Interlock status register */
+#define AIM_I_FISTAT      STD2IDX (AIM_A_FISTAT)
+
+#define AIM_V_SPARE       8                         /* "spare" fault... no room in FFR! */
+#define AIM_M_SPARE      (0x0001 << AIM_V_SPARE)
+
+
+/*---------------- Control and Status Register ----------------*/
+
+#define AIM_V_SFTRST      0
+#define AIM_M_SFTRST     (0x0001 << AIM_V_SFTRST)
+
+#define AIM_V_SYSFAILINH  1
+#define AIM_M_SYSFAILINH (0x0001 << AIM_V_SYSFAILINH)
+
+#define AIM_V_PASSED      2
+#define AIM_M_PASSED     (0x0001 << AIM_V_PASSED)
+
+#define AIM_V_READY       3
+#define AIM_M_READY      (0x0001 << AIM_V_READY)
+
+#define AIM_V_SFTINT      5
+#define AIM_M_SFTINT     (0x0001 << AIM_V_SFTINT)
+
+#define AIM_V_MODIDCOMPL  14
+#define AIM_M_MODIDCOMPL (0x0001 << AIM_V_MODIDCOMPL)
+
+#define AIM_V_A24A32      15
+#define AIM_M_A24A32     (0x0001 << AIM_V_A24A32)
+
+/*---------------- Interrupt Status and Control Registers ----------------*/
+
+#define AIM_V_INTLA       0
+#define AIM_M_INTLA      (0x00ff << AIM_V_INTLA)
+
+#define AIM_V_INTLEVEL    3
+#define AIM_M_INTLEVEL   (0x0007 << AIM_V_INTLEVEL)
+
+#define AIM_V_INTMASK     7
+#define AIM_M_INTMASK    (0x0001 << AIM_V_INTMASK)
+
+#define AIM_V_ARCDETD     8
+#define AIM_M_ARCDETD    (0x0001 << AIM_V_ARCDETD)
+
+#define AIM_V_VXIBPFLT    9
+#define AIM_M_VXIBPFLT   (0x0001 << AIM_V_VXIBPFLT)
+
+#define AIM_V_ABFLT       10
+#define AIM_M_ABFLT      (0x0001 << AIM_V_ABFLT)
+
+#define AIM_V_FRCDFLTINT  11
+#define AIM_M_FRCDFLTINT (0x0001 << AIM_V_FRCDFLTINT)
+
+#define AIM_V_TEMPVOLT    12
+#define AIM_M_TEMPVOLT   (0x0001 << AIM_V_TEMPVOLT)
+
+#define AIM_V_INVOP       13
+#define AIM_M_INVOP      (0x0001 << AIM_V_INVOP)
+
+#define AIM_V_SOFTWARE    15
+#define AIM_M_SOFTWARE   (0x0001 << AIM_V_SOFTWARE)
+
+/*---------------- Fast Interlock Control Register ----------------*/
+
+#define AIM_V_SOLENOID    0
+#define AIM_M_SOLENOID   (0x0001 << AIM_V_SOLENOID)
+
+#define AIM_V_HVPS        1
+#define AIM_M_HVPS       (0x0001 << AIM_V_HVPS)
+
+#define AIM_V_FILAMENT    2
+#define AIM_M_FILAMENT   (0x0001 << AIM_V_FILAMENT)
+
+#define AIM_V_FILTMOOVRD  3
+#define AIM_M_FILTMOOVRD (0x0001 << AIM_V_FILTMOOVRD)
+
+#define AIM_V_FRCDFLT     4
+#define AIM_M_FRCDFLT    (0x0001 << AIM_V_FRCDFLT)
+
+#define AIM_V_FLTRESET    5
+#define AIM_M_FLTRESET   (0x0001 << AIM_V_FLTRESET)
+
+#define AIM_V_FRCBMABT    6
+#define AIM_M_FRCBMABT   (0x0001 << AIM_V_FRCBMABT)
+
+#define AIM_V_RSTBMABT    7
+#define AIM_M_RSTBMABT   (0x0001 << AIM_V_RSTBMABT)
+
+/* the following are for 12-channel only
+ */
+
+/* Fast ADC mux:
+ *	0 = HVPS + all arcs
+ *	1 = HVPS only)
+ */
+#define AIM_V_ADCMUX      8
+#define AIM_M_ADCMUX     (0x0001 << AIM_V_ADCMUX)
+
+/* Fast ADC mux control:
+ *	1 (or fault) = stop history buffering
+ *	0 and NO fault = start history buffering
+ */
+#define AIM_V_ADCCTL      9
+#define AIM_M_ADCCTL     (0x0001 << AIM_V_ADCCTL)
+
+
+/*---------------- Fast Interlock Status Register ----------------*/
+
+#define AIM_V_HVPSON      6
+#define AIM_M_HVPSON     (0x0001 << AIM_V_HVPSON)
+
+
+/*****************************************************************
+ * A24 registers
+ *****************************************************************
+ */
+
+/*---------------- Arc ID Register ----------------*/
+
+/*  7-channel uses bits 0-7  (channels 1-7  + spare)
+ * 12-channel uses bits 0-8 & 12-15 (channels 0-11 + spare; nibble swapped)
+ */
+
+#define AIM_A_FLTENBSTT   0x0000
+#define AIM_I_FLTENBSTT   EXT2IDX (AIM_A_FLTENBSTT)
+
+#define AIM_V_FLTENBSTT   0
+#define AIM_M_FLTENBSTT  ((AIM_IS7CH ? 0x00ff : 0xf1ff) << AIM_V_FLTENBSTT)
+
+/*---------------- Arc Current Status Register ----------------*/
+
+#define AIM_A_ARCCURSTT   0x0002
+#define AIM_I_ARCCURSTT   EXT2IDX (AIM_A_ARCCURSTT)
+
+#define AIM_V_ARCCURSTT   0
+#define AIM_M_ARCCURSTT  ((AIM_IS7CH ? 0x00ff : 0xf1ff) << AIM_V_ARCCURSTT)
+
+#define AIM_V_ARCCURSTT_FLT   0
+#define AIM_M_ARCCURSTT_FLT  ((AIM_IS7CH ? 0x00ff : 0xf1ff) << AIM_V_ARCCURSTT_FLT)	/* spare (bit 8) is special... */
+
+/*---------------- Arc Latched Status Register ----------------*/
+
+#define AIM_A_ARCLTDSTT   0x0004
+#define AIM_I_ARCLTDSTT   EXT2IDX (AIM_A_ARCLTDSTT)
+
+#define AIM_V_ARCLTDSTT   0
+#define AIM_M_ARCLTDSTT  ((AIM_IS7CH ? 0x00ff : 0xf1ff) << AIM_V_ARCLTDSTT)
+
+/*---------------- First Fault Register ----------------*/
+
+#define AIM_A_FIRSTFLT    0x0006
+#define AIM_I_FIRSTFLT    EXT2IDX (AIM_A_FIRSTFLT)
+
+#define AIM_V_FIRSTFLT    0
+#define AIM_M_FIRSTFLT   ((AIM_IS7CH ? 0x0fff : 0xffff) << AIM_V_FIRSTFLT)
+
+#define AIM_V_ARCFLT      0
+#define AIM_M_ARCFLT     ((AIM_IS7CH ? 0x00ff : 0xf0ff) << AIM_V_ARCFLT)
+
+#define AIM_V_VXIFLT      8
+#define AIM_M_VXIFLT     (0x0001 << AIM_V_VXIFLT)
+
+#define AIM_V_ABHBFLT     9
+#define AIM_M_ABHBFLT    (0x0001 << AIM_V_ABHBFLT)
+
+#define AIM_V_ABSUMFLT   10
+#define AIM_M_ABSUMFLT   (0x0001 << AIM_V_ABSUMFLT)
+
+#define AIM_V_FRCD_FLT   11
+#define AIM_M_FRCD_FLT   (0x0001 << AIM_V_FRCD_FLT)
+
+#if 0 /* not used, as far as I can tell [lazmo] */
+#define AIM_M_INVTMSK    (AIM_M_VXIFLT   | AIM_M_ABHBFLT | \
+                          AIM_M_ABSUMFLT | AIM_M_FRCD_FLT)
+#endif
+
+/*---------------- Trip Test Registers ----------------*/
+
+/* Trip Test registers start at the same address in both 7 & 12-channel versions
+ */
+
+#define AIM_A_TRIPTEST1   0x0008
+#define AIM_I_TRIPTEST1   EXT2IDX (AIM_A_TRIPTEST1)
+
+/* TRIPTEST2 etc. are accessed via offset from TRIPTEST1 */
+
+
+/*---------------- Trip Level Registers ----------------*/
+
+/* Trip Level registers start at different addresses in the 7 & 12-channel versions
+ */
+
+/* 12-chan AIM: fixed channel number (not writable) */
+#define AIM_V_TRIPLVL_CHAN 8
+#define AIM_M_TRIPLVL_CHAN ((AIM_IS7CH ? 0 : 0x000f) << AIM_V_TRIPLVL_CHAN)
+
+#define AIM_V_TRIPLVL      0
+#define AIM_M_TRIPLVL     (0x00ff << AIM_V_TRIPLVL)
+
+/* both trip level & chan# (for 12-chan AIM) */
+#define AIM_M_TRIPLVL_ALL (AIM_M_TRIPLVL | AIM_M_TRIPLVL_CHAN)
+
+#define AIM_A_TRIPLVL1    (AIM_IS7CH ? 0x0016 : 0x0020)
+#define AIM_I_TRIPLVL1    EXT2IDX (AIM_A_TRIPLVL1)
+
+/* TRIPLVL2 etc. are accessed via offset from TRIPLVL1 */
+
+
+/*
+ * The next 3 are sequential-readout registers... repeated reads of same location
+ * return successive values.
+ */
+
+/*---------------- History Buffer (12-channel ONLY) ----------------*/
+
+#define AIM_K_HISBLKCNT   512		/* size in 1K blocks */
+
+#define AIM_A_HISBUF      0x0038
+#define AIM_I_HISBUF      EXT2IDX (AIM_A_HISBUF)
+#define AIM_K_HISBUFID    "AIM History Buffer"
+
+/*---------------- Arc Voltages (12-channel ONLY) ----------------*/
+
+#define AIM_A_ARCVOL      0x003A
+#define AIM_I_ARCVOL      EXT2IDX (AIM_A_ARCVOL)
+
+#define AIM_V_ARCVOL      0
+#define AIM_M_ARCVOL     (0x0FFF << AIM_V_ARCVOL)
+#define AIM_M_ARCVOL_BITS 12		/* arc voltage # of bits */
+#define AIM_M_ARCVOL_MINV (-10.0)
+#define AIM_M_ARCVOL_MAXV (+10.0)
+
+#define AIM_V_ARCCHAN    12
+#define AIM_M_ARCCHAN    (0x000F << AIM_V_ARCCHAN)
+
+/*---------------- Crate Voltages (12-channel ONLY) ----------------*/
+
+#define AIM_A_CRTVOL      0x003C
+#define AIM_I_CRTVOL      EXT2IDX (AIM_A_CRTVOL)
+
+#define AIM_V_CRTVOL      0
+#define AIM_M_CRTVOL     (0x0FFF << AIM_V_CRTVOL)
+
+#define AIM_V_CRTCHAN    12
+#define AIM_M_CRTCHAN    (0x000F << AIM_V_CRTCHAN)
+
+
+/*---------------- DAS Configuration Registers (7-channel ONLY) ----------------*/
+
+#define AIM_A_DAS1        0x0040
+#define AIM_I_DAS1        EXT2IDX (AIM_A_DAS1)
+
+#define AIM_A_DAS2        0x0060
+#define AIM_I_DAS2        EXT2IDX (AIM_A_DAS2)
+
+#define AIM_K_DASREGCNT   14
+#define AIM_K_DASID       "AIM DAS Instructions"
+
+/*---------------- Invalid Address ----------------*/
+
+#define AIM_A_INVOPADX    (AIM_IS7CH ? 0x007c : 0x003e)
+#define AIM_I_INVOPADX    EXT2IDX (AIM_A_INVOPADX)
+
+#define AIM_V_INVOPADX    0
+#define AIM_M_INVOPADX   (0x00ff << AIM_V_INVOPADX)
+
+#define AIM_V_INVOPSPC    15
+#define AIM_M_INVOPSPC   (0x0001 << AIM_V_INVOPSPC)
+
+/*----------------------------------------------------------------*/
+/*----------------------------------------------------------------*/
+
+#endif /* P2RFAIMDEF_H */
+@
+
+
+1.3
+log
+@
+      August  5, 2003 - [lazmo] Renamed _ADCMUX0 -> _ADCMUX; added _ADCCTL
+@
+text
+@d238 1
+a238 1
+ * 12-channel uses bits 0-12 (channels 0-11 + spare)
+d254 3
+@
+
+
+1.2
+log
+@Changes for new aim module by Lazmo
+@
+text
+@d14 2
+a16 2
+**      October 8, 2003 - Fiddled with by lazmo@@slac
+**                         ... to support both 7- and 12-channel versions
+d209 13
+a221 2
+#define AIM_V_ADCMUX0     8		/* Fast ADC mux (0 = HVPS + all arcs; 1 = HVPS only) */
+#define AIM_M_ADCMUX0    (0x0001 << AIM_V_ADCMUX0)
+d226 2
+a227 2
+#define AIM_V_HVPSON     6
+#define AIM_M_HVPSON    (0x0001 << AIM_V_HVPSON)
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d52 1
+d54 2
+a55 2
+#define AIM_VERSION_7CH  0x1111
+#define AIM_VERSION_12CH 0x1112
+d57 1
+a57 1
+/* macros to tell if we are talking to an old (7-channel) or new (12-channel)
+d60 2
+a61 12
+#define AIM_IS7CH       (rec->vern <  AIM_VERSION_12CH)
+#define AIM_IS12CH      (rec->vern >= AIM_VERSION_12CH)
+
+/* macro to swap nybbles 2 & 3 of certain regs to make bits in
+ * 12-channel AIM match 7-channel versions, for s/w & db compatibility
+ */
+#define AIM_FIX12CH(z)		\
+  if (AIM_IS12CH) {		\
+    z =  (z & 0x00FF)		\
+      | ((z & 0x0F00) << 4)	\
+      | ((z & 0xF000) >> 4);	\
+  }
+d68 1
+a68 1
+#define AIM_K_CHANCNT    (AIM_IS7CH ? 7 : 12)		/* old vs. new */
+d115 3
+d121 4
+d209 1
+a209 1
+#define AIM_V_ADCMUX0     8				/* Fast ADC MUX0 (Arc Channels 0-3)  */
+a211 9
+#define AIM_V_ADCMUX1     9				/* Fast ADC MUX1 (Arc Channels 4-7)  */
+#define AIM_M_ADCMUX1    (0x0001 << AIM_V_ADCMUX1)
+
+#define AIM_V_ADCMUX2    10				/* Fast ADC MUX2 (Arc Channels 8-11 (0x8-0xB) ) */
+#define AIM_M_ADCMUX2    (0x0001 << AIM_V_ADCMUX2)
+
+#define AIM_V_ADCMUX3    11				/* Fast ADC MUX3 (HVPS stuff)        */
+#define AIM_M_ADCMUX3    (0x0001 << AIM_V_ADCMUX3)
+
+d234 1
+a234 6
+#define AIM_M_FLTENBSTT  ((AIM_IS7CH ? 0x00ff : 0xf0ff) << AIM_V_FLTENBSTT)
+
+/* 12ch: bits 8-11 are swapped with 12-15 in s/w to match First Fault reg bits, thus the 0xf0ff
+ * ... 0xf0ff also removes the SPARE CHANNEL input
+ */
+
+d242 1
+a242 1
+#define AIM_M_ARCCURSTT  ((AIM_IS7CH ? 0x00ff : 0xf0ff) << AIM_V_ARCCURSTT)
+d250 1
+a250 1
+#define AIM_M_ARCLTDSTT  ((AIM_IS7CH ? 0x00ff : 0xf0ff) << AIM_V_ARCLTDSTT)
+d303 2
+a304 1
+#define AIM_M_TRIPLVL_ALL (AIM_M_TRIPLVL | AIM_M_TRIPLVL_CHAN)	/* both trip level & chan# (for 12-chan AIM) */
+d332 3
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

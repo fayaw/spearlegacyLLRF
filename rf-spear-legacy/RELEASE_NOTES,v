@@ -1,0 +1,295 @@
+head	1.14;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.14
+	RF-SPEAR-R0-3-1:1.11
+	RF-SPEAR-R0-3-0:1.10
+	RF-SPEAR-R0-2-0:1.8
+	RF-SPEAR-R0-1-0:1.7
+	RF-SPEAR-R0-0-3:1.4
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.14
+date	2021.06.29.19.12.18;	author spear;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	2021.01.26.01.04.29;	author spear;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	2020.09.16.04.06.02;	author scondam;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2020.09.13.00.52.42;	author scondam;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2017.01.05.03.17.34;	author saa;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2016.12.13.21.35.52;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2016.12.05.19.30.25;	author scondam;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2016.10.18.21.22.10;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2016.10.04.00.13.50;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2015.08.11.23.56.47;	author jpdef;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2014.07.13.18.09.45;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2013.03.13.17.54.59;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2012.10.03.19.27.00;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2012.09.18.23.10.50;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.14
+log
+@Force tagged RF-SPEAR-R0-3-2: SRF1:STNAMBAIR:TEMP.HIGH changed from 42 to 28; SRF1:CAV3IONP:TEMP.HIGH changed from 401 to 26
+@
+text
+@#==============================================================
+#
+#  Name: RELEASE_NOTES
+#
+#  Rem:  This files describes release notes for 
+#        the SPEAR RF IOC Application.        
+#
+#--------------------------------------------------------------
+#
+#
+Note: RF-SPEAR must be built on solaris to use vxWorks 5.4
+installed at SLAC.  Since no solaris machine has access to
+spear NFS, the release must be checked out and built in AFS 
+space and then move to NFS space on a spear linux machine.
+
+RF-SPEAR-R0-3-2: 15-Sept-2020
+    * More alarm limit changes 
+      - Make permanent the temporary changes by J.Sebek to  
+	    Klystron window air inlet alarm limits changes for the new klystron
+    * Force tagged on 25-Jan-2021
+            SRF1:FILAMENT:TIME changed from 1600 to 2100 seconds by J.Sebek for the new RF klystron.
+	    Updated the HOPR and HIHI limits accordingly in rf_klys.db.
+    * Force tagged on 29-Jun-2021
+            SRF1:STNAMBAIR:TEMP.HIGH changed from 42 to 28
+	    SRF1:CAV3IONP:TEMP.HIGH changed from 401 to 26	
+		
+RF-SPEAR-R0-3-1: 12-Sept-2020
+    * CATER Id:	146329	    Job Number:	5
+      - Make permanent the temporary changes by J.Sebek to Solenoid bucking coil 
+	    current and voltage alarm limits changes for the new klystron
+	* 18-Oct-2018: Changed limit per SPEAR3 elog entry 961133	
+	  - Commit changes made in production in 2018 to CVS
+
+RF-SPEAR-R0-3-0: 01/04/2017
+    * CATER Id: 	134001	    Job Number:	1
+	    - Add seq record to stop&init all 4 cavity tuners.
+    * Undo changes in previous release - C and D swapped back.
+RF-SPEAR-R0-2-0: 10/03/2016
+    * CATER Id: 	133802	    Job Number:	1
+	    - SW change due to tuner connectors C and D being swapped 
+RF-SPEAR-R0-1-0: 10/03/2016
+	* iocStats-R3-1-12 upgrade.
+	* Increase Window temp HIGH.
+	* Correct crate location.
+	* Add base routines.
+	* Change klystron IP current to nA and changed scaling and alarm limits.  
+RF-SPEAR-R0-0-3: 7/13/2014
+	* Calculate alarm limits for magic T post temp based on ambient.
+	* Increase precision and decrease MDEL for klystron gain and efficiency.
+	* Reduced HCW temp low alarm limits.
+	* Remove ripple loop gain tracking severity from the feedback severity sum.
+
+RF-SPEAR-R0-0-2: 3/13/2013
+	* Change low warning limit on HCW temps.
+	* Add separate low limit on load angle offset.
+
+RF-SPEAR-R0-0-1: 10/3/2012
+	Remove dependency on epics/site:
+	* Move epvxi, allenBradley, and stepper from epics/site to here.
+	* Use restore in epics/modules instead of epics/site.
+
+RF-SPEAR-R0-0-0: 9/18/2012
+	* Initial Release
+
+@
+
+
+1.13
+log
+@Update the RELEASE NOTES
+@
+text
+@d23 3
+@
+
+
+1.12
+log
+@Make permanent the temporary changes by J.Sebek to Klystron window air inlet alarm limits changes for the new klystron
+@
+text
+@d20 3
+@
+
+
+1.11
+log
+@RF-SPEAR-R0-3-1: Make permanent the temporary changes by J.Sebek to the alarm limits for the new klystron
+@
+text
+@d16 5
+d24 1
+a24 1
+	    current and voltage alarm limits changes or the new klystron
+@
+
+
+1.10
+log
+@Add more notes for 0-3-0.
+@
+text
+@d16 7
+@
+
+
+1.9
+log
+@Notes for RF-SPEAR-R0-3-0.
+@
+text
+@d16 1
+a16 1
+RF-SPEAR-R0-3-0: 12/13/2016
+d19 1
+@
+
+
+1.8
+log
+@Tuner connectors C and D swapped to test tuner readback position hitting limit periodically
+@
+text
+@d16 3
+@
+
+
+1.7
+log
+@Add more notes for RF-SPEAR-R0-1-0.
+@
+text
+@d16 3
+@
+
+
+1.6
+log
+@Notes for  RF-SPEAR-R0-1-0.
+@
+text
+@d21 1
+a21 1
+	* Change klystron IP current to nA.  More work needed.
+@
+
+
+1.5
+log
+@added .cram package info so app can be deployed with cram
+@
+text
+@d16 1
+a16 1
+RF-SPEAR-R0-0-4: ??/2014
+d18 4
+@
+
+
+1.4
+log
+@Add notes for R0-0-3.
+@
+text
+@d16 2
+@
+
+
+1.3
+log
+@Notes for RF-SPEAR-R0-0-2.
+@
+text
+@d11 1
+a11 1
+Note: RF-SPEAR must be build on solaris to use vxWorks 5.4
+d16 6
+@
+
+
+1.2
+log
+@Add notes for R0-0-1.
+@
+text
+@d16 4
+@
+
+
+1.1
+log
+@Release notes for R0-0-0.
+@
+text
+@d16 5
+a20 1
+cd 
+@
+

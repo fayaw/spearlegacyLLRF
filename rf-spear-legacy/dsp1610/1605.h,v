@@ -1,0 +1,90 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2014.06.18.17.01.36;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@copied from /afs/slac/package/dsp1610.
+@
+text
+@#ifndef D1605_H
+#define D1605_H
+
+/*
+ * DSP1605 register definitions and assembler directives.
+ * 
+ */
+
+	/* shortcut for defining the chip's peripherals:
+	 * simply define or undef the identifier for the
+	 * particular unit to include or exclude it
+	 */
+
+/* DSP1605 has the following peripherals: */
+#define		_DRAM_
+#define		_PHIF_
+#define		_IOP_
+#define		_SIO_
+#define		_TIMER0_
+#define		_TIMER1_
+
+
+/* register definitions for each peripheral: */
+
+#ifdef	_DRAM_
+#define		pgreg	reg27
+#define		drc	reg38
+#endif
+
+#ifdef	_PHIF_
+#define		phifc	reg28
+#define		pdx0	reg29
+#endif
+
+#ifdef	_IOP_
+#define		cbit	reg40
+#define		sbit	reg41
+#endif
+
+#ifdef	_SIO_
+#define		sioc	reg24
+#define		sioce	reg25
+#define		sdx0	reg26
+#define		sdx1	reg59
+#define		sdx2	reg60
+#endif
+
+#ifdef	_TIMER0_
+#define		timerc	reg52
+#define		timer0	reg53
+#endif
+
+#ifdef _TIMER1_
+#define		timer1	reg58
+#endif
+
+
+/* as1600 directives */
+	.core1_1	/* 1605 uses the new core */
+
+#endif /* D1605_H */
+@

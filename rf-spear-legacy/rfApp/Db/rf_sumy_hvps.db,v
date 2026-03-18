@@ -1,0 +1,176 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2004.01.29.18.13.07;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Remove HVPS oil temperature from HVPS summary.  It remains in the overall
+temperature summary.
+@
+text
+@record(calc,"$(S):HVPSTEMP:SUMY:LTCH") {
+	field(DESC,"HVPS Temp Latch Status Sum")
+	field(FLNK,"$(S):HVPSTEMP:FANO:LTCH")
+	field(CALC,"0")
+	field(INPA,"$(S):HVPS:TEMP:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):HVPSOIL:TEMP:LTCH.SEVR NPP MS")
+}
+record(fanout,"$(S):HVPSTEMP:FANO:LTCH") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):HVPSSTN:SUMY:LTCH.VAL")
+	field(LNK2,"$(S):STNTEMP:SUMY:LTCH.VAL")
+}
+record(calc,"$(S):HVPSSTN:SUMY:LTCH") {
+	field(DESC,"HVPS Latch Status Sum")
+	field(FLNK,"$(S):HVPS:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):HVPSAC:CURR:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):HVPSKLYS:ARC:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):HVPS:CROWBAR:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):HVPS:PANIC:LTCH.SEVR NPP MS")
+	field(INPE,"$(S):HVPSTEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPF,"$(S):HVPSOIL:LEVEL:LTCH.SEVR NPP MS")
+	field(INPG,"$(S):HVPSXFORM:ARC:LTCH.SEVR NPP MS")
+	field(INPH,"$(S):HVPSXFORM:PRESS:LTCH.SEVR NPP MS")
+	field(INPI,"$(S):HVPSXFORM:VACM:LTCH.SEVR NPP MS")
+	field(INPJ,"$(S):HVPS:VOLT:LTCH.SEVR NPP MS")
+	field(INPK,"$(S):HVPS:OPENLOAD:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):HVPSOFF:SUMY:STAT") {
+	field(DESC,"HVPS Stn OFF Status Sum")
+	field(FLNK,"$(S):STNON:SUMY:STAT.PROC")
+	field(CALC,"0")
+	field(INPE,"$(S):HVPSCONTACT:SUMY:STAT.SEVR NPP MS")
+	field(INPH,"$(S):HVPSSTN:SUMY:STAT.SEVR NPP MS")
+	field(INPI,"$(S):HVPSSTN:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):HVPS:SUMY:FRST") {
+	field(DESC,"HVPS Status Sum")
+	field(FLNK,"$(S):HVPSOFF:SUMY:STAT.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):HVPSSTN:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):HVPS:SUMY:SEVR") {
+	field(DESC,"HVPS Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):HVPS:VOLT:RBCK.SEVR NPP MS")
+	field(INPB,"$(S):HVPS:VOLT.SEVR NPP MS")
+	field(INPC,"$(S):HVPSAC:CURR.SEVR NPP MS")
+	field(INPD,"$(S):HVPS:CURR.SEVR NPP MS")
+	field(INPE,"$(S):HVPS:POWER.SEVR NPP MS")
+}
+record(calc,"$(S):HVPS:SUMY:LTCH") {
+	field(DESC,"HVPS Status Sum")
+	field(FLNK,"$(S):HVPS:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPB,"$(S):HVPSCONTACT:SUMY:STAT.SEVR NPP MS")
+	field(INPD,"$(S):HVPSSTN:SUMY:LTCH.SEVR NPP MS")
+	field(INPE,"$(S):HVPSAC:POWER:STAT.SEVR NPP MS")
+	field(INPF,"$(S):HVPSDC:POWER:STAT.SEVR NPP MS")
+	field(INPG,"$(S):HVPS:PPS:STAT.SEVR NPP MS")
+	field(INPH,"$(S):HVPS12KV:VOLT:STAT.SEVR NPP MS")
+	field(INPI,"$(S):HVPSSUPPLY:READY:STAT.SEVR NPP MS")
+}
+record(calc,"$(S):HVPSSTN:SUMY:STAT") {
+	field(DESC,"HVPS Misc Status Sum")
+	field(FLNK,"$(S):HVPS:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):HVPSAC:POWER:STAT.SEVR NPP MS")
+	field(INPB,"$(S):HVPSDC:POWER:STAT.SEVR NPP MS")
+	field(INPC,"$(S):HVPS:PPS:STAT.SEVR NPP MS")
+	field(INPD,"$(S):HVPS12KV:VOLT:STAT.SEVR NPP MS")
+	field(INPF,"$(S):HVPSSUPPLY:ON:STAT.SEVR NPP MS")
+	field(INPG,"$(S):HVPSSUPPLY:READY:STAT.SEVR NPP MS")
+	field(INPH,"$(S):HVPSENERFAST:ON:STAT.SEVR NPP MS")
+	field(INPI,"$(S):HVPSENERSLOW:START:STAT.SEVR NPP MS")
+}
+record(calc,"$(S):HVPSSCR:SUMY:STAT") {
+	field(DESC,"HVPS Contactor Status Sum")
+	field(FLNK,"$(S):HVPS:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPB,"$(S):HVPSSCR1:ON:STAT.SEVR NPP MS")
+	field(INPC,"$(S):HVPSSCR2:ON:STAT.SEVR NPP MS")
+}
+record(calc,"$(S):HVPSCONTACT:SUMY:STAT") {
+	field(DESC,"HVPS Contactor Status Sum")
+	field(FLNK,"$(S):HVPS:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPB,"$(S):HVPSCONTACT:CLOSE:STAT.SEVR NPP MS")
+	field(INPC,"$(S):HVPSCONTACT:OPEN:STAT.SEVR NPP MS")
+	field(INPD,"$(S):HVPSCONTACT:ON:STAT.SEVR NPP MS")
+	field(INPE,"$(S):HVPSCONTACT:READY:STAT.SEVR NPP MS")
+}
+record(calc,"$(S):HVPSDCM:SUMY:MODU") {
+	field(DESC,"HVPS DCM Status Sum")
+	field(CALC,"0")
+	field(INPA,"$(S):HVPSDCM:A1:MODU.SEVR NPP MS")
+	field(INPB,"$(S):HVPSDCM:A1C0:MODU.SEVR NPP MS")
+	field(INPC,"$(S):HVPSDCM:A1C2:MODU.SEVR NPP MS")
+	field(INPD,"$(S):HVPSDCM:A1C4:MODU.SEVR NPP MS")
+	field(INPE,"$(S):HVPSDCM:A1C6:MODU.SEVR NPP MS")
+	field(INPF,"$(S):HVPSDCM:A1C8:MODU.SEVR NPP MS")
+	field(INPG,"$(S):HVPSDCM:A1C10:MODU.SEVR NPP MS")
+	field(INPJ,"$(S):HVPSDCM:A1C12:MODU.SEVR NPP MS")
+	field(INPK,"$(S):HVPSDCM:A1C14:MODU.SEVR NPP MS")
+	field(INPL,"$(S):HVPSDCM:T0:STAT.SEVR NPP MS")
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a51 1
+	field(INPF,"$(S):HVPSOIL:TEMP.SEVR NPP MS")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

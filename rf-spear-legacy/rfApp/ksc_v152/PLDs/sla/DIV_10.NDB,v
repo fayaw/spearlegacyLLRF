@@ -1,0 +1,119 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.08;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.08;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 3
+The length of the symbol table is: 33
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+.	|74160:1.
+8	|74160:1|
+
+The number of name info structs is : 50
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	(@@MF$	!	%	4	F	H	I	J	CLK	k
+#	(@@MF$	!	(	5	A	F	H	I	J	ENABLE	l
+$	IGdq	!	PIN_NAME	m
+%	(>#<h	.	K	"	CLK	o
+&	(>#<h	.	'	#	CLRN	z
+'	(>#<h	.	M	#	ENP	{
+(	(>#<h	.	&	#	ENT	v
+)	I]fu	.	O	F	QA	s
+*	I]fu	.	P	H	QB	r
++	I]fu	.	Q	I	QC	q
+,	I]fu	.	R	J	QD	p
+-	I]g'	.	S	A	RCO	t
+.	IGdW	8	:10	"6
+/	IGdW	8	:11	"7
+0	IGdW	8	:12	"8
+1	IGdW	8	:13	"9
+2	IGdW	8	:14	":
+3	IGdW	8	:15	";
+4	IGdW	8	:16	"<
+5	IGdW	8	:17	"=
+6	IGdW	8	:24	">
+7	IGdW	8	:25	"?
+8	IGdW	8	:26	"@@
+9	IGdW	8	:27	"A
+:	IGdW	8	:28	"B
+;	IGdW	8	:29	"C
+<	IGdW	8	:30	"D
+=	IGdW	8	:31	"E
+>	IGdW	8	:32	"F
+?	IGdW	8	:33	"G
+@@	IGdW	8	:34	"H
+A	L)p?	8	-	1	$	:45	"M
+B	IGdW	8	:46	"L
+C	IGdW	8	:47	"K
+D	IGdW	8	:49	"J
+E	IGdW	8	:50	"I
+F	L)p/	8	)	5	H	I	J	A	F	:6	"2
+G	IGdW	8	:65	"N
+H	L)p/	8	*	3	I	J	H	:7	"3
+I	L)p/	8	+	2	J	I	:8	"4
+J	L)p/	8	,	3	H	A	J	:9	"5
+K	(=rLD	8	"	CLK	"0
+L	(=rLD	8	#	CLRN	"1
+M	(>#<h	8	N	#	ENP	".
+N	(>#<h	8	L	#	ENT	"/
+O	IN{y	8	F	QA	"2
+P	IN{y	8	H	QB	"3
+Q	IN{y	8	I	QC	"4
+R	IN{y	8	J	QD	"5
+S	IN|+	8	A	RCO	"M
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

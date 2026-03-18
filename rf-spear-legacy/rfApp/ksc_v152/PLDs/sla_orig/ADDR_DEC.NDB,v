@@ -1,0 +1,352 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.04;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.04;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 7
+The length of the symbol table is: 81
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+.	|74688:2.
+8	|2x8_mux:18.
+E	|74688:2|
+O	|74374:15.
+Z	|74374:15|
+e	|2x8_mux:18|
+
+The number of name info structs is : 279
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	IFkb	!	/SYSRESET	"/
+#	IU\(	!	#'	/WT_LOGAD	".
+$	IFkI	!	:10	#*
+%	IFkI	!	:11	#+
+&	IU[m	!	#l	:13	#,
+'	IFkI	!	:14	#)
+(	IU[m	!	"b	:19	#(
+)	IFkI	!	:21	#'
+*	IFkI	!	:22	#-
++	IFkI	!	:3	#$
+,	IFk9	!	:5	#%
+-	IFkI	!	:9	#&
+.	IFkb	!	A1	{
+/	IU\(	!	#q	A10	r
+0	IU\(	!	#r	A11	q
+1	IU\(	!	#s	A12	p
+2	IU\(	!	#t	A13	o
+3	IFkb	!	A14	n
+4	IFkb	!	A15	m
+5	IFkb	!	A2	z
+6	IFkb	!	A3	y
+7	IFkb	!	A4	x
+8	IFkb	!	A5	w
+9	IU\(	!	#m	A6	v
+:	IU\(	!	#n	A7	u
+;	IU\(	!	#o	A8	t
+<	IU\(	!	#p	A9	s
+=	$rX8+	!	A[15..1]	#.
+>	IU\(	!	#/	ID0	"-
+?	IU\(	!	#.	ID1	",
+@@	IFkb	!	ID10	"#
+A	IFkb	!	ID11	""
+B	IFkb	!	ID12	"!
+C	IFkb	!	ID13	~
+D	IFkb	!	ID14	}
+E	IFkb	!	ID15	|
+F	IU\(	!	#-	ID2	"+
+G	IU\(	!	#,	ID3	"*
+H	IU\(	!	#+	ID4	")
+I	IU\(	!	#*	ID5	"(
+J	IU\(	!	#)	ID6	"'
+K	IU\(	!	#(	ID7	"&
+L	IFkb	!	ID8	"%
+M	IFkb	!	ID9	"$
+N	$rX8+	!	ID[15..0]	#/
+O	IFkc	!	LA0	"@@
+P	IFkc	!	LA1	"?
+Q	IFkc	!	LA2	">
+R	IFkc	!	LA3	"=
+S	IFkc	!	LA4	"<
+T	IFkc	!	LA5	";
+U	IFkc	!	LA6	":
+V	IFkc	!	LA7	"9
+W	$rX8+	!	LA[7..0]	#1
+X	IFkc	!	MATCH	"A
+Y	IFkb	!	MODID	"0
+Z	IU\(	!	"K	SW10	"4
+[	IU\(	!	"L	SW11	"3
+\	IU\(	!	"M	SW12	"2
+]	IU\(	!	"N	SW13	"1
+^	IU\(	!	"G	SW6	"8
+_	IU\(	!	"H	SW7	"7
+`	IU\(	!	"I	SW8	"6
+a	IU\(	!	"J	SW9	"5
+b	$rX8+	!	SW[13..6]	#0
+c	I\lm	!	"P	#&	WLA0	"g
+d	I\lm	!	"Q	#%	WLA1	"f
+e	I\lm	!	"R	#$	WLA2	"e
+f	I\lm	!	"S	##	WLA3	"d
+g	I\lm	!	"T	#"	WLA4	"c
+h	I\lm	!	"U	#!	WLA5	"b
+i	I\lm	!	"V	"~	WLA6	"a
+j	I\lm	!	"W	"}	WLA7	"`
+k	$rX8+	!	WLA[7..0]	#2
+l	IN#r	8	^	A0	"q
+m	IN#r	8	_	A1	"p
+n	IN#r	8	`	A2	"o
+o	IN#r	8	a	A3	"n
+p	IN#r	8	Z	A4	"m
+q	IN#r	8	[	A5	"l
+r	IN#r	8	\	A6	"k
+s	IN#r	8	]	A7	"j
+t	I\r8	8	#7	#&	B0	"y
+u	I\r8	8	#6	#%	B1	"x
+v	I\r8	8	#5	#$	B2	"w
+w	I\r8	8	#4	##	B3	"v
+x	I\r8	8	#3	#"	B4	"u
+y	I\r8	8	#2	#!	B5	"t
+z	I\r8	8	#1	"~	B6	"s
+{	I\r8	8	#0	"}	B7	"r
+|	I\lm	8	"Y	"8	OUT0	##
+}	I\lm	8	"Z	":	OUT1	#"
+~	I\lm	8	"[	"<	OUT2	#!
+"!	I\lm	8	"\	">	OUT3	"~
+""	I\lm	8	"]	"@@	OUT4	"}
+"#	I\lm	8	"^	"B	OUT5	"|
+"$	I\lm	8	"_	"D	OUT6	"{
+"%	I\lm	8	"`	"F	OUT7	"z
+"&	IN#r	8	(	SELECT	"i
+"'	IdL3	e	16	14	:52	$S
+"(	IdL3	e	16	14	:53	$T
+")	IdL3	e	16	14	:54	$U
+"*	IdL3	e	16	14	:55	$V
+"+	IdL3	e	16	14	:56	$W
+",	IdL3	e	16	14	:57	$X
+"-	IdL3	e	16	14	:58	$Y
+".	IdL3	e	16	14	:59	$Z
+"/	IdL3	e	16	14	:60	$[
+"0	IdL3	e	16	14	:61	$\
+"1	IdL3	e	16	14	:62	$]
+"2	IdL3	e	16	14	:63	$^
+"3	IdL3	e	16	14	:64	$_
+"4	IdL3	e	16	14	:65	$`
+"5	IdL3	e	16	14	:66	$a
+"6	IdL3	e	16	14	:67	$b
+"7	IdL3	e	18	14	:68	$c
+"8	Is7-	e	|	18	14	:69	$d
+"9	IdL3	e	18	14	:70	$e
+":	Is7-	e	}	18	14	:71	$f
+";	IdL3	e	18	14	:72	$g
+"<	Is7-	e	~	18	14	:73	$h
+"=	IdL3	e	18	14	:74	$i
+">	Is7-	e	"!	18	14	:75	$j
+"?	IdL3	e	18	14	:76	$k
+"@@	Is7-	e	""	18	14	:77	$l
+"A	IdL3	e	18	14	:78	$m
+"B	Is7-	e	"#	18	14	:79	$n
+"C	IdL3	e	18	14	:80	$o
+"D	Is7-	e	"$	18	14	:81	$p
+"E	IdL3	e	18	14	:82	$q
+"F	Is7-	e	"%	18	14	:83	$r
+"G	I\r8	e	l	^	A0	$B
+"H	I\r8	e	m	_	A1	$A
+"I	I\r8	e	n	`	A2	$@@
+"J	I\r8	e	o	a	A3	$?
+"K	I\r8	e	p	Z	A4	$>
+"L	I\r8	e	q	[	A5	$=
+"M	I\r8	e	r	\	A6	$<
+"N	I\r8	e	s	]	A7	$;
+"O	$rX8+	e	A[7..0]	$s
+"P	I\r8	e	t	#&	B0	$J
+"Q	I\r8	e	u	#%	B1	$I
+"R	I\r8	e	v	#$	B2	$H
+"S	I\r8	e	w	##	B3	$G
+"T	I\r8	e	x	#"	B4	$F
+"U	I\r8	e	y	#!	B5	$E
+"V	I\r8	e	z	"~	B6	$D
+"W	I\r8	e	{	"}	B7	$C
+"X	$rX8+	e	B[7..0]	$t
+"Y	I\r9	e	#u	"8	OUT0	$R
+"Z	I\r9	e	#v	":	OUT1	$Q
+"[	I\r9	e	#w	"<	OUT2	$P
+"\	I\r9	e	#x	">	OUT3	$O
+"]	I\r9	e	#y	"@@	OUT4	$N
+"^	I\r9	e	#z	"B	OUT5	$M
+"_	I\r9	e	#{	"D	OUT6	$L
+"`	I\r9	e	#|	"F	OUT7	$K
+"a	$rX8+	e	OUT[7..0]	$u
+"b	I\r8	e	"&	(	SELECT	$:
+"c	IN#r	O	#	CLK	"_
+"d	IN#r	O	K	D1	"V
+"e	IN#r	O	J	D2	"W
+"f	IN#r	O	I	D3	"X
+"g	IN#r	O	H	D4	"Y
+"h	IN#r	O	G	D5	"Z
+"i	IN#r	O	F	D6	"[
+"j	IN#r	O	?	D7	"\
+"k	IN#r	O	>	D8	"]
+"l	IN#s	O	"}	Q1	"`
+"m	IN#s	O	"~	Q2	"a
+"n	IN#s	O	#!	Q3	"b
+"o	IN#s	O	#"	Q4	"c
+"p	IN#s	O	##	Q5	"d
+"q	IN#s	O	#$	Q6	"e
+"r	IN#s	O	#%	Q7	"f
+"s	IN#s	O	#&	Q8	"g
+"t	IFk9	Z	:13	$4
+"u	IFk9	Z	:14	$3
+"v	IFk9	Z	:15	$2
+"w	IFk9	Z	:16	$1
+"x	IFk9	Z	:17	$0
+"y	IFk9	Z	:18	$/
+"z	IFk9	Z	:19	$.
+"{	IFkI	Z	:2	$,
+"|	IFk9	Z	:20	$-
+"}	IUVC	Z	j	:40	$+
+"~	IUVC	Z	i	:41	$*
+#!	IUVC	Z	h	:42	$)
+#"	IUVC	Z	g	:43	$(
+##	IUVC	Z	f	:44	$'
+#$	IUVC	Z	e	:45	$&
+#%	IUVC	Z	d	:46	$%
+#&	IUVC	Z	c	:47	$$
+#'	I\r8	Z	"c	#	CLK	#y
+#(	I\r8	Z	"d	K	D1	$#
+#)	I\r8	Z	"e	J	D2	$"
+#*	I\r8	Z	"f	I	D3	$!
+#+	I\r8	Z	"g	H	D4	#~
+#,	I\r8	Z	"h	G	D5	#}
+#-	I\r8	Z	"i	F	D6	#|
+#.	I\r8	Z	"j	?	D7	#{
+#/	I\r8	Z	"k	>	D8	#z
+#0	I\r_	Z	"l	"}	Q1	$+
+#1	I\r_	Z	"m	"~	Q2	$*
+#2	I\r_	Z	"n	#!	Q3	$)
+#3	I\r_	Z	"o	#"	Q4	$(
+#4	I\r_	Z	"p	##	Q5	$'
+#5	I\r_	Z	"q	#$	Q6	$&
+#6	I\r_	Z	"r	#%	Q7	$%
+#7	I\r_	Z	"s	#&	Q8	$$
+#8	I\lm	.	#k	#d	EQUALN	"T
+#9	IN#r	.	&	GN	"C
+#:	IN#r	.	9	P0	"R
+#;	IN#r	.	:	P1	"N
+#<	IN#r	.	;	P2	"P
+#=	IN#r	.	<	P3	"J
+#>	IN#r	.	/	P4	"L
+#?	IN#r	.	0	P5	"F
+#@@	IN#r	.	1	P6	"H
+#A	IN#r	.	2	P7	"S
+#B	IN#r	.	"8	Q0	"Q
+#C	IN#r	.	":	Q1	"M
+#D	IN#r	.	"<	Q2	"O
+#E	IN#r	.	">	Q3	"I
+#F	IN#r	.	"@@	Q4	"K
+#G	IN#r	.	"B	Q5	"E
+#H	IN#r	.	"D	Q6	"G
+#I	IN#r	.	"F	Q7	"D
+#J	IFkI	E	:1	#X
+#K	IFkI	E	:10	#O
+#L	IFkI	E	:11	#N
+#M	IFkI	E	:12	#M
+#N	IFkI	E	:13	#L
+#O	IFkI	E	:14	#K
+#P	IFkI	E	:15	#J
+#Q	IFkI	E	:2	#W
+#R	IFkI	E	:3	#V
+#S	IFkI	E	:32	#i
+#T	IFkI	E	:33	#h
+#U	IFkI	E	:34	#g
+#V	IFkI	E	:35	#f
+#W	IFkI	E	:36	#e
+#X	IFkI	E	:37	#d
+#Y	IFkI	E	:38	#c
+#Z	IFkI	E	:39	#b
+#[	IFkI	E	:4	#U
+#\	IFkI	E	:40	#a
+#]	IFkI	E	:41	#`
+#^	IFkI	E	:42	#_
+#_	IFkI	E	:43	#^
+#`	IFkI	E	:44	#]
+#a	IFkI	E	:45	#\
+#b	IFkI	E	:46	#[
+#c	IFkI	E	:47	#Z
+#d	IUVC	E	#8	:48	#Y
+#e	IFkI	E	:49	#j
+#f	IFkI	E	:5	#T
+#g	IFkI	E	:6	#S
+#h	IFkI	E	:7	#R
+#i	IFkI	E	:8	#Q
+#j	IFkI	E	:9	#P
+#k	IN$;	E	#d	EQUALN	#Y
+#l	I\r8	E	#9	&	GN	#H
+#m	I\r8	E	#:	9	P0	#E
+#n	I\r8	E	#;	:	P1	#G
+#o	I\r8	E	#<	;	P2	#?
+#p	I\r8	E	#=	<	P3	#A
+#q	I\r8	E	#>	/	P4	#C
+#r	I\r8	E	#?	0	P5	#<
+#s	I\r8	E	#@@	1	P6	#:
+#t	I\r8	E	#A	2	P7	#8
+#u	I\r8	E	#B	"8	Q0	#D
+#v	I\r8	E	#C	":	Q1	#F
+#w	I\r8	E	#D	"<	Q2	#>
+#x	I\r8	E	#E	">	Q3	#@@
+#y	I\r8	E	#F	"@@	Q4	#B
+#z	I\r8	E	#G	"B	Q5	#=
+#{	I\r8	E	#H	"D	Q6	#;
+#|	I\r8	E	#I	"F	Q7	#9
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

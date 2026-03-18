@@ -1,0 +1,87 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R1_0:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.12.04.15.07.02;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.12.04.15.07.02;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@GVF Equalizer Coefficients
+-0.00054275
+-0.00039216
+0.00060333
+0.0064514
+0.016882
+0.032188
+0.046937
+0.060675
+0.071756
+0.086817
+0.10707
+0.13869
+0.17672
+0.22703
+0.27622
+0.33628
+0.44186
+0.60838
+0.84093
+0.999
+0.91765
+0.55874
+0.07699
+-0.27991
+-0.37738
+-0.26606
+-0.11657
+-0.02485
+0.01081
+0.0035962
+0.0026057
+-0.00043907
+@
+
+
+1.1.1.1
+log
+@initial import
+@
+text
+@@

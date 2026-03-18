@@ -1,0 +1,77 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_0:1.1.1.1
+	R_epics_3_14_6_spear0:1.1.1.1
+	R_3_14_1_spear1:1.1.1.1
+	R1:1.1.1.1
+	B1:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.01.30.22.34.00;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.30.22.34.00;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@GI_VXI      ,KineticSystems ,V160        ,0,ffff,ffff,ffff
+V151        ,KineticSystems ,V151        ,ffff,ffff,ffff,ffff
+V152        ,KineticSystems ,V152        ,ffff,ffff,ffff,ffff
+VXI_DSP     ,KineticSystems ,V165        ,ffff,ffff,ffff,ffff
+V200	    ,KineticSystems ,V200        ,ffff,ffff,ffff,ffff
+V200_2	    ,KineticSystems ,V200        ,ffff,ffff,ffff,ffff
+V200_3	    ,KineticSystems ,V200        ,ffff,ffff,ffff,ffff
+V207        ,KineticSystems ,V207        ,ffff,ffff,ffff,ffff
+V208        ,KineticSystems ,V208        ,ffff,ffff,ffff,ffff
+V210        ,KineticSystems ,V210        ,ffff,ffff,ffff,ffff
+V241        ,KineticSystems ,V241        ,ffff,ffff,ffff,ffff
+V243        ,KineticSystems ,V243        ,ffff,ffff,ffff,ffff
+V246        ,KineticSystems ,V246        ,ffff,ffff,ffff,ffff
+V266        ,KineticSystems ,V266        ,ffff,ffff,ffff,ffff
+V270        ,KineticSystems ,V270        ,ffff,ffff,ffff,ffff
+V285        ,KineticSystems ,V285        ,ffff,ffff,ffff,ffff
+V345        ,KineticSystems ,V345        ,ffff,ffff,ffff,ffff
+KSC2961     ,KineticSystems ,KSC2961     ,ffff,ffff,ffff,ffff
+HP-E1410A   ,Hewlett-Packard,HP-E1410A   ,ffff,ffff,ffff,ffff
+@
+
+
+1.1.1.1
+log
+@RF IOC startup files.
+@
+text
+@@

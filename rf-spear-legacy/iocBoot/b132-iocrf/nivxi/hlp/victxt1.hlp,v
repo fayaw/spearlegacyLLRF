@@ -1,0 +1,1531 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_0:1.1.1.1
+	R_epics_3_14_6_spear0:1.1.1.1
+	R_3_14_1_spear1:1.1.1.1
+	R1:1.1.1.1
+	B1:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	95.01.14.01.32.34;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	95.01.14.01.32.34;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@; National Instruments VicText Help File
+; Copyright 1993 National Instruments Corporation. All Rights Reserved.
+; Version 2.4.1
+;
+; This is the help file for the VXI Interactive Control Program.
+; Comment lines can be added at any part of this file. The 
+; order and format of this file, however, should be maintained.
+#s
+help  [<command>]
+  Note: Here <command> is a valid command or a
+        key word for group of commands. The key
+        words for help are: cwsc,swsc,hldbac,lra
+        sigc,intr,trig,sih,scc,bec,aux,all.
+
+#t
+Auxiliary Command
+#p
+Provides help on the specified command. If the
+specified command is not unique, it lists all
+commands with that prefix
+    .eg., help vxi
+will list all commands with prefix vxi.
+
+#s
+?  [<command>]
+  Note: Here <command> is a valid command or a
+        key word for group of commands. The key
+        words for help are: cwsc,swsc,hldbac,lra
+        sigc,intr,trig,sih,scc,bec,aux,all.
+#t
+Auxiliary Command
+#p
+Provides help on the specified command. If the
+specified command is not unique, it lists all
+commands with that prefix
+    e.g., ? vxi
+will list all commands with prefix vxi.
+
+#s
+wsrd [<la>,] <count>,<mode>
+  <la>     logical address of servant device
+  <count>  maximum number of bytes to transfer
+  <mode>   mode of transfer (bit vector)
+    Bit  Description
+    ---- --------------
+    0    Not DOR
+         0 = abort if not DOR
+         1 = poll till DOR
+    1    END bit termination suppression
+         0 = terminate on END bit
+         1 = do not terminate on END bit
+    2    LF character termination
+         1 = terminate on LF bit
+         0 = do not terminate on LF bit
+    3    CR character termination
+         1 = terminate on CR bit
+         0 = do not terminate on CR bit
+    4    EOS character termination
+         1 = terminate on EOS bit
+         0 = do not terminate on EOS bit
+    8-15 EOS character (if enabled)
+#t
+Commander Word Serial Command
+#p
+Transfers data from a Message-Based device to 
+the console using the VXIbus Byte Transfer 
+Protocol.
+
+#s
+wsrdf [<la>,] <filename>,<count>,<mode>
+  <la>       logical address of servant device
+  <filename> file name
+  <count>    number of bytes to transfer
+  <mode>     mode of transfer (bit vector)
+             (Same as in WSrd)
+#t
+Commander Word Serial Command
+#p
+Transfers data from a Message-Based device to
+a file, using the VXIbus Byte Transfer Protocol.
+
+#s
+wswrt [<la>,] <string> [,<mode>]
+  <la>      logical address of servant device
+  <string>  buffer to send
+  <mode>    mode of transfer (bit vector)
+    Bit  Description
+    ---- --------------
+    0    Not DIR
+         0 = abort if not DIR
+         1 = poll till DIR
+    1    END bit termination
+         0 = clear END bit on the last byte
+         1 = set END bit on the last byte 
+#t
+Commander Word Serial Command
+#p
+Transfers the specified string to a Message-
+Based servant using VXIbus Byte Transfer
+Protocol.
+
+#s
+wswrtf [<la>,] <filename> [,<count>]
+  <la>       logical address of servant device
+  <filename> file name
+  <count>    maximum number of bytes to
+             transfer
+#t
+Commander Word Serial Command
+#p 
+Transfers data from the specified file to a
+Message-Based servant using the VXIbus Byte
+Transfer Protocol.
+
+#s
+wscmd [<la>,] <command>
+  <la>       logical address of servant device
+  <command>  Word Serial Command
+#t
+Commander Word Serial Command
+#p
+Send a Word Serial command to a Message-Based
+servant device.
+
+#s
+wscmd? [<la>,] <command>
+  <la>       logical address of servant device
+  <command>  Word Serial query
+#t
+Commander Word Serial Command
+#p
+Sends a Word Serial query to a Message-Based
+and gets the response.
+
+#s
+wsresp [<la>]
+  <la>       logical address of servant device
+#t
+Commander Word Serial Command
+#p
+Gets the response to the previously sent
+Word Serial query.
+
+#s
+wstrg [<la>]
+  <la>       logical address of servant device
+#t
+Commander Word Serial Command
+#p
+Send the Word Serial Trigger command to 
+a servant device.
+
+#s
+wsclr [<la>]
+  <la>       logical address of servant device
+#t
+Commander Word Serial Command
+#p
+Sends the Word Serial Protocol command Clear to 
+a Message-Based servant device.
+
+#s
+wsabort [<la>,] <abortop>
+  <la>       logical address of servant device
+  <abortop>  option to abort Word Serial
+             operation
+   1 = ForcedAbort: aborts WSwrt,WSrd and WStrg
+   2 = UnSupCom: aborts WScmd, WSLcmd and WSEcmd
+   3 = ForcedAbort: aborts WScmd, WSLcmd and 
+       WSEcmd
+   4 = ForcedAbort: aborts all Word Serial
+       operations
+   5 = Async ForcedAbort: aborts all Word Serial
+       operations immediately.
+       (See manual for details)
+#t
+Commander Word Serial Command
+#p
+Aborts the Commander Word Serial operation(s)
+that is (are) in progress.
+ 
+#s
+wslcmd [<la>,] <command>,<respflag>
+  <la>       logical address of servant device
+  <command>  Longword Serial command
+  <respflag> response flag
+             0 = do not get the response
+             1 = get the response
+#t
+Commander Word Serial Command
+#p
+Sends a Longword Serial command to a Message-
+Based servant device and gets the response.
+
+#s
+wslresp [<la>]
+  <la>       logical address of servant device
+#t
+Commander Word Serial Command
+#p
+Gets the response for the previously sent
+Longword query.
+
+#s
+wsecmd [<la>,] <cmdext>,<command>,<respflag>
+  <la>       logical address of servant device
+  <cmdext>   upper 16 bits of 48-bit command
+  <command>  lower 32 bits of 48-bit command
+  <respflag> response flag
+             0 = do not get the response
+             1 = get the response
+#t
+Commander Word Serial Command
+#p
+Sends an Extended Longword Serial command to a 
+Message-Based servant device and gets the
+response.
+
+#s
+wssettmo <timeout>
+  <timeout>     timeout period (in milliseconds)
+#t
+Commander Word Serial Command
+#p
+Sets the timeout period for all Word Serial
+commands.
+
+#s
+wsgettmo 
+#t
+Commander Word Serial Command
+#p
+Gets the timeout period set for all Word Serial
+commands.
+
+#s
+wssenable 
+#t
+Servant Word Serial Command
+#p
+Enables all Servant Word Serial Protocol
+commands.
+
+#s
+wssdisable 
+#t
+Servant Word Serial Command
+#p
+Disables all Servant Word Serial Protocol
+commands.
+
+#s
+wssrd  <count>,<mode>
+  <count> maximum number of bytes to transfer
+  <mode>  mode of transfer (bit vector)
+    Bit  Description
+    ---- --------------
+    0    0 = do not send DIR signal to Commander
+         1 = send DIR signal to Commander
+#t
+Servant Word Serial Command
+#p
+Receives data from a Message-Based commander
+using the VXIbus Byte Transfer Protocol.
+ 
+#s
+wsswrt  <string>,<mode>
+  <string> buffer to send
+  <mode>   mode of transfer (bit vector)
+    Bit  Description
+    ---- --------------
+    0    0 = do not send DOR signal to Commander
+         1 = send DOR signal to Commander
+    1    0 = do not send END with the last byte
+         1 = send END with the last byte
+#t
+Servant Word Serial Command
+#p
+Transfers data to a Message-Based commander
+using the VXIbus Byte Transfer Protocol.
+
+#s
+wssabort  <abortop>
+  <abortop>  option to abort Servant Word Serial
+             operation
+   Bit  Description
+   ---- --------------
+    0   Abort WSSwrt
+    1   Abort WSSrd
+    2   Abort WSSsendResp
+   15   Initialize Word Serial Servant hardware.
+        This includes aborting all Word Serial
+        Servant operations, clearing all errors,
+        removing all pending Word Serial servant
+        interrupts and disabling the interrupts.
+#t
+Servant Word Serial Command
+#p
+Aborts Servant Word Serial operations
+
+#s
+vxiin <accessparms>,<address>,<width>
+  <accessparms> (bits 0-1) VXI address space
+                  1 = A16, 2 = A24, 3 = A32
+                (bits 2-4) access privilege
+                  0 = non-priv data,  1 = priv
+                  2 = non-priv prog,  3 = priv
+                  4 = non-priv block, 5 = priv
+                (bit 7) byte order
+                  0 = Motorola, 1 = Intel
+                (bits 5-6) and (bits 8-15)
+                  0
+  <address>     VXI address 
+  <width>       1 = byte,2 = word,4 = longword 
+#t
+High-Level VXIbus Access Commands
+#p
+Reads a single byte, word, or longword from the
+specified address in the specified address space
+with the specified access parameters.
+
+#s
+vxiout <accessparms>,<address>,<width>,<value>
+  <accessparms> (bits 0-1) VXI address space
+                  1 = A16, 2 = A24, 3 = A32
+                (bits 2-4) access privilege
+                  0 = non-priv data,  1 = priv
+                  2 = non-priv prog,  3 = priv
+                  4 = non-priv block, 5 = priv
+                (bit 7) byte order
+                  0 = Motorola, 1 = Intel
+                (bits 5-6) and (bits 8-15)
+                  0
+  <address>     VXI address 
+  <width>       1 = byte,2 = word,4 = longword 
+  <value>       data to write
+#t
+High-Level VXIbus Access Commands
+#p
+Writes a single byte, word, or longword to the 
+specified address in the specified address 
+space with the specified access parameters.
+
+#s
+vxiinreg [<la>,] <reg>
+  <la>       logical address 
+  <reg>      offset within VXI logical address
+             registers
+#t
+High-Level VXIbus Access Commands
+#p
+Reads a single word from the specified register
+offset on the specified logical address.
+
+#s
+vxioutreg [<la>,] <reg>,<value>
+  <la>       logical address 
+  <reg>      offset within VXI logical address 
+             registers
+  <value>    value to write
+#t
+High-Level VXIbus Access Commands
+#p
+Writes a single word to the specified register
+offset on the specified logical address.
+
+#s
+vximove <srcparms>,<srcaddr>,<destparms>,
+        <destaddr>,<length>,<width>
+  <srcparms>    (bits 0-1) VXI address space
+ and <destparms>     1 = A16, 2 = A24, 3 = A32
+                (bits 2-4) access privilege
+                  0 = non-priv data,  1 = priv
+                  2 = non-priv prog,  3 = priv
+                  4 = non-priv block, 5 = priv
+                (bit 7) byte order
+                  0 = Motorola, 1 = Intel
+                (bits 5-6) and (bits 8-15)
+                  0
+  <srcaddr> and <destaddr>       address 
+  <length>       number of elements to transfer
+  <width>        1 = byte,2 = word,4 = longword 
+#t
+High-Level VXIbus Access Commands
+#p
+Moves a block of bytes, words, or longwords 
+from a source location in any address space
+to a destination in any address space with
+the specified access parameters.
+
+#s
+getmyla 
+#t
+Local Resource Access Commands
+#p
+Gets the logical address of the local VXI 
+device.
+
+#s
+vxiinlr <reg>,<width>
+  <reg>    offset within VXI logical address 
+           registers
+  <width>  1 = byte,2 = word,4 = longword 
+#t
+Local Resource Access Commands
+#p
+Reads a single byte, word, or longword from
+the specified register on the local VXI device.
+
+#s
+vxioutlr <reg>,<width>,<value>
+  <reg>     offset within VXI logical address 
+            registers
+  <width>   1 = byte,2 = word,4 = longword 
+  <value>   value to write
+#t
+Local Resource Access Commands
+#p
+Writes a single byte, word, or longword from
+the specified register on the local VXI device.
+
+#s
+setmodid <enable>,<modid>
+  <enable>     1 = set MODID enable bit
+               0 = clear MODID enable bit
+  <modid>      bit vector for bits 0-12 
+               corresponding to slots 0-12
+#t
+Local Resource Access Commands
+#p
+Controls the MODID lines of the VXIbus
+backplane.
+
+#s
+readmodid  
+#t
+Local Resource Access Commands
+#p
+Read the MODID lines of the VXIbus backplane.
+
+#s
+routesignal [<la>,] <modemask>
+  <la>       logical address to set handler for
+  <modemask> a bit vector that specifies whether
+             each type of signal is enqueued or 
+             handled by the signal handler. A
+             zero in any bit position causes
+             signals of the associated type to 
+             be queued.  All other signals are
+             handled by the signal handler.
+    (Please see the manual for bit positions)
+#t
+VXI Signal Commands
+#p
+Selects whether each type of signal is enqueued
+on a software queue or handled by the signal
+handler.
+ 
+#s
+enablesignalint
+#t
+VXI Signal Commands
+#p
+Sensitizes VIC to receive all signals.
+
+#s
+disablesignalint
+#t
+VXI Signal Commands
+#p
+Desensitizes VIC to not receive signals.
+
+#s
+signaldeq  [<la>,] <signalmask>
+  <la>       logical address of signal to 
+             dequeue for (-1 = any)
+  <signalmask> Bit Vector
+               (0xffff = any)
+    (Please see the manual for bit positions)
+#t
+VXI Signal Commands
+#p
+Gets a signal specified by the signalmask 
+for the specified logical address from 
+the software signal queue.
+
+#s
+signalenq <signal>
+  <signal>       signal to enqueue at the
+                 end of the queue
+#t
+VXI Signal Commands
+#p
+Puts the specified signal on the tail of the
+global software signal queue.
+
+#s
+signaljam <signal>
+  <signal>       signal to jam in the front
+                 of the queue
+#t
+VXI Signal Commands
+#p
+Puts the signal on the head of the global
+software signal queue.
+
+#s
+waitforsignal [<la>,] <signalmask>,<timeout>
+  <la>       logical address of device
+             to wait on (-1 = any)
+  <signalmask> Bit Vector
+               (0xffff = any)
+    (Please see the manual for bit positions)
+  <timeout>  time period to wait 
+             (in milliseconds)
+#t
+VXI Signal Commands
+#p
+Waits for one of the specified signals to be
+received.
+
+#s
+routevxiint  <controller>,<sroute>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1.
+  <sroute>     bit vector of VXI interrupt
+               levels to route
+               Bits 6 to 0 correspond to VXI
+               interrupt levels 7 to 1.
+               1 = handle as a VXI signal
+               0 = handle as a VXI interrupt
+#t
+VXI Interrupt Commands
+#p
+Selects whether VXI interrupts are handled
+as VXI signals or routed to the VXI interrupt
+handler for the specified controller
+
+#s
+enablevxitosignalint <controller>,<levels>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <levels>     bit vector of VXI interrupt 
+               levels to enable
+               Bits 6 to 0 correspond to 
+               VXI interrupt levels 7 to 1.
+               1 = enable for the level
+#t
+VXI Interrupt Commands
+#p
+Sensitizes the specified controller to the specified 
+VXI interrupt levels being processed as VXI signals 
+
+#s
+disablevxitosignalint <controller>,<levels>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <levels>     bit vector of VXI interrupt 
+               levels to disable
+               Bits 6 to 0 correspond to 
+               VXI interrupt levels 7 to 1.
+               1 = disable for the level
+#t
+VXI Interrupt Commands
+#p
+Desensitizes the specified controller to the specified 
+VXI interrupt levels being processed as VXI signals 
+ 
+#s
+enablevxiint <controller>,<levels>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <levels>     bit vector of VXI interrupt 
+               levels to enable
+               Bits 6 to 0 correspond to 
+               VXI interrupt levels 7 to 1.
+               1 = enable for the level
+#t
+VXI Interrupt Commands
+#p
+Sensitizes the specified controller to the 
+specified VXI interrupt levels being processed 
+as VXI/VME interrupt (not as VXI signal) 
+
+#s
+disablevxiint <controller>,<levels>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <levels>     bit vector of VXI interrupt 
+               levels to disable
+               Bits 6 to 0 correspond to 
+               VXI interrupt levels 7 to 1.
+               1 = disable for the level
+#t
+VXI Interrupt Commands
+#p
+Desensitizes the specified controller to the 
+specified VXI interrupt levels being processed 
+as VXI/VME interrupt (not as VXI signal)
+
+#s
+vxiintacknowledgemode <controller>,<modes>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <modes>      bit vector of VXI interrupt 
+               levels to set to RORA or ROAK
+               interrupt acknowledge mode. 
+               Bits 6 to 0 correspond to 
+               VXI interrupt levels 7 to 1.
+               1 = set to RORA VXI int 
+               0 = set to ROAK VXI int 
+#t
+VXI Interrupt Commands
+#p
+Specifies whether the VXI interrupt acknowledge
+cycle for the specified controller for the 
+specified levels should be handled as Release On
+Acknowledge (ROAK) or as Release On Register 
+Access (RORA).
+
+#s
+assertvxiint <controller>,<level>,<statusId>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <level>      interrupt level
+  <statusId>   status/ID to present during
+               IACK cycle
+#t
+VXI Interrupt Commands
+#p 
+Asserts an interrupt line in a particular
+controller.
+
+#s
+deassertvxiint <controller>,<level>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <level>      interrupt level
+#t
+VXI Interrupt Commands
+#p
+Deasserts an interrupt line in the specified
+controller.
+
+#s
+acknowledgevxiint <controller>,<level>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <level>      interrupt level
+#t
+VXI Interrupt Commands
+#p
+Performs an IACK cycle on the VXIbus in the
+specified controller for the specified level.
+
+#s
+srctrig <controller>,<line>,<protocol>,<timeout>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       trigger lines
+  <protocol>   trigger protocols
+    (Please see the manual for trigger protocols)
+  <timeout>    timeout value in milliseconds
+#t
+VXI Trigger Commands
+#p
+Asserts/Deasserts a trigger on a trigger
+line using a VXI protocol in a specified
+controller.
+
+#s
+srcttltrig <controller>,<line>,<protocol>,<timeout>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       0-7 corresponding to TTL
+               lines 0-7
+  <protocol>   trigger protocols
+    (Please see the manual for trigger protocols)
+  <timeout>    timeout value in milliseconds
+#t
+VXI Trigger Commands
+#p
+Asserts/Deasserts a trigger on a TTL trigger
+line using a VXI protocol in a specified
+controller.
+
+#s
+srcecltrig <controller>,<line>,<protocol>,<timeout>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       0-5 corresponding to ECL
+               lines 0-5
+  <protocol>   trigger protocols
+    (Please see the manual for trigger protocols)
+  <timeout>    timeout value in milliseconds
+#t
+VXI Trigger Commands
+#p
+Asserts/Deasserts a trigger on a ECL trigger
+line using a VXI protocol in a specified
+controller.
+
+#s
+enabletrigsense <controller>,<line>,<protocol>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       Trigger lines
+  <protocol>   Trigger protocols
+    (Please see the manual for trigger protocols)
+#t    
+VXI Trigger Commands
+#p
+Enables sensing of the specified VXIbus
+trigger line for the specified protocol on
+the specified controller.
+ 
+#s
+enablettlsense <controller>,<line>,<protocol>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       0-7 corresponding to TTL
+               lines 0-7
+  <protocol>   trigger protocols
+    (Please see the manual for trigger protocols)
+#t
+VXI Trigger Commands
+#p
+Enables sensing of the specified VXIbus TTL 
+trigger line for the specified protocol on
+the specified controller.
+
+#s
+disabletrigsense <controller>,<line>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       trigger lines 
+#t
+VXI Trigger Commands
+#p
+Disables sensing of the specified VXIbus
+trigger line on the specified controller.
+
+#s
+disablettlsense <controller>,<line>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       0-7 corresponding to TTL
+               lines 0-7
+#t
+VXI Trigger Commands
+#p
+Disables sensing of the specified VXIbus TTL 
+trigger line on the specified controller.
+
+#s
+waitfortrig <controller>,<line>,<timeout>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       Trigger lines
+  <timeout>    timeout value in milliseconds
+#t
+VXI Trigger Commands
+#p
+Waits for the specified trigger line to be
+encountered on the specified controller.
+
+#s
+waitforttltrig <controller>,<line>,<timeout>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       0-7 corresponding to TTL
+               lines 0-7
+  <timeout>    timeout value in milliseconds
+#t
+VXI Trigger Commands
+#p
+Waits for the specified TTL trigger line to be
+encountered on the specified controller.
+
+#s
+enableeclsense <controller>,<line>,<protocol>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       0-5 corresponding to ECL
+               lines 0-5
+  <protocol>   Trigger protocols
+    (Please see the manual for trigger protocols)
+#t
+VXI Trigger Commands
+#p
+Enables sensing of the specified VXIbus ECL 
+trigger line for the specified protocol on
+the specified controller.
+
+#s
+disableeclsense <controller>,<line>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       0-5 corresponding to ECL
+               lines 0-5
+#t
+VXI Trigger Commands
+#p
+Disables sensing of the specified VXIbus ECL 
+trigger line on the specified controller.
+
+#s
+waitforecltrig <controller>,<line>,<timeout>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       0-5 corresponding to ECL
+               lines 0-5
+  <timeout>    timeout value in milliseconds
+#t
+VXI Trigger Commands
+#p
+Waits for the specified ECL trigger line to
+be encountered on the specified controller.
+
+#s
+acknowledgetrig <controller>,<line>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       trigger lines
+#t
+VXI Trigger Commands
+#p
+Acknowledges the specified trigger line.
+
+#s
+maptrigtotrig  <controller>,<srctrig>,
+               <desttrig>,<mode>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <srctrig> and <desttrig>
+  <mode>      signal conditioning mode
+    (Please see the manual for trig and mode
+     descriptions)
+#t
+VXI Trigger Commands
+#p
+Maps the specified TTL, ECL, Star X, Star Y,
+or miscellaneous external line to another.
+
+#s
+unmaptrigtotrig <controller>,<srctrig>,<desttrig>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <srctrig> and <desttrig>
+    (Please see the manual for trig descriptions)
+#t
+VXI Trigger Commands
+#p
+Unmaps the specified TTL, ECL, Star X, Star Y,
+or miscellaneous external lines mapped 
+previously by MapTrigToTrig.
+
+#s
+trigassertconfig <controller>,<line>,<mode>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       trigger line
+  <mode>       configuration mode
+    (Please see the manual for further descriptions)
+#t
+VXI Trigger Commands
+#p
+Configures the specified trigger line
+assertion method.
+ 
+#s 
+trigcntrconfig <controller>,<mode>,<source>,<count>
+  <controller> logical address of extended 
+               controller or embedded controller 
+               to configure or -1 
+  <mode>       configuration mode 
+  <source>     trigger line
+  <count>      input pulses to count
+    (Please see the manual for further descriptions) 
+#t 
+VXI Trigger Commands
+#p 
+Configures the TIC's internal 16-bit counter.
+  
+#s
+trigextconfig <controller>,<line>,<mode>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+  <line>       trigger line
+  <mode>       configuration mode
+    (Please see the manual for further descriptions)
+#t
+VXI Trigger Commands
+#p
+Configures the external trigger lines.
+  
+#s 
+trigtickconfig <controller>,<mode>,<source>,
+               <tcount1>,<tcount2>
+  <controller> logical address of extended 
+               controller or embedded controller
+               to configure or -1 
+  <mode>       configuration mode
+  <source>     trigger line 
+  <tcount1>    input pulses to assert TICK1
+  <tcount2>    input pulses to assert TICK2
+    (Please see the manual for further descriptions) 
+#t 
+VXI Trigger Commands 
+#p 
+Configures the external trigger lines. 
+
+#s
+enablesysfail <controller>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+#t
+System Interrupt Handler Commands
+#p
+Sensitizes VIC to Sysfail interrupts from
+the specified controller.
+
+#s
+disablesysfail <controller>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+#t
+System Interrupt Handler Commands
+#p
+Desensitizes VIC to Sysfail interrupts from
+the specified controller.
+
+#s
+enableacfail <controller>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+#t
+System Interrupt Handler Commands
+#p
+Sensitizes VIC to ACfail interrupts from
+the specified controller.
+
+#s
+disableacfail <controller>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+#t
+System Interrupt Handler Commands
+#p
+Desensitizes VIC to ACfail interrupts from
+the specified controller.
+
+#s
+enablesoftreset
+#t
+System Interrupt Handler Commands
+#p
+Enables the local soft reset interrupt.
+
+#s
+disablesoftreset
+#t
+System Interrupt Handler Commands
+#p
+Disables the local soft reset interrupt.
+
+#s
+assertsysreset <controller>,<mode>
+  <controller> logical address of extended 
+               controller or embedded controller 
+               to configure or -1 
+  <mode>       assertion mode
+#t 
+System Interrupt Handler Commands 
+#p 
+Asserts SYSRESET* on the backplane of the
+specified controller. 
+ 
+#s
+enablesysreset <controller>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+#t
+System Interrupt Handler Commands
+#p
+Sensitizes VIC to SYSRESET* interrupts from
+the specified controller.
+
+#s
+disablesysreset <controller>
+  <controller> logical address of extended
+               controller or embedded controller
+               to configure or -1
+#t
+System Interrupt Handler Commands
+#p
+Desensitizes VIC to SYSRESET* interrupts from
+the specified controller.
+
+#s
+finddevla <namepat>[, <manid>, [<modelcode>,
+         [<devclass>, [<slot>, [<mainframe>,
+         [<cmdrla>]]]]]]
+  <namepat>    name pattern
+  <manid>      VXI manuf identification num
+  <modelcode>  manuf 12-bit model number
+  <devclass>   device class of the device
+               0 = MEM, 1=EXT, 2=MBD, 3=RBD
+  <slot>       slot location of the device
+  <mainframe>  mainframe location of device
+  <cmdrla>     commander's logical address
+
+If any of the attributes is -1 , ""  or missing,
+that attribute is not used in the matching
+algorithm.
+#t
+System Configuration Commands
+#p
+Returns a logical address of a device
+with the specified attributes.
+
+#s
+getdevinfo [<la>,] <field>
+  <la>    logical address of device
+          to get information for
+  <field> field identification number
+    (Please see the manual for <field> values)
+#t
+System Configuration Commands
+#p
+Returns the desired information about a device.
+
+#s
+setdevinfo [<la>,] <field>,<fieldvalue>
+  <la>    logical address of device
+          to set information for
+  <field> field identification number
+    (Please see the manual for <field> values)
+  <fieldvalue> value to set
+#t
+System Configuration Commands
+#p
+Sets the specified information about a device.
+
+#s
+createdevinfo [<la>]
+  <la>    logical address of device
+          to create entry for
+#t
+System Configuration Commands
+#p
+Creates an entry in the RM table for
+the specified logical address.
+
+#s
+mapecltrig <extender>,<lines>,<directions>
+  <extender>   logical address of extender
+  <lines>      bit vector of VXI ECL triggers
+               to map
+               Bits 5 to 0 correspond to 
+               VXI ECL triggers 5 to 0.
+               1 = enable for the level
+               0 = disable for the level
+  <directions> bit vector
+               1 = into the VXI extender
+               0 = out of the VXI extender
+#t
+Bus Extender Commands
+#p
+Routes the VXIbus ECL trigger lines for the
+specified VXI extender in the specified 
+directions.
+
+#s
+mapttltrig <extender>,<lines>,<directions>
+  <extender>   logical address of extender
+  <lines>      bit vector of VXI TTL triggers
+               to map
+               Bits 7 to 0 correspond to 
+               VXI TTL triggers 7 to 0.
+               1 = enable for the level
+               0 = disable for the level
+  <directions> bit vector
+               1 = into the VXI extender
+               0 = out of the VXI extender
+#t
+Bus Extender Commands
+#p
+Routes the VXIbus TTL trigger lines for the
+specified VXI extender in the specified 
+directions.
+
+#s
+maputilbus <extender>,<utilmode>
+  <extender>   logical address of extender
+  <utilmode>   value to write to register for
+               mapping the utility bus
+    (Please see the manual for <utilmode>
+     description)
+#t
+Bus Extender Commands
+#p
+Maps the utility bus for the specified VXI
+extender.
+
+#s
+mapvxiint <extender>,<levels>,<directions>
+  <extender>   logical address of extender
+  <levels>     bit vector of VXI Interrupts
+               to enable
+               Bits 6 to 0 correspond to 
+               VXI Interrupt levels 6 to 0.
+               1 = enable for the level
+               0 = disable for the level
+  <directions> bit vector
+               1 = into the VXI extender
+               0 = out of the VXI extender
+#t
+Bus Extender Commands
+#p
+Routes the VXIbus interrupt lines for the
+specified VXI extender in the specified 
+directions.
+
+#s
+disablemonitor
+#t
+Auxiliary Command
+#p
+Disables the VXIbus monitor, which monitors
+the status of the VXIbus in the system.
+ 
+#s
+enablemonitor [<controller>]
+  <controller> logical address of extended
+               controller or embedded controller
+               to monitor or -2
+#t
+Auxiliary Command
+#p
+Enables the VXIbus monitor, which monitors
+the status of the VXIbus in the system
+for the specified controller. If no controller
+field is specified, the monitoring for the last
+controller being monitored is enabled.
+(-2 = OR of all controllers)
+
+#s
+lpeek <address>,<width>
+  <address> address on the local device
+   <width>  1 = byte,2 = word,4 = longword 
+#t
+Auxiliary Command
+#p
+Reads a single byte, word, or longword from
+the specified address on the local VXI device.
+
+#s
+lpoke <address>,<width>,<value>
+ <address>  address on the local device
+   <width>  1 = byte,2 = word,4 = longword 
+   <value>  value to write
+#t
+Auxiliary Command
+#p
+Writes a single byte, word, or longword to
+the specified address on the local VXI device.
+
+#s
+set <la> or <devname>
+  Note: The single parameter with set command can 
+        be <la> which is the logical address of the
+        device, or <devname> which is the name
+        of the device in "". Partial names
+        will work for the <devname> parameter.
+#t
+Auxiliary Command
+#p
+Invokes device level calls.  The command line
+prompt changes to the device name. At this
+stage you no longer need to specify <la> in
+the VIC Word Serial and some Auxiliary commands.
+
+#s
+pparms [<accessparms>]
+  <accessparms> (same as in vxiin)
+#t
+Auxiliary Command
+#p
+Sets the specified access parameters.
+These access parameters are used in peek
+and poke VIC commands.  If no parameter 
+is specified, it displays the current
+access parameters.
+ 
+#s
+pwidth [<width>]
+  <width> 1 = byte,2 = word,4 = longword
+#t
+Auxiliary Command
+#p
+Sets the specified width.
+This width is used in peek and poke VIC or
+VICTEXT commands. If no parameter is
+specified, it displays the current width.
+ 
+#s
+peek <address>
+#t
+Auxiliary Command
+#p
+Reads a single byte, word, or longword (depending
+upon the width set by the pwidth VIC command) from
+the specified address (in the address space with 
+access parameters set by the pparms VIC command).
+
+#s
+poke <address>,<value>
+#t
+Auxiliary Command
+#p
+Writes a single byte, word, or longword
+(depending upon the width set by the
+pwidth VIC command) to the specified
+address (in the address space with
+access parameters set by the pparms
+VIC command).
+
+#s
+scripton <mode>,<filename>
+  <mode> 0 = writes only the commands
+         1 = writes both the VIC commands
+             entered and the responses
+#t
+Auxiliary Command
+#p
+Captures the information as it is displayed on
+the VIC or VICTEXT screen and writes it to the
+specified file.
+
+#s
+scriptoff 
+#t
+Auxiliary Command
+#p
+Closes the script session.
+
+#s
+cfon 
+#t
+Auxiliary Command
+#p 
+Enables generation of a corresponding C
+function call for NI-VXI library calls.
+
+#s 
+cfoff
+#t
+Auxiliary Command
+#p
+Disables generation of a corresponding C
+function call for NI-VXI library calls.
+
+#s
+rmentry? [<la>]
+#t
+Auxiliary Command
+#p
+Returns Resource Manager (RM) information about
+a device.
+
+#s
+laddrs?
+#t
+Auxiliary Command
+#p
+Gives a list of known logical addresses.
+ 
+#s
+numladdrs?
+#t
+Auxiliary Command
+#p
+Gives the number of known logical addresses.
+
+#s
+cmdrtable?
+#t
+Auxiliary Command
+#p
+Displays the system hierarchy information.
+
+#s
+a16memmap?
+#t
+Auxiliary Command
+#p
+Gives A16 memory map of the system.
+
+#s
+a24memmap?
+#t
+Auxiliary Command
+#p
+Gives A24 memory map of the system.
+
+#s
+a32memmap?
+#t
+Auxiliary Command
+#p
+Gives A32 memory map of the system.
+
+#s
+readregister? <la>,<reg> [,<"OFF/ON">]
+  Note: The flag "ON" or "OFF" (default = "OFF")
+        gives more information on the individual
+        fields of the register. Valid registers
+        are all even numbers between 0 and 62
+        and register names: A24PL, A24PH, A32PL,
+        A32PH, ATTR, DHIG, DLOW, DTYP, ICON, ID,
+        IST, OFFS, PROT, RESP, SNL, SNH, STAT,
+        SUBC, VNUM.
+#t
+Auxiliary Command
+#p
+Reads a register (word access) on the specified
+logical address.
+
+#s
+writeregister <la>,<reg>,<value>
+ Note:  Valid registers are even numbers from
+        0 through 62 and register names: CONT,
+        DEXT, DHIG, DLOW, ICON, LADD, OFFS, SIGN
+#t
+Auxiliary Command
+#p
+Writes to the register (word access) on the
+specified logical address with the specified
+value.
+
+#s
+devicenumber?
+#t
+Auxiliary Command
+#p
+Gets the number of devices in the system if
+issued by the Resource Manager; otherwise it
+gives the number of immediate servants.
+
+#s 
+deviceladd?
+#t
+Auxiliary Command
+#p
+Gets a list of all the in the system if issued
+by the Resource Manager; otherwise it gives a
+list of all the immediate servants.
+
+#s
+deviceconfigure? [<la>]
+#t
+Auxiliary Command
+#p
+Gives the current hierarchy information for the
+specified logical address. If the logical address
+is not specified, it gives the current hierarchy 
+information for all the devices in the system.
+
+#s
+deviceinformation?  [<la>]
+#t
+Auxiliary Command
+#p
+Gives the device information for the specified
+logical address. If the logical address is not
+specified, it gives the information for all the
+devices in the system.
+
+#s
+devicereset? <la>
+#t
+Auxiliary Command
+#p
+Soft resets the device for the specified
+logical address.
+
+#s
+$ <filename>
+#t
+Auxiliary Command
+#p
+Executes VIC commands from a file.
+
+#s
+history
+#t
+Auxiliary Command
+#p
+Displays the last 20 VIC commands.
+
+#s
+! [<command number or command string>]
+#t
+Auxiliary Command
+#p
+Executes the specified VIC command. The search
+can be based on command number (from history)
+or from the command string. If no parameter is
+specified it executes the last VIC command in
+the history of commands.
+
+#s
+*  [<repeat number>]
+#t
+Auxiliary Command
+#p
+Executes the last VIC command for the specified
+number of times. If no parameter is specified,
+it executes the last VIC command once.
+
+#s
+version
+#t
+Auxiliary Command
+#p
+Shows the version of NI-VXI software in use.
+
+#s
+system
+#t
+Auxiliary Command
+#p
+Exits the VIC utility temporarily to operating
+system.
+
+#s
+quit
+#t
+Auxiliary Command
+#p
+Quits the VIC utility.
+@
+
+
+1.1.1.1
+log
+@RF IOC startup files.
+@
+text
+@@

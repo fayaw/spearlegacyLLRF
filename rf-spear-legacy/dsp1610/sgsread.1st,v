@@ -1,0 +1,752 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2014.06.18.17.01.43;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@copied from /afs/slac/package/dsp1610.
+@
+text
+@DSP1600 SGS Tools Release Notes
+Release 3.2.1
+
+
+Release Notes                                                          
+January 1994
+
+  
+                                                                     
+                                                                     
+                                                                     
+                               DSP1600 Family SGS Tools Release 3.2.1
+                                                                      
+
+
+Introduction
+
+The following information reviews the new features and bug fixes for
+the 3.2.1 release of the DSP1600 SGS (Software Generation System) Tools.
+This document covers only the DSP1600  Family SGS Tools which are
+generic to the DSP1600 family of processors.  Information concerning
+device specific tools is contained in the appropriate DSP16XX-ST
+release note.
+
+                                   
+                           Table of Contents
+
+Introduction
+Installation
+     MS-DOS Installation
+     UNIX Installation
+Packing List 
+     MS-DOS Packing List 
+     UNIX Packing List
+Description
+New Features
+     as1600
+     ld1600
+     list1600
+     head1600
+     mask1600
+     prom1600
+     ar1600
+     cfig386
+
+
+
+
+Installation
+
+The following sections describe the MS-DOS* and UNIX** installation for
+the DSP1600 SGS Tools.
+
+MS-DOS Installation
+
+The MS-DOS distribution comes on one 3.5 inch floppy disk.  The software runs
+on 386 or better PC with MS-DOS 4.0 or later and at least 2 megabytes of
+extended memory.
+
+The installation of the DSP1600 SGS tools is a two step procedure.
+First, the installation routine copies the necessary software from the
+distribution diskettes onto your hard drive.  Second, the installation
+routine creates a file named NEW-VARS.BAT containing the environment
+variables.  If the user allows the default, the installation
+automatically adds these variables to the AUTOEXEC.BAT file.  To
+perform the installation, follow the steps below.
+
+     1)  Place the SGS disk marked "DSP1600 Family SGS" in the floppy drive
+         of the host PC.
+     2)  Enter "a:install" at the MS-DOS prompt (this assumes the diskette
+         is in drive a:).
+     3)  Answer the questions presented by the install routine.
+
+Before copying the files to the hard drive, the install routine
+prompts the user for the distribution diskette drive, the boot drive,
+and the installation directory. If the installation directory contains
+a previous release of the tools, the install routine will warn and
+allow the user to quit the process. The user may then start the install
+procedure again, specifying a new directory.  For more details on the
+install procedure, please consult the DSP16XX Support Tools Manual.
+
+It is VERY IMPORTANT that the PATH variable be properly setup as described
+in NEW-VARS.BAT.  If an older version of as1600.exe is found first in the
+PATH the remaining SGS tools will not be able to locate the Phar Lap DOS
+extender embedded in as1600.exe (see New Features as1600 below.)
+
+
+UNIX Installation
+
+The UNIX distribution comes on one quarter inch data cartridge or one
+3.5 inch floppy disk.  The software runs on a Sparc*** processor running
+SunOS 4.1.3.
+
+The UNIX installation of the DSP1600 SGS tools includes two steps.
+First, the user copies the necessary software from the distribution
+tape onto the hard drive.  Second, the user must modify the .profile
+or .login to include the required environment variables.  To perform
+the installation, follow the steps below.
+
+     1)  Place the tape in the tape drive of the host system.
+     2)  Enter "tar xvf /dev/rst0" at the prompt.
+     3)  Edit .profile or .login files and add the following lines (m2_12ka.if
+         can be any valid ifile):
+
+     If you run the sh(1) or ksh(1) shell, the lines are
+          LIB1600=<the tools directory>
+          IFILE=$LIB1600/m2_12ka.if
+          PATH=$PATH:$LIB1600
+          export LIB1600 IFILE PATH
+
+     If you run the csh (1), the lines are
+          setenv LIB1600 <the tools directory>
+          setenv IFILE $LIB1600/m2_12ka.if
+          setenv path=($path $LIB1600)
+
+
+
+Packing List
+
+The following section presents the packing list for both the MS-DOS
+and UNIX distributions.
+
+MS-DOS Packing List
+
+The following is the MS-DOS packing list for the 3.2.1 release of the
+DSP1600 SGS Tools:
+
+Disk 1 of 1
+
+sgsread.1st    - this file
+install.com    - a DOS installation utility, described below
+toollist.txt   - instruction file for install.com
+as1600.exe     - the DSP1600 assembler
+cpp16.exe      - the C preprocessor
+ld1600.exe     - the DSP1600 linker
+1604.h, 1605.h, 1610.h, 1616.h, 1616x30.h, 1617.h, 1618.h, 1630.h, 1633.h
+               - Chip specific header files used by as1600
+markdisk.sgs   - marker file placed in distribution directory
+m1_12ka.if     - map 1 ifile, 12K IROM max
+m2_12ka.if     - map 2 ifile, 12K IROM max
+m3_12ka.if     - map 3 ifile, 12K IROM max
+m4_12ka.if     - map 4 ifile, 12K IROM max
+m1_16ka.if     - map 1 ifile, 16K IROM max
+m2_16ka.if     - map 2 ifile, 16K IROM max
+m3_16ka.if     - map 3 ifile, 16K IROM max
+m4_16ka.if     - map 4 ifile, 16K IROM max
+m1_32ka.if     - map 1 ifile, 32K IROM max
+m2_32ka.if     - map 2 ifile, 32K IROM max
+m3_32ka.if     - map 3 ifile, 32K IROM max
+m4_32ka.if     - map 4 ifile, 32K IROM max
+read1600.exe   - the DSP1600 object file inspection tool
+mask1600.exe   - a utility which produces an internal ROM-mask file
+prom1600.exe   - a utility for generating files for programming
+                 external EPROMs
+head1600.exe   - a utility which adds the "#include 16xx.h" to the
+                 first line of source code
+list1600.exe   - a utility that produces the listing from an object module
+ar1600.exe     - an archive utility for DSP1600 object files
+cfig386.exe    - a DOS extender configuration utility
+pfix1600.bat   - a batch file to assist with cfig386.exe
+pfxagent.bat   - a batch file used by pfix1600.bat
+pfxmklst.bat   - a batch file used by pfix1600.bat
+
+
+
+
+UNIX Packing List
+
+The following is the UNIX packing list for the 3.2.1 release of the
+DSP1600 SGS Tools:
+
+sgsread.1st    - this file
+as1600         - the DSP1600 assembler
+cpp16          - the C preprocessor
+ld1600         - the DSP1600 linker
+1604.h, 1605.h, 1610.h, 1616.h, 1616x30.h, 1617.h, 1618.h, 1630.h
+               - header files for DSP1600 family of devices.
+m1_12ka.if     - map 1 ifile, 12K IROM max
+m2_12ka.if     - map 2 ifile, 12K IROM max
+m3_12ka.if     - map 3 ifile, 12K IROM max
+m4_12ka.if     - map 4 ifile, 12K IROM max
+m1_16ka.if     - map 1 ifile, 16K IROM max
+m2_16ka.if     - map 2 ifile, 16K IROM max
+m3_16ka.if     - map 3 ifile, 16K IROM max
+m4_16ka.if     - map 4 ifile, 16K IROM max
+m1_32ka.if     - map 1 ifile, 32K IROM max
+m2_32ka.if     - map 2 ifile, 32K IROM max
+m3_32ka.if     - map 3 ifile, 32K IROM max
+m4_32ka.if     - map 4 ifile, 32K IROM max
+read1600       - the DSP1600 object file inspection tool
+mask1600       - a utility which produces an internal ROM-mask file
+prom1600       - a utility for generating files for programming external EPROMs
+head1600       - a utility which adds the "#include 16xx.h" to the first
+                 line of source code
+list1600       - a utility that produces the listing from an object module
+ar1600         - an archive utility for DSP1600 object files
+
+
+
+
+Description
+
+The 3.2.1 release of the DSP1600 SGS Tools fixes exceptions and adds
+enhancements to the last production release.  The DSP1600 family SGS Tools
+have been separated from the DSP16XX-ST tools in the 3.2.1 release.
+
+
+
+New Features
+as1600
+
+1.Support for extended DOS memory - All of the tools in this package now
+  make use of the available extended memory in the user's PC.  The memory
+  limitations which the earlier versions of these tools imposed have been
+  lifted.  However, even though the new tools use extended memory, it is
+  recommended that at least 400K of DOS memory be available. The code that
+  allows execution in the extended DOS environment (DOS extender) is
+  as1600.exe.  All executable tools in this release use the embedded DOS
+  extender code in as1600.exe.  For execution of the support tools, the user
+  needs to have the location of as1600.exe in the PATH.  If the required
+  tool with the embedded extender code is not in the PATH, an error message
+  similar to "Stub ldr err 7: DOS-Extender file as1600.exe not found" is
+  issued.  Also, if an older version of the support tools is found in the
+  PATH before as1600.exe from this package, unpredictable behavior will
+  occur.
+
+2.as1600 now accepts expressions in quantifiers.  Quantifiers are
+  used to indicate repeated allocation of data or nop instructions.
+  In the past, only constants could be used as quantifiers, as in:
+
+
+  10 * nop            /* allocate 10 nops */
+  20 * int            /* allocate space for 20 16-bit words */
+   2 * int 0.1, 0.2, 0.3        /* allocate 2 reps of initialized */
+                      /* data, as in 0.1, 0.2, 0.3, 0.1, 0.2, 0.3  */
+
+  now a programmer could write:
+  
+  [5+5] * nop           /* allocate 10 nops */
+  [2*10] * int          /* allocate space for 20 16-bit words */
+  [4-2] * int 0.1, 0.2, 0.3  /* allocate 2 reps of initialized */
+                   /* data, as in 0.1, 0.2, 0.3, 0.1, 0.2, 0.3  */
+  
+  
+  
+    IMPORTANT NOTE:  The square brackets (i.e., []) are a necessary
+     part of the syntax!  You can still use a single constant without
+     brackets, but each expression must be so enclosed.
+  
+    The assembler must be able to evaluate the expression at assembly
+     time.  Relocatable expressions are not permitted.
+  
+    Of course, the programmer could have used preprocessor
+     identifiers to make things more readable.  Here is an example:
+  
+    #define   np    10
+    #define   nr    15
+    #define   tot   np+nr
+    #define   diff  [nr-np]
+  
+  
+    label1:    [tot] * int   /* must use brackets here */
+    label2:    diff * int    /* brackets are already in "diff" */
+
+
+  3.The assembler now accepts the C++ type of comment.  Now two adjacent
+     forward slashes will cause the remainder of a line to be ignored
+     by as1600.  Programmers may mix the old C language style comments
+     with the new C++ style comments.  Here is an example:
+
+       start: mwait=0        // no wait states for external I/O
+         pioc=0x1800    // set PIDS/PODS to active mode
+       /*
+         r0=ARRAY1 // point to input buffer
+         r2=ARRAY2 // point to output buffer
+       */
+         a0=a0+p p=x*y /* x=*pt++ */ y=*r0++
+       //a0=a0+p p=x*y /* x=*pt++ */ y=*r0++
+       
+      The combination of comments in the code fragment above
+       illustrate the convenience of having both
+      comment styles at the programmer's disposal. The programmer can
+       now "comment out" blocks of code
+      without having to eliminate the comments that accompany that
+       code.
+    
+  4.   The j and k register can now be loaded with 256 without the
+  addition of a "move" qualifier.  Previously, if a short-immediate
+  load was used resulting in sign extension and the register was
+  loaded with -256.
+
+  5. x=y is now accepted as a destination for the 1604, 1616x11,
+     1616x30, 1617, 1618, and 1630.  Provided the user has included
+     the appropriate header file (e.g. 1604.h) in their source file.
+     For example, the assembler will now accept the following syntax:
+  
+    auc=0x80
+    x=y=a0
+  
+  
+  The DSP1600 based devices mentioned above all have the capability of
+  loading both the x and y registers from the same source in the same
+  cycle.  This feature was added as a fast way to square values.  The
+  programmer must be aware that the feature is turned on and off by setting
+  and clearing bit 7 in the auc register.  Simply using the new syntax in
+  the source file is not sufficient to load both registers from the same
+  source.  This syntax has only been provided to allow programmers to
+  express their intent in the source, and make the program more readable.
+  They should be aware, however, that the assembler is incapable of
+  performing static analysis to determine if their program is correct.
+
+6.  The DSP1600 assembler now recognizes two new directives:
+                .list off
+                .list on
+These directives turn the assembler listing on & off (if one was requestd).
+They must be entered exactly as they appear above, since each is one
+directive, and not separate tokens read by the parser.
+The assembler listing will now contain everything it normally would except
+for the text between the two directives.  The directives themselves will
+never appear in an assembler listing.
+        This feature spans #included files, so a header file (such as
+1610.h) can be omitted from the listing by bracketing the #include with
+.list off/.list on directives.
+        If more than one assembler source file is assembled on a single
+command line, the listing is reset to on at the beginning of each file.
+In other words, each successive file produces a listing, until a .list off
+directive is encountered in its own text.
+
+7.    Customers have requested that the assembler screen out potential
+errors relating to register sizes and immediates.  Certain registers, such
+as c0, c1, and c2, are not 16 bits wide.  These three registers are actually
+8 bits, signed.  In other words they should only be written with values
+between -128 and 127.  In the latest release of the assembler, if the user
+specifies -DSIZECHECK on the command line, as1600 will report warnings if
+an immediate value exceeds a register's bit width.
+        This has been accomplished by adding a new directive, .size, to 
+the DSP1600 grammar.  The user doesn't need to specify these directives,
+that is already done for them in the header files.  (As of this writing this
+has not been done in the 1604.h and 1605.h header files.)
+        Programmers should still be aware that the assembler only performs
+16 bit arithmetic operations.  So there can still be problems if the assembler
+is programmed with the following expression:
+ 
+        r0 = 25000 * 3
+ 
+        The register in question is 16 bits, and unsigned.  Therefore it can
+hold any number between 0 and 65535.  This expression would evaluate to 75000
+if it were done with 32 bits.  However, a 16 bit expression evaluator will lose
+the high order bits, resulting in 9464.  The assembler would conclude that
+this is a perfectly legitimate value for r0.
+        A final reminder:  This feature only checks immediates!  That is to
+say that the assembler is incapable of screening out a sequence of operations
+such as:
+ 
+        a0=0x7000
+        c0=a0
+ 
+Clearly c0 has been written with a number greater than eight bits, but since
+as1600 can not be certain of the order of evaluation of its own instructions,
+it can not identify this problem.
+ 
+        The diagnostics generated by this feature are only warnings.  The
+assembler will still create the same output file specifying 16 bit immediates
+for the registers in question.  This leaves it to the programmer's discretion
+whether or not to fix the problem.
+
+9.    The assembler is not compatible with the make utility distributed
+with Borland C/C++ 3.1.  This version of make runs in protected mode.  The
+new assembler also runs in protected mode, which frees it from many of its
+earlier memory limitations.  Unfortunately, the DOS extenders are not
+compatible.  It is recommended that programmers use a make utility that does
+not invoke a DOS extender on its own.
+
+10. Previous releases of AS1600 used to display "Invalid DSP1610 opcode" as
+    a result of certain errors.  It now reports an "Invalid DSP16xx opcode"
+    instead.
+
+11. Previous releases of AS1600 allowed the Z:R operation to specify any
+    combination of rN and R.  This operation is not valid however when
+    rN==R (eg: *r0zp : r0).  This is no longer allowed.
+
+12. Previous releases of AS1600 would not accept a file that did not end
+    in a newline character.  It would fail and report a "parse error".  It
+    no longer fails in this case, instead acting as if a newline is present
+    at the end of the file.
+ 
+
+
+
+
+ld1600
+
+1.   There are twelve linker information files included with this release of
+the software tools.  Instructions on how to select ifiles are included in an
+advisory entitled "DSP1600 Support Software Tools New Ifile Names" included
+with this release.  See one of the DSP16XX Support Tools Manuals for details
+on ifiles.
+
+2.    When searching for a linker information file, ld1600 now uses the
+LIB1600 environment variable.  If an information file specified on the command
+line is not found in the current working directory, the linker will search the
+directory pointed to by LIB1600 before reporting an error.
+
+3.    In previous DOS releases of the SGS, ld1600 used to mirror any carriage
+returns and EOF (end-of-file) characters it encountered in a linker information
+file into the beginning of its output.  This could cause problems if the output
+was redirected into a file, such as would be the case when creating a link map
+file.  While extra carriage returns at the beginning of the file are usually
+harmless, an EOF character causes many programs to stop reading the file. The
+current release fixes this problem.
+
+4.   ld1600 now displays the correct usage message when given an illegal
+argument.  It now displays this message by default (rather than an
+empty map) if no input files are specified.  This message is also
+displayed (without any warning messages) if the "-?" option is given.
+ 
+5.   ld1600 no longer aborts if "-oFILE" is specified (without spaces between
+the option and the file name).  Instead it recognizes the file name as if it
+had been typed "-o FILE".
+
+6.   NEW FEATURE:
+ 
+        A new section encoding feature has been provided.  This feature will
+        automatically copy all of the data from one or more sections into
+        another at final link time.  These sections are copied AFTER being
+        relocated, so this only works for absolute linking ("-r" may not be
+        specified).  A table is created which may be used to copy all of the
+        data back into the original section.
+ 
+        The main use for this feature is to allow code and data to be located
+        in volatile memory and initialized at run-time from non-volatile
+        memory.
+ 
+        This feature is controlled through a new "ENCODE" section of the
+        linker information file.  Its format is:
+ 
+        ENCODE INTO targetSection USING symbolName {
+                sourceSection1
+                sourceSection2
+                ...
+        }
+ 
+        This requests that the source sections listed be copied (after being
+        relocated) into the end of the target section, followed by a table
+        indicating where the copied data resides and to where it should be
+        copied.  A symbol with the name given in the ENCODE section will be
+        created so that the table may be referenced by the code.
+ 
+        The table consists of a series of 3-word records, followed by a single
+        zero word, as follows:
+                length, original address, address of copy
+                length, original address, address of copy
+                ...
+                0
+ 
+        Each record corresponds to a single block of data which should be
+        copied at run-time.  Each data block contains one or more sections
+        that were relocated and copied by the linker.
+ 
+        The section encoding feature is not actually enabled unless the "-i"
+        (for initialized data) option is supplied when ld1600 is called.  If
+        "-i" is not specified, the sections are not copied.  A table is still
+        created as well as the symbol which points to it, but it will only
+        contain a single zero word, indicating that it is empty.
+ 
+7. Prior SGS releases contained a bug in LD1600 that occassionally caused
+   erratic behavior when more than two or three options were passed to
+   the linker (whether on the command line or through an ifile).
+
+   Specifically, each option specified other than the first option used one
+   of the 7 "slots" allocated for library directories that may be specified
+   with the "-L" option (the "-L" option thus used two).  If the "-L" option
+   was specified after the slots were all used, the error message "Too many
+   -L options, 7 allowed" would be produced and LD1600 would abort; if not,
+   no error message would be produced.  No other adverse effects have been
+   reported, although the operation of LD1600 may have been affected by this
+   condition.
+ 
+
+
+
+
+
+list1600
+
+This release of the SGS tools provides a listing utility called
+list1600.  This differs from the existing assembler listing built into
+as1600 in that it is a completely independent tool which may be used
+on both DSP relocatable object files, and DSP executables produced by
+the linker.  As a result, list1600 is able to provide users with a
+comprehensive listing of every source file used to build their
+application, complete with the relocated assembler labels.  In
+addition, unlike the listing from as1600, list1600 uses the original
+source code before the preprocessor was run.
+
+The usage is as follows:
+
+     list1600 [-vV] [-l<length>] <DSP1600 executable>
+         -v:        verbose
+         -V:        print the version number
+         -l<length>:     accepts an integer indicating the line length
+
+and finally, the DSP executable or object file is specified.
+
+When the verbose option is used, list1600 prints the name of the
+source files as it reads each one.  Later, it prints the name of the
+source files as it writes the corresponding listing.  This feature was
+added to allow the user to monitor list1600's progress, since it can
+take several minutes to produces listings for large applications.  The
+length option defaults to 80 columns.
+
+All source files are expected to be in the current working directory
+when list1600 is executed.  If any files are not found, list1600 will
+look for them in the directory pointed to by the LIB1600 environment
+variable.  If they are still not found, list1600 reports the error and
+quits.
+
+Instead of creating a single (possibly large) listing file, list1600
+creates a subdirectory, called "listing", in the current working
+directory.  In this directory it writes a separate listing file for
+each of the source and header files used to assemble and link the
+binary file.  This allows users to print or view areas of interest in
+the listing, without having to sort through many pages of source code.
+
+Here is an example of  list1600 output:
+
+
+reloc.s                Page    2       Thu Jul  1 16:34:11 1993
+
+addr:opcd       imm     line                         source
+0035:5080       6f54      61         pt= 0x7000-exlabel  /*subtract extern*/
+0037:5080       7f54      62         pt= 0x8000-exlabel
+                          63
+0039:30c0                 64         nop
+003a:0039                 65     end:    goto end - 1     /*subtract local*/
+003b:00ab                 66         goto exlabel-1
+003c:80ab                 67         call exlabel-1
+                          68         10 * int
+                          69
+
+In the page header, the fields are the name of the source file, the
+page (pages are 60 lines long), and the modification date of the
+source file, respectively.  As indicated by the heading above the
+listing
+itself, the fields in the listing are the address, opcode, immediate
+(if any), line number, and original source code, respectively.  Since
+this is the source code before preprocessing, all comments and
+preprocessor macros are preserved.
+
+As can be seen on line 68 of the example above, list1600 does not
+produce address and code information for data allocation.  This is
+unavoidable because line numbers are not generated for blocks of data
+in the object files.
+
+One final note:  list1600 can only produce a listing if the binary
+file contains a symbol table and line number information.  In other
+words, users should not use as1600 with the "-r" (no line numbers)
+option nor should they strip out the symbol table with the ld1600 "-s"
+option.  The executable or relocatable object file must be created as
+one would create a file for use with one of the win16xx source code
+debuggers.
+
+
+
+
+head1600
+
+To assist in adding the "#include 16xx.h" header line to source files
+that do not already contain a header line, this release of the DSP1600
+SGS includes a tool called head1600.  The command syntax is
+
+     head1600 -hheader [-i][-b] file.s [file.s  . . .]
+
+          where
+          -hheader  specifies the name of the header file (i.e., 1616.h)
+          -i        interactive (i.e., prompt for y/n)
+          -b        save backup copies to file.old
+          file.s         the name of the file to be modified.
+
+For example, if source is to be generated for the DSP1616x30 device,
+and assuming the file sio1.s is in the current directory, the command:
+
+     $ head1600 -h1616x30.h -b sio1.s
+
+will place
+
+     #include <1616x30.h>
+
+followed by a single blank line in the file sio1.s and also create a
+file called sio1.old in the current directory.
+  
+  
+  
+mask1600
+
+
+NOTE: For 3.1.1a and later SGS releases, mask1600 requires a "-s" argument to
+specify the number of 1024 word pages of internal ROM.  Previously, mask1600
+worked with 4096 word pages.
+
+The mask1600 tool generates a ROM mask for the internal ROM on DSP1600 family
+devices.  The usage is as follows:
+
+usage: mask1600 [-V] -s<romsize> <DSP1600 executable program>
+
+ 	Where <romsize> specifies the number of 1K pages to use.
+ 	This will create 2 files:
+ 	(1) hex.out - the internal ROM code in hexadecimal, one word per line.
+ 		(save this file to verify the code AT&T returns.)
+	(2) mask.out - the mask data for the ROM code.  Send this file to AT&T.
+
+The DSP1600 executable program must be properly assembled and linked using a
+ld1600 IFILE that specifies an internal ROM ".rom" section (usually memory map
+1).  The mask1600 tool will issue an error message if the executable does not
+contain a ".rom" section.  If the customer is submitting a secure ROM code, the
+file crc16.v2 (also provided by AT&T) must be included.  Non-secure ROM codes
+require the executable to be linked with the appropriate Hardware Development
+System (HDS) monitor routine for the device.  A separate HDS monitor routine
+file (16XXhds.v2 or 16XXhds.v3) is provided by AT&T on the device-specific tool
+distribution.  
+
+Two output files are generated by mask1600: hex.out and mask.out.  Send
+mask.out to AT&T for encoding of  the ROM.  Keep hex.out for verification with
+a file returned by AT&T.
+
+
+
+prom1600
+
+
+1.  The prom1600 utility in the 3.0 release of the SGS did not correctly
+read all DSP files.  If it encountered the value 0x1A in a file, the output
+file would be corrupted.  This was corrected.
+
+2.  Previous releases of prom1600 had a problem which caused the addresses
+in their output to wrap at 32K.  This has been corrected.
+
+
+
+ar1600
+
+The DSP1600 SGS Tools release now comes with an object file archive
+utility on both DOS and UNIX.  The usage is as follows:
+
+ar1600 {d|m|p|q|r|t|x} [a|b|i c l s u v V] [posname] archive files
+ MODE OPTIONS
+  d     delete named files
+  m     move named files
+  p     print named files
+  q     quickly append named files
+  r     replace named files
+  t     list table of named|ALL files
+  x     extract named|ALL files
+ CONTROL OPTIONS
+  a|b|i put named files after|before|before [posname] file; for r, m
+  c     suppress archive creation message during r or q
+  l     use local current working directory for temp files
+  s     force regeneration of the archive symbol table (use with t)
+  u     update mode for use with r
+  v     verbose mode for use with t, x
+  V     report ar1600's version and release number
+
+The archiver creates library files which can then be used in conjunction
+with the -l and -L options of the DSP1600 linker, ld1600.
+
+
+
+cfig386
+
+The DOS tools releases now include a utility to configure the DOS extender
+stubs included in the executables.  This may be necessary when the tools are
+installed in a directory that is not in the PATH, or when another set of DSP
+tools is installed in a directory that is before them in the PATH.  Its usage
+is as follows:
+
+cfig386 -dosxname file_with_extender file_without_stub
+
+The assembler and command-line simulator files contain a special DOS extender
+that allows them to access memory above the normal limits of DOS.  The other
+tools each contain a small stub that loads the DOS extender from one of these
+files.  When the tools are first installed, the stubs are configured to access
+the assembler or command-line simulator by searching the DOS PATH.  Normally,
+this does not cause any problems.  However, if an earlier version of the
+assembler or simulator is in the PATH before the intended one, this load will
+fail.
+
+If this problem occurs, it may be corrected by using cfig386 to encode the full
+path name of the assembler or command-line simulator into the stub files.
+Batch files have been provided with each of the tools to automate this process.
+The file pfix1600.bat corrects the SGS files, and pfixXXXX.bat (where XXXX is
+the chip name) corrects the simulator files.
+
+None of these utilities should be used unless problems are experienced with the
+tools.  Once the full path name of the executables is encoded into the stubs,
+the tools cannot be moved to a different directory without changing the path
+name using these utilities.
+
+
+
+If you do not have DSP16XX Support Tools Manual or you have any
+questions on the tools, please call the AT&T Microelectronics Customer
+Response Center at 1(800)372-2447.
+
+
+*********************************************
+For additional information.  Contact information is printed in the 
+release notes accompanying the SGS release and in the current AT&T DSP
+data sheet.
+
+AT&T reserves the right to make changes to the product(s) or information
+contained herein without notice.  No liability is assumed as a result of
+their use or application.  No rights under any patent accompany the sale
+of any such product(s) or information.
+
+Copyright (c) 1994 AT&T
+All Rights Reserved
+Printed in U.S.A.
+January 1994
+
+_______________________________
+* MS-DOS is a registered trademark of Microsoft Corporation.
+** UNIX  is a registered trademark of UNIX Systems Laboratory.
+*** Sparc is a registered trademark of Sparc International.
+@

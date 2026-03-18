@@ -1,0 +1,54 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	allenBradley-R2-2-spear0:1.1.1.1
+	allenBradley-R2-2:1.1.1.1
+	allenBradley:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.08.08.13.31.51;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.08.08.13.31.51;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#RULES_DIRS
+include $(EPICS_BASE)/configure/RULES_DIRS
+@
+
+
+1.1.1.1
+log
+@Allenbradley software, version 2.2 from APS:
+http://www.aps.anl.gov/epics/modules/bus/allenBradley/
+@
+text
+@@

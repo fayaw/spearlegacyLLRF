@@ -1,0 +1,36 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2012.10.03.19.30.31;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Used by epvxi,stepper,and allenBradley.
+@
+text
+@#RELEASE Location of external products
+# Run "gnumake clean uninstall install" in the application
+# top directory each time this file is changed.
+
+EPICS_BASE=/afs/slac/g/spear/epics/base
+@

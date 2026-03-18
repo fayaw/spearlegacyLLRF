@@ -1,0 +1,393 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  rmshell.c
+
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include "resman.h"
+
+
+
+/*==========================================================================
+			    global variables
+==========================================================================*/
+
+job_t rmJob;
+
+
+/*==========================================================================
+			      entry point
+==========================================================================*/
+
+int rmShell( unsigned short sfDelay,
+             char* tblPath,
+	     int beVerbose)
+
+{
+  int configured;
+
+  char *strTblTemp;
+  char strTablePath [512];
+
+  time_t sfExpire;
+  sharedMem_t *pSharedMem;
+  nonVxi_t *pNonVxi = NULL;	/*nonvxi*/
+  nonvxi_p vxiHead;		/*nonvxi*/
+  config_p *(pTest);
+  int a = 0;
+  int b = 1;
+  int i;
+char c = 0x31;
+
+  unsigned long sizeMask;
+  char sizeCount;
+
+  /* 
+   * Initialize job context
+   */
+  
+  bzero (&rmJob, sizeof(rmJob));
+
+  VERBOSE = beVerbose;
+  MAINBUS = &KSV151_BUS;
+
+  configured = 0;
+  
+  /*
+   * Verbose Banner 
+   */
+
+  if(VERBOSE) {
+    printf("\nVXI Resource Manager\n");
+    printf("Copyright (c) 2001  KineticSystems Company, LLC\n");
+#ifdef KSC_DEBUG
+    printf("Test Version 1.0\n");
+#endif
+  }
+  
+  /* 
+   * Get time right now & add sysfail delay; pass that expiration time down
+   * to identify() functions as single limit for wait loops.
+   */
+  
+  time( &sfExpire );
+  sfExpire += (time_t)sfDelay;
+
+  /* 
+   * Get rm table directory name from arg
+   */
+
+  if( (tblPath != NULL) && (tblPath[0] != '\0') ) {
+    strcpy( strTablePath, tblPath );  
+    strcat( strTablePath, "/" );
+  }
+  else if( (strTblTemp = getenv("RM_TABLES")) != NULL ) {
+    strcpy( strTablePath, strTblTemp );
+    strcat( strTablePath, "/" );
+  }
+  else {
+    strcpy( strTablePath, "./" );
+  }
+  if (VERBOSE)
+    printf("\nResource Manager tables are in %s.\n", strTablePath);
+   
+  /* 
+   * (try to) read mfr, model, device info from files 
+   * into linked lists
+   */
+#ifdef VERBOSE
+  printf("Reading various tables...\n");
+#endif
+  pName = pModel = pDevice = NULL;	/* Initialize linked list pointers */
+  pSharedMem = getsharedMem( strTablePath );	/* SBC shared memory */
+  rmReadSharedMem ( pSharedMem );		/* SBC shared memory */
+  pNonVxi = getnonVxi(strTablePath, &pName, &pModel, &pDevice);
+  getMfrNames(strTablePath, &pName);
+  getModelNames(strTablePath, &pModel);
+  getDeviceNames(strTablePath, &pDevice);
+
+#if 0
+  pInterrupt = getIntrConf( strTablePath );
+  pTrigUtil  = getUtilConf( strTablePath );
+#endif
+  
+  /* 
+   * Initialize driver access routines
+   */
+#ifdef KSC_DEBUG1
+  printf("\nrmShell:calling InitVXIlibrary \n");
+#endif
+  InitVXIlibrary ();
+for (i=0;i<50000;i++){
+   a = a + b + i;
+}
+  /* 
+   * Identify VXIbus devices
+   */
+#ifdef KSC_DEBUG1
+  printf("rmShell:calling rmIdentify \n");  
+#endif
+  rmIdentify( sfExpire );
+
+  /* 
+   * Manage self-test 
+   */
+#ifdef KSC_DEBUG1
+printf("rmShell:calling rmSelfTest \n");  
+#endif
+
+  rmSelfTest( sfExpire);
+ 
+  /* 
+   * Configure the address maps
+   */
+#ifdef KSC_DEBUG1
+printf("rmShell:calling rmMapMemory \n");  
+#endif
+  vxiHead = pNonVxi;
+					/*nonvxi*/
+  rmMapMemory( VXI_ADDR_EXT_A24, vxiHead, pSharedMem );	/*nonvxi*/
+  rmMapMemory( VXI_ADDR_EXT_A32, vxiHead, pSharedMem );	/*nonvxi*/
+
+#ifdef KSC_DEBUG1
+printf("rmShell:calling rmActivateMemory \n");    
+#endif
+
+  rmActivateSharedMem( pSharedMem );		/* SBC shared memory */
+  rmActivateMemory( );
+  
+  /* 
+   * Configure commander/servant hierarchies 
+   */
+  
+  rmCmdrServ( );
+  
+  /* 
+   * Allocate irq lines 
+   */
+  
+#if 0
+  rmAllocateIRQ( );
+#endif
+  
+  /* 
+   * Configure mxi extenders' ttl/ecl triggers & utility buses 
+   */
+  
+#if 0
+  rmConfigureUtil( );
+#endif
+  
+  /* 
+   * Initiate operation 
+   */
+  
+  rmNormalOp( );
+
+  /* Combine nonvxi device list and vxi device list. */
+  joinlists(&HEAD, &TAIL, vxiHead);		/* nonvxi */
+  
+  /*
+   * Create V151 at HEAD of table 
+   */
+
+#if 1
+  {
+    config_t* thisLA;
+
+    assert(thisLA = calloc(1, sizeof(config_t)));
+
+    thisLA->next = (config_t *)NULL;
+    thisLA->logAdr = 0;
+    thisLA->mainframe = 0;
+    thisLA->reset = 0;
+    thisLA->syfInhb = 0;
+    thisLA->aXXActv = pSharedMem->sysBool;
+/*/  thisLA->aXXActv = 0;*/
+    thisLA->passed = 1;
+    thisLA->ready = 1;
+    thisLA->wsAMCResp = 0xFFFF;
+    thisLA->wsCtrlResp = 0xFFFF;
+    thisLA->protocol = 0xFFFF;
+    thisLA->cmdrLA = 0xFFFF;
+    thisLA->rdProtocol = 0xFFFF;
+    thisLA->subclass = 0;
+    thisLA->ctlrInfo  = 0;
+    thisLA->ihLevels = 0;
+    thisLA->intLevels = 0;
+    thisLA->nrHdlr = 0;
+    thisLA->nrIntr = 0;
+
+    thisLA->mfrID    = 0xF29;
+    thisLA->devClass = 0x2;
+    thisLA->modelID = 0x151;
+
+    /* If V151 shared memory is enabled */
+    if(pSharedMem->sysBool)
+    {
+       thisLA->adrSpace = pSharedMem->adrSpace;
+       if(pSharedMem->adrSpace == VXI_ADDR_EXT_A24)
+       {
+          sizeMask = pSharedMem->size;
+	  sizeCount = 0;
+	  while ((sizeMask & 1) == 0)
+	  { 
+	     sizeMask = sizeMask >> 1;
+	     sizeCount++;
+	     if (sizeCount > 40)
+             {
+#ifdef KSC_DEBUG
+                printf("Invalid A24 size \n");
+#endif
+                break;
+	     }
+	  }   
+          thisLA->memRqmt = 23 - sizeCount;
+/*/        thisLA->memRqmt = 2;  // 0x2000 00;*/
+          thisLA->offset = pSharedMem->vmeAdrs >> 8;
+       }
+       else if(pSharedMem->adrSpace == VXI_ADDR_EXT_A32)
+       {
+          sizeMask = pSharedMem->size / 0x100;
+          sizeCount = 0;
+          while ((sizeMask & 1) == 0)
+          { 
+             sizeMask = sizeMask >> 1;
+             sizeCount++;
+             if (sizeCount > 40)
+             {
+#ifdef KSC_DEBUG
+                printf("Invalid A32 size \n");
+#endif
+                break;
+             }
+          }  
+          thisLA->memRqmt = 23 - sizeCount;
+/*/        thisLA->memRqmt = 7;  // 0x0100 0000;*/
+          thisLA->offset = pSharedMem->vmeAdrs >> 16;
+       }
+    }
+    else
+    {
+       thisLA->adrSpace = 0x3;
+       thisLA->memRqmt = 0;
+    }
+
+    thisLA->next = HEAD;
+    HEAD = thisLA;
+  }
+#endif
+
+  /*
+   * Save configuration info
+   */
+#ifdef KSC_DEBUG1
+printf("rmShell:calling rmGenerateTable \n");    
+#endif
+
+ rmGenerateTable( HEAD, strTablePath, pDevice, pModel, pName );
+  
+  /* 
+   * Remove this call if the completed linked list will be
+   * passed on to VTL or another user application.  15jul96 rcd
+   * This is the list for only the current GI node be configured.
+   */
+  
+  freeConfigList( HEAD );
+  configured++;
+  
+  /*
+   *  Free up alL 'mfrName_t' LINKED LISTS in reverse order 
+   */
+  
+#if 0
+  freeUCList( pTrigUtil );
+  freeICList( pInterrupt );
+#endif
+  free(pSharedMem);
+  freeNonVxi(pNonVxi);
+  freeNameList( pDevice );
+  freeNameList( pModel );
+  freeNameList( pName );
+  
+  /*
+   * All Done
+   */
+
+  if (VERBOSE) {
+    printf ("\nResource Manager is finished.\n\n");
+  }
+
+  return( 0 );
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

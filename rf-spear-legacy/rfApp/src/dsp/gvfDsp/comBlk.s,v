@@ -1,0 +1,444 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP - DSP code
+**
+**  Abstract:
+**      This file contains the DSP - Master communications block definition
+**
+**  Author:
+**      R. Claus, SLAC/PEP-II Feedback Project
+**
+**  History:
+**      January 10, 1994 - Created
+**	4-25-96 - modified by L.Sapozhnikov for GVFF board
+**	June 18, 1997, W. Ross - updated for Revision 1 GVFF Module
+**	June 19, 1997, W. Ross - added conditional mod of DSP_A_ETOP
+**                               for simulation
+**	June 24, 1997, W. Ross - added check on LD_REF msg for block length
+**	July  1, 1997, W. Ross - added DspMsg = CMD_K_ERROR to 'missed
+**                               message' UREF response
+**	March 1, 1998, W. Ross - incrementing version number to 2 to indicate
+**				 expectation of new interpolation coefficient
+**				 in LDREF message body.
+**	May  12, 1998, W. Ross - fix to UREF message label increment, where
+**				 UREF message with label 0x8000 was discarded.
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#include <1610.h>
+
+#include "dspDef.h"
+#include "bioDef.h"
+#include "sttDef.h"
+#include "dspCmdDef.h"
+#include "gvffMisc.h"
+
+.global ComBlk
+.global BlkId
+.global Vers
+.global DspMsg
+.global DspArg
+.global DspLbl
+.global DspChkSum
+.global DspComLen
+.global DspStatus
+.global DspSttArg
+.global CpuMsg
+.global CpuArg
+.global CpuLbl
+.global CpuComLen
+.global ComPtr
+.global ComInit
+.global msg2vxi
+.global msg2dsp
+.global loadRef
+.global newRefUpdate
+.global newFuncUpdate
+.global refUpdate
+.global	I_REF_OUT
+.global	Q_REF_OUT
+.global AvPhase_OUT
+.extern	I_REF
+.extern	Q_REF
+
+#define COM_K_BLKID      0x0002         /* Communications block ID      */
+#define COM_K_VERSION    0x0002         /* Communications block version */
+#define COM_K_SIZE           24         /* Amount to reserve for comm block */
+
+#ifdef SIM_IFILE
+  /* The historic IFILE for GVFF defines ERAM at 0x8000, corresponding   */
+  /* to the ERAM-HI memory bank.  It neglects ERAM-LO residing at 0x2000 */
+  /* The simulator assumes the IFILE will define ERAM at 0x2000, and     */
+  /* does not allocate enough RAM memory space to allow accessing the    */
+  /* top of ERAM-HI.  The following line of code is used only when       */
+  /* the ifile is modified to define: 'eram  (RW) o=12000, l=0a000'      */
+  /* to please the simulator.                                            */
+  /* FOR NORMAL APPLICATION BUILDING, remove -DSIM_IFIL from the         */
+  /* Makefile.Dsp file, and replace copy ifile_org to ifile, which       */
+  /* defines ERAM as: 'eram (RW) o=0x18000, l= 0x4000'                   */
+
+#define DSP_A_ETOP (DSP_A_ERAM + 0x6000 + DSP_K_ESIZE - 1)
+
+#endif  /* ifdef SIM_IFILE */
+
+
+.rsect ".eram"
+
+/*
+   Define Communications Block addresses.  The communciations block can't
+   be filled with data since it doesn't exist at DSP boot time.  This is
+   because the external memory (where the communications block normally
+   resides) is temporarily occupied by the .ram section at boot time. So
+   all we can do is reserve space for the communications block and define
+   its addresses.
+*/
+
+
+	.= (DSP_A_ETOP - COM_K_SIZE - 3)
+I_REF_OUT:	int
+Q_REF_OUT:	int
+AvPhase_OUT:	int
+
+	.= (DSP_A_ETOP - COM_K_SIZE)
+ComBlk:
+BlkId:  	int                    /* Communications block ID */
+Vers:   	int                    /* Communications block version */
+DspMsg: 	int                    /* Message from DSP to Master */
+DspArg: 	int                    /* A message argument */
+DspLbl: 	int                    /* A message label or ID*/
+DspChkSum:	int                    /* Communications block checksum */
+DspComLen: 	int                    /* Communications block size */
+DspStatus: 	int                    /* Status value of code */
+DspSttArg: STT_K_ARGCNT * int          /* Location of 8 arguments for status */
+CpuMsg: 	int                    /* Message from Master to DSP */
+CpuArg: 	int                    /* A message argument */
+CpuLbl: 	int                    /* A message label or ID*/
+CpuComLen: 	int                    /* Communications block size */
+
+	.= DSP_A_ETOP
+ComPtr: int                             /* Pointer to communications block */
+
+
+
+.rsect ".ram"
+
+/*
+   Template Communication block to be copied to the real communications
+   block once the DSP boots.  Stick template data here.  Make sure that
+   the structure is the same as the real one defined above!
+*/
+LclCom:
+	int COM_K_BLKID                 /* Communications block ID */
+	int COM_K_VERSION               /* Communications block version */
+	int CMD_K_NOOP                  /* Message from DSP to Master */
+	int NULL                        /* Msg argument from DSP to Master */
+	int NULL                        /* Msg label from DSP to Master */
+	int NULL                        /* Communications block checksum */
+Cnt:    int EndLcl - LclCom             /* Communications block size */
+	int STT_NONE                    /* Status value of code */
+	STT_K_ARGCNT * int NULL         /* Location of 8 arguments for status */
+	int NULL                        /* Message from Master to DSP */
+	int NULL                        /* Msg argument from Master to DSP */
+LclLbl:	int NULL                        /* Msg label from Master to DSP */
+	int NULL	                /* Communications block size */
+EndLcl:
+
+#define COMSIZE  (EndLcl - LclCom)      /* Let linker calculate size of blk */
+
+
+
+ComInit:
+/*
+   Description
+   -----------
+   Initialize the Communications Block by copying a template to the one
+   that resides in external memory.
+
+   Registers used
+   --------------
+	       r0 - Pointer to the external memory Communications Block
+	       r1 - Pointer to the template communications block
+	       a0 - Data to store
+	    cloop - Loop counter
+*/
+
+	r0    = ComPtr                  /* Address of Communications Block */
+	a0    = ComBlk                  /* Where it is located */
+	*r0   = a0                      /* Store it */
+
+	r0    = a0                      /* Start address */
+	r1    = LclCom                  /* Template address */
+	do COMSIZE {                    /* Copy template to real block */
+	  a0    = *r1++
+	  *r0++ = a0
+	}
+	return
+
+msg2vxi:
+/*
+   Description
+   -----------
+   Update command from DSP to VXI in external DSP memory.
+
+   Registers used
+   --------------
+
+	       y - new message
+	       a0 - new message argument
+	       p - new com block size above com. block
+	       r2 - Scratch
+	       a1 - scratch
+*/
+	a1  = auc
+	auc = 0x10
+        r2  = DspMsg
+ 	*r2 = y				/* Update message	*/
+	r2  = DspArg
+	*r2 = a0			/* Update argument of the message */
+	r2  = DspLbl
+	a0  = *r2
+	y   = 0x1
+	a0  = a0 + y
+	*r2 = a0			/* Update message label */
+	r2  = DspComLen
+	*r2 = p				/* Count of # of entries */
+	auc = a1
+	r2  = SndDspMsg
+	a1  = *r2			/* Trigger interrupt to VXI */
+	return
+
+msg2dsp:
+/*
+   Description
+   -----------
+   Update command from VXI to DSP in external DSP memory.
+
+   Registers used
+   --------------
+
+	       r2 - Scratch
+	       r3 - Scratch
+	       a0 - Scratch
+	       a0 - Scratch
+	       ar0 - Scratch
+	       cloop - Scratch
+
+
+	case (message) {
+	new_ref: update I and Q reference
+	{ format-> address of buffer, size = 2};
+	???:
+	}
+*/
+	a0 = a0 - a0
+        r2    = CpuMsg
+ 	a0 = *r2			/* read new message	*/
+	a0h - CMD_K_LDREF		/* Test if new function cmd is set */
+	if eq goto loadRef		/* Call load function		   */
+	a0h - CMD_K_UREF			/* Test if new ref cmd is set */
+	if eq goto newRefUpdate
+	a0h - CMD_K_NFUNC		/* Test if new function cmd is set */
+	if eq goto newFuncUpdate	/* For future use		   */
+	return
+
+loadRef:		/*   Load all configurable parameters.	*/
+	r2 = CpuLbl
+	a0 = *r2		/* Load firstw label 	*/
+	r2 = LclLbl
+	*r2 = a0		/* Store first label	*/
+	r2 = CpuComLen
+	a0 = a0 - a0
+	a0 = *r2
+	a0h - DSP_K_NLDREF	/* Check that number of parameters is correct */
+	if eq goto len_OK	/* If not: */
+	r2 = CpuMsg		/*  Report invlid message to calling routine */
+	a0 = CMD_K_ERROR
+	*r2 = a0
+	return
+len_OK:
+	cloop = a0
+	r2 = CpuArg
+	r3 = *r2		/* load address for new references */
+	r2 = I_REF		/* Initial internal loading location */
+
+	do 0 {
+	  a0 = *r3++
+	  *r2++ = a0
+	}
+
+	return
+
+
+
+
+newRefUpdate:		/*   Update reference to adaptive algorithm.	*/
+        a0 = auc		/* save auc		*/
+        ar0 = a0		/* save auc		*/
+	a0 = a0 - a0
+	a1 = a1 - a1
+	auc = 0x4		/* Disable saturation for a1 */
+	r2 = CpuLbl
+	a0 = *r2		/* Load new label 	*/
+	r2 = LclLbl
+	a1 = *r2		/* Load last label	*/
+	a0 - a1			/* compare		*/
+	if eq goto newRU_end	/* no new data		*/
+	a1 = a1h + 0x1		/* increase old label by 1	*/
+	a0 = a0 - a1		/* compare lowest 15 bits, masking overflow */
+	a0h & 0x7fff		/*   guard bits when 0x7fff is incremented */
+	if ne goto newRU_1	/* if non equal => skip update => update stat */
+	r3 = CpuArg
+	r2 = *r3		/* load address for new references */
+	a0 = *r2++
+	r3 = I_REF
+	*r3 = a0		/* load new I ref.	*/
+	a0 = *r2
+	r3 = Q_REF
+	*r3 = a0		/* load new Q ref.	*/
+	goto newRU_end
+
+newRU_1:
+	r3 = DspMsg		/* Send CMD_K_ERROR message type to CPU */
+	a1 = CMD_K_ERROR
+	*r3 = a1
+	r3 = DspStatus		/* update status of com. block */
+	a1 = STT_MISUPDATE
+	*r3++ = a1		/* Status of missed update for reference */
+	a1 = *r2
+	*r3 = a1		/* put old label value as argument */
+newRU_end:
+	r2 = CpuLbl
+	a0 = *r2		/* Load new label 	*/
+	r2 = LclLbl
+	*r2 = a0		/* Store new label for future ref. */
+	a0 = ar0		/* restore auc */
+	auc = a0		/* restore auc */
+
+	return
+
+
+newFuncUpdate:		/*  For future use, now it test progr. which */
+			/* trigger message back to VXI.*/
+	r2 = CpuMsg
+	r3  = DspMsg
+	do 4 {
+	a0 = *r2++
+	*r3++ = a0
+	}
+	r2 = SndDspMsg
+	a0 = *r2			/* Trigger interrupt to VXI */
+	return
+
+
+refUpdate:
+/*
+   Description
+   -----------
+   Update reference on the fly without doing message exchange protocol.
+
+   Registers used
+   --------------
+
+	       r2 - External memory referense starting address
+	       r3 - Internal memory referense starting address
+	       a0 - Scratch
+	       a1 - Scratch
+
+	Read each referense value until it read two same values in row
+
+*/
+
+	a0 = a0 - a0
+	a1 = a1 - a1
+	a1 = *r2
+refUpd_1:
+	a0 = a1
+	a1 = *r2
+	a0 - a1
+	if ne goto refUpd_1
+	*r3 = a0
+return
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

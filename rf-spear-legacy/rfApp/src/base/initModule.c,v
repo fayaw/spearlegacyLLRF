@@ -1,0 +1,312 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.2.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.3
+date	2011.12.07.00.56.01;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.05.14.23.58.13;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Changes for 3.14.11.
+@
+text
+@/*
+** ++
+**  Facility:  SYS
+**
+**  Abstract:
+**      File containing routines that are called from the startup script.
+**      Module dependent initialization code lives here since we can't
+**      do conditionals from command scripts.
+**
+**  Author:
+**	R. Claus, PEP II Feedback Project
+**
+**  History:
+**	June  7, 1993 - Created.
+**   January 11, 1995 - Added SYS_HdwInit, and conditionally compiled in calls
+**                      to VXIinit and moved resman to the startup script
+**      July 10, 1995 - Removed loading of object files
+**   January 07, 2000 - Added TARGET check for MV177    (LUCHINI)
+**   March   23, 2000 - Added TARGET check for PowerPC  (LUCHINI)
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+*/
+
+
+
+#include "modTypes.h"                   /* To get #ifs to work! */
+#ifdef UNIX
+#  include "vxWorks-unix.h"
+#else
+#  include <vxWorks.h>
+#  if TARGET == FRC40
+#    ifdef CPU
+#      undef CPU
+#    endif
+#    include <config/frc40/config.h>
+#  endif
+#  include <strLib.h>
+#  include <sysLib.h>
+#endif
+
+#include "mibDef.h"
+#include "sglLib.h"
+#define SYS_MSG_GLOBAL
+#include "sys.msg"
+
+#define NIL   (void *)(0)
+/*#define NULL           0 */
+#define TRUE           1
+#define FALSE          0
+#define SUCCESS        0
+#define DONTCARE       0
+
+#define Min(a,b)       ((a) < (b) ? (a) : (b))
+#define Max(a,b)       ((a) > (b) ? (a) : (b))
+#define lsizeof(var)   (sizeof (var) >> 2)
+
+
+#if TARGET == NICPU030
+/* Apparently Nat'l Inst doesn't feel the need to prototype functions... */
+void VXIinit (void);
+#endif
+
+
+MIBblk        *MIB_Info;
+
+
+
+Status SYS_InitModule ()
+/*
+   Description
+   -----------
+   Function to load module dependent initialization code.
+   This function presumes that the NFS file systems have already been mounted.
+
+   Parameter
+   ---------
+   none.
+
+   Returns
+   -------
+   SUCCESS
+*/
+{
+  void   SYS_HdwInit (void);
+
+  static MIBblk  mib;
+
+  char          *model = sysModel ();
+
+
+  /* Publicize the location of the module information block */
+  MIB_Info = &mib;
+
+#if TARGET == NICPU030
+  /* Initialize based on model type */
+  if ((strcmp (model, "National Instrument VXIcpu-030") == NULL) ||
+      (strcmp (model, "Nat'l Instruments VXIcpu-030")   == NULL))
+  {
+    /* Save the module type in the module information block */
+    MIB_Info->type = MOD_K_NIVXICPU030;
+  }
+#elif TARGET == FRC40
+  if (strcmp (model, "Force SYS68K/CPU-40") == NULL)
+  {
+    /* Save the module type in the module information block */
+    MIB_Info->type = MOD_K_FCPU40B;
+  }
+#elif TARGET == MV166
+  if (strcmp (model, "Motorola MVME166") == NULL)
+  {
+    /* Save the module type in the module information block */
+    MIB_Info->type = MOD_K_MVME166;
+  }
+#elif TARGET == M68040
+  if (strcmp (model, "Motorola MVME167") == NULL)
+  {
+    /* Save the module type in the module information block */
+    MIB_Info->type = MOD_K_MVME167;
+  }
+#elif TARGET == M68060
+  if (strcmp (model, "Motorola MVME177") == NULL)
+  {
+    /* Save the module type in the module information block */
+    MIB_Info->type = MOD_K_MVME177;
+  }
+#elif TARGET == HKV4F
+  if (strcmp (model, "Heurikon HK68/V4F") == NULL)
+  {
+    /* Save the module type in the module information block */
+    MIB_Info->type = MOD_K_HKV4F;
+  }
+#elif TARGET == MPPC604
+  if (strcmp (model, "Motorola MVME2401-1 - MPC 750") == NULL)
+  {
+    /* Save the module type in the module information block */
+    MIB_Info->type = MOD_K_MVME2400;
+  }
+  else if (strcmp (model, "Motorola MVME2700 - MPC 750") == NULL)
+  {
+    /* Save the module type in the module information block */
+    MIB_Info->type = MOD_K_MVME2700;
+  }
+#elif TARGET == UNKNOWN
+  else
+  {
+    /* Save the module type in the module information block */
+    MIB_Info->type = MOD_K_UNDEF;
+
+    SGL_Error (SYS_BADMOD, model);
+  }
+#endif
+  /* Do any required hardware setup */
+  SYS_HdwInit ();
+
+  return (SUCCESS);
+}
+
+
+
+void SYS_HdwInit (void)
+/*
+   Description
+   -----------
+   Routine to setup hardware registers.
+
+   Parameter
+   ---------
+   none
+
+   Returns
+   -------
+   SUCCESS
+*/
+{
+#if TARGET == NICPU030
+  /* Initialize VXI code */
+  VXIinit ();
+#elif TARGET == FRC40
+  /*
+  |  CTL5 controls mailbox access from VME.  If enabled, the address is at
+  |  FBFF8000, right in the middle of VME A16 D32 space.  There is also a
+  |  set at FCFF8000, in A16 D16 space.  The following diables them and a
+  |  few other things as well.  See FGA-002 manual, pg 4-4 and register
+  |  descriptions.
+  */
+  *FGA_CTL5 = NULL;
+#endif
+}
+@
+
+
+1.2
+log
+@Got rid of warnings
+@
+text
+@d67 1
+d138 1
+a138 1
+#elif TARGET == MV167
+d144 1
+a144 1
+#elif TARGET == MV177
+d156 1
+a156 1
+#elif TARGET == MV2400
+d162 1
+a162 2
+#elif TARGET == MV2700
+  if (strcmp (model, "Motorola MVME2700 - MPC 750") == NULL)
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d70 1
+a70 1
+#define NULL           0
+d155 2
+a156 2
+#elif TARGET == PCORE603
+  if (strcmp (model, "FORCE COMPUTERS PPC/PowerCore-6603ev") == NULL)
+d159 1
+a159 1
+    MIB_Info->type = MOD_K_PCORE603;
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

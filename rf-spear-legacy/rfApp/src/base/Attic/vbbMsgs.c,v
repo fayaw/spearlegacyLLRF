@@ -1,0 +1,130 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-0:1.2
+	RF-3-13-10:1.1.1.1.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2011.12.07.00.41.44;	author saa;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Move messages from Msgs.c files to .msg files.
+@
+text
+@/*
+** ++
+**
+**  Facility:  VBB - VME/VXI Bus Browser
+**
+**  Abstract:
+**      Messages for VBB
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Feedback Project
+**
+**  Revision History:
+**       July 20, 1993 - Created
+**  September 15, 1994 - Split into text and #define files
+**     August 17, 1995 - Removed function reporting and newline
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+const char
+Vbb_NoSub [] = "Missing subject",
+Vbb_NoVal [] = "Missing value",
+Vbb_BadTyp[] = "Bad data type",
+Vbb_UnaFil[] = "Unable to open file %s",
+Vbb_NoFil [] = "Missing filename",
+Vbb_LogEna[] = "Logging already enabled to file %s",
+Vbb_BadVrb[] = "Bad or missing verb",
+Vbb_BadRad[] = "Bad radix: %i",
+Vbb_BadSpc[] = "Bad address space: A%i",
+Vbb_BadSiz[] = "Bad word size: %i",
+Vbb_BadNmr[] = "Bad number: %s",
+Vbb_NmrTrm[] = "Number '%s' contains bad character '%c'",
+Vbb_NoLed [] = "Unable to open LED library";
+
+const char
+Vbb_InFil [] = "Input file:     %s\n",
+Vbb_OutFil[] = "Output file:    %s\n",
+Vbb_Radix [] = "Radix:          %s\n",
+Vbb_Spc   [] = "Address space:  %s\n",
+Vbb_Siz   [] = "Word size:      %s\n",
+Vbb_Cols  [] = "Column count:   %u\n",
+Vbb_Pmpt  [] = "Prompt:         '%s'\n",
+Vbb_Width [] = "Width:          %u\n",
+Vbb_Ver   [] = "Verify:         %s\n",
+Vbb_Log   [] = "File logging:   %s\nLog File:       %s\n",
+Vbb_Pat   [] = "Search Pattern: 0x%08x, (unsigned long) %u, (long) %d\n",
+Vbb_Loop  [] = "Loop Count:     %u\n";
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

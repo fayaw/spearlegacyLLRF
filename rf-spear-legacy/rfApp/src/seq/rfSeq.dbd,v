@@ -1,0 +1,39 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	RF-SPEAR-R0-0-0:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2011.12.07.01.07.33;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Needed to build rf.munch in epics 3.14.11.
+@
+text
+@registrar("P2RF_CalibRegistrar")
+registrar("rf_dac_loopRegistrar")
+registrar("rf_hvps_loopRegistrar")
+registrar("rf_statesRegistrar")
+registrar("rf_tuner_loopRegistrar")
+registrar("rf_msgsRegistrar")
+@

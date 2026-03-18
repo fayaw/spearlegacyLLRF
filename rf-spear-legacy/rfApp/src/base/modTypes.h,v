@@ -1,0 +1,269 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.2.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.3
+date	2011.12.07.00.56.02;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.05.14.23.58.14;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.46;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.46;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Changes for 3.14.11.
+@
+text
+@/*
+** ++
+**
+**  Facility:  MIB - Module Information Block
+**
+**  Abstract:
+**      This header file contains the module type definitions.
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Feedback Project
+**
+**   History:
+**      September 15, 1993 - Created
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** -- 
+**    Mod:
+**          29-Jan-2003, K. Luchini (LUCHINI):
+**            Replace the PPC603 with the mv2400 as a VXI target
+**          01-Mar-2000, K. Luchini (LUCHINI):
+**            Add PPC603 as a VXI target 
+**          07-Jan-2000, K. Luchini (LUCHINI):
+**            Add MV177 as a VME target
+**           
+*/
+
+#ifndef MODTYPES_H
+#define MODTYPES_H
+
+#  define MOD_K_UNDEF          -1
+
+#  define MOD_K_MASTERMIN       0       /* Minimum id for a VME master        */
+#  define MOD_K_NIVXICPU030     0       /* Nat'l Instr VXIcpu-030             */
+#  define MOD_K_FCPU39B         1       /* Force CPU-39B                      */
+#  define MOD_K_FCPU40B         2       /* Force CPU-40B                      */
+#  define MOD_K_MVME166         3       /* Motorola MVME-166                  */
+#  define MOD_K_MVME167         4       /* Motorola MVME-167                  */
+#  define MOD_K_HKV4F           5       /* Heurikon HK68/V4F                  */
+#  define MOD_K_DATARELAYER     6       /* Data Relayer Module (Interface)    */
+#  define MOD_K_MVME177         7       /* Motorola MVME-177                  */
+#  define MOD_K_MVME2400        8       /* Force V152 PPC MPC750 (604)        */
+#  define MOD_K_MVME2700        9       /* Motorola MVME-2700                 */
+#  define MOD_K_MASTERMAX       9       /* Maximum id for a VME master        */
+#  define MOD_K_MASTERCNT       (MOD_K_MASTERMAX - MOD_K_MASTERMIN + 1)
+
+#  define MOD_K_SLAVEMIN      100       /* Maximum id for a VME slave         */
+#  define MOD_K_DSP1610       100       /* DSP 1610 module                    */
+#  define MOD_K_DWNSMPLR      101       /* Downsampler module                 */
+#  define MOD_K_HLDBUFR       102       /* Hold Buffer module                 */
+#  define MOD_K_FRONTEND      103       /* Front End module                   */
+#  define MOD_K_BACKEND       104       /* Back End module                    */
+#  define MOD_K_TIMING        105       /* Timing module                      */
+#  define MOD_K_SLAVEMAX      105       /* Maximum id for a VME slave         */
+#  define MOD_K_SLAVECNT        (MOD_K_SLAVEMAX - MOD_K_SLAVEMIN + 1)
+
+/* The following are symbols used with #if TARGET == <target> statements */
+#  define SOLARIS_SPARC        -1
+#  define UNKNOWN               0
+#  define NICPU030              11
+#  define niCpu030              11
+#  define FRC39                 2
+#  define FRC40                 3
+#  define frc40                 3
+#  define FRC42                 4
+#  define DSP1600               5
+#  define MV166                 6
+#  define mv166                 6
+#  define M68040                7
+#  define M68040                7
+#  define HKV4F                 8
+#  define hkv4f                 8
+#  define M68060                9
+#  define m68060                9
+#  define mppc604               10
+#  define MPPC604               10
+
+
+#if TARGET == niCpu030
+#  undef  TARGET
+#  define TARGET  NICPU030
+#elif TARGET == frc40
+#  undef  TARGET
+#  define TARGET  FRC40
+#elif TARGET == mv166
+#  undef  TARGET
+#  define TARGET  MV166
+#elif TARGET == mv167 || TARGET == vxWorks-68040
+#  undef  TARGET
+#  define TARGET  M68040
+#elif TARGET == hkv4f
+#  undef  TARGET
+#  define TARGET  HKV4F
+#elif TARGET == mv177 || TARGET == vxWorks-68060
+#  undef TARGET
+#  define TARGET M68060
+#elif TARGET == mv2400 || TARGET == mv2700 || TARGET == vxWorks-ppc604 || TARGET == vxWorks-ppc604_long
+#  undef TARGET
+#  define TARGET MPPC604
+#elif TARGET == sun4 || TARGET == solaris || TARGET == SOLARIS || TARGET == solaris-sparc || TARGET == solaris-sparc-gnu
+#  undef  TARGET
+#  define TARGET  SOLARIS_SPARC
+#endif
+
+#if TARGET == FRC40 || TARGET == MV166 || TARGET == HKV4F || TARGET == M68040 || TARGET == M68060
+#  define VMECPU  TARGET
+#endif
+
+#endif
+@
+
+
+1.2
+log
+@Got rid of warnings
+@
+text
+@d81 1
+a81 1
+#  define SUN4                 -1
+d83 2
+a84 2
+#  define NICPU030              1
+#  define niCpu030              1
+d92 2
+a93 2
+#  define MV167                 7
+#  define mv167                 7
+d96 4
+a99 6
+#  define MV177                 9
+#  define mv177                 9
+#  define mv2400                10
+#  define MV2400                10 
+#  define mv2700                11
+#  define MV2700                11
+d111 1
+a111 1
+#elif TARGET == mv167
+d113 1
+a113 1
+#  define TARGET  MV167
+d117 1
+a117 1
+#elif TARGET == mv177
+d119 2
+a120 2
+#  define TARGET MV177
+#elif TARGET == mv2400
+d122 2
+a123 2
+#  define TARGET MV2400
+#elif TARGET == sun4 || TARGET == solaris || TARGET == SOLARIS
+d125 1
+a125 1
+#  define TARGET  SUN4
+d128 1
+a128 3
+#if TARGET == NICPU030 || MV2400
+#  define VXICPU  TARGET
+#elif TARGET == FRC40 || TARGET == MV166 || TARGET == HKV4F || TARGET == MV177 || TARGET == MV2700
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d42 2
+d65 1
+a65 1
+#  define MOD_K_PCORE603        8       /* Force PowerCore PPC  6603ev        */
+d98 2
+a99 2
+#  define pcore603              10
+#  define PCORE603              10 
+d122 1
+a122 1
+#elif TARGET == pcore603
+d124 1
+a124 1
+#  define TARGET PCORE603
+d130 1
+a130 1
+#if TARGET == NICPU030 || PCORE603
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

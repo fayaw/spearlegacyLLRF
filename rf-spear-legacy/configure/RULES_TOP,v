@@ -1,0 +1,63 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_0:1.1.1.1
+	R_epics_3_14_6_spear0:1.1.1.1
+	R_3_14_1_spear1:1.1.1.1
+	snapshot_may_02_2004_by_ts:1.1.1.1
+	R_3_14_1_spear0:1.1.1.1
+	R_3_14_0_beta1_spear1:1.1.1.1
+	R_configure_orig:1.1.1.1
+	B_configure_orig:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2002.02.17.06.13.23;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.02.17.06.13.23;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#RULES_TOP
+include $(EPICS_BASE)/configure/RULES_TOP
+
+@
+
+
+1.1.1.1
+log
+@Initial version.
+@
+text
+@@

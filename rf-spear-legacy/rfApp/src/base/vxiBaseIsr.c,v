@@ -1,0 +1,394 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.1.0.2;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2011.12.07.00.33.26;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.01.15.16.39.13;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Changes for 3.14.11.
+@
+text
+@/*
+=============================================================
+
+  Abs:  V152-S002 VXI Slot-0 Controller Routines
+
+  Name: vxiBaseIsr.c
+
+  Rem:  This function is used to replace the Kinetic
+        System base VXI Interrupt Service Routine
+        vxiBaseIsr(), providing diagnostic print
+        statements along the way.  The local routine
+        myIsr looks at the slot-0 controller A16 registers 
+        for interrupt status/control and interrupt level
+
+  Side:  Kinetic Systems V152 Slot-0 Controller ONLY
+
+  Proto: None
+
+  Auth: dd-mmm-yyyy, Kristi Luchini   (LUCHINI)
+  Rev : dd-mmm-yyyy, Reviewer's Name  (USERNAME)
+
+-------------------------------------------------------------
+  Mod:
+        19-Dec-2003, K. Luchini       (LUCHINI):
+           added v152_wt_iack_ctrl(),v152_rd_iack_ctrl()
+           v152_rd_int_status(),v152_getBaseAdrs
+        09-Sep-2003, K. Luchini       (LUCHINI):
+           changed #if TARGET == MV2400 to
+           #if CPU_FAMILY == PPC and added a log 
+           message when running reset_kscIsr for the
+           niCpu030
+
+=============================================================
+*/
+#include "vxWorks.h"
+#include "vxLib.h"
+#include "iv.h"
+#include "vme.h"
+#include "intLib.h"
+#include "sysLib.h"
+#include "logLib.h"
+#include "config.h"
+
+/* Prototypes */
+void   my_vxiBaseIsr(void);
+int    reset_kscIsr(void);
+
+#if CPU == PPC604
+
+#ifdef INCLUDE_MPIC
+#include "hawkMpic.h"
+#else
+#include "sl82565IntrCtl.h"
+#endif
+
+#include "universe.h"
+#include "kscvxi.h"  /* globals VXIintLevel, VXIintStatusId */
+
+/* Local Prototypes */
+int    v152_rd_iack_ctrl( unsigned short *pdata );
+int    v152_rd_int_status( unsigned short *pdata );
+int    v152_getBaseAdrs( void );
+int    v152_wt_iack_ctrl( unsigned short data );
+
+IMPORT INT_HANDLER_DESC * sysIntTbl [256];
+
+/* Global Prototypes */
+IMPORT void   sysPciRead32  (UINT32, UINT32 *);
+IMPORT void   sysPciWrite32 (UINT32, UINT32);
+
+/* Globals */
+IMPORT UINT32 univBaseAdrs;
+int vxi_debug = 0;
+
+/* Local variables */
+static volatile unsigned short *vxiBaseAdrs=NULL;
+
+/* Macros */
+#ifndef UNIV_IN_LONG
+# define UNIV_IN_LONG(adr,pVal) \
+  sysPciRead32((UINT32)(adr),(UINT32 *)(pVal));
+#endif
+
+#ifndef UNIV_OUT_LONG
+# define UNIV_OUT_LONG(adr,val) \
+  sysPciWrite32((UINT32)(adr),(UINT32)(val));
+#endif
+ 
+#define VXI_A16_BASE 0xc000
+
+int v152_getBaseAdrs( void )
+{
+    int  status = OK;
+    int  adrSpace = VME_AM_SUP_SHORT_IO;
+
+    status = sysBusToLocalAdrs( adrSpace,
+                               (char *)VXI_A16_BASE,
+                               (char **)&vxiBaseAdrs );
+    if ( status!=OK ) 
+      logMsg("Invalid VXI A16 Base Address 0x%x\n",
+                (int)VXI_A16_BASE,0,0,0,0,0);
+    return(status);
+}
+
+int v152_rd_int_status( unsigned short *pdata )
+{
+  int status=OK;
+  int mode = READ;
+  int bcnt = 2;
+  unsigned short cpu_int_status = 0;
+  unsigned long  adrs = 0;
+
+  if ( !vxiBaseAdrs ) v152_getBaseAdrs();
+  
+  adrs = (unsigned long)vxiBaseAdrs + 0x38;
+  status = vxMemProbe((char *)adrs,mode,bcnt,(char *)&cpu_int_status);
+  if ( status==OK ) {
+    if (vxi_debug) 
+       logMsg("V152 Interrupt Status (0x%x): 0x%x\n",
+              (int)adrs,(int)cpu_int_status,0,0,0,0);
+    *pdata = cpu_int_status;
+  }
+  else if ( vxi_debug )
+    logMsg("Failed to read CPU Interrupt Status Register 0x%x\n",
+          (int)adrs,0,0,0,0,0);
+  return(status);
+}
+
+int v152_rd_iack_ctrl( unsigned short *pdata )
+{
+  int status = OK;
+  int mode = READ;
+  int bcnt = 2;
+  unsigned short cpu_iack_ctrl=0;
+  unsigned long  adrs = 0;
+
+  if ( !vxiBaseAdrs ) v152_getBaseAdrs();
+
+  adrs = (unsigned long)vxiBaseAdrs + 0x36;
+  status = vxMemProbe((char *)adrs,mode,bcnt,(char *)&cpu_iack_ctrl);
+  if (status==OK)  {
+    if (vxi_debug)
+       logMsg("CPU IACK Control Register (0x%x): 0x%x\n",
+              (int)adrs,(int)cpu_iack_ctrl,0,0,0,0);
+    *pdata = cpu_iack_ctrl;
+  }
+  else if (vxi_debug)
+       logMsg("Failed to read CPU IACK Control Register 0x%x\n",
+             (int)adrs,0,0,0,0,0);
+  return(status);
+}
+
+int v152_wt_iack_ctrl( unsigned short data )
+{
+  int status = OK;
+  int mode = WRITE;
+  int bcnt = 2;
+  unsigned short rbk_data=0;
+  unsigned long  adrs = 0;
+
+  if ( !vxiBaseAdrs ) v152_getBaseAdrs();
+
+  adrs = (unsigned long)vxiBaseAdrs + 0x36;
+  status = vxMemProbe((char *)adrs,mode,bcnt,(char *)&data);
+  if (status==OK)  {
+    if (vxi_debug)
+     { 
+       mode = READ;
+       status = vxMemProbe((char *)adrs,mode,bcnt,(char *)&rbk_data);
+       if ((status==OK) && ((rbk_data & 0xff) != (data &0xff))) 
+          logMsg("CPU IACK Control Register (0x%x): rbk=0x%x  wt=0x%x\n",
+                  (int)adrs,(int)rbk_data,(int)data,0,0,0);
+     }
+  }
+  else
+       logMsg("Failed to write CPU IACK Control Register 0x%x\n",
+             (int)adrs,0,0,0,0,0);
+  return(status);
+}
+
+void my_vxiBaseIsr(void)
+{
+  unsigned short cpu_int_status=0;
+  unsigned long  univ_int_status=0;
+  unsigned long  univ_statid=0;
+  static volatile unsigned short *vxiBaseAdrs=NULL;
+  int           status;
+  int           level=0;
+  int           i,j;
+  int           adrSpace = VME_AM_SUP_SHORT_IO;
+  int           mode = READ;
+  int           bcnt = 2;
+  unsigned int  mask;
+  short         controller = -1;
+  unsigned long  statid=0;
+  unsigned long  adrs;
+  unsigned int  *paddr;
+  NIVXI_HVXIINT *proutine;
+  
+
+
+  /* Read the V152 Interrupt Status Id register */
+  if ( !vxiBaseAdrs ) {
+    status = sysBusToLocalAdrs( adrSpace,
+                               (char *)VXI_A16_BASE,
+                               (char **)&vxiBaseAdrs );
+    if ( status!=OK ) {
+      if (vxi_debug)
+         logMsg("Invalid VXI A16 Base Address 0x%x\n",
+                (int)VXI_A16_BASE,0,0,0,0,0);
+       return;
+    }
+  }
+
+  adrs = (unsigned long)vxiBaseAdrs + 0x38;
+  status = vxMemProbe((char *)adrs,mode,bcnt,(char *)&cpu_int_status);
+  if ( status!=OK )
+    logMsg("Failed to read CPU Interrupt Status Register 0x%x\n",
+             (int)adrs,0,0,0,0,0);
+  else if (vxi_debug==2) 
+    logMsg("V152 Interrupt Status (0x%x): 0x%x\n",
+	    (int)adrs,(int)cpu_int_status,0,0,0,0);
+
+  /* Get pending interrupt levels from Universe II chip  */  
+  UNIV_IN_LONG(UNIVERSE_LINT_STAT, &univ_int_status )
+  if (vxi_debug==2) 
+    logMsg("Universe II LINT_STAT register (0x%x): 0x%x\n",
+	 (int)UNIVERSE_ADRS(UNIVERSE_LINT_STAT),
+         (int)univ_int_status,
+         0,0,0,0);
+
+  level = univ_int_status & 0xff;
+  level >>= 1;
+  if ( level ) {  
+    for (i=0; i<7; i++) {
+      j = 6-i;
+      mask = 1 << j;
+      if ( level & mask ) {  
+        level ^= mask; /* Clear interrupt being serviced */
+     	/* 
+	 * The Universe II Chip has individual registers for the status id 
+	 * information of each interrupt level.
+	 */     
+        j++;  
+        switch( j ) {
+	case 1:
+           paddr = UNIVERSE_V1_STATID;
+           break;
+        case 2:
+           paddr = UNIVERSE_V2_STATID;
+           break;
+        case 3:
+           paddr = UNIVERSE_V3_STATID;
+           break;
+        case 4:
+           paddr = UNIVERSE_V4_STATID;
+           break;
+        case 5:
+           paddr = UNIVERSE_V5_STATID;
+           break;
+        case 6:
+           paddr = UNIVERSE_V6_STATID;
+           break;
+        case 7:
+        default:
+           paddr = UNIVERSE_V7_STATID;
+           break;
+        }/* End of SWITCH statement */
+      
+        UNIV_IN_LONG( paddr,&univ_statid );
+        if (vxi_debug)
+          logMsg("D16 IACK level=%d statid=0x%x\n",
+                (int)j,
+                (int)univ_statid,
+                0,0,0,0);
+
+        /* Call user interrupt service routine 
+         * Cause & status of interrupt is in bits 8-15
+	 * and the logical address of the interrupter is in bits 0-7.
+	 */ 
+        proutine = GetVXIintHandler( (UINT16)j );
+        if (proutine) {
+          statid |= ((UINT32)cpu_int_status & 0xffff);
+          (proutine)(controller,(UINT16)j,statid);
+	}
+        else {
+          if (vxi_debug)
+             logMsg("VXI ISR for interrupt level %d has not been set\n",j,0,0,0,0,0); 
+	}       
+      }
+    }/* End of FOR statment */
+  }
+  else {
+      if (vxi_debug)
+        logMsg("Interrupt Level is zero!!!\n",0,0,0,0,0,0);
+  }
+
+  /* Clear interrupt request in Universe chip */
+  UNIV_OUT_LONG(UNIVERSE_LINT_STAT, univ_int_status );
+}
+
+int reset_kscIsr(void)
+{
+   INT_HANDLER_DESC *currHandler = NULL;
+
+   currHandler = sysIntTbl[255];
+   if ( currHandler->vec == NULL )
+      logMsg("Interrupt Vector 255 has not been initialized yet!\n",
+             0,0,0,0,0,0);
+   else {
+      currHandler->vec = my_vxiBaseIsr;
+      if (vxi_debug)
+        logMsg("Resetting KSC Interrupt Vector at 255 to SLAC version\n",
+               0,0,0,0,0,0);
+   }
+  return OK;
+}
+#else
+
+int reset_kscIsr(void)
+{
+  if (vxi_debug) logMsg("Fake ISR for niCpu030\n",0,0,0,0,0,0);
+  return OK;
+}
+
+void  my_vxiBaseIsr(void)
+{
+  return;
+}
+#endif
+
+@
+
+
+1.1
+log
+@Added vxiBaseIsr.c for Kristi Luchini.  This file overrides routines provided
+by KineticSystems for the mv2400 to get VXI and VME interrupts to work.  It is
+built for both mv2400 and niCpu030 though the niCpu030 routines are noop.
+@
+text
+@a43 2
+/*#include "modTypes.h" */
+
+d48 1
+a48 1
+#if CPU_FAMILY == PPC
+d312 3
+a314 2
+      logMsg("Resetting KSC Interrupt Vector at 255 to SLAC version\n",
+             0,0,0,0,0,0);
+d322 1
+a322 1
+  logMsg("Fake ISR for niCpu030\n",0,0,0,0,0,0);
+@
+

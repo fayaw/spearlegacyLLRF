@@ -1,0 +1,109 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.01.10.23.22.31;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.31;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@grecord(mbbi,"$(S):STNDCM:T$(T):STAT") {
+	field(DESC,"Stn DCM Table $(T) Status")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM MBBI")
+	field(NOBT,"16")
+	field(INP,"@@$(S):STN:DCM:MODU.T$(T)[0,0]")
+	field(ONVL,"0x0500")
+	field(TWVL,"0x0900")
+	field(THVL,"0x0D00")
+	field(FRVL,"0x1100")
+	field(FVVL,"0x1500")
+	field(SXVL,"0x2100")
+	field(SVVL,"0x2500")
+	field(EIVL,"0x3100")
+	field(NIVL,"0x3500")
+	field(TEVL,"0x3900")
+	field(ELVL,"0x3D00")
+	field(TVVL,"0x2900")
+	field(TTVL,"0x2D00")
+	field(FTVL,"0x4100")
+	field(FFVL,"0x8100")
+	field(ZRST,"SUCCESS")
+	field(ONST,"OLD_DATA")
+	field(TWST,"NO_DATA")
+	field(THST,"NO_DATA")
+	field(FRST,"BP_ERROR")
+	field(FVST,"BP_ERROR")
+	field(SXST,"BP_RESET")
+	field(SVST,"BP_RESET")
+	field(EIST,"BP_RESET")
+	field(NIST,"BP_RESET")
+	field(TEST,"BP_RESET")
+	field(ELST,"BP_RESET")
+	field(TVST,"BP_RESET")
+	field(TTST,"BP_RESET")
+	field(FTST,"EXC_DATA")
+	field(FFST,"INS_DATA")
+	field(ONSV,"MAJOR")
+	field(TWSV,"MAJOR")
+	field(THSV,"MAJOR")
+	field(FRSV,"MAJOR")
+	field(FVSV,"MAJOR")
+	field(SXSV,"MAJOR")
+	field(SVSV,"MAJOR")
+	field(EISV,"MAJOR")
+	field(NISV,"MAJOR")
+	field(TESV,"MAJOR")
+	field(ELSV,"MAJOR")
+	field(TVSV,"MAJOR")
+	field(TTSV,"MAJOR")
+	field(FTSV,"MAJOR")
+	field(FFSV,"MAJOR")
+	field(UNSV,"INVALID")
+}
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

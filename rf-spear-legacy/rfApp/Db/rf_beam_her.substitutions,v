@@ -1,0 +1,116 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.3.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.3
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.3
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2009.12.12.00.13.41;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2004.01.05.19.35.05;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.02.03.56;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@#==============================================================
+#
+# Abs:   Database template for HER RF beam current and status.
+#
+# Name:  rf_beam_her.substitutions
+#
+# Desc:  EPICS database template file for HER RF beam.
+#
+# Side:  None
+#
+# Facility: SLAC/PEPII Low-Level RF
+#
+# Auth: 02-Nov-2002, Stephanie Allison (SAA)
+# Rev:  dd-mmm-yyyy, First Lastname    (USERNAME)
+#==============================================================
+#
+# Mod:
+#       06-Feb-2003, K. Luchini (LUCHINI):
+#         Added standard header and obtained
+#         db files from the top level db directory
+#         instead of db. Added substitutions tobe used
+#         in the build script
+#
+#==============================================================
+#
+file rf_beam.db
+{
+     {R=$(RRRS), RING=H}
+}
+file rf_sumy_stn_pep.db
+{
+     {S=$(RRRS)}
+}
+@
+
+
+1.2
+log
+@Station and feedback summaries are different for SPEAR.  Move those summaries
+to rf_sumy_stn_(pep,spr).db from rf_sumy_stn.db and include the appropriate
+rf_sumy_stn_* in rf_beam_*.template.
+@
+text
+@d5 1
+a5 1
+# Name:  RRRS_beam_her.template
+d26 1
+a26 1
+file db/rf_beam.db
+d28 1
+a28 1
+     {R=RRRS, RING=H}
+d30 1
+a30 1
+file db/rf_sumy_stn_pep.db
+d32 1
+a32 1
+     {S=RRRS}
+@
+
+
+1.1
+log
+@RF HER beam template
+@
+text
+@d30 4
+@
+

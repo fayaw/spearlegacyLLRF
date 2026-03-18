@@ -1,0 +1,78 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	RF-SPEAR-R0-0-0:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1
+	RF-3-13-10:1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2004.01.05.19.45.02;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@SPEAR uses all arc interlock channels available on the new arc interlock
+module (vacuum and air side for all 4 cavities).  SPEAR uses the arc channel
+reserved for MPS.  All arc interlock records moved out of rf_digital*.template
+and into rf_stn*.template (where 4CVAll uses all channels).  Arc summaries are
+moved out of rf_sumy_(2CV,4CV).db into rf_sumy_arc_(2CV,4CV,4CVAll).db.
+@
+text
+@# Macros:
+#   S = Station (HR81, etc)
+# 
+record(calc,"$(S):CAV1:ARC:LTCH") {
+	field(DESC,"CAV1 Arc Status Sum")
+	field(FLNK,"$(S):CAV1:SUMY:LTCH.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1_1:ARC:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CAV1_2:ARC:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):CAV1:ARC:FRST") {
+	field(DESC,"CAV1 Arc Status Sum")
+	field(FLNK,"$(S):CAV1:SUMY:FRST.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1_1:ARC:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CAV1_2:ARC:FRST.SEVR NPP MS")
+}
+record(fanout,"$(S):STN:AIM:ARCFRSTFANO") {
+	field(DESC,"AIM Arc Latch Fanout")
+	field(LNK1,"$(S):KLYS:ARC:FRST.PROC")
+	field(LNK2,"$(S):CIRC:ARC:FRST.PROC")
+	field(LNK3,"$(S):CAV1_1:ARC:FRST.PROC")
+	field(FLNK,"$(S):CAV1_2:ARC:FRST.PROC")
+	field(LNK4,"$(S):CAV2:ARC:FRST.PROC")
+	field(LNK5,"$(S):CAV3:ARC:FRST.PROC")
+	field(LNK6,"$(S):CAV4:ARC:FRST.PROC")
+}
+record(fanout,"$(S):STN:AIM:ARCLTCHFANO") {
+	field(DESC,"AIM Arc Latch Fanout")
+	field(LNK1,"$(S):KLYS:ARC:LTCH.PROC")
+	field(LNK2,"$(S):CIRC:ARC:LTCH.PROC")
+	field(LNK3,"$(S):CAV1_1:ARC:LTCH.PROC")
+	field(FLNK,"$(S):CAV1_2:ARC:LTCH.PROC")
+	field(LNK4,"$(S):CAV2:ARC:LTCH.PROC")
+	field(LNK5,"$(S):CAV3:ARC:LTCH.PROC")
+	field(LNK6,"$(S):CAV4:ARC:LTCH.PROC")
+}
+@

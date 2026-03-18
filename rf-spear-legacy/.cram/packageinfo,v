@@ -1,0 +1,28 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2015.08.11.23.56.51;	author jpdef;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@added .cram package info so app can be deployed with cram
+@
+text
+@{"type": "HIOC", "name": "RF-SPEAR"}@

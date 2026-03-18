@@ -1,0 +1,215 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.10.02.02.13.16;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.10.02.02.13.16;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@LISTING FOR LOGIC DESCRIPTION FILE: V152_U35.pld                     Page 1
+
+CUPL(WM): Universal Compiler for Programmable Logic
+Version 5.0a Serial# 60008009
+Copyright (c) 1983, 1998 Logical Devices, Inc.
+Created Wed Oct 01 19:13:07 2003
+
+  1:Name      v152_u35;
+  2:Partno    ATF16V8B-10SC;
+  3:Date      9-22-2003;
+  4:Revision  A;
+  5:Designer  John Dusatko;
+  6:Company   SLAC;
+  7:Assembly  A;
+  8:Location  Stanford;
+  9:Device    G16V8as;
+ 10:
+ 11:
+ 12:/*****************************************************************/
+ 13:/* Notes on device mode selection:                                          */
+ 14:/* Device = G16V8 is supposed to let the compiler auto-select the */
+ 15:/* global OLMC mode. It doesn't appear to work here because it    */ 
+ 16:/* allow pin 19 to be used as an input, which becomes an output   */
+ 17:/* ONLY when in complex mode because its feedback is removed.       */
+ 18:/* So it seems like the crappy CUPL compiler is doing this!         */
+ 19:/*                                                                          */
+ 20:/* Mode control settings:                                                   */
+ 21:/*      Mode                    CUPL "Device" Value                         */
+ 22:/*      Registered              G16V8MS                             */
+ 23:/*      Complex         G16V8MA                             */
+ 24:/*      Simple                  G16V8AS                             */
+ 25:/*                                                                          */
+ 26:/*                                                                          */
+ 27:/* To get this damn thing to work properly, I forced the complier */
+ 28:/* to use the SIMPLE mode                                                   */
+ 29:/*****************************************************************/
+ 30:
+ 31:/* */
+ 32:/* */
+ 33:/* */
+ 34:
+ 35:
+ 36:
+ 37:/*****************************************************************/
+ 38:/*              Stanford Linear Accelerator Center                         */
+ 39:/*                      PEP-II / SPEAR3                            */
+ 40:/*              Low Level RF System Upgrade                                */
+ 41:/*                                                                         */
+ 42:/*                                                                         */
+ 43:/*                                                                         */
+ 44:/* This design is to modify the interrupt acknowledge (IACK)     */
+ 45:/* cycle on the Kinetic Systems V152 Slot-0 Controller           */
+ 46:/*                                                                         */
+ 47:/* This device will replace U35, a 74FCT245 on the V152          */
+ 48:/*                                                                         */
+ 49:/* The V152 has been modified to provide controllability of the  */
+ 50:/* type of databus transaction (D16 or D8(O) to occur. In its      */
+ 51:/* unmodified state, the V152 only generates D8(O) cycles. Our   */
+ 52:/* SLAC LLRF VXI modules only respond to D16 IACK cycles. The    */
+ 53:/* mod creates a way to selectively enable the IACK response for */
+
+LISTING FOR LOGIC DESCRIPTION FILE: V152_U35.pld                     Page 2
+
+CUPL(WM): Universal Compiler for Programmable Logic
+Version 5.0a Serial# 60008009
+Copyright (c) 1983, 1998 Logical Devices, Inc.
+Created Wed Oct 01 19:13:07 2003
+
+ 54:/* a specific IRQn level to be either D8(O) or D16.                */
+ 55:/*                                                                         */
+ 56:/* This device implements the selection logic for the VME/VXI      */
+ 57:/* Data Stobe DSn* signals.                                                */
+ 58:/*                                                                         */
+ 59:/* This design basically MUXes DS1. When a D16 IACK is desired,  */
+ 60:/* the MUX is set to select DS0* to drive DS1*. When a regular   */
+ 61:/* VME D8(O) IACK is desired, the MUX is set to so that DS1*     */
+ 62:/* drives DS1* normally.                                                   */
+ 63:/*                                                                         */
+ 64:/* ---> IMPORTANT NOTE!!!                                                  */
+ 65:/* Once this mode has been implemented, the V152 can be used    in */
+ 66:/* bus MASTER mode *ONLY*.                                                 */
+ 67:/*                                                                         */
+ 68:/****************************************************************/
+ 69:
+ 70:
+ 71:
+ 72:/*  inputs  */
+ 73:
+ 74:/* tri-state enables */
+ 75:pin 19 = g_n;
+ 76:
+ 77:/* bidir control */
+ 78:pin 1 = dir;
+ 79:
+ 80:/* VME inputs */
+ 81:pin 2 = vmas_n;
+ 82:pin 4 = vmds0_n; /* note pin order is different! */
+ 83:pin 3 = vmds1_n; /* note pin order is different! */
+ 84:pin 5 = vmwrite_n;
+ 85:
+ 86:/* spare inputs */
+ 87:pin 6 = sp1;
+ 88:pin 7 = sp2;
+ 89:pin 8 = sp3;
+ 90:
+ 91:/* Mux select ctrl from U7 FPGA */
+ 92:pin 9 = d16_isel;
+ 93:
+ 94:
+ 95:/*  outputs  */
+ 96:
+ 97:/* VXI output */
+ 98:pin 18 = vxas_n;        /* buffered version of vmas_n */
+ 99:pin 17 = vxds1_n;       /* special MUXed version of vmds1_n */
+100:pin 16 = vxds0_n;       /* buffered version of vmds0_n */
+101:pin 15 = vxwrite_n;     /* buffered version of vmwrite_n */
+102:
+103:
+104:/* Misc outputs -- unconnected pins, put stuff here for fun */
+105:pin 14 = sout;  /* ORd sum of spare inputs */
+106:pin 13 = dir_out;       /* OR of g_n and dir */
+107:pin 12 = d8_read;       /* OR of DS1 & DS0 before MUX */
+
+LISTING FOR LOGIC DESCRIPTION FILE: V152_U35.pld                     Page 3
+
+CUPL(WM): Universal Compiler for Programmable Logic
+Version 5.0a Serial# 60008009
+Copyright (c) 1983, 1998 Logical Devices, Inc.
+Created Wed Oct 01 19:13:07 2003
+
+108:
+109:/* pin 11 = d8_read;    */ /* active when a D8(O) read is performed */
+110:
+111:
+112:
+113:/* equations */
+114:
+115:vxas_n = vmas_n;   /* buffer as_n */
+116:
+117:vxds0_n = vmds0_n;   /* buffer ds0_n */
+118:
+119:vxwrite_n = vmwrite_n;   /* buffer write_n */
+120:
+121:
+122:vxds1_n = ((vmds1_n & !d16_isel) # (vmds0_n & d16_isel)); /* the DS1_n MUX */
+123:
+124: /* random logic */
+125:sout = sp1 # sp2 # sp3; /* doing someting with the unused signals */
+126:
+127:dir_out = dir # g_n;
+128:
+129:vme_ds16_n = vmds0_n # vmds1_n;
+130:
+131:d8_read = !vxas_n & vmwrite_n & vmds1_n & !vmds0_n;
+132:
+
+
+
+Jedec Fuse Checksum       (36c7)
+Jedec Transmit Checksum   (ce35)
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

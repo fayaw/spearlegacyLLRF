@@ -1,0 +1,421 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2014.06.18.17.01.43;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@copied from /afs/slac/package/dsp1610.
+@
+text
+@DSP1610-ST Release Notes
+Release 3.4.2
+
+
+Release Notes
+March 1994
+
+
+
+
+
+                              DSP1610-ST Release 3.4.2
+
+
+Introduction
+
+The following information reviews the new features and bug fixes for the 3.4.2
+release of the Support Software Tools for the DSP1610 Digital Signal Processor.
+This document covers only the chip-specific tools and not the Software
+Generation System (SGS), the DSP1610 device, or other hardware tools.
+
+
+
+Table of Contents
+
+Introduction
+Installation
+ MS-DOS Installation
+ UNIX Installation
+Packing List
+ MS-DOS Packing List
+ UNIX Packing List
+
+Description
+ Release 3.4 Limitations/Warnings
+ Release 3.4 Features
+ Release 3.4 Differences/Fixes
+ cfig386
+
+
+
+Installation
+
+The following sections describe the MS-DOS* and UNIX** installation procedure
+for the DSP1610 Support Software Tools.
+The following procedures assume that the SGS tools (version 3.2.1 or later)
+have already been installed (see the Release 3.2.1 DSP1600 Family SGS
+release notes and sgsread.1st file for further details)
+
+
+MS-DOS Installation
+
+The MS-DOS distribution comes on two 3.5 inch floppy disks.  The software runs
+on 386 or higher PC with MS-DOS 4.0 or later and at least 2 megabytes of
+extended memory.
+
+The installation of the DSP1610 tools includes two steps.  First, the
+installation routine copies the necessary software from the distribution
+diskettes to your hard drive.  Second, the installation routine creates a
+file named NEW-VARS.BAT containing the environment variables (IFILE and
+LIB1600).  If the user allows the default, the installation automatically
+adds these variables to the AUTOEXEC.BAT file.  To perform the installation,
+follow the steps below.
+
+        1)  Place the disk marked "DSP1610-ST-MSDOS" into the floppy drive
+            of the host PC.
+        2)  Enter "a:install" at the MS-DOS prompt (this assumes the diskette
+            is in drive a:).
+        3)  Answer the questions presented by the install routine.
+
+Before copying the files to the hard drive, the install routine prompts the
+user for the distribution diskette drive, the boot drive, and the installation
+directory. If the installation directory contains a previous release of the
+tools, the install routine will issue a warning and allow the user to quit the
+process.  The user may then start the install procedure again, specifying a
+new directory.  If the installation is proceeding correctly, the install
+routine will prompt the user for additional diskettes.  For more details on
+the install procedure, please consult the DSP1610 Support Tools Manual For
+Release 3.4.
+
+It is VERY IMPORTANT that the PATH variable be properly setup as described
+in NEW-VARS.BAT.  If an older version of cmd1610.exe is found first in the
+PATH, the win1610.exe tool will not be able to locate the DOS extender
+embedded in cmd1610.exe (see Release 3.4.2 Features below).
+
+UNIX Installation
+
+The UNIX distribution comes on 1/4 inch data cartridge or one 3.5 inch
+floppy disk.  The software runs on a Sparc*** processor running SunOS 4.1.3.
+
+The UNIX installation of the DSP1610 tools includes two steps.  First, the
+user copies the necessary software from the distribution medium to the
+hard drive.  Second, the user must modify the .profile or .login files to
+include the environment variables.  To perform the installation, change to
+the directory where the tools are to be installed and follow the steps below.
+
+        1) copy the files:
+           If the distribution media is a 3.5" floppy:
+
+                - Place the diskette in the floppy drive of the host system.
+                - Enter "bar xvZf /dev/fd0a" at the prompt.
+
+           If the distribution media is a 1/4" data cartridge:
+
+                - Place the cartridge into the tape drive of the host system.
+                - Enter "tar xvf /dev/rst0" at the prompt.
+
+        2) Edit your .profile or .login and add the following lines
+           (m2_12ka.if can be any suitable ifile):
+
+           If you run the sh(1) or ksh(1) shell, the lines are
+                LIB1600=<the tools directory>
+                IFILE=$LIB1600/m2_12ka.if
+                PATH=$PATH:$LIB1600
+                export LIB1600 IFILE PATH
+
+           If you run the csh (1), the lines are
+                setenv LIB1600 <the tools directory>
+                setenv IFILE $LIB1600/m2_12ka.if
+                setenv path=($path $LIB1600)
+
+
+Packing List
+
+The following section presents the packing list for both the MS-DOS and UNIX
+distributions.
+
+
+MS-DOS Packing List
+
+The following is the MS-DOS packing list for the 3.4.2 release of the
+DSP1610 Support Software Tools:
+
+cmd1610.exe	- the DSP1610 command-based simulator
+win1610.exe	- the DSP1610 window-based simulator
+bphelp.txt	- interactive help on the breakpoint menu
+cmd.hlp		- a help data file used by cmd1610 and win1610
+dhelp.exe	- a stand alone help facility
+menu1610.rsc	- the menu file for win1610
+read1610.1st	- a text file with useful information
+install.com     - an installation utility which does not get copied to the PC
+                  Hard Drive
+toollist.txt    - the tools list used by the install routine. This file does
+                  not get copied to the PC hard drive.
+1610.h		- Chip specific header file used by as1600
+hw_test.exe	- a utility used to test the installation of the
+		  DSP1600 HDS hardware
+cfig386.exe    - a DOS extender configuration utility
+pfix1610.bat   - a batch file to assist with cfig386.exe
+pfxagent.bat   - a batch file used by pfix1610.bat
+pfxmklst.bat   - a batch file used by pfix1610.bat
+
+UNIX Packing List
+
+The following is the UNIX packing list for the 3.4.2 release of the
+DSP1610 Support Software Tools:
+
+cmd1610         - the DSP1610 command-based simulator
+cmd.hlp		- a help data file used by cmd1610 and win1610
+dhelp		- a stand alone help facility
+read1610.1st    - a text file with useful information
+1610.h		- Chip specific header file used by as1600
+
+
+Description
+
+The DSP1610-ST 3.4.2 release fixes many previously reported exceptions and
+adds several enhancements to the last production release (2.1.4) of the
+DSP1610 tools.  The following sections review these changes.
+
+
+Release 3.4.2 Limitations/Warnings
+
+1.HDS trace buffer - When using software breakpoints, the HDS trace buffer
+  may not reflect reality.  If a software breakpoint is encountered, the trace
+  buffer will contain two instances of the instruction that caused the
+  breakpoint.
+
+2.When the memory map is changed under program control (by setting the alf
+  register), win1610 immediately displays the code pointed to by the new map,
+  even though the next instruction is (correctly) executed from the old map.
+  This can be confusing if a user single-steps through a memory-map change.
+
+3.Numerous improvements to the simulator chip models have been incorporated.
+  Cache operations, SIO, vector processing, and reset processing, are all
+  modeled in exactly the way the chip behaves.  These changes may have effects
+  on the behavior of the simulator (see "Release 3.4 differences/fixes" below.)
+
+
+Release 3.4.2 Features
+
+1.New IFILE Names - The following ifiles should be used for the DSP1610:
+
+       m1_12ka.if - Memory Map 1
+       m2_12ka.if - Memory Map 2
+       m3_12ka.if - Memory Map 3
+       m4_12ka.if - Memory Map 4
+
+The remainder of this file describes changes common to all 3.4 simulators.
+cmd16xx/win16xx in the case of the DSP1610-ST means cmd1610/win1610.
+
+The following features are supported by all release 3.4 cmd16xx and win16xx
+tools in both simulator and HDS modes.
+
+2.Support for extended DOS memory - All of the tools in this package now
+  make use of the available extended memory in the user's PC.  The memory
+  limitations which the earlier versions of these tools imposed have been
+  lifted.  However, even though the new tools use extended memory, it is
+  recommended that at least 400K of DOS memory be available. The code that
+  allows execution in the extended DOS environment (DOS extender) is
+  cmd16xx.exe.  All executable tools in this release use the embedded DOS
+  extender code in cmd16xx.exe.  For execution of the support tools, the user
+  needs to have the location of cmd16xx.exe in the PATH.  If the required
+  tool with the embedded extender code is not in the PATH, an error message
+  similar to "Stub ldr err 7: DOS-Extender file cmd16xx.exe not found" is
+  issued.  Also, if an older version of the support tools is found in the
+  PATH before cmd16xx.exe from this package, unpredictable behavior will
+  occur.
+
+3.The "assem" command is now usable on DOS.  The user should have at least
+  400K of conventional DOS memory available or "assem" will fail.
+
+4.A new simulator variable 'acycles' counts cycles only when the processor
+  is awake.  In every other way, 'acycles' and 'cycles' are similar.  The
+  processor may be put to sleep, for example, using the AWAIT bit in the
+  alf register.
+
+5.Previous versions of cmd16xx/win16xx looked for a startup command script
+  file called "cmds" in the current working directory and the $HOME
+  directory or, if $HOME isn't set, the root directory.  The simulator
+  now searches the $LIB1600 directory also.
+
+
+Release 3.4 Differences/Fixes
+
+The following changes apply to all release 3.4 cmd16xx and win16xx tools.
+The changes can cause behavior differences between release 3.4 simulator/HDS
+output and previous tool releases.
+
+1.Simulator interface modifications (simulator and HDS modes)
+  display "R" now prints only registers (not stime, ibfint, etc.)
+
+  display "I" now prints all internal variables (including stime, ibfint, etc.)
+
+  Users may now issue the ".V" command at the 'cmd>' prompt to display
+    simulator version information.
+ 
+2.Simulator model modifications (simulator only)
+  Modified mwait register initialization.  The interaction of EXM and INT1
+    during reset is now modeled correctly.  The mwait register is initialized
+    to 0xffff when EXM is 1 and INT1 is 0.  This means that users who wish to
+    model fast ERAM/EROM must either place a "mwait = 0x0000" into their code
+    that handles reset, or set the INT1 pin to 1 ("int1 = 1") in the simulator
+    before typing reset and then set the INT1 pin to 0 before typing cont.
+    For example, to provide backward compatible reset and run capability use:
+	cmd> reset_nw = { int1 = 1; reset; int1 = 0 }
+	cmd> run_nw = { int1 = 1; reset; int1 = 0; cont }
+
+  Better modeling of I/O and trap processing.  Improved modeling of I/O and
+    interrupt processing may cause timing changes in simulated tests.
+    Breakpoint and error messages may now occur at different simulation
+    times (stime).
+
+  SIO mode simulation now properly implements bit reversal in both pin mode
+    and file mode I/O.  For more details see section 5.4.6 of the
+    "DSP16xx Support Tool Manual For Release 3.4" 
+
+  Deterministic arithmetic operations using undefined values now give correct
+    results.  For example, if a0 is undefined and y and yl are 0:
+
+	a1 = a0 ^ a0		/* a1 result is 0 */
+	a1 = a0 - a0		/* a1 result is 0 */
+	a1 = a0 & y		/* a1 result is 0 */
+
+    Similarly, if a0 is undefined and y and yl are 0xffff:
+
+	a1 = a0 | y		/* a1 result is 0xffffffff */
+
+  If an operation places the chip model in a sleep mode (STOP pin, AWAIT bit,
+    etc.), statistics, trace information, and number of instructions executed
+    are now correctly displayed.
+
+  The 'stat' command now handles wait state situations correctly.
+
+  The F1 Y operation (multiply/ALU operation with post-modification of pointer
+    register) does not actually access the Y space location since no
+    destination is specified for the Y access.  The simulator no longer
+    issues the warning:
+
+	"internal RAM access out of range"
+
+    when the address contained in the Y side pointer register point outside of
+    allocated memory.
+
+  The pipe-lined instruction execution of the DSP1600 family causes
+    unexpected behavior when the direct branch (goto JA) instruction
+    is located in either of the last 2 locations of a 4K page.  The
+    simulator will now correctly simulate this situation and also issue
+    a warning.  For further information, see the Note for 'goto JA' and
+    "call JA" in the Control Instructions section of chapter 5.0 (Software
+    Architecture) in the DSP16xx data sheet.
+
+  Previously the command "BPSET SW label" would not set a breakpoint in
+    simulator mode.  An error message indicating that SW breakpoints are only
+    used in HDS mode was displayed even though the command "BPSET HW label"
+    operated correctly in simulator mode.  Now, to allow a single script file
+    for both simulation and emulation, if all other conditions favor setting
+    the breakpoint, a warning is issued telling the user that an xmem bkpt will
+    be set instead.  The type is then changed to xmem, and the bkpt is set.
+
+  Output from the logsigs command now uses the following conventions for
+    bit-wide signals (pins).  Inputs and I/O pins operating as inputs:
+	0 - logic low
+	1 - logic high
+
+    Outputs and I/O pins operating as outputs:
+	L - logic low
+	H - logic high
+
+  The variables ibfint, obeint, pidsint, podsint, ibf2int, and obe2int
+    control IO interrupt generation for file mode IO (the default).
+    These variables are (and always have been) initialized to 32 cycles.
+    If, at reset, mwait is initialized with all 1's, after only a few
+    instructions all of these conditions are asserted in the ins register.
+    Generation of the ins status indication can be disabled by setting the
+    corresponding variable(s) to 0.  All interrupts are masked by default
+    in the inc register after reset.
+
+3.win16xx's source window can be scrolled up & down via the scroll arrows
+  on the windows right border.  The source code will scroll by either 1
+  line at a time or a half a window at a time, depending on whether the
+  customer is using the left or right mouse buttons, respectively.
+
+4.HDS modifications (HDS only)
+  a) "display dsp" command has new state: "Trapped in Cache"
+  b) "bpcount" now properly resets to zero when the device reaches its
+      final breakpoint (this matches the simulator mode of operation).
+      Note: If it is manually stopped with a ^C, "bpcount" retains its
+      previous value.
+
+
+
+cfig386
+
+The DOS tools releases now include a utility to configure the DOS extender
+stubs included in the executables.  This may be necessary when the tools are
+installed in a directory that is not in the PATH, or when another set of DSP
+tools is installed in a directory that is before them in the PATH.  Its usage
+is as follows:
+
+cfig386 -dosxname file_with_extender file_without_stub
+
+The assembler and command-line simulator files contain a special DOS extender
+that allows them to access memory above the normal limits of DOS.  The other
+tools each contain a small stub that loads the DOS extender from one of these
+files.  When the tools are first installed, the stubs are configured to access
+the assembler or command-line simulator by searching the DOS PATH.  Normally,
+this does not cause any problems.  However, if an earlier version of the
+assembler or simulator is in the PATH before the intended one, this load will
+fail.
+
+If this problem occurs, it may be corrected by using cfig386 to encode the full
+path name of the assembler or command-line simulator into the stub files.
+Batch files have been provided with each of the tools to automate this process.
+The file pfix1600.bat corrects the SGS files, and pfixXXXX.bat (where XXXX is
+the chip name) corrects the simulator files.
+
+None of these utilities should be used unless problems are experienced with the
+tools.  Once the full path name of the executables is encoded into the stubs,
+the tools cannot be moved to a different directory without changing the path
+name using these utilities.
+
+
+*********************************************
+For additional information.  Contact information is printed in the 
+release notes accompanying the ST release and in the current AT&T DSP
+data sheet.
+
+AT&T reserves the right to make changes to the product(s) or information
+contained herein without notice.  No liability is assumed as a result of
+their use or application.  No rights under any patent accompany the sale
+of any such product(s) or information.
+
+Copyright (c) 1994 AT&T
+All Rights Reserved
+Printed in U.S.A.
+March 1994
+
+_______________________________
+* MS-DOS is a registered trademark of Microsoft Corporation.
+** UNIX  is a registered trademark of UNIX Systems Laboratory.
+*** Sparc is a registered trademark of Sparc International.
+@

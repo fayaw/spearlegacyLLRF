@@ -1,0 +1,865 @@
+head	1.7;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.7
+	RF-SPEAR-R0-3-1:1.7
+	RF-SPEAR-R0-3-0:1.7
+	RF-SPEAR-R0-2-0:1.7
+	RF-SPEAR-R0-1-0:1.7
+	RF-SPEAR-R0-0-3:1.7
+	RF-SPEAR-R0-0-2:1.7
+	RF-SPEAR-R0-0-1:1.7
+	RF-SPEAR-R0-0-0:1.7
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.7
+	RF-3-13-10:1.6.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.6
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.6
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.6
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.7
+date	2012.05.14.17.35.43;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2004.02.19.18.20.17;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2004.01.29.18.13.53;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.01.22.00.29.15;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.01.05.19.35.04;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.27.01.17.13;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.7
+log
+@Add area temp summary for TCs in B132.
+@
+text
+@# Macros:
+#   S = Station (HR81, etc) HER  LER 
+#  W2 = Waveguide 2         WG02 WG01
+#  W3 = Waveguide 3         WG03 WG01
+#  C3 = Cavity 3            CAV3 CAV1
+#  C4 = Cavity 4            CAV4 CAV2
+#  H2 = HCW Circuit 2       HCW2 HCW1
+#  M3 = SM Card for C3       4    0
+#  M4 = SM Card for C4       6    2
+# 
+record(calc,"$(S):WGIQA:SUMY:FRST") {
+	field(DESC,"WG IQA Status Sum")
+	field(FLNK,"$(S):WG:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):WG01IQA:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):$(W2)IQA:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):$(W3)IQA:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):WGIQA:SUMY:LTCH") {
+	field(DESC,"WG IQA Status Sum")
+	field(FLNK,"$(S):WG:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):WG01IQA:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):$(W2)IQA:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):$(W3)IQA:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):WGIQA:SUMY:SEVR") {
+	field(DESC,"WG IQA Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):WG01IQA:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):$(W2)IQA:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):$(W3)IQA:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):WGTEMP:SUMY:FRST") {
+	field(DESC,"WG Temp Status Sum")
+	field(FLNK,"$(S):WGFLOW:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CIRCHCW:TEMP:FRST.SEVR NPP MS")
+	field(INPB,"$(S):WG01HCW:TEMP:FRST.SEVR NPP MS")
+	field(INPC,"$(S):STNHCW:TEMP:FRST.SEVR NPP MS")
+	field(INPD,"$(S):$(W2)HCW:TEMP:FRST.SEVR NPP MS")
+	field(INPE,"$(S):$(W3)HCW:TEMP:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):WGTEMP:SUMY:LTCH") {
+	field(DESC,"WG Temp Status Sum")
+	field(FLNK,"$(S):WGFLOW:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CIRCHCW:TEMP:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):WG01HCW:TEMP:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):STNHCW:TEMP:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):$(W2)HCW:TEMP:LTCH.SEVR NPP MS")
+	field(INPE,"$(S):$(W3)HCW:TEMP:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):WGTEMP:SUMY:SEVR") {
+	field(DESC,"WG Temp Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):CIRCHCW:TEMP.SEVR NPP MS")
+	field(INPB,"$(S):WG01HCW:TEMP.SEVR NPP MS")
+	field(INPC,"$(S):STNHCW:TEMP.SEVR NPP MS")
+	field(INPD,"$(S):$(W2)HCW:TEMP.SEVR NPP MS")
+	field(INPE,"$(S):$(W3)HCW:TEMP.SEVR NPP MS")
+}
+record(calc,"$(S):WGFLOW:SUMY:FRST") {
+	field(DESC,"WG Flow Status Sum")
+	field(FLNK,"$(S):WGIQA:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):STNHCW1:FLOW:FRST.SEVR NPP MS")
+	field(INPB,"$(S):STN$(H2):FLOW:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):WGFLOW:SUMY:LTCH") {
+	field(DESC,"WG Flow Status Sum")
+	field(FLNK,"$(S):WGIQA:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):STNHCW1:FLOW:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):STN$(H2):FLOW:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):WG:SUMY:FRST") {
+	field(DESC,"WG Status Sum")
+	field(FLNK,"$(S):STNTEMP:SUMY:FRST.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):WG01:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):$(W2):SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):$(W3):SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):WG:SUMY:LTCH") {
+	field(DESC,"WG Status Sum")
+	field(FLNK,"$(S):STNTEMP:SUMY:LTCH.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):WG01:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):$(W2):SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):$(W3):SUMY:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):WGAIRPRESS:SUMY:PLC.SEVR NPP MS")
+}
+record(calc,"$(S):WG:SUMY:SEVR") {
+	field(DESC,"WG Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):WG01:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):$(W2):SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):$(W3):SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):CAVLDANGERR:SUMY:SEVR") {
+	field(DESC,"CAV Ld Angle Err Status Sum")
+	field(FLNK,"$(S):HVPS:LOOP:READY.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1LOAD:ANGLE:ERR.SEVR NPP MS")
+	field(INPB,"$(S):CAV2LOAD:ANGLE:ERR.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)LOAD:ANGLE:ERR.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)LOAD:ANGLE:ERR.SEVR NPP MS")
+}
+record(calc,"$(S):CAVARC:SUMY:FRST") {
+	field(DESC,"CAV Arc Status Sum")
+	field(FLNK,"$(S):CAV:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1:ARC:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CAV2:ARC:FRST.SEVR NPP MS")
+	field(INPC,"$(S):$(C3):ARC:FRST.SEVR NPP MS")
+	field(INPD,"$(S):$(C4):ARC:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):CAVARC:SUMY:LTCH") {
+	field(DESC,"CAV Arc Status Sum")
+	field(FLNK,"$(S):CAV:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1:ARC:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CAV2:ARC:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):$(C3):ARC:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):$(C4):ARC:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):CAVFLOW:SUMY:FRST") {
+	field(DESC,"CAV Flow Status Sum")
+	field(FLNK,"$(S):CAVIQA:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1WATR:FLOW:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CAV2WATR:FLOW:FRST.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)WATR:FLOW:FRST.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)WATR:FLOW:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):CAVFLOW:SUMY:LTCH") {
+	field(DESC,"CAV Flow Status Sum")
+	field(FLNK,"$(S):CAVIQA:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1WATR:FLOW:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CAV2WATR:FLOW:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)WATR:FLOW:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)WATR:FLOW:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):CAVIQA:SUMY:FRST") {
+	field(DESC,"CAV IQA Status Sum")
+	field(FLNK,"$(S):CAVARC:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1IQA:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CAV2IQA:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)IQA:SUMY:FRST.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)IQA:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):CAVIQA:SUMY:LTCH") {
+	field(DESC,"CAV IQA Status Sum")
+	field(FLNK,"$(S):CAVARC:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1IQA:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CAV2IQA:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)IQA:SUMY:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)IQA:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):CAVIQA:SUMY:SEVR") {
+	field(DESC,"CAV IQA Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1IQA:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):CAV2IQA:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)IQA:SUMY:SEVR.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)IQA:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):CAVVACM:SUMY:FRST") {
+	field(DESC,"CAV Vacuum Status Sum")
+	field(FLNK,"$(S):CAVTUNR:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1VACM:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CAV2VACM:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)VACM:SUMY:FRST.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)VACM:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):CAVVACM:SUMY:LTCH") {
+	field(DESC,"CAV Vacuum Status Sum")
+	field(FLNK,"$(S):CAVTUNR:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1VACM:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CAV2VACM:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)VACM:SUMY:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)VACM:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):CAVVACM:SUMY:SEVR") {
+	field(DESC,"CAV Vacuum Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1VACM:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):CAV2VACM:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)VACM:SUMY:SEVR.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)VACM:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):CAVVACM:SUMY:MODU") {
+	field(DESC,"CAV Vacuum Status Sum")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1VACM:SUMY:MODU.SEVR NPP MS")
+	field(INPB,"$(S):CAV2VACM:SUMY:MODU.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)VACM:SUMY:MODU.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)VACM:SUMY:MODU.SEVR NPP MS")
+}
+record(calc,"$(S):CAVTEMP:SUMY:FRST") {
+	field(DESC,"CAV Temp Status Sum")
+	field(FLNK,"$(S):CAVVACM:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1TEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CAV2TEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)TEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)TEMP:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):CAVTEMP:SUMY:LTCH") {
+	field(DESC,"CAV Temp Status Sum")
+	field(FLNK,"$(S):CAVVACM:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1TEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CAV2TEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)TEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)TEMP:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):CAVTEMP:SUMY:SEVR") {
+	field(DESC,"CAV Temp Status Sum")
+	field(SCAN,"1 second")
+	field(FLNK,"$(S):CAVTEMP:SUMY:MODU.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1TEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):CAV2TEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)TEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)TEMP:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):CAVTEMP:SUMY:MODU") {
+	field(DESC,"CAV Temp Status Sum")
+	field(FLNK,"$(S):CAVVACM:SUMY:MODU.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1TEMP:SUMY:MODU.SEVR NPP MS")
+	field(INPB,"$(S):CAV2TEMP:SUMY:MODU.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)TEMP:SUMY:MODU.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)TEMP:SUMY:MODU.SEVR NPP MS")
+}
+record(calc,"$(S):CAVTUNR:SUMY:FRST") {
+	field(DESC,"CAV Tuner Status Sum")
+	field(FLNK,"$(S):CAVFLOW:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1TUNR:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CAV2TUNR:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)TUNR:SUMY:FRST.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)TUNR:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):CAVTUNR:SUMY:LTCH") {
+	field(DESC,"CAV Tuner Status Sum")
+	field(FLNK,"$(S):CAVFLOW:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1TUNR:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CAV2TUNR:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)TUNR:SUMY:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)TUNR:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):CAVTUNR:SUMY:SEVR") {
+	field(DESC,"CAV Tuner Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1TUNR:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):CAV2TUNR:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)TUNR:SUMY:SEVR.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)TUNR:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):CAVTUNR:SUMY:MODU") {
+	field(DESC,"CAV Tuner Status Sum")
+	field(FLNK,"$(S):CAVTUNRCARD:SUMY:MODU.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1TUNR:SUMY:MODU.SEVR NPP MS")
+	field(INPB,"$(S):CAV2TUNR:SUMY:MODU.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)TUNR:SUMY:MODU.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)TUNR:SUMY:MODU.SEVR NPP MS")
+}
+record(calc,"$(S):CAVTUNRCARD:SUMY:MODU") {
+	field(DESC,"CAV Tuner Status Sum")
+	field(FLNK,"$(S):CAV:SUMY:MODU.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1TUNR:A2C0:MODU.SEVR NPP MS")
+	field(INPB,"$(S):CAV2TUNR:A2C2:MODU.SEVR NPP MS")
+	field(INPC,"$(S):$(C3)TUNR:A2C$(M3):MODU.SEVR NPP MS")
+	field(INPD,"$(S):$(C4)TUNR:A2C$(M4):MODU.SEVR NPP MS")
+}
+record(calc,"$(S):CAV:SUMY:FRST") {
+	field(DESC,"CAV Status Sum")
+	field(FLNK,"$(S):STNTEMP:SUMY:FRST.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CAV2:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):$(C3):SUMY:FRST.SEVR NPP MS")
+	field(INPD,"$(S):$(C4):SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):CAV:SUMY:LTCH") {
+	field(DESC,"CAV Status Sum")
+	field(FLNK,"$(S):STNTEMP:SUMY:LTCH.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CAV2:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):$(C3):SUMY:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):$(C4):SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):CAV:SUMY:SEVR") {
+	field(DESC,"CAV Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):CAV2:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):$(C3):SUMY:SEVR.SEVR NPP MS")
+	field(INPD,"$(S):$(C4):SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):CAV:SUMY:MODU") {
+	field(DESC,"CAV Status Sum")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1:SUMY:MODU.SEVR NPP MS")
+	field(INPB,"$(S):CAV2:SUMY:MODU.SEVR NPP MS")
+	field(INPC,"$(S):$(C3):SUMY:MODU.SEVR NPP MS")
+	field(INPD,"$(S):$(C4):SUMY:MODU.SEVR NPP MS")
+}
+record(calc,"$(S):STNON:SUMY:STAT") {
+	field(DESC,"Station ON Status Sum")
+	field(FLNK,"$(S):STN:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):STNPARK:SUMY:STAT.SEVR NPP MS")
+	field(INPB,"$(S):HVPS:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):STN:ABSUMY:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):STN:SUMY:PLC.SEVR NPP MS")
+}
+record(calc,"$(S):STNPARK:SUMY:STAT") {
+	field(DESC,"Station PARK Status Sum")
+	field(FLNK,"$(S):STNON:SUMY:STAT.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):STN:VXI:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):STNPLC:SUMY:MODU") {
+	field(DESC,"Station PLC Module Stat Sum")
+	field(FLNK,"$(S):STNAB:SUMY:MODU.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):STNTEMP:SUMY:MODU.SEVR NPP MS")
+	field(INPB,"$(S):STNFLOW:SUMY:MODU.SEVR NPP MS")
+	field(INPC,"$(S):STNVACM:SUMY:MODU.SEVR NPP MS")
+	field(INPD,"$(S):STNR1G1:AI:MODU.SEVR NPP MS")
+}
+record(calc,"$(S):STNOFF:SUMY:STAT") {
+	field(DESC,"Station OFF Status Sum")
+	field(CALC,"0")
+	field(INPA,"$(S):STNPARK:SUMY:STAT.SEVR NPP MS")
+	field(INPB,"$(S):HVPSOFF:SUMY:STAT.SEVR NPP MS")
+	field(INPC,"$(S):STN:LOCAL:ON.SEVR NPP MS")
+	field(INPD,"$(S):STN:ABSUMY:LTCH.SEVR NPP MS")
+	field(INPE,"$(S):STN:SUMY:PLC.SEVR NPP MS")
+}
+record(calc,"$(S):STNAB:SUMY:MODU") {
+	field(DESC,"Station AB Module Stat Sum")
+	field(FLNK,"$(S):STN:SUMY:STATC.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):STNPLC:SUMY:MODU.SEVR NPP MS")
+	field(INPB,"$(S):HVPSDCM:SUMY:MODU.SEVR NPP MS")
+	field(INPC,"$(S):STNDCM:SUMY:MODU.SEVR NPP MS")
+	field(INPD,"$(S):CAVTUNRCARD:SUMY:MODU.SEVR NPP MS")
+}
+record(calc,"$(S):STNARC:SUMY:FRST") {
+	field(DESC,"Station Arc Status Sum")
+	field(FLNK,"$(S):STN:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYS:ARC:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CIRC:ARC:FRST.SEVR NPP MS")
+	field(INPD,"$(S):CAVARC:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):STNARC:SUMY:LTCH") {
+	field(DESC,"Station Arc Status Sum")
+	field(FLNK,"$(S):STNPARK:SUMY:STAT.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYS:ARC:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CIRC:ARC:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):CAVARC:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):STNIQA:SUMY:MODU") {
+	field(DESC,"Station IQA Status Sum")
+	field(CALC,"0")
+}
+record(calc,"$(S):STNIQA:SUMY:FRST") {
+	field(DESC,"Station IQA Status Sum")
+	field(FLNK,"$(S):STNARC:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSIQA:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CIRCIQA:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):WGIQA:SUMY:FRST.SEVR NPP MS")
+	field(INPD,"$(S):CAVIQA:SUMY:FRST.SEVR NPP MS")
+	field(INPE,"$(S):STNREF:POWER:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):STNIQA:SUMY:LTCH") {
+	field(DESC,"Station IQA Status Sum")
+	field(FLNK,"$(S):STNARC:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSIQA:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CIRCIQA:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):WGIQA:SUMY:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):CAVIQA:SUMY:LTCH.SEVR NPP MS")
+	field(INPE,"$(S):STNREF:POWER:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):STNIQA:SUMY:SEVR") {
+	field(DESC,"Station IQA Status Sum")
+	field(SCAN,"1 second")
+	field(FLNK,"$(S):STNIQA:SUMY:MODU.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSIQA:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):CIRCIQA:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):WGIQA:SUMY:SEVR.SEVR NPP MS")
+	field(INPD,"$(S):CAVIQA:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):STNTEMP:SUMY:MODU") {
+	field(DESC,"Station Temp Status Sum")
+	field(CALC,"0")
+	field(INPA,"$(S):STNR0G0:TEMP:MODU.SEVR NPP MS")
+	field(INPB,"$(S):CIRCTEMP:SUMY:MODU.SEVR NPP MS")
+	field(INPD,"$(S):CAVTEMP:SUMY:MODU.SEVR NPP MS")
+}
+record(calc,"$(S):STNTEMP:SUMY:FRST") {
+	field(DESC,"Station Temp Status Sum")
+	field(FLNK,"$(S):STNFLOW:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSTEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CIRCTEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):WGTEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPD,"$(S):CAVTEMP:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):STNTEMP:SUMY:LTCH") {
+	field(DESC,"Station Temp Status Sum")
+	field(FLNK,"$(S):STNFLOW:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSTEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CIRCTEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):WGTEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):CAVTEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPE,"$(S):HVPSTEMP:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):AREATEMP:SUMY:SEVR") {
+	field(DESC,"Area Temp Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):STNCRATEPS:TEMP.SEVR NPP MS")
+	field(INPB,"$(PS):CntlTemp.SEVR NPP MS")
+	field(INPC,"$(S):STNAMBAIR:TEMP.SEVR NPP MS")
+	field(INPD,"$(S):CRATE:VXI:TEMP.SEVR NPP MS")
+}
+record(calc,"$(S):STNTEMP:SUMY:SEVR") {
+	field(DESC,"Station Temp Status Sum")
+	field(SCAN,"1 second")
+	field(FLNK,"$(S):STNTEMP:SUMY:MODU.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSTEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):CIRCTEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):WGTEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPD,"$(S):CAVTEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPE,"$(S):HVPSOIL:TEMP.SEVR NPP MS")
+	field(INPF,"$(S):AREATEMP:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):STNVACM:SUMY:MODU") {
+	field(DESC,"Station Vacuum Status Sum")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSAIDI:SUMY:MODU.SEVR NPP MS")
+	field(INPB,"$(S):CAVVACM:SUMY:MODU.SEVR NPP MS")
+}
+record(calc,"$(S):STNVACM:SUMY:FRST") {
+	field(DESC,"Station Vacuum Status Sum")
+	field(FLNK,"$(S):STNIQA:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYS:VACM:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CAVVACM:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):STNVACM:SUMY:LTCH") {
+	field(DESC,"Station Vacuum Status Sum")
+	field(FLNK,"$(S):STNIQA:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYS:VACM:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CAVVACM:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):STNVACM:SUMY:SEVR") {
+	field(DESC,"Station Vacuum Status Sum")
+	field(SCAN,"1 second")
+	field(FLNK,"$(S):STNVACM:SUMY:MODU.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYS:VACM.SEVR NPP MS")
+	field(INPB,"$(S):CAVVACM:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):STNFLOW:SUMY:FRST") {
+	field(DESC,"Station Flow Status Sum")
+	field(FLNK,"$(S):STNVACM:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSFLOW:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CIRCFLOW:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):WGFLOW:SUMY:FRST.SEVR NPP MS")
+	field(INPD,"$(S):CAVFLOW:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):STNFLOW:SUMY:LTCH") {
+	field(DESC,"Station Flow Status Sum")
+	field(FLNK,"$(S):STNVACM:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSFLOW:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CIRCFLOW:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):WGFLOW:SUMY:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):CAVFLOW:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):STNFLOW:SUMY:MODU") {
+	field(DESC,"Station Flow Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):STNR3G0:DI:MODU.SEVR NPP MS")
+	field(INPD,"$(S):CAVR3G2:DI:MODU.SEVR NPP MS")
+}
+record(calc,"$(S):STN:SUMY:FRST") {
+	field(DESC,"Station Status Sum")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYS:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):CIRC:SUMY:FRST.SEVR NPP MS")
+	field(INPD,"$(S):WG:SUMY:FRST.SEVR NPP MS")
+	field(INPE,"$(S):CAV:SUMY:FRST.SEVR NPP MS")
+	field(INPF,"$(S):STNMPS:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):STN:SUMY:LTCH") {
+	field(DESC,"Station Status Sum")
+	field(FLNK,"$(S):STNOFF:SUMY:STAT.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYS:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):CIRC:SUMY:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):WG:SUMY:LTCH.SEVR NPP MS")
+	field(INPE,"$(S):CAV:SUMY:LTCH.SEVR NPP MS")
+	field(INPF,"$(S):STNMPS:SUMY:LTCH.SEVR NPP MS")
+	field(INPH,"$(S):STNON:SUMY:STAT.SEVR NPP MS")
+}
+record(calc,"$(S):STN:SUMY:SEVR") {
+	field(DESC,"Station Status Sum")
+	field(SCAN,"1 second")
+	field(FLNK,"$(S):STN:SUMY:MODU.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYS:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):HVPS:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):CIRC:SUMY:SEVR.SEVR NPP MS")
+	field(INPD,"$(S):WG:SUMY:SEVR.SEVR NPP MS")
+	field(INPE,"$(S):CAV:SUMY:SEVR.SEVR NPP MS")
+	field(INPF,"$(S):STNMPS:SUMY:SEVR.SEVR NPP MS")
+	field(INPG,"$(S):FBCK:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):STNMPS:SUMY:FRST") {
+	field(DESC,"Station MPS Status Sum")
+	field(FLNK,"$(S):STNTEMP:SUMY:FRST.PROC")
+	field(CALC,"0")
+	field(INPB,"$(S):STN:FORCED:FRST.SEVR NPP MS")
+	field(INPC,"$(S):STN:VXI:FRST.SEVR NPP MS")
+	field(INPF,"$(S):STNREF:POWER:FRST.SEVR NPP MS")
+	field(INPG,"$(S):STNCRATEPS:TEMP:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):STNMPS:SUMY:SEVR") {
+	field(DESC,"Station MPS Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):AREATEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"0")
+	field(INPC,"$(S):CRATE:M2:VOLT.SEVR NPP MS")
+	field(INPD,"$(S):CRATE:M5:VOLT.SEVR NPP MS")
+	field(INPE,"$(S):CRATE:1P5:VOLT.SEVR NPP MS")
+	field(INPF,"$(S):CRATE:P5:VOLT.SEVR NPP MS")
+	field(INPG,"$(S):CRATE:M24:VOLT.SEVR NPP MS")
+	field(INPH,"$(S):CRATE:P24:VOLT.SEVR NPP MS")
+	field(INPI,"$(S):CRATE:M12:VOLT.SEVR NPP MS")
+	field(INPJ,"$(S):CRATE:P12:VOLT.SEVR NPP MS")
+	field(INPK,"$(S):STN:RF476MHZREF:LTCH.SEVR NPP MS")
+	field(INPL,"$(S):STNREF:POWER.SEVR NPP MS")
+}
+record(calc,"$(S):STNDCM:SUMY:MODU") {
+	field(DESC,"Station DCM Status Sum")
+	field(CALC,"0")
+	field(INPA,"$(S):STN:DCM:MODU.SEVR NPP MS")
+	field(INPB,"$(S):STNDCM:A3:MODU.SEVR NPP MS")
+	field(INPC,"$(S):STNDCM:A3C0:MODU.SEVR NPP MS")
+	field(INPD,"$(S):STNDCM:T0:STAT.SEVR NPP MS")
+	field(INPE,"$(S):STNDCM:T1:STAT.SEVR NPP MS")
+	field(INPF,"$(S):STNDCM:T2:STAT.SEVR NPP MS")
+	field(INPG,"$(S):STNDCM:T3:STAT.SEVR NPP MS")
+	field(INPH,"$(S):STNDCM:T4:STAT.SEVR NPP MS")
+	field(INPI,"$(S):STNDCM:T5:STAT.SEVR NPP MS")
+	field(INPJ,"$(S):STNDCM:T6:STAT.SEVR NPP MS")
+	field(INPK,"$(S):STNDCM:T7:STAT.SEVR NPP MS")
+}
+record(fanout,"$(S):STNREF:POWER:FANO") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):STNREF:POWER:LTCH.VAL")
+	field(LNK2,"$(S):STNREF:POWER:FRST.VAL")
+}
+record(fanout,"$(S):STN:AIM:STATFANO") {
+	field(DESC,"AIM Status Fanout")
+	field(FLNK,"$(S):STN:CRATE:LTCH.PROC")
+}
+record(fanout,"$(S):STN:AIM:FRSTFANO") {
+	field(DESC,"AIM State Latch Fanout")
+	field(FLNK,"$(S):STNMPS:SUMY:FRST.PROC")
+	field(LNK1,"$(S):STN:VXI:FRST.PROC")
+	field(LNK2,"$(S):STN:ABHEART:FRST.PROC")
+	field(LNK3,"$(S):STN:ABSUMY:FRST.PROC")
+	field(LNK4,"$(S):STN:FORCED:FRST.PROC")
+	field(LNK5,"$(S):STN:AIM:ARCFRSTFANO.PROC")
+}
+record(fanout,"$(S):STN:AIM:LTCHFANO") {
+	field(DESC,"AIM State Latch Fanout")
+	field(FLNK,"$(S):STNMPS:SUMY:LTCH.PROC")
+	field(LNK1,"$(S):STN:VXI:LTCH.PROC")
+	field(LNK2,"$(S):STN:ABHEART:LTCH.PROC")
+	field(LNK3,"$(S):STN:ABSUMY:LTCH.PROC")
+	field(LNK4,"$(S):STN:FORCED:LTCH.PROC")
+	field(LNK5,"$(S):STN:ARCSUMY:LTCH.PROC")
+	field(LNK6,"$(S):STN:BEAMABORT:STAT.PROC")
+}
+record(mbbiDirect,"$(S):STN:AIM:STAT") {
+	field(DESC,"AIM Status Bits")
+	field(FLNK,"$(S):STN:AIM:STATFANO.VAL")
+	field(NOBT,"16")
+	field(INP,"$(S):STN:AIM:MODU.ISTT CPP MS")
+}
+record(mbbiDirect,"$(S):STN:AIM:LTCH") {
+	field(DESC,"AIM State Latch Bits")
+	field(FLNK,"$(S):STN:AIM:LTCHFANO.VAL")
+	field(NOBT,"16")
+	field(INP,"$(S):STN:AIM:MODU.FSTT CPP MS")
+}
+record(mbbiDirect,"$(S):STN:AIM:FRST") {
+	field(DESC,"AIM State Latch Bits")
+	field(FLNK,"$(S):STN:AIM:FRSTFANO.VAL")
+	field(NOBT,"16")
+	field(INP,"$(S):STN:AIM:MODU.FFLT CPP MS")
+}
+record(mbbiDirect,"$(S):STN:AIMARC:LTCH") {
+	field(DESC,"AIMARC Arc Latch Bits")
+	field(FLNK,"$(S):STN:AIM:ARCLTCHFANO.VAL")
+	field(NOBT,"16")
+	field(INP,"$(S):STN:AIM:MODU.ALST CPP MS")
+}
+@
+
+
+1.6
+log
+@Removed reference to MPS:FRST in all files.
+@
+text
+@d446 9
+d465 1
+d566 2
+a567 2
+	field(INPA,"$(S):STNCRATEPS:TEMP.SEVR NPP MS")
+	field(INPB,"$(S):CRATE:VXI:TEMP.SEVR NPP MS")
+@
+
+
+1.5
+log
+@Change register that is used for logging the latched vxi backplane,
+AB summary, AB heartbeat, and forced faults.  Instead of the interrupt
+status register (where the faults are cleared on every read instead of
+when the reset button is pushed), we now use the fast interlock status
+register.
+@
+text
+@d543 9
+@
+
+
+1.4
+log
+@Added external MPS to SPEAR system summary and not to PEPII.
+@
+text
+@d582 1
+a582 1
+	field(FLNK,"$(S):STN:BEAMABORT:STAT.PROC")
+d586 6
+a591 2
+	field(FLNK,"$(S):STN:FORCED:FRST.PROC")
+	field(LNK1,"$(S):STN:AIM:ARCFRSTFANO.PROC")
+d595 7
+a601 1
+	field(FLNK,"$(S):STN:FORCED:LTCH.PROC")
+d607 1
+a607 1
+	field(INP,"$(S):STN:AIM:MODU.FSTT CPP MS")
+d613 1
+a613 1
+	field(INP,"$(S):STN:AIM:MODU.ISTT CPP MS")
+@
+
+
+1.3
+log
+@Station and feedback summaries are different for SPEAR.  Move those summaries
+to rf_sumy_stn_(pep,spr).db from rf_sumy_stn.db and include the appropriate
+rf_sumy_stn_* in rf_beam_*.template.
+@
+text
+@a542 20
+record(calc,"$(S):STNMPS:SUMY:FRST") {
+	field(DESC,"Station MPS Status Sum")
+	field(FLNK,"$(S):STNTEMP:SUMY:FRST.PROC")
+	field(CALC,"0")
+	field(INPB,"$(S):STN:FORCED:FRST.SEVR NPP MS")
+	field(INPC,"$(S):STN:VXI:FRST.SEVR NPP MS")
+	field(INPF,"$(S):STNREF:POWER:FRST.SEVR NPP MS")
+	field(INPG,"$(S):STNCRATEPS:TEMP:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):STNMPS:SUMY:LTCH") {
+	field(DESC,"Station MPS Status Sum")
+	field(FLNK,"$(S):STNTEMP:SUMY:LTCH.PROC")
+	field(CALC,"0")
+	field(INPB,"$(S):STN:FORCED:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):STN:VXI:LTCH.SEVR NPP MS")
+	field(INPE,"$(S):STN:NCV:PLC.SEVR NPP MS")
+	field(INPF,"$(S):STNREF:POWER:LTCH.SEVR NPP MS")
+	field(INPG,"$(S):STNCRATEPS:TEMP:LTCH.SEVR NPP MS")
+	field(INPH,"$(S):STN:RF476MHZREF:LTCH.SEVR NPP MS")
+}
+@
+
+
+1.2
+log
+@Rename
+@
+text
+@a384 1
+	field(INPE,"$(S):STN:ARCSUMY:LTCH.SEVR NPP MS")
+a509 16
+record(calc,"$(S):STN:SUMY:MODU") {
+	field(DESC,"Station Status Sum")
+	field(FLNK,"$(S):STNPLC:SUMY:MODU.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYS:SUMY:MODU.SEVR NPP MS")
+	field(INPB,"$(S):HVPSDCM:SUMY:MODU.SEVR NPP MS")
+	field(INPC,"$(S):CIRC:SUMY:MODU.SEVR NPP MS")
+	field(INPD,"$(S):STN:GVF:MODU.SEVR NPP MS")
+	field(INPE,"$(S):CAV:SUMY:MODU.SEVR NPP MS")
+	field(INPF,"$(S):STNDCM:SUMY:MODU.SEVR NPP MS")
+	field(INPG,"$(S):STN:CLK:MODU.SEVR NPP MS")
+	field(INPH,"$(S):STN:CFM1:MODU.SEVR NPP MS")
+	field(INPI,"$(S):STN:CFM2:MODU.SEVR NPP MS")
+	field(INPJ,"$(S):STN:RFP:MODU.SEVR NPP MS")
+	field(INPK,"$(S):STN:AIM:MODU.SEVR NPP MS")
+}
+a541 16
+}
+record(calc,"$(S):FBCK:SUMY:SEVR") {
+	field(DESC,"Feedback Loop Severity Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):STNDAC:LOOP:STATUS.SEVR NPP MS")
+	field(INPB,"$(S):HVPS:LOOP:STATUS.SEVR NPP MS")
+	field(INPC,"$(S):STN:GFF:CTRL.SEVR NPP MS")
+	field(INPD,"$(S):STNCOMB:LOOP:CTRL.SEVR NPP MS")
+	field(INPE,"$(S):STNDIRECT:LOOP:CTRL.SEVR NPP MS")
+	field(INPF,"$(S):STNDIRECT:LEADCOMP:CTRL.SEVR NPP MS")
+	field(INPG,"$(S):STNDIRECT:INTCOMP:CTRL.SEVR NPP MS")
+	field(INPH,"$(S):STNDIRECT:LOOP:TRACK.SEVR NPP MS")
+	field(INPI,"$(S):STNRIPPLE:LOOP:TRACK.SEVR NPP MS")
+	field(INPJ,"$(S):STN:RFP:RIPPLELOOP.SEVR NPP MS")
+	field(INPK,"$(S):STN:TAXILINK:STAT.SEVR NPP MS")
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d591 1
+a591 1
+	field(INPE,"$(S):STN:RING:PLC.SEVR NPP MS")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

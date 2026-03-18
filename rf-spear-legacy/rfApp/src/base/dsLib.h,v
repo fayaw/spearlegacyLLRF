@@ -1,0 +1,339 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DS - Down Sampler
+**
+**  Abstract:
+**      Parameter definitions for the SLAC Down Sampler board.
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Longitudinal Feedback Project
+**
+**   History:
+**  January 11, 1995	- Created
+** February 22, 1995	- Added CSR definitions
+**  1996-7-5		- Modified to support rev. 0 and 1 of the board - D.T.
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef DSLIB_H
+#define DSLIB_H
+
+#include "sglLib.h"
+#include "busLib.h"
+#include "dspLib.h"
+
+#define DS_K_LINKCNT        4           /* Number of links */
+
+#define DS_K_CSRSPACE       SPC_K_A16   /* Space CSR registers reside in */
+#define DS_K_CSRSIZE        SIZ_K_SHORT /* Size of CSR space transactions */
+#define DS_A_CSRS           0x8000      /* CSR register location */
+#define DS_K_CSRCOUNT       4           /* Number of CSRs */
+
+#define DS_K_LUTSPACE       SPC_K_A24   /* Space lookup table resides in */
+#define DS_K_LUTSIZE        SIZ_K_LONG  /* Size of Lookup Table transactions */
+
+/* Revision 0 defines */
+#define DS_A_LUTABLE0       0x800000    /* Lookup table location */
+#define DS_K_LUTLEN0        0x1000      /* Lookup table size in long words */
+
+/* Revision 1 defines */
+#define DS_A_LUTABLE1       0x800000    /* Lookup table location */
+#define DS_K_LUTLEN1        0x4000      /* Lookup table size in long words */
+
+
+#define DS_K_BOARDID        0x0001      /* Down sampler board ID */
+
+#define DS_K_MAXALSDLY      0xfeba      /* Maximum bucket delay for ALS */
+#define DS_K_MAXPEPDLY      0xf930      /* Maximum bucket delay for PEP-II */
+
+#define DS_K_DSPCNT         DSP_K_SLOTCOUNT /* # of DSP boards in the system */
+
+#define DS_A_CSR0          (volatile unsigned short *) (DS_A_CSRS + 0x0000)
+#define DS_A_CSR1          (volatile unsigned short *) (DS_A_CSRS + 0x0002)
+#define DS_A_CSR2          (volatile unsigned short *) (DS_A_CSRS + 0x0004)
+#define DS_A_CSR3          (volatile unsigned short *) (DS_A_CSRS + 0x0006)
+
+
+/* Down sampler look-up table data format */
+#define DS_V_DSPBUFPTR      0
+#define DS_M_DSPBUFPTR     (0x0000001f << DS_V_DSPBUFPTR)
+#define DS_V_DSPBSADX       5
+#define DS_M_DSPBSADX      (0x00000007 << DS_V_DSPBSADX)
+#define DS_V_LNKENB         8
+#define DS_M_LNKENB        (0x0000000f << DS_V_LNKENB)
+#define DS_V_HBSTOP        14
+#define DS_M_HBSTOP        (0x00000001 << DS_V_HBSTOP)
+#define DS_V_HBSTART       15
+#define DS_M_HBSTART       (0x00000001 << DS_V_HBSTART)
+#define DS_V_HBADX         16
+#define DS_M_HBADX         (0x00000fff << DS_V_HBADX)
+#define DS_V_INCTRNCNT     29
+#define DS_M_INCTRNCNT     (0x00000001 << DS_V_INCTRNCNT)
+#define DS_V_CLRTRNCNT     30
+#define DS_M_CLRTRNCNT     (0x00000001 << DS_V_CLRTRNCNT)
+#define DS_V_HLTCNTR       31
+#define DS_M_HLTCNTR       (0x00000001 << DS_V_HLTCNTR)
+
+/* Down sampler look-up table address format */
+#define DS_V_GRPADX         1
+#define DS_M_GRPADX        (0x00007fff << DS_V_GRPADX)
+#define DS_V_DSBRDADX      16
+#define DS_M_DSBRDADX      (0x0000ffff << DS_V_DSBRDADX)
+
+
+/* CSR 0 - Master Status and Control Register */
+#define DS_V_RUNENB         0
+#define DS_M_RUNENB        (0x0001 << DS_V_RUNENB)
+#define DS_V_AUTOENB        1
+#define DS_M_AUTOENB       (0x0001 << DS_V_AUTOENB)
+#define DS_V_TXENB          2
+#define DS_M_TXENB         (0x0001 << DS_V_TXENB)
+#define DS_V_EXCPTENB       3
+#define DS_M_EXCPTENB      (0x0001 << DS_V_EXCPTENB)
+#define DS_V_FILTER         4
+#define DS_M_FILTER        (0x0003 << DS_V_FILTER)
+#define DS_V_RUNNING        7
+#define DS_M_RUNNING       (0x0001 << DS_V_RUNNING)
+#define DS_V_BOARDID        8
+#define DS_M_BOARDID       (0x003f << DS_V_BOARDID)
+#define DS_V_REVISION      14
+#define DS_M_REVISION      (0x0003 << DS_V_REVISION)
+
+#define DS_V_SETRUNENB      0
+#define DS_M_SETRUNENB     (0x0001 << DS_V_SETRUNENB)
+#define DS_V_SETAUTOENB     1
+#define DS_M_SETAUTOENB    (0x0001 << DS_V_SETAUTOENB)
+#define DS_V_SETTXENB       2
+#define DS_M_SETTXENB      (0x0001 << DS_V_SETTXENB)
+#define DS_V_SETEXCPTENB    3
+#define DS_M_SETEXCPTENB   (0x0001 << DS_V_SETEXCPTENB)
+#define DS_V_SETFILTER      4
+#define DS_M_SETFILTER     (0x0003 << DS_V_SETFILTER)
+
+#define DS_V_CLRRUNENB      8
+#define DS_M_CLRRUNENB     (0x0001 << DS_V_CLRRUNENB)
+#define DS_V_CLRAUTOENB     9
+#define DS_M_CLRAUTOENB    (0x0001 << DS_V_CLRAUTOENB)
+#define DS_V_CLRTXENB      10
+#define DS_M_CLRTXENB      (0x0001 << DS_V_CLRTXENB)
+#define DS_V_CLREXCPTENB   11
+#define DS_M_CLREXCPTENB   (0x0001 << DS_V_CLREXCPTENB)
+#define DS_V_CLRFILTER     12
+#define DS_M_CLRFILTER     (0x0003 << DS_V_CLRFILTER)
+#define DS_V_RESET         14
+#define DS_M_RESET         (0x0001 << DS_V_RESET)
+#define DS_V_ABORT         15
+#define DS_M_ABORT         (0x0001 << DS_V_ABORT)
+
+/* CSR 1 - Link Status Register */
+#define DS_V_LNK0TX         0
+#define DS_M_LNK0TX        (0x0001 << DS_V_LNK0TX)
+#define DS_V_LNK0RX         1
+#define DS_M_LNK0RX        (0x0001 << DS_V_LNK0RX)
+#define DS_V_LNK1TX         2
+#define DS_M_LNK1TX        (0x0001 << DS_V_LNK1TX)
+#define DS_V_LNK1RX         3
+#define DS_M_LNK1RX        (0x0001 << DS_V_LNK1RX)
+#define DS_V_LNK2TX         4
+#define DS_M_LNK2TX        (0x0001 << DS_V_LNK2TX)
+#define DS_V_LNK2RX         5
+#define DS_M_LNK2RX        (0x0001 << DS_V_LNK2RX)
+#define DS_V_LNK3TX         6
+#define DS_M_LNK3TX        (0x0001 << DS_V_LNK3TX)
+#define DS_V_LNK3RX         7
+#define DS_M_LNK3RX        (0x0001 << DS_V_LNK3RX)
+
+#define DS_V_SETLNK0TX      0
+#define DS_M_SETLNK0TX     (0x0001 << DS_V_SETLNK0TX)
+#define DS_V_SETLNK0RX      1
+#define DS_M_SETLNK0RX     (0x0001 << DS_V_SETLNK0RX)
+#define DS_V_SETLNK1TX      2
+#define DS_M_SETLNK1TX     (0x0001 << DS_V_SETLNK1TX)
+#define DS_V_SETLNK1RX      3
+#define DS_M_SETLNK1RX     (0x0001 << DS_V_SETLNK1RX)
+#define DS_V_SETLNK2TX      4
+#define DS_M_SETLNK2TX     (0x0001 << DS_V_SETLNK2TX)
+#define DS_V_SETLNK2RX      5
+#define DS_M_SETLNK2RX     (0x0001 << DS_V_SETLNK2RX)
+#define DS_V_SETLNK3TX      6
+#define DS_M_SETLNK3TX     (0x0001 << DS_V_SETLNK3TX)
+#define DS_V_SETLNK3RX      7
+#define DS_M_SETLNK3RX     (0x0001 << DS_V_SETLNK3RX)
+
+#define DS_V_CLRLNK0TX      8
+#define DS_M_CLRLNK0TX     (0x0001 << DS_V_CLRLNK0TX)
+#define DS_V_CLRLNK0RX      9
+#define DS_M_CLRLNK0RX     (0x0001 << DS_V_CLRLNK0RX)
+#define DS_V_CLRLNK1TX     10
+#define DS_M_CLRLNK1TX     (0x0001 << DS_V_CLRLNK1TX)
+#define DS_V_CLRLNK1RX     11
+#define DS_M_CLRLNK1RX     (0x0001 << DS_V_CLRLNK1RX)
+#define DS_V_CLRLNK2TX     12
+#define DS_M_CLRLNK2TX     (0x0001 << DS_V_CLRLNK2TX)
+#define DS_V_CLRLNK2RX     13
+#define DS_M_CLRLNK2RX     (0x0001 << DS_V_CLRLNK2RX)
+#define DS_V_CLRLNK3TX     14
+#define DS_M_CLRLNK3TX     (0x0001 << DS_V_CLRLNK3TX)
+#define DS_V_CLRLNK3RX     15
+#define DS_M_CLRLNK3RX     (0x0001 << DS_V_CLRLNK3RX)
+
+#define DS_V_SETLNKTX       DS_V_SETLNK0TX
+#define DS_V_CLRLNKTX       DS_V_CLRLNK0TX
+#define DS_V_SETLNKRX       DS_V_SETLNK0RX
+#define DS_V_CLRLNKRX       DS_V_CLRLNK0RX
+#define DS_V_LNKTX          DS_V_LNK0TX
+#define DS_V_LNKRX          DS_V_LNK0RX
+#define DS_M_LNKTX         (DS_M_LNK0TX|DS_M_LNK1TX|DS_M_LNK2TX|DS_M_LNK3TX)
+#define DS_M_LNKRX         (DS_M_LNK0RX|DS_M_LNK1RX|DS_M_LNK2RX|DS_M_LNK3RX)
+
+/* CSR 2 - Bucket Delay Register */
+#define DS_V_DELAY          0
+#define DS_M_DELAY         (0xffff << DS_V_DELAY)
+
+/* CSR 3 - Exception Bucket Select Register */
+#define DS_V_EXCPTBCKT      0
+#define DS_M_EXCPTBCKT     (0xffff << DS_V_EXCPTBCKT)
+
+
+#include "DSL.h"          /* For some reason Dmitry insists on creating his own
+                             version rather than updating this file */
+
+#if 0
+typedef struct _DsLutDsc
+{
+  char  filename[80];
+  int   link[DS_K_LINKCNT];
+  int   monitor[DS_K_LINKCNT];
+  int   board[DS_K_LINKCNT][DS_K_DSPCNT + 1];
+  int   bucketCnt;
+  int   turnMap;
+  int   dsFactor;
+  float sampleFreq;
+  int   filterNo;
+  int   exception;
+  int   hbOffset;
+  int   autoMode;
+  int   firstGroup;
+  int   groupStep;
+  float filtExeTime;
+} DsLutDsc;
+#endif
+
+typedef DSL_params DsLutDsc;
+
+typedef struct _DsCsrs
+{
+  unsigned short data[DS_K_CSRCOUNT];
+}  DsCsrs;
+
+typedef struct _DsBoard
+{
+  volatile unsigned short *csrs;
+  volatile unsigned long  *data;
+  int revision;
+  unsigned long int LutAddr;
+  unsigned long int LutLen;
+}  DsBoard;
+
+
+#define DsPokeCsr(csr, data)  BusPokeCsr(DS_K_CSRSPACE, DS_K_CSRSIZE, csr, data)
+#define DsPeekCsr(csr, data)  BusPeekCsr(DS_K_CSRSPACE, DS_K_CSRSIZE, csr, data)
+
+Status DS_Reset              (void);
+Status DS_Abort              (void);
+Status DS_Start              (int);
+Status DS_Stop               (void);
+Status DS_SetCsr0            (unsigned int);
+Status DS_SetFilterNo        (unsigned int);
+Status DS_SetBucketDelay     (unsigned int);
+Status DS_ExcptnBcktEnable   (void);
+Status DS_ExcptnBcktDisable  (void);
+Status DS_SetExceptionBucket (unsigned int);
+Status DS_GetLinkStatus      (unsigned int *);
+Status DS_ClearLut           (void);
+Status DS_GenTable           (DsLutDsc *, void **, DsBoard *);
+Status DS_LoadTable          (void *, DsLutDsc *, int, int, int, char *);
+Status DS_FreeTable          (void *);
+int    DS_IsDs               (void);
+Status DS_FindIt             (DsBoard **);
+
+#endif
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

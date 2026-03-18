@@ -1,0 +1,40 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1
+	allenBradley-R2-2-spear0:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2011.11.11.22.40.20;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Add individual dbd files (to be used in lieu of allenBradley.dbd).
+@
+text
+@#-- AllenBradley SLC 500 DCM
+
+device(ai,AB_IO,devAiAbSlcDcm,"AB-SLC500DCM")
+device(ao,AB_IO,devAoAbSlcDcm,"AB-SLC500DCM")
+device(longin,AB_IO,devLiAbSlcDcm,"AB-SLC500DCM")
+device(longout,AB_IO,devLoAbSlcDcm,"AB-SLC500DCM")
+device(ai,AB_IO,devAiAbSlcDcmSigned,"AB-SLC500DCM-Signed")
+@

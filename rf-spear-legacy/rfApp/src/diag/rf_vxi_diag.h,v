@@ -1,0 +1,196 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.01.10.23.22.43;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.43;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+
+   **MEMBER**=NONE
+   **CVS**=UNIX_INCLUDE
+=============================================================
+
+  Abs:  Include file for VXI 
+
+  Name: test.h
+
+  Auth: 5-Apr-2000, Kristi L. Luchini  (USERNAME)
+  Rev : dd-mmm-yyyy, Reviewer's Name   (USERNAME)
+
+-------------------------------------------------------------
+  Mod:
+        dd-mmm-yyyy, First Lastname (USERNAME):
+          comments
+
+=============================================================
+*/
+
+#ifndef TEST_H
+#define TEST_H
+
+
+#define INTLEVEL       5
+#define VXI_ID_REG     0x0
+#define VXI_DTYPE_REG  0x2
+#define VXI_STATUS_REG 0x4
+#define VXI_OFFSET_REG 0x6
+
+#define VXI_EXT_DEVICE_CLASS 1
+
+/* Read only */
+typedef struct 
+{
+  unsigned  manuf     :12;  /* vendor name                    */
+  unsigned  adrsSpace :2;   /* addressing mode(s)             */
+  unsigned  class     :2;   /* device class (msg base device) */ 
+}vxi_id_ts;
+
+/* Write only */
+typedef struct {
+  unsigned la         :8;  /* logical address (0-255) */
+  unsigned            :8;  /* unused                  */
+}vxi_la_ts;
+
+typedef struct
+{
+  unsigned  model   :12;
+  unsigned  memsize :4;
+} vxi_dtype_ts;
+
+typedef struct 
+{
+  unsigned  sft_rst :1;
+  unsigned  sys_inh :1;
+  unsigned  pass    :1;
+  unsigned  rdy     :1;
+  unsigned          :10;
+  unsigned  modid   :1;
+  unsigned          :1;
+}vxi_status_ts;
+
+typedef struct
+{
+  unsigned sft_tst :1;  
+  unsigned sys_inh :1;
+  unsigned         :14; 
+} vxi_ctrl_ts;
+
+typedef struct
+{
+  unsigned           :10;
+  unsigned  shr_mem  :1;
+  unsigned  fsh_fast :1;  /* support fast handshake mode if set */
+  unsigned  intr     :1;  /* interrupt */
+  unsigned  mstr     :1;  /* master    */
+  unsigned  sngl     :1;  /* does not contain signal reg if set */
+  unsigned  cmdr     :1;  /* message base device only if set    */
+}vxi_protocol_ts;
+
+typedef struct 
+{
+  unsigned  lines :13;
+  unsigned  enb   :1;
+  unsigned        :2;
+} vxi_modid_ts;
+
+typedef union 
+{
+  UINT16  id;         /* identification  */
+  UINT16  type;       /* Device type     */
+  UINT16  status;     /* status register */
+  UINT16  protocol;
+} vxi_rd_ts;
+
+/* All PEP-II RF modules share this structure but bit meanings may differ */
+typedef struct 
+{
+  vxi16_t       attr;
+  vxi16_t       serNoHi;
+  vxi16_t       serNoLo;
+  vxi16_t       version;
+  vxi16_t       pad[5];
+  vxi16_t       intStat;
+  vxi16_t       intCtrl;
+  vxi16_t       subClass;
+  vxi16_t       devCtrl;
+  vxi16_t       devStat;
+}  P2RfDevDep;
+
+typedef struct 
+{
+  unsigned long   driverId;             /* ID used to identify this driver */
+}  P2RfBlk;
+
+typedef struct
+{
+  char         *name;                   /* PEP-II VXI module name */
+  char         *drawing;                /* PEP-II VXI drawing number */
+}  P2RfModel;
+
+typedef struct
+{
+  P2RfBlk              *blk;
+  int                   la;             /* The module's logical address       */
+  P2RfModel             model;          /* The module's model information     */
+  volatile VXICSR      *csr;            /* VXI device hdr ptr                 */
+  volatile P2RfDevDep  *devDep;         /* Ptr to device dependent registers  */
+  vxi16_t              *ext;            /* Pointer to module's extended space */
+  FAST_LOCK             lock;           /* Mutual exclusion lock handle       */
+  void                (*isrRtn) (void *, unsigned short); /* ISR rtn pointer  */
+  void                 *isrArg;         /* Pointer to an argument for ISR     */
+  void                (*sdRtn) (void *);/* Pointer to shutdown routine        */
+  void                 *sdArg;          /* Pointer to an argument for SDR     */
+  int                   sharedCnt;      /* # of clients sharing a module      */
+  SEM_ID                shrSem;         /* Semaphore for circ buf control     */
+}  P2RfPvt;
+
+#endif /* TEST_H */
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

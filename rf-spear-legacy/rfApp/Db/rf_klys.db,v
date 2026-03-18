@@ -1,0 +1,655 @@
+head	1.7;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.7
+	RF-SPEAR-R0-3-1:1.6
+	RF-SPEAR-R0-3-0:1.6
+	RF-SPEAR-R0-2-0:1.6
+	RF-SPEAR-R0-1-0:1.6
+	RF-SPEAR-R0-0-3:1.6
+	RF-SPEAR-R0-0-2:1.5
+	RF-SPEAR-R0-0-1:1.5
+	RF-SPEAR-R0-0-0:1.5
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.5
+	RF-3-13-10:1.5.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.5
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.5
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.5
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.7
+date	2021.01.25.23.14.37;	author spear;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2013.07.03.00.33.49;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2004.06.21.23.05.01;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.06.15.00.54.58;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.01.05.19.30.29;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.27.01.17.07;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.45;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.45;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.7
+log
+@J.Sebek increased cathode heater timeout from 1600 to 2100 seconds. Update the limits accordingly
+@
+text
+@grecord(ai,"$(S):FILAMENT:TIME") {
+	field(DESC,"Klys Filament Time Left")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM AI I to F")
+	field(INP,"@@$(S):STN:DCM:MODU.T4[40]")
+	field(EGUF,"2300")
+	field(EGU,"Sec")
+	field(HOPR,"2300")
+	field(HIHI,"1700")
+	field(HIGH,"1")
+	field(HHSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(ADEL,"1")
+	field(MDEL,"1")
+}
+grecord(ai,"$(S):KLYSCOLL:POWER:ULIM") {
+	field(DESC,"Klys Coll Power Limit")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM AI I to F")
+	field(INP,"@@$(S):STN:DCM:MODU.T4[42]")
+	field(EGUF,"1200")
+	field(EGU,"kW")
+	field(HOPR,"1200")
+	field(HYST,"1")
+	field(ADEL,"1")
+	field(MDEL,"1")
+}
+grecord(ai,"$(S):KLYSCOLLPLC:POWER") {
+	field(DESC,"Klys Coll Power from PLC")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM AI I to F")
+	field(INP,"@@$(S):STN:DCM:MODU.T4[41]")
+	field(EGUF,"1200")
+	field(EGU,"kW")
+	field(HOPR,"1200")
+	field(HIHI,"1175")
+	field(HIGH,"1150")
+	field(HHSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(HYST,"10")
+	field(ADEL,"1")
+	field(MDEL,"1")
+}
+grecord(ao,"$(S):KLYS:GAIN:CTRL") {
+	field(DESC,"Klys Gain Setpoint")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"4")
+	field(EGUF,"100")
+	field(EGU,"dB")
+	field(DRVH,"100")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):KLYSDRIVFRWD:POWER:HIGH") {
+	field(DESC,"DRVPWRHI  Drive Pwr Hi Beam")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"100")
+	field(EGU,"W")
+	field(DRVH,"100")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):KLYSDRIVFRWD:POWER:ON") {
+	field(DESC,"DRVPWRLO  Drive Power Lo Bm")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"100")
+	field(EGU,"W")
+	field(DRVH,"100")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):KLYSDRIVFRWD:POWER:SAT") {
+	field(DESC,"DRVPWRSAT Drive Power Satur")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(OUT,"$(S):KLYSDRIVFRWD:POWER:TUNE.VAL  PP NMS")
+	field(PREC,"2")
+	field(EGUF,"100")
+	field(EGU,"W")
+	field(DRVH,"100")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):KLYSDRIVFRWD:POWER:TUNE") {
+	field(DESC,"Drive Pwr TUNE Ctrl")
+	field(DTYP,"Soft Channel")
+	field(PREC,"2")
+	field(EGUF,"100")
+	field(EGU,"W")
+	field(DRVH,"100")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):KLYSOUTFRWD:POWER:HIGH") {
+	field(DESC,"Klys Out Frwd Pwr High Beam")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"1500")
+	field(EGU,"kW")
+	field(DRVH,"1500")
+	field(HOPR,"1500")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):KLYSOUTFRWD:POWER:MAX") {
+	field(DESC,"Klys Out Frwd Pwr HVPS Limit")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"1000")
+	field(EGU,"kW")
+	field(DRVH,"1000")
+	field(HOPR,"1000")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):KLYSOUTFRWD:POWER:MIN") {
+	field(DESC,"Klys Out Frwd Pwr TUNR Limit")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"500")
+	field(EGU,"kW")
+	field(DRVH,"500")
+	field(HOPR,"500")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):KLYSOUTFRWD:POWER:NORM") {
+	field(DESC,"Klys Out Frwd Pwr Normal")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"1000")
+	field(EGU,"kW")
+	field(DRVH,"1000")
+	field(HOPR,"1000")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(calc,"$(S):FILAMENT:POWER") {
+	field(DESC,"Filament Power")
+	field(SCAN,"2 second")
+	field(CALC,"A*B")
+	field(INPA,"$(S):FILAMENT:VOLT.VAL  NPP MS")
+	field(INPB,"$(S):FILAMENT:CURR.VAL  NPP MS")
+	field(EGU,"W")
+	field(PREC,"1")
+	field(HOPR,"700")
+	field(LOPR,"500")
+	field(HYST,"0.1")
+	field(ADEL,"0.1")
+	field(MDEL,"0.1")
+}
+grecord(compress,"$(S):KLYSDRIVFRWD:POWER:HIST") {
+	field(DESC,"Klys Drive Power History")
+	field(FLNK,"$(S):KLYSOUTFRWD:POWER:HIST.VAL  PP NMS")
+	field(INP,"$(S):KLYSDRIVFRWD:POWER.VAL  NPP NMS")
+	field(ALG,"Circular Buffer")
+	field(NSAM,"300")
+	field(N,"300")
+	field(HOPR,"120")
+	field(EGU,"W")
+}
+grecord(compress,"$(S):KLYSOUTFRWD:POWER:HIST") {
+	field(DESC,"Klys Out Frwd Power History")
+	field(INP,"$(S):KLYSOUTFRWD:POWER.VAL  NPP NMS")
+	field(ALG,"Circular Buffer")
+	field(NSAM,"300")
+	field(N,"300")
+	field(HOPR,"650")
+	field(EGU,"kW")
+}
+grecord(sel,"$(S):KLYSDRIVFRWD:POWER:CTRL") {
+	field(DESC,"Drive Power Setpoint")
+	field(FLNK,"$(S):KLYSDRIVFRWD:HVPS:DELTA.VAL  PP NMS")
+	field(PREC,"2")
+	field(NVL,"$(S):KLYSDRIVFRWD:POWER:SEL.VAL  NPP NMS")
+	field(INPA,"10")
+	field(INPB,"$(S):KLYSDRIVFRWD:POWER:ON.VAL  NPP NMS")
+	field(INPC,"$(S):KLYSDRIVFRWD:POWER:HIGH.VAL  NPP NMS")
+	field(INPD,"$(S):KLYSDRIVFRWD:POWER:SAT.VAL  NPP NMS")
+	field(INPE,"100")
+	field(INPF,"100")
+	field(INPG,"100")
+	field(INPH,"100")
+	field(INPI,"100")
+	field(INPJ,"100")
+	field(INPK,"100")
+	field(INPL,"100")
+	field(EGU,"W")
+	field(HOPR,"100")
+}
+grecord(sel,"$(S):KLYSDRIVFRWD:POWER:ERR") {
+	field(DESC,"Drive Power Error")
+	field(PREC,"1")
+	field(NVL,"$(S):STN:STATE:RBCK.VAL  NPP NMS")
+	field(INPA,"$(S):KLYSDRIVFRWD:HVPS:DELTA.K  NPP MS")
+	field(INPB,"$(S):KLYSDRIVFRWD:HVPS:DELTA.K  NPP MS")
+	field(INPC,"$(S):KLYSDRIVFRWD:DAC:DELTA.K  NPP MS")
+	field(INPD,"$(S):KLYSDRIVFRWD:HVPS:DELTA.K  NPP MS")
+	field(INPE,"$(S):KLYSDRIVFRWD:HVPS:DELTA.K  NPP MS")
+	field(EGU,"W")
+	field(HOPR,"10")
+	field(LOPR,"-10")
+	field(HIHI,"5")
+	field(LOLO,"-1")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HYST,".1")
+	field(ADEL,".1")
+	field(MDEL,".1")
+}
+grecord(sub,"$(S):KLYS:EFFICIENCY") {
+	field(DESC,"Klystron Efficiency")
+	field(FLNK,"$(S):KLYSDRIVFRWD:POWER:SEL.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQpowerEff")
+	field(INPA,"$(S):HVPS:POWER.VAL  NPP MS")
+	field(INPB,"$(S):KLYSOUTFRWD:POWER.VAL  NPP NMS")
+	field(INPC,"0.01")
+	field(INPD,"$(S):KLYSOUTFRWD:PHASE.VAL  NPP MS")
+	field(EGU,"Percent")
+	field(HOPR,"100")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.02")
+	field(MDEL,"0.02")
+	field(PREC,"2")
+}
+grecord(sub,"$(S):KLYS:GAIN") {
+	field(DESC,"Klystron Gain")
+	field(FLNK,"$(S):STNRIPPLE:LOOP:AMPL.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQpower2gain")
+	field(INPA,"$(S):KLYSOUTFRWD:POWER.VAL  NPP NMS")
+	field(INPB,"$(S):KLYSDRIVFRWD:POWER.VAL  NPP NMS")
+	field(INPC,"1000")
+	field(INPD,"10")
+	field(INPE,"0.1")
+	field(INPF,"0.1")
+	field(INPG,"$(S):KLYSOUTFRWD:PHASE.VAL  NPP MS")
+	field(INPH,"$(S):KLYSDRIVFRWD:PHASE.VAL  NPP MS")
+	field(EGU,"dB")
+	field(HOPR,"100")
+	field(PREC,"1")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.01")
+	field(MDEL,"0.01")
+	field(PREC,"2")
+}
+grecord(sub,"$(S):KLYSCOLL:POWER") {
+	field(DESC,"Klystron Collector Power")
+	field(FLNK,"$(S):KLYS:EFFICIENCY.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQpowerNet")
+	field(INPA,"$(S):HVPS:POWER.VAL  NPP MS")
+	field(INPB,"$(S):KLYSOUTFRWD:POWER.VAL  NPP NMS")
+	field(INPC,"$(S):KLYSOUTFRWD:PHASE.VAL  NPP MS")
+	field(INPD,"$(S):KLYSCOLLPLC:POWER.SEVR  NPP MS")
+	field(EGU,"kW")
+	field(HOPR,"1000")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.99")
+	field(MDEL,"0.99")
+}
+grecord(sub,"$(S):KLYSDRIVFRWD:DAC:DELTA") {
+	field(DESC,"Drive Power DAC Delta Cnts")
+	field(FLNK,"$(S):KLYSDRIVFRWD:GFF:DELTA.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQcounts")
+#	field(INPA,"1")
+	field(INPB,"$(S):KLYSDRIVFRWD:POWER.VAL  NPP MS")
+	field(INPC,"$(S):KLYSDRIVFRWD:POWER:TUNE.VAL  NPP NMS")
+#	field(INPD,"2")
+#	field(INPE,"0.1")
+#	field(INPF,"50")
+	field(EGU,"Counts")
+	field(HOPR,"2047")
+	field(LOPR,"-2048")
+	field(PREC,"4")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.5")
+	field(MDEL,"0.5")
+}
+grecord(sub,"$(S):KLYSDRIVFRWD:GFF:DELTA") {
+	field(DESC,"Drive Power GFF Delta Counts")
+	field(FLNK,"$(S):KLYSDRIVFRWD:ODAC:DELTA.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQcounts")
+#	field(INPA,"1")
+	field(INPB,"$(S):KLYSDRIVFRWD:POWER.VAL  NPP MS")
+	field(INPC,"$(S):KLYSDRIVFRWD:POWER:CTRL.VAL  NPP NMS")
+#	field(INPD,"2")
+#	field(INPE,"0.5")
+#	field(INPF,"50")
+	field(EGU,"Counts")
+	field(HOPR,"2047")
+	field(LOPR,"-2048")
+	field(PREC,"4")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.5")
+	field(MDEL,"0.5")
+}
+grecord(sub,"$(S):KLYSDRIVFRWD:HVPS:DELTA") {
+	field(DESC,"Drive Pwr HVPS Delta Volt")
+	field(FLNK,"$(S):KLYSDRIVFRWD:DAC:DELTA.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQcounts")
+#	field(INPA,"1")
+	field(INPB,"$(S):KLYSDRIVFRWD:POWER.VAL  NPP MS")
+	field(INPC,"$(S):KLYSDRIVFRWD:POWER:CTRL.VAL  NPP NMS")
+#	field(INPD,"0.1")
+#	field(INPE,"0.1")
+	field(INPF,"0.5")
+	field(EGU,"kV")
+	field(HOPR,"1")
+	field(LOPR,"-1")
+	field(PREC,"4")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.0005")
+	field(MDEL,"0.0005")
+}
+grecord(sub,"$(S):KLYSDRIVFRWD:ODAC:DELTA") {
+	field(DESC,"Drive Power DAC Delta Counts")
+	field(FLNK,"$(S):KLYSDRIVFRWD:POWER:ERR.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQcounts")
+#	field(INPA,"1")
+	field(INPB,"$(S):KLYSDRIVFRWD:POWER.VAL  NPP MS")
+	field(INPC,"$(S):KLYSDRIVFRWD:POWER:CTRL.VAL  NPP NMS")
+#	field(INPD,"0.5")
+#	field(INPE,"0.1")
+#	field(INPF,"25")
+	field(EGU,"Counts")
+	field(HOPR,"2047")
+	field(LOPR,"-2048")
+	field(PREC,"4")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.5")
+	field(MDEL,"0.5")
+}
+grecord(sub,"$(S):KLYSDRIVFRWD:POWER:SEL") {
+	field(DESC,"Drive Power Setpoint Select")
+	field(FLNK,"$(S):KLYSDRIVFRWD:POWER:CTRL.VAL  PP NMS")
+	field(INAM,"subSysInit")
+	field(SNAM,"subSysDrivSel")
+	field(INPA,"$(S):KLYSOUTFRWD:POWER.VAL  NPP NMS")
+	field(INPB,"$(S):KLYSOUTFRWD:POWER:HIGH.VAL  NPP NMS")
+	field(INPC,"$(S):KLYSOUTFRWD:POWER.HYST  NPP NMS")
+	field(HOPR,"4")
+	field(BRSV,"INVALID")
+}
+grecord(sub,"$(S):STNRIPPLE:LOOP:AMPL") {
+	field(DESC,"Ripple Lp DC Coefficient")
+	field(FLNK,"$(S):KLYSCOLL:POWER.VAL  PP NMS")
+	field(INAM,"subSysInit")
+	field(SNAM,"subSysDCcoeff")
+	field(INPA,"$(S):STNRIPPLE:LOOP:TRACK.VAL  NPP NMS")
+	field(INPB,"$(S):KLYS:GAIN.VAL  NPP MS")
+	field(INPC,"$(S):KLYS:GAIN:CTRL.VAL  NPP NMS")
+#	field(INPD,"0.9")
+#	field(INPE,"0.2")
+#	field(INPF,"0.02")
+	field(INPG,"$(S):STN:RFP:MODU.AMSP  NPP MS")
+	field(INPH,"$(S):STN:BEAMABORT:STAT.VAL  NPP MS")
+	field(INPJ,"1")
+#	field(INPK,"0.9")
+	field(EGU,"V")
+	field(HOPR,"0.9")
+	field(LOPR,"0.55")
+	field(PREC,"3")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.005")
+	field(MDEL,"0.005")
+}
+@
+
+
+1.6
+log
+@Per Jim Sebek - increase MDEL and PREC for klystron gain and efficiency.
+@
+text
+@d6 1
+a6 1
+	field(EGUF,"1800")
+d8 2
+a9 2
+	field(HOPR,"1800")
+	field(HIHI,"1200")
+@
+
+
+1.5
+log
+@Add PINI's on all the soft setpoints.
+@
+text
+@d237 3
+a239 2
+	field(ADEL,"0.99")
+	field(MDEL,"0.99")
+d258 3
+a260 2
+	field(ADEL,"0.1")
+	field(MDEL,"0.1")
+@
+
+
+1.4
+log
+@Comment out .INP* lines that are restored.
+Correct LOLO alarm limit for klys drive power error.
+Use better HOPR/LOPR for filament power, collector power, and
+ripple loop amplitude.
+@
+text
+@d47 1
+d59 1
+d71 1
+d82 1
+a83 1
+	field(DTYP,"Soft Channel")
+d107 1
+d119 1
+d131 1
+d143 1
+@
+
+
+1.3
+log
+@Power must be greater than 0.01 before efficiency is calculated.
+@
+text
+@d153 2
+a154 1
+	field(HOPR,"1400")
+d211 1
+a211 1
+	field(LOLO,"-5")
+d263 1
+a263 1
+	field(HOPR,"1200")
+d273 1
+a273 1
+	field(INPA,"1")
+d276 3
+d292 1
+a292 1
+	field(INPA,"1")
+d295 3
+d311 1
+a311 1
+	field(INPA,"1")
+d314 3
+d330 1
+a330 1
+	field(INPA,"1")
+d333 3
+d363 3
+a365 3
+	field(INPD,"0.5")
+	field(INPE,"0.2")
+	field(INPF,"0.02")
+d369 1
+d371 2
+a372 2
+	field(HOPR,"0.75")
+	field(LOPR,"0.25")
+@
+
+
+1.2
+log
+@Rename
+@
+text
+@d224 1
+a224 1
+	field(INPC,"0.0001")
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d36 5
+a40 1
+	field(HYST,"1")
+d44 2
+a45 2
+grecord(ao,"$(S):KLYSOUTFRWD:POWER:HIGH") {
+	field(DESC,"Klys Out Frwd Pwr High Beam")
+d47 5
+a51 5
+	field(PREC,"2")
+	field(EGUF,"1500")
+	field(EGU,"kW")
+	field(DRVH,"1500")
+	field(HOPR,"1500")
+a65 11
+grecord(ao,"$(S):KLYS:GAIN:CTRL") {
+	field(DESC,"Klys Gain Setpoint")
+	field(DTYP,"Soft Channel")
+	field(PREC,"4")
+	field(EGUF,"100")
+	field(EGU,"dB")
+	field(DRVH,"100")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+d101 11
+d177 20
+a216 20
+grecord(sel,"$(S):KLYSDRIVFRWD:POWER:CTRL") {
+	field(DESC,"Drive Power Setpoint")
+	field(FLNK,"$(S):KLYSDRIVFRWD:HVPS:DELTA.VAL  PP NMS")
+	field(PREC,"2")
+	field(NVL,"$(S):KLYSDRIVFRWD:POWER:SEL.VAL  NPP NMS")
+	field(INPA,"10")
+	field(INPB,"$(S):KLYSDRIVFRWD:POWER:ON.VAL  NPP NMS")
+	field(INPC,"$(S):KLYSDRIVFRWD:POWER:HIGH.VAL  NPP NMS")
+	field(INPD,"$(S):KLYSDRIVFRWD:POWER:SAT.VAL  NPP NMS")
+	field(INPE,"100")
+	field(INPF,"100")
+	field(INPG,"100")
+	field(INPH,"100")
+	field(INPI,"100")
+	field(INPJ,"100")
+	field(INPK,"100")
+	field(INPL,"100")
+	field(EGU,"W")
+	field(HOPR,"100")
+}
+d260 1
+d262 1
+a262 3
+	field(HOPR,"500")
+	field(HIHI,"400")
+	field(HIGH,"300")
+a263 3
+	field(HHSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(HYST,"10")
+d331 11
+a362 11
+}
+grecord(sub,"$(S):KLYSDRIVFRWD:POWER:SEL") {
+	field(DESC,"Drive Power Setpoint Select")
+	field(FLNK,"$(S):KLYSDRIVFRWD:POWER:CTRL.VAL  PP NMS")
+	field(INAM,"subSysInit")
+	field(SNAM,"subSysDrivSel")
+	field(INPA,"$(S):KLYSOUTFRWD:POWER.VAL  NPP NMS")
+	field(INPB,"$(S):KLYSOUTFRWD:POWER:HIGH.VAL  NPP NMS")
+	field(INPC,"$(S):KLYSOUTFRWD:POWER.HYST  NPP NMS")
+	field(HOPR,"4")
+	field(BRSV,"INVALID")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

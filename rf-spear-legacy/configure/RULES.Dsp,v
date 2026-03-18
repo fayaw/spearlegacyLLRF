@@ -1,0 +1,111 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	RF-SPEAR-R0-0-0:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2008.09.30.16.57.55;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Rules for compiling RF IOC DSP code - used by rfApp only.
+@
+text
+@# $Id: RULES.Dsp,v 1.1.1.1 2003/01/10 23:16:56 greg Exp $
+
+ifdef SRCS.s
+	$(DEPENDS_RULE.s)
+endif
+
+clean::
+	@@echo "Cleaning"
+	@@$(RM) *.i *.o *.a $(TARGETS) $(PROD) $(LIBNAME) $(INC)
+
+
+#  The order of the following dependencies is
+#  VERY IMPORTANT !!!!
+
+%: %.o
+	$(RM) $@@
+	$(LINK.s) -o $@@ $(IFILE) $< $(LDLIBS)
+
+%.o: %.s
+	$(RM) $@@
+	$(COMPILE.s) $<
+
+%.o: ../%.s
+	$(RM) $@@
+	$(COMPILE.s) $<
+
+$(LIBNAME):
+	@@echo Building library $@@
+	$(AR) $(ARFLAGS) $@@ $?
+
+$(INSTALL_BIN)/%: %
+	@@echo "Installing $@@"
+	@@test -d $(INSTALL_LOCATION_BIN) || mkdir $(INSTALL_LOCATION_BIN)
+	@@test -d $(INSTALL_BIN) || mkdir $(INSTALL_BIN)
+	@@$(INSTALL) -m 555 $< $(INSTALL_BIN)
+
+$(INSTALL_BIN)/%: ../%
+	@@echo "Installing $@@"
+	@@test -d $(INSTALL_LOCATION_BIN) || mkdir $(INSTALL_LOCATION_BIN)
+	@@test -d $(INSTALL_BIN) || mkdir $(INSTALL_BIN)
+	@@$(INSTALL) -m 555 $< $(INSTALL_BIN)
+
+$(INSTALL_MAN)/man9/% \
+$(INSTALL_MAN)/man8/% \
+$(INSTALL_MAN)/man7/% \
+$(INSTALL_MAN)/man6/% \
+$(INSTALL_MAN)/man5/% \
+$(INSTALL_MAN)/man4/% \
+$(INSTALL_MAN)/man3/% \
+$(INSTALL_MAN)/man2/% \
+$(INSTALL_MAN)/man1/%: ../%
+	@@echo "Installing $@@"
+	@@test -d $(INSTALL_MAN) || mkdir $(INSTALL_MAN)
+	@@test -d $(@@D) || mkdir $(@@D)
+	@@$(INSTALL) -m 644 $< $(@@D)
+
+$(INSTALL_INCLUDE)/%: %
+	@@echo "Installing $@@"
+	@@test -d $(INSTALL_INCLUDE) || mkdir $(INSTALL_INCLUDE)
+	@@$(INSTALL) -m 644 $< $(INSTALL_INCLUDE)
+
+$(INSTALL_INCLUDE)/%: ../%
+	@@echo "Installing $@@"
+	@@test -d $(INSTALL_INCLUDE) || mkdir $(INSTALL_INCLUDE)
+	@@$(INSTALL) -m 644 $< $(INSTALL_INCLUDE)
+
+$(INSTALL_DOC)/%: ../%
+	@@echo "Installing $@@"
+	@@test -d $(INSTALL_DOC) || mkdir $(INSTALL_DOC)
+	@@$(INSTALL) -m 644 $< $(INSTALL_DOC)
+
+.PRECIOUS: %.o %.s
+
+include .DEPENDS
+
+@

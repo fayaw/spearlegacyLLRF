@@ -1,0 +1,203 @@
+head	1.7;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.7
+	RF-SPEAR-R0-1-0:1.7
+	RF-SPEAR-R0-0-3:1.7
+	RF-SPEAR-R0-0-2:1.7
+	RF-SPEAR-R0-0-0:1.7
+	RF-3-13-10:1.6.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.6
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.6
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.6
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.7
+date	2011.12.07.01.10.13;	author saa;	state dead;
+branches;
+next	1.6;
+
+1.6
+date	2006.01.25.23.54.21;	author lazmo;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2006.01.11.01.20.56;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.01.15.23.46.39;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.08.21.19.27.20;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.08.21.19.23.24;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.48;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.48;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.7
+log
+@Not used in 3.14.11 build.
+@
+text
+@# Records
+LIBOBJS += p2RfCf2Record.o
+LIBOBJS += p2RfGvfRecord.o
+LIBOBJS += p2RfIqaRecord.o
+LIBOBJS += p2RfRfpRecord.o
+LIBOBJS += p2RfClkRecord.o
+LIBOBJS += p2RfAimRecord.o
+LIBOBJS += p2RfInitClk.o
+
+# Allen-Bradley device and driver support
+#LIBOBJS += $(EPICS_SITE_BIN)/abLib
+#Special subroutines for subroutine records
+LIBOBJS += $(EPICS_SITE_BIN)/subSysAb.o
+
+#Allen Bradley Basic Support
+LIBOBJS += $(EPICS_SITE_BIN)/devABBINARY.o
+LIBOBJS += $(EPICS_SITE_BIN)/devABStatus.o
+LIBOBJS += $(EPICS_SITE_BIN)/drvAb.o
+
+#Allen Bradley 1746HSTP Stepper Motor Controller
+LIBOBJS += $(EPICS_BASE_BIN)/steppermotorRecord.o
+LIBOBJS += $(EPICS_SITE_BIN)/devSmAB1746HSTP1.o
+
+#Allen Bradley 1771 DCM
+LIBOBJS += $(EPICS_SITE_BIN)/abDcmLib
+
+#Allen Bradley SLC DCM
+LIBOBJS += $(EPICS_SITE_BIN)/devABSLCDCM.o
+
+# Pepii Rf VXI device and driver support
+LIBOBJS += devP2RfCf2.o
+LIBOBJS += devP2RfGvf.o
+LIBOBJS += devP2RfIqa.o
+LIBOBJS += devP2RfRfp.o
+LIBOBJS += devP2RfClk.o
+LIBOBJS += devP2RfAim.o
+LIBOBJS += drvP2RfVxi.o
+
+# VXI Drivers
+LIBOBJS += drvEpvxi.o
+LIBOBJS += $(EPICS_BASE_BIN)/drvEpvxiMsg.o
+LIBOBJS += $(EPICS_BASE_BIN)/drvHp1404a.o
+
+# Subroutine record functions
+LIBOBJS += subIQ.o
+LIBOBJS += subSys.o
+LIBOBJS += subSysReboot.o
+
+# Special VXI interrupt handling
+LIBOBJS += $(EPICS_SITE_BIN)/vxiBaseIsr.o
+
+# EPICS Initialization
+LIBOBJS += initHooks.o
+
+
+
+
+
+@
+
+
+1.6
+log
+@Initial import of COMB-2 (Cf2) support.
+@
+text
+@@
+
+
+1.5
+log
+@Link against individual allenBradley modules instead of library.
+This makes it easier to debug one.
+@
+text
+@d2 1
+a2 1
+LIBOBJS += p2RfCfmRecord.o
+d31 1
+a31 1
+LIBOBJS += devP2RfCfm.o
+@
+
+
+1.4
+log
+@Moved vxiBaseIsr.c to $EPICS/site/src/diag.
+@
+text
+@d12 17
+@
+
+
+1.3
+log
+@Get vxiBaseIsr.o from TOP/bin/T_A
+@
+text
+@d33 1
+a33 1
+LIBOBJS += $(TOP)/bin/$(T_A)/vxiBaseIsr.o
+@
+
+
+1.2
+log
+@Modify for ppc
+@
+text
+@d33 1
+a33 1
+LIBOBJS += vxiBaseIsr.o
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d11 1
+a11 1
+LIBOBJS += $(EPICS_SITE_BIN)/abLib
+d32 3
+d37 1
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

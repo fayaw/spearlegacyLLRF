@@ -1,0 +1,1245 @@
+head	1.9;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.9
+	RF-SPEAR-R0-3-1:1.9
+	RF-SPEAR-R0-3-0:1.9
+	RF-SPEAR-R0-2-0:1.9
+	RF-SPEAR-R0-1-0:1.9
+	RF-SPEAR-R0-0-3:1.9
+	RF-SPEAR-R0-0-2:1.8
+	RF-SPEAR-R0-0-1:1.6
+	RF-SPEAR-R0-0-0:1.6
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.6
+	RF-3-13-10:1.5.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.5
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.4
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.4
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.9
+date	2013.05.21.21.28.41;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2013.03.26.16.48.01;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2013.03.13.17.05.45;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2011.12.07.01.18.54;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2010.11.28.18.10.47;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.03.24.01.34.27;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.01.05.22.23.12;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.08.26.15.09.02;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.46;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.46;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.9
+log
+@Add comments for more placeholders.
+@
+text
+@/*                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+*/
+/*=============================================================================
+
+  Abs:  Functions for calculations based on I and Q for use by EPICS
+        subroutine records.
+
+  Name: subIQ.c
+	   subIQinit           - general initialization
+           subIQgetInit        - initialization for subIQget
+           subIQget            - get fresh I and Q values in the IQA record
+           subIQphase          - phase calculation
+           subIQampl           - amplitude from dB calculation
+	   subIQampl2conv      - reference amplitude to conversion calculation
+           subIQamplStn        - total station amplitude or gap voltage
+	   subIQamplCplg       - cavity coupling factor based on amplitudes
+	   subIQampl2loss      - conversion loss calc from amplitude 
+	   subIQampl2iq        - amplitude to I and Q calculation
+           subIQpower          - power or amplitude calculation
+	   subIQpowerNet       - net power
+	   subIQpowerEff       - klystron efficiency or cavity strength
+	   subIQpower2gain     - gain/loss calculated from powers or amplitudes
+	   subIQpower2ampl     - power/ampl to amplitude calculation
+	   subIQphaseOffs      - total phase offset calculation
+	   subIQphaseOffsU     - unadjusted phase offset calculation
+	   subIQphaseErr       - load angle phase error calculation
+	   subIQphase2posn     - phase error to delta stepper motor position
+	   subIQdac            - calculate II/IQ/QI/QQ DAC values
+	   subIQcounts         - error to delta counts calculation
+	   subIQcorrected      - directivity correction
+	   subIQscaled         - calculate scaled I and Q
+
+  Proto: not required and not used.  All functions called by the
+         subroutine record get passed one argument:
+
+         psub                       Pointer to the subroutine record data.
+          Use:  pointer               In general, all functions read the
+          Type: struct subRecord *    input fields (a to l) and write to
+          Acc:  read/write            the val field.
+          Mech: reference
+
+         All functions return a long integer.  0 = OK, -1 = ERROR.
+         The subroutine record ignores the status returned by the Init
+         routines.  For the calculation routines, the record status (STAT) is
+         set to SOFT_ALARM (unless it is already set to LINK_ALARM due to
+         severity maximization) and the severity (SEVR) is set to psub->brsv
+         (BRSV - set by the user in the database though it is expected to
+          be invalid).
+
+  Auth: 31-Oct-1996, Stephanie Allison
+  Rev:  DD-MMM-YYYY, Reviewer's Name (.NE. Author's Name)
+
+-------------------------------------------------------------------------------
+
+  Mod:  04-Dec-1996, Ric Claus - Added subIQget
+
+=============================================================================*/
+
+#include        <vxWorks.h>    /* Always required for VxWorks code    */
+#include        <stdlib.h>     /* Standard library definitions        */
+#include        <semLib.h>     /* Define semaphore related stuff      */
+#include        <math.h>       /* for atan2, pow, sqrt prototypes     */
+#include        <sysLib.h>     /* System library definitions          */
+#include        <recSup.h>     /* Record support definitions          */
+#include        <recGbl.h>
+#include        <dbAccess.h>   /* Runtime database access definitions */
+#include        <dbCommon.h>   /* Common record definitions           */
+#include	<subRecord.h>  /* for struct subRecord                */
+#include        <alarm.h>      /* Alarm definitions                   */
+#include        <callback.h>   /* Callback utility definitions        */
+
+#include        "rf_station_state.h"  /* for STATION_ON_FM            */
+
+#include        <dbDefs.h>     /* registration stuff */
+#include        <registryFunction.h>  /* ... */
+#include        <epicsExport.h>
+
+#define SUBIQGET_TMO      (sysClkRateGet () / 5) /* 200 msecs */
+#define SUBIQ_PI          3.14159265359          /*(4.0 * atan(1.0)) */
+#define SUBIQ_IQ2VOLTS    (2.0/65535.0)    /* convert from counts to volts */
+
+#define SUBIQ_COUNTCHECK(count, hopr, lopr, roundoff)                   \
+{                                                                       \
+count = (count) > (hopr) ? (hopr) : (count) < (lopr) ? (lopr) : (count);\
+if ((roundoff) < 0.0001)                                                \
+    count = (count) < 0  ? (count) - 0.4999 : (count) + 0.4999;         \
+}
+
+static long subIQinit(struct subRecord *psub)
+{
+  /*
+   * General purpose initialization required since all subroutine records
+   * require a non-NULL init routine even if no initialization is required.  
+   * Note that most subroutines in this file use this routine as an init
+   * routine.  If init logic is needed for a specific subroutine, create a 
+   * new routine for it - don't modify this one.
+   */
+  return(OK);
+}
+
+static long subIQphase(struct subRecord *psub)
+{
+  /*
+   * Calculate phase based on I and Q.  The value will range from
+   * -180 to 180 degrees.  After the phase offset is applied, the value
+   * is adjusted to be in that range.  
+   * Inputs:  A = Corrected In-Phase   (volts)
+   *          B = Corrected Quadrature (volts)
+   *          C = Phase Offset (degrees): -180 <= offset >= 180.
+   * Outputs: L = Unadjusted Phase  (degrees)
+   *          VAL = Adjusted Phase  (degrees)
+   */
+  if ((psub->a != 0.0) || (psub->b != 0.0))
+  {
+    /*
+     * Note - the conversion from radians to degrees will be optimized
+     * by the compiler.
+     */
+    psub->val = psub->l = 
+      (atan2(psub->b, psub->a) * (180.0/SUBIQ_PI)) + psub->c;
+    if      (psub->val < -180.0) psub->val += 360.0;
+    else if (psub->val >  180.0) psub->val -= 360.0;
+  }
+  return(OK);
+}
+
+static long subIQampl(struct subRecord *psub)
+{
+  /*
+   * Calculate amplitude from gain in dB.
+   * Inputs:  A = Gain          (dB)
+   *          B = Gain Offset 1 (dB)
+   *          C = Gain Offset 2 (dB)
+   *          D = Divisor       (20)
+   *          E = Conversion    (Counts)
+   *          F = Gain Offset 3 (dB)
+   *          G = Placeholder for transitional gain offset (dB)
+   *          H = Placeholder for gain offset ramp delta   (dB)
+   *          I = Placeholder for configure_direct constant
+   *          J = Placeholder for configure_direct constant
+   *  Outputs:K = Intermediate Value
+   *          L = Amplitude     (dimensionless)
+   *          VAL = Amplitude   (Counts)
+   */
+  /* Calculate dimensionless amplitude. */
+  psub->k = (psub->a + psub->b + psub->c + psub->f)/psub->d;
+  psub->l = pow(10.0, psub->k);
+  /* Calculate amplitude in counts. */
+  psub->val = psub->l * psub->e;
+  return (OK);
+}
+
+static long subIQampl2conv(struct subRecord *psub)
+{
+  /*
+   * Calculate conversion constant from reference amplitude.
+   * Conversion = Current Ref Ampl/(current gap voltage * 
+   *                                (1 + dimensionless direct loop gain)) 
+   * Inputs:  A = Current Reference Ampl      (Counts)
+   *          B = Previous Conversion Const   (Counts/kV)        
+   *          C = Current Station Gap Voltage (kV)
+   *          D = Gap Voltage Severity        (<3 = OK, 3 = INVALID)      
+   *          E = Direct Loop Gain            (dimensionless)
+   *          F = Minimum Gap Voltage         (kV)
+   * Outputs: VAL = New Conversion Const      (Counts/kV)
+   */
+  /* 
+   * Do the calculation if the gap voltage is valid and
+   * above the minimum.  The current amplitude and direct loop gain
+   * must also be non-zero.
+   */
+  if ((psub->a > 0.0001) && (psub->e > 0.0001) && 
+      (psub->d < 2.5) && (psub->c > psub->f))
+  {
+    psub->val = psub->a/(psub->c * (1 + psub->e));
+    return(OK);
+  }
+  else
+  {
+    psub->val = psub->b;
+    return(ERROR);
+  }
+}
+
+static long subIQamplStn(struct subRecord *psub)
+{
+  /*
+   * Calculate station amplitude or voltage from cavity probe voltages.
+   * Inputs:  A to D = Cavity 1 to 4 Probe Voltages (kV)
+   * Outputs: VAL = Station Voltage (kV)
+   */
+  psub->val = psub->a + psub->b + psub->c + psub->d;
+  return(OK);
+}
+
+long subIQamplCplg(struct subRecord *psub)
+{
+  /*
+   * Calculate cavity coupling factor (1+(refl_ampl/frwd_ampl))/
+   *                                  (1-(refl_ampl/frwd_ampl)).
+   * Inputs:  A = Forward   Amplitude (kV)
+   *          B = Reflected Amplitude (kV)
+   *          C = Min Frwd  Amplitude (kV) (must be greater than 0)
+   *          D = Max Ampl Ratio      (0 < ratio < 1)
+   * Outputs: L = Reflected Amplitude/Forward Amplitude
+   *          VAL = Coupling Factor   (dimensionless)
+   */
+  /*
+   * Only calculate a new value when there's power and the ratio
+   * of the two amplitudes is reasonable - prevent divide-by-zero.
+   */
+  if (psub->a >= psub->c)
+  {
+    psub->l = psub->b/psub->a;
+    if (psub->l < psub->d)
+    {
+      psub->val = (1 + psub->l)/(1 - psub->l);
+    }
+  }
+  return(OK);
+}
+
+static long subIQampl2loss(struct subRecord *psub)
+{
+  /*
+   * Calculate conversion loss from amplitude.
+   * Inputs:  A = Amplitude                (volts)
+   *          B = Amplitude Severity       (<3 = OK, 3 = INVALID)      
+   *          C = Previous Conversion Loss (dB)        
+   *          D = Multiplier               (20)
+   *          E = Power Conversion Factor  (0.31623)
+   *          F = Calibration Power        (mW)
+   *          G = Station State            (0 = OFF, >0 = not OFF)
+   * Outputs: L   = Intermediate value
+   *          VAL = Conversion Loss        (dB)
+   */
+  /* Check for valid inputs.  Don't calibrate while station is not OFF. */
+  if ((psub->a > 0.0001) && (psub->b < 2.5) && (psub->f > 0.0001) &&
+      (psub->g < 0.0001))
+  {
+    psub->l   = psub->e * sqrt(psub->f)/psub->a;
+    psub->val = psub->d * log10(psub->l);
+    return(OK);
+  }
+  else
+  {
+    psub->val = psub->c;
+    return(ERROR);
+  }
+}
+
+static long subIQampl2iq(struct subRecord *psub)
+{
+  /*
+   * Calculate I and Q values based on an input value and phase.
+   * Inputs:  A = Value
+   *          B = Phase (degrees)
+   *          C = Conversion Factor for Value to convert to counts
+   *          D = Roundoff flag (0 = roundoff, >0 = no roundoff)
+   *          E = Placeholder for Low Alpha Gain
+   *          F = Placeholder for Low Alpha Phase
+   *       HOPR = High Count Value (2047)
+   *       LOPR = Low  Count Value (0)
+   * Outputs: G = Phase (radians)
+   *          H = Count Value   (not adjusted)
+   *          I = I Counts      (not adjusted)
+   *          J = Q Counts      (not adjusted)
+   *          K = I Counts      (adjusted)
+   *          L = Q Counts      (adjusted)
+   *          VAL = Count Value (adjusted)
+   */
+  psub->val = psub->h = psub->a * psub->c;
+  /* Check against limits. */
+  if      (psub->val > psub->hopr) psub->val = psub->hopr;
+  else if (psub->val < psub->lopr) psub->val = psub->lopr;
+  /* Find phase in radians. */
+  psub->g = psub->b * SUBIQ_PI/180.0;
+  /* Calculate I and Q and check against limits. */
+  psub->k = psub->i = psub->val * cos(psub->g);
+  psub->l = psub->j = psub->val * sin(psub->g);
+  SUBIQ_COUNTCHECK(psub->k, psub->hopr, -psub->hopr, psub->d);
+  SUBIQ_COUNTCHECK(psub->l, psub->hopr, -psub->hopr, psub->d);
+  return(OK);
+}
+
+static long subIQpower(struct subRecord *psub)
+{
+  /*
+   * Calculate power or amplitude based on I and Q or measured amplitude.
+   * Inputs:  A = Corrected In-Phase      (volts)
+   *          B = Corrected Quadrature    (volts)        
+   *          C = IQ Scale Factor         ((kV or V)/volts)
+   *          D = Spare
+   *          E = Power Conversion Factor (0.31623 for kW, 10 for W,
+   *                                       <=0 means calculate amplitude)
+   *          F = Current Station State   (see loop_defs.h for definitions)
+   *          G = Amplitude               (volts)
+   *          H = Ampl Scale Factor       ((kV or V)/volts)
+   *          J = Smoothing Factor        (0 to 1, 0 = no smoothing)
+   * Outputs: I = Smoothed   Amplitude    (kV or V)
+   *          K = Unsmoothed Amplitude    (kV or V)
+   *          L = Raw Amplitude           (volts)
+   *          VAL = Smoothed Power or Amplitude (kW or W, kV or V)
+   */
+  /* When in ON_FM state, use measured amplitude */
+  if ((int)(psub->f + 0.5) == STATION_ON_FM)
+  {
+    psub->l = psub->g;
+    /* Calculate converted amplitude. */
+    psub->k = psub->l * psub->h;
+  }
+  /* When not in ON_FM state, use amplitude calculated from I and Q. */
+  else
+  {
+    psub->l = (psub->a * psub->a) + (psub->b * psub->b);
+    psub->l = sqrt(psub->l);
+    /* Calculate converted amplitude. */
+    psub->k = psub->l * psub->c;
+  }
+  /* Smooth amplitude */
+  psub->i = (psub->k * (1 - psub->j)) + (psub->i * psub->j);
+  /* Check if power is required */
+  if (psub->e > 0.0001)
+    psub->val = (psub->i/psub->e)*(psub->i/psub->e);
+  else
+    psub->val = psub->i;
+  return (OK);
+}
+
+static long subIQpowerNet(struct subRecord *psub)
+{
+  /*
+   * Calculate net power (forward - reflected power) or 
+   * (collector power = HVPS - klystron forward power).
+   * Don't allow negative values (or clamp at low 
+   * operating limit).  
+   * Inputs:  A = Forward   (or HVPS)     Power (kW)
+   *          B = Reflected (or klystron) Power (kW)
+   * Outputs: VAL = Net                   Power (kW)
+   */
+  psub->val = psub->a - psub->b;
+  if (psub->val < psub->lopr) psub->val = psub->lopr;
+  return(OK);
+}
+
+static long subIQpowerEff(struct subRecord *psub)
+{
+  /*
+   * Calculate klystron efficiency as a percentage of HVPS 
+   * power ((klystron power/HVPS power)*100).  Also used to
+   * calculate cavity strength ((cavity voltage/station voltage)*100).
+   * Don't calculate for low values of HVPS power or station voltage.
+   * Inputs:  A = HVPS     Power (kW) or Station Voltage (kV)
+   *          B = Klystron Power (kW) or Cavity  Voltage (kV)
+   *          C = Min HVPS Power (kW) or Station Voltage (kV)
+   *              (must be greater than 0)
+   * Outputs: VAL = Efficiency or Strength (%)
+   */
+  if (psub->a >= psub->c)
+    psub->val = (psub->b/psub->a)*100.0;
+  return(OK);
+}
+
+static long subIQpower2gain(struct subRecord *psub)
+{
+  /*
+   * Calculate a gain or loss from powers or amplitudes.
+   * Inputs:  A = Output Power or Amplitude (kW or W, kV or V)         
+   *          B = Input  Power or Amplitude (kW or W, kV or V)         
+   *          C = EU conversion factor needed to make A and B
+   *              have the same units (1 = no conversion needed)
+   *          D = Multiplier                (10)
+   *          E = Minimum Value for Output Power (>0)
+   *          F = Minimum Value for Input  Power (>0)
+   * Outputs: L   = Output/Input * Conversion
+   *          VAL = Gain or Loss            (dB)
+   */
+  /* Set value to zero if either supplied pwr/ampl is below its minimum */
+  if ((psub->a < psub->e) || (psub->b < psub->f))
+  {
+    psub->val = psub->l = 0;
+  }
+  else
+  {
+    psub->l   = (psub->a/psub->b) * psub->c;
+    psub->val = psub->d * log10(psub->l);
+  }
+  return(OK);
+}
+
+static long subIQpower2ampl(struct subRecord *psub)
+{
+  /*
+   * Calculate amplitude voltage value based on an input power or voltage.
+   * Also, calculate the power/voltage warning limits based on an input
+   * percentage.  Used for updating amplitude threshhold voltage
+   * values. 
+   * Inputs:  A = Ampl Scale Factor       ((kV or V)/volts)
+   *          B = Current Station State   (see loop_defs.h for definitions)
+   *          C = Power (W or kW) or Amplitude (V or kV) to use when
+   *              station is in ON_FM mode.  If 0, use G instead.
+   *          D = Spare
+   *          E = Spare
+   *          F = Power Conversion Factor (0.31623 for kW, 10 for W,
+   *                                       <=0 means calculate amplitude)
+   *          G = Power (W or kW) or Amplitude (V or kV)
+   *          H = Maximum Voltage Flag (0  = don't use maximum voltage,
+   *                                    >0 = use H as maximum voltage)
+   *          I = Percentage for calculating HIGH limit (%)
+   *       HOPR = High Amplitude Value (4.9 or 5) (volts)
+   *       LOPR = Low  Amplitude Value (0)        (volts)
+   * Outputs: J = Currently Selected Power or Amplitude (either C or G)
+   *          K = HIGH Limit  (kW or W, kV or V)
+   *          L = HIHI Limit  (kW or W, kV or V)
+   *          VAL = Amplitude (volts)
+   */
+  /*  Select a limit depending on the current station state. */
+  if (((int)(psub->b + 0.5) == STATION_ON_FM) && (psub->c > 0.0001))
+    psub->j = psub->c;
+  else
+    psub->j = psub->g;
+  /*  Calculate HIGH and HIHI limits. */
+  psub->k = psub->j * psub->i/100.0;
+  psub->l = psub->j * (100 + psub->i)/200.0;
+  /*  Check if maximum value should be used. */
+  if (psub->h < 0.0001)
+  {
+    /* Check if input is a power or amplitude */
+    if (psub->f > 0.0001)
+      psub->val = psub->f * sqrt(psub->j);
+    else
+      psub->val = psub->j;
+    psub->val /= psub->a;
+    /* Check against limits. */
+    if      (psub->val > psub->hopr) psub->val = psub->hopr;
+    else if (psub->val < psub->lopr) psub->val = psub->lopr;
+  }
+  else
+  {
+    psub->val = psub->h;
+  }
+  return(OK);
+}
+
+static long subIQphaseOffsU(struct subRecord *psub)
+{
+  /*
+   * Calculate unadjusted loading angle offset:
+   *   Total loading angle offset = forgetting factor *
+   *    (previous loading angle offset - (K*(cavity strength - setpoint)))  
+   * Inputs:  A = Enable/Disable Calc           (0 = Disabled, >0 = Enabled)
+   *          B = Loading Angle Error Severity Summary (0 = OK, >0 = not OK)
+   *              This is the sum of the severities for all individual
+   *              cavity loading angle errors.  A non-zero severity indicates
+   *              that one or more errors is beyond limits or is invalid due 
+   *              to a problem acquiring phase or doing the arctangent.  In 
+   *              any case, we don't want to calc a new offset value.
+   *          C = Beam Status Severity                 (0 = OK,
+   *                                                    1, 2 = below limit
+   *                                                    3 = invalid)
+   *          D = Current Station State    (see loop_defs.h for definitions)
+   *          F = Desired Cavity Strength                  (%)
+   *          G = Current Cavity Strength                  (%)
+   *          H = Current Cavity Strength Severity     (<3 = OK, 3 = INVALID)
+   *          I = Cavity Strength Deadband                 (%)
+   *          J = K constant                               (degrees/%)
+   *          K = Forgetting Factor                        (dimensionless)
+   * Outputs: L = Cavity Strength Error                    (%)
+   *          E = Previous Beam Status Severity
+   *        VAL = Unadjusted Loading Angle Phase Offset    (degrees)
+   */
+  /*
+   * Calculate the cavity strength error.
+   */
+  psub->l = psub->g - psub->f;
+  /*
+   * If calculation is disabled, the station is not in ON_CW, or the beam
+   * current status is not OK and not invalid, zero the
+   * previous unadjusted loading angle offset.
+   */
+  if ((psub->a < 0.5) || ((int)(psub->d + 0.5) != STATION_ON_CW) ||
+      ((psub->c > 0.5) && (psub->c < 2.5)))
+  {
+    psub->val = 0.0;
+    psub->e   = psub->c;
+  }
+  /*
+   * All load angle errors (all cavities) must be OK, the beam current must
+   * be above the limit, and the cavity strength
+   * must be valid before a new unadjusted loading angle offset can be
+   * calculated.  Leave the previous value as is if all is not OK.
+   */
+  else
+  {
+    if (psub->c < 0.5) psub->e = psub->c;
+    if ((psub->b < 0.5) && (psub->e < 0.5) && (psub->h < 2.5))
+    {
+      /*
+       * Calculate the new unadjusted loading angle offset if the strength
+       * error is outside the deadband.
+       */
+      if ((psub->l > psub->i) || (psub->l < -psub->i))
+        psub->val -= psub->l * psub->j;
+    }
+    /*
+     * The forgetting factor allows the calculation to slowly forget the
+     * old strength error.
+     */
+    psub->val *= psub->k;
+  }
+  /*
+   * Protect against a runaway calc so we don't overflow.  Value
+   * should never get anywhere close to 180.
+   */
+  if      (psub->val < -180.0) psub->val = -180.0;
+  else if (psub->val >  180.0) psub->val =  180.0;
+  return(OK);
+}
+
+static long subIQphaseOffs(struct subRecord *psub)
+{
+  /*
+   * Calculate total loading angle offset:
+   *   Total loading angle offset = fixed offset + unadjusted phase offset
+   * Inputs:  A = Enable/Disable Calc           (0 = Disabled, >0 = Enabled)
+   *          B = Unadjusted phase offset                  (degrees)
+   *          C = Maximum Load Angle Offset Value          (degrees)
+   *          D = Fixed Offset                             (degrees)
+   *          E = Minimum Load Angle Offset Value          (degrees)
+   * Outputs: VAL = Total Loading Angle Phase Offset       (degrees) 
+   *          
+   *        
+   */
+  psub->val = psub->d;
+  /*
+   * Add in the unadjusted phase offset if the calculation is enabled.
+   */
+  if (psub->a > 0.5) psub->val += psub->b;
+  if      (psub->val >  psub->c) psub->val =  psub->c;
+  else if (psub->val <  psub->e) psub->val =  psub->e;
+  return(OK);
+}
+
+static long subIQphaseErr(struct subRecord *psub)
+{
+  /*
+   * Calculate load angle phase error (or difference between the desired 
+   * and actual loading angles).  Also used for adding 2 or 3 phases 
+   * (input B is set to zero in this case).
+   * Inputs:  A = Unadjusted Probe   Phase (degrees)
+   *          B = Unadjusted Forward Phase (degrees)
+   *          C = Desired Phase            (degrees)
+   *          D = Phase Offset             (degrees)
+   * Outputs: L = Unadjusted Phase Error   (degrees)
+   *          VAL = Adjusted Phase Error   (degrees)
+   */
+  psub->val = psub->l = psub->a - psub->b + psub->c + psub->d;
+  if      (psub->val < -180.0) psub->val += 360.0;
+  else if (psub->val >  180.0) psub->val -= 360.0;
+
+  return(OK);
+}
+
+static long subIQphase2posn(struct subRecord *psub)
+{
+  /*
+   * Calculate amount to move the stepper motor to correct the phase error.
+   * Phase error depends on station state.
+   * Inputs:  A = Current Station State   (see loop_defs.h for definitions)
+   *          B = Phase Error Deadband (degrees)
+   *          C = Factor to convert phase error to delta position (mm/degrees)
+   *          D = Maximum Absolute Position Change (mm)
+   *          E = Gain (0 to 1)
+   *          F = Load Angle     Error (degrees)
+   *          G = Park Frequency Error (degrees)
+   * Outputs: L = Error being used (either F or G) (degrees)
+   *          VAL = Desired Position Change (mm)
+   */
+  /* When in PARK state, use park frequency error. */
+  if ((int)(psub->a + 0.5) == STATION_PARK) psub->l = psub->g;
+  else                                      psub->l = psub->f;
+  /* Make sure gain is a valid number. */
+  if      (psub->e < 0.0) psub->e = 0.0;
+  else if (psub->e > 1.0) psub->e = 1.0;
+  if ((psub->l > psub->b) || (psub->l < -psub->b))
+  {
+    psub->val = psub->l * psub->c * psub->e;
+    if      (psub->val >  psub->d) psub->val =  psub->d;
+    else if (psub->val < -psub->d) psub->val = -psub->d;
+  }
+  else
+  {
+    psub->val = 0;
+  }
+  return(OK);
+}
+
+static long subIQdac(struct subRecord *psub)
+{
+  /*
+   * Calculate DAC II/IQ/QI/QQ values - used for the RFP module.
+   * Inputs:  A = II Value                (counts)
+   *          B = II Offset               (counts)        
+   *          C = IQ Value                (counts)
+   *          D = IQ Offset               (counts)        
+   *          E = QI Value                (counts)
+   *          F = QI Offset               (counts)        
+   *          G = QQ Value                (counts)
+   *          H = QQ Offset               (counts)        
+   *       HOPR = High Count Value        (2047)
+   *       LOPR = Low  Count Value        (-2048)
+   * Outputs: I = II DAC Value            (counts)
+   *          J = IQ DAC Value            (counts)
+   *          K = QI DAC Value            (counts)
+   *          L = QQ DAC Value            (counts)
+   *          VAL = 0 (not used)
+   */
+  /* Calculate values and round-off. */
+  psub->i = psub->a + psub->b;
+  SUBIQ_COUNTCHECK(psub->i, psub->hopr, psub->lopr, 0);
+  psub->j = psub->c + psub->d;
+  SUBIQ_COUNTCHECK(psub->j, psub->hopr, psub->lopr, 0);
+  psub->k = psub->e + psub->f;
+  SUBIQ_COUNTCHECK(psub->k, psub->hopr, psub->lopr, 0);
+  psub->l = psub->g + psub->h;
+  SUBIQ_COUNTCHECK(psub->l, psub->hopr, psub->lopr, 0);
+  psub->val = 0;
+  return (OK);
+}
+
+static long subIQcounts (struct subRecord *psub)
+{
+  /*
+   * Calculate amount to change counts used in the difference node offset or
+   * tune mode DACs based on error (gap voltage or drive power).  Also used
+   * to calculate amount to change HVPS voltage.
+   * Inputs:  A = Gain (0 to 1)
+   *          B = Station Gap Voltage or Drive Power           (kV or W)
+   *          C = Desired Station Gap Voltage or Drive Power   (kV or W)
+   *          D = Error to Delta Counts or Delta Voltage Conversion Factor
+   *                                         (counts or voltage/kV or W)
+   *          E = Station Gap Voltage or Drive Power Deadband  (kV or W)
+   *          F = Maximum Delta Counts or Voltage              (counts or kV)
+   *          G = Minimum Value below which no change is made  (kV or W)
+   *          H = Direct Loop Gain (0 if not applicable)       (dimensionless)
+   * Outputs: VAL = Delta Counts or Voltage                    (counts or kV)
+   *          K = Error                                        (kV or W)
+   *          L = Conversion Factor * (1 + Direct Loop Gain)   (counts/kV)
+   */
+  /* 
+   * Make sure the gain factor is within allowed limits [0..1]
+   */
+  if      (psub->a < 0.0) psub->a = 0.0;
+  else if (psub->a > 1.0) psub->a = 1.0;
+  /*
+   * Make a change only if the input is outside the deadband.
+   */
+  psub->k = psub->c - psub->b;
+  psub->l = psub->d * (1 + psub->h);
+  if ((psub->b > psub->g) && ((psub->k > psub->e) || (psub->k < -psub->e)))
+  {
+     psub->val = psub->a * psub->k * psub->l;
+     /* 
+      * Check against limits.
+      */
+     if      (psub->val >  psub->f) psub->val =  psub->f;
+     else if (psub->val < -psub->f) psub->val = -psub->f;
+  }
+  else
+  {
+    psub->val = 0;
+  }
+  return(OK);
+}
+
+static long subIQcorrected(struct subRecord *psub)
+{
+  /*
+   * Correct I and Q using the directivity correction matrix and
+   * forward and reflected I and Q scaled values.  The correction is
+   * divided between 2 subroutine records where each has 8 matrix elements.
+   *              Subroutine 1   Subroutine 2 
+   * Inputs:  A = DfIfI          DfIrI
+   *          B = DfQfI          DfQrI
+   *          C = DrIfI          DrIrI
+   *          D = DrQfI          DrQrI
+   *          E = DfIfQ          DfIrQ
+   *          F = DfQfQ          DfQrQ
+   *          G = DrIfQ          DrIrQ
+   *          H = DrQfQ          DrQrQ
+   *          I = Scaled Forward   I
+   *          J = Scaled Forward   Q
+   *          K = Scaled Reflected I
+   *          L = Scaled Reflected Q 
+   * Outputs: I = Corrected I (Sub1: Forward, Sub2: Reflected)
+   *          J = Corrected J (Sub1: Forward, Sub2: Reflected)
+   *          VAL = not used
+   */
+  /* Matrix multiplication. */
+  double i = (psub->i * psub->a) + (psub->j * psub->b) + 
+             (psub->k * psub->c) + (psub->l * psub->d);
+  double q = (psub->i * psub->e) + (psub->j * psub->f) + 
+             (psub->k * psub->g) + (psub->l * psub->h);
+  psub->i = i;
+  psub->j = q;
+  return(OK);
+}
+
+static long subIQscaled(struct subRecord *psub)
+{
+  /*
+   * Calculate scaled I and Q.  Returns an error if there is any 
+   * data acquisition error.
+   * Inputs:  A = Raw In-Phase     (counts)
+   *          B = Raw Quadrature   (counts)
+   *          D = I Data Ready    Flag (0 = not ready,      >0 = ready)
+   *          E = I Data Overflow Flag (0 = not overflowed, >0 = overflowed)
+   *          F = Q Data Ready    Flag (0 = not ready,      >0 = ready)
+   *          G = Q Data Overflow Flag (0 = not overflowed, >0 = overflowed)
+   *          H = Severity of subIQget, >0 = IQ data not ready
+   *          I = Conversion Loss Scaling Factor 
+   * Outputs: J = Scaled In-Phase   (volts)
+   *          K = Scaled Quadrature (volts)
+   *          C = Raw In-Phase      (volts)
+   *          L = Raw Quadrature    (volts)
+   *          VAL = not used
+   */
+  /* Convert I and Q to volts and scale based on conversion loss. */
+  psub->c = psub->a * SUBIQ_IQ2VOLTS;
+  psub->j = psub->c * psub->i;
+  psub->l = psub->b * SUBIQ_IQ2VOLTS;
+  psub->k = psub->l * psub->i;
+  /*
+   * Data must be ready, must not be overflowed, and IQ get must be successful.
+   */
+  if ((psub->d < 0.5) || (psub->e > 0.5) ||
+      (psub->f < 0.5) || (psub->g > 0.5) || (psub->h > 0.5)) 
+  {
+    return(ERROR);
+  }
+  else
+  {
+    return(OK);
+  }
+}
+
+static long subIQgetInit (struct subRecord *rec)
+/*
+   Description
+   -----------
+   Function to initialize the subIQget function which acquires raw IQ data.
+
+   The subIQget function is written as an asynchronous subroutine because
+   the acquisition of IQ data could potentially take a long time (if
+   everything is working correctly, it won't).  Since one is never supposed
+   to allow record processing to stall, this function has been written to
+   only start the acquisition.  When it completes in the context of a
+   callback routine, completion processing is carried out , thereby returning
+   pact to FALSE and processing forward links.
+
+   Parameters
+   ----------
+          rec - A pointer to the subroutine routine
+
+   Returns
+   -------
+   OK for success
+*/
+{
+  static void subIQgetCb (CALLBACK *);
+
+  CALLBACK  *callback;
+
+
+  if ((callback = (CALLBACK *) calloc (1, sizeof (*callback))) == NULL)
+  {
+    recGblRecordError (-1, (void *) rec,
+                       "subIQgetInit: No memory for callback struct");
+    /* recGblSetSevr     (rec, INVALID_ALARM, INVALID_ALARM);*/
+  }
+  /* Initialize the callback facility for the reset function*/
+  else
+  {
+    callbackSetCallback (subIQgetCb, callback);
+    callbackSetPriority (priorityHigh, callback);
+    callbackSetUser     (rec, callback);
+  }
+
+  /* Store the pointer to the callback block in the record */
+  rec->dpvt = callback;
+
+  return (OK);
+}
+
+static long subIQget (struct subRecord *rec)
+/*
+   Description
+   -----------
+   Function to synchronize the procurement of raw IQ data from an IQA module.
+   This function is typically run periodically (e.g., with the periodic scan
+   mechanism) to trigger the IQA record to acquire consistent I/Q data pairs
+   from the IQA module.   A forward link on this record then triggers
+   subsequent processing.
+
+   Parameters
+   ----------
+          rec - A pointer to the subroutine record
+
+  Inputs
+  ------
+    A - ID of semaphore that starts IQ data acquisition.
+    B - ID of semaphore that is set when IQ data acquisition is finished.
+    C - 0 = enable semaphore handshaking, 1 = disable semaphore handshaking
+        (usually connected to the UDF field of the IQA module record)
+
+   Returns
+   -------
+   OK for success
+*/
+{
+  /*long    status;*/
+
+  /* If handshaking is disabled, return with a good status */
+  if (rec->c > 0.5) return (OK);
+
+  /* If the record private field has not been initialized yet,
+     return with an error */
+  if (rec->dpvt == NULL) return (ERROR);
+
+  /* If pact is FALSE, start IQ data procurement, else complete processing */
+  if (!rec->pact)
+  {
+    SEM_ID  ssem;
+
+    /* Find the data-ready semaphore in an input (IQA) record */
+    /*    if (status = dbGetLink (&rec->inpa, DBR_LONG, &ssem, 0, 0)) return (status);*/
+    /* Convert from double to long integer to semaphore ID pointer */
+    if (rec->a < 0) ssem = (SEM_ID)((long)(rec->a - 0.5));
+    else            ssem = (SEM_ID)((long)(rec->a + 0.5));
+
+    /* Trigger the input (IQA) record to scan IQ data - note returning
+       error here will make the record take the severity in the BRSV field. */
+    if (semGive (ssem) == ERROR)
+    {
+/*
+      recGblRecordError (-1, (void *) rec, "Invalid IQ Scan semaphore");
+*/
+      return (ERROR);
+    }
+
+    /* Don't block further record processing by queuing a callback routine */
+    callbackRequest ((CALLBACK *) rec->dpvt);
+
+    /* Disallow reinvokation of this record */
+    rec->pact = TRUE;
+  }
+  else                                  /* Completion processing */
+  {
+    SEM_ID  rsem;
+
+    /* Find the data-ready semaphore in an input (IQA) record */
+    /*if (status = dbGetLink (&rec->inpb, DBR_LONG, &rsem, 0, 0)) return (status);*/
+    /* Convert from double to long integer */
+    if (rec->b < 0) rsem = (SEM_ID)((long)(rec->b - 0.5));
+    else            rsem = (SEM_ID)((long)(rec->b + 0.5));
+
+    /* Wait for the input (IQA) record to complete the scan - note returning
+       error here will make the record take the severity in the BRSV field. */
+    if (semTake (rsem, SUBIQGET_TMO) == ERROR)
+    {
+/*      
+      recGblRecordError (-1, (void *) rec, "Invalid IQ Data-Ready semaphore");
+*/
+      return (ERROR);
+    }
+  }
+
+  return (OK);
+}
+
+
+static void subIQgetCb (CALLBACK  *callback)
+/*
+   Description
+   -----------
+   Callback routine to invoke completion processing of the subIQget function.
+
+   Parameters
+   ----------
+     callback - A pointer to a callback block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  struct dbCommon *rec;
+  struct rset     *rSet;
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Complete processing */
+  dbScanLock (rec);
+  (*rSet->process) (rec);
+  dbScanUnlock (rec);
+}
+
+
+/* registration stuff for EPICS R3.14.x */
+
+static registryFunctionRef subIQRef[] = {
+  {"subIQinit",       (REGISTRYFUNCTION) subIQinit       },
+  {"subIQphase",      (REGISTRYFUNCTION) subIQphase      },
+  {"subIQampl",       (REGISTRYFUNCTION) subIQampl       },
+  {"subIQampl2conv",  (REGISTRYFUNCTION) subIQampl2conv  },
+  {"subIQamplStn",    (REGISTRYFUNCTION) subIQamplStn    },
+  {"subIQampl2loss",  (REGISTRYFUNCTION) subIQampl2loss  },
+  {"subIQampl2iq",    (REGISTRYFUNCTION) subIQampl2iq    },
+  {"subIQpower",      (REGISTRYFUNCTION) subIQpower      },
+  {"subIQpowerNet",   (REGISTRYFUNCTION) subIQpowerNet   },
+  {"subIQpowerEff",   (REGISTRYFUNCTION) subIQpowerEff   },
+  {"subIQpower2gain", (REGISTRYFUNCTION) subIQpower2gain },
+  {"subIQpower2ampl", (REGISTRYFUNCTION) subIQpower2ampl },
+  {"subIQphaseOffsU", (REGISTRYFUNCTION) subIQphaseOffsU },
+  {"subIQphaseOffs",  (REGISTRYFUNCTION) subIQphaseOffs  },
+  {"subIQphaseErr",   (REGISTRYFUNCTION) subIQphaseErr   },
+  {"subIQphase2posn", (REGISTRYFUNCTION) subIQphase2posn },
+  {"subIQdac",        (REGISTRYFUNCTION) subIQdac        },
+  {"subIQcounts",     (REGISTRYFUNCTION) subIQcounts     },
+  {"subIQcorrected",  (REGISTRYFUNCTION) subIQcorrected  },
+  {"subIQscaled",     (REGISTRYFUNCTION) subIQscaled     },
+  {"subIQgetInit",    (REGISTRYFUNCTION) subIQgetInit    },
+  {"subIQget",        (REGISTRYFUNCTION) subIQget        }
+};
+
+void subIQ(void)
+{
+  registryFunctionRefAdd(subIQRef,NELEMENTS(subIQRef));
+}
+
+epicsExportRegistrar(subIQ);
+@
+
+
+1.8
+log
+@Bug fix in last release.
+@
+text
+@d282 2
+@
+
+
+1.7
+log
+@Per Jim Sebek - provide a separate minimum for load angle offset.
+@
+text
+@d560 1
+a560 1
+  else if (psub->val <  psub->e) psub->val = -psub->e;
+@
+
+
+1.6
+log
+@Add 3.14.11 registration.
+@
+text
+@d549 1
+d560 1
+a560 1
+  else if (psub->val < -psub->c) psub->val = -psub->c;
+@
+
+
+1.5
+log
+@Add comment for more placeholder fields in subIQampl.
+@
+text
+@d87 1
+d93 1
+d96 4
+d103 1
+d111 1
+a111 1
+long subIQinit(struct subRecord *psub)
+d123 1
+a123 1
+long subIQphase(struct subRecord *psub)
+d149 1
+a149 1
+long subIQampl(struct subRecord *psub)
+d175 1
+a175 1
+long subIQampl2conv(struct subRecord *psub)
+d207 1
+a207 1
+long subIQamplStn(struct subRecord *psub)
+d245 1
+a245 1
+long subIQampl2loss(struct subRecord *psub)
+d274 1
+a274 1
+long subIQampl2iq(struct subRecord *psub)
+d306 1
+a306 1
+long subIQpower(struct subRecord *psub)
+d350 1
+a350 1
+long subIQpowerNet(struct subRecord *psub)
+d366 1
+a366 1
+long subIQpowerEff(struct subRecord *psub)
+d384 1
+a384 1
+long subIQpower2gain(struct subRecord *psub)
+d411 1
+a411 1
+long subIQpower2ampl(struct subRecord *psub)
+d465 1
+a465 1
+long subIQphaseOffsU(struct subRecord *psub)
+d540 1
+a540 1
+long subIQphaseOffs(struct subRecord *psub)
+d563 1
+a563 1
+long subIQphaseErr(struct subRecord *psub)
+d583 1
+a583 1
+long subIQphase2posn(struct subRecord *psub)
+d617 1
+a617 1
+long subIQdac(struct subRecord *psub)
+d650 1
+a650 1
+long subIQcounts (struct subRecord *psub)
+d695 1
+a695 1
+long subIQcorrected(struct subRecord *psub)
+d728 1
+a728 1
+long subIQscaled(struct subRecord *psub)
+d766 1
+a766 1
+long subIQgetInit (struct subRecord *rec)
+d789 1
+a789 1
+  void subIQgetCb (CALLBACK *);
+d814 1
+a814 1
+long subIQget (struct subRecord *rec)
+d901 1
+a901 1
+void subIQgetCb (CALLBACK  *callback)
+d928 35
+@
+
+
+1.4
+log
+@When beam current cannot be determined, the load angle offset calc no longer
+sets the value to zero.  If the station is not ON_CW, the value is set to zero.
+@
+text
+@d154 2
+@
+
+
+1.3
+log
+@Change roundup algorithm so that exactly zero stays zero.
+@
+text
+@d469 4
+a472 3
+   *          C = Beam Status Severity                 (0 = OK, >0 = not OK)
+   *          D = Spare
+   *          E = Spare
+d480 1
+d488 3
+a490 2
+   * If calculation is disabled or the beam current is low, zero the previous 
+   * unadjusted loading angle offset.
+d492 3
+a494 1
+  if ((psub->a < 0.5) || (psub->c > 0.5))
+d496 2
+d499 2
+a500 1
+   * All load angle errors (all cavities) must be OK and the cavity strength
+d504 1
+a504 1
+  else if ((psub->b < 0.5) && (psub->h < 2.5)) 
+d506 10
+a515 6
+    /*
+     * Calculate the new unadjusted loading angle offset if the strength
+     * error is outside the deadband.
+     */
+    if ((psub->l > psub->i) || (psub->l < -psub->i))
+      psub->val -= psub->l * psub->j;
+@
+
+
+1.2
+log
+@Added rf_station_state.h (used to be part of rfApp/src/seq/rf_loop_defs.h).
+vxi.h is moved to EPICS site/src/diag.
+subIQ.c now includes rf_station_state.h instead of rf_loop_defs.h.
+@
+text
+@d101 1
+a101 1
+    count = (count) < 0  ? (count) - 0.5 : (count) + 0.5;               \
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d92 1
+a92 1
+#include        "rf_loop_defs.h"  /* for STATION_ON_FM                */
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

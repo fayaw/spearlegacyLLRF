@@ -1,0 +1,111 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_0:1.1.1.1
+	R_epics_3_14_6_spear0:1.1.1.1
+	R_3_14_1_spear1:1.1.1.1
+	R1:1.1.1.1
+	B1:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.01.27.19.08.07;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.27.19.08.07;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#==============================================================
+#
+#  Abs:  Allen-Bradley Remote I/O Scanner Configuration  
+#
+#  Name: config.ab
+#  
+#  Rem:  This script is use to configure the
+#        Allen-Bradley hardware. To create this file, 
+#        first modify the start-up file to run
+#        abConfigAuto (<link>).  At the VxWorks prompt 
+#        after iocInit do  dbior ("drvAb", 4).  Find the
+#        Adapter Status Words.  There are four words
+#        (one per group) per adapter. The first word 
+#        describes adapter zero, group zero.  Page 5-11 
+#        of the AB VMEbus Remote I/O Scanner User's Guide 
+#        describes the bits in the status words.  Bits
+#        8 and 9 give the adapter size:
+#
+#            0 for 1/4
+#            1 for 1/2
+#            2 for 3/4 
+#            3 for Full
+#
+#       Enter the information below for each of the
+#       adapters and groups.  Groups are labled 0, 1, 2, 
+#       and 3 despite what it looks like in the User's Guide.
+#       The format is:
+#
+#  <rack(= adapter)> <group> <rack size>
+#
+#  Where rack size is:  1/4, 1/2, 3/4, Full
+#
+#  
+#  Side:  Keep comment lines in this file to 
+#         less than 80 chars! 
+#
+#  Facility:  SLAC/PEPII RF Low-Level RF
+#
+#  Auth: 12-Mar-1999, K. Luchini     (LUCHINI)
+#  Rev:  dd-mmm-yyyy, First Lastname (USERNAME)
+#
+#--------------------------------------------------------------
+#  Mod:
+#       dd-mmm-yyyy, First Lastname (USERNAME):
+#         comment
+#
+#==============================================================
+#
+#  (!! Keep comment lines in this file to less than 80 chars!  Grrrr!)
+#
+1 0 Full
+2 0 3/4
+3 0 1/4
+@
+
+
+1.1.1.1
+log
+@RF IOC startup files.
+@
+text
+@@

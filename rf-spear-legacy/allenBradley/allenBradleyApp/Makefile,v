@@ -1,0 +1,184 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	allenBradley-R2-2-spear0:1.3
+	allenBradley-R2-2:1.1.1.1
+	allenBradley:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2011.11.12.01.44.36;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2011.11.11.22.42.38;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.08.08.13.31.46;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.08.08.13.31.46;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Add drvAB.dbd
+@
+text
+@#*************************************************************************
+# Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+#     National Laboratory.
+# Copyright (c) 2002 The Regents of the University of California, as
+#     Operator of Los Alamos National Laboratory.
+# EPICS BASE Versions 3.13.7
+# and higher are distributed subject to a Software License Agreement found
+# in file LICENSE that is included with this distribution.
+#*************************************************************************
+TOP = ..
+include $(TOP)/configure/CONFIG
+
+AB = $(TOP)/allenBradleyApp
+#USR_CFLAGS += -DDEBUG
+
+SRC_DIRS += $(AB)/1746HSTP1Src
+SRC_DIRS += $(AB)/1771DCMSrc
+SRC_DIRS += $(AB)/1771IFESrc
+SRC_DIRS += $(AB)/1771IXSrc
+SRC_DIRS += $(AB)/1771NSeriesSrc
+SRC_DIRS += $(AB)/1791BlockIOSrc
+SRC_DIRS += $(AB)/SLCDCMSrc
+SRC_DIRS += $(AB)/basicSrc
+SRC_DIRS += $(AB)/gpIfaceSrc
+#SRC_DIRS += $(AB)/oldSrc
+
+LIBRARY_IOC_vxWorks += allenBradley
+allenBradley_LIBS += $(EPICS_BASE_IOC_LIBS)
+
+INC += abDcm.h
+INC += devIai1.h
+INC += devIao1.h
+INC += drvAb.h
+
+DBDINC += ab1771IFERecord
+DBDINC += ab1771IXRecord
+DBDINC += ab1771NRecord
+DBDINC += ab1791Record
+DBDINC += abDcmRecord
+
+DBD += allenBradley.dbd
+DBD += devSmAB1746Hstp.dbd
+DBD += devABDCM.dbd
+DBD += devABSLCDCM.dbd
+DBD += devABSLC500DCM.dbd
+DBD += devABBINARY.dbd
+DBD += devABStatus.dbd
+DBD += drvAB.dbd
+
+#If you want to build devSmAB1746HSTP1 RELEASE must include
+#support for the steppermotorRecord
+allenBradley_SRCS += devSmAB1746HSTP1.c
+
+allenBradley_SRCS += abDcmRecord.c
+allenBradley_SRCS += devAiAbDcm.c
+allenBradley_SRCS += devAiAbDcmi2f.c
+allenBradley_SRCS += devAoAbDcm.c
+allenBradley_SRCS += devAoAbDcmi2f.c
+allenBradley_SRCS += devBiAbDcm.c
+allenBradley_SRCS += devBoAbDcm.c
+allenBradley_SRCS += devLiAbDcm.c
+allenBradley_SRCS += devLoAbDcm.c
+allenBradley_SRCS += devMbbiAbDcm.c
+allenBradley_SRCS += devMbboAbDcm.c
+allenBradley_SRCS += plcSimulate.c
+
+allenBradley_SRCS += ab1771IFERecord.c
+
+allenBradley_SRCS += ab1771IXRecord.c
+
+allenBradley_SRCS += ab1771NRecord.c
+
+allenBradley_SRCS += ab1791Record.c
+
+allenBradley_SRCS += devABSLCDCM.c
+
+allenBradley_SRCS += drvAb.c
+allenBradley_SRCS += devABBINARY.c
+allenBradley_SRCS += devABStatus.c
+
+allenBradley_SRCS += devIai1.c
+allenBradley_SRCS += devIao1.c
+
+#allenBradley_SRCS += devAB1771IFE.c
+#allenBradley_SRCS += devAB1771IL.c
+#allenBradley_SRCS += devAB1771IR.c
+#allenBradley_SRCS += devAB1771IXE.c
+#allenBradley_SRCS += devAB1771OFE.c
+
+include $(TOP)/configure/RULES
+@
+
+
+1.2
+log
+@Don't build files in oldSrc.  Add i2f analog support for DCM.  Build for
+steppermotor.  Add individual dbd files.
+@
+text
+@d48 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d25 1
+a25 1
+SRC_DIRS += $(AB)/oldSrc
+d42 6
+d51 1
+a51 1
+#allenBradley_SRCS += devSmAB1746HSTP1.c
+d55 1
+d57 1
+d83 5
+a87 5
+allenBradley_SRCS += devAB1771IFE.c
+allenBradley_SRCS += devAB1771IL.c
+allenBradley_SRCS += devAB1771IR.c
+allenBradley_SRCS += devAB1771IXE.c
+allenBradley_SRCS += devAB1771OFE.c
+@
+
+
+1.1.1.1
+log
+@Allenbradley software, version 2.2 from APS:
+http://www.aps.anl.gov/epics/modules/bus/allenBradley/
+@
+text
+@@

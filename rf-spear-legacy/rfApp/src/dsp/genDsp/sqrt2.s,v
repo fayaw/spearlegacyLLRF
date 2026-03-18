@@ -1,0 +1,208 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.1
+date	2003.01.10.23.22.40;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.40;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/********************** The routine _sqrt2 follows ***********************
+
+Name:           _sqrt2
+		[sqrt2.s - sqrt2.o]
+
+Synopsis:       Calculates the square root of an 32 bit number in Q16 format.
+		The result is a 32 bit number in Q16 format.
+
+Performance and Memory Requirements:
+
+	Instruction cycles:  [With or without BMU device]
+
+			If X=0           8 cycles
+			If 0.5<= X <=1, 51 cycles
+			If X<0.5        60-168 cycles.  The number of cycles
+					increases as X gets closer to 0. Each
+					shift needed, uses 9 cycles.
+					[Call and return are included].
+
+	Code:                   42 words of ROM [With or without BMU device].
+
+	Coefficients:           10 Words of RAM.
+	Local variables:        0
+	Static variables:       0
+	Registers used: x, y, p, a0, a1, r2, auc [initialized to 0x2].
+	Accuracy:       3 decimal digits.
+
+Description:
+
+	Algorithm: For X in [0.5, 1.0], the square root is approximated by
+		   sqrt(X) = c0 + c1.X + ... + c5.X^5
+			   = ((..(c5.X + c4).X + ...).X + c0
+		   For X in ]0, 0.5[, the routine shifts the input left to
+		   make it in the right segment.
+
+	BEGIN _sqrt2
+	    If X=0,
+		 [a0 already contains the result, and anyway, the shift
+		 method will not give the right result because 0 shifted
+		 N times will always be 0!]
+		 Return.
+	    End If.
+	    If X<0.5,
+		 [X is not null]
+		 Shift left until X becomes greater than or equal to 0.5.
+		 Record shifts in a1h.
+	    End If.
+	    Process the relation given in the algorithm section with the
+	    shifted value.
+	    Make the adjustment to have the correct result in Q14 format.
+	END _sqrt2.
+
+Inputs:         A 16 bit number in Q14 format is passed in a0h [a0l = 0].
+
+Outputs:        The result is a 16 bit number in Q14 format returned in a0h.
+
+Routines Called:        None.
+
+Originally written by Yves Nicoue (June 1992) using RAM only. Modified to
+use both RAM and EROM and also revised comments for clarification. This
+routine was not in the DSP16A Application Library so there is no measure
+of improvement. Work by Aristos Nkansa-Kissi (Summer 1994).
+*************************************************************************
+Modified by R. Claus, SLAC 6/29/97.  Added additional adjustment coefficients
+to the sqrt2a table to allow this routine to work with 32 bit numbers (a0l
+is no longer required to be zero).  Current timing:
+	If X = 0                                  8 cycles
+	If 0.5 <= X <= 1                         51 cycles
+	If 6.103422e-5 <= X < 0.5            60-168 cycles.
+	If 9.313226e-10 <= X < 6.103422e-5  177-321 cycles.  The number of cycles
+					    increases as X gets closer to 0. Each
+                                            shift needed, uses 9 cycles.
+					[Call and return are included].
+Memory used has changed a little:
+	Coefficients:           39 Words of RAM.
+*************************************************************************/
+/*                                                                      */
+#include <1610.h>              /* Include the DSP16xx device            */
+			       /* header file.                          */
+
+.global _sqrt2                 /* Declare the routine sqrt2 as global.  */
+.rsect ".ram"                  /* Begin assembly in RAM.                */
+_sqrt2: a0 = a0
+	if eq goto _sqrt23
+
+	auc = 0x2                       /* Scale p register by 4 (p*4). */
+	r2 = _sqrt2c                    /* Pointer to coefficients.     */
+	a1 = _sqrt2a
+
+_sqrt21:
+	a0h - 0x2000                    /* Q14 format, so test if >=0.5.*/
+	if pl goto _sqrt22
+	a0 = a0 << 1                    /* Shift a0 left until input is */
+	a1h = a1h + 1                   /* greater than 0.5.            */
+	goto _sqrt21                    /* Shifts recorded in a1h.      */
+
+_sqrt22:
+	x = a0                          /* Store Shifted input value    */
+					/* in register x in Q14 format. */
+			   y = *r2++    /* Take coefficient c5 in Q14.  */
+		p = x * y  y = *r2++    /* Product in Q12 format and    */
+	a0 = p                          /* take coefficient c4 in Q14.  */
+	a0 = a0 + y
+	y = a0                          /* c5.X + c4 in Q14 format.     */
+
+		p = x * y  y = *r2++    /* Take coefficient c3 in Q14.  */
+	a0 = p                          /* Product in Q12 format.       */
+	a0 = a0 + y
+	y = a0                          /* (c5.X + c4).X + c3           */
+
+		p = x * y  y = *r2++    /* Take coefficient c2 in Q14.  */
+	a0 = p                          /* Product in Q12 format.       */
+	a0 = a0 + y
+	y = a0                          /* (c5.X + c4).X + c3).X + c2   */
+
+		p = x * y  y = *r2++    /* Take coefficient c1 in Q14.  */
+	a0 = p                          /* Product in Q12 format.       */
+	a0 = a0 + y
+	y = a0                          /* (c5.X + c4).X + ...).X + c1  */
+
+		p = x * y  y = *r2++    /* Take coefficient c0 in Q14.  */
+	a0 = p                          /* Product in Q12 format.       */
+
+	r2 = a1                         /* a1h has the address of the   */
+					/* adjustment coefficient.      */
+	a0 = a0 + y        y = *r2      /* (c5.X + c4).X + ...).X + c0  */
+					/* and take coefficient in Q14. */
+	x = a0                          /* x in Q14 format.             */
+		p = x * y               /* Product in Q12 format.       */
+	a0 = p
+_sqrt23:
+	return
+
+.rsect ".ram"                           /* Begin assembly in RAM.             */
+
+_sqrt2c:                                /* Coefficients                 */
+	int      0.1121216!14           /* c5                           */
+	int     -0.536499!14            /* c4                           */
+	int      1.106812!14            /* c3                           */
+	int     -1.34491!14             /* c2                           */
+	int      1.454895!14            /* c1                           */
+	int      0.2075806!14           /* c0                           */
+_sqrt2a:                                /* Adjustment coefficients      */
+	int      1.0!14                 /* Powers of sqrt(1/2), 0 to 31 */
+	int      0.707106781!14, 0.5!14,         0.353553391!14, 0.25!14
+	int      0.176776795!14, 0.125!14,       0.088388348!14, 0.0625!14
+	int      0.044194174!14, 0.03125!14,     0.022097087!14, 0.015625!14
+	int      0.011048543!14, 0.0078125!14,   0.005524272!14, 0.003906250!14
+	int      0.002762136!14, 0.001953125!14, 0.001381068!14, 0.000976562!14
+	int      0.000690534!14, 0.000488281!14, 0.000345267!14, 0.000244141!14
+	int      0.000172633!14, 0.000122070!14, 0.000086317!14, 0.000061035!14
+        int      0.000043158!14, 0.000030518!14, 0.000021579!14, 0.000015259!14
+/************************************************************************/
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

@@ -1,0 +1,122 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2011.12.07.01.02.23;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.39;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.39;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Changes for 3.14.11 build.
+@
+text
+@#==============================================================
+#
+#  Abs:  Makefile to build EPICS RF Host components
+#
+#  Name: Makefile
+#
+#  Facility:  SLAC/PEP-II 
+#
+#  Auth: dd-mmm-yyyy, Stephanie Allison  (SAA)
+#  Rev:  14-Mar-2000, Kristi Luchini     (LUCHINI)
+#
+#--------------------------------------------------------------
+#  Mod:
+#       03-Feb-2005, M. Laznovsky (LAZMO)
+#         Ported to EPICS R3.14.6
+#       14-Jan-2003, K. Luchini (LUCHINI):
+#         Removed install of p2RfRfpDef_phaseoff.h.
+#         This include file does not exist.
+#       14-Mar-2000, K. Luchini (LUCHINI):
+#         Add stanfard header
+#         Add $(EPICS_SITE)/dbd to USER_DBDFLAGS
+#
+#==============================================================
+#
+TOP=../../..
+include $(TOP)/configure/CONFIG
+
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+#----------------------------------------
+
+USR_INCLUDES += -I ../../db
+
+LIBRARY_IOC_vxWorks = rfSeq
+DBD                 = rfSeq.dbd
+
+# Sequences
+rfSeq_SRCS += rf_tuner_loop.st
+rfSeq_SRCS += rf_hvps_loop.st
+rfSeq_SRCS += rf_states.st
+rfSeq_SRCS += rf_dac_loop.st
+rfSeq_SRCS += rf_calib.st
+rfSeq_SRCS += rf_msgs.st
+
+#===========================
+
+include $(TOP)/configure/RULES
+
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+#----------------------------------------
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 24
+d26 26
+a51 2
+include $(TOP)/config/CONFIG_APP.Vxi
+include $(TOP)/config/RULES_ARCHS
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

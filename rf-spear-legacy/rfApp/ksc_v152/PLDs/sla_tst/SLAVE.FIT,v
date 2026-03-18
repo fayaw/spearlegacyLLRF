@@ -1,0 +1,443 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.14;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.14;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@-- MAX+plus II Compiler Fit File      
+-- Version 6.1 02/28/96               
+-- Compiled: 05/06/96 11:13:39        
+
+-- Copyright (c) 1996 by Altera Corporation.  All rights reserved.  This text
+-- contains proprietary, confidential information of Altera Corporation, and
+-- may be used, copied, and/or disclosed only pursuant to the terms of a
+-- valid software license agreement with Altera Corporation.  This copyright
+-- notice must be retained as part of this text at all times.
+
+CHIP "slave"
+BEGIN
+
+    DEVICE = "EPF8452AQC160-5";
+
+    "AM0"                          : INPUT_PIN  = 50     ;
+    "AM1"                          : INPUT_PIN  = 35     ;
+    "AM3"                          : INPUT_PIN  = 32     ;
+    "AM4"                          : INPUT_PIN  = 72     ;
+    "AM5"                          : INPUT_PIN  = 48     ;
+    "A1"                           : INPUT_PIN  = 150    ;
+    "A2"                           : INPUT_PIN  = 137    ;
+    "A3"                           : INPUT_PIN  = 6      ;
+    "A4"                           : INPUT_PIN  = 122    ;
+    "A5"                           : INPUT_PIN  = 149    ;
+    "A6"                           : INPUT_PIN  = 52     ;
+    "A7"                           : INPUT_PIN  = 31     ;
+    "A8"                           : INPUT_PIN  = 158    ;
+    "A9"                           : INPUT_PIN  = 156    ;
+    "A10"                          : INPUT_PIN  = 44     ;
+    "A11"                          : INPUT_PIN  = 34     ;
+    "A12"                          : INPUT_PIN  = 43     ;
+    "A13"                          : INPUT_PIN  = 55     ;
+    "A14"                          : INPUT_PIN  = 42     ;
+    "A15"                          : INPUT_PIN  = 144    ;
+    "DS"                           : INPUT_PIN  = 86     ;
+    "ERR"                          : INPUT_PIN  = 141    ;
+    "IACKIN"                       : INPUT_PIN  = 61     ;
+    "ID0"                          : INPUT_PIN  = 27     ;
+    "ID1"                          : INPUT_PIN  = 91     ;
+    "ID2"                          : INPUT_PIN  = 49     ;
+    "ID3"                          : INPUT_PIN  = 79     ;
+    "ID4"                          : INPUT_PIN  = 145    ;
+    "ID5"                          : INPUT_PIN  = 87     ;
+    "ID6"                          : INPUT_PIN  = 8      ;
+    "ID7"                          : INPUT_PIN  = 57     ;
+    "ID8"                          : INPUT_PIN  = 134    ;
+    "ID9"                          : INPUT_PIN  = 63     ;
+    "LOC_INT"                      : INPUT_PIN  = 85     ;
+    "MODID"                        : INPUT_PIN  = 45     ;
+    "RESET"                        : INPUT_PIN  = 5      ;
+    "SW6"                          : INPUT_PIN  = 152    ;
+    "SW7"                          : INPUT_PIN  = 30     ;
+    "SW8"                          : INPUT_PIN  = 92     ;
+    "SW9"                          : INPUT_PIN  = 29     ;
+    "SW10"                         : INPUT_PIN  = 9      ;
+    "SW11"                         : INPUT_PIN  = 33     ;
+    "SW12"                         : INPUT_PIN  = 47     ;
+    "SW13"                         : INPUT_PIN  = 56     ;
+    "/SYSRESET"                    : INPUT_PIN  = 36     ;
+    "TRG_INT"                      : INPUT_PIN  = 135    ;
+    "WRITE"                        : INPUT_PIN  = 105    ;
+    "20M_CLK"                      : INPUT_PIN  = 116    ;
+    "BERR"                         : OUTPUT_PIN = 113    ;
+    "/DTACK"                       : OUTPUT_PIN = 111    ;
+    "ENA_VECTOR"                   : OUTPUT_PIN = 64     ;
+    "IACKOUT"                      : OUTPUT_PIN = 124    ;
+    "INTC_D3"                      : OUTPUT_PIN = 10     ;
+    "INTC_D4"                      : OUTPUT_PIN = 159    ;
+    "INTC_D5"                      : OUTPUT_PIN = 109    ;
+    "INTC_D7"                      : OUTPUT_PIN = 24     ;
+    "INTC_D8"                      : OUTPUT_PIN = 102    ;
+    "INTC_D9"                      : OUTPUT_PIN = 129    ;
+    "INTS_D8"                      : OUTPUT_PIN = 110    ;
+    "INTS_D9"                      : OUTPUT_PIN = 18     ;
+    "/IRQ1"                        : OUTPUT_PIN = 90     ;
+    "/IRQ2"                        : OUTPUT_PIN = 11     ;
+    "/IRQ3"                        : OUTPUT_PIN = 142    ;
+    "/IRQ4"                        : OUTPUT_PIN = 106    ;
+    "/IRQ5"                        : OUTPUT_PIN = 16     ;
+    "/IRQ6"                        : OUTPUT_PIN = 96     ;
+    "/IRQ7"                        : OUTPUT_PIN = 15     ;
+    "LA0"                          : OUTPUT_PIN = 103    ;
+    "LA1"                          : OUTPUT_PIN = 151    ;
+    "LA2"                          : OUTPUT_PIN = 97     ;
+    "LA3"                          : OUTPUT_PIN = 51     ;
+    "LA4"                          : OUTPUT_PIN = 54     ;
+    "LA5"                          : OUTPUT_PIN = 146    ;
+    "LA6"                          : OUTPUT_PIN = 7      ;
+    "LA7"                          : OUTPUT_PIN = 19     ;
+    "RD_CSR"                       : OUTPUT_PIN = 143    ;
+    "RD_DATALO"                    : OUTPUT_PIN = 154    ;
+    "RD_ID"                        : OUTPUT_PIN = 115    ;
+    "RD_INTCNTL"                   : OUTPUT_PIN = 25     ;
+    "RD_INTSTA"                    : OUTPUT_PIN = 157    ;
+    "RD_LOCINT"                    : OUTPUT_PIN = 99     ;
+    "RD_MODID"                     : OUTPUT_PIN = 26     ;
+    "RD_PROTOCOL"                  : OUTPUT_PIN = 104    ;
+    "RD_RESPONSE"                  : OUTPUT_PIN = 69     ;
+    "RD_ROM"                       : OUTPUT_PIN = 139    ;
+    "RD_TRIGINT"                   : OUTPUT_PIN = 17     ;
+    "SFAIL_INH"                    : OUTPUT_PIN = 59     ;
+    "SFT_RESET"                    : OUTPUT_PIN = 66     ;
+    "WT_CSR"                       : OUTPUT_PIN = 127    ;
+    "WT_DATALO"                    : OUTPUT_PIN = 94     ;
+    "/WT_INTCNTL"                  : OUTPUT_PIN = 22     ;
+    "WT_INTSTA"                    : OUTPUT_PIN = 136    ;
+    "WT_LOCINT"                    : OUTPUT_PIN = 138    ;
+    "/WT_LOGAD"                    : OUTPUT_PIN = 77     ;
+    "WT_MODID"                     : OUTPUT_PIN = 89     ;
+    "WT_PROTERR"                   : OUTPUT_PIN = 101    ;
+    "WT_ROM"                       : OUTPUT_PIN = 58     ;
+    "WT_SIGNAL"                    : OUTPUT_PIN = 23     ;
+    "WT_TIMERCNTL"                 : OUTPUT_PIN = 132    ;
+    "WT_TIMERHI"                   : OUTPUT_PIN = 153    ;
+    "WT_TIMERLO"                   : OUTPUT_PIN = 98     ;
+    "WT_TRGMSK"                    : OUTPUT_PIN = 62     ;
+    "WT_TRGSRC"                    : OUTPUT_PIN = 20     ;
+    "WT_TRIGCLR"                   : OUTPUT_PIN = 95     ;
+    "|addr_dec:1|2x8_mux:18|:69"   : LOCATION   = LC3_B6 ;  -- |addr_dec:1.LA0
+    "|addr_dec:1|2x8_mux:18|:71"   : LOCATION   = LC2_B6 ;  -- |addr_dec:1.LA1
+    "|addr_dec:1|2x8_mux:18|:73"   : LOCATION   = LC1_B7 ;  -- |addr_dec:1.LA2
+    "|addr_dec:1|2x8_mux:18|:75"   : LOCATION   = LC7_B7 ;  -- |addr_dec:1.LA3
+    "|addr_dec:1|2x8_mux:18|:77"   : LOCATION   = LC4_B8 ;  -- |addr_dec:1.LA4
+    "|addr_dec:1|2x8_mux:18|:79"   : LOCATION   = LC8_B7 ;  -- |addr_dec:1.LA5
+    "|addr_dec:1|2x8_mux:18|:81"   : LOCATION   = LC3_B8 ;  -- |addr_dec:1.LA6
+    "|addr_dec:1|2x8_mux:18|:83"   : LOCATION   = LC1_B6 ;  -- |addr_dec:1.LA7
+    "|addr_dec:1|~3~1"             : LOCATION   = LC5_B8 ;
+    "|addr_dec:1|~3~2"             : LOCATION   = LC1_B8 ;
+    "|addr_dec:1|:5"               : LOCATION   = LC8_B8 ;
+    "|addr_dec:1|:13"              : LOCATION   = LC2_B8 ;
+    "|addr_dec:1|~24~1"            : LOCATION   = LC4_B20;  -- |addr_dec~1.MATCH~1
+    "|addr_dec:1|~24~2"            : LOCATION   = LC5_B20;  -- |addr_dec~1.MATCH~2
+    "|addr_dec:1|~24~3"            : LOCATION   = LC6_B20;  -- |addr_dec~1.MATCH~3
+    "|addr_dec:1|~24~4"            : LOCATION   = LC7_B20;  -- |addr_dec~1.MATCH~4
+    "|addr_dec:1|~24~5"            : LOCATION   = LC8_B20;  -- |addr_dec~1.MATCH~5
+    "|addr_dec:1|~24~6"            : LOCATION   = LC2_B20;  -- |addr_dec~1.MATCH~6
+    "|addr_dec:1|~24~7"            : LOCATION   = LC1_B20;  -- |addr_dec~1.MATCH~7
+    "|addr_dec:1|74374:15|:13"     : LOCATION   = LC4_B6 ;
+    "|addr_dec:1|74374:15|:14"     : LOCATION   = LC6_B8 ;
+    "|addr_dec:1|74374:15|:15"     : LOCATION   = LC2_B7 ;
+    "|addr_dec:1|74374:15|:16"     : LOCATION   = LC7_B8 ;
+    "|addr_dec:1|74374:15|:17"     : LOCATION   = LC3_B7 ;
+    "|addr_dec:1|74374:15|:18"     : LOCATION   = LC4_B7 ;
+    "|addr_dec:1|74374:15|:19"     : LOCATION   = LC5_B6 ;
+    "|addr_dec:1|74374:15|:20"     : LOCATION   = LC6_B6 ;
+    "|a16_ack:27|ack_seq:1|BERR~"  : LOCATION   = LC1_A17;  -- |a16_ack:27.BERR
+    "|a16_ack:27|ack_seq:1|CONTROL~1" : LOCATION   = LC3_A15;
+    "|a16_ack:27|ack_seq:1|CONTROL~2" : LOCATION   = LC5_A15;
+    "|a16_ack:27|ack_seq:1|CONTROL~3" : LOCATION   = LC6_A15;
+    "|a16_ack:27|ack_seq:1|CONTROL~4" : LOCATION   = LC4_A16;
+    "|a16_ack:27|ack_seq:1|CONTROL~5" : LOCATION   = LC6_A16;
+    "|a16_ack:27|ack_seq:1|CONTROL~6" : LOCATION   = LC7_A16;
+    "|a16_ack:27|ack_seq:1|CONTROL~7" : LOCATION   = LC5_A16;
+    "|a16_ack:27|ack_seq:1|CONTROL~8" : LOCATION   = LC3_A17;
+    "|a16_ack:27|ack_seq:1|CONTROL~9" : LOCATION   = LC4_A17;
+    "|a16_ack:27|ack_seq:1|CONTROL~10" : LOCATION   = LC4_A10;
+    "|a16_ack:27|ack_seq:1|DTACK~" : LOCATION   = LC2_A15;  -- |a16_ack:27.DTACK
+    "|a16_ack:27|ack_seq:1|RDINT~" : LOCATION   = LC1_A16;  -- |a16_ack:27.RDINT
+    "|a16_ack:27|ack_seq:1|ST1"    : LOCATION   = LC5_A17;
+    "|a16_ack:27|ack_seq:1|ST11"   : LOCATION   = LC1_A15;
+    "|a16_ack:27|ack_seq:1|WTINT~" : LOCATION   = LC4_A15;  -- |a16_ack:27.WTINT
+    "|a16_ack:27|ack_seq:1|~41~5~1" : LOCATION   = LC3_A16;
+    "|a16_ack:27|ack_seq:1|:72"    : LOCATION   = LC2_A17;
+    "|a16_ack:27|ack_seq:1|:83"    : LOCATION   = LC1_A13;
+    "|a16_ack:27|ack_seq:1|:92"    : LOCATION   = LC5_A13;
+    "|a16_ack:27|ack_seq:1|:102"   : LOCATION   = LC4_A13;
+    "|a16_ack:27|ack_seq:1|:107"   : LOCATION   = LC6_A17;
+    "|a16_ack:27|ack_seq:1|~154~1" : LOCATION   = LC7_A17;
+    "|a16_ack:27|ack_seq:1|~154~2" : LOCATION   = LC8_A17;
+    "|a16_ack:27|ack_seq:1|:172"   : LOCATION   = LC2_A16;
+    "|a16_ack:27|74174:2|:9"       : LOCATION   = LC2_A13;  -- |a16_ack:27|74174:2.4Q
+    "|a16_ack:27|74174:2|:10"      : LOCATION   = LC3_A13;  -- |a16_ack:27|74174:2.3Q
+    "|a16_ack:27|74174:2|:12"      : LOCATION   = LC3_B20;  -- |a16_ack:27|74174:2.1Q
+    "|a16_dec:3|:127"              : LOCATION   = LC3_B11;  -- |a16_dec:3.WT_ROM
+    "|a16_dec:3|:134"              : LOCATION   = LC1_B21;  -- |a16_dec:3.WT_LOGAD
+    "|a16_dec:3|:142"              : LOCATION   = LC1_B19;  -- |a16_dec:3.WT_CSR
+    "|a16_dec:3|:150"              : LOCATION   = LC4_B3 ;  -- |a16_dec:3.WT_SIGNAL
+    "|a16_dec:3|:160"              : LOCATION   = LC5_B3 ;  -- |a16_dec:3.WT_DATALO
+    "|a16_dec:3|:169"              : LOCATION   = LC1_B18;  -- |a16_dec:3.WT_MODID
+    "|a16_dec:3|:179"              : LOCATION   = LC1_B14;  -- |a16_dec:3.WT_INTSTA
+    "|a16_dec:3|:189"              : LOCATION   = LC3_B1 ;  -- |a16_dec:3.WT_INTCNTL
+    "|a16_dec:3|~189~1"            : LOCATION   = LC3_B18;  -- |a16_dec~3.WT_INTCNTL~1
+    "|a16_dec:3|:200"              : LOCATION   = LC2_B13;  -- |a16_dec:3.WT_TRIGMSK
+    "|a16_dec:3|:209"              : LOCATION   = LC5_B4 ;  -- |a16_dec:3.WT_TRIGCLR
+    "|a16_dec:3|:219"              : LOCATION   = LC3_B4 ;  -- |a16_dec:3.WT_TRGSRC
+    "|a16_dec:3|~219~1"            : LOCATION   = LC4_B4 ;  -- |a16_dec~3.WT_TRGSRC~1
+    "|a16_dec:3|:229"              : LOCATION   = LC1_B4 ;  -- |a16_dec:3.WT_TIMERHI
+    "|a16_dec:3|:240"              : LOCATION   = LC2_B4 ;  -- |a16_dec:3.WT_TIMERLO
+    "|a16_dec:3|:250"              : LOCATION   = LC1_B15;  -- |a16_dec:3.WT_TIMERCNTL
+    "|a16_dec:3|:261"              : LOCATION   = LC1_B12;  -- |a16_dec:3.WT_LOCINT
+    "|a16_dec:3|:272"              : LOCATION   = LC1_B9 ;  -- |a16_dec:3.WT_PROTERR
+    "|a16_dec:3|:333"              : LOCATION   = LC1_B11;  -- |a16_dec:3.RD_ROM
+    "|a16_dec:3|~333~1"            : LOCATION   = LC6_B19;  -- |a16_dec~3.RD_ROM~1
+    "|a16_dec:3|~333~2"            : LOCATION   = LC2_B11;  -- |a16_dec~3.RD_ROM~2
+    "|a16_dec:3|:340"              : LOCATION   = LC1_B13;  -- |a16_dec:3.RD_ID
+    "|a16_dec:3|~340~1"            : LOCATION   = LC8_B5 ;  -- |a16_dec~3.RD_ID~1
+    "|a16_dec:3|:348"              : LOCATION   = LC2_B10;  -- |a16_dec:3.RD_CSR
+    "|a16_dec:3|:356"              : LOCATION   = LC2_B3 ;  -- |a16_dec:3.RD_PROTOCOL
+    "|a16_dec:3|~356~1"            : LOCATION   = LC1_B3 ;  -- |a16_dec~3.RD_PROTOCOL~1
+    "|a16_dec:3|:365"              : LOCATION   = LC1_B17;  -- |a16_dec:3.RD_RESPONSE
+    "|a16_dec:3|:375"              : LOCATION   = LC3_B3 ;  -- |a16_dec:3.RD_DATALO
+    "|a16_dec:3|:384"              : LOCATION   = LC7_B2 ;  -- |a16_dec:3.RD_MODID
+    "|a16_dec:3|:394"              : LOCATION   = LC1_B2 ;  -- |a16_dec:3.RD_INTSTA
+    "|a16_dec:3|:404"              : LOCATION   = LC3_B2 ;  -- |a16_dec:3.RD_INTCNTL
+    "|a16_dec:3|:415"              : LOCATION   = LC4_B2 ;  -- |a16_dec:3.RD_TRIGINT
+    "|a16_dec:3|:426"              : LOCATION   = LC2_B2 ;  -- |a16_dec:3.RD_LOCINT
+    "|a16_dec:3|~426~1"            : LOCATION   = LC5_B2 ;  -- |a16_dec~3.RD_LOCINT~1
+    "|intcntl:2|int_ack:47|CLR_INTS~" : LOCATION   = LC1_A14;  -- |intcntl:2|int_ack:47.CLR_INTS
+    "|intcntl:2|int_ack:47|CONTROL~1" : LOCATION   = LC7_A14;
+    "|intcntl:2|int_ack:47|CONTROL~2" : LOCATION   = LC5_A8 ;
+    "|intcntl:2|int_ack:47|CONTROL~3" : LOCATION   = LC4_A8 ;
+    "|intcntl:2|int_ack:47|DTACK~" : LOCATION   = LC5_A14;  -- |intcntl:2.INT_DTACK
+    "|intcntl:2|int_ack:47|ENA_VECT~" : LOCATION   = LC2_A14;  -- |intcntl:2.ENA_VECTOR
+    "|intcntl:2|int_ack:47|IACKOUT~" : LOCATION   = LC1_A8 ;  -- |intcntl:2|int_ack:47.IACKOUT
+    "|intcntl:2|int_ack:47|ST2~1"  : LOCATION   = LC8_A14;
+    "|intcntl:2|int_ack:47|ST4~1"  : LOCATION   = LC4_A14;
+    "|intcntl:2|int_ack:47|~39~4~1" : LOCATION   = LC6_A14;
+    "|intcntl:2|int_ack:47|:75"    : LOCATION   = LC6_A8 ;
+    "|intcntl:2|int_ack:47|:79"    : LOCATION   = LC1_A6 ;
+    "|intcntl:2|int_ack:47|:99"    : LOCATION   = LC2_A8 ;
+    "|intcntl:2|int_ack:47|~114~1" : LOCATION   = LC3_A8 ;
+    "|intcntl:2|int_ack:47|:124"   : LOCATION   = LC3_A14;
+    "|intcntl:2|:9"                : LOCATION   = LC7_A9 ;
+    "|intcntl:2|:10"               : LOCATION   = LC6_A9 ;
+    "|intcntl:2|:20"               : LOCATION   = LC5_A9 ;
+    "|intcntl:2|:21"               : LOCATION   = LC4_A9 ;
+    "|intcntl:2|:30"               : LOCATION   = LC2_A9 ;
+    "|intcntl:2|:55"               : LOCATION   = LC1_A20;  -- |intcntl:2.IACKOUT
+    "|intcntl:2|7474:3|:9"         : LOCATION   = LC1_A18;  -- |intcntl:2|7474:3.1Q
+    "|intcntl:2|7474:3|:10"        : LOCATION   = LC6_A5 ;  -- |intcntl:2|7474:3.2Q
+    "|intcntl:2|7474:4|:9"         : LOCATION   = LC4_B1 ;  -- |intcntl:2.INTC_D7
+    "|intcntl:2|7474:4|:10"        : LOCATION   = LC1_B1 ;  -- |intcntl:2.INTC_D5
+    "|intcntl:2|7474:5|:9"         : LOCATION   = LC6_B1 ;  -- |intcntl:2.INTC_D4
+    "|intcntl:2|7474:5|:10"        : LOCATION   = LC2_B1 ;  -- |intcntl:2.INTC_D3
+    "|intcntl:2|7475:29|:7"        : LOCATION   = LC8_A9 ;  -- |intcntl:2.INTS_D9
+    "|intcntl:2|7475:29|:8"        : LOCATION   = LC1_A9 ;  -- |intcntl:2.INTS_D8
+    "|intcntl:2|7485:23|f7485:sub|~109~1" : LOCATION   = LC5_B1 ;
+    "|intcntl:2|74138:11|:1"       : LOCATION   = LC3_A9 ;
+    "|intcntl:2|74138:11|:15"      : LOCATION   = LC2_A10;  -- |intcntl:2./IRQ7
+    "|intcntl:2|74138:11|:16"      : LOCATION   = LC2_A5 ;  -- |intcntl:2./IRQ6
+    "|intcntl:2|74138:11|:17"      : LOCATION   = LC1_A5 ;  -- |intcntl:2./IRQ5
+    "|intcntl:2|74138:11|:18"      : LOCATION   = LC1_A12;  -- |intcntl:2./IRQ4
+    "|intcntl:2|74138:11|:19"      : LOCATION   = LC1_A10;  -- |intcntl:2./IRQ3
+    "|intcntl:2|74138:11|:20"      : LOCATION   = LC1_A11;  -- |intcntl:2./IRQ2
+    "|intcntl:2|74138:11|:21"      : LOCATION   = LC1_A19;  -- |intcntl:2./IRQ1
+    "|intcntl:2|74174:51|:9"       : LOCATION   = LC2_A7 ;  -- |intcntl:2|74174:51.4Q
+    "|intcntl:2|74174:51|:10"      : LOCATION   = LC7_A8 ;  -- |intcntl:2|74174:51.3Q
+    "|intcntl:2|74174:51|:11"      : LOCATION   = LC8_A8 ;  -- |intcntl:2|74174:51.2Q
+    "|intcntl:2|74174:51|:12"      : LOCATION   = LC7_B1 ;  -- |intcntl:2|74174:51.1Q
+    "|slv_csr:79|:2"               : LOCATION   = LC2_B12;  -- |slv_csr:79.SFAIL_INH
+    "|slv_csr:79|:3"               : LOCATION   = LC1_B16;  -- |slv_csr:79.SFT_RST
+    ":59"                          : LOCATION   = LC1_A21;
+
+END;
+
+INTERNAL_INFO "slave"
+BEGIN
+	DEVICE = EPF8452AQC160-5;
+	LC5_A17 : LORAX = "G166R0";
+	OH7R0   : LORAX = "G125R0";
+	LC4_A13 : LORAX = "G75R0";
+	LC1_A13 : LORAX = "G11R0";
+	LC5_A13 : LORAX = "G162R0";
+	LC4_A10 : LORAX = "G68R0";
+	OV0C10  : LORAX = "V9C10,G24R0";
+	OV3C5   : LORAX = "V15C5,G93R1";
+	LC8_B7  : LORAX = "G102R1,V7C6";
+	OV3C2   : LORAX = "V14C2,G110R1";
+	LC4_B8  : LORAX = "G71R1,V3C7";
+	OV2C0   : LORAX = "V13C0,G127R1";
+	LC2_B6  : LORAX = "G30R1,V9C5";
+	OV2C7   : LORAX = "V12C7,G160R1";
+	LC3_B6  : LORAX = "G56R1";
+	OV2C8   : LORAX = "V12C8,G161R1";
+	LC1_B6  : LORAX = "G10R1";
+	OV2C1   : LORAX = "V12C1,G147R1";
+	LC3_B8  : LORAX = "G51R1,V2C7";
+	OV2C17  : LORAX = "V13C17,G128R1";
+	OV2C4   : LORAX = "V13C4,G132R1";
+	OV3C0   : LORAX = "V14C0,G107R1";
+	OV1C8   : LORAX = "V10C8,G62R1";
+	OV2C5   : LORAX = "V12C5,G167R1";
+	OV2C6   : LORAX = "V13C6,G133R1";
+	OV3C1   : LORAX = "V15C1,G85R1";
+	OV2C3   : LORAX = "V13C3,G146R1";
+	LC2_B8  : LORAX = "G32R1";
+	OV0C2   : LORAX = "V8C2,G5R1";
+	LC7_B7  : LORAX = "G111R1,V6C6";
+	OV0C1   : LORAX = "V8C1,G16R1";
+	LC1_B7  : LORAX = "G18R1";
+	LC3_B20 : LORAX = "V2C19,G55R0";
+	LC8_A14 : LORAX = "G84R0";
+	LC3_A9  : LORAX = "G62R0";
+	LC7_B1  : LORAX = "V6C0,G107R0";
+	LC1_A6  : LORAX = "G10R0";
+	LC1_A14 : LORAX = "G2R0";
+	OV2C10  : LORAX = "V12C10,G148R0";
+	LC2_A7  : LORAX = "G27R0";
+	LC6_B19 : LORAX = "G134R1";
+	LC1_B2  : LORAX = "V0C1,G16R0";
+	OV1C13  : LORAX = "V10C13,G61R0";
+	OD3     : LORAX = "OF3";
+	LC5_A8  : LORAX = "G160R0";
+	LC8_B5  : LORAX = "G88R1";
+	LC1_B21 : LORAX = "G6R1,V8C20";
+	OV1C4   : LORAX = "V10C4,G46R1";
+	OH14R1  : LORAX = "G14R1";
+	OV3C4   : LORAX = "V14C4,G117R1";
+	OH13R1  : LORAX = "G118R1";
+	OH12R1  : LORAX = "G11R1";
+	OV1C3   : LORAX = "V11C3,G63R1";
+	OV2C2   : LORAX = "V13C2,G145R1";
+	OV0C4   : LORAX = "V8C4,G12R1";
+	OV3C3   : LORAX = "V15C3,G101R1";
+	LC8_B8  : LORAX = "G98R1";
+	OV3C8   : LORAX = "V14C8,G122R1";
+	OV2C9   : LORAX = "V13C9,G144R1";
+	OV3C13  : LORAX = "V15C13,G84R1";
+	OV0C7   : LORAX = "V8C7,G13R1";
+	OV3C9   : LORAX = "V14C9,G112R1";
+	LC4_A15 : LORAX = "V3C14,G80R1";
+	LC2_A16 : LORAX = "G26R0";
+	LC1_A16 : LORAX = "G17R0,V0C15,G17R1";
+	OV0C6   : LORAX = "V9C6,G27R1";
+	OV0C8   : LORAX = "V9C8,G22R1";
+	OV1C12  : LORAX = "V11C12,G75R1";
+	OV1C5   : LORAX = "V11C5,G67R1";
+	OV1C11  : LORAX = "V10C11,G57R1";
+	OV3C11  : LORAX = "V15C11,G96R0";
+	LC1_A8  : LORAX = "G13R0";
+	OD1     : LORAX = "OF1";
+	LC2_A15 : LORAX = "G21R0";
+	LC5_A14 : LORAX = "G155R0";
+	OD0     : LORAX = "OF0";
+	OH15R1  : LORAX = "G115R1";
+	OD2     : LORAX = "OF2";
+	OH10R1  : LORAX = "G7R1";
+	LC1_A17 : LORAX = "V0C16";
+	LC8_A9  : LORAX = "G90R0";
+	LC1_A9  : LORAX = "G9R0";
+	LC3_B18 : LORAX = "G49R1";
+	LC3_B1  : LORAX = "V2C0,G47R0,G47R1";
+	LC4_B1  : LORAX = "V3C0,G64R0,G64R1";
+	LC1_B1  : LORAX = "V0C0,G4R0";
+	LC6_B1  : LORAX = "V5C0,G127R0";
+	LC2_B1  : LORAX = "V1C0,G39R0,V9C0";
+	LC2_A14 : LORAX = "G33R0,V1C13";
+	OV0C14  : LORAX = "V8C14,G14R0";
+	LC6_A5  : LORAX = "G132R0";
+	OV3C12  : LORAX = "V14C12,G123R0";
+	LC1_A18 : LORAX = "G15R0,V0C17";
+	LC1_A19 : LORAX = "V8C18";
+	LC1_A11 : LORAX = "G7R0";
+	LC1_A10 : LORAX = "V0C9";
+	LC1_A12 : LORAX = "G20R0";
+	LC1_A5  : LORAX = "G12R0";
+	LC2_A5  : LORAX = "V1C4,G35R1";
+	LC2_A10 : LORAX = "G38R0";
+	LC4_B3  : LORAX = "G73R1";
+	LC1_B19 : LORAX = "G0R1,V0C18";
+	LC3_B11 : LORAX = "V10C10";
+	LC1_B14 : LORAX = "V0C13";
+	LC1_B18 : LORAX = "V8C17";
+	LC5_B3  : LORAX = "G150R1";
+	LC1_B4  : LORAX = "V0C3";
+	LC3_B4  : LORAX = "G52R1";
+	LC5_B4  : LORAX = "G163R1";
+	LC2_B13 : LORAX = "V1C12";
+	LC1_B9  : LORAX = "G9R1";
+	LC1_B12 : LORAX = "V0C11";
+	LC1_B15 : LORAX = "V0C14";
+	LC2_B4  : LORAX = "G28R1";
+	LC2_B3  : LORAX = "G41R1";
+	LC2_B10 : LORAX = "V9C9";
+	LC1_B13 : LORAX = "V0C12";
+	LC1_B11 : LORAX = "V0C10";
+	LC7_B2  : LORAX = "G120R1";
+	LC3_B3  : LORAX = "V2C2";
+	LC1_B17 : LORAX = "V8C16";
+	LC2_B2  : LORAX = "G23R1";
+	LC4_B2  : LORAX = "G78R1";
+	LC3_B2  : LORAX = "G50R1";
+	LC1_A20 : LORAX = "V0C19";
+	LC1_A21 : LORAX = "V0C20";
+	LC2_B12 : LORAX = "V1C11";
+	LC1_B16 : LORAX = "V8C15";
+END;
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

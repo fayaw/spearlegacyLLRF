@@ -1,0 +1,618 @@
+head	1.22;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.22
+	RF-SPEAR-R0-3-1:1.22
+	RF-SPEAR-R0-3-0:1.21
+	RF-SPEAR-R0-2-0:1.21
+	RF-SPEAR-R0-1-0:1.21
+	RF-SPEAR-R0-0-3:1.16
+	RF-SPEAR-R0-0-2:1.16
+	RF-SPEAR-R0-0-1:1.16
+	RF-SPEAR-R0-0-0:1.16
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.16
+	RF-3-13-10:1.15.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.14
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.12
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.9
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.22
+date	2020.09.13.00.40.28;	author scondam;	state Exp;
+branches;
+next	1.21;
+
+1.21
+date	2016.10.27.22.44.01;	author saa;	state Exp;
+branches;
+next	1.20;
+
+1.20
+date	2016.10.18.21.20.02;	author saa;	state Exp;
+branches;
+next	1.19;
+
+1.19
+date	2016.10.17.22.43.18;	author saa;	state Exp;
+branches;
+next	1.18;
+
+1.18
+date	2016.10.03.23.41.04;	author saa;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	2015.02.10.22.57.36;	author saa;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	2012.05.14.17.55.12;	author saa;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	2011.11.10.23.20.35;	author saa;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	2011.04.25.22.36.53;	author saa;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	2010.11.13.02.30.29;	author saa;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	2010.02.08.22.02.26;	author saa;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2009.12.12.00.13.41;	author saa;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2009.09.28.21.16.42;	author saa;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2008.11.17.17.51.07;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2008.10.13.22.49.52;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2008.05.19.15.46.05;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2005.08.24.18.45.13;	author lazmo;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2004.06.21.21.40.04;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.06.15.18.24.15;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.06.15.01.03.23;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.27.01.17.02;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.22
+log
+@Make permanent the temporary changes by J.Sebek to Solenoid bucking coil current and voltage alarm limits changes or the new klystron
+@
+text
+@#==============================================================
+#
+# Abs:  Database template for RF Analog Inputs
+#
+# Name:  rf_analog.substitutions
+#
+# Desc:  EPICS database template file for RF PLC 
+#        analog inputs and associated interlocks
+#
+# Side:  None
+#
+# Facility: SLAC/PEPII Low-Level RF 
+#
+# Auth: dd-mmm-yyyy, Stephanie Allison (SAA)
+# Rev:  dd-mmm-yyyy, First Lastname  (USERNAME)
+#==============================================================
+#
+# Mod:
+#       23-Aug-2005, M. Laznovsky (LAZMO):
+#         Converted KLYS:VACM to "Volts" at Alan Hill's request
+#       13-Feb-2003, K. Luchini (LUCHINI):
+#         Change KLY:VACM from Torr to micro amps (uA)
+#         Range is 0-200uAmps, where 1V=200uAmps and
+#         10V=2000uAmps. Offset binary is used so EFUG=2000
+#         and EGUL=-2000 so that software works.
+#         Changed CAV1:TUNR:POSN and CAV2:TUNR:POSN
+#         LOW,and LOLO from -28 to -30
+#       06-Feb-2002, K. Luchini (LUCHINI):
+#         Added standard header and obtained
+#         db files from the top level db directory
+#         instead of epicsApp/Db
+#       12-Sept-2020, S. Condamoor (scondam0:
+#         Changes to alarm limits for the new klystron
+#==============================================================
+#
+file rf_analog.db
+{
+#	                                                                                                                   LIM AN LL UL LT FR LL UL  
+#	   STN     COMP Quantity   Group Next Description        HOPR HIHI HIGH LOPR LOLO LOW  EGUF EGUL EGU   PREC HYST MDEL TBL WD WD WD WD WD BT BT 
+  pattern { S     , C  ,   Q       , G  , N  ,      D           , HO , HH , HI , LO , LL , LW , EF , EL , E      ,P, H  , M  , T, W, WW,WU,WL,WF,BL,BU }
+	  {$(RRRS),CAV1,TUNR:POSN  ,TUNR,SUMY,"Tuner Position"  , 20 , 18 , 18 ,-30 ,-30 ,-30 , 51 ,-153,mm      ,2,0.03,0.03, 4, 4, 36,37,11,26, 0, 1 }
+	  {$(RRRS),CAV1,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" ,100 , 95 , 91 , 0  , 20 , 25 , 500,-500,C       ,1,1   ,0.1 , 5, 7,  6, 7,11,26, 6, 7 }
+                               
+	  {$(RRRS),CAV2,TUNR:POSN  ,TUNR,SUMY,"Tuner Position"  , 20 , 18 , 18 ,-30 ,-30 ,-30 , 51 ,-153,mm      ,2,0.03,0.03, 5, 8,  8, 9,11,26, 8, 9 }
+	  {$(RRRS),CAV2,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" ,100 , 95 , 91 , 0  , 20 , 25 , 500,-500,C       ,1,1   ,0.1 , 5,11, 14,15,11,26,14,15 }
+
+	  {$(RRRS),FILA,MENT:VOLT  ,MENT,SUMY,"Voltage"         , 150, 128, 127, 50 , 95 , 96 , 150,-150,V       ,1,0.3 ,0.3 , 5,12, 16,17,12,27, 0, 1 }
+	  {$(RRRS),FILA,MENT:CURR  ,MENT,SUMY,"Current"         , 10 , 6.5, 6.4, 5  , 4.7, 4.8, 10 ,-10 ,Amp     ,2,0.01,0.01, 5,13, 18,19,12,27, 2, 3 }
+	  {$(RRRS),SOLN,MAIN:VOLT  ,MAIN,SUMY,"Main Voltage"    , 100, 99 , 98 , 50 , 41 , 45 ,146.2,-146.2,V    ,1,0.1 ,0.1 , 5,14, 20,21,12,27, 4, 5 }
+	  {$(RRRS),SOLN,MAIN:CURR  ,MAIN,SUMY,"Main Current"    , 50 , 48 , 46 , 40 , 42 , 43 , 129,-129,Amp     ,1,0.1 ,0.1 , 5,15, 22,23,12,27, 6, 7 }
+#	  {$(RRRS),SOLN,BUCK:VOLT  ,BUCK,SUMY,"Bucking Voltage" , 6  , 5  , 4  , 0  ,-0.6,-0.5, 60 ,-60 ,V       ,2,.015,.015, 5,16, 24,25,12,27, 8, 9 }
+	  {$(RRRS),SOLN,BUCK:VOLT  ,BUCK,SUMY,"Bucking Voltage" , 6  , 4.345 , 4.1475 , 0,3.555,3.7525, 60 ,-60 ,V       ,2,.015,.015, 5,16, 24,25,12,27, 8, 9 }
+#	  {$(RRRS),SOLN,BUCK:CURR  ,BUCK,SUMY,"Bucking Current" , 10 , 5.3, 5  , 0  ,-0.2,-.18,19.38,-19.23,Amp  ,2,0.01,0.01, 5,17, 26,27,12,27,10,11 }
+	  {$(RRRS),SOLN,BUCK:CURR  ,BUCK,SUMY,"Bucking Current" , 10 , 5.454, 5.252  , 0 , 4.646, 4.848,19.38,-19.23,Amp  ,2,0.01,0.01, 5,17, 26,27,12,27,10,11 }
+
+      {$(RRRS),KLYS,:VACM      ,""  ,SUMY,"Ion Pump Current", 100,25000,90 , 0  , -15, -10,1000,-1000,nA     ,2,1.00,0.01 ,5,18, 28,29,12,27,12,13 }
+	  {$(RRRS),CIRC,:CURR      ,""  ,SUMY,"Pump Current"    , 10 , 9.5, 9  , -10,-9.5, -9 , 10 ,-10 ,Amp     ,2,0.01,0.01, 5,19, 30,31,12,27,14,15 }
+
+	  {$(RRRS),CAV ,TUNR:VOLT  ,TUNR,FANO,"Tnr BlkPwrSply V", 24 ,101 ,101 , 20 , 20 , 21 , 24 ,-24 ,V       ,2,0.02,0.02, 5,28, 48,49,14,29, 0, 1 }
+	  {$(RRRS),KLYS,PLC:POWER  ,""  ,SUMY,"PLC Power"       ,4095,4095,4095,0,-5000,-5000,4095,-4096,Counts  ,0, 1  , 1  , 5,29, 50,51,14,29, 2, 3 }
+	  {$(RRRS),HVPS,PLC:VOLT   ,""  ,SUMY,"PLC Voltage"     , 90 , 87 , 85 , 0  ,-101,-101, 100,-100,kV      ,1,0.03,0.03, 5,30, 52,53,14,29, 4, 5 }
+	  {$(RRRS),HVPS,PLC:CURR   ,""  ,SUMY,"PLC Current"     , 30 , 30 , 30 , 0  ,-101,-101, 50 ,-50 ,Amp     ,2,0.03,0.03, 5,31, 54,55,14,29, 6, 7 }
+}
+#
+file rf_analog_log.db
+{
+#	                                               EXP                 EXP             EGUF            PREC     2ND  LIM AN LL UL LT FR LL UL  
+#	   STN     COMP Quantity Group  Description      HOPR HOPR HIHI HIGH LOPR LOPR LOLO LOW  EGUL CONV EGU   MDEL  STAT TBL WD WD WD WD WD BT BT 
+  pattern { S     , C  ,   Q     , G ,    D              ,HOE, HO,  HH  , HI ,LOE, LO  ,LL, LW,EF, EL, CV,  E  ,P, M  , S2  ,T, W, WW,WU,WL,WF,BL,BU }
+  	  {$(RRRS),CAV1,:VACM    ,VACM,"Vacuum"          ,-6,1E-6,2.5E-8,1E-8,-12,1E-12,-1,-1, -2,-22, 1 ,Torr ,9,.005,TIMED,4, 5, 38,39,11,26, 2, 3 }
+  	  {$(RRRS),CAV1,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 20 , 2 , 5   ,.5,.5, 10,-10,.01, uA  ,2,0.02,STAT ,5, 6,  4, 5,11,26, 4, 5 }
+                               
+  	  {$(RRRS),CAV2,:VACM    ,VACM,"Vacuum"          ,-6,1E-6,2.5E-8,1E-8,-12,1E-12,-1,-1, -2,-22, 1 ,Torr ,9,.005,TIMED,5, 9, 10,11,11,26,10,11 }
+  	  {$(RRRS),CAV2,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 20 , 2 , 5   ,.5,.5, 10,-10,.01, uA  ,2,0.02,STAT ,5,10, 12,13,11,26,12,13 }
+}
+
+@
+
+
+1.21
+log
+@Increase klystron ion pump current HIGH from 50 to 90 so no warning at
+lower beam current.
+@
+text
+@d32 2
+a33 1
+#
+d51 6
+a56 3
+	  {$(RRRS),SOLN,BUCK:VOLT  ,BUCK,SUMY,"Bucking Voltage" , 6  , 5  , 4  , 0  ,-0.6,-0.5, 60 ,-60 ,V       ,2,.015,.015, 5,16, 24,25,12,27, 8, 9 }
+	  {$(RRRS),SOLN,BUCK:CURR  ,BUCK,SUMY,"Bucking Current" , 10 , 5.3, 5  , 0  ,-0.2,-.18,19.38,-19.23,Amp  ,2,0.01,0.01, 5,17, 26,27,12,27,10,11 }
+          {$(RRRS),KLYS,:VACM      ,""  ,SUMY,"Ion Pump Current", 100,25000,90 , 0  , -15, -10,1000,-1000,nA     ,2,1.00,0.01 ,5,18, 28,29,12,27,12,13 }
+@
+
+
+1.20
+log
+@Make HIHI limit for the klystron ion pum current be the trip level of 25uA.
+Note that all the other ion pump currents at spear have no HIHI values.
+@
+text
+@d52 1
+a52 1
+          {$(RRRS),KLYS,:VACM      ,""  ,SUMY,"Ion Pump Current", 100,25000,50 , 0  , -15, -10,1000,-1000,nA     ,2,1.00,0.01 ,5,18, 28,29,12,27,12,13 }
+@
+
+
+1.19
+log
+@Per vacuum system manager, correct scaling of klystron vacuum ion pump current.
+(0-10V, 1V=100nA). From Joe Vargas:
+This morning, Jim Sebek explained that the SPEAR RF Cavity ion pump power
+supply (SPCe) may need a scaling adjustment because History Plot showed it
+exceeded the scale.  I changed it from 1V=10nA to 1V = 100 nA.   This should
+be proper.
+@
+text
+@d52 1
+a52 1
+          {$(RRRS),KLYS,:VACM      ,""  ,SUMY,"Ion Pump Current", 100, 55 , 50 , 0  , -15, -10,1000,-1000,nA     ,2,1.00,0.01 ,5,18, 28,29,12,27,12,13 }
+@
+
+
+1.18
+log
+@Change klystron IP current from uA to nA.  Note that more work is needed to
+correct the value.
+@
+text
+@d52 1
+a52 1
+          {$(RRRS),KLYS,:VACM      ,""  ,SUMY,"Ion Pump Current", 10 , 15 , 5  , -10, -15, -10, 100,-100,nA      ,3,0.01,0.001,5,18, 28,29,12,27,12,13 }
+@
+
+
+1.17
+log
+@Increase yellow high alarm limit for window infrared temp by 1C from 90 to 91C.
+Per Jim Sebek:
+The cavity D window is known to operate at a higher temperature than that of the
+other cavities.  The window temperature depends on both the electric field at
+the window and the window coating.  The cavity D window was replaced at the same
+time that the Cavity C window was replaced at the end of the 2011 run.  The
+procedure for the coating of the new windows had changed, changing the
+conductivity and increasing the temperature.  The temperatures rise to this
+level each time there is a low alpha run as can be seem from the history buffers
+from last year.  These elevated temperatures are still below the values of
+150degC to which the windows were tested.  If we continue low alpha runs, we
+should change the warning limits of the PVs.
+@
+text
+@d52 1
+a52 1
+          {$(RRRS),KLYS,:VACM      ,""  ,SUMY,"Ion Pump Current",  10,  15,  5 , -10, -15, -10, 100,-100,uA      ,3,0.01,0.001,5,18, 28,29,12,27,12,13 }
+@
+
+
+1.16
+log
+@Change klystron vacuum to ion pump current (new controller).
+@
+text
+@d41 1
+a41 1
+	  {$(RRRS),CAV1,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" ,100 , 95 , 90 , 0  , 20 , 25 , 500,-500,C       ,1,1   ,0.1 , 5, 7,  6, 7,11,26, 6, 7 }
+d44 1
+a44 1
+	  {$(RRRS),CAV2,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" ,100 , 95 , 90 , 0  , 20 , 25 , 500,-500,C       ,1,1   ,0.1 , 5,11, 14,15,11,26,14,15 }
+@
+
+
+1.15
+log
+@Jim Sebek changed high alarm limits for the cavity window infrared temps.
+@
+text
+@d52 1
+a52 1
+          {$(RRRS),KLYS,:VACM      ,""  ,SUMY,"Vacuum"          ,  10,  15,  10, -10, -15, -10,  10, -10,V       ,3,0.01,0.001,5,18, 28,29,12,27,12,13 }
+@
+
+
+1.14
+log
+@Reduce ion pump yellow high limits from 300 to 20 uA per Mike Nalls.
+@
+text
+@d41 1
+a41 1
+	  {$(RRRS),CAV1,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  , 20 , 25 , 500,-500,C       ,1,1   ,0.1 , 5, 7,  6, 7,11,26, 6, 7 }
+d44 1
+a44 1
+	  {$(RRRS),CAV2,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  , 20 , 25 , 500,-500,C       ,1,1   ,0.1 , 5,11, 14,15,11,26,14,15 }
+@
+
+
+1.13
+log
+@Change EGU for ion pump currents from McAmp to uA to be consistent with the
+SPEAR control system.
+@
+text
+@d67 1
+a67 1
+  	  {$(RRRS),CAV1,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.01, uA  ,2,0.02,STAT ,5, 6,  4, 5,11,26, 4, 5 }
+d70 1
+a70 1
+  	  {$(RRRS),CAV2,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.01, uA  ,2,0.02,STAT ,5,10, 12,13,11,26,12,13 }
+@
+
+
+1.12
+log
+@Changes to add low limits to all temperatures.
+@
+text
+@d67 1
+a67 1
+  	  {$(RRRS),CAV1,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.01,McAmp,2,0.02,STAT ,5, 6,  4, 5,11,26, 4, 5 }
+d70 1
+a70 1
+  	  {$(RRRS),CAV2,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.01,McAmp,2,0.02,STAT ,5,10, 12,13,11,26,12,13 }
+@
+
+
+1.11
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@d41 1
+a41 1
+	  {$(RRRS),CAV1,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  ,-501,-501, 500,-500,C       ,1,1   ,0.1 , 5, 7,  6, 7,11,26, 6, 7 }
+d44 1
+a44 1
+	  {$(RRRS),CAV2,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  ,-501,-501, 500,-500,C       ,1,1   ,0.1 , 5,11, 14,15,11,26,14,15 }
+@
+
+
+1.10
+log
+@New conversion factors for solenoid main voltage and current per Jim Sebek.
+@
+text
+@d5 1
+a5 1
+# Name:  RRRS_analog.template
+d35 1
+a35 1
+file db/rf_analog.db
+d38 4
+a41 4
+#	   STN  COMP Quantity   Group Next Description        HOPR HIHI HIGH LOPR LOLO LOW  EGUF EGUL EGU   PREC HYST MDEL TBL WD WD WD WD WD BT BT 
+  pattern { S  , C  ,   Q       , G  , N  ,      D           , HO , HH , HI , LO , LL , LW , EF , EL , E      ,P, H  , M  , T, W, WW,WU,WL,WF,BL,BU }
+	  {RRRS,CAV1,TUNR:POSN  ,TUNR,SUMY,"Tuner Position"  , 20 , 18 , 18 ,-30 ,-30 ,-30 , 51 ,-153,mm      ,2,0.03,0.03, 4, 4, 36,37,11,26, 0, 1 }
+	  {RRRS,CAV1,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  ,-501,-501, 500,-500,C       ,1,1   ,0.1 , 5, 7,  6, 7,11,26, 6, 7 }
+d43 2
+a44 2
+	  {RRRS,CAV2,TUNR:POSN  ,TUNR,SUMY,"Tuner Position"  , 20 , 18 , 18 ,-30 ,-30 ,-30 , 51 ,-153,mm      ,2,0.03,0.03, 5, 8,  8, 9,11,26, 8, 9 }
+	  {RRRS,CAV2,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  ,-501,-501, 500,-500,C       ,1,1   ,0.1 , 5,11, 14,15,11,26,14,15 }
+d46 8
+a53 8
+	  {RRRS,FILA,MENT:VOLT  ,MENT,SUMY,"Voltage"         , 150, 128, 127, 50 , 95 , 96 , 150,-150,V       ,1,0.3 ,0.3 , 5,12, 16,17,12,27, 0, 1 }
+	  {RRRS,FILA,MENT:CURR  ,MENT,SUMY,"Current"         , 10 , 6.5, 6.4, 5  , 4.7, 4.8, 10 ,-10 ,Amp     ,2,0.01,0.01, 5,13, 18,19,12,27, 2, 3 }
+	  {RRRS,SOLN,MAIN:VOLT  ,MAIN,SUMY,"Main Voltage"    , 100, 99 , 98 , 50 , 41 , 45 ,146.2,-146.2,V    ,1,0.1 ,0.1 , 5,14, 20,21,12,27, 4, 5 }
+	  {RRRS,SOLN,MAIN:CURR  ,MAIN,SUMY,"Main Current"    , 50 , 48 , 46 , 40 , 42 , 43 , 129,-129,Amp     ,1,0.1 ,0.1 , 5,15, 22,23,12,27, 6, 7 }
+	  {RRRS,SOLN,BUCK:VOLT  ,BUCK,SUMY,"Bucking Voltage" , 6  , 5  , 4  , 0  ,-0.6,-0.5, 60 ,-60 ,V       ,2,.015,.015, 5,16, 24,25,12,27, 8, 9 }
+	  {RRRS,SOLN,BUCK:CURR  ,BUCK,SUMY,"Bucking Current" , 10 , 5.3, 5  , 0  ,-0.2,-.18,19.38,-19.23,Amp  ,2,0.01,0.01, 5,17, 26,27,12,27,10,11 }
+          {RRRS,KLYS,:VACM      ,""  ,SUMY,"Vacuum"          ,  10,  15,  10, -10, -15, -10,  10, -10,V       ,3,0.01,0.001,5,18, 28,29,12,27,12,13 }
+	  {RRRS,CIRC,:CURR      ,""  ,SUMY,"Pump Current"    , 10 , 9.5, 9  , -10,-9.5, -9 , 10 ,-10 ,Amp     ,2,0.01,0.01, 5,19, 30,31,12,27,14,15 }
+d55 4
+a58 4
+	  {RRRS,CAV ,TUNR:VOLT  ,TUNR,FANO,"Tnr BlkPwrSply V", 24 ,101 ,101 , 20 , 20 , 21 , 24 ,-24 ,V       ,2,0.02,0.02, 5,28, 48,49,14,29, 0, 1 }
+	  {RRRS,KLYS,PLC:POWER  ,""  ,SUMY,"PLC Power"       ,4095,4095,4095,0,-5000,-5000,4095,-4096,Counts  ,0, 1  , 1  , 5,29, 50,51,14,29, 2, 3 }
+	  {RRRS,HVPS,PLC:VOLT   ,""  ,SUMY,"PLC Voltage"     , 90 , 87 , 85 , 0  ,-101,-101, 100,-100,kV      ,1,0.03,0.03, 5,30, 52,53,14,29, 4, 5 }
+	  {RRRS,HVPS,PLC:CURR   ,""  ,SUMY,"PLC Current"     , 30 , 30 , 30 , 0  ,-101,-101, 50 ,-50 ,Amp     ,2,0.03,0.03, 5,31, 54,55,14,29, 6, 7 }
+d61 1
+a61 1
+file db/rf_analog_log.db
+d64 4
+a67 4
+#	   STN  COMP Quantity Group  Description      HOPR HOPR HIHI HIGH LOPR LOPR LOLO LOW  EGUL CONV EGU   MDEL  STAT TBL WD WD WD WD WD BT BT 
+  pattern { S  , C  ,   Q     , G ,    D              ,HOE, HO,  HH  , HI ,LOE, LO  ,LL, LW,EF, EL, CV,  E  ,P, M  , S2  ,T, W, WW,WU,WL,WF,BL,BU }
+  	  {RRRS,CAV1,:VACM    ,VACM,"Vacuum"          ,-6,1E-6,2.5E-8,1E-8,-12,1E-12,-1,-1, -2,-22, 1 ,Torr ,9,.005,TIMED,4, 5, 38,39,11,26, 2, 3 }
+  	  {RRRS,CAV1,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.01,McAmp,2,0.02,STAT ,5, 6,  4, 5,11,26, 4, 5 }
+d69 2
+a70 2
+  	  {RRRS,CAV2,:VACM    ,VACM,"Vacuum"          ,-6,1E-6,2.5E-8,1E-8,-12,1E-12,-1,-1, -2,-22, 1 ,Torr ,9,.005,TIMED,5, 9, 10,11,11,26,10,11 }
+  	  {RRRS,CAV2,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.01,McAmp,2,0.02,STAT ,5,10, 12,13,11,26,12,13 }
+@
+
+
+1.9
+log
+@Change ion pump conversion for new ion pumps - per Jim Sebek.
+@
+text
+@d48 2
+a49 2
+	  {RRRS,SOLN,MAIN:VOLT  ,MAIN,SUMY,"Main Voltage"    , 100, 99 , 98 , 50 , 41 , 45 , 320,-320,V       ,1,0.1 ,0.1 , 5,14, 20,21,12,27, 4, 5 }
+	  {RRRS,SOLN,MAIN:CURR  ,MAIN,SUMY,"Main Current"    , 50 , 48 , 46 , 40 , 42 , 43 , 124,-124,Amp     ,1,0.1 ,0.1 , 5,15, 22,23,12,27, 6, 7 }
+@
+
+
+1.8
+log
+@Correct EGU limits for SOLNMAIN voltage and SOLNBUCK current.
+@
+text
+@d67 1
+a67 1
+  	  {RRRS,CAV1,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.05,McAmp,2,0.02,STAT ,5, 6,  4, 5,11,26, 4, 5 }
+d70 1
+a70 1
+  	  {RRRS,CAV2,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.05,McAmp,2,0.02,STAT ,5,10, 12,13,11,26,12,13 }
+@
+
+
+1.7
+log
+@Change degC to C.
+@
+text
+@d48 1
+a48 1
+	  {RRRS,SOLN,MAIN:VOLT  ,MAIN,SUMY,"Main Voltage"    , 100, 99 , 98 , 50 , 41 , 45 , 160,-160,V       ,1,0.1 ,0.1 , 5,14, 20,21,12,27, 4, 5 }
+d50 2
+a51 2
+	  {RRRS,SOLN,BUCK:VOLT  ,BUCK,SUMY,"Bucking Voltage" , 6  , 5  , 4  , 0  ,-0.6,-0.5, 30 ,-30 ,V       ,2,.015,.015, 5,16, 24,25,12,27, 8, 9 }
+	  {RRRS,SOLN,BUCK:CURR  ,BUCK,SUMY,"Bucking Current" , 10 , 5.3, 5  , 0  ,-0.2,-.18, 10 ,-10 ,Amp     ,2,0.01,0.01, 5,17, 26,27,12,27,10,11 }
+@
+
+
+1.6
+log
+@Changed :KLYS:VACM from uAmps to Volts
+@
+text
+@d41 1
+a41 1
+	  {RRRS,CAV1,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  ,-501,-501, 500,-500,degC    ,1,1   ,0.1 , 5, 7,  6, 7,11,26, 6, 7 }
+d44 1
+a44 1
+	  {RRRS,CAV2,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  ,-501,-501, 500,-500,degC    ,1,1   ,0.1 , 5,11, 14,15,11,26,14,15 }
+@
+
+
+1.5
+log
+@Give cavity vacuums a precision of 9 so that CA server formatting will
+use scientific notation.
+@
+text
+@d19 2
+d52 1
+a52 1
+          {RRRS,KLYS,:VACM      ,""  ,SUMY,"Vacuum"          ,2e-9,2e-9,2e-9,-2e-9,-2e-9,-2e-9,2e-9,-2e-9,uAmp,2,0.01,0.01, 5,18, 28,29,12,27,12,13 }
+@
+
+
+1.4
+log
+@Correct engr units limits for the focus power supply.  Provide better initial
+values for other limits.
+@
+text
+@d64 1
+a64 1
+  	  {RRRS,CAV1,:VACM    ,VACM,"Vacuum"          ,-6,1E-6,2.5E-8,1E-8,-12,1E-12,-1,-1, -2,-22, 1 ,Torr ,3,.005,TIMED,4, 5, 38,39,11,26, 2, 3 }
+d67 1
+a67 1
+  	  {RRRS,CAV2,:VACM    ,VACM,"Vacuum"          ,-6,1E-6,2.5E-8,1E-8,-12,1E-12,-1,-1, -2,-22, 1 ,Torr ,3,.005,TIMED,5, 9, 10,11,11,26,10,11 }
+@
+
+
+1.3
+log
+@Correct cavity window alarm limits.
+Use better limits for filament, solenoid main, solenoid bucking voltage and
+current and the circulator pump current and tuner bulk power supply voltage.
+@
+text
+@d47 1
+a47 1
+	  {RRRS,SOLN,MAIN:CURR  ,MAIN,SUMY,"Main Current"    , 50 , 45 , 44 , 40 , 35 , 36 ,126.5,-126.5,Amp   ,1,0.1 ,0.1 , 5,15, 22,23,12,27, 6, 7 }
+@
+
+
+1.2
+log
+@Rename
+@
+text
+@d39 1
+a39 1
+	  {RRRS,CAV1,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 83 , 80 , 0  ,-501,-501, 500,-500,degC    ,0,1   ,0.9 , 5, 7,  6, 7,11,26, 6, 7 }
+d42 1
+a42 1
+	  {RRRS,CAV2,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 83 , 80 , 0  ,-501,-501, 500,-500,degC    ,0,1   ,0.9 , 5,11, 14,15,11,26,14,15 }
+d44 6
+a49 6
+	  {RRRS,FILA,MENT:VOLT  ,MENT,SUMY,"Voltage"         , 100, 88 , 85 , 50 , 76 , 79 , 150,-150,V       ,1,0.3 ,0.3 , 5,12, 16,17,12,27, 0, 1 }
+	  {RRRS,FILA,MENT:CURR  ,MENT,SUMY,"Current"         , 10 ,8.8 ,8.5 , 5  , 7.2, 7.5, 10 ,-10 ,Amp     ,2,0.01,0.01, 5,13, 18,19,12,27, 2, 3 }
+	  {RRRS,SOLN,MAIN:VOLT  ,MAIN,SUMY,"Main Voltage"    ,160 ,150 ,140 , 0  , 1  , 2  , 160,-160,V       ,1,0.1 ,0.1 , 5,14, 20,21,12,27, 4, 5 }
+	  {RRRS,SOLN,MAIN:CURR  ,MAIN,SUMY,"Main Current"    , 62 , 55 , 50 , 0  , 1  , 2 ,126.5,-126.5,Amp   ,1,0.1 ,0.1 , 5,15, 22,23,12,27, 6, 7 }
+	  {RRRS,SOLN,BUCK:VOLT  ,BUCK,SUMY,"Bucking Voltage" , 30 , 25 , 20 , 0  , 1  , 2  , 30 ,-30 ,V       ,2,.015,.015, 5,16, 24,25,12,27, 8, 9 }
+	  {RRRS,SOLN,BUCK:CURR  ,BUCK,SUMY,"Bucking Current" , 10 , 9  , 8  , 0  , 1  , 2  , 10 ,-10 ,Amp     ,2,0.01,0.01, 5,17, 26,27,12,27,10,11 }
+d51 1
+a51 1
+	  {RRRS,CIRC,:CURR      ,""  ,SUMY,"Pump Current"    , 10 ,100 ,100 , 0  ,-101,-101, 10 ,-10 ,Amp     ,2,0.01,0.01, 5,19, 30,31,12,27,14,15 }
+d53 1
+a53 1
+	  {RRRS,CAV ,TUNR:VOLT  ,TUNR,FANO,"Tnr BlkPwrSply V", 24 ,101 ,101 , 0  , 20 , 21 , 24 ,-24 ,V       ,2,0.02,0.02, 5,28, 48,49,14,29, 0, 1 }
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 32
+d50 1
+a50 1
+  	  {RRRS,KLYS,:VACM      ,""  ,SUMY,"Vacuum"          ,1E-8,4095,4095,1E-4,-5000,-5000,1E-4,1E-8,Torr  ,2,1E-8,1E-8 ,5,18, 28,29,12,27,12,13 }
+d58 1
+a58 9
+#file db/rf_analog_plc.db
+#{
+#	                                                                                                                       AN                    
+#	   STN  COMP Quantity              Description        HOPR HIHI HIGH LOPR LOLO LOW            EGU                      WD                   
+#  pattern { S  , C  ,   Q                 ,      D           , HO , HH , HI , LO , LL , LW           , E                       W                   }
+#	  {RRRS,FILA,MENT:TIME            ,"Time Left"       ,1800,1200, 1  , 0  ,-101,-101          ,Sec                    ,40                    }
+#	  {RRRS,KLYS,COLLPLC:POWER        ,"PLC Coll Pwr"    ,1200,9999,9999, 0  ,-101,-101          ,kW                     ,41                    }
+#	  {RRRS,KLYS,COLL:POWER:ULIM      ,"PLC Coll Pwr Lim",1200,9999,9999, 0  ,-101,-101          ,kW                     ,42                    }
+#}
+d70 1
+a70 20
+#file db/rf_analog_hvps.db
+#{
+#	   STN  COMP         FLNK                     Description          HOPR HIHI HIGH   EGUF EGUL EGU   PREC HYST MDEL WORD=CARD/2
+# pattern { S  , C        ,                     ,      D                   , HO , HH , HI , EF , EL , E      ,P, H  , M     ,CARD    }
+#	  {RRRS,AC:CURR   ,0                    ,"AC Current"              ,500 ,500 ,400 , 500,-500 ,Amp    ,2,0.03,0.03   ,2       }
+#	  {RRRS,:VOLT:RBCK,0                    ,"Desired Volt Readback"   , 90 , 87 , 85 , 100,-100 ,kV     ,2,0.03,0.03   ,4       }
+#	  {RRRS,:VOLT     ,RRRS:HVPS:POWER      ,"Monitored Voltage"       , 90 , 87 , 85 , 100,-100 ,kV     ,2,0.03,0.03   ,6       }
+#	  {RRRS,:CURR     ,RRRS:HVPS:POWER      ,"Monitored Current"       , 30 , 30 , 30 ,  50,-50  ,Amp    ,2,0.03,0.03   ,8       }
+#	  {RRRS,:VOLT:ULIM,0                    ,"Max Voltage Readback"    ,100 , 0  , 0  , 100,-100 ,kV     ,2,0.03,0.03   ,10      }
+# Note CARD 12 and 14 (WORD 6 and 7) are used for digital inputs.
+#}
+#file db/rf_analog_hvps_out.db
+#{
+#	   STN  COMP         FLNK                     Description          HOPR  DRVH       EGUF      EGU   PREC PINI      WORD=CARD/2
+# pattern { S  , C       ,                      ,      D                   , HO ,DRVH      ,EF      , E      ,P ,PINI       ,CARD    }
+#	  {RRRS,:VOLTULIM,RRRS:HVPS:VOLTULIM:SEQ,"MAXVLT HVPS Max Voltage" ,100 , 90       ,100      ,kV     ,2 ,NO         ,2       }
+#	  {RRRS,:VOLT    ,RRRS:HVPS:VOLTULIM:SEQ,"DESVLT HVPS Desired Volt",100 ,100       ,100      ,kV     ,2 ,YES        ,4       }
+#	  {RRRS,:SPARE1  ,0                     ,"Spare 1"                 ,100 ,100       ,100      ,kV     ,2 ,NO         ,12      }
+#	  {RRRS,:SPARE1  ,0                     ,"Spare 1"                 ,100 ,100       ,100      ,kV     ,2 ,NO         ,14      }
+#}
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

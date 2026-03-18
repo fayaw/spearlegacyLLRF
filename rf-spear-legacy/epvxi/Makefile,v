@@ -1,0 +1,76 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	EPVXI-2:1.1.1.1
+	EPVXI-1:1.1.1.1
+	EPVXI:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2008.09.30.16.32.30;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2005.02.15.18.53.20;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2005.02.15.18.53.20;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Changes for KineticSystem PPC used in the RF IOC.
+@
+text
+@#Makefile at top of application tree
+TOP = .
+include $(TOP)/configure/CONFIG
+DIRS += configure
+DIRS += src
+#DIRS += test
+DIRS += iocBoot
+include $(TOP)/configure/RULES_TOP
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d6 1
+a6 1
+DIRS += test
+@
+
+
+1.1.1.1
+log
+@epvxi from Marty Kraimer via tech-talk on Feb 15, 2005.
+@
+text
+@@

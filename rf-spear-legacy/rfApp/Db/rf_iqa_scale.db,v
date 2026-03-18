@@ -1,0 +1,198 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2004.06.15.00.50.05;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.45;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.45;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Comment out .INP* lines that are restored.
+@
+text
+@grecord(calc,"$(S):$(C)$(Q):C:SCALE") {
+	field(DESC,"$(C) $(D) C Scale")
+	field(FLNK,"$(S):$(C)$(Q):VOLT:ULIM.VAL  PP NMS")
+	field(CALC,"10**(C/D)")
+	field(INPC,"$(S):$(C)$(Q):IQ:SCALE.C  NPP NMS")
+	field(INPD,"20")
+	field(PREC,"4")
+}
+grecord(calc,"$(S):$(C)$(Q):A:SCALE") {
+	field(DESC,"$(C) $(D) A Scale")
+	field(FLNK,"$(S):$(C)$(Q):C:SCALE.VAL  PP NMS")
+	field(CALC,"(10**((A+B+C+F)/D))/E")
+	field(INPA,"$(S):$(C)$(Q):IQ:SCALE.A  NPP NMS")
+	field(INPB,"$(S):$(C)$(Q):IQ:SCALE.B  NPP NMS")
+#	field(INPC,"$(LCA)")
+	field(INPD,"$(S):$(C)$(Q):IQ:SCALE.D  NPP NMS")
+	field(INPE,"$(S):$(C)$(Q):IQ:SCALE.E  NPP NMS")
+	field(INPF,"$(S):$(C)$(Q):IQ:SCALE.F  NPP NMS")
+	field(EGU,"$(AE)/V")
+	field(PREC,"4")
+}
+grecord(calc,"$(S):$(C)$(Q):A:RAW") {
+	field(DESC,"$(C) $(D) Raw A")
+	field(CALC,"SQR((A*A)+(B*B))*2/65535")
+	field(INPA,"$(S):STN:$(IQM):MODU.IDT$(CH)  NPP MS")
+	field(INPB,"$(S):STN:$(IQM):MODU.QDT$(CH)  NPP MS")
+	field(INPC,"$(S):$(C)$(Q):SCLIQ.SEVR  NPP MS")
+	field(EGU,"Volts")
+	field(PREC,"6")
+}
+grecord(calc,"$(S):$(C)$(Q):IQ:SCALE") {
+	field(DESC,"$(C) $(D) IQ Scale")
+	field(PINI,"YES")
+	field(FLNK,"$(S):$(C)$(Q):A:SCALE.VAL  PP NMS")
+	field(CALC,"(10**((A+B+F)/D))/E")
+#	field(INPA,"$(LCP)")
+#	field(INPB,"$(LCB)")
+#	field(INPC,"$(LCV)")
+	field(INPD,"20")
+	field(INPE,"$(AC)")
+	field(EGU,"$(AE)/V")
+	field(PREC,"4")
+}
+grecord(seq,"$(S):$(C)$(Q):CAL:SEQC") {
+	field(DESC,"$(C) $(D) Calib")
+	field(DLY1,"5")
+	field(DOL1,"$(CH1)")
+	field(LNK1,"$(S):STN:$(IQM):MODU.ASS  PP NMS")
+	field(DOL2,"$(S):$(C)$(Q):A:RAW.VAL  PP NMS")
+	field(LNK2,"$(S):STN:CONV:LOSS.A  NPP NMS")
+	field(DOL3,"$(S):$(C)$(Q):A:RAW.SEVR  NPP NMS")
+	field(LNK3,"$(S):STN:CONV:LOSS.B  NPP NMS")
+	field(DOL4,"$(S):$(C)$(Q):IQ:SCALE.C  NPP NMS")
+	field(LNK4,"$(S):STN:CONV:LOSS.C  NPP NMS")
+	field(DOL5,"$(S):STN:CONV:LOSS.VAL  PP NMS")
+	field(LNK5,"$(S):$(C)$(Q):IQ:SCALE.C  PP NMS")
+	field(DLY6,"1")
+	field(DOL6,"$(S):STN:$(IQM):MODU.AD$(CH)  NPP NMS")
+	field(LNK6,"$(S):STN:CONV:LOSS.A  NPP NMS")
+	field(LNK7,"$(S):STN:CONV:LOSS.B  NPP NMS")
+	field(DOL8,"$(S):$(C)$(Q):A:SCALE.C  NPP NMS")
+	field(LNK8,"$(S):STN:CONV:LOSS.C  NPP NMS")
+	field(DOL9,"$(S):STN:CONV:LOSS.VAL  PP NMS")
+	field(LNK9,"$(S):$(C)$(Q):A:SCALE.C  PP NMS")
+	field(DLYA,"1")
+	field(DOLA,"$(S):$(C)$(Q):CAL:SEQ.DO1  NPP NMS")
+	field(LNKA,"$(S):$(C)$(Q):VOLT:ULIM.H  PP NMS")
+}
+grecord(seq,"$(S):$(C)$(Q):CAL:SEQ") {
+	field(DESC,"$(C) $(D) Calib")
+	field(FLNK,"$(S):$(C)$(Q):CAL:SEQC.VAL  PP NMS")
+	field(DOL1,"$(S):$(C)$(Q):VOLT:ULIM.H  NPP NMS")
+	field(DOL2,"4.9")
+	field(LNK2,"$(S):$(C)$(Q):VOLT:ULIM.H  PP NMS")
+	field(DLY3,"1")
+	field(DOL3,"1")
+	field(LNK3,"$(S):STN:RESET:CTRL.VAL  PP NMS")
+}
+grecord(seq,"$(S):$(C)$(Q):ULIM:SEQ") {
+	field(DESC,"$(C) $(D) Limit Upd")
+	field(PREC,"4")
+	field(DOL1,"$(S):$(C)$(Q):VOLT:ULIM.VAL  NPP NMS")
+	field(LNK1,"$(S):STN:$(IQM):MODU.AT$(CH)  PP NMS")
+	field(DOL2,"$(S):$(C)$(Q):VOLT:ULIM.K  NPP NMS")
+	field(LNK2,"$(S):$(C)$(Q):$(QS).HIGH  NPP NMS")
+	field(DOL3,"$(S):$(C)$(Q):VOLT:ULIM.L  NPP NMS")
+	field(LNK3,"$(S):$(C)$(Q):$(QS).HIHI  NPP NMS")
+}
+grecord(sub,"$(S):$(C)$(Q):SCLIQ") {
+	field(DESC,"$(C) $(D) SclIQ")
+	field(FLNK,"$(S):$(C)$(F).VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQscaled")
+	field(INPA,"$(S):STN:$(IQM):MODU.IDT$(CH)  NPP MS")
+	field(INPB,"$(S):STN:$(IQM):MODU.QDT$(CH)  NPP MS")
+	field(INPD,"$(S):STN:$(IQM):DRDY.B$(IB)  NPP MS")
+	field(INPE,"$(S):STN:$(IQM):OVFL.B$(IB)  NPP MS")
+	field(INPF,"$(S):STN:$(IQM):DRDY.B$(QB)  NPP MS")
+	field(INPG,"$(S):STN:$(IQM):OVFL.B$(QB)  NPP MS")
+	field(INPH,"$(S):STN:$(IQM):GET.SEVR  NPP NMS")
+	field(INPI,"$(S):$(C)$(Q):C:SCALE.VAL  NPP NMS")
+	field(EGU,"Volts")
+	field(PREC,"6")
+	field(BRSV,"INVALID")
+}
+grecord(sub,"$(S):$(C)$(Q):VOLT:ULIM") {
+	field(DESC,"$(C) $(D) Volt Limit")
+	field(FLNK,"$(S):$(C)$(Q):ULIM:SEQ.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQpower2ampl")
+	field(INPA,"$(S):$(C)$(Q):A:SCALE.VAL  NPP NMS")
+	field(INPB,"$(S):STN:STATE:RBCK.VAL  NPP NMS")
+	field(INPC,"$(S):$(C)$(QF):VOLT:ULIM.G  NPP NMS")
+	field(INPF,"$(PC)")
+	field(INPH,"$(T)")
+#	field(INPI,"90")
+	field(EGU,"V")
+	field(HOPR,"4.9")
+	field(PREC,"4")
+	field(BRSV,"INVALID")
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d15 1
+a15 1
+	field(INPC,"$(LCA)")
+d36 3
+a38 3
+	field(INPA,"$(LCP)")
+	field(INPB,"$(LCB)")
+	field(INPC,"$(LCV)")
+d116 1
+a116 1
+	field(INPI,"90")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

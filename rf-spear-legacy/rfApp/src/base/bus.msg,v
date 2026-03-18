@@ -1,0 +1,162 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.1.1.1.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2011.12.07.00.41.46;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.46;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.46;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Move messages from Msgs.c files to .msg files.
+@
+text
+@/*
+** ++
+**
+**  Facility:  BUS - Bus Utilities and Services
+**
+**  Abstract:
+**      Messages for BUS.
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Longitudinal Feedback Project
+**
+**  Revision History:
+**      September 28, 1993 - Created
+**      September 15, 1994 - Split text and #defines into two files
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef BUS_MSG
+#define BUS_MSG
+
+#include <sglLib.h>
+
+#ifdef BUS_MSG_GLOBAL
+const char
+Bus_BusErr[] = "Bus error occurred during transfer",
+Bus_InvWin[] = "Invalid window",
+Bus_InvPrm[] = "Invalid space, access privilege or byte order parameter",
+Bus_InvAdx[] = "Invalid address",
+Bus_InvWid[] = "Invalid width",
+Bus_BytOrd[] = "Byte order not supported",
+Bus_AdxAcc[] = "Address not accessible with this hardware",
+Bus_PrvSup[] = "Privilege not supported",
+Bus_TimOut[] = "Timeout",
+Bus_UnrRet[] = "Unrecognized return code",
+Bus_AccRel[] = "Access Only released",
+Bus_Parms [] = "space = %s, size = %d, addr = %08x",
+Bus_NotImp[] = "Block transfers ain't implemented yet",
+Bus_NoMem [] = "No memory available for BUS handle";
+#else
+extern const char *Bus_BusErr;
+extern const char *Bus_InvWin;
+extern const char *Bus_InvPrm;
+extern const char *Bus_InvAdx;
+extern const char *Bus_InvWid;
+extern const char *Bus_BytOrd;
+extern const char *Bus_AdxAcc;
+extern const char *Bus_PrvSup;
+extern const char *Bus_TimOut;
+extern const char *Bus_UnrRet;
+extern const char *Bus_AccRel;
+extern const char *Bus_Parms;
+extern const char *Bus_NotImp;
+extern const char *Bus_NoMem;
+#endif
+
+#define BUS_BUSERR	(Status) &Bus_BusErr
+#define BUS_INVWIN	(Status) &Bus_InvWin
+#define BUS_INVPRM	(Status) &Bus_InvPrm
+#define BUS_INVADX	(Status) &Bus_InvAdx
+#define BUS_INVWID	(Status) &Bus_InvWid
+#define BUS_BYTORD	(Status) &Bus_BytOrd
+#define BUS_ADXACC	(Status) &Bus_AdxAcc
+#define BUS_PRVSUP	(Status) &Bus_PrvSup
+#define BUS_TIMOUT	(Status) &Bus_TimOut
+#define BUS_UNRRET	(Status) &Bus_UnrRet
+#define BUS_ACCREL	(Status) &Bus_AccRel
+#define BUS_PARMS	(Status) &Bus_Parms
+#define BUS_NOTIMP	(Status) &Bus_NotImp
+#define BUS_NOMEM	(Status) &Bus_NoMem
+
+#endif
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d49 17
+d80 1
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

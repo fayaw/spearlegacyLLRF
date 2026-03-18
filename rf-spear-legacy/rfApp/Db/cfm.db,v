@@ -1,0 +1,213 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.3.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.3
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.3
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.3
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2004.04.09.23.57.12;	author lazmo;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.09.10.23.52.43;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@[lazmo 2004-04-09] Modified PVs to support Comb Module overflow
+    indication on PEPII EPICS displays
+@
+text
+@grecord(ai,"$(R):STN:CFM$(M):INPDATA") {
+	field(DTYP,"Raw Soft Channel")
+	field(FLNK,"$(R):STN:CFM$(M):INTSTATE.PROC  PP MS")
+	field(INP,"$(R):STN:CFM$(M):MODU.IPRO  NPP MS")
+	field(PREC,"4")
+	field(LINR,"LINEAR")
+	field(HOPR,"1")
+	field(LOPR,"-1")
+	field(ASLO,"4.884005e-04")
+}
+grecord(bi,"$(R):STN:CFM$(M)OVFL:STAT") {
+	field(DESC,"CFM$(M) Overflow Status")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(R):STNCFM$(M):SUMY:MODU  PP MS")
+	field(INP,"$(R):STN:CFM$(M):INTSTATE.B8  NPP MS")
+	field(OSV,"MINOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(bo,"$(R):STN:CFM$(M):EQBNKSEL") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:CFM$(M):MODU.EBS  PP NMS")
+	field(ZNAM,"Bank 0")
+	field(ONAM,"Bank 1")
+	field(OSV,"MAJOR")
+}
+grecord(bo,"$(R):STN:CFM$(M):RIST") {
+	field(DESC,"Read Int Status Reg")
+	field(SCAN,"10 second")
+	field(DTYP,"Soft Channel")
+	field(DOL,"1")
+	field(OUT,"$(R):STN:CFM$(M):MODU.RIST  PP MS")
+	field(ZNAM,"NoRead")
+	field(ONAM,"Read")
+}
+grecord(calc,"$(R):STNCFM$(M):SUMY:MODU") {
+	field(DESC,"CFM$(M) Status Summary")
+	field(CALC,"0")
+	field(INPA,"$(R):STN:CFM$(M):MODU.SEVR  NPP MS")
+	field(INPB,"$(R):STN:CFM$(M)OVFL:STAT.SEVR  NPP MS")
+}
+grecord(mbbiDirect,"$(R):STN:CFM$(M):INTSTATE") {
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(R):STN:CFM$(M)OVFL:STAT  PP MS")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:CFM$(M):MODU.ISTT  NPP MS")
+}
+grecord(mbbo,"$(R):STN:CFM$(M):CMBSETSEL") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"2")
+	field(OUT,"$(R):STN:CFM$(M):MODU.CSS  PP NMS")
+	field(ZRVL,"0x0")
+	field(ONVL,"0x1")
+	field(TWVL,"0x2")
+	field(THVL,"0x3")
+	field(ZRST,"0")
+	field(ONST,"1")
+	field(TWST,"2")
+	field(THST,"THRU")
+}
+grecord(mbbo,"$(R):STN:CFM$(M):DATAALIGN") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"3")
+	field(OUT,"$(R):STN:CFM$(M):MODU.DA  PP NMS")
+	field(ZRVL,"0x0")
+	field(ONVL,"0x1")
+	field(TWVL,"0x2")
+	field(THVL,"0x3")
+	field(FRVL,"0x4")
+	field(FVVL,"0x5")
+	field(SXVL,"0x6")
+	field(SVVL,"0x7")
+	field(ZRST,"0")
+	field(ONST,"1")
+	field(TWST,"2")
+	field(THST,"3")
+	field(FRST,"4")
+	field(FVST,"5")
+	field(SXST,"6")
+	field(SVST,"7")
+	field(ONSV,"MAJOR")
+	field(TWSV,"MAJOR")
+	field(THSV,"MAJOR")
+	field(FRSV,"MAJOR")
+	field(FVSV,"MAJOR")
+	field(SXSV,"MAJOR")
+	field(SVSV,"MAJOR")
+}
+grecord(mbbo,"$(R):STN:CFM$(M):STATE") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"2")
+	field(OUT,"$(R):STN:CFM$(M):MODU.MODE  PP NMS")
+	field(ZRVL,"0x0")
+	field(ONVL,"0x2")
+	field(TWVL,"0x1")
+	field(ZRST,"Load")
+	field(ONST,"Run")
+	field(TWST,"Test")
+}
+grecord(mbboDirect,"$(R):STN:CFM$(M):INTACK") {
+	field(DTYP,"Soft Channel")
+	field(NOBT,"16")
+	field(OUT,"$(R):STN:CFM$(M):MODU.IACK  PP NMS")
+}
+grecord(p2RfCfm,"$(R):STN:CFM$(M):MODU") {
+	field(DTYP,"PEP-II RF CFM")
+	field(FLNK,"$(R):STN:CFM$(M):INPDATA.PROC  PP MS")
+	field(OUT,"#V0 C$(S) S0 @@")
+	field(PREC,"2")
+	field(MTL,"7")
+	field(ITL,"5")
+	field(E0CF,"/tbl/cfmEqCoefs0.tbl")
+	field(E1CF,"/tbl/cfmEqCoefs1.tbl")
+	field(IMCF,"/tbl/cfmIirCoefs.tbl")
+	field(F0FO,"483.968")
+	field(HFIL,"/dat/cfmHistory.dat")
+}
+@
+
+
+1.2
+log
+@Add pv XXX:STN:CFMX:RIST
+@
+text
+@d11 17
+d37 5
+a41 7
+grecord(bo,"$(R):STN:CFM$(M):EQBNKSEL") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:CFM$(M):MODU.EBS  PP NMS")
+	field(ZNAM,"Bank 0")
+	field(ONAM,"Bank 1")
+	field(OSV,"MAJOR")
+d45 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d11 9
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

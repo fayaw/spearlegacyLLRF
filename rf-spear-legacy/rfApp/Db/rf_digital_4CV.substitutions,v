@@ -1,0 +1,209 @@
+head	1.4;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.4
+	RF-SPEAR-R0-3-1:1.4
+	RF-SPEAR-R0-3-0:1.4
+	RF-SPEAR-R0-2-0:1.4
+	RF-SPEAR-R0-1-0:1.4
+	RF-SPEAR-R0-0-3:1.4
+	RF-SPEAR-R0-0-2:1.4
+	RF-SPEAR-R0-0-1:1.4
+	RF-SPEAR-R0-0-0:1.4
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.4
+	RF-3-13-10:1.4.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.4
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.4
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.3;
+locks; strict;
+comment	@# @;
+
+
+1.4
+date	2009.12.12.00.13.41;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.01.22.00.30.13;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2004.01.05.19.45.02;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.01.17.04;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@#==============================================================
+#
+# Abs:  Database template for 4-cavity station RF VXI Digitial Inputs
+#
+# Name:  rf_digital_4CV.substitutions
+#
+# Desc:  EPICS database template file for RF VXI
+#        Module Digital Inputs for a 4-cavity station.
+#
+# Side:  None
+#
+# Facility: SLAC/PEPII Low-Level RF
+#
+# Auth: dd-mmm-yyyy, Stephanie Allison (SAA)
+# Rev:  dd-mmm-yyyy, First Lastname  (USERNAME)
+#==============================================================
+#
+# Mod:
+#       06-Feb-2002, K. Luchini (LUCHINI):
+#         Added standard header and obtained
+#         db files from the top level db directory
+#         instead of epicsApp/Db
+#
+#==============================================================
+#
+file rf_interlock.db
+{
+#	                                                                     LTCH FRST DIG
+#	   STN     COMP      Quantity    Group    Next    Description           WORD WORD BIT   
+  pattern { S     , C      ,   Q       , G      , N  ,      D                  , WL , WF , B }
+	  {$(RRRS),STNHCW2 ,:FLOW      ,FLOW    ,FANO,"Flow Return"            , 15 , 30 , 7 }
+
+	  {$(RRRS),CAV3    ,WATR:FLOW  ,""      ,SUMY,"Raft Water Flow"        , 18 , 33 , 0 }
+	  {$(RRRS),CAV3    ,:VACMSTAT  ,""      ,VACM,"Vacuum Status"          , 18 , 33 , 1 }
+	  {$(RRRS),CAV3    ,:VACMTIMED ,""      ,VACM,"Timed Vacuum Status"    , 18 , 33 , 2 }
+	  {$(RRRS),CAV3    ,:VACMSPARE1,""      ,VACM,"Spare Vacuum Status"    , 18 , 33 , 3 }
+	  {$(RRRS),CAV3    ,:VACMSPARE2,""      ,VACM,"Spare Vacuum Status"    , 18 , 33 , 4 }
+	  {$(RRRS),CAV3IONP,:CURRSTAT  ,""      ,CURR,"Current Status"         , 18 , 33 , 5 }
+
+	  {$(RRRS),CAV4    ,WATR:FLOW  ,""      ,SUMY,"Raft Water Flow"        , 18 , 33 , 8 }
+	  {$(RRRS),CAV4    ,:VACMSTAT  ,""      ,VACM,"Vacuum Status"          , 18 , 33 , 9 }
+	  {$(RRRS),CAV4    ,:VACMTIMED ,""      ,VACM,"Timed Vacuum Status"    , 18 , 33 , 10}
+	  {$(RRRS),CAV4    ,:VACMSPARE1,""      ,VACM,"Spare Vacuum Status"    , 18 , 33 , 11}
+	  {$(RRRS),CAV4    ,:VACMSPARE2,""      ,VACM,"Spare Vacuum Status"    , 18 , 33 , 12}
+	  {$(RRRS),CAV4IONP,:CURRSTAT  ,""      ,CURR,"Current Status"         , 18 , 33 , 13}
+
+}
+file rf_sumy_plc.db
+{
+#	                                                                          DIG  DIG
+#	   STN     COMP      Quantity    Group    Next                               WORD BIT   
+  pattern { S     , C      ,   Q       , G      , N  ,                                W  , B }
+	  {$(RRRS),CAV3    ,""         ,""      ,LTCH,                                36 , 2 }
+	  {$(RRRS),CAV4    ,""         ,""      ,LTCH,                                36 , 3 }
+	  {$(RRRS),WG02    ,""         ,""      ,LTCH,                                36 , 8 }
+	  {$(RRRS),WG03    ,""         ,""      ,LTCH,                                36 , 9 }
+
+}
+@
+
+
+1.3
+log
+@Remove power/amplitude interlocks.  These are part of rf_iqa.
+@
+text
+@d5 1
+a5 1
+# Name:  RRRS_digital_4CV.template
+d26 1
+a26 1
+file db/rf_interlock.db
+d29 3
+a31 3
+#	   STN  COMP      Quantity    Group    Next    Description           WORD WORD BIT   
+  pattern { S  , C      ,   Q       , G      , N  ,      D                  , WL , WF , B }
+	  {RRRS,STNHCW2 ,:FLOW      ,FLOW    ,FANO,"Flow Return"            , 15 , 30 , 7 }
+d33 6
+a38 6
+	  {RRRS,CAV3    ,WATR:FLOW  ,""      ,SUMY,"Raft Water Flow"        , 18 , 33 , 0 }
+	  {RRRS,CAV3    ,:VACMSTAT  ,""      ,VACM,"Vacuum Status"          , 18 , 33 , 1 }
+	  {RRRS,CAV3    ,:VACMTIMED ,""      ,VACM,"Timed Vacuum Status"    , 18 , 33 , 2 }
+	  {RRRS,CAV3    ,:VACMSPARE1,""      ,VACM,"Spare Vacuum Status"    , 18 , 33 , 3 }
+	  {RRRS,CAV3    ,:VACMSPARE2,""      ,VACM,"Spare Vacuum Status"    , 18 , 33 , 4 }
+	  {RRRS,CAV3IONP,:CURRSTAT  ,""      ,CURR,"Current Status"         , 18 , 33 , 5 }
+d40 6
+a45 6
+	  {RRRS,CAV4    ,WATR:FLOW  ,""      ,SUMY,"Raft Water Flow"        , 18 , 33 , 8 }
+	  {RRRS,CAV4    ,:VACMSTAT  ,""      ,VACM,"Vacuum Status"          , 18 , 33 , 9 }
+	  {RRRS,CAV4    ,:VACMTIMED ,""      ,VACM,"Timed Vacuum Status"    , 18 , 33 , 10}
+	  {RRRS,CAV4    ,:VACMSPARE1,""      ,VACM,"Spare Vacuum Status"    , 18 , 33 , 11}
+	  {RRRS,CAV4    ,:VACMSPARE2,""      ,VACM,"Spare Vacuum Status"    , 18 , 33 , 12}
+	  {RRRS,CAV4IONP,:CURRSTAT  ,""      ,CURR,"Current Status"         , 18 , 33 , 13}
+d48 1
+a48 1
+file db/rf_sumy_plc.db
+d51 6
+a56 6
+#	   STN  COMP      Quantity    Group    Next                               WORD BIT   
+  pattern { S  , C      ,   Q       , G      , N  ,                                W  , B }
+	  {RRRS,CAV3    ,""         ,""      ,LTCH,                                36 , 2 }
+	  {RRRS,CAV4    ,""         ,""      ,LTCH,                                36 , 3 }
+	  {RRRS,WG02    ,""         ,""      ,LTCH,                                36 , 8 }
+	  {RRRS,WG03    ,""         ,""      ,LTCH,                                36 , 9 }
+@
+
+
+1.2
+log
+@SPEAR uses all arc interlock channels available on the new arc interlock
+module (vacuum and air side for all 4 cavities).  SPEAR uses the arc channel
+reserved for MPS.  All arc interlock records moved out of rf_digital*.template
+and into rf_stn*.template (where 4CVAll uses all channels).  Arc summaries are
+moved out of rf_sumy_(2CV,4CV).db into rf_sumy_arc_(2CV,4CV,4CVAll).db.
+@
+text
+@a58 19
+file db/rf_interlock_vxi.db
+{
+#                                                                                     LTCH    LTCH      LTCH     LTCH
+#	                                                          LTCH FRST LTCH FRST Zero    One       Zero     One
+#	   STN  COMP Quantity Group Next    Description           MBBI MBBI BIT  BIT  SEVR    SEVR      Name     Name
+  pattern { S  , C  ,   Q    , G ,   N   ,      D              ,   WL ,  WF  ,BL,BF,   LZS  ,  LOS   ,  LZN   ,  LON   }
+	  {RRRS,WG02,LDFRWD:POWER  ,LDREFL   ,POWER,"Load  Frwd Power Fault",IQA2,IQA2,E,E,NO_ALARM,MAJOR,OK,FAULT}
+	  {RRRS,WG02,LDREFL:POWER  ,IQA      ,SUMY ,"Load  Refl Power Fault",IQA2,IQA2,F,F,NO_ALARM,MAJOR,OK,FAULT}
+
+	  {RRRS,CAV3,FRWD:POWER    ,REFL     ,POWER,"Forward    Power Fault",IQA3,IQA3,8,8,NO_ALARM,MAJOR,OK,FAULT}
+	  {RRRS,CAV3,REFL:POWER    ,PROBE    ,AMPL ,"Reflected  Power Fault",IQA3,IQA3,9,9,NO_ALARM,MAJOR,OK,FAULT}
+	  {RRRS,CAV4,FRWD:POWER    ,REFL     ,POWER,"Forward    Power Fault",IQA3,IQA3,A,A,NO_ALARM,MAJOR,OK,FAULT}
+	  {RRRS,CAV4,REFL:POWER    ,PROBE    ,AMPL ,"Reflected  Power Fault",IQA3,IQA3,B,B,NO_ALARM,MAJOR,OK,FAULT}
+	  {RRRS,CAV3,PROBE:AMPL    ,IQA      ,SUMY ,"Gap Voltage Fault"     ,IQA3,IQA3,C,C,NO_ALARM,MAJOR,OK,FAULT}
+	  {RRRS,CAV4,PROBE:AMPL    ,IQA      ,SUMY ,"Gap Voltage Fault"     ,IQA3,IQA3,D,D,NO_ALARM,MAJOR,OK,FAULT}
+	  {RRRS,WG03,LDFRWD:POWER  ,LDREFL   ,POWER,"Load  Frwd Power Fault",IQA3,IQA3,E,E,NO_ALARM,MAJOR,OK,FAULT}
+	  {RRRS,WG03,LDREFL:POWER  ,IQA      ,SUMY ,"Load  Refl Power Fault",IQA3,IQA3,F,F,NO_ALARM,MAJOR,OK,FAULT}
+
+}
+@
+
+
+1.1
+log
+@Rename
+@
+text
+@a58 10
+file db/rf_interlock_arc.db
+{
+#	   STN  COMP Quantity Description   BIT  Next
+  pattern { S  , C  ,   Q    ,   D          , B , N  }
+	  {RRRS,CAV1,"_2"    ,"Arc 2"       , 2 ,ARC }
+	  {RRRS,CAV1,"_1"    ,"Arc 1"       , 3 ,ARC }
+	  {RRRS,CAV2,""      ,"Arc"         , 4 ,SUMY}
+	  {RRRS,CAV3,""      ,"Arc"         , 5 ,SUMY}
+	  {RRRS,CAV4,""      ,"Arc"         , 6 ,SUMY}
+}
+@
+

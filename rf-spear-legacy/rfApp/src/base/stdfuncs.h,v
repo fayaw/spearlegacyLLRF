@@ -1,0 +1,139 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.04.08.23.17.46;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.46;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP - C include file
+**
+**  Abstract:
+**      This file contains prototypes for the standard C library functions
+**	which are missing from include files on some machines, e.g.  SunOS.
+**
+**  Author:
+**      Dmitry Teytelman
+**
+**  History:
+**      1995-02-13: Created
+**
+** --
+*/
+
+#ifndef STDFUNCS_H
+#define STDFUNCS_H
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+#if !defined(VXWORKS) && !defined(vxWorks)
+#  include <sys/time.h>
+
+#ifndef SOLARIS
+/* 
+   Here are things that are missing on sun4, but
+   present in Solaris
+*/
+
+
+int rewind(FILE *fp);
+int fread (void *ptr, int size, int nitems, FILE *stream);
+int gettimeofday(struct timeval * __tp, struct timezone * __tz);
+int strftime(char *buf, int bufsize, char *fmt, struct tm *tm);
+void bzero(void *__s, int __n);
+void bcopy (const void *src, void *dest, int n);
+int sendto(int __sockfd, __const void *__buff, int __len,
+	   unsigned int __flags, __const struct sockaddr *__to,
+	   int __tolen);
+int recvfrom(int __sockfd, void *__buff, int __len,
+	     unsigned int __flags, struct sockaddr *__from,
+	     int *__fromlen);
+#endif
+
+size_t fwrite (__const void*, size_t, size_t, FILE*);
+int fseek(FILE *fp, long offset, int whence);
+int select(int __width, fd_set * __readfds,
+	   fd_set * __writefds, fd_set * __exceptfds,
+	   struct timeval * __timeout);
+int cfree(char *ptr);
+
+#endif /* VXWORKS */
+
+/* Stuff that should be in stdio.h */
+int fprintf(FILE*, __const char* __format, ...);
+int printf(__const char* __format, ...);
+int sscanf(__const char* __string, __const char* __format, ...);
+int fputs(__const char *str, FILE *fp);
+int fputc(int c, FILE* fp);
+int fclose(FILE *fp);
+int _flsbuf(unsigned char x, FILE *p);
+int fflush(FILE *stream);
+
+void perror(const char *s);
+int socket(int domain, int type, int protocol);
+int connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
+
+#ifndef SOLARIS
+
+/* Normally in sys/types.h */
+typedef unsigned long int ulong;
+#endif
+
+void *memset(void *s, int __c, size_t __n);
+long int strtol(const char *nptr, char **endptr, int base);
+int rename(const char *oldpath, const char *newpath);
+int getopt(int argc, char * const argv[], const char *optstring);
+time_t time(time_t *tloc);
+
+#endif
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

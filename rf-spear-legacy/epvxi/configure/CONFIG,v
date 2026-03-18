@@ -1,0 +1,81 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	EPVXI-2:1.1.1.1
+	EPVXI-1:1.1.1.1
+	EPVXI:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2008.09.30.16.50.09;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2005.02.15.14.25.46;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2005.02.15.14.25.46;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Build against SPEAR epics instead of package.  Build for ppc604 only.
+@
+text
+@#CONFIG
+include $(TOP)/configure/CONFIG_APP
+# Add any changes to make definitions here
+
+CROSS_COMPILER_TARGET_ARCHS = vxWorks-ppc604_long
+
+# Use this when your IOC and the host use different paths
+# to access the application. Typically this will be 
+# used with the Microsoft FTP server or with NFS mounts. Use
+# is indicated by failure of the cdCommands script on
+# vxWorks. You must rebuild in the iocBoot directory 
+# before this takes effect.
+#IOCS_APPL_TOP = <the top of the application as seen by the IOC>
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d5 1
+a5 1
+#CROSS_COMPILER_TARGET_ARCHS = vxWorks-68040
+@
+
+
+1.1.1.1
+log
+@epvxi from Marty Kraimer via tech-talk on Feb 15, 2005.
+@
+text
+@@

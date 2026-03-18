@@ -1,0 +1,91 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+***************************************************************************/
+
+/***************************************************************************
+  portable.c
+
+  This file contains routines to make resman portable across the multiple
+  SBC's used in the V151.
+***************************************************************************/
+#include <stdio.h>
+#include <vxWorks.h>
+#include "resman.h"
+
+#define X32(x)          ((((UINT32)(x) << 24) & 0xff000000) | \
+                         (((UINT32)(x) <<  8) & 0x00ff0000) | \
+                         (((UINT32)(x) >>  8) & 0x0000ff00) | \
+                         (((UINT32)(x) >> 24) & 0x000000ff))
+
+UINT32 rmUnivRegRd ( UINT16 offset )
+{
+    UINT32 value = 0xffffffff;
+
+    value = *( (UINT32*) (RM_UNIV_BASE + offset) );
+
+    value = X32(value);
+
+    return value;
+}
+
+void rmUnivRegWr ( UINT16 offset, UINT32 value )
+{
+    value = X32(value);
+
+    *( (UINT32*) (RM_UNIV_BASE + offset) ) = value;
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

@@ -1,0 +1,85 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	allenBradley-R2-2-spear0:1.1.1.1
+	allenBradley-R2-2:1.1.1.1
+	allenBradley:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.03.19.13.46.18;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.03.19.13.46.18;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* devIao1.h */
+
+/*
+ *      Author:  Marty Kraimer
+ *      Date:   July 2,1997
+*/
+/*************************************************************************
+* Copyright (c) 2003 The University of Chicago, as Operator of Argonne
+* National Laboratory, the Regents of the University of California, as
+* Operator of Los Alamos National Laboratory, and Leland Stanford Junior
+* University, as the Operator of Stanford Linear Accelerator.
+* This code is distributed subject to a Software License Agreement found
+* in file LICENSE that is included with this distribution.
+*************************************************************************/
+/* devIao1: synchronous interface to an analog output device record*/
+#ifndef boolean
+#define boolean char
+#endif
+
+/*Standard returns. Others are also possible*/
+#define devIao1OK             0
+#define devIao1HardwareFault  1
+
+/*Interface definition*/
+typedef struct devIao1{
+    int (*connect) (void **pdevIao1Pvt,DBLINK *plink, boolean *isEng);
+    char *(*get_status_message) (void *pdevIao1Pvt,int status);
+    int (*get_linconv) (void *devIao1Pvt,long *range,long *roff);
+    int (*get_raw) (void *devIao1Pvt,long *praw);
+    int (*get_eng) (void *devIao1Pvt,double *peng);
+    int (*put_raw) (void *devIao1Pvt,long raw);
+    int (*put_eng) (void *devIao1Pvt,double eng);
+} devIao1;
+@
+
+
+1.1.1.1
+log
+@Allenbradley software, version 2.2 from APS:
+http://www.aps.anl.gov/epics/modules/bus/allenBradley/
+@
+text
+@@

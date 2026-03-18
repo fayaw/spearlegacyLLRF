@@ -1,0 +1,208 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.1.1.1.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2011.12.07.00.41.46;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.46;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.46;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Move messages from Msgs.c files to .msg files.
+@
+text
+@/*
+** ++
+**
+**  Facility:  DWN - Down Loader
+**
+**  Abstract:
+**      Messages for DWN.
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Longitudinal Feedback Project
+**
+**  Revision History:
+**  September 30, 1993 - Created
+**  September 15, 1994 - Split text and #defines into two files
+**  February  24, 1995 - Added messages for DLT after upgrade to read Vbb files
+**     August 17, 1995 - Removed function reporting and newline.
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef DWN_MSG
+#define DWN_MSG
+
+#include <sglLib.h>
+
+#ifdef DWN_MSG_GLOBAL
+const char
+Dwn_NotDsp   [] = "VSB slot %u does not contain a DSP board",
+Dwn_IllChn   [] = "Illegal DSP channel: %d",
+Dwn_UnaFil   [] = "Unable to open file %s",
+Dwn_NoSub    [] = "Missing subject",
+Dwn_VerErr   [] = "Verify error @@ %08x: w=%0x r=%0x w^r=%0x",
+Dwn_NoFil    [] = "Missing filename",
+Dwn_NoVal    [] = "Missing value",
+Dwn_BadTyp   [] = "Bad data type",
+Dwn_BadNmr   [] = "Bad number: %s",
+Dwn_BadRad   [] = "Bad radix: %i",
+Dwn_BadSpc   [] = "Bad address space: A%i",
+Dwn_BadSiz   [] = "Bad word size: %i",
+Dwn_BadMag   [] = "Bad magic number 0%o",
+Dwn_RelFil   [] = "File contains relocation information",
+Dwn_NotExe   [] = "File is not an executeable",
+Dwn_MinFil   [] = "File is a minimal object file (bad)",
+Dwn_UpdFil   [] = "File is an update file (bad)",
+Dwn_UnsSwp   [] = "File contains an unsupported byte order",
+Dwn_SwpNot   [] = "File seems byte swapped but claims not",
+Dwn_NotSwp   [] = "File claims bytes swapped but seems not",
+Dwn_UnxVad   [] = "Unexpected virtual address pointer",
+Dwn_BadFlg   [] = "Unsupported section flags",
+Dwn_RdErr    [] = "Error occured during file read",
+Dwn_RstErr   [] = "DSP reset error on slot %d, channel %d",
+Dwn_NoBuf    [] = "No buffer of size %d available for section %s data",
+Dwn_NotRst   [] = "Mask of DSP channels that won't reset: %01x",
+Dwn_SynErr   [] = "Syntax error in table file %s, line %i";
+#else
+extern const char *Dwn_NotDsp;
+extern const char *Dwn_IllChn;
+extern const char *Dwn_UnaFil;
+extern const char *Dwn_NoSub;
+extern const char *Dwn_VerErr;
+extern const char *Dwn_NoFil;
+extern const char *Dwn_NoVal;
+extern const char *Dwn_BadTyp;
+extern const char *Dwn_BadNmr;
+extern const char *Dwn_BadRad;
+extern const char *Dwn_BadSpc;
+extern const char *Dwn_BadSiz;
+extern const char *Dwn_BadMag;
+extern const char *Dwn_RelFil;
+extern const char *Dwn_NotExe;
+extern const char *Dwn_MinFil;
+extern const char *Dwn_UpdFil;
+extern const char *Dwn_UnsSwp;
+extern const char *Dwn_SwpNot;
+extern const char *Dwn_NotSwp;
+extern const char *Dwn_UnxVad;
+extern const char *Dwn_BadFlg;
+extern const char *Dwn_RdErr;
+extern const char *Dwn_RstErr;
+extern const char *Dwn_NoBuf;
+extern const char *Dwn_NotRst;
+extern const char *Dwn_SynErr;
+#endif
+
+#define DWN_NOTDSP	(Status) &Dwn_NotDsp   
+#define DWN_ILLCHN	(Status) &Dwn_IllChn   
+#define DWN_UNAFIL	(Status) &Dwn_UnaFil   
+#define DWN_NOSUB	(Status) &Dwn_NoSub    
+#define DWN_VERERR	(Status) &Dwn_VerErr   
+#define DWN_NOFIL	(Status) &Dwn_NoFil    
+#define DWN_NOVAL	(Status) &Dwn_NoVal    
+#define DWN_BADTYP	(Status) &Dwn_BadTyp   
+#define DWN_BADNMR	(Status) &Dwn_BadNmr   
+#define DWN_BADRAD	(Status) &Dwn_BadRad   
+#define DWN_BADSPC	(Status) &Dwn_BadSpc   
+#define DWN_BADSIZ	(Status) &Dwn_BadSiz   
+#define DWN_BADMAG	(Status) &Dwn_BadMag   
+#define DWN_RELFIL	(Status) &Dwn_RelFil   
+#define DWN_NOTEXE	(Status) &Dwn_NotExe   
+#define DWN_MINFIL	(Status) &Dwn_MinFil   
+#define DWN_UPDFIL	(Status) &Dwn_UpdFil   
+#define DWN_UNSSWP	(Status) &Dwn_UnsSwp   
+#define DWN_SWPNOT	(Status) &Dwn_SwpNot   
+#define DWN_NOTSWP	(Status) &Dwn_NotSwp   
+#define DWN_UNXVAD	(Status) &Dwn_UnxVad   
+#define DWN_BADFLG	(Status) &Dwn_BadFlg   
+#define DWN_RDERR	(Status) &Dwn_RdErr    
+#define DWN_RSTERR	(Status) &Dwn_RstErr   
+#define DWN_NOBUF	(Status) &Dwn_NoBuf    
+#define DWN_NOTRST	(Status) &Dwn_NotRst   
+#define DWN_SYNERR	(Status) &Dwn_SynErr   
+
+#endif
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d49 1
+a49 3
+#ifndef SGL_MSG
+#  include <sglLib.h>
+#endif
+d51 30
+d108 1
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

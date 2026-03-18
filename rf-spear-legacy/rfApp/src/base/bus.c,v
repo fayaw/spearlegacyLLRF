@@ -1,0 +1,960 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.2.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.3
+date	2011.12.07.00.53.40;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.05.14.23.58.12;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Changes to get rid of *Msgs.c files.  Also changes for 3.14.11 for bus.c.
+@
+text
+@/*
+** ++
+**
+**  Facility:  BUS - Bus Utilities and Services
+**
+**  Abstract:
+**      This file contains functions for probing the bus address space of
+**      VME modules.
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Longitudinal Feedback Project
+**
+**  History:
+**      February  16, 2000 - Cast 4th arg of vxMemProbe
+**	September 16, 1993 - Created
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#ifdef VXWORKS
+#  include <vxWorks.h>
+#  include <vxLib.h>
+#  include <stdlib.h>
+#  include <a_out.h>
+#  include <sysSymTbl.h>
+#  include <symLib.h>
+
+#  include "modTypes.h"
+
+#  if TARGET == NICPU030
+#    include <nivxi.h>
+#  elif TARGET == FRC40
+#    include "frc40Lib.h"
+#    include "e02Lib.h"
+#  elif TARGET == HKV4F
+#    include "hkv4fLib.h"
+#  elif TARGET == MV166
+#    include "mv166Lib.h"
+#  endif
+#else
+#  include "vxWorks-unix.h"
+#  include "modTypes.h"
+#endif
+
+#include "stdlib.h"     /* for malloc,free */
+#include "mibDef.h"
+#include "sglLib.h"
+#include "busLib.h"
+#define BUS_MSG_GLOBAL
+#include "bus.msg"
+#include "genLib.h"
+
+
+#define VXITMO         0
+
+   static Status     PeekB (unsigned int, unsigned char  *, unsigned char  *);
+   static Status     PeekS (unsigned int, unsigned short *, unsigned short *);
+   static Status     PeekL (unsigned int, unsigned long  *, unsigned long  *);
+   static Status     PokeB (unsigned int, unsigned char  *, unsigned char  *);
+   static Status     PokeS (unsigned int, unsigned short *, unsigned short *);
+   static Status     PokeL (unsigned int, unsigned long  *, unsigned long  *);
+
+
+Status BUS_Peek (unsigned int   space,
+                 unsigned int   size,
+                 unsigned long  adx,
+                 void          *val)
+/*
+   Description
+   -----------
+   Do a protected read of an address in a module independent way.
+   This routine should not be used in speed critical situations.
+
+   Parameter
+   ---------
+       space - Space to touch as defined by the SPC_K_* parameters
+        size - Size of operation to do; 1, 2 or 4 byte transfer
+         adx - Address to touch
+         val - Address of location in which to return datum
+
+   Returns
+   -------
+   SUCCESS if successful, otherwise some screwy status.
+*/
+{
+#if TARGET != SOLARIS_SPARC
+  Status          status;
+  unsigned long   mappedAdx;
+  unsigned long   window;
+
+  /* Map the address in the space to a physical address on the board */
+  if ((status = BUS_MapAddress (space, size, adx, &mappedAdx, &window)) != OK)
+    return (status);
+
+#if TARGET == FRC40
+  /* space has already been verified to be okay by MapAddress above */
+  switch (space)
+  {
+  case SPC_K_VSBSYS:
+    E02SetSpc (E02_K_CSR1SYS);
+    break;
+
+  case SPC_K_VSBALT:
+    E02SetSpc (E02_K_CSR1ALT);
+    break;
+
+  case SPC_K_VSBIO:
+    E02SetSpc (E02_K_CSR1IO);
+    break;
+  }
+#endif  /* TARGET == FRC40 */
+
+  /* Do a protected probe on the mapped address, trapping bus errors */
+  if (vxMemProbe ((char *) mappedAdx, READ, size, val))  status = BUS_BUSERR;
+
+  /* Unmap the address window */
+  BUS_UnMapAddress (window);
+
+  return (status);
+
+#else
+
+  return (vxMemProbe ((char *) adx, READ, size, val));
+
+#endif
+}
+
+
+
+Status BUS_Poke (unsigned int   space,
+                 unsigned int   size,
+                 unsigned long  adx,
+                 void          *val)
+/*
+   Description
+   -----------
+   Do a protected write on an address in a module independent way.
+   This routine should not be used in speed critical situations since it
+   checks its arguments and traps bus errors.
+
+   Parameter
+   ---------
+       space - Space to touch as defined by the SPC_K_* parameters
+        size - Size of operation to do; 1, 2 or 4 byte transfer
+         adx - Address to touch
+         val - Address of location containing datum to write
+
+   Returns
+   -------
+   SUCCESS if successful, otherwise some screwy status.
+*/
+{
+#if TARGET != SOLARIS_SPARC
+  Status          status;
+  unsigned long   mappedAdx;
+  unsigned long   window;
+
+  /* Map the address in the space to a physical address on the board */
+  if ((status = BUS_MapAddress (space, size, adx, &mappedAdx, &window)) != OK)
+    return (status);
+
+#if TARGET == FRC40
+  /* space has already been verified to be okay by MapAddress above */
+  switch (space)
+  {
+  case SPC_K_VSBSYS:
+    E02SetSpc (E02_K_CSR1SYS);
+    break;
+
+  case SPC_K_VSBALT:
+    E02SetSpc (E02_K_CSR1ALT);
+    break;
+
+  case SPC_K_VSBIO:
+    E02SetSpc (E02_K_CSR1IO);
+    break;
+  }
+#endif  /* TARGET == FRC40 */
+
+  if (vxMemProbe ((char *) mappedAdx, WRITE, size, val))  status = BUS_BUSERR;
+
+  /* Unmap the address window */
+  BUS_UnMapAddress (window);
+
+  return (status);
+
+
+#else
+
+  return (vxMemProbe ((char *) adx, WRITE, size, val));
+
+#endif
+}
+
+
+
+Status BUS_Rmw (unsigned int   space,
+                unsigned int   size,
+                unsigned long  adx,
+                void          *val)
+/*
+   Description
+   -----------
+   Do a Read-Modify-Write cycle at an address in a module independent way.
+   This routine should not be used in speed critical situations.
+
+   *** - Note that if compiled on for non 68k processors, this routine does
+         a read operation followed by write operation without holding the
+         bus in-between and thus is then not a true RMW.
+
+   Parameter
+   ---------
+       space - Space to touch as defined by the SPC_K_* parameters
+        size - Size of operation to do; 1, 2 or 4 byte transfer
+         adx - Address to touch
+         val - Address of location which initially contains datum to write
+               and upon return contains the datum read
+
+   Returns
+   -------
+   SUCCESS if successful, otherwise some screwy status.
+*/
+{
+#if TARGET != SOLARIS_SPARC
+  Status            status;
+  unsigned long     mappedAdx;
+  unsigned long     window;
+
+  union
+  {
+    unsigned char   b;
+    unsigned short  s;
+    unsigned long   l;
+  }                 tmp;
+
+  /* Map the address in the space to a physical address on the board */
+  if ((status = BUS_MapAddress (space, size, adx, &mappedAdx, &window)) != OK)
+    return (status);
+
+#if TARGET == FRC40
+  /* space has already been verified to be okay by MapAddress above */
+  switch (space)
+  {
+  case SPC_K_VSBSYS:
+    E02SetSpc (E02_K_CSR1SYS);
+    break;
+
+  case SPC_K_VSBALT:
+    E02SetSpc (E02_K_CSR1ALT);
+    break;
+
+  case SPC_K_VSBIO:
+    E02SetSpc (E02_K_CSR1IO);
+    break;
+  }
+#endif  /* TARGET == FRC40 */
+
+/*
+   In the following, val and tmp are not shared locations.  val may be anywhere
+   in the address space (and so should be checked for legality) and tmp is a
+   local variable.  adx can be a shared location.
+
+         move.x  (val),tmp   ; Save value to write in tmp union & trap bus error
+         move.x  (adx),(val) ; Read address to read & trap bus error
+         move.x  (val),d0    ; Load the compare register (v)
+         move.x  tmp,d1      ; Load the update  register (t)
+  loop:  cas.x   d0,d1,adx   ; RMW: if d0 == (adx), (adx) = d1 else d0 = (adx)
+         bne     loop        ; try again if compare failed
+         move.x  d0,(val)    ; return last read of adx
+*/
+
+  /* Get the value to write */
+  if (vxMemProbe ((char *) val,       READ, size, (void *) &tmp))
+    return (BUS_BUSERR);
+
+  /* Get the value for cas to compare to.  Also trap possible bus error. */
+  if (vxMemProbe ((char *) mappedAdx, READ, size,  val))
+    return (BUS_BUSERR);
+
+  /*
+  |  If another process doesn't modify *mappedAdx between the preceding read
+  |  and the cas, the jne instruction will never branch.  cas only updates
+  |  the desired location if what it finds at that location is the same as
+  |  what it compares to.  Thus one has to do a read first to get something
+  |  to compare to.  Either that or the compare value must be supplied as an
+  |  argument...
+  */
+#if TARGET == MV166 || TARGET == M68040 || TARGET == M68060 
+  switch (size)
+  {
+  case SIZ_K_BYTE:
+    {
+      register unsigned char   v = *(unsigned char  *) val;
+      register unsigned char   t =  tmp.b;
+      __asm__ ("lpb: casb %0,%2,%3@@\n\tjne lpb"
+           : "=d" (v)
+           : "0"  (v), "d" (t), "a" (mappedAdx));
+      *(unsigned char  *) val = v;
+    }
+    break;
+
+  case SIZ_K_SHORT:
+    {
+      register unsigned short  v = *(unsigned short *) val;
+      register unsigned short  t =  tmp.s;
+      __asm__ ("lps: casw %0,%2,%3@@\n\tjne lps"
+           : "=d" (v)
+           : "0"  (v), "d" (t), "a" (mappedAdx));
+      *(unsigned short *) val = v;
+    }
+    break;
+
+  case SIZ_K_LONG:
+    {
+      register unsigned long   v = *(unsigned long  *) val;
+      register unsigned long   t =  tmp.l;
+      __asm__ ("lpl: casl %0,%2,%3@@\n\tjne lpl"
+           : "=d" (v)
+           : "0" ( v), "d" (t), "a" (mappedAdx));
+      *(unsigned long  *) val = v;
+    }
+    break;
+  }
+#else   /* Not CPU_FAMILY == MC680X0 */
+  if (vxMemProbe ((char *) mappedAdx, WRITE, size, (char *)&tmp))  status = BUS_BUSERR;
+#endif   /* Not CPU_FAMILY == MC680X0 */
+
+  /* Unmap the address window */
+  BUS_UnMapAddress (window);
+
+  return (status);
+
+#else
+
+  Status        status;
+  unsigned long tmp = *((unsigned long *) val);
+
+  if ((status = vxMemProbe ((char *) adx, READ, size, val)) != SUCCESS)
+    return (status);
+  else
+    return (vxMemProbe ((char *) adx, WRITE, size, (char *) &tmp));
+
+#endif
+}
+
+
+
+Status BUS_MapAddress (unsigned int    space,
+                       unsigned int    size,
+                       unsigned long   address,
+                       unsigned long  *mappedAdx,
+                       unsigned long  *window)
+/*
+   Description
+   -----------
+   Convert an address in the space of interest to a physical address.
+
+   Parameter
+   ---------
+       space - The space the caller plans to touch
+        size - The word size of the transaction
+     address - The address to map into the processor's address map
+   mappedAdx - Place to return mapped address in
+      window - Hardware (?) window number for use with other functions (NI)
+
+   Returns
+   -------
+   status
+*/
+{
+  Status            status = SUCCESS;
+  unsigned long     raam;
+  unsigned long     addr;
+
+
+  /* Select a method based on the module type */
+#if TARGET == NICPU030
+
+  short    ret;
+
+  raam = NULL;
+  addr = address;
+
+  switch (space)
+  {
+  case SPC_K_LOCAL:
+    break;
+
+  case SPC_K_A16:
+  case SPC_K_A24:
+  case SPC_K_A32:
+    addr = (unsigned long) MapVXIAddress ((space >> 3) - 1, address, VXITMO,
+                                          (UINT32 *) &raam, &ret);
+    if (ret)
+    {
+      switch (ret)
+      {
+      case -2:  status = BUS_INVPRM;  break;
+      case -3:  status = BUS_INVADX;  break;
+      case -5:  status = BUS_BYTORD;  break;
+      case -6:  status = BUS_ADXACC;  break;
+      case -7:  status = BUS_PRVSUP;  break;
+      case -8:  status = BUS_TIMOUT;  break;
+      default:  return (SGL_Error (BUS_UNRRET, ret));  break;
+      }
+    }
+    break;
+
+  default:
+    status = SGL_Error (BUS_INVPRM);
+    break;
+  }
+
+#elif TARGET == FRC40
+
+  unsigned long   addrMax = NULL;
+
+  raam = NULL;
+  addr = address;
+
+  switch (space)
+  {
+  case SPC_K_LOCAL:
+    addr    += FRC40_A_LOCAL;
+    addrMax  = 0xffffffff;              /* sysMemTop () */
+    break;
+
+  case SPC_K_A32:
+    addr    += FRC40_A_A32;
+    addrMax  = FRC40_A_A32END;
+    break;
+
+  case SPC_K_A24:
+    addr    += FRC40_A_A24;
+    addrMax  = FRC40_A_A24END;
+    break;
+
+  case SPC_K_A16:
+    addr    += FRC40_A_A16;
+    addrMax  = FRC40_A_A16END;
+    break;
+
+  case SPC_K_VSBSYS:
+    addr    += FRC40_E002_VSB1_BASE_ADRS;
+    addrMax  = FRC40_E002_IOC_BASE_ADRS - 1;
+    break;
+
+  case SPC_K_VSBALT:
+    addr    += FRC40_E002_VSB1_BASE_ADRS;
+    addrMax  = FRC40_E002_IOC_BASE_ADRS - 1;
+    break;
+
+  case SPC_K_VSBIO:
+    addr    += FRC40_E002_VSB1_BASE_ADRS;
+    addrMax  = FRC40_E002_IOC_BASE_ADRS - 1;
+    break;
+
+  default:
+    status = SGL_Error (BUS_INVPRM);
+    break;
+  }
+  if (addr > addrMax)  status = BUS_INVADX;
+
+#elif TARGET == HKV4F
+
+  unsigned long   addrMax = NULL;
+
+  raam = NULL;
+  addr = address;
+
+  switch (space)
+  {
+  case SPC_K_LOCAL:
+    addr    += HKV4F_A_LOCAL;
+    addrMax  = 0xffffffff;              /* sysMemTop () */
+    break;
+
+  case SPC_K_A32:
+    addr    += HKV4F_A_A32;
+    addrMax  = HKV4F_A_A32END;
+    break;
+
+  case SPC_K_A24:
+    addr    += HKV4F_A_A24;
+    addrMax  = HKV4F_A_A24END;
+    break;
+
+  case SPC_K_A16:
+    addr    += HKV4F_A_A16;
+    addrMax  = HKV4F_A_A16END;
+    break;
+
+  case SPC_K_VSBSYS:
+    addr    += HKV4F_A_VSBSYS;
+    addrMax  = HKV4F_A_VSBSYSEND;
+    break;
+
+  default:
+    status = SGL_Error (BUS_INVPRM);
+    break;
+  }
+  if (addr > addrMax)  status = BUS_INVADX;
+
+#elif TARGET == MV166
+
+  unsigned long   addrMax = NULL;
+
+  raam = NULL;
+  addr = address;
+
+  switch (space)
+  {
+  case SPC_K_LOCAL:
+    addr    += MV166_A_LOCAL;
+    addrMax  = 0xffffffff;              /* sysMemTop () */
+    break;
+
+  case SPC_K_A32:
+    addr    += MV166_A_A32;
+    addrMax  = MV166_A_A32END;
+    break;
+
+  case SPC_K_A24:
+    addr    += MV166_A_A24;
+    addrMax  = MV166_A_A24END;
+    break;
+
+  case SPC_K_A16:
+    addr    += MV166_A_A16;
+    addrMax  = MV166_A_A16END;
+    break;
+
+  case SPC_K_VSBSYS:
+    addr    += MV166_A_VSBSYS;
+    addrMax  = MV166_A_VSBSYSEND;
+    break;
+
+  default:
+    status = SGL_Error (BUS_INVPRM);
+    break;
+  }
+  if (addr > addrMax)  status = BUS_INVADX;
+
+#else
+
+  raam = NULL;
+  addr = address;
+
+#endif  /* TARGET */
+
+  /* Only return something if we're successful */
+  if (status == OK)
+  {
+    *window    = raam;
+    *mappedAdx = addr;
+  }
+
+  return (status);
+}
+
+
+
+Status BUS_UnMapAddress (unsigned long  window)
+/*
+   Description
+   -----------
+   Unmap an address window allocated by BUS_MapAddress.  This routine does
+   something only on National Instruments CPU-030s, and I guess, wastes time
+   on everything else.
+
+   Parameter
+   ---------
+      window - Hardware (?) window number for use with other functions (NI)
+
+   Returns
+   -------
+   SUCCESS
+*/
+{
+  Status            status = SUCCESS;
+
+
+#if TARGET == NICPU030
+  if (window != NULL)
+  {
+    unsigned short ret;
+    if ((ret = UnMapVXIAddress (window)) != SUCCESS)
+    {
+      switch (ret)
+      {
+      case  1:  status = BUS_ACCREL;  break;
+      case -1:  status = BUS_INVWIN;  break;
+      default:  return (SGL_Error (BUS_UNRRET, ret));  break;
+      }
+    }
+  }
+#endif  /* TARGET == NICPU030 */
+
+  return (status);
+}
+
+
+
+BusHndl *BUS_Prepare (unsigned int    space,
+                      unsigned int    size,
+                      unsigned int    xfrMode)
+/*
+   Description
+   -----------
+   Set up the bus interface registers to perform bus transactions.
+   Note that when using this routine, only one task can have ownership
+   of the bus interface.  If this isn't the case, the bus interface may
+   be left in an unexpected state by another task with higher priority.
+   Bus interface ownership can't be controlled, so beware!
+
+   Parameter
+   ---------
+       space - The space the caller plans to touch
+        size - The word size of the transaction
+     xfrMode - Transfer mode, for future expansion.  Ignored for now.
+
+   Returns
+   -------
+   A handle storing the context or NIL if an error occured.
+*/
+{
+
+  BusHndl          *hndl;
+  Status            status;
+  unsigned long     offset;
+  unsigned long     window;
+  Status          (*read)  ();
+  Status          (*write) ();
+
+
+  /* Select a method based on the module type */
+  status = BUS_MapAddress (space, size, NULL, &offset, &window);
+  if ( status != SUCCESS )
+    return (BUS_Error (status, space, size, NULL), NIL);
+
+  switch (size)
+  {
+  case SIZ_K_BYTE:
+    read  = PeekB;
+    write = PokeB;
+    break;
+
+  case SIZ_K_SHORT:
+    read  = PeekS;
+    write = PokeS;
+    break;
+
+  case SIZ_K_LONG:
+    read  = PeekL;
+    write = PokeL;
+    break;
+
+  default:
+    return (BUS_Error (BUS_INVWID, space, size, NULL), NIL);
+    break;
+  }
+
+  /* Grab a handle and initialize it */
+  if ((hndl    = (BusHndl *) malloc (sizeof (*hndl))) == NIL)
+    return (SGL_Error (BUS_NOMEM), NIL);
+
+  hndl->blkXfr = NULL;
+  hndl->offset = (void *) offset;
+  hndl->window = window;
+  hndl->read   = read;
+  hndl->write  = write;
+
+  return (hndl);
+}
+
+
+
+Status BUS_Release (BusHndl  *hndl)
+/*
+   Description
+   -----------
+   Release the bus.
+
+   Parameter
+   ---------
+        hndl - A BUS handle containing context information.  It should have
+               been allocated by BUS_Prepare.
+
+   Returns
+   -------
+   A status value.
+*/
+{
+  Status   status;
+
+  /* Unmap the address window */
+  status = BUS_UnMapAddress (hndl->window);
+
+  /* Free up the handle memory */
+  free ((void *) hndl);
+
+  return (status);
+}
+
+
+
+Status BUS_Error (Status         status,
+                  unsigned int   space,
+                  unsigned int   size,
+                  unsigned long  adx)
+/*
+   Description
+   -----------
+   This routine reports the error condition returned by the BUS routines.
+
+   Parameter
+   ---------
+      status - The status returned by BUS_Peek or BUS_Poke to report
+       space - The space   argument used in the call to BUS_Peek or BUS_Poke
+        size - The size    argument used in the call to BUS_Peek or BUS_Poke
+         adx - The address argument used in the call to BUS_Peek or BUS_Poke
+
+   Returns
+   -------
+   The first argument
+*/
+{
+#if TARGET != SOLARIS_SPARC
+  char     *spcStr;
+  char      fn[80];
+  int       value;
+  SYM_TYPE  type;
+
+
+  /* Find the nearest public function name preceding the call to this routine */
+  symFindByValueAndType (sysSymTbl, (unsigned int) *(&status - 1), fn,
+                         &value, &type, N_TEXT | N_EXT, N_TEXT | N_EXT);
+
+  SGL_ErrorFn (status, fn);
+
+  switch (space)
+  {
+  case SPC_K_LOCAL:   spcStr = "Local";    break;
+  case SPC_K_VSBSYS:  spcStr = "VSBSYS";   break;
+  case SPC_K_VSBALT:  spcStr = "VSBALT";   break;
+  case SPC_K_VSBIO:   spcStr = "VSBIO";    break;
+  case SPC_K_A16:     spcStr = "A16";      break;
+  case SPC_K_A24:     spcStr = "A24";      break;
+  case SPC_K_A32:     spcStr = "A32";      break;
+  default:            spcStr = "Unknown";  break;
+  }
+  SGL_ErrorFn (BUS_PARMS, fn, spcStr, size, adx);
+
+#else
+
+  const char fmt[] = "%s: status = %i, space = %i, size = %i, adx = 0x%0x\n";
+  SGL_Error ((Status) fmt, status, space, size, adx);
+
+#endif
+
+  return (status);
+}
+
+
+
+static Status PeekB (unsigned int    cnt,
+                     unsigned char  *src,
+                     unsigned char  *dst)
+{
+  while (cnt--)  *dst++ = *src++;
+
+  return (SUCCESS);
+}
+
+
+
+static Status PeekS (unsigned int    cnt,
+                     unsigned short *src,
+                     unsigned short *dst)
+{
+  while (cnt--)  *dst++ = *src++;
+
+  return (SUCCESS);
+}
+
+
+
+static Status PeekL (unsigned int    cnt,
+                     unsigned long  *src,
+                     unsigned long  *dst)
+{
+  while (cnt--)  *dst++ = *src++;
+
+  return (SUCCESS);
+}
+
+
+
+static Status PokeB (unsigned int    cnt,
+                     unsigned char  *src,
+                     unsigned char  *dst)
+{
+  while (cnt--)  *dst++ = *src++;
+
+  return (SUCCESS);
+}
+
+
+
+static Status PokeS (unsigned int    cnt,
+                     unsigned short *src,
+                     unsigned short *dst)
+{
+  while (cnt--)  *dst++ = *src++;
+
+  return (SUCCESS);
+}
+
+
+
+static Status PokeL (unsigned int    cnt,
+                     unsigned long  *src,
+                     unsigned long  *dst)
+{
+  while (cnt--)  *dst++ = *src++;
+
+  return (SUCCESS);
+}
+@
+
+
+1.2
+log
+@Got rid of warnings
+@
+text
+@d76 1
+d113 1
+a113 1
+#if TARGET != SUN4
+d180 1
+a180 1
+#if TARGET != SUN4
+d251 1
+a251 1
+#if TARGET != SUN4
+d315 1
+a315 1
+#if CPU_FAMILY == MC680X0
+d755 1
+a755 1
+#if TARGET != SUN4
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d77 1
+a77 11
+
+#define NIL   (void *)(0)
+#define NULL           0
+#define TRUE           1
+#define FALSE          0
+#define SUCCESS        0
+#define FAILURE        1
+
+#define Min(a,b)       ((a) < (b) ? (a) : (b))
+#define Max(a,b)       ((a) > (b) ? (a) : (b))
+#define lsizeof(var)   (sizeof (var) >> 2)
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

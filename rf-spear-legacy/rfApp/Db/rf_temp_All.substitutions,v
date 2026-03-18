@@ -1,0 +1,578 @@
+head	1.13;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.13
+	RF-SPEAR-R0-3-1:1.11
+	RF-SPEAR-R0-3-0:1.11
+	RF-SPEAR-R0-2-0:1.11
+	RF-SPEAR-R0-1-0:1.11
+	RF-SPEAR-R0-0-3:1.11
+	RF-SPEAR-R0-0-2:1.10
+	RF-SPEAR-R0-0-1:1.9
+	RF-SPEAR-R0-0-0:1.9
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.8
+	RF-3-13-10:1.8.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.8
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.7
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.3
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.13
+date	2021.06.29.19.17.56;	author spear;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	2020.09.16.04.06.03;	author scondam;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2013.12.05.17.57.29;	author saa;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2012.12.19.18.05.01;	author saa;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2012.08.28.16.46.09;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2011.06.21.01.10.32;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2010.05.18.23.37.23;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2010.02.17.19.36.01;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2010.02.08.22.02.26;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2009.12.12.00.13.43;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.06.15.01.07.04;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.27.01.17.14;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.46;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.46;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.13
+log
+@Force tagged RF-SPEAR-R0-3-2: SRF1:STNAMBAIR:TEMP.HIGH changed from 42 to 28; SRF1:CAV3IONP:TEMP.HIGH changed from 401 to 26
+@
+text
+@#==============================================================
+#
+# Abs:  Database template for RF PLC Temperature  PV's
+#
+# Name:  rf_temp.substitutions
+#
+# Desc:  EPICS database template file for RF PLC
+#        temperatures pv's
+#
+# Side:  None
+#
+# Facility: SLAC/PEPII Low-Level RF
+#
+# Auth: dd-mmm-yyyy, Stephanie Allison (SAA)
+# Rev:  dd-mmm-yyyy, First Lastname  (USERNAME)
+#==============================================================
+#
+# Mod:
+#       06-Feb-2002, K. Luchini (LUCHINI):
+#         Added standard header and obtained
+#         db files from the top level db directory
+#         instead of db
+#       14-Sept-2020, S. Condamoor (scondam):
+#         Klysron Window Air Inlet alarm limit changes for the new klystron per J.Sebek
+#              SRF1:KLYSWNDWAIRI:TEMP.LOW   Old: 45 New: 35
+#              SRF1:KLYSWNDWAIRI:TEMP.LOLO  Old: 40 New: 30 
+#==============================================================
+#
+file rf_temp.db
+{
+#	                                                                                  ULIM VAL ANA LTCH FRST DIG
+#	   STN     COMP Quantity Grp      Next    Description    HOPR HIHI HIGH LOLO  LOW  TBL TBL WRD WORD WORD BIT   
+  pattern { S     , C  ,   Q    , G      , N  ,      D           , HO , HH , HI , LL , LW , TU, T , W , WL , WF , B }
+	  {$(RRRS),KLYS,WATR    ,WATRTEMP,FANO,"Water Supply"    , 40 , 39 , 38 , 25 , 27 ,  0, 2 , 4 , 4  , 19 , 0 }
+	  {$(RRRS),KLYS,BD01WATR,BD01TEMP,SUMY,"BD01 Wtr Delta"  , 20 , 14 , 13 , -2 , -1 ,  0, 2 , 5 , 4  , 19 , 1 }
+	  {$(RRRS),KLYS,BD02WATR,BD02TEMP,SUMY,"BD02 Wtr Delta"  , 20 , 20 , 19 , -2 , -1 ,  0, 2 , 6 , 4  , 19 , 2 }
+	  {$(RRRS),KLYS,BD03WATR,BD03TEMP,SUMY,"BD03 Wtr Delta"  , 20 ,401 ,401 ,-401,-401,  0, 2 , 7 , 4  , 19 , 3 }
+	  {$(RRRS),KLYS,COLLWATR,COLLTEMP,SUMY,"Coll Wtr Delta"  , 20 , 19 , 18 , -2 , -1 ,  0, 2 , 8 , 4  , 19 , 4 }
+	  {$(RRRS),KLYS,WNDWAIR ,WNDWTEMP,SUMY,"Window Air"      , 25 , 53 , 52 ,-10 , -8 ,  0, 2 , 9 , 4  , 19 , 5 }
+#	  {$(RRRS),KLYS,WNDWAIRI,WNDWTEMP,SUMY,"Window Air Rtn"  ,115 ,110 ,105 , 40 , 45 ,  0, 2 , 10, 4  , 19 , 6 }
+	  {$(RRRS),KLYS,WNDWAIRI,WNDWTEMP,SUMY,"Window Air Rtn"  ,115 ,110 ,105 , 30 , 35 ,  0, 2 , 10, 4  , 19 , 6 }
+	  
+	  {$(RRRS),STN ,HCW     ,HCWTEMP ,FANO,"HCW Supply"      , 75 , 32 , 30 , 12 , 14 ,  0, 2 , 11, 4  , 19 , 7 }
+	  {$(RRRS),STN ,CRATEPS ,MPS     ,SUMY,"Crate Pwr Supply", 60 , 45 , 38 , 20 , 25 ,  0, 2 , 12, 4  , 19 , 8 }
+	  {$(RRRS),STN ,AMBAIR  ,MPS     ,SUMY,"Ambient Air"     , 60 , 44 , 28 , 10 , 15 ,  0, 2 , 13, 4  , 19 , 9 }
+#         See rf_hvps.db for HVPS oil temperature - special case.
+#	  {$(RRRS),HVPS,OIL     ,STN     ,SUMY,"HVPS Oil"        , 70 , 60 , 55 , 10 , 15 ,  0, 2 , 14, 4  , 19 ,10 }
+	  {$(RRRS),KLYS,DRIVAMPL,TEMP    ,SUMY,"Drive Amplifier" , 75 , 70 , 65 , 15 , 20 ,  0, 2 , 15, 4  , 19 ,11 }
+	  {$(RRRS),CIRC,HCW     ,HCWTEMP ,FANO,"Load HCW Return" , 75 , 32 , 30 , 12 , 14 ,  0, 2 , 16, 4  , 19 ,12 }
+	  {$(RRRS),WG01,HCW     ,TEMP    ,SUMY,"Load HCW Return" , 75 , 32 , 30 , 12 , 14 ,  0, 2 , 17, 4  , 19 ,13 }
+
+	  {$(RRRS),CAV1,BD01    ,BDTEMPI ,SUMY,"Body 01"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 20, 5  , 20 , 0 }
+	  {$(RRRS),CAV1,BD02    ,BDTEMPI ,SUMY,"Body 02"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 21, 5  , 20 , 1 }
+	  {$(RRRS),CAV1,BD03    ,BDTEMPI ,SUMY,"Body 03"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 22, 5  , 20 , 2 }
+	  {$(RRRS),CAV1,BD04    ,BDTEMPI ,SUMY,"Body 04"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 23, 5  , 20 , 3 }
+	  {$(RRRS),CAV1,BD05    ,BDTEMPI ,SUMY,"Body 05"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 24, 5  , 20 , 4 }
+	  {$(RRRS),CAV1,BD06    ,BDTEMPI ,SUMY,"Body 06"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 25, 5  , 20 , 5 }
+	  {$(RRRS),CAV1,BD07    ,BDTEMPI ,SUMY,"Body 07"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 26, 5  , 20 , 6 }
+	  {$(RRRS),CAV1,BD08    ,BDTEMPI ,SUMY,"Body 08"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 27, 5  , 20 , 7 }
+	  {$(RRRS),CAV1,BD09    ,BDTEMPI ,SUMY,"Body 09"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 28, 5  , 20 , 8 }
+	  {$(RRRS),CAV1,BD10    ,BDTEMPI ,SUMY,"Body 10"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 29, 5  , 20 , 9 }
+	  {$(RRRS),CAV1,BD11    ,BDTEMPI ,SUMY,"Body 11"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 30, 5  , 20 ,10 }
+	  {$(RRRS),CAV1,BD12    ,BDTEMPI ,SUMY,"Body 12"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 31, 5  , 20 ,11 }
+	  {$(RRRS),CAV1,BD13    ,BDTEMP  ,SUMY,"Body 13"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 32, 5  , 20 ,12 }
+	  {$(RRRS),CAV1,BD14    ,BDTEMP  ,SUMY,"Body 14"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 33, 5  , 20 ,13 }
+
+	  {$(RRRS),CAV1,TUNRFX  ,TUNRTEMP,SUMY,"Fixed Tuner"     , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 34, 5  , 20 ,14 }
+	  {$(RRRS),CAV1,TUNRMV  ,TUNRTEMP,SUMY,"Moveable Tuner"  , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 35, 5  , 20 ,15 }
+	  {$(RRRS),CAV1,TUNRBL  ,TUNRTEMP,SUMY,"Mv Tuner Bellows", 60 , 58 , 57 , 23 , 25 ,  0, 2 , 36, 6  , 21 , 0 }
+	  {$(RRRS),CAV1,HOM1    ,TEMP    ,SUMY,"HOM Load 1"      , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 37, 6  , 21 , 1 }
+	  {$(RRRS),CAV1,HOM2    ,TEMP    ,SUMY,"HOM Load 2"      , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 38, 6  , 21 , 2 }
+	  {$(RRRS),CAV1,HOM3    ,TEMP    ,SUMY,"HOM Load 3"      , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 39, 6  , 21 , 3 }
+	  {$(RRRS),CAV1,WATRRTN ,TEMP    ,SUMY,"Water Return"    , 50 , 48 , 45 , 25 , 27 ,  0, 2 , 40, 6  , 21 , 4 }
+	  {$(RRRS),CAV1,WATR    ,TEMP    ,SUMY,"Water Supply"    , 80 , 75 , 70 , 25 , 27 ,  0, 2 , 41, 6  , 21 , 5 }
+	  {$(RRRS),CAV1,WGFERR  ,TEMP    ,SUMY,"WGFerr Ld WtrRtn", 60 , 58 , 57 , 23 , 25 ,  0, 2 , 42, 6  , 21 , 6 }
+	  {$(RRRS),CAV1,IONP    ,TEMP    ,SUMY,"Ion Pump"        , 60 ,401 ,401 ,-401,-401,  0, 2 , 43, 6  , 21 , 7 }
+
+	  {$(RRRS),CAV2,BD01    ,BDTEMPI ,SUMY,"Body 01"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 44, 6  , 21 , 8 }
+	  {$(RRRS),CAV2,BD02    ,BDTEMPI ,SUMY,"Body 02"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 45, 6  , 21 , 9 }
+	  {$(RRRS),CAV2,BD03    ,BDTEMPI ,SUMY,"Body 03"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 46, 6  , 21 ,10 }
+	  {$(RRRS),CAV2,BD04    ,BDTEMPI ,SUMY,"Body 04"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 47, 6  , 21 ,11 }
+	  {$(RRRS),CAV2,BD05    ,BDTEMPI ,SUMY,"Body 05"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 48, 6  , 21 ,12 }
+	  {$(RRRS),CAV2,BD06    ,BDTEMPI ,SUMY,"Body 06"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 49, 6  , 21 ,13 }
+	  {$(RRRS),CAV2,BD07    ,BDTEMPI ,SUMY,"Body 07"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 50, 6  , 21 ,14 }
+	  {$(RRRS),CAV2,BD08    ,BDTEMPI ,SUMY,"Body 08"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 51, 6  , 21 ,15 }
+	  {$(RRRS),CAV2,BD09    ,BDTEMPI ,SUMY,"Body 09"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 52, 7  , 22 , 0 }
+	  {$(RRRS),CAV2,BD10    ,BDTEMPI ,SUMY,"Body 10"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 53, 7  , 22 , 1 }
+	  {$(RRRS),CAV2,BD11    ,BDTEMPI ,SUMY,"Body 11"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 54, 7  , 22 , 2 }
+	  {$(RRRS),CAV2,BD12    ,BDTEMPI ,SUMY,"Body 12"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 55, 7  , 22 , 3 }
+	  {$(RRRS),CAV2,BD13    ,BDTEMP  ,SUMY,"Body 13"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 56, 7  , 22 , 4 }
+	  {$(RRRS),CAV2,BD14    ,BDTEMP  ,SUMY,"Body 14"         , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 57, 7  , 22 , 5 }
+
+	  {$(RRRS),CAV2,TUNRFX  ,TUNRTEMP,SUMY,"Fixed Tuner"     , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 58, 7  , 22 , 6 }
+	  {$(RRRS),CAV2,TUNRMV  ,TUNRTEMP,SUMY,"Moveable Tuner"  , 60 , 58 , 57 , 23 , 25 ,  0, 2 , 59, 7  , 22 , 7 }
+	  {$(RRRS),CAV2,TUNRBL  ,TUNRTEMP,SUMY,"Mv Tuner Bellows", 60 , 58 , 57 , 23 , 25 ,  1, 3 , 4 , 7  , 22 , 8 }
+	  {$(RRRS),CAV2,HOM1    ,TEMP    ,SUMY,"HOM Load 1"      , 60 , 58 , 57 , 23 , 25 ,  1, 3 , 5 , 7  , 22 , 9 }
+	  {$(RRRS),CAV2,HOM2    ,TEMP    ,SUMY,"HOM Load 2"      , 60 , 58 , 57 , 23 , 25 ,  1, 3 , 6 , 7  , 22 ,10 }
+	  {$(RRRS),CAV2,HOM3    ,TEMP    ,SUMY,"HOM Load 3"      , 60 , 58 , 57 , 23 , 25 ,  1, 3 , 7 , 7  , 22 ,11 }
+	  {$(RRRS),CAV2,WATRRTN ,TEMP    ,SUMY,"Water Return"    , 50 , 48 , 45 , 25 , 27 ,  1, 3 , 8 , 7  , 22 ,12 }
+	  {$(RRRS),CAV2,WATR    ,TEMP    ,SUMY,"Water Supply"    , 80 , 75 , 70 , 25 , 27 ,  1, 3 , 9 , 7  , 22 ,13 }
+	  {$(RRRS),CAV2,WGFERR  ,TEMP    ,SUMY,"WGFerr Ld WtrRtn", 60 , 58 , 57 , 23 , 25 ,  1, 3 , 10, 7  , 22 ,14 }
+	  {$(RRRS),CAV2,IONP    ,TEMP    ,SUMY,"Ion Pump"        , 60 ,401 ,401 ,-401,-401,  1, 3 , 11, 7  , 22 ,15 }
+
+}
+@
+
+
+1.12
+log
+@Make permanent the temporary changes by J.Sebek to Klystron window air inlet alarm limits changes for the new klystron
+@
+text
+@d26 1
+a26 1
+#              SRF1:KLYSWNDWAIRI:TEMP.LOLO  Old: 40 New: 30
+d45 1
+a45 1
+	  {$(RRRS),STN ,AMBAIR  ,MPS     ,SUMY,"Ambient Air"     , 60 , 44 , 42 , 10 , 15 ,  0, 2 , 13, 4  , 19 , 9 }
+@
+
+
+1.11
+log
+@Per Dave Ernst, change HCW temp low alarm limits to 12C (red) and 14C (yellow).
+@
+text
+@d23 4
+a26 1
+#
+d40 3
+a42 2
+	  {$(RRRS),KLYS,WNDWAIRI,WNDWTEMP,SUMY,"Window Air Rtn"  ,115 ,110 ,105 , 40 , 45 ,  0, 2 , 10, 4  , 19 , 6 }
+
+@
+
+
+1.10
+log
+@Change HCW low warning limit from 20C to 18C.
+@
+text
+@d39 1
+a39 1
+	  {$(RRRS),STN ,HCW     ,HCWTEMP ,FANO,"HCW Supply"      , 75 , 32 , 30 , 15 , 18 ,  0, 2 , 11, 4  , 19 , 7 }
+d45 2
+a46 2
+	  {$(RRRS),CIRC,HCW     ,HCWTEMP ,FANO,"Load HCW Return" , 75 , 32 , 30 , 15 , 18 ,  0, 2 , 16, 4  , 19 ,12 }
+	  {$(RRRS),WG01,HCW     ,TEMP    ,SUMY,"Load HCW Return" , 75 , 32 , 30 , 15 , 18 ,  0, 2 , 17, 4  , 19 ,13 }
+@
+
+
+1.9
+log
+@Increase LOW warning limit on cavity body, tuner, and HOM TCs so TCs stay red
+during downtime.
+@
+text
+@d39 1
+a39 1
+	  {$(RRRS),STN ,HCW     ,HCWTEMP ,FANO,"HCW Supply"      , 75 , 32 , 30 , 15 , 20 ,  0, 2 , 11, 4  , 19 , 7 }
+d45 2
+a46 2
+	  {$(RRRS),CIRC,HCW     ,HCWTEMP ,FANO,"Load HCW Return" , 75 , 32 , 30 , 15 , 20 ,  0, 2 , 16, 4  , 19 ,12 }
+	  {$(RRRS),WG01,HCW     ,TEMP    ,SUMY,"Load HCW Return" , 75 , 32 , 30 , 15 , 20 ,  0, 2 , 17, 4  , 19 ,13 }
+@
+
+
+1.8
+log
+@Decrease the upper alarm limits for ambient temp.
+@
+text
+@d48 14
+a61 14
+	  {$(RRRS),CAV1,BD01    ,BDTEMPI ,SUMY,"Body 01"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 20, 5  , 20 , 0 }
+	  {$(RRRS),CAV1,BD02    ,BDTEMPI ,SUMY,"Body 02"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 21, 5  , 20 , 1 }
+	  {$(RRRS),CAV1,BD03    ,BDTEMPI ,SUMY,"Body 03"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 22, 5  , 20 , 2 }
+	  {$(RRRS),CAV1,BD04    ,BDTEMPI ,SUMY,"Body 04"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 23, 5  , 20 , 3 }
+	  {$(RRRS),CAV1,BD05    ,BDTEMPI ,SUMY,"Body 05"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 24, 5  , 20 , 4 }
+	  {$(RRRS),CAV1,BD06    ,BDTEMPI ,SUMY,"Body 06"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 25, 5  , 20 , 5 }
+	  {$(RRRS),CAV1,BD07    ,BDTEMPI ,SUMY,"Body 07"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 26, 5  , 20 , 6 }
+	  {$(RRRS),CAV1,BD08    ,BDTEMPI ,SUMY,"Body 08"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 27, 5  , 20 , 7 }
+	  {$(RRRS),CAV1,BD09    ,BDTEMPI ,SUMY,"Body 09"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 28, 5  , 20 , 8 }
+	  {$(RRRS),CAV1,BD10    ,BDTEMPI ,SUMY,"Body 10"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 29, 5  , 20 , 9 }
+	  {$(RRRS),CAV1,BD11    ,BDTEMPI ,SUMY,"Body 11"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 30, 5  , 20 ,10 }
+	  {$(RRRS),CAV1,BD12    ,BDTEMPI ,SUMY,"Body 12"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 31, 5  , 20 ,11 }
+	  {$(RRRS),CAV1,BD13    ,BDTEMP  ,SUMY,"Body 13"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 32, 5  , 20 ,12 }
+	  {$(RRRS),CAV1,BD14    ,BDTEMP  ,SUMY,"Body 14"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 33, 5  , 20 ,13 }
+d63 6
+a68 6
+	  {$(RRRS),CAV1,TUNRFX  ,TUNRTEMP,SUMY,"Fixed Tuner"     , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 34, 5  , 20 ,14 }
+	  {$(RRRS),CAV1,TUNRMV  ,TUNRTEMP,SUMY,"Moveable Tuner"  , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 35, 5  , 20 ,15 }
+	  {$(RRRS),CAV1,TUNRBL  ,TUNRTEMP,SUMY,"Mv Tuner Bellows", 60 , 58 , 57 , 20 , 25 ,  0, 2 , 36, 6  , 21 , 0 }
+	  {$(RRRS),CAV1,HOM1    ,TEMP    ,SUMY,"HOM Load 1"      , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 37, 6  , 21 , 1 }
+	  {$(RRRS),CAV1,HOM2    ,TEMP    ,SUMY,"HOM Load 2"      , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 38, 6  , 21 , 2 }
+	  {$(RRRS),CAV1,HOM3    ,TEMP    ,SUMY,"HOM Load 3"      , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 39, 6  , 21 , 3 }
+d71 1
+a71 1
+	  {$(RRRS),CAV1,WGFERR  ,TEMP    ,SUMY,"WGFerr Ld WtrRtn", 60 , 58 , 57 , 20 , 25 ,  0, 2 , 42, 6  , 21 , 6 }
+d74 14
+a87 14
+	  {$(RRRS),CAV2,BD01    ,BDTEMPI ,SUMY,"Body 01"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 44, 6  , 21 , 8 }
+	  {$(RRRS),CAV2,BD02    ,BDTEMPI ,SUMY,"Body 02"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 45, 6  , 21 , 9 }
+	  {$(RRRS),CAV2,BD03    ,BDTEMPI ,SUMY,"Body 03"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 46, 6  , 21 ,10 }
+	  {$(RRRS),CAV2,BD04    ,BDTEMPI ,SUMY,"Body 04"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 47, 6  , 21 ,11 }
+	  {$(RRRS),CAV2,BD05    ,BDTEMPI ,SUMY,"Body 05"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 48, 6  , 21 ,12 }
+	  {$(RRRS),CAV2,BD06    ,BDTEMPI ,SUMY,"Body 06"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 49, 6  , 21 ,13 }
+	  {$(RRRS),CAV2,BD07    ,BDTEMPI ,SUMY,"Body 07"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 50, 6  , 21 ,14 }
+	  {$(RRRS),CAV2,BD08    ,BDTEMPI ,SUMY,"Body 08"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 51, 6  , 21 ,15 }
+	  {$(RRRS),CAV2,BD09    ,BDTEMPI ,SUMY,"Body 09"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 52, 7  , 22 , 0 }
+	  {$(RRRS),CAV2,BD10    ,BDTEMPI ,SUMY,"Body 10"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 53, 7  , 22 , 1 }
+	  {$(RRRS),CAV2,BD11    ,BDTEMPI ,SUMY,"Body 11"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 54, 7  , 22 , 2 }
+	  {$(RRRS),CAV2,BD12    ,BDTEMPI ,SUMY,"Body 12"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 55, 7  , 22 , 3 }
+	  {$(RRRS),CAV2,BD13    ,BDTEMP  ,SUMY,"Body 13"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 56, 7  , 22 , 4 }
+	  {$(RRRS),CAV2,BD14    ,BDTEMP  ,SUMY,"Body 14"         , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 57, 7  , 22 , 5 }
+d89 6
+a94 6
+	  {$(RRRS),CAV2,TUNRFX  ,TUNRTEMP,SUMY,"Fixed Tuner"     , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 58, 7  , 22 , 6 }
+	  {$(RRRS),CAV2,TUNRMV  ,TUNRTEMP,SUMY,"Moveable Tuner"  , 60 , 58 , 57 , 20 , 25 ,  0, 2 , 59, 7  , 22 , 7 }
+	  {$(RRRS),CAV2,TUNRBL  ,TUNRTEMP,SUMY,"Mv Tuner Bellows", 60 , 58 , 57 , 20 , 25 ,  1, 3 , 4 , 7  , 22 , 8 }
+	  {$(RRRS),CAV2,HOM1    ,TEMP    ,SUMY,"HOM Load 1"      , 60 , 58 , 57 , 20 , 25 ,  1, 3 , 5 , 7  , 22 , 9 }
+	  {$(RRRS),CAV2,HOM2    ,TEMP    ,SUMY,"HOM Load 2"      , 60 , 58 , 57 , 20 , 25 ,  1, 3 , 6 , 7  , 22 ,10 }
+	  {$(RRRS),CAV2,HOM3    ,TEMP    ,SUMY,"HOM Load 3"      , 60 , 58 , 57 , 20 , 25 ,  1, 3 , 7 , 7  , 22 ,11 }
+d97 1
+a97 1
+	  {$(RRRS),CAV2,WGFERR  ,TEMP    ,SUMY,"WGFerr Ld WtrRtn", 60 , 58 , 57 , 20 , 25 ,  1, 3 , 10, 7  , 22 ,14 }
+@
+
+
+1.7
+log
+@Make alarm limits for ion pump temps large since they are not connected
+to the ion pumps.
+@
+text
+@d41 1
+a41 1
+	  {$(RRRS),STN ,AMBAIR  ,MPS     ,SUMY,"Ambient Air"     , 60 , 58 , 57 , 10 , 15 ,  0, 2 , 13, 4  , 19 , 9 }
+@
+
+
+1.6
+log
+@Reduce alarm limits on HCW temps.
+@
+text
+@d34 1
+a34 1
+	  {$(RRRS),KLYS,BD03WATR,BD03TEMP,SUMY,"BD03 Wtr Delta"  , 20 ,400 ,400 ,-400,-400,  0, 2 , 7 , 4  , 19 , 3 }
+d72 1
+a72 1
+	  {$(RRRS),CAV1,IONP    ,TEMP    ,SUMY,"Ion Pump"        , 60 ,401 ,401 , 10 , 15 ,  0, 2 , 43, 6  , 21 , 7 }
+d98 1
+a98 1
+	  {$(RRRS),CAV2,IONP    ,TEMP    ,SUMY,"Ion Pump"        , 60 ,401 ,401 , 10 , 15 ,  1, 3 , 11, 7  , 22 ,15 }
+@
+
+
+1.5
+log
+@Changes to add low limits to all temperatures.
+@
+text
+@d39 1
+a39 1
+	  {$(RRRS),STN ,HCW     ,HCWTEMP ,FANO,"HCW Supply"      , 75 , 40 , 38 , 15 , 20 ,  0, 2 , 11, 4  , 19 , 7 }
+d45 2
+a46 2
+	  {$(RRRS),CIRC,HCW     ,HCWTEMP ,FANO,"Load HCW Return" , 75 , 58 , 57 , 15 , 20 ,  0, 2 , 16, 4  , 19 ,12 }
+	  {$(RRRS),WG01,HCW     ,TEMP    ,SUMY,"Load HCW Return" , 75 , 58 , 57 , 15 , 20 ,  0, 2 , 17, 4  , 19 ,13 }
+@
+
+
+1.4
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@d28 14
+a41 14
+#	                                                                    ULIM VAL ANA LTCH FRST DIG
+#	   STN     COMP Quantity Grp      Next    Description    HOPR HIHI HIGH TBL TBL WRD WORD WORD BIT   
+  pattern { S     , C  ,   Q    , G      , N  ,      D           , HO , HH , HI ,TU, T , W , WL , WF , B }
+	  {$(RRRS),KLYS,WATR    ,WATRTEMP,FANO,"Water Supply"    , 40 , 39 , 38 , 0, 2 , 4 , 4  , 19 , 0 }
+	  {$(RRRS),KLYS,BD01WATR,BD01TEMP,SUMY,"BD01 Wtr Delta"  , 20 , 18 , 17 , 0, 2 , 5 , 4  , 19 , 1 }
+	  {$(RRRS),KLYS,BD02WATR,BD02TEMP,SUMY,"BD02 Wtr Delta"  , 20 , 19 , 18 , 0, 2 , 6 , 4  , 19 , 2 }
+	  {$(RRRS),KLYS,BD03WATR,BD03TEMP,SUMY,"BD03 Wtr Delta"  , 20 , 7  , 6  , 0, 2 , 7 , 4  , 19 , 3 }
+	  {$(RRRS),KLYS,COLLWATR,COLLTEMP,SUMY,"Coll Wtr Delta"  , 20 , 19 , 18 , 0, 2 , 8 , 4  , 19 , 4 }
+	  {$(RRRS),KLYS,WNDWAIR ,WNDWTEMP,SUMY,"Window Air"      , 25 , 53 , 52 , 0, 2 , 9 , 4  , 19 , 5 }
+	  {$(RRRS),KLYS,WNDWAIRI,WNDWTEMP,SUMY,"Window Air Rtn"  ,115 ,110 ,105 , 0, 2 , 10, 4  , 19 , 6 }
+
+	  {$(RRRS),STN ,HCW     ,HCWTEMP ,FANO,"HCW Supply"      , 75 , 40 , 38 , 0, 2 , 11, 4  , 19 , 7 }
+	  {$(RRRS),STN ,CRATEPS ,MPS     ,SUMY,"Crate Pwr Supply", 60 , 46 , 44 , 0, 2 , 12, 4  , 19 , 8 }
+	  {$(RRRS),STN ,AMBAIR  ,MPS     ,SUMY,"Ambient Air"     , 60 , 58 , 57 , 0, 2 , 13, 4  , 19 , 9 }
+d43 56
+a98 56
+#	  {$(RRRS),HVPS,OIL     ,STN     ,SUMY,"HVPS Oil"        , 70 , 60 , 55 , 0, 2 , 14, 4  , 19 ,10 }
+	  {$(RRRS),KLYS,DRIVAMPL,TEMP    ,SUMY,"Drive Amplifier" , 75 , 70 , 65 , 0, 2 , 15, 4  , 19 ,11 }
+	  {$(RRRS),CIRC,HCW     ,HCWTEMP ,FANO,"Load HCW Return" , 75 , 58 , 57 , 0, 2 , 16, 4  , 19 ,12 }
+	  {$(RRRS),WG01,HCW     ,TEMP    ,SUMY,"Load HCW Return" , 75 , 58 , 57 , 0, 2 , 17, 4  , 19 ,13 }
+
+	  {$(RRRS),CAV1,BD01    ,BDTEMPI ,SUMY,"Body 01"         , 60 , 58 , 57 , 0, 2 , 20, 5  , 20 , 0 }
+	  {$(RRRS),CAV1,BD02    ,BDTEMPI ,SUMY,"Body 02"         , 60 , 58 , 57 , 0, 2 , 21, 5  , 20 , 1 }
+	  {$(RRRS),CAV1,BD03    ,BDTEMPI ,SUMY,"Body 03"         , 60 , 58 , 57 , 0, 2 , 22, 5  , 20 , 2 }
+	  {$(RRRS),CAV1,BD04    ,BDTEMPI ,SUMY,"Body 04"         , 60 , 58 , 57 , 0, 2 , 23, 5  , 20 , 3 }
+	  {$(RRRS),CAV1,BD05    ,BDTEMPI ,SUMY,"Body 05"         , 60 , 58 , 57 , 0, 2 , 24, 5  , 20 , 4 }
+	  {$(RRRS),CAV1,BD06    ,BDTEMPI ,SUMY,"Body 06"         , 60 , 58 , 57 , 0, 2 , 25, 5  , 20 , 5 }
+	  {$(RRRS),CAV1,BD07    ,BDTEMPI ,SUMY,"Body 07"         , 60 , 58 , 57 , 0, 2 , 26, 5  , 20 , 6 }
+	  {$(RRRS),CAV1,BD08    ,BDTEMPI ,SUMY,"Body 08"         , 60 , 58 , 57 , 0, 2 , 27, 5  , 20 , 7 }
+	  {$(RRRS),CAV1,BD09    ,BDTEMPI ,SUMY,"Body 09"         , 60 , 58 , 57 , 0, 2 , 28, 5  , 20 , 8 }
+	  {$(RRRS),CAV1,BD10    ,BDTEMPI ,SUMY,"Body 10"         , 60 , 58 , 57 , 0, 2 , 29, 5  , 20 , 9 }
+	  {$(RRRS),CAV1,BD11    ,BDTEMPI ,SUMY,"Body 11"         , 60 , 58 , 57 , 0, 2 , 30, 5  , 20 ,10 }
+	  {$(RRRS),CAV1,BD12    ,BDTEMPI ,SUMY,"Body 12"         , 60 , 58 , 57 , 0, 2 , 31, 5  , 20 ,11 }
+	  {$(RRRS),CAV1,BD13    ,BDTEMP  ,SUMY,"Body 13"         , 60 , 58 , 57 , 0, 2 , 32, 5  , 20 ,12 }
+	  {$(RRRS),CAV1,BD14    ,BDTEMP  ,SUMY,"Body 14"         , 60 , 58 , 57 , 0, 2 , 33, 5  , 20 ,13 }
+
+	  {$(RRRS),CAV1,TUNRFX  ,TUNRTEMP,SUMY,"Fixed Tuner"     , 60 , 58 , 57 , 0, 2 , 34, 5  , 20 ,14 }
+	  {$(RRRS),CAV1,TUNRMV  ,TUNRTEMP,SUMY,"Moveable Tuner"  , 60 , 58 , 57 , 0, 2 , 35, 5  , 20 ,15 }
+	  {$(RRRS),CAV1,TUNRBL  ,TUNRTEMP,SUMY,"Mv Tuner Bellows", 60 , 58 , 57 , 0, 2 , 36, 6  , 21 , 0 }
+	  {$(RRRS),CAV1,HOM1    ,TEMP    ,SUMY,"HOM Load 1"      , 60 , 58 , 57 , 0, 2 , 37, 6  , 21 , 1 }
+	  {$(RRRS),CAV1,HOM2    ,TEMP    ,SUMY,"HOM Load 2"      , 60 , 58 , 57 , 0, 2 , 38, 6  , 21 , 2 }
+	  {$(RRRS),CAV1,HOM3    ,TEMP    ,SUMY,"HOM Load 3"      , 60 , 58 , 57 , 0, 2 , 39, 6  , 21 , 3 }
+	  {$(RRRS),CAV1,WATRRTN ,TEMP    ,SUMY,"Water Return"    , 50 , 48 , 45 , 0, 2 , 40, 6  , 21 , 4 }
+	  {$(RRRS),CAV1,WATR    ,TEMP    ,SUMY,"Water Supply"    , 80 , 75 , 70 , 0, 2 , 41, 6  , 21 , 5 }
+	  {$(RRRS),CAV1,WGFERR  ,TEMP    ,SUMY,"WGFerr Ld WtrRtn", 60 , 58 , 57 , 0, 2 , 42, 6  , 21 , 6 }
+	  {$(RRRS),CAV1,IONP    ,TEMP    ,SUMY,"Ion Pump"        , 60 ,401 ,401 , 0, 2 , 43, 6  , 21 , 7 }
+
+	  {$(RRRS),CAV2,BD01    ,BDTEMPI ,SUMY,"Body 01"         , 60 , 58 , 57 , 0, 2 , 44, 6  , 21 , 8 }
+	  {$(RRRS),CAV2,BD02    ,BDTEMPI ,SUMY,"Body 02"         , 60 , 58 , 57 , 0, 2 , 45, 6  , 21 , 9 }
+	  {$(RRRS),CAV2,BD03    ,BDTEMPI ,SUMY,"Body 03"         , 60 , 58 , 57 , 0, 2 , 46, 6  , 21 ,10 }
+	  {$(RRRS),CAV2,BD04    ,BDTEMPI ,SUMY,"Body 04"         , 60 , 58 , 57 , 0, 2 , 47, 6  , 21 ,11 }
+	  {$(RRRS),CAV2,BD05    ,BDTEMPI ,SUMY,"Body 05"         , 60 , 58 , 57 , 0, 2 , 48, 6  , 21 ,12 }
+	  {$(RRRS),CAV2,BD06    ,BDTEMPI ,SUMY,"Body 06"         , 60 , 58 , 57 , 0, 2 , 49, 6  , 21 ,13 }
+	  {$(RRRS),CAV2,BD07    ,BDTEMPI ,SUMY,"Body 07"         , 60 , 58 , 57 , 0, 2 , 50, 6  , 21 ,14 }
+	  {$(RRRS),CAV2,BD08    ,BDTEMPI ,SUMY,"Body 08"         , 60 , 58 , 57 , 0, 2 , 51, 6  , 21 ,15 }
+	  {$(RRRS),CAV2,BD09    ,BDTEMPI ,SUMY,"Body 09"         , 60 , 58 , 57 , 0, 2 , 52, 7  , 22 , 0 }
+	  {$(RRRS),CAV2,BD10    ,BDTEMPI ,SUMY,"Body 10"         , 60 , 58 , 57 , 0, 2 , 53, 7  , 22 , 1 }
+	  {$(RRRS),CAV2,BD11    ,BDTEMPI ,SUMY,"Body 11"         , 60 , 58 , 57 , 0, 2 , 54, 7  , 22 , 2 }
+	  {$(RRRS),CAV2,BD12    ,BDTEMPI ,SUMY,"Body 12"         , 60 , 58 , 57 , 0, 2 , 55, 7  , 22 , 3 }
+	  {$(RRRS),CAV2,BD13    ,BDTEMP  ,SUMY,"Body 13"         , 60 , 58 , 57 , 0, 2 , 56, 7  , 22 , 4 }
+	  {$(RRRS),CAV2,BD14    ,BDTEMP  ,SUMY,"Body 14"         , 60 , 58 , 57 , 0, 2 , 57, 7  , 22 , 5 }
+
+	  {$(RRRS),CAV2,TUNRFX  ,TUNRTEMP,SUMY,"Fixed Tuner"     , 60 , 58 , 57 , 0, 2 , 58, 7  , 22 , 6 }
+	  {$(RRRS),CAV2,TUNRMV  ,TUNRTEMP,SUMY,"Moveable Tuner"  , 60 , 58 , 57 , 0, 2 , 59, 7  , 22 , 7 }
+	  {$(RRRS),CAV2,TUNRBL  ,TUNRTEMP,SUMY,"Mv Tuner Bellows", 60 , 58 , 57 , 1, 3 , 4 , 7  , 22 , 8 }
+	  {$(RRRS),CAV2,HOM1    ,TEMP    ,SUMY,"HOM Load 1"      , 60 , 58 , 57 , 1, 3 , 5 , 7  , 22 , 9 }
+	  {$(RRRS),CAV2,HOM2    ,TEMP    ,SUMY,"HOM Load 2"      , 60 , 58 , 57 , 1, 3 , 6 , 7  , 22 ,10 }
+	  {$(RRRS),CAV2,HOM3    ,TEMP    ,SUMY,"HOM Load 3"      , 60 , 58 , 57 , 1, 3 , 7 , 7  , 22 ,11 }
+	  {$(RRRS),CAV2,WATRRTN ,TEMP    ,SUMY,"Water Return"    , 50 , 48 , 45 , 1, 3 , 8 , 7  , 22 ,12 }
+	  {$(RRRS),CAV2,WATR    ,TEMP    ,SUMY,"Water Supply"    , 80 , 75 , 70 , 1, 3 , 9 , 7  , 22 ,13 }
+	  {$(RRRS),CAV2,WGFERR  ,TEMP    ,SUMY,"WGFerr Ld WtrRtn", 60 , 58 , 57 , 1, 3 , 10, 7  , 22 ,14 }
+	  {$(RRRS),CAV2,IONP    ,TEMP    ,SUMY,"Ion Pump"        , 60 ,401 ,401 , 1, 3 , 11, 7  , 22 ,15 }
+@
+
+
+1.3
+log
+@Use better limits for klystron body water, collector water, and
+window air temperatures.
+@
+text
+@d5 1
+a5 1
+# Name:  RRRS_temp.template
+d26 1
+a26 1
+file db/rf_temp.db
+d29 13
+a41 13
+#	   STN  COMP Quantity Grp      Next    Description    HOPR HIHI HIGH TBL TBL WRD WORD WORD BIT   
+  pattern { S  , C  ,   Q    , G      , N  ,      D           , HO , HH , HI ,TU, T , W , WL , WF , B }
+	  {RRRS,KLYS,WATR    ,WATRTEMP,FANO,"Water Supply"    , 40 , 39 , 38 , 0, 2 , 4 , 4  , 19 , 0 }
+	  {RRRS,KLYS,BD01WATR,BD01TEMP,SUMY,"BD01 Wtr Delta"  , 20 , 18 , 17 , 0, 2 , 5 , 4  , 19 , 1 }
+	  {RRRS,KLYS,BD02WATR,BD02TEMP,SUMY,"BD02 Wtr Delta"  , 20 , 19 , 18 , 0, 2 , 6 , 4  , 19 , 2 }
+	  {RRRS,KLYS,BD03WATR,BD03TEMP,SUMY,"BD03 Wtr Delta"  , 20 , 7  , 6  , 0, 2 , 7 , 4  , 19 , 3 }
+	  {RRRS,KLYS,COLLWATR,COLLTEMP,SUMY,"Coll Wtr Delta"  , 20 , 19 , 18 , 0, 2 , 8 , 4  , 19 , 4 }
+	  {RRRS,KLYS,WNDWAIR ,WNDWTEMP,SUMY,"Window Air"      , 25 , 53 , 52 , 0, 2 , 9 , 4  , 19 , 5 }
+	  {RRRS,KLYS,WNDWAIRI,WNDWTEMP,SUMY,"Window Air Rtn"  ,115 ,110 ,105 , 0, 2 , 10, 4  , 19 , 6 }
+
+	  {RRRS,STN ,HCW     ,HCWTEMP ,FANO,"HCW Supply"      , 75 , 40 , 38 , 0, 2 , 11, 4  , 19 , 7 }
+	  {RRRS,STN ,CRATEPS ,MPS     ,SUMY,"Crate Pwr Supply", 60 , 46 , 44 , 0, 2 , 12, 4  , 19 , 8 }
+	  {RRRS,STN ,AMBAIR  ,MPS     ,SUMY,"Ambient Air"     , 60 , 58 , 57 , 0, 2 , 13, 4  , 19 , 9 }
+d43 56
+a98 56
+#	  {RRRS,HVPS,OIL     ,STN     ,SUMY,"HVPS Oil"        , 70 , 60 , 55 , 0, 2 , 14, 4  , 19 ,10 }
+	  {RRRS,KLYS,DRIVAMPL,TEMP    ,SUMY,"Drive Amplifier" , 75 , 70 , 65 , 0, 2 , 15, 4  , 19 ,11 }
+	  {RRRS,CIRC,HCW     ,HCWTEMP ,FANO,"Load HCW Return" , 75 , 58 , 57 , 0, 2 , 16, 4  , 19 ,12 }
+	  {RRRS,WG01,HCW     ,TEMP    ,SUMY,"Load HCW Return" , 75 , 58 , 57 , 0, 2 , 17, 4  , 19 ,13 }
+
+	  {RRRS,CAV1,BD01    ,BDTEMPI ,SUMY,"Body 01"         , 60 , 58 , 57 , 0, 2 , 20, 5  , 20 , 0 }
+	  {RRRS,CAV1,BD02    ,BDTEMPI ,SUMY,"Body 02"         , 60 , 58 , 57 , 0, 2 , 21, 5  , 20 , 1 }
+	  {RRRS,CAV1,BD03    ,BDTEMPI ,SUMY,"Body 03"         , 60 , 58 , 57 , 0, 2 , 22, 5  , 20 , 2 }
+	  {RRRS,CAV1,BD04    ,BDTEMPI ,SUMY,"Body 04"         , 60 , 58 , 57 , 0, 2 , 23, 5  , 20 , 3 }
+	  {RRRS,CAV1,BD05    ,BDTEMPI ,SUMY,"Body 05"         , 60 , 58 , 57 , 0, 2 , 24, 5  , 20 , 4 }
+	  {RRRS,CAV1,BD06    ,BDTEMPI ,SUMY,"Body 06"         , 60 , 58 , 57 , 0, 2 , 25, 5  , 20 , 5 }
+	  {RRRS,CAV1,BD07    ,BDTEMPI ,SUMY,"Body 07"         , 60 , 58 , 57 , 0, 2 , 26, 5  , 20 , 6 }
+	  {RRRS,CAV1,BD08    ,BDTEMPI ,SUMY,"Body 08"         , 60 , 58 , 57 , 0, 2 , 27, 5  , 20 , 7 }
+	  {RRRS,CAV1,BD09    ,BDTEMPI ,SUMY,"Body 09"         , 60 , 58 , 57 , 0, 2 , 28, 5  , 20 , 8 }
+	  {RRRS,CAV1,BD10    ,BDTEMPI ,SUMY,"Body 10"         , 60 , 58 , 57 , 0, 2 , 29, 5  , 20 , 9 }
+	  {RRRS,CAV1,BD11    ,BDTEMPI ,SUMY,"Body 11"         , 60 , 58 , 57 , 0, 2 , 30, 5  , 20 ,10 }
+	  {RRRS,CAV1,BD12    ,BDTEMPI ,SUMY,"Body 12"         , 60 , 58 , 57 , 0, 2 , 31, 5  , 20 ,11 }
+	  {RRRS,CAV1,BD13    ,BDTEMP  ,SUMY,"Body 13"         , 60 , 58 , 57 , 0, 2 , 32, 5  , 20 ,12 }
+	  {RRRS,CAV1,BD14    ,BDTEMP  ,SUMY,"Body 14"         , 60 , 58 , 57 , 0, 2 , 33, 5  , 20 ,13 }
+
+	  {RRRS,CAV1,TUNRFX  ,TUNRTEMP,SUMY,"Fixed Tuner"     , 60 , 58 , 57 , 0, 2 , 34, 5  , 20 ,14 }
+	  {RRRS,CAV1,TUNRMV  ,TUNRTEMP,SUMY,"Moveable Tuner"  , 60 , 58 , 57 , 0, 2 , 35, 5  , 20 ,15 }
+	  {RRRS,CAV1,TUNRBL  ,TUNRTEMP,SUMY,"Mv Tuner Bellows", 60 , 58 , 57 , 0, 2 , 36, 6  , 21 , 0 }
+	  {RRRS,CAV1,HOM1    ,TEMP    ,SUMY,"HOM Load 1"      , 60 , 58 , 57 , 0, 2 , 37, 6  , 21 , 1 }
+	  {RRRS,CAV1,HOM2    ,TEMP    ,SUMY,"HOM Load 2"      , 60 , 58 , 57 , 0, 2 , 38, 6  , 21 , 2 }
+	  {RRRS,CAV1,HOM3    ,TEMP    ,SUMY,"HOM Load 3"      , 60 , 58 , 57 , 0, 2 , 39, 6  , 21 , 3 }
+	  {RRRS,CAV1,WATRRTN ,TEMP    ,SUMY,"Water Return"    , 50 , 48 , 45 , 0, 2 , 40, 6  , 21 , 4 }
+	  {RRRS,CAV1,WATR    ,TEMP    ,SUMY,"Water Supply"    , 80 , 75 , 70 , 0, 2 , 41, 6  , 21 , 5 }
+	  {RRRS,CAV1,WGFERR  ,TEMP    ,SUMY,"WGFerr Ld WtrRtn", 60 , 58 , 57 , 0, 2 , 42, 6  , 21 , 6 }
+	  {RRRS,CAV1,IONP    ,TEMP    ,SUMY,"Ion Pump"        , 60 ,401 ,401 , 0, 2 , 43, 6  , 21 , 7 }
+
+	  {RRRS,CAV2,BD01    ,BDTEMPI ,SUMY,"Body 01"         , 60 , 58 , 57 , 0, 2 , 44, 6  , 21 , 8 }
+	  {RRRS,CAV2,BD02    ,BDTEMPI ,SUMY,"Body 02"         , 60 , 58 , 57 , 0, 2 , 45, 6  , 21 , 9 }
+	  {RRRS,CAV2,BD03    ,BDTEMPI ,SUMY,"Body 03"         , 60 , 58 , 57 , 0, 2 , 46, 6  , 21 ,10 }
+	  {RRRS,CAV2,BD04    ,BDTEMPI ,SUMY,"Body 04"         , 60 , 58 , 57 , 0, 2 , 47, 6  , 21 ,11 }
+	  {RRRS,CAV2,BD05    ,BDTEMPI ,SUMY,"Body 05"         , 60 , 58 , 57 , 0, 2 , 48, 6  , 21 ,12 }
+	  {RRRS,CAV2,BD06    ,BDTEMPI ,SUMY,"Body 06"         , 60 , 58 , 57 , 0, 2 , 49, 6  , 21 ,13 }
+	  {RRRS,CAV2,BD07    ,BDTEMPI ,SUMY,"Body 07"         , 60 , 58 , 57 , 0, 2 , 50, 6  , 21 ,14 }
+	  {RRRS,CAV2,BD08    ,BDTEMPI ,SUMY,"Body 08"         , 60 , 58 , 57 , 0, 2 , 51, 6  , 21 ,15 }
+	  {RRRS,CAV2,BD09    ,BDTEMPI ,SUMY,"Body 09"         , 60 , 58 , 57 , 0, 2 , 52, 7  , 22 , 0 }
+	  {RRRS,CAV2,BD10    ,BDTEMPI ,SUMY,"Body 10"         , 60 , 58 , 57 , 0, 2 , 53, 7  , 22 , 1 }
+	  {RRRS,CAV2,BD11    ,BDTEMPI ,SUMY,"Body 11"         , 60 , 58 , 57 , 0, 2 , 54, 7  , 22 , 2 }
+	  {RRRS,CAV2,BD12    ,BDTEMPI ,SUMY,"Body 12"         , 60 , 58 , 57 , 0, 2 , 55, 7  , 22 , 3 }
+	  {RRRS,CAV2,BD13    ,BDTEMP  ,SUMY,"Body 13"         , 60 , 58 , 57 , 0, 2 , 56, 7  , 22 , 4 }
+	  {RRRS,CAV2,BD14    ,BDTEMP  ,SUMY,"Body 14"         , 60 , 58 , 57 , 0, 2 , 57, 7  , 22 , 5 }
+
+	  {RRRS,CAV2,TUNRFX  ,TUNRTEMP,SUMY,"Fixed Tuner"     , 60 , 58 , 57 , 0, 2 , 58, 7  , 22 , 6 }
+	  {RRRS,CAV2,TUNRMV  ,TUNRTEMP,SUMY,"Moveable Tuner"  , 60 , 58 , 57 , 0, 2 , 59, 7  , 22 , 7 }
+	  {RRRS,CAV2,TUNRBL  ,TUNRTEMP,SUMY,"Mv Tuner Bellows", 60 , 58 , 57 , 1, 3 , 4 , 7  , 22 , 8 }
+	  {RRRS,CAV2,HOM1    ,TEMP    ,SUMY,"HOM Load 1"      , 60 , 58 , 57 , 1, 3 , 5 , 7  , 22 , 9 }
+	  {RRRS,CAV2,HOM2    ,TEMP    ,SUMY,"HOM Load 2"      , 60 , 58 , 57 , 1, 3 , 6 , 7  , 22 ,10 }
+	  {RRRS,CAV2,HOM3    ,TEMP    ,SUMY,"HOM Load 3"      , 60 , 58 , 57 , 1, 3 , 7 , 7  , 22 ,11 }
+	  {RRRS,CAV2,WATRRTN ,TEMP    ,SUMY,"Water Return"    , 50 , 48 , 45 , 1, 3 , 8 , 7  , 22 ,12 }
+	  {RRRS,CAV2,WATR    ,TEMP    ,SUMY,"Water Supply"    , 80 , 75 , 70 , 1, 3 , 9 , 7  , 22 ,13 }
+	  {RRRS,CAV2,WGFERR  ,TEMP    ,SUMY,"WGFerr Ld WtrRtn", 60 , 58 , 57 , 1, 3 , 10, 7  , 22 ,14 }
+	  {RRRS,CAV2,IONP    ,TEMP    ,SUMY,"Ion Pump"        , 60 ,401 ,401 , 1, 3 , 11, 7  , 22 ,15 }
+@
+
+
+1.2
+log
+@Rename
+@
+text
+@d32 5
+a36 5
+	  {RRRS,KLYS,BD01WATR,BD01TEMP,SUMY,"BD01 Wtr Delta"  , 4  , 4  , 3  , 0, 2 , 5 , 4  , 19 , 1 }
+	  {RRRS,KLYS,BD02WATR,BD02TEMP,SUMY,"BD02 Wtr Delta"  , 3  , 3  , 3  , 0, 2 , 6 , 4  , 19 , 2 }
+	  {RRRS,KLYS,BD03WATR,BD03TEMP,SUMY,"BD03 Wtr Delta"  , 6  , 6  , 6  , 0, 2 , 7 , 4  , 19 , 3 }
+	  {RRRS,KLYS,COLLWATR,COLLTEMP,SUMY,"Coll Wtr Delta"  , 15 , 15 , 14 , 0, 2 , 8 , 4  , 19 , 4 }
+	  {RRRS,KLYS,WNDWAIR ,WNDWTEMP,SUMY,"Window Air"      , 25 , 15 , 12 , 0, 2 , 9 , 4  , 19 , 5 }
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 25
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

@@ -1,0 +1,1353 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP - DSP code
+**
+**  Abstract:
+**      Simple test loading recognizable waveforms into I and Q circ buffers
+**
+**  Author:
+**	L. Sapozhnikov, SLAC/PEP-II Low Level RF Project
+**
+**   History:
+**    May      30, 1997 - W. Ross:  Update for GVFF Revision 1 module
+**
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+/* Modified by W. Ross, May 30, 1997, to conform to Revision 1 Gap Module */
+/* The main change is the exchange of IOBit2 and IOBit3 functions, IOBit3 now */
+/* drives an external LED (and additionally resets the IQ FIFOs which don't */
+/* effect this test.  IOBit2 is now an input for an external test switch */
+
+#include <1610.h>
+
+#include "dspDef.h"
+#include "timDef.h"
+#include "intDef.h"
+#include "bioDef.h"
+
+.rsect ".ram"
+.= VEC_A_RESET
+main:
+	auc = 0
+	mwait = 0x3333
+        inc    = 0                      /* Disable interrupts */
+	sbit = DSP_K_BIODIR			/* Set sbit configuration */
+        cbit   = 0                      /* Reset all BIO outputs */
+        cbit   = BIO_OFF(BIO_V_FIFOENA) /* Used here as output bit driving */
+					/*   external led through IOBit conn */
+	pl = 0
+
+	cbit	= BIO_ON(BIO_V_BUFSEL)	/* Select high buffers as output
+	nop				/* wait for control bit re-sync */
+	nop
+	nop
+	nop
+	nop
+	nop
+
+        r0 = 0x2000			/* Put wave form in I-lo circular buf */
+	r1 = out_wave4
+	do 72 {
+           a0 = *r1++
+	   *r0++ =a0
+           a0 = *r1++
+	   *r0++ =a0
+         }
+
+        r0 = 0x2200			/* Put wave form in Q-lo circular buf */
+	r1 = out_wave4
+	do 72 {
+           a0 = *r1++
+	   *r0++ =a0
+           a0 = *r1++
+	   *r0++ =a0
+         }
+
+	cbit	= BIO_OFF(BIO_V_BUFSEL)	/* Select low buffers as output
+	nop				/* wait for control bit re-sync */
+	nop
+	nop
+	nop
+	nop
+	nop
+
+        r0 = 0x2100			/* Put wave form in I-hi circular buf */
+	r1 = out_wave6
+	do 72 {
+           a0 = *r1++
+	   *r0++ =a0
+           a0 = *r1++
+	   *r0++ =a0
+         }
+
+        r0 = 0x2300			/* Put wave form in Q-hi circular buf */
+	r1 = out_wave6
+	do 72 {
+           a0 = *r1++
+	   *r0++ =a0
+           a0 = *r1++
+	   *r0++ =a0
+         }
+
+	cbit = BIO_ON(BIO_V_DSPRUN)	/* turn on DSP_RUN led, enable DAC */
+	cbit = BIO_ON(BIO_V_FIFOENA)	/* turn on IOBit Connector LED	   */
+test:
+        cbit = BIO_TESTT(BIO_V_GENERAL)	/* test iobit2 and select between upper
+					  and lower buffer for both channels */
+   	if allt goto l_buf
+	goto test
+l_buf:
+	cbit = BIO_ON(BIO_V_BUFSEL)
+	goto test1
+test1:
+        cbit   = BIO_TESTF(BIO_V_GENERAL)
+   	if allt goto l_buf1
+	goto test1
+l_buf1:
+	cbit = BIO_OFF(BIO_V_BUFSEL)
+	goto test
+end: goto end
+
+out_wave: 			/* sine wave at about 136kHz */
+int 1429  
+int 2856  
+int 4277  
+int 5690  
+int 7092  
+int 8481  
+int 9853  
+int 11207 
+int 12539 
+int 13848 
+int 15130 
+int 16383 
+int 17606 
+int 18794 
+int 19947 
+int 21062 
+int 22137 
+int 23170 
+int 24158 
+int 25101 
+int 25996 
+int 26841 
+int 27635 
+int 28377 
+int 29065 
+int 29697 
+int 30273 
+int 30791 
+int 31250 
+int 31650 
+int 31990 
+int 32269 
+int 32487 
+int 32642 
+int 32736 
+int 32767 
+int 32736 
+int 32642 
+int 32487 
+int 32269 
+int 31990 
+int 31650 
+int 31250 
+int 30791 
+int 30273 
+int 29697 
+int 29065 
+int 28377 
+int 27635 
+int 26841 
+int 25996 
+int 25101 
+int 24158 
+int 23170 
+int 22137 
+int 21062 
+int 19947 
+int 18794 
+int 17606 
+int 16384 
+int 15130 
+int 13848 
+int 12539 
+int 11207 
+int 9853  
+int 8481  
+int 7092  
+int 5690  
+int 4277  
+int 2856  
+int 1429  
+int 0     
+int -1429 
+int -2856 
+int -4277 
+int -5690 
+int -7092 
+int -8481 
+int -9853 
+int -11207 
+int -12539 
+int -13848 
+int -15130 
+int -16384 
+int -17606 
+int -18794 
+int -19947 
+int -21062 
+int -22137 
+int -23170 
+int -24158 
+int -25101 
+int -25996 
+int -26841 
+int -27635 
+int -28377 
+int -29065 
+int -29697 
+int -30273 
+int -30791 
+int -31250 
+int -31650 
+int -31990 
+int -32269 
+int -32487 
+int -32642 
+int -32736 
+int -32767 
+int -32736 
+int -32642 
+int -32487 
+int -32269 
+int -31990 
+int -31650 
+int -31250 
+int -30791 
+int -30273 
+int -29697 
+int -29065 
+int -28377 
+int -27635 
+int -26841 
+int -25996 
+int -25101 
+int -24158 
+int -23170 
+int -22137 
+int -21062 
+int -19947 
+int -18794 
+int -17606 
+int -16383 
+int -15130 
+int -13848 
+int -12539 
+int -11207 
+int -9853 
+int -8481 
+int -7092 
+int -5690 
+int -4277 
+int -2856 
+int -1429 
+int -0   
+out_wave1:  			/* sine wave at about 272kHz */
+int 2856  
+int 5690  
+int 8481  
+int 11207 
+int 13848 
+int 16383 
+int 18794 
+int 21062 
+int 23170 
+int 25101 
+int 26841 
+int 28377 
+int 29697 
+int 30791 
+int 31650 
+int 32269 
+int 32642 
+int 32767 
+int 32642 
+int 32269 
+int 31650 
+int 30791 
+int 29697 
+int 28377 
+int 26841 
+int 25101 
+int 23170 
+int 21062 
+int 18794 
+int 16384 
+int 13848 
+int 11207 
+int 8481  
+int 5690  
+int 2856  
+int 0     
+int -2856 
+int -5690 
+int -8481 
+int -11207 
+int -13848 
+int -16384 
+int -18794 
+int -21062 
+int -23170 
+int -25101 
+int -26841 
+int -28377 
+int -29697 
+int -30791 
+int -31650 
+int -32269 
+int -32642 
+int -32767 
+int -32642 
+int -32269 
+int -31650 
+int -30791 
+int -29697 
+int -28377 
+int -26841 
+int -25101 
+int -23170 
+int -21062 
+int -18794 
+int -16383 
+int -13848 
+int -11207 
+int -8481 
+int -5690 
+int -2856 
+int -0    
+int 2856  
+int 5690  
+int 8481  
+int 11207 
+int 13848 
+int 16383 
+int 18794 
+int 21062 
+int 23170 
+int 25101 
+int 26841 
+int 28377 
+int 29697 
+int 30791 
+int 31650 
+int 32269 
+int 32642 
+int 32767 
+int 32642 
+int 32269 
+int 31650 
+int 30791 
+int 29697 
+int 28377 
+int 26841 
+int 25101 
+int 23170 
+int 21062 
+int 18794 
+int 16383 
+int 13848 
+int 11207 
+int 8481  
+int 5690  
+int 2856  
+int 0     
+int -2856 
+int -5690 
+int -8481 
+int -11207 
+int -13848 
+int -16383 
+int -18794 
+int -21062 
+int -23170 
+int -25101 
+int -26841 
+int -28377 
+int -29697 
+int -30791 
+int -31650 
+int -32269 
+int -32642 
+int -32767 
+int -32642 
+int -32269 
+int -31650 
+int -30791 
+int -29697 
+int -28377 
+int -26841 
+int -25101 
+int -23170 
+int -21062 
+int -18794 
+int -16383 
+int -13848 
+int -11207 
+int -8481 
+int -5690 
+int -2856 
+int -0     
+out_wave2:  			/* sawtooth wave at about 136kHz */
+int -32767 
+int -32312 
+int -31857 
+int -31402 
+int -30947 
+int -30492 
+int -30036 
+int -29581 
+int -29126 
+int -28671 
+int -28216 
+int -27761 
+int -27306 
+int -26851 
+int -26396 
+int -25941 
+int -25485 
+int -25030 
+int -24575 
+int -24120 
+int -23665 
+int -23210 
+int -22755 
+int -22300 
+int -21845 
+int -21390 
+int -20934 
+int -20479 
+int -20024 
+int -19569 
+int -19114 
+int -18659 
+int -18204 
+int -17749 
+int -17294 
+int -16839 
+int -16384 
+int -15928 
+int -15473 
+int -15018 
+int -14563 
+int -14108 
+int -13653 
+int -13198 
+int -12743 
+int -12288 
+int -11833 
+int -11377 
+int -10922 
+int -10467 
+int -10012 
+int -9557 
+int -9102 
+int -8647 
+int -8192 
+int -7737 
+int -7282 
+int -6826 
+int -6371 
+int -5916 
+int -5461 
+int -5006 
+int -4551 
+int -4096 
+int -3641 
+int -3186 
+int -2731 
+int -2275 
+int -1820 
+int -1365 
+int -910  
+int -455  
+int 0     
+int 455   
+int 910   
+int 1365  
+int 1820  
+int 2275  
+int 2731  
+int 3186  
+int 3641  
+int 4096  
+int 4551  
+int 5006  
+int 5461  
+int 5916  
+int 6371  
+int 6826  
+int 7282  
+int 7737  
+int 8192  
+int 8647  
+int 9102  
+int 9557  
+int 10012 
+int 10467 
+int 10922 
+int 11377 
+int 11833 
+int 12288 
+int 12743 
+int 13198 
+int 13653 
+int 14108 
+int 14563 
+int 15018 
+int 15473 
+int 15928 
+int 16384 
+int 16839 
+int 17294 
+int 17749 
+int 18204 
+int 18659 
+int 19114 
+int 19569 
+int 20024 
+int 20479 
+int 20934 
+int 21390 
+int 21845 
+int 22300 
+int 22755 
+int 23210 
+int 23665 
+int 24120 
+int 24575 
+int 25030 
+int 25485 
+int 25941 
+int 26396 
+int 26851 
+int 27306 
+int 27761 
+int 28216 
+int 28671 
+int 29126 
+int 29581 
+int 30036 
+int 30492 
+int 30947 
+int 31402 
+int 31857 
+int 32312
+out_wave3:  			/* square wave at about 136kHz */
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int -32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767 
+int 32767
+out_wave4: 			/* test each bit */
+int 16 
+int 16 
+int 16 
+int 16 
+int 16 
+int 16
+int 16
+int 16 
+int 16 
+int 16 
+int 16 
+int 16 
+int 32 
+int 32
+int 32
+int 32
+int 32
+int 32
+int 32
+int 32
+int 32
+int 32
+int 32
+int 32
+int 64
+int 64
+int 64
+int 64
+int 64
+int 64
+int 64
+int 64
+int 64
+int 64
+int 64
+int 64
+int 128
+int 128
+int 128
+int 128
+int 128
+int 128
+int 128
+int 128
+int 128
+int 128
+int 128
+int 128
+int 256
+int 256
+int 256
+int 256
+int 256
+int 256
+int 256
+int 256
+int 256
+int 256
+int 256
+int 256
+int 512
+int 512
+int 512
+int 512
+int 512
+int 512
+int 512
+int 512
+int 512
+int 512
+int 512
+int 512
+int 1024
+int 1024
+int 1024
+int 1024
+int 1024
+int 1024
+int 1024
+int 1024
+int 1024
+int 1024
+int 1024
+int 1024
+int 2048
+int 2048
+int 2048
+int 2048
+int 2048
+int 2048
+int 2048
+int 2048
+int 2048
+int 2048
+int 2048
+int 2048
+int 4096 
+int 4096 
+int 4096 
+int 4096 
+int 4096 
+int 4096
+int 4096
+int 4096
+int 4096 
+int 4096 
+int 4096 
+int 4096
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768 
+int 8192
+int 8192
+int 8192
+int 8192
+int 8192
+int 8192
+int 8192
+int 8192
+int 8192
+int 8192
+int 8192
+int 8192
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+out_wave5:  			/* all zeros output*/
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0   
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0     
+int 0
+out_wave6: 			/* all -1 output*/
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+int 32768
+out_wave7:   			/* all 0.5 output */
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+int 16384
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

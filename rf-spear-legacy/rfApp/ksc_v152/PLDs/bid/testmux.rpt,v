@@ -1,0 +1,507 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.56.56;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.56.56;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Project Information                                        c:\v150\testmux.rpt
+
+MAX+plus II Compiler Report File
+Version 8.1 9/12/97
+Compiled: 07/09/99 15:00:41
+
+Copyright (C) 1991-1997 Altera Corporation
+Any megafunction design, and related net list (encrypted or decrypted),
+support information, device programming or simulation file, and any other
+associated documentation or information provided by Altera or a partner
+under Altera's Megafunction Partnership Program may be used only to
+program PLD devices (but not masked PLD devices) from Altera.  Any other
+use of such megafunction design, net list, support information, device
+programming or simulation file, or any other related documentation or
+information is prohibited for any other purpose, including, but not
+limited to modification, reverse engineering, de-compiling, or use with
+any other silicon devices, unless such use is explicitly licensed under
+a separate agreement with Altera or a megafunction partner.  Title to
+the intellectual property, including patents, copyrights, trademarks,
+trade secrets, or maskworks, embodied in any such megafunction design,
+net list, support information, device programming or simulation file, or
+any other related documentation or information provided by Altera or a
+megafunction partner, remains with Altera, the megafunction partner, or
+their respective licensors.  No other licenses, including any licenses
+needed under any third party's intellectual property, are provided herein.
+
+
+
+***** Project compilation was successful
+
+
+
+
+** DEVICE SUMMARY **
+
+Chip/                     Input   Output   Bidir 			    LCs
+POF       Device          Pins    Pins     Pins      LCs    % Utilized
+
+testmux   EPF8282ALC84-2   3        2        0       8           3  %
+
+User Pins:                 3        2        0  
+
+
+
+Project Information                                        c:\v150\testmux.rpt
+
+** FILE HIERARCHY **
+
+
+
+|74139:13|
+
+
+Device-Specific Information:                               c:\v150\testmux.rpt
+testmux
+
+***** Logic for device 'testmux' compiled without errors.
+
+
+
+
+Device: EPF8282ALC84-2
+
+FLEX 8000 Configuration Scheme: Active Serial
+
+Device Options:
+    User-Supplied Start-Up Clock               = OFF
+    Auto-Restart Configuration on Frame Error  = OFF
+    Release Clears Before Tri-States           = OFF
+    Enable DCLK Output in User Mode            = OFF
+    Disable Start-Up Time-Out                  = OFF
+    Enable JTAG Support                        = OFF
+
+                ^                                                              
+                C                                                              
+                O     R  R  R  R     R  R  R  R  R  R  R  R        R  R  R     
+                N     E  E  E  E     E  E  E  E  E  E  E  E        E  E  E     
+                F     S  S  S  S     S  S  S  S  S  S  S  S  V  *  S  S  S     
+                _  ^  E  E  E  E     E  E  E  E  E  E  E  E  C  S  E  E  E     
+                D  D  R  R  R  R     R  R  R  R  R  R  R  R  C  D  R  R  R  ^  
+                O  C  V  V  V  V  G  V  V  V  V  V  V  V  V  I  O  V  V  V  n  
+                N  L  E  E  E  E  N  E  E  E  E  E  E  E  E  N  U  E  E  E  S  
+                E  K  D  D  D  D  D  D  D  D  D  D  D  D  D  T  T  D  D  D  P  
+              -----------------------------------------------------------------_ 
+            /  11 10  9  8  7  6  5  4  3  2  1 84 83 82 81 80 79 78 77 76 75   | 
+ DRIVE_VME | 12                                                              74 | ^MSEL0 
+  RESERVED | 13                                                              73 | DRIVE_VXI 
+    +DATA0 | 14                                                              72 | RESERVED 
+  RESERVED | 15                                                              71 | RESERVED 
+  RESERVED | 16                                                              70 | RESERVED 
+    VCCINT | 17                                                              69 | RESERVED 
+  RESERVED | 18                                                              68 | GND 
+  RESERVED | 19                                                              67 | RESERVED 
+  RESERVED | 20                                                              66 | RESERVED 
+  RESERVED | 21                                                              65 | RESERVED 
+ VXI_DRIVE | 22                        EPF8282ALC84-2                        64 | RESERVED 
+  RESERVED | 23                                                              63 | RESERVED 
+  RESERVED | 24                                                              62 | RESERVED 
+  RESERVED | 25                                                              61 | RESERVED 
+       GND | 26                                                              60 | RESERVED 
+  RESERVED | 27                                                              59 | VCCINT 
+  RESERVED | 28                                                              58 | RESERVED 
+  RESERVED | 29                                                              57 | RESERVED 
+  RESERVED | 30                                                              56 | VME_DRIVE 
+    /RESET | 31                                                              55 | RESERVED 
+  ^nSTATUS | 32                                                              54 | GND 
+           |_  33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53  _| 
+             ------------------------------------------------------------------ 
+                ^  R  R  R  R  V  R  R  R  R  R  R  R  R  G  R  R  R  R  G  ^  
+                n  E  E  E  E  C  E  E  E  E  E  E  E  E  N  E  E  E  E  N  M  
+                C  S  S  S  S  C  S  S  S  S  S  S  S  S  D  S  S  S  S  D  S  
+                O  E  E  E  E  I  E  E  E  E  E  E  E  E     E  E  E  E     E  
+                N  R  R  R  R  N  R  R  R  R  R  R  R  R     R  R  R  R     L  
+                F  V  V  V  V  T  V  V  V  V  V  V  V  V     V  V  V  V     1  
+                I  E  E  E  E     E  E  E  E  E  E  E  E     E  E  E  E        
+                G  D  D  D  D     D  D  D  D  D  D  D  D     D  D  D  D        
+                                                                               
+                                                                               
+
+
+N.C. = Not Connected.
+VCCINT = Dedicated power pin, which MUST be connected to VCC (5.0 volts).
+VCCIO = Dedicated power pin, which MUST be connected to VCC (5.0 volts).
+GND = Dedicated ground pin or unused dedicated input, which MUST be connected to GND.
+RESERVED = Unused I/O pin, which MUST be left unconnected.
+
+^ = Dedicated configuration pin.
++ = Reserved configuration pin, which is tri-stated during user mode.
+* = Reserved configuration pin, which drives out in user mode.
+PDn = Power Down pin. 
+@@ = Special-purpose pin. 
+# = JTAG Boundary-Scan Testing Pin.
+
+
+Device-Specific Information:                               c:\v150\testmux.rpt
+testmux
+
+** RESOURCE USAGE **
+
+Logic                Column       Row                                   
+Array                Interconnect Interconnect         Clears/     External  
+Block   Logic Cells  Driven       Driven       Clocks  Presets   Interconnect
+B1       8/ 8(100%)   0/ 8(  0%)   2/ 8( 25%)    1/2    1/2       3/24( 12%)   
+
+
+Total dedicated input pins used:                 3/4      ( 75%)
+Total I/O pins used:                             4/64     (  6%)
+Total logic cells used:                          8/208    (  3%)
+Average fan-in:                                 1.87/4    ( 46%)
+Total fan-in:                                  15/832     (  1%)
+
+Total input pins required:                       3
+Total input I/O cell registers required:         0
+Total output pins required:                      2
+Total output I/O cell registers required:        0
+Total buried I/O cell registers required:        0
+Total bidirectional pins required:               0
+Total reserved pins required                     2
+Total logic cells required:                      8
+Total flipflops required:                        1
+Total logic cells in carry chains:               0
+Total number of carry chains:                    0
+Total logic cells in cascade chains:             0
+Total number of cascade chains:                  0
+
+Synthesized logic cells:                         0/ 208   (  0%)
+
+Logic Cell Counts
+
+Column:  01  02  03  04  05  06  07  08  09  10  11  12  13  Total
+ A:      0   0   0   0   0   0   0   0   0   0   0   0   0      0
+ B:      8   0   0   0   0   0   0   0   0   0   0   0   0      8
+
+Total:   8   0   0   0   0   0   0   0   0   0   0   0   0      8
+
+
+
+Device-Specific Information:                               c:\v150\testmux.rpt
+testmux
+
+** INPUTS **
+
+                                               Fan-In    Fan-Out
+ Pin     LC   Row  Col  Primitive    Code     INP  FBK  OUT  FBK  Name
+  12      -    -    --      INPUT              0    0    0    1  DRIVE_VME
+  73      -    -    --      INPUT              0    0    0    1  DRIVE_VXI
+  31      -    -    --      INPUT              0    0    0    2  /RESET
+
+
+Code:
+
+s = Synthesized pin or logic cell
++ = Synchronous flipflop
+/ = Slow slew-rate output
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+^ = Increased input delay
+$ = Driven by fast output logic cell
+
+
+Device-Specific Information:                               c:\v150\testmux.rpt
+testmux
+
+** OUTPUTS **
+
+       Fed By                                  Fan-In    Fan-Out
+ Pin     LC   Row  Col  Primitive    Code     INP  FBK  OUT  FBK  Name
+  56      -    B    --     OUTPUT              0    1    0    0  VME_DRIVE
+  22      -    B    --     OUTPUT              0    1    0    0  VXI_DRIVE
+
+
+Code:
+
+s = Synthesized pin or logic cell
++ = Synchronous flipflop
+/ = Slow slew-rate output
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+^ = Increased input delay
+$ = Driven by fast output logic cell
+
+
+Device-Specific Information:                               c:\v150\testmux.rpt
+testmux
+
+** BURIED LOGIC **
+
+                                               Fan-In    Fan-Out
+ IOC     LC   Row  Col  Primitive    Code     INP  FBK  OUT  FBK  Name
+   -      7    B    01        OR2             1    1    0    3  :26
+   -      6    B    01        DFF       !     0    2    0    3  :52
+   -      8    B    01      LCELL             0    1    0    1  :55
+   -      5    B    01      LCELL             0    1    0    1  :56
+   -      4    B    01      LCELL             0    1    0    1  :58
+   -      3    B    01        OR2       !     1    1    0    2  |74139:13|:11
+   -      2    B    01       AND2       !     1    3    1    1  |74139:13|Y11N (|74139:13|:34)
+   -      1    B    01        OR2       !     1    3    1    1  |74139:13|Y12N (|74139:13|:35)
+
+
+Code:
+
+s = Synthesized pin or logic cell
++ = Synchronous flipflop
+/ = Slow slew-rate output
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+^ = Increased input delay
+$ = Driven by fast output logic cell
+
+
+Device-Specific Information:                               c:\v150\testmux.rpt
+testmux
+
+** FASTTRACK INTERCONNECT UTILIZATION **
+
+Row FastTrack Interconnect:
+
+         FastTrack                                 
+Row     Interconnect    Input Pins     Output Pins     Bidir Pins
+A:       0/168(  0%)    0/16(  0%)      1/16(  6%)     0/16(  0%)
+B:       2/168(  1%)    0/16(  0%)      2/16( 12%)     0/16(  0%)
+
+
+Column FastTrack Interconnect:
+
+         FastTrack                                 
+Column  Interconnect    Input Pins     Output Pins     Bidir Pins
+01:      0/16(  0%)     0/4(  0%)      0/4(  0%)       0/4(  0%)
+02:      0/16(  0%)     0/4(  0%)      0/4(  0%)       0/4(  0%)
+03:      0/16(  0%)     0/4(  0%)      0/4(  0%)       0/4(  0%)
+04:      0/16(  0%)     0/4(  0%)      0/4(  0%)       0/4(  0%)
+05:      0/16(  0%)     0/4(  0%)      0/4(  0%)       0/4(  0%)
+06:      0/16(  0%)     0/4(  0%)      0/4(  0%)       0/4(  0%)
+07:      0/16(  0%)     0/4(  0%)      0/4(  0%)       0/4(  0%)
+08:      0/16(  0%)     0/4(  0%)      0/4(  0%)       0/4(  0%)
+09:      0/16(  0%)     0/4(  0%)      0/4(  0%)       0/4(  0%)
+10:      0/16(  0%)     0/4(  0%)      0/4(  0%)       0/4(  0%)
+11:      0/16(  0%)     0/4(  0%)      1/4( 25%)       0/4(  0%)
+12:      0/16(  0%)     0/4(  0%)      0/4(  0%)       0/4(  0%)
+13:      0/16(  0%)     0/4(  0%)      0/4(  0%)       0/4(  0%)
+
+
+Device-Specific Information:                               c:\v150\testmux.rpt
+testmux
+
+** CLOCK SIGNALS **
+
+Type     Fan-out       Name
+LCELL        3         :26
+
+
+Device-Specific Information:                               c:\v150\testmux.rpt
+testmux
+
+** CLEAR SIGNALS **
+
+Type     Fan-out       Name
+LCELL        1         :55
+
+
+Device-Specific Information:                               c:\v150\testmux.rpt
+testmux
+
+** EQUATIONS **
+
+DRIVE_VME : INPUT;
+DRIVE_VXI : INPUT;
+/RESET   : INPUT;
+
+-- Node name is 'VME_DRIVE' 
+-- Equation name is 'VME_DRIVE', type is output 
+VME_DRIVE =  _LC1_B1;
+
+-- Node name is 'VXI_DRIVE' 
+-- Equation name is 'VXI_DRIVE', type is output 
+VXI_DRIVE =  _LC2_B1;
+
+-- Node name is '|74139:13|:34' = '|74139:13|Y11N' 
+-- Equation name is '_LC2_B1', type is buried 
+!_LC2_B1 = _LC2_B1~NOT;
+_LC2_B1~NOT = LCELL( _EQ001);
+  _EQ001 =  _LC3_B1 &  _LC6_B1 &  _LC7_B1 &  /RESET;
+
+-- Node name is '|74139:13|:35' = '|74139:13|Y12N' 
+-- Equation name is '_LC1_B1', type is buried 
+!_LC1_B1 = _LC1_B1~NOT;
+_LC1_B1~NOT = LCELL( _EQ002);
+  _EQ002 = !_LC3_B1 & !_LC6_B1 &  /RESET
+         # !_LC3_B1 & !_LC7_B1 &  /RESET;
+
+-- Node name is '|74139:13|:11' 
+-- Equation name is '_LC3_B1', type is buried 
+!_LC3_B1 = _LC3_B1~NOT;
+_LC3_B1~NOT = LCELL( _EQ003);
+  _EQ003 = !_LC1_B1
+         #  DRIVE_VXI;
+
+-- Node name is ':26' 
+-- Equation name is '_LC7_B1', type is buried 
+_LC7_B1  = LCELL( _EQ004);
+  _EQ004 = !_LC2_B1
+         #  DRIVE_VME;
+
+-- Node name is ':52' 
+-- Equation name is '_LC6_B1', type is buried 
+!_LC6_B1 = _LC6_B1~NOT;
+_LC6_B1~NOT = DFF( VCC, !_LC7_B1,  _LC8_B1,  VCC);
+
+-- Node name is ':55' 
+-- Equation name is '_LC8_B1', type is buried 
+_LC8_B1  = LCELL( _LC4_B1);
+
+-- Node name is ':56' 
+-- Equation name is '_LC5_B1', type is buried 
+_LC5_B1  = LCELL( _LC6_B1);
+
+-- Node name is ':58' 
+-- Equation name is '_LC4_B1', type is buried 
+_LC4_B1  = LCELL( _LC5_B1);
+
+
+
+Project Information                                        c:\v150\testmux.rpt
+
+** COMPILATION SETTINGS & TIMES **
+
+Processing Menu Commands
+------------------------
+
+Design Doctor                             = off
+
+Logic Synthesis:
+
+   Synthesis Type Used                    = Multi-Level
+
+   Default Synthesis Style                = NORMAL
+
+      Logic option settings in 'NORMAL' style for 'FLEX8000' family
+
+      CARRY_CHAIN                         = ignore
+      CARRY_CHAIN_LENGTH                  = 32
+      CASCADE_CHAIN                       = ignore
+      CASCADE_CHAIN_LENGTH                = 2
+      DECOMPOSE_GATES                     = on
+      DUPLICATE_LOGIC_EXTRACTION          = on
+      MINIMIZATION                        = full
+      MULTI_LEVEL_FACTORING               = on
+      NOT_GATE_PUSH_BACK                  = on
+      REDUCE_LOGIC                        = on
+      REFACTORIZATION                     = on
+      REGISTER_OPTIMIZATION               = on
+      RESYNTHESIZE_NETWORK                = on
+      SLOW_SLEW_RATE                      = off
+      SUBFACTOR_EXTRACTION                = on
+      IGNORE_SOFT_BUFFERS                 = on
+      USE_LPM_FOR_AHDL_OPERATORS          = off
+
+   Other logic synthesis settings:
+
+      Automatic Global Clock              = on
+      Automatic Global Clear              = on
+      Automatic Global Preset             = on
+      Automatic Global Output Enable      = on
+      Automatic Fast I/O                  = off
+      Automatic Register Packing          = off
+      Automatic Open-Drain Pins           = on
+      Automatic Implement in EAB          = off
+      One-Hot State Machine Encoding      = off
+      Optimize                            = 5
+
+Default Timing Specifications: None
+
+Cut All Bidir Feedback Timing Paths       = on
+Cut All Clear & Preset Timing Paths       = on
+
+Ignore Timing Assignments                 = off
+
+Functional SNF Extractor                  = off
+
+Linked SNF Extractor                      = off
+Timing SNF Extractor                      = on
+Optimize Timing SNF                       = off
+Generate AHDL TDO File                    = off
+Fitter Settings                           = NORMAL
+Smart Recompile                           = off
+Total Recompile                           = off
+
+Interfaces Menu Commands
+------------------------
+
+EDIF Netlist Writer                       = off
+Verilog Netlist Writer                    = off
+VHDL Netlist Writer                       = off
+
+Compilation Times
+-----------------
+
+   Compiler Netlist Extractor             00:00:00
+   Database Builder                       00:00:00
+   Logic Synthesizer                      00:00:01
+   Partitioner                            00:00:01
+   Fitter                                 00:00:01
+   Timing SNF Extractor                   00:00:00
+   Assembler                              00:00:00
+   --------------------------             --------
+   Total Time                             00:00:03
+
+
+Memory Allocated
+-----------------
+
+Peak memory allocated during compilation  = 7,445K
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

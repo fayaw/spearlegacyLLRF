@@ -1,0 +1,541 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.2.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.3
+date	2011.12.07.00.54.36;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.05.14.23.58.14;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Changes to get rid of *Msgs.c.
+@
+text
+@/*
+** ++
+**
+**  Facility:  RDT - Repository for Diagnostic Tools
+**
+**  Abstract:
+**      This program contains code to do memory tests of various sorts.
+**      It is based upon a similar program called SLVTESTS.C used in the
+**      SLD below line system.
+**
+**  Author:
+**	R. Claus,     SLAC/PEP-II Feedback Project
+**      J.J. Russell, SLAC/SLD Below line group
+**
+**  History:
+**	October  7, 1993 - Stolen from SLD for LFB use
+**      January 10, 1995 - Added output of xored values when compare fails
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#include <vxWorks.h>
+#include <memLib.h>
+#include <string.h>
+#include <stdioLib.h>
+#include <stdlib.h>
+
+#include "busLib.h"
+#include "sglLib.h"
+#include "mtlLib.h"
+#define MTL_MSG_GLOBAL
+#include "mtl.msg"
+#include "genLib.h"
+
+
+typedef Status (*PFstatus)();
+
+  static Status  TestMem  ();
+  static Status  BitFill  ();
+  static Status  IncFill  ();
+  static Status  CmpFill  ();
+  static Status  MemFill  ();
+  static Status  Compare  ();
+
+
+Status MemTest (unsigned int   space,
+                unsigned long  address,
+                unsigned int   xfrCnt,
+                unsigned int   wordSize,
+                unsigned int   testAlg,
+                unsigned long  value,
+                unsigned int   loopCnt,
+                unsigned int   bail)
+/*
+   Description
+   -----------
+   This program comprises a collection of memory tests.  The four tests
+   available are defined in mtlLib.h.  The Constant test tests memory by
+   loading the memory block with a specified constant.  The Bit test tests
+   that bits are independent by loading the memory block with a revolving
+   bit pattern.  All bits are tested.  The Increment test tests the memory
+   interface by loading the memory block with an incrementing bit pattern.
+   Each byte in the word is incremented.  The Complement test also checks
+   for stickiness of bits by complementing each memory location.
+   All of these tests are repeated for the number of bits in the specified
+   word size with each iteration using the next value in the series for each
+   memory location.
+
+   Parameter
+   ---------
+       space - The space to test: A16, A24, A32 or VSB.
+     address - Address to start testing at.
+      xfrCnt - Maximum number of bytes, shorts or longwords to test.
+    wordSize - Word size to use: 1, 2, or 4 bytes.
+     testAlg - Type of test to perform, e.g., bit, increment or constant
+       value - Initial data value for the test.
+     loopCnt - Number of times to repeat, 0 = forever.
+        bail - TRUE if we should stop on error.
+
+   Returns
+   -------
+   SUCCESS if okay, FAILURE otherwise.
+*/
+{
+  BusHndl       *busHndl;
+  int           *memory;
+  int           *compare;
+  unsigned int   bitCnt;
+  unsigned int   byteCnt;
+  PFstatus       setMem;
+  int            idx;
+  int           *memBlk;
+  unsigned int   passCnt;
+  Status         status;
+
+
+  /* Get prepared to go off board */
+  if ((busHndl = BUS_Prepare (space, wordSize, BUS_K_SINGLE)) == NIL)
+    return (SGL_Error (MTL_NOBUS), FAILURE);
+
+  /* Get a memory block */
+  bitCnt  = 8 * wordSize;
+  byteCnt = (xfrCnt + bitCnt) * wordSize;
+  if ((memory  = (int *) malloc (byteCnt)) == NIL)
+    return (SGL_Error (MTL_NOMEM), FAILURE);
+  if ((compare = (int *) malloc (byteCnt)) == NIL)
+    return (SGL_Error (MTL_NOCMP), FAILURE);
+
+#ifdef DBG
+  SGL_Output ("Memory = %08x, Compare = %08x\n", memory, compare);
+#endif
+
+  /* Select memory test pattern generator algorithm */
+  if      (testAlg == MTL_K_BIT)        setMem = BitFill;
+  else if (testAlg == MTL_K_INCREMENT)  setMem = IncFill;
+  else if (testAlg == MTL_K_COMPLEMENT) setMem = CmpFill;
+  else                                  setMem = MemFill;
+
+  /* Test the memory in blocks */
+  status = SUCCESS;
+  passCnt = 1;
+  do
+  {
+    (*setMem) (wordSize, memory, xfrCnt + bitCnt, value);
+
+    /* Loop once per bit */
+    for (memBlk = memory, idx = 0; idx < bitCnt; memBlk += wordSize, idx++)
+    {
+      status = TestMem (busHndl, address, xfrCnt, wordSize,
+                        (void *)memBlk,  compare, xfrCnt, bail);
+      if (status != SUCCESS) break;
+    }
+
+    printf ("Pass %u\n", passCnt++);
+  }
+  while ((status == SUCCESS) && --loopCnt);
+
+  /* Clean up */
+  free ((void *) memory);
+  free ((void *) compare);
+  BUS_Release (busHndl);
+
+  return (status);
+}
+
+
+
+static Status TestMem (BusHndl      *busHndl,
+                       unsigned int  address,
+                       unsigned int  length,
+                       unsigned int  wrdSize,
+                       int           buffer[],
+                       int           compare[],
+                       unsigned int  blkSize,
+                       unsigned int  bail)
+{
+  Status         status;
+  int            dwnLen;
+  int            dwnCnt;
+  int            remLen;
+  unsigned int  *mappedAdx = (unsigned int *)busHndl->offset + address;
+
+  /* Convert to bytes */
+  blkSize *= wrdSize;
+  length  *= wrdSize;
+
+  /* Download in blocks */
+  remLen   = length;
+  while (remLen > 0)
+  {
+    dwnLen = remLen >= blkSize ? blkSize : remLen;
+    dwnCnt = dwnLen / wrdSize;
+
+    /* Write the block */
+    status = (*busHndl->write) (dwnCnt, buffer, mappedAdx);
+    if (status != SUCCESS) return (FAILURE);
+
+    /* Read it back */
+    status = (*busHndl->read)  (dwnCnt, mappedAdx, compare);
+    if (status != SUCCESS) return (FAILURE);
+
+    /* Look for errors */
+    status = Compare (buffer, compare, dwnCnt, address, wrdSize, bail);
+    if (status != SUCCESS) return (FAILURE);
+
+    remLen  -= dwnLen;
+    address += dwnCnt;
+  }
+  return (SUCCESS);
+}
+
+
+
+static Status MemFill (unsigned int  size,
+                       unsigned int *memory,
+                       int           len,
+                       unsigned int  value)
+{
+  switch (size)
+  {
+  case SIZ_K_BYTE:
+    while (--len >= 0) 
+    {
+      *((char *) memory) = (char ) value;
+       memory += sizeof(char);
+    }
+    break;
+
+  case SIZ_K_SHORT:
+    while (--len >= 0) 
+    {
+       *((short *) memory) = (short) value;
+        memory += sizeof(short);
+    }
+    break;
+  case SIZ_K_LONG:
+    while (--len >= 0)
+    {
+       *((long *) memory) = (long ) value;
+        memory += sizeof(long);
+    }   
+   break;
+  }
+  return (SUCCESS);
+}
+
+
+
+static Status IncFill (unsigned int  size,
+                       unsigned int *memory,
+                       int           len,
+                       unsigned int  value)
+{
+  switch (size)
+  {
+  case SIZ_K_BYTE:
+    while (--len >= 0)
+    {
+      *((char *) memory) = (char ) value;
+      memory += sizeof(char);
+      value += 0x01;
+    }
+    break;
+  case SIZ_K_SHORT:
+    while (--len >= 0)
+    {
+      *((short *) memory) = (short) value;
+      memory += sizeof(short);
+      value += 0x0101;
+    }
+    break;
+  case SIZ_K_LONG:
+    while (--len >= 0)
+    {
+      *((long *) memory) = (long ) value;
+      memory += sizeof(long);
+      value += 0x01010101;
+    }
+    break;
+  }
+  return (SUCCESS);
+}
+
+
+
+static Status BitFill (unsigned int  size,
+                       unsigned int *memory,
+                       int           len,
+                       unsigned int  value)
+{
+  if (value == 0) value = 1;
+  switch (size)
+  {
+  case SIZ_K_BYTE:
+    {
+      unsigned char  *mem = (unsigned char  *) memory;
+      unsigned char   val = (unsigned char   ) value;
+      while (--len >= 0)    {  *mem++ = val;
+                               val    = (val >> 1) | (val << 7);   }
+    }
+    break;
+
+  case SIZ_K_SHORT:
+    {
+      unsigned short *mem = (unsigned short *) memory;
+      unsigned short  val = (unsigned short  ) value;
+      while (--len >= 0)    {  *mem++ = val;
+                               val    = (val >> 1) | (val << 15);  }
+    }
+    break;
+
+  case SIZ_K_LONG:
+    {
+      unsigned long *mem = (unsigned long *) memory;
+      unsigned long  val = (unsigned long  ) value;
+      while (--len >= 0)   {  *mem++ = val;
+                              val    = (val >> 1) | (val << 31);  }
+    }
+    break;
+  }
+
+  return (SUCCESS);
+}
+
+
+
+static Status CmpFill (unsigned int  size,
+                       unsigned int *memory,
+                       int           len,
+                       unsigned int  value)
+{
+  switch (size)
+  {
+  case SIZ_K_BYTE:
+    while (--len >= 0)
+    {
+      *((unsigned char  *) memory) =  (unsigned char ) value;
+      memory += sizeof(unsigned char);
+      value  = (unsigned char)(~(unsigned char)value);
+    }
+    break;
+
+  case SIZ_K_SHORT:
+    while (--len >= 0)
+    {
+      *((unsigned short *) memory) =  (unsigned short) value;
+       memory += sizeof(unsigned short);
+      value    = (unsigned short)(~(unsigned short)value);
+    }
+    break;
+
+  case SIZ_K_LONG:
+    while (--len >= 0)
+    {
+      *((unsigned long  *) memory) =  (unsigned long ) value;
+       memory += sizeof(unsigned long);
+      value    =  (unsigned long)(~(unsigned long)value);
+    }
+    break;
+  }
+
+  return (SUCCESS);
+}
+
+
+
+static Status Compare (int          *write,
+                       int          *read,
+                       unsigned int  count,
+                       unsigned int  address,
+                       unsigned int  size,
+                       unsigned int  bail)
+{
+  Status  status = SUCCESS;
+
+  switch (size)
+  {
+  case SIZ_K_BYTE:
+    {
+      char *wrt = (char *) write;
+      char *rd  = (char *) read;
+      char *adx = (char *) address;
+
+      while (count--)
+      {
+        if (*rd != *wrt)
+        {
+          status = FAILURE;
+          printf ("Error adx: %08lx rd: %02x wrt: %02x xor: %02x\n",
+                  (unsigned long int)adx,*rd, *wrt, *rd ^ *wrt);
+          if (bail)  break;
+        }
+        adx++;  rd++;  wrt++;
+      }
+    }
+    break;
+
+
+  case SIZ_K_SHORT:
+    {
+      short *wrt = (short *) write;
+      short *rd  = (short *) read;
+      short *adx = (short *) address;
+
+      while (count--)
+      {
+        if (*rd != *wrt)
+        {
+          status = FAILURE;
+          printf ("Error adx: %08lx rd: %04x wrt: %04x xor: %04x\n",
+                  (unsigned long int)adx, *rd, *wrt,(*rd ^ *wrt));
+          if (bail)  break;
+        }
+        adx++;  rd++;  wrt++;
+      }
+    }
+    break;
+
+  case SIZ_K_LONG:
+    {
+      long *wrt = (long *) write;
+      long *rd  = (long *) read;
+      long *adx = (long *) address;
+
+      while (count--)
+      {
+        if (*rd != *wrt)
+        {
+          status = FAILURE;
+          printf ("Error adx: %08lx rd: %08lx wrt: %08lx xor: %08lx\n",
+                  (unsigned long int)adx,
+                  (unsigned long int)(*rd), 
+                  (unsigned long int)(*wrt), 
+                  (unsigned long int)(*rd ^ *wrt));
+          if (bail)  break;
+        }
+        adx++;  rd++;  wrt++;
+      }
+    }
+    break;
+  }
+
+  return (status);
+}
+@
+
+
+1.2
+log
+@Got rid of warnings
+@
+text
+@d58 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d59 1
+a59 11
+
+#define NIL   (void *)(0)
+#define NULL           0
+#define TRUE           1
+#define FALSE          0
+#define SUCCESS        0
+#define FAILURE        1
+
+#define Min(a,b)       ((a) < (b) ? (a) : (b))
+#define Max(a,b)       ((a) > (b) ? (a) : (b))
+#define lsizeof(var)   (sizeof (var) >> 2)
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

@@ -1,0 +1,230 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.09.23.18.58.48;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.09.23.18.58.48;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@{COMPONENT Z:\WRK\KSC_V152\PLDS\TEST\CUPL_SRC\INT_MOD.SYM
+
+ {ENVIRONMENT
+  {PDIFvrev 3.00}
+  {Program "CUPL(WM) Version 5.0a"}
+  {DBtype "Schematic"}
+  {DBvrev 1.01}
+  {DBtime "Tue Sep 23 12:02:01 2003 "}
+  {DBunit "MIL"}
+  {DBgrid 10}
+  {Lyrstr "WIRES" 1 "BUS" 1 "GATE" 2 "IEEE" 2 "PINFUN" 3 "PINNUM" 1 
+          "PINNAM" 6 "PINCON" 4 "REFDES" 2 "ATTR" 6 "SDOT" 1 
+          "DEVICE" 5 "OUTLIN" 5 "ATTR2" 6 "NOTES" 6 "NETNAM" 4 
+          "CMPNAM" 5 "BORDER" 5}
+ }
+
+ {USER
+  {VIEW
+   {Mode SYMB}
+   {Nlst OPEN}
+   {Vw 0 0 2}
+   {Lv 12 2 2 2 0 0 2 2 2 2 0 0 2 1 2 0 0 0 0}
+   {Gs 10 10}
+  }
+ }
+
+ {DISPLAY
+  [Ly "PINNUM"]
+  [Ls "SOLID"][Wd 0]
+  [Ts 15][Tj "LC"][Tr 0][Tm "N"]
+ }
+
+ {SYMBOL
+  {PIN_DEF
+   [Ly "PINCON"]
+   {P G1 {Pt "INPUT"}{Lq 0}{Ploc 100 260}}
+   {P AS_N {Pt "INPUT"}{Lq 0}{Ploc 100 240}}
+   {P DS0_N {Pt "INPUT"}{Lq 0}{Ploc 100 220}}
+   {P DS1_N {Pt "INPUT"}{Lq 0}{Ploc 100 200}}
+   {P A4 {Pt "INPUT"}{Lq 0}{Ploc 100 180}}
+   {P A5 {Pt "INPUT"}{Lq 0}{Ploc 100 160}}
+   {P A6 {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
+   {P A7 {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
+   {P A8 {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
+   {P BIACKIN_ {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
+   {P BDS0_N {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
+   {P BAS_N {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
+   {P G2 {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
+   {P NOP {Pt "I/O"}{Lq 0}{Ploc 340 20}}
+   {P BDS1_N {Pt "I/O"}{Lq 0}{Ploc 340 40}}
+  }
+
+  {PKG
+   [Ly "REFDES"]
+   [Ts 25][Tj "CB"][Tr 0][Tm "N"]
+   {Rdl 220 290}
+
+   [Ly "PINNUM"]
+   [Ts 15][Tj "RC"]
+   {Pnl 120 270}
+   {Pnl 120 250}
+   {Pnl 120 230}
+   {Pnl 120 210}
+   {Pnl 120 190}
+   {Pnl 120 170}
+   {Pnl 120 150}
+   {Pnl 120 130}
+   {Pnl 120 110}
+   {Pnl 120 90}
+   {Pnl 120 70}
+   {Pnl 120 50}
+   {Pnl 120 30}
+   [Ts 15][Tj "LC"]
+   {Pnl 320 30}
+   {Pnl 320 50}
+
+   {Sd A 1 2 3 4 5 6 7 8 9 11 17 18 19 15 16}
+  }
+
+  {PIC
+   [Ly "GATE"]
+   [Ts 15][Tj "LC"][Tr 0][Tm "N"]
+   {R 130 280 310 0}
+   {L 130 260 100 260}
+   {L 130 240 100 240}
+   {L 130 220 100 220}
+   {L 130 200 100 200}
+   {L 130 180 100 180}
+   {L 130 160 100 160}
+   {L 130 140 100 140}
+   {L 130 120 100 120}
+   {L 130 100 100 100}
+   {L 130 80 100 80}
+   {L 130 60 100 60}
+   {L 130 40 100 40}
+   {L 130 20 100 20}
+   {L 310 20 340 20}
+   {L 310 40 340 40}
+   [Ly "PINNAM"]
+   [Tj "LC"]
+   {T "G1" 140 260}
+   {T "AS_N" 140 240}
+   {T "DS0_N" 140 220}
+   {T "DS1_N" 140 200}
+   {T "A4" 140 180}
+   {T "A5" 140 160}
+   {T "A6" 140 140}
+   {T "A7" 140 120}
+   {T "A8" 140 100}
+   {T "BIACKIN_" 140 80}
+   {T "BDS0_N" 140 60}
+   {T "BAS_N" 140 40}
+   {T "G2" 140 20}
+   [Tj "RC"]
+   {T "NOP" 300 20}
+   {T "BDS1_N" 300 40}
+   [Ly "DEVICE"]
+   [Tj "CT"]
+   {T "G16V8S" 220 -10}
+  }
+
+  {ATR
+   {IN
+    {Org 100 20}
+    {Ty 255}
+   }
+   {EX
+    [Ly "ATTR2"]
+    [Ts 12][Tj "CT"][Tr 0][Tm "N"]
+    {At PLD Z:\WRK\KSC_V152\PLDS\TEST\CUPL_SRC\INT_MOD 220 280}
+   }
+  }
+ }
+
+ {DETAIL
+  {ANNOTATE
+  }
+
+  {NET_DEF
+   {N G1
+   }
+   {N AS_N
+   }
+   {N DS0_N
+   }
+   {N DS1_N
+   }
+   {N A4
+   }
+   {N A5
+   }
+   {N A6
+   }
+   {N A7
+   }
+   {N A8
+   }
+   {N BIACKIN_
+   }
+   {N BDS0_N
+   }
+   {N BAS_N
+   }
+   {N G2
+   }
+   {N NOP
+   }
+   {N BDS1_N
+   }
+  }
+
+  {SUBCOMP
+  }
+ }
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

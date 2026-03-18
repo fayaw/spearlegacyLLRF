@@ -1,0 +1,170 @@
+head	1.5;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.5
+	RF-SPEAR-R0-3-1:1.5
+	RF-SPEAR-R0-3-0:1.5
+	RF-SPEAR-R0-2-0:1.5
+	RF-SPEAR-R0-1-0:1.5
+	RF-SPEAR-R0-0-3:1.5
+	RF-SPEAR-R0-0-2:1.5
+	RF-SPEAR-R0-0-1:1.5
+	RF-SPEAR-R0-0-0:1.5
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.5
+	RF-3-13-10:1.5.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.5
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.5
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.3
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.5
+date	2010.02.09.18.17.42;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2010.02.08.22.02.26;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2008.05.19.15.46.05;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2006.10.30.22.56.27;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.5
+log
+@Set alarm hysterisis on temperatures from 2 to 1 degrees.
+Remove ADEL and MDEL and just monitor on any change since resolution is
+1 degree anyway.
+@
+text
+@grecord(ai,"$(S):$(C)$(Q):TEMP:ULIM") {
+	field(DESC,"$(C) $(D)")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM AI I to F")
+	field(INP,"@@$(S):STN:DCM:MODU.T$(TU)[$(W)]")
+	field(EGUF,"400")
+	field(EGU,"C")
+	field(HOPR,"$(HO)")
+	field(ADEL,"0.9")
+	field(MDEL,"0.9")
+}
+grecord(ai,"$(S):$(C)$(Q):TEMP") {
+	field(DESC,"$(C) $(D)")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM AI I to F")
+	field(INP,"@@$(S):STN:DCM:MODU.T$(T)[$(W)]")
+	field(EGUF,"400")
+	field(EGU,"C")
+	field(HOPR,"$(HO)")
+	field(HIHI,"$(HH)")
+	field(HIGH,"$(HI)")
+	field(LOLO,"$(LL)")
+	field(LOW,"$(LW)")
+	field(HHSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LLSV,"MAJOR")
+	field(LSV,"MINOR")
+	field(HYST,"1")
+}
+grecord(bi,"$(S):$(C)$(Q):TEMP:LTCH") {
+	field(DESC,"$(C) $(D)")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM BI")
+	field(FLNK,"$(S):$(C)$(G):$(N):LTCH.PROC")
+	field(INP,"@@$(S):STN:DCM:MODU.T6[$(WL),$(B)]")
+	field(OSV,"MAJOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(bi,"$(S):$(C)$(Q):TEMP:FRST") {
+	field(DESC,"$(C) $(D)")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM BI")
+	field(FLNK,"$(S):$(C)$(G):$(N):FRST.PROC")
+	field(INP,"@@$(S):STN:DCM:MODU.T6[$(WF),$(B)]")
+	field(OSV,"MAJOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+@
+
+
+1.4
+log
+@Changes to add low limits to all temperatures.
+@
+text
+@d28 1
+a28 3
+	field(ADEL,"0.9")
+	field(MDEL,"0.9")
+	field(HYST,"2")
+@
+
+
+1.3
+log
+@Change degC to C.
+@
+text
+@d22 2
+d26 2
+@
+
+
+1.2
+log
+@Added alarm hysterisis of 1 degree for all temperatures from the RF MPS.
+@
+text
+@d7 1
+a7 1
+	field(EGU,"degC")
+d18 1
+a18 1
+	field(EGU,"degC")
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d26 1
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

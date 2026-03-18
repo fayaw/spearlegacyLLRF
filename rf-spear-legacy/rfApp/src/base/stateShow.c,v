@@ -1,0 +1,97 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	RF-SPEAR-R0-0-0:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1
+	RF-3-13-10:1.1.0.2;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2004.04.29.16.41.37;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Modified stateShow.c from WindRiver.  Fixes a bug in inetstatShow.
+@
+text
+@#ifdef NICPU030
+
+void changePcbShow (void)
+    {
+    }
+
+#else
+
+
+#include "vxWorks.h"
+#include "sys/types.h"
+#include "netinet/in.h"
+#include "netinet/in_systm.h"
+#include "netinet/ip.h"
+#include "netinet/ip_var.h"
+#include "netinet/in_pcb.h"
+#include "netinet/tcp.h"
+#include "netinet/tcp_debug.h"
+#include "netinet/tcp_fsm.h"
+#include "netinet/tcp_timer.h"
+#include "netinet/tcp_var.h"
+#include "errno.h"
+#include "string.h"
+#include "stdio.h"
+
+/* externs */
+
+IMPORT char *                   tcpstates[];    /* defined in tcp_fsm.h */
+IMPORT VOIDFUNCPTR              _pTcpPcbPrint;  /* defined in tcpShow.c */
+
+/* forward declarations */
+
+LOCAL void _tcpPcbPrint (struct inpcb * pInPcb);
+
+
+void changePcbShow (void)
+    {
+    _pTcpPcbPrint = _tcpPcbPrint;       /* initialize tcp specific print rtn */
+    }
+
+
+
+LOCAL void _tcpPcbPrint
+    (
+    struct inpcb * pInPcb       /* pointer to the protocol control block */
+    )
+    {
+    char * tcpstates[] = {
+         "CLOSED", "LISTEN", "SYN_SENT", "SYN_RCVD", "ESTABLISHED", "CLOSE_WAIT"
+,
+         "FIN_WAIT_1","CLOSING","LAST_ACK","FIN_WAIT_2","TIME_WAIT"
+         };
+    struct tcpcb *      pTcpCb; /* pointer to tcp Control block */
+
+    pTcpCb = (struct tcpcb *) pInPcb->inp_ppcb;
+
+    if (pTcpCb->t_state < 0 || pTcpCb->t_state >= TCP_NSTATES)
+        printf(" %d", pTcpCb->t_state);
+    else
+        printf(" %s", tcpstates[pTcpCb->t_state]);
+
+    }
+#endif
+@

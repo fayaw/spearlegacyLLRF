@@ -1,0 +1,339 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.01.10.23.22.43;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.43;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  RFP - RF Processing module code
+**
+**  Abstract:
+**      This file contains a routine to test the ripple loop code that runs
+**      on the RFP module's DSP.
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Low Level RF Group
+**
+**  History:
+**	October 28, 1996 - Created
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+#include <vxWorks.h>
+#include <stdioLib.h>
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+
+#include "dspCmdDef.h"
+#include "sttDef.h"
+
+#define GVF
+/*#define RFP*/
+
+#define CLOSED_LOOP
+
+#define PI (4.0 * atan (1.0))
+
+#define A16_OFFSET        0xffff0000
+#define A24_OFFSET        0xf0000000
+
+#define GVF_V_MSGTODSP    5
+#define GVF_M_MSGTODSP   (0x0001 << GVF_V_MSGTODSP)
+
+#define RFP_V_MSGTODSP    3
+#define RFP_M_MSGTODSP   (0x0001 << RFP_V_MSGTODSP)
+
+#define GVF_A_GFFCTRL     0x20          /* Gap Feed Forward Control register */
+#define RFP_A_RFCTRL      0x20          /* RF module control register */
+
+#ifdef GVF
+#  define MSG_TO_DSP      GVF_M_MSGTODSP
+#  define CTRL_REG        GVF_A_GFFCTRL
+#else
+#  define MSG_TO_DSP      RFP_M_MSGTODSP
+#  define CTRL_REG        RFP_A_RFCTRL
+#endif
+
+#define DSP_A_ERAM       0x8000         /* Image of external RAM for linker */
+#define DSP_K_ESIZE      0x4000		/* 0x2000 = 8k, 0x4000 = 16k        */
+#define DSP_A_ETOP       (DSP_A_ERAM + DSP_K_ESIZE - 1)
+
+#define I_ADX             0
+#define Q_ADX             2
+
+#define II_ADX            4
+#define IQ_ADX            6
+#define QI_ADX            8
+#define QQ_ADX            10
+
+#define IS_ADX            12
+#define QS_ADX            14
+#define PS_ADX            16
+#define AS_ADX            18
+
+#define WII_ADX           20
+#define WIQ_ADX           22
+#define WQI_ADX           24
+#define WQQ_ADX           26
+
+#define AT2_ADX           28
+
+#define SS_ADX            30
+#define SQRT_ADX          32
+
+#define COS_ADX           34
+#define SIN_ADX           36
+
+#define PO_ADX            38
+#define AO_ADX            40
+
+
+typedef struct _DspComBlk
+{
+  volatile unsigned short  blkId;
+  volatile unsigned short  vers;
+  volatile unsigned short  chkSum;
+  volatile unsigned short  status;
+  volatile unsigned short  sttArg[STT_K_ARGCNT];
+  volatile unsigned short  dspMsg;
+  volatile unsigned short  dspArg;
+  volatile unsigned short  cpuMsg;
+  volatile unsigned short  cpuArg;
+  volatile unsigned short  cpuComLen;
+}  DspComBlk;
+
+
+
+long RipTest (unsigned int  a16Adx,
+              unsigned int  a24Adx,
+              char         *file,
+              unsigned int  numPts)
+{
+  char            fileBuf[80];
+  FILE           *iiFp;
+  FILE           *iqFp;
+  FILE           *qiFp;
+  FILE           *qqFp;
+  unsigned int    i;
+  unsigned int    wtCnt;
+  unsigned short  cctl;
+  unsigned short  comBlkPtr;
+
+  float           Iin = 1.0;
+  float           Qin = 0.0;
+
+  float           ii = 0.0;
+  float           iq = 0.0;
+  float           qi = 0.0;
+  float           qq = 0.0;
+
+  volatile unsigned short  *ctrl   = (void *) (A16_OFFSET + a16Adx + CTRL_REG);
+
+  volatile unsigned short  *iAdx   = (void *) (A24_OFFSET + a24Adx + I_ADX);
+  volatile unsigned short  *qAdx   = (void *) (A24_OFFSET + a24Adx + Q_ADX);
+
+  volatile unsigned short  *iiAdx  = (void *) (A24_OFFSET + a24Adx + WII_ADX);
+  volatile unsigned short  *iqAdx  = (void *) (A24_OFFSET + a24Adx + WIQ_ADX);
+  volatile unsigned short  *qiAdx  = (void *) (A24_OFFSET + a24Adx + WQI_ADX);
+  volatile unsigned short  *qqAdx  = (void *) (A24_OFFSET + a24Adx + WQQ_ADX);
+  /*
+  volatile unsigned short  *isAdx  = (void *) (A24_OFFSET + a24Adx + IS_ADX);
+  volatile unsigned short  *qsAdx  = (void *) (A24_OFFSET + a24Adx + QS_ADX);
+  volatile unsigned short  *psAdx  = (void *) (A24_OFFSET + a24Adx + PS_ADX);
+  volatile unsigned short  *asAdx  = (void *) (A24_OFFSET + a24Adx + AS_ADX);
+
+  volatile unsigned short  *at2Adx = (void *) (A24_OFFSET + a24Adx + AT2_ADX);
+
+  volatile unsigned short  *ssAdx  = (void *) (A24_OFFSET + a24Adx + SS_ADX);
+  volatile unsigned short  *sqrtAdx= (void *) (A24_OFFSET + a24Adx + SQRT_ADX);
+
+  volatile unsigned short  *cosAdx = (void *) (A24_OFFSET + a24Adx + COS_ADX);
+  volatile unsigned short  *sinAdx = (void *) (A24_OFFSET + a24Adx + SIN_ADX);
+  */
+  volatile unsigned short  *poAdx  = (void *) (A24_OFFSET + a24Adx + PO_ADX);
+  volatile unsigned short  *aoAdx  = (void *) (A24_OFFSET + a24Adx + AO_ADX);
+
+  volatile DspComBlk       *comBlk;
+
+  comBlkPtr = *((volatile unsigned short *) (A24_OFFSET + a24Adx +
+                                             ((DSP_K_ESIZE - 1) << 1)));
+  comBlk    = (volatile DspComBlk *) (A24_OFFSET + a24Adx +
+                                      ((comBlkPtr - DSP_A_ERAM) << 1));
+
+  strcpy (fileBuf, file);
+  strcat (fileBuf, ".");
+  *strstr (fileBuf, ".") = '\0';
+  iiFp = fopen (strcat (fileBuf,".ii"), "w");
+  *strstr (fileBuf, ".") = '\0';
+  iqFp = fopen (strcat (fileBuf,".iq"), "w");
+  *strstr (fileBuf, ".") = '\0';
+  qiFp = fopen (strcat (fileBuf,".qi"), "w");
+  *strstr (fileBuf, ".") = '\0';
+  qqFp = fopen (strcat (fileBuf,".qq"), "w");
+
+  if ((iiFp == 0) || (iqFp == 0) || (qiFp == 0) || (qqFp == 0))
+  {
+    printf ("%s: Can't open file {%s}\n", "RipTest", file);
+    return (ERROR);
+  }
+
+  for (i = 0; i < numPts; i++)
+  {
+    short iTmp = (short) (16384.0 * (ii * Iin + iq * Qin));
+    short qTmp = (short) (16384.0 * (qi * Iin + qq * Qin));
+
+    *iAdx = iTmp;
+    *qAdx = qTmp;
+
+    /*    printf ("I = %f, Q = %f, i = %h04x, q = %h04x\n", ii, iq, iTmp, qTmp);*/
+
+    comBlk->cpuMsg = CMD_K_TEST;
+
+    cctl = *ctrl;
+    *ctrl = cctl | MSG_TO_DSP;
+    *ctrl = cctl;
+
+    /* Wait for at least 50 uS */
+    for (wtCnt = 0; wtCnt < 1000; wtCnt++) {}
+
+    {
+#ifdef DBG
+      int    ii = (short) *iiAdx;
+
+      fprintf (iiFp, "%i %d\n", i, ii);
+#else
+# ifdef CLOSED_LOOP
+#if 0
+
+      float    ii     = (*(short *) iiAdx) / 256.0;
+      float    iq     = (*(short *) iqAdx) / 256.0;
+
+      float    cosPhs = (*(short *) cosAdx) / 16384.0;
+      float    sinPhs = (*(short *) sinAdx) / 16384.0;
+      float    phsErr = (*(short *) psAdx)   / 8192.0;
+      float    phs    = (*(short *) at2Adx)  / 8192.0;
+
+      float    phsErr = (*(short *) psAdx)   / 8192.0;
+      float    ampErr = (*(short *) asAdx)   / 8192.0;
+      float    phsErr = (*(short *) psAdx)   / 8192.0;
+      float    ampErr = (*(short *) asAdx)   / 8192.0;
+      float    is     = (*(short *) isAdx);
+      float    qs     = (*(short *) qsAdx);
+      float    ss     = (*(short *) ssAdx);
+      float    phs    = (*(short *) at2Adx)  / 8192.0;
+      float    amp    = (*(short *) sqrtAdx) / 16384.0;
+#endif
+# else
+      float    ii = I = (float) (*(short *) iiAdx);
+      float    iq = Q = (float) (*(short *) iqAdx);
+# endif
+
+      float    phsOut = (*(short *) poAdx) / 8192.0;
+      float    ampOut = (*(short *) aoAdx) / 1024.0;
+
+      ii =        ((((*iiAdx) & 0xfff0) >> 4) - 0x0800) / 2048.0;
+      iq = -1.0 * ((((*iqAdx) & 0xfff0) >> 4) - 0x0800) / 2048.0;
+      qi =        ((((*qiAdx) & 0xfff0) >> 4) - 0x0800) / 2048.0;
+      qq =        ((((*qqAdx) & 0xfff0) >> 4) - 0x0800) / 2048.0;
+
+#if 0
+      ii = (*(short *) iiAdx) / 128.0;
+      iq = (*(short *) iqAdx) / 128.0;
+      qi = (*(short *) qiAdx) / 128.0;
+      qq = (*(short *) qqAdx) / 128.0;
+#endif
+
+      fprintf (iiFp, "%i %f\n", i, ii);
+      fprintf (iqFp, "%i %f\n", i, phsOut);
+      fprintf (qiFp, "%i %f\n", i, qi);
+      fprintf (qqFp, "%i %f\n", i, ampOut);
+#endif
+    }
+  }
+
+  fclose (iiFp);
+  fclose (iqFp);
+  fclose (qiFp);
+  fclose (qqFp);
+
+  return (OK);
+}
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

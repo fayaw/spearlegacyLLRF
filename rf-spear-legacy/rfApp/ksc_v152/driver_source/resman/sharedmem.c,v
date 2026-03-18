@@ -1,0 +1,364 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include <stdio.h>
+#include <stdlib.h>   /* for malloc */
+#include <assert.h>
+#include <vxWorks.h>
+#include <string.h>   /* for strcpy */
+#include <limits.h>   /* for PATH_MAX */
+
+#include "resman.h"
+
+#define SUCCESS 0
+#define OVERLAP 1
+#define RANGE_ERR 2
+
+#undef	KSC_DEBUG
+
+sharedMem_t *getsharedMem( char* path )
+{
+   FILE *fpSharedMem;
+   char fn[PATH_MAX];
+   sharedMem_t* sharedMem = malloc(sizeof(sharedMem_t));
+
+   assert(sharedMem);
+   sharedMem->sysBool = 0;
+   strcpy( fn, path );
+   strcat( fn, "sharedmem.tbl" );
+
+   if( (fpSharedMem = fopen( fn, "r" )) == NULL )
+   {
+      WARN "SBC Shared memory disabled:\nCould not open ");
+      perror( fn );
+   }
+   else if (fscanf(fpSharedMem, "%hd, %[^,], %hx, %hx",
+      &sharedMem->LA, sharedMem->device,
+      &sharedMem->adrSpace, &sharedMem->sysBool) != 4)
+   {
+      WARN "SBC Shared memory disabled:\nInvalid format in ");
+      perror( fn );
+      sharedMem->sysBool = 0;
+   }
+   else
+   {
+      TrimSp(sharedMem->device);
+
+#ifdef KSC_DEBUG
+      printf("sharedmem.tbl entry:\n  "
+             "LA %hd, device \"%s\", adrSpace %hd (%s), sysBool %s\n",
+	 sharedMem->LA, sharedMem->device, sharedMem->adrSpace,
+	 sharedMem->adrSpace == VXI_ADDR_EXT_A32 ? "A32" : 
+	    ( sharedMem->adrSpace == VXI_ADDR_EXT_A24 ? "A24" : 
+	      (sharedMem->adrSpace == VXI_ADDR_EXT_A16 ? "A16" : "Unknown") ),
+	 sharedMem->sysBool ? "TRUE" : "FALSE");
+#endif
+
+   }
+   fclose( fpSharedMem );
+   return sharedMem;
+}
+
+void rmReadSharedMem(sharedMem_t* pSharedMem)
+{
+    int                 rngNum;
+    UINT32              ctl;
+    UINT16		vsiRegs;
+/*/  unsigned long       size;   /*used to round up to next block size*/
+
+    if (pSharedMem->sysBool != 0 && pSharedMem->adrSpace == VXI_ADDR_EXT_A24)
+    {
+	    /* Enable A24 slave image, disable A32 */
+            rmUnivRegWr(RM_UNIV_A24_CTL,
+                rmUnivRegRd(RM_UNIV_A24_CTL) | 0x80000000);
+            rmUnivRegWr(RM_UNIV_A32_CTL,
+                rmUnivRegRd(RM_UNIV_A32_CTL) & 0x7fffffff);
+
+            /* Select A24 slave image */
+            vsiRegs = RM_UNIV_A24;
+            rngNum = 1;
+    }
+    else if (pSharedMem->sysBool!=0 && pSharedMem->adrSpace == VXI_ADDR_EXT_A32)
+    {
+	    /* Disable A24 slave image, enable A32 */
+            rmUnivRegWr(RM_UNIV_A24_CTL,
+                rmUnivRegRd(RM_UNIV_A24_CTL) & 0x7fffffff);
+            rmUnivRegWr(RM_UNIV_A32_CTL,
+                rmUnivRegRd(RM_UNIV_A32_CTL) | 0x80000000);
+
+            /* Select A32 slave image */
+            vsiRegs = RM_UNIV_A32;
+            rngNum = 0;
+    }
+    else
+    {
+            if (pSharedMem->sysBool != 0)
+	        WARN "SBC Shared memory disabled:\n"
+                    "Invalid address space in sharedmem.tbl\n");
+            pSharedMem->sysBool = 0;
+	    pSharedMem->adrSpace = VXI_ADDR_EXT_NONE;
+	    pSharedMem->sysBool = FALSE;
+
+	    /* Disable unused A32 slave image */
+            ctl = rmUnivRegRd( RM_UNIV_A32_CTL );
+            rmUnivRegWr( RM_UNIV_A32_CTL, ctl & 0x7fffffff );
+
+	    /* Disable unused A24 slave image */
+            ctl = rmUnivRegRd( RM_UNIV_A24_CTL );
+            rmUnivRegWr( RM_UNIV_A24_CTL, ctl & 0x7fffffff );
+	    return;
+    }
+   
+    ctl = rmUnivRegRd( vsiRegs + RM_UNIV_VSI_CTL );
+
+    /* If image enable bit is set */
+    if ((ctl >> 31) & 1)
+    {
+        pSharedMem->size = ( rmUnivRegRd( vsiRegs + RM_UNIV_VSI_BD ) -
+                             rmUnivRegRd( vsiRegs + RM_UNIV_VSI_BS ) );
+
+        pSharedMem->vmeAdrs = rmUnivRegRd( vsiRegs + RM_UNIV_VSI_BS );
+
+        pSharedMem->locAdrs = ( rmUnivRegRd( vsiRegs + RM_UNIV_VSI_TO ) +
+                                rmUnivRegRd( vsiRegs + RM_UNIV_VSI_BS ) );
+
+	/* Local address is different if memory or IO space is used */
+	if ((ctl & 3) == 0)
+	    pSharedMem->locAdrs = RM_PCI_MEM_2_CPU_CONV (pSharedMem->locAdrs);
+	else
+	    pSharedMem->locAdrs = RM_PCI_IO_2_CPU_CONV (pSharedMem->locAdrs);
+
+	switch (pSharedMem->adrSpace)
+	{
+#if 0
+	    case VXI_ADDR_EXT_A16:
+		if (((ctl >> 16) & 7) != 0)
+		{
+		    WARN "Slave image %d does not specify A16 space.\n"
+			"SBC Shared memory disabled.\n", rngNum);
+		    pSharedMem->adrSpace = VXI_ADDR_EXT_NONE;
+		    pSharedMem->sysBool = FALSE;
+		    break;
+		}
+		break;
+#endif
+	    case VXI_ADDR_EXT_A24:
+		if (((ctl >> 16) & 7) != 1)
+		{
+		    WARN "Slave image %d does not specify A24 space.\n"
+			"SBC Shared memory disabled.\n", rngNum);
+		    pSharedMem->adrSpace = VXI_ADDR_EXT_NONE;
+		    pSharedMem->sysBool = FALSE;
+		    break;
+		}
+#if 0
+		/*/ round up size*/
+		for(size = 0x800000; size >= pSharedMem->size &&
+				     size >= 0x200000; size>>=1)
+		   ;
+		pSharedMem->size = size << 1;
+#endif
+		/*/ force size to the only size that our extender allows*/
+		pSharedMem->size = 0x200000;
+                rmUnivRegWr( vsiRegs + RM_UNIV_VSI_BD, pSharedMem->vmeAdrs + pSharedMem->size );
+		break;
+	    case VXI_ADDR_EXT_A32:
+		if (((ctl >> 16) & 7) != 2)
+		{
+		    WARN "Slave image %d does not specify A32 space.\n"
+			"SBC Shared memory disabled.\n", rngNum);
+		    pSharedMem->adrSpace = VXI_ADDR_EXT_NONE;
+		    pSharedMem->sysBool = FALSE;
+		    break;
+		}
+#if 0
+		/*/ round up size*/
+		for(size = 0x80000000; size >= pSharedMem->size &&
+				       size >= 0x1000000; size>>=1)
+		   ;
+		pSharedMem->size = size << 1;
+#endif
+		/*/ force size to the only size that our extender allows*/
+		pSharedMem->size = 0x1000000;
+                rmUnivRegWr( vsiRegs + RM_UNIV_VSI_BD, pSharedMem->vmeAdrs + pSharedMem->size );
+		break;
+	}
+    } /* if enabled */
+    else
+    {
+	pSharedMem->sysBool = FALSE;
+    }
+
+}
+
+int assignSBCSharedMem( sharedMem_t *pSharedMem,
+                        config_t *root,
+                        unsigned short adrSpace )
+{
+   config_t *thisLA;
+
+   if (pSharedMem == (sharedMem_t*) NULL)
+      return (SUCCESS);
+
+   if (!pSharedMem->sysBool || pSharedMem->adrSpace == VXI_ADDR_EXT_NONE)
+      return (SUCCESS);
+
+   if((pSharedMem->adrSpace == adrSpace) && (adrSpace == VXI_ADDR_EXT_A16))
+   {
+      /* Check for conflicts with VXI LA's */
+      for(thisLA = root; thisLA != NULL; thisLA = thisLA->next)
+	 if(pSharedMem->vmeAdrs == (VXI_LA2PA(thisLA->logAdr)))
+	 {
+	     printf("Error:  A16 Base address conflict \n");
+	     printf("SBC Shared memory at 0x%lx, VXI LA:%d\n",
+		    pSharedMem->vmeAdrs, thisLA->logAdr);
+             pSharedMem->sysBool = FALSE;
+	     return(OVERLAP);
+	 }
+   }
+
+   else if((pSharedMem->adrSpace == adrSpace) && (adrSpace == VXI_ADDR_EXT_A24))
+   {
+      if ( getMemBlock( pSharedMem->size >> 8,
+			pSharedMem->vmeAdrs  >> 8) == FALSE )
+      {
+         WARN "Unable to assign SBC Shared memory to 0x%lx A24\n",
+            pSharedMem->vmeAdrs);
+	 pSharedMem->sysBool = FALSE;
+         return (RANGE_ERR);
+      }
+   }
+
+   else if((pSharedMem->adrSpace == adrSpace) && (adrSpace == VXI_ADDR_EXT_A32))
+   {
+      if ( getMemBlock( pSharedMem->size >> 16,
+			pSharedMem->vmeAdrs >> 16) == FALSE )
+      {
+	 WARN "Unable to assign SBC Shared memory to 0x%lx A32\n",
+	    pSharedMem->vmeAdrs);
+	 pSharedMem->sysBool = FALSE;
+	 return (RANGE_ERR);
+      }
+   }
+
+   return( SUCCESS );
+}
+
+void rmActivateSharedMem ( sharedMem_t *pSharedMem )
+{
+   unsigned short enblMask = 0x100;
+   unsigned long ctl;
+   UINT16		vsiRegs;
+
+   /* set Universe VME slave images */
+   vsiRegs = pSharedMem->adrSpace == VXI_ADDR_EXT_A32 ? RM_UNIV_A32 : RM_UNIV_A24 ;
+
+   if (pSharedMem == (sharedMem_t*) NULL)
+   {
+      enblMask = 0x000;
+      /*/turn off universe register*/
+      ctl = rmUnivRegRd( vsiRegs + RM_UNIV_VSI_CTL );
+      rmUnivRegWr( vsiRegs + RM_UNIV_VSI_CTL, ctl & 0x7fffffff );
+   }
+
+   if (!pSharedMem->sysBool)
+   {
+      enblMask = 0x000;
+      /*/turn off universe register*/
+      ctl = rmUnivRegRd( vsiRegs + RM_UNIV_VSI_CTL );
+      rmUnivRegWr( vsiRegs + RM_UNIV_VSI_CTL, ctl & 0x7fffffff );
+   }
+
+   switch (pSharedMem->adrSpace)
+   {
+      case VXI_ADDR_EXT_A16:
+#ifdef KSC_DEBUG
+         printf( "Writing 0x%lx to SBC register\n",
+                 (0x2 << 14) | enblMask | (pSharedMem->vmeAdrs >> 8) );
+#endif
+         VXIoutReg ( 0, 0x38,
+            (0x2 << 14) | enblMask | (pSharedMem->vmeAdrs >> 8) );
+         break;
+
+      case VXI_ADDR_EXT_A24:
+#ifdef KSC_DEBUG
+         printf( "Writing 0x%lx to SBC register\n",
+                 (0x1 << 14) | enblMask | (pSharedMem->vmeAdrs >> 21) );
+#endif
+	 VXIoutReg ( 0, 0x38,
+	    (0x1 << 14) | enblMask | (pSharedMem->vmeAdrs >> 21) );
+         break;
+
+      case VXI_ADDR_EXT_A32:
+#ifdef KSC_DEBUG
+         printf( "Writing 0x%lx to SBC register\n",
+                 (0x0 << 14) | enblMask | (pSharedMem->vmeAdrs >> 24) );
+#endif
+	 VXIoutReg ( 0, 0x38,
+	    (0x0 << 14) | enblMask | (pSharedMem->vmeAdrs >> 24) );
+         break;
+   }
+   
+   if (pSharedMem->sysBool && VERBOSE)
+      printf("\n"
+             "SBC Shared memory slave image exists at 0x%lx %s, to 0x%lx CPU.\n"
+	     "Only the first 0x%x bytes of shared memory will be accessible.\n",
+	 pSharedMem->vmeAdrs,
+	 pSharedMem->adrSpace == VXI_ADDR_EXT_A32 ? "A32" : 
+	    (pSharedMem->adrSpace == VXI_ADDR_EXT_A24 ? "A24" : "A16"),
+	 pSharedMem->locAdrs,
+	 pSharedMem->adrSpace == VXI_ADDR_EXT_A32 ? 0x1000000 :
+	    (pSharedMem->adrSpace == VXI_ADDR_EXT_A24 ? 0x200000 : 0x100) );
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

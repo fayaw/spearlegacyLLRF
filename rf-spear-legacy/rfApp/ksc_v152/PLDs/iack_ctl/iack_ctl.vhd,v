@@ -1,0 +1,226 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.08.06.00.09.00;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.08.06.00.09.00;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@------------------------------------------------------------------
+--					IACK CONTROL								--
+------------------------------------------------------------------
+--
+--	File:           iack_ctl.vhd
+--	Created By:     J. Dusatko
+--	Created:        July 29, 2003
+--
+--	Stanford Linear Accelerator Center
+--	Copyright 2003
+--
+--
+--		Created on: 7/29/2003 6:12:46 PM
+--		Last change: JED 7/30/2003 3:12:12 PM
+--
+--
+--Description:
+--	This module implements the IACK cycle Data size selection feature.
+--
+--
+--
+--
+--
+--
+--	CHANGE HISTORY:
+--
+--		<7-29-2003 JED>: original version
+--
+--
+--
+--
+--
+--
+--
+--
+-------------------------------------------------------------------
+
+
+
+-------------------------------------------------------------------
+
+-- Standard library configuration --
+Library IEEE;
+use IEEE.STD_LOGIC_1164.all;
+use IEEE.STD_LOGIC_UNSIGNED.all;
+
+
+
+--Define I/O Signals
+entity iack_ctl is
+
+	port (
+
+
+		-- Inputs
+		reset:		in std_logic; --power-on reset from U7
+
+		as_n:		in std_logic; --VXIbus address strobe
+
+		iack_n:		in std_logic; --VXIbus interrupt acknowledge
+
+		rd_int:		in std_logic; --FPGA internal read strobe / from slave>a16_ack state machine
+
+		wr_int:		in std_logic; --FPGA internal write strobe / from slave>a16_ack state machine
+
+
+		id:			in std_logic_vector(15 downto 0); --internal VXI databus
+
+		a:			in std_logic_vector(15 downto 0);  --internal VXI addr bus
+
+
+		--outputs
+		d16_isel:		out std_logic; --select ctrl to DSn* mux in GAL16V8
+
+		iak_ctrl:		out std_logic_vector(15 downto 0); --output of IACK_CTRL register for readback
+
+		rd_iackctrl:		out std_logic	 --read strobe to rd_mux block
+
+		);
+
+end iack_ctl;
+
+
+
+architecture behavioral of iack_ctl is
+
+------------------------------------------------------------------------
+--Define Constants
+	CONSTANT	iac_reg_val: std_logic_vector(5 downto 0) := x"36"; --A16 offset 0x36
+
+
+------------------------------------------------------------------------
+--define Nodes (SIGNAL statements)
+
+	SIGNAL	iack_ctrl:		std_logic_vector(7 downto 0); --IACK data mode control register
+
+	SIGNAL	iack_ctrl:		std_logic_vector(15 downto 8); --unused upper byte
+
+	SIGNAL	wr_ictlreg:		std_logic; --decoded write strobe to the IACK_CTRL reg
+
+	SIGNAL	adr:			std_logic_vector(5 downto 0); --right-justified address bus for ease of design
+
+------------------------------------------------------------------------
+
+
+
+----------------------------------------------------------------------
+--Equations Section
+
+begin
+
+	-------------------------------
+	--re-define the address bus for easier use
+	adr(5 downto 1) <= a(5 downto 1);
+	adr(0)	<= "0";	--placeholder for a0
+
+
+	-------------------------------
+	--IACK_CTRL register
+	iac_reg: process (wr_ictlreg, reset) begin
+		IF (reset = '1') THEN
+			iack_ctrl <= x"00";
+		ELSIF rising_edge(wr_ictlreg) THEN
+			iack_ctrl <= id(7 downto 0);
+		END IF;
+	end process iac_reg;
+
+
+	--register write strobe logic
+	wr_ictlreg			= wr_int & (adr = iac_reg_val);
+
+	--register read strobe logic
+	rd_iackctrl			= rd_int & (adr = iac_reg_val);
+
+
+	--form the readback value
+	--gets sent to the rd_mux.tdf block
+	iak_ctrl(15 downto 8)		= x"00";	--upper byte is unused, set to 0x00
+	iak_ctrl(7 downto 0)		= iack_ctrl(7 downto 0); 
+
+	-------------------------------
+
+
+	-------------------------------
+	--Main Logic section
+	--this logic generates the control signal to the DS1* src select mux
+	IF ( as_n = '0' AND iack_n = '0') THEN
+		IF (adr = x"7" AND iack_ctrl(7) = '1') THEN
+			d16_isel = '1';
+		ELSIF (adr = x"6" AND iack_ctrl(6) = '1') THEN
+			d16_isel = '1';
+		ELSIF (adr = x"5" AND iack_ctrl(5) = '1') THEN
+			d16_isel = '1';
+		ELSIF (adr = x"4" AND iack_ctrl(4) = '1') THEN
+			d16_isel = '1';
+		ELSIF (adr = x"3" AND iack_ctrl(3) = '1') THEN
+			d16_isel = '1';
+		ELSIF (adr = x"2" AND iack_ctrl(2) = '1') THEN
+			d16_isel = '1';
+		ELSIF (adr = x"1" AND iack_ctrl(1) = '1') THEN
+			d16_isel = '1';
+		END IF;
+	ELSE
+			d16_isel = '0';
+	END IF;
+
+ ------------------------------------------------------------------------
+
+
+end behavioral;
+
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

@@ -1,0 +1,661 @@
+head	1.9;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.9
+	RF-SPEAR-R0-3-1:1.9
+	RF-SPEAR-R0-3-0:1.9
+	RF-SPEAR-R0-2-0:1.9
+	RF-SPEAR-R0-1-0:1.9
+	RF-SPEAR-R0-0-3:1.9
+	RF-SPEAR-R0-0-2:1.8
+	RF-SPEAR-R0-0-1:1.8
+	RF-SPEAR-R0-0-0:1.8
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.8
+	RF-3-13-10:1.8.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.8
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.7
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.5
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.9
+date	2014.09.04.16.35.37;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2011.01.10.16.45.59;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2010.02.09.18.17.41;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2010.02.08.22.02.26;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2008.05.19.15.46.05;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.06.15.00.48.51;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.01.05.19.28.33;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.08.26.23.55.32;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.44;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.44;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.9
+log
+@Increase default alarm limits for HVPSOIL:TEMP (aka magic T post temp).
+@
+text
+@grecord(ai,"$(S):HVPS:CURR") {
+	field(DESC,"HVPS Monitored Current")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-SLC500DCM-Signed")
+	field(FLNK,"$(S):HVPS:POWER.VAL  PP NMS")
+	field(INP,"#L0 A1 C8 S0 @@")
+	field(PREC,"2")
+	field(LINR,"LINEAR")
+	field(EGUF,"50")
+	field(EGUL,"-50")
+	field(EGU,"Amp")
+	field(HOPR,"30")
+	field(HIHI,"30")
+	field(HIGH,"30")
+	field(HHSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(HYST,"0.03")
+	field(ADEL,"0.03")
+	field(MDEL,"0.03")
+}
+grecord(ai,"$(S):HVPS:VOLT") {
+	field(DESC,"HVPS Monitored Voltage")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-SLC500DCM-Signed")
+	field(FLNK,"$(S):HVPS:POWER.VAL  PP NMS")
+	field(INP,"#L0 A1 C6 S0 @@")
+	field(PREC,"2")
+	field(LINR,"LINEAR")
+	field(EGUF,"100")
+	field(EGUL,"-100")
+	field(EGU,"kV")
+	field(HOPR,"90")
+	field(HIHI,"87")
+	field(HIGH,"85")
+	field(HHSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(HYST,"0.03")
+	field(ADEL,"0.03")
+	field(MDEL,"0.03")
+}
+grecord(ai,"$(S):HVPS:VOLT:RBCK") {
+	field(DESC,"HVPS Desired Volt Readback")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-SLC500DCM-Signed")
+	field(INP,"#L0 A1 C4 S0 @@")
+	field(PREC,"2")
+	field(LINR,"LINEAR")
+	field(EGUF,"100")
+	field(EGUL,"-100")
+	field(EGU,"kV")
+	field(HOPR,"90")
+	field(HIHI,"87")
+	field(HIGH,"85")
+	field(HHSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(HYST,"0.03")
+	field(ADEL,"0.03")
+	field(MDEL,"0.03")
+}
+grecord(ai,"$(S):HVPS:VOLT:ULIM") {
+	field(DESC,"HVPS Max Voltage Readback")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-SLC500DCM-Signed")
+	field(INP,"#L0 A1 C10 S0 @@")
+	field(PREC,"2")
+	field(LINR,"LINEAR")
+	field(EGUF,"100")
+	field(EGUL,"-100")
+	field(EGU,"kV")
+	field(HOPR,"100")
+	field(HYST,"0.03")
+	field(ADEL,"0.03")
+	field(MDEL,"0.03")
+}
+grecord(ai,"$(S):HVPSAC:CURR") {
+	field(DESC,"HVPS AC Current")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-SLC500DCM-Signed")
+	field(INP,"#L0 A1 C2 S0 @@")
+	field(PREC,"2")
+	field(LINR,"LINEAR")
+	field(EGUF,"500")
+	field(EGUL,"-500")
+	field(EGU,"Amp")
+	field(HOPR,"500")
+	field(HIHI,"500")
+	field(HIGH,"400")
+	field(HHSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(HYST,"0.03")
+	field(ADEL,"0.03")
+	field(MDEL,"0.03")
+}
+grecord(ai,"$(S):HVPSOIL:TEMP") {
+	field(DESC,"HVPS Oil")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM AI I to F")
+	field(INP,"@@$(S):STN:DCM:MODU.T2[14]")
+	field(EGUF,"400")
+	field(EGU,"C")
+	field(HOPR,"80")
+	field(HIHI,"80")
+	field(HIGH,"75")
+	field(LOLO,"10")
+	field(LOW,"15")
+	field(HHSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LLSV,"MAJOR")
+	field(LSV,"MINOR")
+	field(HYST,"1")
+}
+grecord(ao,"$(S):HVPS:LOOP:DELAY") {
+	field(DESC,"HVPS Loop Activation Delay")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(EGUF,"30")
+	field(EGUL,"1")
+	field(EGU,"Sec")
+	field(DRVH,"30")
+	field(DRVL,"1")
+	field(HOPR,"30")
+	field(LOPR,"1")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):HVPS:LOOP:VOLTDIFF") {
+	field(DESC,"HVPS Loop Allowed kV Diff")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"4")
+	field(EGUF,"100")
+	field(EGU,"kV")
+	field(DRVH,"100")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):HVPS:LOOP:VOLTDOWN") {
+	field(DESC,"HVPS Loop Delta kV Down")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"4")
+	field(EGUL,"-100")
+	field(EGU,"kV")
+	field(DRVL,"-5.0")
+	field(LOPR,"-5.0")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):HVPS:LOOP:VOLTUP") {
+	field(DESC,"HVPS Loop Delta kV Up")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"4")
+	field(EGUF,"100")
+	field(EGU,"kV")
+	field(DRVH,"1")
+	field(HOPR,"1")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):HVPS:VOLT:CTRL") {
+	field(DESC,"HVPSDESVLT HVPS Desired Volt")
+	field(DTYP,"AB-SLC500DCM")
+	field(FLNK,"$(S):HVPS:VOLTULIM:SEQ.VAL  PP NMS")
+	field(OUT,"#L0 A1 C2 S0 @@")
+	field(PREC,"2")
+	field(LINR,"LINEAR")
+	field(EGUF,"100")
+	field(EGU,"kV")
+	field(DRVH,"90")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):HVPS:VOLT:LOOP") {
+	field(DESC,"HVPS Loop Desired Voltage")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(S):HVPS:LOOP:VOLTHIST.VAL  PP NMS")
+	field(PREC,"2")
+	field(EGUF,"100")
+	field(EGU,"kV")
+	field(DRVH,"100")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):HVPS:VOLT:MIN") {
+	field(DESC,"HVPSMINVLT HVPS Min Voltage")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"100")
+	field(EGU,"kV")
+	field(DRVH,"60")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):HVPS:VOLTULIM:CTRL") {
+	field(DESC,"HVPSMAXVLT HVPS Max Voltage")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(OUT,"$(S):HVPS:VOLT:MAX.VAL  PP NMS")
+	field(PREC,"2")
+	field(EGUF,"100")
+	field(EGU,"kV")
+	field(DRVH,"87")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):HVPS:VOLT:MAX") {
+	field(DESC,"HVPS Max Voltage")
+	field(DTYP,"AB-SLC500DCM")
+	field(FLNK,"$(S):HVPS:VOLTULIM:SEQ.VAL  PP NMS")
+	field(OUT,"#L0 A1 C4 S0 @@")
+	field(PREC,"2")
+	field(LINR,"LINEAR")
+	field(EGUF,"100")
+	field(EGU,"kV")
+	field(DRVH,"87")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):HVPSOIL:TEMP:ULIM") {
+	field(DESC,"HVPS Oil")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(DOL,"65")
+	field(EGUF,"400")
+	field(EGU,"C")
+	field(DRVH,"400")
+	field(HOPR,"70")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(bo,"$(S):HVPS:RESET:CTRL") {
+	field(DESC,"HVPS Reset Control")
+	field(DTYP,"AB-16 bit BO")
+	field(OUT,"#L0 A1 C10 S0 @@")
+	field(HIGH,"3")
+	field(ZNAM,"NORESET")
+	field(ONAM,"RESET")
+	field(ZSV,"MAJOR")
+	field(IVOA,"Set output to IVOV")
+}
+grecord(bo,"$(S):HVPSCONTACT:CLOSE:CTRL") {
+	field(DESC,"HVPS Contactor State Control")
+	field(DTYP,"AB-16 bit BO")
+	field(FLNK,"$(S):HVPSCONTACT:SUMY:STAT.VAL  PP NMS")
+	field(OUT,"#L0 A1 C6 S0 @@")
+	field(ZNAM,"OPEN")
+	field(ONAM,"CLOSE")
+	field(ZSV,"MAJOR")
+	field(IVOA,"Set output to IVOV")
+}
+grecord(bo,"$(S):HVPSOIL:TEMP:FRST") {
+	field(DESC,"HVPS Oil")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(DOL,"0")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+	field(OSV,"MAJOR")
+	field(IVOA,"Set output to IVOV")
+}
+grecord(bo,"$(S):HVPSSCR:ON:CTRL") {
+	field(DESC,"HVPS SCR Enable Switch")
+	field(DTYP,"AB-16 bit BO")
+	field(FLNK,"$(S):HVPSSCR:SUMY:STAT.VAL  PP NMS")
+	field(OUT,"#L0 A1 C8 S0 @@")
+	field(ZNAM,"OFF")
+	field(ONAM,"ON")
+	field(ZSV,"MAJOR")
+	field(IVOA,"Set output to IVOV")
+}
+grecord(calc,"$(S):HVPS:PERV") {
+	field(DESC,"HVPS Perveance")
+	field(DISV,"0")
+	field(SDIS,"$(S):STN:STATE:RBCK.VAL  NPP NMS")
+	field(CALC,"A<E?F:B*C/(A**D)")
+	field(INPA,"$(S):HVPS:VOLT.VAL  NPP MS")
+	field(INPB,"$(S):HVPS:CURR.VAL  NPP MS")
+	field(INPC,"31.62278")
+	field(INPD,"1.5")
+	field(INPE,"20")
+	field(INPF,"$(S):HVPS:PERV.VAL  NPP NMS")
+	field(EGU,"micrPerv")
+	field(PREC,"2")
+	field(HOPR,"1.5")
+	field(LOPR,"0.5")
+	field(HIHI,"1.1")
+	field(LOLO,"0.95")
+	field(HIGH,"1.05")
+	field(LOW,"1.0")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(HYST,"0.01")
+	field(ADEL,"0.01")
+	field(MDEL,"0.01")
+}
+grecord(calc,"$(S):HVPS:POWER") {
+	field(DESC,"HVPS Power")
+	field(FLNK,"$(S):HVPS:PERV.VAL  PP NMS")
+	field(CALC,"A*B")
+	field(INPA,"$(S):HVPS:VOLT.VAL  NPP MS")
+	field(INPB,"$(S):HVPS:CURR.VAL  NPP MS")
+	field(EGU,"kW")
+	field(HOPR,"1200")
+	field(HYST,"1")
+	field(ADEL,"1")
+	field(MDEL,"1")
+}
+grecord(compress,"$(S):HVPS:LOOP:VOLTHIST") {
+	field(DESC,"HVPS Loop Voltage History")
+	field(INP,"$(S):HVPS:VOLT:LOOP.VAL  NPP NMS")
+	field(ALG,"Circular Buffer")
+	field(NSAM,"300")
+	field(N,"300")
+	field(HOPR,"90")
+	field(PREC,"2")
+	field(EGU,"kV")
+}
+grecord(event,"$(S):HVPS:LOOP:READY") {
+	field(DESC,"HVPS Loop Ready")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(S):STNDAC:LOOP:READY.VAL  PP NMS")
+}
+grecord(mbbi,"$(S):HVPSDCM:T0:STAT") {
+	field(DESC,"HVPS SLC Table 0 Status")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-16 bit BI")
+	field(NOBT,"16")
+	field(INP,"#L0 A1 C0 S0 @@")
+	field(ONVL,"0x0300")
+	field(TWVL,"0x0500")
+	field(THVL,"0x0700")
+	field(ZRST,"SUCCESS")
+	field(ONST,"MODE_ERR")
+	field(TWST,"INV_DATA")
+	field(THST,"INV_DATA")
+	field(ONSV,"MAJOR")
+	field(TWSV,"MAJOR")
+	field(THSV,"MAJOR")
+	field(FRSV,"MAJOR")
+	field(FVSV,"MAJOR")
+	field(SXSV,"MAJOR")
+	field(SVSV,"MAJOR")
+	field(EISV,"MAJOR")
+	field(NISV,"MAJOR")
+	field(TESV,"MAJOR")
+	field(ELSV,"MAJOR")
+	field(TVSV,"MAJOR")
+	field(TTSV,"MAJOR")
+	field(FTSV,"MAJOR")
+	field(FFSV,"MAJOR")
+	field(UNSV,"INVALID")
+}
+grecord(mbbo,"$(S):HVPS:LOOP:CTRL") {
+	field(DESC,"HVPS Loop Enable")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(ZRST,"OFF")
+	field(ONST,"PROC")
+	field(TWST,"ON")
+	field(ZRSV,"MAJOR")
+	field(UNSV,"INVALID")
+}
+grecord(mbbo,"$(S):HVPS:LOOP:STATE") {
+	field(DESC,"HVPS Loop State")
+	field(DTYP,"Soft Channel")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(ZRST,"OFF")
+	field(ONST,"PROC")
+	field(TWST,"ON")
+	field(UNSV,"INVALID")
+}
+grecord(mbbo,"$(S):HVPS:LOOP:STATUS") {
+	field(DESC,"HVPS Loop Status")
+	field(DTYP,"Soft Channel")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(FRVL,"4")
+	field(FVVL,"5")
+	field(SXVL,"6")
+	field(SVVL,"7")
+	field(EIVL,"8")
+	field(NIVL,"9")
+	field(TEVL,"10")
+	field(ELVL,"11")
+	field(TVVL,"12")
+	field(TTVL,"13")
+	field(FTVL,"14")
+	field(FFVL,"15")
+	field(ZRST,"UNKNOWN")
+	field(ONST,"GOOD")
+	field(TWST,"RFP_BAD")
+	field(THST,"CAVV_LIM")
+	field(FRST,"LOOP_OFF")
+	field(FVST,"VACM_BAD")
+	field(SXST,"POWR_BAD")
+	field(SVST,"GAPV_BAD")
+	field(EIST,"GAPV_TOL")
+	field(NIST,"VOLT_LIM")
+	field(TEST,"STN_OFF")
+	field(ELST,"VOLT_TOL")
+	field(TVST,"VOLT_BAD")
+	field(TTST,"DRIV_BAD")
+	field(FTST,"ON_FM")
+	field(FFST,"DRIV_TOL")
+	field(ZRSV,"INVALID")
+	field(TWSV,"MAJOR")
+	field(THSV,"MAJOR")
+	field(FRSV,"MAJOR")
+	field(FVSV,"MAJOR")
+	field(SXSV,"MAJOR")
+	field(SVSV,"MAJOR")
+	field(EISV,"MINOR")
+	field(NISV,"MINOR")
+	field(ELSV,"MINOR")
+	field(TVSV,"MAJOR")
+	field(TTSV,"MAJOR")
+	field(FFSV,"MINOR")
+	field(UNSV,"INVALID")
+}
+grecord(seq,"$(S):HVPS:VOLTULIM:SEQ") {
+	field(DESC,"HVPS Max Voltage Seq")
+	field(DOL1,"$(S):HVPS:VOLTULIM:CTRL.VAL  NPP NMS")
+	field(LNK1,"$(S):HVPS:VOLT:CTRL.DRVH  PP NMS")
+}
+grecord(seq,"$(S):HVPSCONTACT:CTRL:SEQ") {
+	field(DESC,"HVPS Contactor Control Seq")
+	field(DISV,"0")
+	field(SDIS,"$(S):FILAMENT:SUMY:PLC.VAL  NPP NMS")
+	field(DISS,"MAJOR")
+	field(DOL1,"$(S):HVPSCONTACT:CLOSE:STAT.VAL  NPP NMS")
+	field(LNK1,"$(S):HVPSCONTACT:CLOSE:CTRL.VAL  PP NMS")
+	field(DLY2,"1.0")
+	field(DOL2,"$(S):HVPSCONTACT:CTRL:SEQ.VAL  NPP NMS")
+	field(LNK2,"$(S):HVPSCONTACT:CLOSE:CTRL.VAL  PP NMS")
+	field(DLY3,"1.0")
+	field(DOL3,"$(S):HVPSCONTACT:CTRL:SEQ.VAL  NPP NMS")
+}
+grecord(stringout,"$(S):HVPS:LOOP:STRING") {
+	field(DESC,"HVPS Loop Status String")
+	field(DTYP,"Soft Channel")
+	field(VAL,"Nonfunctional - unknown status")
+}
+@
+
+
+1.8
+log
+@Correct low alarm limits on HVPS OIL temp.
+@
+text
+@d101 3
+a103 3
+	field(HOPR,"70")
+	field(HIHI,"60")
+	field(HIGH,"55")
+@
+
+
+1.7
+log
+@Set alarm hysterisis on temperatures from 2 to 1 degrees.
+Remove ADEL and MDEL and just monitor on any change since resolution is
+1 degree anyway.
+@
+text
+@d104 2
+a105 2
+	field(LOLO,"15")
+	field(LOW,"10")
+@
+
+
+1.6
+log
+@Changes to add low limits to all temperatures.
+@
+text
+@d110 1
+a110 2
+	field(ADEL,"0.9")
+	field(MDEL,"0.9")
+@
+
+
+1.5
+log
+@Change degC to C.
+@
+text
+@d104 2
+d108 2
+@
+
+
+1.4
+log
+@Correct DRVH for a few records.
+Add PINI=YES for a few soft records.
+Correct logic for setting maximum voltage so that the restored value is
+not lost during initialization of the HVPS SLC500 little DCM.
+@
+text
+@d100 1
+a100 1
+	field(EGU,"degC")
+d230 1
+a230 1
+	field(EGU,"degC")
+@
+
+
+1.3
+log
+@Added PINI=YES for soft passive output records.
+@
+text
+@d112 1
+d126 1
+d138 1
+a141 1
+	field(DRVH,"-0.1")
+a142 1
+	field(HOPR,"-0.1")
+d150 1
+d186 1
+a186 1
+	field(DESC,"HVPSMINVLT Min Voltage")
+d188 1
+d199 1
+d201 11
+d219 1
+a219 1
+	field(DRVH,"100")
+@
+
+
+1.2
+log
+@Added "CAVV_LIM" (cavity overvoltage) state to the HVPS loop status.
+Added buildSRF for SPEAR RF and updated the README for it.
+@
+text
+@d347 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d387 1
+a387 1
+	field(THST,"RF_OFF")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

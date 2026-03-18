@@ -1,0 +1,2589 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.2.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.3
+date	2011.12.07.00.53.40;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.05.14.23.58.16;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Changes to get rid of *Msgs.c files.  Also changes for 3.14.11 for bus.c.
+@
+text
+@/*
+** ++
+**  Facility:  VBB - VME/VXI Bus Browser
+**
+**  Abstract:
+**      This file contains a collection of routines for browsing the address
+**      space of a VME or VXI bus from a module in a VME/VXI crate.
+**
+**  Author:
+**	R. Claus, PEP II Feedback Project
+**
+**  History:
+**	June 10, 1993 - Created.
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+
+#include <string.h>
+#ifdef VXWORKS
+#  include <vxWorks.h>
+#  include <stdlib.h>
+#  include <stdio.h>
+#  include <ioLib.h>
+#  include <lstLib.h>
+#  include <ledLib.h>
+#  include <shellLib.h>
+#  include <envLib.h>
+#else
+#  include <stdio.h>
+#  include <malloc.h>
+#  include <unistd.h>
+#  include <stdlib.h>
+#  include "vxWorks-unix.h"
+#  include "lstLib-unix.h"
+#  include "mvxLib.h"
+
+#  define memShow mallocmap
+#endif
+
+#include "modTypes.h"
+#include "lipDef.h"
+#include "lipLib.h"
+#include "busLib.h"
+#include "sglLib.h"
+#define VBB_MSG_GLOBAL
+#include "vbb.msg"
+#include "genLib.h"
+
+
+static Status VBB_Output ();
+
+
+#define LED_K_HIST         20            /* Number of history lines to keep */
+
+#define RAD_K_DEC          10
+#define RAD_K_HEX          16
+
+#define CMD_K_BOGUS         0
+#define CMD_K_SET           1
+#define CMD_K_SHOW          2
+
+#define VBB_K_STDIN         "stdin"
+#define VBB_K_STDOUT        "stdout"
+#define VBB_K_STDERR        "stderr"
+#define VBB_K_LOGFILE       "vbb.log"
+#define VBB_K_PROMPT        "> "
+#define VBB_K_WIDTH        80
+#define VBB_K_LOOPCNT       1           /* Originally 4, but who knows why?! */
+
+
+#define VRB(wrd,min,fn,arg,gbl,lcl,sub) \
+{TYP_K_VERB,     wrd, sizeof (wrd), min,  fn,  arg,  gbl, lcl, sub}
+#define SBJ(wrd,min,fn,arg,lcl,sub)     \
+{TYP_K_SUBJECT,  wrd, sizeof (wrd), min,  fn,  arg,  NIL, lcl, sub}
+#define MOD(wrd,min,fn,arg,sub)         \
+{TYP_K_MODIFIER, wrd, sizeof (wrd), min,  fn,  arg,  NIL, NIL, sub}
+#define NMB(fn,arg,lcl)                 \
+{TYP_K_NUMBER,   "",  NULL,         NULL, fn,  arg,  NIL, lcl, NIL}
+#define ARN(fn,arg,lcl)                 \
+{TYP_K_ABSRNGE,  "",  NULL,         NULL, fn,  arg,  NIL, lcl, NIL}
+#define CRN(fn,arg,lcl)                 \
+{TYP_K_CNTDRNGE, "",  NULL,         NULL, fn,  arg,  NIL, lcl, NIL}
+#define STR(fn,arg,lcl)                 \
+{TYP_K_STRING,   "",  NULL,         NULL, fn,  arg,  NIL, lcl, NIL}
+#define FIL(fn,arg,lcl)                 \
+{TYP_K_FILENAME, "",  NULL,         NULL, fn,  arg,  NIL, lcl, NIL}
+#define CMT(fn,arg)                     \
+{TYP_K_COMMENT,  "",  NULL,         NULL, fn,  arg,  NIL, NIL, NIL}
+#define END()                           \
+{TYP_K_UNKNOWN,  NIL, NULL,         NULL, NIL, NULL, NIL, NIL, NIL}
+
+typedef struct _FileNode
+{
+  NODE           links;
+  FILE          *stream;
+  char          *fileName;
+} FileNode;
+
+typedef struct _ModContext
+{
+  unsigned int   columns;
+  unsigned int   radix;
+  unsigned int   space;
+  unsigned int   size;
+  unsigned int   output;
+  unsigned int   loop;
+} ModContext;
+
+typedef struct _VbbContext
+{
+  FILE          *in;
+  char          *inFile;
+  LIST          *inLst;
+  FILE          *out;
+  char          *outFile;
+  FILE          *err;
+  char          *errFile;
+  FILE          *log;
+  char          *logFile;
+  char          *prompt;
+  unsigned int   width;
+  unsigned int   verify;
+  unsigned int   done;
+  unsigned long  address;
+  unsigned int   count;
+  unsigned long  value;
+  unsigned long  pattern;
+  unsigned long  loopCnt;
+  ModContext     save;
+  ModContext     copy;
+}  VbbContext;
+
+typedef struct _VbbHndl
+{
+  VbbContext    *context;
+  LipWrdDsc     *dict;
+  char          *oneChrDict;
+  char          *line;
+  int            maxCnt;
+  int            ledId;
+} VbbHndl;
+
+typedef struct _ItemDsc
+{
+  int            type;
+  unsigned long  value;
+} ItemDsc;
+
+
+static const struct _Fmts
+{
+  unsigned int   aLen[3];
+  char          *aFmt;
+  unsigned int   dLen[4];
+  char          *dFmt;
+} Fmts[] = {{{     5,           8,                10}, "%c%*u%c",
+/*           {"65535", "16777215",      "4294967295"}             */
+             {     3,           5,   0,           10}, " %*u" },
+/*           { "255",     "65535", NIL, "4294967295"}             */
+            {{     4,           6,                 8}, "%c%0*x%c",
+/*           {"ffff",    "ffffff",        "ffffffff"}             */
+             {     2,           4,   0,            8}, " %0*x"}};
+/*           {  "ff",      "ffff", NIL,   "ffffffff"}             */
+
+static VbbContext   *vbbContext = NIL;
+
+
+  static Status    VbbNoOp  (void);
+  static char     *GetLine  (VbbHndl *, char **);
+  static void      DoMods   (VbbContext *, LIST *);
+
+  static void     *Number   (int   , VbbContext *, LipWrdNode *, ItemDsc *);
+  static void     *String   (void *, VbbContext *, LipWrdNode *, ItemDsc *);
+  static void     *File     (void *, VbbContext *, LipWrdNode *, ItemDsc *);
+  static void     *Comment  (void *, VbbContext *, LipWrdNode *, void    *);
+  static void     *SetShow  (int   , VbbContext *, LipWrdNode *, void    *);
+  static void     *Read     (void *, VbbContext *, LipWrdNode *, void    *);
+  static void     *Write    (void *, VbbContext *, LipWrdNode *, void    *);
+  static void     *Rmw      (void *, VbbContext *, LipWrdNode *, void    *);
+  static void     *Search   (void *, VbbContext *, LipWrdNode *, void    *);
+  static void     *Input    (int   , VbbContext *, LipWrdNode *, int      );
+  static void     *Output   (int   , VbbContext *, LipWrdNode *, int      );
+  static void     *Radix    (void *, VbbContext *, LipWrdNode *, int      );
+  static void     *Space    (void *, VbbContext *, LipWrdNode *, int      );
+  static void     *Size     (void *, VbbContext *, LipWrdNode *, int      );
+  static void     *Prompt   (void *, VbbContext *, LipWrdNode *, int      );
+  static void     *Width    (void *, VbbContext *, LipWrdNode *, int      );
+  static void     *Columns  (void *, VbbContext *, LipWrdNode *, int      );
+  static void     *Verify   (int   , VbbContext *, LipWrdNode *, int      );
+  static void     *Log      (int   , VbbContext *, LipWrdNode *, int      );
+  static void     *Command  (void *, VbbContext *, LipWrdNode *, void    *);
+  static void     *All      (void *, VbbContext *, LipWrdNode *, void    *);
+  static void     *Help     (void *, VbbContext *, LipWrdNode *, void    *);
+  static void     *Done     (void *, VbbContext *, LipWrdNode *, void    *);
+  static Status    Range   (VbbContext    *, LipWrdNode   **,
+                            unsigned long *, unsigned int *);
+  static Status    RdOut   (VbbContext *, unsigned long *, unsigned long, 
+			    Status (*) ());
+  static Status    RdNoOut (VbbContext *, unsigned long *, unsigned long,
+			    Status (*) ());
+
+  static void     *Mcolumns (int   , VbbContext *, LipWrdNode *, void    *);
+  static void     *Mradix   (int   , VbbContext *, LipWrdNode *, void    *);
+  static void     *Mspace   (int   , VbbContext *, LipWrdNode *, void    *);
+  static void     *Msize    (int   , VbbContext *, LipWrdNode *, void    *);
+  static void     *Moutput  (int   , VbbContext *, LipWrdNode *, void    *);
+  static void     *Mloop    (void *, VbbContext *, LipWrdNode *, void    *);
+
+#ifdef UNIX
+Status main (int   argc,
+             char *argv[])
+/*
+   Description
+   -----------
+   Stupid main routine seems to be required for linking on Unix.
+   It's just a shell for the real thing.
+
+   Parameter
+   ---------
+       argc - A count of the command line arguments.
+       argv - A pointer to the command line arguments.
+
+   Returns
+   -------
+   status.
+*/
+{
+  Status  Vbb (char *);
+  return (Vbb ((char *) argv[1]));
+}
+#endif
+
+
+
+Status Vbb (char *cmdLine)
+/*
+   Description
+   -----------
+   Top level routine for browsing the address space in VME/VXI crates.
+
+   Parameter
+   ---------
+     cmdLine - a command line to execute immediately.
+               NIL to right to prompt mode
+
+   Returns
+   -------
+   status.
+*/
+{
+#ifdef DBG
+  Function ("Vbb");
+#endif
+  /*   (keyword,     min, routine,  arg,      global,     local,     subject) */
+  static LipWrdDsc    stringSubj[]  =
+  {STR (                  String,   NULL,                   NIL             ),
+   END (                                                                    )};
+  static LipWrdDsc    strFilSubj[]  =
+  {STR (                  String,   NULL,                   NIL             ),
+   FIL (                  File,     NULL,                   NIL             ),
+   END (                                                                    )};
+  static LipWrdDsc    radixMod[]    =
+  {MOD ("decimal",     1, Mradix,   RAD_K_DEC,                    NIL       ),
+   MOD ("hexadecimal", 1, Mradix,   RAD_K_HEX,                    NIL       ),
+   END (                                                                    )};
+  static LipWrdDsc    numberSubj[]  =
+  {NMB (                  Number,   NULL,               radixMod            ),
+   END (                                                                    )};
+  static LipWrdDsc    rangeMod[]    =
+  {MOD ("decimal",     1, Mradix,   RAD_K_DEC,                    NIL       ),
+   MOD ("hexadecimal", 1, Mradix,   RAD_K_HEX,                    NIL       ),
+   MOD ("local",       1, Mspace,   SPC_K_LOCAL,                  NIL       ),
+   MOD ("vsbsys",      4, Mspace,   SPC_K_VSBSYS,                 NIL       ),
+   MOD ("vsbalt",      4, Mspace,   SPC_K_VSBALT,                 NIL       ),
+   MOD ("vsbio",       4, Mspace,   SPC_K_VSBIO,                  NIL       ),
+   MOD ("a16",         3, Mspace,   SPC_K_A16,                    NIL       ),
+   MOD ("a24",         3, Mspace,   SPC_K_A24,                    NIL       ),
+   MOD ("a32",         3, Mspace,   SPC_K_A32,                    NIL       ),
+   MOD ("byte",        1, Msize,    SIZ_K_BYTE,                   NIL       ),
+   MOD ("short",       1, Msize,    SIZ_K_SHORT,                  NIL       ),
+   MOD ("word",        1, Msize,    SIZ_K_SHORT,                  NIL       ),
+   MOD ("long",        3, Msize,    SIZ_K_LONG,                   NIL       ),
+   END (                                                                    )};
+  static LipWrdDsc    rangeSubj[]   =
+  {NMB (                  Number,   NULL,              rangeMod             ),
+   ARN (                  Number,   NULL,              rangeMod             ),
+   CRN (                  Number,   NULL,              rangeMod             ),
+   END (                                                                    )};
+  static LipWrdDsc    readMod[]     =
+  {MOD ("columns",     1, Mcolumns, NULL,                         numberSubj),
+   MOD ("decimal",     1, Mradix,   RAD_K_DEC,                    NIL       ),
+   MOD ("hexadecimal", 1, Mradix,   RAD_K_HEX,                    NIL       ),
+   MOD ("local",       1, Mspace,   SPC_K_LOCAL,                  NIL       ),
+   MOD ("vsbsys",      4, Mspace,   SPC_K_VSBSYS,                 NIL       ),
+   MOD ("vsbalt",      4, Mspace,   SPC_K_VSBALT,                 NIL       ),
+   MOD ("vsbio",       4, Mspace,   SPC_K_VSBIO,                  NIL       ),
+   MOD ("a16",         3, Mspace,   SPC_K_A16,                    NIL       ),
+   MOD ("a24",         3, Mspace,   SPC_K_A24,                    NIL       ),
+   MOD ("a32",         3, Mspace,   SPC_K_A32,                    NIL       ),
+   MOD ("byte",        1, Msize,    SIZ_K_BYTE,                   NIL       ),
+   MOD ("short",       1, Msize,    SIZ_K_SHORT,                  NIL       ),
+   MOD ("word",        1, Msize,    SIZ_K_SHORT,                  NIL       ),
+   MOD ("long",        3, Msize,    SIZ_K_LONG,                   NIL       ),
+   MOD ("output",      1, Moutput,  TRUE,                         NIL       ),
+   MOD ("nooutput",    3, Moutput,  FALSE,                        NIL       ),
+   MOD ("loop",        3, Mloop,    NULL,                         numberSubj),
+   END (                                                                    )};
+  static LipWrdDsc    writeMod[]    =
+  {MOD ("decimal",     1, Mradix,   RAD_K_DEC,                    NIL       ),
+   MOD ("hexadecimal", 1, Mradix,   RAD_K_HEX,                    NIL       ),
+   MOD ("local",       1, Mspace,   SPC_K_LOCAL,                  NIL       ),
+   MOD ("vsbsys",      4, Mspace,   SPC_K_VSBSYS,                 NIL       ),
+   MOD ("vsbalt",      4, Mspace,   SPC_K_VSBALT,                 NIL       ),
+   MOD ("vsbio",       4, Mspace,   SPC_K_VSBIO,                  NIL       ),
+   MOD ("a16",         3, Mspace,   SPC_K_A16,                    NIL       ),
+   MOD ("a24",         3, Mspace,   SPC_K_A24,                    NIL       ),
+   MOD ("a32",         3, Mspace,   SPC_K_A32,                    NIL       ),
+   MOD ("byte",        1, Msize,    SIZ_K_BYTE,                   NIL       ),
+   MOD ("short",       1, Msize,    SIZ_K_SHORT,                  NIL       ),
+   MOD ("word",        1, Msize,    SIZ_K_SHORT,                  NIL       ),
+   MOD ("long",        3, Msize,    SIZ_K_LONG,                   NIL       ),
+   MOD ("output",      1, Moutput,  TRUE,                         NIL       ),
+   MOD ("nooutput",    3, Moutput,  FALSE,                        NIL       ),
+   MOD ("loop",        3, Mloop,    NULL,                         numberSubj),
+   END (                                                                    )};
+  static LipWrdDsc    searchMod[]   =
+  {MOD ("decimal",     1, Mradix,   RAD_K_DEC,                    NIL       ),
+   MOD ("hexadecimal", 1, Mradix,   RAD_K_HEX,                    NIL       ),
+   MOD ("local",       1, Mspace,   SPC_K_LOCAL,                  NIL       ),
+   MOD ("vsbsys",      4, Mspace,   SPC_K_VSBSYS,                 NIL       ),
+   MOD ("vsbalt",      4, Mspace,   SPC_K_VSBALT,                 NIL       ),
+   MOD ("vsbio",       4, Mspace,   SPC_K_VSBIO,                  NIL       ),
+   MOD ("a16",         3, Mspace,   SPC_K_A16,                    NIL       ),
+   MOD ("a24",         3, Mspace,   SPC_K_A24,                    NIL       ),
+   MOD ("a32",         3, Mspace,   SPC_K_A32,                    NIL       ),
+   MOD ("byte",        1, Msize,    SIZ_K_BYTE,                   NIL       ),
+   MOD ("short",       1, Msize,    SIZ_K_SHORT,                  NIL       ),
+   MOD ("word",        1, Msize,    SIZ_K_SHORT,                  NIL       ),
+   MOD ("long",        1, Msize,    SIZ_K_LONG,                   NIL       ),
+   END (                                                                    )};
+  static LipWrdDsc    radixSubj[]   =
+  {SBJ ("decimal",     1, Number,   RAD_K_DEC,    NIL,            NIL       ),
+   SBJ ("hexadecimal", 1, Number,   RAD_K_HEX,    NIL,            NIL       ),
+   END (                                                                    )};
+  static LipWrdDsc    spaceSubj[]   =
+  {SBJ ("local",       1, Number,   SPC_K_LOCAL,  NIL,            NIL       ),
+   SBJ ("vsbsys",      4, Number,   SPC_K_VSBSYS, NIL,            NIL       ),
+   SBJ ("vsbalt",      4, Number,   SPC_K_VSBALT, NIL,            NIL       ),
+   SBJ ("vsbio",       4, Number,   SPC_K_VSBIO,  NIL,            NIL       ),
+   SBJ ("a16",         3, Number,   SPC_K_A16,    NIL,            NIL       ),
+   SBJ ("a24",         3, Number,   SPC_K_A24,    NIL,            NIL       ),
+   SBJ ("a32",         3, Number,   SPC_K_A32,    NIL,            NIL       ),
+   END (                                                                    )};
+  static LipWrdDsc    sizeSubj[]    =
+  {SBJ ("byte",        1, Number,   SIZ_K_BYTE,   NIL,            NIL       ),
+   SBJ ("short",       1, Number,   SIZ_K_SHORT,  NIL,            NIL       ),
+   SBJ ("word",        1, Number,   SIZ_K_SHORT,  NIL,            NIL       ),
+   SBJ ("long",        1, Number,   SIZ_K_LONG,   NIL,            NIL       ),
+   END (                                                                    )};
+  static LipWrdDsc    setSubj[]     =
+  {SBJ ("radix",       1, Radix,    NULL,         NIL,            radixSubj ),
+   SBJ ("space",       2, Space,    NULL,         NIL,            spaceSubj ),
+   SBJ ("size",        2, Size,     NULL,         NIL,            sizeSubj  ),
+   SBJ ("input",       1, Input,    NULL,         NIL,            strFilSubj),
+   SBJ ("output",      1, Output,   NULL,         NIL,            strFilSubj),
+   SBJ ("prompt",      1, Prompt,   NULL,         NIL,            stringSubj),
+   SBJ ("width",       1, Width,    NULL,         radixMod,       numberSubj),
+   SBJ ("columns",     1, Columns,  NULL,         radixMod,       numberSubj),
+   SBJ ("verify",      1, Verify,   TRUE,         NIL,            NIL       ),
+   SBJ ("noverify",    3, Verify,   FALSE,        NIL,            NIL       ),
+   SBJ ("log",         1, Log,      TRUE,         NIL,            strFilSubj),
+   SBJ ("nolog",       3, Log,      FALSE,        NIL,            NIL       ),
+   END (                                                                    )};
+  static LipWrdDsc    shSubj[]      =
+  {SBJ ("radix",       1, Radix,    NULL,         NIL,            NIL       ),
+   SBJ ("space",       2, Space,    NULL,         NIL,            NIL       ),
+   SBJ ("size",        2, Size,     NULL,         NIL,            NIL       ),
+   SBJ ("input",       1, Input,    NULL,         NIL,            NIL       ),
+   SBJ ("output",      1, Output,   NULL,         NIL,            NIL       ),
+   SBJ ("prompt",      1, Prompt,   NULL,         NIL,            NIL       ),
+   SBJ ("width",       1, Width,    NULL,         NIL,            NIL       ),
+   SBJ ("columns",     1, Columns,  NULL,         NIL,            NIL       ),
+   SBJ ("verify",      1, Verify,   NULL,         NIL,            NIL       ),
+   SBJ ("log",         1, Log,      NULL,         NIL,            NIL       ),
+   SBJ ("all",         1, All,      NULL,         NIL,            NIL       ),
+   END (                                                                   )};
+  static LipWrdDsc    dict[]         =
+  {VRB ("set",         3, SetShow,  CMD_K_SET,    NIL,       NIL, setSubj   ),
+   VRB ("show",        2, SetShow,  CMD_K_SHOW,   NIL,       NIL, shSubj    ),
+   VRB ("read",        1, Read,     NULL,         readMod,   NIL, rangeSubj ),
+   VRB ("write",       1, Write,    NULL,         writeMod,  NIL, rangeSubj ),
+   VRB ("rmw",         2, Rmw,      NULL,         readMod,   NIL, rangeSubj ),
+   VRB ("search",      3, Search,   NULL,         searchMod, NIL, rangeSubj ),
+   VRB ("exit",        1, Done,     NULL,         NIL,       NIL, NIL       ),
+   VRB ("quit",        1, Done,     NULL,         NIL,       NIL, NIL       ),
+   VRB ("help",        1, Help,     NULL,         NIL,       NIL, NIL       ),
+   VRB ("<",           1, Input,    CMD_K_SET,    NIL,       NIL, strFilSubj),
+   VRB ("@@",           1, Input,    CMD_K_SET,    NIL,       NIL, strFilSubj),
+   VRB (">",           1, Output,   CMD_K_SET,    NIL,       NIL, strFilSubj),
+   VRB ("cmd",         3, Command,  NULL,         NIL,       NIL, stringSubj),
+   CMT (                  Comment,  NULL                                    ),
+   END (                                                                   )};
+
+/*  Status        status    = SUCCESS;      = (memShow (0), SUCCESS); */
+  unsigned int  maxCnt    = 256;
+  char         *line      = (char *) myMalloc (maxCnt,FN);
+  LIST          inLst;
+  VbbContext    Context   = {NULL,  VBB_K_STDIN, NULL, NULL, VBB_K_STDOUT,
+                             NULL, VBB_K_STDERR, NIL,    VBB_K_LOGFILE,
+                             VBB_K_PROMPT, 80, FALSE, FALSE, NULL, NULL,
+                             NULL, 0xabadcafe, VBB_K_LOOPCNT,
+                             {NULL, RAD_K_HEX, SPC_K_LOCAL, SIZ_K_LONG,
+                              TRUE, FALSE}};
+
+  VbbContext   *context   = &Context;
+  VbbHndl       Handle    = {NULL, dict, "<>@@", NULL, 256, NULL};
+  VbbHndl      *hndl      = &Handle;
+  LIST         *verbList  = NIL;
+  LIST         *saveList  = NIL;
+  LIST         *fileList  = NIL;
+  LipWrdNode   *verb;
+  void         *sglHndl;
+
+
+  Context.in     = stdin;
+  Context.inLst  = &inLst;
+  Context.out    = stdout;
+  Context.err    = stderr;
+  Handle.context = context;
+  Handle.line    = line;
+  Handle.maxCnt  = maxCnt;
+
+  /* For testing... */
+#ifdef UNIX
+  unsigned long address = (unsigned long) myMalloc (10*1024,FN);
+  context->address      = address;
+  printf ("10K at 0x%08x = %u for R/W/S testing\n",
+          context->address, context->address);
+#endif
+
+  /* While SGL doesn't work right, see sgl.c: */
+  vbbContext = context;
+
+  /* Initialize the signalling facility with context dependent file streams*/
+/*  SGL_Init (&context->out, &context->err, &context->log);*/
+  sglHndl = SGL_Init (NIL, VbbNoOp, NIL);
+
+  /* Initialize the file queue */
+  lstInit (context->inLst);
+
+#if TARGET == MV166          /* Doesn't belong here. Taken from vsb.c */
+  {
+#include "mv166Lib.h"
+    /* Change SHORT_IO accesses to A16/D32 from default A16/D16 */
+    *(volatile unsigned long *) VMECHIP2_LBSAR ^= (unsigned long) LBSAR1_D16;
+  }
+#endif
+
+  /* Open the line editing library */
+#ifdef VXWORKS
+  hndl->ledId = ledOpen (fileno (stdin), fileno (stdout), LED_K_HIST);
+  if (hndl->ledId == ERROR) SGL_Error (VBB_NOLED);
+#endif
+
+  /* Process commands 'til done */
+  while (!context->done)
+  {
+    /* Get a line of input */
+    line = GetLine (hndl, &cmdLine);
+    if (context->done) break;
+
+    /* Compile the line into a list of instructions */
+    if ((verbList = LIP_CompileLine (line, hndl->dict, hndl->oneChrDict)))
+    {
+      verb = LIP_First (verbList);
+
+      /* Repeat last command if current line is blank and input is from kbd */
+      if (context->in == stdin)
+      {
+        if (verb == NIL)
+        {
+          /* Blank line.  Use previous non-blank line */
+          LIP_Free (verbList);
+          if (saveList == NIL) continue;
+          verbList = saveList;
+          verb = LIP_First (verbList);
+          VBB_Output ("repeated...\n");
+        }
+        else
+        {
+          if (verb->word->type == TYP_K_COMMENT)
+          {
+            /* Discard comment-only lines */
+            LIP_Free (verbList);
+            continue;
+          }
+          else
+          {
+            /* Save the current compiled line */
+            LIP_Free (saveList);
+            saveList = verbList;
+          }
+        }
+      }
+      else
+      {
+        LIP_Free (fileList);
+        fileList = verbList;
+      }
+
+      /* Carry out the instruction list */
+      while (verb)
+      {
+        /* Reset the modifier part of the context block */
+        context->copy = context->save;
+
+        /* Eat the verb's global and local modifiers */
+        DoMods (context, verb->gblLst);
+        DoMods (context, verb->lclLst);
+
+        /* Munch on the verbs and their subjects */
+        verb = (*verb->word->fn) (verb->word->arg, context, verb, NIL);
+      }
+    }
+  }
+
+  /* Clean up */
+  LIP_Free (verbList);
+  LIP_Free (fileList);
+#ifdef VXWORKS
+  ledClose (hndl->ledId);
+#endif
+  if (context->prompt  != VBB_K_PROMPT)   myFree ((void *) context->prompt,FN);
+  if (context->inFile  != VBB_K_STDIN)    myFree ((void *) context->inFile,FN);
+  if (context->outFile != VBB_K_STDOUT)   myFree ((void *) context->outFile,FN);
+  if (context->logFile != VBB_K_LOGFILE)  myFree ((void *) context->logFile,FN);
+  lstFree  (context->inLst);
+  myFree     ((void *) hndl->line,FN);
+#ifdef UNIX
+  myFree     ((void *) address,FN);
+#endif
+  SGL_Free (sglHndl);
+
+/*  memShow (0); */
+
+  return (SUCCESS);
+}
+
+
+
+static Status VbbNoOp (void)
+/*
+   Description
+   -----------
+   Silly routine that is called back when signalling a message with SGL_*
+   routines.
+
+   Parameters
+   ----------
+   none
+
+   Returns
+   -------
+   nothing
+*/
+{
+  return (SUCCESS);
+}
+
+
+
+static char *GetLine (VbbHndl   *hndl,
+                      char     **cmdLine)
+/*
+   Description
+   -----------
+   Get a line of input.  Someday we'll maybe stick some code in here to
+   handle continued lines.  The trouble is, if you don't know the line
+   syntax, how can you find a line continuation character before a
+   comment character?
+
+   Parameter
+   ---------
+        hndl - A pointer to a VBB handle.
+     cmdLine - Address of an initial command line to execute.
+
+   Returns
+   -------
+   A NULL terminated line of input.
+*/
+{
+#ifdef DBG
+  Function ("GetLine");
+#endif
+
+  VbbContext *context = hndl->context;
+  char       *line;
+
+  /* Print the prompt and get a line */
+  if (isatty (fileno (context->in)))
+  {
+    VBB_Output (context->prompt);
+    if (!isatty (fileno (context->out)))
+    {
+      VBB_Output ("\n");
+      printf (context->prompt);
+    }
+
+    /* Get a line from the keyboard */
+    if (*cmdLine == NIL)
+    {
+#ifdef VXWORKS
+      if (ledRead (hndl->ledId, hndl->line, hndl->maxCnt) == EOF)
+      {
+        context->done = TRUE;
+        line = NIL;
+      }
+      else
+      {
+        line = hndl->line;
+      }
+#else
+      if ((line = fgets (hndl->line, hndl->maxCnt, context->in)) == NIL)
+      {
+        context->done = TRUE;
+      }
+#endif
+    }
+    else                                /* Handle command line command */
+    {
+      VBB_Output (*cmdLine);
+      VBB_Output ("\n");
+      strncpy (hndl->line, *cmdLine, hndl->maxCnt);
+      *cmdLine = NIL;
+      line = hndl->line;
+    }
+  }
+  else
+  {
+    /* Get a line from the file */
+    line = fgets (hndl->line, hndl->maxCnt, context->in);
+
+    /*
+    |  Three cases on EOF:
+    |    1) Input was redirected in a command file.  Close file and put previous
+    |       stream back.
+    |    2) Input was redirected from the Vbb prompt.  In this case the last
+    |       nested input file generating EOF will cause stdin = tty to be put
+    |       back and execution continues for keyboard case above.
+    |    3) Input was redirected from the Vbb invocation line.  In this case
+    |       the last nested input file to generate EOF will take the else case
+    |       below, rewind stdin = a file, set the done flag and return.
+    */
+    if (line == NIL)
+    {
+      FileNode *inNode = (FileNode *) lstLast (context->inLst);
+
+      if (inNode)
+      {
+        fclose (context->in);
+        myFree   ((void *) context->inFile,FN);
+        context->in     = inNode->stream;
+        context->inFile = inNode->fileName;
+        lstDelete (context->inLst, (NODE *) inNode);
+        myFree ((void *) inNode,FN);
+        return (GetLine (hndl, cmdLine));
+      }
+      else
+      {
+        rewind (context->in);           /* Can't close stdin so rewind */
+        context->done = TRUE;
+        return (NIL);
+      }
+    }
+
+    /* Output line if verify set */
+    if (context->verify)
+    {
+      VBB_Output (context->prompt);
+      fprintf (context->out, "%s", line);
+    }
+  }
+
+  /* Output line to log file if logging is enabled */
+  if (context->log)
+  {
+    fprintf (context->log, "%s", line);
+#ifdef VXWORKS
+    fprintf (context->log, "\n");
+#endif
+  }
+
+  /* Get rid of stupid newline character.  ARRGGGHHH what a waste of time! */
+  if (line)
+  {
+    register char *c = line;
+    while (*c && *c != '\n')  {  c++;  }
+    if (*c) *c = '\0';
+  }
+
+  /* Don't return blank lines if input is not coming from stdin */
+  if (!isatty (fileno (context->in)) && *line == '\0')
+    return (GetLine (hndl, cmdLine));
+
+  return (line);
+}
+
+
+
+static void       *Number (int         number,
+                           VbbContext *context,
+                           LipWrdNode *node,
+                           ItemDsc    *item)
+{
+#ifdef DBG
+  Function ("Number");
+#endif
+  if (number)
+  {
+    item->type    = TYP_K_NUMBER;
+    item->value = number;
+  }
+  else
+  {
+    int        nmr;
+    char       dmy;
+    LipWrdDsc *word;
+    char      *fmt;
+    int        cnt;
+
+    /* Eat the node's local modifiers */
+    DoMods (context, node->list);
+
+    word = node->word;
+    fmt  = context->copy.radix == RAD_K_DEC || strchr (word->string, 'x') ?
+      "%i%c" : "%x%c";
+
+    /* Convert the number and look for terminator */
+    cnt  = sscanf (word->string, fmt, &nmr, &dmy);
+
+    /* If legal terminator return number in item descriptor */
+    if (cnt == 2 && strchr (" \t;:/", dmy))  cnt = 1;
+    if (cnt == 1)
+    {
+      item->value = nmr;
+      item->type  = word->type;
+    }
+    else
+    {
+      SGL_Error  (VBB_BADNMR, word->string);
+      item->type = TYP_K_UNKNOWN;
+      return (NIL);
+    }
+  }
+
+  return (LIP_Next (node));
+}
+
+
+
+static void       *String (void       *arg,
+                           VbbContext *context,
+                           LipWrdNode *node,
+                           ItemDsc    *item)
+{
+#ifdef DBG
+  Function ("String");
+#endif
+  int          length;
+  char        *string;
+  LipWrdDsc   *word = node->word;
+
+  /* Eat the node's local modifiers */
+  DoMods (context, node->list);
+
+  /* Allocate space and make a private copy.  Scrape off quotes */
+  length = word->size - 1;
+  string = (char *) myMalloc (length,FN);
+  strncpy (string, &word->string[1], length);
+  string[length - 1] = '\0';
+
+  /* Return the value in an item descriptor */
+  item->type  = word->type;
+  item->value = (unsigned long) string;
+
+  return (LIP_Next (node));
+}
+
+
+
+static void       *File (void       *arg,
+                         VbbContext *context,
+                         LipWrdNode *node,
+                         ItemDsc    *item)
+{
+#ifdef DBG
+  Function ("File");
+#endif
+
+  int          length;
+  char        *file;
+  LipWrdDsc   *word = node->word;
+
+  /* Eat the node's local modifiers */
+  DoMods (context, node->list);
+
+  /* Allocate space and make a private copy */
+  length = word->size;
+  file   = (char *) myMalloc (length + 1,FN);
+  strncpy (file, word->string, length);
+  file[length] = '\0';
+
+  /* Return the value in an item descriptor */
+  item->type  = word->type;
+  item->value = (unsigned long) file;
+
+  return (LIP_Next (node));
+}
+
+
+
+static void       *Comment (void       *arg,
+                            VbbContext *context,
+                            LipWrdNode *verb,
+                            void       *item)
+{
+  return (LIP_Next (verb));
+}
+
+
+
+static void       *SetShow (int         setShow,
+                            VbbContext *context,
+                            LipWrdNode *verb,
+                            void       *parm)
+{
+#ifdef DBG
+  Function ("SetShow");
+#endif
+
+  LipWrdNode *sbj = LIP_First (verb->list);
+
+  if (sbj)
+  {
+    while (sbj) sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj, setShow);
+  }
+  else      SGL_Error (VBB_NOSUB);
+
+  return (LIP_Next (verb));
+}
+
+
+
+static void       *Read (void       *arg,
+                         VbbContext *context,
+                         LipWrdNode *verb,
+                         void       *parm)
+{
+  LipWrdNode    *sbj    = LIP_First (verb->list);
+  unsigned int   cnt;
+  unsigned long  adx;
+  ModContext     ctxt   = context->copy;
+  Status         status;
+
+  /* Loop while there is more to do */
+  do
+  {
+    /* Get the range to treat */
+    if (Range (context, &sbj, &adx, &cnt)) return (LIP_Next (verb));
+
+    /* Save the count for next time */
+    context->count = cnt;
+
+    /* Read it with or without output */
+    if (context->copy.output)   status = RdOut   (context, &adx, cnt, BUS_Peek);
+    else                        status = RdNoOut (context, &adx, cnt, BUS_Peek);
+
+    /* Reset context */
+    context->copy = ctxt;
+
+  } while (sbj && status == OK);
+
+
+  /* Save the end address for next time */
+  if (status == OK)  context->address = adx;
+
+  return (LIP_Next (verb));
+}
+
+
+
+static void       *Write (void       *arg,
+                          VbbContext *context,
+                          LipWrdNode *verb,
+                          void       *parm)
+{
+  LipWrdNode    *sbj  = LIP_First (verb->list);
+  ModContext     ctxt = context->copy;
+  unsigned int   cnt  = 0;
+  unsigned long  adx;
+  Status         status = OK;
+
+  /* Loop while there is more to do */
+  do
+  {
+    if (cnt != 1)
+    {
+      /* Get the address range to treat */
+      if (Range (context, &sbj, &adx, &cnt)) return (LIP_Next (verb));
+
+      /* Store count for next time */
+      context->count = cnt;
+    }
+
+    /* Get the value to write */
+    if (sbj)
+    {
+      ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+      sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj, &item);
+      if (item.type == TYP_K_NUMBER)      context->value = item.value;
+      else      return (SGL_Error (VBB_BADTYP), NIL);
+    }
+
+    /* Write it */
+    {
+      register unsigned int   space   = context->copy.space;
+      register unsigned int   size    = context->copy.size;
+      register unsigned long  loopCnt = context->copy.loop ? context->loopCnt : 1;
+      register unsigned long  count   = cnt;
+      register unsigned long  address = adx;
+      register void          *value;
+      unsigned char           b;
+      unsigned short          w;
+      unsigned long           l;
+
+      switch (size)
+      {
+      default:
+      case 1:        b = context->value;        value = &b;        break;
+      case 2:        w = context->value;        value = &w;        break;
+      case 4:        l = context->value;        value = &l;        break;
+      }
+
+      if (loopCnt == 0)
+      {
+        if (cnt == 1)
+        {
+          do
+          {
+            status = BUS_Poke (space, size, adx, value);
+          } while (status == OK);
+          adx += size;
+        }
+        else
+        {
+          do
+          {
+            adx = address;
+            while (cnt-- && status == OK)
+            {
+              status  = BUS_Poke (space, size, adx, value);
+              adx    += size;
+            }
+            cnt = count;
+          }  while (status == OK);
+        }
+      }
+      else
+      {
+        while (loopCnt-- && status == OK)
+        {
+          adx = address;
+          while (cnt-- && status == OK)
+          {
+            status  = BUS_Poke (space, size, adx, value);
+            adx    += size;
+          }
+          cnt = count;
+        }
+      }
+
+      if (status != OK)
+        BUS_Error (status, space, size, address);
+    }
+
+    /* Reset context */
+    context->copy = ctxt;
+
+  } while (sbj && status == OK);
+
+  /* Save the finishing point for next time */
+  if (status == OK)  context->address = adx;
+
+  return (LIP_Next (verb));
+}
+
+
+
+static void       *Rmw (void       *arg,
+                        VbbContext *context,
+                        LipWrdNode *verb,
+                        void       *parm)
+{
+#ifdef DBG
+  Function ("Rmw");
+#endif
+  LipWrdNode    *sbj    = LIP_First (verb->list);
+  unsigned int   cnt;
+  unsigned long  adx;
+  ModContext     ctxt   = context->copy;
+  Status         status;
+
+  /* Loop while there is more to do */
+  do
+  {
+    /* Get the range to treat */
+    if (Range (context, &sbj, &adx, &cnt)) return (LIP_Next (verb));
+
+    /* Save the count for next time */
+    context->count = cnt;
+
+    /* Get the value to write */
+    if (sbj)
+    {
+      ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+      sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj, &item);
+      if (item.type == TYP_K_NUMBER)      context->value = item.value;
+      else      return (SGL_Error (VBB_BADTYP), NIL);
+    }
+
+    /* Read-Modify-Write it with or without output */
+    if (context->copy.output)    status = RdOut   (context, &adx, cnt, BUS_Rmw);
+    else                         status = RdNoOut (context, &adx, cnt, BUS_Rmw);
+
+    /* Reset context */
+    context->copy = ctxt;
+
+  } while (sbj && status == OK);
+
+
+  /* Save the end address for next time */
+  if (status == OK)  context->address = adx;
+
+  return (LIP_Next (verb));
+}
+
+
+
+static Status RdOut (VbbContext     *context,
+                     unsigned long  *address,
+                     unsigned long   count,
+                     Status        (*busFn) ())
+{
+  unsigned int   space   = context->copy.space;
+  unsigned int   size    = context->copy.size;
+  int            columns = context->copy.columns;
+  unsigned int   idx     = context->copy.radix >> 4;
+  int            dLen    = Fmts[idx].dLen[size  - 1];
+  char          *dFmt    = Fmts[idx].dFmt;
+  int            jdx     = (space >> 3) - 2;
+  int            aLen    = Fmts[idx].aLen[jdx < 0 ? 2 : jdx];
+  char          *aFmt    = Fmts[idx].aFmt;
+  unsigned long  loopCnt = context->copy.loop ? context->loopCnt : 1;
+  unsigned int   loopDec = loopCnt ? 1 : (loopCnt++, 0);
+  unsigned int   valSav  = context->value;
+  unsigned char  nl      = '\0';
+  int            cols;
+  unsigned long  cnt;
+  unsigned long  adx = 0;
+  unsigned char  b;
+  unsigned short w;
+  unsigned long  l;
+  Status         status = OK;
+
+  if (columns == 0) columns = ((int) context->width - (aLen+2)) / (dLen+1);
+  if (columns  < 1) columns = 1;
+
+  while (loopCnt)
+  {
+    cols =  1;
+    cnt  =  count;
+    adx  = *address;
+    while (cnt--)
+    {
+      if (--cols == 0)
+      {
+        VBB_Output ((const char *) aFmt, nl, aLen, adx, ':');
+        nl   = '\n';
+        cols = columns;
+      }
+      switch (size)
+      {
+      case 1:
+        b = valSav;
+        if ((status = (*busFn) (space, size, adx, &b)) == OK)
+          VBB_Output ((const char *) dFmt, dLen, b);
+        break;
+
+      case 2:
+        w = valSav;
+        if ((status = (*busFn) (space, size, adx, &w)) == OK)
+          VBB_Output ((const char *) dFmt, dLen, w);
+        break;
+
+      case 4:
+        l = valSav;
+        if ((status = (*busFn) (space, size, adx, &l)) == OK)
+          VBB_Output ((const char *) dFmt, dLen, l);
+        break;
+      }
+      if (status != OK)
+      {
+        VBB_Output ("\n");
+        BUS_Error (status, space, size, adx);
+        break;
+      }
+      adx += size;
+    }
+    if (status != OK) break;
+    loopCnt -= loopDec;
+  }
+  VBB_Output ("\n");
+
+  if (status == OK)  *address = adx;
+
+  return (status);
+}
+
+
+
+static Status RdNoOut (VbbContext     *context,
+                       unsigned long  *address,
+                       unsigned long   count,
+                       Status        (*busFn) ())
+{
+  register unsigned int  space   = context->copy.space;
+  register unsigned int  size    = context->copy.size;
+  register unsigned long loopCnt = context->copy.loop ? context->loopCnt : 1;
+  register unsigned long valSav  = context->value;
+  register unsigned long cnt     = count;
+  register unsigned long adx     = *address;
+  unsigned long          value   = NULL;
+  Status                 status  = OK;
+
+  if (loopCnt == 0)
+  {
+    if (cnt == 1)
+    {
+      do
+      {
+        value  = valSav;
+        status = (*busFn) (space, size, adx, &value);
+      }  while (TRUE);
+    }
+    else
+    {
+      do
+      {
+        while (cnt-- && TRUE)
+        {
+          value   = valSav;
+          status  = (*busFn) (space, size, adx, &value);
+          adx    += size;
+        }
+        cnt = count;
+        adx = *address;
+      }  while (TRUE);
+    }
+  }
+  else
+  {
+    while (loopCnt-- && TRUE)
+    {
+      while (cnt-- && TRUE)
+      {
+        value   = valSav;
+        status  = (*busFn) (space, size, adx, &value);
+        adx    += size;
+      }
+      cnt =  count;
+      adx = *address;
+    }
+  }
+
+  if (status == OK)
+    *address = adx;
+  else
+    BUS_Error (status, space, size, adx);
+
+  return (status);
+}
+
+
+
+static void       *Search (void       *arg,
+                           VbbContext *context,
+                           LipWrdNode *verb,
+                           void       *parm)
+{
+#ifdef DBG
+  Function ("Search");
+#endif
+
+  LipWrdNode    *sbj  = LIP_First (verb->list);
+  ModContext     ctxt = context->copy;
+  unsigned long  pat  = context->pattern;
+  unsigned int   cnt;
+  unsigned long  adx;
+  Status         status = OK;
+
+  /* Loop while there is more to do */
+  do
+  {
+    /* Get the address range to treat */
+    if (Range (context, &sbj, &adx, &cnt)) return (LIP_Next (verb));
+
+    /* Store count for next time */
+    context->count = cnt;
+
+    /* Get pattern to find */
+    if (sbj)
+    {
+      ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+      sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj, &item);
+      if (item.type == TYP_K_NUMBER)      pat = item.value;
+      else      return (SGL_Error (VBB_BADTYP), NIL);
+      context->pattern = pat;
+    }
+
+    /* Search for it */
+    {
+      int            idx  = context->copy.radix >> 4;
+      int            jdx  = (context->copy.space >> 3) - 2;
+      unsigned int   len  = Fmts[idx].aLen[jdx < 0 ? 0 : jdx];
+      char          *fmt  = Fmts[idx].aFmt;
+      unsigned int   spc  = context->copy.space;
+      unsigned int   siz  = context->copy.size;
+      int            fnd  = FALSE;
+      unsigned char  b;
+      unsigned short w;
+      unsigned long  l;
+
+      /* Search for it */
+      switch (siz)
+      {
+      case 1:
+        while (cnt--)
+        {
+          if ((status = BUS_Peek (spc, siz, adx, &b)) == OK)
+          {
+            if (b == (unsigned char) pat)
+            {
+              VBB_Output ((const char *) fmt, '\0', len, adx, '\n');
+              fnd = TRUE;
+            }
+            adx += siz;
+          } else  break;
+        }
+        break;
+
+      case 2:
+        while (cnt--)
+        {
+          if ((status = BUS_Peek (spc, siz, adx, &w)) == OK)
+          {
+            if (w == (unsigned short) pat)
+            {
+              VBB_Output ((const char *) fmt, '\0', len, adx, '\n');
+              fnd = TRUE;
+            }
+            adx += siz;
+          } else  break;
+        }
+       break;
+
+      case 4:
+        while (cnt--)
+        {
+          if ((status = BUS_Peek (spc, siz, adx, &l)) == OK)
+          {
+            if (l == (unsigned long) pat)
+            {
+              VBB_Output ((const char *) fmt, '\0', len, adx, '\n');
+              fnd = TRUE;
+            }
+            adx += siz;
+          } else  break;
+        }
+        break;
+      }
+
+      if (status == OK)
+      {
+        if (!fnd)   VBB_Output ("Pattern 0x%0x not found in range\n", pat);
+      }
+      else          BUS_Error  (status, spc, siz, adx);
+    }
+
+    /* Reset context */
+    context->copy = ctxt;
+
+  } while (sbj && status == OK);
+
+  /* Save the finishing point for next time */
+  if (status == OK)  context->address = adx;
+
+  return (LIP_Next (verb));
+}
+
+
+
+static void       *Input (int         verb,
+                          VbbContext *context,
+                          LipWrdNode *sbj,
+                          int         setShow)
+{
+#ifdef DBG
+  Function ("Input");
+#endif
+
+  LipWrdNode *val;
+
+  if (verb)
+  {
+    setShow = verb;
+    val     = LIP_First (sbj->list);
+  }
+  else
+  {
+    /* Eat the subject's local modifiers */
+    DoMods (context, sbj->list);
+
+    val = LIP_Next (sbj);
+  }
+
+  switch (setShow)
+  {
+  case CMD_K_SET:
+    if (val)
+    {
+      ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+      /* Eat the value's local modifiers */
+      DoMods (context, val->list);
+
+      val = (*val->word->fn) (val->word->arg, context, val, &item);
+      if ((item.type == TYP_K_FILENAME) || (item.type == TYP_K_STRING))
+      {
+        FILE *in;
+
+        if ((in = fopen ((char *) item.value, "r")) != NIL)
+        {
+          FileNode *inNode;
+
+          inNode           = (FileNode *) myMalloc (sizeof (*inNode),FN);
+          inNode->stream   = context->in;
+          inNode->fileName = context->inFile;
+          lstAdd ((LIST *)context->inLst, (NODE *) inNode);
+          context->in      = in;
+          context->inFile  = (char *) item.value;
+        }
+        else
+        {
+          SGL_Error (VBB_UNAFIL, (char *) item.value);
+          myFree ((void *) item.value,FN);
+        }
+      }
+      else      SGL_Error (VBB_BADTYP);
+    }
+    else        SGL_Error (VBB_NOFIL);
+    break;
+
+  case CMD_K_SHOW:
+    VBB_Output ((const char *) VBB_INFIL, context->inFile);
+    break;
+
+  default:
+    SGL_Error (VBB_BADVRB);
+    break;
+  }
+
+  return (val);
+}
+
+
+
+static void       *Output (int         verb,
+                           VbbContext *context,
+                           LipWrdNode *sbj,
+                           int         setShow)
+{
+#ifdef DBG
+  Function ("Output");
+#endif
+  LipWrdNode *val;
+
+  if (verb)
+  {
+    setShow = verb;
+    val     = LIP_First (sbj->list);
+  }
+  else
+  {
+    /* Eat the subject's local modifiers */
+    DoMods (context, sbj->list);
+
+    /* Pick off the next the subject of the subject */
+    val = LIP_Next (sbj);
+  }
+
+  /* Set or show, depending */
+  switch (setShow)
+  {
+  case CMD_K_SET:
+    if (val)
+    {
+      ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+      /* Eat the values's local modifiers */
+      DoMods (context, val->list);
+
+      /* Get a value */
+      val = (*val->word->fn) (val->word->arg, context, val, &item);
+      if (item.type == TYP_K_FILENAME || item.type == TYP_K_STRING)
+      {
+        FILE *out;
+
+        if (context->out != stdout)
+        {
+          fclose (context->out);
+          if (context->outFile != VBB_K_STDOUT)  myFree ((void *) context->outFile,FN);
+        }
+        if (strcmp ((char *) item.value, VBB_K_STDOUT) == NULL)
+        {
+          context->out     = stdout;
+          context->outFile = VBB_K_STDOUT;
+        }
+        else if ((out = fopen ((char *) item.value, "w")) != NIL)
+        {
+          context->out     = out;
+          context->outFile = (char *) item.value;
+        }
+        else
+        {
+          SGL_Error (VBB_UNAFIL, (char *) item.value);
+          context->out     = stdout;
+          context->outFile = VBB_K_STDOUT;
+          myFree ((char *) item.value,FN);
+        }
+      }
+      else      SGL_Error (VBB_BADTYP);
+    }
+    else
+    {
+      if (context->out != stdout)
+      {
+        fclose (context->out);
+        if (context->outFile != VBB_K_STDOUT)  myFree ((void *) context->outFile,FN);
+        context->out     = stdout;
+        context->outFile = VBB_K_STDOUT;
+      }
+    }
+    break;
+
+  case CMD_K_SHOW:
+    VBB_Output ((const char *) VBB_OUTFIL, context->outFile);
+    break;
+
+  default:
+    SGL_Error (VBB_BADVRB);
+    break;
+  }
+
+  return (val);
+}
+
+
+
+static void       *Moutput (int         yesno,
+                            VbbContext *context,
+                            LipWrdNode *mod,
+                            void       *item)
+{
+  context->copy.output = yesno;
+
+  return (LIP_Next (mod));
+}
+
+
+
+static void       *Radix (void       *arg,
+                          VbbContext *context,
+                          LipWrdNode *sbj,
+                          int         setShow)
+{
+#ifdef DBG
+  Function ("Radix");
+#endif
+  LipWrdNode *val;
+
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  val = LIP_Next (sbj);
+
+  switch (setShow)
+  {
+  case CMD_K_SET:
+    if (val)
+    {
+      ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+      /* Eat the value's local modifiers */
+      DoMods (context, val->list);
+
+      val = (*val->word->fn) (val->word->arg, context, val, &item);
+      if (item.type == TYP_K_NUMBER)
+      {
+        int radix = item.value;
+        if (radix == RAD_K_DEC || radix == RAD_K_HEX)
+          context->save.radix = radix;
+        else    SGL_Error (VBB_BADRAD, radix);
+      }
+      else      SGL_Error (VBB_BADTYP);
+    }
+    else        SGL_Error (VBB_NOVAL);
+    break;
+
+  case CMD_K_SHOW:
+    switch (context->save.radix)
+    {
+    case RAD_K_DEC:
+      VBB_Output ((const char *) VBB_RADIX, "decimal");
+      break;
+
+    case RAD_K_HEX:
+      VBB_Output ((const char *) VBB_RADIX, "hexadecimal");
+      break;
+
+    default:
+      SGL_Error (VBB_BADRAD, context->save.radix);
+      break;
+    }
+    break;
+
+  default:
+    SGL_Error (VBB_BADVRB);
+    break;
+  }
+
+  return (val);
+}
+
+
+
+static void       *Mradix (int         radix,
+                           VbbContext *context,
+                           LipWrdNode *mod,
+                           void       *item)
+{
+  context->copy.radix = radix;
+
+  return (LIP_Next (mod));
+}
+
+
+
+static void       *Space (void       *arg,
+                          VbbContext *context,
+                          LipWrdNode *sbj,
+                          int         setShow)
+{
+#ifdef DGB
+  Function ("Space");
+#endif
+  LipWrdNode *val;
+
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  val = LIP_Next (sbj);
+
+  switch (setShow)
+  {
+  case CMD_K_SET:
+    if (val)
+    {
+      ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+      /* Eat the value's local modifiers */
+      DoMods (context, val->list);
+
+      val = (*val->word->fn) (val->word->arg, context, val, &item);
+      if (item.type == TYP_K_NUMBER)
+      {
+        int space = item.value;
+        if (space == SPC_K_LOCAL   ||  space == SPC_K_A16     ||
+            space == SPC_K_A24     ||  space == SPC_K_A32     ||
+            space == SPC_K_VSBSYS  ||  space == SPC_K_VSBALT  ||
+            space == SPC_K_VSBIO)
+          context->save.space = space;
+        else    SGL_Error (VBB_BADSPC, space);
+      }
+      else      SGL_Error (VBB_BADTYP);
+    }
+    else        SGL_Error (VBB_NOVAL);
+    break;
+
+  case CMD_K_SHOW:
+    switch (context->save.space)
+    {
+    case SPC_K_LOCAL:
+      VBB_Output ((const char *) VBB_SPC, "local");
+      break;
+
+    case SPC_K_VSBSYS:
+      VBB_Output ((const char *) VBB_SPC, "vsbsys");
+      break;
+
+    case SPC_K_VSBALT:
+      VBB_Output ((const char *) VBB_SPC, "vsbalt");
+      break;
+
+    case SPC_K_VSBIO:
+      VBB_Output ((const char *) VBB_SPC, "vsbio");
+      break;
+
+    case SPC_K_A16:
+      VBB_Output ((const char *) VBB_SPC, "A16");
+      break;
+
+    case SPC_K_A24:
+      VBB_Output ((const char *) VBB_SPC, "A24");
+      break;
+
+    case SPC_K_A32:
+      VBB_Output ((const char *) VBB_SPC, "A32");
+      break;
+
+    default:
+      SGL_Error (VBB_BADSPC, context->save.space);
+      break;
+    }
+    break;
+
+  default:
+    SGL_Error (VBB_BADVRB);
+    break;
+  }
+
+  return (val);
+}
+
+
+
+static void       *Mspace (int         space,
+                           VbbContext *context,
+                           LipWrdNode *mod,
+                           void       *item)
+{
+  context->copy.space = space;
+
+  return (LIP_Next (mod));
+}
+
+
+
+static void       *Size (void       *arg,
+                         VbbContext *context,
+                         LipWrdNode *sbj,
+                         int         setShow)
+{
+#ifdef DBG
+  Function ("Size");
+#endif
+
+  LipWrdNode *val;
+
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  val = LIP_Next (sbj);
+
+  switch (setShow)
+  {
+  case CMD_K_SET:
+    if (val)
+    {
+      ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+      /* Eat the value's local modifiers */
+      DoMods (context, val->list);
+
+      val = (*val->word->fn) (val->word->arg, context, val, &item);
+      if (item.type == TYP_K_NUMBER)
+      {
+        int size = item.value;
+        if (size == SIZ_K_BYTE || size == SIZ_K_SHORT || size == SIZ_K_LONG)
+          context->save.size = size;
+        else    SGL_Error (VBB_BADSIZ, size);
+      }
+      else      SGL_Error (VBB_BADTYP);
+    }
+    else        SGL_Error (VBB_NOVAL);
+    break;
+
+  case CMD_K_SHOW:
+    switch (context->save.size)
+    {
+    case SIZ_K_BYTE:
+      VBB_Output ((const char *) VBB_SIZ, "byte");
+      break;
+
+    case SIZ_K_SHORT:
+      VBB_Output ((const char *) VBB_SIZ, "short");
+      break;
+
+    case SIZ_K_LONG:
+      VBB_Output ((const char *) VBB_SIZ, "long");
+      break;
+
+    default:
+      SGL_Error (VBB_BADSIZ, context->save.size);
+      break;
+    }
+    break;
+
+  default:
+    SGL_Error (VBB_BADVRB);
+    break;
+  }
+
+  return (val);
+}
+
+
+
+static void       *Msize (int         size,
+                          VbbContext *context,
+                          LipWrdNode *mod,
+                          void       *item)
+{
+  context->copy.size = size;
+
+  return (LIP_Next (mod));
+}
+
+
+
+static void       *Prompt (void       *arg,
+                           VbbContext *context,
+                           LipWrdNode *sbj,
+                           int         setShow)
+{
+#ifdef DBG
+  Function ("Prompt");
+#endif
+  LipWrdNode *val;
+
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  val = LIP_Next (sbj);
+
+  switch (setShow)
+  {
+  case CMD_K_SET:
+    if (val)
+    {
+      ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+      /* Eat the value's local modifiers */
+      DoMods (context, val->list);
+
+      val = (*val->word->fn) (val->word->arg, context, val, &item);
+      if (item.type == TYP_K_STRING)
+      {
+        if (context->prompt != VBB_K_PROMPT)  myFree ((void *) context->prompt,FN);
+        context->prompt = (char *) item.value;
+      }
+      else      SGL_Error (VBB_BADTYP);
+    }
+    else
+    {
+      if (context->prompt != VBB_K_PROMPT)  myFree ((void *) context->prompt,FN);
+      context->prompt = VBB_K_PROMPT;
+    }
+    break;
+
+  case CMD_K_SHOW:
+    VBB_Output ((const char *) VBB_PMPT, context->prompt);
+    break;
+
+  default:
+    SGL_Error (VBB_BADVRB);
+    break;
+  }
+
+  return (val);
+}
+
+
+
+static void       *Width (void       *arg,
+                          VbbContext *context,
+                          LipWrdNode *sbj,
+                          int         setShow)
+{
+#ifdef DBG
+  Function ("Width");
+#endif
+  LipWrdNode *val;
+
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  val = LIP_Next (sbj);
+
+  switch (setShow)
+  {
+  case CMD_K_SET:
+    if (val)
+    {
+      ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+      /* Eat the value's local modifiers */
+      DoMods (context, val->list);
+
+      val = (*val->word->fn) (val->word->arg, context, val, &item);
+      if (item.type == TYP_K_NUMBER)
+        context->width = (int) item.value <= 0 ? VBB_K_WIDTH : item.value;
+      else      SGL_Error (VBB_BADTYP);
+    }
+    else        context->width = VBB_K_WIDTH;
+    break;
+
+  case CMD_K_SHOW:
+    VBB_Output ((const char *) VBB_WIDTH, context->width);
+    break;
+
+  default:
+    SGL_Error (VBB_BADVRB);
+    break;
+  }
+
+  return (val);
+}
+
+
+
+static void       *Columns (void       *arg,
+                            VbbContext *context,
+                            LipWrdNode *sbj,
+                            int         setShow)
+{
+#ifdef DBG
+  Function ("Columns");
+#endif
+  LipWrdNode *val;
+
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  val = LIP_Next (sbj);
+
+  switch (setShow)
+  {
+  case CMD_K_SET:
+    if (val)
+    {
+      ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+      /* Eat the value's local modifiers */
+      DoMods (context, val->list);
+
+      val = (*val->word->fn) (val->word->arg, context, val, &item);
+      if (item.type == TYP_K_NUMBER)
+        context->save.columns = item.value;
+      else      SGL_Error (VBB_BADTYP);
+    }
+    else        context->save.columns = 0;
+    break;
+
+  case CMD_K_SHOW:
+    VBB_Output ((const char *) VBB_COLS, context->save.columns);
+    break;
+
+  default:
+    SGL_Error (VBB_BADVRB);
+    break;
+  }
+
+  return (val);
+}
+
+
+
+static void       *Mcolumns (int         columns,
+                             VbbContext *context,
+                             LipWrdNode *mod,
+                             void       *item)
+{
+  context->copy.columns = columns;
+
+  return (LIP_Next (mod));
+}
+
+
+
+static void       *Verify (int         onOff,
+                           VbbContext *context,
+                           LipWrdNode *sbj,
+                           int         setShow)
+{
+#ifdef DBG
+  Function ("Verify");
+#endif
+  LipWrdNode *val;
+
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  val = LIP_Next (sbj);
+
+  switch (setShow)
+  {
+  case CMD_K_SET:
+    context->verify = onOff;
+    break;
+
+  case CMD_K_SHOW:
+    if (context->verify)
+      VBB_Output ((const char *) VBB_VER, "on");
+    else
+      VBB_Output ((const char *) VBB_VER, "off");
+    break;
+
+  default:
+    SGL_Error (VBB_BADVRB);
+    break;
+  }
+
+  return (val);
+}
+
+
+
+static void       *Log (int         onOff,
+                        VbbContext *context,
+                        LipWrdNode *sbj,
+                        int         setShow)
+{
+#ifdef DBG
+  Function ("Log");
+#endif
+
+  LipWrdNode *val;
+
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  val = LIP_Next (sbj);
+
+  switch (setShow)
+  {
+  case CMD_K_SET:
+    if (onOff)
+    {
+      if (val)
+      {
+        ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+        /* Eat the value's local modifiers */
+        DoMods (context, val->list);
+
+        val = (*val->word->fn) (val->word->arg, context, val, &item);
+        if (item.type == TYP_K_FILENAME || item.type == TYP_K_STRING)
+        {
+          FILE *log;
+
+          if (context->log == NIL)
+          {
+            if ((log = fopen ((char *) item.value, "a")) != NIL)
+            {
+              if (context->logFile != VBB_K_LOGFILE)
+                myFree ((void *) context->logFile,FN);
+              context->log     = log;
+              context->logFile = (char *) item.value;
+            }
+            else
+            {
+              SGL_Error (VBB_UNAFIL, (char *) item.value);
+              context->log     = NIL;
+              context->logFile = VBB_K_LOGFILE;
+              myFree ((void *) item.value,FN);
+            }
+          }
+          else
+          {
+            SGL_Error (VBB_LOGENA, context->logFile);
+            myFree ((void *) item.value,FN);
+          }
+        }
+        else      SGL_Error (VBB_BADTYP);
+      }
+      else
+      {
+        FILE *log;
+
+        if (context->log == NIL)
+        {
+          if ((log = fopen (context->logFile, "a")) != NIL)
+            context->log = log;
+          else    SGL_Error (VBB_UNAFIL, context->logFile);
+        }
+        else      SGL_Error (VBB_LOGENA, context->logFile);
+      }
+    }
+    else
+    {
+      if (context->log)
+      {
+        fclose (context->log);
+        context->log     = NIL;
+      }
+    }
+    break;
+
+  case CMD_K_SHOW:
+    if (context->log)
+      VBB_Output ((const char *) VBB_LOG, "enabled", context->logFile);
+    else
+      VBB_Output ((const char *) VBB_LOG, "disabled", context->logFile);
+    break;
+
+  default:
+    SGL_Error (VBB_BADVRB);
+    break;
+  }
+
+  return (val);
+}
+
+
+
+static void       *Command (void       *arg,
+                            VbbContext *context,
+                            LipWrdNode *verb,
+                            void       *parm)
+{
+#ifdef DBG
+  Function ("Command");
+#endif
+
+  LipWrdNode *sbj = LIP_First (verb->list);
+
+  if (sbj)
+  {
+    ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+    /* Eat the subject's local modifiers */
+    DoMods (context, sbj->list);
+
+    /* Get a value */
+    sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj, &item);
+    if (item.type == TYP_K_STRING)
+    {
+#ifndef VXWORKS
+      int execute (char *);
+#endif
+      execute ((char *) item.value);    /* Not documented? */
+      myFree ((void *) item.value,FN);
+
+    }
+    else      SGL_Error (VBB_BADTYP);
+  }
+  else        SGL_Error (VBB_NOVAL);
+
+  return (sbj);
+}
+
+
+
+static void       *All (void       *arg,
+                        VbbContext *context,
+                        LipWrdNode *sbj,
+                        void       *parm)
+{
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  /* Show everything we can think of */
+  Input   (NULL, context, sbj, CMD_K_SHOW);
+  Output  (NULL, context, sbj, CMD_K_SHOW);
+  Prompt  (NIL,  context, sbj, CMD_K_SHOW);
+  Width   (NIL,  context, sbj, CMD_K_SHOW);
+  Columns (NIL,  context, sbj, CMD_K_SHOW);
+  Verify  (NULL, context, sbj, CMD_K_SHOW);
+  Log     (NULL, context, sbj, CMD_K_SHOW);
+  Radix   (NIL,  context, sbj, CMD_K_SHOW);
+  Space   (NIL,  context, sbj, CMD_K_SHOW);
+  Size    (NIL,  context, sbj, CMD_K_SHOW);
+
+  VBB_Output ((const char *) VBB_PAT,
+              context->pattern, context->pattern, context->pattern);
+  VBB_Output ((const char *) VBB_LOOP, context->loopCnt);
+
+  return (LIP_Next (sbj));
+}
+
+
+
+static void       *Done (void       *arg,
+                         VbbContext *context,
+                         LipWrdNode *sbj,
+                         void       *parm)
+{
+  context->done = TRUE;
+
+  return (NIL);
+}
+
+
+
+static void       *Help (void       *arg,
+                         VbbContext *context,
+                         LipWrdNode *sbj,
+                         void       *parm)
+{
+#ifdef DBG
+  Function ("Help");
+#endif
+
+  FILE *hlp;
+  char  line[80];
+
+  if ((hlp = fopen (getenv ("VBB_DocFile"), "r")) != NIL)
+  {
+
+    while (fgets (line, 80, hlp))  VBB_Output (line);
+    fclose (hlp);
+  }
+  else    SGL_Error (VBB_UNAFIL, getenv ("VBB_DocFile"));
+
+  return (NIL);
+}
+
+
+
+static void       *Mloop (void       *arg,
+                          VbbContext *context,
+                          LipWrdNode *mod,
+                          void       *parm)
+{
+#ifdef DBG
+  Function ("Loop");
+#endif
+
+  unsigned long loopCnt = context->loopCnt;
+
+  context->copy.loop   = TRUE;
+
+  if (mod->list)
+  {
+    ItemDsc     item;
+    LipWrdNode *val = LIP_First (mod->list);
+
+    val = (*val->word->fn) (val->word->arg, context, val, &item);
+
+    if (item.type == TYP_K_NUMBER)
+      loopCnt = item.value;
+    else   SGL_Error (VBB_BADTYP);
+  }
+
+  context->loopCnt = loopCnt;
+
+  return (LIP_Next (mod));
+}
+
+
+
+/*----------------------------------------------------------------------------*/
+
+
+static void DoMods (VbbContext  *context,
+                    LIST        *list)
+{
+  if (list)
+  {
+    LipWrdNode *mod = LIP_First (list);
+    while (mod) mod = (*mod->word->fn) (mod->word->arg, context, mod, NIL);
+  }
+}
+
+
+
+static Status Range (VbbContext     *context,
+                     LipWrdNode    **subj,
+                     unsigned long  *addr,
+                     unsigned int   *cnt)
+{
+#ifdef DBG
+  Function ("Range");
+#endif
+
+  LipWrdNode *sbj = *subj;
+
+  /* Return context values if an error occurs */
+  *subj  = NIL;
+  *addr  = context->address;
+  *cnt   = context->count;
+
+  /* Decode the range */
+  if (sbj)
+  {
+    ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+    sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj, &item);
+    switch (item.type)
+    {
+    case TYP_K_NUMBER:
+      *cnt  = 1;
+      *addr = item.value;
+      break;
+
+    case TYP_K_ABSRNGE:
+      if (sbj)
+      {
+        unsigned long a = item.value;
+        sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj, &item);
+        if (item.type == TYP_K_NUMBER)
+          *cnt = 1 + (item.value - a) / context->copy.size;
+        else
+        {
+          if (item.type != TYP_K_UNKNOWN)  SGL_Error (VBB_BADTYP);
+          return (FAILURE);
+        }
+        *addr = a;
+      }
+      break;
+
+    case TYP_K_CNTDRNGE:
+      if (sbj)
+      {
+        unsigned long a = item.value;
+        sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj, &item);
+        if (item.type == TYP_K_NUMBER)
+          *cnt = item.value;
+        else if (item.type == TYP_K_UNKNOWN)
+          return (FAILURE);
+        else
+          return (SGL_Error (VBB_BADTYP), FAILURE);
+        *addr = a;
+      }
+      break;
+
+    default:
+      SGL_Error (VBB_BADTYP);
+
+    case TYP_K_UNKNOWN:
+      return (FAILURE);
+
+    case TYP_K_UNINITIALIZED:
+      break;
+    }
+  }
+
+  *subj = sbj;
+
+  return (SUCCESS);
+}
+
+
+
+static Status VBB_Output (const char *msg,
+                          void       *arg0,
+                          void       *arg1,
+                          void       *arg2,
+                          void       *arg3,
+                          void       *arg4,
+                          void       *arg5,
+                          void       *arg6,
+                          void       *arg7)
+{
+  if (msg)
+  {
+    if (vbbContext->out)
+    {
+      fprintf (vbbContext->out,
+               msg, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+      fflush  (vbbContext->out);
+    }
+    if (vbbContext->log)
+    {
+      fprintf (vbbContext->log,
+               msg, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+      fflush  (vbbContext->log);
+    }
+  }
+
+  return ((Status) msg);
+
+#if 0
+  return (SGL_Report (vbbContext->out, vbbContext->log,
+                      msg, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+#endif
+}
+
+
+
+#if 0                                   /* Kludge for testing on UNIX */
+Status BUS_Peek (unsigned int   space,
+                 unsigned int   size,
+                 unsigned long  adx,
+                 void          *val)
+{
+  return (vxMemProbe ((char *) adx, READ, size, val));
+}
+
+
+
+Status BUS_Poke (unsigned int   space,
+                 unsigned int   size,
+                 unsigned long  adx,
+                 void          *val)
+{
+  return (vxMemProbe ((char *) adx, WRITE, size, val));
+}
+
+
+
+Status BUS_Rmw (unsigned int   space,
+                unsigned int   size,
+                unsigned long  adx,
+                void          *val)
+{
+  Status        status;
+  unsigned long tmp = *((unsigned long *) val);
+
+  if ((status = vxMemProbe ((char *) adx, READ, size, val)) != SUCCESS)
+    return (status);
+  else
+    return (vxMemProbe ((char *) adx, WRITE, size, (char *) &tmp));
+}
+
+
+
+Status BUS_Error (Status         status,
+                  unsigned int   space,
+                  unsigned int   size,
+                  unsigned long  adx)
+{
+  const char fmt[] = "status = %i, space = %i, size = %i, adx = 0x%0x\n";
+  SGL_Error ((Status) fmt, status, space, size, adx);
+  return (status);
+}
+#endif
+
+
+
+#ifdef UNIX
+int execute (char *command)
+{
+  printf ("execute routine unimplemented on UNIX\n");
+  return (0);
+}
+#endif
+@
+
+
+1.2
+log
+@Got rid of warnings
+@
+text
+@d73 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d74 1
+a74 11
+
+#define NIL   (void *)(0)
+#define NULL           0
+#define TRUE           1
+#define FALSE          0
+#define SUCCESS        0
+#define FAILURE        1
+
+#define Min(a,b)       ((a) < (b) ? (a) : (b))
+#define Max(a,b)       ((a) > (b) ? (a) : (b))
+#define lsizeof(var)   (sizeof (var) >> 2)
+a96 12
+#ifdef DBG
+#  define myMalloc(size) \
+  ({void *__p = malloc (size); \
+    printf ("%s: malloc: size %u, 0x%x\n", FN, size, (unsigned long) __p); \
+    __p; })
+#  define myFree(__p) \
+  ({printf ("%s: free: 0x%x\n", FN, (unsigned long) __p); \
+    free (__p); })
+#else
+#  define myMalloc(size) malloc(size)
+#  define myFree(size)   free(size)
+#endif
+a280 1
+
+d433 1
+a433 1
+  char         *line      = (char *) myMalloc (maxCnt);
+d462 1
+a462 1
+  unsigned long address = (unsigned long) myMalloc (10*1024);
+d560 4
+a563 4
+  if (context->prompt  != VBB_K_PROMPT)   myFree ((void *) context->prompt);
+  if (context->inFile  != VBB_K_STDIN)    myFree ((void *) context->inFile);
+  if (context->outFile != VBB_K_STDOUT)   myFree ((void *) context->outFile);
+  if (context->logFile != VBB_K_LOGFILE)  myFree ((void *) context->logFile);
+d565 1
+a565 1
+  myFree     ((void *) hndl->line);
+d567 1
+a567 1
+  myFree     ((void *) address);
+d688 1
+a688 1
+        myFree   ((void *) context->inFile);
+d692 1
+a692 1
+        myFree ((void *) inNode);
+a744 1
+
+a795 1
+
+d805 1
+a805 1
+  string = (char *) myMalloc (length);
+d836 1
+a836 1
+  file   = (char *) myMalloc (length + 1);
+a1034 1
+
+d1385 1
+a1385 1
+          inNode           = (FileNode *) myMalloc (sizeof (*inNode));
+d1395 1
+a1395 1
+          myFree ((void *) item.value);
+a1424 1
+
+d1461 1
+a1461 1
+          if (context->outFile != VBB_K_STDOUT)  myFree ((void *) context->outFile);
+d1478 1
+a1478 1
+          myFree ((char *) item.value);
+d1488 1
+a1488 1
+        if (context->outFile != VBB_K_STDOUT)  myFree ((void *) context->outFile);
+a1528 1
+
+d1603 1
+a1603 1
+#ifdef DBG
+a1605 1
+
+a1787 1
+
+d1808 1
+a1808 1
+        if (context->prompt != VBB_K_PROMPT)  myFree ((void *) context->prompt);
+d1815 1
+a1815 1
+      if (context->prompt != VBB_K_PROMPT)  myFree ((void *) context->prompt);
+a1841 1
+
+a1888 1
+
+a1947 1
+
+d2016 1
+a2016 1
+                myFree ((void *) context->logFile);
+d2025 1
+a2025 1
+              myFree ((void *) item.value);
+d2031 1
+a2031 1
+            myFree ((void *) item.value);
+d2102 1
+a2102 1
+      myFree ((void *) item.value);
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

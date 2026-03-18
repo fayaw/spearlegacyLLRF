@@ -1,0 +1,668 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.56.48;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.56.48;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 37
+The length of the symbol table is: 643
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+.	|singbuf:138.
+<	|singbuf:138|
+J	|singbuf:175.
+X	|singbuf:175|
+f	|singbuf:93.
+s	|singbuf:93|
+""	|singbuf:151.
+"0	|singbuf:151|
+">	|singbuf:33.
+"K	|singbuf:33|
+"X	|singbuf:23.
+"e	|singbuf:23|
+"r	|sysfail:147.
+#"	|sysfail:147|
+#0	|buff_with_clk:154.
+#D	|buff_with_clk:154|
+#X	|buff_with_clk:165.
+#l	|buff_with_clk:165|
+$"	|buff_with_clk:164.
+$6	|buff_with_clk:164|
+$J	|buff_with_clk:163.
+$^	|buff_with_clk:163|
+$r	|buff_with_clk:162.
+%(	|buff_with_clk:162|
+%<	|buff_with_clk:166.
+%P	|buff_with_clk:166|
+%d	|buff_with_clk:167.
+%x	|buff_with_clk:167|
+&.	|buff_with_clk:171.
+&B	|buff_with_clk:171|
+&V	|buff_with_clk:160.
+&j	|buff_with_clk:160|
+&~	|buff_with_clk:158.
+'4	|buff_with_clk:158|
+'H	|buff_with_clk:157.
+'\	|buff_with_clk:157|
+
+The number of name info structs is : 565
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	L)uB	!	"3	44	v	"'	"4	"C	"P	"_	"l	"{	#*	#9	#F	#U	#b	#q	#~	$/	$<	$K	$X	$g	$t	%%	N	O	P	Q	R	S	T	U	Z	[	\	]	^	_	`	a	b	c	d	e	f	g	20M_CLK	p
+#	Ky&}	!	1	#	A_BBSY_AST	":
+$	(@@MF$	!	&0	3	I	&=	&?	IACFAIL_A	"2
+%	(@@MF$	!	&1	5	H	I	&;	&>	&?	IACFAIL_B	"1
+&	(@@MF$	!	%\	4	#	K	%i	%k	IBBSY_A	s
+'	(@@MF$	!	%]	6	#	J	K	%g	%j	%k	IBBSY_B	t
+(	(@@MF$	!	%u	3	M	&$	&&	IBERR_A	"6
+)	(@@MF$	!	%v	5	L	M	&"	&%	&&	IBERR_B	"5
+*	(@@MF$	!	"f	2	"l	O	IBR0_A	"&
++	(@@MF$	!	"g	2	"{	N	IBR0_B	"%
+,	(@@MF$	!	"J	2	"P	Q	IBR1_A	"'
+-	(@@MF$	!	"K	2	"_	P	IBR1_B	"(
+.	(@@MF$	!	".	2	"4	S	IBR2_A	"*
+/	(@@MF$	!	"/	2	"C	R	IBR2_B	")
+0	(@@MF$	!	p	2	v	U	IBR3_A	"+
+1	(@@MF$	!	q	2	"'	T	IBR3_B	",
+2	(@@MF$	!	&I	3	W	&V	&X	IDTACK_A	r
+3	(@@MF$	!	&J	5	V	W	&T	&W	&X	IDTACK_B	q
+4	(@@MF$	!	%*	3	Y	%7	%9	IIACK_A	"$
+5	(@@MF$	!	%+	5	X	Y	%5	%8	%9	IIACK_B	"#
+6	(@@MF$	!	$n	2	$t	[	IIRQ1_A	"!
+7	L)uB	!	%'	2	%%	Z	IIRQ1_B	""
+8	L)uB	!	$h	2	$X	]	IIRQ2_A	}
+9	L)uB	!	$i	2	$g	\	IIRQ2_B	~
+:	L)uB	!	$L	2	$<	_	IIRQ3_A	{
+;	L)uB	!	$M	2	$K	^	IIRQ3_B	|
+<	L)uB	!	$0	2	#~	a	IIRQ4_A	y
+=	L)uB	!	$1	2	$/	`	IIRQ4_B	z
+>	L)uB	!	#r	2	#b	c	IIRQ5_A	u
+?	L)uB	!	#s	2	#q	b	IIRQ5_B	v
+@@	L)uB	!	#V	2	#F	e	IIRQ6_A	"0
+A	L)uB	!	#W	2	#U	d	IIRQ6_B	"/
+B	L)uB	!	#:	2	#*	g	IIRQ7_A	w
+C	L)uB	!	#;	2	#9	f	IIRQ7_B	x
+D	L)uB	!	&y	3	h	i	&p	ISYSFAIL_A	o
+E	L)uB	!	&z	1	h	ISYSFAIL_B	"7
+F	L)uB	!	%U	3	k	%P	%R	ISYSRESET_A	"4
+G	L)uB	!	%V	5	j	k	%N	%Q	%R	ISYSRESET_B	"3
+H	IGdq	!	OACFAIL_A	"X
+I	Ky&}	!	4	H	&>	&?	I	OACFAIL_B	"W
+J	IGdq	!	OBBSY_A	";
+K	Ky&}	!	4	J	%j	%k	K	OBBSY_B	"9
+L	IGdq	!	OBERR_A	"\
+M	Ky&}	!	4	L	&%	&&	M	OBERR_B	"[
+N	IGdq	!	OBR0_A	"Q
+O	IGdq	!	OBR0_B	"P
+P	IGdq	!	OBR1_A	"S
+Q	IGdq	!	OBR1_B	"R
+R	IGdq	!	OBR2_A	"U
+S	IGdq	!	OBR2_B	"T
+T	IGdq	!	OBR3_A	"M
+U	IGdq	!	OBR3_B	"L
+V	IGdq	!	ODTACK_A	"=
+W	Ky&}	!	4	V	&W	&X	W	ODTACK_B	"<
+X	IGdq	!	OIACK_A	"O
+Y	Ky&}	!	4	X	%8	%9	Y	OIACK_B	"N
+Z	IGdq	!	OIRQ1_A	"?
+[	IGdq	!	OIRQ1_B	">
+\	IGdq	!	OIRQ2_A	"A
+]	IGdq	!	OIRQ2_B	"@@
+^	IGdq	!	OIRQ3_A	"C
+_	IGdq	!	OIRQ3_B	"B
+`	IGdq	!	OIRQ4_A	"D
+a	IGdq	!	OIRQ4_B	"E
+b	IGdq	!	OIRQ5_A	"G
+c	IGdq	!	OIRQ5_B	"F
+d	IGdq	!	OIRQ6_A	"H
+e	IGdq	!	OIRQ6_B	"I
+f	IGdq	!	OIRQ7_A	"K
+g	IGdq	!	OIRQ7_B	"J
+h	Ky&}	!	4	i	&k	&p	h	OSYSFAIL_A	"8
+i	IGdq	!	OSYSFAIL_B	"V
+j	IGdq	!	OSYSRESET_A	"Z
+k	Ky&}	!	4	j	%Q	%R	k	OSYSRESET_B	"Y
+l	(@@MF$	!	%.	72	#	v	"'	"4	"C	"P	"_	"l	"{	#*	#9	#F	#U	#b	#q	#~	$/	$<	$K	$X	$g	$t	%%	H	I	J	K	L	M	N	O	P	Q	R	S	T	U	V	W	X	Y	Z	[	\	]	^	_	`	a	b	c	d	e	f	g	h	i	j	k	&%	&&	&>	&?	&W	&X	%8	%9	%Q	%R	%j	%k	&p	RESET_L	".
+m	L)uB	!	&~	3	h	i	&p	SYSFAIL_INH	"-
+n	(>#<h	#0	#v	l	/RESET	#/
+o	IN{b	#0	"	20M_CLK	#0
+p	(>#<h	#0	"(	0	INA	#-
+q	(>#<h	#0	")	1	INB	#,
+r	I]e{	#0	"*	}	OUTA	#.
+s	I]e{	#0	"+	|	OUTB	#+
+t	(>#<h	#D	#|	l	/RESET	%X
+u	I]l(	#D	"-	"	20M_CLK	%U
+v	P}gM	#D	4	"'	T	U	v	1	:1	%\
+w	IGdG	#D	:2	%^
+x	IGdW	#D	:21	%b
+y	IGdW	#D	:22	%`
+z	IGdW	#D	:24	%d
+{	IGdW	#D	:25	%e
+|	IVOQ	#D	s	:27	%a
+}	IVOQ	#D	r	:28	%_
+~	IGdG	#D	:3	%]
+"!	IGdW	#D	:38	%f
+""	IGdW	#D	:40	%g
+"#	IGdW	#D	:41	%h
+"$	IGdW	#D	:42	%i
+"%	IGdW	#D	:58	%j
+"&	IGdW	#D	:8	%c
+"'	Ky'5	#D	2	v	T	:9	%[
+"(	(=rLD	#D	0	INA	%W
+")	(=rLD	#D	1	INB	%V
+"*	IN{I	#D	}	OUTA	%_
+"+	IN{I	#D	|	OUTB	%a
+",	(>#<h	'H	%@@	l	/RESET	#u
+"-	I]l(	'H	"I	"	20M_CLK	#v
+".	(>#<h	'H	"D	.	INA	#s
+"/	(>#<h	'H	"E	/	INB	#r
+"0	I]e{	'H	"F	";	OUTA	#t
+"1	I]e{	'H	"G	":	OUTB	#q
+"2	(=rLD	'\	l	/RESET	(C
+"3	I]l(	'\	"O	"	20M_CLK	(@@
+"4	P}gM	'\	4	"C	R	S	"4	1	:1	(G
+"5	IGdG	'\	:2	(I
+"6	IGdW	'\	:21	(M
+"7	IGdW	'\	:22	(K
+"8	IGdW	'\	:24	(O
+"9	IGdW	'\	:25	(P
+":	IVOQ	'\	"1	:27	(L
+";	IVOQ	'\	"0	:28	(J
+"<	IGdG	'\	:3	(H
+"=	IGdW	'\	:38	(Q
+">	IGdW	'\	:40	(R
+"?	IGdW	'\	:41	(S
+"@@	IGdW	'\	:42	(T
+"A	IGdW	'\	:58	(U
+"B	IGdW	'\	:8	(N
+"C	Ky'5	'\	2	"4	R	:9	(F
+"D	(=rLD	'\	.	INA	(B
+"E	(=rLD	'\	/	INB	(A
+"F	IN{I	'\	";	OUTA	(J
+"G	IN{I	'\	":	OUTB	(L
+"H	(>#<h	&~	",	l	/RESET	#n
+"I	I]l(	&~	"e	"	20M_CLK	#o
+"J	(>#<h	&~	"`	,	INA	#l
+"K	(>#<h	&~	"a	-	INB	#k
+"L	I]e{	&~	"b	"W	OUTA	#m
+"M	I]e{	&~	"c	"V	OUTB	#j
+"N	(>#<h	'4	"2	l	/RESET	()
+"O	I]l(	'4	"k	"	20M_CLK	(&
+"P	P}gM	'4	4	"_	P	Q	"P	1	:1	(-
+"Q	IGdG	'4	:2	(/
+"R	IGdW	'4	:21	(3
+"S	IGdW	'4	:22	(1
+"T	IGdW	'4	:24	(5
+"U	IGdW	'4	:25	(6
+"V	IVOQ	'4	"M	:27	(2
+"W	IVOQ	'4	"L	:28	(0
+"X	IGdG	'4	:3	(.
+"Y	IGdW	'4	:38	(7
+"Z	IGdW	'4	:40	(8
+"[	IGdW	'4	:41	(9
+"\	IGdW	'4	:42	(:
+"]	IGdW	'4	:58	(;
+"^	IGdW	'4	:8	(4
+"_	Ky'5	'4	2	"P	P	:9	(,
+"`	(=rLD	'4	,	INA	((
+"a	(=rLD	'4	-	INB	('
+"b	IN{I	'4	"W	OUTA	(0
+"c	IN{I	'4	"V	OUTB	(2
+"d	(>#<h	&V	"H	l	/RESET	#g
+"e	I]l(	&V	$m	"	20M_CLK	#h
+"f	(>#<h	&V	"|	*	INA	#e
+"g	(>#<h	&V	"}	+	INB	#d
+"h	I]e{	&V	"~	"s	OUTA	#f
+"i	I]e{	&V	#!	"r	OUTB	#c
+"j	(>#<h	&j	"N	l	/RESET	'm
+"k	I]l(	&j	$s	"	20M_CLK	'j
+"l	P}gM	&j	4	"{	N	O	"l	1	:1	'q
+"m	IGdG	&j	:2	's
+"n	IGdW	&j	:21	'w
+"o	IGdW	&j	:22	'u
+"p	IGdW	&j	:24	'y
+"q	IGdW	&j	:25	'z
+"r	IVOQ	&j	"i	:27	'v
+"s	IVOQ	&j	"h	:28	't
+"t	IGdG	&j	:3	'r
+"u	IGdW	&j	:38	'{
+"v	IGdW	&j	:40	'|
+"w	IGdW	&j	:41	'}
+"x	IGdW	&j	:42	'~
+"y	IGdW	&j	:58	(!
+"z	IGdW	&j	:8	'x
+"{	Ky'5	&j	2	"l	N	:9	'p
+"|	(=rLD	&j	*	INA	'l
+"}	(=rLD	&j	+	INB	'k
+"~	IN{I	&j	"s	OUTA	't
+#!	IN{I	&j	"r	OUTB	'v
+#"	(>#<h	$r	$4	l	/RESET	#K
+##	I]l(	$r	#?	"	20M_CLK	#L
+#$	IN{b	$r	B	INA	#I
+#%	IN{b	$r	C	INB	#H
+#&	I]e{	$r	#<	#1	OUTA	#J
+#'	I]e{	$r	#=	#0	OUTB	#G
+#(	(>#<h	%(	$:	l	/RESET	&c
+#)	I]l(	%(	#E	"	20M_CLK	&`
+#*	P}gM	%(	4	#9	f	g	#*	1	:1	&g
+#+	IGdG	%(	:2	&i
+#,	IGdW	%(	:21	&m
+#-	IGdW	%(	:22	&k
+#.	IGdW	%(	:24	&o
+#/	IGdW	%(	:25	&p
+#0	IVOQ	%(	#'	:27	&l
+#1	IVOQ	%(	#&	:28	&j
+#2	IGdG	%(	:3	&h
+#3	IGdW	%(	:38	&q
+#4	IGdW	%(	:40	&r
+#5	IGdW	%(	:41	&s
+#6	IGdW	%(	:42	&t
+#7	IGdW	%(	:58	&u
+#8	IGdW	%(	:8	&n
+#9	Ky'5	%(	2	#*	f	:9	&f
+#:	I]l(	%(	#$	B	INA	&b
+#;	I]l(	%(	#%	C	INB	&a
+#<	IN{I	%(	#1	OUTA	&j
+#=	IN{I	%(	#0	OUTB	&l
+#>	(>#<h	$J	#"	l	/RESET	#D
+#?	I]l(	$J	#[	"	20M_CLK	#E
+#@@	IN{b	$J	@@	INA	#B
+#A	IN{b	$J	A	INB	#A
+#B	I]e{	$J	#X	#M	OUTA	#C
+#C	I]e{	$J	#Y	#L	OUTB	#@@
+#D	(>#<h	$^	#(	l	/RESET	&I
+#E	I]l(	$^	#a	"	20M_CLK	&F
+#F	P}gM	$^	4	#U	d	e	#F	1	:1	&M
+#G	IGdG	$^	:2	&O
+#H	IGdW	$^	:21	&S
+#I	IGdW	$^	:22	&Q
+#J	IGdW	$^	:24	&U
+#K	IGdW	$^	:25	&V
+#L	IVOQ	$^	#C	:27	&R
+#M	IVOQ	$^	#B	:28	&P
+#N	IGdG	$^	:3	&N
+#O	IGdW	$^	:38	&W
+#P	IGdW	$^	:40	&X
+#Q	IGdW	$^	:41	&Y
+#R	IGdW	$^	:42	&Z
+#S	IGdW	$^	:58	&[
+#T	IGdW	$^	:8	&T
+#U	Ky'5	$^	2	#F	d	:9	&L
+#V	I]l(	$^	#@@	@@	INA	&H
+#W	I]l(	$^	#A	A	INB	&G
+#X	IN{I	$^	#M	OUTA	&P
+#Y	IN{I	$^	#L	OUTB	&R
+#Z	(>#<h	$"	#>	l	/RESET	#=
+#[	I]l(	$"	#w	"	20M_CLK	#>
+#\	IN{b	$"	>	INA	#;
+#]	IN{b	$"	?	INB	#:
+#^	I]e{	$"	#t	#i	OUTA	#<
+#_	I]e{	$"	#u	#h	OUTB	#9
+#`	(>#<h	$6	#D	l	/RESET	&/
+#a	I]l(	$6	#}	"	20M_CLK	&,
+#b	P}gM	$6	4	#q	b	c	#b	1	:1	&3
+#c	IGdG	$6	:2	&5
+#d	IGdW	$6	:21	&9
+#e	IGdW	$6	:22	&7
+#f	IGdW	$6	:24	&;
+#g	IGdW	$6	:25	&<
+#h	IVOQ	$6	#_	:27	&8
+#i	IVOQ	$6	#^	:28	&6
+#j	IGdG	$6	:3	&4
+#k	IGdW	$6	:38	&=
+#l	IGdW	$6	:40	&>
+#m	IGdW	$6	:41	&?
+#n	IGdW	$6	:42	&@@
+#o	IGdW	$6	:58	&A
+#p	IGdW	$6	:8	&:
+#q	Ky'5	$6	2	#b	b	:9	&2
+#r	I]l(	$6	#\	>	INA	&.
+#s	I]l(	$6	#]	?	INB	&-
+#t	IN{I	$6	#i	OUTA	&6
+#u	IN{I	$6	#h	OUTB	&8
+#v	(>#<h	#X	#Z	l	/RESET	#6
+#w	I]l(	#X	o	"	20M_CLK	#7
+#x	IN{b	#X	<	INA	#4
+#y	IN{b	#X	=	INB	#3
+#z	I]e{	#X	$2	$'	OUTA	#5
+#{	I]e{	#X	$3	$&	OUTB	#2
+#|	(>#<h	#l	#`	l	/RESET	%s
+#}	I]l(	#l	u	"	20M_CLK	%p
+#~	P}gM	#l	4	$/	`	a	#~	1	:1	%w
+$!	IGdG	#l	:2	%y
+$"	IGdW	#l	:21	%}
+$#	IGdW	#l	:22	%{
+$$	IGdW	#l	:24	&!
+$%	IGdW	#l	:25	&"
+$&	IVOQ	#l	#{	:27	%|
+$'	IVOQ	#l	#z	:28	%z
+$(	IGdG	#l	:3	%x
+$)	IGdW	#l	:38	&#
+$*	IGdW	#l	:40	&$
+$+	IGdW	#l	:41	&%
+$,	IGdW	#l	:42	&&
+$-	IGdW	#l	:58	&'
+$.	IGdW	#l	:8	%~
+$/	Ky'5	#l	2	#~	`	:9	%v
+$0	I]l(	#l	#x	<	INA	%r
+$1	I]l(	#l	#y	=	INB	%q
+$2	IN{I	#l	$'	OUTA	%z
+$3	IN{I	#l	$&	OUTB	%|
+$4	(>#<h	%<	$P	l	/RESET	#R
+$5	I]l(	%<	##	"	20M_CLK	#S
+$6	IN{b	%<	:	INA	#P
+$7	IN{b	%<	;	INB	#O
+$8	I]e{	%<	$N	$C	OUTA	#Q
+$9	I]e{	%<	$O	$B	OUTB	#N
+$:	(>#<h	%P	$V	l	/RESET	&}
+$;	I]l(	%P	#)	"	20M_CLK	&z
+$<	P}gM	%P	4	$K	^	_	$<	1	:1	'#
+$=	IGdG	%P	:2	'%
+$>	IGdW	%P	:21	')
+$?	IGdW	%P	:22	''
+$@@	IGdW	%P	:24	'+
+$A	IGdW	%P	:25	',
+$B	IVOQ	%P	$9	:27	'(
+$C	IVOQ	%P	$8	:28	'&
+$D	IGdG	%P	:3	'$
+$E	IGdW	%P	:38	'-
+$F	IGdW	%P	:40	'.
+$G	IGdW	%P	:41	'/
+$H	IGdW	%P	:42	'0
+$I	IGdW	%P	:58	'1
+$J	IGdW	%P	:8	'*
+$K	Ky'5	%P	2	$<	^	:9	'"
+$L	I]l(	%P	$6	:	INA	&|
+$M	I]l(	%P	$7	;	INB	&{
+$N	IN{I	%P	$C	OUTA	'&
+$O	IN{I	%P	$B	OUTB	'(
+$P	(>#<h	%d	$l	l	/RESET	#Y
+$Q	I]l(	%d	$5	"	20M_CLK	#Z
+$R	IN{b	%d	8	INA	#W
+$S	IN{b	%d	9	INB	#V
+$T	I]e{	%d	$j	$_	OUTA	#X
+$U	I]e{	%d	$k	$^	OUTB	#U
+$V	(>#<h	%x	$r	l	/RESET	'9
+$W	I]l(	%x	$;	"	20M_CLK	'6
+$X	P}gM	%x	4	$g	\	]	$X	1	:1	'=
+$Y	IGdG	%x	:2	'?
+$Z	IGdW	%x	:21	'C
+$[	IGdW	%x	:22	'A
+$\	IGdW	%x	:24	'E
+$]	IGdW	%x	:25	'F
+$^	IVOQ	%x	$U	:27	'B
+$_	IVOQ	%x	$T	:28	'@@
+$`	IGdG	%x	:3	'>
+$a	IGdW	%x	:38	'G
+$b	IGdW	%x	:40	'H
+$c	IGdW	%x	:41	'I
+$d	IGdW	%x	:42	'J
+$e	IGdW	%x	:58	'K
+$f	IGdW	%x	:8	'D
+$g	Ky'5	%x	2	$X	\	:9	'<
+$h	I]l(	%x	$R	8	INA	'8
+$i	I]l(	%x	$S	9	INB	'7
+$j	IN{I	%x	$_	OUTA	'@@
+$k	IN{I	%x	$^	OUTB	'B
+$l	(>#<h	&.	"d	l	/RESET	#`
+$m	I]l(	&.	$Q	"	20M_CLK	#a
+$n	(>#<h	&.	%&	6	INA	#^
+$o	IN{b	&.	7	INB	#]
+$p	I]e{	&.	%(	${	OUTA	#_
+$q	I]e{	&.	%)	$z	OUTB	#\
+$r	(>#<h	&B	"j	l	/RESET	'S
+$s	I]l(	&B	$W	"	20M_CLK	'P
+$t	P}gM	&B	4	%%	Z	[	$t	1	:1	'W
+$u	IGdG	&B	:2	'Y
+$v	IGdW	&B	:21	']
+$w	IGdW	&B	:22	'[
+$x	IGdW	&B	:24	'_
+$y	IGdW	&B	:25	'`
+$z	IVOQ	&B	$q	:27	'\
+${	IVOQ	&B	$p	:28	'Z
+$|	IGdG	&B	:3	'X
+$}	IGdW	&B	:38	'a
+$~	IGdW	&B	:40	'b
+%!	IGdW	&B	:41	'c
+%"	IGdW	&B	:42	'd
+%#	IGdW	&B	:58	'e
+%$	IGdW	&B	:8	'^
+%%	Ky'5	&B	2	$t	Z	:9	'V
+%&	(=rLD	&B	6	INA	'R
+%'	I]l(	&B	$o	7	INB	'Q
+%(	IN{I	&B	${	OUTA	'Z
+%)	IN{I	&B	$z	OUTB	'\
+%*	(>#<h	.	%<	4	INA	"a
+%+	(>#<h	.	%=	5	INB	"`
+%,	I]e{	.	%>	%0	OUTA	"_
+%-	I]e{	.	%?	%/	OUTB	"^
+%.	(>#<h	.	%`	l	RESET_L	"b
+%/	IVOQ	<	%-	:36	$$
+%0	IVOQ	<	%,	:37	$#
+%1	IGdW	<	:46	$%
+%2	IGdW	<	:61	$'
+%3	IGdW	<	:68	$&
+%4	IGdW	<	:82	$)
+%5	Ky'E	<	4	X	Y	%8	%9	:83	$+
+%6	IGdW	<	:84	$(
+%7	Ky'E	<	2	Y	%9	:85	$*
+%8	Q.RG	<	%;	3	X	Y	%9	1	:86	$-
+%9	Q.RG	<	%:	1	Y	2	:87	$,
+%:	INvO	<	%9	DIS_A	$,
+%;	INvO	<	%8	DIS_B	$-
+%<	(=rLD	<	4	INA	#}
+%=	(=rLD	<	5	INB	#~
+%>	IN{I	<	%0	OUTA	$#
+%?	IN{I	<	%/	OUTB	$$
+%@@	(>#<h	<	%r	l	RESET_L	#|
+%A	IFkI	<	~36~1	$$
+%B	IFkI	<	~37~1	$#
+%C	IN{b	""	F	INA	"s
+%D	IN{b	""	G	INB	"r
+%E	I]e{	""	%W	%I	OUTA	"q
+%F	I]e{	""	%X	%H	OUTB	"p
+%G	(>#<h	""	&4	l	RESET_L	"t
+%H	IVOQ	"0	%F	:36	$a
+%I	IVOQ	"0	%E	:37	$`
+%J	IGdW	"0	:46	$b
+%K	IGdW	"0	:61	$d
+%L	IGdW	"0	:68	$c
+%M	IGdW	"0	:82	$f
+%N	Ky'E	"0	4	j	k	%Q	%R	:83	$h
+%O	IGdW	"0	:84	$e
+%P	Ky'E	"0	2	k	%R	:85	$g
+%Q	Q.RG	"0	%T	3	j	k	%R	1	:86	$j
+%R	Q.RG	"0	%S	1	k	2	:87	$i
+%S	INvO	"0	%R	DIS_A	$i
+%T	INvO	"0	%Q	DIS_B	$j
+%U	I]l(	"0	%C	F	INA	$\
+%V	I]l(	"0	%D	G	INB	$]
+%W	IN{I	"0	%I	OUTA	$`
+%X	IN{I	"0	%H	OUTB	$a
+%Y	(>#<h	"0	&F	l	RESET_L	$[
+%Z	IFkI	"0	~36~1	$a
+%[	IFkI	"0	~37~1	$`
+%\	(>#<h	J	%n	&	INA	"g
+%]	(>#<h	J	%o	'	INB	"f
+%^	I]e{	J	%p	%b	OUTA	"e
+%_	I]e{	J	%q	%a	OUTB	"d
+%`	(>#<h	J	&M	l	RESET_L	"h
+%a	IVOQ	X	%_	:36	$9
+%b	IVOQ	X	%^	:37	$8
+%c	IGdW	X	:46	$:
+%d	IGdW	X	:61	$<
+%e	IGdW	X	:68	$;
+%f	IGdW	X	:82	$>
+%g	Ky'E	X	5	#	J	K	%j	%k	:83	$@@
+%h	IGdW	X	:84	$=
+%i	Ky'E	X	3	#	K	%k	:85	$?
+%j	Q.RG	X	%m	4	#	J	K	%k	1	:86	$B
+%k	Q.RG	X	%l	2	#	K	2	:87	$A
+%l	INvO	X	%k	DIS_A	$A
+%m	INvO	X	%j	DIS_B	$B
+%n	(=rLD	X	&	INA	$4
+%o	(=rLD	X	'	INB	$5
+%p	IN{I	X	%b	OUTA	$8
+%q	IN{I	X	%a	OUTB	$9
+%r	(>#<h	X	&_	l	RESET_L	$3
+%s	IFkI	X	~36~1	$9
+%t	IFkI	X	~37~1	$8
+%u	(>#<h	"X	&)	(	INA	#!
+%v	(>#<h	"X	&*	)	INB	"~
+%w	I]e{	"X	&+	%{	OUTA	"}
+%x	I]e{	"X	&,	%z	OUTB	"|
+%y	(>#<h	"X	&f	l	RESET_L	#"
+%z	IVOQ	"e	%x	:36	%+
+%{	IVOQ	"e	%w	:37	%*
+%|	IGdW	"e	:46	%,
+%}	IGdW	"e	:61	%.
+%~	IGdW	"e	:68	%-
+&!	IGdW	"e	:82	%0
+&"	Ky'E	"e	4	L	M	&%	&&	:83	%2
+&#	IGdW	"e	:84	%/
+&$	Ky'E	"e	2	M	&&	:85	%1
+&%	Q.RG	"e	&(	3	L	M	&&	1	:86	%4
+&&	Q.RG	"e	&'	1	M	2	:87	%3
+&'	INvO	"e	&&	DIS_A	%3
+&(	INvO	"e	&%	DIS_B	%4
+&)	(=rLD	"e	(	INA	%&
+&*	(=rLD	"e	)	INB	%'
+&+	IN{I	"e	%{	OUTA	%*
+&,	IN{I	"e	%z	OUTB	%+
+&-	(>#<h	"e	&}	l	RESET_L	%%
+&.	IFkI	"e	~36~1	%+
+&/	IFkI	"e	~37~1	%*
+&0	(>#<h	">	&B	$	INA	"y
+&1	(>#<h	">	&C	%	INB	"x
+&2	I]e{	">	&D	&6	OUTA	"w
+&3	I]e{	">	&E	&5	OUTB	"v
+&4	(>#<h	">	%y	l	RESET_L	"z
+&5	IVOQ	"K	&3	:36	$u
+&6	IVOQ	"K	&2	:37	$t
+&7	IGdW	"K	:46	$v
+&8	IGdW	"K	:61	$x
+&9	IGdW	"K	:68	$w
+&:	IGdW	"K	:82	$z
+&;	Ky'E	"K	4	H	I	&>	&?	:83	$|
+&<	IGdW	"K	:84	$y
+&=	Ky'E	"K	2	I	&?	:85	${
+&>	Q.RG	"K	&A	3	H	I	&?	1	:86	$~
+&?	Q.RG	"K	&@@	1	I	2	:87	$}
+&@@	INvO	"K	&?	DIS_A	$}
+&A	INvO	"K	&>	DIS_B	$~
+&B	(=rLD	"K	$	INA	$p
+&C	(=rLD	"K	%	INB	$q
+&D	IN{I	"K	&6	OUTA	$t
+&E	IN{I	"K	&5	OUTB	$u
+&F	(>#<h	"K	&-	l	RESET_L	$o
+&G	IFkI	"K	~36~1	$u
+&H	IFkI	"K	~37~1	$t
+&I	(>#<h	f	&[	2	INA	"m
+&J	(>#<h	f	&\	3	INB	"l
+&K	I]e{	f	&]	&O	OUTA	"k
+&L	I]e{	f	&^	&N	OUTB	"j
+&M	(>#<h	f	%G	l	RESET_L	"n
+&N	IVOQ	s	&L	:36	$M
+&O	IVOQ	s	&K	:37	$L
+&P	IGdW	s	:46	$N
+&Q	IGdW	s	:61	$P
+&R	IGdW	s	:68	$O
+&S	IGdW	s	:82	$R
+&T	Ky'E	s	4	V	W	&W	&X	:83	$T
+&U	IGdW	s	:84	$Q
+&V	Ky'E	s	2	W	&X	:85	$S
+&W	Q.RG	s	&Z	3	V	W	&X	1	:86	$V
+&X	Q.RG	s	&Y	1	W	2	:87	$U
+&Y	INvO	s	&X	DIS_A	$U
+&Z	INvO	s	&W	DIS_B	$V
+&[	(=rLD	s	2	INA	$H
+&\	(=rLD	s	3	INB	$I
+&]	IN{I	s	&O	OUTA	$L
+&^	IN{I	s	&N	OUTB	$M
+&_	(>#<h	s	%Y	l	RESET_L	$G
+&`	IFkI	s	~36~1	$M
+&a	IFkI	s	~37~1	$L
+&b	IN{b	"r	D	INA	#(
+&c	IN{b	"r	E	INB	#'
+&d	I]e{	"r	&{	&n	OUTA	#%
+&e	I]e{	"r	&|	&m	OUTB	#$
+&f	(>#<h	"r	n	l	RESET_L	#)
+&g	IN{b	"r	m	SYSFAIL_INH	#&
+&h	IGdW	#"	:34	%F
+&i	Ky'E	#"	1	h	:35	%E
+&j	Ky'E	#"	1	&i	:36	%D
+&k	P}g]	#"	1	&l	4	:37	%C
+&l	Ky'E	#"	3	h	i	&p	:38	%B
+&m	IVOQ	#"	&e	:39	%@@
+&n	IVOQ	#"	&d	:40	%?
+&o	IGdW	#"	:46	%G
+&p	P}g]	#"	1	&j	4	:47	%A
+&q	IGe9	#"	:48	%H
+&r	IGe9	#"	:49	%J
+&s	IGe9	#"	:50	%I
+&t	IGe9	#"	:51	%M
+&u	IGe9	#"	:52	%N
+&v	IGe9	#"	:53	%O
+&w	IGe9	#"	:54	%L
+&x	IGe9	#"	:55	%K
+&y	I]l(	#"	&b	D	INA	%:
+&z	I]l(	#"	&c	E	INB	%9
+&{	IN{I	#"	&n	OUTA	%?
+&|	IN{I	#"	&m	OUTB	%@@
+&}	(>#<h	#"	t	l	RESET_L	%;
+&~	I]l(	#"	&g	m	SYSFAIL_INH	%<
+'!	IFkI	#"	~39~1	%@@
+'"	IFkI	#"	~40~1	%?
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

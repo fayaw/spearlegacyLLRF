@@ -1,0 +1,101 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-0:1.3
+	RF-3-13-10:1.3.0.2;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2006.01.11.01.20.55;	author saa;	state dead;
+branches;
+next	1.2;
+
+1.2
+date	2004.02.10.00.08.32;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.08.21.18.55.11;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Link against individual allenBradley modules instead of library.
+This makes it easier to debug one.
+@
+text
+@#Special subroutines for subroutine records
+LIBOBJS += $(EPICS_SITE_BIN)/subSysAb.o
+
+#Allen Bradley Basic Support
+LIBOBJS += $(EPICS_SITE_BIN)/devABBINARY.o
+LIBOBJS += $(EPICS_SITE_BIN)/devABStatus.o
+LIBOBJS += $(EPICS_SITE_BIN)/drvAb.o
+
+#Allen Bradley 1746HSTP Stepper Motor Controller
+LIBOBJS += $(EPICS_BASE_BIN)/steppermotorRecord.o
+LIBOBJS += $(EPICS_SITE_BIN)/devSmAB1746HSTP1.o
+
+#Allen Bradley 1771 DCM
+LIBOBJS += $(EPICS_SITE_BIN)/abDcmLib
+
+#General Purpose Device Interfaces
+LIBOBJS += $(EPICS_SITE_BIN)/devIai1.o
+LIBOBJS += $(EPICS_SITE_BIN)/devIao1.o
+
+#Allen Bradley 1771IX(E and HR) - also needs devIai1
+LIBOBJS += $(EPICS_SITE_BIN)/ab1771IXRecord.o
+
+#Allen Bradley 1771IFE - also needs devIai1
+LIBOBJS += $(EPICS_SITE_BIN)/ab1771IFERecord.o
+
+#Allen Bradley 1771N Series - also needs devIai1 and devIao1
+LIBOBJS += $(EPICS_SITE_BIN)/ab1771NRecord.o
+
+#Allen Bradley 1791 Block I/O
+LIBOBJS += $(EPICS_SITE_BIN)/ab1791Record.o
+
+#Allen Bradley SLC DCM
+LIBOBJS += $(EPICS_SITE_BIN)/devABSLCDCM.o
+
+
+
+
+
+
+
+
+@
+
+
+1.2
+log
+@Revert to original AllenBradley driver.
+@
+text
+@@
+
+
+1.1
+log
+@AllenBradley objs to build abLib. Temp. for mv2400
+@
+text
+@d7 1
+a7 1
+LIBOBJS += drvAb.o
+@
+

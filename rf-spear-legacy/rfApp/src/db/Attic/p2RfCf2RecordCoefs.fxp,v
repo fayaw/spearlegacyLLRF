@@ -1,0 +1,602 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-0:1.2
+	RF-3-13-10:1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2011.12.07.01.17.19;	author saa;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2006.01.25.23.54.21;	author lazmo;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@No longer supporting these.  SPEAR has no CF2 module anyway.
+@
+text
+@#================================================================
+# PEP-II COMB-2 module EPICS record cofficient definitions
+# M. Laznovsky 2005-April-06
+#
+# To build "p2RfCf2RecordCoefs.dbd":
+#
+#     % fxplode p2RfCf2RecordCoefs.fxp >p2RfCf2RecordCoefs.dbd
+#
+# (fxplode currently found in ~lazmo/bin)
+#
+# Note that fields need to be parameterized in such a way that the 
+# panels that use them can easily generate the correct field names
+# (e.g. per-bank).
+#
+#================================================================
+
+#################################################################
+# coefficients
+#################################################################
+
+#================================================================
+#
+# comb coefficients
+# 
+# bank(0,1) * (II,QQ,QI,IQ) * (A,B) * (0,1,2,3) = 64 fields
+#             ( 0, 1, 2, 3)   (0,1,........6,7)
+# 
+# Mapping:
+#   B0,B1,B2,B3: C $(BANK) $(IQ) [0,1,2,3]
+#    G,A1,A2,A3: C $(BANK) $(IQ) [4,5,6,7]
+#
+#      [0][0]
+# C [0][1] .
+#   [1][2] .
+#      [3][7]
+#
+#
+# VXI A24 addresses:
+#
+#   0x0200 - II bank 0
+#   0x0210 - II bank 1
+#   0x0220 - QI bank 0
+#   0x0230 - QI bank 1
+#
+#   0x0600 - QQ bank 0
+#   0x0610 - QQ bank 1
+#   0x0620 - IQ bank 0
+#   0x0630 - IQ bank 1
+#
+#================================================================
+
+begin DBF_DOUBLE
+prompt("cmb_coef")
+promptgroup(GUI_COMMON)
+pp(TRUE)
+interest(1)
+for C
+for 0 1
+for 0 1 2 3
+for 0 1 2 3 4 5 6 7
+end
+
+#================================================================
+# 
+# equalizer coefficients
+# 
+# bank(0,1)* f(II,QQ,QI,IQ) * n(0..31) = 256 fields
+#             ( 0, 1, 2, 3)
+# 
+# Address space is reserved for n(0..63), so s/w needs to skip over gaps 
+# when reading/writing these regs in sequence.
+#
+# Can't use all-digit fields since field names are used as C identifiers
+# (elements of module record struct)... so use "0-9,A-V".  Will need to come
+# up with another scheme (split?) if it goes to 64 coefs.
+#
+#      [0][0]
+# E [0][1] .
+#   [1][2] .
+#      [3][V]
+#
+# VXI A24 addresses:
+#
+#   0x0000 - II bank 0
+#   0x0080 - II bank 1
+#   0x0100 - QI bank 0
+#   0x0180 - QI bank 1
+#
+#   0x0400 - QQ bank 0
+#   0x0480 - QQ bank 1
+#   0x0500 - IQ bank 0
+#   0x0580 - IQ bank 1
+#
+#================================================================
+
+begin DBF_DOUBLE
+prompt("equ_coef")
+promptgroup(GUI_COMMON)
+pp(TRUE)
+interest(1)
+for E
+for 0 1
+for 0 1 2 3
+for 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P Q R S T U V
+end
+
+#================================================================
+# 
+# interpolation filter coefficients
+# 
+# bank(0,1,2,3) * (I,Q) * tap?(1,2,3,4) * (A,B,C,D) = 128 fields
+#                             (A,B,...........,O,P)
+# 
+#    [0]   [A]
+# [I][1][I] .
+#    [2][Q] .
+#    [3]   [P]
+#
+# VXI A24 addresses:
+#
+#   0x0280 - I bank 0
+#   0x02A0 - I bank 1
+#   0x02C0 - I bank 2
+#   0x02E0 - I bank 3
+#
+#   0x0680 - Q bank 0
+#   0x06A0 - Q bank 1
+#   0x06C0 - Q bank 2
+#   0x06E0 - Q bank 3
+#
+#================================================================
+
+begin DBF_DOUBLE
+prompt("int_coef")
+promptgroup(GUI_COMMON)
+pp(TRUE)
+interest(1)
+for I
+for 0 1 2 3
+for I Q
+for A B C D E F G H I J K L M N O P
+end
+
+#################################################################
+# load/save buttons
+#################################################################
+
+#================================================================
+#
+# comb coefficient load/save buttons
+#
+# (load,save) * file(1,2) * bank(0,1) = 8 fields
+#
+# C [L][1][0]
+#   [S][2][1]
+#
+#================================================================
+
+begin DBF_UCHAR
+prompt("comb coef button")
+pp(TRUE)
+interest(2)
+for C
+for L S
+for 1 2
+for 0 1
+end
+
+#================================================================
+#
+# equalizer coefficient load/save buttons
+#
+# (load,save) * file(1,2) * bank(0,1) = 8 fields
+#
+# E [L][1][0]
+#   [S][2][1]
+#
+#================================================================
+
+begin DBF_UCHAR
+prompt("equ coef button")
+pp(TRUE)
+interest(2)
+for E
+for L S
+for 1 2
+for 0 1
+end
+
+#================================================================
+#
+# interpolation coefficient load/save buttons
+#
+# (load,save) * bank(0,1,2,3) = 8 fields
+#
+#         [0]
+# I [L] 0 [1]
+#   [S]   [2]
+#         [3]
+#
+#================================================================
+
+begin DBF_UCHAR
+prompt("interp coef button")
+pp(TRUE)
+interest(2)
+for I
+for L S
+for 0
+for 0 1 2 3
+end
+
+#################################################################
+# load/save status
+# SAME ORDER AS BUTTONS!
+#################################################################
+
+#================================================================
+#
+# comb coefficient load/save status
+#
+# file(1,2) * bank(0,1) = 4 fields
+#
+# C Z [1][0]
+#     [2][1]
+#
+#================================================================
+
+begin DBF_MENU
+prompt("comb coef status")
+special(SPC_NOMOD)
+menu(menuAlarmStat)
+initial("17")
+for CZ
+for 1 2
+for 0 1
+end
+
+#================================================================
+#
+# equalizer coefficient load/save status
+#
+# file(1,2) * bank(0,1) = 4 fields
+#
+# E Z [1][0]
+#     [2][1]
+#
+#================================================================
+
+begin DBF_MENU
+prompt("equ coef status")
+special(SPC_NOMOD)
+menu(menuAlarmStat)
+initial("17")
+for EZ
+for 1 2
+for 0 1
+end
+
+#================================================================
+#
+# interpolation coefficient load/save status
+#
+# bank(0,1,2,3) = 4 fields
+#
+#       [0]
+# I Z 0 [1]
+#       [2]
+#       [3]
+#
+#================================================================
+
+begin DBF_MENU
+prompt("interp coef status")
+special(SPC_NOMOD)
+menu(menuAlarmStat)
+initial("17")
+for IZ0
+for 0 1 2 3
+end
+
+#################################################################
+# load/save filenames
+# SAME ORDER AS BUTTONS!
+#################################################################
+
+#================================================================
+#
+#
+# comb coefficient filenames
+#
+# file(1,2) * bank(0,1) = 4 fields
+#
+# C F [1][0]
+#     [2][1]
+#
+#================================================================
+
+begin DBF_STRING
+prompt("comb coef file")
+promptgroup(GUI_COMMON)
+size(40)
+for CF
+for 1 2
+for 0 1
+end
+
+#================================================================
+#
+# equalizer coefficient filenames 
+#
+# file(1,2) * bank(0,1) = 4 fields
+#
+# E F [1][0]
+#     [2][1]
+#
+#================================================================
+
+begin DBF_STRING
+prompt("equ coef file")
+promptgroup(GUI_COMMON)
+size(40)
+for EF
+for 1 2
+for 0 1
+end
+
+#================================================================
+#
+# interpolation coefficient filenames
+#
+# bank(0,1,2,3) = 4 fields
+#
+#       [0]
+# I F 0 [1]
+#       [2]
+#       [3]
+#
+#================================================================
+
+begin DBF_STRING
+prompt("interp coef file")
+promptgroup(GUI_COMMON)
+size(40)
+for IF
+for 0
+for 0 1 2 3
+end
+
+#################################################################
+# load/save comments
+# SAME ORDER AS BUTTONS!
+#################################################################
+
+#================================================================
+#
+# comb coefficient comments
+#
+# file(1,2) * bank(0,1) = 4 fields
+#
+# C C [1][0]
+#     [2][1]
+#
+#================================================================
+
+begin DBF_STRING
+prompt("comb coef comment")
+promptgroup(GUI_COMMON)
+size(40)
+for CC
+for 1 2
+for 0 1
+end
+
+#================================================================
+#
+# equalizer coefficient comments
+#
+# file(1,2) * bank(0,1) = 8 fields
+#
+# E C [1][0]
+#     [2][1]
+#
+#================================================================
+
+begin DBF_STRING
+prompt("equ coef comment")
+promptgroup(GUI_COMMON)
+size(40)
+for EC
+for 1 2
+for 0 1
+end
+
+#================================================================
+#
+# interpolation coefficient comments
+#
+# bank(0,1,2,3) = 4 fields
+#
+#       [0]
+# I C 0 [1]
+#       [2]
+#       [3]
+#
+#================================================================
+
+begin DBF_STRING
+prompt("interp coef file")
+promptgroup(GUI_COMMON)
+size(40)
+for IC0
+for 0 1 2 3
+end
+
+#################################################################
+# miscellaneous fields
+#################################################################
+
+#================================================================
+#
+# error counts
+#
+# 8 counts = 8 fields
+#
+#       [1]
+# E C N  .
+#       [8]
+#
+#================================================================
+
+begin DBF_DOUBLE
+prompt("error count")
+promptgroup(GUI_COMMON)
+for ECN
+for 1 2 3 4 5 6 7 8
+end
+
+#
+# error count reset button... put here just to keep it near the counts
+#
+begin DBF_UCHAR
+prompt("error count reset")
+pp(TRUE)
+interest(2)
+for ECNR
+end
+
+#================================================================
+#
+# main-panel stuff
+#
+#================================================================
+
+#--------------------------------
+# history/diagnostic memory record choice buttons
+#  ... "Yxxx" versions are "previous" values
+#--------------------------------
+begin DBF_USHORT
+prompt("mem rec choice button")
+promptgroup(GUI_COMMON)
+pp(TRUE)
+initial("1")
+for X Y
+for DIR HIR
+end
+
+#--------------------------------
+# other choice buttons
+#--------------------------------
+begin DBF_USHORT
+prompt("panel choice button")
+promptgroup(GUI_COMMON)
+pp(TRUE)
+for X
+for ANA CBS DAA DGA DDC EBS IOT IBS IFO SLB D1S D2S HBS SYS
+end
+
+#================================================================
+#
+# bank-select indicators... for gating display backgrounds
+#
+#================================================================
+
+begin DBF_UCHAR
+prompt("CMB bank select indicator")
+for CBS
+for 0 1
+end
+
+begin DBF_UCHAR
+prompt("EQU bank select indicator")
+for EBS
+for 0 1
+end
+
+begin DBF_UCHAR
+prompt("INT bank select indicator")
+for IBS
+for 0 1 2 3
+end
+
+#================================================================
+#
+# buffer-panel stuff
+#
+#================================================================
+
+#--------------------------------
+# file names
+#--------------------------------
+begin DBF_STRING
+prompt("buffer filename")
+promptgroup(GUI_COMMON)
+size(40)
+for IH QH D1 D2 IP QP
+for FN
+end
+
+#--------------------------------
+# history-get/mem-load buttons
+#--------------------------------
+begin DBF_UCHAR
+prompt("buffer button")
+pp(TRUE)
+interest(2)
+for IH QH D1 D2 IP QP
+for GT
+end
+
+#--------------------------------
+# get/load status
+#--------------------------------
+begin DBF_MENU
+prompt("buffer status")
+special(SPC_NOMOD)
+menu(menuAlarmStat)
+initial("17")
+for IH QH D1 D2 IP QP
+for ST
+end
+
+#--------------------------------
+# file size, in Kwords (IP/QP not used)
+#--------------------------------
+begin DBF_ULONG
+prompt("buffer size")
+promptgroup(GUI_COMMON)
+for IH QH D1 D2 IP QP
+for SZ
+end
+
+#--------------------------------
+#--------------------------------
+
+# end
+@
+
+
+1.1
+log
+@Initial import of COMB-2 (Cf2) support.
+@
+text
+@@
+

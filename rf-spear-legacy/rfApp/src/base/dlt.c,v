@@ -1,0 +1,1084 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2002.05.14.23.58.13;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Got rid of warnings
+@
+text
+@/*
+** ++
+**WASTEBASKET
+**  Facility:  DLT - Down Load Table
+**
+**  Abstract:
+**      Program to load a table into memory.
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Feedback Project
+**
+**  History:
+**	October  11, 1993 - Created
+**      February 24, 1994 - Modified to read Vbb syntax files
+**                          Dispensed with the old format
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#ifdef VXWORKS
+#  include <vxWorks.h>
+#  include <stdlib.h>
+#  include <stdioLib.h>
+#  include <strLib.h>
+#  include <ioLib.h>
+#  include <lstLib.h>
+#else
+#  include <malloc.h>
+#  include <unistd.h>
+#  include "vxWorks-unix.h"
+#  include "lstLib-unix.h"
+#  include "mvxLib.h"
+
+#  define memShow mallocmap
+#endif
+#include <stdio.h>
+#include <string.h>
+
+#include "modTypes.h"
+#include "lipDef.h"
+#include "lipLib.h"
+#include "busLib.h"
+#include "sglLib.h"
+#if TARGET == VMECPU
+#  include "dspLib.h"
+#endif
+#include "dwnLib.h"
+#include "dwn.msg"
+#include "genLib.h"
+
+
+#ifndef VXWORKS
+#  define DUMP                          /* DUMP enables dumping of a table */
+#endif
+
+
+#define RAD_K_DEC          10
+#define RAD_K_HEX          16
+
+#define VRB(wrd,min,fn,arg,gbl,lcl,sub) \
+{TYP_K_VERB,     wrd, sizeof (wrd), min,  fn,  arg,  gbl, lcl, sub}
+#define SBJ(wrd,min,fn,arg,lcl,sub)     \
+{TYP_K_SUBJECT,  wrd, sizeof (wrd), min,  fn,  arg,  NIL, lcl, sub}
+#define MOD(wrd,min,fn,arg,sub)         \
+{TYP_K_MODIFIER, wrd, sizeof (wrd), min,  fn,  arg,  NIL, NIL, sub}
+#define NMB(fn,arg,lcl)                 \
+{TYP_K_NUMBER,   "",  NULL,         NULL, fn,  arg,  NIL, lcl, NIL}
+#define ARN(fn,arg,lcl)                 \
+{TYP_K_ABSRNGE,  "",  NULL,         NULL, fn,  arg,  NIL, lcl, NIL}
+#define CRN(fn,arg,lcl)                 \
+{TYP_K_CNTDRNGE, "",  NULL,         NULL, fn,  arg,  NIL, lcl, NIL}
+#define FIL(fn,arg,lcl)                 \
+{TYP_K_FILENAME, "",  NULL,         NULL, fn,  arg,  NIL, lcl, NIL}
+#define CMT(fn,arg)                     \
+{TYP_K_COMMENT,  "",  NULL,         NULL, fn,  arg,  NIL, NIL, NIL}
+#define END()                           \
+{TYP_K_UNKNOWN,  NIL, NULL,         NULL, NIL, NULL, NIL, NIL, NIL}
+
+typedef struct _FileNode
+{
+  NODE           links;
+  FILE          *stream;
+  char          *fileName;
+} FileNode;
+
+typedef struct _ModContext
+{
+  unsigned int   radix;
+  unsigned int   space;
+  unsigned int   size;
+} ModContext;
+
+typedef struct _DltContext
+{
+  FILE          *in;
+  LIST          *inLst;
+  unsigned int   verify;
+  unsigned int   dump;
+  unsigned int   done;
+  unsigned long  address;
+  unsigned int   count;
+  unsigned long  value;
+  int            slot;
+  int            channel;
+#if TARGET == VMECPU
+  DspBoard      *board;
+#else
+  void          *board;
+#endif
+  ModContext     save;
+  ModContext     copy;
+}  DltContext;
+
+typedef struct _DltHndl
+{
+  DltContext    *context;
+  LipWrdDsc     *dict;
+  char          *oneChrDict;
+  char          *line;
+  int            maxCnt;
+} DltHndl;
+
+typedef struct _ItemDsc
+{
+  int            type;
+  unsigned long  value;
+} ItemDsc;
+
+  static char     *GetLine  (DltHndl *);
+  static void      DoMods   (DltContext *, LIST *);
+  static Status    Range    (DltContext    *, LipWrdNode   **,
+                             unsigned long *, unsigned int *);
+
+  static void     *Number   (int,    DltContext *, LipWrdNode *, ItemDsc *);
+  static void     *File     (void *, DltContext *, LipWrdNode *, ItemDsc *);
+  static void     *Comment  (void *, DltContext *, LipWrdNode *, void    *);
+  static void     *Set      (void *, DltContext *, LipWrdNode *, void    *);
+  static void     *Write    (void *, DltContext *, LipWrdNode *, void    *);
+  static void     *Input    (void *, DltContext *, LipWrdNode *, void    *);
+  static void     *Radix    (void *, DltContext *, LipWrdNode *, void    *);
+  static void     *Space    (void *, DltContext *, LipWrdNode *, void    *);
+  static void     *Size     (void *, DltContext *, LipWrdNode *, void    *);
+
+  static void     *Mradix   (int   , DltContext *, LipWrdNode *, void    *);
+  static void     *Mspace   (int   , DltContext *, LipWrdNode *, void    *);
+  static void     *Msize    (int   , DltContext *, LipWrdNode *, void    *);
+
+
+#ifndef VXWORKS
+Status main (int   argc,
+             char *argv[])
+{
+  return (DWN_LoadTable ((char       *) argv[1],
+                         (unsigned int) argv[2],
+                         (unsigned int) argv[3],
+                         FALSE,
+                         TRUE)                 );
+}
+#endif
+
+
+
+Status LdTbl (char          *filename,
+              unsigned int   slot,
+              unsigned int   channel)
+/*
+   Description
+   -----------
+   Program to load a table from a file.  This routine is meant to be used
+   from the VxWorks command line prompt and should not be called by other
+   functions.  Use DWN_LoadTable for that purpose.
+
+   Parameter
+   ---------
+    filename - Table file to load
+        slot - VSB slot number to load.  Valid values are 1 to 5.
+     channel - Channel number (0 - 3) on the DSP module to load.
+
+   Returns
+   -------
+   SUCCESS
+*/
+{
+  /* Load the stinkin' thing */
+  return (DWN_LoadTable (filename, slot, channel, TRUE, FALSE));
+}
+
+
+
+Status DWN_LoadTable (char          *filename,
+                      int            slot,
+                      int            channel,
+                      unsigned int   verify,
+                      unsigned int   dump)
+/*
+   Description
+   -----------
+   Callable function to load a table from a .tbl file.  The format of the .tbl
+   file is a subset of Vbb command syntax.  See Vbb for details
+   The slot and channel arguments are meaningful only with DSP modules and are
+   otherwise ignored.
+
+   Parameter
+   ---------
+    filename - File to load at a given address, NIL if from stdin
+        slot - VSB slot number to load.  Valid values are 1 to 5, and -1 for all
+     channel - Channel number (0 - 3) on the DSP module to load,      -1 for all
+      verify - Flag to verify that the file was loaded properly
+        dump - Flag to dump the contents of the file as it is loaded
+               *** dump only works if DUMP is #defined ***
+
+   Returns
+   -------
+   SUCCESS
+*/
+{
+  /*   (keyword,     min, routine,  arg,      global,     local,     subject) */
+  static LipWrdDsc    fileSubj[]    =
+  {FIL (                  File,     NULL,                   NIL             ),
+   END (                                                                    )};
+  static LipWrdDsc    rangeMod[]    =
+  {MOD ("decimal",     1, Mradix,   RAD_K_DEC,                    NIL       ),
+   MOD ("hexadecimal", 1, Mradix,   RAD_K_HEX,                    NIL       ),
+   MOD ("local",       1, Mspace,   SPC_K_LOCAL,                  NIL       ),
+   MOD ("vsbsys",      4, Mspace,   SPC_K_VSBSYS,                 NIL       ),
+   MOD ("vsbalt",      4, Mspace,   SPC_K_VSBALT,                 NIL       ),
+   MOD ("vsbio",       4, Mspace,   SPC_K_VSBIO,                  NIL       ),
+   MOD ("a16",         3, Mspace,   SPC_K_A16,                    NIL       ),
+   MOD ("a24",         3, Mspace,   SPC_K_A24,                    NIL       ),
+   MOD ("a32",         3, Mspace,   SPC_K_A32,                    NIL       ),
+   MOD ("byte",        1, Msize,    SIZ_K_BYTE,                   NIL       ),
+   MOD ("short",       1, Msize,    SIZ_K_SHORT,                  NIL       ),
+   MOD ("word",        1, Msize,    SIZ_K_SHORT,                  NIL       ),
+   MOD ("long",        3, Msize,    SIZ_K_LONG,                   NIL       ),
+   END (                                                                    )};
+  static LipWrdDsc    rangeSubj[]   =
+  {NMB (                  Number,   NULL,              rangeMod             ),
+   ARN (                  Number,   NULL,              rangeMod             ),
+   CRN (                  Number,   NULL,              rangeMod             ),
+   END (                                                                    )};
+  static LipWrdDsc    writeMod[]    =
+  {MOD ("decimal",     1, Mradix,   RAD_K_DEC,                    NIL       ),
+   MOD ("hexadecimal", 1, Mradix,   RAD_K_HEX,                    NIL       ),
+   MOD ("local",       1, Mspace,   SPC_K_LOCAL,                  NIL       ),
+   MOD ("vsbsys",      4, Mspace,   SPC_K_VSBSYS,                 NIL       ),
+   MOD ("vsbalt",      4, Mspace,   SPC_K_VSBALT,                 NIL       ),
+   MOD ("vsbio",       4, Mspace,   SPC_K_VSBIO,                  NIL       ),
+   MOD ("a16",         3, Mspace,   SPC_K_A16,                    NIL       ),
+   MOD ("a24",         3, Mspace,   SPC_K_A24,                    NIL       ),
+   MOD ("a32",         3, Mspace,   SPC_K_A32,                    NIL       ),
+   MOD ("byte",        1, Msize,    SIZ_K_BYTE,                   NIL       ),
+   MOD ("short",       1, Msize,    SIZ_K_SHORT,                  NIL       ),
+   MOD ("word",        1, Msize,    SIZ_K_SHORT,                  NIL       ),
+   MOD ("long",        3, Msize,    SIZ_K_LONG,                   NIL       ),
+   END (                                                                    )};
+  static LipWrdDsc    radixSubj[]   =
+  {SBJ ("decimal",     1, Number,   RAD_K_DEC,    NIL,            NIL       ),
+   SBJ ("hexadecimal", 1, Number,   RAD_K_HEX,    NIL,            NIL       ),
+   END (                                                                    )};
+  static LipWrdDsc    spaceSubj[]   =
+  {SBJ ("local",       1, Number,   SPC_K_LOCAL,  NIL,            NIL       ),
+   SBJ ("vsbsys",      4, Number,   SPC_K_VSBSYS, NIL,            NIL       ),
+   SBJ ("vsbalt",      4, Number,   SPC_K_VSBALT, NIL,            NIL       ),
+   SBJ ("vsbio",       4, Number,   SPC_K_VSBIO,  NIL,            NIL       ),
+   SBJ ("a16",         3, Number,   SPC_K_A16,    NIL,            NIL       ),
+   SBJ ("a24",         3, Number,   SPC_K_A24,    NIL,            NIL       ),
+   SBJ ("a32",         3, Number,   SPC_K_A32,    NIL,            NIL       ),
+   END (                                                                    )};
+  static LipWrdDsc    sizeSubj[]    =
+  {SBJ ("byte",        1, Number,   SIZ_K_BYTE,   NIL,            NIL       ),
+   SBJ ("short",       1, Number,   SIZ_K_SHORT,  NIL,            NIL       ),
+   SBJ ("word",        1, Number,   SIZ_K_SHORT,  NIL,            NIL       ),
+   SBJ ("long",        1, Number,   SIZ_K_LONG,   NIL,            NIL       ),
+   END (                                                                    )};
+  static LipWrdDsc    setSubj[]     =
+  {SBJ ("radix",       1, Radix,    NULL,         NIL,            radixSubj ),
+   SBJ ("space",       2, Space,    NULL,         NIL,            spaceSubj ),
+   SBJ ("size",        2, Size,     NULL,         NIL,            sizeSubj  ),
+   END (                                                                    )};
+  static LipWrdDsc    dict[]         =
+  {VRB ("set",         3, Set,      NULL,         NIL,       NIL, setSubj   ),
+   VRB ("write",       1, Write,    NULL,         writeMod,  NIL, rangeSubj ),
+   VRB ("<",           1, Input,    NULL,         NIL,       NIL, fileSubj  ),
+   VRB ("@@",           1, Input,    NULL,         NIL,       NIL, fileSubj  ),
+   CMT (                  Comment,  NULL                                    ),
+   END (                                                                   )};
+
+  unsigned int  maxCnt    = 256;
+  char         *line      = (char *) malloc (maxCnt);
+  LIST          inLst;
+  DltContext    Context   = {NIL, NIL, 0, 0, FALSE, NULL, NULL, NULL,
+                             NULL, NULL, NIL,
+                             {RAD_K_HEX, SPC_K_LOCAL, SIZ_K_LONG}};
+
+  DltContext   *context   = &Context;
+  DltHndl       Handle    = {NIL, dict, "<@@", 0, 0};
+  DltHndl      *hndl      = &Handle;
+  LIST         *verbList  = NIL;
+  LipWrdNode   *verb;
+
+
+#if TARGET == VMECPU
+  /* Check arguments */
+  if (slot    != -1)
+  {
+    if (!DSP_IsDsp (slot))  return (SGL_Error (DWN_NOTDSP, slot));
+  }
+  if (channel != -1)
+  {
+    if ((channel < DSP_K_CHANMIN) || (channel > DSP_K_CHANMAX))
+      return (SGL_Error (DWN_ILLCHN, channel));
+  }
+
+  /* Get a list of DSP modules */
+  if ((DSP_FindEm (&context->board)) != SUCCESS)
+    return (FAILURE);
+
+  context->slot    = slot;
+  context->channel = channel;
+#endif
+
+  /* Some run-time non-constant initializaion to keep ANSI switch happy */
+
+  Context.inLst  = &inLst;
+  Context.verify = verify;
+  Context.dump   = dump;
+  Handle.context = context;
+  Handle.line    = line;
+  Handle.maxCnt  = maxCnt; 
+
+
+  /* Initialize the file queue */
+  lstInit (context->inLst);
+
+  /* Open the file if supplied, else assume input comes from stdin */
+  if (filename)
+  {
+    if ((context->in = fopen (filename, "r")) == NULL)
+      return (SGL_Error (DWN_UNAFIL, filename));
+  }
+  else
+  {
+    context->in = stdin;
+  }
+
+  /* Process commands 'til done */
+  while (!context->done)
+  {
+    /* Get a line of input */
+    line = GetLine (hndl);
+    if (context->done) break;
+
+    /* Compile the line into a list of instructions */
+    if ((verbList = LIP_CompileLine (line, hndl->dict, hndl->oneChrDict)))
+    {
+      verb = LIP_First (verbList);
+
+      /* Carry out the instruction list */
+      while (verb)
+      {
+        /* Reset the modifier part of the context block */
+        context->copy = context->save;
+
+        /* Eat the verb's global and local modifiers */
+        DoMods (context, verb->gblLst);
+        DoMods (context, verb->lclLst);
+
+        /* Munch on the verbs and their subjects */
+        verb = (*verb->word->fn) (verb->word->arg, context, verb, NIL);
+      }
+
+      /* Free the command list */
+      LIP_Free (verbList);
+    }
+  }
+
+  /* Clean up */
+  lstFree (context->inLst);
+  free    ((void *) hndl->line);
+
+/*  memShow (0); */
+
+  return (SUCCESS);
+}
+
+
+
+static char *GetLine (DltHndl   *hndl)
+/*
+   Description
+   -----------
+   Get a line of input.  Someday we'll maybe stick some code in here to
+   handle a continued lines.  The trouble is, if you don't know the line
+   syntax, how can you find a line continuation character before a
+   comment character?
+
+   Parameter
+   ---------
+        hndl - A pointer to a DLT handle.
+
+   Returns
+   -------
+   A NULL terminated line of input.
+*/
+{
+  DltContext *context = hndl->context;
+  char       *line;
+
+  /* Get a line from the file */
+  if ((line = (char *) fgets (hndl->line, hndl->maxCnt, context->in)) == NIL)
+  {
+    FileNode *inNode = (FileNode *) lstLast (context->inLst);
+
+    /*
+    |  If EOF and input was redirected in the command file
+    |    close the file and put the previous stream back
+    |  else
+    |    if input was redirected from the invocation line, the last nested
+    |    input file to generate EOF will take the else case below,
+    |    rewind the file attached to stdin, set the done flag and return.
+    */
+    if (inNode)
+    {
+      fclose (context->in);
+      context->in     = inNode->stream;
+      lstDelete (context->inLst, (NODE *) inNode);
+      free ((void *) inNode);
+      return (GetLine (hndl));
+    }
+    else
+    {
+      if (context->in != stdin)  fclose (context->in);
+      else                       rewind (context->in);
+      context->done = TRUE;
+      return (NIL);
+    }
+  }
+
+  /* Get rid of stupid newline character.  ARRGGGHHH what a waste of time! */
+  if (line)
+  {
+    register char *c = line;
+    while (*c && *c != '\n')  {  c++;  }
+    if (*c) *c = '\0';
+  }
+
+  /* Don't return blank lines */
+  if (*line == '\0')    return (GetLine (hndl));
+
+  return (line);
+}
+
+
+
+static void       *Number (int         number,
+                           DltContext *context,
+                           LipWrdNode *node,
+                           ItemDsc    *item)
+{
+  if (number)
+  {
+    item->type  = TYP_K_NUMBER;
+    item->value = number;
+  }
+  else
+  {
+    int        nmr;
+    char       dmy;
+    LipWrdDsc *word;
+    char      *fmt;
+    int        cnt;
+
+    /* Eat the node's local modifiers */
+    DoMods (context, node->list);
+
+    word = node->word;
+    fmt  = context->copy.radix == RAD_K_DEC || strchr (word->string, 'x') ?
+      "%i%c" : "%x%c";
+
+    /* Convert the number and look for terminator */
+    cnt  = sscanf (word->string, fmt, &nmr, &dmy);
+
+    /* If legal terminator return number in item descriptor */
+    if (cnt == 2 && strchr (" \t;:/", dmy))  cnt = 1;
+    if (cnt == 1)
+    {
+      item->value = nmr;
+      item->type  = word->type;
+    }
+    else
+    {
+      SGL_Error  (DWN_BADNMR, word->string);
+      item->type = TYP_K_UNKNOWN;
+      return (NIL);
+    }
+  }
+
+  return (LIP_Next (node));
+}
+
+
+
+static void       *File (void       *arg,
+                         DltContext *context,
+                         LipWrdNode *node,
+                         ItemDsc    *item)
+{
+  int        length;
+  char      *file;
+  LipWrdDsc *word = node->word;
+
+  /* Eat the node's local modifiers */
+  DoMods (context, node->list);
+
+  /* Allocate space and make a private copy */
+  length = word->size;
+  file   = (char *) malloc (length + 1);
+  strncpy (file, word->string, length);
+  file[length] = '\0';
+
+  /* Return the value in an item descriptor */
+  item->type  = word->type;
+  item->value = (unsigned long) file;
+
+  return (LIP_Next (node));
+}
+
+
+
+static void       *Comment (void       *arg,
+                            DltContext *context,
+                            LipWrdNode *verb,
+                            void       *item)
+{
+  return (LIP_Next (verb));
+}
+
+
+
+static void       *Set (void       *arg,
+                        DltContext *context,
+                        LipWrdNode *verb,
+                        void       *parm)
+{
+  LipWrdNode *sbj = LIP_First (verb->list);
+
+  if (sbj)
+  {
+    while (sbj) sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj);
+  }
+  else      SGL_Error (DWN_NOSUB);
+
+  return (LIP_Next (verb));
+}
+
+
+
+static void       *Write (void       *arg,
+                          DltContext *context,
+                          LipWrdNode *verb,
+                          void       *parm)
+{
+  LipWrdNode    *sbj  = LIP_First (verb->list);
+  ModContext     ctxt = context->copy;
+  unsigned int   cnt  = 0;
+  unsigned long  adx;
+  Status         status = OK;
+
+  /* Loop while there is more to do */
+  do
+  {
+    if (cnt != 1)
+    {
+      /* Get the address range to treat */
+      if (Range (context, &sbj, &adx, &cnt)) return (LIP_Next (verb));
+
+      /* Store count for next time */
+      context->count = cnt;
+    }
+
+    /* Get the value to write */
+    if (sbj)
+    {
+      ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+      sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj, &item);
+      if (item.type == TYP_K_NUMBER)  context->value = item.value;
+      else                            return (SGL_Error (DWN_BADTYP), NIL);
+    }
+
+    /* Write it */
+    {
+      register unsigned int   space   = context->copy.space;
+      register unsigned int   size    = context->copy.size;
+      register unsigned long  count   = cnt;
+      register void          *value = NIL;
+      unsigned long           addr = 0;
+      unsigned char           b;
+      unsigned short          w;
+      unsigned long           l;
+
+      switch (size)
+      {
+      case 1:        b = context->value;        value = &b;        break;
+      case 2:        w = context->value;        value = &w;        break;
+      case 4:        l = context->value;        value = &l;        break;
+      }
+
+      while (cnt-- && (status == OK))
+      {
+#if TARGET == VMECPU
+        DspBoard       *board;
+        int             slot;
+        int             channel;
+
+        /* Loop over boards */
+        board = context->board;
+        do
+        {
+          slot = board->slot;
+
+          /* Treat all boards or loop 'til requested board is found */
+          if (!(context->slot == -1    || slot == context->slot))     continue;
+
+          /* Loop over channels */
+          channel = 0;
+          do
+          {
+            /* Treat all channels or loop 'til requested channel is found */
+            if (!(context->channel==-1 || channel==context->channel))  continue;
+
+            /* Calculate the address offset given the slot and channel number */
+            addr = DSP_K_SLOTSIZE * slot + 2 * board->dataSize * channel + adx;
+#else
+            addr = adx;
+#endif
+
+            /* Load the table onto the memory */
+            status = BUS_Poke (space, size, addr, value);
+
+#ifdef DUMP
+            /* Dump the action if so requested */
+            if (context->dump)
+            {
+              SGL_Output("Space = %d, Size = %d, adx = 0x%08x, data = 0x%08x\n",
+                         space, size, addr, value);
+            }
+#endif
+            /* Verify proper loading if so requested */
+            if (context->verify)
+            {
+              unsigned char   c;
+              unsigned short  s;
+              unsigned long   u;
+
+              switch (size)
+              {
+              case 1:
+                status = BUS_Peek (space, size, addr, &c);
+                if (c != b)  SGL_Error (DWN_VERERR, addr, b, c);
+                break;
+              case 2:
+                status = BUS_Peek (space, size, addr, &s);
+                if (s != w)  SGL_Error (DWN_VERERR, addr, w, s);
+                break;
+              case 4:
+                status = BUS_Peek (space, size, addr, &u);
+                if (u != l)  SGL_Error (DWN_VERERR, addr, l, u);
+                break;
+              }
+            }
+
+#if TARGET == VMECPU
+          } while ((++channel < DSP_K_CHANCOUNT) && (status == OK));
+        } while ((++board)->slot && (status == OK));
+#endif
+
+        adx    += size;
+      }
+
+      /* Reset count */
+      cnt = count;
+
+      /* Scream if bad status */
+      if (status != OK)      BUS_Error (status, space, size, addr);
+    }
+
+    /* Reset context */
+    context->copy = ctxt;
+
+  } while (sbj && status == OK);
+
+  /* Save the finishing point for next time */
+  if (status == OK)  context->address = adx;
+
+  return (LIP_Next (verb));
+}
+
+
+
+static void       *Input (void       *arg,
+                          DltContext *context,
+                          LipWrdNode *sbj,
+                          void       *item)
+{
+  LipWrdNode *val;
+
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  val = LIP_Next (sbj);
+
+  if (val)
+  {
+    ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+    /* Eat the value's local modifiers */
+    DoMods (context, val->list);
+
+    val = (*val->word->fn) (val->word->arg, context, val, &item);
+    if ((item.type == TYP_K_FILENAME) || (item.type == TYP_K_STRING))
+    {
+      FILE *in;
+
+      if ((in = fopen ((char *) item.value, "r")) != NIL)
+      {
+        FileNode *inNode;
+
+        inNode           = (FileNode *) malloc (sizeof (*inNode));
+        inNode->stream   = context->in;
+        lstAdd ((LIST *)context->inLst, (NODE *) inNode);
+        context->in      = in;
+      }
+      else
+      {
+        SGL_Error (DWN_UNAFIL, (char *) item.value);
+        free ((void *) item.value);
+      }
+    }
+    else      SGL_Error (DWN_BADTYP);
+  }
+  else        SGL_Error (DWN_NOFIL);
+
+  return (val);
+}
+
+
+
+static void       *Radix (void       *arg,
+                          DltContext *context,
+                          LipWrdNode *sbj,
+                          void       *item)
+{
+  LipWrdNode *val;
+
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  val = LIP_Next (sbj);
+
+  if (val)
+  {
+    ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+    /* Eat the value's local modifiers */
+    DoMods (context, val->list);
+
+    val = (*val->word->fn) (val->word->arg, context, val, &item);
+    if (item.type == TYP_K_NUMBER)
+    {
+      int radix = item.value;
+      if (radix == RAD_K_DEC || radix == RAD_K_HEX)
+        context->save.radix = radix;
+      else    SGL_Error (DWN_BADRAD, radix);
+    }
+    else      SGL_Error (DWN_BADTYP);
+  }
+  else        SGL_Error (DWN_NOVAL);
+
+  return (val);
+}
+
+
+
+static void       *Mradix (int         radix,
+                           DltContext *context,
+                           LipWrdNode *mod,
+                           void       *item)
+{
+  context->copy.radix = radix;
+
+  return (LIP_Next (mod));
+}
+
+
+
+static void       *Space (void       *arg,
+                          DltContext *context,
+                          LipWrdNode *sbj,
+                          void       *item)
+{
+  LipWrdNode *val;
+
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  val = LIP_Next (sbj);
+
+  if (val)
+  {
+    ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+    /* Eat the value's local modifiers */
+    DoMods (context, val->list);
+
+    val = (*val->word->fn) (val->word->arg, context, val, &item);
+    if (item.type == TYP_K_NUMBER)
+    {
+      int space = item.value;
+      if (space == SPC_K_LOCAL   ||  space == SPC_K_A16     ||
+          space == SPC_K_A24     ||  space == SPC_K_A32     ||
+          space == SPC_K_VSBSYS  ||  space == SPC_K_VSBALT  ||
+          space == SPC_K_VSBIO)
+        context->save.space = space;
+      else    SGL_Error (DWN_BADSPC, space);
+    }
+    else      SGL_Error (DWN_BADTYP);
+  }
+  else        SGL_Error (DWN_NOVAL);
+
+  return (val);
+}
+
+
+
+static void       *Mspace (int         space,
+                           DltContext *context,
+                           LipWrdNode *mod,
+                           void       *item)
+{
+  context->copy.space = space;
+
+  return (LIP_Next (mod));
+}
+
+
+
+static void       *Size (void       *arg,
+                         DltContext *context,
+                         LipWrdNode *sbj,
+                         void       *item)
+{
+  LipWrdNode *val;
+
+  /* Eat the subject's local modifiers */
+  DoMods (context, sbj->list);
+
+  val = LIP_Next (sbj);
+
+  if (val)
+  {
+    ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+    /* Eat the value's local modifiers */
+    DoMods (context, val->list);
+
+    val = (*val->word->fn) (val->word->arg, context, val, &item);
+    if (item.type == TYP_K_NUMBER)
+    {
+      int size = item.value;
+      if (size == SIZ_K_BYTE || size == SIZ_K_SHORT || size == SIZ_K_LONG)
+        context->save.size = size;
+      else    SGL_Error (DWN_BADSIZ, size);
+    }
+    else      SGL_Error (DWN_BADTYP);
+  }
+  else        SGL_Error (DWN_NOVAL);
+
+  return (val);
+}
+
+
+
+static void       *Msize (int         size,
+                          DltContext *context,
+                          LipWrdNode *mod,
+                          void       *item)
+{
+  context->copy.size = size;
+
+  return (LIP_Next (mod));
+}
+
+
+
+/*----------------------------------------------------------------------------*/
+
+
+static void DoMods (DltContext  *context,
+                    LIST        *list)
+{
+  if (list)
+  {
+    LipWrdNode *mod = LIP_First (list);
+    while (mod) mod = (*mod->word->fn) (mod->word->arg, context, mod, NIL);
+  }
+}
+
+
+
+static Status Range (DltContext     *context,
+                     LipWrdNode    **subj,
+                     unsigned long  *addr,
+                     unsigned int   *cnt)
+{
+  LipWrdNode *sbj = *subj;
+
+  /* Return context values if an error occurs */
+  *subj  = NIL;
+  *addr  = context->address;
+  *cnt   = context->count;
+
+  /* Decode the range */
+  if (sbj)
+  {
+    ItemDsc item = {TYP_K_UNINITIALIZED, NULL};
+
+    sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj, &item);
+    switch (item.type)
+    {
+    case TYP_K_NUMBER:
+      *cnt  = 1;
+      *addr = item.value;
+      break;
+
+    case TYP_K_ABSRNGE:
+      if (sbj)
+      {
+        unsigned long a = item.value;
+        sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj, &item);
+        if (item.type == TYP_K_NUMBER)
+          *cnt = 1 + (item.value - a) / context->copy.size;
+        else
+        {
+          if (item.type != TYP_K_UNKNOWN)  SGL_Error (DWN_BADTYP);
+          return (FAILURE);
+        }
+        *addr = a;
+      }
+      break;
+
+    case TYP_K_CNTDRNGE:
+      if (sbj)
+      {
+        unsigned long a = item.value;
+        sbj = (*sbj->word->fn) (sbj->word->arg, context, sbj, &item);
+        if (item.type == TYP_K_NUMBER)
+          *cnt = item.value;
+        else if (item.type == TYP_K_UNKNOWN)
+          return (FAILURE);
+        else
+          return (SGL_Error (DWN_BADTYP), FAILURE);
+        *addr = a;
+      }
+      break;
+
+    default:
+      SGL_Error (DWN_BADTYP);
+
+    case TYP_K_UNKNOWN:
+      return (FAILURE);
+
+    case TYP_K_UNINITIALIZED:
+      break;
+    }
+  }
+
+  *subj = sbj;
+
+  return (SUCCESS);
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d76 1
+a76 11
+
+#define NIL   (void *)(0)
+#define NULL           0
+#define TRUE           1
+#define FALSE          0
+#define SUCCESS        0
+#define FAILURE        1
+
+#define Min(a,b)       ((a) < (b) ? (a) : (b))
+#define Max(a,b)       ((a) > (b) ? (a) : (b))
+#define lsizeof(var)   (sizeof (var) >> 2)
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

@@ -1,0 +1,433 @@
+head	1.11;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.11
+	RF-SPEAR-R0-1-0:1.11
+	RF-SPEAR-R0-0-3:1.11
+	RF-SPEAR-R0-0-2:1.11
+	RF-SPEAR-R0-0-0:1.11
+	RF-3-13-10:1.10.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.11
+date	2011.12.07.00.57.05;	author saa;	state dead;
+branches;
+next	1.10;
+
+1.10
+date	2005.01.24.16.39.18;	author saa;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2004.04.29.17.11.19;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2004.01.15.16.39.13;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2002.11.19.02.01.14;	author luchini;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2002.07.24.01.51.29;	author luchini;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2002.07.24.01.47.33;	author luchini;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2002.07.24.01.42.57;	author luchini;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.05.14.23.58.11;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.04.10.01.02.51;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.11
+log
+@Changes for 3.14.11 build.
+@
+text
+@#==============================================================
+#
+#  Abs:  Makefile for IOC diagnostic Components
+#      
+#  Name: Makefile.Vx 
+#
+#  Facility:  SLAC
+#
+#  Auth: 09-Mar-1999, Author         (USERNAME)
+#  Rev:  dd-mmm-yyyy, First Lastname (USERNAME)
+#
+#--------------------------------------------------------------
+#  Mod:
+#       15-Jan-2004, S. Allison (saa):
+#         Added vxiBaseIsr.c for K. Luchini.
+#       23-Jul-2002, K. Luchini (LUCHINI):
+#         Installed dtlMsgs.o and mtlMsgs.o
+#       16-Mar-2000, K. Luchini (Luchini):
+#         Build niLib for both niCpu030 and
+#         the powerPC targets
+#
+#==============================================================
+#
+# default definition for local epics directory
+TOP = ../../..
+include $(TOP)/config/CONFIG_APP
+#
+#INSTALL_LOCATION = $(TOP)
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+#
+INC += busLib.h
+INC += dwnLib.h
+INC += mtlLib.h
+INC += sglLib.h
+INC += memTest.h
+INC += dwn.msg
+INC += dtl.msg
+INC += sttDef.h
+INC += modTypes.h
+
+
+# config.h is needed for bootFix.c and initModules.c
+VX_TARGET_DIR = $(VX_CONFIG_DIR_YES)/$(T_A)
+USR_INCLUDES += -I $(VX_CONFIG_DIR_YES)/all
+USR_INCLUDES += -I $(VX_TARGET_DIR)
+
+ifeq ($(T_A),niCpu030) 
+  USR_INCLUDES += -I $(VX_TARGET_DIR)/nivxi/include
+endif
+ifeq ($(T_A),mv2400)
+  USR_INCLUDES += -I $(VX_TARGET_DIR)/V152/Include
+endif
+
+#for compiling sys routines
+USR_CPPFLAGS += -DVXWORKS -DTARGET=$(T_A)
+#USR_CFLAGS   += -DDBG
+
+# sys files
+SRCS.c += ../bootFix.c
+SRCS.c += ../bus.c
+SRCS.c += ../busMsgs.c
+SRCS.c += ../dld.c
+SRCS.c += ../dlt.c
+SRCS.c += ../dtlMsgs.c
+SRCS.c += ../dwnMsgs.c
+SRCS.c += ../initModule.c
+SRCS.c += ../lip.c
+SRCS.c += ../lipMsgs.c
+SRCS.c += ../lstLib.c
+SRCS.c += ../mvxLib.c
+SRCS.c += ../sgl.c
+SRCS.c += ../sglMsgs.c
+SRCS.c += ../sysMsgs.c
+SRCS.c += ../time.c
+SRCS.c += ../stateShow.c
+SRCS.c += ../ethShow.c
+
+# dut files
+SRCS.c += ../mapAdx.c
+SRCS.c += ../memTest.c
+SRCS.c += ../mtlMsgs.c
+SRCS.c += ../tstMem.c
+SRCS.c += ../vbb.c
+SRCS.c += ../vbbMsgs.c
+
+# vxi files
+SRCS.c += ../vxiBaseIsr.c
+
+LIBOBJS += bootFix.o
+LIBOBJS += bus.o 
+LIBOBJS += busMsgs.o  
+LIBOBJS += dld.o 
+LIBOBJS += dlt.o
+LIBOBJS += dtlMsgs.o 
+LIBOBJS += dwnMsgs.o 
+LIBOBJS += initModule.o 
+LIBOBJS += lip.o 
+LIBOBJS += lipMsgs.o
+LIBOBJS += lstLib.o
+LIBOBJS += mvxLib.o 
+LIBOBJS += memTest.o
+LIBOBJS += mtlMsgs.o
+LIBOBJS += sgl.o 
+LIBOBJS += sglMsgs.o 
+LIBOBJS += sysMsgs.o
+LIBOBJS += stateShow.o
+LIBOBJS += ethShow.o
+
+
+# System Diagnostics 
+# Note: These routines do not need EPICS
+# and therefore diagLib can be loaded
+# before iocCore
+
+PROD += time
+PROD += dld dlt mapAdx memTest tstMem vbb
+PROD += dtlMsgs.o mtlMsgs.o
+ifeq ($(T_A),niCpu030)
+# VXI_OBJECTS  += $(VX_TARGET_DIR)/nivxi/nivxi.o 
+# VXI_OBJECTS  += $(VX_TARGET_DIR)/nivxi/resman.o
+# PROD         += niLib
+ PROD         += vxiBaseIsr.o
+ PROD         += $(VX_TARGET_DIR)/nivxi/nivxi.o
+ PROD         += $(VX_TARGET_DIR)/nivxi/resman.o
+ PROD         += $(VX_TARGET_DIR)/nivxi/vxitedit.o
+ PROD         += $(VX_TARGET_DIR)/nivxi/victext.o
+endif
+ifeq ($(T_A),mv2400)
+# VXI_OBJECTS  += $(VX_TARGET_DIR)/V152/Resman.o
+# VXI_OBJECTS  += $(VX_TARGET_DIR)/V152/VXI_Library.o
+# PROD        += niLib
+ PROD         += vxiBaseIsr.o
+ PROD         += $(VX_TARGET_DIR)/V152/nivxi.o
+ PROD         += $(VX_TARGET_DIR)/V152/resman.o
+endif
+
+LIBNAME = diagLib
+
+include $(TOP)/config/RULES.Vx
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+#
+time:	time.o
+	$(LD) -o time time.o
+
+dld: 	dld.o dwnMsgs.o lstLib.o sgl.o sglMsgs.o
+	$(LD) -o dld dld.o dwnMsgs.o lstLib.o sgl.o sglMsgs.o
+
+dlt: 	dlt.o dwnMsgs.o lip.o lipMsgs.o
+	$(LD) -o dlt dlt.o dwnMsgs.o lip.o lipMsgs.o lstLib.o \
+		 bus.o busMsgs.o mvxLib.o sgl.o sglMsgs.o
+mapAdx: mapAdx.o
+	$(LD) -o mapAdx mapAdx.o
+
+memTest:  memTest.o mtlMsgs.o
+	  $(LD) -o memTest memTest.o mtlMsgs.o
+
+tstMem:	tstMem.o memTest.o mtlMsgs.o
+	$(LD) -o tstMem tstMem.o memTest.o mtlMsgs.o 
+
+
+vbb:	vbb.o vbbMsgs.o
+	$(LD) -o vbb vbb.o vbbMsgs.o
+
+# VXI library of routines 
+niLib: $(VXI_OBJECTS)
+	$(LD) -o niLib $?
+
+
+@
+
+
+1.10
+log
+@Added ethShow.c made available by John Sinclair on tech-talk:
+http://www.aps.anl.gov/epics/tech-talk/2004/msg00221.php
+@
+text
+@@
+
+
+1.9
+log
+@Added stateShow to diagLib.
+@
+text
+@d77 1
+d108 1
+@
+
+
+1.8
+log
+@Added vxiBaseIsr.c for Kristi Luchini.  This file overrides routines provided
+by KineticSystems for the mv2400 to get VXI and VME interrupts to work.  It is
+built for both mv2400 and niCpu030 though the niCpu030 routines are noop.
+@
+text
+@d76 1
+d106 1
+@
+
+
+1.7
+log
+@Change name of V152 VXI objects to match the niCpu030
+@
+text
+@d14 2
+d85 2
+d119 1
+d129 1
+@
+
+
+1.6
+log
+@Another typo...I'm tired
+@
+text
+@d42 3
+a44 2
+USR_INCLUDES += -I $(VX_DIR)/target/config/all
+USR_INCLUDES += -I $(VX_DIR)/target/config/$(T_A)
+d47 1
+a47 1
+  USR_INCLUDES += -I $(VX_DIR)/target/config/$(T_A)/nivxi/include
+d49 2
+a50 2
+ifeq ($(T_A),ppc603)
+  USR_INCLUDES += -I $(VX_DIR)/target/config/$(T_A)/V152/Include
+d112 7
+a118 6
+ LIBOBJS      += $(VX_DIR)/target/config/$(T_A)/nivxi/nivxi.o
+ LIBOBJS      += $(VX_DIR)/target/config/$(T_A)/nivxi/resman.o
+ VXI_OBJECTS   = $(VX_DIR)/target/config/$(T_A)/nivxi/nivxi.o 
+ VXI_OBJECTS  += $(VX_DIR)/target/config/$(T_A)/nivxi/resman.o
+ PROD         += $(VX_DIR)/target/config/$(T_A)/nivxi/vxitedit.o
+ PROD         += niLib
+d121 5
+a125 4
+LIBOBJS += $(VX_DIR)/target/config/$(T_A)/V152/VXI_Library.out
+LIBOJBS += $(VX_DIR)/target/config/$(T_A)/V152/Resman.out
+PROD    += $(VX_DIR)/target/config/$(T_A)/V152/VXI_Library.out
+PROD    += $(VX_DIR)/target/config/$(T_A)/V152/Resman.out
+d159 1
+@
+
+
+1.5
+log
+@Fixed typo dlt.o should have been dtl.o
+@
+text
+@d109 1
+a109 1
+PROD += dtlMsg.o mtlMsg.o
+@
+
+
+1.4
+log
+@Installed dtlMsgs.o  and mtlMsgs.o
+@
+text
+@d109 1
+a109 1
+PROD += dltMsg.o mtlMsg.o
+@
+
+
+1.3
+log
+@Got rid of warnings
+@
+text
+@d14 2
+d109 1
+a123 1
+
+@
+
+
+1.2
+log
+@Changes for R3.13.6.
+@
+text
+@a37 4
+# This is for config.h
+VX_CONFIG_DIR=$(VX_CONFIG_DIR_YES)
+USR_INCLUDES += -I $(VX_CONFIG_DIR)/all
+USR_INCLUDES += -I $(VX_CONFIG_DIR)/$(T_A)
+d39 3
+d44 1
+a44 2
+  NIVXI_DIR = $(VX_CONFIG_DIR)/$(T_A)/nivxi
+  USR_INCLUDES += -I $(VX_CONFIG_DIR)/$(T_A)/nivxi/include
+d47 1
+a47 3
+  PPC_DIR  = $(VX_CONFIG_DIR)/$(T_A)/v151
+  USR_INCLUDES += -I $(VX_CONFIG_DIR)/$(T_A)/v151/include
+  USR_INCLUDES += -I $(VX_CONFIG_DIR)
+d52 1
+a52 2
+
+USR_CFLAGS   += -DDBG
+d106 1
+d108 6
+a113 7
+ LIBOBJS += $(NIVXI_DIR)/nivxi.o
+ LIBOBJS += $(NIVXI_DIR)/resman.o
+ VXI_OBJECTS  = $(NIVXI_DIR)/nivxi.o 
+ VXI_OBJECTS += $(NIVXI_DIR)/resman.o
+ PROD += $(NIVXI_DIR)/vxitedit.o
+ PROD += dld dlt mapAdx memTest tstMem vbb
+ PROD += niLib
+d115 5
+a119 6
+ifeq ($(T_A),ppc603)
+ LIBOBJS += $(PPC_DIR)/libvxi.vo
+ LIBOBJS += $(PPC_DIR)/resman.vo
+ PROD += dld dlt mapAdx memTest tstMem vbb 
+ PROD += $(PPC_DIR)/libvxi.vo
+ PROD += $(PPC_DIR)/resman.vo
+d122 1
+a137 1
+	 
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d39 1
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

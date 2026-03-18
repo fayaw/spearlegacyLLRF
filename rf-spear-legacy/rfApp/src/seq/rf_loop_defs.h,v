@@ -1,0 +1,91 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2003.08.26.15.07.02;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.39;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.39;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@rf_loop_defs.h now includes rfApp/src/db/rf_station_state.h and no longer
+needs to be installed for rfApp/src/db/subIQ.c.
+@
+text
+@/* Definitions for station states */
+#include "rf_station_state.h"
+
+/* Definitions for controlling a loop */
+#define LOOP_CONTROL_OFF     0 
+#define LOOP_CONTROL_ON      1
+
+/* Definitions for loop sequence macros */
+#define MACRO_TASK_NAME "name"
+#define MACRO_STN_NAME  "STN"
+#define MACRO_CAV_NAME  "CAV"
+#define MACRO_RING_NAME "RING"
+#define MACRO_REG_NAME  "REG"
+#define MACRO_IOC_NAME  "IOC"
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 3
+a14 7
+
+/* Definitions for station states */
+#define STATION_OFF     0
+#define STATION_PARK    1
+#define STATION_TUNE    2
+#define STATION_ON_FM   3
+#define STATION_ON_CW   4
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

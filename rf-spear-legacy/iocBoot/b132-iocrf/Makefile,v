@@ -1,0 +1,56 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.1.0.4;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2011.12.07.02.00.27;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2011.08.05.00.34.19;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Correct architecture.
+@
+text
+@TOP = ../..
+include $(TOP)/configure/CONFIG
+ARCH = vxWorks-ppc604_long
+TARGETS = envPaths
+include $(TOP)/configure/RULES.ioc
+@
+
+
+1.1
+log
+@Add envPaths.
+@
+text
+@d3 1
+a3 1
+ARCH = RTEMS-mvme2307
+@
+

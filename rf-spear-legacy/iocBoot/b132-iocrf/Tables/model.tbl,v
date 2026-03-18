@@ -1,0 +1,180 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_0:1.1.1.1
+	R_epics_3_14_6_spear0:1.1.1.1
+	R_3_14_1_spear1:1.1.1.1
+	R1:1.1.1.1
+	B1:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.01.30.22.34.00;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.30.22.34.00;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@73A-353     ,Colorado Data  ,e9e
+73A-353     ,Colorado Data  ,fe9e
+1140A       ,EIP Microwave  ,474
+1141A       ,EIP Microwave  ,475
+1142A       ,EIP Microwave  ,476
+1230A       ,EIP Microwave  ,4ce
+1313A       ,EIP Microwave  ,521
+1911A       ,EIP Microwave  ,777
+HP-E1404A   ,Hewlett-Packard,10
+HP-E1404A   ,Hewlett-Packard,110
+HP-E1404A   ,Hewlett-Packard,111
+HP-E1406A   ,Hewlett-Packard,114
+HP-E1410A   ,Hewlett-Packard,140
+HP-E1413A   ,Hewlett-Packard,1c4
+HP-E1482B   ,Hewlett-Packard,fe
+HP-E1482B   ,Hewlett-Packard,8fe
+HP-E1490A   ,Hewlett-Packard,f40
+V160        ,KineticSystems ,60
+V150        ,KineticSystems ,150
+V151        ,KineticSystems ,151
+V152        ,KineticSystems ,152
+V160        ,KineticSystems ,160
+V165        ,KineticSystems ,165
+V200        ,KineticSystems ,200 
+V207        ,KineticSystems ,207
+V208        ,KineticSystems ,208
+V210        ,KineticSystems ,210
+V215        ,KineticSystems ,215
+V241        ,KineticSystems ,241
+V243        ,KineticSystems ,243
+V246        ,KineticSystems ,246
+V249        ,KineticSystems ,249
+V265        ,KineticSystems ,265
+V266        ,KineticSystems ,266
+V270        ,KineticSystems ,270
+V280        ,KineticSystems ,280
+V285        ,KineticSystems ,285
+V345        ,KineticSystems ,345
+V350        ,KineticSystems ,350
+V387        ,KineticSystems ,387
+V510        ,KineticSystems ,510
+V645        ,KineticSystems ,645
+KSC2961     ,KineticSystems ,961
+AT-MXI      ,National Instrm,ff3
+MC-MXI      ,National Instrm,ff5
+NB-MXI      ,National Instrm,ff4
+SB-MXI      ,National Instrm,ff0
+TC-MXI      ,National Instrm,ff6
+VME-MXI     ,National Instrm,fff1
+VME-MXI     ,National Instrm,ff1
+VXI-MXI     ,National Instrm,f1
+VXI-MXI     ,National Instrm,8f1
+VXI-MXI     ,National Instrm,fe
+VXI-MXI     ,National Instrm,8fe
+VXI-MXI     ,National Instrm,7e
+VXI-MXI     ,National Instrm,87e
+VXI-MXI     ,National Instrm,f0fe
+VXI-MXI     ,National Instrm,f8fe
+VXI-MXI     ,National Instrm,f07e
+VXI-MXI     ,National Instrm,f87e
+VXIcpu-030  ,National Instrm,f7
+VXIcpu-030  ,National Instrm,ff7
+VXIcpu-030  ,National Instrm,77
+VXIcpu-030  ,National Instrm,f77
+VXIpc-030   ,National Instrm,fd
+VXIpc-030   ,National Instrm,ffd
+VXIpc-030   ,National Instrm,7d
+VXIpc-030   ,National Instrm,f7d
+VXIpc-386   ,National Instrm,f9
+VXIpc-386   ,National Instrm,ff9
+VXIpc-386   ,National Instrm,79
+VXIpc-386   ,National Instrm,f79
+VXIpc-486200,National Instrm,fa
+VXIpc-486200,National Instrm,ffa
+VXIpc-486200,National Instrm,7a
+VXIpc-486200,National Instrm,f7a
+VXIpc-486500,National Instrm,fb
+VXIpc-486500,National Instrm,ffb
+VXIpc-486500,National Instrm,7b
+VXIpc-486500,National Instrm,f7b
+VXIpc-486566,National Instrm,ef
+VXIpc-486566,National Instrm,fef
+VXIpc-486566,National Instrm,6f
+VXIpc-486566,National Instrm,f6f
+GPIB-VXI    ,National Instrm,ff
+GPIB-VXI    ,National Instrm,8ff
+GPIB-VXI    ,National Instrm,7f
+GPIB-VXI    ,National Instrm,87f
+PAC-629C    ,Pac Avionics   ,aab
+1260-40     ,Racal-Dana     ,ff0
+1265        ,Racal-Dana     ,ff
+1265        ,Racal-Dana     ,1ff
+2251        ,Racal-Dana     ,8cb
+2251        ,Racal-Dana     ,f8cb
+6056        ,Racal-Dana     ,fd7
+7052        ,Racal-Dana     ,ff
+7065        ,Racal-Dana     ,1b99
+EPC-1       ,RadiSys        ,5f
+EPC-2       ,RadiSys        ,ff
+EPC-2       ,RadiSys        ,1ff
+EPC-7       ,RadiSys        ,ef
+EPC-7       ,RadiSys        ,1ef
+VX1321      ,Tektronix      ,ffb
+VX1421      ,Tektronix      ,ffc
+VX1521      ,Tektronix      ,ffd
+VX4440      ,Tektronix      ,ffa
+VX5260      ,Tektronix      ,fff
+VX5520      ,Tektronix      ,ff
+VX5530      ,Tektronix      ,fd
+WVTK1326    ,Wavetek        ,2e
+WVTK1326    ,Wavetek        ,52e
+WVTK1375    ,Wavetek        ,55f
+WVTK1395    ,Wavetek        ,573
+WVTK4236    ,Wavetek        ,fff7
+WVTK4820    ,Wavetek        ,7ff6
+Arc/Intlk   ,user custom    ,107
+Clock Module,user custom    ,106
+Comb Filter ,user custom    ,101
+Gap FdFwd   ,user custom    ,105
+IQ Detector ,user custom    ,102
+RF Proc     ,user custom    ,103
+
+@
+
+
+1.1.1.1
+log
+@RF IOC startup files.
+@
+text
+@@

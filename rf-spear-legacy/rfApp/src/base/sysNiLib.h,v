@@ -1,0 +1,115 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	RF-SPEAR-R0-0-0:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1
+	RF-3-13-10:1.1.0.2;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.08.26.00.26.47;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@Missing prototypes for niCpu030
+@
+
+
+1.1
+log
+@Missing prototypes for niCPu030
+@
+text
+@/* sysNiLib.h - National Instruments VXIcpu-030 system-dependent header file */
+
+/* Created by Ric Claus 9/17/96 to satisify missing prototype compiler warnings */
+
+/*
+modification history
+--------------------
+01a,17sep96,ric  derived from version niCpu030/sysLib.c.
+*/
+/*
+DESCRIPTION
+This library provides prototypes for board-specific routines found in sysLib.c
+This header file should really be brought in as part of sysLib.h.
+
+AUTHOR
+Ric Claus - Stanford Linear Accelerator Center
+
+INCLUDE FILES: sysLib.h
+
+SEE ALSO:
+.pG "Configuration"
+*/
+
+#ifndef __INCsysNiLibh
+#define __INCsysNiLibh
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <vxWorks.h>
+
+#ifndef _ASMLANGUAGE
+
+#if defined(__STDC__) || defined(__cplusplus)
+
+extern void       sysSanityEnable (void);
+extern void       sysSanityDisable (void);
+extern char      *sysBspRev (void);
+extern void       sysSanityDisable (void);
+extern void       sysSanityEnable (void);
+extern STATUS     sysLanIntEnable (int);
+extern STATUS     sysLanIntDisable (void);
+extern STATUS     sysBusErrorConnect (FUNCPTR);
+extern STATUS     sysBusIntMaskGet (void);
+extern void       sysBusIntMaskSet (int);
+extern STATUS     sysBusVXIIntConnect (FUNCPTR);
+/*  The following three have weird args I can't find, so screw 'em */
+/* extern void       sysScsiBusReset (FAST WD_33C93_SCSI_CTRL *); */
+/* extern STATUS     sysNvConfigGet (Config *); */
+/* extern STATUS     sysNvConfigSet (Config *); */
+extern STATUS     sysNvConfigChange (void);
+
+#else   /* __STDC__ */
+
+extern void       sysSanityEnable ();
+extern void       sysSanityDisable ();
+extern char      *sysBspRev ();
+extern void       sysSanityDisable ();
+extern void       sysSanityEnable ();
+extern STATUS     sysLanIntEnable ();
+extern STATUS     sysLanIntDisable ();
+extern STATUS     sysBusErrorConnect ();
+extern STATUS     sysBusIntMaskGet ();
+extern void       sysBusIntMaskSet ();
+extern STATUS     sysBusVXIIntConnect ();
+extern void       sysScsiBusReset ();
+extern STATUS     sysNvConfigGet ();
+extern STATUS     sysNvConfigSet ();
+extern STATUS     sysNvConfigChange ();
+
+#endif  /* __STDC__ */
+
+#endif  /* _ASMLANGUAGE */
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __INCsysNiLibh */
+@

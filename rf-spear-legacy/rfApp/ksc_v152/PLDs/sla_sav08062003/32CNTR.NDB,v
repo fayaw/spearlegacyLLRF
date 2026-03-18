@@ -1,0 +1,1072 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.02;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.02;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 41
+The length of the symbol table is: 637
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+.	|74273B:20.
+:	|74273B:20|
+F	|74273B:19.
+R	|74273B:19|
+^	|74273B:18.
+j	|74273B:18|
+v	|74273B:40.
+"$	|74273B:40|
+"0	|74191:34.
+";	|74191:34|p74191:sub.
+"Q	|74191:44.
+"\	|74191:38.
+"g	|74191:44|p74191:sub.
+"}	|74191:33.
+#*	|74191:33|p74191:sub.
+#@@	|74191:32.
+#K	|74191:32|p74191:sub.
+#a	|74191:31.
+#l	|74191:31|p74191:sub.
+$$	|74191:30.
+$/	|74191:30|p74191:sub.
+$E	|74191:29.
+$P	|74191:29|p74191:sub.
+$f	|74191:38|p74191:sub.
+$|	|74191:34|
+%)	|74191:34|p74191:sub|
+%?	|74191:44|
+%J	|74191:44|p74191:sub|
+%`	|74191:33|
+%k	|74191:33|p74191:sub|
+&#	|74191:32|
+&.	|74191:32|p74191:sub|
+&D	|74191:31|
+&O	|74191:31|p74191:sub|
+&e	|74191:30|
+&p	|74191:30|p74191:sub|
+'(	|74191:29|
+'3	|74191:29|p74191:sub|
+'I	|74191:38|
+'T	|74191:38|p74191:sub|
+
+The number of name info structs is : 965
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	IFk9	!	:11	$/
+#	IFkI	!	:12	$0
+$	IFkI	!	:26	$1
+%	IFkc	!	BIC_BY	o
+&	I\lm	!	'B	*]	CNT0	"9
+'	I\lm	!	'C	*\	CNT1	"8
+(	I\lm	!	%K	*1	CNT10	"J
+)	I\lm	!	%M	*0	CNT11	"I
+*	I\lm	!	$K	*/	CNT12	"H
++	I\lm	!	$L	*.	CNT13	"G
+,	I\lm	!	$M	*-	CNT14	"F
+-	I\lm	!	$O	*,	CNT15	"E
+.	I\lm	!	#M	)g	CNT16	"_
+/	I\lm	!	#N	)f	CNT17	"^
+0	I\lm	!	#O	)e	CNT18	"]
+1	I\lm	!	#Q	)d	CNT19	"\
+2	I\lm	!	'D	*[	CNT2	"7
+3	I\lm	!	"O	)c	CNT20	"[
+4	I\lm	!	"P	)b	CNT21	"Z
+5	I\lm	!	"Q	)a	CNT22	"Y
+6	I\lm	!	"S	)`	CNT23	"X
+7	I\lm	!	(?	+)	CNT24	"r
+8	I\lm	!	(@@	+(	CNT25	"q
+9	I\lm	!	(A	+'	CNT26	"p
+:	I\lm	!	(C	+&	CNT27	"o
+;	I\lm	!	)=	+%	CNT28	"n
+<	I\lm	!	)>	+$	CNT29	"m
+=	I\lm	!	'F	*Z	CNT3	"6
+>	I\lm	!	)?	+#	CNT30	"l
+?	I\lm	!	)A	+"	CNT31	"k
+@@	I\lm	!	&G	*Y	CNT4	"5
+A	I\lm	!	&H	*X	CNT5	"4
+B	I\lm	!	&I	*W	CNT6	"3
+C	I\lm	!	&K	*V	CNT7	"2
+D	I\lm	!	%I	*3	CNT8	"L
+E	I\lm	!	%J	*2	CNT9	"K
+F	$rX8+	!	CNT[15..8]	$6
+G	$rX8+	!	CNT[23..16]	$5
+H	$rX8+	!	CNT[31..0]	$9
+I	$rX8+	!	CNT[31..24]	$3
+J	$rX8+	!	CNT[7..0]	$7
+K	IU\(	!	(B	DEC_BICs	p
+L	IU\(	!	)i	ID0	""
+M	IU\(	!	)j	ID1	"!
+N	IU\(	!	+-	ID10	v
+O	IU\(	!	+.	ID11	u
+P	IU\(	!	+/	ID12	t
+Q	IU\(	!	+0	ID13	s
+R	IU\(	!	+1	ID14	r
+S	IU\(	!	+2	ID15	q
+T	IU\(	!	)k	ID2	~
+U	IU\(	!	)l	ID3	}
+V	IU\(	!	)m	ID4	|
+W	IU\(	!	)n	ID5	{
+X	IU\(	!	)o	ID6	z
+Y	IU\(	!	)p	ID7	y
+Z	IU\(	!	++	ID8	x
+[	IU\(	!	+,	ID9	w
+\	$rX8+	!	ID[15..0]	$2
+]	$rX8+	!	ID[15..8]	$4
+^	$rX8+	!	ID[7..0]	$8
+_	IU\(	!	(E	LD_BICCNT	"%
+`	IU\(	!	+*	LD_CREGHI	"$
+a	IU\(	!	*4	LD_CREGLO	"#
+b	IFkb	!	RESET_L	"&
+c	I\r8	$E	)u	)c	A	#v
+d	I\r8	$E	)v	)b	B	#u
+e	I\r8	$E	)w	)a	C	#t
+f	I\r8	$E	"d	K	CLK	#p
+g	I\r8	$E	)x	)`	D	#s
+h	I\r8	$E	#$	#J	GN	#r
+i	I\r8	$E	"g	_	LDN	#w
+j	I\lm	$E	"V	"@@	MXMN	#|
+k	I\lm	$E	"W	"H	QA	#x
+l	I\lm	$E	"X	"I	QB	#y
+m	I\lm	$E	"Y	"J	QC	#z
+n	I\lm	$E	"Z	"K	QD	#{
+o	I\lm	$E	(D	"L	RCON	#}
+p	I\r8	'(	c	)c	a	+`
+q	I\r8	'(	d	)b	b	+_
+r	I\r8	'(	e	)a	c	+^
+s	I\r8	'(	#P	K	clk	+Y
+t	I\r8	'(	g	)`	d	+]
+u	I\r8	'(	#Y	#J	gn	+Z
+v	I\r8	'(	#S	_	ldn	+[
+w	I\r9	'(	"!	"@@	mxmn	+e
+x	I\r8	$P	p	)c	a	+h
+y	I\r8	$P	q	)b	b	+i
+z	I\r8	$P	r	)a	c	+j
+{	I\r8	$P	s	K	clk	+o
+|	I\r8	$P	t	)`	d	+k
+}	I\r8	$P	u	#J	gn	+n
+~	I\r8	$P	v	_	ldn	+m
+"!	IN#s	$P	"@@	mxmn	+q
+""	IN#s	$P	"H	qa	+r
+"#	IN#s	$P	"I	qb	+s
+"$	IN#s	$P	"J	qc	+t
+"%	IN#s	$P	"K	qd	+u
+"&	IN#s	$P	"L	rcon	+p
+"'	IFkI	'3	:11	,-
+"(	IFkI	'3	:12	,.
+")	IFkI	'3	:13	,/
+"*	IFkI	'3	:14	,0
+"+	IFkI	'3	:15	,1
+",	IFkI	'3	:16	,2
+"-	IFkI	'3	:17	,3
+".	IFkI	'3	:18	,4
+"/	IFkI	'3	:19	,5
+"0	IFkI	'3	:20	,6
+"1	IFkI	'3	:21	,7
+"2	IFkI	'3	:22	,8
+"3	IFkI	'3	:23	,9
+"4	IFkI	'3	:24	,:
+"5	IFkI	'3	:25	,;
+"6	IFkI	'3	:26	,<
+"7	IFkI	'3	:27	,=
+"8	IFkI	'3	:28	,>
+"9	IFkI	'3	:29	,?
+":	IFkI	'3	:30	,@@
+";	IFkI	'3	:31	,A
+"<	IFkI	'3	:32	,B
+"=	IFkI	'3	:33	,C
+">	IFkI	'3	:36	,D
+"?	IFkI	'3	:37	,E
+"@@	IUVC	'3	j	:38	,F
+"A	IFkI	'3	:39	,G
+"B	IFkI	'3	:40	,H
+"C	IFkI	'3	:41	,I
+"D	IFkI	'3	:42	,J
+"E	IFkI	'3	:43	,K
+"F	IFkI	'3	:44	,L
+"G	IFkI	'3	:45	,M
+"H	IUV3	'3	k	:46	,N
+"I	IUV3	'3	l	:47	,O
+"J	IUV3	'3	m	:48	,P
+"K	IUV3	'3	n	:49	,Q
+"L	IUVC	'3	o	:56	,R
+"M	IFkI	'3	:57	,+
+"N	IFkI	'3	:58	,,
+"O	I\r8	'3	x	)c	A	,"
+"P	I\r8	'3	y	)b	B	+~
+"Q	I\r8	'3	z	)a	C	+}
+"R	I\r8	'3	{	K	CLK	,$
+"S	I\r8	'3	|	)`	D	+|
+"T	I\r8	'3	}	#J	GN	,!
+"U	I\r8	'3	~	_	LDN	+{
+"V	I\r_	'3	w	"@@	MXMN	,F
+"W	I\rO	'3	"\	"H	QA	,N
+"X	I\rO	'3	"]	"I	QB	,O
+"Y	I\rO	'3	"^	"J	QC	,P
+"Z	I\rO	'3	"_	"K	QD	,Q
+"[	I\r_	'3	"`	"L	RCON	,R
+"\	I\r9	'(	""	"H	qa	+d
+"]	I\r9	'(	"#	"I	qb	+c
+"^	I\r9	'(	"$	"J	qc	+b
+"_	I\r9	'(	"%	"K	qd	+a
+"`	I\r9	'(	'X	"L	rcon	+f
+"a	I\r8	$$	)q	)g	A	#g
+"b	I\r8	$$	)r	)f	B	#f
+"c	I\r8	$$	)s	)e	C	#e
+"d	I\r8	$$	#b	K	CLK	#a
+"e	I\r8	$$	)t	)d	D	#d
+"f	I\r8	$$	$"	$H	GN	#c
+"g	I\r8	$$	#e	_	LDN	#h
+"h	I\lm	$$	#T	#>	MXMN	#m
+"i	I\lm	$$	#U	#F	QA	#i
+"j	I\lm	$$	#V	#G	QB	#j
+"k	I\lm	$$	#W	#H	QC	#k
+"l	I\lm	$$	#X	#I	QD	#l
+"m	I\lm	$$	"T	#J	RCON	#n
+"n	I\r8	&e	"a	)g	a	*a
+"o	I\r8	&e	"b	)f	b	*`
+"p	I\r8	&e	"c	)e	c	*_
+"q	I\r8	&e	$N	K	clk	*Z
+"r	I\r8	&e	"e	)d	d	*^
+"s	I\r8	&e	$W	$H	gn	*[
+"t	I\r8	&e	$Q	_	ldn	*\
+"u	I\r9	&e	"}	#>	mxmn	*f
+"v	I\r8	$/	"n	)g	a	*i
+"w	I\r8	$/	"o	)f	b	*j
+"x	I\r8	$/	"p	)e	c	*k
+"y	I\r8	$/	"q	K	clk	*p
+"z	I\r8	$/	"r	)d	d	*l
+"{	I\r8	$/	"s	$H	gn	*o
+"|	I\r8	$/	"t	_	ldn	*n
+"}	IN#s	$/	#>	mxmn	*r
+"~	IN#s	$/	#F	qa	*s
+#!	IN#s	$/	#G	qb	*t
+#"	IN#s	$/	#H	qc	*u
+##	IN#s	$/	#I	qd	*v
+#$	IN#s	$/	#J	rcon	*q
+#%	IFkI	&p	:11	+.
+#&	IFkI	&p	:12	+/
+#'	IFkI	&p	:13	+0
+#(	IFkI	&p	:14	+1
+#)	IFkI	&p	:15	+2
+#*	IFkI	&p	:16	+3
+#+	IFkI	&p	:17	+4
+#,	IFkI	&p	:18	+5
+#-	IFkI	&p	:19	+6
+#.	IFkI	&p	:20	+7
+#/	IFkI	&p	:21	+8
+#0	IFkI	&p	:22	+9
+#1	IFkI	&p	:23	+:
+#2	IFkI	&p	:24	+;
+#3	IFkI	&p	:25	+<
+#4	IFkI	&p	:26	+=
+#5	IFkI	&p	:27	+>
+#6	IFkI	&p	:28	+?
+#7	IFkI	&p	:29	+@@
+#8	IFkI	&p	:30	+A
+#9	IFkI	&p	:31	+B
+#:	IFkI	&p	:32	+C
+#;	IFkI	&p	:33	+D
+#<	IFkI	&p	:36	+E
+#=	IFkI	&p	:37	+F
+#>	IUVC	&p	"h	:38	+G
+#?	IFkI	&p	:39	+H
+#@@	IFkI	&p	:40	+I
+#A	IFkI	&p	:41	+J
+#B	IFkI	&p	:42	+K
+#C	IFkI	&p	:43	+L
+#D	IFkI	&p	:44	+M
+#E	IFkI	&p	:45	+N
+#F	IUV3	&p	"i	:46	+O
+#G	IUV3	&p	"j	:47	+P
+#H	IUV3	&p	"k	:48	+Q
+#I	IUV3	&p	"l	:49	+R
+#J	IUVC	&p	"m	:56	+S
+#K	IFkI	&p	:57	+,
+#L	IFkI	&p	:58	+-
+#M	I\r8	&p	"v	)g	A	+#
+#N	I\r8	&p	"w	)f	B	+!
+#O	I\r8	&p	"x	)e	C	*~
+#P	I\r8	&p	"y	K	CLK	+%
+#Q	I\r8	&p	"z	)d	D	*}
+#R	I\r8	&p	"{	$H	GN	+"
+#S	I\r8	&p	"|	_	LDN	*|
+#T	I\r_	&p	"u	#>	MXMN	+G
+#U	I\rO	&p	#Z	#F	QA	+O
+#V	I\rO	&p	#[	#G	QB	+P
+#W	I\rO	&p	#\	#H	QC	+Q
+#X	I\rO	&p	#]	#I	QD	+R
+#Y	I\r_	&p	#^	#J	RCON	+S
+#Z	I\r9	&e	"~	#F	qa	*e
+#[	I\r9	&e	#!	#G	qb	*d
+#\	I\r9	&e	#"	#H	qc	*c
+#]	I\r9	&e	##	#I	qd	*b
+#^	I\r9	&e	h	#J	rcon	*g
+#_	I\r8	#a	*A	*/	A	#X
+#`	I\r8	#a	*B	*.	B	#W
+#a	I\r8	#a	*C	*-	C	#V
+#b	I\r8	#a	$`	K	CLK	#R
+#c	I\r8	#a	*D	*,	D	#U
+#d	I\r8	#a	$~	%F	GN	#T
+#e	I\r8	#a	$c	_	LDN	#Y
+#f	I\lm	#a	$R	$<	MXMN	#^
+#g	I\lm	#a	$S	$D	QA	#Z
+#h	I\lm	#a	$T	$E	QB	#[
+#i	I\lm	#a	$U	$F	QC	#\
+#j	I\lm	#a	$V	$G	QD	#]
+#k	I\lm	#a	#R	$H	RCON	#_
+#l	I\r8	&D	#_	*/	a	)b
+#m	I\r8	&D	#`	*.	b	)a
+#n	I\r8	&D	#a	*-	c	)`
+#o	I\r8	&D	%L	K	clk	)[
+#p	I\r8	&D	#c	*,	d	)_
+#q	I\r8	&D	%U	%F	gn	)\
+#r	I\r8	&D	%O	_	ldn	)]
+#s	I\r9	&D	#{	$<	mxmn	)g
+#t	I\r8	#l	#l	*/	a	)j
+#u	I\r8	#l	#m	*.	b	)k
+#v	I\r8	#l	#n	*-	c	)l
+#w	I\r8	#l	#o	K	clk	)q
+#x	I\r8	#l	#p	*,	d	)m
+#y	I\r8	#l	#q	%F	gn	)p
+#z	I\r8	#l	#r	_	ldn	)o
+#{	IN#s	#l	$<	mxmn	)s
+#|	IN#s	#l	$D	qa	)t
+#}	IN#s	#l	$E	qb	)u
+#~	IN#s	#l	$F	qc	)v
+$!	IN#s	#l	$G	qd	)w
+$"	IN#s	#l	$H	rcon	)r
+$#	IFkI	&O	:11	*/
+$$	IFkI	&O	:12	*0
+$%	IFkI	&O	:13	*1
+$&	IFkI	&O	:14	*2
+$'	IFkI	&O	:15	*3
+$(	IFkI	&O	:16	*4
+$)	IFkI	&O	:17	*5
+$*	IFkI	&O	:18	*6
+$+	IFkI	&O	:19	*7
+$,	IFkI	&O	:20	*8
+$-	IFkI	&O	:21	*9
+$.	IFkI	&O	:22	*:
+$/	IFkI	&O	:23	*;
+$0	IFkI	&O	:24	*<
+$1	IFkI	&O	:25	*=
+$2	IFkI	&O	:26	*>
+$3	IFkI	&O	:27	*?
+$4	IFkI	&O	:28	*@@
+$5	IFkI	&O	:29	*A
+$6	IFkI	&O	:30	*B
+$7	IFkI	&O	:31	*C
+$8	IFkI	&O	:32	*D
+$9	IFkI	&O	:33	*E
+$:	IFkI	&O	:36	*F
+$;	IFkI	&O	:37	*G
+$<	IUVC	&O	#f	:38	*H
+$=	IFkI	&O	:39	*I
+$>	IFkI	&O	:40	*J
+$?	IFkI	&O	:41	*K
+$@@	IFkI	&O	:42	*L
+$A	IFkI	&O	:43	*M
+$B	IFkI	&O	:44	*N
+$C	IFkI	&O	:45	*O
+$D	IUV3	&O	#g	:46	*P
+$E	IUV3	&O	#h	:47	*Q
+$F	IUV3	&O	#i	:48	*R
+$G	IUV3	&O	#j	:49	*S
+$H	IUVC	&O	#k	:56	*T
+$I	IFkI	&O	:57	*-
+$J	IFkI	&O	:58	*.
+$K	I\r8	&O	#t	*/	A	*$
+$L	I\r8	&O	#u	*.	B	*"
+$M	I\r8	&O	#v	*-	C	*!
+$N	I\r8	&O	#w	K	CLK	*&
+$O	I\r8	&O	#x	*,	D	)~
+$P	I\r8	&O	#y	%F	GN	*#
+$Q	I\r8	&O	#z	_	LDN	)}
+$R	I\r_	&O	#s	$<	MXMN	*H
+$S	I\rO	&O	$X	$D	QA	*P
+$T	I\rO	&O	$Y	$E	QB	*Q
+$U	I\rO	&O	$Z	$F	QC	*R
+$V	I\rO	&O	$[	$G	QD	*S
+$W	I\r_	&O	$\	$H	RCON	*T
+$X	I\r9	&D	#|	$D	qa	)f
+$Y	I\r9	&D	#}	$E	qb	)e
+$Z	I\r9	&D	#~	$F	qc	)d
+$[	I\r9	&D	$!	$G	qd	)c
+$\	I\r9	&D	"f	$H	rcon	)h
+$]	I\r8	#@@	*=	*3	A	#I
+$^	I\r8	#@@	*>	*2	B	#H
+$_	I\r8	#@@	*?	*1	C	#G
+$`	I\r8	#@@	%^	K	CLK	#C
+$a	I\r8	#@@	*@@	*0	D	#F
+$b	I\r8	#@@	%|	&D	GN	#E
+$c	I\r8	#@@	%a	_	LDN	#J
+$d	I\lm	#@@	%P	%:	MXMN	#O
+$e	I\lm	#@@	%Q	%B	QA	#K
+$f	I\lm	#@@	%R	%C	QB	#L
+$g	I\lm	#@@	%S	%D	QC	#M
+$h	I\lm	#@@	%T	%E	QD	#N
+$i	I\lm	#@@	$P	%F	RCON	#P
+$j	I\r8	&#	$]	*3	a	(c
+$k	I\r8	&#	$^	*2	b	(b
+$l	I\r8	&#	$_	*1	c	(a
+$m	I\r8	&#	&J	K	clk	(\
+$n	I\r8	&#	$a	*0	d	(`
+$o	I\r8	&#	&S	&D	gn	(]
+$p	I\r8	&#	&M	_	ldn	(^
+$q	I\r9	&#	$y	%:	mxmn	(h
+$r	I\r8	#K	$j	*3	a	(k
+$s	I\r8	#K	$k	*2	b	(l
+$t	I\r8	#K	$l	*1	c	(m
+$u	I\r8	#K	$m	K	clk	(r
+$v	I\r8	#K	$n	*0	d	(n
+$w	I\r8	#K	$o	&D	gn	(q
+$x	I\r8	#K	$p	_	ldn	(p
+$y	IN#s	#K	%:	mxmn	(t
+$z	IN#s	#K	%B	qa	(u
+${	IN#s	#K	%C	qb	(v
+$|	IN#s	#K	%D	qc	(w
+$}	IN#s	#K	%E	qd	(x
+$~	IN#s	#K	%F	rcon	(s
+%!	IFkI	&.	:11	)0
+%"	IFkI	&.	:12	)1
+%#	IFkI	&.	:13	)2
+%$	IFkI	&.	:14	)3
+%%	IFkI	&.	:15	)4
+%&	IFkI	&.	:16	)5
+%'	IFkI	&.	:17	)6
+%(	IFkI	&.	:18	)7
+%)	IFkI	&.	:19	)8
+%*	IFkI	&.	:20	)9
+%+	IFkI	&.	:21	):
+%,	IFkI	&.	:22	);
+%-	IFkI	&.	:23	)<
+%.	IFkI	&.	:24	)=
+%/	IFkI	&.	:25	)>
+%0	IFkI	&.	:26	)?
+%1	IFkI	&.	:27	)@@
+%2	IFkI	&.	:28	)A
+%3	IFkI	&.	:29	)B
+%4	IFkI	&.	:30	)C
+%5	IFkI	&.	:31	)D
+%6	IFkI	&.	:32	)E
+%7	IFkI	&.	:33	)F
+%8	IFkI	&.	:36	)G
+%9	IFkI	&.	:37	)H
+%:	IUVC	&.	$d	:38	)I
+%;	IFkI	&.	:39	)J
+%<	IFkI	&.	:40	)K
+%=	IFkI	&.	:41	)L
+%>	IFkI	&.	:42	)M
+%?	IFkI	&.	:43	)N
+%@@	IFkI	&.	:44	)O
+%A	IFkI	&.	:45	)P
+%B	IUV3	&.	$e	:46	)Q
+%C	IUV3	&.	$f	:47	)R
+%D	IUV3	&.	$g	:48	)S
+%E	IUV3	&.	$h	:49	)T
+%F	IUVC	&.	$i	:56	)U
+%G	IFkI	&.	:57	).
+%H	IFkI	&.	:58	)/
+%I	I\r8	&.	$r	*3	A	)%
+%J	I\r8	&.	$s	*2	B	)#
+%K	I\r8	&.	$t	*1	C	)"
+%L	I\r8	&.	$u	K	CLK	)'
+%M	I\r8	&.	$v	*0	D	)!
+%N	I\r8	&.	$w	&D	GN	)$
+%O	I\r8	&.	$x	_	LDN	(~
+%P	I\r_	&.	$q	%:	MXMN	)I
+%Q	I\rO	&.	%V	%B	QA	)Q
+%R	I\rO	&.	%W	%C	QB	)R
+%S	I\rO	&.	%X	%D	QC	)S
+%T	I\rO	&.	%Y	%E	QD	)T
+%U	I\r_	&.	%Z	%F	RCON	)U
+%V	I\r9	&#	$z	%B	qa	(g
+%W	I\r9	&#	${	%C	qb	(f
+%X	I\r9	&#	$|	%D	qc	(e
+%Y	I\r9	&#	$}	%E	qd	(d
+%Z	I\r9	&#	#d	%F	rcon	(i
+%[	I\r8	"}	*k	*Y	A	#:
+%\	I\r8	"}	*l	*X	B	#9
+%]	I\r8	"}	*m	*W	C	#8
+%^	I\r8	"}	(T	K	CLK	#4
+%_	I\r8	"}	*n	*V	D	#7
+%`	I\r8	"}	&w	'?	GN	#6
+%a	I\r8	"}	(W	_	LDN	#;
+%b	I\lm	"}	&N	&8	MXMN	#@@
+%c	I\lm	"}	&O	&@@	QA	#<
+%d	I\lm	"}	&P	&A	QB	#=
+%e	I\lm	"}	&Q	&B	QC	#>
+%f	I\lm	"}	&R	&C	QD	#?
+%g	I\lm	"}	%N	&D	RCON	#A
+%h	I\r8	%`	%[	*Y	a	'd
+%i	I\r8	%`	%\	*X	b	'c
+%j	I\r8	%`	%]	*W	c	'b
+%k	I\r8	%`	)@@	K	clk	']
+%l	I\r8	%`	%_	*V	d	'a
+%m	I\r8	%`	'M	'?	gn	'^
+%n	I\r8	%`	)C	_	ldn	'_
+%o	I\r9	%`	%w	&8	mxmn	'i
+%p	I\r8	#*	%h	*Y	a	'l
+%q	I\r8	#*	%i	*X	b	'm
+%r	I\r8	#*	%j	*W	c	'n
+%s	I\r8	#*	%k	K	clk	's
+%t	I\r8	#*	%l	*V	d	'o
+%u	I\r8	#*	%m	'?	gn	'r
+%v	I\r8	#*	%n	_	ldn	'q
+%w	IN#s	#*	&8	mxmn	'u
+%x	IN#s	#*	&@@	qa	'v
+%y	IN#s	#*	&A	qb	'w
+%z	IN#s	#*	&B	qc	'x
+%{	IN#s	#*	&C	qd	'y
+%|	IN#s	#*	&D	rcon	't
+%}	IFkI	%k	:11	(1
+%~	IFkI	%k	:12	(2
+&!	IFkI	%k	:13	(3
+&"	IFkI	%k	:14	(4
+&#	IFkI	%k	:15	(5
+&$	IFkI	%k	:16	(6
+&%	IFkI	%k	:17	(7
+&&	IFkI	%k	:18	(8
+&'	IFkI	%k	:19	(9
+&(	IFkI	%k	:20	(:
+&)	IFkI	%k	:21	(;
+&*	IFkI	%k	:22	(<
+&+	IFkI	%k	:23	(=
+&,	IFkI	%k	:24	(>
+&-	IFkI	%k	:25	(?
+&.	IFkI	%k	:26	(@@
+&/	IFkI	%k	:27	(A
+&0	IFkI	%k	:28	(B
+&1	IFkI	%k	:29	(C
+&2	IFkI	%k	:30	(D
+&3	IFkI	%k	:31	(E
+&4	IFkI	%k	:32	(F
+&5	IFkI	%k	:33	(G
+&6	IFkI	%k	:36	(H
+&7	IFkI	%k	:37	(I
+&8	IUVC	%k	%b	:38	(J
+&9	IFkI	%k	:39	(K
+&:	IFkI	%k	:40	(L
+&;	IFkI	%k	:41	(M
+&<	IFkI	%k	:42	(N
+&=	IFkI	%k	:43	(O
+&>	IFkI	%k	:44	(P
+&?	IFkI	%k	:45	(Q
+&@@	IUV3	%k	%c	:46	(R
+&A	IUV3	%k	%d	:47	(S
+&B	IUV3	%k	%e	:48	(T
+&C	IUV3	%k	%f	:49	(U
+&D	IUVC	%k	%g	:56	(V
+&E	IFkI	%k	:57	(/
+&F	IFkI	%k	:58	(0
+&G	I\r8	%k	%p	*Y	A	(&
+&H	I\r8	%k	%q	*X	B	($
+&I	I\r8	%k	%r	*W	C	(#
+&J	I\r8	%k	%s	K	CLK	((
+&K	I\r8	%k	%t	*V	D	("
+&L	I\r8	%k	%u	'?	GN	(%
+&M	I\r8	%k	%v	_	LDN	(!
+&N	I\r_	%k	%o	&8	MXMN	(J
+&O	I\rO	%k	&T	&@@	QA	(R
+&P	I\rO	%k	&U	&A	QB	(S
+&Q	I\rO	%k	&V	&B	QC	(T
+&R	I\rO	%k	&W	&C	QD	(U
+&S	I\r_	%k	&X	&D	RCON	(V
+&T	I\r9	%`	%x	&@@	qa	'h
+&U	I\r9	%`	%y	&A	qb	'g
+&V	I\r9	%`	%z	&B	qc	'f
+&W	I\r9	%`	%{	&C	qd	'e
+&X	I\r9	%`	$b	&D	rcon	'j
+&Y	I\r8	"0	*g	*]	A	"z
+&Z	I\r8	"0	*h	*\	B	"y
+&[	I\r8	"0	*i	*[	C	"x
+&\	IN#r	"0	K	CLK	"t
+&]	I\r8	"0	*j	*Z	D	"w
+&^	IN#r	"0	_	LDN	"{
+&_	I\lm	"0	'H	'3	MXMN	#"
+&`	I\lm	"0	'I	';	QA	"|
+&a	I\lm	"0	'J	'<	QB	"}
+&b	I\lm	"0	'K	'=	QC	"~
+&c	I\lm	"0	'L	'>	QD	#!
+&d	I\lm	"0	&L	'?	RCON	##
+&e	I\r8	$|	&Y	*]	a	%f
+&f	I\r8	$|	&Z	*\	b	%e
+&g	I\r8	$|	&[	*[	c	%d
+&h	I\r8	$|	'V	K	clk	%_
+&i	I\r8	$|	&]	*Z	d	%c
+&j	I\r8	$|	'Y	_	ldn	%a
+&k	I\r9	$|	&r	'3	mxmn	%k
+&l	I\r8	";	&e	*]	a	%n
+&m	I\r8	";	&f	*\	b	%o
+&n	I\r8	";	&g	*[	c	%p
+&o	I\r8	";	&h	K	clk	%u
+&p	I\r8	";	&i	*Z	d	%q
+&q	I\r8	";	&j	_	ldn	%s
+&r	IN#s	";	'3	mxmn	%w
+&s	IN#s	";	';	qa	%x
+&t	IN#s	";	'<	qb	%y
+&u	IN#s	";	'=	qc	%z
+&v	IN#s	";	'>	qd	%{
+&w	IN#s	";	'?	rcon	%v
+&x	IFkI	%)	:11	&3
+&y	IFkI	%)	:12	&4
+&z	IFkI	%)	:13	&5
+&{	IFkI	%)	:14	&6
+&|	IFkI	%)	:15	&7
+&}	IFkI	%)	:16	&8
+&~	IFkI	%)	:17	&9
+'!	IFkI	%)	:18	&:
+'"	IFkI	%)	:19	&;
+'#	IFkI	%)	:20	&<
+'$	IFkI	%)	:21	&=
+'%	IFkI	%)	:22	&>
+'&	IFkI	%)	:23	&?
+''	IFkI	%)	:24	&@@
+'(	IFkI	%)	:25	&A
+')	IFkI	%)	:26	&B
+'*	IFkI	%)	:27	&C
+'+	IFkI	%)	:28	&D
+',	IFkI	%)	:29	&E
+'-	IFkI	%)	:30	&F
+'.	IFkI	%)	:31	&G
+'/	IFkI	%)	:32	&H
+'0	IFkI	%)	:33	&I
+'1	IFkI	%)	:36	&J
+'2	IFkI	%)	:37	&K
+'3	IUVC	%)	&_	:38	&L
+'4	IFkI	%)	:39	&M
+'5	IFkI	%)	:40	&N
+'6	IFkI	%)	:41	&O
+'7	IFkI	%)	:42	&P
+'8	IFkI	%)	:43	&Q
+'9	IFkI	%)	:44	&R
+':	IFkI	%)	:45	&S
+';	IUV3	%)	&`	:46	&T
+'<	IUV3	%)	&a	:47	&U
+'=	IUV3	%)	&b	:48	&V
+'>	IUV3	%)	&c	:49	&W
+'?	IUVC	%)	&d	:56	&X
+'@@	IFkI	%)	:57	&1
+'A	IFkI	%)	:58	&2
+'B	I\r8	%)	&l	*]	A	&(
+'C	I\r8	%)	&m	*\	B	&&
+'D	I\r8	%)	&n	*[	C	&%
+'E	I\r8	%)	&o	K	CLK	&*
+'F	I\r8	%)	&p	*Z	D	&$
+'G	I\r8	%)	&q	_	LDN	&#
+'H	I\r_	%)	&k	'3	MXMN	&L
+'I	I\rO	%)	'N	';	QA	&T
+'J	I\rO	%)	'O	'<	QB	&U
+'K	I\rO	%)	'P	'=	QC	&V
+'L	I\rO	%)	'Q	'>	QD	&W
+'M	I\r_	%)	'R	'?	RCON	&X
+'N	I\r9	$|	&s	';	qa	%j
+'O	I\r9	$|	&t	'<	qb	%i
+'P	I\r9	$|	&u	'=	qc	%h
+'Q	I\r9	$|	&v	'>	qd	%g
+'R	I\r9	$|	%`	'?	rcon	%l
+'S	I\r8	"\	+3	+)	A	$'
+'T	I\r8	"\	+4	+(	B	$&
+'U	I\r8	"\	+5	+'	C	$%
+'V	I\r8	"\	f	K	CLK	$!
+'W	I\r8	"\	+6	+&	D	$$
+'X	I\r8	"\	"&	"L	GN	$#
+'Y	I\r8	"\	i	_	LDN	$(
+'Z	I\lm	"\	(F	(0	MXMN	$-
+'[	I\lm	"\	(G	(8	QA	$)
+'\	I\lm	"\	(H	(9	QB	$*
+']	I\lm	"\	(I	(:	QC	$+
+'^	I\lm	"\	(J	(;	QD	$,
+'_	I\lm	"\	(K	(<	RCON	$.
+'`	I\r8	'I	'S	+)	a	,_
+'a	I\r8	'I	'T	+(	b	,^
+'b	I\r8	'I	'U	+'	c	,]
+'c	I\r8	'I	"R	K	clk	,X
+'d	I\r8	'I	'W	+&	d	,\
+'e	I\r8	'I	"[	"L	gn	,Y
+'f	I\r8	'I	"U	_	ldn	,Z
+'g	I\r9	'I	'o	(0	mxmn	,d
+'h	I\r8	$f	'`	+)	a	,g
+'i	I\r8	$f	'a	+(	b	,h
+'j	I\r8	$f	'b	+'	c	,i
+'k	I\r8	$f	'c	K	clk	,n
+'l	I\r8	$f	'd	+&	d	,j
+'m	I\r8	$f	'e	"L	gn	,m
+'n	I\r8	$f	'f	_	ldn	,l
+'o	IN#s	$f	(0	mxmn	,p
+'p	IN#s	$f	(8	qa	,q
+'q	IN#s	$f	(9	qb	,r
+'r	IN#s	$f	(:	qc	,s
+'s	IN#s	$f	(;	qd	,t
+'t	I\r9	$f	(V	(<	rcon	,o
+'u	IFkI	'T	:11	-,
+'v	IFkI	'T	:12	--
+'w	IFkI	'T	:13	-.
+'x	IFkI	'T	:14	-/
+'y	IFkI	'T	:15	-0
+'z	IFkI	'T	:16	-1
+'{	IFkI	'T	:17	-2
+'|	IFkI	'T	:18	-3
+'}	IFkI	'T	:19	-4
+'~	IFkI	'T	:20	-5
+(!	IFkI	'T	:21	-6
+("	IFkI	'T	:22	-7
+(#	IFkI	'T	:23	-8
+($	IFkI	'T	:24	-9
+(%	IFkI	'T	:25	-:
+(&	IFkI	'T	:26	-;
+('	IFkI	'T	:27	-<
+((	IFkI	'T	:28	-=
+()	IFkI	'T	:29	->
+(*	IFkI	'T	:30	-?
+(+	IFkI	'T	:31	-@@
+(,	IFkI	'T	:32	-A
+(-	IFkI	'T	:33	-B
+(.	IFkI	'T	:36	-C
+(/	IFkI	'T	:37	-D
+(0	IUVC	'T	'Z	:38	-E
+(1	IFkI	'T	:39	-F
+(2	IFkI	'T	:40	-G
+(3	IFkI	'T	:41	-H
+(4	IFkI	'T	:42	-I
+(5	IFkI	'T	:43	-J
+(6	IFkI	'T	:44	-K
+(7	IFkI	'T	:45	-L
+(8	IUV3	'T	'[	:46	-M
+(9	IUV3	'T	'\	:47	-N
+(:	IUV3	'T	']	:48	-O
+(;	IUV3	'T	'^	:49	-P
+(<	IUVC	'T	'_	:56	-Q
+(=	IFkI	'T	:57	-*
+(>	IFkI	'T	:58	-+
+(?	I\r8	'T	'h	+)	A	-!
+(@@	I\r8	'T	'i	+(	B	,}
+(A	I\r8	'T	'j	+'	C	,|
+(B	I\r8	'T	'k	K	CLK	-#
+(C	I\r8	'T	'l	+&	D	,{
+(D	I\r8	'T	'm	"L	GN	,~
+(E	I\r8	'T	'n	_	LDN	,z
+(F	I\r_	'T	'g	(0	MXMN	-E
+(G	I\rO	'T	(L	(8	QA	-M
+(H	I\rO	'T	(M	(9	QB	-N
+(I	I\rO	'T	(N	(:	QC	-O
+(J	I\rO	'T	(O	(;	QD	-P
+(K	I\r_	'T	(P	(<	RCON	-Q
+(L	I\r9	'I	'p	(8	qa	,c
+(M	I\r9	'I	'q	(9	qb	,b
+(N	I\r9	'I	'r	(:	qc	,a
+(O	I\r9	'I	's	(;	qd	,`
+(P	I\r9	'I	)B	(<	rcon	,e
+(Q	I\r8	"Q	+7	+%	A	#+
+(R	I\r8	"Q	+8	+$	B	#*
+(S	I\r8	"Q	+9	+#	C	#)
+(T	I\r8	"Q	&\	K	CLK	#%
+(U	I\r8	"Q	+:	+"	D	#(
+(V	IN#r	"Q	(<	GN	#'
+(W	I\r8	"Q	&^	_	LDN	#,
+(X	I\lm	"Q	)D	).	MXMN	#1
+(Y	I\lm	"Q	)E	)6	QA	#-
+(Z	I\lm	"Q	)F	)7	QB	#.
+([	I\lm	"Q	)G	)8	QC	#/
+(\	I\lm	"Q	)H	)9	QD	#0
+(]	I\lm	"Q	)I	):	RCON	#2
+(^	I\r8	%?	(Q	+%	a	&e
+(_	I\r8	%?	(R	+$	b	&d
+(`	I\r8	%?	(S	+#	c	&c
+(a	I\r8	%?	'E	K	clk	&^
+(b	I\r8	%?	(U	+"	d	&b
+(c	I\r8	%?	't	(<	gn	&_
+(d	I\r8	%?	'G	_	ldn	&`
+(e	I\r9	%?	(m	).	mxmn	&j
+(f	I\r8	"g	(^	+%	a	&m
+(g	I\r8	"g	(_	+$	b	&n
+(h	I\r8	"g	(`	+#	c	&o
+(i	I\r8	"g	(a	K	clk	&t
+(j	I\r8	"g	(b	+"	d	&p
+(k	I\r8	"g	(c	(<	gn	&s
+(l	I\r8	"g	(d	_	ldn	&r
+(m	IN#s	"g	).	mxmn	&v
+(n	IN#s	"g	)6	qa	&w
+(o	IN#s	"g	)7	qb	&x
+(p	IN#s	"g	)8	qc	&y
+(q	IN#s	"g	)9	qd	&z
+(r	IN#s	"g	):	rcon	&u
+(s	IFkI	%J	:11	'2
+(t	IFkI	%J	:12	'3
+(u	IFkI	%J	:13	'4
+(v	IFkI	%J	:14	'5
+(w	IFkI	%J	:15	'6
+(x	IFkI	%J	:16	'7
+(y	IFkI	%J	:17	'8
+(z	IFkI	%J	:18	'9
+({	IFkI	%J	:19	':
+(|	IFkI	%J	:20	';
+(}	IFkI	%J	:21	'<
+(~	IFkI	%J	:22	'=
+)!	IFkI	%J	:23	'>
+)"	IFkI	%J	:24	'?
+)#	IFkI	%J	:25	'@@
+)$	IFkI	%J	:26	'A
+)%	IFkI	%J	:27	'B
+)&	IFkI	%J	:28	'C
+)'	IFkI	%J	:29	'D
+)(	IFkI	%J	:30	'E
+))	IFkI	%J	:31	'F
+)*	IFkI	%J	:32	'G
+)+	IFkI	%J	:33	'H
+),	IFkI	%J	:36	'I
+)-	IFkI	%J	:37	'J
+).	IUVC	%J	(X	:38	'K
+)/	IFkI	%J	:39	'L
+)0	IFkI	%J	:40	'M
+)1	IFkI	%J	:41	'N
+)2	IFkI	%J	:42	'O
+)3	IFkI	%J	:43	'P
+)4	IFkI	%J	:44	'Q
+)5	IFkI	%J	:45	'R
+)6	IUV3	%J	(Y	:46	'S
+)7	IUV3	%J	(Z	:47	'T
+)8	IUV3	%J	([	:48	'U
+)9	IUV3	%J	(\	:49	'V
+):	IUVC	%J	(]	:56	'W
+);	IFkI	%J	:57	'0
+)<	IFkI	%J	:58	'1
+)=	I\r8	%J	(f	+%	A	''
+)>	I\r8	%J	(g	+$	B	'%
+)?	I\r8	%J	(h	+#	C	'$
+)@@	I\r8	%J	(i	K	CLK	')
+)A	I\r8	%J	(j	+"	D	'#
+)B	I\r8	%J	(k	(<	GN	'&
+)C	I\r8	%J	(l	_	LDN	'"
+)D	I\r_	%J	(e	).	MXMN	'K
+)E	I\rO	%J	)J	)6	QA	'S
+)F	I\rO	%J	)K	)7	QB	'T
+)G	I\rO	%J	)L	)8	QC	'U
+)H	I\rO	%J	)M	)9	QD	'V
+)I	I\r_	%J	)N	):	RCON	'W
+)J	I\r9	%?	(n	)6	qa	&i
+)K	I\r9	%?	(o	)7	qb	&h
+)L	I\r9	%?	(p	)8	qc	&g
+)M	I\r9	%?	(q	)9	qd	&f
+)N	I\r9	%?	(r	):	rcon	&k
+)O	IN#r	^	`	CLK	"N
+)P	I\r8	^	*F	L	D1	"V
+)Q	I\r8	^	*G	M	D2	"U
+)R	I\r8	^	*H	T	D3	"T
+)S	I\r8	^	*I	U	D4	"S
+)T	I\r8	^	*J	V	D5	"R
+)U	I\r8	^	*K	W	D6	"Q
+)V	I\r8	^	*L	X	D7	"P
+)W	I\r8	^	*M	Y	D8	"O
+)X	IN#s	^	)g	Q1	"_
+)Y	IN#s	^	)f	Q2	"^
+)Z	IN#s	^	)e	Q3	"]
+)[	IN#s	^	)d	Q4	"\
+)\	IN#s	^	)c	Q5	"[
+)]	IN#s	^	)b	Q6	"Z
+)^	IN#s	^	)a	Q7	"Y
+)_	IN#s	^	)`	Q8	"X
+)`	IUV3	j	6	:12	%3
+)a	IUV3	j	5	:13	%4
+)b	IUV3	j	4	:14	%5
+)c	IUV3	j	3	:15	%6
+)d	IUV3	j	1	:16	%7
+)e	IUV3	j	0	:17	%8
+)f	IUV3	j	/	:18	%9
+)g	IUV3	j	.	:19	%:
+)h	I\r8	j	*o	`	CLK	%"
+)i	I\r8	j	*_	L	D1	%*
+)j	I\r8	j	*`	M	D2	%)
+)k	I\r8	j	*a	T	D3	%(
+)l	I\r8	j	*b	U	D4	%'
+)m	I\r8	j	*c	V	D5	%&
+)n	I\r8	j	*d	W	D6	%%
+)o	I\r8	j	*e	X	D7	%$
+)p	I\r8	j	*f	Y	D8	%#
+)q	I\rO	j	)X	)g	Q1	%:
+)r	I\rO	j	)Y	)f	Q2	%9
+)s	I\rO	j	)Z	)e	Q3	%8
+)t	I\rO	j	)[	)d	Q4	%7
+)u	I\rO	j	)\	)c	Q5	%6
+)v	I\rO	j	)]	)b	Q6	%5
+)w	I\rO	j	)^	)a	Q7	%4
+)x	I\rO	j	)_	)`	Q8	%3
+)y	I\r8	F	*E	a	CLK	";
+)z	IN#r	F	Z	D1	"C
+){	IN#r	F	[	D2	"B
+)|	IN#r	F	N	D3	"A
+)}	IN#r	F	O	D4	"@@
+)~	IN#r	F	P	D5	"?
+*!	IN#r	F	Q	D6	">
+*"	IN#r	F	R	D7	"=
+*#	IN#r	F	S	D8	"<
+*$	IN#s	F	*3	Q1	"L
+*%	IN#s	F	*2	Q2	"K
+*&	IN#s	F	*1	Q3	"J
+*'	IN#s	F	*0	Q4	"I
+*(	IN#s	F	*/	Q5	"H
+*)	IN#s	F	*.	Q6	"G
+**	IN#s	F	*-	Q7	"F
+*+	IN#s	F	*,	Q8	"E
+*,	IUV3	R	-	:12	$r
+*-	IUV3	R	,	:13	$s
+*.	IUV3	R	+	:14	$t
+*/	IUV3	R	*	:15	$u
+*0	IUV3	R	)	:16	$v
+*1	IUV3	R	(	:17	$w
+*2	IUV3	R	E	:18	$x
+*3	IUV3	R	D	:19	$y
+*4	I\r8	R	*^	a	CLK	$a
+*5	I\r8	R	*p	Z	D1	$i
+*6	I\r8	R	*q	[	D2	$h
+*7	I\r8	R	*r	N	D3	$g
+*8	I\r8	R	*s	O	D4	$f
+*9	I\r8	R	*t	P	D5	$e
+*:	I\r8	R	*u	Q	D6	$d
+*;	I\r8	R	*v	R	D7	$c
+*<	I\r8	R	*w	S	D8	$b
+*=	I\rO	R	*$	*3	Q1	$y
+*>	I\rO	R	*%	*2	Q2	$x
+*?	I\rO	R	*&	*1	Q3	$w
+*@@	I\rO	R	*'	*0	Q4	$v
+*A	I\rO	R	*(	*/	Q5	$u
+*B	I\rO	R	*)	*.	Q6	$t
+*C	I\rO	R	**	*-	Q7	$s
+*D	I\rO	R	*+	*,	Q8	$r
+*E	IN#r	.	a	CLK	"(
+*F	IN#r	.	L	D1	"0
+*G	IN#r	.	M	D2	"/
+*H	IN#r	.	T	D3	".
+*I	IN#r	.	U	D4	"-
+*J	IN#r	.	V	D5	",
+*K	IN#r	.	W	D6	"+
+*L	IN#r	.	X	D7	"*
+*M	IN#r	.	Y	D8	")
+*N	IN#s	.	*]	Q1	"9
+*O	IN#s	.	*\	Q2	"8
+*P	IN#s	.	*[	Q3	"7
+*Q	IN#s	.	*Z	Q4	"6
+*R	IN#s	.	*Y	Q5	"5
+*S	IN#s	.	*X	Q6	"4
+*T	IN#s	.	*W	Q7	"3
+*U	IN#s	.	*V	Q8	"2
+*V	IUV3	:	C	:12	$S
+*W	IUV3	:	B	:13	$T
+*X	IUV3	:	A	:14	$U
+*Y	IUV3	:	@@	:15	$V
+*Z	IUV3	:	=	:16	$W
+*[	IUV3	:	2	:17	$X
+*\	IUV3	:	'	:18	$Y
+*]	IUV3	:	&	:19	$Z
+*^	I\r8	:	)y	a	CLK	$B
+*_	I\r8	:	)P	L	D1	$J
+*`	I\r8	:	)Q	M	D2	$I
+*a	I\r8	:	)R	T	D3	$H
+*b	I\r8	:	)S	U	D4	$G
+*c	I\r8	:	)T	V	D5	$F
+*d	I\r8	:	)U	W	D6	$E
+*e	I\r8	:	)V	X	D7	$D
+*f	I\r8	:	)W	Y	D8	$C
+*g	I\rO	:	*N	*]	Q1	$Z
+*h	I\rO	:	*O	*\	Q2	$Y
+*i	I\rO	:	*P	*[	Q3	$X
+*j	I\rO	:	*Q	*Z	Q4	$W
+*k	I\rO	:	*R	*Y	Q5	$V
+*l	I\rO	:	*S	*X	Q6	$U
+*m	I\rO	:	*T	*W	Q7	$T
+*n	I\rO	:	*U	*V	Q8	$S
+*o	I\r8	v	)O	`	CLK	"a
+*p	I\r8	v	)z	Z	D1	"i
+*q	I\r8	v	){	[	D2	"h
+*r	I\r8	v	)|	N	D3	"g
+*s	I\r8	v	)}	O	D4	"f
+*t	I\r8	v	)~	P	D5	"e
+*u	I\r8	v	*!	Q	D6	"d
+*v	I\r8	v	*"	R	D7	"c
+*w	I\r8	v	*#	S	D8	"b
+*x	IN#s	v	+)	Q1	"r
+*y	IN#s	v	+(	Q2	"q
+*z	IN#s	v	+'	Q3	"p
+*{	IN#s	v	+&	Q4	"o
+*|	IN#s	v	+%	Q5	"n
+*}	IN#s	v	+$	Q6	"m
+*~	IN#s	v	+#	Q7	"l
++!	IN#s	v	+"	Q8	"k
++"	IUV3	"$	?	:12	%R
++#	IUV3	"$	>	:13	%S
++$	IUV3	"$	<	:14	%T
++%	IUV3	"$	;	:15	%U
++&	IUV3	"$	:	:16	%V
++'	IUV3	"$	9	:17	%W
++(	IUV3	"$	8	:18	%X
++)	IUV3	"$	7	:19	%Y
++*	I\r8	"$	)h	`	CLK	%A
+++	I\r8	"$	*5	Z	D1	%I
++,	I\r8	"$	*6	[	D2	%H
++-	I\r8	"$	*7	N	D3	%G
++.	I\r8	"$	*8	O	D4	%F
++/	I\r8	"$	*9	P	D5	%E
++0	I\r8	"$	*:	Q	D6	%D
++1	I\r8	"$	*;	R	D7	%C
++2	I\r8	"$	*<	S	D8	%B
++3	I\rO	"$	*x	+)	Q1	%Y
++4	I\rO	"$	*y	+(	Q2	%X
++5	I\rO	"$	*z	+'	Q3	%W
++6	I\rO	"$	*{	+&	Q4	%V
++7	I\rO	"$	*|	+%	Q5	%U
++8	I\rO	"$	*}	+$	Q6	%T
++9	I\rO	"$	*~	+#	Q7	%S
++:	I\rO	"$	+!	+"	Q8	%R
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

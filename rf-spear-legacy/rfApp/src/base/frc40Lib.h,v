@@ -1,0 +1,116 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  FRC40 - Force-40 definitions
+**
+**  Abstract:
+**      Header file defining Force-40 registers and fields
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Feedback Project
+**
+**   History:
+**      October 12, 1993 - Created
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef FRC40LIB_H
+#define FRC40LIB_H
+
+#include "config.h"
+
+#define FRC40_A_LCLBEG   (LOCAL_MEM_LOCAL_ADRS)
+#define FRC40_A_LCLEND   (FRC40_A_LCLBEG + LOCAL_MEM_SIZE)
+
+#define FRC40_A_A32BEG  (0x01000000)
+#define FRC40_A_A24BEG  (0xfb000000)
+#define FRC40_A_A16BEG  (0xfbff0000)
+
+#define FRC40_A_A32END  (0xf9ffffff)
+#define FRC40_A_A24END  (0xfbfeffff)
+#define FRC40_A_A16END  (0xfbffffff)
+
+#define FRC40_A_LOCAL   FRC40_A_LCLBEG
+#define FRC40_A_A32     FRC40_A_A32BEG
+#define FRC40_A_A24     FRC40_A_A24BEG
+#define FRC40_A_A16     FRC40_A_A16BEG
+
+#endif
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

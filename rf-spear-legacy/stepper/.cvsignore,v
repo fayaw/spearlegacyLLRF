@@ -1,0 +1,62 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	stepper-R1-1-spear0:1.1.1.1
+	stepper-R1-1:1.1.1.1
+	stepper:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	99.10.26.21.20.01;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	99.10.26.21.20.01;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@bin
+include
+lib
+man
+dbd
+templates
+doc
+html
+db
+javalib
+@
+
+
+1.1.1.1
+log
+@Stepper motor software from:
+http://www.aps.anl.gov/asd/people/mrk/epics/modules/mechanism/stepper/
+@
+text
+@@

@@ -105,38 +105,38 @@ The upgraded system replaces all control electronics while retaining the RF plan
 > **Figure 1 — Upgraded System Architecture** (see `Designs/docx/drawings/PRD_drawings.vsdx`)
 
 ```
-  ┌─────────────────────────────┐                  ┌──────────────────────────────────────────────────────────┐
+  ┌─────────────────────────────┐                  ┌─────────────────────────────────────────────────────────┐
   │       OPERATOR LAYER        │                  │                     EXPERT LAYER                        │
   │ EDM Panels | Web Dashboard  │                  │ MATLAB Tools (Dmitry/LLRF9 + in-house) | Expert EPICS   │
   │ EPICS Archiver | Logging    │                  │ Panels | System Diagnostics                             │
-  └──────────────┬──────────────┘                  └────────────────────────────┬─────────────────────────────┘
+  └──────────────┬──────────────┘                  └───────────────────────────┬─────────────────────────────┘
                  │                                                             │
                  └──────────────────────────┬──────────────────────────────────┘
                                             │
-  ┌─────────────────────────────────────────┴────────────────────────────────────────────────────────┐
+  ┌─────────────────────────────────────────┴───────────────────────────────────────────────────────┐
   │                                EPICS (Soft IOC) COORDINATOR                                     │
   │  State Machine | HVPS Loop | Tuner Mgr | Fault Mgr | Diagnostics | Heartbeat Monitoring         │
-  └─────────────────────────────────────────┬────────────────────────────────────────────────────────┘
+  └─────────────────────────────────────────┬───────────────────────────────────────────────────────┘
                                             │ EPICS CA (~1 Hz supervisory)
      ┌──────────┬──────────┬────────────────┼──────────┬──────────┬──────────┐
      │          │          │                │          │          │          │
-  ┌──┴───────┐┌─┴────────┐┌┴───────────┐┌──┴────────┐┌┴────────┐┌┴───────┐┌┴──────────────┐
+  ┌──┴───────┐┌─┴────────┐┌┴───────────┐┌───┴───────┐┌─┴───────┐┌─┴──────┐┌──┴────────────┐
   │ LLRF9 #1 ││ LLRF9 #2 ││ Motor Ctrl ││ HVPS PLC  ││Waveform ││  Arc   ││ RF MPS PLC    │
-  │Field Ctrl││Field Ctrl ││Galil       ││Compact-   ││ Buffer  ││ Detect ││CtrlLogix 1756 │
-  │+Tuner    ││+Tuner    ││ DMC-4143   ││ Logix     ││ System  ││6 sensor││Collector pwr  │
+  │Field Ctrl││Field Ctrl ││Galil       ││Compact-  ││ Buffer  ││ Detect ││CtrlLogix 1756 │
+  │+Tuner    ││+Tuner    ││ DMC-4143   ││ Logix     ││ System  ││12sensor││Collector pwr  │
   │+Intlk    ││+Intlk    ││Ethernet HB ││V control  ││         ││        ││   calc        │
-  └┬───┬─────┘└────┬─────┘└─────┬──────┘└──┬──┬─────┘└───┬─────┘└───┬────┘└──┬──────────┬┘
-   │   └─int.─┘    │            │           │  │          │          │        │          │
-   │  (No IC)      │            │           │  │STATUS    │          │        │    ┌─────┴────────┐
-   │               │            │           │  │fiber     │          │        │    │ Heater Ctrl  │
-   │               │            │           │  │(direct   │          │        │    │Prog. AC Sup. │
-   │               │            │           │  │ to HVPS  │          │        │    │Controlled by │
-   │               │            │           │  │ Power)   │          │        │    │  RF MPS      │
-   │  to IC ───>   │            │           │  │          │  <─── to IC      │    └──────────────┘
-   ▼  from above   ▼            ▼           ▼  │          ▲  from below ▲    ▲    (NOT connected
+  └┬───┬─────┘└──────────┘└─────┬──────┘└───┬──┬────┘└────┬────┘└────┬───┘└───┬──────────┬┘
+   │   └─int.─┘                 │           │  │          │          │        │          │
+   │  (No IC)                   │           │  │STATUS    │          │        │    ┌─────┴────────┐
+   │                            │           │  │fiber     │          │        │    │ Heater Ctrl  │
+   │                            │           │  │(direct   │          │        │    │Prog. AC Sup. │
+   │                            │           │  │ to HVPS  │          │        │    │Controlled by │
+   │                            │           │  │ Power)   │          │        │    │  RF MPS      │
+   │  to IC ───>                │           │  │          │  <─── to IC       │    └──────────────┘
+   ▼  from above                ▼           ▼  │          ▲  from below ▲     ▲    (NOT connected
   ┌────────────────────────────────────────────┐│┌─────────────────────────────────────────────────┐ to IC)
   │                        INTERFACE CHASSIS   │││(NEW)                                            │
-  │  First-fault detection | Optocoupler/galv. │││isol. | Fiber I/O | AND-gate permit logic       │
+  │  First-fault detection | Optocoupler/galv. │││isol. | Fiber I/O | AND-gate permit logic        │
   └────────┬───────────────────────────────────┘│└──────────────────────────────────────┬──────────┘
            │                                    │                                      │
            │                                    │                            3x fiber optic
@@ -148,22 +148,22 @@ The upgraded system replaces all control electronics while retaining the RF plan
   │ SPEAR MPS | Orbit Interlock | Ext Permits │ └────>│   transformer, rectifier, crowbar,    │
   │        (feed into Interface Chassis)      │       │   thyristor stacks, grounding tank,   │
   └───────────────────────────────────────────┘       │   Ross switch, filter inductors       │
-                                                      └───────────────┬────────────────────────┘
+                                                      └───────────────┬───────────────────────┘
                                                         PPS interlock signals
                                                       (HVPS contactor, Ross sw)
                                                                       │
-                                                      ┌───────────────┴────────────────────────┐
-                                                      │       PPS INTERFACE BOX                │
+                                                      ┌───────────────┴─────────────────────────┐
+                                                      │       PPS INTERFACE BOX                 │
                                                       │   Bud enclosure, 4 relays, status LEDs, │
                                                       │   lockable conn., HVPS contactor +      │
                                                       │   Ross switch ctrl                      │
-                                                      └───────────────┬────────────────────────┘
+                                                      └───────────────┬─────────────────────────┘
                                                              PPS chain signals
                                                                       │
                                                       ┌───────────────┴────────────────────────┐
                                                       │           SPEAR PPS                    │
-                                                      │   Personnel Protection System           │
-                                                      └───────────────────────────────────────┘
+                                                      │   Personnel Protection System          │
+                                                      └────────────────────────────────────────┘
 ```
 
 **Key Architectural Principle**: The Interface Chassis implements **machine/equipment protection and operational interlocks** (LLRF/HVPS/RF MPS coordination), while personnel safety (PPS) functions are implemented exclusively in a completely separate, dedicated **PPS Interface Box**. These two safety-related subsystems are architecturally independent:
@@ -296,7 +296,7 @@ The amplitudes of the RF data need to be acquired. The RF signals that are curre
                                                                P2│       P3│       P4│
                                                                  │         │         └──► [WG LOAD 1] (7,8)
                                                                  │         │
-                                              ──────────────────┘         └─────────────────────────────
+                                              ───────────────────┘         └─────────────────────────────
                                              │                                                     │
                                              ▼                                                     ▼
                                     [MAGIC TEE 2]  (2nd split)                          [MAGIC TEE 3]  (2nd split)
@@ -452,16 +452,16 @@ Based on the proven PEP-II design architecture from 1997, this legacy system has
                                     BUILDING B514
                                     
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                          SWITCHGEAR & SAFETY                               │
-│  Disconnect Switch │ Fuses (3×50A) │ Vacuum Contactor                      │
-│  Ground Switch │ Interlocks                                                │
+│                          SWITCHGEAR & SAFETY                                │
+│  Disconnect Switch │ Fuses (3×50A) │ Vacuum Contactor                       │
+│  Ground Switch │ Interlocks                                                 │
 └─────────────────────────────┬───────────────────────────────────────────────┘
                               │ 12.47 kV delta
                               ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    PHASE-SHIFT TRANSFORMER (T0)                            │
-│                    Extended Delta │ 350 kVA                                │
-│     Primary: 12.47 kV delta │ Secondary: Dual wye ±15° phase shift        │
+│                    PHASE-SHIFT TRANSFORMER (T0)                             │
+│                    Extended Delta │ 350 kVA                                 │
+│     Primary: 12.47 kV delta │ Secondary: Dual wye ±15° phase shift          │
 └─────────────┬───────────────────────────────────────────────┬───────────────┘
               │ +15°                                          │ -15°
               ▼                                               ▼
@@ -473,19 +473,19 @@ Based on the proven PEP-II design architecture from 1997, this legacy system has
 │    12.5 kV                  │                 │    12.5 kV                  │
 └─────────────┬───────────────┘                 └─────────────┬───────────────┘
               │                                               │
-              └─────────────────┬───────────────────────────────┘
+              └─────────────────┬─────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                        6-PULSE BRIDGE (SCR 1-6)                            │
-│                   Phase Control Thyristor Bridge                           │
-│                   6 stacks × 14 Powerex T8K7 SCRs                         │
+│                        6-PULSE BRIDGE (SCR 1-6)                             │
+│                   Phase Control Thyristor Bridge                            │
+│                   6 stacks × 14 Powerex T8K7 SCRs                           │
 └─────────────────────────────┬───────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           CROWBAR PROTECTION                               │
-│                        4 thyristor stacks                                  │
+│                           CROWBAR PROTECTION                                │
+│                        4 thyristor stacks                                   │
 └─────────────────────────────┬───────────────────────────────────────────────┘
                               │ -90 kV DC (max) / -74.4 kV DC (nominal)
                               ▼
@@ -976,12 +976,12 @@ The Arc Detection Chassis routes both paths to the Interface Chassis — the fas
 > **Figure 4 — Arc Detection Signal Path** (see `Designs/docx/drawings/PRD_drawings.vsdx`)
 
 ```
-[Cav A sensor]  ───┐                               ┌── OR gate ──────► PERMIT input         ──┐
-[Cav B sensor]  ───┤                               │   (1 wire,          (fast trip)         │
+[Cav A sensor]  ───┐                                 ┌── OR gate ──────► PERMIT input        ──┐
+[Cav B sensor]  ───┤                                 │   (1 wire,          (fast trip)         │
 [Cav C sensor]  ───┼──► [Microstep-MIS Controller] ──┤    hardware)                            ├─► [Interface Chassis]
-[Cav D sensor]  ───┤   (6 relay outputs)           │                                         │
-[Kly sensor]   ───┤                               └── 6-bit latch ──► 6 status inputs  ─────┘
-[Circulator]   ───┘                                    (latching)       (diagnostic)
+[Cav D sensor]  ───┤   (6 relay outputs)             │                                         │
+[Kly sensor]    ───┤                                 └── 6-bit latch ──► 6 status inputs  ─────┘
+[Circulator]    ───┘                                    (latching)       (diagnostic)
                                                 Also: Test + Reset signals from Interface Chassis → Arc Detect
 ```
 

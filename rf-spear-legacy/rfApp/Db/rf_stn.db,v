@@ -1,0 +1,815 @@
+head	1.6;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.6
+	RF-SPEAR-R0-3-1:1.6
+	RF-SPEAR-R0-3-0:1.6
+	RF-SPEAR-R0-2-0:1.6
+	RF-SPEAR-R0-1-0:1.6
+	RF-SPEAR-R0-0-3:1.6
+	RF-SPEAR-R0-0-2:1.6
+	RF-SPEAR-R0-0-1:1.6
+	RF-SPEAR-R0-0-0:1.6
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.6
+	RF-3-13-10:1.5.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.5
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.5
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.5
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.6
+date	2012.02.07.01.27.04;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2004.06.21.23.05.01;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.01.29.18.13.51;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.01.05.19.28.33;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.27.01.17.08;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.46;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.46;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.6
+log
+@Add main solenoid turn-on to the reset sequence.
+@
+text
+@grecord(ao,"$(S):STN:FAULT:ANUM") {
+	field(DESC,"Fault to Analyze")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(EGUF,"15")
+	field(EGUL,"1")
+	field(DRVH,"15")
+	field(DRVL,"1")
+	field(HOPR,"15")
+	field(LOPR,"1")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):STN:FAULT:FSIZE") {
+	field(DESC,"Fault File Size Kb")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(EGUF,"512")
+	field(EGUL,"1")
+	field(EGU,"Kb")
+	field(DRVH,"512")
+	field(DRVL,"1")
+	field(HOPR,"512")
+	field(LOPR,"1")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):STN:FAULT:NUM") {
+	field(DESC,"Last Fault Number")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(EGUF,"15")
+	field(EGUL,"1")
+	field(DRVH,"15")
+	field(DRVL,"1")
+	field(HOPR,"15")
+	field(LOPR,"1")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):STN:RAMP:SETTLE") {
+	field(DESC,"Ramping Settling Time")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"5")
+	field(EGUL,"1")
+	field(EGU,"Sec")
+	field(DRVH,"5")
+	field(DRVL,"1")
+	field(HOPR,"5")
+	field(LOPR,"1")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):STN:RESET:COUNTER") {
+	field(DESC,"Reset Counter")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(EGUF,"25")
+	field(EGU,"Count")
+	field(DRVH,"25")
+	field(HOPR,"25")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):STN:VOLT:SETTLE") {
+	field(DESC,"Stn Voltage Settling Time")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"60")
+	field(EGUL,"10")
+	field(EGU,"Sec")
+	field(DRVH,"60")
+	field(DRVL,"10")
+	field(HOPR,"60")
+	field(LOPR,"10")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(bi,"$(S):STN:ARCSUMY:LTCH") {
+	field(DESC,"STN Arc Fault")
+	field(DTYP,"Soft Channel")
+	field(INP,"$(S):STN:AIM:LTCH.B0  NPP MS")
+	field(OSV,"MAJOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(bi,"$(S):STN:BEAMABORT:STAT") {
+	field(DESC,"Beam Abort Status")
+	field(DTYP,"Soft Channel")
+	field(INP,"$(S):STN:AIM:LTCH.B5  NPP MS")
+	field(OSV,"MINOR")
+	field(ZNAM,"OFF")
+	field(ONAM,"ON")
+}
+grecord(bi,"$(S):STN:CRATE:LTCH") {
+	field(DESC,"STN Crate Temp/VoltTol")
+	field(DTYP,"Soft Channel")
+	field(INP,"$(S):STN:AIM:STAT.BC  NPP MS")
+	field(OSV,"MAJOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(bi,"$(S):STN:NCV:PLC") {
+	field(DESC,"Station Cavity ID")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM BI")
+	field(FLNK,"$(S):STNMPS:SUMY:LTCH.VAL  PP NMS")
+	field(INP,"@@$(S):STN:DCM:MODU.T6[35,8]")
+	field(ZSV,"$(4S)")
+	field(OSV,"$(2S)")
+	field(ZNAM,"4CV")
+	field(ONAM,"2CV")
+}
+grecord(bi,"$(S):STN:RF476MHZREF:LTCH") {
+	field(DESC,"RF 476 MHz Ref Status")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(S):STNMPS:SUMY:LTCH.VAL  PP NMS")
+	field(INP,"$(S):STN:RFP:RFSTATUS.BD  NPP NMS")
+	field(OSV,"MAJOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(bi,"$(S):WGAIR:NIRP:STAT") {
+	field(DESC,"WG Air NIRP Status")
+	field(DTYP,"Soft Channel")
+	field(INP,"$(S):WGAIR:NIRP:STATC.VAL  NPP MS")
+	field(OSV,"MAJOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(bo,"$(S):STN:FASTON:CTRL") {
+	field(DESC,"Station Fast On Enable")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(ZNAM,"OFF")
+	field(ONAM,"ON")
+	field(ZSV,"MAJOR")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(bo,"$(S):STN:FAULT:CTRL") {
+	field(DESC,"Fault Files Enable")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(ZNAM,"OFF")
+	field(ONAM,"ON")
+	field(ZSV,"MAJOR")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(bo,"$(S):STN:FMTYPE:CTRL") {
+	field(DESC,"Station ON FM File Type")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(ZNAM,"400_HZ")
+	field(ONAM,"1000_HZ")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(bo,"$(S):STN:TICKLE:CTRL") {
+	field(DESC,"Station Tickle Enable")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(ZNAM,"OFF")
+	field(ONAM,"ON")
+	field(OSV,"MAJOR")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(calc,"$(S):STN:PARK:CTRL") {
+	field(DESC,"Station Park Control")
+	field(FLNK,"$(S):STN:PARK:SEQ1.VAL  PP NMS")
+	field(CALC,"A>2.5?1:A<1.5?1:B>0.5?1:0")
+	field(INPA,"$(S):STN:LOCAL:ON.SEVR  NPP NMS")
+	field(INPB,"$(S):STNDCM:SUMY:MODU.SEVR  CPP NMS")
+}
+grecord(calc,"$(S):STN:SUMY:STATC") {
+	field(DESC,"Station Status (Calc)")
+	field(FLNK,"$(S):STN:SUMY:STAT.VAL  PP NMS")
+	field(CALC,"A?4:B?3:C?2:D>1?2:D?1:E?5:0")
+	field(INPA,"$(S):STN:SUMY:MODU.SEVR  NPP NMS")
+	field(INPB,"$(S):STN:SUMY:FRST.SEVR  NPP NMS")
+	field(INPC,"$(S):STN:SUMY:LTCH.SEVR  NPP NMS")
+	field(INPD,"$(S):STN:SUMY:SEVR.SEVR  NPP NMS")
+	field(INPE,"$(S):STN:BEAMABORT:STAT.SEVR  NPP NMS")
+	field(HOPR,"5")
+}
+grecord(calc,"$(S):WGAIR:NIRP:STATC") {
+	field(DESC,"WG Air NIRP Status (Calc)")
+	field(FLNK,"$(S):WGAIR:NIRP:STAT.VAL  PP NMS")
+	field(CALC,"A=B&&A<3?0:1")
+	field(INPA,"$(S):WGAIR:NIRPOUTPUT:LTCH.SEVR  NPP NMS")
+	field(INPB,"$(S):WGAIR:NIRPINPUT:LTCH.SEVR  NPP NMS")
+	field(HOPR,"1")
+}
+grecord(fanout,"$(S):STN:PARK:FAN1") {
+	field(DESC,"Station Park First Fanout")
+	field(FLNK,"$(S):STN:PARK:FAN2.VAL  PP NMS")
+	field(LNK1,"$(S):KLYSTEMP:SUMY:LTCH.PROC  PP NMS")
+	field(LNK2,"$(S):KLYSTEMP:SUMY:FRST.PROC  PP NMS")
+	field(LNK3,"$(S):KLYS:VACM:LTCH.PROC  PP NMS")
+	field(LNK4,"$(S):KLYS:VACM:FRST.PROC  PP NMS")
+	field(LNK5,"$(S):KLYSFLOW:SUMY:LTCH.PROC  PP NMS")
+	field(LNK6,"$(S):KLYSFLOW:SUMY:FRST.PROC  PP NMS")
+}
+grecord(fanout,"$(S):STN:PARK:FAN2") {
+	field(DESC,"Station Park Second Fanout")
+	field(FLNK,"$(S):STN:PARK:FAN3.VAL  PP NMS")
+	field(LNK1,"$(S):KLYS:SUMY:LTCH.PROC  PP NMS")
+	field(LNK2,"$(S):KLYS:SUMY:FRST.PROC  PP NMS")
+	field(LNK3,"$(S):HVPSTEMP:SUMY:LTCH.PROC  PP NMS")
+	field(LNK4,"$(S):HVPS:POWER.PROC  PP NMS")
+	field(LNK5,"$(S):HVPS:SUMY:LTCH.PROC  PP NMS")
+	field(LNK6,"$(S):HVPS:SUMY:FRST.PROC  PP NMS")
+}
+grecord(fanout,"$(S):STN:PARK:FAN3") {
+	field(DESC,"Station Park Third       ")
+	field(LNK1,"$(S):STNTEMP:SUMY:LTCH.PROC  PP NMS")
+	field(LNK2,"$(S):STNTEMP:SUMY:FRST.PROC  PP NMS")
+	field(LNK3,"$(S):HVPSSCR:ON:CTRL.PROC  PP NMS")
+}
+grecord(fanout,"$(S):STN:RF476MHZREF:FANO") {
+	field(DESC,"RF 476 MHz Reference Fanout")
+	field(SELM,"Specified")
+	field(SELL,"$(S):STN:RFP:RFSTATUS.BD  CPP NMS")
+	field(LNK1,"$(S):STN:RF476MHZREF:LTCH.VAL  PP NMS")
+}
+grecord(longout,"$(S):STN:SUMY:STAT:VSTA") {
+	field(DESC,"Station Status VSTA")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+}
+grecord(mbbi,"$(S):STN:RING:PLC") {
+	field(DESC,"Station Ring ID")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"2")
+	field(INP,"$(RINGID)")
+	field(ZRVL,"0")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(ZRST,"HER")
+	field(ONST,"LER")
+	field(TWST,"SPR")
+	field(UNSV,"INVALID")
+}
+grecord(mbbi,"$(S):STN:SUMY:STAT") {
+	field(DESC,"$(RING) RF$(REGIOC) Stat")
+	field(DTYP,"Soft Channel")
+	field(INP,"$(S):STN:SUMY:STATC.VAL  NPP NMS")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(FRVL,"4")
+	field(FVVL,"5")
+	field(SXVL,"6")
+	field(ZRST,"OK")
+	field(ONST,"WARNING")
+	field(TWST,"ALARM")
+	field(THST,"FAULT")
+	field(FRST,"HWERROR")
+	field(FVST,"BEAMABRT")
+	field(ONSV,"MINOR")
+	field(TWSV,"MAJOR")
+	field(THSV,"MAJOR")
+	field(FRSV,"INVALID")
+	field(FVSV,"MINOR")
+	field(UNSV,"INVALID")
+}
+grecord(mbbo,"$(S):STN:STATE:CTRL") {
+	field(DESC,"Desired Station State")
+	field(DTYP,"Raw Soft Channel")
+	field(NOBT,"16")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(FRVL,"4")
+	field(ZRST,"OFF")
+	field(ONST,"PARK")
+	field(TWST,"TUNE")
+	field(THST,"ON_FM")
+	field(FRST,"ON_CW")
+}
+grecord(mbbo,"$(S):STN:STATE:RBCK") {
+	field(DESC,"Actual Station State")
+	field(DTYP,"Raw Soft Channel")
+	field(FLNK,"$(S):STN:STATE:FANO.VAL  PP NMS")
+	field(NOBT,"16")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(FRVL,"4")
+	field(ZRST,"OFF")
+	field(ONST,"PARK")
+	field(TWST,"TUNE")
+	field(THST,"ON_FM")
+	field(FRST,"ON_CW")
+	field(ZRSV,"MAJOR")
+}
+grecord(seq,"$(S):STN:PARK:SEQ1") {
+	field(DESC,"Station Park First Seq")
+	field(FLNK,"$(S):STN:PARK:SEQ2.VAL  PP NMS")
+	field(DOL1,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK1,"$(S):KLYS:SUMY:SEVR.DISV  NPP NMS")
+	field(DOL2,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK2,"$(S):KLYS:SUMY:LTCH.DISV  NPP NMS")
+	field(DOL3,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK3,"$(S):KLYS:SUMY:FRST.DISV  NPP NMS")
+	field(DOL4,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK4,"$(S):KLYSTEMP:SUMY:SEVR.DISV  NPP NMS")
+	field(DOL5,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK5,"$(S):KLYSTEMP:SUMY:LTCH.DISV  NPP NMS")
+	field(DOL6,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK6,"$(S):KLYSTEMP:SUMY:FRST.DISV  NPP NMS")
+	field(DOL7,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK7,"$(S):KLYS:VACM:LTCH.DISV  NPP NMS")
+	field(DOL8,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK8,"$(S):KLYS:VACM:FRST.DISV  NPP NMS")
+}
+grecord(seq,"$(S):STN:PARK:SEQ2") {
+	field(DESC,"Station Park Second Seq")
+	field(FLNK,"$(S):STN:PARK:FAN1.VAL  PP NMS")
+	field(DOL1,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK1,"$(S):KLYSFLOW:SUMY:LTCH.DISV  NPP NMS")
+	field(DOL2,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK2,"$(S):KLYSFLOW:SUMY:FRST.DISV  NPP NMS")
+	field(DOL3,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK3,"$(S):HVPS:SUMY:SEVR.DISV  NPP NMS")
+	field(DOL4,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK4,"$(S):HVPS:SUMY:LTCH.DISV  NPP NMS")
+	field(DOL5,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK5,"$(S):HVPS:SUMY:FRST.DISV  NPP NMS")
+	field(DOL6,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK6,"$(S):HVPSDCM:SUMY:MODU.DISV  NPP NMS")
+	field(DOL7,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK7,"$(S):HVPS:POWER.DISV  NPP NMS")
+	field(DOL8,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNK8,"$(S):HVPSTEMP:SUMY:LTCH.DISV  NPP NMS")
+	field(DOLA,"$(S):STN:PARK:CTRL.VAL  NPP NMS")
+	field(LNKA,"$(S):HVPSSCR:ON:CTRL.DISV  NPP NMS")
+}
+grecord(seq,"$(S):STN:RESET:CTRL") {
+	field(DESC,"Interlock Reset")
+	field(PINI,"YES")
+	field(FLNK,"$(S):STN:RESETCONT:CTRL.VAL  PP NMS")
+	field(DOL1,"2")
+	field(LNK1,"$(PS):Control PP")
+	field(LNK2,"$(S):STN:DCM:MODU.DISV  NPP NMS")
+	field(DOL3,"1")
+	field(LNK3,"$(S):STN:IQA1:MODU.CAF  PP NMS")
+	field(DOL4,"1")
+	field(LNK4,"$(S):STN:IQA2:MODU.CAF  PP NMS")
+	field(DOL5,"1")
+	field(LNK5,"$(S):STN:$(IQA3):MODU.CAF  PP NMS")
+	field(DLY6,"0.1")
+	field(DOL6,"1")
+	field(LNK6,"$(S):STN:AIM:MODU.RSTF  PP NMS")
+	field(DLY7,"0.1")
+	field(DOL7,"1")
+	field(LNK7,"$(S):STN:RFP:MODU.RFFR  PP NMS")
+	field(DOL8,"1")
+	field(LNK8,"$(S):STN:IQA1:MODU.RLST  PP NMS")
+	field(DOL9,"1")
+	field(LNK9,"$(S):STN:IQA2:MODU.RLST  PP NMS")
+	field(DOLA,"1")
+	field(LNKA,"$(S):STN:$(IQA3):MODU.RLST  PP NMS")
+}
+grecord(seq,"$(S):STN:RESETCONT:CTRL") {
+	field(DESC,"Interlock Reset (cont)")
+	field(DOL1,"1")
+	field(LNK1,"$(S):HVPS:RESET:CTRL.VAL  PP NMS")
+	field(DLY2,"2")
+	field(DOL2,"1")
+	field(LNK2,"$(S):STN:AIM:MODU.RSTF  PP NMS")
+	field(DOL3,"1")
+	field(LNK3,"$(S):STN:RFP:MODU.RFFR  PP NMS")
+	field(DOL4,"1")
+	field(LNK4,"$(S):STN:IQA1:MODU.CAF  PP NMS")
+	field(DOL5,"1")
+	field(LNK5,"$(S):STN:IQA2:MODU.CAF  PP NMS")
+	field(DOL6,"1")
+	field(LNK7,"$(S):STN:$(IQA3):MODU.CAF  PP NMS")
+	field(LNK7,"$(S):HVPS:RESET:CTRL.VAL  PP NMS")
+	field(DLY8,"1")
+	field(DOL8,"1")
+	field(LNK8,"$(S):STN:AIM:MODU.RSTF  PP NMS")
+	field(LNK9,"$(S):STN:RF476MHZREF:LTCH.PROC  PP NMS")
+	field(DOLA,"1")
+	field(LNKA,"$(S):STN:DCM:MODU.DISV  NPP NMS")
+}
+grecord(state,"$(S):STN:ID") {
+	field(DESC,"Station ID")
+	field(PINI,"YES")
+	field(VAL,"$(REGIOC)")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME1") {
+	field(DESC,"Date/Time FAULT 1")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME10") {
+	field(DESC,"Date/Time FAULT 10")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME11") {
+	field(DESC,"Date/Time FAULT 11")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME12") {
+	field(DESC,"Date/Time FAULT 12")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME13") {
+	field(DESC,"Date/Time FAULT 13")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME14") {
+	field(DESC,"Date/Time FAULT 14")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME15") {
+	field(DESC,"Date/Time FAULT 15")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME2") {
+	field(DESC,"Date/Time FAULT 2")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME3") {
+	field(DESC,"Date/Time FAULT 3")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME4") {
+	field(DESC,"Date/Time FAULT 4")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME5") {
+	field(DESC,"Date/Time FAULT 5")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME6") {
+	field(DESC,"Date/Time FAULT 6")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME7") {
+	field(DESC,"Date/Time FAULT 7")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME8") {
+	field(DESC,"Date/Time FAULT 8")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FAULT:TIME9") {
+	field(DESC,"Date/Time FAULT 9")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"No FAULT file saved.")
+}
+grecord(stringout,"$(S):STN:FM1000HZ:IFILE") {
+	field(DESC,"Swept Sine 1000 Hz I File")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"/tbl/SWEEP_1000_I")
+}
+grecord(stringout,"$(S):STN:FM1000HZ:QFILE") {
+	field(DESC,"Swept Sine 1000 Hz Q File")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"/tbl/SWEEP_1000_Q")
+}
+grecord(stringout,"$(S):STN:FM400HZ:IFILE") {
+	field(DESC,"Swept Sine 400 Hz I File")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"/tbl/SWEEP_400_I")
+}
+grecord(stringout,"$(S):STN:FM400HZ:QFILE") {
+	field(DESC,"Swept Sine 400 Hz Q File")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"/tbl/SWEEP_400_Q")
+}
+grecord(stringout,"$(S):STN:STATE:STRING") {
+	field(DESC,"Station State Status String")
+	field(DTYP,"Soft Channel")
+	field(VAL,"Nonfunctional - unknown status")
+}
+grecord(stringout,"$(S):STN:TICKLE:IFILE") {
+	field(DESC,"Beam Tickle I File")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"/tbl/TICKLE_I")
+}
+grecord(stringout,"$(S):STN:TICKLE:QFILE") {
+	field(DESC,"Beam Tickle Q File")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(VAL,"/tbl/TICKLE_Q")
+}
+grecord(sub,"$(S):STN:CONV:LOSS") {
+	field(DESC,"IQ and A Conv Loss Calc")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQampl2loss")
+	field(INPD,"20")
+	field(INPE,"0.31623")
+	field(INPG,"$(S):STN:STATE:RBCK.VAL  NPP NMS")
+	field(EGU,"dB")
+	field(PREC,"4")
+	field(BRSV,"INVALID")
+}
+grecord(sub,"$(S):STNAB:RESET:CTRL") {
+	field(DESC,"Allen-Bradley Reset")
+	field(INAM,"subSysInit")
+	field(SNAM,"subSysABreset")
+	field(BRSV,"INVALID")
+}
+grecord(abDcm,"$(S):STN:DCM:MODU") {
+	field(DESC,"Station DCM Module")
+	field(FLNK,"$(S):STNDCM:SUMY:MODU.VAL  PP NMS")
+	field(NT,"8")
+	field(TOFF,"3")
+	field(DLY,"0.00001")
+	field(RACK,"3")
+}
+@
+
+
+1.5
+log
+@Add PINI's on all the soft setpoints.
+@
+text
+@d346 3
+a348 3
+	field(LNK1,"$(S):STN:DCM:MODU.DISV  NPP NMS")
+	field(DOL2,"1")
+	field(LNK2,"$(S):STN:IQA1:MODU.CAF  PP NMS")
+d350 1
+a350 1
+	field(LNK3,"$(S):STN:IQA2:MODU.CAF  PP NMS")
+d352 1
+a352 2
+	field(LNK4,"$(S):STN:$(IQA3):MODU.CAF  PP NMS")
+	field(DLY5,"0.1")
+d354 1
+a354 1
+	field(LNK5,"$(S):STN:AIM:MODU.RSTF  PP NMS")
+d357 2
+a358 1
+	field(LNK6,"$(S):STN:RFP:MODU.RFFR  PP NMS")
+d360 1
+a360 1
+	field(LNK7,"$(S):STN:IQA1:MODU.RLST  PP NMS")
+d362 1
+a362 1
+	field(LNK8,"$(S):STN:IQA2:MODU.RLST  PP NMS")
+d364 1
+a364 1
+	field(LNK9,"$(S):STN:$(IQA3):MODU.RLST  PP NMS")
+d366 1
+a366 1
+	field(LNKA,"$(S):HVPS:RESET:CTRL.VAL  PP NMS")
+a369 1
+	field(DLY1,"2")
+d371 2
+a372 1
+	field(LNK1,"$(S):STN:AIM:MODU.RSTF  PP NMS")
+d374 1
+a374 1
+	field(LNK2,"$(S):STN:RFP:MODU.RFFR  PP NMS")
+d376 1
+a376 1
+	field(LNK3,"$(S):STN:IQA1:MODU.CAF  PP NMS")
+d378 1
+a378 1
+	field(LNK4,"$(S):STN:IQA2:MODU.CAF  PP NMS")
+d380 10
+a389 8
+	field(LNK5,"$(S):STN:$(IQA3):MODU.CAF  PP NMS")
+	field(LNK6,"$(S):HVPS:RESET:CTRL.VAL  PP NMS")
+	field(DLY7,"1")
+	field(DOL7,"1")
+	field(LNK7,"$(S):STN:AIM:MODU.RSTF  PP NMS")
+	field(LNK8,"$(S):STN:RF476MHZREF:LTCH.PROC  PP NMS")
+	field(DOL9,"1")
+	field(LNK9,"$(S):STN:DCM:MODU.DISV  NPP NMS")
+@
+
+
+1.4
+log
+@Change register that is used for logging the latched vxi backplane,
+AB summary, AB heartbeat, and forced faults.  Instead of the interrupt
+status register (where the faults are cleared on every read instead of
+when the reset button is pushed), we now use the fast interlock status
+register.
+@
+text
+@d4 1
+d17 1
+d31 1
+d44 1
+d59 1
+d70 1
+d138 1
+d147 1
+d156 1
+d163 1
+a164 1
+	field(DTYP,"Soft Channel")
+d231 1
+d397 1
+d403 1
+d409 1
+d415 1
+d421 1
+d427 1
+d433 1
+d439 1
+d445 1
+d451 1
+d457 1
+d463 1
+d469 1
+d475 1
+d481 1
+d487 1
+d493 1
+d499 1
+d505 1
+d516 1
+d522 1
+@
+
+
+1.3
+log
+@Added PINI=YES for soft passive output records.
+@
+text
+@d76 8
+d87 1
+a87 1
+	field(INP,"$(S):STN:AIM:STAT.B5  NPP MS")
+d92 8
+@
+
+
+1.2
+log
+@Rename
+@
+text
+@d138 1
+d207 14
+a241 14
+	field(UNSV,"INVALID")
+}
+grecord(mbbi,"$(S):STN:RING:PLC") {
+	field(DESC,"Station Ring ID")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"2")
+	field(INP,"$(RINGID)")
+	field(ZRVL,"0")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(ZRST,"HER")
+	field(ONST,"LER")
+	field(TWST,"SPR")
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a75 8
+grecord(bi,"$(S):STN:BEAM:STAT") {
+	field(DESC,"Beam Available")
+	field(DTYP,"Soft Channel")
+	field(INP,"$(R)B60:RF:BEAMON.VAL  CPP MS")
+	field(ZSV,"MAJOR")
+	field(ZNAM,"OFF")
+	field(ONAM,"ON")
+}
+d84 11
+a104 11
+grecord(bi,"$(S):STN:RING:PLC") {
+	field(DESC,"Station Ring ID")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM BI")
+	field(FLNK,"$(S):STNMPS:SUMY:LTCH.VAL  PP NMS")
+	field(INP,"@@$(S):STN:DCM:MODU.T6[35,8]")
+	field(ZSV,"$(HS)")
+	field(OSV,"$(LS)")
+	field(ZNAM,"HER")
+	field(ONAM,"LER")
+}
+d207 1
+a207 1
+	field(DESC,"$(R)ER RF$(REG)-$(IOC) Stat")
+d229 14
+d363 1
+a363 1
+	field(DESC,"Station Region and Number")
+d365 1
+a365 1
+	field(VAL,"$(REG)-$(IOC)")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

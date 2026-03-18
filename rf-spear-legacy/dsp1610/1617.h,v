@@ -1,0 +1,155 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2014.06.18.17.01.37;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@copied from /afs/slac/package/dsp1610.
+@
+text
+@#ifndef D1617_H
+#define D1617_H
+/*
+ *	DSP1617 registers and conditions which were removed from the as1600
+ *	grammar to make the assembler truly generic:
+ */
+
+
+	/* shortcut to defining the chip's peripherals */
+	/* simply define or undef the identifier for the */
+	/* particular unit to include or exclude it */
+
+/* DSP1617 has the following peripherals ... */
+#define		_PIO_
+#define		_BIO_
+#define		_SIO_
+#define		_SIO2_
+#define		_TIMER0_
+#define		_BMU_
+
+
+#define		ioc	reg42
+
+/* DSP1617 new register */
+#define		powerc reg56
+
+/* pertaining to the PIO */
+#ifdef	_PIO_
+	/* registers */
+#define		pioc	reg28
+#define		pdx0	reg29
+#define		pdx1	reg30
+#define		pdx2	reg14
+#define		pdx3	reg15
+#define		pdx4	reg44
+#define		pdx5	reg45
+#define		pdx6	reg46
+#define		pdx7	reg47
+#endif
+
+/* pertaining to the BIO */
+#ifdef	_BIO_
+	/* registers */
+#define		cbit	reg40
+#define		sbit	reg41
+	/* conditionals */
+#define		allt	uflag18
+#define		allf	uflag19
+#define		somet	uflag20
+#define		somef	uflag21
+#endif
+
+#ifdef _SIO_
+	/* registers */
+#define		sioc	reg24
+#define		srta	reg25
+#define		sdx	reg26
+#define		tdms	reg27
+#define		saddx	reg35
+#endif
+
+#ifdef _SIO2_
+#define		sdx2	reg34
+#define		sioc2	reg39
+#define		saddx2	reg38
+#define		tdms2	reg54
+#define		srta2	reg55
+#endif
+
+#ifdef	_TIMER0_
+#define		timerc	reg52
+#define		timer0	reg53
+#endif
+
+#ifdef	_BMU_
+	/* registers */
+#define		ar0	reg58
+#define		ar1	reg59
+#define		ar2	reg60
+#define		ar3	reg61
+	/* conditionals */
+#define		oddp	uflag22
+#define		evenp	uflag23
+#define		mns1	uflag24
+#define		nmns1	uflag25
+
+	.f4	/* this directive enables the generic f4 unit in */
+		/* the as1600 parser */
+	.bmu	/* this directive enables the BMU instructions in */
+		/* the as1600 parser.  */
+#endif
+
+	.core1_1	/* 1617 uses the new core */
+
+#ifdef SIZECHECK
+        /* new size directives */
+	.size	j	-16
+	.size	k	-16
+	.size	i	-16
+	.size	p	-16
+	.size	x	-16
+	.size	y	-16
+        .size   auc      9
+        .size   c0      -8
+        .size   c1      -8
+        .size   c2      -8
+        .size   cloop    7
+        .size   a0	-16
+        .size   a1	-16
+	.size	sioc	10
+	.size	sioc2	10
+	.size	tdms	10
+	.size	tdms2	10
+	.size	timerc	 7
+	.size	ioc	15
+	.size	pdx0	 8
+	.size	pdx1	 8
+	.size	pdx2	 8
+	.size	pdx3	 8
+	.size	pdx4	 8
+	.size	pdx5	 8
+	.size	pdx6	 8
+	.size	pdx7	 8
+#endif
+
+#endif /* D1617_H */
+@

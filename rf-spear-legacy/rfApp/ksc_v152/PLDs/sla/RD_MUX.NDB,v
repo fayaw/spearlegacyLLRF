@@ -1,0 +1,371 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.09.19.23.27.02;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.09.19.23.27.02;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 1
+The length of the symbol table is: 13
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+
+The number of name info structs is : 304
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	IeEA	!	71	4	:125	"s
+#	IeEA	!	72	4	:126	"t
+$	IeEA	!	73	4	:127	"u
+%	IeEA	!	74	4	:128	"v
+&	IeEA	!	75	4	:129	"w
+'	IeEA	!	76	4	:130	"x
+(	IeEA	!	77	4	:131	"y
+)	IeEA	!	78	4	:132	"z
+*	IeEA	!	79	4	:133	"{
++	IeEA	!	80	4	:134	"|
+,	IeEA	!	89	9	:135	"}
+-	IeEA	!	90	12	:136	"~
+.	IeEA	!	90	12	:137	#!
+/	IeEA	!	90	12	:138	#"
+0	IeEA	!	90	12	:139	##
+1	IeEA	!	90	12	:140	#$
+2	IeEA	!	90	12	:141	#%
+3	IeEA	!	90	12	:142	#&
+4	IeEA	!	90	12	:143	#'
+5	IeEA	!	91	8	:144	#(
+6	IeEA	!	92	8	:145	#)
+7	IeEA	!	92	8	:146	#*
+8	IeEA	!	96	12	:147	#+
+9	IeEA	!	96	12	:148	#,
+:	IeEA	!	96	12	:149	#-
+;	IeEA	!	96	12	:150	#.
+<	IeEA	!	96	12	:151	#/
+=	IeEA	!	96	12	:152	#0
+>	IeEA	!	96	12	:153	#1
+?	IeEA	!	96	12	:154	#2
+@@	IeEA	!	96	12	:155	#3
+A	IeEA	!	96	12	:156	#4
+B	IeEA	!	96	12	:157	#5
+C	IeEA	!	96	12	:158	#6
+D	IeEA	!	96	12	:159	#7
+E	IeEA	!	100	13	:160	#8
+F	IeEA	!	101	9	:161	#9
+G	IeEA	!	101	9	:162	#:
+H	IeEA	!	102	9	:163	#;
+I	IeEA	!	102	9	:164	#<
+J	IeEA	!	103	8	:165	#=
+K	IeEA	!	103	8	:166	#>
+L	IeEA	!	104	11	:167	#?
+M	IeEA	!	104	11	:168	#@@
+N	IeEA	!	104	11	:169	#A
+O	IeEA	!	104	11	:170	#B
+P	IeEA	!	104	11	:171	#C
+Q	IeEA	!	104	11	:172	#D
+R	IeEA	!	104	11	:173	#E
+S	IeEA	!	104	11	:174	#F
+T	IeEA	!	104	11	:175	#G
+U	IeEA	!	108	12	:176	#H
+V	IeEA	!	108	12	:177	#I
+W	IeEA	!	108	12	:178	#J
+X	IeEA	!	108	12	:179	#K
+Y	IeEA	!	108	12	:180	#L
+Z	IeEA	!	108	12	:181	#M
+[	IeEA	!	108	12	:182	#N
+\	IeEA	!	108	12	:183	#O
+]	IeEA	!	108	12	:184	#P
+^	IeEA	!	108	12	:185	#Q
+_	IeEA	!	108	12	:186	#R
+`	IeEA	!	108	12	:187	#S
+a	IeEA	!	108	12	:188	#T
+b	IeEA	!	108	12	:189	#U
+c	IeEA	!	108	12	:190	#V
+d	IeEA	!	108	12	:191	#W
+e	IeEA	!	108	12	:192	#X
+f	IeEA	!	108	12	:193	#Y
+g	IeEA	!	108	12	:194	#Z
+h	IeEA	!	108	12	:195	#[
+i	IeEA	!	108	12	:196	#\
+j	IeEA	!	108	12	:197	#]
+k	IeEA	!	108	12	:198	#^
+l	IeEA	!	108	12	:199	#_
+m	IeEA	!	108	12	:200	#`
+n	IeEA	!	108	12	:201	#a
+o	IeEA	!	108	12	:202	#b
+p	IeEA	!	108	12	:203	#c
+q	IeEA	!	108	12	:204	#d
+r	IeEA	!	108	12	:205	#e
+s	IeEA	!	108	12	:206	#f
+t	IeEA	!	108	12	:207	#g
+u	IeEA	!	113	8	:208	#h
+v	IeEA	!	113	8	:209	#i
+w	IeEA	!	114	8	:210	#j
+x	IeEA	!	114	8	:211	#k
+y	IeEA	!	115	11	:212	#l
+z	IeEA	!	115	11	:213	#m
+{	IeEA	!	115	11	:214	#n
+|	IeEA	!	115	11	:215	#o
+}	IeEA	!	115	11	:216	#p
+~	IeEA	!	115	11	:217	#q
+"!	IeEA	!	115	11	:218	#r
+""	IeEA	!	115	11	:219	#s
+"#	IeEA	!	119	13	:220	#t
+"$	IeEA	!	119	13	:221	#u
+"%	IeEA	!	119	13	:222	#v
+"&	IeEA	!	119	13	:223	#w
+"'	IeEA	!	119	13	:224	#x
+"(	IeEA	!	119	13	:225	#y
+")	IeEA	!	120	8	:226	#z
+"*	IeEA	!	120	8	:227	#{
+"+	IeEA	!	121	8	:228	#|
+",	IeEA	!	121	8	:229	#}
+"-	IeEA	!	122	8	:230	#~
+".	IeEA	!	122	8	:231	$!
+"/	IeEA	!	123	8	:232	$"
+"0	IeEA	!	124	8	:233	$#
+"1	IeEA	!	124	8	:234	$$
+"2	IeEA	!	125	8	:235	$%
+"3	IeEA	!	125	8	:236	$&
+"4	IeEA	!	126	8	:237	$'
+"5	IeEA	!	126	8	:238	$(
+"6	IeEA	!	127	11	:239	$)
+"7	IeEA	!	127	11	:240	$*
+"8	IeEA	!	127	11	:241	$+
+"9	IeEA	!	132	12	:242	$,
+":	IeEA	!	132	12	:243	$-
+";	IeEA	!	132	12	:244	$.
+"<	IeEA	!	132	12	:245	$/
+"=	IeEA	!	132	12	:246	$0
+">	IeEA	!	132	12	:247	$1
+"?	IeEA	!	132	12	:248	$2
+"@@	IeEA	!	132	12	:249	$3
+"A	IeEA	!	132	12	:250	$4
+"B	IeEA	!	132	12	:251	$5
+"C	IeEA	!	132	12	:252	$6
+"D	IeEA	!	132	12	:253	$7
+"E	IeEA	!	132	12	:254	$8
+"F	IeEA	!	132	12	:255	$9
+"G	IeEA	!	132	12	:256	$:
+"H	IeEA	!	132	12	:257	$;
+"I	IeEA	!	132	12	:258	$<
+"J	IeEA	!	132	12	:259	$=
+"K	IeEA	!	132	12	:260	$>
+"L	IeEA	!	132	12	:261	$?
+"M	IeEA	!	132	12	:262	$@@
+"N	IeEA	!	132	12	:263	$A
+"O	IeEA	!	132	12	:264	$B
+"P	IeEA	!	132	12	:265	$C
+"Q	IeEA	!	137	8	:266	$D
+"R	IeEA	!	137	8	:267	$E
+"S	IeEA	!	138	8	:268	$F
+"T	IeEA	!	138	8	:269	$G
+"U	IeEA	!	139	8	:270	$H
+"V	IeEA	!	139	8	:271	$I
+"W	IeEA	!	140	8	:272	$J
+"X	IeEA	!	140	8	:273	$K
+"Y	IeEA	!	147	12	:274	$L
+"Z	IeEA	!	147	12	:275	$M
+"[	IeEA	!	147	12	:276	$N
+"\	IeEA	!	147	12	:277	$O
+"]	IeEA	!	147	12	:278	$P
+"^	IeEA	!	147	12	:279	$Q
+"_	IeEA	!	147	12	:280	$R
+"`	IeEA	!	147	12	:281	$S
+"a	IeEA	!	147	12	:282	$T
+"b	IeEA	!	147	12	:283	$U
+"c	IeEA	!	147	12	:284	$V
+"d	IeEA	!	147	12	:285	$W
+"e	IeEA	!	147	12	:286	$X
+"f	IeEA	!	147	12	:287	$Y
+"g	IeEA	!	147	12	:288	$Z
+"h	IeEA	!	147	12	:289	$[
+"i	IeEA	!	147	12	:290	$\
+"j	IeEA	!	147	12	:291	$]
+"k	IeEA	!	147	12	:292	$^
+"l	IeEA	!	147	12	:293	$_
+"m	IeEA	!	147	12	:294	$`
+"n	IeEA	!	147	12	:295	$a
+"o	IeEA	!	147	12	:296	$b
+"p	IeEA	!	147	12	:297	$c
+"q	IeEA	!	147	12	:298	$d
+"r	IeEA	!	147	12	:299	$e
+"s	IeEA	!	147	12	:300	$f
+"t	IeEA	!	147	12	:301	$g
+"u	IeEA	!	147	12	:302	$h
+"v	IeEA	!	147	12	:303	$i
+"w	IeEA	!	147	12	:304	$j
+"x	IeEA	!	147	12	:305	$k
+"y	IeEA	!	153	8	:306	$l
+"z	IeEA	!	153	8	:307	$m
+"{	IeEA	!	154	8	:308	$n
+"|	IeEA	!	154	8	:309	$o
+"}	IeEA	!	155	11	:310	$p
+"~	IeEA	!	155	11	:311	$q
+#!	IeEA	!	155	11	:312	$r
+#"	IeEA	!	155	11	:313	$s
+##	IeEA	!	155	11	:314	$t
+#$	IeEA	!	155	11	:315	$u
+#%	IeEA	!	155	11	:316	$v
+#&	IeEA	!	155	11	:317	$w
+#'	IeEA	!	155	11	:318	$x
+#(	IeEA	!	155	11	:319	$y
+#)	IeEA	!	155	11	:320	$z
+#*	IeEA	!	155	11	:321	${
+#+	IeEA	!	155	11	:322	$|
+#,	IeEA	!	155	11	:323	$}
+#-	IeEA	!	155	11	:324	$~
+#.	IeEA	!	155	11	:325	%!
+#/	IeEZ	!	46	8	DATALO0	"0
+#0	IeEZ	!	46	8	DATALO1	"/
+#1	L8ef	!	46	8	1	#f	DATALO10	"&
+#2	L8ef	!	46	8	1	#g	DATALO11	"%
+#3	L8ef	!	46	8	1	#h	DATALO12	"$
+#4	L8ef	!	46	8	1	#i	DATALO13	"#
+#5	L8ef	!	46	8	1	#j	DATALO14	""
+#6	L8ef	!	46	8	1	#k	DATALO15	"!
+#7	L8ef	!	46	8	1	#l	DATALO2	".
+#8	L8ef	!	46	8	1	#m	DATALO3	"-
+#9	L8ef	!	46	8	1	#n	DATALO4	",
+#:	L8ef	!	46	8	1	#o	DATALO5	"+
+#;	L8ef	!	46	8	1	#p	DATALO6	"*
+#<	L8ef	!	46	8	1	#q	DATALO7	")
+#=	L8ef	!	46	8	1	#r	DATALO8	"(
+#>	IeEZ	!	46	8	DATALO9	"'
+#?	$rX8+	!	DATALO[15..0]	%"
+#@@	L8ef	!	39	2	10	#d	#e	#l	#m	#n	#o	#p	#q	#r	#s	ENA_VECTOR	x
+#A	L8ef	!	43	2	1	#g	ERR	|
+#B	L8ef	!	57	2	1	#m	ERR_ISRC	"M
+#C	IeEZ	!	61	10	IAK_CTRL0	"`
+#D	IeEZ	!	61	10	IAK_CTRL1	"_
+#E	IeEZ	!	61	10	IAK_CTRL10	"V
+#F	IeEZ	!	61	10	IAK_CTRL11	"U
+#G	IeEZ	!	61	10	IAK_CTRL12	"T
+#H	IeEZ	!	61	10	IAK_CTRL13	"S
+#I	IeEZ	!	61	10	IAK_CTRL14	"R
+#J	IeEZ	!	61	10	IAK_CTRL15	"Q
+#K	IeEZ	!	61	10	IAK_CTRL2	"^
+#L	IeEZ	!	61	10	IAK_CTRL3	"]
+#M	IeEZ	!	61	10	IAK_CTRL4	"\
+#N	IeEZ	!	61	10	IAK_CTRL5	"[
+#O	IeEZ	!	61	10	IAK_CTRL6	"Z
+#P	IeEZ	!	61	10	IAK_CTRL7	"Y
+#Q	IeEZ	!	61	10	IAK_CTRL8	"X
+#R	IeEZ	!	61	10	IAK_CTRL9	"W
+#S	$rX8+	!	IAK_CTRL[15..0]	%%
+#T	L8ef	!	52	2	1	#q	IR_ENA	"=
+#U	L8ef	!	55	2	1	#m	IRQ_S1	"@@
+#V	L8ef	!	54	2	1	#n	IRQ_S2	"?
+#W	L8ef	!	53	2	1	#o	IRQ_S3	">
+#X	L8ef	!	49	4	1	#d	LA0	":
+#Y	L8ef	!	49	4	1	#e	LA1	"9
+#Z	L8ef	!	49	4	1	#l	LA2	"8
+#[	L8ef	!	49	4	1	#m	LA3	"7
+#\	L8ef	!	49	4	1	#n	LA4	"6
+#]	L8ef	!	49	4	1	#o	LA5	"5
+#^	L8ef	!	49	4	1	#p	LA6	"4
+#_	L8ef	!	49	4	1	#q	LA7	"3
+#`	$rX8+	!	LA[7..0]	%#
+#a	IeEZ	!	50	2	LMON_IE	";
+#b	L8ef	!	47	2	1	#s	LOC_ISRC	"1
+#c	L8ef	!	40	2	1	#j	MODID	y
+#d	IeE[	!	155	4	RD0	"r
+#e	IeE[	!	155	4	RD1	"q
+#f	Nj's	!	152	4	1	RD10	"h
+#g	Nj's	!	152	4	1	RD11	"g
+#h	IeE[	!	152	4	RD12	"f
+#i	IeE[	!	152	4	RD13	"e
+#j	IeE[	!	152	4	RD14	"d
+#k	IeE[	!	152	4	RD15	"c
+#l	Nj's	!	155	4	2	RD2	"p
+#m	Nj's	!	155	4	3	RD3	"o
+#n	XsJE	!	155	4	1	1	1	RD4	"n
+#o	XsJE	!	155	4	1	1	1	RD5	"m
+#p	Nj's	!	155	4	2	RD6	"l
+#q	XsJE	!	155	4	1	1	1	RD7	"k
+#r	Nj's	!	154	4	2	RD8	"j
+#s	Nj's	!	153	4	1	RD9	"i
+#t	$rX8+	!	RD[15..0]	%&
+#u	L8ef	!	31	2	14	#l	#m	#n	#o	#p	#q	#r	#s	#f	#g	#h	#i	#j	$7	RD_CSR	p
+#v	L8ef	!	34	2	14	#l	#m	#n	#o	#p	#q	#r	#f	#g	#h	#i	#j	#k	$7	RD_DATALO	s
+#w	IeEZ	!	62	2	RD_IACKCTRL	"a
+#x	IeEZ	!	30	2	RD_ID	o
+#y	L8ef	!	36	2	16	#d	#e	#l	#m	#n	#o	#p	#q	#r	#f	#g	#h	#i	#j	#k	$7	RD_INTCNTL	u
+#z	L8ef	!	35	2	10	#d	#e	#l	#m	#n	#o	#p	#q	#r	$7	RD_INTSTA	t
+#{	L8ef	!	38	2	5	#d	#e	#l	#m	$7	RD_LOCINT	w
+#|	IeEZ	!	32	2	RD_PROTOCOL	q
+#}	L8ef	!	44	2	1	#f	RD_RDY	}
+#~	L8ef	!	33	2	13	#d	#e	#l	#m	#n	#o	#p	#q	#r	#f	#g	#j	$7	RD_RESPONSE	r
+$!	L8ef	!	37	2	10	#l	#m	#n	#o	#p	#q	#r	#f	#g	$7	RD_TRIGINT	v
+$"	L8ef	!	59	2	1	#e	RDDATA_ISRC	"O
+$#	IeEZ	!	42	2	SFT_RST	{
+$$	IeEZ	!	41	2	SYS_INH	z
+$%	IeEZ	!	56	9	TI_ISRC0	"L
+$&	IeEZ	!	56	9	TI_ISRC1	"K
+$'	L8ef	!	56	9	1	#f	TI_ISRC10	"B
+$(	L8ef	!	56	9	1	#g	TI_ISRC11	"A
+$)	L8ef	!	56	9	1	#l	TI_ISRC2	"J
+$*	L8ef	!	56	9	1	#m	TI_ISRC3	"I
+$+	L8ef	!	56	9	1	#n	TI_ISRC4	"H
+$,	L8ef	!	56	9	1	#o	TI_ISRC5	"G
+$-	L8ef	!	56	9	1	#p	TI_ISRC6	"F
+$.	L8ef	!	56	9	1	#q	TI_ISRC7	"E
+$/	L8ef	!	56	9	1	#r	TI_ISRC8	"D
+$0	IeEZ	!	56	9	TI_ISRC9	"C
+$1	$rX8+	!	TI_ISRC[11..0]	%$
+$2	L8ef	!	51	2	1	#r	TRG_IE	"<
+$3	L8ef	!	48	2	1	#r	TRG_ISRC	"2
+$4	IeEZ	!	45	2	WT_RDY	~
+$5	L8ef	!	58	2	1	#l	WTDATA_ISRC	"N
+$6	L8ef	!	60	2	1	#d	WTSGNL_ISRC	"P
+$7	IeE[	!	70	1	XMT_DATA	"b
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

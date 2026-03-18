@@ -1,0 +1,3160 @@
+head	1.9;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.9
+	RF-SPEAR-R0-3-1:1.9
+	RF-SPEAR-R0-3-0:1.9
+	RF-SPEAR-R0-2-0:1.9
+	RF-SPEAR-R0-1-0:1.9
+	RF-SPEAR-R0-0-3:1.9
+	RF-SPEAR-R0-0-2:1.9
+	RF-SPEAR-R0-0-1:1.9
+	RF-SPEAR-R0-0-0:1.9
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.9
+	RF-3-13-10:1.8.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.8
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.8
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.8
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.9
+date	2011.12.07.01.21.54;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2003.07.29.18.39.31;	author khkim;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2003.02.19.19.07.38;	author luchini;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2003.02.19.16.50.33;	author luchini;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.02.11.19.47.50;	author luchini;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.02.11.19.46.46;	author luchini;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.02.11.18.53.51;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.01.22.20.15.40;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.9
+log
+@Changes for 3.14.11 (export) and compiler warnings.
+@
+text
+@/*
+** ++
+**
+**  Facility:  DEV - DEVice support
+**
+**  Abstract:
+**      EPICS device support for the PEP-II RF I/Q & Amplitude Detector Module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Low Level RF Group
+**
+**  History:
+**	August 6, 1996 - Created
+**      28-Aug-97, S. Allison:
+**         Initialize amplitude data to invalid during cold init.
+**         Set memmode bit in actl during ampl fault reset.  Add
+**         readback of actl.
+**         Don't enable ripple clock in tctl for non-ripple IQAs.
+**      13-Jan-99, S. Allison:
+**         Move semaphore creation to init.      
+**      21-Oct-02, K. H. Kim
+**         Modify for ver. 3 IQA module
+**         Insert new register - Fist Fault
+**      17-Apr-03, K. H. Kim:
+**         Insert locking mechanism between SCAN process and File dump callback
+**      16-Jul-03, K. H. Kim:
+**         Insert db_post function for First Fault in Action function.
+**         So, the First Fault register will be updated on the OPI pannel when any buttons
+**         are pressed by operator.
+**
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#include <vxWorks.h>
+#include <sysLib.h>
+#include <stdlib.h>
+#include <types.h>
+#include <stdioLib.h>
+#include <string.h>
+#include <semLib.h>
+#include <taskLib.h>
+#include <usrLib.h>
+#include <logLib.h>
+#include <tickLib.h>
+
+#include <taskwd.h>
+#include <cvtTable.h>
+#include <dbDefs.h>
+#include <dbAccess.h>
+#include <dbEvent.h>
+#include <recGbl.h>
+#include <recSup.h>
+#include <devSup.h>
+#include <dbScan.h>
+#include <link.h>
+#include <alarm.h>
+/*#include <module_types.h>*/
+#include <callback.h>
+#include <epicsPrint.h>
+
+#include <p2RfLib.h>
+#include <drvP2RfVxi.h>
+#include <p2RfIqaDef.h>
+#include <p2RfIqaRecord.h>
+
+#include "epicsExport.h"
+
+
+#define IQA_V_INTSELECT   IQA_V_DDFDATRDY
+#define IQA_M_INTSELECT  (IQA_M_AMPTHRFLT | IQA_M_INV10MHZ  | IQA_M_INV20MHZ  | \
+                          IQA_M_INVADX    | IQA_M_SOFTWARE)
+#define IQA_M_INTSELECT3 (IQA_M_AMPTHRFLT | IQA_M_INV10MHZ  | IQA_M_INV20MHZ  | \
+                          IQA_M_INVADX    | IQA_M_SOFTWARE  | \
+                          IQA_M_DDFOVRFLW | (0x0001 << 8)   | (0x0001 << 9) )
+#define IQA_INTSELECT(ver) ((ver) < IQA_K_VER3VERN ? IQA_M_INTSELECT : IQA_M_INTSELECT3 )
+
+/* KHKIM, 04-17-2003 */
+#define IQA_V_HST_BUSY           0
+#define IQA_M_HST_BUSY           (0x01 << IQA_V_HST_BUSY)
+#define IQA_V_HST_TRYNEXT        1
+#define IQA_M_HST_TRYNEXT        (0x01 << IQA_V_HST_TRYNEXT)
+
+#define IQA_K_IQRDRT             5      /* IQ data read rate in Hz */
+
+#define IQA_K_AMPDATA_INIT       -2.0   /* Initial amplitude data values */
+
+#define IQA_SCANNAME     "tIqaScan"     /* Name     of the scan task */
+#define IQA_SCANPRI             46      /* Priority of the scan task */
+#define IQA_SCANSTK           3072      /* Amount of scan task stack space */
+
+typedef struct p2RfIqaRecord   P2RfIqaRecord;
+ 
+static long InitRecord    (P2RfIqaRecord *);
+static long Action        (P2RfIqaRecord *);
+static void UpdateAmpData (P2RfIqaRecord *, short, short );
+ 
+typedef struct
+{
+  long		number;
+  DEVSUPFUN	report;
+  DEVSUPFUN	init;
+  DEVSUPFUN	init_record;
+  DEVSUPFUN	get_ioint_info;
+  DEVSUPFUN	action;
+} P2RfIqaDset;
+
+P2RfIqaDset devP2RfIqa = {5, NULL, NULL, InitRecord, NULL, Action};
+
+epicsExportAddress(dset,devP2RfIqa);
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  long            status;
+}  IqaRstBlk;
+
+typedef struct
+{
+  unsigned short  chanMask;
+  char           *id;
+  int             iIndex;
+  int             qIndex;
+  P2RfDdf         ddf;
+}  IqaDdfPrm;
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  IqaDdfPrm      *prm;
+  long            status;
+}  IqaDdfBlk;
+
+typedef struct
+{
+  char           *id;
+  int             index;
+  int             count;
+  char           *file;
+  char           busy;     /* KHKIM, 04-17-2003 */
+}  IqaMemPrm;
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  IqaMemPrm      *prm;
+  long            status;
+  int             abortFlg;
+}  IqaHistBlk;
+
+typedef struct
+{
+  void           *drvPvt;
+  P2RfIqaRecord  *rec;
+  int             scanTid;
+  IqaRstBlk       resetBlk;
+  unsigned char   ldDdfRqst;
+  unsigned short  rdyMsk;
+  IqaDdfBlk       ddfBlk;
+  IqaHistBlk      histBlk;
+  int             intPrc;
+
+  unsigned short  ampThrFltMsk;
+  float           ampThr[IQA_K_CHANCNT];
+  IqaDdfPrm       ddfPrm[IQA_K_CHANCNT];
+  IqaMemPrm       ampHistPrm;
+  IqaMemPrm       iqHistPrm;
+
+  unsigned long   tickLastScan;
+}  IqaBoard;
+
+/* Forward references */
+static long   SpawnReset      (P2RfIqaRecord *, IqaRstBlk *);
+static void   ResetCallback   (IqaRstBlk *);
+static long   SpawnLdDdf      (P2RfIqaRecord *, unsigned char *, IqaDdfBlk *,
+                               unsigned short, IqaDdfPrm *);
+static void   LdDdfCallback   (IqaDdfBlk *);
+static long   SpawnGetHist    (P2RfIqaRecord *, unsigned char *, IqaHistBlk *,
+                               IqaMemPrm *, unsigned int, char *,
+                               unsigned short *);
+static void   GetHistCallback (IqaHistBlk *);
+static void   IqaIsr          (void *, unsigned short);
+static void   IqaShutdown     (void *);
+static long   InitFields      (IqaBoard *, int);
+static long   ColdInit        (IqaBoard *, P2RfIqaRecord *);
+static long   WarmInit        (IqaBoard *, P2RfIqaRecord *);
+static long   DdfInit         (void *, unsigned short);
+static long   DdfLoad         (void *, unsigned short, IqaDdfPrm *);
+static long   DdfStart        (void *, unsigned short);
+static long   ResetAmpThrFault(IqaBoard *);
+static long   ReadAmpData     (IqaBoard *);
+static long   ReadIqData      (IqaBoard *brd,
+                               unsigned short  ripChanMsk, 
+                               unsigned short *dataRdyMsk,
+                               unsigned short *dataOflwMsk);
+static long   UpdateFirstFaultStatus(IqaBoard *);
+static long   DbPostIqData    (P2RfIqaRecord *rec,
+			       short *idt,  short *qdt,
+			       short *i,    short *q,
+			       int index);
+static long   UpdateActlIqpc  (IqaBoard *);
+
+
+
+static void IqaIsr (void           *brdArg,
+                    unsigned short  intStat)
+/*
+   Description
+   -----------
+   Device specific routine to handle interrupts generated by the module.
+   It runs in the context of the Interrupt Service Routine.  Thus all
+   the rules for coding at IPL apply.
+
+   In this case, alarms are set depending on the interrupt type.
+
+   Parameters
+   ----------
+       brdArg - A pointer to the device private structure
+      intStat - The interrupt status mask
+
+   Returns
+   -------
+   nothing
+*/
+{
+#if DBG
+  Function ("IqaIsr");
+#endif
+
+  IqaBoard       *brd    = (IqaBoard *) brdArg;
+  P2RfIqaRecord  *rec    = brd->rec;
+
+
+#if DBG
+  if (intStat & IQA_M_INV20MHZ)
+    logMsg("%s: Invalid 20 MHz clock\n", (int)FN,0,0,0,0,0);
+  if (intStat & IQA_M_INV10MHZ)
+    logMsg ("%s: Invalid 10 MHz clock\n", (int)FN,0,0,0,0,0);
+  if (intStat & IQA_M_INVADX)
+    logMsg ("%s: Invalid address or access\n", (int)FN,0,0,0,0,0);
+  if (intStat & IQA_M_SOFTWARE)
+    logMsg ("%s: Software interrupt\n", (int)FN,0,0,0,0,0);
+#endif
+
+  /* Only reflect a predefined a subset of the possible interrupts
+   * in the database. 
+   */
+   
+  intStat &= ~IQA_INTSTAT(rec->verh); 
+
+  /* If AMPTHRFL or any other change do record processing */
+  if ( /* (intStat & IQA_M_AMPTHRFLT) ||*/ (intStat & (intStat ^ rec->istt)) )
+  {
+    rec->istt |= intStat;
+
+    /* Process forward links */
+    brd->intPrc++;
+    scanOnce ((dbCommon *)rec);
+  }
+}
+
+
+
+static void IqaScanTask (IqaBoard  *brd)
+/*
+   Description
+   -----------
+   This function is run by the tIqaScan task.  Its purpose is to read the I,
+   Q and A data from an IQA module and put a consistent set of data into the
+   database.  The reason that this is not done in the Interrupt Service
+   Routine is that the minimum rate of interrupts proclaiming I & Q data
+   ready is about 50 Hz.  This is much faster than any software client of
+   this data will ever need.  EPICS advertises a maximum data update rate
+   (one field of one record) of about 10 Hz.  With multiple IQA modules in
+   the system and eight channels of I and Q, this value is exceeded.  Thus
+   we poll the data as requested by clients of the data.
+
+   To allow clients to get reliable data, two semaphores are stored in the
+   record.  When a client wants data, it "gives" the scan semaphore and
+   then waits on the data-ready semaphore.  Multiple clients can do this.
+   The data-ready semaphore is given when all IQA data has been collected.
+
+   Each I and Q channel is read at least twice.  The reason for this is
+   to ensure that the I and Q that ends up in the database actually belong
+   together.  Thus the requirement is that two consecutive reads of I and
+   Q each must return the same data.  There is a check so that if this isn't
+   achievable for a channel that is updating too quickly, it is skipped.
+
+   Parameters
+   ----------
+          brd - A pointer to an IqaBoard structure
+
+   Returns
+   -------
+   Doesn't
+*/
+{
+  /* Function ("IqaScanTask"); */
+
+  P2RfIqaRecord  *rec = brd->rec;
+
+  SEM_ID          scanSem;
+  SEM_ID          dRdySem;
+
+  unsigned short  dataRdyMsk;
+  unsigned short  dataOflwMsk;
+  unsigned short  ripChanMsk;
+
+/*unsigned long   tickNow; ... unused */
+
+  /* Check if we have semaphores and hang if we don't get 'em */
+  scanSem = (SEM_ID)rec->ssem;
+  dRdySem = (SEM_ID)rec->rsem;
+  if ((scanSem == NULL) || (dRdySem == NULL))
+  {
+    taskSuspend (0);
+  }
+
+  /* Build the ripple channel mask - this should be found from hdw iqpc reg? */
+  ripChanMsk = rec->lenb ? 1 << IQA_K_RIPCHAN : 0;
+
+  /* Loop forever */
+  while (TRUE)
+  {
+    /* Clear the data ready and data overflow masks */
+    dataRdyMsk  = 0;
+    dataOflwMsk = 0;
+
+    /* Wait for a client's request for data */
+    semTake (scanSem, WAIT_FOREVER);
+
+    /* to avoid Queued SCAN processing */  
+    /* Sometimes, the queued scan process which are caused by file dumping in other module
+       can make DDF not ready */
+    /* 07-15-2003, KHKIM */
+    /* 
+    tickNow = tickGet();
+    if((float)(tickNow - brd->tickLastScan)/(float)sysClkRateGet() < .1 ) {
+         brd->tickLastScan = tickNow;
+         semGive(dRdySem);
+         continue;
+    }
+    brd->tickLastScan = tickNow;
+    */ 
+ 
+    if(brd->ampHistPrm.busy || brd->iqHistPrm.busy ) { 
+         if(brd->ampHistPrm.busy & IQA_M_HST_TRYNEXT) brd->ampHistPrm.busy &= ~IQA_M_HST_TRYNEXT;
+         else                                         brd->ampHistPrm.busy |= IQA_M_HST_TRYNEXT;
+         if(brd->iqHistPrm.busy & IQA_M_HST_TRYNEXT)  brd->iqHistPrm.busy &= ~IQA_M_HST_TRYNEXT;
+         else                                         brd->iqHistPrm.busy |= IQA_M_HST_TRYNEXT;
+         semGive(dRdySem); 
+         continue; 
+    } /* KHKIM, 04-17-2003 */
+
+    /* Read the I/Q Data from dual port memory and update database */
+     ReadIqData(brd,ripChanMsk,&dataRdyMsk,&dataOflwMsk);
+  
+    /* Let clients know which data we found */
+    if (rec->niqr != dataRdyMsk)
+    {
+      rec->niqr = dataRdyMsk;
+      db_post_events (rec, &rec->niqr, DBE_VALUE | DBE_LOG);
+    }
+
+    /* Let clients know which data we found overflowed */
+    if (rec->iqof != dataOflwMsk)
+    {
+      rec->iqof = dataOflwMsk;
+      db_post_events (rec, &rec->iqof, DBE_VALUE | DBE_LOG);
+    }
+     
+    /* Read the amplitude data,convert to volts and update the database */ 
+    ReadAmpData(brd); 
+
+    /* To monitor change of ACTL and IQPC caused by backplane fault and to update it */
+    UpdateActlIqpc(brd);
+
+    /* Let clients know we have data ready for them */
+    semGive (dRdySem);
+  }
+}
+
+
+
+static void IqaShutdown (void  *brdArg)
+/*
+   Description
+   -----------
+   Device specific routine to run at shutdown time.
+
+   Parameters
+   ----------
+       brdArg - A pointer to the device private structure
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("IqaShutdown"); */
+}
+
+
+
+static long InitRecord (P2RfIqaRecord  *rec)
+/*
+   Description
+   -----------
+   Initialize the record.  Many fields of the record are filled with data from
+   the hardware.  Depending on the start-up type (cold or warm) some record
+   fields will either set up the hardware or get their values from a restore
+   file.  Interrupts from the board are enabled at the end of the
+   initialization.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("InitRecord");
+
+  struct vxiio   *vxiIo = NULL;
+  IqaBoard       *brd;
+  long            status;
+  void           *drvPvt;
+  char           *msg   = "IQA module initialization failed";
+  int             startType;
+  SEM_ID          sem;
+
+
+  /* rec.out must be of type VXI_IO */
+  if (rec->out.type != VXI_IO)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (S_db_badField, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "Illegal OUT field"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return(S_db_badField);
+  }
+
+  /* Allocate the device private block */
+  if ((brd = calloc (1, sizeof (*brd))) == NULL)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (ERROR, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN,
+                                     "No memory for IQA board descriptor"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Register the module to get a driver handle */
+  vxiIo = &rec->out.value.vxiio;
+  if ((status = P2RF_RegisterModule(vxiIo->flag, vxiIo->frame, vxiIo->slot,
+                                    vxiIo->la,
+                                    IQA_K_MODEL, IQA_K_NAME, IQA_K_DRAWING,
+                                    IqaIsr, brd, IqaShutdown, brd,
+                                    &drvPvt)))
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "P2RF_RegisterModule"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (status);
+  }
+
+  /* Set up the device private block and save a pointer to it in the record */
+  brd->drvPvt = drvPvt;
+  brd->rec    = rec;
+  rec->dpvt   = brd;
+
+  /* Initialize the callback facility for the reset function*/
+  callbackSetCallback ((void*)ResetCallback, &brd->resetBlk.callback);
+  callbackSetPriority (priorityHigh,         &brd->resetBlk.callback);
+  callbackSetUser     (rec,                  &brd->resetBlk.callback);
+  brd->resetBlk.drvPvt = drvPvt;
+
+  /* Initialize the callback facility for loading DDF coefficients */
+  callbackSetCallback ((void*)LdDdfCallback, &brd->ddfBlk.callback);
+  callbackSetPriority (priorityLow,          &brd->ddfBlk.callback);
+  callbackSetUser     (rec,                  &brd->ddfBlk.callback);
+  brd->ddfBlk.drvPvt = drvPvt;
+
+  /* Load the static part of the DDF coefficient parameter block */
+  {
+    IqaDdfPrm  *prm  = brd->ddfPrm;
+    int         iIdx = IQA_I_I0F;
+    int         qIdx = IQA_I_Q0F;
+    int         chan;
+
+    for (chan = 0; chan < IQA_K_CHANCNT; prm++, chan++)
+    {
+      prm->id     = IQA_K_DDFCOEFID;
+      prm->iIndex = iIdx;
+      prm->qIndex = qIdx;
+      iIdx += 8;
+      qIdx += 8;
+    }
+  }
+
+  /* Initialize the callback facility for History Buffer */  
+  brd->ampHistPrm.busy = 0x00;      /* KHKIM, 04-17-2003 */
+  brd->iqHistPrm.busy  = 0x00;      /* KHKIM, 04-17-2003 */
+  brd->histBlk.drvPvt = drvPvt;
+  callbackSetCallback ((void*)GetHistCallback, &brd->histBlk.callback);
+  callbackSetPriority (priorityLow,            &brd->histBlk.callback);
+  callbackSetUser     (rec,                    &brd->histBlk.callback);
+
+  /* Load the static part of the history parameter block */
+  {
+    IqaMemPrm  *prm = &brd->ampHistPrm;
+
+    prm->id    = IQA_K_AMPHISTID;
+    prm->index = IQA_I_AMPMEM;
+  }
+
+  /* Load the static part of the history parameter block */
+  {
+    IqaMemPrm  *prm = &brd->iqHistPrm;
+
+    prm->id    = IQA_K_IQHISTID;
+    prm->index = IQA_I_IQMEM;
+  }
+
+  /* Figure out the restart type -- To be determined */
+  startType = P2RF_K_COLDSTART;
+
+  /* Initialize the module and the database fields depending on startup type */
+  if ((status = InitFields (brd, startType)))
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Get us a coupla semaphores and hang if we don't get 'em */
+  if ((sem = semBCreate (SEM_Q_FIFO, SEM_FULL)) == NULL)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (-1, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN,
+                                     "%s failed - id = %s",
+                                     "semBCreate", "scanSem"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+  rec->ssem = (long) sem;
+
+  if ((sem = semBCreate (SEM_Q_FIFO, SEM_FULL)) == NULL)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (-1, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN,
+                                     "%s failed - id = %s",
+                                     "semBCreate", "dRdySem"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+  rec->rsem = (long) sem;
+
+  /* Start up the scan task */
+  brd->scanTid = taskSpawn (IQA_SCANNAME, IQA_SCANPRI, VX_FP_TASK, IQA_SCANSTK,
+                            (FUNCPTR) IqaScanTask, (int) brd,
+                            0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+  taskwdInsert ((epicsThreadId)(brd->scanTid), NULL, 0L);
+
+  /* Enable module interrupts and update the database copy */
+  P2RF_ModIntEnable (drvPvt);
+  P2RF_ReadVme (brd->drvPvt, IQA_I_INTCTRL,  &rec->ictl);
+
+  return (OK);
+}
+
+
+
+static long InitFields (IqaBoard *brd,
+                        int       initType)
+/*
+   Description
+   -----------
+   Function to initialize the fields in the database record and/or the module,
+   depending on the initialization type.
+
+   I/Q channels can be disabled by setting the DDF file to NULL.
+
+   Parameters
+   ----------
+          brd - A pointer to the device private block
+     initType - Type of initialization.
+
+   Returns
+   -------
+   Status
+*/
+{
+  /*  Function ("InitFields");*/
+
+  P2RfIqaRecord  *rec    = brd->rec;
+  void           *drvPvt = brd->drvPvt;
+  long            status;
+  unsigned short  sernHi;
+  unsigned short  sernLo; 
+
+
+  /* Reset the module, if it's a cold startup.  This takes a while... */
+  if (initType == P2RF_K_COLDSTART)  P2RF_ResetModule (drvPvt);
+
+  /* Load the record fields with device data */
+  P2RF_ReadVme (drvPvt, IQA_I_MANID,     &rec->mid );
+  P2RF_ReadVme (drvPvt, IQA_I_MODELNO,   &rec->mtyp);
+  P2RF_ReadVme (drvPvt, IQA_I_STATUS,    &rec->mstt);
+  P2RF_ReadVme (drvPvt, IQA_I_OFFSET,    &rec->a24o);
+  P2RF_ReadVme (drvPvt, IQA_I_ATTRIBUTE, &rec->vatt);
+  P2RF_ReadVme (drvPvt, IQA_I_SERIALHI,  &sernHi   );
+  P2RF_ReadVme (drvPvt, IQA_I_SERIALLO,  &sernLo   );
+  rec->sern = (sernHi << 16) | sernLo;
+  P2RF_ReadVme (drvPvt, IQA_I_VERSION,   &rec->vern);
+  P2RF_ReadVme (drvPvt, IQA_I_SUBCLASS,  &rec->vscl);
+  
+  /* Take the hardware and software version and set the fields */
+  rec->verh = P2RF_HWVER(rec->vern);
+  rec->verf = P2RF_FWVER(rec->vern);
+  rec->ssi  = IQA_K_SSI(rec->verh);
+  rec->sti  = IQA_K_STI(rec->verh);
+
+  /* Write some registers if we're doing a grounds-up initialization */
+  if (initType == P2RF_K_COLDSTART)    status = ColdInit (brd, rec);
+  else                                 status = WarmInit (brd, rec);
+
+  /* Set mask to ignore ripple channel if it's on this board */
+#ifdef ROTB_FLD_CREATED
+  brd->rdyMsk = rec->rotb ? IQA_K_RDYNOTRIP : IQA_K_RDYALL;
+#else
+  brd->rdyMsk = TRUE ? IQA_K_RDYNOTRIP : IQA_K_RDYALL;
+#endif
+
+  /* Resman wrote 0xfffc to module control register; take down software int */
+  rec->mctl = rec->mstt & (IQA_M_SFTRST | IQA_M_SYSFAILINH | IQA_M_A24A32);
+  P2RF_WriteVme (drvPvt, IQA_I_CONTROL,  rec->mctl);
+  P2RF_ReadVme  (drvPvt, IQA_I_STATUS,  &rec->mstt);
+
+  /*
+  |  Reading the Interrupt Status Register clears the outstanding Software
+  |  Interrupt Status bit, but does not clear the pending interrupt.  Thus
+  |  reading the register here would confuse the ISR when interrupts are
+  |  enabled and the pending software interrupt is taken: the ISR would
+  |  not be able to find the source of the interrupt.
+  */
+
+  /* Update DB copy of a few status and control registers */
+  P2RF_ReadVme (drvPvt, IQA_I_FLTENBSTT, &rec->fest);
+  P2RF_ReadVme (drvPvt, IQA_I_TRIGCTRL,  &rec->tctl);
+  P2RF_ReadVme (drvPvt, IQA_I_AMPCTL,    &rec->actl);
+  P2RF_ReadVme (drvPvt, IQA_I_DDFCTL,    &rec->dctl);
+  P2RF_ReadVme (drvPvt, IQA_I_IQCTL,     &rec->iqpc);
+
+  return (status);
+}
+
+
+
+static long ColdInit (IqaBoard      *brd,
+                      P2RfIqaRecord *rec)
+/*
+   Description
+   -----------
+   Initialization file to run when starting up from scratch.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("ColdInit");
+
+  register void  *drvPvt = brd->drvPvt;
+  unsigned short  chanMask = 0;
+  int             chan;
+  unsigned short  reg;
+  long            status;
+
+
+  /* Don't allow database access to the interrupt level */
+  reg = (P2RF_K_INTLEVEL << IQA_V_INTLEVEL) & IQA_M_INTLEVEL;
+
+  /* Initialize the Interrupt Control Register from the database */
+  rec->ictl = ~(reg | ((rec->imsk << IQA_V_INTSELECT) & IQA_INTSELECT(rec->verh)));
+  P2RF_WriteVme (drvPvt, IQA_I_INTCTRL, rec->ictl);
+  rec->oimk = rec->imsk;
+
+  /* Initialize the Trigger Control Register */
+  reg  = (rec->sti  << IQA_V_STPTRGSEL)  & IQA_M_STPTRGSEL;
+  reg |= (rec->ssi  << IQA_V_SSITRGSEL)  & IQA_M_SSITRGSEL;
+  reg |= (rec->fo   << IQA_V_FLTTRGSEL)  & IQA_M_FLTTRGSEL;
+  reg |= (rec->rco  << IQA_V_RCKTRGSEL)  & IQA_M_RCKTRGSEL;
+  reg |= IQA_M_STPTRGENB | IQA_M_SSITRGENB |
+         IQA_M_FLTTRGENB;
+  if (rec->lenb) reg |= IQA_M_RCKTRGENB;
+  P2RF_WriteVme (drvPvt, IQA_I_TRIGCTRL, reg);
+  rec->tctl = reg;
+
+  /* Initialize the Amplitude Processing registers */
+  {
+    int    idx = IQA_I_AMPTHR0;
+    float *at  = &rec->at0;
+    float *oat = &brd->ampThr[0];
+
+    for (idx = IQA_I_AMPTHR0; idx <= IQA_I_AMPTHR7; idx++)
+    {
+      P2RF_WriteVme (drvPvt, idx,
+                     ((unsigned short)(*at * IQA_K_ATCNTPERV) << IQA_V_AMPTHR));
+      *oat++ = *at++;
+    }
+  }
+  /* Initialize the database amplitude data fields */
+  {
+    register int             sig  = 0;
+    register float          *ad   = &rec->ad0;
+
+    for (sig = 0; sig < IQA_K_CHANCNT; ad++, sig++)
+    {
+      *ad = IQA_K_AMPDATA_INIT;
+      db_post_events (rec, ad, DBE_VALUE | DBE_LOG);
+    }
+  }
+
+  if      (rec->ass <= 0)            rec->ass = 1;
+  else if (rec->ass > IQA_K_CHANCNT) rec->ass = IQA_K_CHANCNT;
+
+  /* Setup the amplitude control register in the database */
+  rec->actl = (((rec->ass - 1) << IQA_V_SIGSEL) & IQA_M_SIGSEL) |
+              IQA_M_AMPMEMMOD;
+  /* Enable the amplitude dual-port memory and the
+   * amplitude scan mode for ver3 of the iqa */
+  if (rec->verh >= IQA_K_VER3VERN) {
+    rec->actl |= (IQA_M_AMPDPMENB | AMPMODE(rec->ampm) << IQA_V_AMPMODE);
+  }
+
+  /* Reset amplitude threshold fault after the amplitued 
+   * data register has been setup in A24. 
+   * This function write the act register, so make
+   * sure that the database field representation 
+   * actl has been setup at this point.
+   */
+  ResetAmpThrFault( brd );
+  
+  /* Read the DDF data files for all channels */
+  {
+    IqaDdfPrm      *prm   = brd->ddfPrm;
+    char           *file  = rec->dcf0;
+    unsigned short *dst   = &rec->dst0;
+    unsigned int    iqMsk = 0x0001;
+
+    /* Read and load the DDF files */
+    for (chan = 0; chan < IQA_K_CHANCNT; prm++, dst++, chan++)
+    {
+      *dst = NO_ALARM;
+
+      /* Build the channel mask channels to enable */
+      chanMask |= iqMsk;
+
+      /* Null file names disable the I and Q channel */
+      if (strlen (file) != 0)
+      {
+        *dst = UDF_ALARM;
+
+        if ((status = P2RF_ReadDdfFile (drvPvt, file, prm->id, &prm->ddf,
+                                        rec->val, sizeof (rec->val))) != OK)
+        {
+          char  buf[P2RF_K_BUFSIZE];
+
+          recGblRecordError (status, rec,
+                             P2RF_Sprintf (buf, __FILE__, FN,
+                                           "%s failed - id = %s, file = %s, chan = %d",
+                                           "P2RF_ReadDdfFile",
+                                           prm->id, chan, file));
+          chanMask ^= iqMsk;            /* Take enable down */
+        }
+        else
+        {
+          *dst = NO_ALARM;
+        }
+      }
+      else
+      {
+        *dst = NO_ALARM;
+        chanMask ^= iqMsk;              /* Take enable down */
+      }
+
+      iqMsk <<= 1;
+      file   += sizeof (rec->dcf0);
+    }
+  }
+
+  /* Enable fast clock */
+  P2RF_WriteVme (drvPvt, IQA_I_IQCTL,  IQA_K_FSTCLKENB);
+
+  /* Initialize the DDF control register */
+  P2RF_WriteVme (drvPvt, IQA_I_DDFCTL, 0);
+
+  /* Initialize the DDFs */
+  DdfInit (drvPvt, chanMask);
+
+  /* Load the DDFs */
+  DdfLoad (drvPvt, chanMask, brd->ddfPrm);
+
+  /* Start DDFs */
+  DdfStart (drvPvt, chanMask);
+
+  /* Set the I/Q Processing register according to the database */
+  reg  = (rec->updt         << IQA_V_UPDRATE)  & IQA_M_UPDRATE;
+  reg |= IQA_M_IQMEMMOD;
+  if      (rec->ifc <= 0)            rec->ifc = 1;
+  else if (rec->ifc > IQA_K_CHANCNT) rec->ifc = IQA_K_CHANCNT;
+  reg |= ((rec->ifc - 1)    << IQA_V_IFCHNSEL) & IQA_M_IFCHNSEL;
+  reg |= (rec->ifm          << IQA_V_IFMODE)   & IQA_M_IFMODE;
+  reg |= (rec->lenb         << IQA_V_LNKENB)   & IQA_M_LNKENB;
+
+  /* Enable IQ dual-port memory for the ver3 of the iqa. */
+  if (rec->verh >= IQA_K_VER3VERN) 
+    reg |= ( IQA_M_IQDPMENB | IQA_M_IQMEMMOD );
+
+  P2RF_WriteVme (drvPvt, IQA_I_IQCTL, reg);
+  rec->iqpc = reg;
+
+  return (OK);
+}
+
+
+
+static long WarmInit (IqaBoard       *brd,
+                      P2RfIqaRecord  *rec)
+/*
+   Description
+   -----------
+   Initialization routine to run when the module is still running
+   satisfactorily.  This function will (when it is written) bring
+   the EPICS database in synch with the module.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  /* Restore DB fields from reboot parameter file? */
+
+  return (OK);
+}
+
+
+
+static long DdfInit (void           *drvPvt,
+                     unsigned short  chanMask)
+/*
+   Description
+   -----------
+   Initialize the DDFs by enabling their clocking, asserting their reset
+   lines and then reenabling them.  RESET# must be held low (active) for
+   at least 4 clocks of the slowest clock, according to Harris TechBrief
+   TB309.  This value is 47.2 KHz / 256 = 6 mSec = 1/60th second (lowest
+   resolution of most VxWorks clocks).  Similarly, one is supposed to wait
+   for the "RESET# recovery time" before accessing the DDF registers.
+   This time is specified as 8 ticks of the input clock, which is
+   8 / 19.63 MHz / 16 = 6.5 uSecs.  To be conservative, we delay 1/60th
+   second before returning from this routine to allow for the reset recovery.
+
+   Parameters
+   ----------
+       drvPvt - A pointer to the driver-private block
+     chanMask - Mask of channels to initialize
+
+   Returns
+   -------
+   OK
+*/
+{
+  unsigned short reg;
+
+  /* Clear the start and stop bits of the interesting channels */
+  chanMask = (chanMask << IQA_V_DDFNRST) & IQA_M_DDFNRST;
+
+  /* Get the current state of the DDF control register */
+  P2RF_ReadVme (drvPvt, IQA_I_DDFCTL, &reg);
+
+  /* Reset the DDF(s) */
+  reg &= ~((chanMask << IQA_V_DDFSTRT) | (chanMask << IQA_V_DDFNRST));
+#if 0
+  reg &= ~(0xff);                  /* Kludge for bit 0 being bits 0-7 on SN 1*/
+#endif
+  P2RF_WriteVme (drvPvt, IQA_I_DDFCTL, reg);
+  taskDelay (sysClkRateGet () / 60);         /* Allow DDFs to settle */
+
+  /* Remove Reset* from the DDF(s) */
+  reg |= chanMask << IQA_V_DDFNRST;
+#if 0
+  reg |= 0xff;                    /* Kludge for bit 0 being bits 0-7 on SN 1 */
+#endif
+  P2RF_WriteVme (drvPvt, IQA_I_DDFCTL, reg);
+  taskDelay (sysClkRateGet () / 60);         /* Allow DDFs to settle */
+
+  return (OK);
+}
+
+
+
+static long DdfLoad (void           *drvPvt,
+                     unsigned short  chanMask,
+                     IqaDdfPrm      *prm)
+/*
+   Description
+   -----------
+   Load the DDF chips with coefficients
+
+   Parameters
+   ----------
+       drvPvt - A pointer to the driver-private block
+     chanMask - Mask of channels to initialize
+          prm - Pointer to a structure containing the DDF parameters
+
+   Returns
+   -------
+   OK
+*/
+{
+  int             chan;
+
+  for (chan = 0; chan < IQA_K_CHANCNT; prm++, chan++)
+  {
+    if (chanMask & 0x0001)
+      P2RF_LoadDdf (drvPvt, prm->iIndex, prm->qIndex, &prm->ddf);
+    chanMask >>= 1;
+  }
+
+  return (OK);
+}
+
+
+
+static long DdfStart (void           *drvPvt,
+                      unsigned short  chanMask)
+/*
+   Description
+   -----------
+   Start the DDF chips
+
+   Parameters
+   ----------
+       drvPvt - A pointer to the driver-private block
+     chanMask - Mask of channels to initialize
+
+   Returns
+   -------
+   OK
+*/
+{
+  unsigned short reg;
+
+
+  /* Make sure the channel mask is okay */
+  chanMask = (chanMask << IQA_V_DDFNRST) & IQA_M_DDFNRST;
+
+  /* Get the current state of the DDF control register */
+  P2RF_ReadVme (drvPvt, IQA_I_DDFCTL, &reg);
+
+  reg |= (((chanMask << IQA_V_DDFNRST) & IQA_M_DDFNRST) |
+          ((chanMask << IQA_V_DDFSTRT) & IQA_M_DDFSTRT));
+#if 0
+  reg |= 0xff;                     /* Kludge for bit 0 being bits 0-7 on SN 1 */
+#endif
+  P2RF_WriteVme (drvPvt, IQA_I_DDFCTL, reg);
+
+  return (OK);
+}
+
+
+
+static long Action (P2RfIqaRecord    *rec)
+/*
+   Description
+   -----------
+   This is the action routine for the IQA module.
+
+   Parameters
+   ----------
+          rec - A pointer to the record structure
+
+   Returns
+   -------
+   0 or 2 for successful returns, else a status
+*/
+{
+  /*  Function ("Action");*/
+
+  IqaBoard       *brd    = NULL;
+  void           *drvPvt;
+  unsigned short  iqpc;
+  unsigned short  reg;
+
+
+  /* If initialization failed let the system know */
+  if ((brd = rec->dpvt) == NULL)  return (ERROR);
+  drvPvt = brd->drvPvt;
+
+  /* If processing was invoked by an interrupt, handle it */
+  if (brd->intPrc)
+  {
+    unsigned short chanMask;
+
+
+    if (rec->istt & IQA_M_AMPTHRFLT)
+    {
+      /* Read the Amplitude Fault register into the database */
+      P2RF_ReadVme (drvPvt, IQA_I_FLTSTAT, &brd->ampThrFltMsk);
+      /* Read the Amplitude Processing Control register and post it */
+      P2RF_ReadVme (drvPvt, IQA_I_AMPCTL,    &rec->actl);
+      db_post_events(rec,&rec->actl, DBE_VALUE | DBE_LOG);
+    }
+
+    /* Update client value of interrupt status field */
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+
+    /* Report enabled channels only */
+    chanMask = (rec->fest & IQA_M_FLTENB) >> IQA_V_FLTENB;
+    chanMask = (chanMask << IQA_V_LATFAULT) | (chanMask << IQA_V_CURFAULT);
+    brd->ampThrFltMsk &= chanMask;
+
+    /* Fold current into latched */
+    brd->ampThrFltMsk |= (brd->ampThrFltMsk & IQA_M_CURFAULT) << IQA_V_LATFAULT;
+
+    /* Update database amplitude threshold fault mask copy, if necessary */
+    if (brd->ampThrFltMsk != rec->tfst)
+    {
+      rec->tfst = brd->ampThrFltMsk;
+      db_post_events (rec, &rec->tfst, DBE_VALUE | DBE_LOG);
+    }
+
+    UpdateFirstFaultStatus(brd);
+
+    /* Don't loose invocation count on multiple interrupts */
+    brd->intPrc--;
+    return (0);
+  }
+
+  /* Initialize the message buffer if we're not doing completion processing */
+  if (!rec->pact)    strncpy (rec->val, "Success", sizeof (rec->val));
+
+  /* If requested, do a "software reset" on the module */
+  if (rec->mrst)  return (SpawnReset (rec, &brd->resetBlk));
+
+  /* If operator disabled interrupts update interrupt status DB field */
+  P2RF_ReadVme (brd->drvPvt, IQA_I_INTCTRL, &reg);
+  if ((reg & IQA_INTSELECT(rec->verh)) == IQA_INTSELECT(rec->verh))
+  {
+    unsigned short chanMask;
+
+    P2RF_ReadVme (brd->drvPvt, IQA_I_INTSTAT, &rec->istt);
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+
+    /* Read the Amplitude Fault register into the database */
+    P2RF_ReadVme (drvPvt, IQA_I_FLTSTAT, &brd->ampThrFltMsk);
+
+    /* Report enabled channels only */
+    chanMask = (rec->fest & IQA_M_FLTENB) >> IQA_V_FLTENB;
+    chanMask = (chanMask << IQA_V_LATFAULT) | (chanMask << IQA_V_CURFAULT);
+    brd->ampThrFltMsk &= chanMask;
+
+    /* Fold current into latched */
+    brd->ampThrFltMsk |= (brd->ampThrFltMsk & IQA_M_CURFAULT) << IQA_V_LATFAULT;
+
+    /* Update database amplitude threshold fault mask copy, if necessary */
+    if (brd->ampThrFltMsk != rec->tfst)
+    {
+      rec->tfst = brd->ampThrFltMsk;
+      db_post_events (rec, &rec->tfst, DBE_VALUE | DBE_LOG);
+    }
+
+    UpdateFirstFaultStatus(brd);
+  }
+
+  /* Let the operator acknowledge that the interrupts have been seen */
+  if (rec->iack)
+  {
+    rec->istt &= ~rec->iack;            /* Only take requested bits down */
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+    rec->iack = 0;
+    db_post_events (rec, &rec->iack, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Update the interrupt control register if there was a change request */
+  if (rec->imsk != rec->oimk)
+  {
+    rec->oimk = rec->imsk;
+    rec->ictl = (rec->ictl & ~IQA_INTSELECT(rec->verh)) |
+      ((~rec->imsk << IQA_V_INTSELECT) & IQA_INTSELECT(rec->verh));
+    P2RF_WriteVme (drvPvt, IQA_I_INTCTRL,  rec->ictl);
+    db_post_events (rec, &rec->ictl, DBE_VALUE | DBE_LOG);
+  }
+
+ 
+  /* To monitor change of ACTL caused by backplane fault and to update ACTL */
+  {
+      unsigned short actl;
+      /* Read the Amplitude Processing Control register and post it */
+      P2RF_ReadVme (drvPvt, IQA_I_AMPCTL,    &actl);
+      if(actl != rec->actl) {
+          rec->actl = actl;
+          db_post_events(rec,&rec->actl, DBE_VALUE | DBE_LOG);
+      }
+   }
+
+  /* Reset amplitude threshold faults */
+  if (rec->caf)
+  {
+    rec->caf = 0;
+    ResetAmpThrFault( brd );
+  }
+
+  /* Read the Amplitude Fault register into the database */
+  {
+    unsigned short chanMask;
+
+    P2RF_ReadVme (drvPvt, IQA_I_FLTSTAT, &brd->ampThrFltMsk);
+
+    /* Report enabled channels only */
+    chanMask = (rec->fest & IQA_M_FLTENB) >> IQA_V_FLTENB;
+    chanMask = (chanMask << IQA_V_LATFAULT) | (chanMask << IQA_V_CURFAULT);
+    brd->ampThrFltMsk &= chanMask;
+
+    /* Fold current into latched */
+    brd->ampThrFltMsk |= (brd->ampThrFltMsk & IQA_M_CURFAULT) << IQA_V_LATFAULT;
+
+    /* Update database amplitude threshold fault mask copy, if necessary */
+    if (brd->ampThrFltMsk != rec->tfst)
+    {
+      rec->tfst = brd->ampThrFltMsk;
+      db_post_events (rec, &rec->tfst, DBE_VALUE | DBE_LOG);
+    }
+
+    UpdateFirstFaultStatus(brd); 
+  }
+
+  /* Select the Amplitude scan mode */
+  if((rec->verh<IQA_K_VER3VERN) && rec->ampm) {
+    rec->ampm = 0;
+    strncpy(rec->oval, rec->val, sizeof(rec->oval));
+    strncpy(rec->val, "8CHN mode is NOT available",sizeof(rec->val));
+    db_post_events(rec, &rec->val, DBE_VALUE | DBE_LOG );
+  }
+  if (rec->verh >= IQA_K_VER3VERN) {
+      if(rec->ampm) rec->actl |= IQA_M_AMPMODE;   /* to set 8ch scan mode */
+      else          rec->actl &= ~IQA_M_AMPMODE;  /* to set single ch scan mode */
+      P2RF_WriteVme(drvPvt,IQA_I_AMPCTL, rec->actl &= ~IQA_M_CLRFAULT);
+      db_post_events(rec,&rec->actl, DBE_VALUE | DBE_LOG);
+  }
+
+
+  /* Read the amplitude signal selection, if it's changed */
+  if (rec->ass != rec->oass)
+  {
+    if ((rec->ass <= 0) || (rec->ass > IQA_K_CHANCNT))
+    {
+      if      (rec->ass <= 0)            rec->ass = 1;
+      else if (rec->ass > IQA_K_CHANCNT) rec->ass = IQA_K_CHANCNT;
+      db_post_events (rec, &rec->ass, DBE_VALUE | DBE_LOG);
+    }
+    rec->oass = rec->ass;
+    rec->actl = (rec->actl & ~IQA_M_SIGSEL) |
+                (((rec->ass - 1) << IQA_V_SIGSEL) & IQA_M_SIGSEL);
+    P2RF_WriteVme (drvPvt, IQA_I_AMPCTL,  rec->actl &= ~IQA_M_CLRFAULT);
+    db_post_events (rec, &rec->actl, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Update the amplitude threshold(s), if requested */
+  {
+    register int     idx = IQA_I_AMPTHR0;
+    register float  *at  = &rec->at0;
+    register float  *oat = &brd->ampThr[0];
+
+    for (idx = IQA_I_AMPTHR0; idx <= IQA_I_AMPTHR7; at++, oat++, idx++)
+    {
+      if (*at != *oat)
+      {
+        P2RF_WriteVme (drvPvt, idx,
+                       (unsigned short)((*at*IQA_K_ATCNTPERV)) << IQA_V_AMPTHR);
+        *oat = *at;
+        db_post_events (rec, at, DBE_VALUE | DBE_LOG);
+      }
+    }
+  }
+
+  /* Update the database copy of the Fault Enable Status register */
+  P2RF_ReadVme (drvPvt, IQA_I_FLTENBSTT, &reg);
+  if (reg != rec->fest)
+  {
+    rec->fest = reg;
+    db_post_events (rec, &rec->fest, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Process request to read out the module's amplitude history buffer */
+  if (rec->gahs)  return (SpawnGetHist (rec, &rec->gahs, &brd->histBlk,
+                                        &brd->ampHistPrm, rec->ahsz, rec->ahfs,
+                                        &rec->astt));
+
+  /* Get the current state of the module */
+  P2RF_ReadVme (drvPvt, IQA_I_IQCTL, &iqpc);
+
+  /* Look at only those bits that are modifiable */
+  iqpc &= ~(IQA_M_IFCHNSEL | IQA_M_IFMODE | IQA_M_LNKENB);
+
+  /* Potentially change the IF channel selection */
+  if      (rec->ifc <= 0)            rec->ifc = 1;
+  else if (rec->ifc > IQA_K_CHANCNT) rec->ifc = IQA_K_CHANCNT;
+  iqpc |= ((rec->ifc - 1) << IQA_V_IFCHNSEL) & IQA_M_IFCHNSEL;
+
+  /* The new IQA module (ver.3) has Dual-port enable bit on IQCTL register.
+   * So, the follwing statements do to set this bit to enable dual-port memory */
+  if (rec->verh >= IQA_K_VER3VERN)
+      iqpc |= ( IQA_M_IQDPMENB | IQA_M_IQMEMMOD );
+
+  /* Check the IF mux mode bit to en/disable single channel mode */
+  if (rec->ifm)  iqpc |= IQA_M_IFMODE;
+
+  /* Check if the link with the RFP module is enabled. */
+  if (rec->lenb) iqpc |= IQA_M_LNKENB;
+
+  /* Update module and database versions of I/Q Processing Control register */
+  /* Reset latched stop trigger, if so requested */
+  if (rec->rlst || (iqpc != rec->iqpc))
+  {
+    if (rec->rlst)
+    {
+      rec->rlst = 0;
+      /* We don't have to stop the trigger on new module.
+        But, I am not sure about old modules.
+        So, stopping trigger is still needed for old modules */
+      if(rec->verh < IQA_K_VER3VERN )
+            P2RF_WriteVme (drvPvt, IQA_I_IQCTL,  iqpc & ~IQA_M_IQMEMMOD);
+      P2RF_WriteVme (drvPvt, IQA_I_IQCTL,  iqpc | IQA_M_IQMEMMOD);
+      taskDelay(1);
+    }
+    else
+    { 
+      if(rec->verh >= IQA_K_VER3VERN && !(iqpc & IQA_M_IQHSTENB)) iqpc &= ~IQA_M_IQMEMMOD;   
+      P2RF_WriteVme (drvPvt, IQA_I_IQCTL,  iqpc);
+    }
+    P2RF_ReadVme  (drvPvt, IQA_I_IQCTL, &rec->iqpc);
+    db_post_events (rec, &rec->iqpc, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Process request to read out the module's IQ history buffer */
+  if (rec->giqh)  return (SpawnGetHist (rec, &rec->giqh, &brd->histBlk,
+                                        &brd->iqHistPrm, rec->iqhs, rec->iqhf,
+                                        &rec->iqst));
+
+  /* Deal with load DDF coefficient file requests */
+  {
+    unsigned char  *lcf  = &rec->lcf0;
+    int             chan;
+    unsigned short  chanMask = 0;
+
+    for (chan = 0; chan < IQA_K_CHANCNT; lcf++, chan++)
+    {
+      if (*lcf)
+      {
+        chanMask |= 1 << chan;
+        *lcf      = 0;
+        brd->ldDdfRqst = TRUE;
+      }
+    }
+
+#if 0
+    /* Since the DDFCTL register is brain dead, we load all DDFs every time */
+    chanMask = 0x00ff;
+#endif
+
+    if (brd->ldDdfRqst)  return (SpawnLdDdf (rec, &brd->ldDdfRqst, &brd->ddfBlk,
+                                             chanMask, brd->ddfPrm));
+  }
+
+  return (0);
+}
+
+
+static long SpawnReset (P2RfIqaRecord  *rec,
+                        IqaRstBlk      *blk)
+/*
+   Description
+   -----------
+   This function initiates and completes the module reset.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+          blk - A pointer to the reset block
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnReset");
+
+
+  if (!rec->pact)
+  {
+    /* Let operator know what's happening */
+    strncpy (rec->val,  "Software Reset: active", sizeof (rec->val));
+    strncpy (rec->oval, "Software Reset: active", sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow reprocessing of record before reset completes */
+    rec->pact = TRUE;
+
+    /* Disable module interrupts during software reset */
+    P2RF_ModIntDisable (blk->drvPvt);
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+      strncpy (rec->val, "Attempt to initialize module failed", sizeof (rec->val));
+      recGblSetSevr (rec, UDF_ALARM, INVALID_ALARM);
+    }
+    else
+    {
+      /* Re-enable module interrupts */
+      P2RF_ModIntEnable (blk->drvPvt);
+      P2RF_ReadVme (blk->drvPvt, IQA_I_INTCTRL,  &rec->ictl);
+
+      strncpy (rec->val, "Software reset: done", sizeof (rec->val));
+    }
+
+    /* Reset the reset request */
+    rec->mrst = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void ResetCallback (IqaRstBlk  *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a module software reset it requested.  It invokes completion processing
+   of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the reset block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("ResetCallback"); */
+
+  struct dbCommon  *rec;
+  struct rset      *rSet;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during reinitialization */
+  dbScanLock       (rec);
+
+ /* Reset and update the record and the module */
+  blk->status = InitFields ((IqaBoard *) rec->dpvt, P2RF_K_COLDSTART);
+
+  /* Complete processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     (rec);
+}
+
+
+
+static long SpawnLdDdf (P2RfIqaRecord  *rec,
+                        unsigned char  *request,
+                        IqaDdfBlk      *blk,
+                        unsigned short  chanMask,
+                        IqaDdfPrm      *prm)
+/*
+   Description
+   -----------
+   This function initiates and completes the loading of DDF coefficients
+   on the module.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the coefficient block
+     chanMask - A mask of DDF channels to load
+          prm - A pointer to the coefficient parameter block
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  /*  Function ("SpawnLdDdf");*/
+
+  char  buf[P2RF_K_BUFSIZE];
+
+
+  if (!rec->pact)
+  {
+    sprintf (buf, "Load DDFs: active");
+
+    /* Let operator know what's happening */
+    strncpy(rec->val,  buf, sizeof(rec->val));
+    strncpy(rec->oval, buf, sizeof(rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+
+    /* Inhibit record reprocessing record before DDF-load completes */
+    rec->pact = TRUE;
+
+    /* Save the channel and file name in the parameter block */
+    prm->chanMask = chanMask;
+
+    /* Point the DDF coefficient block to the proper parameter block */
+    blk->prm  = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    /* Update the database copy of the DDF control register */
+    P2RF_ReadVme (blk->drvPvt, IQA_I_DDFCTL,  &rec->dctl);
+    db_post_events (rec, &rec->dctl, DBE_VALUE | DBE_LOG);
+
+    if (blk->status == 0)
+    {
+      sprintf (buf, "Load DDFs: done");
+      strncpy (rec->val, buf, sizeof (rec->val));
+    }
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void LdDdfCallback (IqaDdfBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to read the modules history memory.  It invokes
+   completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the load-coefficients block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  Function ("LdDdfCallback");
+
+  P2RfIqaRecord    *rec;
+  struct rset      *rSet;
+  char             *file;
+  unsigned short   *dst;
+  int               chan;
+  IqaDdfPrm        *prm       = blk->prm;
+  unsigned short    chanMask  = prm->chanMask;
+  unsigned short    resetMask = 0;
+  unsigned short    testMask  = 1;
+  unsigned long     status    = 0;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback))  == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  file = rec->dcf0;
+  dst  = &rec->dst0;
+
+  blk->status = 0;
+
+  for (chan = 0; chan < IQA_K_CHANCNT; prm++, dst++, chan++)
+  {
+    /* If if file name length went to zero leave IQ channel disabled */
+    if (strlen (file) != 0)
+    {
+      *dst = UDF_ALARM;
+      db_post_events (rec, dst, DBE_VALUE | DBE_LOG);
+
+      /* Read and load the DDF coefficients */
+      if ((status = P2RF_ReadDdfFile (blk->drvPvt,
+                                      file, prm->id, &prm->ddf,
+                                      rec->val, sizeof (rec->val))) != OK)
+      {
+        char  buf[P2RF_K_BUFSIZE];
+
+        chanMask &= ~testMask;
+        blk->status = status;
+        recGblRecordError (status, rec,
+                           P2RF_Sprintf (buf, __FILE__, FN,
+                                         "%s failed - id = %s, file = %s, channel = %d",
+                                         "P2RF_ReadDdfFile",
+                                         prm->id, file, chan));
+        *dst      = WRITE_ALARM;
+      }
+      else
+      {
+        *dst      = NO_ALARM;
+      }
+    }
+    else
+    {
+      *dst      = NO_ALARM;
+
+      chanMask  &= ~testMask;
+      resetMask |=  testMask;
+    }
+    db_post_events (rec, dst, DBE_VALUE | DBE_LOG);
+
+    testMask <<= 1;
+    file      += sizeof (rec->dcf0);
+  }
+
+    /* Reset those DDF channels as requested */
+  if (resetMask)
+  {
+    unsigned short  reg;
+
+    P2RF_ReadVme (blk->drvPvt, IQA_I_DDFCTL, &reg);
+    reg &= ~((resetMask << IQA_V_DDFSTRT) | (resetMask << IQA_V_DDFNRST));
+#if 0
+    reg &= ~(0xff);                /* Kludge for bit 0 being bits 0-7 on SN 1*/
+#endif
+    P2RF_WriteVme (blk->drvPvt, IQA_I_DDFCTL,  reg);
+  }
+
+  /* Initialize the DDF channel */
+  DdfInit (blk->drvPvt, chanMask);
+
+  /* Load the DDFs */
+  DdfLoad (blk->drvPvt, chanMask, blk->prm);
+
+  /* Start the IQ channel */
+  DdfStart (blk->drvPvt, chanMask);
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+
+
+
+static long SpawnGetHist (P2RfIqaRecord  *rec,
+                          unsigned char  *request,
+                          IqaHistBlk     *blk,
+                          IqaMemPrm      *prm,
+                          unsigned int    blkCnt,
+                          char           *file,
+                          unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the retrieval of module history.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the history block
+          prm - A pointer to the history parameter block
+       blkCnt - Number of blocks of history to record
+         file - The file to record the history in
+         stat - A pointer to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnGetHist");
+
+  char  buf[P2RF_K_BUFSIZE];
+
+
+  if (!rec->pact)
+  {
+    sprintf (buf, "Get %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before get-history completes */
+    rec->pact = TRUE;
+
+    /* Set up the history request block */
+    prm->count    = blkCnt < IQA_K_HISTMEMLEN ? blkCnt : IQA_K_HISTMEMLEN;
+    prm->file     = file;
+    blk->abortFlg = FALSE;
+
+    /* Point the history block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN, "%s failed",
+                                       "P2RF_RecordHistory"));
+      *stat = READ_ALARM;
+      db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+    }
+    else
+    {
+      *stat = NO_ALARM;
+      db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+      sprintf (buf, "Get %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+    }
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void GetHistCallback (IqaHistBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to read the module's history memory.
+   It invokes completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the get-history block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("GetHistCallback"); */
+
+  P2RfIqaRecord    *rec;
+  struct rset      *rSet;
+  IqaMemPrm        *prm = blk->prm;
+  unsigned short    reg;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  prm->busy |= IQA_M_HST_BUSY;   /* KHKIM, 04-17-2003 */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Disable recording to the history memory */
+  if (prm->index == IQA_I_AMPMEM)
+  {
+    P2RF_ReadVme  (blk->drvPvt, IQA_I_AMPCTL, &reg);
+    P2RF_WriteVme (blk->drvPvt, IQA_I_AMPCTL, reg & ~IQA_M_AMPMEMMOD);
+  }
+  else
+  {
+    P2RF_ReadVme  (blk->drvPvt, IQA_I_IQCTL,  &reg);
+    P2RF_WriteVme (blk->drvPvt, IQA_I_IQCTL,  reg & ~IQA_M_IQMEMMOD);
+
+    /* Allow DDFs to settle - is this really necessary? */
+    taskDelay (sysClkRateGet () / 6);
+  }
+
+
+  /* Check up the status of history buffer 
+   * We have to wait for stopping of history buffer
+   * to take the value in history buffer */
+  if(rec->verh >= IQA_K_VER3VERN) {
+      unsigned short status_reg;
+      unsigned short history_buff_mask = 0x8000;
+
+      while(TRUE){
+          if(prm->index == IQA_I_AMPMEM)
+              P2RF_ReadVme (blk->drvPvt, IQA_I_AMPCTL, &status_reg);
+          else
+              P2RF_ReadVme (blk->drvPvt, IQA_I_IQCTL,  &status_reg);
+
+          if( !(status_reg & history_buff_mask) ) break;
+
+          taskDelay(sysClkRateGet());
+      }
+  }
+
+  /* Read the history memory and record it */
+  blk->status = P2RF_RecordMemory (blk->drvPvt, prm->id, prm->index,
+                                   prm->count, prm->file, &blk->abortFlg,
+                                   rec->val, sizeof (rec->val));
+
+  /* Re-enable the history memory */
+  if (prm->index == IQA_I_AMPMEM)
+  {
+    P2RF_WriteVme (blk->drvPvt, IQA_I_AMPCTL, reg);
+  }
+  else
+  {
+    P2RF_WriteVme (blk->drvPvt, IQA_I_IQCTL,  reg);
+  }
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+  prm->busy &= ~IQA_M_HST_BUSY;  /* KHKIM, 04-17-2003 */
+}
+
+
+static long ResetAmpThrFault (IqaBoard *brd)
+/*
+   Description
+   -----------
+   This function resets the amplitude threshold fault.
+
+   Parameters
+   ----------
+          brd - A pointer to an IqaBoard structure
+
+   Returns
+   -------
+   OK    for success
+   ERROR for failure
+*/
+{
+  /*Function ("ResetAmpThrFault"); */
+
+    long            status = OK;
+    P2RfIqaRecord  *rec    = brd->rec;
+    void           *drvPvt = brd->drvPvt;
+
+
+    /* Acknowledge the interrupt if one has occurred. */
+    if ( rec->istt & IQA_M_AMPTHRFLT ) {
+      rec->istt &= ~IQA_M_AMPTHRFLT;
+      rec->oist &= ~IQA_M_AMPTHRFLT;
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+    }
+
+    /* Clear the fault */
+    drvPvt = brd->drvPvt;
+    if(rec->verh >=  IQA_K_VER3VERN)
+          P2RF_WriteVme (drvPvt, IQA_I_AMPCTL, rec->actl | IQA_M_CLRFAULT);
+    else
+          P2RF_WriteVme (drvPvt, IQA_I_AMPCTL,
+                         (rec->actl | IQA_M_CLRFAULT) & ~IQA_M_AMPMEMMOD);
+    taskDelay(1);
+    P2RF_WriteVme (drvPvt, IQA_I_AMPCTL, (rec->actl | IQA_M_AMPMEMMOD) & ~IQA_M_CLRFAULT);
+    taskDelay(1);
+    P2RF_ReadVme  (drvPvt, IQA_I_AMPCTL, &rec->actl);
+    db_post_events (rec, &rec->actl, DBE_VALUE | DBE_LOG);
+    return( status );
+}
+
+
+static long ReadAmpData(IqaBoard *brd)
+/*
+   Description
+   -----------
+   This function reads the Amplitude Data Channel(s),
+   converts the raw data to volts and then updates the
+   database.
+
+   Parameters
+   ----------
+          brd          - A pointer to an IqaBoard structure
+
+   Returns
+   -------
+    0 for success (always returned)
+*/
+{
+#if 0 
+    Function ("ReadAmpData");
+#endif
+    P2RfIqaRecord  *rec = brd->rec;
+    unsigned short  rval=0;
+    int             offset;
+
+
+    /* Update the database amplitude data field 
+     * Read the Amplitude data and updating the database.
+     * The new module (ver. 3) can read with 8ch at once 
+     * It loop will do one turn when it's running on the old IQA module */ 
+    if (rec->verh >= IQA_K_VER3VERN) 
+    {
+       /* The new module (ver. 3) can read 8 channels. 
+	* Note: the _A_ definitions indicate byte offsets while the _I_ definitions
+	* in the p2RfIqaDef.h indicate word offset. In otherwords, if you are using _A_
+	* then you increment by two, and if you are using the _I_ offset you increment
+	* by one. */
+       for(offset=IQA_A_AMPDATA0; offset<=IQA_A_AMPDATA7; offset+=2)
+       {
+          P2RF_ReadVme(brd->drvPvt, EXT2IDX(offset), (unsigned short *) &rval);
+
+         /* Convert raw data and update the database fields */
+          UpdateAmpData(rec, AMPCHAN(rval), AMPDATA(rval));
+       }/* End of for loop */
+    }
+    else {
+      /* The IQA module amplitude data for 1 channel only */
+       P2RF_ReadVme (brd->drvPvt, IQA_I_AMPDATA, (unsigned short *) &rval);
+
+       /* Convert raw data and update the database fields */
+       UpdateAmpData(rec, AMPCHAN(rval), AMPDATA(rval));
+    }
+    return(OK);
+}
+
+
+static void UpdateAmpData(P2RfIqaRecord  *rec, short chan, short rval) 
+/*
+   Description
+   -----------
+   This function converts the raw data to volts and
+   then updates the database. 
+
+   Parameters
+   ----------
+          rec  - A pointer to the record
+          rval - Raw amplitude data vaule
+
+   Returns
+   -------
+    None
+*/
+{
+  /*  Function ("UpdateAmpData"); */
+
+    register float *ad = &rec->ad0;
+    register float  delta;
+    short           val = 0;  /* two's compliment value */
+    
+ 
+    if ( !AMPCHAN_VALID(chan) ) return;
+
+    /* Convert from offset binary to two's complement */
+    val = rval - IQA_K_AMPOS;
+
+    /* Convert to floats and flip sign if conversion error made it negative */
+    delta = ad[chan] - IQA_K_ADVPERCNT * val;
+    if (delta < 0.0)  delta = -delta;
+    if (delta > 0.0)
+    {
+        ad[chan] = IQA_K_ADVPERCNT * val;
+        if (delta > rec->amd)  
+          db_post_events (rec, &ad[chan], DBE_VALUE | DBE_LOG);
+    }
+    return;
+}
+
+
+static long ReadIqData(IqaBoard       *brd,
+                       unsigned short  ripChanMsk, 
+                       unsigned short *dataRdyMsk,
+                       unsigned short *dataOflwMsk)
+/*
+   Description
+   -----------
+   This function reads the I & Q Output Data Registers and 
+   then updates the corresponding database fields if the 
+   changes change exceeds a delta value.. 
+
+   Parameters
+   ----------
+          brd          - A pointer to an IqaBoard structure
+          ripChanMsk   - Ripple channel mask
+          dataRdyMsk   - A pointer to the Data Ready mask
+          dataOflwMsk  - A pointer to the Data overflow fault mask
+
+   Returns
+   -------
+    0 for success (always returned)
+*/
+{
+#if 0
+    Function ("ReadIqData");
+#endif
+    long              status    = OK;
+    P2RfIqaRecord    *rec       = brd->rec;
+    short            *idt       = &rec->idt0;
+    short            *qdt       = &rec->qdt0;
+    int               index     = 0;
+    int               iIdx      = IQA_I_I0DATA;
+    int               qIdx      = IQA_I_Q0DATA;
+    int               chan      = IQA_K_CHANCNT;
+    unsigned short    chanMask  = 0;
+    unsigned short    testMask  = 0x0003;
+    unsigned short    oflwMask  = 0x0000;
+    short             iLast;
+    short             qLast;
+    short             i[IQA_K_CHANCNT];
+    short             q[IQA_K_CHANCNT];
+    unsigned short    iqInvalidValue = IQA_K_IQINVALIDVAL;
+
+
+    if (rec->verh >= IQA_K_VER3VERN){
+
+       /* Read the I/Q Data overflow fault register.
+	* NOTE: this register must be read prior to reading
+	* the I/Q data from dual port memory because the
+	* dpr read-access clears the overflow bits for that
+	* channel in the I/Q Data Overflow fault register. */
+       P2RF_ReadVme (brd->drvPvt, IQA_I_DATAOFLW, &oflwMask);
+
+       /* Read all I/Q data channels from dual port memory. 
+	* Note: the index for I and Q are word offset's and not
+	* byte offsets into A24 space. */
+       for(index=0;index < IQA_K_CHANCNT; index++,iIdx+=2,qIdx+=2){
+            P2RF_ReadVme (brd->drvPvt, iIdx, (unsigned short *) &i[index]);
+            P2RF_ReadVme (brd->drvPvt, qIdx, (unsigned short *) &q[index]);
+       } /* End of for loop */
+
+       /* Read the I/Q Data not updated fault register.
+	* NOTE: this register must be read after ALL fifo
+	* locations the I/Q data from dual port memory has been
+	* read because that is what clocks the individual bits
+	* in the Data not updated fault register. */
+       P2RF_ReadVme (brd->drvPvt, IQA_I_DATANOUPD, &chanMask);
+
+       /* Check the I/Q data for new data and update the database. */
+       for (index=0; 
+            index < IQA_K_CHANCNT;
+            index++,testMask<<=2,idt+=2,qdt+=2) {
+           if (testMask & chanMask) continue;
+
+	   if ((unsigned short) i[index] == iqInvalidValue ) continue;
+	   if ((unsigned short) q[index] == iqInvalidValue ) continue;
+
+	   DbPostIqData(rec,idt,qdt,i,q,index);
+
+       } /* End of for loop */
+
+       *dataRdyMsk   |= ~chanMask;
+       *dataOflwMsk  |= oflwMask;
+
+       return( status );
+    } /* End of vers 3 or later */
+
+    /* Old iqa modules earier than version 3 */
+
+    /* Check which channels have data ready on them */
+     P2RF_ReadVme (brd->drvPvt, IQA_I_DATARDY, &chanMask);
+    if ( !chanMask ) return(status);
+
+
+    while (chan--)
+    {
+       /* Do only those channels which claim to have data ready */
+      if (chanMask & testMask)
+      {
+         int     cnt = 10;
+
+         /* Prime by reading I & Q, once */
+         P2RF_ReadVme (brd->drvPvt, iIdx, (unsigned short *) &i[0]);
+         P2RF_ReadVme (brd->drvPvt, qIdx, (unsigned short *) &q[0]);                        
+
+         /* Loop until 2 consecutive reads of I & Q give answer within delta */
+         while (cnt--)
+         {
+            register short    iEqDelta;
+            register short    qEqDelta;
+
+            iLast = i[0];
+            qLast = q[0];
+
+            /* Read I  & Q data as a pair. If you don't do this then this incrementing
+	     * register will get out of sync. */
+            P2RF_ReadVme (brd->drvPvt, iIdx, (unsigned short *) &i[0]); 
+            P2RF_ReadVme (brd->drvPvt, qIdx, (unsigned short *) &q[0]);
+            
+            /* Read Data Ready register */
+            P2RF_ReadVme (brd->drvPvt, IQA_I_DATARDY,  &chanMask); 
+
+	    /* Read I Data Overflow register */
+            P2RF_ReadVme (brd->drvPvt, IQA_I_DATAOFLW, &oflwMask);
+	     
+            /* Calculate I & Q equivalence delta */
+            iEqDelta = i[0] - iLast;
+            qEqDelta = q[0] - qLast;
+
+            /* Force deltas to be positive */
+            if (iEqDelta < 0)  iEqDelta = -iEqDelta;
+            if (qEqDelta < 0)  qEqDelta = -qEqDelta;
+
+            /* Make sure I & Q get updated together, unless it's ripple chan */
+            if ((testMask & ripChanMsk) ||
+                ((iEqDelta <= rec->iqed) && (qEqDelta <= rec->iqed)))
+            {
+	      DbPostIqData(rec,idt,qdt,i,q,0);
+
+              /* Build data-ready and data-overflow masks */
+              *dataRdyMsk  |= testMask;
+              *dataOflwMsk |= oflwMask & testMask;
+              break;
+            }
+         }/* End of while (cnt) */
+
+         /* Move on to the next channel */
+         testMask <<= 2;
+         iIdx += 2;
+         qIdx += 2;
+         idt  += 2;
+         qdt  += 2;
+      }
+    }/* End of while (chan) */
+
+    return( status );
+}
+
+
+static long UpdateFirstFaultStatus(IqaBoard    *brd)
+/*
+    Description
+    -----------
+    This function updates a first fault status field (FFLT).
+    The FFLT is a new register for Hardware version 3 or later.
+    If this routine is working in earlier version of HW,
+    the latched amplitude threshold fault will be posted on FFLT.
+
+    Parameters
+    ----------
+	  brd            - A pointer to an IqaBoard structure
+
+    Returns
+    -------
+      0 for success (always returned)
+*/
+
+
+{
+  /*  Function("UpdateFistFaultStatus"); */
+      long                status = OK;
+      p2RfIqaRecord       *rec   = brd->rec;
+      unsigned short      firstFaultMask = 0xe3ff;
+      unsigned short      firstFaultStat;
+      unsigned short      ampThrFlt2firstFaultMsk = 0x00ff;
+       
+
+       /* IQA hardware version eariler then 3 doesn't have FFLT register.
+	* So, this functin reads latched amplitude threshold fault register and
+	* this value will be posted on FFLT.
+	* The latched ampThr is using higher bits in ampThr register.
+	* So, we have to shift it to lower bits.
+        */
+       if (rec->verh < IQA_K_VER3VERN) {
+          firstFaultStat = brd->ampThrFltMsk >> IQA_V_LATFAULT;
+          firstFaultStat &= ampThrFlt2firstFaultMsk;
+       }
+       else {
+          P2RF_ReadVme (brd->drvPvt, IQA_I_FIRSTFLTSTAT, &firstFaultStat);
+          firstFaultStat &= firstFaultMask;
+       }
+     
+       if(rec->fflt != firstFaultStat){
+           rec->fflt = firstFaultStat;
+           db_post_events(rec,&rec->fflt, DBE_VALUE|DBE_LOG);
+       }
+
+       return (status);
+}
+
+
+static long DbPostIqData(P2RfIqaRecord     *rec,
+			 short *idt, short *qdt,
+			 short *i,   short *q,
+			 int   index)
+
+/* 
+    Description
+    -----------
+    This function posts new I & Q values to epics db when its differences 
+    from previous values are larger than monitoring dead band.
+
+    Parameters
+    ----------
+	    rec           - A pointer to an Iqa record
+	    idt           - A pointer to an I data field in record
+	    qdt           - A pointer to a Q data field in record
+	    i             - A pointer to an array for I reading value
+	    q             - A pointer to an array for Q reading value
+	    index         - An index to scribe interasting data position
+
+    Returns
+    -------
+      0 for success (always returned)
+*/
+{
+  /*    Function("DbPostIqData"); */
+    long  status = OK;
+    short iMonDelta;
+    short qMonDelta;
+
+    iMonDelta = *idt - i[index];
+    qMonDelta = *qdt - q[index];
+    *idt = i[index];
+    *qdt = q[index];
+
+    if(iMonDelta<0) iMonDelta = -iMonDelta;
+    if(qMonDelta<0) qMonDelta = -qMonDelta;
+    if(iMonDelta > rec->iqmd)
+        db_post_events (rec, idt, DBE_VALUE | DBE_LOG);
+    if(qMonDelta > rec->iqmd)
+        db_post_events (rec, qdt, DBE_VALUE | DBE_LOG);
+
+    return (status);
+}
+
+
+
+static long UpdateActlIqpc(IqaBoard *brd)
+{
+    long           status = OK;
+    p2RfIqaRecord  *rec   = brd->rec;
+    unsigned short actl;
+    unsigned short iqpc;
+
+    P2RF_ReadVme(brd->drvPvt, IQA_I_AMPCTL, &actl);
+    P2RF_ReadVme(brd->drvPvt, IQA_I_IQCTL, &iqpc);
+
+    if(actl != rec->actl) {
+        rec->actl = actl;
+        db_post_events(rec,&rec->actl, DBE_VALUE | DBE_LOG);
+    }
+    if(iqpc != rec->iqpc){
+        rec->iqpc = iqpc;
+        db_post_events(rec,&rec->iqpc, DBE_VALUE | DBE_LOG);
+    }
+
+    return status;
+}
+@
+
+
+1.8
+log
+@Insert db_post function for First Fault in Action function.  So, the First Fault register will be updated on the OPI pannel when any buttons are pressed by operator.
+@
+text
+@d79 1
+d85 1
+a85 1
+#include <module_types.h>
+d94 2
+d137 2
+d288 1
+a288 1
+    scanOnce (rec);
+d331 1
+d334 1
+d338 2
+a339 1
+  unsigned long   tickNow;
+d512 3
+a514 3
+  callbackSetCallback (ResetCallback, &brd->resetBlk.callback);
+  callbackSetPriority (priorityHigh, &brd->resetBlk.callback);
+  callbackSetUser     (rec, &brd->resetBlk.callback);
+d518 3
+a520 3
+  callbackSetCallback (LdDdfCallback, &brd->ddfBlk.callback);
+  callbackSetPriority (priorityLow, &brd->ddfBlk.callback);
+  callbackSetUser     (rec, &brd->ddfBlk.callback);
+d544 3
+a546 3
+  callbackSetCallback (GetHistCallback, &brd->histBlk.callback);
+  callbackSetPriority (priorityLow, &brd->histBlk.callback);
+  callbackSetUser     (rec, &brd->histBlk.callback);
+d616 1
+a616 1
+  taskwdInsert (brd->scanTid, NULL, 0L);
+@
+
+
+1.7
+log
+@in ReadAmpData chg offset from ushort to int and use byte offset not word
+@
+text
+@d21 1
+a21 1
+**      21-Oct-02, K. Kim
+d23 8
+d72 1
+d94 13
+a106 3
+#define IQA_V_INTSELECT  IQA_V_DDFDATRDY
+#define IQA_M_INTSELECT (IQA_M_AMPTHRFLT | IQA_M_INV10MHZ  | IQA_M_INV20MHZ  | \
+                         IQA_M_INVADX    | IQA_M_SOFTWARE)
+d164 1
+d193 2
+d226 1
+d271 4
+a274 2
+   * in the database. */
+  intStat &= ~IQA_INTSTAT(rec->verh);
+d277 1
+a277 1
+  if ( (intStat & IQA_M_AMPTHRFLT) || (intStat & (intStat ^ rec->istt)) )
+d331 1
+a331 1
+
+d354 23
+d397 3
+d532 3
+a534 1
+  /* Initialize the callback facility for the get history function */
+d735 1
+a735 1
+  rec->ictl = ~(reg | ((rec->imsk << IQA_V_INTSELECT) & IQA_M_INTSELECT));
+d1062 1
+d1067 3
+d1109 1
+a1109 1
+  if ((reg & IQA_M_INTSELECT) == IQA_M_INTSELECT)
+d1138 1
+a1138 1
+    /* UpdateFirstFaultStatus(brd); */
+d1158 2
+a1159 2
+    rec->ictl = (rec->ictl & ~IQA_M_INTSELECT) |
+      ((~rec->imsk << IQA_V_INTSELECT) & IQA_M_INTSELECT);
+d1164 12
+d1204 1
+a1204 1
+    /* UpdateFirstFaultStatus(brd); */
+d1217 1
+a1217 1
+      P2RF_WriteVme(drvPvt,IQA_I_AMPCTL, rec->actl);
+d1234 1
+a1234 1
+    P2RF_WriteVme (drvPvt, IQA_I_AMPCTL,  rec->actl);
+d1298 5
+a1302 1
+      P2RF_WriteVme (drvPvt, IQA_I_IQCTL,  iqpc & ~IQA_M_IQMEMMOD);
+d1304 1
+d1307 2
+a1308 1
+    {    
+d1769 1
+d1827 1
+d1863 8
+a1870 3
+    P2RF_WriteVme (drvPvt, IQA_I_AMPCTL,
+                   (rec->actl | IQA_M_CLRFAULT) & ~IQA_M_AMPMEMMOD);
+    P2RF_WriteVme (drvPvt, IQA_I_AMPCTL, rec->actl | IQA_M_AMPMEMMOD);
+d2230 23
+@
+
+
+1.6
+log
+@Fix hw ver check in ReadAmpData
+@
+text
+@d1812 3
+a1814 1
+  /*    Function ("ReadAmpData"); */
+d1817 1
+a1817 1
+    unsigned short  offset;
+d1826 6
+a1831 2
+       /* The new module (ver. 3) can reads 8 channels. */
+       for(offset=IQA_I_AMPDATA0; offset<=IQA_I_AMPDATA7; offset+=2)
+d1833 2
+a1834 1
+          P2RF_ReadVme(brd->drvPvt, offset, (unsigned short *) &rval);
+d1915 3
+a1917 1
+  /*    Function ("ReadIqData"); */
+d1945 3
+a1947 1
+       /* Read all I/Q data channels from dual port memory */
+@
+
+
+1.5
+log
+@get rid of warning messages
+@
+text
+@d330 2
+a331 2
+    ReadIqData(brd,ripChanMsk,&dataRdyMsk,&dataOflwMsk);
+
+d346 2
+a347 2
+    /* Read the amplitude data,convert to volts and update the database */
+    ReadAmpData(brd);
+d1822 1
+a1822 1
+    if (rec->vern >= IQA_K_VER3VERN) 
+d1825 1
+a1825 1
+       for(offset=IQA_A_AMPDATA0; offset<=IQA_A_AMPDATA7; offset+=2)
+d1827 1
+a1827 1
+          P2RF_ReadVme(brd->drvPvt, EXT2IDX(offset),(unsigned short *) &rval);
+d1833 2
+a1834 3
+      /* The old IQA module monitors amplitude data for 1 channel only */
+       offset = IQA_A_AMPDATA;
+       P2RF_ReadVme (brd->drvPvt, EXT2IDX(offset), (unsigned short *) &rval);
+d1842 1
+a1842 1
+
+d1860 1
+a1860 1
+    Function ("UpdateAmpData");
+d1867 1
+a1867 5
+    if ( !AMPCHAN_VALID(chan) ) {
+       epicsPrintf("%s: Invalid Amplitude Data Channel (%hd) specifed\n",
+                   FN,chan);
+       return;
+    }
+a1883 1
+
+d1971 1
+a1971 1
+    P2RF_ReadVme (brd->drvPvt, IQA_I_DATARDY, &chanMask);
+d1984 1
+a1984 1
+         P2RF_ReadVme (brd->drvPvt, qIdx, (unsigned short *) &q[0]);
+d1995 3
+a1997 1
+            P2RF_ReadVme (brd->drvPvt, iIdx, (unsigned short *) &i[0]);
+d1999 2
+d2002 2
+d2005 1
+a2005 1
+
+a2039 2
+
+
+a2091 1
+
+a2115 1
+
+a2132 1
+
+@
+
+
+1.4
+log
+@remove temp debug messages
+@
+text
+@d1812 1
+a1812 1
+    Function ("ReadAmpData");
+d1914 1
+a1914 1
+    Function ("ReadIqData");
+@
+
+
+1.3
+log
+@Fixed ver3 bugs by Kuhkee
+@
+text
+@a83 2
+int debugIqa = 0;
+
+a1827 3
+          if (debugIqa)
+	    printf("%s: chan=%hd  data=0x%4.4x  rval=0x%4.4x\n",
+                   FN,AMPCHAN(rval),AMPDATA(rval),rval);
+d1959 2
+a1960 5
+           if (testMask & chanMask) {
+	     if (debugIqa) 
+               printf("%s:  Data not ready  chan=%hd chanMask = 0x%4.4x\n",FN,index,chanMask);
+              continue;
+	   }
+@
+
+
+1.2
+log
+@Phase 2 upgrade of IQA modules
+@
+text
+@d84 1
+d100 5
+a104 5
+
+static long InitRecord (P2RfIqaRecord *);
+static long Action     (P2RfIqaRecord *);
+
+
+d195 11
+d230 1
+a230 1
+#if 0
+d238 1
+a238 1
+#if 0
+d240 1
+a240 1
+    epicsPrintf ("%s: Invalid %d MHz clock\n", FN, 20);
+d242 1
+a242 1
+    epicsPrintf ("%s: Invalid %d MHz clock\n", FN, 10);
+d244 1
+a244 1
+    epicsPrintf ("%s: Invalid address or access\n", FN);
+d246 1
+a246 1
+    epicsPrintf ("%s: Software interrupt\n", FN);
+d249 3
+a251 21
+
+#if 0
+{
+  unsigned short intCtrl;
+  P2RF_ReadVme (brd->drvPvt, IQA_I_INTCTRL, &intCtrl); 
+  epicsPrintf("ISR: intStat 0x%4.4hx  intCtrl 0x%4.4hx\n",intStat,intCtrl);
+}
+#endif
+
+  switch(rec->verh){
+      case IQA_GET_HWV(IQA_K_VER3VERN):
+              /* Don't include record processing for DDF data NOT updated,
+                 IQSLIP or DDF data overflow */
+              intStat &= ~(IQA_M_DDFDATANOUPD | IQA_M_IQSLIP | IQA_M_DDFOVRFLW); 
+          break;
+      case IQA_GET_HWV(IQA_K_OLDVERN):
+      default:
+          /* Don't induce record processing for DDF data ready, 
+             overwrite or overflow */
+          intStat &= ~(IQA_M_DDFDATRDY | IQA_M_DDFOVRWRT | IQA_M_DDFOVRFLW);
+  }
+d300 1
+a300 1
+  Function ("IqaScanTask");
+d302 1
+a302 4
+  P2RfIqaRecord  *rec   = brd->rec;
+  short           i, iLast;
+  short           q, qLast;
+  short           a;
+a304 1
+  unsigned short  chanMask;
+a308 1
+  short index, index_max;
+a328 2
+
+
+d331 2
+a332 172
+    switch(rec->verh) {
+        case IQA_GET_HWV(IQA_K_OLDVERN):
+                  /* Check the IQ channel ready for old module */
+                  /* Modified by KHKIM      October 31, 2002 */
+              /* Check which channels have data ready on them */
+            P2RF_ReadVme (brd->drvPvt, IQA_I_DATARDY, &chanMask);
+              /* I am using old code to check for old module */
+            break;
+        case IQA_GET_HWV(IQA_K_VER3VERN): 
+                  /* Check the IQ channel ready for old module */
+                  /* Modified by KHKIM     October 31, 2002 */
+             /* Check which channels have data not update on them */
+            P2RF_ReadVme(brd->drvPvt, IQA_I_DATANOUPD, &chanMask);
+            /* Conver to data ready mask */
+            /* Do One's complement */
+            chanMask = ~chanMask;
+            break;
+        default:
+            /* Version check failure */
+            break;
+    }
+                                             /* end of modification to check data ready */
+
+    /* Read the I/Q Output Data register into the database */
+    if ( chanMask && rec->verh == IQA_GET_HWV(IQA_K_VER3VERN)){
+        int          index;
+        short        *idt           =  &rec->idt0;
+        short        *qdt           =  &rec->qdt0;
+        int          iIdx           =  IQA_I_I0DATA;
+        int          qIdx           =  IQA_I_Q0DATA;
+        int          chan           =  IQA_K_CHANCNT; 
+        short        i[IQA_K_CHANCNT], q[IQA_K_CHANCNT];
+        unsigned short    testMask  =  0x0003;
+        unsigned short    oflwMask  =  0x0000; 
+        short        iMonDelta, qMonDelta;
+
+        P2RF_ReadVme (brd->drvPvt, IQA_I_DATAOFLW, &oflwMask);
+
+        for(index=0;index<chan;index++){
+            P2RF_ReadVme (brd->drvPvt, iIdx+(index*2), (unsigned short *) i+index);
+            P2RF_ReadVme (brd->drvPvt, qIdx+(index*2), (unsigned short *) q+index);
+        }
+
+       P2RF_ReadVme (brd->drvPvt, IQA_I_DATANOUPD, &chanMask);
+       chanMask = ~chanMask;
+
+       for(index=0;index<chan;index++){
+           if (!((testMask << (index*2)) & chanMask)) continue;
+           if (i[index] == IQA_K_IQINVALIDVAL || q[index] == IQA_K_IQINVALIDVAL ) continue;
+
+           iMonDelta = idt[index*2] - i[index];
+           qMonDelta = qdt[index*2] - q[index];
+
+           idt[index*2] = i[index];
+           qdt[index*2] = q[index];
+
+           if(iMonDelta<0) iMonDelta = -iMonDelta;
+           if(qMonDelta<0) qMonDelta = -qMonDelta;
+
+           if(iMonDelta > rec->iqmd)
+               db_post_events (rec, idt+(index*2), DBE_VALUE | DBE_LOG);
+
+           if(qMonDelta > rec->iqmd)
+               db_post_events (rec, qdt+(index*2), DBE_VALUE | DBE_LOG);
+       }
+
+       dataRdyMsk    |= chanMask;
+       dataOflwMsk   |= oflwMask;
+    }
+
+
+
+    /* for old IQA moudle */
+    /* Read the I/Q Output Data registers into the database */
+    if (chanMask && rec->verh == IQA_GET_HWV(IQA_K_OLDVERN))
+    {
+      short          *idt         = &rec->idt0;
+      short          *qdt         = &rec->qdt0;
+      int             iIdx        = IQA_I_I0DATA;
+      int             qIdx        = IQA_I_Q0DATA;
+      int             chan        = IQA_K_CHANCNT;
+      unsigned short  testMask    = 0x0003;
+      unsigned short  oflwMask    = 0;
+
+
+      while (chan--)
+      {
+
+        /* Do only those channels which claim to have data ready */
+        if (chanMask & testMask)
+        {
+          int     cnt = 10;
+
+
+          /* Prime by reading I & Q, once */
+          P2RF_ReadVme (brd->drvPvt, iIdx, (unsigned short *) &i);
+          P2RF_ReadVme (brd->drvPvt, qIdx, (unsigned short *) &q);
+
+          /* Loop until 2 consecutive reads of I & Q give answer within delta */
+          while (cnt--)
+          {
+            register short  iEqDelta;
+            register short  qEqDelta;
+
+            iLast = i;
+            qLast = q;
+
+            P2RF_ReadVme (brd->drvPvt, iIdx, (unsigned short *) &i);
+            P2RF_ReadVme (brd->drvPvt, qIdx, (unsigned short *) &q);
+            P2RF_ReadVme (brd->drvPvt, IQA_I_DATARDY,  &chanMask); 
+            P2RF_ReadVme (brd->drvPvt, IQA_I_DATAOFLW, &oflwMask);
+
+            /* Check up IQ slip */
+            /* Inserted by KHKIM     November 5, 2002 */
+            if((rec->verh == IQA_GET_HWV(IQA_K_VER3VERN)) &&
+               ((i == IQA_K_IQINVALIDVAL)||(q == IQA_K_IQINVALIDVAL))){
+              /* Build data-ready and data-overflow masks */
+              /* turn off the bits indicate the slip channel */
+              dataRdyMsk  &= ~testMask; 
+              dataOflwMsk |= oflwMask & testMask;
+              break;
+            }
+            /* end of modification */
+
+            /* Calculate I & Q equivalence delta */
+            iEqDelta = i - iLast;
+            qEqDelta = q - qLast;
+
+            /* Force deltas to be positive */
+            if (iEqDelta < 0)  iEqDelta = -iEqDelta;
+            if (qEqDelta < 0)  qEqDelta = -qEqDelta;
+
+            /* Make sure I & Q get updated together, unless it's ripple chan */
+            if ((testMask & ripChanMsk) ||
+                ((iEqDelta <= rec->iqed) && (qEqDelta <= rec->iqed)))
+            {
+              /* Calculate another delta to see if monitor needs posting */
+              register short  iMonDelta = *idt - i;
+              register short  qMonDelta = *qdt - q;
+
+              /* Force deltas to be positive */
+              if (iMonDelta < 0)  iMonDelta = -iMonDelta;
+              if (qMonDelta < 0)  qMonDelta = -qMonDelta;
+
+              /* Update database */
+              *idt = i;
+              *qdt = q;
+
+              /* Have consistent I & Q.  Post monitor only if delta exceeded */
+              if (iMonDelta > rec->iqmd){
+                db_post_events (rec, idt, DBE_VALUE | DBE_LOG);
+              } 
+              if (qMonDelta > rec->iqmd){
+                db_post_events (rec, qdt, DBE_VALUE | DBE_LOG);
+              }
+
+              /* Build data-ready and data-overflow masks */
+              dataRdyMsk  |= testMask;
+              dataOflwMsk |= oflwMask & testMask;
+              break;
+            }
+          }
+        }
+
+        /* Move on to the next channel */
+        testMask <<= 2;
+        iIdx += 2;
+        qIdx += 2;
+        idt  += 2;
+        qdt  += 2;
+      }
+    }
+d347 3
+a349 96
+
+    /* Check the First Fault Status Register */
+    /* The new register in ver. 3 module */
+    /* Inserted by KHKIM        October 31, 2002 */
+   
+    {
+        unsigned short       firstFaultMask = 0xe3ff;
+        unsigned short       firstFaultStat;
+        
+
+        switch(rec->verh) {
+            case IQA_GET_HWV(IQA_K_OLDVERN):
+                /* The old module does'nt have First Fault Status register.
+                 * Read Fault Status Register and Set as First Fault Status */
+                P2RF_ReadVme (brd->drvPvt, IQA_I_FLTSTAT,&firstFaultStat);
+                /* We are interested in LATCHED FAULT.
+                 * The MSB byte is LATCHED FAULT.
+                 * Move MSB byte to LSM byte  */
+                firstFaultStat = (firstFaultStat & 0xff00) >> 8;
+                break;
+            case IQA_GET_HWV(IQA_K_VER3VERN):
+                P2RF_ReadVme (brd->drvPvt, IQA_I_FIRSTFLTSTAT, &firstFaultStat);
+                firstFaultStat &= firstFaultMask;
+                break;
+            default:
+                /* version check failure */
+                break;
+
+        }
+
+        firstFaultStat &= firstFaultMask;
+
+        /* Disabled db_post_events
+         * The First Fault monitoring has moved into Action function
+         *
+         * Changed by KHKIM       November 5, 2002
+         *
+        if(rec->fflt != firstFaultStat){
+            rec->fflt = firstFaultStat;
+            db_post_events(rec, &rec->fflt, DBE_VALUE| DBE_LOG);
+        }
+        */
+
+    }
+    
+    /* end of modification */
+
+    switch(rec->verh) {
+        case IQA_GET_HWV(IQA_K_OLDVERN):
+                /* Amplitude data gettering and updating the database for old IQA module 
+                 * The old IQA module can monitor 1ch amplitude only
+                 * Modified by KHKIM     October 21, 2002 */
+
+            /* Update the database amplitude data field */
+            P2RF_ReadVme (brd->drvPvt, IQA_I_AMPDATA, (unsigned short *) &a);
+            index_max = 1; 
+            break;
+        case IQA_GET_HWV(IQA_K_VER3VERN):
+            index_max = IQA_K_CHANCNT;
+            break;
+        default:
+            /* version check failure */
+            break;
+    }
+
+    /* Amplitude data gettering and updating the database for new module(ver 3) 
+     * The new module (ver. 3) can read with 8ch at once */
+    /* It loop will do one turn when it's running on the old IQA module 
+     * but, If it's running on the new module (ver. 3), this loop will do 8 turns */
+    for(index=0;index < index_max ;index++)
+    {
+       /* The 8 of amplitude data register will be access when this module
+        * is running on the new IQA module   */
+       if(rec->verh == IQA_GET_HWV(IQA_K_VER3VERN)) {
+           P2RF_ReadVme(brd->drvPvt,
+                        EXT2IDX(IQA_A_AMPDATA0+(index*sizeof(unsigned short))), 
+                        (unsigned short *) &a); 
+       }  
+    {
+      register float *ad = &(&rec->ad0)[(a & IQA_M_AMPTAG) >> IQA_V_AMPTAG];
+      register float  delta;
+
+      /* Convert from offset binary to two's complement */
+      a = (((a & IQA_M_AMPDATA) >> IQA_V_AMPDATA) - IQA_K_AMPOS);
+
+      /* Convert to floats and flip sign if conversion error made it negative */
+      delta = *ad - IQA_K_ADVPERCNT * a;
+      if (delta < 0.0)  delta = -delta;
+      if (delta > 0.0)
+      {
+        *ad = IQA_K_ADVPERCNT * a;
+        if (delta > rec->amd)  db_post_events (rec, ad, DBE_VALUE | DBE_LOG);
+      }
+    }
+    /* end of loop to gettering and updating amplitude data */
+    }
+d594 1
+a594 1
+  unsigned short  sernLo;
+d611 1
+a611 1
+
+d613 4
+a616 4
+  /* Inserted by KHKIM    November 1, 2002 */
+  rec->verh = IQA_GET_HWV(rec->vern);
+  rec->verf = IQA_GET_FWV(rec->vern);
+  /* end of modification */
+d726 2
+d730 4
+a733 10
+
+  /* The new IQA module (ver. 3) has Amplitude dual-port memory enable bit
+   * on the AMPCTL register.
+   * So, the following statements do to set this bit to enable Amplitude 
+   * dual-port memory */
+  /* Inserted by KHKIM       October 22, 2002 */
+  if(rec->verh == IQA_GET_HWV(IQA_K_VER3VERN)) {
+      rec->actl |= IQA_M_AMPDPMENB;    /* to enable dual-port memory */
+      rec->actl |= ( (rec->ampm << IQA_V_AMPMODE ) & IQA_M_AMPMODE) ;
+                                       /* to set the amplitude scan mode */
+a734 2
+  /* end of modification */
+  P2RF_WriteVme (drvPvt, IQA_I_AMPCTL, rec->actl);
+d736 8
+d816 3
+a818 6
+  /* The new IQA module (ver. 3) has IQ Dual-port Enable bit in IQCTL register.
+   * So, the following statements do to set this bit to enable dual port memory */
+  /* Inserted by KHKIM       October 22, 2002 */
+  if(rec->verh == IQA_GET_HWV(IQA_K_VER3VERN)) 
+      reg |= ( IQA_M_IQDPMENB | IQA_M_IQMEMMOD );
+  /* end of modification */
+d1039 1
+a1039 27
+    /* Update First Fault Status register */
+    /* Inserted by KHKIM   November 5, 2002 */
+    {
+       unsigned short      firstFaultMask = 0xe3ff;
+       unsigned short      firstFaultStat;
+       unsigned short      ampThrFlt2firstFaultMsk = 0x00ff;
+
+       switch(rec->verh){
+           case IQA_GET_HWV(IQA_K_OLDVERN):
+               firstFaultStat = brd->ampThrFltMsk >> IQA_V_LATFAULT;
+               firstFaultStat &= ampThrFlt2firstFaultMsk;
+               break;
+           case IQA_GET_HWV(IQA_K_VER3VERN):
+               P2RF_ReadVme (brd->drvPvt, IQA_I_FIRSTFLTSTAT, &firstFaultStat);
+               firstFaultStat &= firstFaultMask;
+               break;
+           default:
+               /* version check failure */
+               break;
+       }
+     
+       if(rec->fflt != firstFaultStat){
+           rec->fflt = firstFaultStat;
+           db_post_events(rec,&rec->fflt, DBE_VALUE|DBE_LOG);
+       } 
+    }
+    /* end of modification */
+d1083 1
+a1083 28
+    /* Update First Fault Status register */
+    /* Inserted by KHKIM   November 5, 2002 */
+    {
+       unsigned short      firstFaultMask = 0xe3ff;
+       unsigned short      firstFaultStat;
+       unsigned short      ampThrFlt2firstFaultMsk = 0x00ff;
+
+       switch(rec->verh){
+           case IQA_GET_HWV(IQA_K_OLDVERN):
+               firstFaultStat = brd->ampThrFltMsk >> IQA_V_LATFAULT;
+               firstFaultStat &= ampThrFlt2firstFaultMsk;
+               break;
+           case IQA_GET_HWV(IQA_K_VER3VERN):
+               P2RF_ReadVme (brd->drvPvt, IQA_I_FIRSTFLTSTAT, &firstFaultStat);
+               firstFaultStat &= firstFaultMask;
+               break;
+           default:
+               /* version check failure */
+               break;
+       }
+     
+       if(rec->fflt != firstFaultStat){
+           rec->fflt = firstFaultStat;
+           db_post_events(rec,&rec->fflt, DBE_VALUE|DBE_LOG);
+       }
+    }
+    /* end of modification */
+
+d1113 1
+a1113 12
+
+    /* Acknowledge the interrupt */
+    rec->istt &= ~IQA_M_AMPTHRFLT;
+    rec->oist &= ~IQA_M_AMPTHRFLT;
+    db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+
+    /* Clear the fault */
+    P2RF_WriteVme (drvPvt, IQA_I_AMPCTL,
+                   (rec->actl | IQA_M_CLRFAULT) & ~IQA_M_AMPMEMMOD);
+    P2RF_WriteVme (drvPvt, IQA_I_AMPCTL, rec->actl | IQA_M_AMPMEMMOD);
+    P2RF_ReadVme  (drvPvt, IQA_I_AMPCTL, &rec->actl);
+    db_post_events (rec, &rec->actl, DBE_VALUE | DBE_LOG);
+d1137 1
+a1137 28
+    /* Update First Fault Status register */
+    /* Inserted by KHKIM   November 5, 2002 */
+    {
+       unsigned short      firstFaultMask = 0xe3ff;
+       unsigned short      firstFaultStat;
+       unsigned short      ampThrFlt2firstFaultMsk = 0x00ff;
+
+       switch(rec->verh){
+           case IQA_GET_HWV(IQA_K_OLDVERN):
+               firstFaultStat = brd->ampThrFltMsk >> IQA_V_LATFAULT;
+               firstFaultStat &= ampThrFlt2firstFaultMsk;
+               break;
+           case IQA_GET_HWV(IQA_K_VER3VERN):
+               P2RF_ReadVme (brd->drvPvt, IQA_I_FIRSTFLTSTAT, &firstFaultStat);
+               firstFaultStat &= firstFaultMask;
+               break;
+           default:
+               /* version check failure */
+               break;
+       }
+
+       if(rec->fflt != firstFaultStat){
+           rec->fflt = firstFaultStat;
+           db_post_events(rec,&rec->fflt, DBE_VALUE|DBE_LOG);
+       }
+    }
+    /* end of modification */
+
+d1141 7
+a1147 2
+  /* Inserted by KHKIM     October 22, 2002 */
+  if(rec->verh == IQA_GET_HWV(IQA_K_VER3VERN)){
+d1215 1
+a1215 2
+  /* Inserted by KHKIM      October 22, 2002 */
+  if(rec->verh == IQA_GET_HWV(IQA_K_VER3VERN)) 
+a1216 1
+  /* end of modification */
+a1274 1
+
+d1714 4
+a1717 5
+  /* Check up the status of history buffer */
+  /* We have to wait for stopping of history buffer to take the value
+     in history buffer */
+  /* Modified by KHKIM,     November 14, 2002 */
+  if(rec->verh == IQA_GET_HWV(IQA_K_VER3VERN) ) {
+a1731 1
+  /* end of modification */
+d1754 396
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d21 2
+d63 1
+d238 20
+a257 2
+  /* Don't induce record processing for DDF data ready, overwrite or overflow */
+  intStat &= ~(IQA_M_DDFDATRDY | IQA_M_DDFOVRWRT | IQA_M_DDFOVRFLW);
+d319 2
+d340 2
+d344 61
+a404 2
+    /* Check which channels have data ready on them */
+    P2RF_ReadVme (brd->drvPvt, IQA_I_DATARDY, &chanMask);
+d406 11
+d418 1
+a418 1
+    if (chanMask)
+d428 1
+d431 1
+d437 1
+d453 1
+a453 1
+            P2RF_ReadVme (brd->drvPvt, IQA_I_DATARDY,  &chanMask);
+d456 12
+d493 1
+a493 1
+              if (iMonDelta > rec->iqmd)
+d495 2
+a496 1
+              if (qMonDelta > rec->iqmd)
+d498 1
+d531 77
+a607 2
+    /* Update the database amplitude data field */
+    P2RF_ReadVme (brd->drvPvt, IQA_I_AMPDATA, (unsigned short *) &a);
+d624 2
+d888 6
+d1004 12
+d1090 7
+d1316 28
+d1385 29
+d1477 38
+d1517 1
+d1576 7
+d2078 22
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

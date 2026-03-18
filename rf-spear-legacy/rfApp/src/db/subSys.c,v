@@ -1,0 +1,589 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.3
+date	2011.12.07.01.14.52;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2004.06.21.18.07.37;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.46;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.46;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Add registration for 3.14.11.  Add subSysInit from subSysReboot and
+subSysABreset that used to be in the allenBradley module.
+@
+text
+@/*                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+*/
+/*=============================================================================
+
+  Abs:  Functions for system monitoring and control.
+
+  Name: subSys.c      
+	   subSysinit      - general initialization
+	   subSysFreqOff  - Cavity Frequency Offset Estimation
+	   subSysFreqOAvg - Average Cavity Frequency Offset
+	   subSysFreqErr  - Cavity Park Frequency Error Calculation
+	   subSysPhaseTot - Direct Loop Phase Calculation
+	   subSysPhaseCmb - Comb   Loop Phase Calculation
+	   subSysPhaseStn - Station     Phase Calculation
+	   subSysDCcoeff  - Ripple Loop DC Coefficient Calculation
+	   subSysDrivSel  - Drive Power Setpoint Selection
+	   subSysLog      - Value from Log Calculation
+           subSysABreset  - Allen-Bradley reset
+
+  Proto: not required and not used.  All functions called by the
+         subroutine record get passed one argument:
+
+         psub                       Pointer to the subroutine record data.
+          Use:  pointer               In general, all functions read the
+          Type: struct subRecord *    input fields (a to l) and write to
+          Acc:  read/write            the val field.
+          Mech: reference
+
+         All functions return a long integer.  0 = OK, -1 = ERROR.
+         The subroutine record ignores the status returned by the Init
+         routines.  For the calculation routines, the record status (STAT) is
+         set to SOFT_ALARM (unless it is already set to LINK_ALARM due to
+         severity maximization) and the severity (SEVR) is set to psub->brsv
+         (BRSV - set by the user in the database though it is expected to
+          be invalid).
+
+  Auth: 16-Jan-1997, Stephanie Allison
+  Rev:  DD-MMM-YYYY, Reviewer's Name (.NE. Author's Name)
+
+-------------------------------------------------------------------------------
+
+  Mod:  
+        07-Mar-2005, M. Laznovky -- added subSysABreset(), for EPICS 3.14.6
+        02-Aug-2001, Stephanie Allison
+        Add subroutines for average frequency offset and comb loop phase.
+        28-Sep-2000, Stephanie Allison
+        Make initial DC coeff for ripple loop gain tracking be enterable.
+
+=============================================================================*/
+
+#include        <vxWorks.h>    /* Always required for VxWorks code    */
+#include        <math.h>       /* for pow prototype                   */
+#include	<subRecord.h>  /* for struct subRecord                */
+
+#include        <dbDefs.h>     /* registration stuff */
+#include        <errlog.h>     /* epicsPrintf */
+#include        <registryFunction.h>  /* ... */
+#include        <epicsExport.h>
+
+#include        <drvAb.h>      /* for ab_reset prototype              */
+
+/*====================================================
+
+  Abs:  Subroutine record initialization
+
+  Name: subSysInit
+
+  Args: psub                       Subroutine record info
+          Use:  pointer            
+          Type: struct subRecord * 
+          Acc:  read/write        
+          Mech: reference
+
+  Rem: General purpose initialization required since all 
+       subroutine records require a non-NULL init routine 
+       even if no initialization is required.  Note that most 
+       subroutines in this file use this routine as an init
+       routine.  If init logic is needed for a specific 
+       subroutine, create a new routine for it - don't modify 
+       this one.
+
+  Side: None
+   
+  Ret: long  
+            OK - Successful operation (Always)
+
+=======================================================*/
+static long subSysInit(struct subRecord *psub)
+{
+  return(OK);
+}
+
+static long subSysFreqOff(struct subRecord *psub)
+{
+  /*
+   * Estimate cavity frequency offset.
+   * Inputs:  A = Zeroth Polynomial Coefficient (p0)
+   *          B = First  Polynomial Coefficient (p1)
+   *          C = Second Polynomial Coefficient (p2)
+   *          D = Third  Polynomial Coefficient (p3)
+   *          E = Temperature       Coefficient (t1)
+   *          F = Tuner Home    Position (mm)
+   *          G = Tuner Current Position (mm)
+   *          H = Cavity Voltage         (kV)
+   *          L = Smoothing Factor (0 to 1)
+   *          VAL = Previous Smoothed Value (kHz)
+   *  Outputs:I = Position Difference    (mm)
+   *          J = Polynomial  Term       (kHz)
+   *          K = Unsmoothed Cavity Frequency Offset Estimate (kHz)
+   *          VAL = Smoothed Cavity Frequency Offset Estimate (kHz)
+   */
+  /* Calculate position difference from home and the polynomial term. */
+  psub->i = psub->g - psub->f;
+  psub->j = psub->a + (psub->b * psub->i) + (psub->c * psub->i * psub->i) +
+            (psub->d * psub->i * psub->i * psub->i);
+  /* Calculate the raw (unsmoothed) frequency offset */
+  psub->k = psub->j + (psub->e * psub->h * psub->h);
+  /* Check for a valid smoothing factor and do the smoothing */
+  if      (psub->l < 0.0) psub->l = 0.0;
+  else if (psub->l > 1.0) psub->l = 1.0;
+  psub->val = (psub->k * (1 - psub->l)) + (psub->val * psub->l);
+  return (OK);
+}
+
+static long subSysFreqErr(struct subRecord *psub)
+{
+  /*
+   * Calculate cavity park frequency error =
+   * (90/(476e3*4))*Loaded Cavity Q*(Desired Park Frequency - Frequency Offset)
+   * Inputs:  A = 90/(476e3*4)                  (degrees/kHz)
+   *          B = Load Cavity Q (QL)
+   *          C = Desired Cavity Park Frequency (kHz)
+   *          D = Cavity Frequency Offset       (kHz)
+   *  Outputs:L = Frequency Difference          (kHz)
+   *          VAL = Cavity Park Frequency Error (degrees)
+   */
+  psub->l   = psub->c - psub->d;
+  psub->val = psub->a * psub->b * psub->l;
+  return (OK);
+}
+
+static long subSysFreqOAvg(struct subRecord *psub)
+{
+  /*
+   * Calculate average cavity frequency offset.
+   * Inputs:  A = Cavity A Freq     Offset (kHz)
+   *          B = Cavity B Freq     Offset (kHz)
+   *          C = Cavity C (HER)/Cavity A (LER) Freq Offset (kHz)
+   *          D = Cavity D (HER)/Cavity B (LER) Freq Offset (kHz)
+   *  Outputs:VAL = Average  Freq   Offset (kHz)
+   */
+  psub->val = (psub->a + psub->b + psub->c + psub->d)/4;
+  return (OK);
+}
+
+static long subSysPhaseTot(struct subRecord *psub)
+{
+  /*
+   * Calculate total direct loop phase.
+   * Inputs:  A = Direct Loop On/Off       (0 = Off, >0 = On)
+   *          B = Station Group Delay      (nsec)
+   *          C = Direct Loop Phase        (degrees)
+   *          D = Calibration Phase Offset (degrees)
+   *          E = Direct Loop Tracking Flag (0 = Off, >0 = On)
+   *          F = Average Cavity Freq Offset Conversion Constant
+   *          G = Max Direct Loop Delta Phase (>0)   (degrees)
+   *          H = Maximum Phase Change (>0)    (degrees)
+   *          I = First Time flag              
+   *          J = Average Cavity Freq Offset (kHz)
+   *  Outputs:K = Direct Loop Delta Phase            (degrees)
+   *          L = Unadjusted Total Direct Loop Phase (degrees)
+   *          VAL = Adjusted Total Direct Loop Phase (degrees)
+   */
+  double temp;
+  /* 
+   * Calculate direct loop delta phase if both loop and tracking are on.
+   * Limit-check.
+   */
+  if ((psub->e > 0.0001) && (psub->a > 0.001))
+  {
+     psub->k = -0.000360 * psub->b * psub->j * psub->f;
+     if      (psub->k >  psub->g) psub->k =  psub->g;
+     else if (psub->k < -psub->g) psub->k = -psub->g;
+  }
+  else
+  {
+     psub->k = 0.0;
+  }
+  /* If first time through then initialize l */
+  if (psub->i < 0.001) {
+    psub->l = psub->c + psub->d + psub->k;
+    psub->i = 1.0;
+  }
+  /* Calculate the total direct loop phase and adjust. */ 
+  temp = psub->c + psub->d + psub->k - psub->l;
+  if (psub->h <= 0) psub->h = 0.1;  /* Set to a default value */
+  if      (temp >  psub->h) temp =  psub->h;
+  else if (temp < -psub->h) temp = -psub->h;
+  psub->val = psub->l = psub->l + temp;
+  if      (psub->val < -180.0) psub->val += 360.0;
+  else if (psub->val >  180.0) psub->val -= 360.0;
+  return (OK);
+}
+
+static long subSysPhaseCmb(struct subRecord *psub)
+{
+  /*
+   * Calculate total comb loop phase.
+   * Inputs:  A = Comb Loop Phase                  (degrees)
+   *          B = Direct Loop Delta Phase          (degrees)
+   *          C = Direct Loop Delta Phase Conversion Constant
+   *          D = Calibration Phase Offset         (degrees)
+   *  Outputs:K = Comb Loop Delta Phase            (degrees)
+   *          L = Unadjusted Total Comb Loop Phase (degrees)
+   *          VAL = Adjusted Total Comb Loop Phase (degrees)
+   */
+  /* Calculate the total comb loop phase and adjust. */
+  psub->k = -psub->b * psub->c;
+  psub->l = psub->a + psub->d + psub->k;
+  psub->val = psub->l;
+  if      (psub->val < -180.0) psub->val += 360.0;
+  else if (psub->val >  180.0) psub->val -= 360.0;
+  return (OK);
+}
+
+static long subSysPhaseStn(struct subRecord *psub)
+{
+  /*
+   * Calculate station phase.
+   * Inputs:  A = Phase Adjustment by the User (degrees)
+   *          B = Maximum Phase Change (>0)    (degrees)
+   *          C = Base Phase                   (degrees)
+   *          D = Direct Loop Delta Phase      (degrees)
+   *          I = First Time flag              
+   * Outputs: K = Unadjusted Phase Difference  (degrees)
+   *          L = Unadjusted Station Phase     (degrees)
+   *          VAL = Station Phase              (degrees)
+   */
+  /* If first time through then initialize l */
+  if (psub->i < 0.001) {
+     psub->l = psub->a + psub->c + psub->d;
+     psub->i = 1;
+  }
+  psub->k = psub->a + psub->c + psub->d - psub->l;
+  if (psub->b <= 0.0) psub->b = 0.1;  /* Set to a default value */
+  if      (psub->k >  psub->b) psub->k =  psub->b;
+  else if (psub->k < -psub->b) psub->k = -psub->b;
+  psub->val = psub->l = psub->l + psub->k;
+  if      (psub->val < -180.0) psub->val += 360.0;
+  else if (psub->val >  180.0) psub->val -= 360.0;
+
+  return(OK);
+}
+
+static long subSysDCcoeff (struct subRecord *psub)
+{
+  /*
+   * Calculate ripple loop DC gain coefficient for ripple loop gain tracking:
+   *  DC coefficient = original DC coefficient *
+   *                   (10**(delta klystron gain/20)) 
+   *  where delta klystron gain = gain setpoint - klystron gain 
+   *  with a user-supplied limit on the delta in one calculation cycle.
+   * Inputs:  A = Ripple Loop Gain Tracking Flag (0 = Off, >0 = On)
+   *          B = Klystron Gain                                (dB)     
+   *          C = Desired Klystron Gain                        (dB)     
+   *          D = Calculated Maximum DC Coefficient            (volts)
+   *          E = Klystron Gain Deadband                       (dB)     
+   *          F = Maximum Delta DC Coefficient                 (volts)       
+   *          G = Current DC Coefficient                       (volts)
+   *          H = Beam Abort      (0 = no beam abort, >0 = beam abort)
+   *          K = Initial DC Coefficient                       (volts)
+   *       HOPR = High DC Coefficient Limit                    (volts)
+   *       LOPR = Low  DC Coefficient Limit                    (volts)       
+   * Outputs: VAL = DC Coefficient                             (volts)
+   *          I = Previous Delta Gain                          (dB)   
+   *          J = Previous Gain Tracking Flag    (0 = Off, >0 = On)
+   *          L = Delta DC Coefficient                         (volts)
+   */
+  /*
+   * Find the difference between the current delta gain and the delta
+   * gain used in the previous calculation.  Don't let that difference
+   * be greater than the deadband.
+   */
+  if (psub->d < 0.001) psub->d = 0.001;
+  if (psub->g < 0.001) psub->g = 0.001;
+  psub->i = log10(psub->g/psub->d)*20.0;
+  psub->l = psub->c - psub->b - psub->i;
+  if      (psub->l >  psub->e) psub->l =  psub->e;
+  else if (psub->l < -psub->e) psub->l = -psub->e;
+  /*
+   * Calculate the delta DC coefficient needed to reach the next
+   * gain step.  Also, don't step the coefficient more than a reasonable 
+   * amount.  Make sure the calculated maximum DC coefficient is something 
+   *> 0 to prevent divide-by-zero error towards the end of this routine.
+   */
+  psub->l = (psub->i + psub->l)/20.0;
+  psub->l = (psub->d * pow(10.0, psub->l)) - psub->g;
+  if      (psub->l >  psub->f) psub->l =  psub->f;
+  else if (psub->l < -psub->f) psub->l = -psub->f;
+  /*
+   * Don't set a new DC coefficient until the beam abort is reset.
+   * Keep using the current value until then.
+   * Also, if the tracking flag is off but was on the last time around,
+   * reset the DC coefficient to the initial value.  If tracking
+   * is off and has been off, we won't reset the value since the
+   * user may be manually adjusting it (ie, with a slider).  If the
+   * klystron gain is low (ie, we're in park), don't set a new coeff.
+   */
+  if ((psub->a < 0.5) || (psub->h > 0.5) || (psub->b < 0.1))
+  {
+     if (psub->j > 0.5) psub->val = psub->k;
+     /* No previous tracking. */
+     psub->j = 0.0;
+  }
+  /*
+   * Otherwise, tracking is on so add delta coefficient to the current value.
+   * Update the previous tracking flag.
+   */
+  else
+  {
+     psub->val = psub->g + psub->l;
+     psub->j = psub->a;
+  }
+  /* 
+   * Check against limits.  
+   */
+  if      (psub->val > psub->hopr) psub->val = psub->hopr;
+  else if (psub->val < psub->lopr) psub->val = psub->lopr;
+  return(OK);
+}
+
+static long subSysDrivSel (struct subRecord *psub)
+{
+  /*
+   * Determine which drive power setpoint to use during ON_CW operation.
+   * Inputs:  A = Klystron Output Forward Power              (kW)
+   *          B = Limit on A for high beam current operation (kW)
+   *          C = Hysterisis on Limit Check                  (kW)
+   *          VAL = Previous Selection
+   * Outputs: VAL = New Selection:
+   *                0 = Use Lowest Setpoint for RF Station Turnon
+   *                1 = Use Low  Beam Current Setpoint
+   *                2 = Use High Beam Current Setpoint
+   *                3 = Use Saturated Drive Power as Setpoint
+   */
+  /*
+   * Check if klystron power is high or has been high and hasn't gone
+   * low enough yet.
+   */
+  if ((psub->a >= psub->b) || 
+      ((psub->val > 1.5) && (psub->a >= (psub->b - psub->c))))
+  {
+    psub->val = 2.0;
+  }
+  /*
+   * Don't support 0 or 3 at this time.
+   */
+  else
+  {
+    psub->val = 1.0;
+  }
+  return(OK);
+}
+
+static long subSysLog (struct subRecord *psub)
+{
+  /*
+   * Calculate value from the log of the value.  Used for vacuums and
+   * ion pump currents.
+   * Inputs:  A = Log of the Value
+   *          B = Conversion Constant
+   *          C = Last Monitored Value of the Log (MLST)
+   *          D = Last Archived  Value of the Log (ALST)
+   *          I = Previous Non-Zero Monitor Delta
+   *          J = Previous Non-Zero Archive Delta
+   *          K = Previous Monitored Value of the Log
+   *          L = Previous Archived  Value of the Log
+   *          MDEL = Monitor Delta
+   *          ADEL = Archive Delta
+   * Outputs: VAL  = Value from the Log
+   *          I = Previous Non-Zero Monitor Delta
+   *          J = Previous Non-Zero Archive Delta
+   *          K = Previous Monitored Value of the Log
+   *          L = Previous Archived  Value of the Log
+   *          MDEL = Monitor Delta
+   *          ADEL = Archive Delta
+   */
+  /*
+   * Calculate value.
+   */
+  psub->val = psub->b * pow(10.0, psub->a);
+  /*
+   * Force a monitor if the log of the value had one.
+   */
+  if (psub->mdel != 0.0)    psub->i    = psub->mdel;
+  if (psub->c == psub->k)   psub->mdel = psub->i;
+  else { psub->k = psub->c; psub->mdel = 0.0; }
+  /*
+   * Force an archive if the log of the value had one.
+   */
+  if (psub->adel != 0.0)    psub->j    = psub->adel;
+  if (psub->d == psub->l)   psub->adel = psub->j;
+  else { psub->l = psub->d; psub->adel = 0.0; }
+
+  return(OK);
+}
+
+static long subSysABreset(struct subRecord *psub)
+{
+  /*
+   * Reset Allen-Bradley.
+   */
+  epicsPrintf("Allen-Bradley reset started\n");
+  ab_reset();
+  return(OK);
+}
+
+/****************************************************************/
+
+/* registration stuff for EPICS R3.14.x */
+
+static registryFunctionRef subSysRef[] = {
+  {"subSysInit",     (REGISTRYFUNCTION) subSysInit     },
+  {"subSysFreqOff",  (REGISTRYFUNCTION) subSysFreqOff  },
+  {"subSysFreqErr",  (REGISTRYFUNCTION) subSysFreqErr  },
+  {"subSysFreqOAvg", (REGISTRYFUNCTION) subSysFreqOAvg },
+  {"subSysPhaseTot", (REGISTRYFUNCTION) subSysPhaseTot },
+  {"subSysPhaseCmb", (REGISTRYFUNCTION) subSysPhaseCmb },
+  {"subSysPhaseStn", (REGISTRYFUNCTION) subSysPhaseStn },
+  {"subSysDCcoeff",  (REGISTRYFUNCTION) subSysDCcoeff  },
+  {"subSysDrivSel",  (REGISTRYFUNCTION) subSysDrivSel  },
+  {"subSysLog",      (REGISTRYFUNCTION) subSysLog      },
+  {"subSysABreset",  (REGISTRYFUNCTION) subSysABreset  },
+
+};
+
+void subSys(void)
+{
+  registryFunctionRefAdd(subSysRef,NELEMENTS(subSysRef));
+}
+
+epicsExportRegistrar(subSys);
+@
+
+
+1.2
+log
+@Add direct loop phase ramp.
+@
+text
+@d30 1
+d40 1
+d65 1
+d77 6
+d84 32
+a115 1
+long subSysFreqOff(struct subRecord *psub)
+d147 1
+a147 1
+long subSysFreqErr(struct subRecord *psub)
+d164 1
+a164 1
+long subSysFreqOAvg(struct subRecord *psub)
+d178 1
+a178 1
+long subSysPhaseTot(struct subRecord *psub)
+d227 1
+a227 1
+long subSysPhaseCmb(struct subRecord *psub)
+d248 1
+a248 1
+long subSysPhaseStn(struct subRecord *psub)
+d277 1
+a277 1
+long subSysDCcoeff (struct subRecord *psub)
+d354 1
+a354 1
+long subSysDrivSel (struct subRecord *psub)
+d387 1
+a387 1
+long subSysLog (struct subRecord *psub)
+d429 36
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d149 2
+a150 2
+   *          H = Spare
+   *          I = Spare
+d156 1
+d171 5
+d177 5
+a181 2
+  psub->l = psub->c + psub->d + psub->k;
+  psub->val = psub->l;
+d216 1
+d221 5
+d227 1
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

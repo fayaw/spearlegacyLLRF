@@ -1,0 +1,167 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.33.04;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.33.04;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/************************************************************************/
+/* The following file contains all of the necessary typedef information
+ * for use of the National Instruments NI-VXI Software Interface
+ * functions.
+ */
+
+#if !defined(datasize_h)
+#define datasize_h
+
+/* === Target dependencies -- MUST define one of following !!! ======== */
+
+#define NIVXI_FSPEC
+
+#define NIVXI_HSPEC  NIVXI_FSPEC
+#define NIVXI_DSPEC
+
+
+#define NIVXI_HQUAL
+
+/* === Data Sizes -- machine specific ================================= */
+
+#ifdef INCLUDE_TYPEDEFS
+typedef          char   INT8;
+typedef signed   char   SINT8;
+typedef unsigned char   UINT8;
+typedef          short  INT16;
+typedef signed   short  SINT16;
+typedef unsigned short  UINT16;
+typedef          long   INT32;
+typedef signed   long   SINT32;
+typedef unsigned long   UINT32;
+#endif /** INCLUDE_TYPEDEFS **/
+
+typedef INT16           NIVXI_STATUS;
+
+/* following provided for backward compatability */
+
+#define int8            INT8
+#define uint8           UINT8
+#define int16           INT16
+#define uint16          UINT16
+#define int32           INT32
+#define uint32          UINT32
+
+#define NIVXI_DT        NIVXI_DSPEC
+#define NIVXI_FN        NIVXI_FSPEC
+#define NIVXI_HANDLER   NIVXI_HSPEC
+
+typedef NIVXI_HQUAL void (NIVXI_HSPEC *FN_PTR)(void);
+typedef void NIVXI_DSPEC *lpvoid;
+
+/* === Interrupt Handler Function Types =============================== */
+
+#if !defined(__NO_PROTOTYPES__)
+
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HACFAIL   (INT16  controller);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HBUSERROR (void);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HCLOCK    (void);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HVXIINT   (INT16  controller,
+                                                        UINT16 level,
+                                                        UINT32 statusId);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HSIGNAL   (UINT16 signal);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HSOFTRESET(void);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HSYSFAIL  (INT16  controller);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HSYSRESET (INT16  controller);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HTRIG     (INT16  controller,
+                                                        UINT16 line,
+                                                        UINT16 type);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HWSSCMD   (UINT16 cmd);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HWSSECMD  (UINT16 cmdExt,
+                                                        UINT32 cmd);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HWSSLCMD  (UINT32 cmd);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HWSSRD    (INT16  status,
+                                                        UINT32 count);
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HWSSWRT   (INT16  status,
+                                                        UINT32 count);
+
+#else
+
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HACFAIL   ();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HBUSERROR ();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HCLOCK    ();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HVXIINT   ();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HSIGNAL   ();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HSOFTRESET();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HSYSFAIL  ();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HSYSRESET ();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HTRIG     ();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HWSSCMD   ();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HWSSECMD  ();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HWSSLCMD  ();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HWSSRD    ();
+typedef NIVXI_HQUAL void NIVXI_HSPEC NIVXI_HWSSWRT   ();
+
+#endif
+
+/* === Version specific information =================================== */
+
+#define NIVXI_EXTERNAL        (0x100)
+#define NIVXI_EMBEDDED        (0x200)
+
+#define NIVXI_RETRY           (0x100)
+#define NIVXI_NO_RETRY        (0x200)
+
+#define NIVXI_SWREV           (100)
+#define NIVXI_HWREV           (200)
+#define NIVXI_DEVNAME         "VXIpc"
+#define NIVXI_DEVLOCATION     NIVXI_EMBEDDED
+#define NIVXI_DEVRETRY        NIVXI_NO_RETRY
+
+#endif
+
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

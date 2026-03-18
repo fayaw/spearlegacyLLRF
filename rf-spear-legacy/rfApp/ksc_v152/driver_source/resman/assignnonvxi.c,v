@@ -1,0 +1,244 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***** Copyright (c) 1995, 1996 KineticSystems Corporation ***********
+*
+* File:     assignnonvximem.c
+*
+* Description:  Auxiliary (old) routines for MXI Resource Manager's
+*               Configure system A24/A32 address maps
+*               function (third of six parts)
+*               per section C.4.1.3, Rule C.4.8 of
+*               VXIbus System Specification VXI-1, Rev. 1.4; 4/21/92
+*
+*               MXI functionality per section F.2 of Mainframe Extender
+*               Specification VXI-6, Rev. 1.0; 2/7/91
+*
+*               Most of these functions are found in the addrmaps.c
+*               file in the "old" non-MXI resource manager.
+*
+* History:   1/19/95 - RCDowling - Original
+*            2/06/95 -  "  - Initial coding, using linked list for config data
+*            2/08/95 -  "  Added (simple) memory block allocation scheme:
+*                          just look for first block that will hold it
+*            3/15/95    "  Don't malloc for addrmaps if no modules use memory
+*            4/13/95    "  Change to "new" GI-VXI & RM libraries
+*            6/13/95    "  Don't free up memNeeds if it was never malloc'd
+*           10/10/95 @@HMSC Control info (vice warning) printf's with verbose
+*            1/17/96  RCD  MXI support grafted in; use calloc not malloc
+*                          split old addrmaps.c into 2 distinct files
+*                          Memory config now generalized for either A24
+*                          or A32, but not both (as was true for addrmaps.c)
+*            1/25/96   "   Select devices whose Address Space *and* Mainframe
+*                          values in linked list match this function's args.
+*                          Changed findMemBlock w/ new arg & return "status"
+*                          Split out rmActivateMemory to a separate file
+*            2/14/96   "   Changed header from malloc.h to stdlib.h;
+*                          Changed error printf's to fprintf( stderr )
+*            3/06/96   "   Changed memRqmtCompare() args to match ANSI C
+*                          requirement of const void * vs. map_t *.
+*  7/16/96 RCD Changed malloc error to warning & cleaned VXI mem warning. 
+*  12/13/96  RQ  Fixed bug in memory allocation (findMemBlock routine)
+*
+***********************************************************************/
+/*/#define KSC_DEBUG1*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "resman.h"
+#include "epvxi.h"
+
+#define SUCCESS 0
+#define OVERLAP 1
+#define RANGE_ERR 2
+#if 0
+// These addresses are ONLY for GI need to use vxiio.h for v150
+//#if defined (KSCGI)
+//#define A24_BASE_ADDR 0x200000
+//#define A24_MAX_ADDR 0xdfffff
+//#define A32_BASE_ADDR 0x20000000
+//#define A32_MAX_ADDR 0xdfffffff
+
+//#elif defined (KSV150)
+//#include "vxiio.h"
+//#define A24_MAX_ADDR 0xfeffffff
+//#define A32_MAX_ADDR 0xfbffffff
+
+//#else
+//#error Board type not specified
+//#endif
+#endif
+
+int assignNonVxiMem( nonVxi_t *nonvxi,
+			  config_t *root,
+			  unsigned short adrSpace)
+{
+	nonVxi_t *nonVxiLA;
+	config_t *thisLA;
+	long i;
+	long getMemSize;
+
+	for( nonVxiLA = nonvxi; nonVxiLA != NULL; nonVxiLA = nonVxiLA->next )
+	{
+#ifdef KSC_DEBUG1
+  printf("Assigning memory for LA %d \n",nonVxiLA->pseudoLA);
+#endif
+		for( thisLA = root; thisLA != NULL; thisLA = thisLA->next )
+		{
+			 if(nonVxiLA->A16Base == (VXI_LA2PA(thisLA->logAdr)))
+			 {
+				printf("Error:  A16 Base address conflict \n");
+				printf("Non-vxi device LA:%x and VXI LA:%x share same A16 space\n",nonVxiLA->pseudoLA, thisLA->logAdr);
+                                nonVxiLA->sysBool = FALSE;
+				return(OVERLAP);
+			 }
+		}
+		if(nonVxiLA->sysBool)
+		{
+	       		if(adrSpace == VXI_ADDR_EXT_A24 && nonVxiLA->A24Size!=0)
+                        {
+#ifdef KSC_DEBUG1
+  printf("Trying to assign nonvxi, A24Base is 0x%x, A24Size is 0x%x\n",
+           nonVxiLA->A24Base, nonVxiLA->A24Size);
+#endif
+                           /* Round the requested size up to a power of 2. */
+                           getMemSize = nonVxiLA->A24Size >> 8;
+                           if ((nonVxiLA->A24Size & 0xff) != 0)
+                              getMemSize++;
+                           for (i = 0x8000; i != 0; i >>= 1) {
+                              if ((getMemSize & i) != 0) {
+                                 if ((getMemSize & ~i) != 0)
+                                    getMemSize = i << 1;
+                                 break;
+                              }
+                           }
+                           if (getMemSize != (nonVxiLA->A24Size >> 8))
+                              WARN "Increasing the A24 space "
+                                 "assigned for non-VXI device \"%s\" \n"
+                                 "at address 0x%06x, to 0x%04x00 bytes.\n",
+                                 nonVxiLA->device, nonVxiLA->A24Base,
+                                 (short) getMemSize);
+
+                           /* Ensure the base address is a multiple of size. */
+                           nonVxiLA->A24Size = getMemSize << 8;
+                           if (nonVxiLA->A24Base % nonVxiLA->A24Size != 0) {
+                              WARN "Unable to assign A24 space "
+                                 "for non-VXI device \"%s\":\n"
+                                 "address 0x%06x is not evenly divisible "
+                                 "by size 0x%06x.\n",
+                                 nonVxiLA->device,
+                                 nonVxiLA->A24Base, nonVxiLA->A24Size);
+                              nonVxiLA->sysBool = FALSE;
+
+                           /* Allocate the A24 space. */
+                           } else if (getMemBlock(
+                              getMemSize, nonVxiLA->A24Base >> 8) == FALSE) {
+                              WARN "Unable to assign A24 space "
+                                 "for non-VXI device \"%s\"\n"
+                                 "at address 0x%06x.\n",
+                                 nonVxiLA->device, nonVxiLA->A24Base);
+                              nonVxiLA->sysBool = FALSE;
+                           }
+                        }
+	        	else if (adrSpace == VXI_ADDR_EXT_A32 && nonVxiLA->A32Size!=0)
+                        {
+#ifdef KSC_DEBUG1
+  printf("Trying to assign nonvxi, A32Base is 0x%x, A32Size is 0x%x\n", 
+           nonVxiLA->A32Base, nonVxiLA->A32Size);
+#endif
+                           /* Round the requested size up to a power of 2. */
+                           getMemSize = nonVxiLA->A32Size >> 16;
+                           if ((nonVxiLA->A32Size & 0xffff) != 0)
+                              getMemSize++;
+                           for (i = 0x8000; i != 0; i >>= 1) {
+                              if ((getMemSize & i) != 0) {
+                                 if ((getMemSize & ~i) != 0)
+                                    getMemSize = i << 1;
+                                 break;
+                              }
+                           }
+                           if (getMemSize != (nonVxiLA->A32Size >> 16))
+                              WARN "Increasing the A32 space "
+                                 "assigned for non-VXI device \"%s\" \n"
+                                 "at address 0x%08x, to 0x%04x0000 bytes.\n",
+                                 nonVxiLA->device, nonVxiLA->A32Base,
+                                 (short) getMemSize);
+
+                           /* Ensure the base address is a multiple of size. */
+                           nonVxiLA->A32Size = getMemSize << 16;
+                           if (nonVxiLA->A32Base % nonVxiLA->A32Size != 0) {
+                              WARN "Unable to assign A32 space "
+                                 "for non-VXI device \"%s\":\n"
+                                 "address 0x%08x is not evenly divisible "
+                                 "by size 0x%08x.\n",
+                                 nonVxiLA->device,
+                                 nonVxiLA->A32Base, nonVxiLA->A32Size);
+                              nonVxiLA->sysBool = FALSE;
+
+                           /* Allocate the A32 space. */
+                           } else if (getMemBlock(
+                              getMemSize, nonVxiLA->A32Base >> 16) == FALSE) {
+                              WARN "Unable to assign A32 space "
+                                 "for non-VXI device \"%s\"\n"
+                                 "at address 0x%08x.\n",
+                                 nonVxiLA->device, nonVxiLA->A32Base);
+                              nonVxiLA->sysBool = FALSE;
+                           }
+                        }
+		}
+        }
+	return( SUCCESS );
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

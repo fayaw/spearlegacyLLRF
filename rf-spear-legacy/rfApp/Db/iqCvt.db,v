@@ -1,0 +1,144 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.3.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.3
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.3
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.3
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2008.05.19.15.42.46;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2006.06.19.21.47.04;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Change Deg to deg.
+@
+text
+@grecord(sub,"$(R):STN:Q$(M)$(C)") {
+	field(FLNK,"$(R):STN:P$(M)$(C).VAL  PP MS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQ")
+	field(INPA,"$(R):STN:IQA$(M):MODU.QDT$(C)  NPP MS")
+	field(INPB,"1")
+	field(INPD,"1")
+	field(INPE,"-1")
+	field(EGU,"V")
+	field(PREC,"5")
+	field(ADEL,"0.00005")
+	field(MDEL,"0.00005")
+}
+grecord(sub,"$(R):STN:PWR$(M)$(C)") {
+	field(FLNK,"$(R):STN:$(F).VAL  PP MS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQpower")
+	field(INPA,"$(R):STN:A$(M)$(C).VAL  NPP MS")
+	field(INPB,"10")
+	field(EGU,"W")
+	field(PREC,"5")
+	field(ADEL,"0.00005")
+	field(MDEL,"0.00005")
+}
+grecord(sub,"$(R):STN:P$(M)$(C)") {
+	field(FLNK,"$(R):STN:A$(M)$(C).VAL  PP MS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQphase")
+	field(INPA,"$(R):STN:I$(M)$(C).VAL  NPP MS")
+	field(INPB,"$(R):STN:Q$(M)$(C).VAL  NPP MS")
+	field(EGU,"deg")
+	field(PREC,"1")
+	field(ADEL,"0.1")
+	field(MDEL,"0.1")
+}
+grecord(sub,"$(R):STN:I$(M)$(C)") {
+	field(FLNK,"$(R):STN:Q$(M)$(C).VAL  PP MS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQ")
+	field(INPA,"$(R):STN:IQA$(M):MODU.IDT$(C)  NPP MS")
+	field(INPB,"1")
+	field(INPD,"1")
+	field(INPE,"-1")
+	field(EGU,"V")
+	field(PREC,"5")
+	field(ADEL,"0.00005")
+	field(MDEL,"0.00005")
+}
+grecord(sub,"$(R):STN:A$(M)$(C)") {
+	field(FLNK,"$(R):STN:PWR$(M)$(C).VAL  PP MS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQampl")
+	field(INPA,"$(R):STN:I$(M)$(C).VAL  NPP MS")
+	field(INPB,"$(R):STN:Q$(M)$(C).VAL  NPP MS")
+	field(EGU,"V")
+	field(PREC,"5")
+	field(ADEL,"0.00005")
+	field(MDEL,"0.00005")
+}
+@
+
+
+1.2
+log
+@Change "deg" to "Deg" to be consistent with EGU of other databases.
+@
+text
+@d31 1
+a31 1
+	field(EGU,"Deg")
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d31 1
+a31 1
+	field(EGU,"deg")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

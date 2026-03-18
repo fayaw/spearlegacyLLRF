@@ -1,0 +1,190 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_0:1.1.1.1
+	R_epics_3_14_6_spear0:1.1.1.1
+	R_3_14_1_spear1:1.1.1.1
+	R1:1.1.1.1
+	B1:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.09.16.19.27.41;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.09.16.19.27.41;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@VBB - VME/VXI Bus Browser                                        R. Claus
+                                                                 8/30/93
+
+Command format:
+
+> verb/modifiers subject/mods subject/mods ...
+
+A blank line command re-executes the previous command.
+
+All input entry should be in lowercase.
+
+Only as many characters as are needed to make a word unique need be entered.
+
+Modifiers come in two forms: global and local.  Global means the modifier may
+appear anywhere in the command and it will be executed before the verb is
+executed.  Local means that the modifier belongs with the verb or subject and
+will be executed before the corresponding verb or subject is executed.  A line
+is analyzed from left to right, so if contradicting modifiers appear on a line,
+the right-most one "wins".  Local modifiers override global ones.  None of the
+verbs have local modifiers.
+
+Usually, several subjects may follow a verb.  If a subject is not recognized,
+it is treated as a verb.  Thus several commands may be given on one line.
+
+No continuation character is available.  Line lengths are limited to 256
+characters.
+
+The commands "<filename.ext", "@@filename.ext" and "set input <filename.ext>"
+mean "take input from the given filename.ext until end of file".  There is no
+default extension.  Do "set verify" to see lines read from the input file as
+they're being executed.
+
+Similarly, ">filename.ext" and "set output <filename.ext>" mean send output to
+filename.ext.  To make stdout the output device, issue ">" or "set output" sans
+filename or do ">stdout" or "set output stdout".
+
+If you need to include a path with the filename when using the "<", "@@" or ">"
+commands, insert the entire file specification in single or double quotes,
+e.g., @@"/u/ec/claus/fdbk/tst.vbb".  You can also use the "set input" or "set
+output" formats of these commands with quoted strings as file spec arguments.
+Note that the tilda (~) character has no special significance in Vbb filenames.
+
+The "set log" command sends copies of the input and output to a file created in
+the current directory.  The default filename is "vbb.log", but this may be
+changed by adding a filename argument.  As with "set input/output", enter the
+file specification in singler or double quotes if a directory specification is
+to be included.  To avoid accidently overwriting an existing log file, the file
+is opened with the append attribute.
+
+There are two comment characters: "#" and "!".  They may appear anywhere on
+the line and cause everything upto the next newline to be ignored.  A comment
+line is not the same as a blank line.
+
+String arguments (not the same as filename arguments) must be enclosed in
+single or double quotes.
+
+read or write with /loop=0 goes forever.  Only way out is ctrl-c.
+
+Width is the number of character columns on the page.  Default (80) is usually
+the right value.  Columns is the number columns of output created by read.
+Default (0) means as many as will fit in width.
+
+Do "show all" right after invoking Vbb to see startup defaults.
+
+The 'cmd' command allows you to issue a VxWorks command in the context of the
+task running Vbb.  The VxWorks command must be enclosed in single or double
+quotes.  Useful for changing the host login parameters so that you can "set
+output" without loosing Vbb context.
+
+Vbb can also be started up with redirection on the command line as in:
+Vbb < /exe/tst.vbb.  This will run Vbb with the commands in /exe/tst.vbb and
+then exit Vbb.  Good for load a VME device's registers.  For some reason, the
+lines in the input file are printed out as they are read in.  This can be
+suppressed by redirecting output to the null device: Vbb < tst.vbb > /null
+Of course, any lines in the input file expressly producing output then have no
+effect.  Also, be careful of blank lines in input files since they will cause
+the previous non-blank line to be repeated.
+
+
+Verb	Globals		Subject		Locals		Value
+----	-------		-------		------		-----
+read	/decimal	<adx>		/decimal	none
+write	/hexadecimal	<adx>;<cnt>	/hexadecimal	<write value>
+rmw   	/local		<beg>:<end>	/local		<search pattern>
+search	/vsbsys				/vsbsys
+	/vsbalt				/vsbalt
+	/vsbio				/vsbio
+      	/a16				/a16
+	/a24				/a24
+	/a32				/a32
+	/byte				/byte
+	/word				/word
+	/long				/long
+
+read	/columns=<no.>	as above	as above
+	/[no]output
+
+read	/loop=<count>	as above	as above
+write
+
+set	none		radix		none		decimal
+show					none		hexadecimal
+			space		none		a16
+					none		a24
+					none		a32
+			size		none		byte
+					none		short
+					none		word
+					none		long
+			input		none		<filename>
+			output		none		<filename>
+			prompt		none		<string>
+			width		/decimal	<number>
+					/hexadecimal
+			columns		/decimal	<number>
+					/hexadecimal
+			[no]verify	none
+			[no]log		none		<filename>
+
+show	none		all		none
+
+<	none		<filename>	none
+
+@@	none		<filename>	none
+
+>	none		<filename>	none
+
+cmd     none            <string>        none
+
+exit	none		none
+
+quit	none		none
+@
+
+
+1.1.1.1
+log
+@RF IOC startup files.
+@
+text
+@@

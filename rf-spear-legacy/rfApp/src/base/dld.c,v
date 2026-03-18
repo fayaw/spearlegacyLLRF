@@ -1,0 +1,667 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.2.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.3
+date	2011.12.07.00.54.36;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.05.14.23.58.12;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Changes to get rid of *Msgs.c.
+@
+text
+@/*
+** ++
+**
+**  Facility:  DWN - Downloader
+**
+**  Abstract:
+**      This file contains code to load a.out style files on the DSP memories.
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Low Level RF Project
+**
+**  History:
+**	September 24, 1993 - Created
+**         August 29, 1996 - Modified from LFB for LLRF use
+**
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#ifdef VXWORKS
+#  include <vxWorks.h>
+#  include <memLib.h>
+#  include <strLib.h>
+#  include <stdioLib.h>
+#  include <stdlib.h>
+#else
+#  include <stdio.h>
+#  include <malloc.h>
+#  include <string.h>
+#  include <strings.h>
+#  include <unistd.h>
+#  include "vxWorks-unix.h"
+
+#  define DUMP                          /* DUMP enables dumping of a file */
+#endif
+
+#include "filehdr.h"
+#include "scnhdr.h"
+#include "busLib.h"
+#include "sglLib.h"
+#include "dwnLib.h"
+#define DWN_MSG_GLOBAL
+#include "dwn.msg"
+#include "genLib.h"
+
+typedef struct _DldHndl
+{
+  FILE           *in;
+  int             swap;
+#ifdef DUMP
+  int             dump;
+#endif
+  int             verify;
+  int             lderam;
+  FILHDR          fileHdr;
+  SCNHDR          scnHdr;
+  unsigned int    offset;
+  unsigned long   relAddr;
+} DldHndl;
+
+  static Status  DldFileHdr    (DldHndl *);
+  static Status  DldSections   (DldHndl *);
+  static Status  DldSection (DldHndl *, SCNHDR *, unsigned int, unsigned int);
+  static Status  DldLoad    (unsigned short *, unsigned short *, unsigned int);
+  static Status  DldVerify  (unsigned short *, unsigned short *, unsigned int);
+  static void    ByteSwap   (void *, int);
+  static void    WordSwap   (void *, int);
+#ifdef DUMP
+  static void    DumpFilHdr (FILHDR *);
+  static void    DumpScnHdr (SCNHDR *);
+  static void    DumpRaw    (unsigned short *, unsigned short *, unsigned int);
+#endif
+
+
+#ifdef UNIX
+Status main (int   argc,
+             char *argv[])
+{
+  return (DWN_LdDspExe (argv[1], 1, 0, FALSE, TRUE));
+}
+#endif
+
+
+
+Status LdDspExe (char           *filename,
+                 unsigned long   relAddr)
+/*
+   Description
+   -----------
+   Program to load a DSP module with code from a COFF (a.out style) file.
+   This is a shell routine that runs the actual loading routine with a
+   set of preset defaults for the various options.
+
+   Parameter
+   ---------
+    filename - File to load onto a given DSP
+     relAddr - Relative board Local Address at which to load the DSP executable
+
+   Returns
+   -------
+   SUCCESS
+*/
+{
+  /* Perform the download */
+  return (DWN_LdDspExe (filename, relAddr, TRUE, FALSE
+#ifdef DUMP
+                                               , FALSE
+#endif
+                                                      ));
+}
+
+
+
+Status DWN_LdDspExe (char          *filename,
+                     unsigned long  relAddr,
+                     unsigned int   verify,
+                     int            lderam
+#ifdef DUMP
+                   , unsigned int   dump
+#endif
+                     )
+/*
+   Description
+   -----------
+   Callable function to load a DSP module with code from a COFF (a.out style)
+   file.  It can optionally display the contents of the file as it is being
+   loaded and check that the file was loaded properly by reading it back from
+   the DSP memory and comparing it with the original.
+
+   Parameter
+   ---------
+    filename - File to load onto a given DSP
+     address - Local Address at which to load the DSP executable
+      verify - Flag to verify that the file was loaded properly.
+      lderam - If eram section should be loaded.
+        dump - Flag to dump the contents of the file as it is loaded.
+               *** dump only works if DUMP is #defined ***
+
+   Returns
+   -------
+   SUCCESS
+*/
+{
+  DldHndl        Hndl;
+  DldHndl       *hndl    = &Hndl;
+
+
+  /* Open the file */
+  if ((hndl->in = fopen (filename, "r")) == NULL)
+    return (SGL_Error (DWN_UNAFIL, filename));
+
+  /* Initialize some flags */
+  hndl->relAddr = relAddr;
+  hndl->swap    = FALSE;                /* TRUE if compiled on a PC */
+  hndl->verify  = verify;
+  hndl->lderam  = lderam;
+#ifdef DUMP
+  hndl->dump    = dump;
+#endif
+
+  /* Read the file header */
+  if (DldFileHdr  (hndl)) return (FAILURE);
+
+  /* Treat the file sections */
+  if (DldSections (hndl)) return (FAILURE);
+
+  /* Close the file */
+  fclose (hndl->in);
+
+  return (SUCCESS);
+}
+
+
+
+static Status DldFileHdr (DldHndl *hndl)
+/*
+   Description
+   -----------
+   Function to read, interpret and verify the integrety of the file header.
+
+   Parameter
+   ---------
+        hndl - A handle containing context information.
+
+   Returns
+   -------
+   SUCCESS or FAILURE.  This routine singals its errors.
+*/
+{
+  FILHDR *fileHdr = &hndl->fileHdr;
+  Status  status;
+
+  /* Read the file header */
+  if ((status = fread (fileHdr, sizeof (*fileHdr), 1, hndl->in)) == NULL)
+    return (SGL_Error (DWN_RDERR));
+  hndl->offset = sizeof (*fileHdr);
+
+  /* Check the magic number.  If not, try byte/word swapping */
+  if (fileHdr->f_magic != DSP1600MAGIC)
+  {
+    ByteSwap (fileHdr, sizeof (*fileHdr));
+    WordSwap (fileHdr, sizeof (*fileHdr));
+
+    if (fileHdr->f_magic != DSP1600MAGIC)
+      return (SGL_Error (DWN_BADMAG, fileHdr->f_magic));
+    else
+      hndl->swap = TRUE;
+  }
+
+  /* If requested, dump the file header */
+#ifdef DUMP
+  if (hndl->dump)  DumpFilHdr (fileHdr);
+#endif
+
+  /* Check that the flags are in the proper state */
+  if (!(fileHdr->f_flags & F_RELFLG))       return (SGL_Error (DWN_RELFIL));
+  if (!(fileHdr->f_flags & F_EXEC))         return (SGL_Error (DWN_NOTEXE));
+  if (fileHdr->f_flags & F_MINMAL)          return (SGL_Error (DWN_MINFIL));
+  if (fileHdr->f_flags & F_UPDATE)          return (SGL_Error (DWN_UPDFIL));
+  if (fileHdr->f_flags & F_SWABD & F_AR32WR & F_AR32W)
+    return (SGL_Error (DWN_UNSSWP));
+  if (!(fileHdr->f_flags & F_AR16WR) & hndl->swap)
+    return (SGL_Error (DWN_SWPNOT));
+  if ((fileHdr->f_flags & F_AR16WR) & !hndl->swap)
+    return (SGL_Error (DWN_NOTSWP));
+
+  /* Calculate file offset for first section header */
+  hndl->offset += fileHdr->f_opthdr;
+
+  return (SUCCESS);
+}
+
+
+
+static Status DldSections (DldHndl *hndl)
+/*
+   Description
+   -----------
+   Function to read, interpret and verify the integrety of the section headers
+   and to load the data they describe.
+
+   Parameter
+   ---------
+        hndl - A handle containing context information.
+
+   Returns
+   -------
+   SUCCESS or FAILURE.  This routine signals its errors.
+*/
+{
+  Status          status;
+  FILHDR         *fileHdr = &hndl->fileHdr;
+  SCNHDR         *scnHdr  = &hndl->scnHdr;
+  int             nScns;
+  unsigned int    secnOs;
+
+
+  /* Load .eram sections if desired */
+  if (hndl->lderam)
+  {
+    secnOs = hndl->offset;
+    nScns  = fileHdr->f_nscns;
+    while (nScns--)
+    {
+      fseek (hndl->in, secnOs, SEEK_SET);
+      if ((status = fread (scnHdr, SCNHSZ, 1, hndl->in)) == NULL)
+        return (SGL_Error (DWN_RDERR));
+      secnOs += sizeof (*scnHdr);
+      if ((scnHdr->s_size != NULL) && (strcmp (scnHdr->s_name, ".eram") == NULL))
+      {
+        if (DldSection (hndl, scnHdr, TRUE, TRUE )) return (FAILURE);
+      }
+    }
+  }
+  /* Load .ram sections */
+  secnOs = hndl->offset;
+  nScns  = fileHdr->f_nscns;
+  while (nScns--)
+  {
+    fseek (hndl->in, secnOs, SEEK_SET);
+    if ((status = fread (scnHdr, SCNHSZ, 1, hndl->in)) == NULL)
+      return (SGL_Error (DWN_RDERR));
+    secnOs += sizeof (*scnHdr);
+    if ((scnHdr->s_size != NULL) && (strcmp (scnHdr->s_name, ".ram") == NULL))
+    {
+      if (DldSection (hndl, scnHdr, TRUE, FALSE)) return (FAILURE);
+    }
+  }
+
+  /* Now treat other sections */
+#ifdef DUMP
+  secnOs = hndl->offset;
+  nScns  = fileHdr->f_nscns;
+  while (nScns--)
+  {
+    fseek (hndl->in, secnOs, SEEK_SET);
+    if ((status = fread (scnHdr, SCNHSZ, 1, hndl->in)) == NULL)
+      return (SGL_Error (DWN_RDERR));
+    secnOs += SCNHSZ;
+    if ((scnHdr->s_size != NULL) &&
+        ((strcmp (scnHdr->s_name, ".erom") == NULL) ||
+         (strcmp (scnHdr->s_name, ".eram") == NULL)))
+    {
+      if (hndl->dump)                   /* This looks screwy! */
+      {
+        SGL_Output ("\nSection %s is not loaded since it is overlapped by \n\
+the .ram section at DSP boot time.\n", scnHdr->s_name);
+        if (DldSection (hndl, scnHdr, FALSE)) return (FAILURE);
+      }
+    }
+  }
+#endif
+
+  return (SUCCESS);
+}
+
+
+
+static Status DldSection (DldHndl       *hndl,
+                          SCNHDR        *scnHdr,
+                          unsigned int   load,
+                          unsigned int   iseram)
+/*
+   Description
+   -----------
+   Function to read, interpret and verify the integrety of a particular
+   section headers and to load the data it describes.
+
+   Parameter
+   ---------
+        hndl - A handle containing context information.
+      scnHdr - The section to treat
+        load - TRUE if the section should be loaded on the memory, FALSE if not
+
+   Returns
+   -------
+   SUCCESS or FAILURE.  This routine signals its errors.
+*/
+{
+  Status          status = SUCCESS;
+  unsigned int    size;
+  unsigned short *buffer;
+  unsigned short *adx;
+  int             cnt;
+
+  /* Character data is already in right order, so don't swap s_name */
+  if (hndl->swap)
+  {
+    ByteSwap (&scnHdr->s_paddr, SCNHSZ - sizeof (scnHdr->s_name));
+    WordSwap (&scnHdr->s_paddr, SCNHSZ - sizeof (scnHdr->s_name));
+  }
+
+#ifdef DUMP
+  /* Dump the section if so requested */
+  if (hndl->dump)  DumpScnHdr (scnHdr);
+#endif
+
+  /* Check for funny business in the section header */
+/*  if (scnHdr->s_vaddr != NULL)      return (SGL_Error (DWN_UNXVAD));*/
+  if (scnHdr->s_flags != STYP_REG)  return (SGL_Error (DWN_BADFLG));
+
+  /* Read the section's raw data */
+  if ((size = scnHdr->s_size) != NULL)
+  {
+    if ((buffer = (unsigned short *) malloc (size)) == NIL)
+    {
+      return (SGL_Error (DWN_NOBUF, size, scnHdr->s_name));
+    }
+    fseek (hndl->in, scnHdr->s_scnptr, SEEK_SET);
+    if ((status = fread (buffer, size, 1, hndl->in)) == NULL)
+    {
+      status = SGL_Error (DWN_RDERR);
+    }
+    else
+    {
+      if (hndl->swap) ByteSwap (buffer, size);
+
+      /* Quit here if we're not asked to load the memory */
+      if (!load) return (SUCCESS);
+
+      /* Number of words to transfer */
+      cnt = scnHdr->s_size >> 1;
+
+      /* Load the raw data onto the DSP */
+      adx = &((unsigned short *) (hndl->relAddr))[scnHdr->s_paddr];
+      /* From the DSP's view, eram should start at 0x8000 words */
+      if (iseram)
+      {
+         adx -= 0x8000;
+      }
+#ifdef VXWORKS
+      if ((status = DldLoad (buffer, adx, cnt)) == SUCCESS)
+      if (hndl->verify) status = DldVerify (buffer, adx, cnt);
+#else
+      status = SUCCESS;
+#endif
+#ifdef DUMP
+      if (hndl->dump) DumpRaw (buffer, adx, cnt);
+#endif
+    }
+
+    free ((void *) buffer);
+  }
+
+  return (status);
+}
+
+
+
+#ifdef VXWORKS
+static Status DldLoad (unsigned short *buf,
+                       unsigned short *adx,
+                       unsigned int    cnt)
+{
+  Status status = SUCCESS;
+
+  while (cnt-- && (status == OK))
+  {
+    status = BUS_Poke (SPC_K_LOCAL, SIZ_K_SHORT, (unsigned long) adx, buf);
+    adx++;
+    buf++;
+  }
+  if (status != OK)
+    BUS_Error (status, SPC_K_LOCAL, SIZ_K_SHORT, (unsigned long) adx);
+
+  return (status);
+}
+
+
+
+static Status DldVerify (unsigned short *buf,
+                         unsigned short *adx,
+                         unsigned int    cnt)
+{
+  Status         status = SUCCESS;
+  unsigned short val;
+  unsigned int   errCnt = 0;
+
+
+  while (cnt-- && (errCnt < 5) && (status == OK))
+  {
+    status = BUS_Peek (SPC_K_LOCAL, SIZ_K_SHORT, (unsigned long) adx, &val);
+    if (val != *buf)
+    {
+      SGL_Error (DWN_VERERR, adx, *buf, val, *buf ^ val);
+      errCnt++;
+    }
+    adx++;
+    buf++;
+  }
+  if (status != OK)
+    BUS_Error (status, SPC_K_LOCAL, SIZ_K_SHORT, (unsigned long) adx);
+
+  return (status);
+}
+#endif
+
+
+
+#ifdef DUMP
+static void DumpFilHdr (FILHDR  *fileHdr)
+{
+  printf ("File header:\n");
+  printf ("\tf_magic:    %8d \t0%o\n",  fileHdr->f_magic,    fileHdr->f_magic);
+  printf ("\tf_nscns:    %8d \t0x%x\n", fileHdr->f_nscns,    fileHdr->f_nscns);
+  printf ("\tf_timdat:   %8d \t0x%x\n", fileHdr->f_timdat,   fileHdr->f_timdat);
+  printf ("\tf_symptr:   %8d \t0x%x\n", fileHdr->f_symptr,   fileHdr->f_symptr);
+  printf ("\tf_nsyms:    %8d \t0x%x\n", fileHdr->f_nsyms,    fileHdr->f_nsyms);
+  printf ("\tf_opthdr:   %8d \t0x%x\n", fileHdr->f_opthdr,   fileHdr->f_opthdr);
+  printf ("\tf_flags:    %8d \t0%o\n",  fileHdr->f_flags,    fileHdr->f_flags);
+}
+
+
+
+static void DumpScnHdr (SCNHDR *scnHdr)
+{
+  printf ("\n%8s - Section header:\n", scnHdr->s_name);
+  printf ("\ts_paddr:    %8d \t0x%x\n", scnHdr->s_paddr,   scnHdr->s_paddr);
+  printf ("\ts_vaddr:    %8d \t0x%x\n", scnHdr->s_vaddr,   scnHdr->s_vaddr);
+  printf ("\ts_size:     %8d \t0x%x\n", scnHdr->s_size,    scnHdr->s_size);
+  printf ("\ts_scnptr:   %8d \t0x%x\n", scnHdr->s_scnptr,  scnHdr->s_scnptr);
+  printf ("\ts_relptr:   %8d \t0x%x\n", scnHdr->s_relptr,  scnHdr->s_relptr);
+  printf ("\ts_lnnoptr:  %8d \t0x%x\n", scnHdr->s_lnnoptr, scnHdr->s_lnnoptr);
+  printf ("\ts_nreloc:   %8d \t0x%x\n", scnHdr->s_nreloc,  scnHdr->s_nreloc);
+  printf ("\ts_nlnno:    %8d \t0x%x\n", scnHdr->s_nlnno,   scnHdr->s_nlnno);
+  printf ("\ts_flags:    %8d \t0x%x\n", scnHdr->s_flags,   scnHdr->s_flags);
+}
+
+
+
+static void DumpRaw (unsigned short  *buffer,
+                     unsigned short  *address,
+                     unsigned int     count)
+{
+  unsigned short *buf = buffer;
+  int             cnt = count;
+  unsigned short *adx = address;
+  int             c;
+
+  printf ("\nRaw data:\n");
+  while (cnt > 0)
+  {
+    printf ("%08x ", (unsigned long) adx);
+    c = 8;
+    while ((c--) && (cnt-- > 0))      printf (" %04x", *buf++);
+    adx += 8;
+    printf ("\n");
+  }
+}
+#endif
+
+
+
+static void ByteSwap (void *bytes,
+                      int   cnt)
+{
+  register char *b = bytes;
+  register int   c = cnt;
+  register char  t;
+
+  while (c > 0)
+  {
+    t    = b[0];
+    b[0] = b[1];
+    b[1] = t;
+    b   += 2;
+    c   -= 2;
+  }
+}
+
+
+
+static void WordSwap (void *words,
+                      int    cnt)
+{
+  register short *w = words;
+  register int    c = cnt >> 1;
+  register short  t;
+
+  while (c > 0)
+  {
+    t    = w[0];
+    w[0] = w[1];
+    w[1] = t;
+    w   += 2;
+    c   -= 2;
+  }
+}
+@
+
+
+1.2
+log
+@Got rid of warnings
+@
+text
+@d69 1
+a72 1
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d70 1
+a70 11
+
+#define NIL   (void *)(0)
+#define NULL           0
+#define TRUE           1
+#define FALSE          0
+#define SUCCESS        0
+#define FAILURE        1
+
+#define Min(a,b)       ((a) < (b) ? (a) : (b))
+#define Max(a,b)       ((a) > (b) ? (a) : (b))
+#define lsizeof(var)   (sizeof (var) >> 2)
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

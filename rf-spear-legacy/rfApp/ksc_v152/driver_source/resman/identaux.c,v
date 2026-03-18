@@ -1,0 +1,403 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  identaux.c
+
+  Identify all VXIbus devices (first step of RM) per section C.4.1.1,
+  Rule C.4.5 of VXIbus System Specification VXI-1, Rev. 1.4; 4/21/92
+  Dynamic configuration per section F.3.1.2.
+
+  MXI functionality per section F of Mainframe Extender Specification
+  VXI-6, Rev. 1.0; 2/7/91
+
+  This file contains the routines which must be run on each mainframe.
+  The auxiliary function defined here is called from the rmIdentify
+  function.
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <time.h>
+
+#include "resman.h"
+
+
+
+/*
+* Entry Point
+*/
+
+int rmIdentifyAux (unsigned short mainframe,
+		   unsigned short extndrLA)
+
+{
+  BusCntl* bus;
+  config_t* thisDev;
+
+  UINT16 data;
+  int status;
+
+  int modID, la;
+  int devCt, i;
+  int maxLA;
+  /*
+   * Rule C.4.5, part 1:  "After the de-assertion of SYSRESET*, wait
+   *  until either SYSFAIL* is de-asserted, or five (5) seconds have
+   *  elapsed (whichever occurs first) ..."
+   *
+   * We delay 0.1 seconds between checks so we don't hog the highway.
+   */
+
+
+  if (mainframe == ROOT_MAINFRAME) {
+    if (VERBOSE)
+      fprintf(stderr, "\nWaiting 5 seconds for SysFail to be de-asserted.\n");
+    for (i = 0; i < 50; i++) {
+      int sysfail = 0;           /* Dummy.  Is there a register bit to check? */
+      if (! sysfail) break;
+      taskDelay(6);
+    }
+  }
+
+  /*
+   * Determine correct bus object to use
+   */
+
+  bus = (mainframe == ROOT_MAINFRAME) ? MAINBUS : 0;
+      
+  /* 
+   * Turn off the MODID output enable bit 
+   * Take the Slot 0 Ctlr off all of the 12 modid lines so can see
+   * all other boards in the chassis.
+   */
+  
+  if (data = bus->chkModId (extndrLA),  data == (UINT16)(-1)) {
+    printf("\nError checking ModID register outputs: extender LA %d\n",
+	   extndrLA);
+  }
+
+  /* 
+   * Determine which slots are occupied (zero == occupied)
+   */
+
+  if (VERBOSE) {
+    printf("VXI modules in slots: ");
+  }
+
+  for (modID = 0; modID < NVXISLOTS; modID++, data >>= 1) {
+    if( (data & 1L) == 0L ) {
+      slotPresent[modID] = SLOT_OCCUPIED;
+      if (VERBOSE) {
+	printf(" %d", modID );
+      }
+    }
+    else {
+      slotPresent[modID] = SLOT_EMPTY;
+    }
+  }
+
+  if (VERBOSE) {
+    printf(".\n");
+  }
+
+  /*
+   * Try all 256 possible logical addresses from 0 to 255 
+   * for the crate and try to match the logical addresses
+   * to slot numbers for the static devices.
+   *
+   * Note: the extender should have been identified from its
+   * child-side partner (the guy in the root mainframe), so
+   * add 1 and start looking inside the parent-side's mainframe.
+   */
+
+   la = (VXI_RESMAN_LA == extndrLA) ? VXI_RESMAN_LA : (extndrLA + 1);
+   for (la=extndrLA+1; la < NVXIADDR; la++) {
+     /*    
+      * Read configuration status register for current l.a. 
+      */
+     
+     status = VXIinReg (la, VXI_STAT_CTRL, &data);
+/*     status = vxMemProbe((0xfbff00000 + 0xc000 + (la << 6) + VXI_STAT_CTRL),0,2,&data); */
+     /* 
+      * Did we bus error?
+      */
+
+     if (status < 0) {
+       /*  
+        * Set L.A. entry to "not in any slot"
+	*/
+       laPresent[la] = LA_NOT_SEEN;
+     }
+     else {
+       /*
+       * Determine device type
+       */
+
+       if (VERBOSE) {
+	 printf("SC Device at LA %3d  \n", la);
+       }
+
+#ifdef KSC_DEBUG1
+printf("\n");
+#endif
+
+#ifdef KSC_DEBUG1
+printf("rmIdentifyAux:calling rmBuildConfig for la %d\n",la);
+#endif
+
+       if ((status = rmBuildConfig (la,mainframe)),  status != 0) {
+		printf("rmBuildConfig failed reading la %d\n",la);
+
+	 return (status);
+       }
+
+       thisDev = TAIL;
+
+       /*
+       * Identify which slot this device occupies 
+       * by selecting the module id line for the occupied
+       * slots in the chassis.
+       */
+
+       for (modID = 0; modID < NVXISLOTS; modID++) {
+	 if( slotPresent[modID] == SLOT_OCCUPIED ) {
+	   /*
+	    * Assert ModId line and read CSR
+	    */
+
+	   bus->setModId (extndrLA, (1 << modID));
+	   status = VXIinReg (la, VXI_STAT_CTRL, &data);
+	   bus->clrModId (extndrLA);
+
+	   /*
+	    * If we see the ModID* bit in CSR is now 0 (normally 1),
+	    * that means this module is in this slot.
+	    */
+
+	   if ((data & 0x4000L) == 0L) {
+	     thisDev->slot = modID;
+	     laPresent[la] = modID;
+
+	     slotPresent[modID] = SLOT_SC_DEVICE;
+	     break;
+	   }
+	 }
+       }
+
+       /*
+	* Did we reach the end without finding it?  If so, report it!
+	*/
+
+       if (modID == NVXISLOTS)
+         WARN "Could not find which slot in mainframe %d LA %d is in.\n",
+           mainframe, la);
+/*/       else {
+//	 if (VERBOSE) {
+//	   printf("at slot %d\n", modID);
+//	 }
+//       }*/
+     }
+   }
+
+  /*
+   * Check for CHILD-SIDE extenders in this mainframe, so that
+   * we know the range of DC devices below
+   */
+
+  maxLA = 254;
+
+  /*
+   * Proceed with DYNAMIC CONFIGURATION
+   */
+
+   if( laPresent[VXIDYNAMICADDR] < NVXISLOTS ) {
+     WARN "There is a Static Configured device at Logical Address %d.",
+       VXIDYNAMICADDR);
+     return( 0 );
+   }
+
+  /*
+   * Only perform DYNAMIC CONFIGURATION in mainframe 0
+   */
+
+   if( ROOT_MAINFRAME == mainframe ) {
+     /* 
+      * For every slot from 1 to 12 find any that need to be
+      * configured (skipping slot zero controller)
+      */
+
+     for( modID = 1; modID < NVXISLOTS; modID++ ) {
+       /* 
+	* If the slot is occupied but not by a static configured device 
+	* then we need to configure it.
+	*/
+
+       if( slotPresent[modID] == SLOT_OCCUPIED ) {
+	 /*
+	  * Assert the slot's modid line by writing to
+	  * the modid register with the bit set for the
+	  * desired slot.
+	  */
+	 
+	 status = bus->setModId (extndrLA, (1 << modID));
+
+	 /* 
+	  * Read the offset register until we get a VXI bus error
+	  */
+
+	 do {
+	   status = VXIinReg (255, 0x06, &data);
+	 } while (status != 0);
+
+	 /*
+	  * If offset indicates a single device, set count to 1 
+	  */
+
+	 devCt = data & 0xFFL;
+	 if( (devCt < 2) || (devCt == 255) ) devCt = 1;
+
+	 /*
+	  * Assign next la to this device
+	  */
+
+	 if (la = rmFindFreeLAs(extndrLA +1, maxLA, devCt), la >= NVXIADDR) {
+	   WARN "Could not assign a logical address for DC device "
+             "in mainframe %d slot %2d\n", mainframe, modID);
+	   continue;
+	 }
+	 else {
+	   /* 
+	    * Good LA assigned 
+	    */
+
+	   if (VERBOSE) {
+	     printf("DC device in slot %2d assigned to LA %3d\n", 
+		    modID, la );
+	   }
+
+	   /*
+	    * Write new la to la register for the device in the slot
+	    */
+
+	   status = VXIoutReg (255, 0x00, (0xFF00 | la));
+	   if (status != 0)
+	     WARN "Could not write new la to la register 
+               in slot %2d\n(tried LA %3d).\n", modID, la);
+
+	   /*
+	    * Verify that the new logical address works 
+	    * by reading a config register (Recommendation F.3.1)
+	    * Here, we read the Device Type reg. @@ offset 02
+	    */
+
+	   status = VXIinReg (la, 0x02, &data);
+
+	   if (status != 0)
+	     WARN "Logical address may not be set properly for DC device 
+               in slot %2d\n(tried LA %3d).\n", modID, la);
+
+	   /*
+	    * Update config table in memory
+	    */
+	     
+	   /* MOVE THIS STUFF OUT OF MODID-ON LOOP???
+	    * GOTTA HANDLE EACH DEVICE IN BLOCK SEPARATELY, YOU KNOW!
+	    */
+
+	   for( i = 0; i < devCt; i++ ) {
+	     laPresent[la + i] = modID;
+#ifdef KSC_DEBUG1
+printf("rmIdentifyAux:calling rmBuildConfig for la %d\n",la);
+#endif
+	     if ((status = rmBuildConfig(la,mainframe)),  status != 0) {
+		printf("rmBuildConfig failed reading la %d\n",la);
+	       return( status );
+	     }
+
+	     thisDev = TAIL;
+	     thisDev->slot = modID;
+	   }
+
+	   if (VERBOSE) {
+	     printf("\n");
+	   }
+	 }
+
+	 /* 
+	  * de-assert the slot's modid line 
+	  */
+
+	 bus->clrModId (extndrLA);
+       }
+     }
+   }
+
+  return 0;
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

@@ -1,0 +1,94 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP - DSP1610 include file
+**
+**  Abstract:
+**      Addresses and masks for the DSP filter
+**
+**  Author:
+**      Dmitry Teytelman
+**
+**  History:
+**      1995-04-09: Created
+**
+** --
+*/
+
+#ifndef FILTER_H
+#define FILTER_H
+
+#define FLT_A_PTR	0xc00
+#define FLT_K_PTRSIZE	0x400
+#define FLT_K_PTRENTRY	4
+
+#define FLT_A_COEFF	0x780
+#define FLT_K_COEFFSIZE	0x80
+#define FLT_A_DATA	0xa00
+#define FLT_K_DATASIZE	0x200
+#define FLT_A_CFG	0x800
+#define FLT_K_CFGSIZE	0x10
+
+/* Shift gain is stored here */
+#define FLT_A_SFT_GAIN	0x801
+
+#define FLT_K_FILTERS	8
+#define FLT_K_MAXTAPS	16
+#define FLT_K_MAXBUNCHES 32
+
+#define FLT_K_SIZE	FLT_A_PTR+FLT_K_PTRSIZE-FLT_A_COEFF
+#define FLT_A_START	FLT_A_COEFF
+
+#endif /* FILTER_H */
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

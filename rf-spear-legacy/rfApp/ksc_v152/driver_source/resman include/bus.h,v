@@ -1,0 +1,113 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.33.04;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.33.04;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  bus.h
+
+  Fundamental VXI bus access routines.
+***************************************************************************/
+
+#ifndef vxiLib_bus_DEFINED
+#define vxiLib_bus_DEFINED
+
+#define VXIBUS_OK		0
+#define VXIBUS_ERR		(-1)
+
+
+#define  MY_LOG_ADDR		0
+#define  MY_BASE_ADDR		(0xC000 + (MY_LOG_ADDR << 6))
+
+#define  GET_MY_REG(x)	    	PEEK16 (VXIBUS_A16, MY_BASE_ADDR+(x))
+#define  PUT_MY_REG(x,v)    	POKE16 (VXIBUS_A16, MY_BASE_ADDR+(x), (v))
+
+
+extern void* vxiBusBase16;
+extern void* vxiBusBase24;
+extern void* vxiBusBase32;
+
+#define VXIBUS_A32		((unsigned char*) vxiBusBase32)
+#define VXIBUS_A24		((unsigned char*) vxiBusBase24)
+#define VXIBUS_A16		((unsigned char*) vxiBusBase16)
+
+#define VXIBUS_D8(adr,ofs)	(* (unsigned char*)  ((adr)+(ofs)))
+#define VXIBUS_D16(adr,ofs)	(* (unsigned short*) ((adr)+(ofs)))
+#define VXIBUS_D32(adr,ofs)	(* (unsigned long*)  ((adr)+(ofs)))
+
+#define PEEK8(adr,ofs)		VXIBUS_D8(adr,ofs)
+#define PEEK16(adr,ofs)		VXIBUS_D16(adr,ofs)
+#define PEEK32(adr,ofs)		VXIBUS_D32(adr,ofs)
+
+#define POKE8(adr,ofs,val)	(VXIBUS_D8(adr,ofs) = (val))
+#define POKE16(adr,ofs,val)	(VXIBUS_D16(adr,ofs) = (val))
+#define POKE32(adr,ofs,val)	(VXIBUS_D32(adr,ofs) = (val))
+
+
+int vxiBusInit (void);
+
+#endif /** DEFINED **/
+
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

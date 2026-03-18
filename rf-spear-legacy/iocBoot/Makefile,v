@@ -1,0 +1,63 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1
+	R_epics_3_14_8_2_rtems_4_7_0:1.1
+	R_epics_3_14_6_spear0:1.1
+	R_3_14_1_spear1:1.1
+	snapshot_may_02_2004_by_ts:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2011.08.08.16.21.26;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.03.17.01.39.54;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Add lines to build ioc directories.
+@
+text
+@TOP = ..
+include $(TOP)/configure/CONFIG
+DIRS += $(wildcard ioc*)
+DIRS += $(wildcard soft-ioc*)
+DIRS += $(wildcard b*-ioc*)
+include $(TOP)/configure/RULES_DIRS
+@
+
+
+1.1
+log
+@From initial setup.
+@
+text
+@d3 4
+a6 1
+include $(TOP)/configure/RULES.iocBoot
+@
+

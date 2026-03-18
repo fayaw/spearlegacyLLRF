@@ -1,0 +1,70 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	stepper-R1-1-spear0:1.2
+	stepper-R1-1:1.1.1.1
+	stepper:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2011.11.11.22.33.26;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	99.10.26.21.20.02;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	99.10.26.21.20.02;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Changes for SPEAR.
+@
+text
+@#CONFIG
+include $(TOP)/configure/CONFIG_APP
+# Add any changes to make rules here
+CROSS_COMPILER_TARGET_ARCHS = vxWorks-ppc604_long
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d4 1
+a4 1
+#CROSS_COMPILER_TARGET_ARCHS = mv167
+@
+
+
+1.1.1.1
+log
+@Stepper motor software from:
+http://www.aps.anl.gov/asd/people/mrk/epics/modules/mechanism/stepper/
+@
+text
+@@

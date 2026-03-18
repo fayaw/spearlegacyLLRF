@@ -1,0 +1,122 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  activeMem.c
+
+  Auxiliary routine to activate A24/A32 memory in VXI device's
+  Control/Status register.  Part of MXI Resource Manager's Configure
+  system A24/A32 address maps function (third of six parts) per section
+  C.4.1.3, Rule C.4.8 of VXIbus System Specification VXI-1, Rev. 1.4;
+  4/21/92
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "resman.h"
+
+
+int rmActivateMemory( void )
+{
+   config_t *thisLA;
+   int status;
+
+/* FOR ALL "ON-LINE" (PASSED) DEVICES WITH A24 OR A32 MEMORY */
+   for( thisLA = HEAD; thisLA != NULL; thisLA = thisLA->next )
+   {
+      if ((thisLA->passed == 1)  &&
+          ((thisLA->adrSpace == VXI_ADDR_EXT_A24)  ||
+	   (thisLA->adrSpace == VXI_ADDR_EXT_A32)))
+      {
+/*       ASSIGN THE A24 or A32 BASE ADDRESSES BY WRITING THE OFFSETS TO
+ *       EACH DEVICE'S OFFSET REGISTER
+ */
+	status = VXIoutReg (thisLA->logAdr, 0x06, thisLA->offset);
+
+	if( status != 0 ) 
+		WARN "Offset may not be set properly for LA %3d.\n",
+			thisLA->logAdr);
+
+/*       ENABLE EACH DEVICE'S A24 OR A32 REGISTERS BY WRITING A ONE TO THE
+ *       A24/A32 ENABLE BIT OF EACH DEVICE'S CONTROL REGISTER
+ */
+	status = VXIoutReg (thisLA->logAdr, 0x04, 0xFFFC);
+
+	if( status != 0 ) 
+		WARN "A24/A32 may not be enabled properly for LA %3d.\n",
+			thisLA->logAdr);
+
+/*    ENDIF PASSED *AND* A24/A32 USED */
+      }
+/* ENDFOR ALL DEVICES */
+   }
+
+/* RETURN "ok" CODE */
+   return( 0 );
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

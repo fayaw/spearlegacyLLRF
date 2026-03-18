@@ -1,0 +1,322 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  mapMem.c
+
+  Main (new) routine for MXI Resource Manager's Configure system A24/A32
+  address maps function (third of six parts) per section C.4.1.3, Rule
+  C.4.8 of VXIbus System Specification VXI-1, Rev. 1.4; 4/21/92
+
+  MXI functionality per section F.2 of Mainframe Extender Specification
+  VXI-6, Rev. 1.0; 2/7/91
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "resman.h"
+
+
+#ifndef max
+#define max(a,b) ((a > b)? (a) : (b))
+#endif
+
+#define  NR_MAINFRAMES  16
+
+typedef struct mainframe {
+  unsigned short mxiLA;
+  unsigned int   nrDevices;
+  unsigned short base;
+  unsigned short size;
+  unsigned short sizeCode;
+} mainframe_t;
+
+extern unsigned short blkBase24;
+extern unsigned short blkSize24;
+extern unsigned short blkBase32;
+extern unsigned short blkSize32;
+
+int rmMapMemory( unsigned short adrSpace, 
+		 nonVxi_t *nonvxiroot,    /*nonvxi */
+                 sharedMem_t *pSharedMem ) /* SBC shared memory */
+{
+   config_t *thisLA;
+
+   mainframe_t bus;
+   mainframe_t crate[NR_MAINFRAMES];
+
+   unsigned int i, mf;
+   unsigned short aXXBase = adrSpace == VXI_ADDR_EXT_A24 ? VXI_BLK_BASE_A24
+                                                         : VXI_BLK_BASE_A32;
+   int status;
+
+/* INITIALIZE mainframe_t STRUCTURES */
+   for( i = 0;  i < NR_MAINFRAMES;  i++ )
+   {
+      crate[i].mxiLA = KSC_NO_MXI_LA;
+      crate[i].nrDevices = 0;
+      crate[i].base = 0;
+      crate[i].size = 0;
+      crate[i].sizeCode = 7;
+   }
+   bus.mxiLA = KSC_NO_MXI_LA;
+   bus.nrDevices = 0;
+   bus.base = 0;
+   bus.size = 0;
+   bus.sizeCode = 7;
+
+   /* FOR ALL DEVICES IN THIS NODE */
+   for( thisLA = HEAD; thisLA != NULL; thisLA = thisLA->next )
+   {
+      /* IF DEVICE IS IN A MAINFRAME */
+      if( thisLA->mainframe != KSC_STANDALONE )
+      {
+         /* IF DEVICE REQUIRES THE SELECTED TYPE OF MEMORY */
+         if( thisLA->adrSpace == adrSpace )
+         {
+            /* ADD ITS MEMORY REQUIREMENTS TO ITS MAINFRAME'S */
+            crate[thisLA->mainframe].nrDevices++;
+            crate[thisLA->mainframe].size += (1 << (15 - thisLA->memRqmt));
+
+         /* ENDIF SELECTED MEMORY */
+         }
+
+         /* IF DEVICE IS A MXI EXTENDER */
+         if( (thisLA->devClass == DEVCL_EXTENDED) &&
+             (thisLA->subclass == VXI_MXI_DEVICE)   )
+         {
+            /* UPDATE THE MAINFRAME'S MXI LA INFO */
+            crate[thisLA->mainframe].mxiLA = thisLA->logAdr;
+
+         /* ENDIF MXI */
+         }
+
+      /* ELSE (STAND-ALONE DEVICE) */
+      }
+#if MXIRM_STANDALONE
+      else
+      {
+         /* ADD ITS MEMORY REQUIREMENTS TO BUS ONLY */
+         bus.nrDevices++;
+         bus.size += (1 << (15 - thisLA->memRqmt));
+
+      /* ENDIF IN MAINFRAME */
+      }
+#endif
+   /* ENDFOR ALL DEVICES */
+   }
+
+   /* FOR ALL VALID MAINFRAMES (M/F) */
+   for( mf = ROOT_MAINFRAME;  mf < NR_MAINFRAMES;  mf++ )
+   {
+      /* IF ROOT M/F OR IF MXI EXTENDER PRESENT (THUS VALID MAINFRAME) */
+      if( (mf == ROOT_MAINFRAME) ||
+          (crate[mf].mxiLA != KSC_NO_MXI_LA) )
+      {
+         /* ROUND UP THE TOTAL MEMORY REQUIREMENT OF THIS MAINFRAME
+          * TO THE NEXT POWER-OF-2 BOUNDARY ALLOWED BY THE ADDRESS
+          * WINDOW REGISTERS.
+          */
+         for( i = 7;  i >= 0;  i-- )
+         {
+            if( (0x0100 << (8-i)) >= crate[mf].size )
+               break;
+         }
+         crate[mf].size = (0x01 << (8-i));   /* 26jan96 */
+         crate[mf].sizeCode = i;
+
+         /*  IF NOT ROOT M/F, ADD INTO BUS REQUIREMENT */
+         if( mf != ROOT_MAINFRAME )
+         {
+            bus.nrDevices += crate[mf].nrDevices;
+            bus.size      += crate[mf].size;
+         }
+
+      /* ENDIF ROOT OR MXI */
+      }
+
+   /* ENDFOR MAINFRAMES */
+   }
+#if 0
+//   /* FUTILITY CHECK:  IF NO DEVICES AT ALL, WE'RE DONE. */
+//   if( (crate[ROOT_MAINFRAME].nrDevices == 0)
+//       &&
+//       (bus.nrDevices == 0)
+//     )
+//   {
+//         status = assignSBCSharedMem(pSharedMem,HEAD,adrSpace);
+//         status = assignNonVxiMem(nonvxiroot,HEAD,adrSpace);
+//         status = assignMemory(adrSpace, mf, crate[mf].base << 8);
+//      return( 0 );
+//   }
+#endif
+   /* UPDATE BUS' SIZE & SIZE CODE
+    * NOW THAT ALL MAINFRAMES HAVE BEEN COUNTED.
+    */
+         for( i = 7;  i >= 0;  i-- )
+         {
+            if( (0x01 << (8-i)) >= bus.size )
+               break;
+         }
+         bus.size = (0x01 << (8-i));
+         bus.sizeCode = i;
+
+   /* A24 devices are managed in 0x0100 byte chunks;
+    * A32 in 0x1_0000 byte chunks. 16 different sizes are allowed.
+    * Address windows, however, are in 0x02_0000 and 0x0200_0000 byte
+    * chunks, respectively.  Only 8 sizes are allowed.
+    */
+
+   /* TO BE BUILT:  CALL TO assignMainframeMemory */
+
+   /* FOR ALL VALID MAINFRAMES (M/F) */
+   for( mf = ROOT_MAINFRAME;  mf < NR_MAINFRAMES;  mf++ )
+   {
+      /* IF ROOT M/F OR IF MXI EXTENDER PRESENT (THUS VALID MAINFRAME)
+       * *AND* HAS AT LEAST ONE DEVICE WITH MEMORY IN IT
+       */
+      if( ( (mf == ROOT_MAINFRAME)
+            ||
+            (crate[mf].mxiLA != KSC_NO_MXI_LA)
+          )
+/*/          &&*/
+/*/          (crate[mf].nrDevices != 0)*/
+        )
+      {
+         crate[mf].base = aXXBase;
+#if 0  
+/*/ this information isnt always correct, so why print it out?*/
+         if(VERBOSE)
+         {
+            printf("Mainframe %d has %d A%d device(s) and 0x%X%s_0000",
+                mf,
+                crate[mf].nrDevices,
+                (adrSpace == VXI_ADDR_EXT_A32)? 32 : 24,
+                crate[mf].size,
+                (adrSpace == VXI_ADDR_EXT_A32)? "00":"" );
+            printf(" bytes of\n   memory starting at 0x%X%s_0000\n",
+                   aXXBase,
+                  (adrSpace == VXI_ADDR_EXT_A32)? "00":"" );
+         }
+#endif
+
+        /* CONFIGURE ADDRESS MAP IN M/F USING "OLD" PROCEDURE:
+          * Assign memory from largest to smallest needed.
+          */
+
+         /* New method for assigning memory - based on free blocks */
+         InitMemBlocks(crate[mf].base << 8,
+                       adrSpace == VXI_ADDR_EXT_A24 ?
+                                      VXI_BLK_REMN_A24(crate[mf].base) << 8 :
+                                      VXI_BLK_REMN_A32(crate[mf].base) << 8);
+/*/                     adrSpace == VXI_ADDR_EXT_A24 ? (0x100-crate[mf].base)<<8*/
+/*/                                                  : (0x50-crate[mf].base)<<8);*/
+         status = assignSBCSharedMem(pSharedMem,HEAD,adrSpace);
+         status = assignNonVxiMem(nonvxiroot,HEAD,adrSpace);
+         status = assignMemory( adrSpace,
+                                mf,
+                                crate[mf].base << 8);
+         DestroyMemBlocks();
+         aXXBase += crate[mf].size;
+
+         /* CONFIGURE MXI ADDRESS WINDOW REGISTER:
+          * IF ROOT M/F, USE BUS DATA TO SET CHILD-SIDE EXTENDER,
+          * if there are actually memory devices out on the MXIbus.
+          */
+         if( mf == ROOT_MAINFRAME )
+         {
+            if( bus.nrDevices > 0 )
+            {
+               status = setAddressWindow( crate[mf].mxiLA, 
+                                       adrSpace,
+                                       MXI_OUTWARD,
+                                       aXXBase,
+                                       bus.size,
+                                       bus.sizeCode);
+            }
+         }
+         else
+         {
+            status = setAddressWindow( crate[mf].mxiLA, 
+                                       adrSpace,
+                                       MXI_INWARD,
+                                       crate[mf].base,
+                                       crate[mf].size,
+                                       crate[mf].sizeCode);
+         }
+
+      /* ENDIF ROOT OR MXI */
+      }
+
+   /* ENDFOR MAINFRAMES */
+   }
+
+/* RETURN "ok" CODE */
+   return( 0 );
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

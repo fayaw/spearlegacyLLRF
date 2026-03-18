@@ -1,0 +1,65 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2006.10.31.23.53.22;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2005.05.16.23.48.43;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Added SRF1 with a gain factor of 1.
+@
+text
+@LR42 1
+LR43 10
+LR44 1
+LR45 1
+HR41 1
+HR81 1
+HR83 1
+HR85 1
+HR21 1
+HR22 1
+HR23 1
+HR25 1
+HR26 1
+SRF1 1
+@
+
+
+1.1
+log
+@Recent changes from PEPII.
+@
+text
+@d14 1
+@
+

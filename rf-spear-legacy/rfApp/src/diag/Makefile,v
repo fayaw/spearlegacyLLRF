@@ -1,0 +1,120 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2011.12.07.00.58.18;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.43;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.43;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Changes for 3.14.11 build.
+@
+text
+@#==============================================================
+#
+#  Abs:  Makefile for EPICS RF IOC components
+#      
+#  Name: Makefile
+#
+#  Facility:  SLAC/PEPII Low Level RF
+#
+#  Auth: dd-mmm-yyyy, Author's Name    (USERNAME)
+#  Rev:  dd-mmm-yyyy, Reviewer's Name  (USERNAME)
+#
+#--------------------------------------------------------------
+#  Mod:
+#        28-Jan-2005, M. Laznovsky (LAZMO)
+#          Port to EPICS 3.14.6
+#        15-Jan-2004, S. Allison (saa):
+#          Moved vxiBaseIsr.c to $EPICS/site/src/diag.
+#        09-Sep-2003, K. Luchini       (LUCHINI):
+#          Changed definition of VxWorks directory
+#
+#==============================================================
+#
+TOP=../../..
+include $(TOP)/configure/CONFIG
+
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+#----------------------------------------
+
+TGT_DIR = $(VX_DIR)/target/config/mv2400
+
+USR_INCLUDES += -I $(TGT_DIR)
+USR_INCLUDES += -I $(VX_DIR)/target/config/all
+USR_INCLUDES += -I $(TGT_DIR)/V152/Include
+USR_INCLUDES += -I ../../base
+
+# Compile source
+
+LIBRARY_IOC_vxWorks = rfDiag
+
+rfDiag_SRCS += rf_vxi_diag.c
+rfDiag_SRCS += rf_rfpDiags.c
+rfDiag_SRCS += rf_ripTest.c
+
+include $(TOP)/configure/RULES
+
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+#----------------------------------------
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 22
+d24 26
+a49 2
+include $(TOP)/config/CONFIG_APP.Vxi
+include $(TOP)/config/RULES_ARCHS
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

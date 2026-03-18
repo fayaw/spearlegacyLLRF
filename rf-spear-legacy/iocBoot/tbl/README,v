@@ -1,0 +1,115 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R1_0:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.12.04.15.06.53;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.12.04.15.06.53;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#==============================================================
+#
+#  Name: README
+#
+#  Rem:  The files in this directory are tables containing
+#        configuration data (read-only), or coefficients.
+#        These tables are currently only used for rf ioc
+#        applications. However, this directory is ment to
+#        contain general ioc application tables.
+#
+#  Side:  All ioc startup files conform to the following
+# 
+#  Loc:  /afs/slac/g/cd/soft/ref/epics/iocBoot/tbl
+#
+#  Auth: 15-Jan-2003, K. Luchini      (LUCHINI)
+#  Rev:  dd-mmm-yyyy, Reviewer's Name (USERNAME)
+#--------------------------------------------------------------
+#  Mod:
+#       dd-mmm-yyyy, First Lastname   (USERNAME):
+#           comments
+#
+#==============================================================
+#
+Filename             Description
+----------           -----------------
+README                This file
+AmplCoefs.tbl
+DRIVE_HER_I
+DRIVE_HER_Q
+DRIVE_LER_I
+DRIVE_LER_Q
+NOISE_I_BL
+NOISE_I_BL.out
+NOISE_I_BL_SMALL
+NOISE_I_BL_SMALL.out
+NOISE_Q_BL
+NOISE_Q_BL.out
+NOISE_Q_BL_SMALL
+NOISE_Q_BL_SMALL.out
+PhaseCoefs.tbl
+SWEEP_1000_I
+SWEEP_1000_Q
+SWEEP_400_I
+SWEEP_400_Q
+TICKLE_I
+TICKLE_Q
+WOOFER_NOISE.tbl
+aimDas0.inst
+aimDas1.inst
+cfmIirCoefsHER.tbl
+cfmIirCoefsLER.tbl
+cfmThru1.tbl
+detunEqHER.tbl
+detunEqLER.tbl
+gvfDspConsts.tbl
+gvfHERdetun.tbl
+gvfLERdetun.tbl
+gvfPlayMem.tbl
+gvfThru1.tbl
+iqaDdf_23KHz.rpt
+iqaDdf_50Hz.rpt
+@
+
+
+1.1.1.1
+log
+@initial import
+@
+text
+@@

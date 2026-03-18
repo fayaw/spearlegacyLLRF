@@ -1,0 +1,326 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.01.10.23.22.48;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.48;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  CLK - Clock & RF distribution module
+**
+**  Abstract:
+**      Parameter and register definitions for the Clock and RF Distribution
+**      module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II RF Project
+**
+**   History:
+**      June 21, 1996 - R. Claus       Created
+**   October 16, 1996 - R. Claus       Added the "meat"
+**   December 5, 1997 - Robert C. Sass Support Version 2 of the board. New/revised
+**                                     register definitions begin with V2...
+**   October 30, 2002 - K. Luchini     Support Version 3 of the board
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef CLKDEF_H
+#define CLKDEF_H
+
+#include <drvP2RfVxi.h>
+
+#define CLK_K_MAKE       P2RF_K_MAKE
+#define CLK_K_MODEL      0x106
+#define CLK_K_NAME       "Clock & RF Distribution"
+#define CLK_K_DRAWING    "340-306"
+
+/* Amount of time CLK needs to complete software reset */
+#define CLK_K_RESETTMO   (1 * sysClkRateGet ())
+
+/* A16 space registers: */
+#define CLK_A_MANID       0x00          /* ID/LA register */
+#define CLK_I_MANID       STD2IDX (CLK_A_MANID)
+#define CLK_A_MODELNO     0x02          /* Device type register */
+#define CLK_I_MODELNO     STD2IDX (CLK_A_MODELNO)
+#define CLK_A_STATUS      0x04          /* Status register */
+#define CLK_I_STATUS      STD2IDX (CLK_A_STATUS)
+#define CLK_A_CONTROL     0x04          /* Control register */
+#define CLK_I_CONTROL     STD2IDX (CLK_A_CONTROL)
+#define CLK_A_ATTRIBUTE   0x08          /* Attribute register */
+#define CLK_I_ATTRIBUTE   STD2IDX (CLK_A_ATTRIBUTE)
+#define CLK_A_SERIALHI    0x0a          /* Serial number high register */
+#define CLK_I_SERIALHI    STD2IDX (CLK_A_SERIALHI)
+#define CLK_A_SERIALLO    0x0c          /* Serial number low register */
+#define CLK_I_SERIALLO    STD2IDX (CLK_A_SERIALLO)
+#define CLK_A_VERSION     0x0e          /* Version number register */
+#define CLK_I_VERSION     STD2IDX (CLK_A_VERSION)
+#define CLK_A_INTSTAT     0x1a          /* Interrupt status register */
+#define CLK_I_INTSTAT     STD2IDX (CLK_A_INTSTAT)
+#define CLK_A_INTCTRL     0x1c          /* Interrupt control register */
+#define CLK_I_INTCTRL     STD2IDX (CLK_A_INTCTRL)
+#define CLK_A_SUBCLASS    0x1e          /* Subclass register */
+#define CLK_I_SUBCLASS    STD2IDX (CLK_A_SUBCLASS)
+
+#define CLK_A_TRGCTRL     0x20          /* Trigger Control register */
+#define CLK_I_TRGCTRL     STD2IDX (CLK_A_TRGCTRL)
+#define CLK_A_HARMNORB    0x22          /* Harmonic number readback register */
+#define CLK_I_HARMNORB    STD2IDX (CLK_A_HARMNORB)
+
+#define CLK_A_CLKCTRL     0x24          /* Clock Control register */
+#define CLK_I_CLKCTRL     STD2IDX (CLK_A_CLKCTRL)
+#define CLK_A_V2DLYCTRL   0x24          /* V2 Delay Control register */
+#define CLK_I_V2DLYCTRL   STD2IDX (CLK_A_V2DLYCTRL)/* Replaces CLKCTRL on board version 2 */ 
+
+#define CLK_A_RESYNCH     0x26          /* Resyncronize Command register */
+#define CLK_I_RESYNCH     STD2IDX (CLK_A_RESYNCH)
+
+#define CLK_A_V2SYNCHCAL  0x26      /* V2 syncronize/calibrate Command register */
+#define CLK_I_V2SYNCHCAL  STD2IDX (CLK_A_V2SYNCHCAL)
+
+#define CLK_A_39MHZPLL    0x28          /* 39.3 MHz Phase-Locked Loop Consts */
+#define CLK_I_39MHZPLL    STD2IDX (CLK_A_39MHZPLL)
+
+#define CLK_A_V239MHZPLL1 0x28        /* V2 39.3 MHz Phase-Locked Loop Consts 1 */
+#define CLK_I_V239MHZPLL1 STD2IDX (CLK_A_V239MHZPLL1)
+#define CLK_A_V239MHZPLL2 0x2a        /* V2 39.3 MHz Phase-Locked Loop Consts 2 */
+#define CLK_I_V239MHZPLL2 STD2IDX (CLK_A_V239MHZPLL2)
+#define CLK_A_V2471MHZPLL 0x2c       /* V2 471.1 MHz Phase-Locked Loop Consts */
+#define CLK_I_V2471MHZPLL STD2IDX (CLK_A_V2471MHZPLL)
+#define CLK_A_V2CALIBPLL1 0x2e       /* V2 Calibration Phase-Locked Loop Consts 1 */
+#define CLK_I_V2CALIBPLL1 STD2IDX (CLK_A_V2CALIBPLL1)
+
+#define CLK_A_V3DLYPRST  0x2e        /* V3 Clock Delay Preset Constants Register */
+#define CLK_I_V3DLYPRST  STD2IDX  (CLK_A_V3DLYPRST)
+
+#define CLK_A_V2CALIBPLL2 0x30         /* V2 Calibration Phase-Locked Loop Consts 2 */
+#define CLK_I_V2CALIBPLL2 STD2IDX (CLK_A_V2CALIBPLL2)
+
+#define CLK_A_V3CFGID    0x30       /* V3 Configuration ID Constants Register   */
+#define CLK_I_V3CFGID    STD2IDX  (CLK_A_V3CFGID)
+
+#define CLK_A_471MHZPLL   0x2a          /* 471.1 MHz Phase-Locked Loop Consts */
+#define CLK_I_471MHZPLL   STD2IDX (CLK_A_471MHZPLL)
+
+/* Control and Status Register */
+#define CLK_V_SFTRST      0
+#define CLK_M_SFTRST     (0x0001 << CLK_V_SFTRST)
+#define CLK_V_SYSFAILINH  1
+#define CLK_M_SYSFAILINH (0x0001 << CLK_V_SYSFAILINH)
+#define CLK_V_PASSED      2
+#define CLK_M_PASSED     (0x0001 << CLK_V_PASSED)
+#define CLK_V_READY       3
+#define CLK_M_READY      (0x0001 << CLK_V_READY)
+#define CLK_V_SFTINT      5
+#define CLK_M_SFTINT     (0x0001 << CLK_V_SFTINT)
+#define CLK_V_SIE         6
+#define CLK_M_SIE        (0x0001 << CLK_V_SIE)
+#define CLK_V_DCE         7
+#define CLK_M_DCE        (0x0001 << CLK_V_DCE)
+#define CLK_V_MODIDCOMPL  14
+#define CLK_M_MODIDCOMPL (0x0001 << CLK_V_MODIDCOMPL)
+
+/* Interrupt Status and Control Registers */
+#define CLK_V_INTLA       0
+#define CLK_M_INTLA      (0x00ff << CLK_V_INTLA)
+#define CLK_V_INTLEVEL    3
+#define CLK_M_INTLEVEL   (0x0007 << CLK_V_INTLEVEL)
+#define CLK_V_INTMASK     7
+#define CLK_M_INTMASK    (0x0001 << CLK_V_INTMASK)
+#define CLK_V_FIDERR      8
+#define CLK_M_FIDERR     (0x0001 << CLK_V_FIDERR)
+#define CLK_V_FIDLOS      9
+#define CLK_M_FIDLOS     (0x0001 << CLK_V_FIDLOS)
+#define CLK_V_PLL1U       10
+#define CLK_M_PLL1U      (0x0001 << CLK_V_PLL1U)
+#define CLK_V_PLL2U       11
+#define CLK_M_PLL2U      (0x0001 << CLK_V_PLL2U)
+
+
+#define CLK_V_V2PLL1U       10
+#define CLK_M_V2PLL1U      (0x0001 << CLK_V_V2PLL1U)
+#define CLK_V_V2PLL2U       11
+#define CLK_M_V2PLL2U      (0x0001 << CLK_V_V2PLL2U)
+#define CLK_V_V2PLL3U       12
+#define CLK_M_V2PLL3U      (0x0001 << CLK_V_V2PLL3U)
+
+
+#define CLK_V_V3RFLOSS      12
+#define CLK_M_V3RFLOSS     (0x0001 << CLK_V_V3RFLOSS)
+#define CLK_V_V3EXTINT      13
+#define CLK_M_V3EXTINT     (0x0001 << CLK_V_V3EXTINT)
+
+#define CLK_V_INVADX      14
+#define CLK_M_INVADX     (0x0001 << CLK_V_INVADX)
+#define CLK_V_SOFTWARE    15
+#define CLK_M_SOFTWARE   (0x0001 << CLK_V_SOFTWARE)
+
+/* Trigger Control Register */
+#define CLK_V_AUXOUT      0
+#define CLK_M_AUXOUT     (0x0007 << CLK_V_AUXOUT)
+#define CLK_V_AUXOUTENB   3
+#define CLK_M_AUXOUTENB  (0x0001 << CLK_V_AUXOUTENB)
+#define CLK_V_AUXIN       4
+#define CLK_M_AUXIN      (0x0007 << CLK_V_AUXIN)
+#define CLK_V_AUXINENB    7
+#define CLK_M_AUXINENB   (0x0001 << CLK_V_AUXINENB)
+#define CLK_V_SOFTTRG     8
+#define CLK_M_SOFTTRG    (0x00ff << CLK_V_SOFTTRG)
+
+#define CLK_V_V3SOFTTRG   8
+#define CLK_M_V3SOFTTRG  (0x00f4 << CLK_V_V3SOFTTRG)
+
+#define CLK_K_AUXOUT      0
+#define CLK_K_AUXIN       1
+#define CLK_K_SOFTTRG     0
+
+/* Delay/Clock Control Register */
+#define CLK_V_FIDDEL      0
+#define CLK_M_FIDDEL     (0x007f << CLK_V_FIDDEL)
+#define CLK_V_TRNCLKSEL   7
+#define CLK_M_TRNCLKSEL  (0x0001 << CLK_V_TRNCLKSEL)
+#define CLK_V_C39DELSEL   8
+#define CLK_M_C39DELSEL  (0x000f << CLK_V_C39DELSEL)
+#define CLK_V_V2TCLKDELSEL 12
+#define CLK_M_V2TCLKDELSEL (0x000f << CLK_V_V2TCLKDELSEL)
+
+/* V2 synch/calibrate command register */
+#define CLK_V_V2SNCHDELSEL   0
+#define CLK_M_V2SNCHDELSEL  (0x000f << CLK_V_V2SNCHDELSEL)
+#define CLK_V_V2SYNON    4
+#define CLK_M_V2SYNON    (0x0001 << CLK_V_V2SYNON)
+#define CLK_V_V2CALON    5
+#define CLK_M_V2CALON  (0x0001 << CLK_V_V2CALON)
+
+/* Various delay steps */
+#define CLK_K_FIDDELRES     0.02          /* ns */
+#define CLK_K_C39DELRES     1.5           /* ns */
+#define CLK_K_V2TCLKDELRES  1.5           /* ns */
+#define CLK_K_V2SNCHDELRES  1.5           /* ns */
+
+/* Phase-Locked Loop Constants */
+#define CLK_V_R           0
+#define CLK_M_R          (0x000f << CLK_V_R)
+#define CLK_V_A           4
+#define CLK_M_A          (0x000f << CLK_V_A)
+#define CLK_V_M           8
+#define CLK_M_M          (0x007f << CLK_V_M)
+#define CLK_V_PREENB      15
+#define CLK_M_PREENB     (0x0001 << CLK_V_PREENB)
+
+#define ClkConsts(r,a,m,p) ((r << CLK_V_R) | (a << CLK_V_A) | \
+                            (m << CLK_V_M) | (p << CLK_V_PREENB))
+
+/* 39.3 MHz PEP-II values: all 18 ns @@1.5ns/tick */
+#define CLK_K_39R         0xC
+#define CLK_K_39A         0xC
+#define CLK_K_39M         0xC
+#define CLK_K_39P         0
+
+#define CLK_K_39CONST    ClkConsts(CLK_K_39R, CLK_K_39A, \
+                                   CLK_K_39M, CLK_K_39P)
+
+/* 471.1 MHz PEP-II values: */
+#define CLK_K_471R_N      7
+#define CLK_K_471A_N      6
+#define CLK_K_471M_N      8
+#define CLK_K_471P_N      0
+
+#define CLK_K_471R_L      7
+#define CLK_K_471A_L      6
+#define CLK_K_471M_L      8
+#define CLK_K_471P_L      0
+
+#define CLK_K_471R_H      7
+#define CLK_K_471A_H      6
+#define CLK_K_471M_H      8
+#define CLK_K_471P_H      0
+
+
+#define CLK_K_471NORM    ClkConsts(CLK_K_471R_N, CLK_K_471A_N, \
+                                   CLK_K_471M_N, CLK_K_471P_N)
+#define CLK_K_471LOW     ClkConsts(CLK_K_471R_L, CLK_K_471A_L, \
+                                   CLK_K_471M_L, CLK_K_471P_L)
+#define CLK_K_471HIGH    ClkConsts(CLK_K_471R_H, CLK_K_471A_H, \
+                                   CLK_K_471M_H, CLK_K_471P_H)
+
+/* Configuration ID Constants Register */
+#define CLK_V_V3CFGID    0
+#define CLK_M_V3CFGID   (0xffff << CLK_V_V3CFGID)
+
+#endif
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

@@ -1,0 +1,933 @@
+head	1.10;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.10
+	RF-SPEAR-R0-3-1:1.10
+	RF-SPEAR-R0-3-0:1.10
+	RF-SPEAR-R0-2-0:1.9
+	RF-SPEAR-R0-1-0:1.9
+	RF-SPEAR-R0-0-3:1.9
+	RF-SPEAR-R0-0-2:1.9
+	RF-SPEAR-R0-0-1:1.9
+	RF-SPEAR-R0-0-0:1.9
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.8
+	RF-3-13-10:1.8.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.8
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.8
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.8
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.10
+date	2016.12.13.21.36.10;	author saa;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2012.08.13.18.37.15;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2009.06.29.17.04.11;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2009.06.22.18.57.28;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2009.06.19.19.13.49;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2008.05.19.15.42.46;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.06.21.23.05.01;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.06.15.00.58.28;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2004.01.05.19.25.27;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.46;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.46;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.10
+log
+@Add seq record to stop&init all 4 tuners.
+@
+text
+@record(ao,"$(S):CAV:FREQOFFS:SMOO") {
+	field(DESC,"Cav Freq Offset Smoothing")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"3")
+	field(EGUF,"1")
+	field(DRVH,"1")
+	field(HOPR,"1")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+record(ao,"$(S):CAV:STRENGTH:DIFF") {
+	field(DESC,"Cav Strength Allowable Diff")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"3")
+	field(EGUF,"100")
+	field(EGU,"Percent")
+	field(DRVH,"100")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+record(ao,"$(S):CAV:VACM:MAX") {
+	field(DESC,"Cavity Vacuum Limit")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(S):CAVVACM:CHECK.E  NPP NMS")
+	field(PREC,"10")
+	field(EGUF,"5E-7")
+	field(EGU,"Torr")
+	field(DRVH,"5E-7")
+	field(HOPR,"5E-7")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+record(ao,"$(S):CAV:VOLT:MAX") {
+	field(DESC,"Cavity Voltage Limit")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(VAL, "850")
+	field(OUT,"$(S):CAVVOLT:CHECK.E  NPP NMS")
+	field(PREC,"2")
+	field(EGUF,"1000")
+	field(EGU,"kV")
+	field(DRVH,"1000")
+	field(HOPR,"1000")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+record(ao,"$(S):CAVLOAD:ANGLE:ERRMAX") {
+	field(DESC,"Load Angle Error Maximum")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(FLNK,"$(S):CAVLOAD:ANGLE:EMAXNEG.VAL  PP NMS")
+	field(PREC,"3")
+	field(EGUF,"180")
+	field(EGU,"deg")
+	field(DRVH,"180")
+	field(HOPR,"180")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+record(ao,"$(S):CAVLOAD:ANGLE:FORGET") {
+	field(DESC,"Load Angle Offset Forget")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"6")
+	field(EGUF,"1")
+	field(DRVH,"1")
+	field(HOPR,"1")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+record(ao,"$(S):CAVLOAD:ANGLE:K") {
+	field(DESC,"Load Angle Offset K")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"6")
+	field(EGUF,"1")
+	field(EGU,"deg/Per")
+	field(DRVH,"1")
+	field(HOPR,"1")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+record(ao,"$(S):CAVTUNR:LOOP:GAIN") {
+	field(DESC,"Cavity Tuner Loop Gain")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"1")
+	field(DRVH,"1")
+	field(HOPR,"1")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+record(ao,"$(S):HVPS:VOLT:FASTON") {
+	field(DESC,"Fast Turnon Stn Voltage")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"3500")
+	field(EGU,"kV")
+	field(DRVH,"3500")
+	field(HOPR,"3500")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+record(ao,"$(S):STN:PHASE") {
+	field(DESC,"STNPHASE  Station Phase")
+	field(DTYP,"Soft Channel")
+	field(PINI,"YES")
+	field(PREC,"2")
+	field(EGUF,"200")
+	field(EGUL,"-200")
+	field(EGU,"deg")
+	field(DRVH,"200")
+	field(DRVL,"-200")
+	field(HOPR,"200")
+	field(LOPR,"-200")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+record(ao,"$(S):STN:VOLT:CTRL") {
+	field(DESC,"STNVLTDES Stn Volt Control")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(S):STNTRANS:VOLT:CTRL.VAL  PP NMS")
+	field(OUT,"$(S):STNCURR:VOLT:CTRL.VAL  PP NMS")
+	field(PREC,"2")
+	field(EGUF,"3500")
+	field(EGU,"kV")
+	field(DRVH,"3500")
+	field(HOPR,"3500")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+record(ao,"$(S):STNCURR:VOLT:CTRL") {
+	field(DESC,"Stn Volt Control")
+	field(DTYP,"Soft Channel")
+	field(PREC,"2")
+	field(EGUF,"3500")
+	field(EGU,"kV")
+	field(DRVH,"3500")
+	field(HOPR,"3500")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+record(bo,"$(S):CAVLOAD:ANGLE:CTRL") {
+	field(DESC,"Load Angle Offset Enable")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(S):CAVLOAD:ANGLE:FANO.VAL  PP NMS")
+	field(ZNAM,"OFF")
+	field(ONAM,"ON")
+	field(IVOA,"Set output to IVOV")
+}
+record(bo,"$(S):CAVTUNR:LOOP:CTRL") {
+	field(DESC,"Cavity Tuner Loop Enable")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(ZNAM,"OFF")
+	field(ONAM,"ON")
+	field(ZSV,"MAJOR")
+	field(IVOA,"Set output to IVOV")
+}
+record(calc,"$(S):CAVLOAD:ANGLE:EMAXNEG") {
+	field(DESC,"Load Angle Error Neg Max")
+	field(FLNK,"$(S):CAVLOAD:ANGLE:SELMAX.VAL  PP NMS")
+	field(CALC,"-1*A")
+	field(INPA,"$(S):CAVLOAD:ANGLE:ERRMAX.VAL  NPP NMS")
+	field(EGU,"deg")
+	field(PREC,"3")
+	field(HOPR,"-180")
+}
+record(calc,"$(S):CAVVACM:CHECK") {
+	field(DESC,"Cavity Vacuum Limit Check")
+	field(FLNK,"$(S):CAVVOLT:CHECK.VAL  PP NMS")
+	field(CALC,"(A>E)||(B>E)||(C>E)||(D>E)")
+	field(INPA,"$(S):CAV1:VACM.VAL  NPP NMS")
+	field(INPB,"$(S):CAV2:VACM.VAL  NPP NMS")
+	field(INPC,"$(S):$(C3):VACM.VAL  NPP NMS")
+	field(INPD,"$(S):$(C4):VACM.VAL  NPP NMS")
+	field(HOPR,"1")
+	field(HIHI,"0.5")
+	field(HHSV,"MAJOR")
+}
+record(calc,"$(S):CAVVOLT:CHECK") {
+	field(DESC,"Cavity Voltage Limit Check")
+	field(FLNK,"$(S):CAV:STRENGTH:FANO.VAL  PP NMS")
+	field(CALC,"(A*F>E)||(B*G>E)||(C*H>E)||(D*I>E)")
+	field(INPA,"$(S):CAV1PROBE:AMPL.VAL  NPP NMS")
+	field(INPB,"$(S):CAV2PROBE:AMPL.VAL  NPP NMS")
+	field(INPC,"$(S):$(C3)PROBE:AMPL.VAL  NPP NMS")
+	field(INPD,"$(S):$(C4)PROBE:AMPL.VAL  NPP NMS")
+	field(INPF,"$(S):STN:VOLT:FACTOR.A  NPP NMS")
+	field(INPG,"$(S):STN:VOLT:FACTOR.B  NPP NMS")
+	field(INPH,"$(S):STN:VOLT:FACTOR.C  NPP NMS")
+	field(INPI,"$(S):STN:VOLT:FACTOR.D  NPP NMS")
+	field(HOPR,"1")
+	field(HIHI,"0.5")
+	field(HHSV,"MAJOR")
+}
+record(compress,"$(S):STN:VOLT:HIST") {
+	field(DESC,"Station Voltage History")
+	field(FLNK,"$(S):CAV:FREQOFFSHIST:FANO.VAL  PP NMS")
+	field(INP,"$(S):STN:VOLT.VAL  NPP NMS")
+	field(ALG,"Circular Buffer")
+	field(NSAM,"300")
+	field(N,"300")
+	field(HOPR,"3500")
+	field(EGU,"kV")
+}
+record(compress,"$(S):STNHCW:TEMPHst") {
+	field(DESC,"Station HCW Temp History")
+	field(INP,"$(S):STNHCW:TEMP MS")
+	field(ALG,"Circular Buffer")
+	field(ASG,"Internal")
+	field(NSAM,"600")
+	field(SCAN,"1 second")
+	field(N,"600")
+	field(HOPR,"30")
+	field(LOPR,"20")
+	field(EGU,"C")
+}
+record(event,"$(S):CAVTUNR:LOOP:READY") {
+	field(DESC,"Cavity Tuner Loop Ready")
+	field(DTYP,"Soft Channel")
+}
+record(event,"$(S):CAVTUNR:LOOPON:HOME") {
+	field(DESC,"Cavity Tuner Loop ON Home")
+	field(DTYP,"Soft Channel")
+}
+record(event,"$(S):CAVTUNR:LOOPON:RESET") {
+	field(DESC,"Cavity Tuner Loop ON Reset")
+	field(DTYP,"Soft Channel")
+}
+record(event,"$(S):CAVTUNR:LOOPPARK:HOME") {
+	field(DESC,"Cavity Tuner Loop PARK Home")
+	field(DTYP,"Soft Channel")
+}
+record(event,"$(S):CAVTUNR:LOOPPARK:RESET") {
+	field(DESC,"Cavity Tuner Loop PARK Reset")
+	field(DTYP,"Soft Channel")
+}
+record(sel,"$(S):CAVLOAD:ANGLE:SELMAX") {
+	field(DESC,"Load Angle Maximum Select")
+	field(FLNK,"$(S):CAVLOAD:ANGLE:SELMIN.VAL  PP NMS")
+	field(PREC,"3")
+	field(NVL,"$(S):STN:STATE:RBCK.VAL  NPP NMS")
+	field(INPA,"180")
+	field(INPB,"180")
+	field(INPC,"$(S):CAVLOAD:ANGLE:ERRMAX.VAL  NPP NMS")
+	field(INPD,"180")
+	field(INPE,"$(S):CAVLOAD:ANGLE:ERRMAX.VAL  NPP NMS")
+	field(INPF,"180")
+	field(INPG,"180")
+	field(INPH,"180")
+	field(INPI,"180")
+	field(INPJ,"180")
+	field(INPK,"180")
+	field(INPL,"180")
+	field(EGU,"deg")
+	field(HOPR,"180")
+}
+record(sel,"$(S):CAVLOAD:ANGLE:SELMIN") {
+	field(DESC,"Load Angle Minimum Select")
+	field(FLNK,"$(S):CAVLOAD:ANGLE:EMAXSEQ.VAL  PP NMS")
+	field(PREC,"3")
+	field(NVL,"$(S):STN:STATE:RBCK.VAL  NPP NMS")
+	field(INPA,"-180")
+	field(INPB,"-180")
+	field(INPC,"$(S):CAVLOAD:ANGLE:EMAXNEG.VAL  NPP NMS")
+	field(INPD,"-180")
+	field(INPE,"$(S):CAVLOAD:ANGLE:EMAXNEG.VAL  NPP NMS")
+	field(INPF,"-180")
+	field(INPG,"-180")
+	field(INPH,"-180")
+	field(INPI,"-180")
+	field(INPJ,"-180")
+	field(INPK,"-180")
+	field(INPL,"-180")
+	field(EGU,"deg")
+	field(HOPR,"-180")
+}
+record(sel,"$(S):STN:VOLT:ERR") {
+	field(DESC,"Stn Volt Error")
+	field(FLNK,"$(S):CAV:FREQ:OFFS.VAL  PP NMS")
+	field(PREC,"1")
+	field(INPA,"$(S):STNVOLT:HVPS:DELTA.K  NPP MS")
+	field(EGU,"kV")
+	field(HOPR,"50")
+	field(LOPR,"-50")
+	field(HIHI,"30")
+	field(LOLO,"-30")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HYST,"2")
+	field(ADEL,"0.1")
+	field(MDEL,"0.1")
+}
+record(sel,"$(S):STNTRANS:VOLT:CTRL") {
+	field(DESC,"Stn Volt Transit Control")
+	field(SELM,"Low Signal")
+	field(PREC,"4")
+	field(INPA,"2000")
+	field(INPB,"$(S):STN:VOLT:CTRL.VAL  NPP NMS")
+	field(INPC,"10000")
+	field(INPD,"10000")
+	field(INPE,"10000")
+	field(INPF,"10000")
+	field(INPG,"10000")
+	field(INPH,"10000")
+	field(INPI,"10000")
+	field(INPJ,"10000")
+	field(INPK,"10000")
+	field(INPL,"10000")
+	field(EGU,"kV")
+	field(HOPR,"3500")
+	field(MDEL,"-1")
+}
+record(seq,"$(S):CAVTUNR:LOOP:SEQ") {
+	field(DESC,"Cavity Tuner Loop Sequence")
+	field(SCAN,"2 second")
+	field(FLNK,"$(S):CAVTUNR:LOOP:READY.VAL  PP NMS")
+	field(DLY1,"0.2")
+}
+record(seq,"$(S):CAVTUNR:STEP:STOP") {
+	field(DESC,"Tuner Step Motor Stop Seq")
+	field(LNK1,"$(S):CAV1TUNR:STEP:STOP.PROC  PP NMS")
+	field(DLY2,"0.2")
+	field(LNK2,"$(S):CAV2TUNR:STEP:STOP.PROC  PP NMS")
+	field(DLY3,"0.2")
+	field(LNK3,"$(S):$(C3)TUNR:STEP:STOP.PROC  PP NMS")
+	field(DLY4,"0.2")
+	field(LNK4,"$(S):$(C4)TUNR:STEP:STOP.PROC  PP NMS")
+}
+record(seq,"$(S):STNVOLT:DAC:CALSEQ") {
+	field(DESC,"Stn DAC Calib")
+	field(DOL1,"$(S):STN:ON:IQ.VAL  NPP NMS")
+	field(LNK1,"$(S):STN:CONV:CONST.A  NPP NMS")
+	field(DOL2,"$(S):STNVOLT:DAC:DELTA.D  NPP NMS")
+	field(LNK2,"$(S):STN:CONV:CONST.B  NPP NMS")
+	field(DOL3,"$(S):STN:CONV:CONST.VAL  PP NMS")
+	field(LNK3,"$(S):STNVOLT:DAC:DELTA.D  NPP NMS")
+}
+record(seq,"$(S):STNVOLT:GFF:CALSEQ") {
+	field(DESC,"Stn GFF Calib")
+	field(DOL1,"$(S):STN:GFF:IQ.VAL  NPP NMS")
+	field(LNK1,"$(S):STN:CONV:CONST.A  NPP NMS")
+	field(DOL2,"$(S):STNVOLT:GFF:DELTA.D  NPP NMS")
+	field(LNK2,"$(S):STN:CONV:CONST.B  NPP NMS")
+	field(DOL3,"$(S):STN:CONV:CONST.VAL  PP NMS")
+	field(LNK3,"$(S):STNVOLT:GFF:DELTA.D  NPP NMS")
+}
+record(calc,"$(S):CAV:FREQ:OFFS") {
+	field(DESC,"Cavity Average Freq Offset")
+	field(FLNK,"$(S):STNDIRECT:LOOP:PHASE.VAL  PP NMS")
+	field(INPA,"$(S):CAV1:FREQ:OFFS.VAL  NPP MS")
+	field(INPB,"$(S):CAV2:FREQ:OFFS.VAL  NPP MS")
+	field(INPC,"$(S):$(C3):FREQ:OFFS.VAL  NPP MS")
+	field(INPD,"$(S):$(C4):FREQ:OFFS.VAL  NPP MS")
+	field(E,"1")
+	field(F,"1")
+	field(G,"1")
+	field(H,"1")
+	field(I,"$(NC)")
+	field(EGU,"kHz")
+	field(HOPR,"10")
+	field(LOPR,"-10")
+	field(HIHI,"0")
+	field(CALC,"I<=0?0:(A*E+B*F+C*G+D*H)/I")
+	field(ADEL,"0.1")
+	field(MDEL,"0.1")
+}
+record(sub,"$(S):STN:CONV:CONST") {
+	field(DESC,"Ref Ampl Conv Const Calc")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQampl2conv")
+	field(INPC,"$(S):STN:VOLT.VAL  NPP NMS")
+	field(INPD,"$(S):STN:VOLT.SEVR  NPP NMS")
+	field(INPE,"$(S):STNDIRECT:LOOP:COUNTS.L  NPP NMS")
+	field(INPF,"2")
+	field(EGU,"Cnts/kV")
+	field(PREC,"4")
+	field(BRSV,"INVALID")
+}
+record(sub,"$(S):STN:PHASE:CALC") {
+	field(DESC,"Station Phase")
+	field(FLNK,"$(S):STNCOMB:LOOP:PHASE.VAL  PP NMS")
+	field(INAM,"subSysInit")
+	field(SNAM,"subSysPhaseStn")
+	field(INPA,"$(S):STN:PHASE.VAL  NPP NMS")
+#	field(INPB,"0.1")
+	field(INPD,"$(S):STNDIRECT:LOOP:PHASE.K  NPP NMS")
+	field(EGU,"deg")
+	field(HOPR,"180")
+	field(LOPR,"-180")
+	field(PREC,"2")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.5")
+	field(MDEL,"0.1")
+}
+record(sub,"$(S):STNCOMB:LOOP:PHASE") {
+	field(DESC,"Comb Loop Phase")
+	field(FLNK,"$(S):CAVVACM:CHECK.VAL  PP NMS")
+	field(INAM,"subSysInit")
+	field(SNAM,"subSysPhaseCmb")
+	field(INPB,"$(S):STNDIRECT:LOOP:PHASE.K  NPP NMS")
+#	field(INPC,"1")
+	field(EGU,"deg")
+	field(HOPR,"180")
+	field(LOPR,"-180")
+	field(PREC,"4")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.5")
+	field(MDEL,"0.5")
+}
+record(sub,"$(S):STNDIRECT:LOOP:PHASE") {
+	field(DESC,"Direct Loop Total Phase")
+	field(FLNK,"$(S):STN:PHASE:CALC.VAL  PP NMS")
+	field(INAM,"subSysInit")
+	field(SNAM,"subSysPhaseTot")
+	field(INPA,"$(S):STN:RFP:MODU.DLE  NPP NMS")
+	field(INPE,"$(S):STNDIRECT:LOOP:TRACK.VAL  NPP NMS")
+#	field(INPF,"0.8")
+#	field(INPG,"40")
+	field(INPH,"$(S):STN:PHASE:CALC.B  NPP NMS")
+	field(INPJ,"$(S):CAV:FREQ:OFFS.VAL  NPP MS")
+	field(EGU,"deg")
+	field(HOPR,"180")
+	field(LOPR,"-180")
+	field(PREC,"4")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.5")
+	field(MDEL,"0.5")
+}
+record(sub,"$(S):STNVOLT:DAC:DELTA") {
+	field(DESC,"Stn Volt DAC Delta Cnts")
+	field(FLNK,"$(S):STNVOLT:GFF:DELTA.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQcounts")
+#	field(INPA,"1")
+	field(INPB,"$(S):STN:VOLT.VAL  NPP MS")
+	field(INPC,"$(S):STNCURR:VOLT:CTRL.VAL  NPP NMS")
+#	field(INPD,"0.03")
+#	field(INPE,"2")
+#	field(INPF,"20")
+	field(INPG,"2")
+	field(INPH,"$(S):STNDIRECT:LOOP:COUNTS.L  NPP NMS")
+	field(EGU,"Counts")
+	field(HOPR,"2047")
+	field(LOPR,"-2048")
+	field(PREC,"4")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.5")
+	field(MDEL,"0.5")
+}
+record(sub,"$(S):STNVOLT:GFF:DELTA") {
+	field(DESC,"Stn Volt GFF Delta Cnts")
+	field(FLNK,"$(S):STNVOLT:HVPS:DELTA.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQcounts")
+#	field(INPA,"0.5")
+	field(INPB,"$(S):STN:VOLT.VAL  NPP MS")
+	field(INPC,"$(S):STNCURR:VOLT:CTRL.VAL  NPP NMS")
+#	field(INPD,"0.06")
+#	field(INPE,"2")
+#	field(INPF,"25")
+	field(INPG,"2")
+	field(INPH,"$(S):STNDIRECT:LOOP:COUNTS.L  NPP NMS")
+	field(EGU,"Counts")
+	field(HOPR,"2047")
+	field(LOPR,"-2048")
+	field(PREC,"4")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.5")
+	field(MDEL,"0.5")
+}
+record(sub,"$(S):STNVOLT:HVPS:DELTA") {
+	field(DESC,"Stn Volt HVPS Delta Volt")
+	field(FLNK,"$(S):STN:VOLT:ERR.VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQcounts")
+#	field(INPA,"1")
+	field(INPB,"$(S):STN:VOLT.VAL  NPP MS")
+	field(INPC,"$(S):STNCURR:VOLT:CTRL.VAL  NPP NMS")
+#	field(INPD,"0.001")
+#	field(INPE,"2")
+#	field(INPF,"0.5")
+	field(INPG,"2")
+	field(EGU,"kV")
+	field(HOPR,"1")
+	field(LOPR,"-1")
+	field(PREC,"4")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.0005")
+	field(MDEL,"0.0005")
+}
+record(calc,"$(S):STN:VOLT:FACTOR") {
+	field(DESC,"Station Voltage Factors")
+	field(FLNK,"$(S):STN:VOLT:FACTORSEQ")
+	field(PINI,"YES")
+	field(A,"1")
+	field(B,"1")
+	field(C,"1")
+	field(D,"1")
+	field(HOPR,"4")
+	field(PREC,"4")
+	field(CALC,"A+B+C+D")
+}
+record(seq,"$(S):STN:VOLT:FACTORSEQ") {
+	field(DESC,"Stn Voltage Factor Update")
+	field(DOL1,"$(S):STN:VOLT:FACTOR.A  NPP NMS")
+	field(LNK1,"$(S):STN:VOLT.E  NPP NMS")
+	field(DOL2,"$(S):STN:VOLT:FACTOR.B  NPP NMS")
+	field(LNK2,"$(S):STN:VOLT.F  NPP NMS")
+	field(DOL3,"$(S):STN:VOLT:FACTOR.C  NPP NMS")
+	field(LNK3,"$(S):STN:VOLT.G  NPP NMS")
+	field(DOL4,"$(S):STN:VOLT:FACTOR.D  NPP NMS")
+	field(LNK4,"$(S):STN:VOLT.H  NPP NMS")
+	field(DOL5,"$(S):STN:VOLT:FACTOR.VAL  NPP NMS")
+	field(LNK5,"$(S):STN:VOLT.I  NPP NMS")
+	field(DOL6,"$(S):STN:VOLT:FACTOR.A  NPP NMS")
+	field(LNK6,"$(S):CAV:FREQ:OFFS.E  NPP NMS")
+	field(DOL7,"$(S):STN:VOLT:FACTOR.B  NPP NMS")
+	field(LNK7,"$(S):CAV:FREQ:OFFS.F  NPP NMS")
+	field(DOL8,"$(S):STN:VOLT:FACTOR.C  NPP NMS")
+	field(LNK8,"$(S):CAV:FREQ:OFFS.G  NPP NMS")
+	field(DOL9,"$(S):STN:VOLT:FACTOR.D  NPP NMS")
+	field(LNK9,"$(S):CAV:FREQ:OFFS.H  NPP NMS")
+	field(DOLA,"$(S):STN:VOLT:FACTOR.VAL  NPP NMS")
+	field(LNKA,"$(S):CAV:FREQ:OFFS.I  NPP NMS")
+}
+record(calc,"$(S):STN:VOLT") {
+	field(DESC,"Station Voltage")
+	field(FLNK,"$(S):STNVOLT:DAC:DELTA.VAL")
+	field(INPA,"$(S):CAV1PROBE:AMPL.VAL  NPP MS")
+	field(INPB,"$(S):CAV2PROBE:AMPL.VAL  NPP MS")
+	field(INPC,"$(S):$(C3)PROBE:AMPL.VAL  NPP MS")
+	field(INPD,"$(S):$(C4)PROBE:AMPL.VAL  NPP MS")
+	field(E,"1")
+	field(F,"1")
+	field(G,"1")
+	field(H,"1")
+	field(I,"$(NC)")
+	field(J,"$(NC)")
+	field(EGU,"kV")
+	field(HOPR,"3500")
+	field(CALC,"I<=0?0:(A*E+B*F+C*G+D*H)*J/I")
+	field(ADEL,"0.99")
+	field(MDEL,"0.99")
+}
+@
+
+
+1.9
+log
+@Add history of station HCW temp for display purposes.
+@
+text
+@d329 10
+@
+
+
+1.8
+log
+@Use a macro for number of cavities.
+@
+text
+@d215 12
+@
+
+
+1.7
+log
+@Add factors when doing the cavity voltage check.
+@
+text
+@d346 1
+a346 1
+	field(I,"4")
+d525 2
+a526 1
+	field(I,"4")
+d529 1
+a529 1
+	field(CALC,"I<=0?0:(A*E+B*F+C*G+D*H)*4/I")
+@
+
+
+1.6
+log
+@Add station voltage calculation.  Add record to set factor per cavity and
+change station voltage and average frequency offset to use them.
+@
+text
+@d41 1
+d192 1
+a192 1
+	field(CALC,"(A>E)||(B>E)||(C>E)||(D>E)")
+d197 4
+@
+
+
+1.5
+log
+@Change Deg to deg.
+@
+text
+@d1 1
+a1 1
+grecord(ao,"$(S):CAV:FREQOFFS:SMOO") {
+d12 1
+a12 1
+grecord(ao,"$(S):CAV:STRENGTH:DIFF") {
+d24 1
+a24 1
+grecord(ao,"$(S):CAV:VACM:MAX") {
+d37 1
+a37 1
+grecord(ao,"$(S):CAV:VOLT:MAX") {
+d50 1
+a50 1
+grecord(ao,"$(S):CAVLOAD:ANGLE:ERRMAX") {
+d63 1
+a63 1
+grecord(ao,"$(S):CAVLOAD:ANGLE:FORGET") {
+d74 1
+a74 1
+grecord(ao,"$(S):CAVLOAD:ANGLE:K") {
+d86 1
+a86 1
+grecord(ao,"$(S):CAVTUNR:LOOP:GAIN") {
+d97 1
+a97 1
+grecord(ao,"$(S):HVPS:VOLT:FASTON") {
+d109 1
+a109 1
+grecord(ao,"$(S):STN:PHASE") {
+d124 1
+a124 1
+grecord(ao,"$(S):STN:VOLT:CTRL") {
+d138 1
+a138 1
+grecord(ao,"$(S):STNCURR:VOLT:CTRL") {
+d149 1
+a149 1
+grecord(bo,"$(S):CAVLOAD:ANGLE:CTRL") {
+d158 1
+a158 1
+grecord(bo,"$(S):CAVTUNR:LOOP:CTRL") {
+d167 1
+a167 1
+grecord(calc,"$(S):CAVLOAD:ANGLE:EMAXNEG") {
+d176 1
+a176 1
+grecord(calc,"$(S):CAVVACM:CHECK") {
+d188 1
+a188 1
+grecord(calc,"$(S):CAVVOLT:CHECK") {
+d200 1
+a200 1
+grecord(compress,"$(S):STN:VOLT:HIST") {
+d210 1
+a210 1
+grecord(event,"$(S):CAVTUNR:LOOP:READY") {
+d214 1
+a214 1
+grecord(event,"$(S):CAVTUNR:LOOPON:HOME") {
+d218 1
+a218 1
+grecord(event,"$(S):CAVTUNR:LOOPON:RESET") {
+d222 1
+a222 1
+grecord(event,"$(S):CAVTUNR:LOOPPARK:HOME") {
+d226 1
+a226 1
+grecord(event,"$(S):CAVTUNR:LOOPPARK:RESET") {
+d230 1
+a230 1
+grecord(sel,"$(S):CAVLOAD:ANGLE:SELMAX") {
+d250 1
+a250 1
+grecord(sel,"$(S):CAVLOAD:ANGLE:SELMIN") {
+d270 1
+a270 1
+grecord(sel,"$(S):STN:VOLT:ERR") {
+d286 1
+a286 1
+grecord(sel,"$(S):STNTRANS:VOLT:CTRL") {
+d306 1
+a306 1
+grecord(seq,"$(S):CAVTUNR:LOOP:SEQ") {
+d312 1
+a312 1
+grecord(seq,"$(S):STNVOLT:DAC:CALSEQ") {
+d321 1
+a321 1
+grecord(seq,"$(S):STNVOLT:GFF:CALSEQ") {
+d330 1
+a330 1
+grecord(sub,"$(S):CAV:FREQ:OFFS") {
+a332 2
+	field(INAM,"subSysInit")
+	field(SNAM,"subSysFreqOAvg")
+d337 5
+d346 1
+a346 1
+	field(BRSV,"INVALID")
+d350 1
+a350 1
+grecord(sub,"$(S):STN:CONV:CONST") {
+d362 1
+a362 1
+grecord(sub,"$(S):STN:PHASE:CALC") {
+d378 1
+a378 1
+grecord(sub,"$(S):STNCOMB:LOOP:PHASE") {
+d393 1
+a393 1
+grecord(sub,"$(S):STNDIRECT:LOOP:PHASE") {
+d412 1
+a412 1
+grecord(sub,"$(S):STNVOLT:DAC:DELTA") {
+d433 1
+a433 1
+grecord(sub,"$(S):STNVOLT:GFF:DELTA") {
+d454 1
+a454 1
+grecord(sub,"$(S):STNVOLT:HVPS:DELTA") {
+d474 53
+@
+
+
+1.4
+log
+@Add PINI's on all the soft setpoints.
+@
+text
+@d57 1
+a57 1
+	field(EGU,"Deg")
+d80 1
+a80 1
+	field(EGU,"Deg/Per")
+d116 1
+a116 1
+	field(EGU,"Deg")
+d172 1
+a172 1
+	field(EGU,"Deg")
+d247 1
+a247 1
+	field(EGU,"Deg")
+d267 1
+a267 1
+	field(EGU,"Deg")
+d367 1
+a367 1
+	field(EGU,"Deg")
+d382 1
+a382 1
+	field(EGU,"Deg")
+d401 1
+a401 1
+	field(EGU,"Deg")
+@
+
+
+1.3
+log
+@Comment out .INP* lines that are restored.
+Correct MDEL for station phase (from 0.5 to 0.1 degrees).
+@
+text
+@d4 1
+d15 1
+d53 1
+d66 1
+d77 1
+d89 1
+d100 1
+d112 1
+a168 1
+	field(PINI,"YES")
+@
+
+
+1.2
+log
+@Added input for future direct loop phase ramping.
+Added PINI=YES for two soft passive output records.
+@
+text
+@d283 1
+a283 1
+	field(INPA,"2500")
+d358 1
+a358 1
+	field(INPB,"10")
+d366 1
+a366 1
+	field(MDEL,"0.5")
+d374 1
+a374 1
+	field(INPC,"1")
+d390 2
+a391 2
+	field(INPF,"1")
+	field(INPG,"40")
+d407 1
+a407 1
+	field(INPA,"1")
+d410 3
+d428 1
+a428 1
+	field(INPA,"1")
+d431 3
+d449 1
+a449 1
+	field(INPA,"1")
+d452 3
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d143 1
+d152 1
+d392 1
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

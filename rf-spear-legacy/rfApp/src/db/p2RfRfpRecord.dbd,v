@@ -1,0 +1,1151 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.3.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.3
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.3
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.3
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2004.09.21.00.11.14;	author lazmo;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.11.19.04.12;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.46;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.46;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Added :STN:RFP:CALABORT PV for rf_calib.st.
+Changed fields SXST/SVST in :STN:RFP:FBSIG.
+Added db_post_events() for .lod & .dlod.
+@
+text
+@# p2RfRfpRecord.ascii
+# share/ascii @@(#)p2RfRfpRecord.ascii	0.0     10/16/96
+#
+#       Original Author: Ric Claus
+#       Date:            9-10-96
+#
+#       Experimental Physics and Industrial Control System (EPICS)
+#
+#       Copyright 1996, The Board of Trustees of the Leland Stanford
+#       Junior University.  All rights reserved.
+#
+#	This software was produced under U.S. Government contract
+#       DE-AC03-76SF00515 at the Stanford Linear Accelerator Center.
+#
+#         The items furnished herewith were developed under the sponsorship
+#    of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+#    Leland Stanford Junior University, nor their employees, makes any war-
+#    ranty, express or implied, or assumes any liability or responsibility
+#    for accuracy, completeness or usefulness of any information, apparatus,
+#    product or process disclosed, or represents that its use will not in-
+#    fringe privately-owned rights.  Mention of any product, its manufactur-
+#    er, or suppliers shall not, nor is it intended to, imply approval, dis-
+#    approval, or fitness for any particular use.  The U.S. and the Univer-
+#    sity at all times retain the right to use and disseminate the furnished
+#    items for any purpose whatsoever.                       Notice 91 02 01
+#
+#
+#       Initial development by:
+#               The PEP-II Low Level RF Group
+#               Positron Electron Project upgrade
+#               Stanford Linear Accelerator Center
+#
+#  Modification Log:
+#  -----------------
+#  .01  09-10-96	ric	Created
+#  .02  10-11-96        ric     Converted from .ascii to .dbd format
+#  .03  01-07-03        luchini Added 8 new DAC fields
+#  .04  01-09-03        luchini Added Analog Ripple Loop On and menuActive
+#                               Added feedback signal mux status, and menuFeedbackSigMux
+#                               Added DAC output injection point and menuDacOutInjPoint
+#                               Added VERH,VERF for hardware and firmware version fields.
+#                               Added IERR,QERR,IKLY,QKLY fields for ver3 new ADC's
+#  .05  06-23-04        lazmo   Changed (RLII,RLIQ) order to (RLIQ,RLII) per SAA/MJB
+#                                 to fix DAC load order problem
+#  .nn  mm-dd-yy        iii     Comment
+#       ...
+#
+menu(menuFeedbackSigMux) {
+        choice(menuFbmx_Total      , "Total")
+        choice(menuFsmx_CombOut    , "Comb Out")
+        choice(menuFsmx_Noise1     , "Noise 1")
+        choice(menuFsmx_Drive      , "Drive")
+        choice(menuFsmx_RippleMon  , "Ripple Mon")
+        choice(menuFsmx_ErrSum     , "Error Sum")
+        choice(menuFsmx_Noise2     , "Noise 2")
+        choice(menuFsmx_Spare      , "Spare")
+}
+menu(menuActive) {
+        choice(menuActive_NotActive  , "Not Active")
+        choice(menuActive_Active     , "Active")
+}
+menu(menuDacsOnOff) {
+        choice(menuDacsOnOff_Off,    "Off")
+        choice(menuDacsOnOff_On,     "On")   
+}
+menu(menuDacs) {
+        choice(menuDacs_OnNoise1,"Noise 1" )
+        choice(menuDacs_OnNoise2,"Noise 2" )       
+}
+menu(menuDacsState) {
+        choice(menuDacsState_Off,     "Off")
+        choice(menuDacsState_OnNoise1,"Noise 1 On" )
+        choice(menuDacsState_OnNoise2,"Noise 2 On" )       
+}
+menu(menuLeadComp) {
+        choice(menuLeadComp_On, "On")
+        choice(menuLeadComp_Off,"Off" )   
+}
+menu(menuIntegralComp) {
+        choice(menuIntComp_Off,"Off")
+        choice(menuIntComp_On, "On" )   
+}
+menu(menuRfMode) {
+        choice(menuRfMode_Reset, "Reset")
+        choice(menuRfMode_Load,  "Load" )
+        choice(menuRfMode_Run,   "Run")
+}
+menu(menuRfRunMode) {
+        choice(menuRfRunMode_SingleShot, "Single Shot")
+        choice(menuRfRunMode_Cont,       "Continuous" )
+}
+recordtype(p2RfRfp) {
+	include "dbCommon.dbd"
+	field(VAL,DBF_STRING) {
+		prompt("Status message")
+		asl(ASL0)
+		pp(TRUE)
+		size(40)
+	}
+	field(OVAL,DBF_STRING) {
+		prompt("Previous Value")
+		special(SPC_NOMOD)
+		interest(3)
+		size(40)
+	}
+	field(OUT,DBF_OUTLINK) {
+		prompt("Output Specification")
+		promptgroup(GUI_OUTPUT)
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(PREC,DBF_SHORT) {
+		prompt("Display Precision")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+	field(MID,DBF_USHORT) {
+		prompt("Manufacturer ID")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(MTYP,DBF_USHORT) {
+		prompt("Model Type")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(MSTT,DBF_USHORT) {
+		prompt("Module Status")
+		special(SPC_NOMOD)
+	}
+	field(MCTL,DBF_USHORT) {
+		prompt("Module Control")
+		special(SPC_NOMOD)
+		pp(TRUE)
+	}
+	field(MRST,DBF_SHORT) {
+		prompt("Module Reset")
+		pp(TRUE)
+		interest(2)
+	}
+	field(A24O,DBF_USHORT) {
+		prompt("A24 Offset")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(VATT,DBF_USHORT) {
+		prompt("VXI Attributes")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(SERN,DBF_ULONG) {
+		prompt("Serial Number")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(VERN,DBF_USHORT) {
+		prompt("Version Number")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+        field(VERH,DBF_USHORT) {
+                prompt("Hardware Version")
+                special(SPC_NOMOD)
+                interest(3)
+        }
+        field(VERF,DBF_USHORT) {
+                prompt("Firmware Version")
+                special(SPC_NOMOD)
+                interest(3)
+        }
+	field(ISTT,DBF_USHORT) {
+		prompt("Interrupt Status")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(2)
+	}
+	field(OIST,DBF_USHORT) {
+		prompt("Old Interrupt Status")
+		interest(3)
+	}
+	field(IACK,DBF_USHORT) {
+		prompt("Interrupt Oper Ack")
+		pp(TRUE)
+		interest(2)
+	}
+	field(ICTL,DBF_USHORT) {
+		prompt("Interrupt Control")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(2)
+	}
+	field(IMSK,DBF_UCHAR) {
+		prompt("Interrupt Mask")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		base(HEX)
+		interest(1)
+	}
+	field(OIMK,DBF_UCHAR) {
+		prompt("Old Interrupt Mask")
+		interest(3)
+	}
+	field(VSCL,DBF_USHORT) {
+		prompt("VXI Subclass")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+#
+# RF Module Control and Status Register (A16 offset=0x20)
+#
+	field(RCTL,DBF_USHORT) {
+		prompt("RF Proc. Control")
+		special(SPC_NOMOD)
+		pp(TRUE)
+	}
+	field(RSTT,DBF_USHORT) {
+		prompt("RF Proc. Status Word")
+		special(SPC_NOMOD)
+		pp(TRUE)
+	}
+#
+######################################################################################
+# The following fields represent the bit fields of the Control 
+# and Stauts fields (A16 offset=0x4).
+######################################################################################
+#
+	field(LCE,DBF_UCHAR) {
+		prompt("Lead Compensation")
+#                menu(menuLeadComp)
+		pp(TRUE)
+	}
+#
+# Integral compensation is set in bit 11 of the Control Register (A16 offset=0x4).
+# In hw versions 2 and later of the RFP module, this bit is always high, indicating an Active state.
+# In hw versions eariler than version 2 this bit can be set to either Active (1) or Not Active (0).
+#
+	field(ICE,DBF_UCHAR) {
+		prompt("Integral Comp")
+#                menu(menuIntegralComp)
+		pp(TRUE)
+	}
+#
+# Analog Ripple Loop Acvite control and status. This is set in bit 13 of the
+# Control Register (A16 offset=0x4).
+#
+	field(RLON,DBF_MENU) {
+		prompt("Analog Ripple Loop Active")
+                menu(menuActive)
+		pp(TRUE)
+		interest(2)
+	}
+	field(SRLO,DBF_MENU) {
+		prompt("Ripple Loop On Status")
+		special(SPC_NOMOD)
+                menu(menuActive)
+		pp(TRUE)
+		interest(2)
+	}
+
+######################################################################################
+# The following fields represent the bit fields of the RF Module Control 
+# and Stauts fields (A16 offset=0x20).
+######################################################################################
+#
+	field(RFOO,DBF_UCHAR) {
+		prompt("RF Enable")
+		pp(TRUE)
+	}
+	field(TNOP,DBF_UCHAR) {
+		prompt("Tune/Operate")
+		pp(TRUE)
+	}
+	field(DLE,DBF_UCHAR) {
+		prompt("Direct Loop Enable")
+		pp(TRUE)
+	}
+	field(CLE,DBF_UCHAR) {
+		prompt("Comb Loop Enable")
+		pp(TRUE)
+	}
+	field(RLE,DBF_UCHAR) {
+		prompt("Ripple Loop Enable")
+		pp(TRUE)
+	}
+	field(CSMX,DBF_UCHAR) {
+		prompt("Cavity Select Mux")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+#
+# In hw version 2 or later of the RFP modules, the feeback signal control signal uses
+# three bit, two contrl bits A0-A1 are set in the RF Module Control Register (offset=0x20), while
+# bit A2 is set in  the Control (offset=0x4).  In hardware versions eariler than 2 only control bits
+# A0-A1 exists.
+#
+	field(FSMX,DBF_MENU) {
+		prompt("Feedback Signal Mux")
+		promptgroup(GUI_COMMON)
+                menu(menuFeedbackSigMux)
+		pp(TRUE)
+	}
+	field(OFMX,DBF_MENU) {
+		prompt("Old Feedback Signal Mux")
+                menu(menuFeedbackSigMux)
+		initial("Drive")
+		interest(3)
+	}
+	field(SFMX,DBF_MENU) {
+		prompt("Feedback Signal Mux Status")
+		special(SPC_NOMOD)
+                menu(menuFeedbackSigMux)
+		interest(2)
+	} 
+#######################################################################################
+#
+	field(SCDT,DBF_UCHAR) {
+		prompt("Stop Cont Data Acq")
+		pp(TRUE)
+	}
+	field(RFFR,DBF_UCHAR) {
+		prompt("RF Fault Reset")
+		pp(TRUE)
+		interest(2)
+	}
+############################################################################
+# The following fields are associated with the RF Module Control
+# Register (A16 offset=0x20) bits 6-8. These bits control the
+# RF module mode.
+############################################################################
+#
+	field(SSCT,DBF_MENU) {
+		prompt("Sgl Shot/Continuous")
+                menu(menuRfRunMode)
+		promptgroup(GUI_COMMON)
+	}
+#
+# The DACS field will actually control the setting of bits in two registers. 
+# In the RF module control register  (A16 offset=0x20)bit 8 for the DACS output on/off.
+# In the Control Register (A16 offset=0x4) bit 9 for the DACS output injection point 
+#
+	field(DACS,DBF_MENU) {
+		prompt("DACs Output On/Off Control")
+		promptgroup(GUI_COMMON)
+                menu(menuDacsOnOff)
+		pp(TRUE)
+		interest(2)
+	}
+	field(DINJ,DBF_MENU) {
+		prompt("DACs Output Injection Point")
+		promptgroup(GUI_COMMON)
+                menu(menuDacs)
+		pp(TRUE)
+		interest(2)
+	}
+	field(SDAC,DBF_MENU) {
+		prompt("DACs Output Mode Status")
+                menu(menuDacsState)
+		special(SPC_NOMOD)
+		interest(2)
+	}
+# 
+# The MODE field will control bits 6-7 of the RF Module Control Register
+# 
+	field(MODE,DBF_MENU) {
+		prompt("Module Mode")
+		promptgroup(GUI_COMMON)
+                menu(menuRfMode)
+		asl(ASL0)
+		pp(TRUE)
+	}
+#
+# The following fields are associated with the DSP
+#
+	field(LDSP,DBF_UCHAR) {
+		prompt("Load DSP Exec File")
+		pp(TRUE)
+		interest(3)
+	}
+	field(DSPE,DBF_STRING) {
+		prompt("DSP Exec File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(DSTT,DBF_MENU) {
+		prompt("DSP Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+		pp(TRUE)
+	}
+	field(DDSF,DBF_STRING) {
+		prompt("DSP Data File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(SDST,DBF_MENU) {
+		prompt("DSP Data Save Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+		pp(TRUE)
+	}
+#
+	field(LOD,DBF_UCHAR) {
+		prompt("Load Octal DACs")
+		pp(TRUE)
+		interest(3)
+	}
+#
+# The following fields are for loading various items to the Ripple loop
+# DSP code.
+#
+	field(LDAS,DBF_UCHAR) {
+		prompt("Load Amplitude Setpoint")
+		pp(TRUE)
+		interest(3)
+	}
+	field(AMSP,DBF_FLOAT) {
+		prompt("Amplitude Setpoint")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(LDPG,DBF_UCHAR) {
+		prompt("Load Phase Gain")
+		pp(TRUE)
+		interest(3)
+	}
+	field(PHSG,DBF_FLOAT) {
+		prompt("Phase Gain")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(DLOD,DBF_UCHAR) {
+		prompt("Load DSP DAC offsets")
+		pp(TRUE)
+		interest(3)
+	}
+	field(KMII,DBF_SHORT) {
+		prompt("DSP II DACoffset")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(KMIQ,DBF_SHORT) {
+		prompt("DSP IQ DAC offset")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(KMQI,DBF_SHORT) {
+		prompt("DSP QI DAC offset")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(KMQQ,DBF_SHORT) {
+		prompt("DSP QQ DAC offset")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(LDPC,DBF_UCHAR) {
+		prompt("Load Phase Harm Coefs")
+		pp(TRUE)
+		interest(3)
+	}
+	field(PCDF,DBF_STRING) {
+		prompt("Phase Harm Coefs File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(PCST,DBF_MENU) {
+		prompt("Phase Coefs Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(LDAC,DBF_UCHAR) {
+		prompt("Load Ampl Harm Coefs")
+		pp(TRUE)
+		interest(3)
+	}
+	field(ACDF,DBF_STRING) {
+		prompt("Ampl Harm Coefs File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(ACST,DBF_MENU) {
+		prompt("Ampl Coefs  Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+#
+#  The following are for retrieving various run-time ripple loop parameters.
+#
+	field(GERP,DBF_UCHAR) {
+		prompt("Get Ripple Params")
+		pp(TRUE)
+		interest(3)
+	}
+	field(IREF,DBF_FLOAT) {
+		prompt("I Reference Q16")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(QREF,DBF_FLOAT) {
+		prompt("Q Reference Q16")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(PREF,DBF_FLOAT) {
+		prompt("Phase Reference Q13")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(IKLS,DBF_FLOAT) {
+		prompt("I Klystron Q16")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(QKLS,DBF_FLOAT) {
+		prompt("I Klystron Q16")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(PKLS,DBF_FLOAT) {
+		prompt("Phase Klystron Q13")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(PERR,DBF_FLOAT) {
+		prompt("Phase Error Q12")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(PERP,DBF_FLOAT) {
+		prompt("Phase Error Q12 Mod Pi")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(AERR,DBF_FLOAT) {
+		prompt("Amplitude Error Q15")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(POUT,DBF_FLOAT) {
+		prompt("Phase Out Q10")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(POUP,DBF_FLOAT) {
+		prompt("Phase Out Mod Pi Q13")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(AOUT,DBF_FLOAT) {
+		prompt("Amplitude Out Q10")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+#
+# Four new ADC's for version 3.
+# These registers mirror the data read by the DSP Parallel I/O
+#
+	field(IERR,DBF_FLOAT) {
+		prompt("I Error")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(QERR,DBF_FLOAT) {
+		prompt("Q Error")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(IKLY,DBF_FLOAT) {
+		prompt("I Klystron")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(QKLY,DBF_FLOAT) {
+		prompt("I Klystron")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}        
+#
+#  The following 56 fields must be kept in order to allow array reference!
+#
+	field(C1II,DBF_SHORT) {
+		prompt("Combiner Coef C1-II")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C1IQ,DBF_SHORT) {
+		prompt("Combiner Coef C1-IQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C1QI,DBF_SHORT) {
+		prompt("Combiner Coef C1-QI")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C1QQ,DBF_SHORT) {
+		prompt("Combiner Coef C1-QQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C2II,DBF_SHORT) {
+		prompt("Combiner Coef C2-II")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C2IQ,DBF_SHORT) {
+		prompt("Combiner Coef C2-IQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C2QI,DBF_SHORT) {
+		prompt("Combiner Coef C2-QI")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C2QQ,DBF_SHORT) {
+		prompt("Combiner Coef C2-QQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C3II,DBF_SHORT) {
+		prompt("Combiner Coef C3-II")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C3IQ,DBF_SHORT) {
+		prompt("Combiner Coef C3-IQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C3QI,DBF_SHORT) {
+		prompt("Combiner Coef C3-QI")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C3QQ,DBF_SHORT) {
+		prompt("Combiner Coef C3-QQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C4II,DBF_SHORT) {
+		prompt("Combiner Coef C4-II")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C4IQ,DBF_SHORT) {
+		prompt("Combiner Coef C4-IQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C4QI,DBF_SHORT) {
+		prompt("Combiner Coef C4-QI")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(C4QQ,DBF_SHORT) {
+		prompt("Combiner Coef C4-QQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#
+	field(CO1I,DBF_SHORT) {
+		prompt("Combiner C1-I Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(CO1Q,DBF_SHORT) {
+		prompt("Combiner C1-Q Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(CO2I,DBF_SHORT) {
+		prompt("Combiner C2-I Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(CO2Q,DBF_SHORT) {
+		prompt("Combiner C2-Q Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(CO3I,DBF_SHORT) {
+		prompt("Combiner C3-I Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(CO3Q,DBF_SHORT) {
+		prompt("Combiner C3-Q Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(CO4I,DBF_SHORT) {
+		prompt("Combiner C4-I Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(CO4Q,DBF_SHORT) {
+		prompt("Combiner C4-Q Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#
+	field(GO1I,DBF_SHORT) {
+		prompt("Gain Stg C1-I Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(GO1Q,DBF_SHORT) {
+		prompt("Gain Stg C1-Q Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(GO2I,DBF_SHORT) {
+		prompt("Gain Stg C2-I Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(GO2Q,DBF_SHORT) {
+		prompt("Gain Stg C2-Q Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(GO3I,DBF_SHORT) {
+		prompt("Gain Stg C3-I Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(GO3Q,DBF_SHORT) {
+		prompt("Gain Stg C3-Q Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(GO4I,DBF_SHORT) {
+		prompt("Gain Stg C4-I Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(GO4Q,DBF_SHORT) {
+		prompt("Gain Stg C4-Q Out OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#
+	field(SNIO,DBF_SHORT) {
+		prompt("Summing Node I OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(SNQO,DBF_SHORT) {
+		prompt("Summing Node Q OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#
+	field(DLIO,DBF_SHORT) {
+		prompt("Direct Loop Ctl I OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(DLQO,DBF_SHORT) {
+		prompt("Direct Loop Ctl Q OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#
+	field(DLII,DBF_SHORT) {
+		prompt("Direct Loop Coef II")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(DLIQ,DBF_SHORT) {
+		prompt("Direct Loop Coef IQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(DLQI,DBF_SHORT) {
+		prompt("Direct Loop Coef QI")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(DLQQ,DBF_SHORT) {
+		prompt("Direct Loop Coef QQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#
+	field(TMIS,DBF_SHORT) {
+		prompt("Tune Mode I Set Pt")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(TMQS,DBF_SHORT) {
+		prompt("Tune Mode Q Set Pt")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#
+	field(KLIO,DBF_SHORT) {
+		prompt("Kly Loop Mod I OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(KLQO,DBF_SHORT) {
+		prompt("Kly Loop Mod Q OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#
+	field(DNIO,DBF_SHORT) {
+		prompt("Diff Node I Error OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(DNQO,DBF_SHORT) {
+		prompt("Diff Node Q Error OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#
+	field(RFIO,DBF_SHORT) {
+		prompt("RF Modulator I OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(RFQO,DBF_SHORT) {
+		prompt("RF Modulator Q OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#
+	field(CSIO,DBF_SHORT) {
+		prompt("Comp Stage I OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(CSQO,DBF_SHORT) {
+		prompt("Comp Stage Q OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#
+	field(CLIO,DBF_SHORT) {
+		prompt("Comb Loop I OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(CLQO,DBF_SHORT) {
+		prompt("Comb Loop Q OS")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#
+	field(CLII,DBF_SHORT) {
+		prompt("Comb Loop Coef II")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(CLIQ,DBF_SHORT) {
+		prompt("Comb Loop Coef IQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(CLQI,DBF_SHORT) {
+		prompt("Comb Loop Coef QI")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(CLQQ,DBF_SHORT) {
+		prompt("Comb Loop Coef QQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+
+# Additional 8 DACs for version2 of the RFP
+
+	field(KLOI,DBF_SHORT) {
+		prompt("Klystron Demodu I offset")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(KLOQ,DBF_SHORT) {
+		prompt("Klystron Demodu Q offset")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+# RLII/RLIQ swapped 2004-06-23 by lazmo
+	field(RLIQ,DBF_SHORT) {
+		prompt("Ripple Loop Coef IQ")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(RLII,DBF_SHORT) {
+		prompt("Ripple Loop Coef II")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(IREI,DBF_SHORT) {
+		prompt("Internal Ref I")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(IREQ,DBF_SHORT) {
+		prompt("Internal Ref Q")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(MDRV,DBF_SHORT) {
+		prompt("Maximum Drive")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+#	field(XDAC,DBF_SHORT) {
+#		prompt("Spare DAC")
+#		promptgroup(GUI_COMMON)
+#		interest(1)
+#	}
+#
+#  End of contiguous 56 (64 ver 2) field group to be kept in order to allow array reference
+#
+	field(RMSZ,DBF_ULONG) {
+		prompt("RAM Size")
+		promptgroup(GUI_COMMON)
+		initial("512")
+	}
+	field(GSIR,DBF_UCHAR) {
+		prompt("Get Signal I RAM")
+		pp(TRUE)
+		interest(2)
+	}
+	field(GSQR,DBF_UCHAR) {
+		prompt("Get Signal Q RAM")
+		pp(TRUE)
+		interest(2)
+	}
+	field(SIRF,DBF_STRING) {
+		prompt("Signal I RAM File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(SQRF,DBF_STRING) {
+		prompt("Signal Q RAM File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(SIST,DBF_MENU) {
+		prompt("Signal I Alrm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		pp(TRUE)
+	}
+	field(SQST,DBF_MENU) {
+		prompt("Signal Q Alrm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		pp(TRUE)
+	}
+#
+	field(GCIR,DBF_UCHAR) {
+		prompt("Get Cavity I RAM")
+		pp(TRUE)
+		interest(2)
+	}
+	field(GCQR,DBF_UCHAR) {
+		prompt("Get Cavity Q RAM")
+		pp(TRUE)
+		interest(2)
+	}
+	field(CIRF,DBF_STRING) {
+		prompt("Cavity I RAM File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(CQRF,DBF_STRING) {
+		prompt("Cavity Q RAM File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(CIST,DBF_MENU) {
+		prompt("Cavity I Alrm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		pp(TRUE)
+	}
+	field(CQST,DBF_MENU) {
+		prompt("Cavity Q Alrm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		pp(TRUE)
+	}
+#
+	field(LDIR,DBF_UCHAR) {
+		prompt("Load DAC I RAM")
+		pp(TRUE)
+		interest(2)
+	}
+	field(LDQR,DBF_UCHAR) {
+		prompt("Load DAC Q RAM")
+		pp(TRUE)
+		interest(2)
+	}
+	field(DIRF,DBF_STRING) {
+		prompt("DAC I RAM File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(DQRF,DBF_STRING) {
+		prompt("DAC Q RAM File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(DIST,DBF_MENU) {
+		prompt("DAC I Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		pp(TRUE)
+	}
+	field(DQST,DBF_MENU) {
+		prompt("DAC Q Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		pp(TRUE)
+	}
+}
+@
+
+
+1.2
+log
+@Additions for hw vers 2
+@
+text
+@d43 2
+d890 3
+a892 2
+	field(RLII,DBF_SHORT) {
+		prompt("Ripple Loop Coef II")
+d896 2
+a897 2
+	field(RLIQ,DBF_SHORT) {
+		prompt("Ripple Loop Coef IQ")
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d37 6
+d46 44
+d159 10
+d207 2
+d220 5
+d227 1
+d230 5
+d237 1
+d240 23
+d288 7
+a294 1
+	field(FSMX,DBF_UCHAR) {
+d297 1
+d300 14
+d323 5
+d329 1
+a329 1
+	field(SSCT,DBF_UCHAR) {
+d331 1
+d334 7
+a340 2
+	field(DACS,DBF_UCHAR) {
+		prompt("DACs")
+d342 3
+d346 17
+a362 1
+	field(MODE,DBF_UCHAR) {
+d365 1
+d370 2
+d557 24
+d875 43
+d919 1
+a919 1
+#  End of contiguous 56 field group to be kept in order to allow array reference
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

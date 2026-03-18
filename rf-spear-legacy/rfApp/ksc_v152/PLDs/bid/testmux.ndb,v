@@ -1,0 +1,110 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.56.56;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.56.56;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 2
+The length of the symbol table is: 24
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+.	|74139:13|
+
+The number of name info structs is : 42
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	Ky&|	!	2	:	;	/RESET	o
+#	IGdW	!	/RESET~1	"S
+$	Ky'E	!	3	(	:	;	:26	"#
+%	IGdW	!	:27	"%
+&	IGdW	!	:28	"'
+'	IGdW	!	:29	"$
+(	Ky'5	!	3	+	:	;	:52	"(
+)	IGdW	!	:53	"&
+*	Ky'E	!	1	(	:55	")
++	Ky'E	!	1	,	:56	"+
+,	Ky'E	!	1	*	:58	"*
+-	IGdW	!	:60	",
+.	Ky&|	!	1	$	DRIVE_VME	m
+/	Ky&|	!	1	3	DRIVE_VXI	n
+0	IGdq	!	VME_DRIVE	p
+1	IGdq	!	VXI_DRIVE	q
+2	IGdW	.	:10	"N
+3	Ky'E	.	2	:	;	:11	"M
+4	IGdW	.	:12	"L
+5	IGdW	.	:13	"K
+6	IGdW	.	:14	"J
+7	IGdW	.	:15	"I
+8	IGdW	.	:16	"H
+9	IVOQ	.	D	:33	"@@
+:	L)p?	.	E	2	1	$	:34	"A
+;	L)p?	.	F	2	0	3	:35	"B
+<	IVOQ	.	G	:36	"C
+=	IVOQ	.	H	:37	"D
+>	IVOQ	.	I	:38	"E
+?	IVOQ	.	J	:39	"F
+@@	IVOQ	.	K	:40	"G
+A	IGdW	.	:7	"Q
+B	IGdW	.	:8	"P
+C	IGdW	.	:9	"O
+D	INu}	.	9	Y10N	"@@
+E	INv_	.	:	Y11N	"A
+F	INv_	.	;	Y12N	"B
+G	INu}	.	<	Y13N	"C
+H	INu}	.	=	Y20N	"D
+I	INu}	.	>	Y21N	"E
+J	INu}	.	?	Y22N	"F
+K	INu}	.	@@	Y23N	"G
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

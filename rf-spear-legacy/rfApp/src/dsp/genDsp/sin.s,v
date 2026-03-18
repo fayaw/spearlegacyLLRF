@@ -1,0 +1,147 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.1
+date	2003.01.10.23.22.40;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.40;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/************************ The routine _sin follows **********************
+
+Name:           _sin
+		[sin.s - sin.o]
+
+Synopsis:       Implementation of the sine function of an argument X
+		between -PI/2 and PI/2.
+
+Performance and Memory Requirement:
+
+	Instruction cycles:     38 with BMU device [Call & return included].
+				38 with non BMU device [Call & return incl.].
+
+	Code:                   20 words of ROM with BMU device.
+				20 words of ROM with non BMU device.
+
+	Coefficients:           5 words of RAM.
+	Local variables:        0 RAM locations.
+	Static variables:       0
+	Registers used: x, y, p, a0, a1, ar1, r0, auc
+			auc is initialized to 0x0 [no scaling of p register].
+	Accuracy:       Result is accurate to 16 bits of precision for
+			inputs in the segment [-PI/2, PI/2].
+Description:
+
+	Algorithm: Sin(X) = X(c1+X^2(c3+X^2(c5+X^2(c7+X^2(c9)))))
+		   where cn corresponds to coefficients of the Taylor
+		   series expansion of the cosine function.
+
+	BEGIN _sin
+	    Set auc = 0
+	    Angle X is passed via the a1h register in q14 format.
+	    Compute nested polynomial series representation of sin(X).
+	    Return result in a0h in q14 format.
+	END _sin
+
+Inputs:         The argument X, is passed in a0h in Q14 format.
+
+Outputs:        The  sine of the argument is returned in a0h in q14 format.
+
+Routines Called:        None.
+
+This _sin routine was written by Homayoon Sam (March 1994) to run on
+DSP1616. I evaluated and verified the routine efficiency on DSP1610,
+included a performance summary, and added comments to the existing code
+for clarification.
+
+This routine shows 61.6% improvement in instruction cycles and 76.2%
+improvement in memory requirements when BMU device is used and compared
+to the performance on DSP16A.
+Work by Aristos Nkansa-Kissi (Summer 1994).
+***************************************************************************/
+/*                                                                        */
+#include <1610.h>               /* Include 16xx device header file.       */
+
+.global _sin                    /* Declare routine as global. This allows */
+				/* _sin to be called from other routines. */
+.rsect ".ram"                   /* Assemble in .ram.                      */
+
+_sin:   auc = 0x0               /* No scaling of p register.              */
+	x=a1                    /* Load input number into x, in q14.      */
+	y=a1                    /* Load input number into y, in q14.      */
+	p=x*y                   /* Calcualte x^2 in q12.                  */
+	a0=p                    /* Load x^2 into a0, retain q12 format.   */
+	x=a0                    /* Load x^2 into x reg.                   */
+	auc=0x02                /* Load p<<2 into a0.                     */
+	r0=SineCoeff            /* Pointer to sine coefficients.          */
+	y=*r0++                 /* Load the last coefficient cn into y.   */
+
+do 4 {
+	p=x*y  a0=*r0++         /* p gets x^2 * c[n], a0 gets c[n-1].     */
+	a0 = a0+p               /* a0 gets c[n-1] + x^2 * a[n].           */
+	y = a0
+     }                          /* This is two cycles.                    */
+
+	x=a1                    /* Restore original x value (input).      */
+	p=x*y                   /* p now has sine(x).                     */
+	a0=p                    /* a0=sin(x) in q14 format.              */
+
+	return
+
+.rsect ".ram"                   /* Begin assembly in RAM.                 */
+
+SineCoeff:              /*****  all numbers in q14 format by default  *****/
+	int 0.000705467         /* c9<<8 */
+	int -0.0126984          /* c7<<6 */
+	int 0.133333            /* c5<<4 */
+	int -0.666667           /* c3<<2 */
+	int 1.0                 /* c1 */
+
+/***********************************************************************/
+
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

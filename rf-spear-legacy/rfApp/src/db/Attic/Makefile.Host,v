@@ -1,0 +1,285 @@
+head	1.9;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.9
+	RF-SPEAR-R0-1-0:1.9
+	RF-SPEAR-R0-0-3:1.9
+	RF-SPEAR-R0-0-2:1.9
+	RF-SPEAR-R0-0-0:1.9
+	RF-3-13-10:1.8.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.8
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.8
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.8
+	BR3_13_1:1.4.0.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.9
+date	2011.12.07.01.08.38;	author saa;	state dead;
+branches;
+next	1.8;
+
+1.8
+date	2006.02.08.00.38.13;	author lazmo;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2006.01.25.23.54.19;	author lazmo;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2003.08.26.15.09.02;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.01.22.20.15.40;	author luchini;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.01.18.00.22.32;	author luchini;	state Exp;
+branches
+	1.4.2.1;
+next	1.3;
+
+1.3
+date	2003.01.16.21.15.26;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.01.15.05.07.30;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.4.2.1
+date	2003.01.18.00.44.44;	author luchini;	state Exp;
+branches;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.9
+log
+@Changes for 3.14.11 build.
+@
+text
+@#==============================================================
+#
+#  Abs:  Makefile to build EPICS RF Host components
+#
+#  Name: Makefile.Host
+#
+#  Facility:  SLAC/PEP-II 
+#
+#  Auth: dd-mmm-yyyy, Stephanie Allison  (SAA)
+#  Rev:  14-Mar-2000, Kristi Luchini     (LUCHINI)
+#
+#--------------------------------------------------------------
+#  Mod:
+#       14-Jan-2003, K. Luchini (LUCHINI):
+#         Removed install of p2RfRfpDef_phaseoff.h.
+#         This include file does not exist.
+#       14-Mar-2000, K. Luchini (LUCHINI):
+#         Add stanfard header
+#         Add $(EPICS_SITE)/dbd to USER_DBDFLAGS
+#
+#==============================================================
+#
+TOP = ../../../..
+include $(TOP)/config/CONFIG_APP.Vxi
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+#
+USR_DBDFLAGS += -I .. -I $(TOP)/dbd
+USR_DBDFLAGS += -I $(EPICS_SITE)/dbd
+USR_DBDFLAGS += -I $(EPICS_BASE)/dbd
+
+USR_CFLAGS   += -DDBG
+
+# Install includes. 
+# This is needed for any private
+# EPICS development areas.
+INC += rf_station_state.h
+INC += drvP2RfVxi.h
+INC += p2RfAimDef.h
+#INC += p2RfCfmDef.h
+INC += p2RfCf2Def.h
+INC += p2RfClkDef.h
+INC += p2RfGvfDef.h
+INC += p2RfIqaDef.h
+INC += p2RfLib.h
+INC += p2RfRfpDef.h
+INC += sysNiLib.h
+
+# Record include files
+#RECTYPES += p2RfCfmRecord.h
+RECTYPES += p2RfCf2Record.h
+RECTYPES += p2RfGvfRecord.h
+RECTYPES += p2RfIqaRecord.h
+RECTYPES += p2RfRfpRecord.h
+RECTYPES += p2RfClkRecord.h
+RECTYPES += p2RfAimRecord.h
+
+# Build database
+DBDEXPAND  = rfInclude.dbd
+DBDNAME    = rfApp.dbd
+
+include $(TOP)/config/RULES.Host
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+@
+
+
+1.8
+log
+@Sync to today's boot image... includes continuous CF2 coefficient
+readback & verify.  Stn goes purple if any verify fails.
+@
+text
+@@
+
+
+1.7
+log
+@Initial import of COMB-2 (Cf2) support.
+@
+text
+@d40 1
+a40 1
+INC += p2RfCfmDef.h
+d50 1
+a50 1
+RECTYPES += p2RfCfmRecord.h
+@
+
+
+1.6
+log
+@Added rf_station_state.h (used to be part of rfApp/src/seq/rf_loop_defs.h).
+vxi.h is moved to EPICS site/src/diag.
+subIQ.c now includes rf_station_state.h instead of rf_loop_defs.h.
+@
+text
+@d41 1
+d51 1
+@
+
+
+1.5
+log
+@Phase 2 upgrade of IQA modules
+@
+text
+@d37 1
+a37 1
+INC  += vxi.h
+@
+
+
+1.4
+log
+@Undo previous change
+@
+text
+@a13 5
+#       16-Jan-2003, Greg White (GREG):
+#         Undo previous change
+#       16-Jan-2003, K. Luchini (LUCHINI):
+#         Changed variable USR_DBDFLAGS to USER_DBDFLAGS
+#         so that this will work in R3.13.1.
+d32 2
+d37 1
+a37 1
+INC += vxi.h
+@
+
+
+1.4.2.1
+log
+@Create branch BR3_13_1
+@
+text
+@a13 2
+#       16-Jan-2003, Kristi Luchini (LUCHINI):
+#         Create branch for R3.13.1
+d33 3
+a35 3
+USER_DBDFLAGS += -I .. -I $(TOP)/dbd
+USER_DBDFLAGS += -I $(EPICS_SITE)/dbd
+USER_DBDFLAGS += -I $(EPICS_BASE)/dbd
+@
+
+
+1.3
+log
+@Changed USR_DBDFLAGS to USER_DBFLAGS so that this works for R3.13.1
+@
+text
+@d14 2
+a15 1
+#
+d33 3
+a35 3
+USER_DBDFLAGS += -I .. -I $(TOP)/dbd
+USER_DBDFLAGS += -I $(EPICS_SITE)/dbd
+USER_DBDFLAGS += -I $(EPICS_BASE)/dbd
+@
+
+
+1.2
+log
+@Remove references to p2RfRfpDef_phaseoff.h
+@
+text
+@d14 4
+d32 3
+a34 5
+USR_DBDFLAGS += -I .. -I $(TOP)/dbd
+USR_DBDFLAGS += -I $(EPICS_SITE)/dbd
+USR_DBDFLAGS += -I $(EPICS_BASE)/dbd
+
+USR_CFLAGS   += -DDBG
+d39 1
+a39 1
+INC  += vxi.h
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d14 3
+a45 1
+INC += p2RfRfpDef_phaseoff.h
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

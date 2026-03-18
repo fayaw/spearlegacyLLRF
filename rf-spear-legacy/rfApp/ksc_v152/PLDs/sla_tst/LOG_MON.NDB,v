@@ -1,0 +1,141 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.10;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.10;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 3
+The length of the symbol table is: 35
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+.	|74174:16.
+9	|74174:16|
+
+The number of name info structs is : 72
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	IFkb	!	/RD_DATALO	p
+#	IFkb	!	/WT_DATALO	q
+$	IU\(	!	h	/WT_LOCMON	m
+%	IFkb	!	/WT_SIGNAL	o
+&	IFk9	!	:1	"9
+'	IFk9	!	:19	"<
+(	IFk9	!	:22	";
+)	IFk9	!	:25	":
+*	IFkI	!	:26	"=
++	IFkI	!	:27	">
+,	IFkI	!	:28	"?
+-	IFkI	!	:29	"@@
+.	IFkI	!	:30	"A
+/	IFkI	!	:31	"D
+0	IFkI	!	:32	"C
+1	IFkI	!	:33	"B
+2	IFkI	!	:34	"E
+3	IFkI	!	:35	"F
+4	IFkb	!	ERR	r
+5	IFkc	!	ERR_ISRC	"&
+6	IU\(	!	^	ID0	"$
+7	IU\(	!	\	ID1	"#
+8	IFkb	!	ID10	x
+9	IFkb	!	ID11	w
+:	IFkb	!	ID12	v
+;	IFkb	!	ID13	u
+<	IFkb	!	ID14	t
+=	IFkb	!	ID15	s
+>	IU\(	!	Z	ID2	""
+?	IU\(	!	X	ID3	"!
+@@	IFkb	!	ID4	~
+A	IFkb	!	ID5	}
+B	IFkb	!	ID6	|
+C	IFkb	!	ID7	{
+D	IFkb	!	ID8	z
+E	IFkb	!	ID9	y
+F	$rX8+	!	ID[15..0]	"G
+G	IFkc	!	PIN_NAME	"%
+H	IFkc	!	RDAT_ISRC	"(
+I	IU\(	!	i	RESET_L	n
+J	IFkc	!	WDAT_ISRC	")
+K	IFkc	!	WSIG_ISRC	"'
+L	IN#r	.	?	1D	"8
+M	I\lm	.	Y	d	1Q	"2
+N	IN#r	.	>	2D	"+
+O	I\lm	.	[	c	2Q	"3
+P	IN#r	.	7	3D	",
+Q	I\lm	.	]	b	3Q	"4
+R	IN#r	.	6	4D	"-
+S	I\lm	.	_	g	4Q	"5
+T	I\lm	.	`	f	5Q	"6
+U	I\lm	.	a	e	6Q	"7
+V	IN#r	.	$	CLK	"1
+W	IN#r	.	I	CLRN	"0
+X	I\r8	9	L	?	1D	"T
+Y	IN$+	9	d	1Q	"`
+Z	I\r8	9	N	>	2D	"S
+[	IN$+	9	c	2Q	"_
+\	I\r8	9	P	7	3D	"R
+]	IN$+	9	b	3Q	"^
+^	I\r8	9	R	6	4D	"Q
+_	IN$+	9	g	4Q	"]
+`	IN$+	9	f	5Q	"\
+a	IN$+	9	e	6Q	"[
+b	IUV3	9	Q	:10	"^
+c	IUV3	9	O	:11	"_
+d	IUV3	9	M	:12	"`
+e	IUV3	9	U	:7	"[
+f	IUV3	9	T	:8	"\
+g	IUV3	9	S	:9	"]
+h	I\r8	9	V	$	CLK	"N
+i	I\r8	9	W	I	CLRN	"M
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

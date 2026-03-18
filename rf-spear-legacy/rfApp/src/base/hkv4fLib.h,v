@@ -1,0 +1,206 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  HKV4F - Heurikon HK68/V4F definitions
+**
+**  Abstract:
+**      Header file defining Heurikon HK68/V4F registers and fields
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Feedback Project
+**
+**   History:
+**      June 14, 1995 - Created
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef HKV4FLIB_H
+#define HKV4FLIB_H
+
+/* Kludge for missing define */
+#define MVME166
+
+#include "config.h"
+
+#define HKV4F_A_LCLBEG    (unsigned long) (LOCAL_MEM_LOCAL_ADRS)
+#define HKV4F_A_LCLEND    (unsigned long) (HKV4F_A_LCLBEG + LOCAL_MEM_SIZE)
+
+#define HKV4F_A_A32BEG    (unsigned long) 0x40000000 /*HKV4F_VME_EXTENDED_ADRS*/
+#define HKV4F_A_A24BEG    (unsigned long) HKV4F_VME_STANDARD_ADRS
+#define HKV4F_A_A16BEG    (unsigned long) HKV4F_VME_SHORT_ADRS
+
+#define HKV4F_A_A32END    (HKV4F_A_A32BEG + 0xbbffffff)/* HKV4F_VME_EXTENDED) */
+#define HKV4F_A_A24END    (HKV4F_A_A24BEG + HKV4F_VME_STANDARD)
+#define HKV4F_A_A16END    (HKV4F_A_A16BEG + HKV4F_VME_SHORT)
+
+#define HKV4F_A_VSBSYSBEG ((unsigned long) sysMemTop ())
+#define HKV4F_A_VSBSYSEND ((unsigned long) 0x40000000)
+
+#define HKV4F_A_LOCAL      HKV4F_A_LCLBEG
+#define HKV4F_A_A32        HKV4F_A_A32BEG
+#define HKV4F_A_A24        HKV4F_A_A24BEG
+#define HKV4F_A_A16        HKV4F_A_A16BEG
+#define HKV4F_A_VSBSYS     HKV4F_A_VSBSYSBEG
+
+#define INT_VEC_VSB        0x70
+
+#if 0
+/* Definitions missing from Heurikon's hkv4f.h */
+/* Interrupt vectors locations */
+#define VSB_INT_VEC_BASE        0x70    /* VSBchip2 interrupt vector base */
+                                        /* number - Guess by Ric!         */
+
+/* Definitions missing from WRS's config.h */
+/* Interrupt vectors */
+#define INT_VEC_LWP             (VSB_INT_VEC_BASE + LIVB_LWP)
+#define INT_VEC_VWP             (VSB_INT_VEC_BASE + LIVB_VWP)
+#define INT_VEC_VSB             (VSB_INT_VEC_BASE + LIVB_VSB)
+#define INT_VEC_ATT             (VSB_INT_VEC_BASE + LIVB_ATT)
+#define INT_VEC_VIA             (VSB_INT_VEC_BASE + LIVB_VIA)
+
+
+/* Definitions missing from WRS's vsbchip2.h */
+
+/* VSBCHIP2_LIVB register definitions */
+#define LIVB_LWP                 0x00      /* Lcl Wrt Post Err Int Vector     */
+#define LIVB_VWP                 0x01      /* VSB Wrt Post Err Int Vector     */
+#define LIVB_VSB                 0x02      /* VSB Interrupt Vector            */
+#define LIVB_ATT                 0x04      /* EVSB Attention Int Vector       */
+#define LIVB_VIA                 0x05      /* VSB Int Ack Complete Int Vect   */
+
+/* VSBCHIP2_LISR register definitions */
+#define LISR_LWPIF              (1 << 30)  /* Lcl Wrt Post Err Int Flag    30 */
+#define LISR_VWPIF              (1 << 29)  /* VSB Wrt Post Err Int Flag    29 */
+#define LISR_VSBIF              (1 << 28)  /* VSB Interrupt Flag           28 */
+#define LISR_ATTIF              (1 << 26)  /* EVSB Attention Int Flag      26 */
+#define LISR_VIAIF              (1 << 25)  /* VSB Int Ack Complete Int Flg 25 */
+
+/* VSBCHIP2_LIER register definitions */
+#define LIER_GIE                (1 << 15)  /* Global Interrupt Enable      15 */
+#define LIER_LWPIE              (1 << 14)  /* Lcl Wrt Post Err Int Enable  14 */
+#define LIER_VWPIE              (1 << 13)  /* VSB Wrt Post Err Int Enable  13 */
+#define LIER_VSBIE              (1 << 12)  /* VSB Interrupt Enable         12 */
+#define LIER_ATTIE              (1 << 10)  /* EVSB Attention Int Enable    10 */
+#define LIER_VIAIE              (1 <<  9)  /* VSB Int Ack Complete Int Enb  9 */
+
+/* VSBCHIP2_LILR register definitions */
+#define LILR_LWP_LEVEL1       (~(1 << 24)) /* Lcl Bus Write Post Lvl 1  26-24 */
+#define LILR_LWP_LEVEL2       (~(2 << 24)) /* Lcl Bus Write Post Lvl 2  26-24 */
+#define LILR_LWP_LEVEL3       (~(3 << 24)) /* Lcl Bus Write Post Lvl 3  26-24 */
+#define LILR_LWP_LEVEL4       (~(4 << 24)) /* Lcl Bus Write Post Lvl 4  26-24 */
+#define LILR_LWP_LEVEL5       (~(5 << 24)) /* Lcl Bus Write Post Lvl 5  26-24 */
+#define LILR_LWP_LEVEL6       (~(6 << 24)) /* Lcl Bus Write Post Lvl 6  26-24 */
+#define LILR_LWP_LEVEL7       (~(7 << 24)) /* Lcl Bus Write Post Lvl 7  26-24 */
+
+#define LILR_VWP_LEVEL1       (~(1 << 20)) /* VSB Write Post Err Lvl 1  22-20 */
+#define LILR_VWP_LEVEL2       (~(2 << 20)) /* VSB Write Post Err Lvl 2  22-20 */
+#define LILR_VWP_LEVEL3       (~(3 << 20)) /* VSB Write Post Err Lvl 3  22-20 */
+#define LILR_VWP_LEVEL4       (~(4 << 20)) /* VSB Write Post Err Lvl 4  22-20 */
+#define LILR_VWP_LEVEL5       (~(5 << 20)) /* VSB Write Post Err Lvl 5  22-20 */
+#define LILR_VWP_LEVEL6       (~(6 << 20)) /* VSB Write Post Err Lvl 6  22-20 */
+#define LILR_VWP_LEVEL7       (~(7 << 20)) /* VSB Write Post Err Lvl 7  22-20 */
+
+#define LILR_VSB_LEVEL1       (~(1 << 16)) /* VSB Interrupt Lvl 1       18-16 */
+#define LILR_VSB_LEVEL2       (~(2 << 16)) /* VSB Interrupt Lvl 2       18-16 */
+#define LILR_VSB_LEVEL3       (~(3 << 16)) /* VSB Interrupt Lvl 3       18-16 */
+#define LILR_VSB_LEVEL4       (~(4 << 16)) /* VSB Interrupt Lvl 4       18-16 */
+#define LILR_VSB_LEVEL5       (~(5 << 16)) /* VSB Interrupt Lvl 5       18-16 */
+#define LILR_VSB_LEVEL6       (~(6 << 16)) /* VSB Interrupt Lvl 6       18-16 */
+#define LILR_VSB_LEVEL7       (~(7 << 16)) /* VSB Interrupt Lvl 7       18-16 */
+
+#define LILR_ATT_LEVEL1       (~(1 <<  8)) /* EVSB Attention Inter Lvl 1 10-8 */
+#define LILR_ATT_LEVEL2       (~(2 <<  8)) /* EVSB Attention Inter Lvl 2 10-8 */
+#define LILR_ATT_LEVEL3       (~(3 <<  8)) /* EVSB Attention Inter Lvl 3 10-8 */
+#define LILR_ATT_LEVEL4       (~(4 <<  8)) /* EVSB Attention Inter Lvl 4 10-8 */
+#define LILR_ATT_LEVEL5       (~(5 <<  8)) /* EVSB Attention Inter Lvl 5 10-8 */
+#define LILR_ATT_LEVEL6       (~(6 <<  8)) /* EVSB Attention Inter Lvl 6 10-8 */
+#define LILR_ATT_LEVEL7       (~(7 <<  8)) /* EVSB Attention Inter Lvl 7 10-8 */
+
+#define LILR_VIA_LEVEL1       (~(1 <<  4)) /* VSB Int Ack Complete Lvl 1  6-4 */
+#define LILR_VIA_LEVEL2       (~(2 <<  4)) /* VSB Int Ack Complete Lvl 2  6-4 */
+#define LILR_VIA_LEVEL3       (~(3 <<  4)) /* VSB Int Ack Complete Lvl 3  6-4 */
+#define LILR_VIA_LEVEL4       (~(4 <<  4)) /* VSB Int Ack Complete Lvl 4  6-4 */
+#define LILR_VIA_LEVEL5       (~(5 <<  4)) /* VSB Int Ack Complete Lvl 5  6-4 */
+#define LILR_VIA_LEVEL6       (~(6 <<  4)) /* VSB Int Ack Complete Lvl 6  6-4 */
+#define LILR_VIA_LEVEL7       (~(7 <<  4)) /* VSB Int Ack Complete Lvl 7  6-4 */
+#endif
+
+#endif
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

@@ -1,0 +1,239 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.1
+date	2003.01.10.23.22.42;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.42;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@
+/********************* The routine _atan follows ************************
+Name:           _atan
+		[atan.s - atan.o]
+
+Synopsis:       Implements the arc-tangent function of Y/X. Y and X are
+		two signed, 16 bit numbers.
+	
+Performance and Memory Requirement:
+
+	Instruction cycles:     131 with BMU device [Call & return included].
+
+	Code:                   71 words of ROM with BMU device. 
+
+	Coefficients:           6 Words of RAM.
+	Local variables:        3 RAM locations.
+	Static variables:       0
+	Registers used: x, y, p, a0, a1, r0 [not modified], r2,
+			auc is initialized to 0.
+	Accuracy:       accurate to 3 or 4 decimal digits.
+
+Description:
+
+	Algorithm: atan(Y/X) = PI/2 + c1.D + c3.D^3 + ... + c9.D^9
+			     = PI/2 + (...((c9.D^2 + c7).D^2 + ...).D^2 + c1).D
+	Where D = [|Y| - |X|]/[|Y| + |X|].
+
+	BEGIN _atan
+	    Save sign of X and Y respectively in local and local+1.
+	    Get absolute value of X and Y.
+	    Determine |Y|+|X| and |Y|-|X|.
+	    Save the sign of the division D: sgn(D) = sgn(|Y|-|X|).
+	    Calculate D = [|Y|-|X|]/[Y|+|X|].
+	    Restore sign of D and save D in Q14 format.
+	    Calculate atan(|Y|/|X|), using D [See atan routine].
+	    Get atan(Y/X) according to sign of X and Y.
+	    Result in a0h in Q13 format.
+	END _atan.
+
+Inputs:         Y and X are signed, 16-bit numbers. Y is passed in a0h 
+		and X in a1h.
+
+Outputs:        The return value is a signed, 16-bit number passed in a0h 
+		in Q13 format.
+
+Routines Called:        None.
+
+Originally written by Yves Nicoue (June 1992) using RAM only. Modified to 
+use both RAM and EROM and also revised comments. This routine shows 16% 
+improvement in instruction cycles and 29% improvement in memory requirements
+when BMU device is used and compared to the performance on DSP16A. 
+Work by Aristos Nkansa-Kissi (Summer 1994).
+****************************************************************************
+Modified by L.Sapozhnikov, SLAC in order to change range from -pi/2 to pi/2 
+to range from -pi to pi. Result of this change
+	Instruction cycles:     138 with BMU device [Call & return included].
+
+	Code:                   77 words of ROM with BMU device. 
+
+		
+*************************************************************************/
+
+#include <1610.h>
+                                                                     
+.global _atan                 /* Declare routine as global.             */
+.global atan_loc
+.rsect ".ram"                /* Assemble in RAM.                      */
+
+_atan:  auc = 0x0             /* Clear low part of accumulators.        */
+	r2 = _atanc           /* Pointer to coefficients.               */
+
+			*r0++ = a0      /* Save sign of Y in local.     */
+			*r0++ = a1      /* Save sign of X in local+1.   */
+	a0 = a0
+	if mi a0 = -a0                  /* Get absolute values of Y     */
+	a1 = a1
+	if mi a1 = -a1                  /* and X.                       */
+	y = a1
+	a1 = a0 + y                     /* a1 = |Y| + |X| > 0.          */
+	a0 = a0 - y                     /* a0 = |Y| - |X|.              */
+
+		 /******* Now, calculate D. *******/
+			
+			*r0 = a0        /* Sign of division in local+2. */
+	a0 = a0
+	if mi a0 = -a0                  /* Make a0 = abs(|Y| - |X|).    */
+	a1 = a1 >> 1                    /* |Y|+|X| is shifted to the    */
+	y = a1                          /* right by 1 bit to avoid      */
+	yl = a1l                        /* saturation in the division.  */
+	a0 = a0 >> 1
+	do 15 {
+		a0 = a0 << 1            /* The quotient is being cons-  */
+		a1 = a0 - y             /* tructed in a0l and the rema- */
+		if pl a0 = a1 + 1       /* inder (shifted n times) is   */
+	       }                        /* in a0h, y = |Y| + |X|.       */
+		
+	a0 = extractz(a0,0x0f00)        /* Take the quotient.           */
+	a0 = a0 << 1    
+			a1 = *r0        /* Take sign of D in local + 2. */
+	a1 = a1         
+	if mi a0 = -a0                  /* Restore sign of D.           */
+	
+	a0 = a0 << 14                  /* Make a0 Q14 format.           */            
+	*r0 = a0		        /* In local+2, there is D (Q14).*/
+	x = a0
+	y = a0
+	p =  x * y                      /* y = x = a0h = D (Q12).       */
+	a0 = p
+
+	a0 = a0 << 2                   /* a0 = D^2 in Q14.              */         
+	x = a0                          /* x contains D^2 in Q14 format.*/
+
+			y = *r2++       /* Get c9 in Q14 format.        */
+	p = x * y                       /* Qx-2                         */
+	a0 = p          y = *r2++       /* c9.D^2 in Q12 format, Get c7.*/
+	a0 = a0 + y
+	y = a0                          /* c9.D^2 (Q12) + c7 (Q14).     */
+
+	p = x * y                       /* Q12  format for c7.D^2.      */
+	a0 = p          y = *r2++       /* Get c5 in Q14 format.        */
+	
+	a0 = a0 << 2                   /* Add 2 to format. c7.D^2=Q14   */
+	
+	a0 = a0 + y                     /* c9.D^4 (Q12) + c7.D^2 (Q14)  */
+	y = a0                          /* + c5 (Q14)                   */
+
+	p = x * y                       /* Qx-2: Q12 for c5.D^2         */
+	a0 = p          y = *r2++       /* Get c3 in Q14 format         */
+	a0 = a0 + y                     /* c9.D^6 (Q10) + c7.D^4 (Q12)  */
+	y = a0                          /* + c5.D^2 (Q12) + c3 (Q14)    */
+
+	p = x * y                       /* Qx-2: Q12 for c3.D^2         */
+	a0 = p          y = *r2++       /* Get c1 in Q14 format         */
+	
+	a0 = a0 << 2                    /* Add 2 to format: Q14=c3.D^2. */  
+	
+	a0 = a0 + y     x = *r0--       /* Get D in Q14 format          */
+	y = a0                          /* Now, r0 = local+1 (on X)     */
+	
+	p = x * y                       /* Qx-2: Q12 for c1.D           */
+	a0 = p          y = *r2++       /* c9.D^9 (Q8) +...+ c1.D (Q12) */
+					/* Get c0 = PI/4 in Q13 format. */
+	a0 = a0 << 1                    /* a0 in Q13 format.            */
+	a0 = a0 + y                     /* atan(|Y|/|X|) in Q13 format. */
+	
+			x = *r0--       /* Recall sign of X.            */
+			y = *r0         /* Recall sign of Y.            */
+	p = x * y
+	a1 = x				/* if x is negative therefore	*/
+	a1 = a1
+	if mi goto _atan_pi		/* angle in range from +/-]pi,pi/2] */
+	a1 = p
+	if mi a0 = -a0                  /* If X.Y<0 change sign.        */
+					/* Result in a0h in Q13 format. */
+	return
+
+_atan_pi:
+	a0 = a0h - 0x6488		/* if x is negative therefore	*/
+					/* angle in range from +/-]pi,pi/2] */
+					/* add pi/2 in Q13 format	*/
+	a1 = p
+	if mi a0 = -a0                  /* If X.Y<0 change sign.        */
+					/* Result in a0h in Q13 format. */
+	return
+
+.rsect ".ram"                           /* Begin assembly in RAM.       */
+
+/* Coefficients: c1 =  0.999866                                         */
+/*               c3 = -0.3302995                                        */
+/*               c5 =  0.180141                                         */      
+/*               c7 = -0.085133                                         */
+/*               c9 =  0.0208535                                        */
+
+_atanc: int  0.33365616!14              /* c9 * 2^4                     */
+	int -0.340532!14                /* c7 * 2^2                     */
+	int  0.720564!14                /* c5 * 2^2                     */
+	int -0.3302995!14               /* c3                           */
+	int  0.999866!14                /* c1                           */
+	int  0.785398163!13             /* c0 = PI/4                    */
+
+atan_temp: int
+atan_loc:  3*int                   /* 3 RAM locations for _atan.           */
+
+
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

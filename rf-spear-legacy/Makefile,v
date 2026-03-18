@@ -1,0 +1,198 @@
+head	1.10;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.10
+	RF-SPEAR-R0-3-1:1.10
+	RF-SPEAR-R0-3-0:1.10
+	RF-SPEAR-R0-2-0:1.10
+	RF-SPEAR-R0-1-0:1.10
+	RF-SPEAR-R0-0-3:1.10
+	RF-SPEAR-R0-0-2:1.10
+	RF-SPEAR-R0-0-1:1.10
+	RF-SPEAR-R0-0-0:1.9
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.8
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.6
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.6
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.6
+	R_epics_3_14_8_2_rtems_4_7_0:1.4
+	R_epics_3_14_6_spear0:1.2
+	R_3_14_1_spear1:1.2
+	snapshot_may_02_2004_by_ts:1.2
+	R_3_14_1_spear0:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.10
+date	2012.10.03.19.27.40;	author saa;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2012.09.18.22.46.14;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2011.12.07.01.30.23;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2011.08.08.16.06.08;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2008.04.23.18.33.01;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2007.09.22.00.55.16;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2007.09.20.01.52.34;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2006.08.25.22.05.52;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2004.03.24.22.16.33;	author till;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.04.25.22.37.21;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.10
+log
+@Add epvxi, stepper, and allenBradley.
+@
+text
+@#Makefile at top of application tree
+TOP = .
+include $(TOP)/configure/CONFIG
+DIRS := $(DIRS) $(filter-out $(DIRS), configure)
+ifeq ($(EPICS_HOST_ARCH),solaris-sparc-gnu)
+DIRS += epvxi
+# stepper before allenBradley
+DIRS += stepper
+DIRS += allenBradley
+endif
+DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard *App))
+DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard *app))
+DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard iocBoot))
+DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard iocboot))
+include $(TOP)/configure/RULES_TOP
+@
+
+
+1.9
+log
+@Removed unused directories.
+@
+text
+@d5 6
+@
+
+
+1.8
+log
+@config directory no longer needed.
+@
+text
+@a4 4
+DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard drv*))
+DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard dev*))
+# ecdr814App builds libraries used by other Apps
+DIRS += ecdr814App
+@
+
+
+1.7
+log
+@Build boot directories too.
+@
+text
+@a3 3
+ifeq ($(EPICS_HOST_ARCH),solaris-sparc-gnu)
+DIRS := $(DIRS) $(filter-out $(DIRS), config)
+endif
+@
+
+
+1.6
+log
+@Add config directory for building rfApp on 3.13.10 (solaris only).
+@
+text
+@d14 2
+a15 2
+#DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard iocBoot))
+#DIRS := $(DIRS) $(filter-out $(DIRS), $(wildcard iocboot))
+@
+
+
+1.5
+log
+@Remove last change - bpmAdcApp and fofbApp depend on each other.  So neither
+can be built all the way without the other.  The change really needs to be
+made to the bpmAdcApp and fofbApp src Makefiles.
+@
+text
+@d4 3
+@
+
+
+1.4
+log
+@Build fofbApp before bpmAdcApp.
+@
+text
+@a8 2
+# build fofbApp before bpmAdcApp
+DIRS += fofbApp
+@
+
+
+1.3
+log
+@ecdr814App must be built before other Apps.
+@
+text
+@d9 2
+@
+
+
+1.2
+log
+@ - make 'drv*' prior to 'dev*' and '*App'
+ - make 'dev*' prior to '*App'
+@
+text
+@d7 2
+@
+
+
+1.1
+log
+@First version - don't build iocBoot.
+@
+text
+@d5 2
+@
+

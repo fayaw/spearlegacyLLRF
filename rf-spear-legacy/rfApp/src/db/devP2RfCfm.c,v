@@ -1,0 +1,1702 @@
+head	1.7;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.7
+	RF-SPEAR-R0-3-1:1.7
+	RF-SPEAR-R0-3-0:1.7
+	RF-SPEAR-R0-2-0:1.7
+	RF-SPEAR-R0-1-0:1.7
+	RF-SPEAR-R0-0-3:1.7
+	RF-SPEAR-R0-0-2:1.7
+	RF-SPEAR-R0-0-1:1.7
+	RF-SPEAR-R0-0-0:1.7
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.7
+	RF-3-13-10:1.6.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.6
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.6
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.6
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.7
+date	2011.12.07.01.21.54;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2006.01.25.23.54.19;	author lazmo;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2004.04.10.00.02.30;	author lazmo;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.09.10.23.50.59;	author luchini;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.02.11.19.34.53;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.11.19.22.35;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.7
+log
+@Changes for 3.14.11 (export) and compiler warnings.
+@
+text
+@/*
+** ++
+**
+**  Facility:  DEV - DEVice support
+**
+**  Abstract:
+**      EPICS device support for the PEP-II RF Comb Filter Module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Low Level RF Group
+**
+**  History:
+**	March 29, 2004     - Removed CFM_M_INVADX from CFM_M_INTSELECT for MJB [LAZMO]
+**      September 10, 2003,- Added function Read_IntStatus                  (K. Luchini)
+**      February  11, 2003 - Updated new fields verh and verf in InitFields (K. Luchini)
+**	June 13, 1996      - Created  (R.Claus)
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#include <vxWorks.h>
+#include <logLib.h>
+#include <sysLib.h>
+#include <stdlib.h>
+#include <types.h>
+#include <stdioLib.h>
+#include <string.h>
+#include <taskLib.h>
+
+#include <epicsPrint.h>
+#include <cvtTable.h>
+#include <dbDefs.h>
+#include <dbAccess.h>
+#include <dbEvent.h>
+#include <recGbl.h>
+#include <recSup.h>
+#include <devSup.h>
+#include <link.h>
+#include <alarm.h>
+/*#include <module_types.h>*/
+#include <callback.h>
+
+#include <p2RfLib.h>
+#include <drvP2RfVxi.h>
+#include <p2RfCfmDef.h>
+#include <p2RfCfmRecord.h>
+
+#include "epicsExport.h"
+
+#if 0
+#define REVERSE_BITS                    /* For hardware bug fixed in rev 2 */
+#endif
+
+
+
+#define CFM_V_INTSELECT    CFM_V_COMBOFLW
+#define CFM_M_INTSELECT   (CFM_M_INV40MHZ | CFM_M_INV20MHZ | CFM_M_INV10MHZ | \
+                           CFM_M_ADCOFLW  | CFM_M_EQOFLW   | CFM_M_COMBOFLW | \
+                           CFM_M_SOFTWARE)
+/*** removed CFM_M_INVADX for MJB [lazmo 2004-03-29] ***/
+
+
+
+typedef struct p2RfCfmRecord   P2RfCfmRecord;
+
+static long InitRecord (P2RfCfmRecord *);
+static long Action     (P2RfCfmRecord *);
+
+typedef struct
+{
+  long		number;
+  DEVSUPFUN	report;
+  DEVSUPFUN	init;
+  DEVSUPFUN	init_record;
+  DEVSUPFUN	get_ioint_info;
+  DEVSUPFUN	action;
+} P2RfCfmDset;
+
+P2RfCfmDset devP2RfCfm = {5, NULL, NULL, InitRecord, NULL, Action};
+
+epicsExportAddress(dset,devP2RfCfm);
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  long            status;
+}  CfmRstBlk;
+
+typedef struct
+{
+  char           *id;
+  float          *coefs;
+  int             count;
+  int             index;
+  P2RfCvtBlk      cvtBlk;
+  char           *file;
+}  CfmCoefPrm;
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  CfmCoefPrm     *prm;
+  long            status;
+}  CfmCoefBlk;
+
+typedef struct
+{
+  char           *id;
+  int             index;
+  int             count;
+  char           *file;
+}  CfmMemPrm;
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  CfmMemPrm      *prm;
+  long            status;
+  int             abortFlg;
+}  CfmHistBlk;
+
+typedef struct
+{
+  void           *drvPvt;
+  P2RfCfmRecord  *rec;
+  CfmRstBlk       resetBlk;
+  CfmCoefBlk      coefBlk;
+  CfmHistBlk      histBlk;
+  unsigned int    intPrc;
+  CfmCoefPrm      eq0Prm;
+  float           eqCoefs0[CFM_K_EQCOEFCNT];
+  CfmCoefPrm      eq1Prm;
+  float           eqCoefs1[CFM_K_EQCOEFCNT];
+  CfmCoefPrm      iirPrm;
+  float           iirCoefs[CFM_K_IIRCOEFCNT];
+  CfmMemPrm       histPrm;
+
+}  CfmBoard;
+
+/* Forward references */
+static long  SpawnReset      (P2RfCfmRecord *, CfmRstBlk *);
+static void  ResetCallback   (CfmRstBlk *);
+static long  SpawnLdCoefs    (P2RfCfmRecord *, unsigned char *, CfmCoefBlk *,
+                              CfmCoefPrm *, char *, unsigned short *);
+static void  LdCoefCallback  (CfmCoefBlk *);
+static long  SpawnGetHist    (P2RfCfmRecord *, unsigned char *, CfmHistBlk *,
+                              CfmMemPrm *, unsigned int, char *,
+                              unsigned short *);
+static void  GetHistCallback (CfmHistBlk *);
+static void  CfmIsr          (void *, unsigned short);
+static void  CfmShutdown     (void *);
+static long  InitFields      (CfmBoard *, int);
+static long  ColdInit        (CfmBoard *, P2RfCfmRecord *);
+static long  WarmInit        (CfmBoard *, P2RfCfmRecord *);
+static void  Read_IntStatus  (CfmBoard *, P2RfCfmRecord *);
+
+#ifdef REVERSE_BITS
+static short ReverseBits     (void *, short);
+#endif
+
+
+static void CfmIsr (void           *brdArg,
+                    unsigned short  intStat)
+/*
+   Description
+   -----------
+   Device specific routine to handle interrupts generated by the module.
+   It runs in the context of the Interrupt Service Routine.  Thus all
+   the rules for coding at IPL apply.
+
+   In this case, alarms are set depending on the interrupt type.
+
+   Parameters
+   ----------
+       brdArg - A pointer to the device private structure
+      intStat - The interrupt status mask
+
+   Returns
+   -------
+   nothing
+*/
+{
+#if 0
+   Function ("CfmIsr");
+#endif
+  CfmBoard       *brd = (CfmBoard *) brdArg;
+  P2RfCfmRecord  *rec = brd->rec;
+
+
+#if 0
+  if (intStat & CFM_M_INV40MHZ)
+    logMsg ("%s: Invalid 40 MHz clock\n", (int)FN, 0, 0, 0, 0, 0);
+  if (intStat & CFM_M_INV20MHZ)
+    logMsg ("%s: Invalid 20 MHz clock\n",(int)FN, 0, 0, 0, 0, 0);
+  if (intStat & CFM_M_INV10MHZ)
+    logMsg ("%s: Invalid 10 MHz clock\n", (int)FN, 0, 0, 0, 0, 0);
+
+  if (intStat & CFM_M_ADCOFLW)
+    logMsg ("%s: ADC overflow detected\n", (int)FN, 0, 0, 0, 0, 0);
+  if (intStat & CFM_M_EQOFLW)
+    logMsg ("%s: Equalizer overflow detected\n",(int)FN, 0, 0, 0, 0, 0);
+  if (intStat & CFM_M_COMBOFLW)
+    logMsg ("%s: Comb overflow detected\n",(int)FN, 0, 0, 0, 0, 0);
+
+  if (intStat & CFM_M_INVADX)
+    logMsg ("%s: Invalid address or access\n",(int)FN, 0, 0, 0, 0, 0);
+  if (intStat & CFM_M_SOFTWARE)
+    logMsg ("%s: Software interrupt\n",(int)FN, 0, 0, 0, 0, 0);
+#endif
+
+  /* Update mask of interrupts set */
+  if (intStat & (intStat ^ rec->istt))  /* Is bit already set in istt? */
+  {
+    rec->istt |= intStat;
+
+    /* Process forward links */
+    brd->intPrc++;
+    scanOnce ((dbCommon *)rec);
+  }
+}
+
+
+
+static void CfmShutdown (void  *brdArg)
+/*
+   Description
+   -----------
+   Device specific routine to run at shutdown time.
+
+   Parameters
+   ----------
+       brdArg - A pointer to the device private structure
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("CfmShutdown"); */
+}
+
+
+
+static long InitRecord (P2RfCfmRecord  *rec)
+/*
+   Description
+   -----------
+   Initialize the record.  Many fields of the record are filled with data from
+   the hardware.  Depending on the start-up type (cold or warm) some record
+   fields will either set up the hardware or get their values from a restore
+   file.  Interrupts from the board are enabled at the end of the
+   initialization.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("InitRecord");
+
+  struct vxiio   *vxiIo = NULL;
+  CfmBoard       *brd;
+  long            status;
+  void           *drvPvt;
+  char           *msg   = "CFM module initialization failed";
+  int             startType;
+
+
+  /* rec.out must be of type VXI_IO */
+  if (rec->out.type != VXI_IO)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (S_db_badField, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "Illegal OUT field"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return(S_db_badField);
+  }
+
+  /* Allocate the device private block */
+  if ((brd = calloc (1, sizeof (*brd))) == NULL)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (ERROR, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN,
+                                     "No memory for CFM board descriptor"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Register the module to get a driver handle */
+  vxiIo = &rec->out.value.vxiio;
+  if ((status = P2RF_RegisterModule(vxiIo->flag, vxiIo->frame, vxiIo->slot,
+                                    vxiIo->la,
+                                    CFM_K_MODEL, CFM_K_NAME, CFM_K_DRAWING,
+                                    CfmIsr, brd, CfmShutdown, brd,
+                                    &drvPvt)))
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "P2RF_RegisterModule"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (status);
+  }
+
+  /* Set up the device private block and save a pointer to it in the record */
+  brd->drvPvt = drvPvt;
+  brd->rec    = rec;
+  rec->dpvt   = brd;
+
+  /* Initialize the callback facility for the reset function*/
+  callbackSetCallback ((void*)ResetCallback, &brd->resetBlk.callback);
+  callbackSetPriority (priorityHigh,         &brd->resetBlk.callback);
+  callbackSetUser     (rec,                  &brd->resetBlk.callback);
+  brd->resetBlk.drvPvt = drvPvt;
+
+  /* Initialize the callback facility for loading coefficients */
+  callbackSetCallback ((void*)LdCoefCallback, &brd->coefBlk.callback);
+  callbackSetPriority (priorityLow,           &brd->coefBlk.callback);
+  callbackSetUser     (rec,                   &brd->coefBlk.callback);
+  brd->coefBlk.drvPvt = drvPvt;
+
+  /* Load the static part of the coefficient parameter block */
+  {
+    CfmCoefPrm  *prm = &brd->eq0Prm;
+
+    prm->id            = CFM_K_EQCOEFID;
+    prm->coefs         = brd->eqCoefs0;
+    prm->count         = CFM_K_EQCOEFCNT;
+    prm->index         = CFM_I_EQCOEF0;
+    prm->cvtBlk.fMin   = CFM_K_EQCOEFFMIN;
+    prm->cvtBlk.fMax   = CFM_K_EQCOEFFMAX;
+    prm->cvtBlk.iMin   = (short)CFM_K_EQCOEFIMIN;
+    prm->cvtBlk.iMax   = CFM_K_EQCOEFIMAX;
+    prm->cvtBlk.iOff   = 0;
+#ifdef REVERSE_BITS
+    prm->cvtBlk.cvtRtn = ReverseBits;
+    prm->cvtBlk.cvtArg = NULL;
+#else
+    prm->cvtBlk.cvtRtn = NULL;
+    prm->cvtBlk.cvtArg = NULL;
+#endif
+  }
+
+  {
+    CfmCoefPrm  *prm = &brd->eq1Prm;
+
+    prm->id            = CFM_K_EQCOEFID;
+    prm->coefs         = brd->eqCoefs1;
+    prm->count         = CFM_K_EQCOEFCNT;
+    prm->index         = CFM_I_EQCOEF1;
+    prm->cvtBlk.fMin   = CFM_K_EQCOEFFMIN;
+    prm->cvtBlk.fMax   = CFM_K_EQCOEFFMAX;
+    prm->cvtBlk.iMin   = (short)CFM_K_EQCOEFIMIN;
+    prm->cvtBlk.iMax   = CFM_K_EQCOEFIMAX;
+    prm->cvtBlk.iOff   = 0;
+#ifdef REVERSE_BITS
+    prm->cvtBlk.cvtRtn = ReverseBits;
+    prm->cvtBlk.cvtArg = NULL;
+#else
+    prm->cvtBlk.cvtRtn = NULL;
+    prm->cvtBlk.cvtArg = NULL;
+#endif
+  }
+
+  {
+    CfmCoefPrm  *prm = &brd->iirPrm;
+
+    prm->id            = CFM_K_IIRCOEFID;
+    prm->coefs         = brd->iirCoefs;
+    prm->count         = CFM_K_IIRCOEFCNT;
+    prm->index         = CFM_I_IIRCOEF;
+    prm->cvtBlk.fMin   = CFM_K_IIRCOEFFMIN;
+    prm->cvtBlk.fMax   = CFM_K_IIRCOEFFMAX;
+    prm->cvtBlk.iMin   = (short)CFM_K_IIRCOEFIMIN;
+    prm->cvtBlk.iMax   = CFM_K_IIRCOEFIMAX;
+    prm->cvtBlk.iOff   = 0;
+    prm->cvtBlk.cvtRtn = NULL;
+    prm->cvtBlk.cvtArg = NULL;
+  }
+
+  /* Initialize the callback facility for the get history function */
+  brd->histBlk.drvPvt = drvPvt;
+  callbackSetCallback ((void*)GetHistCallback, &brd->histBlk.callback);
+  callbackSetPriority (priorityLow,            &brd->histBlk.callback);
+  callbackSetUser     (rec,                    &brd->histBlk.callback);
+
+  /* Load the static part of the history parameter block */
+  {
+    CfmMemPrm  *prm = &brd->histPrm;
+
+    prm->id            = CFM_K_HISTID;
+    prm->index         = CFM_I_HISTMEM;
+  }
+
+  /* Figure out the restart type -- To be determined */
+  startType = P2RF_K_COLDSTART;
+
+  /* Initialize the module and the database fields depending on startup type */
+  if ((status = InitFields (brd, startType)))
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Enable module interrupts and update the database copy */
+  P2RF_ModIntEnable (drvPvt);
+  P2RF_ReadVme (drvPvt, CFM_I_INTCTRL, &rec->ictl);
+
+  return (OK);
+}
+
+
+
+#ifdef REVERSE_BITS
+static short ReverseBits (void   *arg,
+                          short   coef)
+/*
+   Description
+   -----------
+   Function to swap the bits around to compensate for a wiring error on the
+   module.  Bit 0 is moved to bit 15 and vice versa, bit 1 to bit 14 and vice
+   versa, etc.
+
+   Parameters
+   ----------
+          arg - An unused argument
+         coef - The coefficient to be converted
+
+   Returns
+   -------
+   The converted coefficient
+*/
+{
+  return (((coef & 0x0001) << 15) | ((coef & 0x0002) << 13) |
+          ((coef & 0x0004) << 11) | ((coef & 0x0008) <<  9) |
+          ((coef & 0x0010) <<  7) | ((coef & 0x0020) <<  5) |
+          ((coef & 0x0040) <<  3) | ((coef & 0x0080) <<  1) |
+          ((coef & 0x0100) >>  1) | ((coef & 0x0200) >>  3) |
+          ((coef & 0x0400) >>  5) | ((coef & 0x0800) >>  7) |
+          ((coef & 0x1000) >>  9) | ((coef & 0x2000) >> 11) |
+          ((coef & 0x4000) >> 13) | ((coef & 0x8000) >> 15));
+}
+#endif
+
+
+
+static long InitFields (CfmBoard *brd,
+                        int       initType)
+/*
+   Description
+   -----------
+   Function to initialize the fields in the database record and/or the module,
+   depending on the initialization type.
+
+   Parameters
+   ----------
+          brd - A pointer to the device private block
+     initType - Type of initialization.
+
+   Returns
+   -------
+   Status
+*/
+{
+  /*  Function ("InitFields");*/
+
+  P2RfCfmRecord  *rec    = brd->rec;
+  void           *drvPvt = brd->drvPvt;
+  long            status;
+  unsigned short  sernHi;
+  unsigned short  sernLo;
+
+
+  /* Reset the module, if it's a cold startup.  This takes a while... */
+  if (initType == P2RF_K_COLDSTART)  P2RF_ResetModule (drvPvt);
+
+  /* Load the record fields with device data */
+  P2RF_ReadVme (drvPvt, CFM_I_MANID,     &rec->mid );
+  P2RF_ReadVme (drvPvt, CFM_I_MODELNO,   &rec->mtyp);
+  P2RF_ReadVme (drvPvt, CFM_I_STATUS,    &rec->mstt);
+  P2RF_ReadVme (drvPvt, CFM_I_OFFSET,    &rec->a24o);
+  P2RF_ReadVme (drvPvt, CFM_I_ATTRIBUTE, &rec->vatt);
+  P2RF_ReadVme (drvPvt, CFM_I_SERIALHI,  &sernHi   );
+  P2RF_ReadVme (drvPvt, CFM_I_SERIALLO,  &sernLo   );
+  rec->sern = (sernHi << 16) | sernLo;
+  P2RF_ReadVme (drvPvt, CFM_I_VERSION,   &rec->vern);
+  rec->verh = P2RF_HWVER(rec->vern);  /* lower nibble of hardware version */
+  rec->verf = P2RF_FWVER(rec->vern);  /* lower nibble of firmware version */
+
+  /*================================================================
+   * from Bill Ross 3/31/2005:
+   * The model number is still 0x101.  The way to tell the Comb Version-2
+   * from a Comb Version-1 is by looking at the Version Number Register.
+   * It will show 0x1121 for the new Version-2 Comb.  (The old Comb reads
+   * 0x1111.)
+   *================================================================
+   */
+  if (rec->vern != 0x1111) return ERROR;      /* not a version 1 Comb (CFM) */
+  P2RF_ReadVme (drvPvt, CFM_I_SUBCLASS,  &rec->vscl);
+
+  /* Write some registers if we're doing a grounds-up initialization */
+  if (initType == P2RF_K_COLDSTART)    status = ColdInit (brd, rec);
+  else                                 status = WarmInit (brd, rec);
+
+  /* Resman wrote 0xfffc to module control register; take down software int */
+  rec->mctl = rec->mstt & (CFM_M_SFTRST | CFM_M_SYSFAILINH | CFM_M_A24A32);
+  P2RF_WriteVme (drvPvt, CFM_I_CONTROL,  rec->mctl);
+  P2RF_ReadVme  (drvPvt, CFM_I_STATUS,  &rec->mstt);
+
+  /*
+  |  Reading the Interrupt Status Register clears the outstanding Software
+  |  Interrupt Status bit, but does not clear the pending interrupt.  Thus
+  |  reading the register here would confuse the ISR when interrupts are
+  |  enabled and the pending software interrupt is taken: the ISR would
+  |  not be able to find the source of the interrupt.
+  */
+
+  /* Update the database copy of the Comb Status and Comb control registers */
+  P2RF_ReadVme (drvPvt, CFM_I_COMBSTAT, &rec->cstt);
+  P2RF_ReadVme (drvPvt, CFM_I_COMBCTRL, &rec->cctl);
+
+  return (status);
+}
+
+
+
+static long ColdInit (CfmBoard      *brd,
+                      P2RfCfmRecord *rec)
+/*
+   Description
+   -----------
+   Initialization file to run when starting up from scratch.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("ColdInit");
+
+  register void  *drvPvt = brd->drvPvt;
+  unsigned short  reg;
+  long            status;
+
+
+  /* Don't allow database access to the interrupt level */
+  reg = (P2RF_K_INTLEVEL << CFM_V_INTLEVEL) & CFM_M_INTLEVEL;
+
+  /* Initialize the Interrupt Control Register from the database */
+  rec->ictl = ~(reg | ((rec->imsk << CFM_V_INTSELECT) & CFM_M_INTSELECT));
+  P2RF_WriteVme (drvPvt, CFM_I_INTCTRL, rec->ictl);
+  rec->oimk = rec->imsk;
+
+  /* Make sure module is in LOAD state */
+  P2RF_WriteVme (drvPvt, CFM_I_COMBCTRL, CFM_K_LOAD << CFM_V_STATE);
+
+  /* Initialize the Equalizer Control Register before loading coefficients */
+  P2RF_WriteVme (drvPvt, CFM_I_EQCTRL, CFM_K_EQCTRLVAL);
+  rec->ectl   = CFM_K_EQCTRLVAL;
+
+  /* Load Equalizer Coefficient set 0 from a file onto the module */
+  {
+    CfmCoefPrm  *prm = &brd->eq0Prm;
+
+    if ((status = P2RF_ReadCoefFile (drvPvt, prm->id, rec->e0cf,
+                                     prm->count, prm->coefs,
+                                     rec->val, sizeof (rec->val))) == OK)
+    {
+      P2RF_LoadCoefs (drvPvt, prm->coefs, prm->count, prm->index, &prm->cvtBlk);
+      rec->e0as = NO_ALARM;
+    }
+    else
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_ReadCoefFile",
+                                       prm->id, rec->e0cf));
+      rec->e0as = UDF_ALARM;
+    }
+  }
+
+  /* Load Equalizer Coefficient set 1 from a file onto the module */
+  {
+    CfmCoefPrm  *prm = &brd->eq1Prm;
+
+    if ((status = P2RF_ReadCoefFile (drvPvt, prm->id, rec->e1cf,
+                                     prm->count, prm->coefs,
+                                     rec->val, sizeof (rec->val))) == OK)
+    {
+      P2RF_LoadCoefs (drvPvt, prm->coefs, prm->count, prm->index, &prm->cvtBlk);
+      rec->e1as = NO_ALARM;
+    }
+    else
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s (%s), file = %s",
+                                       "P2RF_ReadCoefFile",
+                                       prm->id, rec->e1cf));
+      rec->e1as = UDF_ALARM;
+    }
+  }
+
+  /* Initialize the Comb IIR Control Latches */
+  P2RF_WriteVme (drvPvt, CFM_I_DVALIDM, CFM_K_DVALIDM);
+  P2RF_WriteVme (drvPvt, CFM_I_DVALIDI, CFM_K_DVALIDI);
+  P2RF_WriteVme (drvPvt, CFM_I_EN0M,    CFM_K_EN0M);
+  P2RF_WriteVme (drvPvt, CFM_I_EN0I,    CFM_K_EN0I);
+  P2RF_WriteVme (drvPvt, CFM_I_EN1M,    CFM_K_EN1M);
+  P2RF_WriteVme (drvPvt, CFM_I_EN1I,    CFM_K_EN1I);
+  P2RF_WriteVme (drvPvt, CFM_I_EN2M,    CFM_K_EN2M);
+  P2RF_WriteVme (drvPvt, CFM_I_EN2I,    CFM_K_EN2I);
+  P2RF_WriteVme (drvPvt, CFM_I_EN3M,    CFM_K_EN3M);
+  P2RF_WriteVme (drvPvt, CFM_I_EN3I,    CFM_K_EN3I);
+  P2RF_WriteVme (drvPvt, CFM_I_RES0M,   CFM_K_RES0M);
+  P2RF_WriteVme (drvPvt, CFM_I_RES0I,   CFM_K_RES0I);
+  P2RF_WriteVme (drvPvt, CFM_I_RES1M,   CFM_K_RES1M);
+  P2RF_WriteVme (drvPvt, CFM_I_RES1I,   CFM_K_RES1I);
+  P2RF_WriteVme (drvPvt, CFM_I_RES2M,   CFM_K_RES2M);
+  P2RF_WriteVme (drvPvt, CFM_I_RES2I,   CFM_K_RES2I);
+  P2RF_WriteVme (drvPvt, CFM_I_RES3M,   CFM_K_RES3M);
+  P2RF_WriteVme (drvPvt, CFM_I_RES3I,   CFM_K_RES3I);
+
+  /* Initialize the Comb IIR Mode Latches */
+  P2RF_WriteVme (drvPvt, CFM_I_DMUX,    CFM_K_DMUX);
+  P2RF_WriteVme (drvPvt, CFM_I_MUX,     CFM_K_MUX );
+  P2RF_WriteVme (drvPvt, CFM_I_MISC,    CFM_K_MISC);
+
+  /* Initialize the Comb IIR Coefficient Latches */
+  {
+    CfmCoefPrm  *prm = &brd->iirPrm;
+
+    if ((status = P2RF_ReadCoefFile (drvPvt, prm->id, rec->imcf,
+                                     prm->count, prm->coefs,
+                                     rec->val, sizeof (rec->val))) == OK)
+    {
+      P2RF_LoadCoefs (drvPvt, prm->coefs, prm->count, prm->index, &prm->cvtBlk);
+      rec->fstt = NO_ALARM;
+    }
+    else
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s (%s), file = %s",
+                                       "P2RF_ReadCoefFile",
+                                       prm->id, rec->imcf));
+      rec->fstt = UDF_ALARM;
+    }
+  }
+
+  /* Delay FIFO Control Registers - Empty & Full offsets */
+  {
+    short ticks = rec->f0fo / CFM_K_FIFOTICK;
+
+    if (ticks < CFM_K_FIFOMIN)  ticks = CFM_K_FIFOMIN;
+    if (ticks > CFM_K_FIFOMAX)  ticks = CFM_K_FIFOMAX;
+
+    /* Double write is black magic necessary to make it work */
+    P2RF_WriteVme (drvPvt, CFM_I_FIFO0EMP,  ticks);
+    P2RF_WriteVme (drvPvt, CFM_I_FIFO0FULL, CFM_K_FIFOMAX +
+                                            CFM_K_FIFOMIN - ticks);
+    P2RF_WriteVme (drvPvt, CFM_I_FIFO1EMP,  0);
+    P2RF_WriteVme (drvPvt, CFM_I_FIFO1FULL, rec->f1fo);
+    P2RF_WriteVme (drvPvt, CFM_I_FIFO2EMP,  0);
+    P2RF_WriteVme (drvPvt, CFM_I_FIFO2FULL, rec->f2fo);
+    P2RF_WriteVme (drvPvt, CFM_I_FIFO3EMP,  0);
+    P2RF_WriteVme (drvPvt, CFM_I_FIFO3FULL, rec->f3fo);
+
+    /* Save current one-turn delay value */
+    rec->of0f = rec->f0fo;
+  }
+
+  /* Initialize the Comb Control Register */
+  reg  = (rec->mtl  << CFM_V_MEMTRGSEL)  & CFM_M_MEMTRGSEL;
+  reg |= (rec->itl  << CFM_V_INPTRGSEL)  & CFM_M_INPTRGSEL;
+  reg |= (rec->da   << CFM_V_DATAALIGN)  & CFM_M_DATAALIGN;
+  reg |= (rec->ebs  << CFM_V_EQCOEFSEL)  & CFM_M_EQCOEFSEL;
+  reg |= (rec->css  << CFM_V_CMBCOEFSEL) & CFM_M_CMBCOEFSEL;
+
+  /* Get the operating mode */
+  switch (rec->mode)
+  {
+    case cfmLoad:  reg |= CFM_K_LOAD  << CFM_V_STATE;  break;
+    case cfmRun:   reg |= CFM_K_RUN   << CFM_V_STATE;  break;
+    case cfmTest:  reg |= CFM_K_SSRUN << CFM_V_STATE;  break;
+  }
+
+  /* Enable history buffer recording */
+  reg |= CFM_M_MEMTRGRST;
+
+  /* Update the module and the database */
+  P2RF_WriteVme (drvPvt, CFM_I_COMBCTRL, reg);
+  rec->cctl = reg;
+
+  return (OK);
+}
+
+
+
+static long WarmInit (CfmBoard       *brd,
+                      P2RfCfmRecord  *rec)
+/*
+   Description
+   -----------
+   Initialization routine to run when the module is still running
+   satisfactorily.  This function will (when it is written) bring
+   the EPICS database in synch with the module.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  /* Note that we can't access A24 registers whilst Comb is running */
+
+  /* Restore the Equalizer Coefficient fields from reboot parameter file? */
+
+  /* Determine the current mode of the module */
+  {
+    CfmState      mode[] = {cfmLoad, cfmTest, cfmRun, cfmRun};
+    unsigned int  state  = (rec->cctl & CFM_M_STATE) >> CFM_V_STATE;
+
+    rec->mode = state < CFM_K_STATECNT ? mode[state] : cfmInvalid;
+  }
+
+  return (OK);
+}
+
+
+
+static long Action (P2RfCfmRecord    *rec)
+/*
+   Description
+   -----------
+   This is the action routine for the CFM.  It handles the several states
+   that the module can be in.  The module's state can be changed by modifying
+   the .MODE field of the record.  The available states are:
+
+   cfmLoad - Put the Comb Control register in the LOAD state.  In this
+             state various module registers are accessable that other-
+             wise aren't.  This state is used to read the module's
+             history buffer, reload coefficient tables, and change the
+             one-turn delay.
+   cfmRun  - Start normal operation (comb and equalizer filtering) of
+             the module.
+   cfmTest - This state is probably not very useful from an EPICS point
+             of view.  It single steps data through the module with
+             each VME write cycle.  Once the module is put in this state
+             the write cycles must be externally introduced (say, with Vbb).
+
+   Additionally, an asynchronous module reset mechanism implemented.  This
+   feature toggles the software reset line on the VXI interface chip.  Since it
+   takes a while (on the order of a second) for the reset to complete, the
+   module must not be touched during its assertion.  To implement this, the
+   record is processed asynchronously.  When the reset completes, the database
+   fields are updated with the current state of the module
+
+   Parameters
+   ----------
+          rec - A pointer to the record structure
+
+   Returns
+   -------
+   0 or 2 for successful returns, else a status */
+{
+  Function ("Action");
+
+  CfmBoard       *brd    = NULL;
+  void           *drvPvt;
+  unsigned short  cctl;
+  CfmState       state  = cfmInvalid;
+  unsigned short  reg;
+
+
+  /* If initialization failed let the system know */
+  if ((brd = rec->dpvt) == NULL)  return (ERROR);
+  drvPvt = brd->drvPvt;
+
+  /* If processing was invoked by an interrupt, handle it */
+  if (brd->intPrc)
+  {
+    /* Update client value of interrupt status field */
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+
+    /* Don't loose invocation count on multiple interrupts */
+    brd->intPrc--;
+
+    /* Update the database copy of the Comb status register */
+    P2RF_ReadVme (drvPvt, CFM_I_COMBSTAT,  &rec->cstt);
+    db_post_events (rec, &rec->cstt, DBE_VALUE | DBE_LOG);
+
+    return (0);
+  }
+
+  /* Read the interrupt status register 
+   * (this is a bad thing to do, only do if IMSK=0)
+   */
+  if (rec->rist) 
+  {
+    if (rec->imsk==0) 
+    {
+      Read_IntStatus( brd,rec );
+    }
+    rec->rist=0;
+    return(0);
+  }
+
+  /* Initialize the message buffer if we're not doing completion processing */
+  if (!rec->pact)    strncpy (rec->val, "Success", sizeof (rec->val));
+
+  /* If requested, do a "software reset" on the module */
+  if (rec->mrst)  return (SpawnReset (rec, &brd->resetBlk));
+
+  /* If operator disabled interrupts update interrupt status DB field */
+  P2RF_ReadVme (brd->drvPvt, CFM_I_INTCTRL, &reg);
+  if ((reg & CFM_M_INTSELECT) == CFM_M_INTSELECT)
+  {
+    P2RF_ReadVme (brd->drvPvt, CFM_I_INTSTAT, &rec->istt);
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+  }
+
+  /* Let the operator acknowledge that the interrupts have been seen */
+  if (rec->iack)
+  {
+    rec->istt &= ~rec->iack;            /* Take only requested bits down */
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+    rec->iack = 0;
+    db_post_events (rec, &rec->iack, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Update the interrupt control register if there was a change request */
+  if (rec->imsk != rec->oimk)
+  {
+    rec->oimk = rec->imsk;
+    rec->ictl = (rec->ictl & ~CFM_M_INTSELECT) |
+      ((~rec->imsk << CFM_V_INTSELECT) & CFM_M_INTSELECT);
+    P2RF_WriteVme (drvPvt, CFM_I_INTCTRL, rec->ictl);
+    db_post_events (rec, &rec->ictl, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Get the current state of the module */
+  P2RF_ReadVme (drvPvt, CFM_I_COMBCTRL, &cctl);
+
+  /* Check if the Comb Control register needs updating */
+  {
+    CfmState      mode[] = {cfmLoad, cfmTest, cfmRun, cfmRun};
+    unsigned int  iState = (cctl & CFM_M_STATE) >> CFM_V_STATE;
+
+    /* Look at only those bits that are modifiable */
+    cctl &= ~(CFM_M_STATE     | CFM_M_CMBCOEFSEL |
+              CFM_M_EQCOEFSEL | CFM_M_DATAALIGN);
+
+    /* Potentially select a new operating mode */
+    switch (rec->mode)
+    {
+      case cfmLoad:  iState = CFM_K_LOAD;   break;
+      case cfmRun:   iState = CFM_K_RUN;    break;
+      case cfmTest:  iState = CFM_K_SSRUN;  break;
+      default:
+        strncpy (rec->val, "Invalid state requested", sizeof (rec->val));
+        return (0);
+        break;
+    }
+    cctl  |= iState << CFM_V_STATE;
+    state = mode[iState];
+
+    /* Potentially select a different comb coefficient bank */
+    cctl  |= (rec->css << CFM_V_CMBCOEFSEL) & CFM_M_CMBCOEFSEL;
+
+    /* Potentially select a different equalizer coefficient bank */
+    cctl  |= (rec->ebs << CFM_V_EQCOEFSEL)  & CFM_M_EQCOEFSEL;
+
+    /* Potentially select a different pre-DAC data alignment */
+    cctl  |= (rec->da << CFM_V_DATAALIGN)   & CFM_M_DATAALIGN;
+
+    /* Update the module and the database versions of Comb Control register */
+    if (cctl != rec->cctl)
+    {
+      P2RF_WriteVme (drvPvt, CFM_I_COMBCTRL,  cctl);
+      P2RF_ReadVme  (drvPvt, CFM_I_COMBCTRL, &rec->cctl);
+      db_post_events (rec, &rec->cctl, DBE_VALUE | DBE_LOG);
+
+      /* Make sure that the register changed to what we set it to */
+      if (cctl != rec->cctl)
+      {
+        epicsPrintf ("%s - Comb Control register readback error: wrt %04x, rd %04x, xor %04x\n",
+                     FN, cctl, rec->cctl, cctl ^ rec->cctl);
+        strncpy (rec->val, "Comb Control register readback error",
+                 sizeof (rec->val));
+      }
+    }
+  }
+
+  /* Update the database copy of the Comb status register */
+  P2RF_ReadVme (drvPvt, CFM_I_COMBSTAT,  &rec->cstt);
+  db_post_events (rec, &rec->cstt, DBE_VALUE | DBE_LOG);
+
+  /* Get the current digitized module input value and store it in the record */
+  if (state != cfmTest)
+  {
+    P2RF_ReadVme (drvPvt, CFM_I_INPRDOUT, &reg);
+    rec->ipro = reg >> 4;
+    db_post_events (rec, &rec->ipro, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Update the one-turn delay, if requested */
+  if (rec->f0fo != rec->of0f)
+  {
+    if (state != cfmRun)
+    {
+      short ticks = rec->f0fo / CFM_K_FIFOTICK;
+
+      if (ticks < CFM_K_FIFOMIN)  ticks = CFM_K_FIFOMIN;
+      if (ticks > CFM_K_FIFOMAX)  ticks = CFM_K_FIFOMAX;
+
+      P2RF_WriteVme (drvPvt, CFM_I_FIFO0EMP,  ticks);
+      P2RF_WriteVme (drvPvt, CFM_I_FIFO0FULL, CFM_K_FIFOMAX +
+                                              CFM_K_FIFOMIN - ticks);
+      rec->of0f = rec->f0fo;
+    }
+    else
+    {
+      /*                 "0123456789112345678921234567893123456789" */
+      strncpy (rec->val, "One-turn delay: Module not in LOAD mode", sizeof (rec->val));
+      rec->f0fo = rec->of0f;
+      db_post_events (rec, &rec->f0fo, DBE_VALUE | DBE_LOG);
+      recGblSetSevr (rec, WRITE_ALARM, MINOR_ALARM);
+    }
+  }
+
+  /* Don't attempt to get history or load coefficients if wrong module state */
+  if (state != cfmLoad)
+  {
+    char *msg = NULL;
+
+    if (rec->ghst)
+    {
+      msg = "Get History: Module not in LOAD mode";
+      rec->ghst = 0;
+      rec->hstt = WRITE_ALARM;
+      db_post_events (rec, &rec->hstt, DBE_VALUE | DBE_LOG);
+    }
+    if ((rec->le0c) || (rec->le1c) || (rec->limc))
+    {
+      msg = "Coef Load: Module not in LOAD mode";
+      if (rec->le0c)
+      {
+        rec->le0c = 0;
+        rec->e0as = WRITE_ALARM;
+        db_post_events (rec, &rec->e0as, DBE_VALUE | DBE_LOG);
+      }
+      if (rec->le1c)
+      {
+        rec->le1c = 0;
+        rec->e1as = WRITE_ALARM;
+        db_post_events (rec, &rec->e1as, DBE_VALUE | DBE_LOG);
+      }
+      if (rec->limc)
+      {
+        rec->limc = 0;
+        rec->fstt = WRITE_ALARM;
+        db_post_events (rec, &rec->fstt, DBE_VALUE | DBE_LOG);
+      }
+    }
+
+    if (msg)  strncpy (rec->val, msg, sizeof (rec->val));
+    return (0);
+  }
+
+  /* Process request to read out the module's history buffer */
+  if (rec->ghst)  return (SpawnGetHist (rec, &rec->ghst, &brd->histBlk,
+                                        &brd->histPrm, rec->hsiz, rec->hfil,
+                                        &rec->hstt));
+
+  /* Process request to load bank 0 equalizer coefficients */
+  if (rec->le0c)  return (SpawnLdCoefs (rec, &rec->le0c, &brd->coefBlk,
+                                        &brd->eq0Prm, rec->e0cf, &rec->e0as));
+
+  /* Process request to load bank 1 equalizer coefficients */
+  if (rec->le1c)  return (SpawnLdCoefs (rec, &rec->le1c, &brd->coefBlk,
+                                        &brd->eq1Prm, rec->e1cf, &rec->e1as));
+
+  /* Process request to load comb IIR MAC coefficients */
+  if (rec->limc)  return (SpawnLdCoefs (rec, &rec->limc, &brd->coefBlk,
+                                        &brd->iirPrm, rec->imcf, &rec->fstt));
+
+  return (0);
+}
+
+
+static void Read_IntStatus(CfmBoard       *brd,
+                           P2RfCfmRecord  *rec)
+/*
+   Description
+   -----------
+   This function reads the interrupt status register on the VXI module in A16 space.
+   Please note that this register should NOT normally be read in this manner, since it is cleared
+   on a read. However, interrupts are currently disabled on the Comb module (see: IMSK=0)
+   so polling this register is a way to report when an interrupt has occured t
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   N/A
+*/
+{
+#if DEBUG
+  Function ("Read_IntStatus");
+#endif
+  unsigned short intStat=0;
+
+  /* Read the interrupt status register */
+  P2RF_ReadVme (brd->drvPvt, CFM_I_INTSTAT, &intStat);
+
+#if DEBUG   
+  Dbg (epicsPrintf ("%s (%s): intStat = %08x\n",__FILE__, FN, intStat));
+#endif
+
+  /* Is bit already set in istt field of the db? */
+  if (intStat & (intStat ^ rec->istt)) 
+  {
+    rec->istt |= intStat;
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+  }
+  return;
+}
+
+
+static long SpawnReset (P2RfCfmRecord  *rec,
+                        CfmRstBlk      *blk)
+/*
+   Description
+   -----------
+   This function initiates and completes the module reset.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+          blk - A pointer to the reset block
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnReset");
+
+
+  if (!rec->pact)
+  {
+    /* Let operator know what's happening */
+    strncpy (rec->val,  "Software Reset: active", sizeof (rec->val));
+    strncpy (rec->oval, "Software Reset: active", sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow reprocessing of record before reset completes */
+    rec->pact = TRUE;
+
+    /* Disable module interrupts during software reset */
+    P2RF_ModIntDisable (blk->drvPvt);
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+      strncpy (rec->val, "Attempt to initialize module failed", sizeof (rec->val));
+      recGblSetSevr (rec, UDF_ALARM, INVALID_ALARM);
+    }
+    else
+    {
+      /* Re-enable module interrupts */
+      P2RF_ModIntEnable (blk->drvPvt);
+
+      strncpy (rec->val, "Software reset: done", sizeof (rec->val));
+    }
+
+    /* Reset the reset request so we don't redo it on the next process pass */
+    rec->mrst = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void ResetCallback (CfmRstBlk  *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a module software reset it requested.  It invokes completion processing
+   of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the reset block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("ResetCallback");*/
+
+  struct dbCommon  *rec;
+  struct rset      *rSet;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((rec = callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Reset and update the record and the module */
+  blk->status = InitFields ((CfmBoard *) rec->dpvt, P2RF_K_COLDSTART);
+
+  /* Complete processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     (rec);
+}
+
+
+
+static long SpawnLdCoefs (P2RfCfmRecord  *rec,
+                          unsigned char  *request,
+                          CfmCoefBlk     *blk,
+                          CfmCoefPrm     *prm,
+                          char           *file,
+                          unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the loading of coefficients
+   on the module.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the coefficient block
+          prm - A pointer to the coefficient parameter block
+         file - The file that contains the coefficients to load
+         stat - A pointer to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnLdCoefs");
+
+  char  buf[P2RF_K_BUFSIZE];
+
+
+  if (!rec->pact)
+  {
+    sprintf (buf, "Load %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before coef load completes */
+    rec->pact = TRUE;
+
+    /* Save the file name in the parameter block */
+    prm->file = file;
+
+    /* Point the coefficient block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_ReadCoefFile",
+                                       prm->id, prm->file));
+      *stat = WRITE_ALARM;
+    }
+    else
+    {
+      sprintf (buf, "Load %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void LdCoefCallback (CfmCoefBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to load equallizer or IIR coefficients.  It invokes
+   completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the load-coefficients block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("LdCoefCallback"); */
+
+  P2RfCfmRecord    *rec;
+  struct rset      *rSet;
+  CfmCoefPrm       *prm = blk->prm;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Read and load the coefficients */
+  if ((blk->status = P2RF_ReadCoefFile (blk->drvPvt, prm->id, prm->file,
+                                        prm->count, prm->coefs,
+                                        rec->val, sizeof (rec->val))) == OK)
+  {
+    P2RF_LoadCoefs (blk->drvPvt, prm->coefs, prm->count,
+                    prm->index, &prm->cvtBlk);
+  }
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+
+
+
+static long SpawnGetHist (P2RfCfmRecord  *rec,
+                          unsigned char  *request,
+                          CfmHistBlk     *blk,
+                          CfmMemPrm      *prm,
+                          unsigned int    blkCnt,
+                          char           *file,
+                          unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the retrieval of module history.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the history block
+          prm - A pointer to the history parameter block
+       blkCnt - Number of blocks of history to record
+         file - The file to record the history in
+         stat - A pointer to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnGetHist");
+
+  char  buf[P2RF_K_BUFSIZE];
+
+
+  if (!rec->pact)
+  {
+    sprintf (buf, "Get %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val,  DBE_VALUE | DBE_LOG);
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before get-history completes */
+    rec->pact = TRUE;
+
+    /* Save block count and file name in parameter block and reset abort flag */
+    prm->count    = blkCnt < CFM_K_HISTMEMLEN ? blkCnt : CFM_K_HISTMEMLEN;
+    prm->file     = file;
+    blk->abortFlg = FALSE;
+
+    /* Point the history block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN, "%s failed",
+                                       "P2RF_RecordMemory"));
+      *stat = READ_ALARM;
+    }
+    else
+    {
+      sprintf (buf, "Get %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void GetHistCallback (CfmHistBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to read the modules history memory.  It invokes
+   completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the get-history block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("GetHistCallback"); */
+
+  P2RfCfmRecord    *rec;
+  struct rset      *rSet;
+  CfmMemPrm        *prm = blk->prm;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Read the history memory and record it */
+  blk->status = P2RF_RecordMemory (blk->drvPvt, prm->id, prm->index,
+                                   prm->count, prm->file, &blk->abortFlg,
+                                   rec->val, sizeof (rec->val));
+
+  /* Pulse the Memory Trigger Reset bit to re-enable history triggers */
+  P2RF_WriteVme (blk->drvPvt, CFM_I_COMBCTRL, rec->cctl | CFM_M_MEMTRGRST);
+  P2RF_WriteVme (blk->drvPvt, CFM_I_COMBCTRL, rec->cctl);
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+@
+
+
+1.6
+log
+@Initial import of COMB-2 (Cf2) support.
+@
+text
+@d62 1
+d67 1
+a67 1
+#include <module_types.h>
+d75 2
+d108 2
+d248 1
+a248 1
+    scanOnce (rec);
+d350 3
+a352 3
+  callbackSetCallback (ResetCallback, &brd->resetBlk.callback);
+  callbackSetPriority (priorityHigh, &brd->resetBlk.callback);
+  callbackSetUser     (rec, &brd->resetBlk.callback);
+d356 3
+a358 3
+  callbackSetCallback (LdCoefCallback, &brd->coefBlk.callback);
+  callbackSetPriority (priorityLow, &brd->coefBlk.callback);
+  callbackSetUser     (rec, &brd->coefBlk.callback);
+d422 3
+a424 3
+  callbackSetCallback (GetHistCallback, &brd->histBlk.callback);
+  callbackSetPriority (priorityLow, &brd->histBlk.callback);
+  callbackSetUser     (rec, &brd->histBlk.callback);
+a530 1
+
+d543 1
+a543 2
+  if (rec->vern != 0x1111) return ERROR;	/* not a version 1 Comb (CFM) */
+
+d960 1
+a960 1
+        epicsPrintf ("%s - Comb Control register readback error: wrt %h04x, rd %h04x, xor %h04x\n",
+@
+
+
+1.5
+log
+@[lazmo 2004-04-09] Removed INVADX from interrupt mask.
+@
+text
+@d526 1
+d530 11
+@
+
+
+1.4
+log
+@Read interrupt status reg if field RIST is set
+@
+text
+@d13 1
+d83 4
+a86 1
+                           CFM_M_INVADX   | CFM_M_SOFTWARE)
+@
+
+
+1.3
+log
+@Update new field verh and verf in InitFields
+@
+text
+@d13 3
+a15 2
+**      February 11, 2003 -  Updated new fields verh and verf in InitFields (K. Luchini)
+**	June 13, 1996     - Created
+a88 1
+
+d176 2
+d842 13
+d1045 45
+@
+
+
+1.2
+log
+@Replaced epicsPrintf with logMsg in ISR
+@
+text
+@d13 2
+a14 1
+**	June 13, 1996 - Created
+d521 2
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d157 1
+d201 3
+a203 2
+  /* Function ("CfmIsr"); */
+
+d210 1
+a210 1
+    logMsg ("CfmIsr: Invalid %d MHz clock\n", (int)40, 0, 0, 0, 0, 0);
+d212 1
+a212 1
+    logMsg ("CfmIsr: Invalid %d MHz clock\n", (int)20, 0, 0, 0, 0, 0);
+d214 1
+a214 1
+    logMsg ("CfmIsr: Invalid %d MHz clock\n", (int)10, 0, 0, 0, 0, 0);
+d217 1
+a217 1
+    logMsg ("CfmIsr: %s overflow detected\n", "ADC", 0, 0, 0, 0, 0);
+d219 1
+a219 1
+    logMsg ("CfmIsr: %s overflow detected\n", "Equalizer", 0, 0, 0, 0, 0);
+d221 1
+a221 1
+    logMsg ("CfmIsr: %s overflow detected\n","Comb", 0, 0, 0, 0, 0);
+d224 1
+a224 1
+    logMsg ("CfmIsr: Invalid address or access\n",0, 0, 0, 0, 0, 0);
+d226 1
+a226 1
+    logMsg ("CfmIsr: Software interrupt\n",0, 0, 0, 0, 0, 0);
+d401 1
+a401 1
+    prm->cvtBlk.iMin   = CFM_K_IIRCOEFIMIN;
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

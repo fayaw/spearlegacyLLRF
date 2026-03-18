@@ -1,0 +1,131 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#==============================================================
+#
+#  Abs:  Makefile for RF Dsp components
+#      
+#  Name: Makefile.Dsp
+#
+#  Facility:  SLAC/PEPII Low Level RF
+#
+#  Auth: dd-mmm-yyyy, Ric Claus       (CLAUS):
+#  Rev:  dd-mmm-yyyy, Reviewer's Name (USERNAME):
+#
+#--------------------------------------------------------------
+#  Mod:
+#        23-Jul-2002, K. Luhcini (LUCHINI):
+#          Added standard header
+#
+#==============================================================
+#
+TOP = ../../../../..
+include $(TOP)/config/CONFIG_APP.Dsp
+INSTALL_LOCATION = $(TOP)
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+# USR_ASFLAGS  += -DGVF -DAP -DEQUALIZ
+USR_ASFLAGS  += -DGVF -DSIM_IFILE
+USR_INCLUDES += -I. -I.. -I../../genDsp
+USR_DEPLIBS  += libGvfCore.a $(TOP)/bin/$(T_A)/libCore.a
+
+USR_LDFLAGS = -L. -L$(TOP)/bin/$(T_A)
+USR_LDLIBS  = -lGvfCore -lCore
+
+INC += gvffMisc.h
+INC += comDef.h
+
+# Compile source
+SRCS.s += ../comBlk.s
+SRCS.s += ../regInit.s
+SRCS.s += ../endCode.s
+SRCS.s += ../gvff.s
+SRCS.s += ../dspmemtest.s
+SRCS.s += ../dsptest.s
+SRCS.s += ../wave_out.s
+
+LIBOBJS += comBlk.o
+LIBOBJS += regInit.o
+LIBOBJS += endCode.o
+LIBNAME += libGvfCore.a
+
+OBJS += gvff.o
+OBJS += dspmemtest.o
+OBJS += dsptest.o
+OBJS += wave_out.o
+
+PROD += gvff
+PROD += dspmemtestGvf
+PROD += dsptestGvf
+PROD += wave_out
+
+include $(TOP)/config/RULES.Dsp
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+#
+%Gvf: %.o
+	$(RM) $@@
+	$(LINK.s) -o $@@ ../ifile $< $(LDLIBS)
+
+libGvfCore.a: $(LIBOBJS)
+
+gvff: gvff.o $(DEPLIBS)
+	$(RM) $@@
+	$(LINK.s) -o $@@ ../ifile $< $(LDLIBS)
+
+wave_out: wave_out.o $(DEPLIBS)
+	$(RM) $@@
+	$(LINK.s) -o $@@ ../ifile $< $(LDLIBS)
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

@@ -1,0 +1,307 @@
+head	1.5;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.5
+	RF-SPEAR-R0-3-1:1.5
+	RF-SPEAR-R0-3-0:1.5
+	RF-SPEAR-R0-2-0:1.5
+	RF-SPEAR-R0-1-0:1.5
+	RF-SPEAR-R0-0-3:1.5
+	RF-SPEAR-R0-0-2:1.5
+	RF-SPEAR-R0-0-1:1.5
+	RF-SPEAR-R0-0-0:1.5
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.5
+	RF-3-13-10:1.5.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.5
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.5
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.4;
+locks; strict;
+comment	@# @;
+
+
+1.5
+date	2009.12.12.00.13.42;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2009.06.29.17.04.11;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.01.22.00.29.16;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2004.01.05.19.45.02;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.01.17.09;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.5
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@#==============================================================
+#
+# Abs:  Database template for 4-cavity station RF Station PV's 
+#
+# Name:  rf_stn_4CV.substitutions
+#
+# Desc:  EPICS database template file for general
+#        4-cavity station PV's (some arc interlocks)
+#
+# Side:  None
+#
+# Facility: SLAC/PEPII Low-Level RF
+#
+# Auth: dd-mmm-yyyy, Stephanie Allison (SAA)
+# Rev:  dd-mmm-yyyy, First Lastname    (USERNAME)
+#==============================================================
+#
+# Mod:       
+#       26-Aug-2002, K. Luchini (LUCHINI):
+#         Moved allen-bradley db to rf_ab_HER.template
+#       06-Feb-2002, K. Luchini (LUCHINI):
+#         Added standard header and obtained
+#         db files from the top level db directory
+#         instead of epicsApp/Db
+#
+#==============================================================
+#
+file rf_sumy_4CV.db
+{
+  {S=$(RRRS)}
+}
+file rf_sumy_wg.db
+{
+#	           Wave  Water Supply Water Flow
+#	   STN     Guide   Temp       Circuit     
+  pattern { S     , C  ,    W       ,   F       }
+	  {$(RRRS),WG02,   STN      ,  HCW2     }
+	  {$(RRRS),WG03,   WG02     ,  HCW2     }
+}
+file rf_stn_cav.db
+{
+  {S=$(RRRS),C3=CAV3,C4=CAV4,NC=4}
+}
+file rf_cav.db
+{
+#	               Step Mtr Ana Inp
+#	   STN     CAV  Card     Card   
+  pattern { S     , C  , M    ,   AI  }
+	  {$(RRRS),CAV3, 4    ,  R1G1 }
+	  {$(RRRS),CAV4, 6    ,  R1G1 }
+}
+file rf_sumy_cav.db
+{
+#	                   Step Mtr Ana Inp TC Inp TC Inp TC Inp
+#	   STN     CAV  IQA Card     Card   Card 1 Card 2 Card 3
+  pattern { S     , C  , I , M    ,   AI  ,  T1  ,  T2  ,  T3  }
+	  {$(RRRS),CAV3, 3 , 4    ,  R1G1 , R2G0 , R2G1 , R2G2 }
+	  {$(RRRS),CAV4, 3 , 6    ,  R1G1 , R2G3 , R2G4 , R2G5 }
+}
+file rf_stn.db
+{
+  {S=$(RRRS),RINGID=$(ID),RING=$(RNG),REGIOC=$(REG),4S=NO_ALARM,2S=MAJOR,IQA3=IQA3}
+}
+file rf_sumy_stn.db
+{
+#	           Cav  Cav   WG   WG  HCW  SM Card  SM Card 
+#	   STN      3    4    2    3    2   for Cav3 for Cav4      
+  pattern { S     , C3 , C4 , W2 , W3 , H2 ,   M3  ,  M4     }
+	  {$(RRRS),CAV3,CAV4,WG02,WG03,HCW2,   4   ,  6      }
+}
+file rf_interlock_arc.db
+{
+#	   STN     COMP Quantity Description   BIT   Next
+  pattern { S     , C  ,   Q    ,   D          , B ,  N  }
+	  {$(RRRS),CAV1,"_2:ARC","Arc 2"       , 2 ,:ARC }
+	  {$(RRRS),CAV1,"_1:ARC","Arc 1"       , 3 ,:ARC }
+	  {$(RRRS),CAV2,":ARC"  ,"Arc"         , 4 ,:SUMY}
+	  {$(RRRS),CAV3,":ARC"  ,"Arc"         , 5 ,:SUMY}
+	  {$(RRRS),CAV4,":ARC"  ,"Arc"         , 6 ,:SUMY}
+}
+file rf_sumy_arc_4CV.db
+{
+  {S=$(RRRS)}
+}
+@
+
+
+1.4
+log
+@Use a macro for number of cavities.
+@
+text
+@d5 1
+a5 1
+# Name:  RRRS_stn_4CV.template
+d28 1
+a28 1
+file db/rf_sumy_4CV.db
+d30 1
+a30 1
+  {S=RRRS}
+d32 1
+a32 1
+file db/rf_sumy_wg.db
+d34 5
+a38 5
+#	        Wave  Water Supply Water Flow
+#	   STN  Guide   Temp       Circuit     
+  pattern { S  , C  ,    W       ,   F       }
+	  {RRRS,WG02,   STN      ,  HCW2     }
+	  {RRRS,WG03,   WG02     ,  HCW2     }
+d40 1
+a40 1
+file db/rf_stn_cav.db
+d42 1
+a42 1
+  {S=RRRS,C3=CAV3,C4=CAV4,NC=4}
+d44 1
+a44 1
+file db/rf_cav.db
+d46 5
+a50 5
+#	            Step Mtr Ana Inp
+#	   STN  CAV  Card     Card   
+  pattern { S  , C  , M    ,   AI  }
+	  {RRRS,CAV3, 4    ,  R1G1 }
+	  {RRRS,CAV4, 6    ,  R1G1 }
+d52 1
+a52 1
+file db/rf_sumy_cav.db
+d54 5
+a58 5
+#	                Step Mtr Ana Inp TC Inp TC Inp TC Inp
+#	   STN  CAV  IQA Card     Card   Card 1 Card 2 Card 3
+  pattern { S  , C  , I , M    ,   AI  ,  T1  ,  T2  ,  T3  }
+	  {RRRS,CAV3, 3 , 4    ,  R1G1 , R2G0 , R2G1 , R2G2 }
+	  {RRRS,CAV4, 3 , 6    ,  R1G1 , R2G3 , R2G4 , R2G5 }
+d60 1
+a60 1
+file db/rf_stn.db
+d62 1
+a62 1
+  {S=RRRS,RINGID=0,RING=HER,REGIOC=8-1,4S=NO_ALARM,2S=MAJOR,IQA3=IQA3}
+d64 1
+a64 1
+file db/rf_sumy_stn.db
+d66 4
+a69 4
+#	        Cav  Cav   WG   WG  HCW  SM Card  SM Card 
+#	   STN   3    4    2    3    2   for Cav3 for Cav4      
+  pattern { S  , C3 , C4 , W2 , W3 , H2 ,   M3  ,  M4     }
+	  {RRRS,CAV3,CAV4,WG02,WG03,HCW2,   4   ,  6      }
+d71 1
+a71 1
+file db/rf_interlock_arc.db
+d73 7
+a79 7
+#	   STN  COMP Quantity Description   BIT   Next
+  pattern { S  , C  ,   Q    ,   D          , B ,  N  }
+	  {RRRS,CAV1,"_2:ARC","Arc 2"       , 2 ,:ARC }
+	  {RRRS,CAV1,"_1:ARC","Arc 1"       , 3 ,:ARC }
+	  {RRRS,CAV2,":ARC"  ,"Arc"         , 4 ,:SUMY}
+	  {RRRS,CAV3,":ARC"  ,"Arc"         , 5 ,:SUMY}
+	  {RRRS,CAV4,":ARC"  ,"Arc"         , 6 ,:SUMY}
+d81 1
+a81 1
+file db/rf_sumy_arc_4CV.db
+d83 1
+a83 1
+  {S=RRRS}
+@
+
+
+1.3
+log
+@Added external MPS to SPEAR system summary and not to PEPII.
+@
+text
+@d42 1
+a42 1
+  {S=RRRS,C3=CAV3,C4=CAV4}
+@
+
+
+1.2
+log
+@SPEAR uses all arc interlock channels available on the new arc interlock
+module (vacuum and air side for all 4 cavities).  SPEAR uses the arc channel
+reserved for MPS.  All arc interlock records moved out of rf_digital*.template
+and into rf_stn*.template (where 4CVAll uses all channels).  Arc summaries are
+moved out of rf_sumy_(2CV,4CV).db into rf_sumy_arc_(2CV,4CV,4CVAll).db.
+@
+text
+@d73 7
+a79 7
+#	   STN  COMP Quantity Description   BIT  Next
+  pattern { S  , C  ,   Q    ,   D          , B , N  }
+	  {RRRS,CAV1,"_2:ARC","Arc 2"       , 2 ,ARC }
+	  {RRRS,CAV1,"_1:ARC","Arc 1"       , 3 ,ARC }
+	  {RRRS,CAV2,":ARC"  ,"Arc"         , 4 ,SUMY}
+	  {RRRS,CAV3,":ARC"  ,"Arc"         , 5 ,SUMY}
+	  {RRRS,CAV4,":ARC"  ,"Arc"         , 6 ,SUMY}
+@
+
+
+1.1
+log
+@Rename
+@
+text
+@d8 1
+a8 1
+#        4-cavity station PV's
+a27 20
+file db/rf_fbck.db
+{
+  {S=RRRS}
+}
+file db/rf_hvps.db
+{
+  {S=RRRS}
+}
+file db/rf_sumy_hvps.db
+{
+  {S=RRRS}
+}
+file db/rf_klys.db
+{
+  {S=RRRS}
+}
+file db/rf_sumy_klys.db
+{
+  {S=RRRS}
+}
+a31 4
+file db/rf_sumy_circ.db
+{
+  {S=RRRS}
+}
+a36 1
+	  {RRRS,WG01,   CIRC     ,  HCW1     }
+a48 2
+	  {RRRS,CAV1, 0    ,  R1G0 }
+	  {RRRS,CAV2, 2    ,  R1G0 }
+a56 2
+	  {RRRS,CAV1, 2 , 0    ,  R1G0 , R0G2 , R0G3 , R0G4 }
+	  {RRRS,CAV2, 2 , 2    ,  R1G0 , R0G5 , R0G6 , R0G7 }
+d70 14
+@
+

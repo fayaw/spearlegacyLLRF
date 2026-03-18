@@ -1,0 +1,643 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2003.02.11.19.03.16;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.49;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.49;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Additions for hw vers 2
+@
+text
+@/*
+** ++
+**
+**  Facility:  RFP - RF Processing module
+**
+**  Abstract:
+**      Parameter and register definitions for the RF Processing module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II RF Project
+**
+**   History:
+**      September 4, 1996 - Created
+**      January   9, 2003 - Additions for hw ver 2, including new registers and bits
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef P2RFRFPDEF_H
+#define P2RFRFPDEF_H
+
+#include <drvP2RfVxi.h>
+
+#define RFP_K_MAKE        P2RF_K_MAKE
+#define RFP_K_MODEL       0x103
+#define RFP_K_NAME       "RF-Processing"
+#define RFP_K_DRAWING    "340-304"
+
+#define RFP_K_CAVCNT      4
+#define RFP_K_VER2VERN    2     /* Version 2 or later */
+
+/* Amount of time RFP needs to complete software reset */
+#define RFP_K_RESETTMO   (1 * sysClkRateGet ())
+
+/* A16 space registers: */
+#define RFP_A_MANID       0x00          /* ID/LA register */
+#define RFP_I_MANID       STD2IDX (RFP_A_MANID)
+#define RFP_A_MODELNO     0x02          /* Device type register */
+#define RFP_I_MODELNO     STD2IDX (RFP_A_MODELNO)
+#define RFP_A_STATUS      0x04          /* Status register */
+#define RFP_I_STATUS      STD2IDX (RFP_A_STATUS)
+#define RFP_A_CONTROL     0x04          /* Control register */
+#define RFP_I_CONTROL     STD2IDX (RFP_A_CONTROL)
+#define RFP_A_OFFSET      0x06          /* A24 offset register */
+#define RFP_I_OFFSET      STD2IDX (RFP_A_OFFSET)
+#define RFP_A_ATTRIBUTE   0x08          /* Attribute register */
+#define RFP_I_ATTRIBUTE   STD2IDX (RFP_A_ATTRIBUTE)
+#define RFP_A_SERIALHI    0x0a          /* Serial number high register */
+#define RFP_I_SERIALHI    STD2IDX (RFP_A_SERIALHI)
+#define RFP_A_SERIALLO    0x0c          /* Serial number low register */
+#define RFP_I_SERIALLO    STD2IDX (RFP_A_SERIALLO)
+#define RFP_A_VERSION     0x0e          /* Version number register */
+#define RFP_I_VERSION     STD2IDX (RFP_A_VERSION)
+#define RFP_A_INTSTAT     0x1a          /* Interrupt status register */
+#define RFP_I_INTSTAT     STD2IDX (RFP_A_INTSTAT)
+#define RFP_A_INTCTRL     0x1c          /* Interrupt control register */
+#define RFP_I_INTCTRL     STD2IDX (RFP_A_INTCTRL)
+#define RFP_A_SUBCLASS    0x1e          /* Subclass register */
+#define RFP_I_SUBCLASS    STD2IDX (RFP_A_SUBCLASS)
+
+#define RFP_A_RFCTRL      0x20          /* RF module control register */
+#define RFP_I_RFCTRL      STD2IDX (RFP_A_RFCTRL)
+#define RFP_A_RFSTAT      0x22          /* RF module status register */
+#define RFP_I_RFSTAT      STD2IDX (RFP_A_RFSTAT)
+
+/* Control and Status Register */
+#define RFP_V_SFTRST      0
+#define RFP_M_SFTRST     (0x0001 << RFP_V_SFTRST)
+#define RFP_V_SYSFAILINH  1
+#define RFP_M_SYSFAILINH (0x0001 << RFP_V_SYSFAILINH)
+#define RFP_V_PASSED      2
+#define RFP_M_PASSED     (0x0001 << RFP_V_PASSED)
+#define RFP_V_READY       3
+#define RFP_M_READY      (0x0001 << RFP_V_READY)
+#define RFP_V_SFTINT      5
+#define RFP_M_SFTINT     (0x0001 << RFP_V_SFTINT)
+#define RFP_V_FBSIGMUX2   8
+#define RFP_M_FBSIGMUX2  (0x0001 << RFP_V_FBSIGMUX2)
+#define RFP_V_DACINJPT    9
+#define RFP_M_DACINJPT   (0x0001 << RFP_V_DACINJPT)
+#define RFP_V_LEADCOMP    10
+#define RFP_M_LEADCOMP   (0x0001 << RFP_V_LEADCOMP)
+#define RFP_V_INTCOMP     11
+#define RFP_M_INTCOMP    (0x0001 << RFP_V_INTCOMP)
+#define RFP_V_RLON        13
+#define RFP_M_RLON       (0x0001 << RFP_V_RLON)
+#define RFP_V_MODIDCOMPL  14
+#define RFP_M_MODIDCOMPL (0x0001 << RFP_V_MODIDCOMPL)
+#define RFP_V_A24A32      15
+#define RFP_M_A24A32     (0x0001 << RFP_V_A24A32)
+
+
+/* Interrupt Status and Control Registers */
+#define RFP_V_INTLA       0
+#define RFP_M_INTLA      (0x00ff << RFP_V_INTLA)
+#define RFP_V_INTLEVEL    3
+#define RFP_M_INTLEVEL   (0x0007 << RFP_V_INTLEVEL)
+#define RFP_V_INTMASK     7
+#define RFP_M_INTMASK    (0x0001 << RFP_V_INTMASK)
+#define RFP_V_INVRFREF    8
+#define RFP_M_INVRFREF   (0x0001 << RFP_V_INVRFREF)
+#define RFP_V_INVSMOP     9
+#define RFP_M_INVSMOP    (0x0001 << RFP_V_INVSMOP)
+#define RFP_V_INVOP       10
+#define RFP_M_INVOP      (0x0001 << RFP_V_INVOP)
+#define RFP_V_ADCOFLW     11
+#define RFP_M_ADCOFLW    (0x0001 << RFP_V_ADCOFLW)
+#define RFP_V_INVCLKS     12
+#define RFP_M_INVCLKS    (0x0001 << RFP_V_INVCLKS)
+#define RFP_V_RIPLPERR    13
+#define RFP_M_RIPLPERR   (0x0001 << RFP_V_RIPLPERR)
+#define RFP_V_DSPMSG      14
+#define RFP_M_DSPMSG     (0x0001 << RFP_V_DSPMSG)
+#define RFP_V_SOFTWARE    15
+#define RFP_M_SOFTWARE   (0x0001 << RFP_V_SOFTWARE)
+
+/* RF module Control Register */
+#define RFP_V_RFENB       0
+#define RFP_M_RFENB      (0x0001 << RFP_V_RFENB)
+#define RFP_V_OPMODE      1
+#define RFP_M_OPMODE     (0x0001 << RFP_V_OPMODE)
+#define RFP_V_NOTDSPRST   2
+#define RFP_M_NOTDSPRST  (0x0001 << RFP_V_NOTDSPRST)
+#define RFP_V_MSGTODSP    3
+#define RFP_M_MSGTODSP   (0x0001 << RFP_V_MSGTODSP)
+#define RFP_V_SERLNKRST   4
+#define RFP_M_SERLNKRST  (0x0001 << RFP_V_SERLNKRST)
+#define RFP_V_MEMCOLRST   4
+#define RFP_M_MEMCOLRST  (0x0001 << RFP_V_MEMCOLRST)
+#define RFP_V_RFFLTRST    5
+#define RFP_M_RFFLTRST   (0x0001 << RFP_V_RFFLTRST)
+#define RFP_V_MODE        6
+#define RFP_M_MODE       (0x0007 << RFP_V_MODE)
+#define RFP_M_RFMODE     (0x0003 << RFP_V_MODE)
+#define RFP_V_DACSON      8
+#define RFP_M_DACSON     (0x0001 << RFP_V_DACSON)
+#define RFP_V_DIRLPENB    9
+#define RFP_M_DIRLPENB   (0x0001 << RFP_V_DIRLPENB)
+#define RFP_V_CMBLPENB    10
+#define RFP_M_CMBLPENB   (0x0001 << RFP_V_CMBLPENB)
+#define RFP_V_RIPLPENB    11
+#define RFP_M_RIPLPENB   (0x0001 << RFP_V_RIPLPENB)
+#define RFP_V_CAVSELMUX   12
+#define RFP_M_CAVSELMUX  (0x0003 << RFP_V_CAVSELMUX)
+#define RFP_V_FBSIGMUX    14
+#define RFP_M_FBSIGMUX   (0x0003 << RFP_V_FBSIGMUX)
+
+#define RFP_M_CONTROL    0xdf33;
+#define RFP_M_STATUS     0xff3f;
+
+/* RF module Status Register */
+#define RFP_V_RFENBSTT    0
+#define RFP_M_RFENBSTT   (0x0001 << RFP_V_RFENBSTT)
+#define RFP_V_FBIADCOOR   1
+#define RFP_M_FBIADCOOR  (0x0001 << RFP_V_FBIADCOOR)
+#define RFP_V_FBQADCOOR   2
+#define RFP_M_FBQADCOOR  (0x0001 << RFP_V_FBQADCOOR)
+#define RFP_V_CAVIADCOOR  3
+#define RFP_M_CAVIADCOOR (0x0001 << RFP_V_CAVIADCOOR)
+#define RFP_V_CAVQADCOOR  4
+#define RFP_M_CAVQADCOOR (0x0001 << RFP_V_CAVQADCOOR)
+#define RFP_V_INV80MHZ    5
+#define RFP_M_INV80MHZ   (0x0001 << RFP_V_INV80MHZ)
+#define RFP_V_INV40MHZ    6
+#define RFP_M_INV40MHZ   (0x0001 << RFP_V_INV40MHZ)
+#define RFP_V_INV10MHZ    7
+#define RFP_M_INV10MHZ   (0x0001 << RFP_V_INV10MHZ)
+#define RFP_V_INVRIPCLK   8
+#define RFP_M_INVRIPCLK  (0x0001 << RFP_V_INVRIPCLK)
+#define RFP_V_RIPLNKERR   9
+#define RFP_M_RIPLNKERR  (0x0001 << RFP_V_RIPLNKERR)
+#define RFP_V_DSPBOOTED   10
+#define RFP_M_DSPBOOTED  (0x0001 << RFP_V_DSPBOOTED)
+#define RFP_V_MSGFRMDSP   11
+#define RFP_M_MSGFRMDSP  (0x0001 << RFP_V_MSGFRMDSP)
+#define RFP_V_DSPMEMBZ    12
+#define RFP_M_DSPMEMBZ   (0x0001 << RFP_V_DSPMEMBZ)
+#define RFP_V_NORFREF     13
+#define RFP_M_NORFREF    (0x0001 << RFP_V_NORFREF)
+#define RFP_V_SMBUSY      14
+#define RFP_M_SMBUSY     (0x0001 << RFP_V_SMBUSY)
+#define RFP_V_RFFLT       15
+#define RFP_M_RFFLT      (0x0001 << RFP_V_RFFLT)
+
+/* Possible states the MODE field can be in */
+#define RFP_K_RESET       0
+#define RFP_K_LOAD        1
+#define RFP_K_RUN         2   
+
+#define RFP_K_STATECNT    3
+
+#define RFP_V_SGLSHTCNT   0
+#define RFP_M_SGLSHTCNT  (0x0001 << RFP_V_SGLSHTCNT)
+#define RFP_V_RSTLDRUN    1
+#define RFP_M_RSTLDRUN   (0x0001 << RFP_V_RSTLDRUN)
+#define RFP_V_DACSOUT     2
+#define RFP_M_DACSOUT    (0x0001 << RFP_V_DACSOUT)
+
+/* Enumerate the states the module can be in */
+typedef enum {rfpReset,  rfpLoad,  rfpRun, rfpInvalid = -1} RfpState;
+
+/* A24 space registers: */
+
+/* DSP Memory */
+#define RFP_A_DSPMEM      0x0000
+#define RFP_I_DSPMEM      EXT2IDX (RFP_A_DSPMEM)
+
+/*
+** I don't like the following in here since it must be included in the
+** DSP code as well. See $RF/neApp/genDsp/dspCmdDef.h  
+*/
+#define CMD_K_NOOP       0x0000   /* No operation command */
+#define CMD_K_READY      0x0001   /* DSP is ready for action */
+#define CMD_K_TEST       0x0002   /* For testing */
+#define CMD_K_ERROR      0x0003   /* DSP had an error condition */
+#define CMD_K_LDTBL      0x0004   /* Load coefficient tables */
+#define CMD_K_SVDATA     0x0005   /* DSP wants ERAM data saved */
+#define CMD_K_APHASE	 0x0006	  /* Save average phase	*/
+#define CMD_K_LDREF      0x0007	  /* Load ref tables */
+#define CMD_K_UREF       0x0008	  /* Update ref tables */
+#define CMD_K_NFUNC      0x0009	  /* For new function */
+#define CMD_K_AMSP       0x000a   /* Update Ripple Amplitude Setpoint */
+#define CMD_K_PHSG       0x000b   /* Update Ripple DC Z-1 Phase Gain */
+#define CMD_K_DACO       0x000c   /* Load Ripple II IQ QI, QQ DAC offsets */
+#define CMD_K_PHARM      0x000d   /* Ripple Phase Harmonic coefficients */
+#define CMD_K_AHARM      0x000e   /* Ripple Amplitude  Harmonic coefficients */
+
+#define DSP_K_COMBLKID   0x0001   /* Communications block ID      */
+#define DSP_K_COMVERS    0x0001   /* Communications block version */
+
+/*
+** Number of harmonics currently supported in the ripple loop. Yes, yes,
+** this define is also in the ripple loop code $RF/neApp/rfpDsp/ripple.s.
+** PHARMID and AHARMID are the first text lines in the coefficients files.
+**
+** A note on NUMHARMS. Because of the way the cache loop in the DSP executes,
+** the last fast harmonic must be a dummy with zeroes. Thus, NUMHARMS should
+** be #fast + 1 + #slow that the DSP is set up to execute.
+*/
+#define NUMHARMS 39
+#define RFP_K_PHARMID "RFP Ripple Phase Harmonic Coefficients"
+#define RFP_K_AHARMID "RFP Ripple Amplitude Harmonic Coefficients"
+
+/* Usage definitions */
+#define STT_K_ARGCNT          8         /* Number of arguments for Status */
+
+/* Status definitions */
+#define STT_NONE         0x0000         /* Status uninitialized           */
+#define STT_OKAY         0xa500         /* dsp working                    */
+#define STT_UNINIINT     0x5a00         /* Spurious interrupt             */
+#define STT_DATARDY      0xa501         /* data ready for reading in ERAM */
+#define STT_ERRPIO       0xa503         /* Error in PIO                   */
+#define STT_ERRINT       0xa504         /* error interrupt                */
+#define STT_ERRXRAM      0xa505         /* error ext. ram                 */
+#define STT_ERRIRAM      0xa506         /* error internal ram             */
+#define STT_ENDOFJOB     0xa508         /* correct end of job             */
+#define STT_INVCPUMSG    0xa509         /* Invalid CPU message received   */
+#define STT_MISUPDATE    0xa50a         /* Missed update or meassge   	  */
+#define STT_WTREF        0xa50b         /* Wait for reference update   	  */
+#define STT_WRNGTERM     0xa50c         /* Wrong termination of the progr */
+#define STT_INT3RCVD     0xa5a5         /* Int3 received                  */
+
+#define DATA_TO_WR       0xa502         /* dsp works, data to write       */
+#define STT_NOTWORK      0xdead         /* dsp not begin to run           */
+
+/* I don't like the previous defines.  They should be moved */
+
+#define RFP_A_ERAM        0x8000
+#define RFP_K_ESIZE       (16*1024)     /* shorts */
+
+/* 
+** Byte offsets to various ripple loop variables in eram. IREF is the
+** the first one we reference and the others are close by so we use that as 
+** a base offset.
+*/
+
+#define RIP_A_BASE        RFP_I_DSPMEM+0x400
+#define RIP_A_IREF        EXT2IDX(RIP_A_BASE)
+#define RIP_A_QREF        EXT2IDX(RIP_A_BASE+2)
+#define RIP_A_PREF        EXT2IDX(RIP_A_BASE+4)
+#define RIP_A_IKLS        EXT2IDX(RIP_A_BASE+8)
+#define RIP_A_QKLS        EXT2IDX(RIP_A_BASE+10)
+#define RIP_A_PKLS        EXT2IDX(RIP_A_BASE+12)
+#define RIP_A_PERR        EXT2IDX(RIP_A_BASE+24)
+#define RIP_A_PERP        EXT2IDX(RIP_A_BASE+26)
+#define RIP_A_AERR        EXT2IDX(RIP_A_BASE+28)
+#define RIP_A_POUT        EXT2IDX(RIP_A_BASE+30)
+#define RIP_A_POUP        EXT2IDX(RIP_A_BASE+32)
+#define RIP_A_AOUT        EXT2IDX(RIP_A_BASE+34)
+
+#define RFP_K_DATASPACE   SPC_K_A24
+#define RFP_K_DATASIZE    SIZ_K_SHORT
+
+#define RFP_K_OCTDACMIN  -5.0
+#define RFP_K_OCTDACMAX   5.0
+#define RFP_K_OCTDACOS    0x800
+#define RFP_V_OCTDAC      4
+#define RFP_M_OCTDAC     (0x0fff << RFP_V_OCTDAC)
+
+/* Cavity combiner coefficients */
+#define RFP_A_CCC1II      0x8000
+#define RFP_I_CCC1II      EXT2IDX (RFP_A_CCC1II)
+#define RFP_A_CCC1IQ      0x8002
+#define RFP_I_CCC1IQ      EXT2IDX (RFP_A_CCC1IQ)
+#define RFP_A_CCC1QI      0x8004
+#define RFP_I_CCC1QI      EXT2IDX (RFP_A_CCC1QI)
+#define RFP_A_CCC1QQ      0x8006
+#define RFP_I_CCC1QQ      EXT2IDX (RFP_A_CCC1QQ)
+
+#define RFP_A_CCC2II      0x8008
+#define RFP_I_CCC2II      EXT2IDX (RFP_A_CCC2II)
+#define RFP_A_CCC2IQ      0x800a
+#define RFP_I_CCC2IQ      EXT2IDX (RFP_A_CCC2IQ)
+#define RFP_A_CCC2QI      0x800c
+#define RFP_I_CCC2QI      EXT2IDX (RFP_A_CCC2QI)
+#define RFP_A_CCC2QQ      0x800e
+#define RFP_I_CCC2QQ      EXT2IDX (RFP_A_CCC2QQ)
+
+#define RFP_A_CCC3II      0x8010
+#define RFP_I_CCC3II      EXT2IDX (RFP_A_CCC3II)
+#define RFP_A_CCC3IQ      0x8012
+#define RFP_I_CCC3IQ      EXT2IDX (RFP_A_CCC3IQ)
+#define RFP_A_CCC3QI      0x8014
+#define RFP_I_CCC3QI      EXT2IDX (RFP_A_CCC3QI)
+#define RFP_A_CCC3QQ      0x8016
+#define RFP_I_CCC3QQ      EXT2IDX (RFP_A_CCC3QQ)
+
+#define RFP_A_CCC4II      0x8018
+#define RFP_I_CCC4II      EXT2IDX (RFP_A_CCC4II)
+#define RFP_A_CCC4IQ      0x801a
+#define RFP_I_CCC4IQ      EXT2IDX (RFP_A_CCC4IQ)
+#define RFP_A_CCC4QI      0x801c
+#define RFP_I_CCC4QI      EXT2IDX (RFP_A_CCC4QI)
+#define RFP_A_CCC4QQ      0x801e
+#define RFP_I_CCC4QQ      EXT2IDX (RFP_A_CCC4QQ)
+
+/* Cavity combiner output offsets */
+#define RFP_A_CC1IOUTOS   0x8020
+#define RFP_I_CC1IOUTOS   EXT2IDX (RFP_A_CC1IOUTOS)
+#define RFP_A_CC1QOUTOS   0x8022
+#define RFP_I_CC1QOUTOS   EXT2IDX (RFP_A_CC1QOUTOS)
+
+#define RFP_A_CC2IOUTOS   0x8024
+#define RFP_I_CC2IOUTOS   EXT2IDX (RFP_A_CC2IOUTOS)
+#define RFP_A_CC2QOUTOS   0x8026
+#define RFP_I_CC2QOUTOS   EXT2IDX (RFP_A_CC2QOUTOS)
+
+#define RFP_A_CC3IOUTOS   0x8028
+#define RFP_I_CC3IOUTOS   EXT2IDX (RFP_A_CC3IOUTOS)
+#define RFP_A_CC3QOUTOS   0x802a
+#define RFP_I_CC3QOUTOS   EXT2IDX (RFP_A_CC3QOUTOS)
+
+#define RFP_A_CC4IOUTOS   0x802c
+#define RFP_I_CC4IOUTOS   EXT2IDX (RFP_A_CC4IOUTOS)
+#define RFP_A_CC4QOUTOS   0x802e
+#define RFP_I_CC4QOUTOS   EXT2IDX (RFP_A_CC4QOUTOS)
+
+/* Cavity gain stage output offsets */
+#define RFP_A_GSC1IOUTOS  0x8030
+#define RFP_I_GSC1IOUTOS  EXT2IDX (RFP_A_GSC1IOUTOS)
+#define RFP_A_GSC1QOUTOS  0x8032
+#define RFP_I_GSC1QOUTOS  EXT2IDX (RFP_A_GSC1QOUTOS)
+
+#define RFP_A_GSC2IOUTOS  0x8034
+#define RFP_I_GSC2IOUTOS  EXT2IDX (RFP_A_GSC2IOUTOS)
+#define RFP_A_GSC2QOUTOS  0x8036
+#define RFP_I_GSC2QOUTOS  EXT2IDX (RFP_A_GSC2QOUTOS)
+
+#define RFP_A_GSC3IOUTOS  0x8038
+#define RFP_I_GSC3IOUTOS  EXT2IDX (RFP_A_GSC3IOUTOS)
+#define RFP_A_GSC3QOUTOS  0x803a
+#define RFP_I_GSC3QOUTOS  EXT2IDX (RFP_A_GSC3QOUTOS)
+
+#define RFP_A_GSC4IOUTOS  0x803c
+#define RFP_I_GSC4IOUTOS  EXT2IDX (RFP_A_GSC4IOUTOS)
+#define RFP_A_GSC4QOUTOS  0x803e
+#define RFP_I_GSC4QOUTOS  EXT2IDX (RFP_A_GSC4QOUTOS)
+
+/* Summing nodes */
+#define RFP_A_SNIOS       0x8040
+#define RFP_I_SNIOS       EXT2IDX (RFP_A_SNIOS)
+#define RFP_A_SNQOS       0x8042
+#define RFP_I_SNQOS       EXT2IDX (RFP_A_SNQOS)
+
+/* Direct Loop Controls */
+#define RFP_A_DLCIOS      0x8044
+#define RFP_I_DLCIOS      EXT2IDX (RFP_A_DLCIOS)
+#define RFP_A_DLCQOS      0x8046
+#define RFP_I_DLCQOS      EXT2IDX (RFP_A_DLCQOS)
+
+/* Direct Loop Coefficients */
+#define RFP_A_DLCII       0x8048
+#define RFP_I_DLCII       EXT2IDX (RFP_A_DLCII)
+#define RFP_A_DLCIQ       0x804a
+#define RFP_I_DLCIQ       EXT2IDX (RFP_A_DLCIQ)
+#define RFP_A_DLCQI       0x804c
+#define RFP_I_DLCQI       EXT2IDX (RFP_A_DLCQI)
+#define RFP_A_DLCQQ       0x804e
+#define RFP_I_DLCQQ       EXT2IDX (RFP_A_DLCQQ)
+
+/* Tune Mode set points */
+#define RFP_A_TMISP       0x8050
+#define RFP_I_TMISP       EXT2IDX (RFP_A_TMISP)
+#define RFP_A_TMQSP       0x8052
+#define RFP_I_TMQSP       EXT2IDX (RFP_A_TMQSP)
+
+/* Klystron loop modulator offsets */
+#define RFP_A_KLMIOS      0x8054
+#define RFP_I_KLMIOS      EXT2IDX (RFP_A_KLMIOS)
+#define RFP_A_KLMQOS      0x8056
+#define RFP_I_KLMQOS      EXT2IDX (RFP_A_KLMQOS)
+
+/* Difference mode error offsets */
+#define RFP_A_DMEIOS      0x8058
+#define RFP_I_DMEIOS      EXT2IDX (RFP_A_DMEIOS)
+#define RFP_A_DMEQOS      0x805a
+#define RFP_I_DMEQOS      EXT2IDX (RFP_A_DMEQOS)
+
+/* RF modulator offsets */
+#define RFP_A_RFMIOS      0x805c
+#define RFP_I_RFMIOS      EXT2IDX (RFP_A_RFMIOS)
+#define RFP_A_RFMQOS      0x805e
+#define RFP_I_RFMQOS      EXT2IDX (RFP_A_RFMQOS)
+
+/* Compensation stage offsets */
+#define RFP_A_CSIOS       0x8060
+#define RFP_I_CSIOS       EXT2IDX (RFP_A_CSIOS)
+#define RFP_A_CSQOS       0x8062
+#define RFP_I_CSQOS       EXT2IDX (RFP_A_CSQOS)
+
+/* Comb Loop offsets */
+#define RFP_A_CLIOS       0x8064
+#define RFP_I_CLIOS       EXT2IDX (RFP_A_CLIOS)
+#define RFP_A_CLQOS       0x8066
+#define RFP_I_CLQOS       EXT2IDX (RFP_A_CLQOS)
+
+/* Comb Loop coefficients */
+#define RFP_A_CLCII       0x8068
+#define RFP_I_CLCII       EXT2IDX (RFP_A_CLCII)
+#define RFP_A_CLCIQ       0x806a
+#define RFP_I_CLCIQ       EXT2IDX (RFP_A_CLCIQ)
+#define RFP_A_CLCQI       0x806c
+#define RFP_I_CLCQI       EXT2IDX (RFP_A_CLCQI)
+#define RFP_A_CLCQQ       0x806e
+#define RFP_I_CLCQQ       EXT2IDX (RFP_A_CLCQQ)
+
+/* Klystron Analog demodulator offsets */
+#define RFP_A_KLDOI       0x8070
+#define RFP_I_KLDOI       EXT2IDX (RFP_A_KLDOI)
+#define RFP_A_KLDOQ       0x8072
+#define RFP_I_KLDOQ       EXT2IDX (RFP_A_KLDOQ)
+
+/* Ripple Loop coefficients */
+#define RFP_A_RLCII       0x8074
+#define RFP_I_RLCII       EXT2IDX (RFP_A_RLCII)
+#define RFP_A_RLCIQ       0x8076
+#define RFP_I_RLCIQ       EXT2IDX (RFP_A_RLCIQ)
+
+/* Internal Reference */
+#define RFP_A_IREFI       0x8078
+#define RFP_I_IREFI       EXT2IDX (RFP_A_IREFI)
+#define RFP_A_IREFQ       0x807a
+#define RFP_I_IREFQ       EXT2IDX (RFP_A_IREFQ)
+
+/* Maximum Drive */
+#define RFP_A_MDRV        0x807c
+#define RFP_I_MDRV        EXT2IDX (RFP_A_MDRV)
+
+/* Spare DAC - not used */
+#define RFP_A_XDAC       0x807e
+#define RFP_I_XDAC       EXT2IDX (RFP_A_XDAC)
+
+/* Common RAM related stuff */
+#define RFP_K_RAMBLKCNT   512           /* blocks */
+
+/* Signal RAM */
+#define RFP_A_SIGIRAM     0x8082
+#define RFP_I_SIGIRAM     EXT2IDX (RFP_A_SIGIRAM)
+#define RFP_K_SIGIRAMID   "RFP Signal I RAM"
+#define RFP_A_SIGQRAM     0x8084
+#define RFP_I_SIGQRAM     EXT2IDX (RFP_A_SIGQRAM)
+#define RFP_K_SIGQRAMID   "RFP Signal Q RAM"
+
+/* Cavity RAM */
+#define RFP_A_CAVIRAM     0x8086
+#define RFP_I_CAVIRAM     EXT2IDX (RFP_A_CAVIRAM)
+#define RFP_K_CAVIRAMID   "RFP Cavity I RAM"
+#define RFP_A_CAVQRAM     0x8088
+#define RFP_I_CAVQRAM     EXT2IDX (RFP_A_CAVQRAM)
+#define RFP_K_CAVQRAMID   "RFP Cavity Q RAM"
+
+/* DAC RAM */
+#define RFP_K_DACMIN     -2.048         /* Volts */
+#define RFP_K_DACMAX      2.048         /* Volts */
+#define RFP_V_DAC         4
+#define RFP_M_DAC        (0x0fff << RFP_V_DAC)
+#define RFP_A_DACIRAM     0x808a
+#define RFP_I_DACIRAM     EXT2IDX (RFP_A_DACIRAM)
+#define RFP_K_DACIRAMID   "RFP DAC I RAM   "
+#define RFP_A_DACQRAM     0x808c
+#define RFP_I_DACQRAM     EXT2IDX (RFP_A_DACQRAM)
+#define RFP_K_DACQRAMID   "RFP DAC Q RAM   "
+#define RFP_K_DACRAMCNT  (512*1024)
+
+/* State machine functions */
+#define RFP_A_SMSTOPDT    0x808e
+#define RFP_I_SMSTOPDT    EXT2IDX (RFP_A_SMSTOPDT)
+#define RFP_A_SMPRELD     0x8090
+#define RFP_I_SMPRELD     EXT2IDX (RFP_A_SMPRELD)
+
+/* Four new ADC's for ver 3 or later
+ * These registers mirror the data read by the DSP Parallel I/O
+ * in A24 space.
+ */
+/* Read quad ADC ADC0 (I Error)     */
+#define  RFP_A_ADCIERR    0x8092
+#define  RFP_I_ADCIERR    EXT2IDX (RFP_A_ADCIERR)
+
+/* Read quad ADC-ADC1 (Q Error)     */
+#define  RFP_A_ADCQERR    0x8094
+#define  RFP_I_ADCQERR    EXT2IDX (RFP_A_ADCQERR)
+
+/* Read quad ADC-ADC2 (I Klystron   */
+#define  RFP_A_ADCIKLY    0x8096
+#define  RFP_I_ADCIKLY    EXT2IDX (RFP_A_ADCIKLY)
+
+/*  Read quad ADC-ADC4 (Q Klystron) */
+#define  RFP_A_ADCQKLY    0x8098
+#define  RFP_I_ADCQKLY    EXT2IDX (RFP_A_ADCQKLY)
+
+/* Feedback Mux database field fsmx. This field is a value 0-7 for hw module version
+ * two or greater. For hw versions zero or one, the file values are 0-3.  For a hw version
+ * two or newer if the fsmx field is 4-7, then the control register bit 8 must be set
+ * or cleared based on the value of bit2 of fsmx.
+ */
+#define FBSIGMUXA2(rec)      (((rec)->mstt & RFP_M_FBSIGMUX2) >> 6)
+#define FBSIGMUX(rec)        (((rec)->rstt & RFP_M_FBSIGMUX) >> RFP_V_FBSIGMUX)
+#define FBSIGMUX_READ(rec)   (FBSIGMUX((rec)) | FBSIGMUXA2((rec)))
+
+#endif
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d14 1
+d55 1
+d102 4
+d110 2
+d117 1
+d159 3
+d173 3
+d213 1
+a213 1
+#define RFP_K_RUN         2
+d472 26
+d535 29
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

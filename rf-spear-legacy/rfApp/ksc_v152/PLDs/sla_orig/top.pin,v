@@ -1,0 +1,246 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.08.29.01.53.02;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.08.29.01.53.02;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@-- Copyright (C) 1988-2002 Altera Corporation
+-- Any megafunction design, and related net list (encrypted or decrypted),
+-- support information, device programming or simulation file, and any other
+-- associated documentation or information provided by Altera or a partner
+-- under Altera's Megafunction Partnership Program may be used only to
+-- program PLD devices (but not masked PLD devices) from Altera.  Any other
+-- use of such megafunction design, net list, support information, device
+-- programming or simulation file, or any other related documentation or
+-- information is prohibited for any other purpose, including, but not
+-- limited to modification, reverse engineering, de-compiling, or use with
+-- any other silicon devices, unless such use is explicitly licensed under
+-- a separate agreement with Altera or a megafunction partner.  Title to
+-- the intellectual property, including patents, copyrights, trademarks,
+-- trade secrets, or maskworks, embodied in any such megafunction design,
+-- net list, support information, device programming or simulation file, or
+-- any other related documentation or information provided by Altera or a
+-- megafunction partner, remains with Altera, the megafunction partner, or
+-- their respective licensors.  No other licenses, including any licenses
+-- needed under any third party's intellectual property, are provided herein.
+
+
+
+N.C. = No Connect. This pin has no internal connection to the device.
+VCCINT = Dedicated power pin, which MUST be connected to VCC (5.0 volts).
+VCCIO = Dedicated power pin, which MUST be connected to VCC (5.0 volts).
+GND = Dedicated ground pin or unused dedicated input, which MUST be connected to GND.
+RESERVED = Unused I/O pin, which MUST be left unconnected.
+
+----------------------------------------------------------------------------
+
+CHIP "top" ASSIGNED TO AN EPF8820AQC160-4
+nSP                              : 1
+MSEL0                            : 2
+VCCINT                           : 3
+RD10                             : 4
+/RD_SIGNAL                       : 5
+/IACK_OUT                        : 6
+RD13                             : 7
+RD7                              : 8
+/ENA_244                         : 9
+RD8                              : 10
+DTACK                            : 11
+GND                              : 12
+GND                              : 13
+/SYSRESET                        : 14
+TSRC3                            : 15
+/RD_INTID                        : 16
+IRQ2                             : 17
+TSRC5                            : 18
+TRG_OUT5                         : 19
+TRG_OUT10                        : 20
+/WT_MODID                        : 21
+/SFT_RESET                       : 22
+VCCIO                            : 23
+VCCINT                           : 24
+TRG_OUT4                         : 25
+IRQ3                             : 26
+SW10                             : 27
+SW9                              : 28
+SW12                             : 29
+SW8                              : 30
+A13                              : 31
+A14                              : 32
+10M_VCLK                         : 33
+GND                              : 34
+GND                              : 35
+TSRC7                            : 36
+TRG_OUT0                         : 37
+/DS                              : 38
+/WRITE                           : 39
+RD4                              : 40
+RD2                              : 41
+TRG_OUT7                         : 42
+RD5                              : 43
+MSEL1                            : 44
+GND                              : 45
+VCCINT                           : 46
+VCCIO                            : 47
+RESERVED                         : 48
+TSRC8                            : 49
+TSRC9                            : 50
+GND                              : 51
+TRG_OUT6                         : 52
+RESERVED                         : 53
+TSRC0                            : 54
+AM0                              : 55
+TSRC1                            : 56
+VCCIO                            : 57
+A1                               : 58
+SW13                             : 59
+AM3                              : 60
+A4                               : 61
+AM1                              : 62
+GND                              : 63
+A10                              : 64
+MODID                            : 65
+A6                               : 66
+ID6                              : 67
+ID13                             : 68
+VCCIO                            : 69
+SW11                             : 70
+ID4                              : 71
+ID10                             : 72
+ID2                              : 73
+RD14                             : 74
+GND                              : 75
+ID0                              : 76
+ID5                              : 77
+A2                               : 78
+VCCIO                            : 79
+GND                              : 80
+nCONFIG                          : 81
+nSTATUS                          : 82
+GND                              : 83
+BERR                             : 84
+IRQ4                             : 85
+/XMT_DATA                        : 86
+TSRC6                            : 87
+TRG_OUT1                         : 88
+TRG_OUT2                         : 89
+TRG_OUT11                        : 90
+/IACKIN                          : 91
+VCCINT                           : 92
+GND                              : 93
+20M_CLK                          : 94
+A12                              : 95
+A15                              : 96
+SDOUT                            : 97
+IRQ7                             : 98
+RD12                             : 99
+SW7                              : 100
+TRG_OUT3                         : 101
+/RD_MODID                        : 102
+GND                              : 103
+VCCIO                            : 104
+SYSFAIL_INH                      : 105
+IRQ6                             : 106
+/WT_ROM                          : 107
+TSRC2                            : 108
+IRQ1                             : 109
+NSLOT0                           : 110
+RD9                              : 111
+RD6                              : 112
+/RESET                           : 113
+VCCINT                           : 114
+GND                              : 115
+RD3                              : 116
+RD0                              : 117
+RD11                             : 118
+RD1                              : 119
+/WT_EXTENDED                     : 120
+RD15                             : 121
+/WT_SIGNAL                       : 122
+TSRC11                           : 123
+CONF_DONE                        : 124
+DCLK                             : 125
+GND                              : 126
+VCCIO                            : 127
+TSRC10                           : 128
+DATA0                            : 129
+ID15                             : 130
+GND                              : 131
+ID7                              : 132
+ID3                              : 133
+ID9                              : 134
+A5                               : 135
+ID8                              : 136
+VCCIO                            : 137
+ID12                             : 138
+ID11                             : 139
+A11                              : 140
+A3                               : 141
+AM5                              : 142
+GND                              : 143
+A9                               : 144
+IRQ5                             : 145
+AM4                              : 146
+A8                               : 147
+SW6                              : 148
+VCCIO                            : 149
+ID14                             : 150
+TRG_OUT8                         : 151
+A7                               : 152
+TSRC4                            : 153
+TRG_OUT9                         : 154
+GND                              : 155
+ID1                              : 156
+RESERVED                         : 157
+/RD_ROM                          : 158
+VCCIO                            : 159
+VCCINT                           : 160
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

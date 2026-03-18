@@ -1,0 +1,260 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.04;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.04;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 5
+The length of the symbol table is: 57
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+.	|ack_seq:1.
+:	|74174:2.
+D	|ack_seq:1|
+P	|74174:2|
+
+The number of name info structs is : 189
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	IU[m	!	K	:14	"3
+#	IFkc	!	BERR	k
+$	IU\(	!	J	CLOCK	p
+%	IU\(	!	<	DS	s
+&	IFkc	!	DTACK	l
+'	IU\(	!	>	ERR	t
+(	IFkc	!	HOLD_ADR	o
+)	IU\(	!	:	MATCH	r
+*	IFkc	!	RDINT	n
++	IU\(	!	"q	RESET	q
+,	IU\(	!	@@	WRITE	u
+-	IFkc	!	WTINT	m
+.	IN#r	:	)	1D	"2
+/	I\lm	:	"m	F	1Q	",
+0	IN#r	:	%	2D	"%
+1	I\lm	:	"g	E	2Q	"-
+2	IN#r	:	'	3D	"&
+3	I\lm	:	"j	D	3Q	".
+4	IN#r	:	,	4D	"'
+5	I\lm	:	"~	I	4Q	"/
+6	I\lm	:	B	H	5Q	"0
+7	I\lm	:	C	G	6Q	"1
+8	I\r8	:	M	$	CLK	"+
+9	IN#r	:	"	CLRN	"*
+:	I\r8	P	.	)	1D	#}
+;	I\rO	P	R	F	1Q	$+
+<	I\r8	P	0	%	2D	#|
+=	I\rO	P	N	E	2Q	$*
+>	I\r8	P	2	'	3D	#{
+?	I\rO	P	P	D	3Q	$)
+@@	I\r8	P	4	,	4D	#z
+A	I\rO	P	U	I	4Q	$(
+B	IN$+	P	H	5Q	$'
+C	IN$+	P	G	6Q	$&
+D	IUV3	P	3	:10	$)
+E	IUV3	P	1	:11	$*
+F	IUV3	P	/	:12	$+
+G	IUV3	P	7	:7	$&
+H	IUV3	P	6	:8	$'
+I	IUV3	P	5	:9	$(
+J	I\r8	P	"e	$	CLK	#w
+K	I\r8	P	9	"	CLRN	#v
+L	I\lm	.	"c	"d	BERR	"#
+M	IN#r	.	$	CLOCK	w
+N	IN#r	.	E	DS	z
+O	I\lm	.	"h	"i	DTACK	""
+P	IN#r	.	D	ERR	{
+Q	I\lm	.	"k	"l	HOLD_ADR	}
+R	IN#r	.	F	MATCH	y
+S	I\lm	.	"o	"p	RDINT	~
+T	IN#r	.	+	RESET	x
+U	IN#r	.	I	WRITE	|
+V	I\lm	.	#!	#"	WTINT	"!
+W	IdL3	D	56	21	:100	#$
+X	IdL3	D	56	30	:101	#%
+Y	IdL3	D	56	30	:102	#&
+Z	IdL3	D	56	3	:103	#'
+[	IdL3	D	19	1	:104	#(
+\	IdL3	D	19	1	:105	#)
+]	IdL3	D	56	3	:106	#*
+^	IdL3	D	56	3	:107	#+
+_	IdL3	D	59	12	:108	#,
+`	IdL3	D	19	1	:109	#-
+a	IdL3	D	19	1	:110	#.
+b	IdL3	D	62	3	:111	#/
+c	IdL3	D	63	12	:112	#0
+d	IdL3	D	19	1	:113	#1
+e	IdL3	D	19	1	:114	#2
+f	IdL3	D	62	3	:115	#3
+g	IdL3	D	62	3	:116	#4
+h	IdL3	D	65	12	:117	#5
+i	IdL3	D	19	1	:118	#6
+j	IdL3	D	19	1	:119	#7
+k	IdL3	D	19	1	:120	#8
+l	IdL3	D	19	1	:121	#9
+m	IdL3	D	19	1	:122	#:
+n	IdL3	D	19	1	:123	#;
+o	IdL3	D	19	1	:124	#<
+p	IdL3	D	19	1	:125	#=
+q	IdL3	D	19	1	:126	#>
+r	IdL3	D	19	1	:127	#?
+s	IdL3	D	76	3	:128	#@@
+t	IdL3	D	77	12	:129	#A
+u	IdL3	D	19	1	:130	#B
+v	IdL3	D	19	1	:131	#C
+w	IdL3	D	76	3	:132	#D
+x	IdL3	D	76	3	:133	#E
+y	IdL3	D	79	12	:134	#F
+z	IdL3	D	19	1	:135	#G
+{	IdL3	D	19	1	:136	#H
+|	IdL3	D	19	1	:137	#I
+}	IdL3	D	19	1	:138	#J
+~	IdL3	D	19	1	:139	#K
+"!	IdL3	D	19	1	:140	#L
+""	IdL3	D	19	1	:141	#M
+"#	IdL3	D	19	1	:142	#N
+"$	IdL3	D	88	3	:143	#O
+"%	IdL3	D	89	12	:144	#P
+"&	IdL3	D	19	1	:145	#Q
+"'	IdL3	D	19	1	:146	#R
+"(	IdL3	D	88	3	:147	#S
+")	IdL3	D	88	3	:148	#T
+"*	IdL3	D	91	12	:149	#U
+"+	IdL3	D	19	1	:150	#V
+",	IdL3	D	19	1	:151	#W
+"-	IdL3	D	22	2	:152	#X
+".	IdL3	D	23	4	:153	#Y
+"/	IdL3	D	23	4	:154	#Z
+"0	IdL3	D	24	4	:155	#[
+"1	IdL3	D	24	4	:156	#\
+"2	IdL3	D	33	3	:157	#]
+"3	IdL3	D	33	3	:158	#^
+"4	IdL3	D	34	3	:159	#_
+"5	IdL3	D	34	3	:160	#`
+"6	IdL3	D	25	4	:161	#a
+"7	IdL3	D	25	4	:162	#b
+"8	IdL3	D	26	4	:163	#c
+"9	IdL3	D	26	4	:164	#d
+":	IdL3	D	27	4	:165	#e
+";	IdL3	D	27	4	:166	#f
+"<	IdL3	D	28	4	:167	#g
+"=	IdL3	D	28	4	:168	#h
+">	IdL3	D	29	4	:169	#i
+"?	IdL3	D	29	4	:170	#j
+"@@	IdL3	D	30	4	:171	#k
+"A	IdL3	D	30	4	:172	#l
+"B	IdL3	D	31	4	:173	#m
+"C	IdL3	D	31	4	:174	#n
+"D	IdL3	D	32	4	:175	#o
+"E	IdL3	D	32	4	:176	#p
+"F	IdL3	D	39	17	:71	"e
+"G	IdL3	D	46	10	:72	"f
+"H	IdL3	D	46	3	:73	"g
+"I	IdL3	D	19	1	:74	"h
+"J	IdL3	D	19	1	:75	"i
+"K	IdL3	D	19	1	:76	"j
+"L	IdL3	D	46	3	:77	"k
+"M	IdL3	D	46	3	:78	"l
+"N	IdL3	D	49	12	:79	"m
+"O	IdL3	D	19	1	:80	"n
+"P	IdL3	D	19	1	:81	"o
+"Q	IdL3	D	52	10	:82	"p
+"R	IdL3	D	52	18	:83	"q
+"S	IdL3	D	52	3	:84	"r
+"T	IdL3	D	19	1	:85	"s
+"U	IdL3	D	19	1	:86	"t
+"V	IdL3	D	52	3	:87	"u
+"W	IdL3	D	52	3	:88	"v
+"X	IdL3	D	54	13	:89	"w
+"Y	IdL3	D	54	21	:90	"x
+"Z	IdL3	D	54	29	:91	"y
+"[	IdL3	D	54	29	:92	"z
+"\	IdL3	D	54	3	:93	"{
+"]	IdL3	D	19	1	:94	"|
+"^	IdL3	D	19	1	:95	"}
+"_	IdL3	D	54	3	:96	"~
+"`	IdL3	D	54	3	:97	#!
+"a	IdL3	D	56	13	:98	#"
+"b	IdL3	D	56	21	:99	##
+"c	IN#s	D	"d	BERR	"C
+"d	Is6{	D	L	19	55	BERR~	"D
+"e	I\r8	D	8	$	CLOCK	"9
+"f	IdL#	D	19	1	CONTROL	"d
+"g	I\r8	D	=	E	DS	"<
+"h	IN#s	D	"i	DTACK	"B
+"i	Is6{	D	O	19	49	DTACK~	"E
+"j	I\r8	D	?	D	ERR	"=
+"k	IN#s	D	"l	HOLD_ADR	"?
+"l	Is6{	D	Q	19	28	HOLD_ADR~	"H
+"m	I\r8	D	;	F	MATCH	";
+"n	IdL3	D	22	2	POWER_UP	"J
+"o	IN#s	D	"p	RDINT	"@@
+"p	Is6{	D	S	19	37	RDINT~	"G
+"q	I\r8	D	T	+	RESET	":
+"r	IdL3	D	23	4	ST0	"L
+"s	IdL3	D	24	4	ST1	"N
+"t	IdL3	D	33	3	ST10	"`
+"u	IdL3	D	34	3	ST11	"b
+"v	IdL3	D	25	4	ST2	"P
+"w	IdL3	D	26	4	ST3	"R
+"x	IdL3	D	27	4	ST4	"T
+"y	IdL3	D	28	4	ST5	"V
+"z	IdL3	D	29	4	ST6	"X
+"{	IdL3	D	30	4	ST7	"Z
+"|	IdL3	D	31	4	ST8	"\
+"}	IdL3	D	32	4	ST9	"^
+"~	I\r8	D	A	I	WRITE	">
+#!	IN#s	D	#"	WTINT	"A
+#"	Is6{	D	V	19	43	WTINT~	"F
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

@@ -1,0 +1,1453 @@
+head	1.6;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.6
+	RF-SPEAR-R0-3-1:1.6
+	RF-SPEAR-R0-3-0:1.6
+	RF-SPEAR-R0-2-0:1.6
+	RF-SPEAR-R0-1-0:1.6
+	RF-SPEAR-R0-0-3:1.6
+	RF-SPEAR-R0-0-2:1.6
+	RF-SPEAR-R0-0-1:1.6
+	RF-SPEAR-R0-0-0:1.6
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.6
+	RF-3-13-10:1.6.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.6
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.6
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.5
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.6
+date	2010.03.08.16.27.58;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.08.27.02.29.22;	author lazmo;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.08.23.01.03.25;	author lazmo;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.08.05.19.20.41;	author lazmo;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.11.22.26.18;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.46;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.46;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.6
+log
+@Set initial flag for updating temp and voltages to 1 so that it is done on
+record initialization (so temp doesn't go into alarm and back out right
+after IOC reboot).
+@
+text
+@# p2RfAimRecord.ascii
+# share/ascii @@(#)p2RfAimRecord.ascii	0.0     1/6/97
+#
+#       Original Author: Ric Claus
+#       Date:            1-6-97
+#
+#       Experimental Physics and Industrial Control System (EPICS)
+#
+#       Copyright 1996, The Board of Trustees of the Leland Stanford
+#       Junior University.  All rights reserved.
+#
+#	This software was produced under U.S. Government contract
+#       DE-AC03-76SF00515 at the Stanford Linear Accelerator Center.
+#
+#         The items furnished herewith were developed under the sponsorship
+#    of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+#    Leland Stanford Junior University, nor their employees, makes any war-
+#    ranty, express or implied, or assumes any liability or responsibility
+#    for accuracy, completeness or usefulness of any information, apparatus,
+#    product or process disclosed, or represents that its use will not in-
+#    fringe privately-owned rights.  Mention of any product, its manufactur-
+#    er, or suppliers shall not, nor is it intended to, imply approval, dis-
+#    approval, or fitness for any particular use.  The U.S. and the Univer-
+#    sity at all times retain the right to use and disseminate the furnished
+#    items for any purpose whatsoever.                       Notice 91 02 01
+#
+#
+#       Initial development by:
+#               The PEP-II Low Level RF Group
+#               Positron Electron Project upgrade
+#               Stanford Linear Accelerator Center
+#
+#  Modification Log:
+#  -----------------
+#  .01  01-06-97	ric	Created
+#  .02  04-22-97	rcs	Add fields to display User-Programmable regs.
+#  .03  10-25-02	lazmo	Added fields for 12-channel AIM support.
+#				??
+#  .nn  mm-dd-yy        iii     Comment
+#       ...
+#
+recordtype(p2RfAim) {
+	include "dbCommon.dbd"
+	field(VAL,DBF_STRING) {
+		prompt("Status message")
+		asl(ASL0)
+		pp(TRUE)
+		size(40)
+	}
+	field(OVAL,DBF_STRING) {
+		prompt("Previous Value")
+		special(SPC_NOMOD)
+		interest(3)
+		size(40)
+	}
+	field(OUT,DBF_OUTLINK) {
+		prompt("Output Specification")
+		promptgroup(GUI_OUTPUT)
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(PREC,DBF_SHORT) {
+		prompt("Display Precision")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+	field(MID,DBF_USHORT) {
+		prompt("Manufacturer ID")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(MTYP,DBF_USHORT) {
+		prompt("Model Type")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(MSTT,DBF_USHORT) {
+		prompt("Module Status")
+		special(SPC_NOMOD)
+	}
+	field(MCTL,DBF_USHORT) {
+		prompt("Module Control")
+		special(SPC_NOMOD)
+		pp(TRUE)
+	}
+	field(MRST,DBF_SHORT) {
+		prompt("Module Reset")
+		pp(TRUE)
+		interest(2)
+	}
+	field(A24O,DBF_USHORT) {
+		prompt("A24 Offset")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(VATT,DBF_USHORT) {
+		prompt("VXI Attributes")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(SERN,DBF_ULONG) {
+		prompt("Serial Number")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(VERN,DBF_USHORT) {
+		prompt("Version Number")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(VERH,DBF_USHORT) {
+		prompt("Hardware Version")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(VERF,DBF_USHORT) {
+		prompt("Firmware Version")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(ISTT,DBF_USHORT) {
+		prompt("Interrupt Status")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(2)
+	}
+	field(OIST,DBF_USHORT) {
+		prompt("Old Interrupt Status")
+		interest(3)
+	}
+	field(IACK,DBF_USHORT) {
+		prompt("Interrupt Oper Ack")
+		pp(TRUE)
+		interest(2)
+	}
+	field(ICTL,DBF_USHORT) {
+		prompt("Interrupt Control")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(IMSK,DBF_UCHAR) {
+		prompt("Interrupt Mask")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		base(HEX)
+		interest(1)
+	}
+	field(OIMK,DBF_UCHAR) {
+		prompt("Old Interrupt Mask")
+		interest(3)
+	}
+	field(VSCL,DBF_USHORT) {
+		prompt("VXI Subclass")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+#
+	field(FCTL,DBF_USHORT) {
+		prompt("Fast Interlock Control")
+		special(SPC_NOMOD)
+		pp(TRUE)
+	}
+	field(FSTT,DBF_USHORT) {
+		prompt("Fast Interlock Status")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(1)
+	}
+	field(SOO,DBF_UCHAR) {
+		prompt("Solenoid On/Off")
+		pp(TRUE)
+		interest(1)
+	}
+	field(HVPS,DBF_UCHAR) {
+		prompt("Request HVPS on")
+		pp(TRUE)
+		interest(1)
+	}
+	field(FOO,DBF_UCHAR) {
+		prompt("Filament On/Off")
+		pp(TRUE)
+		interest(1)
+	}
+	field(FTOR,DBF_UCHAR) {
+		prompt("Request Filament Timeout Override")
+		pp(TRUE)
+		interest(1)
+	}
+	field(FF,DBF_UCHAR) {
+		prompt("Forced Fault")
+		pp(TRUE)
+		interest(1)
+	}
+	field(RSTF,DBF_UCHAR) {
+		prompt("Reset Fault")
+		pp(TRUE)
+		interest(1)
+	}
+	field(FBA,DBF_UCHAR) {
+		prompt("Force Beam Abort")
+		pp(TRUE)
+		interest(1)
+	}
+	field(RBA,DBF_UCHAR) {
+		prompt("Reset Beam Abort")
+		pp(TRUE)
+		interest(1)
+	}
+	field(HMUX,DBF_UCHAR) {
+		prompt("12ch Hist Buf ADC Mux")
+		pp(TRUE)
+		interest(1)
+	}
+	field(HCTL,DBF_UCHAR) {
+		prompt("12ch Hist Buf ADC Ctl")
+		pp(TRUE)
+		interest(1)
+	}
+# 7/12-channel count
+	field(NCHN,DBF_USHORT) {
+		prompt("Number of Channels")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(1)
+	}
+# 12-channel: History Buffer get
+	field(HGET,DBF_UCHAR) {
+		prompt("His Buf Get")
+		pp(TRUE)
+		interest(2)
+	}
+# 12-channel: History Buffer RAM size
+	field(HBSZ,DBF_ULONG) {
+		prompt("His Buf Size")
+		promptgroup(GUI_COMMON)
+		initial("512")
+	}
+# 12-channel: History Buffer file name
+	field(HBFN,DBF_STRING) {
+		prompt("His Buf File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+# 12-channel: History Buffer alarm status
+	field(HBST,DBF_MENU) {
+		prompt("His Buf Alrm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		pp(TRUE)
+	}
+#
+# the following fields contain register contents that have been
+# manipulated in s/w (masked and/or inverted)... see following fields
+# for unmodified versions
+#
+	field(AFES,DBF_USHORT) {
+		prompt("Arc Fault Enable Status")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(1)
+	}
+	field(ACST,DBF_USHORT) {
+		prompt("Arc Current Status")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(1)
+	}
+	field(ALST,DBF_USHORT) {
+		prompt("Arc Latched Status")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(1)
+	}
+	field(FFLT,DBF_USHORT) {
+		prompt("First Fault Arc Channel")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(1)
+	}
+#
+# unmodified versions of AFES, ACST, ALST, FFLT
+#
+	field(QFES,DBF_USHORT) {
+		prompt("Arc Fault Enable Status (h/w)")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(1)
+	}
+	field(QCST,DBF_USHORT) {
+		prompt("Arc Current Status (h/w)")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(1)
+	}
+	field(QLST,DBF_USHORT) {
+		prompt("Arc Latched Status (h/w)")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(1)
+	}
+	field(QFLT,DBF_USHORT) {
+		prompt("First Fault Arc Channel (h/w)")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(1)
+	}
+#
+	field(TT1,DBF_UCHAR) {
+		prompt("Channel 1 Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+	field(TT2,DBF_UCHAR) {
+		prompt("Channel 2 Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+	field(TT3,DBF_UCHAR) {
+		prompt("Channel 3 Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+	field(TT4,DBF_UCHAR) {
+		prompt("Channel 4 Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+	field(TT5,DBF_UCHAR) {
+		prompt("Channel 5 Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+	field(TT6,DBF_UCHAR) {
+		prompt("Channel 6 Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+	field(TT7,DBF_UCHAR) {
+		prompt("Channel 7 Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+	field(TT8,DBF_UCHAR) {
+		prompt("Channel 8 Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+	field(TT9,DBF_UCHAR) {
+		prompt("Channel 9 Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTA,DBF_UCHAR) {
+		prompt("Channel 10 Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTB,DBF_UCHAR) {
+		prompt("Channel 11 Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTC,DBF_UCHAR) {
+		prompt("Channel 12 Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTD,DBF_UCHAR) {
+		prompt("Spare Trip Test")
+		pp(TRUE)
+		interest(1)
+	}
+#
+# The TLn fields are accessed as an array and thus need to be kept together.
+#
+	field(TL1,DBF_USHORT) {
+		prompt("Channel 1 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TL2,DBF_USHORT) {
+		prompt("Channel 2 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TL3,DBF_USHORT) {
+		prompt("Channel 3 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TL4,DBF_USHORT) {
+		prompt("Channel 4 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TL5,DBF_USHORT) {
+		prompt("Channel 5 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TL6,DBF_USHORT) {
+		prompt("Channel 6 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TL7,DBF_USHORT) {
+		prompt("Channel 7 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TL8,DBF_USHORT) {
+		prompt("Channel 8 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TL9,DBF_USHORT) {
+		prompt("Channel 9 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLA,DBF_USHORT) {
+		prompt("Channel 10 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLB,DBF_USHORT) {
+		prompt("Channel 11 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLC,DBF_USHORT) {
+		prompt("Channel 12 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLD,DBF_USHORT) {
+		prompt("Spare Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+#
+# The TLPn fields are accessed as an array and thus need to be kept together.
+#
+	field(TLP1,DBF_USHORT) {
+		prompt("Channel 1 Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLP2,DBF_USHORT) {
+		prompt("Channel 2 Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLP3,DBF_USHORT) {
+		prompt("Channel 3 Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLP4,DBF_USHORT) {
+		prompt("Channel 4 Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLP5,DBF_USHORT) {
+		prompt("Channel 5 Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLP6,DBF_USHORT) {
+		prompt("Channel 6 Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLP7,DBF_USHORT) {
+		prompt("Channel 7 Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLP8,DBF_USHORT) {
+		prompt("Channel 8 Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLP9,DBF_USHORT) {
+		prompt("Channel 9 Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLPA,DBF_USHORT) {
+		prompt("Channel 10 Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLPB,DBF_USHORT) {
+		prompt("Channel 11 Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLPC,DBF_USHORT) {
+		prompt("Channel 12 Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLPD,DBF_USHORT) {
+		prompt("Spare Trip Level Previous")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+#
+# The TLRn fields are accessed as an array and thus need to be kept together.
+#
+	field(TLR1,DBF_USHORT) {
+		prompt("Channel 1 Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLR2,DBF_USHORT) {
+		prompt("Channel 2 Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLR3,DBF_USHORT) {
+		prompt("Channel 3 Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLR4,DBF_USHORT) {
+		prompt("Channel 4 Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLR5,DBF_USHORT) {
+		prompt("Channel 5 Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLR6,DBF_USHORT) {
+		prompt("Channel 6 Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLR7,DBF_USHORT) {
+		prompt("Channel 7 Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLR8,DBF_USHORT) {
+		prompt("Channel 8 Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLR9,DBF_USHORT) {
+		prompt("Channel 9 Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLRA,DBF_USHORT) {
+		prompt("Channel 10 Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLRB,DBF_USHORT) {
+		prompt("Channel 11 Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLRC,DBF_USHORT) {
+		prompt("Channel 12 Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLRD,DBF_USHORT) {
+		prompt("Spare Trip Level Readback")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+# bit mask of all trip level alarms
+	field(TLAM,DBF_USHORT) {
+		prompt("All Trip Level Alarms")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+# sticky bit mask of all trip level alarms -- never reset by s/w
+	field(TLAS,DBF_USHORT) {
+		prompt("All Trip Level Alarms (sticky)")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+#
+	field(LD0F,DBF_UCHAR) {
+		prompt("Load DAS 0 Instructions")
+		pp(TRUE)
+		interest(2)
+	}
+	field(D0IF,DBF_STRING) {
+		prompt("DAS 0 Instruction File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(D0AS,DBF_MENU) {
+		prompt("DAS 0 Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(LD1F,DBF_UCHAR) {
+		prompt("Load DAS 1 Instructions")
+		pp(TRUE)
+		interest(2)
+	}
+	field(D1IF,DBF_STRING) {
+		prompt("DAS 1 Instruction File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(D1AS,DBF_MENU) {
+		prompt("DAS 1 Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(IOAX,DBF_USHORT) {
+		prompt("Invalid Operation Address")
+		special(SPC_NOMOD)
+	}
+#
+# R* fields for debug to read DAS Registers
+#
+	field(RRD0,DBF_UCHAR) {
+		prompt("Read Register D0")
+		pp(TRUE)
+		interest(2)
+	}
+	field(RRD1,DBF_UCHAR) {
+		prompt("Read Register D1")
+		pp(TRUE)
+		interest(2)
+	}
+	field(RID0,DBF_UCHAR) {
+		asl(ASL0)
+		prompt("Register ID D0")
+	}
+	field(RID1,DBF_UCHAR) {
+		asl(ASL0)
+		prompt("Register ID D1")
+	}
+	field(RDD0,DBF_USHORT) {
+		prompt("Register Data D0")
+		base(HEX)
+	}
+	field(RDD1,DBF_USHORT) {
+		prompt("Register Data D1")
+		base(HEX)
+	}
+#
+# R* fields to read DAS Registers which have crate voltages, temp and
+# arc detector peak output. Display output in hex and float.
+#
+	field(RDAS,DBF_UCHAR) {
+		prompt("Read DAS Registers")
+		pp(TRUE)
+		interest(2)
+		initial("1")
+	}
+#
+# So we can do these in a loop, keep all the following fields of the same
+# type together!
+#
+#-------------------------------------
+# D0 raw data -- arc peaks (and crate temp in 7-chan)
+#-------------------------------------
+#
+	field(RS00,DBF_USHORT) {
+		prompt("Register Data D0 0")
+		base(HEX)
+	}
+	field(RS01,DBF_USHORT) {
+		prompt("Register Data D0 1")
+		base(HEX)
+	}
+	field(RS02,DBF_USHORT) {
+		prompt("Register Data D0 2")
+		base(HEX)
+	}
+	field(RS03,DBF_USHORT) {
+		prompt("Register Data D0 3")
+		base(HEX)
+	}
+	field(RS04,DBF_USHORT) {
+		prompt("Register Data D0 4")
+		base(HEX)
+	}
+	field(RS05,DBF_USHORT) {
+		prompt("Register Data D0 5")
+		base(HEX)
+	}
+	field(RS06,DBF_USHORT) {
+		prompt("Register Data D0 6")
+		base(HEX)
+	}
+#
+# RS07 -- was crate temp in original; moved to RS0D in s/w
+#
+	field(RS07,DBF_USHORT) {
+		prompt("Register Data D0 7 (not temp)")
+		base(HEX)
+	}
+# RS08-RS0D added for 12-channel AIM (lazmo@@slac)
+	field(RS08,DBF_USHORT) {
+		prompt("Hex Peak Arc Det Ch9")
+		base(HEX)
+	}
+	field(RS09,DBF_USHORT) {
+		prompt("Hex Peak Arc Det Ch10")
+		base(HEX)
+	}
+	field(RS0A,DBF_USHORT) {
+		prompt("Hex Peak Arc Det Ch11")
+		base(HEX)
+	}
+	field(RS0B,DBF_USHORT) {
+		prompt("Hex Peak Arc Det Ch12")
+		base(HEX)
+	}
+	field(RS0C,DBF_USHORT) {
+		prompt("Hex Peak Arc Det Spare")
+		base(HEX)
+	}
+#
+# crate temp -- was RS07 in original; copied here by s/w
+#
+	field(RS0D,DBF_USHORT) {
+		prompt("Crate Temperature")
+		base(HEX)
+	}
+#
+#-------------------------------------
+# D1 raw data -- crate voltages
+#-------------------------------------
+#
+	field(RS10,DBF_USHORT) {
+		prompt("Register Data D1 0")
+		base(HEX)
+	}
+	field(RS11,DBF_USHORT) {
+		prompt("Register Data D1 1")
+		base(HEX)
+	}
+	field(RS12,DBF_USHORT) {
+		prompt("Register Data D1 2")
+		base(HEX)
+	}
+	field(RS13,DBF_USHORT) {
+		prompt("Register Data D1 3")
+		base(HEX)
+	}
+	field(RS14,DBF_USHORT) {
+		prompt("Register Data D1 4")
+		base(HEX)
+	}
+	field(RS15,DBF_USHORT) {
+		prompt("Register Data D1 5")
+		base(HEX)
+	}
+	field(RS16,DBF_USHORT) {
+		prompt("Register Data D1 6")
+		base(HEX)
+	}
+	field(RS17,DBF_USHORT) {
+		prompt("Register Data D1 7")
+		base(HEX)
+	}
+#
+#-------------------------------------
+# D0 float data -- arc peaks (and crate temp in 7-chan)
+#-------------------------------------
+#
+	field(RF00,DBF_FLOAT) {
+		prompt("Peak Arc Det D0 0")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF01,DBF_FLOAT) {
+		prompt("Peak Arc Det D0 1")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF02,DBF_FLOAT) {
+		prompt("Peak Arc Det D0 2")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF03,DBF_FLOAT) {
+		prompt("Peak Arc Det D0 3")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF04,DBF_FLOAT) {
+		prompt("Peak Arc Det D0 4")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF05,DBF_FLOAT) {
+		prompt("Peak Arc Det D0 5")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF06,DBF_FLOAT) {
+		prompt("Peak Arc Det D0 6")
+		promptgroup(GUI_COMMON)
+	}
+#
+# RF07 -- was crate temp in original; moved to RF0D in s/w
+#
+	field(RF07,DBF_FLOAT) {
+		prompt("Peak Arc Det Ch8 (not temp)")
+		promptgroup(GUI_COMMON)
+	}
+#
+# RF08-RF0D added for 12-channel AIM (lazmo@@slac)
+#
+	field(RF08,DBF_FLOAT) {
+		prompt("Peak Arc Det Ch9")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF09,DBF_FLOAT) {
+		prompt("Peak Arc Det Ch10")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF0A,DBF_FLOAT) {
+		prompt("Peak Arc Det Ch11")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF0B,DBF_FLOAT) {
+		prompt("Peak Arc Det Ch12")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF0C,DBF_FLOAT) {
+		prompt("Peak Arc Det Spare")
+		promptgroup(GUI_COMMON)
+	}
+#
+# crate temp -- was RF07 in original
+#
+	field(RF0D,DBF_FLOAT) {
+ 		prompt("Crate Temperature D0 7")
+		promptgroup(GUI_COMMON)
+	}
+#
+#-------------------------------------
+# D1 float data
+#-------------------------------------
+#
+	field(RF10,DBF_FLOAT) {
+		prompt("Crate Voltage D1 0")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF11,DBF_FLOAT) {
+		prompt("Crate Voltage D1 1")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF12,DBF_FLOAT) {
+		prompt("Crate Voltage D1 2")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF13,DBF_FLOAT) {
+		prompt("Crate Voltage D1 3")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF14,DBF_FLOAT) {
+		prompt("Crate Voltage D1 4")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF15,DBF_FLOAT) {
+		prompt("Crate Voltage D1 5")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF16,DBF_FLOAT) {
+		prompt("Crate Voltage D1 6")
+		promptgroup(GUI_COMMON)
+	}
+	field(RF17,DBF_FLOAT) {
+		prompt("Crate Voltage D1 7")
+		promptgroup(GUI_COMMON)
+	}
+#
+# Calibrate set point for arc detector comparitors using enterable
+# scale factor.
+#
+	field(CALT,DBF_UCHAR) {
+		prompt("Calibrate Trip Levels")
+		pp(TRUE)
+		interest(2)
+        }
+	field(CASF,DBF_FLOAT) {
+		prompt("Calibrate Scale Factor")
+		promptgroup(GUI_COMMON)
+	}
+	field(TSTL,DBF_UCHAR) {
+		prompt("Test Trip Levels")
+		pp(TRUE)
+		interest(2)
+        }
+#
+# The TTLn fields are accessed as an array and thus need to be kept together.
+#
+	field(TTL1,DBF_USHORT) {
+		prompt("Tested Chan 1 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTL2,DBF_USHORT) {
+		prompt("Tested Chan 2 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTL3,DBF_USHORT) {
+		prompt("Tested Chan 3 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTL4,DBF_USHORT) {
+		prompt("Tested Chan 4 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTL5,DBF_USHORT) {
+		prompt("Tested Chan 5 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTL6,DBF_USHORT) {
+		prompt("Tested Chan 6 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTL7,DBF_USHORT) {
+		prompt("Tested Chan 7 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTL8,DBF_USHORT) {
+		prompt("Tested Chan 8 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTL9,DBF_USHORT) {
+		prompt("Tested Chan 9 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTLA,DBF_USHORT) {
+		prompt("Tested Chan 10 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTLB,DBF_USHORT) {
+		prompt("Tested Chan 11 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTLC,DBF_USHORT) {
+		prompt("Tested Chan 12 Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TTLD,DBF_USHORT) {
+		prompt("Tested Spare Trip Level")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+#
+# debugging fields... use as appropriate
+	field(DBG1,DBF_ULONG) {
+		prompt("debug 1")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(DBG2,DBF_ULONG) {
+		prompt("debug 2")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+	field(DBG3,DBF_ULONG) {
+		prompt("debug 3")
+		promptgroup(GUI_COMMON)
+		interest(1)
+	}
+}
+@
+
+
+1.5
+log
+@Removed .TLAn; renamed .TLAZ to .TLAS
+@
+text
+@d704 1
+@
+
+
+1.4
+log
+@Added trip-level alarm fields .TLPn,.TLRn,.TLAn,.TLAM,.TLAZ
+@
+text
+@a615 81
+#
+# The TLAn fields are accessed as an array and thus need to be kept together.
+#
+	field(TLA1,DBF_USHORT) {
+		prompt("Channel 1 Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLA2,DBF_USHORT) {
+		prompt("Channel 2 Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLA3,DBF_USHORT) {
+		prompt("Channel 3 Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLA4,DBF_USHORT) {
+		prompt("Channel 4 Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLA5,DBF_USHORT) {
+		prompt("Channel 5 Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLA6,DBF_USHORT) {
+		prompt("Channel 6 Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLA7,DBF_USHORT) {
+		prompt("Channel 7 Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLA8,DBF_USHORT) {
+		prompt("Channel 8 Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLA9,DBF_USHORT) {
+		prompt("Channel 9 Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLAA,DBF_USHORT) {
+		prompt("Channel 10 Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLAB,DBF_USHORT) {
+		prompt("Channel 11 Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLAC,DBF_USHORT) {
+		prompt("Channel 12 Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(TLAD,DBF_USHORT) {
+		prompt("Spare Trip Level Rbck Alarm")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+d624 1
+a624 1
+	field(TLAZ,DBF_USHORT) {
+@
+
+
+1.3
+log
+@
+  .04  08-05-03        lazmo   Fixed RS/RF fields
+@
+text
+@d38 1
+a38 2
+#  .04  08-05-03	lazmo	Fixed RS/RF fields
+#
+d450 257
+@
+
+
+1.2
+log
+@Changes for new aim module by Lazmo
+@
+text
+@d38 2
+a39 1
+#				??
+d102 1
+a102 1
+	field(SERN,DBF_LONG) {
+d210 7
+a216 5
+# 12-channel: history buffer mux
+#   0: HVPS + all arcs
+#   1: HVPS only
+	field(MUX0,DBF_UCHAR) {
+		prompt("12ch ADC MUX0 (all/HVPS-only)")
+d228 2
+a229 2
+	field(GHIS,DBF_UCHAR) {
+		prompt("Get His Buf")
+d354 1
+a354 1
+	field(TT10,DBF_UCHAR) {
+d359 1
+a359 1
+	field(TT11,DBF_UCHAR) {
+d364 1
+a364 1
+	field(TT12,DBF_UCHAR) {
+d369 1
+a369 1
+	field(TT13,DBF_UCHAR) {
+d431 1
+a431 1
+	field(TL10,DBF_USHORT) {
+d437 1
+a437 1
+	field(TL11,DBF_USHORT) {
+d443 1
+a443 1
+	field(TL12,DBF_USHORT) {
+d449 1
+a449 1
+	field(TL13,DBF_USHORT) {
+d534 3
+a536 1
+# D0 short data
+d566 3
+d570 1
+a570 1
+		prompt("Register Data D0 7")
+d573 1
+a573 1
+# RS08-RS13 added for 12-channel AIM (lazmo@@slac)
+d582 1
+a582 1
+	field(RS10,DBF_USHORT) {
+d586 1
+a586 1
+	field(RS11,DBF_USHORT) {
+d590 1
+a590 1
+	field(RS12,DBF_USHORT) {
+d594 4
+a597 1
+	field(RS13,DBF_USHORT) {
+d602 3
+a604 1
+# D1 short data
+d606 1
+a606 2
+# for 12-channel AIM: RF10-RF17 renamed to RF20-RF27 (lazmo@@slac)
+	field(RS20,DBF_USHORT) {
+d610 1
+a610 1
+	field(RS21,DBF_USHORT) {
+d614 1
+a614 1
+	field(RS22,DBF_USHORT) {
+d618 1
+a618 1
+	field(RS23,DBF_USHORT) {
+d622 1
+a622 1
+	field(RS24,DBF_USHORT) {
+d626 1
+a626 1
+	field(RS25,DBF_USHORT) {
+d630 1
+a630 1
+	field(RS26,DBF_USHORT) {
+d634 1
+a634 1
+	field(RS27,DBF_USHORT) {
+d639 3
+a641 1
+# D0 float data
+d644 1
+a644 1
+		prompt("Peak Arc Det D1 0")
+d648 1
+a648 1
+		prompt("Peak Arc Det D1 1")
+d652 1
+a652 1
+		prompt("Peak Arc Det D1 2")
+d656 1
+a656 1
+		prompt("Peak Arc Det D1 3")
+d660 1
+a660 1
+		prompt("Peak Arc Det D1 4")
+d664 1
+a664 1
+		prompt("Peak Arc Det D1 5")
+d668 1
+a668 1
+		prompt("Peak Arc Det D1 6")
+d671 3
+d675 1
+a675 1
+		prompt("Peak Arc Det Ch8")
+d678 3
+a680 1
+# RF08-RF13 added for 12-channel AIM (lazmo@@slac)
+d689 1
+a689 1
+	field(RF10,DBF_FLOAT) {
+d693 1
+a693 1
+	field(RF11,DBF_FLOAT) {
+d697 1
+a697 1
+	field(RF12,DBF_FLOAT) {
+d701 5
+a705 2
+	field(RF13,DBF_FLOAT) {
+		prompt("Crate Temperature")
+d709 1
+d711 1
+d713 2
+a714 3
+# for 12-channel AIM: RF10-RF17 renamed to RF20-RF27 (lazmo@@slac)
+	field(RF20,DBF_FLOAT) {
+		prompt("Crate Voltage D0 0")
+d717 2
+a718 2
+	field(RF21,DBF_FLOAT) {
+		prompt("Crate Voltage D0 1")
+d721 2
+a722 2
+	field(RF22,DBF_FLOAT) {
+		prompt("Crate Voltage D0 2")
+d725 2
+a726 2
+	field(RF23,DBF_FLOAT) {
+		prompt("Crate Voltage D0 3")
+d729 2
+a730 2
+	field(RF24,DBF_FLOAT) {
+		prompt("Crate Voltage D0 4")
+d733 2
+a734 2
+	field(RF25,DBF_FLOAT) {
+		prompt("Crate Voltage D0 5")
+d737 2
+a738 2
+	field(RF26,DBF_FLOAT) {
+		prompt("Crate Voltage D0 6")
+d741 2
+a742 2
+	field(RF27,DBF_FLOAT) {
+		prompt("Crate Voltage D0 7")
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d111 10
+d141 1
+a141 1
+	field(IMSK,DBF_USHORT) {
+d148 1
+a148 1
+	field(OIMK,DBF_USHORT) {
+d209 3
+a211 1
+# 12-channel: MUX0 on/off
+d213 1
+a213 19
+		prompt("12ch ADC MUX0 (ch 0-3)")
+		pp(TRUE)
+		interest(1)
+	}
+# 12-channel: MUX1 on/off
+	field(MUX1,DBF_UCHAR) {
+		prompt("12ch ADC MUX1 (ch 4-7)")
+		pp(TRUE)
+		interest(1)
+	}
+# 12-channel: MUX2 on/off
+	field(MUX2,DBF_UCHAR) {
+		prompt("12ch ADC MUX2 (ch 8-11)")
+		pp(TRUE)
+		interest(1)
+	}
+# 12-channel: MUX3 on/off
+	field(MUX3,DBF_UCHAR) {
+		prompt("12ch ADC MUX3 (HVPS)")
+d250 4
+d279 27
+d819 17
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

@@ -1,0 +1,746 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2003.01.22.20.15.41;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.45;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.45;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Phase 2 upgrade of IQA modules
+@
+text
+@# p2RfIqaRecord.ascii
+# share/ascii @@(#)p2RfIqaRecord.ascii	0.0     10/16/96
+#
+#       Original Author: Ric Claus
+#       Date:            8-7-96
+#
+#       Experimental Physics and Industrial Control System (EPICS)
+#
+#       Copyright 1996, The Board of Trustees of the Leland Stanford
+#       Junior University.  All rights reserved.
+#
+#	This software was produced under U.S. Government contract
+#       DE-AC03-76SF00515 at the Stanford Linear Accelerator Center.
+#
+#         The items furnished herewith were developed under the sponsorship
+#    of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+#    Leland Stanford Junior University, nor their employees, makes any war-
+#    ranty, express or implied, or assumes any liability or responsibility
+#    for accuracy, completeness or usefulness of any information, apparatus,
+#    product or process disclosed, or represents that its use will not in-
+#    fringe privately-owned rights.  Mention of any product, its manufactur-
+#    er, or suppliers shall not, nor is it intended to, imply approval, dis-
+#    approval, or fitness for any particular use.  The U.S. and the Univer-
+#    sity at all times retain the right to use and disseminate the furnished
+#    items for any purpose whatsoever.                       Notice 91 02 01
+#
+#
+#       Initial development by:
+#               The PEP-II Low Level RF Group
+#               Positron Electron Project upgrade
+#               Stanford Linear Accelerator Center
+#
+#  Modification Log:
+#  -----------------
+#  .01  08-07-96	ric	Created
+#  .02  10-11-96        ric     Converted from .ascii to .dbd format
+#  .03  10-22-02        kkh     Insert new field AMPM - Amplitude scan mode
+#                               to support new feature of IQA module (ver. 3)
+#  .nn  mm-dd-yy        iii     Comment
+#       ...
+#
+recordtype(p2RfIqa) {
+	include "dbCommon.dbd"
+	field(VAL,DBF_STRING) {
+		prompt("Status message")
+		asl(ASL0)
+		pp(TRUE)
+		size(40)
+	}
+	field(OVAL,DBF_STRING) {
+		prompt("Previous Value")
+		special(SPC_NOMOD)
+		interest(3)
+		size(40)
+	}
+	field(OUT,DBF_OUTLINK) {
+		prompt("Output Specification")
+		promptgroup(GUI_OUTPUT)
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(PREC,DBF_SHORT) {
+		prompt("Display Precision")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+	field(MID,DBF_USHORT) {
+		prompt("Manufacturer ID")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(MTYP,DBF_USHORT) {
+		prompt("Model Type")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(MSTT,DBF_USHORT) {
+		prompt("Module Status")
+		special(SPC_NOMOD)
+	}
+	field(MCTL,DBF_USHORT) {
+		prompt("Module Control")
+		special(SPC_NOMOD)
+		pp(TRUE)
+	}
+	field(MRST,DBF_SHORT) {
+		prompt("Module Reset")
+		pp(TRUE)
+		interest(2)
+	}
+	field(A24O,DBF_USHORT) {
+		prompt("A24 Offset")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(VATT,DBF_USHORT) {
+		prompt("VXI Attributes")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(SERN,DBF_ULONG) {
+		prompt("Serial Number")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(VERN,DBF_USHORT) {
+		prompt("Version Number")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+#
+#  Hardware version and Firmware versiona
+#  Inserted by KHKIM    November 1, 2002
+#
+	field(VERH,DBF_USHORT) {
+		prompt("Hardware Version")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(VERF,DBF_USHORT) {
+		prompt("Firmware Version")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+#
+#  end of modification
+#
+	field(ISTT,DBF_USHORT) {
+		prompt("Interrupt Status")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(2)
+	}
+	field(OIST,DBF_USHORT) {
+		prompt("Old Interrupt Status")
+		interest(3)
+	}
+	field(IACK,DBF_USHORT) {
+		prompt("Interrupt Oper Ack")
+		pp(TRUE)
+		interest(2)
+	}
+	field(ICTL,DBF_USHORT) {
+		prompt("Interrupt Control")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(IMSK,DBF_UCHAR) {
+		prompt("Interrupt Mask")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		base(HEX)
+		interest(1)
+	}
+	field(OIMK,DBF_UCHAR) {
+		prompt("Old Interrupt Mask")
+		interest(3)
+	}
+	field(VSCL,DBF_USHORT) {
+		prompt("VXI Subclass")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+#
+	field(TCTL,DBF_USHORT) {
+		prompt("Trigger Control")
+		special(SPC_NOMOD)
+		pp(TRUE)
+	}
+	field(FEST,DBF_USHORT) {
+		prompt("Fault Enable Status")
+		special(SPC_NOMOD)
+	}
+	field(STI,DBF_UCHAR) {
+		prompt("Stop Trigger Input")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(SSI,DBF_UCHAR) {
+		prompt("Snapshot Input")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(FO,DBF_UCHAR) {
+		prompt("Fault Output")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(RCO,DBF_UCHAR) {
+		prompt("Ripple Clock Output")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		interest(1)
+	}
+#
+#  The following eight fields must be kept together to allow access as an array
+#
+	field(AT0,DBF_FLOAT) {
+		prompt("Ampl Thresh Chan 0 V")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(AT1,DBF_FLOAT) {
+		prompt("Ampl Thresh Chan 1 V")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(AT2,DBF_FLOAT) {
+		prompt("Ampl Thresh Chan 2 V")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(AT3,DBF_FLOAT) {
+		prompt("Ampl Thresh Chan 3 V")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(AT4,DBF_FLOAT) {
+		prompt("Ampl Thresh Chan 4 V")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(AT5,DBF_FLOAT) {
+		prompt("Ampl Thresh Chan 5 V")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(AT6,DBF_FLOAT) {
+		prompt("Ampl Thresh Chan 6 V")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(AT7,DBF_FLOAT) {
+		prompt("Ampl Thresh Chan 7 V")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+#
+#  The following eight fields must be kept together to allow access as an array
+#
+	field(AD0,DBF_FLOAT) {
+		prompt("Ampl Data 0")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(AD1,DBF_FLOAT) {
+		prompt("Ampl Data 1")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(AD2,DBF_FLOAT) {
+		prompt("Ampl Data 2")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(AD3,DBF_FLOAT) {
+		prompt("Ampl Data 3")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(AD4,DBF_FLOAT) {
+		prompt("Ampl Data 4")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(AD5,DBF_FLOAT) {
+		prompt("Ampl Data 5")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(AD6,DBF_FLOAT) {
+		prompt("Ampl Data 6")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(AD7,DBF_FLOAT) {
+		prompt("Ampl Data 7")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+#
+	field(ACTL,DBF_USHORT) {
+		prompt("Ampl Mem Ctrl")
+		special(SPC_NOMOD)
+	}
+	field(ASS,DBF_USHORT) {
+		prompt("Ampl Signal Select")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(OASS,DBF_USHORT) {
+		prompt("Old Ampl Sig Select")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(CAF,DBF_UCHAR) {
+		prompt("Clear Ampl Fault")
+		pp(TRUE)
+		interest(2)
+	}
+	field(AHSZ,DBF_ULONG) {
+		prompt("Ampl Hist Buf Size")
+		promptgroup(GUI_COMMON)
+		initial("512")
+	}
+	field(AHFS,DBF_STRING) {
+		prompt("Ampl History File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(GAHS,DBF_UCHAR) {
+		prompt("Get Ampl History")
+		pp(TRUE)
+		interest(2)
+	}
+	field(ASTT,DBF_MENU) {
+		prompt("Ampl Hist Alrm Stat")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+	}
+	field(TFST,DBF_USHORT) {
+		prompt("Thresh Fault Status")
+	}
+	field(AMD,DBF_FLOAT) {
+		prompt("Amplitude Monitor Deadband")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+#
+#  The new IQA module (ver.3) has SCAN mode bit on Amplitude processing
+#  control register.
+#  The new field -AMPM- select the scanning modes (8ch or single channel).
+#    Inserted by KHKIM     October 22, 2002
+	field(AMPM,DBF_UCHAR) {
+		prompt("Amplitude Scan mode - single/8ch")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(2)
+	}
+#  end of modification
+#------------------------------------
+#
+# The new IQA module (ver.3) has First Fault Status register
+#     Inserted by KHKIM    October 31, 2002
+#
+	field(FFLT,DBF_USHORT) {
+		prompt("First Fault Status")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+#
+#------------------------------------
+#
+#  The following 16 fields must be kept together to allow access as an array
+#
+	field(IDT0,DBF_SHORT) {
+		prompt("I Data 0")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(QDT0,DBF_SHORT) {
+		prompt("Q Data 0")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(IDT1,DBF_SHORT) {
+		prompt("I Data 1")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(QDT1,DBF_SHORT) {
+		prompt("Q Data 1")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(IDT2,DBF_SHORT) {
+		prompt("I Data 2")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(QDT2,DBF_SHORT) {
+		prompt("Q Data 2")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(IDT3,DBF_SHORT) {
+		prompt("I Data 3")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(QDT3,DBF_SHORT) {
+		prompt("Q Data 3")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(IDT4,DBF_SHORT) {
+		prompt("I Data 4")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(QDT4,DBF_SHORT) {
+		prompt("Q Data 4")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(IDT5,DBF_SHORT) {
+		prompt("I Data 5")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(QDT5,DBF_SHORT) {
+		prompt("Q Data 5")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(IDT6,DBF_SHORT) {
+		prompt("I Data 6")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(QDT6,DBF_SHORT) {
+		prompt("Q Data 6")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(IDT7,DBF_SHORT) {
+		prompt("I Data 7")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(QDT7,DBF_SHORT) {
+		prompt("Q Data 7")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+#
+	field(SSEM,DBF_LONG) {
+		prompt("Scan semaphore")
+		special(SPC_NOMOD)
+		interest(3)
+        }
+	field(RSEM,DBF_LONG) {
+		prompt("Data Ready semaphore")
+		special(SPC_NOMOD)
+		interest(3)
+        }
+	field(NIQR,DBF_USHORT) {
+		prompt("New I/Q Data Ready")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(IQOW,DBF_USHORT) {
+		prompt("I/Q Data Overwrite")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(IQOF,DBF_USHORT) {
+		prompt("I/Q Data Overflow")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+#  Two consecutive reads each of I and Q are considered equal if they are
+#  within iqed of each other.  To be sure of getting data from the same register
+#  update cycle (as determined by the DDF update rate) set iqed = 0.
+#  This is used by the IQ scan loop.
+	field(IQED,DBF_SHORT) {
+		prompt("I/Q Equivalence Delta")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+#  A monitor is posted for I & Q data if the difference between new data
+#  and what is already in the database is larger than iqmd.
+	field(IQMD,DBF_SHORT) {
+		prompt("I/Q Monitor Deadband")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+	field(DCTL,DBF_USHORT) {
+		prompt("DDF Control")
+		pp(TRUE)
+		interest(2)
+	}
+	field(IQHS,DBF_ULONG) {
+		prompt("I/Q Hist Buf Size")
+		promptgroup(GUI_COMMON)
+		initial("512")
+	}
+	field(IQHF,DBF_STRING) {
+		prompt("I/Q History File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(GIQH,DBF_UCHAR) {
+		prompt("Get I/Q History")
+		pp(TRUE)
+		interest(2)
+	}
+	field(IQST,DBF_MENU) {
+		prompt("I/Q Hist Alrm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+	}
+	field(IQPC,DBF_USHORT) {
+		prompt("I/Q Processing Ctrl")
+		special(SPC_NOMOD)
+	}
+	field(UPDT,DBF_USHORT) {
+		prompt("Update Rate")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+	}
+	field(RLST,DBF_UCHAR) {
+		prompt("Reset Latched Stop Trigger")
+		pp(TRUE)
+		interest(2)
+	}
+	field(IFC,DBF_UCHAR) {
+		prompt("IF Chan Select")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(IFM,DBF_UCHAR) {
+		prompt("IF Mode")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(2)
+	}
+	field(LENB,DBF_UCHAR) {
+		prompt("Link Enable")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		interest(2)
+	}
+#
+#  Following 8 fields to be kept together to allow access as array of filenames
+#
+	field(DCF0,DBF_STRING) {
+		prompt("I/Q DDF Coef File 0")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(DCF1,DBF_STRING) {
+		prompt("I/Q DDF Coef File 1")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(DCF2,DBF_STRING) {
+		prompt("I/Q DDF Coef File 2")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(DCF3,DBF_STRING) {
+		prompt("I/Q DDF Coef File 3")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(DCF4,DBF_STRING) {
+		prompt("I/Q DDF Coef File 4")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(DCF5,DBF_STRING) {
+		prompt("I/Q DDF Coef File 5")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(DCF6,DBF_STRING) {
+		prompt("I/Q DDF Coef File 6")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(DCF7,DBF_STRING) {
+		prompt("I/Q DDF Coef File 7")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+#
+#  The following 8 fields must be kept together to allow access as an array
+#
+	field(LCF0,DBF_UCHAR) {
+		prompt("I/Q Load DDF Coefs 0")
+		pp(TRUE)
+		interest(2)
+	}
+	field(LCF1,DBF_UCHAR) {
+		prompt("I/Q Load DDF Coefs 1")
+		pp(TRUE)
+		interest(2)
+	}
+	field(LCF2,DBF_UCHAR) {
+		prompt("I/Q Load DDF Coefs 2")
+		pp(TRUE)
+		interest(2)
+	}
+	field(LCF3,DBF_UCHAR) {
+		prompt("I/Q Load DDF Coefs 3")
+		pp(TRUE)
+		interest(2)
+	}
+	field(LCF4,DBF_UCHAR) {
+		prompt("I/Q Load DDF Coefs 4")
+		pp(TRUE)
+		interest(2)
+	}
+	field(LCF5,DBF_UCHAR) {
+		prompt("I/Q Load DDF Coefs 5")
+		pp(TRUE)
+		interest(2)
+	}
+	field(LCF6,DBF_UCHAR) {
+		prompt("I/Q Load DDF Coefs 6")
+		pp(TRUE)
+		interest(2)
+	}
+	field(LCF7,DBF_UCHAR) {
+		prompt("I/Q Load DDF Coefs 7")
+		pp(TRUE)
+		interest(2)
+	}
+#
+#  The following 8 fields must be kept together to allow access as an array
+#
+	field(DST0,DBF_MENU) {
+		prompt("DDF Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(DST1,DBF_MENU) {
+		prompt("DDF Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(DST2,DBF_MENU) {
+		prompt("DDF Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(DST3,DBF_MENU) {
+		prompt("DDF Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(DST4,DBF_MENU) {
+		prompt("DDF Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(DST5,DBF_MENU) {
+		prompt("DDF Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(DST6,DBF_MENU) {
+		prompt("DDF Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(DST7,DBF_MENU) {
+		prompt("DDF Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+#
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d37 2
+d111 17
+d332 24
+a355 1
+
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

@@ -1,0 +1,234 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2002.05.14.23.58.15;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Got rid of warnings
+@
+text
+@/*
+** ++
+**  Facility:  MVX - Miscellaneous VxWorks support routines
+**
+**  Abstract:
+**      This file contains Unix entry points for miscellaneous
+**      VxWorks support routines and routines that run under
+**      VxWorks that I feel should have been supplied by Wind River
+**      (maybe this is the wrong file for those?).
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Feedback Project
+**
+**  Revision History:
+**	August 25, 1993 -  Created.
+**   September 13, 1994 -  Added MsgQFlush
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#ifndef VXWORKS
+#  include "vxWorks-unix.h"
+#else
+#  include <vxWorks.h>
+#  include <sysLib.h>
+#  include <msgQLib.h>
+#endif
+#include "genLib.h"
+
+typedef int Status;
+
+
+
+#ifndef VXWORKS
+
+
+Status vxMemProbe (char *adrs,          /* address to be probed          */
+                   int   mode,          /* READ or WRITE                 */
+                   int   length,        /* 1, 2, or 4                    */
+                   char *pVal)          /* Where to return value,        */
+                                        /* or ptr to value to be written */
+/*
+   Description
+   -----------
+   Probe and address for bus error, Unix version.  Doesn't actually
+   detect a bus error, but provides a VxWorks-like entry point.
+
+   Returns
+   -------
+   OK
+*/
+{
+  if (mode == READ)
+  {
+    switch (length)
+    {
+    case 1:
+      *((unsigned char *)  pVal) = *((unsigned char *)  adrs);
+      break;
+
+    case 2:
+      if ((long) adrs & 1) return (ERROR);
+      *((unsigned short *) pVal) = *((unsigned short *) adrs);
+      break;
+
+    case 4:
+      if ((long) adrs & 1) return (ERROR);
+      *((unsigned long *)  pVal) = *((unsigned long *)  adrs);
+      break;
+
+    default:
+      return (ERROR);
+    }
+  }
+  else if (mode == WRITE)
+  {
+    switch (length)
+    {
+    case 1:
+      *((unsigned char *)  adrs) = *((unsigned char *)  pVal);
+      break;
+
+    case 2:
+      if ((long) adrs & 1) return (ERROR);
+      *((unsigned short *) adrs) = *((unsigned short *) pVal);
+      break;
+
+    case 4:
+      if ((long) adrs & 1) return (ERROR);
+      *((unsigned long *)  adrs) = *((unsigned long *)  pVal);
+      break;
+
+    default:
+      return (ERROR);
+    }
+  }
+  else return (ERROR);
+
+  return (OK);
+}
+
+
+#else
+
+
+
+void MsgQFlush (MSG_Q_ID  msgQue)
+/*
+   Description
+   -----------
+   Routine to remove all messages from a message queue by receiving each one
+   of them and pitching them in the bit bucket.
+
+   Seems to me this is a missing msgLib routine.
+   Need to do this in order to deallocate pkt memory.
+
+   Parameters
+   ----------
+       msgQue - The message queue to flush
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Receive messages from the message queue until it is empty */
+  while (msgQReceive (msgQue, NIL, NULL, 1 * sysClkRateGet ()) != ERROR)  {}
+}
+
+
+#endif
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d55 1
+a55 11
+
+#define NIL   (void *)(0)
+#define NULL           0
+#define TRUE           1
+#define FALSE          0
+#define SUCCESS        0
+#define FAILURE        1
+
+#define Min(a,b)       ((a) < (b) ? (a) : (b))
+#define Max(a,b)       ((a) > (b) ? (a) : (b))
+#define lsizeof(var)   (sizeof(var) >> 2)
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

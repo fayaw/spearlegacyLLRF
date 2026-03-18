@@ -1,0 +1,181 @@
+head	1.6;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.6
+	RF-SPEAR-R0-3-1:1.6
+	RF-SPEAR-R0-3-0:1.6
+	RF-SPEAR-R0-2-0:1.6
+	RF-SPEAR-R0-1-0:1.6
+	RF-SPEAR-R0-0-3:1.5
+	RF-SPEAR-R0-0-2:1.4
+	RF-SPEAR-R0-0-1:1.4
+	RF-SPEAR-R0-0-0:1.4
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.4
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.6
+date	2014.10.02.21.36.03;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2014.06.30.17.10.08;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2012.07.20.21.16.00;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2012.05.14.17.55.53;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2012.02.07.02.13.21;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2010.08.27.22.43.47;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2010.08.27.22.43.47;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.6
+log
+@Correct location.
+@
+text
+@#==============================================================================
+#
+# Abs:  Macros for SPEAR RF test records
+#
+# Name:  srf2.substitutions
+#
+#==============================================================================
+#
+file rf_ab_4CV.db      
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+file rf_analog_All.db  
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+file rf_analog_4CV.db  
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+file rf_beam_spear.db  
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2, PS=RF-SOLN-MAIN}}
+file rf_dac.db         
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+file rf_digital_All.db 
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+file rf_digital_4CV.db 
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+file rf_iqa_All.db     
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+file rf_iqa_4CV.db     
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+file rf_stn_All.db     
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2, PS=RF-SOLN-MAIN}}
+file rf_stn_4CVAll.db  
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2, PS=RF-SOLN-MAIN}}
+file rf_temp_All.db    
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+file rf_temp_4CV.db    
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+file rf_vxi_modules_All.db 
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+file rf_vxi_modules_4CV.db 
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+file crat_vxi_13slot.db
+{
+   pattern { dev       , stn  , man  , location       , slot0      , slot1        ,  slot2  , slot3 , slot4           , slot5         , slot6           , slot7  , slot8 , slot9  , slot10 , slot11 , slot12          }
+           { 137-VXI1  , SRF2 , HP   , B034-250     ,"IOC-B34-MG02", "AB Scanner" , "Clock" , ""    , "RF Processing" , "MPS Shutoff" , "Link Passthru" , "IQA1" , ""    , "IQA2" , ""     , "IQA3" , "Arc Interlock" }
+}
+@
+
+
+1.5
+log
+@118-PSD4 is no longer supported.  Use RF-SOLN-MAIN for now.
+@
+text
+@d42 1
+a42 1
+           { 137-VXI1  , SRF2 , HP   , B137-242       , "B6-IOC8"   , "AB Scanner" , "Clock" , ""    , "RF Processing" , "MPS Shutoff" , "Link Passthru" , "IQA1" , ""    , "IQA2" , ""     , "IQA3" , "Arc Interlock" }
+@
+
+
+1.4
+log
+@Add crate information required by IOCManager displays and new ALH.
+@
+text
+@d16 1
+a16 1
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2, PS=118-PSD4}}
+d28 1
+a28 1
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2, PS=118-PSD4}}
+d30 1
+a30 1
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2, PS=118-PSD4}}
+@
+
+
+1.3
+log
+@Add PS macro needed for adding EPSC temp to temp summaries.
+@
+text
+@d39 5
+@
+
+
+1.2
+log
+@Add PS macro for rf main solenoid EPSC device name.
+@
+text
+@d16 1
+a16 1
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d28 1
+a28 1
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+d30 1
+a30 1
+{{RRRS=SRF2, RNG=SPEAR, ID=2, REG=2}}
+@
+
+
+1.1.1.1
+log
+@IOC databases.
+@
+text
+@@

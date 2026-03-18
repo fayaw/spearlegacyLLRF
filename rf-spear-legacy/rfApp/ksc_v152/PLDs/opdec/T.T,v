@@ -1,0 +1,215 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.18.20.23.48;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.18.20.23.48;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Project Information                          c:\pl\v150pl\altera\opdec\top.rpt
+
+MAX+plus II Compiler Report File
+Version 6.1 02/28/96
+Compiled: 05/20/96 09:30:24
+
+Copyright (c) 1996 by Altera Corporation.  All rights reserved.  This text
+contains proprietary, confidential information of Altera Corporation, and
+may be used, copied, and/or disclosed only pursuant to the terms of a
+valid software license agreement with Altera Corporation.  This copyright
+notice must be retained as part of this text at all times.
+
+
+
+***** Project compilation was successful
+
+
+
+
+** DEVICE SUMMARY **
+
+Chip/                     Input   Output   Bidir         Shareable
+POF       Device          Pins    Pins     Pins     LCs  Expanders  % Utilized
+
+top       EPM7096QC100-15  44       4        0      45      21          46 %
+
+User Pins:                 44       4        0  
+
+
+
+
+Device-Specific Information:                 c:\pl\v150pl\altera\opdec\top.rpt
+top
+Device: EPM7096QC100-15
+Turbo: ON
+Security: OFF
+                    /                                      
+                    W                                      
+                    T                                      
+                    _                                      
+                    E                       R R     R R R  
+                    X                       E E     E E E  
+                    T         /     /       S S     S S S  
+                    E         W     R       E E     E E E  
+                  I N     N I R     E       R R N   R R R  
+                  D D   G . D I V G S G G G V V . V V V V  
+                  1 E A N C 1 T C N E N N N E E C C E E E  
+                  5 D 8 D . 4 E C D T D D D D D . C D D D  
+                ------------------------------------------_ 
+               / 100  98  96  94  92  90  88  86  84  82   |_ 
+              /     99  97  95  93  91  89  87  85  83  81    | 
+         A24 |  1                                          80 | RESERVED 
+         AM5 |  2                                          79 | RESERVED 
+         AM4 |  3                                          78 | RESERVED 
+         AM3 |  4                                          77 | RESERVED 
+         VCC |  5                                          76 | GND 
+         /DS |  6                                          75 | RESERVED 
+         AM1 |  7                                          74 | XMT_DATA 
+         AM0 |  8                                          73 | RESERVED 
+        N.C. |  9                                          72 | N.C. 
+         ID4 | 10                                          71 | LWORD_DIR 
+         A15 | 11                                          70 | RESERVED 
+         ID3 | 12                                          69 | RESERVED 
+         GND | 13                                          68 | VCC 
+         ID2 | 14                                          67 | RESERVED 
+         A21 | 15                                          66 | RESERVED 
+         ID1 | 16             EPM7096QC100-15              65 | RESERVED 
+    DRV_BBSY | 17                                          64 | XMT_ADDR 
+         ID0 | 18                                          63 | RESERVED 
+      /DTACK | 19                                          62 | RESERVED 
+         VCC | 20                                          61 | GND 
+         A30 | 21                                          60 | RESERVED 
+         ID6 | 22                                          59 | XMT_STB 
+       /BERR | 23                                          58 | RESERVED 
+        N.C. | 24                                          57 | N.C. 
+          A9 | 25                                          56 | RESERVED 
+         A26 | 26                                          55 | A27 
+         A31 | 27                                          54 | A28 
+         GND | 28                                          53 | VCC 
+         A10 | 29                                          52 | RESERVED 
+         A22 | 30                                          51 | A29 
+             |      32  34  36  38  40  42  44  46  48  50  _| 
+              \   31  33  35  37  39  41  43  45  47  49   | 
+               \------------------------------------------- 
+                  I A A I A V N A I G V A / N G R R A R A  
+                  D 1 1 D 1 C . 1 D N C 2 A . N E E M E 2  
+                  7 1 2 8 3 C C 4 5 D C 5 S C D S S 2 S 3  
+                              .             .   E E   E    
+                                                R R   R    
+                                                V V   V    
+                                                E E   E    
+                                                D D   D    
+
+Device-Specific Information:                 c:\pl\v150pl\altera\opdec\top.rpt
+top
+
+** INPUTS **
+
+                                         Shareable
+                                         Expanders     Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared n/a INP  FBK  OUT  FBK  Name
+   8    (1)  (A)      INPUT              0      0   0    0    0    2    2  AM0
+   7    (3)  (A)      INPUT              0      0   0    0    0    2    2  AM1
+  48   (54)  (D)      INPUT              0      0   0    0    0    2    0  AM2
+   4    (5)  (A)      INPUT              0      0   0    0    0    2    2  AM3
+   3    (6)  (A)      INPUT              0      0   0    0    0    2    2  AM4
+   2    (8)  (A)      INPUT              0      0   0    0    0    2    2  AM5
+  43   (51)  (D)      INPUT              0      0   0    0    0    3    0  /AS
+  98   (13)  (A)      INPUT              0      0   0    0    0    0    2  A8
+  25   (48)  (C)      INPUT              0      0   0    0    0    0    1  A9
+  29   (44)  (C)      INPUT              0      0   0    0    0    0    1  A10
+  32   (40)  (C)      INPUT              0      0   0    0    0    0    1  A11
+  33   (38)  (C)      INPUT              0      0   0    0    0    0    1  A12
+  35   (36)  (C)      INPUT              0      0   0    0    0    0    1  A13
+  38   (35)  (C)      INPUT              0      0   0    0    0    0    1  A14
+  11   (30)  (B)      INPUT              0      0   0    0    0    0    1  A15
+  15   (27)  (B)      INPUT              0      0   0    0    0    0    1  A21
+  30   (43)  (C)      INPUT              0      0   0    0    0    0    1  A22
+  50   (57)  (D)      INPUT              0      0   0    0    0    0    1  A23
+   1    (9)  (A)      INPUT              0      0   0    0    0    0    2  A24
+  42   (49)  (D)      INPUT              0      0   0    0    0    0    1  A25
+  26   (46)  (C)      INPUT              0      0   0    0    0    0    1  A26
+  55   (62)  (D)      INPUT              0      0   0    0    0    0    1  A27
+  54   (61)  (D)      INPUT              0      0   0    0    0    0    1  A28
+  51   (59)  (D)      INPUT              0      0   0    0    0    0    1  A29
+  21   (20)  (B)      INPUT              0      0   0    0    0    0    1  A30
+  27   (45)  (C)      INPUT              0      0   0    0    0    0    1  A31
+  23   (17)  (B)      INPUT              0      0   0    0    0    1    0  /BERR
+  17   (24)  (B)      INPUT              0      0   0    0    0    1    0  DRV_BBSY
+   6    (4)  (A)      INPUT              0      0   0    0    0    2    2  /DS
+  19   (21)  (B)      INPUT              0      0   0    0    0    1    0  /DTACK
+  18   (22)  (B)      INPUT              0      0   0    0    0    0    3  ID0
+  16   (25)  (B)      INPUT              0      0   0    0    0    0    3  ID1
+  14   (28)  (B)      INPUT              0      0   0    0    0    0    3  ID2
+  12   (29)  (B)      INPUT              0      0   0    0    0    0    2  ID3
+  10   (32)  (B)      INPUT              0      0   0    0    0    0    2  ID4
+  39   (33)  (C)      INPUT              0      0   0    0    0    0    2  ID5
+  22   (19)  (B)      INPUT              0      0   0    0    0    0    2  ID6
+  31   (41)  (C)      INPUT              0      0   0    0    0    0    2  ID7
+  34   (37)  (C)      INPUT              0      0   0    0    0    0    3  ID8
+  95   (14)  (A)      INPUT              0      0   0    0    0    0   22  ID14
+ 100   (11)  (A)      INPUT              0      0   0    0    0    0   22  ID15
+  91      -   -       INPUT              0      0   0    0    0    0    0  /RESET
+  94   (16)  (A)      INPUT              0      0   0    0    0    1    0  /WRITE
+  99   (12)  (A)      INPUT              0      0   0    0    0    0   22  /WT_EXTENDED
+
+Device-Specific Information:                 c:\pl\v150pl\altera\opdec\top.rpt
+top
+
+** OUTPUTS **
+
+                                         Shareable
+                                         Expanders     Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared n/a INP  FBK  OUT  FBK  Name
+  71     80    E     OUTPUT     t        4      4   0    7    1    0    0  LWORD_DIR
+  64     72    E     OUTPUT     t        4      4   0    7    1    0    0  XMT_ADDR
+  74     83    F     OUTPUT     t        0      0   0    2    2    0    0  XMT_DATA
+  59     67    E     OUTPUT   s t        0      0   0    5    1    4    0  XMT_STB
+
+
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

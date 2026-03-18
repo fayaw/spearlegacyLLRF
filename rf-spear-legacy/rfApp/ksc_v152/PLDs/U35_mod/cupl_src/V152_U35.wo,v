@@ -1,0 +1,83 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.10.02.02.14.02;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.10.02.02.14.02;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#WAVEFORM
+#H Name     v152_u35;
+#H PartNo   ATF16V8B-10SC;
+#H Date     9-22-2003;
+#H Revision A;
+#H Designer John Dusatko;
+#H Company  SLAC;
+#H Assembly None;
+#E 0025 
+
+#H Location Stanford;
+#H Device   G16V8as;
+#H 
+#H 
+#H ORDER: vmds0_n, vmds1_n, d16_isel, vxds1_n, vxds0_n, vmas_n, vxas_n, vmwrite_n, vxwrite_n, dir, g_n, dir_out, sp1, sp2, sp3, sout, d8_read; 
+#H 
+#H 
+#V 0001 110HH0L1H00L000LL
+#V 0002 010HL0L1H10H100HH
+#V 0003 100LH0L1H01H010HL
+#V 0004 000LL0L1H11H001HL
+#V 0005 111HH0L1H10H000LL
+#V 0006 011LL0L0L10H000LL
+#V 0007 101HH1H1H11H000LL
+#V 0008 001LL1H1H11H000LL
+#V 0009 000LL0L1H00L000LL
+#V 0010 010HL1H0L10H000LL
+#V 0011 010HL0L1H10H000LH
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

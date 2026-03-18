@@ -1,0 +1,225 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.18.20.23.42;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.18.20.23.42;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 1
+The length of the symbol table is: 13
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+
+The number of name info structs is : 158
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	IdL3	!	19	15	:100	"X
+#	IdL3	!	19	15	:101	"Y
+$	IdL3	!	19	7	:102	"Z
+%	IdL3	!	19	7	:103	"[
+&	IdL3	!	20	15	:104	"\
+'	IdL3	!	20	15	:105	"]
+(	IdL3	!	20	15	:106	"^
+)	IdL3	!	20	15	:107	"_
+*	IdL3	!	20	15	:108	"`
++	IdL3	!	20	15	:109	"a
+,	IdL3	!	20	15	:110	"b
+-	IdL3	!	20	15	:111	"c
+.	IdL3	!	20	15	:112	"d
+/	IdL3	!	20	7	:113	"e
+0	IdL3	!	20	7	:114	"f
+1	IdL3	!	21	15	:115	"g
+2	IdL3	!	21	15	:116	"h
+3	IdL3	!	21	15	:117	"i
+4	IdL3	!	21	15	:118	"j
+5	IdL3	!	21	15	:119	"k
+6	IdL3	!	21	15	:120	"l
+7	IdL3	!	21	15	:121	"m
+8	IdL3	!	21	15	:122	"n
+9	IdL3	!	21	15	:123	"o
+:	IdL3	!	21	7	:124	"p
+;	IdL3	!	21	7	:125	"q
+<	IdL3	!	23	21	:126	"r
+=	IdL3	!	23	21	:127	"s
+>	IdL3	!	23	21	:128	"t
+?	IdL3	!	23	21	:129	"u
+@@	IdL3	!	23	21	:130	"v
+A	IdL3	!	23	21	:131	"w
+B	IdL3	!	23	21	:132	"x
+C	IdL3	!	23	21	:133	"y
+D	IdL3	!	23	21	:134	"z
+E	IdL3	!	24	15	:135	"{
+F	IdL3	!	24	15	:136	"|
+G	IdL3	!	24	15	:137	"}
+H	IdL3	!	24	15	:138	"~
+I	IdL3	!	24	15	:139	#!
+J	IdL3	!	24	15	:140	#"
+K	IdL3	!	24	15	:141	##
+L	IdL3	!	24	15	:142	#$
+M	IdL3	!	24	7	:143	#%
+N	IdL3	!	24	7	:144	#&
+O	IdL3	!	24	7	:145	#'
+P	IdL3	!	25	15	:146	#(
+Q	IdL3	!	25	15	:147	#)
+R	IdL3	!	25	15	:148	#*
+S	IdL3	!	25	15	:149	#+
+T	IdL3	!	25	15	:150	#,
+U	IdL3	!	25	15	:151	#-
+V	IdL3	!	25	15	:152	#.
+W	IdL3	!	25	15	:153	#/
+X	IdL3	!	25	7	:154	#0
+Y	IdL3	!	25	7	:155	#1
+Z	IdL3	!	26	15	:156	#2
+[	IdL3	!	26	15	:157	#3
+\	IdL3	!	26	15	:158	#4
+]	IdL3	!	26	15	:159	#5
+^	IdL3	!	26	15	:160	#6
+_	IdL3	!	26	15	:161	#7
+`	IdL3	!	26	15	:162	#8
+a	IdL3	!	26	15	:163	#9
+b	IdL3	!	26	7	:164	#:
+c	IdL3	!	26	7	:165	#;
+d	IdL3	!	27	15	:166	#<
+e	IdL3	!	27	15	:167	#=
+f	IdL3	!	27	15	:168	#>
+g	IdL3	!	27	15	:169	#?
+h	IdL3	!	27	15	:170	#@@
+i	IdL3	!	27	15	:171	#A
+j	IdL3	!	27	15	:172	#B
+k	IdL3	!	27	7	:173	#C
+l	IdL3	!	27	7	:174	#D
+m	IdL3	!	28	15	:175	#E
+n	IdL3	!	28	15	:176	#F
+o	IdL3	!	28	15	:177	#G
+p	IdL3	!	28	15	:178	#H
+q	IdL3	!	28	15	:179	#I
+r	IdL3	!	28	15	:180	#J
+s	IdL3	!	28	15	:181	#K
+t	IdL3	!	28	7	:182	#L
+u	IdL3	!	28	7	:183	#M
+v	IdL3	!	13	21	:36	v
+w	IdL3	!	13	21	:37	w
+x	IdL3	!	13	21	:38	x
+y	IdL3	!	13	21	:39	y
+z	IdL3	!	13	21	:40	z
+{	IdL3	!	13	21	:41	{
+|	IdL3	!	13	21	:42	|
+}	IdL3	!	13	21	:43	}
+~	IdL3	!	13	21	:44	~
+"!	IdL3	!	14	15	:45	"!
+""	IdL3	!	14	15	:46	""
+"#	IdL3	!	14	15	:47	"#
+"$	IdL3	!	14	15	:48	"$
+"%	IdL3	!	14	15	:49	"%
+"&	IdL3	!	14	15	:50	"&
+"'	IdL3	!	14	15	:51	"'
+"(	IdL3	!	14	15	:52	"(
+")	IdL3	!	14	7	:53	")
+"*	IdL3	!	14	7	:54	"*
+"+	IdL3	!	14	7	:55	"+
+",	IdL3	!	16	21	:56	",
+"-	IdL3	!	16	21	:57	"-
+".	IdL3	!	16	21	:58	".
+"/	IdL3	!	16	21	:59	"/
+"0	IdL3	!	16	21	:60	"0
+"1	IdL3	!	16	21	:61	"1
+"2	IdL3	!	16	21	:62	"2
+"3	IdL3	!	16	21	:63	"3
+"4	IdL3	!	16	21	:64	"4
+"5	IdL3	!	16	21	:65	"5
+"6	IdL3	!	16	21	:66	"6
+"7	IdL3	!	17	15	:67	"7
+"8	IdL3	!	17	15	:68	"8
+"9	IdL3	!	17	15	:69	"9
+":	IdL3	!	17	15	:70	":
+";	IdL3	!	17	15	:71	";
+"<	IdL3	!	17	15	:72	"<
+"=	IdL3	!	17	15	:73	"=
+">	IdL3	!	17	15	:74	">
+"?	IdL3	!	17	15	:75	"?
+"@@	IdL3	!	17	15	:76	"@@
+"A	IdL3	!	17	7	:77	"A
+"B	IdL3	!	17	7	:78	"B
+"C	IdL3	!	17	7	:79	"C
+"D	IdL3	!	18	15	:80	"D
+"E	IdL3	!	18	15	:81	"E
+"F	IdL3	!	18	15	:82	"F
+"G	IdL3	!	18	15	:83	"G
+"H	IdL3	!	18	15	:84	"H
+"I	IdL3	!	18	15	:85	"I
+"J	IdL3	!	18	15	:86	"J
+"K	IdL3	!	18	15	:87	"K
+"L	IdL3	!	18	15	:88	"L
+"M	IdL3	!	18	15	:89	"M
+"N	IdL3	!	18	7	:90	"N
+"O	IdL3	!	18	7	:91	"O
+"P	IdL3	!	19	15	:92	"P
+"Q	IdL3	!	19	15	:93	"Q
+"R	IdL3	!	19	15	:94	"R
+"S	IdL3	!	19	15	:95	"S
+"T	IdL3	!	19	15	:96	"T
+"U	IdL3	!	19	15	:97	"U
+"V	IdL3	!	19	15	:98	"V
+"W	IdL3	!	19	15	:99	"W
+"X	IdLM	!	13	2	A16_AMCODE	s
+"Y	IdLM	!	16	2	A24_AMCODE	t
+"Z	IdLM	!	23	2	A32_AMCODE	u
+"[	IdLL	!	5	4	AM0	r
+"\	IdLL	!	5	4	AM1	q
+"]	IdLL	!	5	4	AM2	p
+"^	IdLL	!	5	4	AM3	o
+"_	IdLL	!	5	4	AM4	n
+"`	IdLL	!	5	4	AM5	m
+"a	$rX8+	!	AM[5..0]	#N
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

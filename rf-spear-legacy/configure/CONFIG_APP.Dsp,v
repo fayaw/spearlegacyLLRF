@@ -1,0 +1,58 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	RF-SPEAR-R0-0-0:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2008.09.30.16.57.55;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Rules for compiling RF IOC DSP code - used by rfApp only.
+@
+text
+@DSP_AR   = $(DSP_DIR)/ar1600
+DSP_AS   = $(DSP_DIR)/as1600
+DSP_CMD  = $(DSP_DIR)/cmd1610
+DSP_CPP  = $(DSP_DIR)/cpp16
+DSP_HEAD = $(DSP_DIR)/head1600
+DSP_LD   = $(DSP_DIR)/ld1600
+DSP_LIST = $(DSP_DIR)/list1600
+
+#    Include files
+DSP_INCLUDES = -I$(DSP_DIR)
+
+DSP_ASFLAGS = -r $(USR_INCLUDES) $(DSP_INCLUDES) $(USR_ASFLAGS)
+
+DSP_LDFLAGS = $(USR_LDFLAGS)
+DSP_LDLIBS  = $(USR_LDLIBS)
+DSP_DEPLIBS = $(USR_DEPLIBS)
+
+# Build compile line here
+COMPILE.s = $(DSP_AS) $(DSP_ASFLAGS) $(CPPFLAGS)
+LINK.s    = $(DSP_LD) $(DSP_LDFLAGS)
+
+DEPENDS_RULE.s = $(COMPILE.c) $(DSP_ASFLAGS) -M $(SRCS.s) >> .DEPENDS
+@

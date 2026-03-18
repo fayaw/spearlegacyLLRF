@@ -1,0 +1,120 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-14-11:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2015.08.11.23.57.03;	author jpdef;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2011.12.05.00.11.18;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2011.12.05.00.11.18;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@added .cram package info so app can be deployed with cram
+@
+text
+@TOP=../../..
+include $(TOP)/configure/CONFIG
+
+TGT_DIR = $(VX_DIR)/target/config/mv2400
+
+DBD += rf.dbd
+PROD_IOC_vxWorks = rf
+SCRIPTS_IOC_vxWorks += $(TGT_DIR)/vxWorks
+SCRIPTS_IOC_vxWorks += $(TGT_DIR)/vxWorks.sym
+SCRIPTS_IOC_vxWorks += $(TGT_DIR)/V152/resman.o
+SCRIPTS_IOC_vxWorks += $(TGT_DIR)/V152/nivxi.o
+
+rf_DBD  += base.dbd
+#
+# VXI Driver support
+# Note: the drvVxi must come
+# before any VXI driver support.
+# This is so that the
+# resman VXI initialization
+# in drvEpvxi is exectued
+# prior to any other VXI support.
+rf_DBD += epvxi.dbd
+rf_DBD += devIocStats.dbd
+rf_DBD += devABBINARY.dbd
+rf_DBD += devABStatus.dbd
+rf_DBD += devABSLCDCM.dbd
+rf_DBD += devABDCM.dbd
+rf_DBD += devSmAB1746Hstp.dbd
+rf_DBD += drvAB.dbd
+rf_DBD += dbRestore.dbd
+rf_DBD += rfSeq.dbd
+rf_DBD += rfDb.dbd
+rf_DBD += rfBase.dbd
+
+rf_LIBS += rfSeq
+rf_LIBS += rfDiag 
+rf_LIBS += rfDb
+rf_LIBS += rfBase
+rf_LIBS += allenBradley
+rf_LIBS += stepper
+rf_LIBS += epvxi
+rf_LIBS += restore
+rf_LIBS += devIocStats
+rf_LIBS += seq pv
+rf_LIBS += $(EPICS_BASE_IOC_LIBS)
+
+# add locally compiled object code
+# <name>_registerRecordDeviceDriver.cpp will be created from <name>.dbd
+rf_SRCS += rf_registerRecordDeviceDriver.cpp
+rf_SRCS_DEFAULT += rfMain.cpp
+
+# The following adds support from base/src/vxWorks
+rf_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
+
+include $(TOP)/configure/RULES
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d33 1
+@
+
+
+1.1.1.1
+log
+@Files to build a 3.14.11 rf.munch file.
+@
+text
+@@

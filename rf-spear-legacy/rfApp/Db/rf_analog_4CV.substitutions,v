@@ -1,0 +1,314 @@
+head	1.11;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.11
+	RF-SPEAR-R0-3-1:1.11
+	RF-SPEAR-R0-3-0:1.11
+	RF-SPEAR-R0-2-0:1.11
+	RF-SPEAR-R0-1-0:1.11
+	RF-SPEAR-R0-0-3:1.10
+	RF-SPEAR-R0-0-2:1.10
+	RF-SPEAR-R0-0-1:1.10
+	RF-SPEAR-R0-0-0:1.10
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.10
+	RF-3-13-10:1.10.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.9
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.7
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.5;
+locks; strict;
+comment	@# @;
+
+
+1.11
+date	2015.02.10.22.57.35;	author saa;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2011.11.10.23.20.35;	author saa;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2011.04.25.22.36.53;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2010.11.13.02.30.28;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2010.02.08.22.02.26;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2009.12.12.00.13.41;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2008.11.17.17.51.07;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2008.05.19.15.46.05;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.06.21.21.40.04;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2004.06.15.01.03.23;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.47.52;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.11
+log
+@Increase yellow high alarm limit for window infrared temp by 1C from 90 to 91C.
+Per Jim Sebek:
+The cavity D window is known to operate at a higher temperature than that of the
+other cavities.  The window temperature depends on both the electric field at
+the window and the window coating.  The cavity D window was replaced at the same
+time that the Cavity C window was replaced at the end of the 2011 run.  The
+procedure for the coating of the new windows had changed, changing the
+conductivity and increasing the temperature.  The temperatures rise to this
+level each time there is a low alpha run as can be seem from the history buffers
+from last year.  These elevated temperatures are still below the values of
+150degC to which the windows were tested.  If we continue low alpha runs, we
+should change the warning limits of the PVs.
+@
+text
+@#==============================================================
+#
+# Abs:  Database template for RF 4-cavity station Analog Inputs
+#
+# Name: rf_analog_4CV.substitutions
+#
+# Desc:  EPICS database template file for RF 4CV PLC 
+#        analog inputs and associated interlocks
+#
+# Side:  None
+#
+# Facility: SLAC/PEPII Low-Level RF 
+#
+# Auth: dd-mmm-yyyy, Stephanie Allison (SAA)
+# Rev:  dd-mmm-yyyy, First Lastname  (USERNAME)
+#==============================================================
+#
+# Mod:
+#       06-Feb-2002, K. Luchini (LUCHINI):
+#         Added standard header and obtained
+#         db files from the top level db directory
+#         instead of epicsApp/Db
+#
+#==============================================================
+#
+file rf_analog.db
+{
+#	                                                                                                                   LIM AN LL UL LT FR LL UL  
+#	   STN     COMP Quantity   Group Next Description        HOPR HIHI HIGH LOPR LOLO LOW  EGUF EGUL EGU   PREC HYST MDEL TBL WD WD WD WD WD BT BT 
+  pattern { S     , C  ,   Q       , G  , N  ,     D            , HO , HH , HI , LO , LL , LW , EF , EL , E      ,P, H  , M  , T, W, WW,WU,WL,WF,BL,BU }
+	  {$(RRRS),CAV3,TUNR:POSN  ,TUNR,SUMY,"Tuner Position"  , 20 , 18 , 18 ,-30 ,-28 ,-28 , 51 ,-153,mm      ,2,0.03,0.03, 5,20, 32,33,13,28, 0, 1 }
+	  {$(RRRS),CAV3,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 100, 95 , 91 , 0  , 20 , 25 , 500,-500,C       ,1,1   ,0.1 , 5,23, 38,39,13,28, 6, 7 }
+
+	  {$(RRRS),CAV4,TUNR:POSN  ,TUNR,SUMY,"Tuner Position"  , 20 , 18 , 18 ,-30 ,-28 ,-28 , 51 ,-153,mm      ,2,0.03,0.03, 5,24, 40,41,13,28, 8, 9 }
+	  {$(RRRS),CAV4,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 100, 95 , 91 , 0  , 20 , 25 , 500,-500,C       ,1,1   ,0.1 , 5,27, 46,47,13,28,14,15 }
+}
+file rf_analog_log.db
+{
+#	                                               EXP                 EXP             EGUF            PREC     2ND  LIM AN LL UL LT FR LL UL  
+#	   STN     COMP Quantity Group  Description      HOPR HOPR HIHI HIGH LOPR LOPR LOLO LOW  EGUL CONV EGU   MDEL  STAT TBL WD WD WD WD WD BT BT 
+  pattern { S     , C  ,   Q     , G ,    D              ,HOE, HO,  HH  , HI ,LOE, LO  ,LL, LW,EF, EL, CV,  E  ,P, M  , S2  ,T, W, WW,WU,WL,WF,BL,BU }
+  	  {$(RRRS),CAV3,:VACM    ,VACM,"Vacuum"          ,-6,1E-6,2.5E-8,1E-8,-12,1E-12,-1,-1, -2,-22, 1 ,Torr ,9,.005,TIMED,5,21, 34,35,13,28, 2, 3 }
+  	  {$(RRRS),CAV3,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 20 , 2 , 5   ,.5,.5, 10,-10,.01, uA  ,2,0.02,STAT ,5,22, 36,37,13,28, 4, 5 }
+                               
+  	  {$(RRRS),CAV4,:VACM    ,VACM,"Vacuum"          ,-6,1E-6,2.5E-8,1E-8,-12,1E-12,-1,-1, -2,-22, 1 ,Torr ,9,.005,TIMED,5,25, 42,43,13,28,10,11 }
+  	  {$(RRRS),CAV4,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 20 , 2 , 5   ,.5,.5, 10,-10,.01, uA  ,2,0.02,STAT ,5,26, 44,45,13,28,12,13 }
+}
+@
+
+
+1.10
+log
+@Jim Sebek changed high alarm limits for the cavity window infrared temps.
+@
+text
+@d32 1
+a32 1
+	  {$(RRRS),CAV3,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 100, 95 , 90 , 0  , 20 , 25 , 500,-500,C       ,1,1   ,0.1 , 5,23, 38,39,13,28, 6, 7 }
+d35 1
+a35 1
+	  {$(RRRS),CAV4,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 100, 95 , 90 , 0  , 20 , 25 , 500,-500,C       ,1,1   ,0.1 , 5,27, 46,47,13,28,14,15 }
+@
+
+
+1.9
+log
+@Reduce ion pump yellow high limits from 300 to 20 uA per Mike Nalls.
+@
+text
+@d32 1
+a32 1
+	  {$(RRRS),CAV3,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  , 20 , 25 , 500,-500,C       ,1,1   ,0.1 , 5,23, 38,39,13,28, 6, 7 }
+d35 1
+a35 1
+	  {$(RRRS),CAV4,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  , 20 , 25 , 500,-500,C       ,1,1   ,0.1 , 5,27, 46,47,13,28,14,15 }
+@
+
+
+1.8
+log
+@Change EGU for ion pump currents from McAmp to uA to be consistent with the
+SPEAR control system.
+@
+text
+@d43 1
+a43 1
+  	  {$(RRRS),CAV3,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.01, uA  ,2,0.02,STAT ,5,22, 36,37,13,28, 4, 5 }
+d46 1
+a46 1
+  	  {$(RRRS),CAV4,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.01, uA  ,2,0.02,STAT ,5,26, 44,45,13,28,12,13 }
+@
+
+
+1.7
+log
+@Changes to add low limits to all temperatures.
+@
+text
+@d43 1
+a43 1
+  	  {$(RRRS),CAV3,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.01,McAmp,2,0.02,STAT ,5,22, 36,37,13,28, 4, 5 }
+d46 1
+a46 1
+  	  {$(RRRS),CAV4,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.01,McAmp,2,0.02,STAT ,5,26, 44,45,13,28,12,13 }
+@
+
+
+1.6
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@d32 1
+a32 1
+	  {$(RRRS),CAV3,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  ,-501,-501, 500,-500,C       ,1,1   ,0.1 , 5,23, 38,39,13,28, 6, 7 }
+d35 1
+a35 1
+	  {$(RRRS),CAV4,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  ,-501,-501, 500,-500,C       ,1,1   ,0.1 , 5,27, 46,47,13,28,14,15 }
+@
+
+
+1.5
+log
+@Change ion pump conversion for new ion pumps - per Jim Sebek.
+@
+text
+@d5 1
+a5 1
+# Name: RRRS_analog_4CV.template
+d26 1
+a26 1
+file db/rf_analog.db
+d29 4
+a32 4
+#	   STN  COMP Quantity   Group Next Description        HOPR HIHI HIGH LOPR LOLO LOW  EGUF EGUL EGU   PREC HYST MDEL TBL WD WD WD WD WD BT BT 
+  pattern { S  , C  ,   Q       , G  , N  ,     D            , HO , HH , HI , LO , LL , LW , EF , EL , E      ,P, H  , M  , T, W, WW,WU,WL,WF,BL,BU }
+	  {RRRS,CAV3,TUNR:POSN  ,TUNR,SUMY,"Tuner Position"  , 20 , 18 , 18 ,-30 ,-28 ,-28 , 51 ,-153,mm      ,2,0.03,0.03, 5,20, 32,33,13,28, 0, 1 }
+	  {RRRS,CAV3,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  ,-501,-501, 500,-500,C       ,1,1   ,0.1 , 5,23, 38,39,13,28, 6, 7 }
+d34 2
+a35 2
+	  {RRRS,CAV4,TUNR:POSN  ,TUNR,SUMY,"Tuner Position"  , 20 , 18 , 18 ,-30 ,-28 ,-28 , 51 ,-153,mm      ,2,0.03,0.03, 5,24, 40,41,13,28, 8, 9 }
+	  {RRRS,CAV4,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  ,-501,-501, 500,-500,C       ,1,1   ,0.1 , 5,27, 46,47,13,28,14,15 }
+d37 1
+a37 1
+file db/rf_analog_log.db
+d40 4
+a43 4
+#	   STN  COMP Quantity Group  Description      HOPR HOPR HIHI HIGH LOPR LOPR LOLO LOW  EGUL CONV EGU   MDEL  STAT TBL WD WD WD WD WD BT BT 
+  pattern { S  , C  ,   Q     , G ,    D              ,HOE, HO,  HH  , HI ,LOE, LO  ,LL, LW,EF, EL, CV,  E  ,P, M  , S2  ,T, W, WW,WU,WL,WF,BL,BU }
+  	  {RRRS,CAV3,:VACM    ,VACM,"Vacuum"          ,-6,1E-6,2.5E-8,1E-8,-12,1E-12,-1,-1, -2,-22, 1 ,Torr ,9,.005,TIMED,5,21, 34,35,13,28, 2, 3 }
+  	  {RRRS,CAV3,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.01,McAmp,2,0.02,STAT ,5,22, 36,37,13,28, 4, 5 }
+d45 2
+a46 2
+  	  {RRRS,CAV4,:VACM    ,VACM,"Vacuum"          ,-6,1E-6,2.5E-8,1E-8,-12,1E-12,-1,-1, -2,-22, 1 ,Torr ,9,.005,TIMED,5,25, 42,43,13,28,10,11 }
+  	  {RRRS,CAV4,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.01,McAmp,2,0.02,STAT ,5,26, 44,45,13,28,12,13 }
+@
+
+
+1.4
+log
+@Change degC to C.
+@
+text
+@d43 1
+a43 1
+  	  {RRRS,CAV3,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.05,McAmp,2,0.02,STAT ,5,22, 36,37,13,28, 4, 5 }
+d46 1
+a46 1
+  	  {RRRS,CAV4,IONP:CURR,VACM,"Ion Pump Current", 5,5000, 500  , 300, 2 , 5   ,.5,.5, 10,-10,.05,McAmp,2,0.02,STAT ,5,26, 44,45,13,28,12,13 }
+@
+
+
+1.3
+log
+@Give cavity vacuums a precision of 9 so that CA server formatting will
+use scientific notation.
+@
+text
+@d32 1
+a32 1
+	  {RRRS,CAV3,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  ,-501,-501, 500,-500,degC    ,1,1   ,0.1 , 5,23, 38,39,13,28, 6, 7 }
+d35 1
+a35 1
+	  {RRRS,CAV4,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 80 , 70 , 0  ,-501,-501, 500,-500,degC    ,1,1   ,0.1 , 5,27, 46,47,13,28,14,15 }
+@
+
+
+1.2
+log
+@Correct cavity window alarm limits.
+Use better limits for filament, solenoid main, solenoid bucking voltage and
+current and the circulator pump current and tuner bulk power supply voltage.
+@
+text
+@d42 1
+a42 1
+  	  {RRRS,CAV3,:VACM    ,VACM,"Vacuum"          ,-6,1E-6,2.5E-8,1E-8,-12,1E-12,-1,-1, -2,-22, 1 ,Torr ,3,.005,TIMED,5,21, 34,35,13,28, 2, 3 }
+d45 1
+a45 1
+  	  {RRRS,CAV4,:VACM    ,VACM,"Vacuum"          ,-6,1E-6,2.5E-8,1E-8,-12,1E-12,-1,-1, -2,-22, 1 ,Torr ,3,.005,TIMED,5,25, 42,43,13,28,10,11 }
+@
+
+
+1.1
+log
+@Rename to 4 cavity
+@
+text
+@d32 1
+a32 1
+	  {RRRS,CAV3,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 83 , 80 , 0  ,-501,-501, 500,-500,degC    ,0,1   ,0.9 , 5,23, 38,39,13,28, 6, 7 }
+d35 1
+a35 1
+	  {RRRS,CAV4,WNDW:TEMP  ,TEMP,SUMY,"Window Infrared" , 85 , 83 , 80 , 0  ,-501,-501, 500,-500,degC    ,0,1   ,0.9 , 5,27, 46,47,13,28,14,15 }
+@
+

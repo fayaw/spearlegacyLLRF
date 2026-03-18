@@ -1,0 +1,334 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.01.10.23.22.48;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.48;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  CFM - Comb Filter Module
+**
+**  Abstract:
+**      Parameter and register definitions for the Comb module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II RF Project
+**
+**   History:
+**      May 09, 1996 - Created
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef P2RFCFMDEF_H
+#define P2RFCFMDEF_H
+
+#include <drvP2RfVxi.h>
+
+#define CFM_K_MAKE        P2RF_K_MAKE
+#define CFM_K_MODEL       0x101
+#define CFM_K_NAME       "Comb/Group Delay Equalizer"
+#define CFM_K_DRAWING    "340-301"
+
+/* Amount of time CFM needs to complete software reset */
+#define CFM_K_RESETTMO   (1 * sysClkRateGet ())
+
+/* A16 space registers: */
+#define CFM_A_MANID       0x00          /* ID/LA register */
+#define CFM_I_MANID       STD2IDX (CFM_A_MANID)
+#define CFM_A_MODELNO     0x02          /* Device type register */
+#define CFM_I_MODELNO     STD2IDX (CFM_A_MODELNO)
+#define CFM_A_STATUS      0x04          /* Status register */
+#define CFM_I_STATUS      STD2IDX (CFM_A_STATUS)
+#define CFM_A_CONTROL     0x04          /* Control register */
+#define CFM_I_CONTROL     STD2IDX (CFM_A_CONTROL)
+#define CFM_A_OFFSET      0x06          /* A24 offset register */
+#define CFM_I_OFFSET      STD2IDX (CFM_A_OFFSET)
+#define CFM_A_ATTRIBUTE   0x08          /* Attribute register */
+#define CFM_I_ATTRIBUTE   STD2IDX (CFM_A_ATTRIBUTE)
+#define CFM_A_SERIALHI    0x0a          /* Serial number high register */
+#define CFM_I_SERIALHI    STD2IDX (CFM_A_SERIALHI)
+#define CFM_A_SERIALLO    0x0c          /* Serial number low register */
+#define CFM_I_SERIALLO    STD2IDX (CFM_A_SERIALLO)
+#define CFM_A_VERSION     0x0e          /* Version number register */
+#define CFM_I_VERSION     STD2IDX (CFM_A_VERSION)
+#define CFM_A_INTSTAT     0x1a          /* Interrupt status register */
+#define CFM_I_INTSTAT     STD2IDX (CFM_A_INTSTAT)
+#define CFM_A_INTCTRL     0x1c          /* Interrupt control register */
+#define CFM_I_INTCTRL     STD2IDX (CFM_A_INTCTRL)
+#define CFM_A_SUBCLASS    0x1e          /* Subclass register */
+#define CFM_I_SUBCLASS    STD2IDX (CFM_A_SUBCLASS)
+
+#define CFM_A_COMBCTRL    0x20          /* Comb control register */
+#define CFM_I_COMBCTRL    STD2IDX (CFM_A_COMBCTRL)
+#define CFM_A_COMBSTAT    0x22          /* Comb status register */
+#define CFM_I_COMBSTAT    STD2IDX (CFM_A_COMBSTAT)
+
+/* Control and Status Register */
+#define CFM_V_SFTRST      0
+#define CFM_M_SFTRST     (0x0001 << CFM_V_SFTRST)
+#define CFM_V_SYSFAILINH  1
+#define CFM_M_SYSFAILINH (0x0001 << CFM_V_SYSFAILINH)
+#define CFM_V_PASSED      2
+#define CFM_M_PASSED     (0x0001 << CFM_V_PASSED)
+#define CFM_V_READY       3
+#define CFM_M_READY      (0x0001 << CFM_V_READY)
+#define CFM_V_SFTINT      5
+#define CFM_M_SFTINT     (0x0001 << CFM_V_SFTINT)
+#define CFM_V_MODIDCOMPL  14
+#define CFM_M_MODIDCOMPL (0x0001 << CFM_V_MODIDCOMPL)
+#define CFM_V_A24A32      15
+#define CFM_M_A24A32     (0x0001 << CFM_V_A24A32)
+
+/* Interrupt Status and Control Registers */
+#define CFM_V_INTLA       0
+#define CFM_M_INTLA      (0x00ff << CFM_V_INTLA)
+#define CFM_V_INTLEVEL    3
+#define CFM_M_INTLEVEL   (0x0007 << CFM_V_INTLEVEL)
+#define CFM_V_INTMASK     7
+#define CFM_M_INTMASK    (0x0001 << CFM_V_INTMASK)
+#define CFM_V_COMBOFLW    8
+#define CFM_M_COMBOFLW   (0x0001 << CFM_V_COMBOFLW)
+#define CFM_V_EQOFLW      9
+#define CFM_M_EQOFLW     (0x0001 << CFM_V_EQOFLW)
+#define CFM_V_ADCOFLW     10
+#define CFM_M_ADCOFLW    (0x0001 << CFM_V_ADCOFLW)
+#define CFM_V_INVADX      11
+#define CFM_M_INVADX     (0x0001 << CFM_V_INVADX)
+#define CFM_V_INV10MHZ    12
+#define CFM_M_INV10MHZ   (0x0001 << CFM_V_INV10MHZ)
+#define CFM_V_INV20MHZ    13
+#define CFM_M_INV20MHZ   (0x0001 << CFM_V_INV20MHZ)
+#define CFM_V_INV40MHZ    14
+#define CFM_M_INV40MHZ   (0x0001 << CFM_V_INV40MHZ)
+#define CFM_V_SOFTWARE    15
+#define CFM_M_SOFTWARE   (0x0001 << CFM_V_SOFTWARE)
+
+/* Comb Control Register */
+#define CFM_V_MEMTRGSEL   0
+#define CFM_M_MEMTRGSEL   (0x0007 << CFM_V_MEMTRGSEL)
+#define CFM_V_INPTRGSEL   3
+#define CFM_M_INPTRGSEL   (0x0007 << CFM_V_INPTRGSEL)
+#define CFM_V_DATAALIGN   6
+#define CFM_M_DATAALIGN   (0x0007 << CFM_V_DATAALIGN)
+#define CFM_V_EQCOEFSEL   9
+#define CFM_M_EQCOEFSEL   (0x0001 << CFM_V_EQCOEFSEL)
+#define CFM_V_CMBCOEFSEL  10
+#define CFM_M_CMBCOEFSEL  (0x0003 << CFM_V_CMBCOEFSEL)
+#define CFM_V_STATE       12
+#define CFM_M_STATE       (0x0003 << CFM_V_STATE)
+#define CFM_V_MEMTRGRST   14
+#define CFM_M_MEMTRGRST   (0x0001 << CFM_V_MEMTRGRST)
+
+/* Possible states the STATE field can be in */
+#define CFM_K_LOAD        0
+#define CFM_K_SSRUN       1
+#define CFM_K_RUN         2
+#define CFM_K_RUN2        3
+
+#define CFM_K_STATECNT    4
+
+/* Enumerate the states the module can be in */
+typedef enum {cfmLoad, cfmRun, cfmTest, cfmInvalid = -1} CfmState;
+
+/* A24 space registers: */
+
+/* Equalizer Coefficients and Control Registers */
+#define CFM_K_EQCOEFFMIN -1.0
+#define CFM_K_EQCOEFFMAX  1.0
+#define CFM_K_EQCOEFIMIN  0x8000
+#define CFM_K_EQCOEFIMAX  0x7fff
+
+#define CFM_A_EQCOEF0     0x0000
+#define CFM_I_EQCOEF0     EXT2IDX (CFM_A_EQCOEF0)
+#define CFM_A_EQCOEF1     0x0040
+#define CFM_I_EQCOEF1     EXT2IDX (CFM_A_EQCOEF1)
+#define CFM_K_EQCOEFCNT   32
+#define CFM_A_EQCTRL      0x0100
+#define CFM_I_EQCTRL      EXT2IDX (CFM_A_EQCTRL)
+#ifdef REVERSE_BITS
+#  define CFM_K_EQCTRLVAL   0x0035
+#else
+#  define CFM_K_EQCTRLVAL   0xac00
+#endif
+#define CFM_K_EQCOEFID    "CFM Equalizer Coefficients"
+
+/* IIR Control and Coefficient Registers */
+#define CFM_K_IIRCOEFFMIN -1.0
+#define CFM_K_IIRCOEFFMAX  1.0
+#define CFM_K_IIRCOEFIMIN  0x8000
+#define CFM_K_IIRCOEFIMAX  0x7fff
+
+#define CFM_A_IIRCTRL     0x0200
+#define CFM_I_IIRCTRL     EXT2IDX (CFM_A_IIRCTRL)
+#define CFM_I_DMUX        EXT2IDX (CFM_A_IIRCTRL + 0x24)
+#define CFM_I_MUX         EXT2IDX (CFM_A_IIRCTRL + 0x26)
+#define CFM_I_MISC        EXT2IDX (CFM_A_IIRCTRL + 0x28)
+#define CFM_I_IIRCOEF     EXT2IDX (CFM_A_IIRCTRL + 0x40)
+#define CFM_K_IIRCOEFCNT  16
+#define CFM_K_IIRCOEFID   "CFM IIR Coefficients"
+
+#define CFM_K_DMUX        0x0000
+#define CFM_K_MUX         0xc200
+#define CFM_K_MISC        0xb000
+
+/* IIR MAC Control Latches */
+#define CFM_I_DVALIDM     EXT2IDX (CFM_A_IIRCTRL + 0x00)
+#define CFM_I_DVALIDI     EXT2IDX (CFM_A_IIRCTRL + 0x02)
+#define CFM_I_EN0M        EXT2IDX (CFM_A_IIRCTRL + 0x04)
+#define CFM_I_EN0I        EXT2IDX (CFM_A_IIRCTRL + 0x06)
+#define CFM_I_EN1M        EXT2IDX (CFM_A_IIRCTRL + 0x08)
+#define CFM_I_EN1I        EXT2IDX (CFM_A_IIRCTRL + 0x0a)
+#define CFM_I_EN2M        EXT2IDX (CFM_A_IIRCTRL + 0x0c)
+#define CFM_I_EN2I        EXT2IDX (CFM_A_IIRCTRL + 0x0e)
+#define CFM_I_EN3M        EXT2IDX (CFM_A_IIRCTRL + 0x10)
+#define CFM_I_EN3I        EXT2IDX (CFM_A_IIRCTRL + 0x12)
+#define CFM_I_RES0M       EXT2IDX (CFM_A_IIRCTRL + 0x14)
+#define CFM_I_RES0I       EXT2IDX (CFM_A_IIRCTRL + 0x16)
+#define CFM_I_RES1M       EXT2IDX (CFM_A_IIRCTRL + 0x18)
+#define CFM_I_RES1I       EXT2IDX (CFM_A_IIRCTRL + 0x1a)
+#define CFM_I_RES2M       EXT2IDX (CFM_A_IIRCTRL + 0x1c)
+#define CFM_I_RES2I       EXT2IDX (CFM_A_IIRCTRL + 0x1e)
+#define CFM_I_RES3M       EXT2IDX (CFM_A_IIRCTRL + 0x20)
+#define CFM_I_RES3I       EXT2IDX (CFM_A_IIRCTRL + 0x22)
+
+#define CFM_K_DVALIDM     0x0000
+#define CFM_K_DVALIDI     0x0000
+#define CFM_K_EN0M        0x0000
+#define CFM_K_EN0I        0x0000
+#define CFM_K_EN1M        0x0000
+#define CFM_K_EN1I        0x0000
+#define CFM_K_EN2M        0x0000
+#define CFM_K_EN2I        0x0000
+#define CFM_K_EN3M        0x0000
+#define CFM_K_EN3I        0x0000
+#define CFM_K_RES0M       0x0000
+#define CFM_K_RES0I       0x0000
+#define CFM_K_RES1M       0x0000
+#define CFM_K_RES1I       0x0000
+#define CFM_K_RES2M       0x0000
+#define CFM_K_RES2I       0x0000
+#define CFM_K_RES3M       0x0000
+#define CFM_K_RES3I       0x0000
+
+/* Delay FIFO Control Registers */
+#define CFM_A_FIFO0EMP    0x0260
+#define CFM_I_FIFO0EMP    EXT2IDX (CFM_A_FIFO0EMP)
+#define CFM_A_FIFO0FULL   0x0262
+#define CFM_I_FIFO0FULL   EXT2IDX (CFM_A_FIFO0FULL)
+#define CFM_A_FIFO1EMP    0x0264
+#define CFM_I_FIFO1EMP    EXT2IDX (CFM_A_FIFO1EMP)
+#define CFM_A_FIFO1FULL   0x0266
+#define CFM_I_FIFO1FULL   EXT2IDX (CFM_A_FIFO1FULL)
+#define CFM_A_FIFO2EMP    0x0268
+#define CFM_I_FIFO2EMP    EXT2IDX (CFM_A_FIFO2EMP)
+#define CFM_A_FIFO2FULL   0x026a
+#define CFM_I_FIFO2FULL   EXT2IDX (CFM_A_FIFO2FULL)
+#define CFM_A_FIFO3EMP    0x026c
+#define CFM_I_FIFO3EMP    EXT2IDX (CFM_A_FIFO3EMP)
+#define CFM_A_FIFO3FULL   0x026e
+#define CFM_I_FIFO3FULL   EXT2IDX (CFM_A_FIFO3FULL)
+
+#define CFM_K_FIFOMIN     2
+#define CFM_K_FIFOMAX     511
+#define CFM_K_FIFOTICK    25.472        /* nS = 29 MHz */
+
+/* On board history memory register */
+#define CFM_A_HISTMEM     0x0270
+#define CFM_I_HISTMEM     EXT2IDX (CFM_A_HISTMEM)
+#define CFM_K_HISTMEMLEN  512
+#define CFM_K_HISTID      "CFM History"
+
+/* Digitized input readout register */
+#define CFM_K_INPMIN     -1.0
+#define CFM_K_INPMAX      1.0
+
+#define CFM_A_INPRDOUT    0x0272
+#define CFM_I_INPRDOUT    EXT2IDX (CFM_A_INPRDOUT)
+
+/* FIFO Data Diagnostic registers */
+#define CFM_A_FIFO0DATA   0x0274
+#define CFM_I_FIFO0DATA   EXT2IDX (CFM_A_FIFO0DATA)
+#define CFM_A_FIFO1DATA   0x0276
+#define CFM_I_FIFO1DATA   EXT2IDX (CFM_A_FIFO1DATA)
+#define CFM_A_FIFO2DATA   0x0278
+#define CFM_I_FIFO2DATA   EXT2IDX (CFM_A_FIFO2DATA)
+#define CFM_A_FIFO3DATA   0x027a
+#define CFM_I_FIFO3DATA   EXT2IDX (CFM_A_FIFO3DATA)
+
+#endif
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

@@ -1,0 +1,545 @@
+head	1.18;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.18
+	RF-SPEAR-R0-3-1:1.18
+	RF-SPEAR-R0-3-0:1.18
+	RF-SPEAR-R0-2-0:1.18
+	RF-SPEAR-R0-1-0:1.18
+	RF-SPEAR-R0-0-3:1.18
+	RF-SPEAR-R0-0-2:1.18
+	RF-SPEAR-R0-0-1:1.18
+	RF-SPEAR-R0-0-0:1.18
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.18
+	RF-3-13-10:1.17.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.17
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.15
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.14
+	R_epics_3_14_8_2_rtems_4_7_0:1.8
+	R_epics_3_14_6_spear0:1.7
+	R_3_14_1_spear1:1.1.1.1
+	R1:1.1.1.1
+	B1:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.18
+date	2011.12.07.02.01.15;	author saa;	state Exp;
+branches;
+next	1.17;
+
+1.17
+date	2010.09.24.00.41.13;	author spear;	state Exp;
+branches;
+next	1.16;
+
+1.16
+date	2010.08.31.23.47.42;	author saa;	state Exp;
+branches;
+next	1.15;
+
+1.15
+date	2009.12.12.00.26.44;	author saa;	state Exp;
+branches;
+next	1.14;
+
+1.14
+date	2009.01.15.02.07.26;	author saa;	state Exp;
+branches;
+next	1.13;
+
+1.13
+date	2008.10.13.22.51.40;	author saa;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	2008.05.05.21.34.27;	author saa;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2007.11.13.21.54.17;	author saa;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2007.10.09.22.26.49;	author saa;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2007.09.25.00.14.29;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2007.08.30.18.49.22;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2005.11.04.22.52.39;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2005.07.05.22.02.56;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2005.06.17.00.43.59;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2005.05.04.00.53.29;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2005.03.07.17.37.19;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2005.02.25.18.43.11;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2004.06.15.15.34.16;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2004.06.15.15.34.16;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.18
+log
+@Changes for 3.14.11.
+@
+text
+@#==============================================================
+#
+#  Abs:  vxWorks startup Script file for
+#        Spear RF Station 1 (loads epics after st.cmd.noepics)
+#  
+#  Name: st.cmd.goepics (for Production System)
+#
+#  Facility:  SLAC/Spear Low-Level RF
+#
+#  Auth: 13-Nov-2002, Stephanie Allison (SAA)
+#  Rev:  dd-mmm-yyyy, Reviewer's Name   (USERNAME)
+#
+#--------------------------------------------------------------
+#  Mod:
+#       dd-mmm-yyyy, First Lastname (USERNAME):
+#          comments
+#
+#==============================================================
+#
+# Load base EPICS software
+ld < bin/vxWorks-ppc604_long/rf.munch
+#
+# Initialize EPICS errlog message queue size.  This needs to be
+# done here before any dbLoad call is made.  Note the default is
+# 1260 bytes - too many messages are being discarded making it 
+# hard to debug.
+errlogInit(5000)
+#
+# Station specific database environment variables 
+# for macros used in the database. The sequence
+# rf_states.st needs IQA3MACROS.
+putenv("IQA3MACROS=R=SRF1")
+putenv("DATABASE_MACROS=STN=SRF1")
+putenv("C1TUNRLOOP_MACROS=STN=SRF1,CAV=1,name=C1TUNRLOOP")
+putenv("C2TUNRLOOP_MACROS=STN=SRF1,CAV=2,name=C2TUNRLOOP")
+putenv("C3TUNRLOOP_MACROS=STN=SRF1,CAV=3,name=C3TUNRLOOP")
+putenv("C4TUNRLOOP_MACROS=STN=SRF1,CAV=4,name=C4TUNRLOOP")
+putenv("AB_CONFIG_FILE   = /cmd/config.ab")
+putenv("RESTORE_AB       = /sav/savedataNone")
+putenv("RESTORE_VXI      = /sav/savedataNone")
+putenv("RESTORE_INP      = /sav/savedataNone")
+putenv("RESTORE_FILENAME = /sav/savedataRDB")
+#
+# Load RF database and templates
+dbLoadDatabase( "dbd/rf.dbd" )
+rf_registerRecordDeviceDriver(pdbbase)
+dbLoadRecords( "db/srf1.db" )
+dbLoadRecords("db/iocAdminVxWorks.db","IOC=B132-IOCRF")
+#
+# Report database to PV server and load any setpoints it gives us.
+dbRestore("spear1",0,-1)
+dbRestore("/sav/savedataSRF1.sav",0,-1)
+#dbRestore("/sav/savedataAB.sav")
+#dbRestore("/sav/savedataVXI.sav")
+#dbRestore("/sav/savedata.sav")
+#
+# Configure Allen Bradley
+#ab_debug=5
+#abDcmDebug=1
+abConfigNlinks(1)
+abConfigVme(0, 0xc00000, 0x60, 4)
+abConfigScanListAscii( 0,getenv("AB_CONFIG_FILE"),1 )
+#abConfigAuto(0)
+#
+# The following configures a 13 device
+# window starting at logical address 1(excluding 
+# the slot-0 controller which is defined with a
+# logical address of zero).
+_EPICS_VXI_LA_BASE  = (char)0x01
+EPICS_VXI_LA_COUNT = (char) 13
+#
+# The following define a window in
+# A24/A32 space where the EPICS 
+# Resource Manager (in drvEpvxi)
+# is allowed to place A24/A32 devices.
+EPICS_VXI_A24_BASE = 0x00900000
+EPICS_VXI_A24_SIZE = 0x00100000
+EPICS_VXI_A32_BASE = 0x90000000
+EPICS_VXI_A32_SIZE = 0x10000000
+#
+# Optionally disable logging
+# NOTE: must be done before iocInit!
+#iocLogDisable=1
+#
+# Start EPICS
+#vxi_debug=5
+iocInit()
+#
+# Start state sequence
+seq(&rf_states,getenv("DATABASE_MACROS"))
+#
+# Start tuner loop sequences
+seq(&rf_tuner_loop,getenv("C1TUNRLOOP_MACROS"))
+seq(&rf_tuner_loop,getenv("C2TUNRLOOP_MACROS"))
+seq(&rf_tuner_loop,getenv("C3TUNRLOOP_MACROS"))
+seq(&rf_tuner_loop,getenv("C4TUNRLOOP_MACROS"))
+#
+# Start hvps loop sequence
+seq(&rf_hvps_loop,getenv("DATABASE_MACROS"))
+#
+# Start dac loop sequence
+seq(&rf_dac_loop,getenv("DATABASE_MACROS"))
+#
+# Start RFP Octal DAC calibration sequence
+# NOTE: Does nothing until activated
+seq(&P2RF_Calib,getenv("DATABASE_MACROS"))
+#
+# Start message logging of things not in bumpless reboot
+seq(&rf_msgs,getenv("DATABASE_MACROS"))
+#
+# Override some values in the database
+dbpf("SRF1:STN:ID"," ")
+dbpf("SRF1:STN:SUMY:STATC.CALC","A?4:B?3:C?2:D>1?2:D?1:0")
+#dbpf("SRF1:STN:RESET:COUNTER.DRVH","9999")
+#
+@
+
+
+1.17
+log
+@Use spear1 instead of IP address.
+@
+text
+@d21 1
+a21 4
+ld < bin/iocCore
+ld < bin/seqLib
+ld < bin/restoreLib
+ld < bin/baseLib
+a28 12
+# Load EPICS RF application software
+ld < bin/rfLib
+ld < bin/rf_calib.o
+ld < bin/rf_dac_loop.o
+ld < bin/rf_hvps_loop.o
+ld < bin/rf_msgs.o
+ld < bin/rf_states.o
+ld < bin/rf_tuner_loop.o
+ld < bin/rf_ripTest
+ld < bin/rf_rfpDiags
+ld < bin/rf_vxi_diag.o
+#
+d38 1
+a38 1
+putenv("AB_CONFIG_FILE   = cmd/config.ab")
+d45 2
+a46 1
+dbLoadDatabase( "dbd/rfApp.dbd" )
+d48 1
+a80 8
+# Set operating parameters for synchronized
+# time stamp support using Unix server.  Don't allow this
+# IOC to connect to any other IOC for time (must use the
+# Unix server) by making the ports different from default.
+# Note: must be called before iocInit.
+#
+TSconfigure(0,0,0,18324,18325,0,0)
+#
+d87 1
+a87 1
+iocInit( getenv("RESOURCE_DEF") )
+@
+
+
+1.16
+log
+@Load one file that was created by MSI during the build instead of the
+individual files.  epics 3.14.11 does not create files with undefined
+macros that are compatible with 3.13.10 dbLoadRecords.
+@
+text
+@d64 1
+a64 1
+dbRestore("134.79.33.34",0,-1)
+@
+
+
+1.15
+log
+@Load records instead of templates.  This is a lot faster.
+@
+text
+@d61 1
+a61 15
+dbLoadRecords( "db/rf_ab_4CV.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_analog_All.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_analog_4CV.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_beam_spear.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_dac.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_digital_All.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_digital_4CV.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_iqa_All.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_iqa_4CV.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_stn_All.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_stn_4CVAll.db", "RRRS=SRF1,RNG=SPEAR,ID=2,REG=1")
+dbLoadRecords( "db/rf_temp_All.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_temp_4CV.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_vxi_modules_All.db", "RRRS=SRF1" )
+dbLoadRecords( "db/rf_vxi_modules_4CV.db", "RRRS=SRF1" )
+@
+
+
+1.14
+log
+@Remove commented out cmlog calls.
+@
+text
+@d61 15
+a75 15
+dbLoadTemplate( "db/srf1_ab_4CV.template" )
+dbLoadTemplate( "db/srf1_analog.template" )
+dbLoadTemplate( "db/srf1_analog_4CV.template" )
+dbLoadTemplate( "db/srf1_beam_spr.template" )
+dbLoadTemplate( "db/srf1_dac.template" )
+dbLoadTemplate( "db/srf1_digital.template" )
+dbLoadTemplate( "db/srf1_digital_4CV.template" )
+dbLoadTemplate( "db/srf1_iqa.template" )
+dbLoadTemplate( "db/srf1_iqa_4CV.template" )
+dbLoadTemplate( "db/srf1_stn.template" )
+dbLoadTemplate( "db/srf1_stn_4CVAll.template")
+dbLoadTemplate( "db/srf1_temp.template" )
+dbLoadTemplate( "db/srf1_temp_4CV.template" )
+dbLoadTemplate( "db/srf1_vxi_modules.template" )
+dbLoadTemplate( "db/srf1_vxi_modules_4CV.template" )
+@
+
+
+1.13
+log
+@SOLNBUCK voltage and current EGU limits are now in the database.
+HVPSOIL temp alarm limits are in restore.
+@
+text
+@a22 2
+#ld < bin/save_restore
+#ld < bin/dbrestore
+a25 5
+# Load CMLOG software
+#ld < bin/cmlogClientD
+#ld < bin/libcmlog.a
+#ld < bin/cmlogVxLogMsg
+#
+a31 4
+# Start the cmlog client daemon and log msg catcher
+#taskSpawn( "tCmlogDaemon",100,0,20000,cmlogClientD )
+#taskSpawn( "tCmlogLogMsg",100,0,10000,cmlogVxLogMsg )
+#
+a43 7
+# Load special AB driver.
+#ld < bin/drvAb.o
+#
+# Load special ppc diagnostics.
+#ld < bin/vxiBaseIsr.o
+#reset_kscIsr
+#
+@
+
+
+1.12
+log
+@CMLOG no longer used.  Don't load software.
+@
+text
+@a166 15
+dbpf("SRF1:SOLNBUCK:VOLT.EGUF","60")
+dbpf("SRF1:SOLNBUCK:VOLT.EGUL","-60")
+dbpf("SRF1:SOLNBUCK:VOLT:ULIM.EGUF","60")
+dbpf("SRF1:SOLNBUCK:VOLT:ULIM.EGUL","-60")
+dbpf("SRF1:SOLNBUCK:VOLT:LLIM.EGUF","60")
+dbpf("SRF1:SOLNBUCK:VOLT:LLIM.EGUL","-60")
+dbpf("SRF1:SOLNBUCK:CURR.EGUF","19.38")
+dbpf("SRF1:SOLNBUCK:CURR.EGUL","-19.23")
+dbpf("SRF1:SOLNBUCK:CURR:ULIM.EGUF","19.38")
+dbpf("SRF1:SOLNBUCK:CURR:ULIM.EGUL","-19.23")
+dbpf("SRF1:SOLNBUCK:CURR:LLIM.EGUF","19.38")
+dbpf("SRF1:SOLNBUCK:CURR:LLIM.EGUL","-19.23")
+dbpf("SRF1:HVPSOIL:TEMP.HIHI","70")
+dbpf("SRF1:HVPSOIL:TEMP.HIGH","67")
+#dbpf("SRF1:HVPSOIL:TEMP.PROC","0")
+@
+
+
+1.11
+log
+@Remove cmlog startup.  This will be replaced by iocLogInit in the future.
+@
+text
+@d29 3
+a31 3
+ld < bin/cmlogClientD
+ld < bin/libcmlog.a
+ld < bin/cmlogVxLogMsg
+@
+
+
+1.10
+log
+@Correct limits for solenoid bucking coil.
+@
+text
+@d40 2
+a41 2
+taskSpawn( "tCmlogDaemon",100,0,20000,cmlogClientD )
+taskSpawn( "tCmlogLogMsg",100,0,10000,cmlogVxLogMsg )
+@
+
+
+1.9
+log
+@Make dbRestore wait forever if there is a problem with the savedataSRF1
+setpoint file.
+@
+text
+@d171 8
+@
+
+
+1.8
+log
+@Change location of PV server (for restoring setpoints) from spear2 to spear1.
+@
+text
+@d97 1
+a97 1
+dbRestore("/sav/savedataSRF1.sav")
+@
+
+
+1.7
+log
+@Add commented out lines for restoring from channel watcher files.
+@
+text
+@d96 1
+a96 1
+dbRestore("134.79.33.111",0,-1)
+@
+
+
+1.6
+log
+@Removed commented-out lines for old savedata files.
+@
+text
+@d98 3
+@
+
+
+1.5
+log
+@Changed the magic tee post temp limits to 67 and 70.
+@
+text
+@a97 4
+#dbRestore("/sav/savedataAB.sav")
+#dbRestore("/sav/savedataVXI.sav")
+#dbRestore("/sav/savedataBO.sav")
+#dbRestore("/sav/savedata.sav")
+@
+
+
+1.4
+log
+@Added commented out lines for restoring from CW.  Good for future debugging.
+@
+text
+@d172 2
+a173 2
+dbpf("SRF1:HVPSOIL:TEMP.HIHI","63")
+dbpf("SRF1:HVPSOIL:TEMP.HIGH","60")
+@
+
+
+1.3
+log
+@Restored cmlog startup.
+@
+text
+@d98 4
+@
+
+
+1.2
+log
+@Problem with cmlog daemon - cannot connect to cmlogServer.
+Remove until it can be solved.
+@
+text
+@d40 2
+a41 2
+#taskSpawn( "tCmlogDaemon",100,0,20000,cmlogClientD )
+#taskSpawn( "tCmlogLogMsg",100,0,10000,cmlogVxLogMsg )
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d40 2
+a41 2
+taskSpawn( "tCmlogDaemon",100,0,20000,cmlogClientD )
+taskSpawn( "tCmlogLogMsg",100,0,10000,cmlogVxLogMsg )
+@
+
+
+1.1.1.1
+log
+@RF IOC startup files.
+@
+text
+@@

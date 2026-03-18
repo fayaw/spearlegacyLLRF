@@ -1,0 +1,2892 @@
+head	1.6;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.6
+	RF-SPEAR-R0-3-1:1.6
+	RF-SPEAR-R0-3-0:1.6
+	RF-SPEAR-R0-2-0:1.6
+	RF-SPEAR-R0-1-0:1.6
+	RF-SPEAR-R0-0-3:1.6
+	RF-SPEAR-R0-0-2:1.6
+	RF-SPEAR-R0-0-1:1.6
+	RF-SPEAR-R0-0-0:1.6
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.6
+	RF-3-13-10:1.5.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.5
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.5
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.5
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.6
+date	2011.12.07.01.21.54;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2006.01.25.23.54.19;	author lazmo;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.09.10.01.33.02;	author luchini;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.09.10.01.27.48;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.19.16.51.34;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.6
+log
+@Changes for 3.14.11 (export) and compiler warnings.
+@
+text
+@/**
+** ++
+**
+**  Facility:  DRV - DRiVer support
+**
+**  Abstract:
+**      EPICS driver support for PEP-II RF modules
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Low Level RF Group
+**
+**  History:
+**	April 25, 1996 - Created
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+**----------------------------------------------------------------
+**  Mods: 
+**         30-Oct-2002,   Mike Laznovsky (LAZMO)
+**            added version of P2RF_RecordMemory() that skips the
+**            initial state-machine related read before the full
+**            read loop.
+**----------------------------------------------------------------
+*/
+
+
+
+/*   Notes:
+|
+|  Sometimes one runs into a problem where multiple tasks go after the same
+|  register on a module in an uncontrolled fashion.  Often, one reads the
+|  register, modifies a bit and writes the register.  This should be done
+|  in an atomic manner since if another task gets in the middle of these
+|  operations, the wrong value will be put into the register.  Since the
+|  Motorola CAS(2) instruction isn't portable, we don't want to use it.
+|  One way around it is to set things up so that the register is modified
+|  in the interrupt service routine by queueing a message and generating a
+|  software interrupt for the module in question.  That way only higher IPL
+|  ISRs could interfere, but that can be avoided by not allowing them to
+|  touch the board in the first place.
+|
+|  The interrupt level is modifiable without recompiling the code by
+|  loading the variable P2RfIntLevel with a value after this driver
+|  has been loaded and before P2RF_Init is called.
+|
+*/
+
+
+
+#include <vxWorks.h>
+#include <sysLib.h>
+#include <iv.h>
+#include <types.h>
+#include <rebootLib.h>
+#include <sysLib.h>
+#include <sysNiLib.h>
+#include <intLib.h>
+#include <logLib.h>
+#include <vxLib.h>
+#include <stdioLib.h>
+#include <stdio.h>
+#include <fioLib.h>
+#include <math.h>
+#include <vme.h>
+#include <string.h>
+#include <semLib.h>
+
+#include <epicsPrint.h>
+/*#include <module_types.h>*/
+#include <task_params.h>
+#include <fast_lock.h>
+#include <drvSup.h>
+#include <devLib.h>
+#include <dbDefs.h>
+#include <drvEpvxi.h>
+#include <p2RfLib.h>
+#include <drvP2RfVxi.h>
+#include <epicsExport.h>
+#include <epicsExit.h>
+
+#include <vxi.h>
+
+#define SGLLIB_H                        /* To avoid including SGL stuff */
+
+#include <dwnLib.h>
+#include <dwn.msg>
+
+#define P2RF_PCONFIG(CARD, PTR)     epvxiFetchPConfig(CARD, P2RfDriverId, PTR)
+
+#define DBLBUFSZ 16                     /* Binary file double buffer size */
+
+
+
+/* All PEP-II RF modules share this structure but bit meanings may differ */
+typedef struct _P2RfDevDep
+{
+  vxi16_t       attr;
+  vxi16_t       serNoHi;
+  vxi16_t       serNoLo;
+  vxi16_t       version;
+  vxi16_t       pad[5];
+  vxi16_t       intStat;
+  vxi16_t       intCtrl;
+  vxi16_t       subClass;
+  vxi16_t       devCtrl;
+  vxi16_t       devStat;
+}  P2RfDevDep;
+
+typedef struct _P2RfBlk
+{
+  unsigned long   driverId;             /* ID used to identify this driver */
+}  P2RfBlk;
+
+typedef struct
+{
+  char         *name;                   /* PEP-II VXI module name */
+  char         *drawing;                /* PEP-II VXI drawing number */
+}  P2RfModel;
+
+typedef struct _P2RfPvt
+{
+  P2RfBlk              *blk;
+  int                   la;             /* The module's logical address */
+  P2RfModel             model;          /* The module's model information */
+  volatile VXICSR      *csr;            /* VXI device hdr ptr */
+  volatile P2RfDevDep  *devDep;         /* Ptr to device dependent registers */
+  vxi16_t              *ext;            /* Pointer to module's extended space */
+  FAST_LOCK             lock;           /* Mutual exclusion lock handle */
+  void                (*isrRtn) (void *, unsigned short); /* ISR rtn pointer */
+  void                 *isrArg;         /* Pointer to an argument for ISR */
+  void                (*sdRtn) (void *); /* Pointer to shutdown routine */
+  void                 *sdArg;          /* Pointer to an argument for SDR */
+  int                   sharedCnt;      /* # of clients sharing a module */
+  SEM_ID                shrSem;         /* Semaphore for circ buf control */
+}  P2RfPvt;
+
+
+/* Forward references */
+#ifdef NIVXI
+void   P2RF_IntServRtn     (short, unsigned short, unsigned long);
+#else
+#  ifdef NICPU030
+static void   P2RF_IntServRtn     (short, unsigned short);
+#  else
+static void   P2RF_IntServRtn     (unsigned int);
+#  endif
+#endif
+
+static Status P2RF_Init           (void);
+static Status P2RF_NoOp           (void);
+static void   P2RF_Report         (unsigned int, int);
+static void   P2RF_InitModule     (unsigned int, void *);
+static int    P2RF_Shutdown       (void);
+static void   P2RF_ShutdownModule (unsigned int, void *);
+static void   P2RF_Slot2La        (unsigned int srcLa, void *dstLa);
+
+static Status FileScan (FILE *, char *);
+
+
+/* Global variable declarations */
+struct
+{
+  long          number;
+  DRVSUPFUN     report;
+  DRVSUPFUN     init;
+}  drvP2RfVxi = {2,
+                 P2RF_NoOp,             /* epvxiIOReport takes care of this */
+                 P2RF_Init};
+epicsExportAddress(drvet,drvP2RfVxi);
+
+
+static unsigned long P2RfDriverId;
+int                  P2RfIntLevel  = P2RF_K_INTLEVEL;  /* Default int level */
+int                  P2RfDbg       = TRUE;             /* T for debug prints */
+int                  P2RfStartType = P2RF_K_COLDSTART; /* Cold or warm */
+
+
+
+static Status P2RF_NoOp (void)
+/*
+   Description
+   -----------
+   Dummy routine to act as a place holder for the driver report function.
+   This functionality if provided to prevent the dbior routine from complaining
+   about a missing report function.   The report function for this driver is
+   taken care of in drvEpvxi.
+
+   Parameters
+   ----------
+   none
+
+   Returns
+   -------
+   status
+*/
+{
+  return (OK);
+}
+
+
+
+static Status P2RF_Init (void)
+/*
+   Description
+   -----------
+   Initialize all present PEP-II RF VXI modules
+
+   Parameters
+   ----------
+   none
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("P2RF_Init");
+
+  Status   status;
+  P2RfBlk *blk;
+
+
+  /* Do nothing if Resource manager didn't run (usually crates without VXI) */
+  if (!epvxiResourceMangerOK)  return (VXI_SUCCESS);
+
+  /* Install a reboot handler */
+  if (rebootHookAdd (P2RF_Shutdown) != OK)
+  {
+    status = S_epvxi_internal;
+    errPrintf (status, __FILE__, __LINE__, "%s: rebootHookAdd failed", FN);
+    return (status);
+  }
+
+  /* Install a reboot handler */
+  if (rebootHookAdd ((FUNCPTR)epicsExitCallAtExits) != OK)
+  {
+    status = S_epvxi_internal;
+    errPrintf (status, __FILE__, __LINE__, "%s: rebootHookAdd failed", FN);
+    return (status);
+  }
+
+  /* Before any init_records are called, set up the one and only P2RfBlk */
+  blk = calloc (1, sizeof (*blk));
+
+  /* Set the driver identifier */
+  blk->driverId = epvxiUniqueDriverID ();
+  P2RfDriverId  = blk->driverId;
+
+  /* Find all the PEP-II RF VXI modules in the system and initialize them */
+  {
+    epvxiDeviceSearchPattern  dsp = {VXI_DSP_make, P2RF_K_MAKE};
+
+    return (epvxiLookupLA (&dsp, P2RF_InitModule, (void *) blk));
+  }
+}
+
+
+
+static void P2RF_InitModule (unsigned int  la,
+                             void         *arg)
+/*
+   Description
+   -----------
+   Callback routine to initialize a PEP-II RF VXI module
+
+   Parameters
+   ----------
+           la - The logical address of the module
+          arg - A pointer to a callback argument
+
+   Returns
+   -------
+   nothing
+*/
+{
+  Function ("P2RF_InitModule");
+
+  Status    status;
+  P2RfBlk  *blk = (P2RfBlk *) arg;
+  P2RfPvt  *p2Rf = NULL;
+
+
+  /* Tell the VXI sub-system that this driver is in charge of this module */
+  status = epvxiOpen (la, blk->driverId, sizeof (*p2Rf), P2RF_Report);
+  if (status)
+  {
+    errPrintf (status, __FILE__, __LINE__,
+               "%s: Device open failed, LA = 0X%X", FN, la);
+    return;
+  }
+
+  Dbg (Printf (__FILE__, FN, "Module at LA 0x%02X", la));
+
+  /* Allocate a private block for the module (This macro defines p2Rf!) */
+  status = epvxiFetchPConfig (la, blk->driverId, p2Rf);
+  if (status)
+  {
+    errPrintf (status, __FILE__, __LINE__, "%s: epvxiFetchPConfig", FN);
+    epvxiClose (la, blk->driverId);
+    return;
+  }
+
+  /* Save a pointer to the driver block */
+  p2Rf->blk = blk;
+
+  /* Save the module's logical address */
+  p2Rf->la = la;
+
+#if 0                                /* devRegisterAddress seems not to work */
+  /* Get physical A16 base address of the module and protect it */
+  if (status = devRegisterAddress ("drvP2RfVxi", atVMEA16, (void *) VXIBASE(la),
+                                   sizeof (*p2Rf->csr), (void **) &p2Rf->csr))
+  {
+    errPrintf (status, __FILE__, __LINE__,
+                "%s devRegisterAddress - la = %02x, A16, base = %08x, size = %08x", FN, la, VXIBASE (la), sizeof (*p2Rf->csr));
+    return;
+  }
+#else
+  p2Rf->csr = VXIBASE (la);
+#endif
+
+  /* Store a pointer to the device dependent registers */
+  p2Rf->devDep = (volatile P2RfDevDep *) &p2Rf->csr->dir.r.dd;
+
+  /* Get a pointer to the extended address space of the module and protect it */
+  if (VXIMEMENBL (p2Rf->csr))
+  {
+    epicsAddressType  adxType = atVMEA16;
+    long              vmeMod  = NULL;
+    char             *vmeAddr = NULL;
+    long              vmeSize = NULL;
+    vxi16_t          *base;
+
+    switch (VXIADDRSPACE (p2Rf->csr))
+    {
+      case VXI_ADDR_EXT_A24:
+        adxType = atVMEA24;
+        vmeMod  = VME_AM_STD_SUP_DATA;
+        vmeAddr = (char *) (p2Rf->csr->dir.w.offset << 8);
+        vmeSize = VXIA24MEMSIZE (VXIREQMEM (p2Rf->csr));
+        break;
+
+      case VXI_ADDR_EXT_A32:
+        adxType = atVMEA32;
+        vmeMod  = VME_AM_EXT_SUP_DATA;
+        vmeAddr = (char *) (p2Rf->csr->dir.w.offset << 16);
+        vmeSize = VXIA32MEMSIZE (VXIREQMEM (p2Rf->csr));
+        break;
+    }
+
+    if (vmeMod)
+    {
+      status = sysBusToLocalAdrs (vmeMod, vmeAddr, (char **) &base);
+      if (status >= 0)
+      {
+        Dbg (Printf (__FILE__, FN,
+                     "la = %02x, ExtAdx = %08x, lclAdx = %08x, size = %08x\n",
+                     la, vmeAddr, base, vmeSize));
+
+#if 0                                 /* devRegisterAddress seems not to work */
+        if (status = devRegisterAddress ("drvP2RfVxi", adxType,
+                                         (void *) base, vmeSize,
+                                         (void **) &p2Rf->ext))
+        {
+          errPrintf (status, __FILE__, __LINE__,
+                     "%s devRegisterAddress - A24", FN);
+          return;
+        }
+#else
+        p2Rf->ext = base;
+#endif
+      }
+      else
+      {
+        errPrintf (NULL, __FILE__, __LINE__,
+                   "%s: sysBusToLocalAdrs failed: adx = %08x\n", FN, (int)vmeAddr);
+      }
+    }
+  }
+
+  /* Initialize mutual exclusion locks */
+  FASTLOCKINIT (&p2Rf->lock);
+
+  /* Set up the interrupt service routine */
+#if defined (NIVXI)
+  status = SetVXIintHandler ( 1 << (P2RfIntLevel - 1),(NIVXI_HVXIINT *)P2RF_IntServRtn);
+  if (status)
+  {
+    errPrintf (S_dev_vecInstlFail, __FILE__, __LINE__,
+"%s: Bad status returned when connecting ISR: %08x", FN, (unsigned int)status);
+    return; 
+  }
+#elif defined (NICPU030)
+  status = sysBusVXIIntConnect ((FUNCPTR) P2RF_IntServRtn);
+  if (status)
+  {
+    errPrintf (S_dev_vecInstlFail, __FILE__, __LINE__,
+"%s: Bad status returned when connecting ISR: %08x", FN, (unsigned int)status);
+    return;
+  }
+#else
+  status = devConnectInterrupt (intVXI, la, P2RF_IntServRtn, &la);
+  if (status !=OK)
+  {
+    errPrintf (status, __FILE__, __LINE__, "%s: devConnectInterrupt", FN);
+    return;
+  }
+#endif
+
+  return;
+}
+
+
+
+Status P2RF_RegisterModule (int              dynStat,
+                            int              frame,
+                            int              slot,
+                            int              logicalAdx,
+                            int              model,
+                            char            *name,
+                            char            *drawing,
+                            void           (*isrRtn) (void *, unsigned short),
+                            void            *isrArg,
+                            void           (*sdRtn) (void *),
+                            void            *sdArg,
+                            void           **drvPvt)
+/*
+   Description
+   -----------
+   Function to register a desire to use a module.  This function must be
+   called by only one client (typically EPICS device or record support)
+   to gain access to the module.  If the resource manager has found the
+   requested module in the system, the caller is given a handle which
+   is required to call other driver support functions.
+
+   Parameters
+   ----------
+      dynStat - Type of module addressing to be used: 0 = dynamic, 1 = static
+        frame - Frame number module is located in
+         slot - Slot of the module in the frame
+   logicalAdx - Logical address of the module if dynStat = 1
+        model - Model number of the module
+         name - Name of the module
+      drawing - Drawing number of the module (as a string)
+       isrRtn - Module-specific routine ISR is to call upon module's interrupt
+       isrArg - Argument for the module-specific interrupt routine
+        sdRtn - Module-specific shut-down routine to be called at shut-down
+        sdArg - Argument for the module-specific shut-down routine
+       drvPvt - A location in which to return a pointer to
+                the module-specific driver-private block
+
+   Returns
+   -------
+   Status codes from various routines or VXI_SUCCESS
+*/
+{
+  Function ("P2RF_RegisterModule");
+
+  Status        status = VXI_SUCCESS;
+  unsigned int  la     = logicalAdx;
+  P2RfPvt      *p2Rf   = 0;
+
+
+  Dbg (Printf (__FILE__, FN, "dynStat = %d, frame = %d, slot = %d, LA = %d\nmodel = %d, name = %s, drawing = %s\n",
+               dynStat, frame, slot, logicalAdx, model, name, drawing));
+
+  /* If dynamic addressing is enabled, find the module's logical address */
+  if (dynStat == FALSE)
+  {
+    status = P2RF_GetModuleLa (frame, slot, &la);
+    if (status)
+    {
+      errPrintf (ERROR, __FILE__, __LINE__,
+                 "%s: ResMan did not find a module in frame %d, slot %d",
+                 FN, frame, slot);
+      return (status);
+    }
+  }
+
+  /* Find the driver private block */
+  status = P2RF_PCONFIG (la, p2Rf);
+  if (status)  return (status);
+
+  Dbg (Printf (__FILE__, FN, "Module make = %04x, model = %04x",
+               VXIMAKE (p2Rf->csr), VXIMODEL (p2Rf->csr)));
+
+  /* Verify make and model are as expected for this module */
+  if (p2Rf->model.name ||
+      (P2RF_K_MAKE != VXIMAKE  (p2Rf->csr)) || (model != VXIMODEL (p2Rf->csr)))
+  {
+    errPrintf (ERROR, __FILE__, __LINE__,
+               "%s: Request to register a %s in slot %d failed because\n"
+               "a %s has previously been registered with make %04x, model # %04x",
+               FN, name, slot, p2Rf->model.name ? p2Rf->model.name : "module",
+               VXIMAKE (p2Rf->csr), VXIMODEL (p2Rf->csr));
+    return (ERROR);
+  }
+
+  /* Register the module's model and make names for reporting purposes */
+  p2Rf->model.name    = name;
+  p2Rf->model.drawing = drawing;
+
+  status = epvxiRegisterMakeName (P2RF_K_MAKE, P2RF_K_MANUFACTURER);
+  if (status)
+  {
+    errPrintf (status, __FILE__, __LINE__,
+               "%s: epvxiRegisterMakeName failed", FN);
+  }
+
+  status = epvxiRegisterModelName (P2RF_K_MAKE, model, name);
+  if (status)
+  {
+    errPrintf (status, __FILE__, __LINE__,
+               "%s: epvxiRegisterModelName failed", FN);
+  }
+
+  /* Store the module's ISR function and argument */
+  p2Rf->isrRtn = isrRtn;
+  p2Rf->isrArg = isrArg;
+
+  /* Store the module's Shutdown function and argument */
+  p2Rf->sdRtn = sdRtn;
+  p2Rf->sdArg = sdArg;
+
+  /* Default to single clients which don't need no steenking semaphore */
+  p2Rf->sharedCnt = 0;
+  p2Rf->shrSem    = NULL;
+
+  /* Return  the driver handle */
+  *drvPvt = p2Rf;
+
+  return (status);
+}
+
+
+
+Status P2RF_RegisterClient (void   *drvPvt)
+/*
+   Description
+   -----------
+   Function to register a desire to share a module.  A call by an initial
+   client to RegisterModule must have been previously made to get a driver
+   handle.  This handle must then be passed to or findable by subsequent
+   clients.  The client that called RegisterModule need not call
+   RegisterClient, although it doesn't hurt (modulo a small hit on
+   performance).  RegisterClient need not be called if there is only one client
+   of the module in the system or the module has no features which have context
+   associated with them that can become inconsistent when multiple clients
+   intermingle their access calls.  The only such feature currently (1/97) on
+   the modules are the 512K circulare buffer RAMs that are accessed through one
+   address location.  For the cases of multiple clients of modules with such
+   features, RegisterClient must be called in order to ensure mutual
+   exclusivity whilst the feature is being accessed.
+
+   Parameters
+   ----------
+       drvPvt - A location in which to return a pointer to
+                the module-specific driver-private block
+
+   Returns
+   -------
+   Status codes from various routines or VXI_SUCCESS */
+{
+  Function ("P2RF_RegisterClient");
+
+  P2RfPvt      *p2Rf = (P2RfPvt *) drvPvt;
+  SEM_ID        shrSem;
+
+
+  /* Give the clients a semaphore with which to control resource access */
+  if ((shrSem = semMCreate (SEM_Q_FIFO)) == NULL)
+  {
+    errPrintf (0, __FILE__, __LINE__, "%s: %s failed - id = %d", FN, "semMCreate", (int)shrSem);
+    return (ERROR);
+  }
+  p2Rf->sharedCnt++;
+  p2Rf->shrSem = shrSem;
+
+  return (OK);
+}
+
+
+
+#if 0
+Status P2RF_UnregisterClient (void           **drvPvt)
+/*
+   Description
+   -----------
+   Function to indicate that a client is no longer interested in sharing a
+   module.
+
+   This routine is dangerous and undebugged.  It's not clear that there is any
+   real use for it since currently any client that registers to share a module
+   does so for the life of the processor boot cycle.
+
+   The danger in this routine is that I haven't thought through what happens
+   when a client attempts to take the semaphore or new client registers while
+   this routine is executing.
+
+   Parameters
+   ----------
+       drvPvt - A location in which to return a pointer to
+                the module-specific driver-private block
+
+   Returns
+   -------
+   Status codes from various routines or VXI_SUCCESS */
+{
+  Function ("P2RF_UnregisterClient");
+
+
+  /* If there are two clients, make sure we have the sem before deleting it */
+  if (p2Rf->sharedCnt == 1)  semTake (p2Rf->shrSem, WAIT_FOREVER);
+
+  /* Delete the semaphore if the count goes to zero */
+  if ((--p2Rf->sharedCnt) == 0)
+  {
+    /* Unblock anyone hanging on this semaphore and force a context switch */
+    semGive (p2Rf->shrSem);
+    taskDelay (1);
+
+    semDelete (p2Rf->shrSem);
+    p2Rf->shrSem = NULL;
+  }
+
+  return (OK);
+}
+#endif
+
+
+
+static int P2RF_Shutdown (void)
+/*
+   Description
+   -----------
+   Shut down the PEP-II RF VXI modules
+
+   Parameters
+   ----------
+   none
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("P2RF_Shutdown");
+
+  Status                    status;
+  epvxiDeviceSearchPattern  dsp = {VXI_DSP_make, P2RF_K_MAKE};
+
+
+  /* Find all the PEP-II RF VXI modules in the system and shut them down */
+  status = epvxiLookupLA (&dsp, P2RF_ShutdownModule, (void *) NULL);
+  if (status)
+  {
+    errPrintf (status, __FILE__, __LINE__,
+               "%s: PEP-II RF module shutdown failed", FN);
+  }
+
+  /* Allow some time to print out messages */
+  taskDelay (1 * sysClkRateGet ());
+
+  return (OK);
+}
+
+
+
+static void  P2RF_ShutdownModule (unsigned int  la,
+                                  void         *arg)
+/*
+   Description
+   -----------
+   Specific routine to shut down a PEP-II RF VXI module.
+
+   Parameters
+   ----------
+           la - Logical address of the module
+
+   Returns
+   -------
+   nothing
+*/
+{
+  Function ("P2RF_ShutdownModule");
+
+  Status      status;
+  P2RfPvt    *p2Rf = NULL;
+
+
+  /* Find the driver private block */
+  status = P2RF_PCONFIG (la, p2Rf);
+  if (status)
+  {
+    errPrintf (status, __FILE__, __LINE__, "%s: P2RF_PCONFIG failed", FN);
+    return;
+  }
+
+  /* If a module specific shutdown function was specified, call it */
+  if (p2Rf->sdRtn)  (*p2Rf->sdRtn) (p2Rf->sdArg);
+
+  /* Disable interrupt generation from this module */
+  p2Rf->devDep->intCtrl |= P2RF_M_INTMASK;   /* Complemented! */
+}
+
+
+
+#ifdef NIVXI
+void P2RF_IntServRtn (short          controller,
+                      unsigned short level,
+                      unsigned long  statusId)
+#else
+#  ifdef NICPU030
+static void P2RF_IntServRtn (short          level,
+                             unsigned short statusId)
+#  else
+static void P2RF_IntServRtn (unsigned int   id)
+#  endif
+#endif
+/*
+   Description
+   -----------
+   This is the interrupt service routine for the PEP-II RF VXI modules.
+
+   Parameters
+   ----------
+         p2Rf - A pointer to the module-specific driver-private block
+
+   Returns
+   -------
+   nothing
+*/
+{
+#if 0
+  Function ("P2RF_IntServRtn");
+#endif
+  static int       intInProg = FALSE;
+
+  Status           status;
+  unsigned short   intStat;
+  unsigned int     la;
+  P2RfPvt         *p2Rf = NULL;
+
+
+  /* Trap overlapping interrupts */
+  if (!vxTas ((void *) &intInProg))
+  {
+#if 0
+#if defined (NIVXI)
+    logMsg("%s: ISR interrupted - StatId=0x%08x  Level=%hx\n",
+             (int)FN,(int)statusId,(int)level,0,0,0);
+#else
+#if defined (NICPU030)
+    logMsg("%s: ISR interrupted - StatId=0x%04x  Level=%hx\n",
+             (int)FN,(int)statusId,(int)level,0,0,0);
+#else
+    logMsg("%s: ISR interrupted - Id=0x%hx\n",(int)FN,(int)la,0,0,0,0);
+#endif
+#endif
+#endif
+    return;
+  }
+
+#if defined (NIVXI)
+  la   = statusId & 0x00ff;
+#if 0
+  logMsg("%s:  Controller=%ld   StatusID=0x%08x   Level=%hd\n",
+         (int)FN,(int)controller,(int)statusId,(int)level,0,0);
+#endif
+#elif defined (NICPU030)
+  la   = statusId & 0x00ff;
+#if 0
+  logMsg("%s:  StatId=0x%04x Level=%hd\n",
+         (int)FN,(int)statusId,(int)level,0,0,0);
+#endif
+#else
+  la   = id;
+#if 0
+  logMsg("%s: id=0x%hx Level=%hd\n",(int)FN,(int)id,0 0,0,0);
+#endif
+#endif
+
+  /* Find the driver private block */
+  status = P2RF_PCONFIG (la, p2Rf);
+  if (status)
+  {
+#if 0
+    logMsg("%s: P2RF_CONFIG failed, la = %02x, status = %08x\n",
+           (int)FN,(int)la,(int)status,0,0,0);
+#endif
+    intInProg = FALSE;
+    return;
+  }
+
+  /* For NIVXI and NICPU030 the interrupt is already acknowledged */
+#if defined (NIVXI) || defined (NICPU030)
+  intStat = statusId;
+#else
+  intStat = p2Rf->devDep->intStat;      /* Acknowledge the interrupt by hand */
+#endif
+
+#if 0
+#if defined (NIVXI)
+  Dbg (epicsPrintf ("%s (%s): la = %02x, level = %hd, intStat = %08x\n",
+               __FILE__, FN, la, level, intStat));
+#else
+  Dbg (epicsPrintf ("%s (%s): la = %02x, level = %hd, intStat = %h04x\n",
+               __FILE__, FN, la, level, intStat));
+#endif
+#endif
+
+  /* Reset the software interrupt if that's what caused it */
+  if (p2Rf->csr->dir.r.status & P2RF_M_SFTINT)
+  {
+    p2Rf->csr->dir.w.control &= ~P2RF_M_SFTINT;
+  }
+
+  /* If a module specific ISR function was specified, call it */
+  if (p2Rf->isrRtn)  (*p2Rf->isrRtn) (p2Rf->isrArg, intStat);
+
+  intInProg = FALSE;
+}
+
+
+
+static void P2RF_Report (unsigned int      la,
+                         int               level)
+/*
+   Description
+   -----------
+   Print report for a single PEP-II RF VXI module.
+
+   Parameters
+   ----------
+           la - Logical address of the module
+        level - Detail level of report desired
+
+   Returns
+   -------
+   nothing
+*/
+{
+  Function ("P2RF_Report");
+
+  volatile VXICSR        *csr;
+  vxi16_t                 reg;
+  Status                  status;
+  P2RfPvt                *p2Rf = NULL;
+
+  static char  	*addrMode[] = {"A16",                "A24/A32"         };
+  static char  	*modid[]    = {"modid-on",           ""                };
+  static char  	*sftInt[]   = {"",                   "soft-int-on"     };
+  static char  	*extSt[]    = {"extended-self-testing", ""             };
+  static char  	*st[]       = {"self-testing",       ""                };
+  static char  	*sysFail[]  = {"",                   "sys-fail-inhibit"};
+  static char  	*sysReset[] = {"",                   "sys-reset"       };
+
+
+  if (level == 0)  return;
+
+  status = P2RF_PCONFIG (la, p2Rf);
+  if (status)
+  {
+    errPrintf (status, __FILE__, __LINE__, "%s: P2RF_PCONFIG failed", FN);
+    return;
+  }
+
+  csr = VXIBASE (la);
+
+  if (vxMemProbe((char *) &csr->dir.r.status, READ,
+                 sizeof (reg), (char *) &reg) != OK)  return;
+
+  if (VXIMAKE (csr) != P2RF_K_MAKE)  return;
+
+  epicsPrintf ("\tDrawing: %s\n", p2Rf->model.drawing);
+  epicsPrintf ("\tla=%02x address-mode=%s %s %s %s %s %s %s\n", la,
+               addrMode [(reg & P2RF_M_A24A32)     >> P2RF_V_A24A32],
+               modid    [(reg & P2RF_M_MODIDCMPL)  >> P2RF_V_MODIDCMPL],
+               sftInt   [(reg & P2RF_M_SFTINT)     >> P2RF_V_SFTINT],
+               extSt    [(reg & P2RF_M_READY)      >> P2RF_V_READY],
+               st       [(reg & P2RF_M_PASSED)     >> P2RF_V_PASSED],
+               sysFail  [(reg & P2RF_M_SYSFAILINH) >> P2RF_V_SYSFAILINH],
+               sysReset [(reg & P2RF_M_SOFTRESET)  >> P2RF_V_SOFTRESET]);
+  epicsPrintf ("\tDriver private handle = 0x%08x\n", (int)p2Rf);
+
+  return;
+}
+
+
+
+char *P2RF_Sprintf (char       *buf,
+                    const char *file,
+                    const char *fn,
+                    char       *fmt,
+                    ...)
+{
+  char      fmtBuf[P2RF_K_BUFSIZE];
+  va_list   var;
+
+  /* Build a new format string in the provided buffer */
+  sprintf (fmtBuf, "%s (%s): %s\n", file, fn, fmt);
+
+  va_start (var, fmt);
+  vsprintf (buf, fmtBuf, var);
+  return (buf);
+}
+
+
+
+int P2RF_Printf (const char *file,
+                 const char *fn,
+                 char       *fmt,
+                 ...)
+{
+  char      fmtBuf[P2RF_K_BUFSIZE];
+  va_list   var;
+
+
+  /* Build a new format string on the stack */
+  sprintf (fmtBuf, "%s (%s): %s\n", file, fn, fmt);
+
+  va_start (var, fmt);
+  return (epicsVprintf (fmtBuf, var));
+}
+
+
+
+Status P2RF_IntEnable (void)
+/*
+   Description
+   -----------
+   Routine to be called to enable interrupts for the PEP-II VXI modules.
+   Ideally this routine should be called only after the global variable
+   interruptAccept goes TRUE, but we still need to figure out how to do
+   that.  This routine may be called multiple times without adverse
+   affects.
+
+   Parameters
+   ----------
+   none
+
+   Returns
+   -------
+   status
+*/
+{
+
+  Function ("P2RF_IntEnable");
+  Status status = OK;
+
+
+
+  /* Enable Interrupts */
+#ifdef NIVXI
+  EnableVXIint (P2RF_K_CONTROLLER, 1 << (P2RfIntLevel - 1));
+  RouteVXIint  (P2RF_K_CONTROLLER, 0);
+#else
+#  ifdef NICPU030
+  sysBusIntMaskSet (1 << (P2RfIntLevel - 1));
+# endif
+  status = devEnableInterruptLevel (intVXI, P2RfIntLevel);
+#endif
+  if (status)
+    errPrintf (status, __FILE__, __LINE__,
+               "%s: devEnableInterruptLevel failed", FN);
+
+  return (status);
+}
+
+
+
+Status P2RF_IntDisable (void)
+/*
+   Description
+   -----------
+   Routine to globally disable interrupts for all PEP-II VXI modules.
+
+   Parameters
+   ----------
+   none
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("P2RF_IntDisable");
+  Status status = OK;
+
+
+  /* Disable Interrupts */
+#ifdef NIVXI
+  DisableVXIint (P2RF_K_CONTROLLER, 1 << (P2RfIntLevel - 1));
+  RouteVXIint  (P2RF_K_CONTROLLER, 0);
+#else
+#  ifdef NICPU030
+  sysBusIntMaskSet (sysBusIntMaskGet () & ~(1 << (P2RfIntLevel - 1)));
+#  endif
+  status = devDisableInterruptLevel (intVXI, P2RfIntLevel);
+#endif
+  if (status)
+    errPrintf (status, __FILE__, __LINE__,
+               "%s: devDisableInterruptLevel failed", FN);
+  return (status);
+}
+
+
+
+Status P2RF_ModIntEnable (void  *drvPvt)
+/*
+   Description
+   -----------
+   Routine to enable interrupts for a specific PEP-II VXI module.
+
+   Parameters
+   ----------
+       drvPvt - A pointer to the module-specific driver-private block
+
+   Returns
+   -------
+   status
+*/
+{
+  /* Function ("P2RF_ModIntEnable"); */
+
+  P2RfPvt     *p2Rf = (P2RfPvt *) drvPvt;
+  unsigned short reg;
+
+  /* Enable interrupt generation from this module */
+  p2Rf->devDep->intCtrl &= ~P2RF_M_INTMASK;   /* Complemented! */
+
+  /* Read the interrupt status register to clear out any latent interrupts */
+  reg = p2Rf->devDep->intStat;
+  return (OK);
+}
+
+
+
+Status P2RF_ModIntDisable (void  *drvPvt)
+/*
+   Description
+   -----------
+   Routine to disable interrupts for a specific PEP-II VXI module.
+
+   Parameters
+   ----------
+       drvPvt - A pointer to the module-specific driver-private block
+
+   Returns
+   -------
+   status
+*/
+{
+  /* Function ("P2RF_ModIntDisable"); */
+
+  P2RfPvt  *p2Rf = (P2RfPvt *) drvPvt;
+
+
+  /* Disable interrupt generation from this module */
+  p2Rf->devDep->intCtrl |= P2RF_M_INTMASK;         /* Complemented! */
+
+  return (OK);
+}
+
+
+
+static void P2RF_Slot2La (unsigned int  srcLa,
+                          void         *dstLa)
+{
+  /* Function ("P2RF_Slot2La"); */
+  unsigned int *tmp=(unsigned int *)dstLa;
+  *tmp = srcLa;
+}
+
+
+
+Status P2RF_GetModuleLa (unsigned int   frame,
+                         unsigned int   slot,
+                         unsigned int  *la)
+/*
+   Description
+   -----------
+   Given the frame and slot number return the logical address of the module.
+
+   Parameters
+   ----------
+        frame - Logical address of the slot 0 controller
+         slot - Slot number of the module of interest in the frame
+           la - The corresponding logical address of the module of interest
+
+   Returns
+   -------
+   status
+*/
+{
+  /* Function ("P2RF_GetModuleLa"); */
+
+  Status                    status=OK;
+  epvxiDeviceSearchPattern  dsp;
+
+
+  dsp.flags        = VXI_DSP_slot | VXI_DSP_slot_zero_la;
+  dsp.slot_zero_la = frame;
+  dsp.slot         = slot;
+
+  *la = NULL;
+  status = epvxiLookupLA (&dsp, P2RF_Slot2La, la);
+  if (status)  return (status);
+  if (*la == NULL)  return (ERROR);
+
+  return (VXI_SUCCESS);
+}
+
+
+
+void P2RF_ResetModule (void         *hndl)
+/*
+   Description
+   -----------
+   Function to reset a PEP-II RF module.  Note that this routine blocks
+   whilst the reset is in progress.
+
+   The black magic in this routine follows Leonid's Comb example.
+   In order to do the reset, Leonid first clears the device specific
+   control register which puts some of the modules in the LOAD state.
+   The CFM requires this or it will be hosed up.  It doesn't do harm
+   on the other modules.
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("P2RF_ResetModule"); */
+
+  P2RfPvt         *p2Rf = hndl;
+  unsigned short   mstt;
+  unsigned short   mctl;
+
+
+  mstt = p2Rf->csr->dir.r.status;
+  mctl = mstt & ~(P2RF_M_SYSFAILINH | P2RF_M_SOFTRESET);
+  p2Rf->devDep->devCtrl    = 0;
+  p2Rf->csr->dir.w.control = mctl;
+  p2Rf->csr->dir.w.control = mctl | P2RF_M_SOFTRESET;
+  p2Rf->csr->dir.w.control = 0;
+  p2Rf->csr->dir.w.control = mstt;
+
+  taskDelay (P2RF_K_RESETTMO * sysClkRateGet ());
+}
+
+
+
+void P2RF_ReadVme (void             *hndl,
+                   int               reg,
+                   unsigned short   *val)
+/*
+   Description
+   -----------
+   Function to read a register in one of the VME spaces
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+          reg - An encoded index to the register
+          val - A pointer to the location in which to return the read value
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("P2RF_ReadVme"); */
+
+  P2RfPvt   *p2Rf = hndl;
+
+
+  /* Return the requested register */
+  if (reg & P2RF_M_SPACE)
+  {
+    vxi16_t   *csrs = (vxi16_t *) p2Rf->csr;
+    int        idx = reg & P2RF_M_A16;
+
+    FASTLOCK (&p2Rf->lock);
+    *val = csrs[idx];
+    FASTUNLOCK(&p2Rf->lock);
+
+#if 0
+    Dbg (Printf (__FILE__, FN, "reg = %d, adx = %08x, val = %h04x",
+                 idx, &csrs[idx], *val));
+#endif
+  }
+  else
+  {
+    vxi16_t   *ext  = p2Rf->ext;
+
+    FASTLOCK (&p2Rf->lock);
+    *val = ext[reg];
+    FASTUNLOCK(&p2Rf->lock);
+
+#if 0
+    Dbg (Printf (__FILE__, FN, "reg = %d, adx = %08x, val = %h04x",
+                 reg, &ext[reg], *val));
+#endif
+  }
+}
+
+
+
+void P2RF_WriteVme (void             *hndl,
+                    int               reg,
+                    unsigned short    val)
+/*
+   Description
+   -----------
+   Function to write a register in one of the VME spaces
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+          reg - An encoded index to the register
+          val - The value to write
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("P2RF_WriteVme"); */
+
+  P2RfPvt   *p2Rf = hndl;
+
+
+  /* Load the requested register */
+  if (reg & P2RF_M_SPACE)
+  {
+    int idx = reg & P2RF_M_A16;
+
+    ((vxi16_t *) p2Rf->csr)[idx] = val;
+
+#if 0
+    Dbg (Printf (__FILE__, FN, "reg = %d, adx = %08x, val = %h04x",
+                 idx, &((vxi16_t *) p2Rf->csr)[idx], val));
+#endif
+  }
+  else
+  {
+    ((vxi16_t *) p2Rf->ext)[reg] = val;
+
+#if 0
+    Dbg (Printf (__FILE__, FN, "reg = %d, adx = %08x, val = %h04x",
+                 reg, &((vxi16_t *) p2Rf->ext)[reg], val));
+#endif
+  }
+
+}
+
+
+
+Status P2RF_LoadConsts (void                *hndl,
+                        register short      *consts,
+                        register int         count,
+                        register int         index)
+/*
+   Description
+   -----------
+   Function to load constants onto a module.
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+       consts - An array of constants to load
+        count - The number of constants to load from the consts array
+        index - The starting index of the VME location to load the constant at
+     
+
+   Returns
+   -------
+   ERROR if the input values are suspect, VXI_SUCCESS otherwise.
+*/
+{
+  /*Function ("P2RF_LoadConsts");*/
+
+  register P2RfPvt  *p2Rf = hndl;
+
+  while (count--)
+  {
+#if 0
+    epicsPrintf ("%s: idx = %h04x, const = %i, const = %h04x\n", FN,
+                 index, *consts, *consts);
+#endif
+
+    /* Load the constant on the hardware */
+    P2RF_WriteVme (p2Rf, index, *consts);
+
+    /* Next! */
+    consts++;
+    index++;
+  }
+
+  return (VXI_SUCCESS);
+}
+
+
+
+Status P2RF_ReadConstsFile (void            *hndl,
+                            char            *id,
+                            char            *file,
+                            register int     count,
+                            register short  *consts,
+                            char            *msgBuf,
+                            int              msgBufLen,
+                            int              q14)
+
+/*
+   Description
+   -----------
+   Function for loading integer constants from a file into memory.
+
+  Since file operations are buffered, some errors can't be detected until
+  several file operations have taken place.  This can result in misleading
+  status messages being reported.  Additionally, it has been observed that some
+  (e.g., fclose) file functions output messages (presumably messages reported
+  by the host) themselves and are thus not capturable for reporting to the
+  caller.
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+           id - The ID that the file must contain
+         file - The constants file to read
+        count - The number of constants expected in the file
+        consts - The constants array to fill
+       msgBuf - A pointer to a buffer in which to return formated status msgs
+    msgBufLen - The maximum allowed space status messages may take up
+        q14   - If true, read as float and convert to Q14 for Rfp DSP.
+                If false, read as hex.
+
+   Returns
+   -------
+   ERROR if an error condition was encountered, OK otherwise */
+{
+  Function ("P2RF_ReadConstsFile");
+
+  P2RfPvt        *p2Rf   = hndl;
+  register FILE  *fp     = fopen (file, "r");
+  long            status = OK;
+  char            msg[P2RF_K_BUFSIZE];
+  char            buf[P2RF_K_BUFSIZE];
+  float           afloat[4];
+  char            line[132];       /* A line to read */
+  int             i;
+
+  strcpy (msg,"Success");
+  /* Check that the file was opened */
+  if (fp == 0)
+  {
+    strcpy (msg,"Can't open const file");
+    P2RF_Printf (__FILE__, FN, "%s: %s %s", p2Rf->model.name, msg, file);
+    if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+    return (ERROR);
+  }
+
+  /* Check that the ID string matches the expected value */
+  if (fgets (buf, sizeof (buf), fp) != NULL)
+  {
+    if (strstr (buf, id) == NULL)
+    {
+      strcpy (msg,"File ID string mismatch");
+      P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                   p2Rf->model.name, msg, file);
+      P2RF_Printf (__FILE__, FN, "Expected ID      |%s|", id);
+      P2RF_Printf (__FILE__, FN, "not contained in |%s|", buf);
+      status = ERROR;
+    }
+    else
+    {
+      /* Load constants from file. Read as float and convert or as hex */
+      while (count > 0)
+      {
+        if (q14)
+	{
+	  /* Read four values/line so we can have trailing comments */
+          fgets (line, 132, fp);
+          if (sscanf (line, "%f %f %f %f", &afloat[0], &afloat[1],
+                                           &afloat[2], &afloat[3]) != 4)
+          {
+            strcpy (msg,"Unexpected EOF encountered");
+            goto ErrorOut;
+          }
+          for (i=0; i<4; i++)
+	  {
+            if (fabs(afloat[i]) >= 2.0)    /* +/- 1.9999... is max for Q14 */
+	    {
+              strcpy (msg,"Q14 value >= +/-2.0");
+              goto ErrorOut;
+            }
+            *consts++ =  (short) (afloat[i] * (float) (1 << 14)); /* Q14 */;
+            count--;
+	  }
+	}
+        else
+	{
+          count--;
+          fgets (line, 132, fp);
+          if (sscanf (line, "%hi", consts++) != 1)
+          {
+            strcpy (msg,"Unexpected EOF encountered");
+            goto ErrorOut;
+          }
+        }    /* if (q14)  */
+      }      /* while (count > 0) */
+    }
+  }
+  else
+  {
+    strcpy (msg,"EOF while reading ID string");
+ErrorOut:
+    P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                 p2Rf->model.name, msg, file);
+    status = ERROR;
+  }
+
+  /* Close the file */
+  if (fclose (fp) == EOF)    strcpy (msg,"File close failed");
+
+  /* Save status message in caller's buffer */
+  if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+
+  return (status);
+}
+
+
+
+Status P2RF_LoadCoefs (void                *hndl,
+                       register float      *coefs,
+                       register int         count,
+                       register int         index,
+                       register P2RfCvtBlk *blk)
+/*
+   Description
+   -----------
+   Function to load coefficients onto a module.  The coefficients are first
+   converted from floats to shorts.  The caller may supply a callback routine
+   to further convert the integer coefficient.
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+        coefs - An array of coefficients to load
+        count - The number of coefficients to load from the coefs array
+        index - The starting index of the VME location to load the coefs at
+          blk - A pointer to a block containing coefficient conversion params
+
+   Returns
+   -------
+   ERROR if the input values are suspect, VXI_SUCCESS otherwise.
+*/
+{
+  /*Function ("P2RF_LoadCoefs");*/
+
+  register P2RfPvt  *p2Rf = hndl;
+
+
+  /* Return ERROR if inputs cause problems */
+  if (((blk->iMax - blk->iMin) == 0) || ((blk->fMax - blk->fMin) == 0.0))
+    return (ERROR);
+
+  while (count--)
+  {
+    register float   fCoef = *coefs;
+    register short   iCoef;
+
+    /* Convert the coefficients from floats to shorts */
+    if (fCoef <= blk->fMin)  fCoef = blk->fMin;
+    if (fCoef >  blk->fMax)  fCoef = blk->fMax;
+#if (CPU==PPC604)
+    iCoef = (((blk->iMax - blk->iMin) /
+                     (blk->fMax - blk->fMin)) * fCoef) + blk->iOff;
+#else
+    iCoef = iround (((blk->iMax - blk->iMin) /
+                     (blk->fMax - blk->fMin)) * fCoef) + blk->iOff;
+#endif
+    /* Apply caller defined conversion, if specified */
+    if (*blk->cvtRtn)  iCoef = (*blk->cvtRtn) (blk->cvtArg, iCoef);
+
+#if 0
+    epicsPrintf ("%s: idx = %h04x, fCoef = %f, iCoef = %h04x\n", FN,
+                 index, fCoef, iCoef);
+#endif
+
+    /* Load the coefficient on the hardware */
+    P2RF_WriteVme (p2Rf, index, iCoef);
+
+    /* Next! */
+    coefs++;
+    index++;
+  }
+
+  return (VXI_SUCCESS);
+}
+
+
+
+Status P2RF_ReadCoefFile (void            *hndl,
+                          char            *id,
+                          char            *file,
+                          register int     count,
+                          register float  *coefs,
+                          char            *msgBuf,
+                          int              msgBufLen)
+/*
+   Description
+   -----------
+   Function for loading coefficients from a file into memory.
+
+  Since file operations are buffered, some errors can't be detected until
+  several file operations have taken place.  This can result in misleading
+  status messages being reported.  Additionally, it has been observed that some
+  (e.g., fclose) file functions output messages (presumably messages reported
+  by the host) themselves and are thus not capturable for reporting to the
+  caller.
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+           id - The ID that the file must contain
+         file - The coefficient file to read
+        count - The number of coefficients expected in the file
+        coefs - The coefficient array to fill
+       msgBuf - A pointer to a buffer in which to return formated status msgs
+    msgBufLen - The maximum allowed space status messages may take up
+
+   Returns
+   -------
+   ERROR if an error condition was encountered, OK otherwise */
+{
+  Function ("P2RF_ReadCoefFile");
+
+  P2RfPvt        *p2Rf   = hndl;
+  register FILE  *fp     = fopen (file, "r");
+  long            status = OK;
+  char           *msg    = "Success";
+  char            buf[P2RF_K_BUFSIZE];
+  float           afloat;
+  char            line[132];       /* A line to read */
+
+
+  /* Check that the file was opened */
+  if (fp == 0)
+  {
+    msg = "Can't open coef file";
+    P2RF_Printf (__FILE__, FN, "%s: %s %s", p2Rf->model.name, msg, file);
+    if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+    return (ERROR);
+  }
+
+  /* Check that the ID string matches the expected value */
+  if (fgets (buf, sizeof (buf), fp) != NULL)
+  {
+    if (strstr (buf, id) == NULL)
+    {
+      msg = "File ID string mismatch";
+      P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                   p2Rf->model.name, msg, file);
+      P2RF_Printf (__FILE__, FN, "Expected ID      |%s|", id);
+      P2RF_Printf (__FILE__, FN, "not contained in |%s|", buf);
+      status = ERROR;
+    }
+    else
+    {
+      /* Load coefficients from file */
+      while (count--)
+      {
+        /* Read one value/line so we can have trailing comments */
+        fgets (line, 132, fp);
+        if (sscanf (line, "%f", &afloat) != 1)
+        {
+          strcpy (msg,"Unexpected EOF encountered");
+          goto ErrorOut;
+        }
+        else
+          *coefs++ = afloat;
+      }
+    }
+  }
+  else
+  {
+    msg = "EOF whilst reading ID string";
+ErrorOut:
+    P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                 p2Rf->model.name, msg, file);
+    status = ERROR;
+  }
+
+  /* Close the file */
+  if (fclose (fp) == EOF)    msg = "File close failed";
+
+  /* Save status message in caller's buffer */
+  if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+
+  return (status);
+}
+
+
+
+Status P2RF_LoadDdf (void       *hndl,
+                     int         iIdx,
+                     int         qIdx,
+                     P2RfDdf    *ddf)
+/*
+   Description
+   -----------
+   This function loads an I/Q channel's DDF chips' F, FC, H1 and H2 registers.
+
+   It appears from the HSP43220 data sheet and Harris' TechBrief note TB309
+   that the chip's registers can be written in any particular order
+
+   For this function to work the FIR clock must be going.  It appears that
+   we're safe because it does not look like the FIR clock is disablable.
+
+   Parameters
+   ----------
+       drvPvt - A pointer to the driver-private block
+         iIdx - Index to an I channel DDF (F) register
+         qIdx - Index to a  Q channel DDF (F) register
+          ddf - A pointer to a DDF block
+
+   Returns
+   -------
+   OK
+*/
+{
+  /* Function ("P2RF_LoadDdf"); */
+
+  P2RfPvt   *p2Rf = hndl;
+
+
+  /* Disable the FIR */
+  P2RF_WriteVme (p2Rf, iIdx + DDF_I_H1, DDF_M_FDIS | DDF_M_HBYP);
+  P2RF_WriteVme (p2Rf, qIdx + DDF_I_H1, DDF_M_FDIS | DDF_M_HBYP);
+
+#if 0
+  epicsPrintf ("H1(%08x, %08x) being loaded with %h04x\n",
+               iIdx + DDF_I_H1, qIdx + DDF_I_H1, DDF_M_FDIS | DDF_M_HBYP);
+#endif
+
+  /* Load the F register with reset */
+  P2RF_WriteVme (p2Rf, iIdx + DDF_I_F,  DDF_M_F0AD | DDF_M_FBYP);
+  P2RF_WriteVme (p2Rf, qIdx + DDF_I_F,  DDF_M_F0AD | DDF_M_FBYP);
+
+#if 0
+  epicsPrintf ("F(%08x, %08x) being loaded with %h04x\n",
+               iIdx + DDF_I_F, qIdx + DDF_I_F, DDF_M_F0AD | DDF_M_FBYP);
+#endif
+
+  /* Wait for at least two FIR clock cycles to go by */
+  taskDelay (sysClkRateGet () / 60);
+
+  /* Reload the H1 register to reenable FIR*/
+  P2RF_WriteVme (p2Rf, iIdx + DDF_I_H1, ddf->h1);
+  P2RF_WriteVme (p2Rf, qIdx + DDF_I_H1, ddf->h1);
+
+#if 0
+  epicsPrintf ("H1(%08x, %08x) being loaded with %h04x\n",
+               iIdx + DDF_I_H1, qIdx + DDF_I_H1, ddf->h1);
+#endif
+
+  /* Load the H2 register (may cause HDF to glitch) */
+  P2RF_WriteVme (p2Rf, iIdx + DDF_I_H2, ddf->h2);
+  P2RF_WriteVme (p2Rf, qIdx + DDF_I_H2, ddf->h2);
+
+#if 0
+  epicsPrintf ("H2(%08x, %08x) being loaded with %h04x\n",
+               iIdx + DDF_I_H2, qIdx + DDF_I_H2, ddf->h2);
+#endif
+
+  /* Write the F register */
+  P2RF_WriteVme (p2Rf, iIdx + DDF_I_F, ddf->f);
+  P2RF_WriteVme (p2Rf, qIdx + DDF_I_F, ddf->f);
+
+#if 0
+  epicsPrintf ("F(%08x, %08x) being loaded with %h04x\n",
+               iIdx + DDF_I_F, qIdx + DDF_I_F, ddf->f);
+#endif
+
+  /* Load the coefficients through the FC register */
+  {
+    register P2RfFc   *fc    = ddf->fc;
+    register int       fcCnt = ddf->fcCnt;
+    register int       iFc   = iIdx + DDF_I_FC;
+    register int       qFc   = qIdx + DDF_I_FC;
+
+#if 0
+    epicsPrintf ("FC(%08x, %08x) being loaded with: \n",
+                 iIdx + DDF_I_FC, qIdx + DDF_I_FC);
+#endif
+
+    while (fcCnt--)
+    {
+#if 0
+      epicsPrintf ("iHi = %h04x, iLo = %h04x, qHi = %h04x, qLo = %h04x\n",
+                   fc->hi, fc->lo, fc->hi, fc->lo);
+#endif
+
+      P2RF_WriteVme (p2Rf, iFc, fc->hi);
+      P2RF_WriteVme (p2Rf, iFc, fc->lo);
+      P2RF_WriteVme (p2Rf, qFc, fc->hi);
+      P2RF_WriteVme (p2Rf, qFc, fc->lo);
+      fc++;
+    }
+  }
+
+  return (OK);
+}
+
+
+
+Status P2RF_ReadDdfFile (void    *hndl,
+                         char    *file,
+                         char    *id,
+                         P2RfDdf *ddf,
+                         char    *msgBuf,
+                         int      msgBufLen)
+/*
+   Description
+   -----------
+   This function reads DDF register data for an I/Q channel from a file.
+   The file is expected to have a format like that put out by Harris'
+   DECI-MATE coefficient generating software.
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+         file - The file spec of the file to load
+           id - ID string we expect to find at the top of the file
+          ddf - A pointer to a DDF block
+       msgBuf - A pointer to a buffer for returning status messages
+    msgBufLen - The size of the passed message buffer
+
+   Returns
+   -------
+   ERROR if a problem occured, OK otherwise
+*/
+{
+  Function ("P2RF_ReadDdfFile");
+
+  P2RfPvt   *p2Rf   = hndl;
+  FILE      *fp;
+  char       buf[P2RF_K_BUFSIZE];
+  int        cnt;
+  char      *msg = "File read error (EOF?)";
+
+
+  /* Check that the file was opened */
+  if ((fp = fopen (file, "r")) == 0)
+  {
+    msg = "Can't open file";
+    errPrintf (NULL, __FILE__, __LINE__, "%s: %s: %s %s",
+               FN, p2Rf->model.name, msg, file);
+    if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+    return (ERROR);
+  }
+
+#if 0
+  Dbg (Printf (__FILE__, FN, "fp = %0x", fp));
+#endif
+
+  /* Let's try a trick to keep error processing clean */
+  do
+  {
+    /* Check that the ID string matches the expected value */
+    if (fgets (buf, sizeof (buf), fp) != NULL)
+    {
+      if (strstr (buf, id))
+      {
+        /* Find and read the F register */
+        if (FileScan (fp, DDF_K_FNAME)   != OK)  break;
+        if (fgets (buf, sizeof (buf), fp) == 0)  break;
+#if 0
+        Dbg (epicsPrintf ("%s (%s): buf = %s", __FILE__, FN, buf));
+#endif
+        {
+          int   zad, byp, esym, drate, taps;
+
+          if (fscanf (fp, "%d%d%d%d%d", &zad, &byp, &esym, &drate, &taps) != 5)
+            break;
+#if 0
+          Dbg (Printf (__FILE__, FN,
+                       "zad = %d, byp = %d, esym = %d, drate = %d, taps = %d",
+                       zad, byp, esym, drate, taps));
+#endif
+          ddf->f = ((taps  << DDF_V_FTAPS) | (drate << DDF_V_FDRATE) |
+                    (esym  << DDF_V_FESYM) | (byp   << DDF_V_FBYP)   |
+                    (zad   << DDF_V_F0AD));
+        }
+
+        /* Find and read the FC (coefficient) register data */
+        if (FileScan (fp, DDF_K_FCNAME) != OK)  break;
+        {
+          int                coef;
+          register P2RfFc   *fc = ddf->fc;
+          register int       fcCnt = 0;
+
+          while ((cnt = fscanf (fp, "%d", &coef)) == 1)
+          {
+            fc->lo = coef & 0x000f;
+            fc->hi = coef >> 4;
+#if 0
+            Dbg (Printf (__FILE__, FN, "coef = %08x, hi = %h04x, lo = %h04x",
+                         coef, fc->hi, fc->lo));
+#endif
+            fc++;
+            fcCnt++;
+          }
+          ddf->fcCnt = fcCnt;
+        }
+        if (cnt == EOF)  break;
+
+        /* Find and read the H1 register */
+        if (FileScan (fp, DDF_K_H1NAME)   != OK)  break;
+        if (fgets (buf, sizeof (buf), fp) == 0)   break;
+#if 0
+        Dbg (epicsPrintf ("%s (%s): buf = %s", __FILE__, FN, buf));
+#endif
+        {
+          int   dis, cla, byp, drate;
+
+          if (fscanf (fp, "%d%d%d%d", &dis, &cla, &byp, &drate) != 4)  break;
+#if 0
+          Dbg (Printf (__FILE__, FN, "dis = %d, cla = %d, byp = %d, drate = %d",
+                       dis, cla, byp, drate));
+#endif
+          ddf->h1 = ((drate  << DDF_V_HDRATE) | (byp    << DDF_V_HBYP) |
+                     (cla    << DDF_V_FCLA)   | (dis    << DDF_V_FDIS));
+        }
+
+        /* Find and read the H2 register */
+        if (FileScan (fp, DDF_K_H2NAME)   != OK)  break;
+        if (fgets (buf, sizeof (buf), fp) == 0)   break;
+#if 0
+        Dbg (epicsPrintf ("%s (%s): buf = %s", __FILE__, FN, buf));
+#endif
+        {
+          int   growth, stages;
+
+          if (fscanf (fp, "%d%d", &growth, &stages) != 2)  break;
+#if 0
+          Dbg (Printf (__FILE__, FN, "growth = %d, stages = %d",
+                       growth, stages));
+#endif
+          ddf->h2 = ((stages << DDF_V_STAGES) | (growth << DDF_V_GROWTH));
+        }
+      }
+      else
+      {
+        msg    = "File ID string mismatch";
+        break;
+      }
+    }
+    else
+    {
+      break;
+    }
+
+    /* Close the file */
+    if (fclose (fp) == EOF)
+    {
+      msg = "File close failed";
+      errPrintf (NULL, __FILE__, __LINE__, "%s: %s: %s %s",
+                 FN, p2Rf->model.name, msg, file);
+      if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+      return (ERROR);
+    }
+
+    return (OK);
+  } while (FALSE);
+
+  /* Errors occured */
+  errPrintf (NULL, __FILE__, __LINE__, "%s: %s: %s for %s",
+             FN, p2Rf->model.name, msg, file);
+  if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+  fclose (fp);
+
+  return (ERROR);
+}
+
+
+
+static Status FileScan (FILE  *fp,
+                        char  *test)
+/*
+   Description
+   -----------
+   Function to scan through an open file looking for a test string.  If the
+   string isn't found before the end of the file, an error message is reported
+   and the file is closed.
+
+   Parameters
+   ----------
+           fp - A pointer to an open file
+         test - The test string to look for
+
+   Returns
+   -------
+   OK if the test string is found, ERROR otherwise
+*/
+{
+#if 0
+  Function ("FileScan");
+#endif
+
+  char  buf[P2RF_K_BUFSIZE];
+
+  do
+  {
+    if (fgets (buf, sizeof (buf), fp) == 0)  return (ERROR);
+#if 0
+    Dbg (epicsPrintf ("%s (%s): buf = %s", __FILE__, FN, buf));
+#endif
+  } while (strstr (buf, test) == NULL);
+  return (OK);
+}
+
+
+
+Status P2RF_CopyMemory (void           *hndl,
+                        int             index,
+                        P2RfBufDsc     *bufDsc)
+/*
+   Description
+   -----------
+   Function to copy data from a module's 512K RAM to a private buffer.
+   These RAMs are accessed through a single register location on the module.
+   The module takes care of addressing the RAMS with up counters on writes
+   (via the register or internally generated) or down counters (via reads
+   from the register or internally generated), or vice versa depending on
+   the implementation.
+
+   Since the module owns the addressing of the memory, multiple clients
+   should not be allowed to go after the memory at the same time.  The
+   module can't know which client is requesting what.  For this reason
+   all access routines must recognize when the memory is in use by another
+   client.  This mutual exclusion is handled via a semaphore.  Thus, this
+   routine will block execution whilst another client "owns" the memory
+   by calling this or one of the other memory access routines.  (Perhaps
+   we should add a timeout for this at some point?)
+
+   In order to prevent haphazard calls of this routine from writing onto
+   non-allocated blocks of local memory, a valid memory block address
+   must be passed through a buffer descriptor.  This doesn't guard
+   against the possibility of stomping all over local memory, but you
+   have to try harder.
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+        index - The VME address index at which the memory resides
+       bufDsc - A pointer to a buffer descriptor
+
+   Returns
+   -------
+   ERROR if an error condition was encountered, OK otherwise
+*/
+{
+  Function ("P2RF_CopyMemory");
+
+  P2RfPvt                 *p2Rf   = hndl;
+  register vxi16_t        *ext    = &p2Rf->ext[index];
+  long                     status = OK;
+
+
+  /* If there are multiple clients, lock out other RAM access attempts */
+  if (p2Rf->sharedCnt)  semTake (p2Rf->shrSem, WAIT_FOREVER);/* Needs Timeout */
+
+  /* Check that this is not a bogus call - client must know what he's doing */
+  if (bufDsc->self == bufDsc)
+  {
+    register int           count  = bufDsc->count;
+    register short        *buffer = bufDsc->buffer;
+
+    *buffer = *ext;                     /* 1 read to get hdw ptr to last val */
+
+    /* Copy the memory to the private buffer */
+    while (count--) *buffer++ = *ext;
+  }
+  else
+  {
+    errPrintf (-1, __FILE__, __LINE__, "%s: Bad copy request", FN);
+    status = ERROR;
+  }
+
+  /* If there are multiple clients free the next one */
+  if (p2Rf->sharedCnt)  semGive (p2Rf->shrSem);
+
+  return (status);
+}
+
+
+
+Status P2RF_RecordMemory (void           *hndl,
+                          char           *id,
+                          int             index,
+                          int             count,
+                          char           *file,
+                          int            *abortFlg,
+                          char           *msgBuf,
+                          int             msgBufLen)
+/*
+   Description
+   -----------
+   Function to record data from a module's memory to a binary file.
+
+   Since file operations are buffered, some errors can't be detected until
+   several file operations have taken place.  This can result in misleading
+   status messages being reported.  Additionally, it has been observed that
+   some (e.g., fclose) file functions output messages (presumably messages
+   reported by the host) themselves and are thus not capturable for reporting
+   to the caller.
+
+   The scheme employed below involves double buffering to minimize the overhead
+   incurred by calling fwrite.  Experimentation revealed that with buffers
+   larger than 16 shorts didn't significantly improve the average file
+   access rate.
+
+   Since the module owns the addressing of the memory, multiple clients
+   should not be allowed to go after the memory at the same time.  The
+   module can't know which client is requesting what.  For this reason
+   all access routines must recognize when the memory is in use by another
+   client.  This mutual exclusion is handled via a semaphore.  Thus, this
+   routine will block execution whilst another client "owns" the memory
+   by calling this or one of the other memory access routines.  (Perhaps
+   we should add a timeout for this at some point?)
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+           id - An identification string to put at the top of the file
+        index - The VME address index at which the memory resides
+        count - The number of words of memory to record
+         file - The file to record the data in
+     abortFlg - A pointer to an abort flag
+       msgBuf - A pointer to a buffer in which to return formated status msgs
+    msgBufLen - The maximum allowed space status messages may take up
+
+   Returns
+   -------
+   ERROR if an error condition was encountered, OK otherwise
+*/
+{
+#if 0
+  Function ("P2RF_RecordMemory");
+#endif
+  return P2RF_RecordMemory_common (hndl, id, index, count, file, abortFlg, msgBuf, msgBufLen, 1);
+}
+
+/*----------------------------------------------------------------
+ * new w/out pre-read
+ *----------------------------------------------------------------
+ */
+Status P2RF_RecordMemory_noPreRead (void           *hndl,
+				    char           *id,
+				    int             index,
+				    int             count,
+				    char           *file,
+				    int            *abortFlg,
+				    char           *msgBuf,
+				    int             msgBufLen)
+{
+#if 0
+  Function ("P2RF_RecordMemory_common_noPreRead");
+#endif
+  return P2RF_RecordMemory_common (hndl, id, index, count, file, abortFlg, msgBuf, msgBufLen, 0);
+}
+
+/*----------------------------------------------------------------
+ * common code (was just the old version)
+ *----------------------------------------------------------------
+ */
+Status P2RF_RecordMemory_common (void           *hndl,
+				 char           *id,
+				 int             index,
+				 int             count,
+				 char           *file,
+				 int            *abortFlg,
+				 char           *msgBuf,
+				 int             msgBufLen,
+				 int             doPreRead)	/* 0=no, !0=yes */
+/*
+   Description
+   -----------
+   Function to record data from a module's memory to a binary file.
+
+   Since file operations are buffered, some errors can't be detected until
+   several file operations have taken place.  This can result in misleading
+   status messages being reported.  Additionally, it has been observed that
+   some (e.g., fclose) file functions output messages (presumably messages
+   reported by the host) themselves and are thus not capturable for reporting
+   to the caller.
+
+   The scheme employed below involves double buffering to minimize the overhead
+   incurred by calling fwrite.  Experimentation revealed that with buffers
+   larger than 16 shorts didn't significantly improve the average file
+   access rate.
+
+   Since the module owns the addressing of the memory, multiple clients
+   should not be allowed to go after the memory at the same time.  The
+   module can't know which client is requesting what.  For this reason
+   all access routines must recognize when the memory is in use by another
+   client.  This mutual exclusion is handled via a semaphore.  Thus, this
+   routine will block execution whilst another client "owns" the memory
+   by calling this or one of the other memory access routines.  (Perhaps
+   we should add a timeout for this at some point?)
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+           id - An identification string to put at the top of the file
+        index - The VME address index at which the memory resides
+        count - The number of words of memory to record
+         file - The file to record the data in
+     abortFlg - A pointer to an abort flag
+       msgBuf - A pointer to a buffer in which to return formated status msgs
+    msgBufLen - The maximum allowed space status messages may take up
+
+   Returns
+   -------
+   ERROR if an error condition was encountered, OK otherwise
+*/
+{
+  Function ("P2RF_RecordMemory_common");
+
+  Status                   status = OK;
+  char                    *msg    = "Success";
+  P2RfPvt                 *p2Rf   = hndl;
+  FILE                    *fp;
+
+
+  /* If there are multiple clients, lock out other RAM access attempts */
+  if (p2Rf->sharedCnt)  semTake (p2Rf->shrSem, WAIT_FOREVER);/* Needs Timeout */
+
+  /* Check that the file was opened.  May have failed even with non-null fp! */
+  if ((fp = fopen (file, "wb")) == 0)
+  {
+    msg = "Can't open file for writing";
+    P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                 p2Rf->model.name, msg, file);
+    goto OpenErr;
+  }
+
+  /* Write the ID string to the file */
+  if (fwrite (id, strlen (id), 1, fp) == 1)
+  {
+    unsigned short    dblBuf[DBLBUFSZ];	/* what's DBL about it... */
+
+    register vxi16_t        *ext = &p2Rf->ext[index];
+    register int             cnt = P2RF_K_BLKSIZE * count / DBLBUFSZ;
+    register unsigned short *dbp = dblBuf;
+
+    if (doPreRead) *dbp = *ext;               /* 1 read to get hdw ptr to last val */
+
+    /* Read the memory and write it to the file */
+    while (cnt-- && (*abortFlg == FALSE))
+    {
+      dbp = dblBuf;
+      while (dbp < &dblBuf[DBLBUFSZ])  *dbp++ = *ext;
+      if (fwrite (dblBuf, sizeof (*dblBuf), DBLBUFSZ, fp) < 1)  goto ErrorOut;
+    }
+  }
+  else
+  {
+ErrorOut:
+    msg    = "File write failed";
+    P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                 p2Rf->model.name, msg, file);
+    status = ERROR;
+  }
+
+  /* Close the file.  Will fail if fopen didn't really open the file */
+  if (fclose (fp) == EOF)    msg = "File close failed";
+
+OpenErr:
+  /* Save status message in caller's buffer */
+  if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+
+  /* If there are multiple clients free the next one */
+  if (p2Rf->sharedCnt)  semGive (p2Rf->shrSem);
+
+  return (status);
+}
+
+
+
+Status P2RF_LoadDsp (void           *hndl,
+                     int             index,
+                     char           *file,
+                     int             lderam,
+                     char           *msgBuf,
+                     int             msgBufLen)
+/*
+   Description
+   -----------
+   Function to load an executeable file onto a DSP.
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+        index - The VME address index at which DSP memory starts
+         file - The DSP executable file to load
+       lderam - Logical if eram load desired
+       msgBuf - A pointer to a buffer in which to return formated status msgs
+    msgBufLen - The maximum allowed space status messages may take up
+
+
+   Returns
+   -------
+   ERROR if an error condition was encountered, OK otherwise
+*/
+{
+  Function ("P2RF_LoadDsp");
+
+  P2RfPvt       *p2Rf = hndl;
+  unsigned long  adx  = (unsigned long) &((vxi16_t *) p2Rf->ext)[index];
+  char          *msg  = NULL;
+  Status         status;
+
+  status = DWN_LdDspExe(file, adx, FALSE, lderam);
+  if (status)
+  {
+    if (status == DWN_UNAFIL)
+    {  msg = "Can't open DSP file";  }
+    else if (status == DWN_RDERR)
+    {  msg = "DSP file read error";  }
+    else if ((status == DWN_BADMAG) || (status == DWN_NOTEXE) ||
+             (status == DWN_MINFIL) || (status == DWN_UPDFIL) ||
+             (status == DWN_UNSSWP) || (status == DWN_SWPNOT) ||
+             (status == DWN_NOTSWP) || (status == DWN_BADFLG))
+    {  msg = "DSP file error";  }
+    else
+    {
+      msg = "DSP download error";
+      epicsPrintf ("%s: DWN_LdDspExe status = %08x\n", FN, (int)status);
+    }
+
+    if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+  }
+
+  return (status);
+}
+
+
+
+Status P2RF_LoadTblFile (void           *hndl,
+                         char           *id,
+                         int             index,
+                         char           *file,
+                         int             count,
+                         int            *abortFlg,
+                         char           *msgBuf,
+                         int             msgBufLen)
+/*
+   Description
+   -----------
+   Function to load a table onto a module's table memory from a file.
+
+   Since file operations are buffered, some errors can't be detected until
+   several file operations have taken place.  This can result in misleading
+   status messages being reported.  Additionally, it has been observed that
+   some (e.g., fclose) file functions output messages (presumably messages
+   reported by the host) themselves and are thus not capturable for reporting
+   to the caller.
+
+   The scheme employed below involves double buffering to minimize the overhead
+   incurred by calling fwrite.  Experimentation revealed that with buffers
+   larger than 16 shorts didn't significantly improve the average file
+   access rate.
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+           id - An identification string expected to be at the top of the file
+        index - The VME address index at which the memory resides
+         file - The file to read the data from
+        count - Number of words to load on the module
+     abortFlg - A pointer to an abort flag
+       msgBuf - A pointer to a buffer in which to return formated status msgs
+    msgBufLen - The maximum allowed space status messages may take up
+
+   Returns
+   -------
+   ERROR if an error condition was encountered, OK otherwise */
+{
+  Function ("P2RF_LoadTblFile");
+
+  P2RfPvt        *p2Rf   = hndl;
+  FILE           *fp     = fopen (file, "rb");
+  Status          status = OK;
+  char           *msg    = "Success";
+  char            buf[P2RF_K_BUFSIZE];
+
+
+  /* Check that the file was opened.  May have failed even with non-null fp! */
+  if (fp == 0)
+  {
+    msg = "Can't open table file";
+    P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                 p2Rf->model.name, msg, file);
+    if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+    return (ERROR);
+  }
+
+  /* Check that the ID string matches the expected value */
+  if (fread (buf, strlen (id), 1, fp) == 1)
+  {
+    if (strncmp (buf, id, strlen (id)) == 0)
+    {
+      register vxi16_t        *ext = &p2Rf->ext[index];
+      register int             cnt = count / DBLBUFSZ;
+      unsigned short           dblBuf[DBLBUFSZ];
+      register unsigned short *dbp = dblBuf;
+
+      /* Read the file and write the table memory */
+      while (cnt-- && (*abortFlg == FALSE))
+      {
+        if (fread (dblBuf, sizeof (*dblBuf), DBLBUFSZ, fp) != DBLBUFSZ)  break;
+        dbp = dblBuf;
+        while (dbp < &dblBuf[DBLBUFSZ])  *ext = *dbp++;
+      }
+
+      /* If we weren't able to fit the whole file, let operator know */
+      if ((fread (dblBuf, sizeof (*dblBuf), 1, fp) == 1) &&
+          (*abortFlg == FALSE))
+      {
+        msg = "File too large for table memory";
+        goto ErrorOut;
+      }
+    }
+    else
+    {
+      msg = "File ID string mismatch";
+      P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                   p2Rf->model.name, msg, file);
+      buf[strlen (id)] = '\0';          /* Need to null term ids in files! */
+      P2RF_Printf (__FILE__, FN, "Expected ID |%s|", id);
+      P2RF_Printf (__FILE__, FN, "Read ID     |%s|", buf);
+      status = ERROR;
+    }
+  }
+  else
+  {
+    msg    = "EOF whilst reading ID string";
+ErrorOut:
+    P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                 p2Rf->model.name, msg, file);
+    status = ERROR;
+  }
+
+  /* Close the file */
+  if (fclose (fp) == EOF)
+  {
+    msg = "File close failed";
+    P2RF_Printf (__FILE__, FN, "%s: %s: %s %s",
+                 p2Rf->model.name, msg, file);
+    if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+    return (ERROR);
+  }
+
+  /* Save status message in caller's buffer */
+  if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+
+  return (status);
+}
+
+
+
+Status P2RF_DspFindComBlk (void            *hndl,
+                           volatile void  **comBlk)
+/*
+   Description
+   -----------
+
+   Parameters
+   ----------
+
+   Returns
+   -------
+
+*/
+{
+  Function ("P2RF_DspFindComBlk");
+
+  P2RfPvt        *p2Rf = hndl;
+  unsigned short  comBlkPtr;
+
+
+  /* Get the pointer to the communications block */
+  comBlkPtr = p2Rf->ext[DSP_K_ESIZE - 1];
+
+  /* Sorta check if the pointer value makes sense */
+  if ((comBlkPtr >= DSP_A_ERAM) && (comBlkPtr < DSP_A_ETOP))
+  {
+    *comBlk = &p2Rf->ext[comBlkPtr - DSP_A_ERAM];
+  }
+  else
+  {
+    P2RF_Printf (__FILE__, FN, "DSP comBlk pointer has nonsense value %h04x",
+                 comBlkPtr);
+    return (ERROR);
+  }
+
+  return (OK);
+}
+
+
+
+Status P2RF_SaveDspMemory (void           *hndl,
+                           int             startIdx,
+                           int             begIdx,
+                           int             endIdx,
+                           char           *file,
+                           char           *msgBuf,
+                           int             msgBufLen)
+/*
+   Description
+   -----------
+   Function to save data from a module DSP memory to an ascii file.
+
+   Since file operations are buffered, some errors can't be detected until
+   several file operations have taken place.  This can result in misleading
+   status messages being reported.  Additionally, it has been observed that
+   some (e.g., fclose) file functions output messages (presumably messages
+   reported by the host) themselves and are thus not capturable for reporting
+   to the caller.
+
+   The scheme employed below involves double buffering to minimize the overhead
+   incurred by calling fwrite.  Experimentation revealed that with buffers
+   larger than 16 shorts didn't significantly improve the average file
+   access rate.
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+     startIdx - The VME address index at which the memory resides
+       begIdx - The VME address index at which to start saving
+       endIdx - The VME address index at which to wrap to back to the beginning
+         file - The file to record the data in
+       msgBuf - A pointer to a buffer in which to return formated status msgs
+    msgBufLen - The maximum allowed space status messages may take up
+
+   Returns
+   -------
+   ERROR if an error condition was encountered, OK otherwise */
+{
+  Function ("P2RF_SaveDspMemory");
+
+  P2RfPvt                 *p2Rf   = hndl;
+  FILE                    *fp     = fopen (file, "w");
+  Status                   status = OK;
+  char                    *msg    = "Success";
+
+
+  /* Check that the file was opened.  May have failed even with non-null fp! */
+  if (fp == 0)
+  {
+    msg = "Can't open file for writing";
+    P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                 p2Rf->model.name, msg, file);
+    if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+    return (ERROR);
+  }
+
+  if (TRUE)
+  {
+    vxi16_t                 *beg = &p2Rf->ext[begIdx];
+    vxi16_t                 *end = &p2Rf->ext[endIdx];
+    register vxi16_t        *ext = beg;
+
+    /* Read the memory to the end */
+    while (ext < end)
+    {
+      if (fprintf (fp, "%hi %hi\n", ext[0], ext[1]) < 0)  goto ErrorOut;
+      ext += 2;
+    }
+
+    /* Reset the pointer back to the beginning of memory */
+    ext = &p2Rf->ext[startIdx];
+
+    /* Continue recording from the beginning to the start point */
+    while (ext < beg)
+    {
+      if (fprintf (fp, "%hi %hi\n", ext[0], ext[1]) < 0)  goto ErrorOut;
+      ext += 2;
+    }
+  }
+  else
+  {
+ErrorOut:
+    msg    = "File write failed";
+    P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                 p2Rf->model.name, msg, file);
+    status = ERROR;
+  }
+
+  /* Close the file.  Will fail if fopen didn't really open the file */
+  if (fclose (fp) == EOF)    msg = "File close failed";
+
+  /* Save status message in caller's buffer */
+  if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+
+  return (status);
+}
+
+
+
+Status P2RF_LoadRegFile (void       *hndl,
+                         char       *id,
+                         char       *file,
+                         int         idx,
+                         int         verify,
+                         char       *msgBuf,
+                         int         msgBufLen)
+/*
+   Description
+   -----------
+   Load register(s) from a data file.  The expected file format has the
+   identification string on the first line.  Following lines can be either
+   comments or data lines.  The comment characters are '!' and '#'.  Data
+   lines start with two numbers: an index to the register that is added
+   to the index supplied in the function argument idx, and the 16 bit value
+   that is to be written to be written to the register.  Since C's %i format
+   is used to decode both these numbers, they may entered in the file according
+   to its rules: e.g., decimal and hexadecimal may be used interchangably.
+   Characters following the second number are not interpreted and so the rest
+   of the line may be used as a comment field.
+
+   Parameters
+   ----------
+         hndl - A pointer to the module-specific driver-private block
+           id - An identification string expected to be at the top of the file
+         file - The file to read the data from
+          idx - The VME address index at which the memory resides
+       verify - TRUE to check that register readback is what was written
+       msgBuf - A pointer to a buffer in which to return formated status msgs
+    msgBufLen - The maximum allowed space status messages may take up
+
+   Returns
+   -------
+   SUCCESS or ERROR
+*/
+{
+ Function ("P2RF_LoadRegFile");
+
+  P2RfPvt        *p2Rf   = hndl;
+  register FILE  *fp     = fopen (file, "r");
+  long            status = OK;
+  char           *msg    = "Success";
+  char            buf[P2RF_K_BUFSIZE];
+
+
+  /* Check that the file was opened */
+  if (fp == 0)
+  {
+    msg = "Can't open register file";
+    P2RF_Printf (__FILE__, FN, "%s: %s %s", p2Rf->model.name, msg, file);
+    if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+    return (ERROR);
+  }
+
+  /* Check that the ID string matches the expected value */
+  if (fgets (buf, sizeof (buf), fp) != NULL)
+  {
+    if (strstr (buf, id) == NULL)
+    {
+      msg = "File ID string mismatch";
+      P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                   p2Rf->model.name, msg, file);
+      P2RF_Printf (__FILE__, FN, "Expected ID      |%s|", id);
+      P2RF_Printf (__FILE__, FN, "not contained in |%s|", buf);
+      status = ERROR;
+    }
+    else
+    {
+      int             i;
+      unsigned short  reg;
+      unsigned short  val;
+
+      while (fgets (buf, sizeof (buf), fp) != NULL)
+      {
+        /* Continue if first character is a comment character or blank line */
+        if ((buf[0] == '!') || (buf[0] == '#') || (buf[0] == '\n'))  continue;
+
+        /* Read index and register value from the line */
+        if (sscanf (buf, "%i %hi", &i, &reg) != 2)
+        {
+          msg = "Bad register file format";
+          P2RF_Printf (__FILE__, FN, "%s: file = %s, buffer = %s",
+                       msg, file, buf);
+          status = ERROR;
+          goto ErrorOut;
+        }
+
+#if 0
+        epicsPrintf ("i = %hi, idx = %hi, value = %h04x\n", i, idx + i, reg);
+#endif
+
+        /* Write the value to the register */
+        P2RF_WriteVme (p2Rf, idx + i, reg);
+
+        /* If enabled, read it back and make sure it's the same */
+        if (verify)
+        {
+          P2RF_ReadVme (p2Rf, idx + i, &val);
+          if (val != reg)
+          {
+            msg = "Register verify error";
+            P2RF_Printf (__FILE__, FN,
+                         "%s: idx = %i, wrote %h04x, read %h04x, xor = %h04x",
+                         msg, idx + i, reg, val, reg ^ val);
+            status = ERROR;
+            goto ErrorOut;
+          }
+        }
+      }
+    }
+  }
+  else
+  {
+    msg = "EOF whilst reading ID string";
+ErrorOut:
+    P2RF_Printf (__FILE__, FN, "%s: %s for %s",
+                 p2Rf->model.name, msg, file);
+    status = ERROR;
+  }
+
+  /* Close the file */
+  if (fclose (fp) == EOF)    msg = "File close failed";
+
+  /* Save status message in caller's buffer */
+  if (msgBuf)  strncpy (msgBuf, msg, msgBufLen);
+
+  return (status);
+
+}
+@
+
+
+1.5
+log
+@Initial import of COMB-2 (Cf2) support.
+@
+text
+@a42 4
+**         12-Apr-2005,   Mike Laznovsky (LAZMO)
+**            Fixed bogus use of "msg" variable in P2RF_ReadCoefFile()
+**            (potential CRASH!)
+**
+d44 1
+a44 1
+**            Added version of P2RF_RecordMemory() that skips the
+d46 1
+a46 1
+**            read loop
+d93 1
+a93 1
+#include <module_types.h>
+d102 3
+d193 1
+d258 8
+d400 1
+a400 1
+                   "%s: sysBusToLocalAdrs failed: adx = %08x\n", FN, vmeAddr);
+d413 2
+a414 2
+    errPrintf (S_dev_vxWorksVecInstlFail, __FILE__, __LINE__,
+"%s: Bad status returned when connecting ISR: %08x", FN, status);
+d421 2
+a422 2
+    errPrintf (S_dev_vxWorksVecInstlFail, __FILE__, __LINE__,
+"%s: Bad status returned when connecting ISR: %08x", FN, status);
+a587 1
+#if 0
+a588 1
+#endif
+d597 1
+a597 2
+    errPrintf (0, __FILE__, __LINE__, "%s: %s failed - id = %s",
+               "semMCreate", "shrSem");
+d908 1
+a908 1
+  epicsPrintf ("\tDriver private handle = 0x%08x\n", p2Rf);
+d1505 1
+a1505 1
+#if (CPU_FAMILY==PPC)
+d1607 1
+a1607 1
+          msg = "Unexpected EOF encountered";
+a1993 1
+#if 0
+a1994 1
+#endif
+d2017 1
+a2017 2
+    errPrintf (-1, __FILE__, __LINE__,
+               "%s:  Bad copy request");
+d2270 1
+a2270 1
+      epicsPrintf ("%s: DWN_LdDspExe status = %08x\n", FN, status);
+@
+
+
+1.4
+log
+@Remove debug
+@
+text
+@d43 4
+d48 1
+a48 1
+**            added version of P2RF_RecordMemory() that skips the
+d50 1
+a50 1
+**            read loop.
+d1602 1
+a1602 1
+          strcpy (msg,"Unexpected EOF encountered");
+@
+
+
+1.3
+log
+@ioc/rfApp/src/diag/Makefile.Vx
+@
+text
+@d749 1
+a749 1
+#if DEBUG
+a758 2
+  logMsg("%s: ISR interrupted - StatId=0x%08x  Level=%hx\n",
+         (int)FN,(int)statusId,(int)level,0,0,0);
+d763 1
+a763 1
+#if DEBUG
+d802 1
+a802 1
+#if DEBUG
+@
+
+
+1.2
+log
+@Change compile option for ISR dbg msgs
+@
+text
+@d749 1
+a749 1
+#if 0
+d759 2
+d765 1
+a765 1
+#if 0
+d804 1
+a804 1
+#if 0
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d749 1
+d751 1
+a751 1
+
+d763 1
+d775 1
+d781 1
+d784 1
+d787 1
+d790 1
+d793 1
+d796 1
+d802 1
+a802 1
+#ifdef DBG
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

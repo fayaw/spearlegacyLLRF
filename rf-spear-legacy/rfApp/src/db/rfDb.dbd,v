@@ -1,0 +1,53 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	RF-SPEAR-R0-0-0:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2011.12.07.01.08.38;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Changes for 3.14.11 build.
+@
+text
+@# PEP-II Rf Device and driver support
+include "p2RfCf2Record.dbd"
+include "p2RfGvfRecord.dbd"
+include "p2RfIqaRecord.dbd"
+include "p2RfRfpRecord.dbd"
+include "p2RfClkRecord.dbd"
+include "p2RfAimRecord.dbd"
+
+device(p2RfCf2,VXI_IO,devP2RfCf2,"PEP-II RF CF2")
+device(p2RfIqa,VXI_IO,devP2RfIqa,"PEP-II RF IQA")
+device(p2RfGvf,VXI_IO,devP2RfGvf,"PEP-II RF GVF")
+device(p2RfRfp,VXI_IO,devP2RfRfp,"PEP-II RF RFP")
+device(p2RfClk,VXI_IO,devP2RfClk,"PEP-II RF CLK")
+device(p2RfAim,VXI_IO,devP2RfAim,"PEP-II RF AIM")
+
+driver(drvP2RfVxi)
+
+registrar("subIQ")
+registrar("subSys")
+registrar("p2RfInitHooksRegister")
+@

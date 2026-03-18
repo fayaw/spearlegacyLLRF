@@ -1,0 +1,359 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+
+
+ History:   
+	XX/XX/97 - Original
+	06/14/99	NO	Changed parseLong() to shift properly if A32 or A24.
+***************************************************************************/
+
+/***************************************************************************
+  infoFxn/getInfo.c
+
+  This module provides getInfo routines.
+***************************************************************************/
+
+#include <vxWorks.h>
+#include <string.h>
+
+#include <kscvxi.h>
+#include <devinfo.h>
+#include <epvxi.h>
+#include <libvar.h>
+#undef KSC_DEBUG
+
+/*==========================================================================
+			    PRIVATE ROUTINES
+==========================================================================*/
+
+/*==========================================================================
+  findDevInfo
+==========================================================================*/
+
+static
+UserLAEntry* findDevInfo (INT16 la)
+{
+  UserLAEntry* entry;
+
+  for (entry = vxiDevHead;  entry;  entry = entry->next) {
+    if (entry->la == la)  return entry;
+  }
+
+  return NULL;
+}
+
+
+/*==========================================================================
+  parseLong
+==========================================================================*/
+
+static
+int parseLong (UserLAEntry* entry, int field, UINT32* value)
+{
+  UINT16 tmp;
+  UINT32 data;
+
+  switch (field) 
+  {
+     case DI_MEMBASE:
+	if (entry->MemSpace == VXI_ADDR_EXT_A32)
+	{
+    		*value = entry->MemBase << 16;
+	}
+	else /* A24 SPACE 		added on 6/14/99   */
+	{
+    		*value = entry->MemBase << 8;
+	}
+    break;
+
+    case DI_MEMSIZE:
+	if (entry->MemSpace == VXI_ADDR_EXT_A32)
+	{
+		tmp = 23-entry->MemSize;
+		data = (UINT32)(2<<(tmp-1));
+		*value =(UINT32) ( 256*data );
+#ifdef KSC_DEBUG
+printf("parseLong:A32 tmp = 0x%x, data = 0x%x, value = 0x%x\n",tmp,data,256*data);
+#endif
+
+	}
+	else /* A24 SPACE 		added on 6/14/99   */
+	{
+		tmp = 23-entry->MemSize;
+		data = (UINT32)(2<<(tmp-1));
+		*value =(UINT32) ( data );
+#ifdef KSC_DEBUG
+printf("parseLong:A24 tmp = 0x%x, data = 0x%x, value = 0x%x\n",tmp,data,data);
+#endif
+
+	}
+ 
+
+    break;
+
+    default:
+        return (-1);
+  }
+
+  return 0;
+}
+
+
+/*==========================================================================
+  parseShort
+==========================================================================*/
+
+static
+int parseShort (UserLAEntry* entry, int field, UINT16* value)
+{
+  switch (field) {
+  case DI_CMDR:
+    *value = entry->Cmdr;
+    break;
+  case DI_FRAME:
+    *value = entry->Mainframe;
+    break;
+  case DI_SLOT:
+    *value = entry->Slot;
+    break;
+  case DI_MANID:
+    *value = entry->ManId;
+    break;
+  case DI_MODELCODE:
+    *value = entry->ModelCode;
+    break;
+  case DI_DEVCLASS:
+    *value = entry->DevClass;
+    break;
+  case DI_SUBCLASS:
+    *value = entry->SubClass;
+    break;
+  case DI_MEMSPACE:
+    *value = entry->MemSpace;
+    break;
+  case DI_MEMTYPE:
+    *value = entry->MemType;
+    break;
+  case DI_IRQLEVEL:
+    *value = entry->IrqLevel;
+    break;
+  case DI_IRQHANDLE:
+    *value = entry->IrqHandle;
+    break;
+  case DI_EXTINFO:
+    *value = entry->ExtInfo;
+    break;
+  case DI_ASYNCMODE:
+    *value = entry->AsyncMode;
+    break;
+  case DI_RESPENA:
+    *value = entry->RespEnable;
+    break;
+  case DI_PROT:
+    *value = entry->Prot;
+    break;
+  case DI_FLAGS:
+    *value = entry->Flags;
+    break;
+  case DI_STATUSSTATE:
+    *value = entry->StatusState;
+    break;
+
+  default:
+    return (-1);
+  }
+
+  return 0;
+}
+
+
+/*==========================================================================
+  parseString
+==========================================================================*/
+
+static
+int parseString (UserLAEntry* entry, int field, UINT8* value)
+{
+  switch (field) {
+  case DI_DEVNAME:
+    strcpy (value, entry->DevName);
+    break;
+  case DI_MANNAME:
+    strcpy (value, entry->ManName);
+    break;
+  case DI_MODELNAME:
+    strcpy (value, entry->ModelName);
+    break;
+
+  default:
+    return (-1);
+  }
+/*/printf("\nparseString:value is %s\n",value);*/
+  return 0;
+}
+
+
+
+
+/*==========================================================================
+			    PUBLIC ROUTINES
+==========================================================================*/
+
+/*==========================================================================
+  GetDevInfo
+==========================================================================*/
+
+INT16 GetDevInfo (INT16 la, UINT16 field, void* value)
+{
+  UserLAEntry* entry;
+
+  if (entry = findDevInfo(la),  !entry)
+    return -1;
+
+  switch (field) {
+  case DI_DIENTRY:
+    *(UserLAEntry*)value = *entry;
+    return 0;
+
+  case DI_DEVNAME:
+  case DI_MANNAME:
+  case DI_MODELNAME:
+    return parseString (entry, field, value);
+
+  case DI_CMDR:
+  case DI_FRAME:
+  case DI_SLOT:
+  case DI_MANID:
+  case DI_MODELCODE:
+  case DI_DEVCLASS:
+  case DI_SUBCLASS:
+  case DI_MEMSPACE:
+  case DI_MEMTYPE:
+  case DI_IRQLEVEL:
+  case DI_IRQHANDLE:
+  case DI_EXTINFO:
+  case DI_ASYNCMODE:
+  case DI_RESPENA:
+  case DI_PROT:
+  case DI_FLAGS:
+  case DI_STATUSSTATE:
+    return parseShort (entry, field, value);
+
+  case DI_MEMBASE:
+  case DI_MEMSIZE:
+    return parseLong (entry, field, value);
+  }
+
+  return -1;
+}
+
+		 
+/*==========================================================================
+  GetDevInfoLong
+==========================================================================*/
+
+INT16 GetDevInfoLong (INT16 la, UINT16 field, UINT32* value)
+{
+  UserLAEntry* entry;
+
+  if (entry = findDevInfo(la),  !entry)
+    return -1;
+
+  return parseLong (entry, field, value);
+}
+
+
+/*==========================================================================
+  GetDevInfoShort
+==========================================================================*/
+
+INT16 GetDevInfoShort (INT16 la, UINT16 field, UINT16* value)
+{
+  UserLAEntry* entry;
+
+  if (entry = findDevInfo(la),  !entry)
+    return -1;
+
+  return parseShort (entry, field, value);
+}
+
+
+/*==========================================================================
+  GetDevInfoStr
+==========================================================================*/
+
+INT16 GetDevInfoStr (INT16 la, UINT16 field, UINT8* value)
+{
+  UserLAEntry* entry;
+
+  if (entry = findDevInfo(la),  !entry)
+    return -1;
+
+  return parseString (entry, field, value);
+}
+
+
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

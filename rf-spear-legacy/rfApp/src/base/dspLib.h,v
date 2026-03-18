@@ -1,0 +1,330 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP - DSP library
+**
+**  Abstract:
+**      DSP module definitions
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Longitudinal Feedback Project
+**
+**   History:
+**      September 30, 1993 - Created
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef DSPLIB_H
+#define DSPLIB_H
+
+#include "sglLib.h"
+#include "busLib.h"
+#include "sttDef.h"
+#include "filter.h"
+#include "ramdata.h"
+#include "DSP.h"
+
+#define DSP_K_BOARDID     0xdead
+
+#define DSP_K_SLOTMIN     1
+#define DSP_K_SLOTMAX     5
+#define DSP_K_SLOTCOUNT   (DSP_K_SLOTMAX - DSP_K_SLOTMIN + 1)
+#define DSP_K_CHANMIN     0
+#define DSP_K_CHANMAX     3
+#define DSP_K_CHANCOUNT   (DSP_K_CHANMAX - DSP_K_CHANMIN + 1)
+#define DSP_M_CHANMASK    ((1 << DSP_K_CHANCOUNT) - 1)
+
+#define DSP_K_CHAN0        0
+#define DSP_V_CHAN0        0
+#define DSP_M_CHAN0       (1 << DSP_V_CHAN0)
+#define DSP_K_CHAN1        1
+#define DSP_V_CHAN1        1
+#define DSP_M_CHAN1       (1 << DSP_V_CHAN1)
+#define DSP_K_CHAN2        2
+#define DSP_V_CHAN2        2
+#define DSP_M_CHAN2       (1 << DSP_V_CHAN2)
+#define DSP_K_CHAN3        3
+#define DSP_V_CHAN3        3
+#define DSP_M_CHAN3       (1 << DSP_V_CHAN3)
+
+#define DSP_V_SLOT        17
+#define DSP_M_SLOT        (0x00000007 << DSP_V_SLOT)
+#define DSP_K_SLOTSIZE    (1          << DSP_V_SLOT)
+#define DSP_V_CHAN        14
+#define DSP_M_CHAN        (0x00000003 << DSP_V_CHAN)
+#define DSP_K_CHANSIZE    (1          << DSP_V_CHAN)
+#define DSP_V_VMESPACE    13
+#define DSP_K_VMESPCSZ    (1 << DSP_V_VMESPACE)
+#define DSP_A_VMEPORT     (1 << DSP_V_VMESPACE)
+#define DSP_V_VSBSPACE    16
+#define DSP_K_VSBSPCSZ    (1 << DSP_V_VSBSPACE)
+#define DSP_A_DATA        (2 << DSP_V_VSBSPACE)
+#define DSP_A_CSRS        (3 << DSP_V_VSBSPACE)
+#define DSP_A_ERAM        0x8000
+
+/* Some masks for the revision 2 boards */
+/* Here is the slot number mask for the Rev.2 board csrs */
+#define DSP_V_CSRS2	  4
+#define DSP_M_CSRS2	  (0xf << DSP_V_CSRS2)
+
+/* This splits now for different revisions and versions */
+#define DSP_K_ESIZE1	  0x2000        /* 8k shorts */
+#define DSP_K_ESIZE2	  0x4000	/* 16k shorts */
+
+#define DSP_K_PORTSPACE   SPC_K_A16
+#define DSP_K_PORTSIZE    SIZ_K_LONG
+#define DSP_K_DATASPACE   SPC_K_VSBSYS
+#define DSP_K_DATASIZE    SIZ_K_SHORT
+#define DSP_K_CSRSPACE    SPC_K_VSBSYS
+#define DSP_K_CSRSIZE     SIZ_K_SHORT
+
+#define DSP_K_CSRCOUNT    7
+
+#define DSP_K_COMBLKID    0x0001         /* Communications block ID      */
+#define DSP_K_COMVERS     0x0001         /* Communications block version */
+
+
+/* CSR 0 - Status Register */
+#define DSP_A_CSR0        (volatile unsigned short *) 0x00000000
+#define DSP_I_STAT         0
+#define DSP_A_STAT        (DSP_A_CSR0)
+
+#define DSP_V_INTSTVSB     0            /* From VSB to DSP */
+#define DSP_M_INTSTVSB    (0x000f << DSP_V_INTSTVSB)
+#define DSP_V_INTSTVME     4            /* From VME via DSP */
+#define DSP_M_INTSTVME    (0x000f << DSP_V_INTSTVME)
+#define DSP_V_INTSTDSP     8            /* From DSP to VSB */
+#define DSP_M_INTSTDSP    (0x000f << DSP_V_INTSTDSP)
+#define DSP_V_GEOADX      12
+#define DSP_M_GEOADX      (0x0007 << DSP_V_GEOADX)
+#define DSP_V_INT         15
+#define DSP_M_INT         (0x0001 << DSP_V_INT)
+
+/* CSR 1 - DSP Interrupt Register (from DSP to VSB) */
+#define DSP_A_CSR1        (volatile unsigned short *) 0x00000002
+#define DSP_I_DSPVSBINT    1
+#define DSP_A_DSPVSBINT   (DSP_A_CSR1)
+
+#define DSP_V_ENBDSPINT    0
+#define DSP_M_ENBDSPINT   (0x000f << DSP_V_ENBDSPINT)
+#define DSP_V_ACKDSPINT    4
+#define DSP_M_ACKDSPINT   (0x000f << DSP_V_ACKDSPINT)
+#define DSP_V_DISDSPINT    8
+#define DSP_M_DISDSPINT   (0x000f << DSP_V_DISDSPINT)
+
+#define DSP_V_DSPINTENBST  0
+#define DSP_M_DSPINTENBST (0x000f << DSP_V_DSPINTENBST)
+#define DSP_V_DSPINTST     4
+#define DSP_M_DSPINTST    (0x000f << DSP_V_DSPINTST)
+
+/* CSR 2 - VME Interrupt Register (from VME via DSP to VSB) */
+#define DSP_A_CSR2        (volatile unsigned short *) 0x00000004
+#define DSP_I_VMEVSBINT    2
+#define DSP_A_VMEVSBINT   (DSP_A_CSR2)
+
+#define DSP_V_ENBVMEINT    0
+#define DSP_M_ENBVMEINT   (0x000f << DSP_V_ENBVMEINT)
+#define DSP_V_RSTVMEINT    4
+#define DSP_M_RSTVMEINT   (0x000f << DSP_V_RSTVMEINT)
+#define DSP_V_DISVMEINT    8
+#define DSP_M_DISVMEINT   (0x000f << DSP_V_DISVMEINT)
+
+#define DSP_V_VMEINTENBST  0
+#define DSP_M_VMEINTENBST (0x000f << DSP_V_VMEINTENBST)
+#define DSP_V_VMEINTST     4
+#define DSP_M_VMEINTST    (0x000f << DSP_V_VMEINTST)
+
+/* CSR 3 - VSB Interrupt Register (from VSB to DSP) */
+#define DSP_A_CSR3        (volatile unsigned short *) 0x00000006
+#define DSP_I_VSBDSPINT    3
+#define DSP_A_VSBDSPINT   (DSP_A_CSR3)
+
+#define DSP_V_SETVSBINT    0
+#define DSP_M_SETVSBINT   (0x000f << DSP_V_SETVSBINT)
+#define DSP_V_RSTVSBINT    8
+#define DSP_M_RSTVSBINT   (0x000f << DSP_V_RSTVSBINT)
+
+#define DSP_V_VSBINTST     0
+#define DSP_M_VSBINTST    (0x000f << DSP_V_VSBINTST)
+#define DSP_V_VSBINTENBST  4
+#define DSP_M_VSBINTENBST (0x000f << DSP_V_VSBINTENBST)
+
+/* CSR 4 - DSP Boot Control Register */
+#define DSP_A_CSR4        (volatile unsigned short *) 0x00000008
+#define DSP_I_BOOT         4
+#define DSP_A_BOOT        (DSP_A_CSR4)
+
+#define DSP_V_RESET        0
+#define DSP_M_RESET       (0x000f << DSP_V_RESET)
+#define DSP_V_BOOT         8
+#define DSP_M_BOOT        (0x000f << DSP_V_BOOT)
+
+#define DSP_V_BOOTSTAT     0
+#define DSP_M_BOOTSTAT    (0x000f << DSP_V_BOOTSTAT)
+#define DSP_V_RUNSTAT      4
+#define DSP_M_RUNSTAT     (0x000f << DSP_V_RUNSTAT)
+
+/* CSR 5 - DSP Board ID Register */
+#define DSP_A_CSR5        (volatile unsigned short *) 0x0000000a
+#define DSP_I_BOARDID      5
+#define DSP_A_BOARDID     (DSP_A_CSR5)
+
+#define DSP_V_BOARDID      0
+#define DSP_M_BOARDID     (0xffff << DSP_V_BOARDID)
+
+/* CSR 6 - DSP Board Specific Register */
+#define DSP_A_CSR6        (volatile unsigned short *) 0x0000000c
+#define DSP_I_SERVERREV    6
+#define DSP_A_SERVERREV   (DSP_A_CSR6)
+
+#define DSP_V_SERIALNO     0
+#define DSP_M_SERIALNO    (0x00ff << DSP_V_SERIALNO)
+#define DSP_V_VERSION      8
+#define DSP_M_VERSION     (0x000f << DSP_V_VERSION)
+#define DSP_V_REVISION    12
+#define DSP_M_REVISION    (0x000f << DSP_V_REVISION)
+
+/*
+   These masks define the bits in a 32-bit RunMask which hold the
+   information about the DSP boards present
+*/
+#define DSP_V_BOARDMASK   20
+#define DSP_M_BOARDMASK   (0x0000001f << DSP_V_BOARDMASK)
+
+typedef struct _DspVme
+{
+  unsigned long   port;
+  unsigned long   nxm[(DSP_K_VMESPCSZ - 1) >> 2];
+} DspVme;
+
+typedef struct _DspComBlk
+{
+  volatile unsigned short  blkId;
+  volatile unsigned short  vers;
+  volatile unsigned short  chkSum;
+  volatile unsigned short  status;
+  volatile unsigned short  sttArg[STT_K_ARGCNT];
+  volatile unsigned short  dspMsg;
+  volatile unsigned short  dspArg;
+  volatile unsigned short  cpuMsg;
+  volatile unsigned short  cpuArg;
+  volatile unsigned short  len;
+}  DspComBlk;
+
+typedef struct _DspBoard
+{
+  unsigned int             slot;
+
+  /* This variable holds the  CSR area start address */
+  unsigned int		   csrAdx;
+  /* And finally, this variable hold DPM size */
+  unsigned int		   dataSize;
+  /* Also since some boards have 8K mapped twice, remember the increment */
+  unsigned int		   dataIncr;
+  
+  volatile unsigned long  *port;
+  volatile unsigned short *csrs;
+  volatile unsigned short *data[DSP_K_CHANCOUNT];
+  DspComBlk               *comBlk[DSP_K_CHANCOUNT];
+}  DspBoard;
+
+#define DspPokeCsr(csr,data)  BusPokeCsr(DSP_K_CSRSPACE,DSP_K_CSRSIZE,csr,data)
+#define DspPeekCsr(csr,data)  BusPeekCsr(DSP_K_CSRSPACE,DSP_K_CSRSIZE,csr,data)
+
+/* Function prototypes */
+Status DSP_Reset         (unsigned int, unsigned int, unsigned short *);
+Status DSP_Start         (unsigned int, unsigned int);
+Status DSP_Stop          (unsigned int, unsigned int, unsigned short *);
+Status DSP_DspIntEnable  (unsigned int, unsigned int);
+Status DSP_DspIntDisable (unsigned int, unsigned int);
+Status DSP_VmeIntEnable  (unsigned int, unsigned int);
+Status DSP_VmeIntDisable (unsigned int, unsigned int);
+Status DSP_Run           (unsigned int, unsigned int);
+Status DSP_LoadTables    (void *, int, int, int, char *);
+Status DSP_FreeTables    (void *);
+int    DSP_IsDsp         (int);
+Status DSP_FindEm        (DspBoard **);
+Status DSP_FindComBlk    (DspBoard  *, unsigned int, DspComBlk  **);
+Status DSP_Map           (void);
+Status DSP_GetRev 	 (int slot, int *rev);
+DspBoard *DSP_GetSlot	 (DspBoard  *boards, int slot);
+
+#endif
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

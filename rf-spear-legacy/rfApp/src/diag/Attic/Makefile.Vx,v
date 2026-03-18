@@ -1,0 +1,208 @@
+head	1.5;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.5
+	RF-SPEAR-R0-1-0:1.5
+	RF-SPEAR-R0-0-3:1.5
+	RF-SPEAR-R0-0-2:1.5
+	RF-SPEAR-R0-0-0:1.5
+	RF-3-13-10:1.4.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.4
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.4
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.4
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.5
+date	2011.12.07.00.58.18;	author saa;	state dead;
+branches;
+next	1.4;
+
+1.4
+date	2004.01.15.23.45.01;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.09.10.01.27.49;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.08.21.18.56.29;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.43;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.43;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.5
+log
+@Changes for 3.14.11 build.
+@
+text
+@#==============================================================
+#
+#  Abs:  Makefile for EPICS RF IOC components
+#      
+#  Name: Makefile.Vx 
+#
+#  Facility:  SLAC/PEPII Low Level RF
+#
+#  Auth: dd-mmm-yyyy, Author's Name    (USERNAME)
+#  Rev:  dd-mmm-yyyy, Reviewer's Name  (USERNAME)
+#
+#--------------------------------------------------------------
+#  Mod:
+#        15-Jan-2004, S. Allison (saa):
+#          Moved vxiBaseIsr.c to $EPICS/site/src/diag.
+#        09-Sep-2003, K. Luchini       (LUCHINI):
+#          Changed definition of VxWorks directory
+#
+#==============================================================
+#
+TOP = ../../../..
+include $(TOP)/config/CONFIG_APP.Vxi
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+TGT_DIR = $(VX_CONFIG_DIR_YES)/$(T_A)
+
+USR_INCLUDES += -I..
+USR_INCLUDES += -I $(EPICS_SITE)/include
+USR_INCLUDES += -I $(EPICS_BASE)/include
+
+USR_INCLUDES += -I $(TGT_DIR)
+USR_INCLUDES += -I $(VX_CONFIG_DIR_YES)/all
+
+# Compile special source for PPC and 68K cpu's
+ifeq ($(T_A),mv2400) 
+USR_INCLUDES += -I $(TGT_DIR)/V152/Include
+endif
+ifeq ($(T_A),niCpu030)
+USR_INCLUDES += -I $(TGT_DIR)/nivxi/include
+endif
+
+# Compile source
+SRCS.c += ../rf_vxi_diag.c
+SRCS.c += ../rf_rfpDiags.c
+SRCS.c += ../rf_ripTest.c 
+
+PROD += rf_ripTest rf_rfpDiags
+PROD += rf_vxi_diag.o
+
+include $(TOP)/config/RULES.Vx
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+#rf_rfpDiags: rf_rfpDiags.o \
+#	$(EPICS_SITE_BIN)/dtlMsgs.o \
+#	$(EPICS_SITE_BIN)/memTest \
+#	$(EPICS_SITE_BIN)/mtlMsgs.o 
+#	$(LD) -o rf_rfpDiags rf_rfpDiags.o
+
+
+
+
+
+
+
+
+@
+
+
+1.4
+log
+@Move vxiBaseIsr.c to $EPICS/site/src/diag.
+@
+text
+@@
+
+
+1.3
+log
+@ioc/rfApp/src/diag/Makefile.Vx
+@
+text
+@d14 2
+a42 1
+SRCS.c += ../vxiBaseIsr.c
+a48 1
+PROD += vxiBaseIsr.o
+@
+
+
+1.2
+log
+@Build vxiBaseIsr.c for all bsp's
+@
+text
+@d14 2
+a15 2
+#        dd-mmm-yyyy, Reviewer's Name  (USERNAME):
+#          comments
+d23 1
+a23 2
+VX_CONFIG_DIR = $(VX_CONFIG_DIR_YES)
+VX_TARGET_DIR = $(VX_CONFIG_DIR_YES)/$(T_A)
+d29 2
+a30 2
+USR_INCLUDES += -I $(VX_TARGET_DIR)
+USR_INCLUDES += -I $(VX_CONFIG_DIR)/all
+d33 2
+a34 2
+ifeq ($(T_A),mv2400)
+USR_INCLUDES += -I $(VX_TARGET_DIR)/$(T_A)/V152/Include
+d37 1
+a37 1
+USR_INCLUDES += -I $(VX_TARGET_DIR)/nivxi/include
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d23 2
+d30 2
+a31 3
+USR_INCLUDES += -I $(VX_DIR)/target/config/all
+USR_INCLUDES += -I $(VX_DIR)/target/config/$(T_A)
+USR_INCLUDES += -I $(VX_DIR)/target/config
+d33 1
+a33 1
+# Compile special source for PPC
+d35 1
+a35 3
+USR_INCLUDES += -I $(VX_DIR)/target/config/$(T_A)/V152/Include
+SRCS.c += ../vxiBaseIsr.c
+PROD += vxiBaseIsr.o
+d38 1
+a38 1
+USR_INCLUDES += -I $(VX_DIR)/target/config/$(T_A)/nivxi/include
+d42 1
+d49 1
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

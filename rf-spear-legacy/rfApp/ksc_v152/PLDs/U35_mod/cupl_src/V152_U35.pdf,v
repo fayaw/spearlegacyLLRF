@@ -1,0 +1,242 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.10.02.02.13.14;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.10.02.02.13.14;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@{COMPONENT Z:\WRK\KSC_V152\PLDS\U35_MOD\CUPL_SRC\V152_U35.SYM
+
+ {ENVIRONMENT
+  {PDIFvrev 3.00}
+  {Program "CUPL(WM) Version 5.0a"}
+  {DBtype "Schematic"}
+  {DBvrev 1.01}
+  {DBtime "Wed Oct 01 19:13:12 2003 "}
+  {DBunit "MIL"}
+  {DBgrid 10}
+  {Lyrstr "WIRES" 1 "BUS" 1 "GATE" 2 "IEEE" 2 "PINFUN" 3 "PINNUM" 1 
+          "PINNAM" 6 "PINCON" 4 "REFDES" 2 "ATTR" 6 "SDOT" 1 
+          "DEVICE" 5 "OUTLIN" 5 "ATTR2" 6 "NOTES" 6 "NETNAM" 4 
+          "CMPNAM" 5 "BORDER" 5}
+ }
+
+ {USER
+  {VIEW
+   {Mode SYMB}
+   {Nlst OPEN}
+   {Vw 0 0 2}
+   {Lv 12 2 2 2 0 0 2 2 2 2 0 0 2 1 2 0 0 0 0}
+   {Gs 10 10}
+  }
+ }
+
+ {DISPLAY
+  [Ly "PINNUM"]
+  [Ls "SOLID"][Wd 0]
+  [Ts 15][Tj "LC"][Tr 0][Tm "N"]
+ }
+
+ {SYMBOL
+  {PIN_DEF
+   [Ly "PINCON"]
+   {P DIR {Pt "INPUT"}{Lq 0}{Ploc 100 200}}
+   {P VMAS_N {Pt "INPUT"}{Lq 0}{Ploc 100 180}}
+   {P VMDS1_N {Pt "INPUT"}{Lq 0}{Ploc 100 160}}
+   {P VMDS0_N {Pt "INPUT"}{Lq 0}{Ploc 100 140}}
+   {P VMWRITE_ {Pt "INPUT"}{Lq 0}{Ploc 100 120}}
+   {P SP1 {Pt "INPUT"}{Lq 0}{Ploc 100 100}}
+   {P SP2 {Pt "INPUT"}{Lq 0}{Ploc 100 80}}
+   {P SP3 {Pt "INPUT"}{Lq 0}{Ploc 100 60}}
+   {P D16_ISEL {Pt "INPUT"}{Lq 0}{Ploc 100 40}}
+   {P G_N {Pt "INPUT"}{Lq 0}{Ploc 100 20}}
+   {P D8_READ {Pt "I/O"}{Lq 0}{Ploc 360 20}}
+   {P DIR_OUT {Pt "I/O"}{Lq 0}{Ploc 360 40}}
+   {P SOUT {Pt "I/O"}{Lq 0}{Ploc 360 60}}
+   {P VXWRITE_ {Pt "I/O"}{Lq 0}{Ploc 360 80}}
+   {P VXDS0_N {Pt "I/O"}{Lq 0}{Ploc 360 100}}
+   {P VXDS1_N {Pt "I/O"}{Lq 0}{Ploc 360 120}}
+   {P VXAS_N {Pt "I/O"}{Lq 0}{Ploc 360 140}}
+  }
+
+  {PKG
+   [Ly "REFDES"]
+   [Ts 25][Tj "CB"][Tr 0][Tm "N"]
+   {Rdl 230 230}
+
+   [Ly "PINNUM"]
+   [Ts 15][Tj "RC"]
+   {Pnl 120 210}
+   {Pnl 120 190}
+   {Pnl 120 170}
+   {Pnl 120 150}
+   {Pnl 120 130}
+   {Pnl 120 110}
+   {Pnl 120 90}
+   {Pnl 120 70}
+   {Pnl 120 50}
+   {Pnl 120 30}
+   [Ts 15][Tj "LC"]
+   {Pnl 340 30}
+   {Pnl 340 50}
+   {Pnl 340 70}
+   {Pnl 340 90}
+   {Pnl 340 110}
+   {Pnl 340 130}
+   {Pnl 340 150}
+
+   {Sd A 1 2 3 4 5 6 7 8 9 19 12 13 14 15 16 17 18}
+  }
+
+  {PIC
+   [Ly "GATE"]
+   [Ts 15][Tj "LC"][Tr 0][Tm "N"]
+   {R 130 220 330 0}
+   {L 130 200 100 200}
+   {L 130 180 100 180}
+   {L 130 160 100 160}
+   {L 130 140 100 140}
+   {L 130 120 100 120}
+   {L 130 100 100 100}
+   {L 130 80 100 80}
+   {L 130 60 100 60}
+   {L 130 40 100 40}
+   {L 130 20 100 20}
+   {L 330 20 360 20}
+   {L 330 40 360 40}
+   {L 330 60 360 60}
+   {L 330 80 360 80}
+   {L 330 100 360 100}
+   {L 330 120 360 120}
+   {L 330 140 360 140}
+   [Ly "PINNAM"]
+   [Tj "LC"]
+   {T "DIR" 140 200}
+   {T "VMAS_N" 140 180}
+   {T "VMDS1_N" 140 160}
+   {T "VMDS0_N" 140 140}
+   {T "VMWRITE_" 140 120}
+   {T "SP1" 140 100}
+   {T "SP2" 140 80}
+   {T "SP3" 140 60}
+   {T "D16_ISEL" 140 40}
+   {T "G_N" 140 20}
+   [Tj "RC"]
+   {T "D8_READ" 320 20}
+   {T "DIR_OUT" 320 40}
+   {T "SOUT" 320 60}
+   {T "VXWRITE_" 320 80}
+   {T "VXDS0_N" 320 100}
+   {T "VXDS1_N" 320 120}
+   {T "VXAS_N" 320 140}
+   [Ly "DEVICE"]
+   [Tj "CT"]
+   {T "G16V8AS" 230 -10}
+  }
+
+  {ATR
+   {IN
+    {Org 100 20}
+    {Ty 255}
+   }
+   {EX
+    [Ly "ATTR2"]
+    [Ts 12][Tj "CT"][Tr 0][Tm "N"]
+    {At PLD Z:\WRK\KSC_V152\PLDS\U35_MOD\CUPL_SRC\V152_U35 230 220}
+   }
+  }
+ }
+
+ {DETAIL
+  {ANNOTATE
+  }
+
+  {NET_DEF
+   {N DIR
+   }
+   {N VMAS_N
+   }
+   {N VMDS1_N
+   }
+   {N VMDS0_N
+   }
+   {N VMWRITE_
+   }
+   {N SP1
+   }
+   {N SP2
+   }
+   {N SP3
+   }
+   {N D16_ISEL
+   }
+   {N G_N
+   }
+   {N D8_READ
+   }
+   {N DIR_OUT
+   }
+   {N SOUT
+   }
+   {N VXWRITE_
+   }
+   {N VXDS0_N
+   }
+   {N VXDS1_N
+   }
+   {N VXAS_N
+   }
+  }
+
+  {SUBCOMP
+  }
+ }
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

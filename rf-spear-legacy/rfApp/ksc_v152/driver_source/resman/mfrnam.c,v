@@ -1,0 +1,167 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  mfrnam.c
+
+  Manipulate manufacturer ID codes
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include <vxWorks.h>
+#include <limits.h>
+
+#include "resman.h"
+
+
+/* Add an entry to the circular linked list of manufacturers. */
+void createMfrEntry(mfrName_t **tail, char *mfrName, unsigned short mfrID)
+{
+	mfrName_t *this = malloc(sizeof(mfrName_t));
+
+	assert(this);
+	strcpy(this->manufr, mfrName);
+	this->id_la = mfrID;
+	if (*tail == NULL) {
+		this->next = this;
+	} else {
+		this->next = (*tail)->next;
+		(*tail)->next = this;
+	}
+	*tail = this;
+}
+
+
+/* Read manufacturer names and IDs from a file. */
+void getMfrNames(char *path, mfrName_t **tail)
+{
+   FILE *fpMfrName;
+   char fn[PATH_MAX];
+   char strName[16];
+   unsigned short mfrID;
+
+   strcpy( fn, path );
+   strcat( fn, "mfnameid.tbl" );
+   if( (fpMfrName = fopen( fn, "r" )) == NULL )
+   {
+#ifdef WARN_VERBOSE
+      WARN "Could not open ");
+      perror( fn );
+#endif
+      return;
+   }
+   while( !feof(fpMfrName) )
+   {
+      if(fscanf(fpMfrName, "%[^,], %hx\n", strName, &mfrID) == 2)
+      {
+         TrimSp(strName);
+         createMfrEntry(tail, strName, mfrID);
+      }  /* endif 2 fields */
+   }  /* endwhile !feof */
+
+   fclose( fpMfrName );
+   return;
+}
+
+
+int idToName( mfrName_t *list, unsigned short mfrID, char *pn )
+{
+   mfrName_t *this = list->next;
+/*printf("idToName:mfrID %x\n",mfrID);*/
+   do
+   {
+      if( mfrID == this->id_la )
+      {
+         strcpy( pn, this->manufr );
+/*printf("idToName:TN_FOUND pn %s\n",pn);*/
+	 return( TN_FOUND );
+      }
+      this = this->next;
+   } while (this != list->next);
+   sprintf( pn, "MFR_%X", mfrID );
+/*printf("idToName:TN_DEFAULT pn %s\n",pn);*/
+   return( TN_DEFAULT );
+}
+
+
+void freeNameList( mfrName_t *list )
+{
+   mfrName_t *next, *this = list;
+
+   if (this == NULL)
+      return;
+   do
+   {
+      next = this->next;
+      free( this );
+      this = next;
+   } while (this != list);
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

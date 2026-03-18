@@ -1,0 +1,192 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***** Copyright (c) 1995, 1996 KineticSystems Corporation ************
+*
+* File:     getnonvxi.c
+*
+* Description:  Get Interrupt configuration from file intcfg.tbl
+*
+* History:   1/26/96 - RCDowling - Original (copied from getmxicf.c)
+*            2/13/96    "   Added debug printf, then disabled it
+*            2/14/96    "   Changed error printf's to fprintf( stderr )
+*  7/16/96 RCD Pulled leading slash out of filename, since rmShell now
+*          adds it.  Changed file-open error to a warning.  Added calloc
+*          warning (from getdevice.c).
+*  7/18/96 RCD Minor warning cleanup (added 2nd space, capital C)
+*
+***********************************************************************/
+
+/***** INTERRUPT CONFIGURATION FILE intfg.tbl *****
+*
+* extndrLA  = logical address of extender OR zero for single mainframe
+*
+*--- Bit vectors of VXI interrupt levels: bits 6-0 for Ints 7-1
+* intLevels = 1 = Enable, 0 = Disable
+* intDirns  = 1 = Into mainframe, 0 = Out of mainframe
+*---
+* handler   = logical address of handler for this VXI interrupt
+*             OR 0xff if RM is free to assign a handler to it
+*	      NOTE: handler[0] entry is NOT used.
+*
+* giNode    1 thru 0x7E (1 .. 126)
+*
+* EXAMPLE:  1,7f,0,ff,ff,ff,ff,ff,ff,ff,11
+*
+***************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>   /* for malloc */
+#include <assert.h>
+#include <vxWorks.h>
+#include <string.h>   /* for strcpy */
+#include <limits.h>   /* for PATH_MAX */
+
+
+#include "resman.h"
+
+nonVxi_t *getnonVxi(char *path,
+	mfrName_t **pname, mfrName_t **pmodel, mfrName_t **pdevice)
+{
+	FILE *fpNonVxi;
+	char fn[PATH_MAX];
+	int nrFields;
+	nonVxi_t *this, *prev, *root = NULL;
+	strcpy( fn, path );
+	strcat( fn, "nonvxi.tbl" );   /* removed leading slash 16jul96 rcd */
+	if( (fpNonVxi = fopen( fn, "r" )) == NULL )
+	{
+		WARN "Could not open ");
+		perror( fn );
+		return( (nonVxi_t *)NULL );
+	}
+
+	while( !feof(fpNonVxi) )
+	{
+		assert(this = (nonVxi_t *)calloc(1, sizeof(nonVxi_t)));
+		{
+			nrFields = fscanf( fpNonVxi, "%hx,%[^,],%hx,",
+				 &this->pseudoLA, this->device,
+				 &this->mainframe );
+			if (feof(fpNonVxi))
+				break;
+			TrimSp(this->device);
+/*printf("Entry seen in nonvxi.tbl for LA %d in mainframe %d\n",this->pseudoLA, this->mainframe);*/
+			nrFields = fscanf( fpNonVxi, "%hx,%hx,%hx,",
+				 &this->slot, &this->mfgID,
+				 &this->model );
+/*printf(" Slot %d, mfrID %x, model %d\n",this->slot, this->mfgID, this->model);*/
+			nrFields = fscanf( fpNonVxi, "%hx,%[^,],%[^,],",
+				 &this->devClass, this->mdlName,
+				 this->mfgName );
+			TrimSp(this->mdlName);
+			TrimSp(this->mfgName);
+/*printf(" devClass %d \n",this->devClass);*/
+			nrFields = fscanf( fpNonVxi, "%x,%x,%x,",
+				 &this->A16Base, &this->A16Size,
+				 &this->A24Base );
+/*printf(" A16base %x, a16size %x, a24base %x\n",this->A16Base, this->A16Size, this->A24Base);*/
+			nrFields = fscanf( fpNonVxi, "%x,%x,%x,",
+				 &this->A24Size, &this->A32Base,
+				 &this->A32Size );
+/*printf(" a24size %x, a32base %x, a32size %x\n",this->A24Size, this->A32Base, this->A32Size);*/
+			nrFields = fscanf( fpNonVxi, "%hx,%hx,%hx,",
+				 &this->intLevels, &this->hdlLevels,
+				 &this->sysBool );
+/*printf(" intlevels %x, hdllevels %x, sysbool %x\n",this->intLevels, this->hdlLevels, this->sysBool);
+//			nrFields = fscanf( fpNonVxi, "%hx",
+//				 &this->Node );
+//printf(" node %d \n",this->Node);*/
+			this->next = NULL;
+		}  /* endif calloc'ed OK */
+
+		if( root == NULL )
+		{
+			root = prev = this;
+		}
+	 	else
+	 	{
+			prev->next = this;
+			prev = this;
+		}
+
+		/* Create linked list entries for Mfr., model, and device. */
+		createMfrEntry(pname, this->mfgName, this->mfgID);
+		createModelEntry(pmodel,
+			this->mfgName, this->mdlName, this->model);
+		createDeviceEntry(pdevice, this->device, this->mfgName,
+			this->mdlName, this->pseudoLA, this->mainframe,
+			this->slot, 0xffff);
+	}  /* endwhile !feof */
+
+	fclose( fpNonVxi );
+	return( root );
+}
+
+
+
+/********************************************************/
+/*             freeNonVxi                               */
+/********************************************************/
+void freeNonVxi( nonVxi_t *list )
+{
+   nonVxi_t *next, *this = list;
+
+   for( ; this != NULL; this = next )
+   {
+      next = this->next;
+      free( this );
+   }
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

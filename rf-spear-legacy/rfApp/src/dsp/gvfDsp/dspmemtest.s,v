@@ -1,0 +1,370 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#include <1610.h>
+
+#include "dspDef.h"
+#include "timDef.h"
+#include "intDef.h"
+#include "bioDef.h"
+
+.rsect ".ram"
+.= VEC_A_RESET
+main:
+	auc = 0
+	mwait = 0x3333			/* Set memory wait states */
+        inc    = 0                      /* Disable interrupts */
+	sbit = 0x8c00			/* Set sbit configuration */
+        cbit   = 0                      /* Reset all BIO outputs */
+	pl = 0
+	r1 = 0x1fff			/* use last RAM location for storage */
+        r0 = 0x8000			/* First location of the ERAMHI */
+	a0 = a0 - a0			/* clear a0 */
+	call pat2vximem			/* function call which write pattern */
+				        /*to the memory. Pattern stored in a0 */
+        r0 = 0x8000
+	a0 = a0 - a0		
+	p = 0
+	call patFvximem			/* function call which read pattern */
+					/* from memory			     */
+	r0 = 0x8000
+	a0 = a0 - a0
+	a0 = 0xffff
+	call pat2vximem
+        r0 = 0x8000
+	a0 = a0 - a0
+	p = 0xffff
+	call patFvximem
+        r0 = 0x8000
+	a0 = a0 - a0
+	call cnt2vximem			/* function which write incrementing */
+					/* to memory			     */
+        r0 = 0x8000
+	a0 = a0 - a0
+	call cntFvximem			/* function which read incrementing */
+					/* from memory			     */
+        r0 = 0x2000			/* First location of the ERAMLO */	
+	a0 = a0 - a0
+	call pat2lut			/* Write pattern to LUT memory    */
+        r0 = 0x2000
+	a0 = a0 - a0
+	p = 0
+	call patFlut			/* Read pattern from LUT memory    */
+	r0 = 0x2000
+	a0 = a0 - a0
+	a0 = 0xffff
+	call pat2lut
+        r0 = 0x2000
+	a0 = a0 - a0
+	p = 0xffff
+	call patFlut
+        r0 = 0x2000
+	a0 = a0 - a0
+	call cnt2lut			/* Write incr. count to LUT memory    */
+        r0 = 0x2000
+	a0 = a0 - a0
+	call cntFlut			/* Read incr. count from LUT memory   */
+
+	r0 = 0x8000
+	*r1++
+
+dump:	a0 = *r1++			/* Dump number of error in each test */
+	*r0++ = a0 			/* to the first locations of ERAMHI  */
+        a1=r1
+	a1h - 0x2000
+	if ne goto dump	
+ 
+	a0 = mwait			/* Put content of mwait register in */
+	*r0 = a0			/* ERAMHI location 7 (0x3333)       */
+        cbit   = BIO_ON (BIO_V_GEN1)    /* Turn iobit2 on		    */
+
+end: goto end
+
+pat2vximem:
+
+/* Write pattern specified in a0 to address specified in r0 , total is 16k words */
+
+            do 64 {
+               *r0++=a0
+               *r0++=a0
+               *r0++=a0
+               *r0++=a0
+               *r0++=a0
+               *r0++=a0
+               *r0++=a0
+               *r0++=a0
+	}
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+return
+
+
+/* Read pattern from ERAMHI, test against pattern written in the first place, and count numbers of the errors */
+patFvximem:		
+	a1 = 0
+	c0 = -127
+patFvximem_2:
+        c1 = -127
+patFvximem_1:
+   	a0=*r0++
+	a0 - p
+	if ne a1h= a1h+1
+	if c1lt goto patFvximem_1
+	if c1lt goto patFvximem_2
+	    *r1--=a1
+
+	return
+	
+
+ cnt2vximem:
+
+/* Write address to address specified in r0 , total is 16k words */
+
+            do 64 {
+		a0 = r0
+               *r0++=a0
+		a0 = r0
+               *r0++=a0
+		a0 = r0
+               *r0++=a0
+		a0 = r0
+               *r0++=a0
+	}
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+	redo 64
+
+return
+
+/* Read pattern from ERAMHI, test against count written in the first place, and count numbers of the errors */
+cntFvximem:
+	a1 = 0
+	c0 = -127
+cntFvximem_2:
+        c1 = -127
+cntFvximem_1:
+	a0 = r0
+   	p=*r0++
+	a0 - p
+	if ne a1h = a1h + 1
+	if c1lt goto cntFvximem_1
+	if c1lt goto cntFvximem_2
+	    *r1--=a1
+
+	return
+
+
+pat2lut:
+
+/* Write pattern specified in a0 to address specified in r0 , total is 16k words */
+
+            do 64 {
+               *r0++=a0
+               *r0++=a0
+               *r0++=a0
+               *r0++=a0
+               *r0++=a0
+               *r0++=a0
+               *r0++=a0
+               *r0++=a0
+	}
+	redo 64
+return
+
+
+/* Read pattern from ERAMLO, test against pattern written in the first place, and count numbers of the errors */
+patFlut:
+	a1 = 0
+	c0 = -127
+patFlut_2:
+        c1 = -127
+patFlut_1:
+   	a0=*r0++
+	a0 - p
+	if ne a1h= a1h+1
+	if c1lt goto patFlut_1
+	if c1lt goto patFlut_2
+	    *r1--=a1
+
+	return
+	
+
+ cnt2lut:
+
+/* Write address to address specified in r0  */
+
+            do 64 {
+		a0 = r0
+               *r0++=a0
+		a0 = r0
+               *r0++=a0
+		a0 = r0
+               *r0++=a0
+		a0 = r0
+               *r0++=a0
+	}
+	redo 64
+	redo 64
+	redo 64
+return
+
+
+/* Read pattern from ERAMLO, test against count written in the first place, and count numbers of the errors */
+
+cntFlut:
+	a1 = 0
+	c0 = -7
+cntFlut_2:
+        c1 = -127
+cntFlut_1:
+	a0 = r0
+   	p=*r0++
+	a0 - p
+	if ne a1h = a1h + 1
+	if c1lt goto cntFlut_1
+	if c1lt goto cntFlut_2
+	    *r1--=a1
+
+	return
+
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

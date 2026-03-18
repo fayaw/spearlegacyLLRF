@@ -1,0 +1,208 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.1
+date	2003.01.10.23.22.42;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.42;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP - DSP code
+**
+**  Abstract:
+**      DSP code to test DACs on the RF Processing module by loading constants
+**      to the DAC registers:
+**
+**      dsp address             value
+**      7f00                    3ff = 1.25V
+**      7f01                    800 = 0.0v
+**      7f02                    800 = 0.0v
+**      7f03                    3ff = 1.25v
+**
+**  Author:
+**      R. Claus, SLAC/PEP-II Low Level RF Project
+**
+**  History:
+**      October  17, 1996 - Created
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+#include <1610.h>
+
+#include "dspDef.h"
+#include "aucDef.h"
+#include "intDef.h"
+#include "bioDef.h"
+#include "pioDef.h"
+#include "sttDef.h"
+#include "timDef.h"
+
+#define DAC_K_II  0xbff                 /* 2.50 V */
+#define DAC_K_IQ  0x800                 /* 0.00 V */
+#define DAC_K_QI  0x800                 /* 0.00 V */
+#define DAC_K_QQ  0xbff                 /* 2.50 V */
+
+
+.rsect ".eram"
+
+#ifdef GVF
+        .= DSP_A_ERAM
+Dac:    int  0.0
+#endif
+
+        .= (DSP_A_ERAM + 4)
+Mem:    int  0.0
+
+
+
+.rsect ".ram"
+
+/* Interrupt and exception vectors */
+        .= VEC_A_RESET
+start:  goto main                       /* Jump to main routine */
+
+.= DSP_A_CODELOW
+
+/* Main program */
+main:
+        call     InitReg                /* Initialize registers   */
+
+RunTest:
+        cbit  = BIO_TOGGLE (BIO_V_GEN1) /* Toggle LED */
+        p     = 0x0fff                  /* Maximum test value */
+        a0    = 0                       /* Clear a0 */
+        a0l   = 0
+
+Loop:
+        r0    = Mem                     /* External memory address */
+#ifdef GVF
+        r1    = Dac                     /* "DAC" address */
+#else
+# ifdef RFP
+        r1    = DSP_A_DACS              /* DAC address */
+# endif
+#endif
+        auc   = 0x8                     /* Don't saturate a1 at 0x7fff */
+
+        a1    = DAC_K_II << 4           /* Shift to MSB */
+        *r0++ = a1                      /* Save in external memory */
+        *r1++ = a1                      /* Load 1st DAC register */
+
+        a1    = DAC_K_IQ << 4           /* Shift to MSB */
+        *r0++ = a1                      /* Save in external memory */
+        *r1++ = a1                      /* Load 1st DAC register */
+
+        a1    = DAC_K_QI << 4           /* Shift to MSB */
+        *r0++ = a1                      /* Save in external memory */
+        *r1++ = a1                      /* Load 1st DAC register */
+
+        a1    = DAC_K_QQ << 4           /* Shift to MSB */
+        *r0++ = a1                      /* Save in external memory */
+        *r1++ = a1                      /* Load 1st DAC register */
+
+#ifdef RFP
+        r0    = DSP_A_UPDDACS           /* Update the DACs */
+        *r0   = a0                      /* Value doesn't matter */
+#endif
+
+end:    goto end
+
+
+/* Routine register init */
+InitReg:
+        inc  = DSP_K_INTINIT            /* Disable interrupts */
+        auc  = DSP_K_AUCINIT            /* Set up Arithmetic Unit */
+        mwait= DSP_K_MEMWAIT            /* Number of wait states for ERAM */
+        pioc = DSP_K_PIOINIT            /* Set up PIO */
+        sbit = DSP_K_BIODIR             /* Set up BIO bit directions */
+        cbit = DSP_K_BIOINIT            /* Set up BIO outputs */
+
+        timer0 = NULL                   /* Timer count-down register */
+        timerc = DSP_K_TIMINIT          /* Timer is off */
+
+        y      = 0
+        yl     = 0                      /* Don't trip on upper bits */
+        p      = 0
+        pl     = 0                      /* Don't trip on upper bits */
+        a0     = 0
+        a0l    = 0                      /* Don't trip on upper bits */
+        a1     = 0
+        a1l    = 0                      /* Don't trip on upper bits */
+
+        return
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

@@ -1,0 +1,1127 @@
+head	1.4;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.4
+	RF-SPEAR-R0-3-1:1.4
+	RF-SPEAR-R0-3-0:1.4
+	RF-SPEAR-R0-2-0:1.4
+	RF-SPEAR-R0-1-0:1.4
+	RF-SPEAR-R0-0-3:1.4
+	RF-SPEAR-R0-0-2:1.4
+	RF-SPEAR-R0-0-1:1.4
+	RF-SPEAR-R0-0-0:1.4
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.4
+	RF-3-13-10:1.3.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.3
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.3
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.3
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.4
+date	2011.12.07.01.21.54;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.09.10.23.50.53;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.11.19.19.46;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@Changes for 3.14.11 (export) and compiler warnings.
+@
+text
+@/*
+** ++
+**
+**  Facility:  DEV - DEVice support
+**
+**  Abstract:
+**      EPICS device support for the PEP-II RF Clock and RF Distribution Module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Low Level RF Group
+**
+**  History:
+**      September 10, 2003 - Added function Read_IntStatus  (LUCHINI)
+**	October   16, 1996 - Created                        (CLAUS)
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+#include <vxWorks.h>
+#include <sysLib.h>
+#include <stdlib.h>
+#include <types.h>
+#include <stdioLib.h>
+#include <string.h>
+#include <taskLib.h>
+#include <logLib.h>
+
+#include <epicsPrint.h>
+#include <cvtTable.h>
+#include <dbDefs.h>
+#include <dbAccess.h>
+#include <dbEvent.h>
+#include <recGbl.h>
+#include <recSup.h>
+#include <devSup.h>
+#include <link.h>
+#include <alarm.h>
+/*#include <module_types.h>*/
+#include <callback.h>
+
+#include <p2RfLib.h>
+#include <drvP2RfVxi.h>
+#include <p2RfClkDef.h>
+#include <p2RfClkRecord.h>
+
+#include "epicsExport.h"
+
+
+#define CLK_V_INTSELECT    CLK_V_FIDERR
+#define CLK_M_INTSELECT   (CLK_M_FIDERR   | CLK_M_FIDLOS   | \
+                           CLK_M_PLL2U    | CLK_M_PLL1U    | \
+                           CLK_M_INVADX   | CLK_M_SOFTWARE)
+
+#define CLK_V_V2INTSELECT    CLK_V_FIDERR
+#define CLK_M_V2INTSELECT   (CLK_M_FIDERR   | CLK_M_FIDLOS   | \
+                             CLK_M_V2PLL1U  | CLK_M_V2PLL2U  | \
+                             CLK_M_V2PLL3U  | CLK_M_INVADX   | CLK_M_SOFTWARE)
+
+#define CLK_V_V3INTSELECT    CLK_V_FIDERR
+#define CLK_M_V3INTSELECT   (CLK_M_FIDERR   | CLK_M_FIDLOS   | \
+                             CLK_M_V2PLL1U  | CLK_M_V2PLL2U  | \
+                             CLK_M_V3RFLOSS | CLK_M_V3EXTINT | \
+                             CLK_M_INVADX   | CLK_M_SOFTWARE)
+
+typedef struct p2RfClkRecord   P2RfClkRecord;
+
+static long InitRecord (P2RfClkRecord *);
+static long Action     (P2RfClkRecord *);
+
+typedef struct
+{
+  long		number;
+  DEVSUPFUN	report;
+  DEVSUPFUN	init;
+  DEVSUPFUN	init_record;
+  DEVSUPFUN	get_ioint_info;
+  DEVSUPFUN	action;
+} P2RfClkDset;
+
+P2RfClkDset devP2RfClk = {5, NULL, NULL, InitRecord, NULL, Action};
+
+epicsExportAddress(dset,devP2RfClk);
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  long            status;
+}  ClkRstBlk;
+
+
+typedef struct
+{
+  void           *drvPvt;
+  P2RfClkRecord  *rec;
+  ClkRstBlk       resetBlk;
+  unsigned int    intPrc;
+}  ClkBoard;
+/* Forward references */
+static long  SpawnReset      (P2RfClkRecord *, ClkRstBlk *);
+static void  ResetCallback   (ClkRstBlk *);
+static void  ClkIsr          (void *, unsigned short);
+static void  ClkShutdown     (void *);
+static long  InitFields      (ClkBoard *, int);
+static long  ColdInit        (ClkBoard *, P2RfClkRecord *);
+static long  WarmInit        (ClkBoard *, P2RfClkRecord *);
+static void  Read_IntStatus  (ClkBoard *, P2RfClkRecord *);
+
+
+static void ClkIsr (void           *brdArg,
+                    unsigned short  intStat)
+/*
+   Description
+   -----------
+   Device specific routine to handle interrupts generated by the module.
+   It runs in the context of the Interrupt Service Routine.  Thus all
+   the rules for coding at IPL apply.
+
+   In this case, alarms are set depending on the interrupt type.
+
+   Parameters
+   ----------
+       brdArg - A pointer to the device private structure
+      intStat - The interrupt status mask
+
+   Returns
+   -------
+   nothing
+*/
+{
+#if 0
+  Function ("ClkIsr");
+#endif
+
+  ClkBoard       *brd = (ClkBoard *) brdArg;
+  P2RfClkRecord  *rec = brd->rec;
+
+
+#if 0
+  if (intStat & CLK_M_FIDERR)
+    logMsg ("%s: Fiducial counter error\n", (int)FN,0,0,0,0,0);
+  if (intStat & CLK_M_FIDLOS)
+    logMsg ("%s: DDF data overwritten (?)\n",(int)FN,0,0,0,0,0);
+
+  if (intStat & CLK_M_PLL2U)
+    logMsg ("%s: 471.1 MHz PLL unlocked\n", (int)FN,0,0,0,0,0);
+  if (intStat & CLK_M_PLL1U)
+    logMsg ("%s: 39.3 MHz PLL unlocked\n", (int)FN,0,0,0,0,0);
+
+  if (rec->verh==3) {
+    if (intStat & CLK_M_V3RFLOSS)
+      logMsg("%s: 476MHz RF Clk signal is not present\n",(int) FN,0,0,0,0,0);
+    if (intStat & CLK_M_V3EXTINT)
+      logMsg("%s: External front panel interrupt signal has been asserted\n",(int) FN,0,0,0,0,0);
+  }
+
+  if (intStat & CLK_M_INVADX)
+    logMsg ("%s: Invalid address or access\n",(int) FN,0,0,0,0,0);
+  if (intStat & CLK_M_SOFTWARE)
+    logMsg ("%s: Software interrupt\n",(int) FN,0,0,0,0,0);
+#endif
+
+  /* Update mask of interrupts set */
+  if (intStat & (intStat ^ rec->istt))  /* Is bit already set in istt? */
+  {
+    rec->istt |= intStat;
+
+    /* Process forward links */
+    brd->intPrc++;
+    scanOnce ((dbCommon *)rec);
+  }
+}
+
+
+
+static void ClkShutdown (void  *brdArg)
+/*
+   Description
+   -----------
+   Device specific routine to run at shutdown time.
+
+   Parameters
+   ----------
+       brdArg - A pointer to the device private structure
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("ClkShutdown"); */
+}
+
+
+
+static long InitRecord (P2RfClkRecord  *rec)
+/*
+   Description
+   -----------
+   Initialize the record.  Many fields of the record are filled with data from
+   the hardware.  Depending on the start-up type (cold or warm) some record
+   fields will either set up the hardware or get their values from a restore
+   file.  Interrupts from the board are enabled at the end of the
+   initialization.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("InitRecord");
+
+  struct vxiio   *vxiIo = NULL;
+  ClkBoard       *brd;
+  long            status;
+  void           *drvPvt;
+  char           *msg   = "CLK module initialization failed";
+  int             startType;
+
+
+  /* rec.out must be of type VXI_IO */
+  if (rec->out.type != VXI_IO)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (S_db_badField, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "Illegal OUT field"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return(S_db_badField);
+  }
+
+  /* Allocate the device private block */
+  if ((brd = calloc (1, sizeof (*brd))) == NULL)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (ERROR, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN,
+                                     "No memory for CLK board descriptor"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Register the module to get a driver handle */
+  vxiIo = &rec->out.value.vxiio;
+  if ((status = P2RF_RegisterModule (vxiIo->flag, vxiIo->frame, vxiIo->slot,
+                                    vxiIo->la,
+                                    CLK_K_MODEL, CLK_K_NAME, CLK_K_DRAWING,
+                                    ClkIsr, brd, ClkShutdown, brd,
+				     &drvPvt)))
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "P2RF_RegisterModule"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (status);
+  }
+
+  /* Set up the device private block and save a pointer to it in the record */
+  brd->drvPvt = drvPvt;
+  brd->rec    = rec;
+  rec->dpvt   = brd;
+
+  /* Initialize the callback facility for the reset function*/
+  callbackSetCallback ((void*)ResetCallback, &brd->resetBlk.callback);
+  callbackSetPriority (priorityHigh,         &brd->resetBlk.callback);
+  callbackSetUser     (rec,                  &brd->resetBlk.callback);
+  brd->resetBlk.drvPvt = drvPvt;
+
+  /* Figure out the restart type -- To be determined */
+  startType = P2RF_K_COLDSTART;
+
+  /* Initialize the module and the database fields depending on startup type */
+  if ((status = InitFields (brd, startType)))
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Enable module interrupts and update the database copy */
+  P2RF_ModIntEnable (drvPvt);
+  P2RF_ReadVme (drvPvt, CLK_I_INTCTRL, &rec->ictl);
+
+  return (OK);
+}
+
+
+
+static long InitFields (ClkBoard *brd,
+                        int       initType)
+/*
+   Description
+   -----------
+   Function to initialize the fields in the database record and/or the module,
+   depending on the initialization type.
+
+   Parameters
+   ----------
+          brd - A pointer to the device private block
+     initType - Type of initialization.
+
+   Returns
+   -------
+   Status
+*/
+{
+  /*  Function ("InitFields");*/
+
+  P2RfClkRecord  *rec    = brd->rec;
+  void           *drvPvt = brd->drvPvt;
+  long            status;
+  unsigned short  sernHi;
+  unsigned short  sernLo;
+
+
+  /* Reset the module, if it's a cold startup.  This takes a while... */
+  if (initType == P2RF_K_COLDSTART)  P2RF_ResetModule (drvPvt);
+
+  /* Load the record fields with device data */
+  P2RF_ReadVme (drvPvt, CLK_I_MANID,     &rec->mid );
+  P2RF_ReadVme (drvPvt, CLK_I_MODELNO,   &rec->mtyp);
+  P2RF_ReadVme (drvPvt, CLK_I_STATUS,    &rec->mstt);
+  P2RF_ReadVme (drvPvt, CLK_I_ATTRIBUTE, &rec->vatt);
+  P2RF_ReadVme (drvPvt, CLK_I_SERIALHI,  &sernHi   );
+  P2RF_ReadVme (drvPvt, CLK_I_SERIALLO,  &sernLo   );
+  rec->sern = (sernHi << 16) | sernLo;
+  P2RF_ReadVme (drvPvt, CLK_I_VERSION,   &rec->vern);
+  rec->verh = P2RF_HWVER(rec->vern);  /* save the lower nibble of the hardware version */
+  rec->verf = P2RF_FWVER(rec->vern);  /* save the lower nibble of the firmware version */
+  P2RF_ReadVme (drvPvt, CLK_I_SUBCLASS,  &rec->vscl);
+
+  /* Write some registers if we're doing a grounds-up initialization */
+  if (initType == P2RF_K_COLDSTART)    status = ColdInit (brd, rec);
+  else                                 status = WarmInit (brd, rec);
+
+  /* Resman wrote 0xfffc to module control register; take down software int */
+  rec->mctl = rec->mstt & (CLK_M_SFTRST | CLK_M_SYSFAILINH);
+  P2RF_WriteVme (drvPvt, CLK_I_CONTROL,  rec->mctl);
+  P2RF_ReadVme  (drvPvt, CLK_I_STATUS,  &rec->mstt);
+
+  /*
+  |  Reading the Interrupt Status Register clears the outstanding Software
+  |  Interrupt Status bit, but does not clear the pending interrupt.  Thus
+  |  reading the register here would confuse the ISR when interrupts are
+  |  enabled and the pending software interrupt is taken: the ISR would
+  |  not be able to find the source of the interrupt.
+  */
+
+  /* Update the database copy of the Trigger and Clock control registers */
+  P2RF_ReadVme (drvPvt, CLK_I_TRGCTRL, &rec->tctl);
+  P2RF_ReadVme (drvPvt, CLK_I_CLKCTRL, &rec->dctl);
+  /*
+  ** Update synch/calibrate register if version 2.
+  */
+  if (rec->verh  >= 2)
+  {
+    P2RF_ReadVme (drvPvt, CLK_I_V2SYNCHCAL, &rec->sctl);
+  }
+  return (status);
+}
+
+
+
+static long ColdInit (ClkBoard      *brd,
+                      P2RfClkRecord *rec)
+/*
+   Description
+   -----------
+   Initialization file to run when starting up from scratch.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("ColdInit");
+
+  register void  *drvPvt = brd->drvPvt;
+  unsigned short  reg;
+  unsigned short  btyp=0;
+
+  /* Don't allow database access to the interrupt level */
+  reg = (P2RF_K_INTLEVEL << CLK_V_INTLEVEL) & CLK_M_INTLEVEL;
+
+  /* Initialize the Interrupt Control Register from the database */
+  if (rec->verh == 1)  
+    rec->ictl = ~(reg | ((rec->imsk << CLK_V_INTSELECT) & CLK_M_INTSELECT));
+  else if (rec->verh==2)
+    rec->ictl = ~(reg | ((rec->imsk << CLK_V_V2INTSELECT) & CLK_M_V2INTSELECT));
+  else
+    rec->ictl = ~(reg | ((rec->imsk << CLK_V_V3INTSELECT) & CLK_M_V3INTSELECT));
+  P2RF_WriteVme (drvPvt, CLK_I_INTCTRL, rec->ictl);
+  rec->oimk = rec->imsk;
+
+  /* Initialize the Trigger Control Register */
+  reg  = (rec->auxo << CLK_V_AUXOUT) & CLK_M_AUXOUT;
+  reg |= (rec->auxi << CLK_V_AUXIN)  & CLK_M_AUXIN;
+  if (rec->axoe)  reg |= CLK_M_AUXOUTENB;
+  if (rec->axie)  reg |= CLK_M_AUXINENB;
+  if (rec->sftt)  reg |= (CLK_K_SOFTTRG << CLK_V_SOFTTRG) & CLK_M_SOFTTRG;
+  P2RF_WriteVme (drvPvt, CLK_I_TRGCTRL, reg);
+  rec->tctl = reg;
+
+  /* 
+  ** Read the configuration id constants register. This represents
+  ** the dip switch settings (SW12 & SW13) that set ID values used to 
+  ** indicate which system clock module is being used in :PEPII-HER,
+  ** PEPII-LER or SPEAR3.
+  */
+  if (rec->verh > 2) 
+  {
+    P2RF_ReadVme (drvPvt, CLK_I_V3CFGID , &reg );
+    btyp = reg & 0x3;
+  }
+  /* Get the harmonic number readback */
+  P2RF_ReadVme (drvPvt, CLK_I_HARMNORB, &reg);
+  if (rec->verh == 1)
+    rec->hnrb = 2.0 * (0x10000 - reg);
+  else
+    rec->hnrb = 2.0 * (0x10000 - reg +1);
+
+  if (rec->hnrb != P2RF_K_HARMNO(btyp))
+  {
+    char  buf[P2RF_K_BUFSIZE];
+    int   stat = rec->hnrb > P2RF_K_HARMNO(btyp) ? HIHI_ALARM : LOLO_ALARM;
+
+    recGblSetSevr (rec, stat, INVALID_ALARM);
+    recGblRecordError (ERROR, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN,
+           "Harmonic Number Readback is not the expected %d: %d", P2RF_K_HARMNO(btyp), rec->hnrb));
+  }
+
+
+  /* Initialize the Clock Control Register */
+  reg  = (((short) (rec->fdel / CLK_K_FIDDELRES))
+          << CLK_V_FIDDEL)    & CLK_M_FIDDEL;
+  reg |= (rec->tcsl ? 1 : 0) << CLK_V_TRNCLKSEL;
+  reg |= (((short) (rec->c39d / CLK_K_C39DELRES))
+          << CLK_V_C39DELSEL) & CLK_M_C39DELSEL;
+  if (rec->verh >= 2)            /* If version 2 of the board */
+  {  
+    reg |= (((short) (rec->tclk / CLK_K_V2TCLKDELRES))
+           << CLK_V_V2TCLKDELSEL) & CLK_M_V2TCLKDELSEL;
+  }
+  P2RF_WriteVme (drvPvt, CLK_I_CLKCTRL, reg);
+  rec->dctl = reg;
+
+  /* Initialize the Phase-Locked loop constants if board vers 1 */
+  if (rec->verh == 1)
+  {  
+    rec->pll3 = CLK_K_39CONST;
+    rec->pll4 = (rec->p4cs == 0 ? CLK_K_471NORM :
+                (rec->p4cs == 1 ? CLK_K_471LOW  : CLK_K_471HIGH));
+
+    P2RF_WriteVme (drvPvt, CLK_I_39MHZPLL,  rec->pll3);
+    P2RF_WriteVme (drvPvt, CLK_I_471MHZPLL, rec->pll4);
+
+    /* Always resynchronize to the fiducial at the beginning */
+    P2RF_WriteVme (drvPvt, CLK_I_RESYNCH, 0);
+  }
+  else   /* Must be version 2. Init. synch/calibrate & R/O registers */
+  {
+    reg  = (((short) (rec->snch / CLK_K_V2SNCHDELRES))
+            << CLK_V_V2SNCHDELSEL)    & CLK_M_V2SNCHDELSEL;
+    P2RF_WriteVme (drvPvt, CLK_I_V2SYNCHCAL, reg);
+    reg  |= CLK_M_V2SYNON;         /* Synchronize the clocks */
+    P2RF_WriteVme (drvPvt, CLK_I_V2SYNCHCAL, reg);
+    taskDelay (sysClkRateGet () / 10);  /* Delay a tad and do it twice */
+    P2RF_WriteVme (drvPvt, CLK_I_V2SYNCHCAL, reg);
+    taskDelay (sysClkRateGet () / 10);  /* Let synch settle */
+    /*
+    ** Get status of all interesting registers including synch/calibrate.
+    */
+    P2RF_ReadVme (drvPvt, CLK_I_V2SYNCHCAL,  &rec->sctl);
+    P2RF_ReadVme (drvPvt, CLK_I_V239MHZPLL1, &rec->p391);
+    P2RF_ReadVme (drvPvt, CLK_I_V239MHZPLL2, &rec->p392);
+    P2RF_ReadVme (drvPvt, CLK_I_V2471MHZPLL, &rec->p471);
+    if ( rec->verh==2 ) 
+    {
+       P2RF_ReadVme (drvPvt, CLK_I_V2CALIBPLL1, &rec->pcl1);
+       P2RF_ReadVme (drvPvt, CLK_I_V2CALIBPLL2, &rec->pcl2);
+    }
+    if ( rec->verh==3 )
+    {
+      /* 
+      ** Read the dip switch settings (SW8 & SW9) that control
+      ** the delay generators for the turn counter output delay. 
+      ** the PLL output clock delay and the Fiducial input pulse delay.
+      ** Note:  these settings are preset, used to initialize the board at 
+      ** power-up, and can be overridden by the values in the Delay Control 
+      ** Register at A16 offset 0x24.
+      *
+      P2RF_ReadVme (drvPvt, CLK_I_V3DLYPRST   , &rec->cdly );
+      */
+    }
+  }
+
+  return (OK);
+}
+
+
+
+static long WarmInit (ClkBoard       *brd,
+                      P2RfClkRecord  *rec)
+/*
+   Description
+   -----------
+   Initialization routine to run when the module is still running
+   satisfactorily.  This function will (when it is written) bring
+   the EPICS database in synch with the module.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  return (OK);
+}
+
+
+
+static long Action (P2RfClkRecord    *rec)
+/*
+   Description
+   -----------
+   This is the action routine for the CLK.
+
+   Parameters
+   ----------
+          rec - A pointer to the record structure
+
+   Returns
+   -------
+   0 or 2 for successful returns, else a status
+*/
+{
+  Function ("Action");
+
+  ClkBoard       *brd    = NULL;
+  void           *drvPvt;
+  unsigned short  dctl;
+  unsigned short  sctl;
+  unsigned short  reg;
+  unsigned short  btyp=0;
+
+
+  /* If initialization failed let the system know */
+  if ((brd = rec->dpvt) == NULL)  return (ERROR);
+  drvPvt = brd->drvPvt;
+
+  /* If processing was invoked by an interrupt, handle it */
+  if (brd->intPrc)
+  {
+    /* Update client value of interrupt status field */
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+
+    /* Don't loose invocation count on multiple interrupts */
+    brd->intPrc--;
+    return (0);
+  }
+
+  /* Read the interrupt status register 
+   * (this is a bad thing to do, only do if imsk==0) 
+   */
+  if (rec->rist) 
+  {
+    if (rec->imsk==0)
+    {
+      Read_IntStatus( brd,rec );
+    }
+    rec->rist=0;
+    return(0);
+  }
+
+  /* Initialize the message buffer if we're not doing completion processing */
+  if (!rec->pact)    strncpy (rec->val, "Success", sizeof (rec->val));
+
+  /* If requested, do a "software reset" on the module */
+  if (rec->mrst)  return (SpawnReset (rec, &brd->resetBlk));
+
+  /* Let the operator acknowledge that the interrupts have been seen */
+  if (rec->iack)
+  {
+    rec->istt &= ~rec->iack;            /* Take only requested bits down */
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+    rec->iack = 0;
+    db_post_events (rec, &rec->iack, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Update the interrupt control register if there was a change request */
+  if (rec->imsk != rec->oimk)
+  {
+    rec->oimk = rec->imsk;
+    if (rec->verh == 1)
+      rec->ictl = (rec->ictl & ~CLK_M_INTSELECT) |
+        ((~rec->imsk << CLK_V_INTSELECT) & CLK_M_INTSELECT);
+    else if (rec->verh == 2)
+      rec->ictl = (rec->ictl & ~CLK_M_V2INTSELECT) |
+        ((~rec->imsk << CLK_V_V2INTSELECT) & CLK_M_V2INTSELECT);
+    else
+      rec->ictl = (rec->ictl & ~CLK_M_V3INTSELECT) |
+        ((~rec->imsk << CLK_V_V3INTSELECT) & CLK_M_V3INTSELECT);
+    P2RF_WriteVme (drvPvt, CLK_I_INTCTRL, rec->ictl);
+    db_post_events (rec, &rec->ictl, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Get the current state of the trigger control register */
+  P2RF_ReadVme (drvPvt, CLK_I_TRGCTRL, &reg);
+
+  /* Potentially modify aux out/in levels, enable, aux out/in, soft trigger */
+  reg  = (rec->auxo << CLK_V_AUXOUT) & CLK_M_AUXOUT;
+  reg |= (rec->auxi << CLK_V_AUXIN)  & CLK_M_AUXIN;
+  if (rec->axoe)  reg |= CLK_M_AUXOUTENB;
+  if (rec->axie)  reg |= CLK_M_AUXINENB;
+  if (rec->sftt)  reg |= (CLK_K_SOFTTRG << CLK_V_SOFTTRG) & CLK_M_SOFTTRG;
+
+  /* Update the module and the database versions of Trigger Control register */
+  if (reg != rec->tctl)
+  {
+    rec->tctl = reg;
+    P2RF_WriteVme (drvPvt, CLK_I_TRGCTRL, rec->tctl);
+    db_post_events (rec, &rec->tctl, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Get the current state of the clock control register */
+  P2RF_ReadVme (drvPvt, CLK_I_CLKCTRL, &dctl);
+
+  /* Look at only those bits that are modifiable. Be version specific */
+  if (rec->verh == 1)
+  {
+    dctl &= ~(CLK_M_FIDDEL | CLK_M_TRNCLKSEL | CLK_M_C39DELSEL);
+    dctl |= (rec->tcsl ? 1 : 0) << CLK_V_TRNCLKSEL;
+    /* Potentially change the turn clock selection, fiducial delay, Clk39 delay */
+    dctl |= (((short) (rec->fdel / CLK_K_FIDDELRES))
+             << CLK_V_FIDDEL)    & CLK_M_FIDDEL;
+    dctl |= (((short) (rec->c39d / CLK_K_C39DELRES))
+             << CLK_V_C39DELSEL) & CLK_M_C39DELSEL;
+  }
+  else           /* Board Version 2 code */
+  {
+    dctl &= ~(CLK_M_FIDDEL | CLK_M_V2TCLKDELSEL | CLK_M_C39DELSEL);
+    /* Potentially change the turn clock selection, fiducial delay, Clk39 delay */
+    dctl |= (((short) (rec->fdel / CLK_K_FIDDELRES))
+             << CLK_V_FIDDEL)    & CLK_M_FIDDEL;
+    dctl |= (((short) (rec->c39d / CLK_K_C39DELRES))
+             << CLK_V_C39DELSEL) & CLK_M_C39DELSEL;
+    dctl |= (((short) (rec->tclk / CLK_K_V2TCLKDELRES))
+             << CLK_V_V2TCLKDELSEL) & CLK_M_V2TCLKDELSEL;
+  }
+
+  /* Update the module and the database versions of Clock Control register */
+  if (dctl != rec->dctl)
+  {
+    rec->dctl = dctl;
+    P2RF_WriteVme (drvPvt, CLK_I_CLKCTRL, rec->dctl);
+    db_post_events (rec, &rec->dctl, DBE_VALUE | DBE_LOG);
+  }
+
+  /* If this is board version 2, update the synch/calibrate register */
+  if (rec->verh >= 2)
+  {
+    /* Get the current state of the synch/calibrate register */
+    P2RF_ReadVme (drvPvt, CLK_I_V2SYNCHCAL, &sctl);
+    if (rec->verh==2) 
+      sctl &= ~(CLK_M_V2SNCHDELSEL | CLK_M_V2SYNON | CLK_M_V2CALON);
+    else
+      sctl &= ~(CLK_M_V2SNCHDELSEL | CLK_M_V2SYNON);
+
+    /* Potentially change the synch delay, synch on & calibrate on */
+    sctl |= (((short) (rec->snch / CLK_K_V2SNCHDELRES))
+             << CLK_V_V2SNCHDELSEL)    & CLK_M_V2SNCHDELSEL;
+    if ((rec->caln) && (rec->verh==2))  sctl |= CLK_M_V2CALON;
+  /* Update the module and the database versions of Synch Control register */
+    if (sctl != rec->sctl)
+    {
+      rec->sctl = sctl;
+      P2RF_WriteVme (drvPvt, CLK_I_V2SYNCHCAL, rec->sctl);
+      db_post_events (rec, &rec->sctl, DBE_VALUE | DBE_LOG);
+    }
+  }
+
+  /* 
+  ** Read the configuration id constants register. This represents
+  ** the dip switch settings (SW12 & SW13) that set ID values used to 
+  ** indicate which system clock module is being used in :PEPII-HER,
+  ** PEPII-LER or SPEAR3.
+  */
+  if (rec->verh > 2) 
+  {
+    P2RF_ReadVme (drvPvt, CLK_I_V3CFGID , &reg );
+    btyp = reg & 0x3;
+  }
+  /* Update the database copy of the harmonic number readback register */
+  P2RF_ReadVme (drvPvt, CLK_I_HARMNORB,  &reg);
+  if (rec->verh == 1)
+    rec->hnrb = 2.0 * (0x10000 - reg);
+  else
+    rec->hnrb = 2.0 * (0x10000 - reg +1);
+
+  db_post_events (rec, &rec->hnrb, DBE_VALUE | DBE_LOG);
+  if (rec->hnrb != P2RF_K_HARMNO(btyp))
+  {
+    char  buf[P2RF_K_BUFSIZE];
+    int   stat = rec->hnrb > P2RF_K_HARMNO(btyp) ? HIHI_ALARM : LOLO_ALARM;
+
+    recGblSetSevr (rec, stat, INVALID_ALARM);
+    recGblRecordError (ERROR, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN,
+                                     "Harmonic Number Readback is not the expected %d: %d", P2RF_K_HARMNO(btyp), rec->hnrb));
+  }
+
+  /* Resynchronize the clocks to the external fiducial */
+  if (rec->rsyn)
+  {
+    if (rec->verh == 1)
+    {  
+      P2RF_WriteVme (drvPvt, CLK_I_RESYNCH, 0);
+    }
+    else    /* Version 2 synch */
+    {
+      reg  = (((short) (rec->snch / CLK_K_V2SNCHDELRES))
+              << CLK_V_V2SNCHDELSEL)    & CLK_M_V2SNCHDELSEL;
+      if ((rec->caln) && (rec->verh==2)) reg |= CLK_M_V2CALON;  /* Or in calibrate bit */
+      reg  |= CLK_M_V2SYNON;         /* Synchronize the clocks */
+      P2RF_WriteVme (drvPvt, CLK_I_V2SYNCHCAL, reg);
+      taskDelay (sysClkRateGet () / 10);  /* Delay a tad and do it twice */
+      P2RF_WriteVme (drvPvt, CLK_I_V2SYNCHCAL, reg);
+    }
+    rec->rsyn = 0;
+  }
+
+  if (rec->verh == 1)
+  {  
+    /* Change the 471.1 MHz PLL constants, if requested */
+    if (rec->p4cs != rec->op4c)
+    {
+      rec->op4c = rec->p4cs;
+      rec->pll4 = (rec->p4cs == 0 ? CLK_K_471NORM :
+                  (rec->p4cs == 1 ? CLK_K_471LOW  : CLK_K_471HIGH));
+
+      P2RF_WriteVme (drvPvt, CLK_I_471MHZPLL, rec->pll4);
+      db_post_events (rec, &rec->pll4, DBE_VALUE | DBE_LOG);
+    }
+  }
+  return (0);
+}
+
+
+static void Read_IntStatus(ClkBoard       *brd,
+                           P2RfClkRecord  *rec)
+/*
+   Description
+   -----------
+   This function reads the interrupt status register on the VXI module in A16 space.
+   Please note that this register should NOT normally be read in this manner, since it is cleared
+   on a read. However, interrupts are currently disabled on the clock module (see: IMSK=0)
+   so polling this register is a way to report when an interrupt has occured t
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   N/A
+*/
+{
+#if 0
+  Function ("Read_IntStatus");
+#endif
+  unsigned short intStat=0;
+
+  /* Read the interrupt status register */
+  P2RF_ReadVme (brd->drvPvt, CLK_I_INTSTAT, &intStat);
+
+#if 0
+  Dbg (epicsPrintf ("%s (%s): intStat = %08x\n",__FILE__, FN, intStat));
+#endif
+
+  /* Is bit already set in istt field of the db? */
+  if (intStat & (intStat ^ rec->istt)) 
+  {
+    rec->istt |= intStat;
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+  }
+  return;
+}
+
+
+static long SpawnReset (P2RfClkRecord  *rec,
+                        ClkRstBlk      *blk)
+/*
+   Description
+   -----------
+   This function initiates and completes the module reset.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+          blk - A pointer to the reset block
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnReset");
+
+
+  if (!rec->pact)
+  {
+    /* Let operator know what's happening */
+    strncpy (rec->val,  "Software Reset: active", sizeof (rec->val));
+    strncpy (rec->oval, "Software Reset: active", sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow reprocessing of record before reset completes */
+    rec->pact = TRUE;
+
+    /* Disable module interrupts during software reset */
+    P2RF_ModIntDisable (blk->drvPvt);
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+      strncpy (rec->val, "Attempt to initialize module failed", sizeof (rec->val));
+      recGblSetSevr (rec, UDF_ALARM, INVALID_ALARM);
+    }
+    else
+    {
+      /* Re-enable module interrupts */
+      P2RF_ModIntEnable (blk->drvPvt);
+
+      strncpy (rec->val, "Software reset: done", sizeof (rec->val));
+    }
+
+    /* Reset the reset request so we don't redo it on the next process pass */
+    rec->mrst = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void ResetCallback (ClkRstBlk  *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a module software reset it requested.  It invokes completion processing
+   of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the reset block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("ResetCallback");*/
+
+  struct dbCommon  *rec;
+  struct rset      *rSet;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((rec = callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Reset and update the record and the module */
+  blk->status = InitFields ((ClkBoard *) rec->dpvt, P2RF_K_COLDSTART);
+
+  /* Complete processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     (rec);
+}
+@
+
+
+1.3
+log
+@Read interrupt status reg if field RIST is set
+@
+text
+@d59 1
+d64 1
+a64 1
+#include <module_types.h>
+d72 2
+d108 2
+d169 1
+a169 1
+    logMsg ("%s: DDF data overwritten (???)\n",(int)FN,0,0,0,0,0);
+d196 1
+a196 1
+    scanOnce (rec);
+d298 3
+a300 3
+  callbackSetCallback (ResetCallback, &brd->resetBlk.callback);
+  callbackSetPriority (priorityHigh, &brd->resetBlk.callback);
+  callbackSetUser     (rec, &brd->resetBlk.callback);
+@
+
+
+1.2
+log
+@add VERH and VERF fields
+@
+text
+@d13 2
+a14 1
+**	October 16, 1996 - Created
+a70 1
+
+a92 1
+
+a119 1
+
+d128 1
+a128 1
+
+d610 13
+a628 18
+  /* If operator disabled interrupts update interrupt status DB field */
+  P2RF_ReadVme (brd->drvPvt, CLK_I_INTCTRL, &reg);
+  if (rec->verh == 1)
+    reg = ((reg & CLK_M_INTSELECT) == CLK_M_INTSELECT);
+  else if (rec->verh == 2)
+    reg = ((reg & CLK_M_V2INTSELECT) == CLK_M_V2INTSELECT);
+  else
+    reg = ((reg & CLK_M_V3INTSELECT) == CLK_M_V3INTSELECT);
+  if (reg)
+  {
+    P2RF_ReadVme (brd->drvPvt, CLK_I_INTSTAT, &rec->istt);
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+  }
+
+d800 45
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d51 1
+d164 1
+a164 1
+    epicsPrintf ("%s: Fiducial counter error\n", FN);
+d166 1
+a166 1
+    epicsPrintf ("%s: DDF data overwritten (???)\n", FN);
+d169 1
+a169 1
+    epicsPrintf ("%s: 471.1 MHz PLL unlocked\n", FN);
+d171 1
+a171 1
+    epicsPrintf ("%s: 39.3 MHz PLL unlocked\n", FN);
+d175 1
+a175 1
+      epicsPrintf("%s: 476MHz RF Clk signal is not present\n", FN);
+d177 1
+a177 1
+      epicsPrintf("%s: External front panel interrupt signal has been asserted\n", FN);
+d181 1
+a181 1
+    epicsPrintf ("%s: Invalid address or access\n", FN);
+d183 1
+a183 1
+    epicsPrintf ("%s: Software interrupt\n", FN);
+d364 2
+a365 1
+  rec->verh = rec->vern & 0xF;                    /* Save just H/W version */
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

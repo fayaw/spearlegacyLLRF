@@ -1,0 +1,337 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  gentable.c
+
+  Writes device data from linked list to Resource Manager table file
+  (opened/closed by rmShell).  This routine is passed two linked lists.
+  The first linked list is for the node just configured.  The second
+  linked list is the results from the last run of RESMAN and contains
+  all devices in a linked list.  If this node is contained in the old
+  list, then those entries are unthreaded and the storage deallocated.
+  Additionally, this routine writes the status of the new device as
+  available.
+
+  This file also includes freeConfigList(), which frees up all memory
+  used by the config_t linked list.
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include "resman.h"
+
+#include <libvar.h>
+
+
+
+int rmGenerateTable( config_t  *root,
+                     char      *strTablePath,
+                     mfrName_t *pDevList,
+                     mfrName_t *pModList,
+                     mfrName_t *pNamList)
+
+{
+   char fileName [512];
+   FILE* fp;
+   int status;
+
+   UserLAEntry* userHead = 0;
+   UserLAEntry* userEntry;
+
+   config_t *thisLA;
+   mfrName_t pSglDev;
+
+   strcpy (fileName, strTablePath);
+   strcat (fileName, "resman.tbl");
+
+   if (fp = fopen (fileName,"w"),  !fp) {
+printf("Could not open file resman.tbl for writing.\n");
+     return( -1 );
+   }
+#ifdef KSC_DEBUG1
+printf("rmGenerateTable:root = 0x%x\n",root);
+#endif
+
+   /* Show summary column headings for the operator. */
+   printf("\nMF  Slot   LA  Mfr  Model  Class  Subclass  "
+     "Space      Base     Bytes\n");
+
+   /* 
+   * Write each device's configuration info from linked list.
+   */
+   for( thisLA = root; thisLA != NULL; thisLA = thisLA->next )
+   {
+
+#ifdef KSC_DEBUG11
+printf("thisLA = 0x%x, thisLA->next = 0x%x\n",thisLA,thisLA->next);
+#endif
+      /* 
+      * Look up the manufacturer, model, and device names 
+      */
+
+      idToName( pNamList, (unsigned short)thisLA->mfrID, pSglDev.manufr );
+
+      codeToName( pModList,
+                  pSglDev.manufr,
+                  (unsigned short)thisLA->modelID,
+                  pSglDev.model );
+
+      pSglDev.code_mf = thisLA->mainframe;
+      pSglDev.id_la = thisLA->logAdr;
+      pSglDev.slot  = thisLA->slot;
+      pSglDev.node  = thisLA->giNode;
+      deviceToName( pDevList, &pSglDev, pSglDev.device );
+
+
+      /*
+       * Create UserLAEntry for this device
+       */
+
+      assert(userEntry = calloc (1, sizeof(UserLAEntry)));
+
+      userEntry->next = userHead;
+      userHead = userEntry;
+
+      userEntry->la = thisLA->logAdr;
+
+#ifdef KSC_DEBUG11
+printf("rmGenerateTable: userEntry->la %d\n", userEntry->la);
+printf("rmGenerateTable: pSglDev.device %s\n", pSglDev.device);
+#endif
+      strncpy (userEntry->DevName, pSglDev.device, 13);
+
+      userEntry->Cmdr = thisLA->cmdrLA;
+      userEntry->Mainframe = thisLA->mainframe;
+      userEntry->Slot = thisLA->slot;
+
+      userEntry->ManId = thisLA->mfrID;
+      strncpy (userEntry->ManName, pSglDev.manufr, 13);
+
+      userEntry->ModelCode = thisLA->modelID;
+      strncpy (userEntry->ModelName, pSglDev.model, 13);
+
+      userEntry->DevClass = thisLA->devClass;
+      userEntry->SubClass = thisLA->subclass;
+
+      userEntry->MemSpace = thisLA->adrSpace;
+      userEntry->MemBase = thisLA->offset;
+      userEntry->MemSize = thisLA->memRqmt;
+      userEntry->MemType = thisLA->memAttrib;
+
+      userEntry->IrqLevel = thisLA->intLevels;
+      userEntry->IrqHandle = thisLA->ihLevels;
+
+      userEntry->ExtInfo = thisLA->ctlrInfo;
+      userEntry->AsyncMode = thisLA->wsAMCResp;
+      userEntry->RespEnable = thisLA->wsCtrlResp;
+      userEntry->Prot = thisLA->protocol;
+      userEntry->Flags = 1;
+      
+      userEntry->StatusState = thisLA->ready*2 + thisLA->passed;
+
+
+      /* 
+      * Now fill in resman.tbl 
+      */
+
+      status = fprintf( fp, "%d,%-15s,",
+               thisLA->logAdr, pSglDev.device );
+#ifdef KSC_DEBUG11
+printf("fprintf status = %d\n",status);
+#endif
+
+       status = fprintf( fp, "%x,%x,%x,%x,%-15s,",
+               thisLA->cmdrLA, thisLA->mainframe,   /* 12oct95 */
+               thisLA->slot, thisLA->mfrID, pSglDev.manufr );
+#ifdef KSC_DEBUG11
+printf("fprintf status = %d\n",status);
+#endif
+
+       status = fprintf( fp, "%x,%-15s,%x,",
+               thisLA->modelID, pSglDev.model, thisLA->devClass );
+#ifdef KSC_DEBUG11
+printf("fprintf status = %d\n",status);
+#endif
+
+       status = fprintf( fp, "%x,%x,", thisLA->subclass, thisLA->adrSpace );
+#ifdef KSC_DEBUG11
+printf("fprintf status = %d\n",status);
+#endif
+
+      switch (thisLA->adrSpace) {
+      case VXI_ADDR_EXT_A24:
+	 status = fprintf( fp, "%x00,%x00,",
+		thisLA->offset, 1 << (15 - thisLA->memRqmt) );
+#ifdef KSC_DEBUG11
+printf("fprintf status = %d\n",status);
+#endif
+	break;
+
+      case VXI_ADDR_EXT_A32:
+	 status = fprintf( fp, "%x0000,%x0000,",
+		thisLA->offset, 1 << (15 - thisLA->memRqmt) );
+#ifdef KSC_DEBUG11
+printf("fprintf status = %d\n",status);
+#endif
+	break;
+	
+      case VXI_ADDR_EXT_NONE:
+      default:
+	 status = fprintf( fp, "ffffffff,0,");
+#ifdef KSC_DEBUG11
+printf("fprintf status = %d\n",status);
+#endif
+	break;
+      }
+      
+       status = fprintf( fp, "%x,%x,%x,%x,%x,%x,",
+               thisLA->memAttrib, thisLA->intLevels, thisLA->ihLevels,
+               thisLA->ctlrInfo, thisLA->wsAMCResp, thisLA->wsCtrlResp );
+#ifdef KSC_DEBUG11
+printf("fprintf status = %d\n",status);
+#endif
+
+       status = fprintf( fp, "%x,1,%x,%x,A\n", 
+               thisLA->protocol, /* wired Misc Flags to 1 */
+               (thisLA->ready * 2) + thisLA->passed, 
+               thisLA->giNode );
+#ifdef KSC_DEBUG11
+printf("fprintf status = %d\n",status);
+#endif
+
+      /* Summarize the table for the operator. */
+      printf("%2d  %4d  %3d  %3x   %4x  ", thisLA->mainframe, thisLA->slot,
+        thisLA->logAdr, thisLA->mfrID, thisLA->modelID);
+
+  switch( thisLA->devClass ) {
+  case DEVCL_EXTENDED:
+    printf("Extended   ");
+    if( thisLA->subclass == 0xFFFC )
+      printf( "MXI   " );
+    else
+      printf( "%04X  ", thisLA->subclass );
+    break;
+  case DEVCL_MESSAGE:
+    printf("Message          ");
+    break;
+  case DEVCL_MEMORY:
+    printf("Memory           ");
+    break;
+  case DEVCL_REGISTER:
+  default:
+    printf("Register         ");
+    break;
+  }
+
+      switch (thisLA->adrSpace) {
+      case VXI_ADDR_EXT_A24:
+	printf("  A24    %04x00    %04x00\n",
+		thisLA->offset, 1 << (15 - thisLA->memRqmt) );
+	break;
+
+      case VXI_ADDR_EXT_A32:
+	printf("  A32  %04x0000  %04x0000\n",
+		thisLA->offset, 1 << (15 - thisLA->memRqmt) );
+	break;
+	
+      case VXI_ADDR_EXT_NONE:
+      default:
+	printf("\n");
+	break;
+      }
+
+   }  /* endfor ==> "dolist" display from linked list */
+
+
+   vxiDevHead = userHead;
+   fclose( fp );
+
+   return( 0 );
+}
+
+
+
+void freeConfigList( config_t  *root )
+{
+   config_t *thisLA;
+
+   while( root != NULL )
+   {
+       /* Advance pointer first (while the allocated memory still
+       * belongs to us) and *then* FREE UP MEMORY USED BY THIS
+       * element of the linked LIST
+       */
+       thisLA = root;
+       root = thisLA->next;
+       free( thisLA );
+
+   }  /* endfor ==> "dolist" display from linked list */
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

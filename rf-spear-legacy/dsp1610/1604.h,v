@@ -1,0 +1,141 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2014.06.18.17.01.36;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@copied from /afs/slac/package/dsp1610.
+@
+text
+@#ifndef D1604_H
+#define D1604_H
+/*
+ * DSP1602/1604 register definitions and assembler directives.
+ * 
+ * For 1602, include this header and define _SIO_DEV_.
+ * The recommended method is on the command line as in this example:
+ *
+ *		as1600 -D_SIO_DEV_ file1.s file2.s ...
+ *
+ * Alternately, the user may place the definition directly in a source or
+ * header file as follows:
+ *
+ * #include "1604.h"
+ * #define _SIO_DEV_	// Enable 1602 features
+ *
+ */
+
+	/* shortcut to defining the chip's peripherals */
+	/* simply define or undef the identifier for the */
+	/* particular unit to include or exclude it */
+
+/* DSP1604 has the following peripherals ... */
+#define		_DRAM_
+#define		_BIOA_
+#define		_BIOB_
+#define		_BIOC_
+#define		_SIOP_		/* SIO features in the production chip */
+#define		_TIMER0_
+#define		_TIMER1_
+
+/* for DRAM support */
+#ifdef	_DRAM_
+#define		pgreg	reg27
+#define		drc	reg38
+#endif
+
+/* pertaining to the BIOA */
+#ifdef	_BIOA_
+	/* registers */
+#define		cbita	reg40
+#define		sbita	reg41
+	/* conditionals */
+#define		allta	uflag18
+#define		allfa	uflag19
+#define		someta	uflag20
+#define		somefa	uflag21
+#endif
+
+/* pertaining to the BIOB */
+#ifdef	_BIOB_
+	/* registers */
+#define		cbitb	reg54
+#define		sbitb	reg55
+	/* conditionals */
+#define		alltb	uflag22
+#define		allfb	uflag23
+#define		sometb	uflag24
+#define		somefb	uflag25
+#endif
+
+/* pertaining to the BIOC */
+#ifdef	_BIOC_
+	/* registers */
+#define		cbitc	reg56
+#define		sbitc	reg57
+	/* conditionals */
+#define		alltc	uflag28
+#define		allfc	uflag29
+#define		sometc	uflag30
+#define		somefc	uflag31
+#endif
+
+#ifdef _SIOP_
+	/* registers */
+#define		sioc	reg24
+#define		sioce	reg25
+#define		sdx0	reg26
+#define		sdx1	reg59
+#define		sdx2	reg60
+#endif
+
+/************************************************************************
+*	_SIO_DEV_: development chip SIO features.  This identifier	*
+*		is NOT defined in this file.  To program with the	*
+*		development chip features, the user must define		*
+*		this identifier explicitly.  The recommended method	*
+*		is on the command line as in this example:		*
+*									*
+*		as1600 -D_SIO_DEV_ file1.s file2.s ...			*
+************************************************************************/
+#ifdef _SIO_DEV_
+#define		sdxb0	reg34
+#define		sdxb1	reg35
+#define		siocb	reg39
+#define		sioceb	reg61
+#define		sdxb2	reg62
+#endif
+
+#ifdef	_TIMER0_
+#define		timerc	reg52
+#define		timer0	reg53
+#endif
+
+#ifdef _TIMER1_
+#define		timer1	reg58
+#endif
+
+/* as1600 directives */
+	.core1_1	/* 1604 uses the new core */
+
+#endif /* D1604_H */
+@

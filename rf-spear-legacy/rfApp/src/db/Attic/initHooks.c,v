@@ -1,0 +1,432 @@
+head	1.8;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.8
+	RF-SPEAR-R0-1-0:1.8
+	RF-SPEAR-R0-0-3:1.8
+	RF-SPEAR-R0-0-2:1.8
+	RF-SPEAR-R0-0-0:1.8
+	RF-3-13-10:1.7.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.7
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.7
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.7
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.8
+date	2011.12.07.01.18.30;	author saa;	state dead;
+branches;
+next	1.7;
+
+1.7
+date	2004.01.22.00.38.50;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2004.01.06.16.17.46;	author luchini;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.09.10.01.50.54;	author luchini;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.09.10.01.32.23;	author luchini;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.09.10.01.27.49;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.08.21.19.23.24;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.8
+log
+@Replace old 3.13 initHooks.c with 3.14.11-compliant p2RfInitHooks.c.
+@
+text
+@/* initHooks.c	ioc initialization hooks */
+/* share/src/db @@(#)initHooks.c	1.5     7/11/94 */
+/*
+ *      Author:		Marty Kraimer
+ *      Date:		06-01-91
+ *
+ *      Experimental Physics and Industrial Control System (EPICS)
+ *
+ *      Copyright 1991, the Regents of the University of California,
+ *      and the University of Chicago Board of Governors.
+ *
+ *      This software was produced under  U.S. Government contracts:
+ *      (W-7405-ENG-36) at the Los Alamos National Laboratory,
+ *      and (W-31-109-ENG-38) at Argonne National Laboratory.
+ *
+ *      Initial development by:
+ *              The Controls and Automation Group (AT-8)
+ *              Ground Test Accelerator
+ *              Accelerator Technology Division
+ *              Los Alamos National Laboratory
+ *
+ *      Co-developed with
+ *              The Controls and Computing Group
+ *              Accelerator Systems Division
+ *              Advanced Photon Source
+ *              Argonne National Laboratory
+ *
+ * Modification Log:
+ * -----------------
+ * .01  09-05-92	rcz	initial version
+ * .02  09-10-92	rcz	changed return from void to long
+ * .03  09-10-92	rcz	changed completely
+ * .04  09-10-92	rcz	bug - moved call to setMasterTimeToSelf later
+ *
+ */
+
+/* Local Modification Log:
+ * ----------------------
+ *
+ * .01  10-Sep-1997	Robert C. Sass (RCS)
+ *                        Initialize Clock registers before epvxiResman is called.
+ * .02  09-Sep-2003     Kristi Luchini (LUCHINI)
+ *                        changed #if TARGET == MV2400 to #if CPU_FAMILY == PPC
+ * .03  09-Sep-2003     Kristi Luchini (LUCHINI)
+ *                        call reset_kscIsr() for any cpu, since function
+ *                        is empty for niCpu030 and this function is only
+ *                        temporary until Kinetic Systems fixes their 
+ *                        interrupt handler
+ * .04 19-Dec-2003      Kristi Luchini (LUCHINI)
+ *                        enable D16 IACK cycle for V152 with new register.
+ */
+
+
+#include <vxWorks.h>
+#include <stdlib.h>              /* getenv()   */
+#include <string.h>              /* strtol()   */
+#include <stdio.h>               /* printf()   */
+#include <logLib.h>              /* logMsg ()  */
+#include <taskLib.h>             /* taskDelay ()       */
+
+#include <drvP2RfVxi.h>          /* P2RF_IntEnable()   */
+#include <initHooks.h>
+#include <save_restore.h>        /* restoreFile()      */
+
+
+/* Prototypes */
+long p2RfInitClk( long slot );
+int reset_kscIsr(void);          /* reset Kinetic Systems isr */
+#if CPU_FAMILY == PPC
+#define HAS_IACK_CTRL_REG 0x5300
+int v152_wt_iack_ctrl(unsigned short data);
+int v152_rd_iack_ctrl(unsigned short *data);
+#endif
+
+/*
+ * INITHOOKS
+ *
+ * called by iocInit at various points during initialization
+ *
+ */
+
+/* If this function (initHooks) is loaded, iocInit calls this function
+ * at certain defined points during IOC initialization */
+void initHooks(callNumber)
+initHookState	callNumber;
+{
+       long      status;
+       char     *clkmacro_ps;         /* Pointer to clock macro definition */
+       char     *slot_ps;             /* Pointer to slot definition in CLKMACROS */
+       long      slot = 0;            /* Clock slot. Make default illegal */
+       unsigned short data;
+
+	switch (callNumber) {
+	case INITHOOKatBeginning :
+#ifdef DBG
+            printf ("INITHOOKatBeginning\n");
+#endif
+     	    /*
+	    ** Get slot of clock module. 
+	    ** Don't do this logic if CLKMACROS is not defined (not defined
+            ** for our test IOC).
+	    */
+            clkmacro_ps = getenv ("CLKMACROS");
+            if ( !clkmacro_ps )  break;
+   
+            slot_ps = strstr (clkmacro_ps, "S=");
+            if (slot_ps != NULL) {
+              slot_ps += 2;    /* Clock slot value */
+              slot = strtol(slot_ps, NULL, 10);
+            }
+            if ((slot == 0) || (slot > 12))
+	    {
+              logMsg("!!CLKMACROS not defined or invalid macro syntax!!\n",0,0,0,0,0,0);
+              status = 99;  
+            }
+            else {
+               /* Initialize the clock module */
+               status = p2RfInitClk( slot );
+               if ( status!=OK ) 
+                  logMsg("Failed to Initialize Clock Module in slot %hd\n",(int)slot,0,0,0,0,0);
+               else
+                  logMsg("Successfully Initialzied Clock Module in slot %hd\n",(int)slot,0,0,0,0,0); 
+	    }
+	    break;
+
+	case INITHOOKafterGetResources :
+#ifdef DBG
+            printf ("INITHOOKafterGetResources\n");
+#endif
+	    break;
+	case INITHOOKafterLogInit :
+#ifdef DBG
+            printf ("INITHOOKafterLogInit\n");
+#endif
+	    break;
+	case INITHOOKafterCallbackInit :
+#ifdef DBG
+            printf ("INITHOOKafterCallbackInit\n");
+#endif
+	    break;
+	case INITHOOKafterCaLinkInit :
+#ifdef DBG
+            printf ("INITHOOKafterCaLinkInit\n");
+#endif
+	    break;
+	case INITHOOKafterInitDrvSup :
+#ifdef DBG
+            printf ("INITHOOKafterInitDrvSup\n");
+#endif
+	    break;
+	case INITHOOKafterInitRecSup :
+#ifdef DBG
+            printf ("INITHOOKafterInitRecSup\n");
+#endif
+	    break;
+	case INITHOOKafterInitDevSup :
+#ifdef DBG
+            printf ("INITHOOKafterInitDevSup\n");
+#endif
+	    break;
+	case INITHOOKafterTS_init :
+            /*
+            **  Restore data before init_record (this is either data 
+            **  used by init_record or data that will not be 
+            **  overwritten by init_record).
+            **/
+	    restoreFile( "RESTORE_AB" );
+	    restoreFile( "RESTORE_VXI" );
+#ifdef DBG
+            printf ("INITHOOKafterTS_init\n");
+#endif
+	    break;
+	case INITHOOKafterInitDatabase :
+	    /*
+            **  Restore data that was overwritten by init_record
+            **  (ie, inputs to calc and subroutine records).
+            */
+	    restoreFile( "RESTORE_INP" );
+
+#ifdef DBG
+            printf ("INITHOOKafterInitDatabase\n");
+#endif
+	    break;
+	case INITHOOKafterFinishDevSup :
+#ifdef DBG
+            printf ("INITHOOKafterFinishDevSup\n");
+#endif
+	    break;
+	case INITHOOKafterScanInit :
+#ifdef DBG
+            printf ("INITHOOKafterScanInit\n");
+#endif
+	    break;
+	case INITHOOKafterInterruptAccept :
+#ifdef DBG
+            printf ("INITHOOKafterInterruptAccept\n");
+#endif
+ 
+           /* Set a D16 interrupt acknowledge for the desired interrupt level 
+            * in the interrupt acklowledge regsiter of the V152 cpu
+            */
+#if CPU_FAMILY == PPC
+	    reset_kscIsr();   /* This does nothing for the niCpu030 */
+ 	    status = v152_rd_iack_ctrl( &data );
+            if (status==OK) {
+	      if ((data & 0xff00)==HAS_IACK_CTRL_REG) {
+                data |= (1 << P2RF_K_INTLEVEL) | 0x1;  
+                status = v152_wt_iack_ctrl( data );
+	      }
+            }
+#endif
+      	    P2RF_IntEnable ();
+            
+            /* Wait a couple of seconds before the CA server starts.
+             * Gives time for all PVs to go to good status.
+             */
+            taskDelay(sysClkRateGet()*2);
+	    break;
+	case INITHOOKafterInitialProcess :
+#ifdef DBG
+            printf ("INITHOOKafterInitialProcess\n");
+#endif
+	    break;
+	case INITHOOKatEnd :
+#ifdef DBG
+            printf ("INITHOOKatEnd\n");
+#endif
+	    break;
+	default:
+	    break;
+	}
+	return;
+}
+
+@
+
+
+1.7
+log
+@Moved ksc ISR reset to later in initialization.  Added 2 second delay before
+starting the CA server for AB DCM processing to finish.
+@
+text
+@@
+
+
+1.6
+log
+@Enable D16 IACk for V152 w/new register
+@
+text
+@d59 1
+a141 1
+	    reset_kscIsr();   /* This does nothing for the niCpu030 */
+d203 1
+d212 6
+a217 1
+      	    P2RF_IntEnable (); 
+@
+
+
+1.5
+log
+@call reset_kscIsr() for any cpu
+@
+text
+@d49 2
+d64 1
+d68 5
+d90 1
+a90 1
+
+d97 1
+a97 1
+	    /*
+d141 1
+d198 14
+a211 2
+   	    reset_kscIsr();   /* Note: does nothing for niCpu030 */
+	    P2RF_IntEnable ();
+@
+
+
+1.4
+log
+@Change #if TARGET==MV2400 to #if CPU_FAMILY==PPC
+@
+text
+@d44 5
+a48 1
+ *
+a63 1
+#if CPU_FAMILY == PPC
+a64 1
+#endif
+a188 1
+#if CPU_FAMILY ==PPC
+a189 1
+#endif
+@
+
+
+1.3
+log
+@ioc/rfApp/src/diag/Makefile.Vx
+@
+text
+@d42 2
+d60 1
+d62 1
+a62 1
+
+d187 1
+d189 1
+@
+
+
+1.2
+log
+@Modify for ppc
+@
+text
+@a54 1
+#include <modTypes.h>            /* for MV2400         */
+d58 1
+a58 3
+#if TARGET == MV2400
+int reset_kscIsr(void);
+#endif
+d184 1
+a184 3
+#if TARGET == MV2400
+   	    reset_kscIsr();
+#endif
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d55 1
+a55 1
+
+d59 3
+a61 1
+
+d186 3
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

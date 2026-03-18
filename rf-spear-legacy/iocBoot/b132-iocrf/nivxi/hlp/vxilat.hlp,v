@@ -1,0 +1,132 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_0:1.1.1.1
+	R_epics_3_14_6_spear0:1.1.1.1
+	R_3_14_1_spear1:1.1.1.1
+	R1:1.1.1.1
+	B1:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	95.01.14.01.32.35;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	95.01.14.01.32.35;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@           Configuration Editor (Logical Address Editor SubMenu)
+           -----------------------------------------------------
+
+Use this editor to modify the logical address configuration
+information.
+
+Field Description:
+------------------
+1. Logical Address:
+                    Logical Address of the VXIcpu-030. Valid values are
+                    0 - 255. 255 establishes the VXIcpu-030 as a dynamic device.
+2. Device Type:
+                    Device Type for the VXIcpu-030. The different choices
+                    are Extended (1), Message Based (2), or Register
+                    Based (3) device.
+3. Address Space:
+                    Address space for slave accesses to VXIcpu-030. The
+                    options are A16 only (3), A16/A24 (0) and A16/A32 (1).
+4. Shared RAM:
+                    The VXIcpu-030 can be configured for the following
+                    slave accesses.
+                    Disable(0) - Allow A16 accesses only.
+                    A24/A32(1) - Share 2 Mb  of RAM.
+                    A24/A32(2) - Share 4 Mb  of RAM.
+                    A24/A32(3) - Share 8 Mb  of RAM.
+                    A24/A32(4) - Share 16 Mb of RAM.
+
+5. Slave Block Transfer Mode :
+                    This is statically configured to 0, i.e., slave
+                    block accesses are not supported.
+6. Slave Supervisory Access Only :
+                    Selecting a value of 1 restricts the slave accesses
+                    to be supervisory only. When 0 is selected, both
+                    unprivileged and supervisory slave accesses succeed.
+7. Resource Manager Delay (sec) :
+                    This gives the time in seconds that the
+                    Resource Manager waits for sysfail to be
+                    removed in the system before starting to
+                    configure the devices.
+8. Servant Area Size:
+                     This gives the slave area size if the VXIcpu-030
+                     is configured to be a Message Based device and
+                     has servants.
+9. Protocol Register:
+                     This gives the Protocol Register value which
+                     defines the supported protocols.
+10.Read Protocol Response:
+                     This gives the response value to a Read Protocol
+                     query received by the VXIcpu-030 as a Message Based
+                     device.
+11.Number of Handlers:
+                     This gives the number of handlers for the
+                     VXIcpu-030.
+12.Number of Interrupters:
+                     This gives the number of interrupters for the
+                     VXIcpu-030.
+13.Cmdr WS Poll Value:
+                     This gives the relative time to wait in a loop
+                     before sleeping in the kernel in a Word Serial
+                     call when polling for Write Ready or Read Ready.
+
+Usage
+-----
+It supports the following commands:
+
+(1) list      [<index#>,[<index#>]] - lists all the entries in the
+                                      specified range.
+(2) display   [<index#>,[<index#>]] - displays the entries in detail.
+(3) modify    <index#>              - lets you modify an existing entry.
+(4) save                            - lets you save the information.
+(5) abort                           - lets you exit the editor,
+                                      ignoring the changes made.
+(6) exit                            - lets you exit the editor.
+(7) help                            - gives help on that editor.
+@
+
+
+1.1.1.1
+log
+@RF IOC startup files.
+@
+text
+@@

@@ -1,0 +1,436 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.00;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.00;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 25
+The length of the symbol table is: 359
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+.	|1trig_out:7.
+<	|1trig_out:7|
+J	|1trig_out:6.
+X	|1trig_out:6|
+f	|1trig_out:5.
+t	|1trig_out:5|
+"$	|1trig_out:4.
+"2	|1trig_out:4|
+"@@	|1trig_out:3.
+"N	|1trig_out:3|
+"\	|1trig_out:2.
+"j	|1trig_out:2|
+"x	|1trig_out:14.
+#)	|1trig_out:14|
+#8	|1trig_out:13.
+#G	|1trig_out:13|
+#V	|1trig_out:12.
+#e	|1trig_out:12|
+#t	|1trig_out:11.
+$%	|1trig_out:11|
+$4	|1trig_out:10.
+$C	|1trig_out:10|
+$R	|1trig_out:9.
+$`	|1trig_out:9|
+
+The number of name info structs is : 345
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	IU\(	!	$X	CLR_PTRIG	m
+#	IU\(	!	$Y	CNTR_OFLO	k
+$	IU\(	!	"`	ID0	}
+%	IU\(	!	"F	ID1	|
+&	IU\(	!	#6	ID10	s
+'	IU\(	!	"z	ID11	r
+(	IU\(	!	",	ID2	{
+)	IU\(	!	p	ID3	z
+*	IU\(	!	V	ID4	y
++	IU\(	!	$Z	ID5	x
+,	IU\(	!	$@@	ID6	w
+-	IU\(	!	$&	ID7	v
+.	IU\(	!	#j	ID8	u
+/	IU\(	!	#P	ID9	t
+0	$rX8+	!	ID[11..0]	#F
+1	IU\(	!	$[	RESET_L	o
+2	IFkc	!	TGOUT0	"+
+3	IFkc	!	TGOUT1	"*
+4	IFkc	!	TGOUT10	"!
+5	IFkc	!	TGOUT11	~
+6	IFkc	!	TGOUT2	")
+7	IFkc	!	TGOUT3	"(
+8	IFkc	!	TGOUT4	"'
+9	IFkc	!	TGOUT5	"&
+:	IFkc	!	TGOUT6	"%
+;	IFkc	!	TGOUT7	"$
+<	IFkc	!	TGOUT8	"#
+=	IFkc	!	TGOUT9	""
+>	$rX8+	!	TGOUT[11..0]	#G
+?	IU\(	!	$]	WT_CLRTRIG	p
+@@	IU\(	!	$^	WT_CNTRENA	l
+A	IU\(	!	$_	WT_PLSTRIG	n
+B	IU\(	!	$`	WT_SETTRG	q
+C	I\r8	$4	]	"	CLR_PTRIG	#9
+D	I\r8	$4	^	#	CNTR_OFLO	#;
+E	IN#r	$4	*	DATA_BIT	#3
+F	I\r8	$4	`	1	RESET_L	#6
+G	I\lm	$4	X	N	TRIG_OUT	#7
+H	I\r8	$4	b	?	WT_CLRTRIG	#5
+I	I\r8	$4	c	@@	WT_CNTTGENA	#:
+J	I\r8	$4	d	A	WT_PLSTRIG	#8
+K	I\r8	$4	e	B	WT_SETTRG	#4
+L	IFkI	$C	:10	%z
+M	IFkI	$C	:12	%{
+N	IUVC	$C	G	:13	%|
+O	IFk9	$C	:14	%x
+P	IFk9	$C	:17	%w
+Q	IFkI	$C	:18	%}
+R	IFk9	$C	:8	%v
+S	IFkI	$C	:9	%y
+T	I\r8	$C	n	"	CLR_PTRIG	%p
+U	I\r8	$C	o	#	CNTR_OFLO	%n
+V	I\r8	$C	E	*	DATA_BIT	%m
+W	I\r8	$C	q	1	RESET_L	%r
+X	IN$;	$C	N	TRIG_OUT	%|
+Y	I\r8	$C	s	?	WT_CLRTRIG	%s
+Z	I\r8	$C	t	@@	WT_CNTTGENA	%o
+[	I\r8	$C	u	A	WT_PLSTRIG	%q
+\	I\r8	$C	v	B	WT_SETTRG	%t
+]	I\r8	#t	w	"	CLR_PTRIG	#/
+^	I\r8	#t	x	#	CNTR_OFLO	#1
+_	IN#r	#t	)	DATA_BIT	#)
+`	I\r8	#t	z	1	RESET_L	#,
+a	I\lm	#t	r	h	TRIG_OUT	#-
+b	I\r8	#t	|	?	WT_CLRTRIG	#+
+c	I\r8	#t	}	@@	WT_CNTTGENA	#0
+d	I\r8	#t	~	A	WT_PLSTRIG	#.
+e	I\r8	#t	"!	B	WT_SETTRG	#*
+f	IFkI	$%	:10	%d
+g	IFkI	$%	:12	%e
+h	IUVC	$%	a	:13	%f
+i	IFk9	$%	:14	%b
+j	IFk9	$%	:17	%a
+k	IFkI	$%	:18	%g
+l	IFk9	$%	:8	%`
+m	IFkI	$%	:9	%c
+n	I\r8	$%	"*	"	CLR_PTRIG	%Z
+o	I\r8	$%	"+	#	CNTR_OFLO	%X
+p	I\r8	$%	_	)	DATA_BIT	%W
+q	I\r8	$%	"-	1	RESET_L	%\
+r	IN$;	$%	h	TRIG_OUT	%f
+s	I\r8	$%	"/	?	WT_CLRTRIG	%]
+t	I\r8	$%	"0	@@	WT_CNTTGENA	%Y
+u	I\r8	$%	"1	A	WT_PLSTRIG	%[
+v	I\r8	$%	"2	B	WT_SETTRG	%^
+w	I\r8	#V	"3	"	CLR_PTRIG	#%
+x	I\r8	#V	"4	#	CNTR_OFLO	#'
+y	IN#r	#V	(	DATA_BIT	"}
+z	I\r8	#V	"6	1	RESET_L	#"
+{	I\lm	#V	".	"$	TRIG_OUT	##
+|	I\r8	#V	"8	?	WT_CLRTRIG	#!
+}	I\r8	#V	"9	@@	WT_CNTTGENA	#&
+~	I\r8	#V	":	A	WT_PLSTRIG	#$
+"!	I\r8	#V	";	B	WT_SETTRG	"~
+""	IFkI	#e	:10	%N
+"#	IFkI	#e	:12	%O
+"$	IUVC	#e	{	:13	%P
+"%	IFk9	#e	:14	%L
+"&	IFk9	#e	:17	%K
+"'	IFkI	#e	:18	%Q
+"(	IFk9	#e	:8	%J
+")	IFkI	#e	:9	%M
+"*	I\r8	#e	"D	"	CLR_PTRIG	%D
+"+	I\r8	#e	"E	#	CNTR_OFLO	%B
+",	I\r8	#e	y	(	DATA_BIT	%A
+"-	I\r8	#e	"G	1	RESET_L	%F
+".	IN$;	#e	"$	TRIG_OUT	%P
+"/	I\r8	#e	"I	?	WT_CLRTRIG	%G
+"0	I\r8	#e	"J	@@	WT_CNTTGENA	%C
+"1	I\r8	#e	"K	A	WT_PLSTRIG	%E
+"2	I\r8	#e	"L	B	WT_SETTRG	%H
+"3	I\r8	#8	"M	"	CLR_PTRIG	"y
+"4	I\r8	#8	"N	#	CNTR_OFLO	"{
+"5	IN#r	#8	%	DATA_BIT	"s
+"6	I\r8	#8	"P	1	RESET_L	"v
+"7	I\lm	#8	"H	">	TRIG_OUT	"w
+"8	I\r8	#8	"R	?	WT_CLRTRIG	"u
+"9	I\r8	#8	"S	@@	WT_CNTTGENA	"z
+":	I\r8	#8	"T	A	WT_PLSTRIG	"x
+";	I\r8	#8	"U	B	WT_SETTRG	"t
+"<	IFkI	#G	:10	%8
+"=	IFkI	#G	:12	%9
+">	IUVC	#G	"7	:13	%:
+"?	IFk9	#G	:14	%6
+"@@	IFk9	#G	:17	%5
+"A	IFkI	#G	:18	%;
+"B	IFk9	#G	:8	%4
+"C	IFkI	#G	:9	%7
+"D	I\r8	#G	"^	"	CLR_PTRIG	%.
+"E	I\r8	#G	"_	#	CNTR_OFLO	%,
+"F	I\r8	#G	"5	%	DATA_BIT	%+
+"G	I\r8	#G	"a	1	RESET_L	%0
+"H	IN$;	#G	">	TRIG_OUT	%:
+"I	I\r8	#G	"c	?	WT_CLRTRIG	%1
+"J	I\r8	#G	"d	@@	WT_CNTTGENA	%-
+"K	I\r8	#G	"e	A	WT_PLSTRIG	%/
+"L	I\r8	#G	"f	B	WT_SETTRG	%2
+"M	I\r8	"x	"g	"	CLR_PTRIG	"o
+"N	I\r8	"x	"h	#	CNTR_OFLO	"q
+"O	IN#r	"x	$	DATA_BIT	"i
+"P	I\r8	"x	"j	1	RESET_L	"l
+"Q	I\lm	"x	"b	"X	TRIG_OUT	"m
+"R	I\r8	"x	"l	?	WT_CLRTRIG	"k
+"S	I\r8	"x	"m	@@	WT_CNTTGENA	"p
+"T	I\r8	"x	"n	A	WT_PLSTRIG	"n
+"U	I\r8	"x	"o	B	WT_SETTRG	"j
+"V	IFkI	#)	:10	%"
+"W	IFkI	#)	:12	%#
+"X	IUVC	#)	"Q	:13	%$
+"Y	IFk9	#)	:14	$~
+"Z	IFk9	#)	:17	$}
+"[	IFkI	#)	:18	%%
+"\	IFk9	#)	:8	$|
+"]	IFkI	#)	:9	%!
+"^	I\r8	#)	"x	"	CLR_PTRIG	$v
+"_	I\r8	#)	"y	#	CNTR_OFLO	$t
+"`	I\r8	#)	"O	$	DATA_BIT	$s
+"a	I\r8	#)	"{	1	RESET_L	$x
+"b	IN$;	#)	"X	TRIG_OUT	%$
+"c	I\r8	#)	"}	?	WT_CLRTRIG	$y
+"d	I\r8	#)	"~	@@	WT_CNTTGENA	$u
+"e	I\r8	#)	#!	A	WT_PLSTRIG	$w
+"f	I\r8	#)	#"	B	WT_SETTRG	$z
+"g	I\r8	"\	##	"	CLR_PTRIG	"e
+"h	I\r8	"\	#$	#	CNTR_OFLO	"g
+"i	IN#r	"\	'	DATA_BIT	"_
+"j	I\r8	"\	#&	1	RESET_L	"b
+"k	I\lm	"\	"|	"r	TRIG_OUT	"c
+"l	I\r8	"\	#(	?	WT_CLRTRIG	"a
+"m	I\r8	"\	#)	@@	WT_CNTTGENA	"f
+"n	I\r8	"\	#*	A	WT_PLSTRIG	"d
+"o	I\r8	"\	#+	B	WT_SETTRG	"`
+"p	IFkI	"j	:10	$j
+"q	IFkI	"j	:12	$k
+"r	IUVC	"j	"k	:13	$l
+"s	IFk9	"j	:14	$h
+"t	IFk9	"j	:17	$g
+"u	IFkI	"j	:18	$m
+"v	IFk9	"j	:8	$f
+"w	IFkI	"j	:9	$i
+"x	I\r8	"j	#4	"	CLR_PTRIG	$`
+"y	I\r8	"j	#5	#	CNTR_OFLO	$^
+"z	I\r8	"j	"i	'	DATA_BIT	$]
+"{	I\r8	"j	#7	1	RESET_L	$b
+"|	IN$;	"j	"r	TRIG_OUT	$l
+"}	I\r8	"j	#9	?	WT_CLRTRIG	$c
+"~	I\r8	"j	#:	@@	WT_CNTTGENA	$_
+#!	I\r8	"j	#;	A	WT_PLSTRIG	$a
+#"	I\r8	"j	#<	B	WT_SETTRG	$d
+##	I\r8	"@@	#=	"	CLR_PTRIG	"[
+#$	I\r8	"@@	#>	#	CNTR_OFLO	"]
+#%	IN#r	"@@	&	DATA_BIT	"U
+#&	I\r8	"@@	#@@	1	RESET_L	"X
+#'	I\lm	"@@	#8	#.	TRIG_OUT	"Y
+#(	I\r8	"@@	#B	?	WT_CLRTRIG	"W
+#)	I\r8	"@@	#C	@@	WT_CNTTGENA	"\
+#*	I\r8	"@@	#D	A	WT_PLSTRIG	"Z
+#+	I\r8	"@@	#E	B	WT_SETTRG	"V
+#,	IFkI	"N	:10	$T
+#-	IFkI	"N	:12	$U
+#.	IUVC	"N	#'	:13	$V
+#/	IFk9	"N	:14	$R
+#0	IFk9	"N	:17	$Q
+#1	IFkI	"N	:18	$W
+#2	IFk9	"N	:8	$P
+#3	IFkI	"N	:9	$S
+#4	I\r8	"N	#N	"	CLR_PTRIG	$J
+#5	I\r8	"N	#O	#	CNTR_OFLO	$H
+#6	I\r8	"N	#%	&	DATA_BIT	$G
+#7	I\r8	"N	#Q	1	RESET_L	$L
+#8	IN$;	"N	#.	TRIG_OUT	$V
+#9	I\r8	"N	#S	?	WT_CLRTRIG	$M
+#:	I\r8	"N	#T	@@	WT_CNTTGENA	$I
+#;	I\r8	"N	#U	A	WT_PLSTRIG	$K
+#<	I\r8	"N	#V	B	WT_SETTRG	$N
+#=	I\r8	"$	#W	"	CLR_PTRIG	"Q
+#>	I\r8	"$	#X	#	CNTR_OFLO	"S
+#?	IN#r	"$	/	DATA_BIT	"K
+#@@	I\r8	"$	#Z	1	RESET_L	"N
+#A	I\lm	"$	#R	#H	TRIG_OUT	"O
+#B	I\r8	"$	#\	?	WT_CLRTRIG	"M
+#C	I\r8	"$	#]	@@	WT_CNTTGENA	"R
+#D	I\r8	"$	#^	A	WT_PLSTRIG	"P
+#E	I\r8	"$	#_	B	WT_SETTRG	"L
+#F	IFkI	"2	:10	$>
+#G	IFkI	"2	:12	$?
+#H	IUVC	"2	#A	:13	$@@
+#I	IFk9	"2	:14	$<
+#J	IFk9	"2	:17	$;
+#K	IFkI	"2	:18	$A
+#L	IFk9	"2	:8	$:
+#M	IFkI	"2	:9	$=
+#N	I\r8	"2	#h	"	CLR_PTRIG	$4
+#O	I\r8	"2	#i	#	CNTR_OFLO	$2
+#P	I\r8	"2	#?	/	DATA_BIT	$1
+#Q	I\r8	"2	#k	1	RESET_L	$6
+#R	IN$;	"2	#H	TRIG_OUT	$@@
+#S	I\r8	"2	#m	?	WT_CLRTRIG	$7
+#T	I\r8	"2	#n	@@	WT_CNTTGENA	$3
+#U	I\r8	"2	#o	A	WT_PLSTRIG	$5
+#V	I\r8	"2	#p	B	WT_SETTRG	$8
+#W	I\r8	f	#q	"	CLR_PTRIG	"G
+#X	I\r8	f	#r	#	CNTR_OFLO	"I
+#Y	IN#r	f	.	DATA_BIT	"A
+#Z	I\r8	f	#t	1	RESET_L	"D
+#[	I\lm	f	#l	#b	TRIG_OUT	"E
+#\	I\r8	f	#v	?	WT_CLRTRIG	"C
+#]	I\r8	f	#w	@@	WT_CNTTGENA	"H
+#^	I\r8	f	#x	A	WT_PLSTRIG	"F
+#_	I\r8	f	#y	B	WT_SETTRG	"B
+#`	IFkI	t	:10	$(
+#a	IFkI	t	:12	$)
+#b	IUVC	t	#[	:13	$*
+#c	IFk9	t	:14	$&
+#d	IFk9	t	:17	$%
+#e	IFkI	t	:18	$+
+#f	IFk9	t	:8	$$
+#g	IFkI	t	:9	$'
+#h	I\r8	t	$$	"	CLR_PTRIG	#|
+#i	I\r8	t	$%	#	CNTR_OFLO	#z
+#j	I\r8	t	#Y	.	DATA_BIT	#y
+#k	I\r8	t	$'	1	RESET_L	#~
+#l	IN$;	t	#b	TRIG_OUT	$*
+#m	I\r8	t	$)	?	WT_CLRTRIG	$!
+#n	I\r8	t	$*	@@	WT_CNTTGENA	#{
+#o	I\r8	t	$+	A	WT_PLSTRIG	#}
+#p	I\r8	t	$,	B	WT_SETTRG	$"
+#q	I\r8	J	$-	"	CLR_PTRIG	"=
+#r	I\r8	J	$.	#	CNTR_OFLO	"?
+#s	IN#r	J	-	DATA_BIT	"7
+#t	I\r8	J	$0	1	RESET_L	":
+#u	I\lm	J	$(	#|	TRIG_OUT	";
+#v	I\r8	J	$2	?	WT_CLRTRIG	"9
+#w	I\r8	J	$3	@@	WT_CNTTGENA	">
+#x	I\r8	J	$4	A	WT_PLSTRIG	"<
+#y	I\r8	J	$5	B	WT_SETTRG	"8
+#z	IFkI	X	:10	#p
+#{	IFkI	X	:12	#q
+#|	IUVC	X	#u	:13	#r
+#}	IFk9	X	:14	#n
+#~	IFk9	X	:17	#m
+$!	IFkI	X	:18	#s
+$"	IFk9	X	:8	#l
+$#	IFkI	X	:9	#o
+$$	I\r8	X	$>	"	CLR_PTRIG	#f
+$%	I\r8	X	$?	#	CNTR_OFLO	#d
+$&	I\r8	X	#s	-	DATA_BIT	#c
+$'	I\r8	X	$A	1	RESET_L	#h
+$(	IN$;	X	#|	TRIG_OUT	#r
+$)	I\r8	X	$C	?	WT_CLRTRIG	#i
+$*	I\r8	X	$D	@@	WT_CNTTGENA	#e
+$+	I\r8	X	$E	A	WT_PLSTRIG	#g
+$,	I\r8	X	$F	B	WT_SETTRG	#j
+$-	IN#r	.	"	CLR_PTRIG	"3
+$.	IN#r	.	#	CNTR_OFLO	"5
+$/	IN#r	.	,	DATA_BIT	"-
+$0	IN#r	.	1	RESET_L	"0
+$1	I\lm	.	$B	$8	TRIG_OUT	"1
+$2	IN#r	.	?	WT_CLRTRIG	"/
+$3	IN#r	.	@@	WT_CNTTGENA	"4
+$4	IN#r	.	A	WT_PLSTRIG	"2
+$5	IN#r	.	B	WT_SETTRG	".
+$6	IFkI	<	:10	#Z
+$7	IFkI	<	:12	#[
+$8	IUVC	<	$1	:13	#\
+$9	IFk9	<	:14	#X
+$:	IFk9	<	:17	#W
+$;	IFkI	<	:18	#]
+$<	IFk9	<	:8	#V
+$=	IFkI	<	:9	#Y
+$>	I\r8	<	$G	"	CLR_PTRIG	#P
+$?	I\r8	<	$H	#	CNTR_OFLO	#N
+$@@	I\r8	<	$/	,	DATA_BIT	#M
+$A	I\r8	<	$J	1	RESET_L	#R
+$B	IN$;	<	$8	TRIG_OUT	#\
+$C	I\r8	<	$L	?	WT_CLRTRIG	#S
+$D	I\r8	<	$M	@@	WT_CNTTGENA	#O
+$E	I\r8	<	$N	A	WT_PLSTRIG	#Q
+$F	I\r8	<	$O	B	WT_SETTRG	#T
+$G	I\r8	$R	C	"	CLR_PTRIG	#C
+$H	I\r8	$R	D	#	CNTR_OFLO	#E
+$I	IN#r	$R	+	DATA_BIT	#=
+$J	I\r8	$R	F	1	RESET_L	#@@
+$K	I\lm	$R	$\	$R	TRIG_OUT	#A
+$L	I\r8	$R	H	?	WT_CLRTRIG	#?
+$M	I\r8	$R	I	@@	WT_CNTTGENA	#D
+$N	I\r8	$R	J	A	WT_PLSTRIG	#B
+$O	I\r8	$R	K	B	WT_SETTRG	#>
+$P	IFkI	$`	:10	&2
+$Q	IFkI	$`	:12	&3
+$R	IUVC	$`	$K	:13	&4
+$S	IFk9	$`	:14	&0
+$T	IFk9	$`	:17	&/
+$U	IFkI	$`	:18	&5
+$V	IFk9	$`	:8	&.
+$W	IFkI	$`	:9	&1
+$X	I\r8	$`	T	"	CLR_PTRIG	&(
+$Y	I\r8	$`	U	#	CNTR_OFLO	&&
+$Z	I\r8	$`	$I	+	DATA_BIT	&%
+$[	I\r8	$`	W	1	RESET_L	&*
+$\	IN$;	$`	$R	TRIG_OUT	&4
+$]	I\r8	$`	Y	?	WT_CLRTRIG	&+
+$^	I\r8	$`	Z	@@	WT_CNTTGENA	&'
+$_	I\r8	$`	[	A	WT_PLSTRIG	&)
+$`	I\r8	$`	\	B	WT_SETTRG	&,
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

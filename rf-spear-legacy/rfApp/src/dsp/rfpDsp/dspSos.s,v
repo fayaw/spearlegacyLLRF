@@ -1,0 +1,190 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.1
+date	2003.01.10.23.22.42;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.42;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP- code
+**
+**  Abstract:
+**      This file contains DSP code for flashing the user LED with SOS
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Feedback Project
+**
+**  History:
+**	January 10, 1994 - Created
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#include <1610.h>
+
+#include "dspDef.h"
+#include "timDef.h"
+#include "intDef.h"
+#include "bioDef.h"
+
+#define DSP_K_DOT    150                /* ~ 1/3 second */
+#define DSP_K_DASH   300                /* ~ 1/2 second */
+#define DSP_K_OFF    150                /* ~ 1/3 second */
+#define DSP_K_PAUSE  500
+
+#define DSP_K_TIMER  ((TIM_K_CKO65536 << TIM_V_PRESCALE) | \
+                      (             1 << TIM_V_T0EN    ) | \
+                      (             0 << TIM_V_RELOAD  ) | \
+                      (             0 << TIM_V_DISABLE ))
+#define Again_A (0x1fff-0x40)
+
+
+.global SOS
+
+.rsect ".ram"
+
+/* Define what to do on a the timer interrupt */
+TmrVec: goto TmrIsr                     /* Instr to load at Timer int vector */
+
+
+TmrIsr: a0     = TRUE                   /* Set the timer interrupt flag */
+        ireturn                         /* return */
+
+
+SOS:
+/*
+   Description
+   -----------
+   This routine flashes SOS on the LED.  It uses the timer interrupt to
+   generate human scale delay times.  Since this routine doesn't return,
+   it takes over the timer resource and installs it's own timer ISR.
+   It also disables all but the timer interrupt.  It also turns off the
+   DSP running CSR 4 bit and LED.
+
+   Registers used
+   --------------
+              inc - For setting up interrupts
+               r0 - Pointer to timer vector
+               r1 - Pointer to timer vector instruction
+               a0 - Flag set by the timer ISR
+           timer0 - Delay times
+*/
+        inc    = 0                      /* Disable interrupts */
+        cbit   = 0                      /* Reset all BIO outputs */
+        r0     = VEC_A_TIME             /* Timer vector */
+        r1     = TmrVec                 /* Address of vector instruction */
+        a0     = *r1                    /* Load timer vector instruction */
+        *r0    = a0                     /* Store instruction */
+        timerc = DSP_K_TIMER            /* Enable timer */
+        inc    = INT_M_TIME             /* Disable interrupts, except timer */
+	a0     = Again_A		/* Done to reflect DSP intr handling */
+	pi     = a0			/* interrupt is not interruptable */
+	ireturn				/* but address of interrupt return */
+					/* can be changed. If SOS cond. */
+					/* happen inside intr this sequence */
+					/* will quit intr right way	*/
+Again:	
+	nop
+	nop
+        call     Dot  \ call Dot  \ call Dot
+        call     Dash \ call Dash \ call Dash
+        call     Dot  \ call Dot  \ call Dot
+
+        timer0 = DSP_K_PAUSE            /* Long wait before we loop */
+        a0     = FALSE                  /* Initialize a0 */
+Wait1:  a0h - 0  \ if eq goto Wait1     /* Wait for a0 to come up */
+
+        goto     Again                  /* And loop again */
+
+
+Dot:    timer0 = DSP_K_DOT              /* Dot time */
+        goto     Led
+Dash:   timer0 = DSP_K_DASH             /* Dash time */
+
+Led:    cbit   = BIO_ON (BIO_V_DSPRUN)     /* Turn LED on */
+        a0     = FALSE                  /* Initialize a0 */
+Wait2:  a0h - 0  \ if eq goto Wait2     /* Wait for a0 to come up */
+
+        timer0 = DSP_K_OFF              /* LED off time */
+        cbit   = BIO_OFF (BIO_V_DSPRUN)    /* Turn LED off */
+        a0     = FALSE                  /* Initialize a0 */
+Wait3:  a0h - 0  \ if eq goto Wait3     /* Wait for a0 to come up */
+
+        return
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

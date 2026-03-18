@@ -1,0 +1,584 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2012.02.07.02.12.55;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.27.01.17.13;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Replace AB PLC solenoid PVs with EPSC PVs.  Add State and CurrCheck to
+severity sum.
+@
+text
+@record(calc,"$(S):KLYSIQA:SUMY:FRST") {
+	field(DESC,"KLYS IQA Status Sum")
+	field(FLNK,"$(S):KLYSTEMP:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSOUTFRWD:POWER:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSOUTREFL:POWER:FRST.SEVR NPP MS")
+	field(INPC,"$(S):KLYSDRIVFRWD:POWER:FRST.SEVR NPP MS")
+	field(INPD,"$(S):KLYSCOLL:POWER:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSIQA:SUMY:LTCH") {
+	field(DESC,"KLYS IQA Status Sum")
+	field(FLNK,"$(S):KLYSTEMP:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSOUTFRWD:POWER:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSOUTREFL:POWER:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):KLYSDRIVFRWD:POWER:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):KLYSCOLL:POWER:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSIQA:SUMY:SEVR") {
+	field(DESC,"KLYS IQA Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPB,"$(S):KLYSOUTFRWD:POWER.SEVR NPP MS")
+	field(INPE,"$(S):KLYSOUTREFL:POWER.SEVR NPP MS")
+	field(INPH,"$(S):KLYSCOLLPLC:POWER.SEVR NPP MS")
+	field(INPK,"$(S):KLYSDRIVFRWD:POWER.SEVR NPP MS")
+}
+record(calc,"$(S):SOLNBUCK:SUMY:FRST") {
+	field(DESC,"KLYS BUCK Solenoid Stat Sum")
+	field(FLNK,"$(S):KLYSTEMP:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):SOLNBUCK:CURR:FRST.SEVR NPP MS")
+	field(INPB,"$(S):SOLNBUCK:VOLT:FRST.SEVR NPP MS")
+	field(INPC,"$(S):SOLNBUCK:STAT:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):SOLNBUCK:SUMY:LTCH") {
+	field(DESC,"KLYS BUCK Solenoid Stat Sum")
+	field(FLNK,"$(S):KLYSTEMP:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):SOLNBUCK:CURR:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):SOLNBUCK:VOLT:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):SOLNBUCK:STAT:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):SOLNBUCK:SUMY:PLC.SEVR NPP MS")
+}
+record(calc,"$(S):SOLNBUCK:SUMY:SEVR") {
+	field(DESC,"KLYS BUCK Solenoid Stat Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):SOLNBUCK:CURR.SEVR NPP MS")
+	field(INPB,"$(S):SOLNBUCK:VOLT.SEVR NPP MS")
+	field(INPC,"$(S):SOLNBUCK:ON:PLC.SEVR NPP MS")
+}
+record(calc,"$(S):SOLNMAIN:SUMY:FRST") {
+	field(DESC,"KLYS MAIN Solenoid Stat Sum")
+	field(FLNK,"$(S):KLYSTEMP:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):SOLNMAIN:CURR:FRST.SEVR NPP MS")
+	field(INPB,"$(S):SOLNMAIN:VOLT:FRST.SEVR NPP MS")
+	field(INPC,"$(S):SOLNMAIN:STAT:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):SOLNMAIN:SUMY:LTCH") {
+	field(DESC,"KLYS MAIN Solenoid Stat Sum")
+	field(FLNK,"$(S):KLYSTEMP:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):SOLNMAIN:CURR:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):SOLNMAIN:VOLT:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):SOLNMAIN:STAT:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):SOLNMAIN:SUMY:PLC.SEVR NPP MS")
+}
+record(calc,"$(S):SOLNMAIN:SUMY:SEVR") {
+	field(DESC,"KLYS MAIN Solenoid Stat Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(PS):Curr.SEVR NPP MS")
+	field(INPB,"$(PS):Volt.SEVR NPP MS")
+	field(INPC,"$(S):SOLNMAIN:ON:PLC.SEVR NPP MS")
+	field(INPD,"$(PS):State.SEVR NPP MS")
+	field(INPE,"$(PS):CurrCheck.SEVR NPP MS")
+}
+record(calc,"$(S):FILAMENT:SUMY:FRST") {
+	field(DESC,"KLYS Filament Status Sum")
+	field(FLNK,"$(S):KLYSTEMP:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):FILAMENT:CURR:FRST.SEVR NPP MS")
+	field(INPB,"$(S):FILAMENT:VOLT:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):FILAMENT:SUMY:LTCH") {
+	field(DESC,"KLYS Filament Status Sum")
+	field(FLNK,"$(S):KLYSTEMP:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):FILAMENT:CURR:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):FILAMENT:VOLT:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):FILAMENT:SUMY:PLC.SEVR NPP MS")
+	field(INPD,"$(S):FILAMENT:ON:PLC.SEVR NPP MS")
+}
+record(calc,"$(S):FILAMENT:SUMY:SEVR") {
+	field(DESC,"KLYS Filament Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):FILAMENT:CURR.SEVR NPP MS")
+	field(INPB,"$(S):FILAMENT:VOLT.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBDTEMP:SUMY:FRST") {
+	field(DESC,"KLYS Body Temp Status Sum")
+	field(FLNK,"$(S):KLYSBDFLOW:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD01TEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD02TEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):KLYSBD03TEMP:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBDTEMP:SUMY:LTCH") {
+	field(DESC,"KLYS Body Temp Status Sum")
+	field(FLNK,"$(S):KLYSBDFLOW:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD01TEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD02TEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):KLYSBD03TEMP:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBDTEMP:SUMY:SEVR") {
+	field(DESC,"KLYS Body Temp Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD01TEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD02TEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):KLYSBD03TEMP:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD:SUMY:FRST") {
+	field(DESC,"KLYS Body Status Sum")
+	field(FLNK,"$(S):KLYSTEMP:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBDFLOW:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBDTEMP:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD:SUMY:LTCH") {
+	field(DESC,"KLYS Body Status Sum")
+	field(FLNK,"$(S):KLYSTEMP:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBDFLOW:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBDTEMP:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD:SUMY:SEVR") {
+	field(DESC,"KLYS Body Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBDTEMP:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBDFLOW:SUMY:FRST") {
+	field(DESC,"KLYS Body Flow Status Sum")
+	field(FLNK,"$(S):KLYSBD:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD01WATR:FLOW:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD02WATR:FLOW:FRST.SEVR NPP MS")
+	field(INPC,"$(S):KLYSBD03WATR:FLOW:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBDFLOW:SUMY:LTCH") {
+	field(DESC,"KLYS Body Flow Status Sum")
+	field(FLNK,"$(S):KLYSBD:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD01WATR:FLOW:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD02WATR:FLOW:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):KLYSBD03WATR:FLOW:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD01TEMP:SUMY:FRST") {
+	field(DESC,"KLYS BD01 Wtr Temp Stat Sum")
+	field(FLNK,"$(S):KLYSBD01:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD01WATR:TEMP:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWATR:TEMP:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD01TEMP:SUMY:LTCH") {
+	field(DESC,"KLYS BD01 Wtr Temp Stat Sum")
+	field(FLNK,"$(S):KLYSBD01:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD01WATR:TEMP:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWATR:TEMP:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD01TEMP:SUMY:SEVR") {
+	field(DESC,"KLYS BD01 Wtr Temp Stat Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD01WATR:TEMP.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWATR:TEMP.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD01:SUMY:FRST") {
+	field(DESC,"KLYS BD01 Wtr Status Sum")
+	field(FLNK,"$(S):KLYSBDTEMP:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD01TEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD01WATR:FLOW:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD01:SUMY:LTCH") {
+	field(DESC,"KLYS BD01 Wtr Status Sum")
+	field(FLNK,"$(S):KLYSBDTEMP:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD01TEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD01WATR:FLOW:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD01:SUMY:SEVR") {
+	field(DESC,"KLYS BD01 Wtr Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD01TEMP:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD02TEMP:SUMY:FRST") {
+	field(DESC,"KLYS BD02 Wtr Temp Stat Sum")
+	field(FLNK,"$(S):KLYSBD02:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD02WATR:TEMP:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWATR:TEMP:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD02TEMP:SUMY:LTCH") {
+	field(DESC,"KLYS BD02 Wtr Temp Stat Sum")
+	field(FLNK,"$(S):KLYSBD02:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD02WATR:TEMP:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWATR:TEMP:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD02TEMP:SUMY:SEVR") {
+	field(DESC,"KLYS BD02 Wtr Temp Stat Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD02WATR:TEMP.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWATR:TEMP.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD02:SUMY:FRST") {
+	field(DESC,"KLYS BD02 Wtr Status Sum")
+	field(FLNK,"$(S):KLYSBDTEMP:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD02TEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD02WATR:FLOW:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD02:SUMY:LTCH") {
+	field(DESC,"KLYS BD02 Wtr Status Sum")
+	field(FLNK,"$(S):KLYSBDTEMP:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD02TEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD02WATR:FLOW:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD02:SUMY:SEVR") {
+	field(DESC,"KLYS BD02 Wtr Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD02TEMP:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD03TEMP:SUMY:FRST") {
+	field(DESC,"KLYS BD03 Wtr Temp Stat Sum")
+	field(FLNK,"$(S):KLYSBD03:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD03WATR:TEMP:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWATR:TEMP:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD03TEMP:SUMY:LTCH") {
+	field(DESC,"KLYS BD03 Wtr Temp Stat Sum")
+	field(FLNK,"$(S):KLYSBD03:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD03WATR:TEMP:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWATR:TEMP:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD03TEMP:SUMY:SEVR") {
+	field(DESC,"KLYS BD03 Wtr Temp Stat Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD03WATR:TEMP.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWATR:TEMP.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD03:SUMY:FRST") {
+	field(DESC,"KLYS BD03 Wtr Status Sum")
+	field(FLNK,"$(S):KLYSBDTEMP:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD03TEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD03WATR:FLOW:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD03:SUMY:LTCH") {
+	field(DESC,"KLYS BD03 Wtr Status Sum")
+	field(FLNK,"$(S):KLYSBDTEMP:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD03TEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD03WATR:FLOW:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSBD03:SUMY:SEVR") {
+	field(DESC,"KLYS BD03 Wtr Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSBD03TEMP:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSWNDWTEMP:SUMY:FRST") {
+	field(DESC,"KLYS Wndw Air Temp Stat Sum")
+	field(FLNK,"$(S):KLYSWNDW:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSWNDWAIR:TEMP:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWNDWAIRI:TEMP:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSWNDWTEMP:SUMY:LTCH") {
+	field(DESC,"KLYS Wndw Air Temp Stat Sum")
+	field(FLNK,"$(S):KLYSWNDW:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSWNDWAIR:TEMP:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWNDWAIRI:TEMP:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSWNDWTEMP:SUMY:SEVR") {
+	field(DESC,"KLYS Wndw Air Temp Stat Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSWNDWAIR:TEMP.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWNDWAIRI:TEMP.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSWNDW:SUMY:FRST") {
+	field(DESC,"KLYS Wndw Air Status Sum")
+	field(FLNK,"$(S):KLYSTEMP:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSWNDWTEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWNDWAIR:FLOW:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSWNDW:SUMY:LTCH") {
+	field(DESC,"KLYS Wndw Air Status Sum")
+	field(FLNK,"$(S):KLYSTEMP:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSWNDWTEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWNDWAIR:FLOW:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSWNDW:SUMY:SEVR") {
+	field(DESC,"KLYS Wndw Air Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSWNDWTEMP:SUMY:SEVR.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSCOLLTEMP:SUMY:FRST") {
+	field(DESC,"KLYS Coll Wtr Temp Stat Sum")
+	field(FLNK,"$(S):KLYSCOLL:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLLWATR:TEMP:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWATR:TEMP:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSCOLLTEMP:SUMY:LTCH") {
+	field(DESC,"KLYS Coll Wtr Temp Stat Sum")
+	field(FLNK,"$(S):KLYSCOLL:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLLWATR:TEMP:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWATR:TEMP:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSCOLLTEMP:SUMY:SEVR") {
+	field(DESC,"KLYS Coll Wtr Temp Stat Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLLWATR:TEMP.SEVR NPP MS")
+	field(INPB,"$(S):KLYSWATR:TEMP.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSCOLL:SUMY:FRST") {
+	field(DESC,"KLYS Coll Wtr Status Sum")
+	field(FLNK,"$(S):KLYSIQA:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLLTEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSCOLLWATR:FLOW:FRST.SEVR NPP MS")
+	field(INPC,"$(S):KLYSCOLL:POWER:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSCOLL:SUMY:LTCH") {
+	field(DESC,"KLYS Coll Wtr Status Sum")
+	field(FLNK,"$(S):KLYSIQA:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLLTEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSCOLLWATR:FLOW:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):KLYSCOLL:POWER:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSCOLL:SUMY:SEVR") {
+	field(DESC,"KLYS Coll Wtr Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLLTEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):KLYSCOLLPLC:POWER.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSTEMP:SUMY:FRST") {
+	field(DESC,"KLYS Temp Status Sum")
+	field(FLNK,"$(S):KLYSFLOW:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLLTEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBDTEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):KLYSWNDWTEMP:SUMY:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSTEMP:SUMY:LTCH") {
+	field(DESC,"KLYS Temp Status Sum")
+	field(FLNK,"$(S):KLYSFLOW:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLLTEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBDTEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):KLYSWNDWTEMP:SUMY:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSTEMP:SUMY:SEVR") {
+	field(DESC,"KLYS Temp Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLLTEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBDTEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):KLYSWNDWTEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPD,"$(S):KLYSDRIVAMPL:TEMP.SEVR NPP MS")
+}
+record(calc,"$(S):KLYS:SUMY:FRST") {
+	field(DESC,"KLYS Status Sum")
+	field(FLNK,"$(S):STNTEMP:SUMY:FRST.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLL:SUMY:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):KLYSWNDW:SUMY:FRST.SEVR NPP MS")
+	field(INPD,"$(S):KLYSIQA:SUMY:FRST.SEVR NPP MS")
+	field(INPE,"$(S):KLYS:VACM:FRST.SEVR NPP MS")
+	field(INPF,"$(S):FILAMENT:SUMY:FRST.SEVR NPP MS")
+	field(INPG,"$(S):SOLNMAIN:SUMY:FRST.SEVR NPP MS")
+	field(INPH,"$(S):SOLNBUCK:SUMY:FRST.SEVR NPP MS")
+	field(INPK,"$(S):KLYS:ARC:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYS:SUMY:LTCH") {
+	field(DESC,"KLYS Status Sum")
+	field(FLNK,"$(S):STNTEMP:SUMY:LTCH.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLL:SUMY:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):KLYSWNDW:SUMY:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):KLYSIQA:SUMY:LTCH.SEVR NPP MS")
+	field(INPE,"$(S):KLYS:VACM:LTCH.SEVR NPP MS")
+	field(INPF,"$(S):FILAMENT:SUMY:LTCH.SEVR NPP MS")
+	field(INPG,"$(S):SOLNMAIN:SUMY:LTCH.SEVR NPP MS")
+	field(INPH,"$(S):SOLNBUCK:SUMY:LTCH.SEVR NPP MS")
+	field(INPI,"$(S):KLYS:SUMY:PLC.SEVR NPP MS")
+	field(INPJ,"$(S):KLYSILCK:SUMY:PLC.SEVR NPP MS")
+	field(INPK,"$(S):KLYS:ARC:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYS:SUMY:SEVR") {
+	field(DESC,"KLYS Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLL:SUMY:SEVR.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBD:SUMY:SEVR.SEVR NPP MS")
+	field(INPC,"$(S):KLYSWNDW:SUMY:SEVR.SEVR NPP MS")
+	field(INPD,"$(S):KLYSIQA:SUMY:SEVR.SEVR NPP MS")
+	field(INPE,"$(S):KLYS:VACM.SEVR NPP MS")
+	field(INPF,"$(S):FILAMENT:SUMY:SEVR.SEVR NPP MS")
+	field(INPG,"$(S):SOLNMAIN:SUMY:SEVR.SEVR NPP MS")
+	field(INPH,"$(S):SOLNBUCK:SUMY:SEVR.SEVR NPP MS")
+	field(INPL,"$(S):KLYSDRIVAMPL:TEMP.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSFLOW:SUMY:FRST") {
+	field(DESC,"KLYS Flow Status Sum")
+	field(FLNK,"$(S):KLYS:SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLLWATR:FLOW:FRST.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBDFLOW:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):KLYSWNDWAIR:FLOW:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSFLOW:SUMY:LTCH") {
+	field(DESC,"KLYS Flow Status Sum")
+	field(FLNK,"$(S):KLYS:SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSCOLLWATR:FLOW:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):KLYSBDFLOW:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):KLYSWNDWAIR:FLOW:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSTEMPDI:SUMY:MODU") {
+	field(DESC,"KLYS TC/DI Mod Status Sum")
+	field(SCAN,"1 second")
+	field(FLNK,"$(S):KLYSAIDI:SUMY:MODU.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):STNR0G0:TEMP:MODU.SEVR NPP MS")
+	field(INPB,"$(S):STNR0G1:TEMP:MODU.SEVR NPP MS")
+	field(INPC,"$(S):STNR3G0:DI:MODU.SEVR NPP MS")
+}
+record(calc,"$(S):KLYSAIDI:SUMY:MODU") {
+	field(DESC,"KLYS AI/DI Mod Status Sum")
+	field(FLNK,"$(S):KLYS:SUMY:MODU.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):STNR1G0:AI:MODU.SEVR NPP MS")
+	field(INPB,"$(S):STNR3G0:DI:MODU.SEVR NPP MS")
+}
+record(calc,"$(S):KLYS:SUMY:MODU") {
+	field(DESC,"KLYS Module Status Sum")
+	field(CALC,"0")
+	field(INPA,"$(S):KLYSTEMPDI:SUMY:MODU.SEVR NPP MS")
+	field(INPB,"$(S):KLYSAIDI:SUMY:MODU.SEVR NPP MS")
+	field(INPC,"$(S):STN:IQA1:MODU.SEVR NPP MS")
+	field(INPD,"$(S):STN:AIM:MODU.SEVR NPP MS")
+}
+record(fanout,"$(S):KLYSWATRTEMP:FANO:LTCH") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):KLYSBD01TEMP:SUMY:LTCH.VAL")
+	field(LNK2,"$(S):KLYSBD02TEMP:SUMY:LTCH.VAL")
+	field(LNK3,"$(S):KLYSBD03TEMP:SUMY:LTCH.VAL")
+	field(LNK4,"$(S):KLYSCOLLTEMP:SUMY:LTCH.VAL")
+}
+record(fanout,"$(S):KLYSWATRTEMP:FANO:FRST") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):KLYSBD01TEMP:SUMY:FRST.VAL")
+	field(LNK2,"$(S):KLYSBD02TEMP:SUMY:FRST.VAL")
+	field(LNK3,"$(S):KLYSBD03TEMP:SUMY:FRST.VAL")
+	field(LNK4,"$(S):KLYSCOLLTEMP:SUMY:FRST.VAL")
+}
+@
+
+
+1.2
+log
+@Rename
+@
+text
+@d74 2
+a75 2
+	field(INPA,"$(S):SOLNMAIN:CURR.SEVR NPP MS")
+	field(INPB,"$(S):SOLNMAIN:VOLT.SEVR NPP MS")
+d77 2
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d25 1
+a25 1
+	field(INPH,"$(S):KLYSCOLL:POWER.SEVR NPP MS")
+d367 1
+a367 1
+	field(INPC,"$(S):KLYSCOLL:POWER.SEVR NPP MS")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

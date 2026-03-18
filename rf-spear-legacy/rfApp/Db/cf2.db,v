@@ -1,0 +1,466 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2011.12.07.00.28.27;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2007.03.20.16.29.09;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2006.01.26.00.27.48;	author lazmo;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Use soft timestamp support provided by epics base for timestamps.
+@
+text
+@grecord(bi,"$(R):STN:CF2OVFL:STAT") {
+	field(DESC,"CF2 Overflow Status")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(R):STNCF2:SUMY:MODU.VAL  PP MS")
+	field(INP,"$(R):STN:CF2:MODU.OVFL  NPP MS")
+	field(OSV,"MINOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(bi,"$(R):STN:CFM1OVFL:STAT") {
+	field(DESC,"CFM1 Ovfl Status Proxy")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(R):STN:CF2OVFL:STAT.VAL  PP MS")
+	field(INP,"$(R):STN:CF2:MODU.OVFL  NPP MS")
+	field(OSV,"MINOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(bi,"$(R):STN:CFM2OVFL:STAT") {
+	field(DESC,"CFM2 Ovfl Status Proxy")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OSV,"MINOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(calc,"$(R):STN:CF2:CALD") {
+	field(DESC,"diag buf button update")
+	field(FLNK,"$(R):STN:CF2:SQD1.VAL  PP MS")
+	field(CALC,"(A#B)?1:0")
+	field(INPA,"$(R):STN:CF2:MODU.XDIR  NPP MS")
+	field(INPB,"$(R):STN:CF2:CALD.LA  NPP MS")
+}
+grecord(calc,"$(R):STN:CF2:CALH") {
+	field(DESC,"hist buf button update")
+	field(FLNK,"$(R):STN:CF2:SQH1.VAL  PP MS")
+	field(CALC,"(A#B)?1:0")
+	field(INPA,"$(R):STN:CF2:MODU.XHIR  NPP MS")
+	field(INPB,"$(R):STN:CF2:CALH.LA  NPP MS")
+}
+grecord(calc,"$(R):STN:CFM1:MODU") {
+	field(DESC,"dummy CFM1")
+	field(CALC,"0")
+	field(INPA,"$(R):STN:CF2:MODU.SEVR  NPP MS")
+	field(FLNK,"$(R):STN:CFM2:MODU.VAL  PP MS")
+}
+grecord(calc,"$(R):STN:CFM2:MODU") {
+	field(DESC,"dummy CFM2")
+	field(CALC,"0")
+	field(INPA,"$(R):STN:CF2:MODU.SEVR  NPP MS")
+}
+grecord(calc,"$(R):STNCF2:SUMY:MODU") {
+	field(DESC,"SEVR aggregator")
+	field(FLNK,"$(R):STN:CFM1:MODU.VAL  PP MS")
+	field(CALC,"0")
+	field(INPA,"$(R):STN:CF2OVFL:STAT.SEVR  NPP MS")
+	field(INPB,"$(R):STN:CF2:MODU.SEVR  NPP MS")
+}
+grecord(fanout,"$(R):STN:CF2:FAN1") {
+	field(LNK1,"$(R):STN:CF2:SEQ1.VAL  PP MS")
+	field(LNK2,"$(R):STN:CF2:INTBNKSEL.VAL  PP MS")
+	field(LNK3,"$(R):STN:CF2:CALD.VAL  PP MS")
+	field(LNK4,"$(R):STN:CF2:CALH.VAL  PP MS")
+}
+grecord(fanout,"$(R):STN:CF2:SCAN") {
+	field(DESC,"temporary 2-sec scan pv")
+	field(SCAN,"2 second")
+	field(LNK1,"$(R):STN:CF2:MODU.VAL  PP MS")
+}
+grecord(mbbiDirect,"$(R):STN:CF2:CMBSTAT") {
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(INP,"0")
+}
+grecord(mbbiDirect,"$(R):STN:CF2:INTSTATE") {
+	field(DESC,"interrupt state")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(INP,"0")
+}
+grecord(mbbo,"$(R):STN:CF2:ANAINP") {
+	field(DESC,"Analog Input")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"3")
+	field(OUT,"$(R):STN:CF2:MODU.XANA  PP MS")
+	field(ZRVL,"0")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"0")
+	field(ZRST,"RFP")
+	field(ONST,"Front Panel")
+	field(TWST,"LoopBack")
+}
+grecord(mbbo,"$(R):STN:CF2:CMBBNKSEL") {
+	field(DESC,"comb bank select")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"1")
+	field(OUT,"$(R):STN:CF2:MODU.XCBS  PP MS")
+	field(ONVL,"1")
+	field(ZRST,"0")
+	field(ONST,"1")
+}
+grecord(mbbo,"$(R):STN:CF2:D1SRC") {
+	field(DESC,"diag mem 1 source")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"4")
+	field(OUT,"$(R):STN:CF2:MODU.XD1S  PP MS")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(FRVL,"4")
+	field(FVVL,"5")
+	field(SXVL,"6")
+	field(SVVL,"7")
+	field(EIVL,"8")
+	field(ZRST,"I ADC")
+	field(ONST,"I Equ Output")
+	field(TWST,"I Comb Output")
+	field(THST,"I Comb Input")
+	field(FRST,"Q ADC")
+	field(FVST,"Q Equ Output")
+	field(SXST,"Q Comb Output")
+	field(SVST,"Q Comb Input")
+	field(EIST,"Off")
+}
+grecord(mbbo,"$(R):STN:CF2:D2SRC") {
+	field(DESC,"diag mem 2 source")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"4")
+	field(OUT,"$(R):STN:CF2:MODU.XD2S  PP MS")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(FRVL,"4")
+	field(FVVL,"5")
+	field(SXVL,"6")
+	field(SVVL,"7")
+	field(EIVL,"8")
+	field(ZRST,"I ADC")
+	field(ONST,"I Equ Output")
+	field(TWST,"I Comb Output")
+	field(THST,"I Comb Input")
+	field(FRST,"Q ADC")
+	field(FVST,"Q Equ Output")
+	field(SXST,"Q Comb Output")
+	field(SVST,"Q Comb Input")
+	field(EIST,"Off")
+}
+grecord(mbbo,"$(R):STN:CF2:DATALIGN") {
+	field(DESC,"pre-DAC data alignment")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"4")
+	field(OUT,"$(R):STN:CF2:MODU.XDAA  PP MS")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(FRVL,"4")
+	field(FVVL,"5")
+	field(SXVL,"6")
+	field(SVVL,"7")
+	field(EIVL,"8")
+	field(NIVL,"9")
+	field(ZRST,"0")
+	field(ONST,"1")
+	field(TWST,"2")
+	field(THST,"3")
+	field(FRST,"4")
+	field(FVST,"5")
+	field(SXST,"6")
+	field(SVST,"7")
+	field(EIST,"8")
+	field(NIST,"9")
+}
+grecord(mbbo,"$(R):STN:CF2:DDCREM") {
+	field(DESC,"DC removal")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"3")
+	field(OUT,"$(R):STN:CF2:MODU.XDDC  PP MS")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(FRVL,"4")
+	field(ZRST,"OFF")
+	field(ONST,"0")
+	field(TWST,"1")
+	field(THST,"2")
+	field(FRST,"3")
+}
+grecord(mbbo,"$(R):STN:CF2:DGAIN") {
+	field(DESC,"digital gain")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"1")
+	field(OUT,"$(R):STN:CF2:MODU.XDGA  PP MS")
+	field(ZRVL,"0")
+	field(ONVL,"1")
+	field(ZRST,"1")
+	field(ONST,"4")
+}
+grecord(mbbo,"$(R):STN:CF2:DIAGREC") {
+	field(DESC,"diagnostic mem record enable")
+	field(DTYP,"Soft Channel")
+	field(DOL,"0")
+	field(NOBT,"1")
+	field(OUT,"$(R):STN:CF2:MODU.XDIR  PP MS")
+	field(ONVL,"1")
+	field(ZRST,"OFF")
+	field(ONST,"ON")
+}
+grecord(mbbo,"$(R):STN:CF2:ECRESET") {
+	field(DESC,"error count reset")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(R):STN:CF2:ECTIME.VAL  PP MS")
+	field(NOBT,"1")
+	field(OUT,"$(R):STN:CF2:MODU.ECNR  PP MS")
+	field(ZRVL,"0")
+	field(ONVL,"1")
+	field(TWVL,"0")
+	field(THVL,"0")
+	field(ZRST,"zero")
+	field(ONST,"one")
+}
+grecord(mbbo,"$(R):STN:CF2:EQUBNKSEL") {
+	field(DESC,"equalizer bank select")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"1")
+	field(OUT,"$(R):STN:CF2:MODU.XEBS  PP MS")
+	field(ONVL,"1")
+	field(ZRST,"0")
+	field(ONST,"1")
+}
+grecord(mbbo,"$(R):STN:CF2:HBSRC") {
+	field(DESC,"history buffer source")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"4")
+	field(OUT,"$(R):STN:CF2:MODU.XHBS  PP MS")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(FRVL,"4")
+	field(ZRST,"Module")
+	field(ONST,"Equ I/Q Out")
+	field(TWST,"Comb I/Q Out")
+	field(THST,"Comb I/Q In")
+	field(FRST,"Off")
+}
+grecord(mbbo,"$(R):STN:CF2:HISTREC") {
+	field(DESC,"history buffer record enable")
+	field(DTYP,"Soft Channel")
+	field(DOL,"0")
+	field(NOBT,"1")
+	field(OUT,"$(R):STN:CF2:MODU.XHIR  PP MS")
+	field(ONVL,"1")
+	field(ZRST,"OFF")
+	field(ONST,"ON")
+}
+grecord(mbbo,"$(R):STN:CF2:INTBNKSEL") {
+	field(DESC,"interpolator bank select")
+	field(DTYP,"Soft Channel")
+	field(DOL,"$(R):STN:CF2:MODU.XIBS  NPP MS")
+	field(OMSL,"closed_loop")
+	field(NOBT,"2")
+	field(OUT,"0")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(ZRST,"0")
+	field(ONST,"1")
+	field(TWST,"2")
+	field(THST,"3")
+}
+grecord(mbbo,"$(R):STN:CF2:INTFILON") {
+	field(DESC,"interp filter enable")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"1")
+	field(OUT,"$(R):STN:CF2:MODU.XIFO  PP MS")
+	field(ONVL,"1")
+	field(ZRST,"OFF")
+	field(ONST,"ON")
+}
+grecord(mbbo,"$(R):STN:CF2:IOTYPE") {
+	field(DESC,"I/O Type")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"1")
+	field(OUT,"$(R):STN:CF2:MODU.XIOT  PP MS")
+	field(ZRVL,"0")
+	field(ONVL,"1")
+	field(ZRST,"Analog")
+	field(ONST,"Serial")
+}
+grecord(mbbo,"$(R):STN:CF2:SERLPBK") {
+	field(DESC,"serial loopback enable")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"1")
+	field(OUT,"$(R):STN:CF2:MODU.XSLB  PP MS")
+	field(ONVL,"1")
+	field(ZRST,"OFF")
+	field(ONST,"ON")
+}
+grecord(mbbo,"$(R):STN:CF2:STATE") {
+	field(DESC,"module state")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"3")
+	field(OUT,"$(R):STN:CF2:MODU.MODE  PP MS")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(ZRST,"Load")
+	field(ONST,"Run")
+	field(TWST,"Play")
+	field(THST,"Idle")
+}
+grecord(mbbo,"$(R):STN:CF2:SYNCSRC") {
+	field(DESC,"scope sync source")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"4")
+	field(OUT,"$(R):STN:CF2:MODU.XSYS  PP MS")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(FRVL,"4")
+	field(FVVL,"5")
+	field(SXVL,"6")
+	field(SVVL,"7")
+	field(EIVL,"8")
+	field(ZRST,"10 MHz Clock")
+	field(ONST,"Turn Clock")
+	field(TWST,"EoPlay Stimulus")
+	field(THST,"EoPlay Preamble")
+	field(FRST,"Backplane Fault")
+	field(FVST,"Input ADC Ovfl")
+	field(SXST,"Comb Ovfl")
+	field(SVST,"Equ Ovfl")
+	field(EIST,"Off")
+}
+grecord(mbboDirect,"$(R):STN:CF2:INTACK") {
+	field(DESC,"interrupt acknowledge")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:CF2:MODU.IACK  PP MS")
+}
+grecord(seq,"$(R):STN:CF2:SEQ1") {
+	field(FLNK,"$(R):STN:CFM1OVFL:STAT.VAL  PP MS")
+	field(DOL1,"$(R):STN:CF2:MODU.CSTT  NPP MS")
+	field(LNK1,"$(R):STN:CF2:CMBSTAT.VAL  PP MS")
+	field(DOL2,"$(R):STN:CF2:MODU.ISTT  NPP MS")
+	field(LNK2,"$(R):STN:CF2:INTSTATE.VAL  PP MS")
+	field(DOL3,"0")
+	field(LNK3,"0")
+	field(DOL4,"0")
+	field(LNK4,"0")
+	field(DOL5,"0")
+	field(LNK5,"0")
+}
+grecord(seq,"$(R):STN:CF2:SQD1") {
+	field(DESC,"diag buf button upd seq1")
+	field(FLNK,"$(R):STN:CF2:SQD2.VAL  PP MS")
+	field(DOL1,"$(R):STN:CF2:CALD.VAL  NPP MS")
+	field(LNK1,"$(R):STN:CF2:SQD2.SELN  NPP MS")
+}
+grecord(seq,"$(R):STN:CF2:SQD2") {
+	field(DESC,"diag buf button upd seq2")
+	field(SELM,"Specified")
+	field(DOL1,"$(R):STN:CF2:MODU.XDIR  NPP MS")
+	field(LNK1,"$(R):STN:CF2:DIAGREC.VAL  PP MS")
+}
+grecord(seq,"$(R):STN:CF2:SQH1") {
+	field(DESC,"hist buf button upd seq1")
+	field(FLNK,"$(R):STN:CF2:SQH2.VAL  PP MS")
+	field(DOL1,"$(R):STN:CF2:CALH.VAL  NPP MS")
+	field(LNK1,"$(R):STN:CF2:SQH2.SELN  NPP MS")
+}
+grecord(seq,"$(R):STN:CF2:SQH2") {
+	field(DESC,"hist buf button upd seq2")
+	field(SELM,"Specified")
+	field(DOL1,"$(R):STN:CF2:MODU.XHIR  NPP MS")
+	field(LNK1,"$(R):STN:CF2:HISTREC.VAL  PP MS")
+}
+grecord(stringin,"$(R):STN:CF2:ECTIME") {
+	field(DESC,"last error count reset")
+	field(PINI,"YES")
+        field(DTYP, "Soft Timestamp")
+        field(INP, "@@%m/%d/%Y %H:%M:%S")
+}
+grecord(p2RfCf2,"$(R):STN:CF2:MODU") {
+	field(DTYP,"PEP-II RF CF2")
+	field(FLNK,"$(R):STN:CF2:FAN1.VAL  PP MS")
+	field(OUT,"#V0 C$(S) S0 @@(null)")
+}
+@
+
+
+1.2
+log
+@make both dummy CFM modules have the severity of the single CF2 comb module.
+This change will make RFP calibration correctly determine that SPEAR has no
+comb modules and will not abort in the middle.
+@
+text
+@d378 1
+a378 1
+grecord(timestamp,"$(R):STN:CF2:ECTIME") {
+d381 2
+a382 1
+	field(TST,"MM/DD/YY HH:MM:SS")
+@
+
+
+1.1
+log
+@Initial import of CF2 support.
+@
+text
+@d45 1
+d48 1
+a48 2
+	field(DESC,"dummy CFM2 PV")
+	field(PINI,"YES")
+d50 1
+@
+

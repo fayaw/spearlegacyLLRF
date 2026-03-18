@@ -1,0 +1,3373 @@
+head	1.6;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.6
+	RF-SPEAR-R0-3-1:1.6
+	RF-SPEAR-R0-3-0:1.6
+	RF-SPEAR-R0-2-0:1.6
+	RF-SPEAR-R0-1-0:1.6
+	RF-SPEAR-R0-0-3:1.6
+	RF-SPEAR-R0-0-2:1.6
+	RF-SPEAR-R0-0-1:1.6
+	RF-SPEAR-R0-0-0:1.6
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.6
+	RF-3-13-10:1.5.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.5
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.5
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.5;
+locks; strict;
+comment	@ * @;
+
+
+1.6
+date	2011.12.07.01.21.53;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2006.03.15.17.37.21;	author lazmo;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2006.02.09.19.43.15;	author lazmo;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2006.02.08.00.38.14;	author lazmo;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2006.01.31.01.20.47;	author lazmo;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2006.01.25.23.54.19;	author lazmo;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.6
+log
+@Changes for 3.14.11 (export) and compiler warnings.
+@
+text
+@/*#define DBG*/
+/* rec->dbg bits:
+ *
+ *	bit  0 (0x1) :: simulate HIS mem cctl bit OFF
+ *	bit  1 (0x2) :: simulate DIA mem cctl bit OFF
+ *	bit  2 (0x4)
+ *	bit  3 (0x8)
+ *
+ *	bit  4 (0x10)
+ *	bit  5 (0x20)
+ *	bit  6 (0x40)
+ *	bit  7 (0x80)
+ *
+ *	bit  8 (0x100)
+ *	bit  9 (0x200)
+ *	bit 10 (0x400)
+ *	bit 11 (0x800)
+ *
+ *	bit 12 (0x1000)
+ *	bit 13 (0x2000)
+ *	bit 14 (0x4000)
+ *	bit 15 (0x8000)
+ *
+ *	bits 16-31 ...
+ */
+
+#if 0
+#define DEBUG 1 /* printfs, mostly */
+#endif
+
+#define ushort unsigned short
+#define uchar  unsigned char
+
+/*
+** ++
+**
+**  Facility:  DEV - DEVice support
+**
+**  Abstract:
+**      EPICS device support for the PEP-II RF Comb Filter Module (VERSION 2)
+**
+**  Author:
+**      M. Laznovsky, SLAC/PEP-II Low Level RF Group
+**   ... based on original concept (but heavily modified) by:
+**	R. Claus, SLAC/PEP-II Low Level RF Group
+**
+**  History:
+**	March 2005         - Adapted for COMB 2 (from devP2RfCf2.c) [LAZMO]
+**	March 29, 2004     - Removed CF2_M_INVADX from CF2_M_INTSELECT for MJB [LAZMO]
+**      September 10, 2003,- Added function Read_IntStatus                  (K. Luchini)
+**      February  11, 2003 - Updated new fields verh and verf in InitFields (K. Luchini)
+**	June 13, 1996      - Created  (R.Claus)
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+/********************************************************************************/
+
+#include <vxWorks.h>
+#include <logLib.h>
+#include <sysLib.h>
+#include <stdlib.h>
+#include <types.h>
+#include <stdioLib.h>
+#include <string.h>
+#include <taskLib.h>
+
+#include <epicsPrint.h>
+#include <cvtTable.h>
+#include <dbDefs.h>
+#include <dbAccess.h>
+#include <dbEvent.h>
+#include <recGbl.h>
+#include <recSup.h>
+#include <devSup.h>
+#include <link.h>
+#include <alarm.h>
+/*#include <module_types.h>*/
+#include <callback.h>
+
+#include <p2RfLib.h>
+#include <drvP2RfVxi.h>
+#include <p2RfCf2Def.h>
+#include <p2RfCf2Record.h>
+
+#include "epicsExport.h"
+
+/********************************************************************************/
+
+#ifdef DEBUG
+#if 0
+...
+#define P2RF_WriteVme(a,b,c) my_P2RF_WriteVme(a,b,c)
+#define P2RF_ReadVme(a,b,c)  my_P2RF_ReadVme(a,b,c) 
+#endif
+...#define P2RF_ReadVme(a,b,c) \
+  printf("  (P2RF_ReadVme)  0x%X 0x%X\n",((int)b<<1),c)
+#endif /*DEBUG*/
+
+#define LAZMO_ReadVme(a,b,c) \
+{ \
+  P2RF_ReadVme(a,b,c); \
+/*printf("  (P2RF_ReadVme)  0x%X 0x%X (%d)\n",((unsigned int)b<<1),c,c);*/ \
+}
+
+#define LAZMO_WriteVme(a,b,c) \
+{ \
+/*printf("  (P2RF_WriteVme) 0x%X 0x%X (%d)\n",((unsigned int)b<<1),c,c);*/ \
+  P2RF_WriteVme(a,b,c); \
+}
+
+/********************************************************************************/
+
+#define CF2_V_INTSELECT    CF2_V_ICMBOVFLMSK
+#define CF2_M_INTSELECT (\
+  CF2_V_ICMBOVFLMSK | CF2_V_IEQUOVFLMSK | CF2_V_IADCOVFLMSK |\
+  CF2_V_QCMBOVFLMSK | CF2_V_QEQUOVFLMSK | CF2_V_QADCOVFLMSK |\
+  CF2_V_SOFTWARE)
+
+/*----------------------------------------------------------------*/
+
+typedef struct p2RfCf2Record P2RfCf2Record;
+
+static long InitRecord (P2RfCf2Record *);
+static long Action     (P2RfCf2Record *);
+
+/*----------------------------------------------------------------*/
+
+#define CF2_K_COEF_FN_LEN   40	/* coef filename len in chars (inc NULL) */
+#define CF2_K_COEF_CM_LEN   40	/* coef file comment len in chars (inc NULL) */
+
+
+/*================================================================================
+ * recBFxxx() -- bit-field ops on module record fields
+ *     recBFGET, recBFAND return a value
+ *     recBFSET, recBFOR  set module record field "R"
+ * all values are "baseband", ie. shifted down to bit 0
+ *================================================================================
+ */
+
+/*--------------------------------------------------------------------------------*/
+
+/* recBFGET: extract bitfield, shifted down to b0
+ *	R module record field name
+ *	F h/w register field name
+ */
+#define recBFGET(R,F) \
+    (((rec->R) & CF2_M_##F) >> CF2_V_##F) 
+
+/*--------------------------------------------------------------------------------*/
+
+/* recBFAND: test bitfield via AND (use "recBFGET() ==" for comparison)
+ *	R module record field name
+ *	F h/w register field name
+ *	Z value to AND with (unshifted)
+ */
+#define recBFAND(R,F,Z) \
+    (recBFGET(R,F) & (Z))
+
+/*--------------------------------------------------------------------------------*/
+
+/* recBFSET: set bitfield to value
+ *	R module record field name
+ *	F h/w register field name
+ *	Z value to set field to (unshifted)
+ */
+#define recBFSET(R,F,Z) \
+    ( rec->R = ((rec->R) & ~CF2_M_##F) | (((Z) << CF2_V_##F) & CF2_M_##F) )
+
+/*--------------------------------------------------------------------------------*/
+
+/* recBFOR: or bits into bitfield
+ *	R module record field name
+ *	F h/w register field name
+ *	Z value to OR in (unshifted)
+ */
+#define recBFOR(R,F,Z) \
+    ( rec->R |= (((Z) << CF2_V_##F) & CF2_M_##F) )
+
+/*--------------------------------------------------------------------------------*/
+
+  /*=================================================================
+   * The following data structures & code support uniform coordinated
+   * transfers between coefficient memories & load/save files, and
+   * rely on button/status/filename record fields defined in the .dbd
+   * file to be in specific coordinated order. CAVEAT PROGRAMMER!! :O
+   *=================================================================
+   */
+
+  /*--------------------------------
+   * struct to hold info for one contiguous-address block of module regs
+   * ... basically address & count
+   *--------------------------------
+   */
+  typedef struct {
+    char   *name;	/* description (w/o bank#) */
+    int     count;	/* # of words (ushort) */
+    int     index;	/* first h/w WORD address ("index") */
+    double *pval;	/* ptr to "current" values ... malloc'd @@ init */
+    ushort *pkk;	/* ptr to "current" values (h/w format) */
+                   /*  ... vals & fields are DOUBLE; regs are USHORT */
+  } cf2_loc_t;
+
+  /*--------------------------------
+   * struct to hold info for one coefficient bank, consisting of multiple cf2_loc's
+   * ... nloc == 0 -> end-of-list
+   *--------------------------------
+   */
+  typedef struct {
+    int         num;	/* bank number (0+) */
+    int         nloc;	/* number of cf2_loc_t's in bank; 0 => end of list */
+    cf2_loc_t  *ploc;	/* ptr to array of cf2_loc_t's */
+  } cf2_bank_t;
+
+  /*----------------------------------------------------------------
+   * comb filter coefficients
+   *----------------------------------------------------------------
+   */
+
+  /* h/w only uses 6 out of the 8 locs in each of these groups, but we
+   * need to keep 8 here to match record field definitions
+   */
+
+  static cf2_loc_t cf2_loc_cmb_bank0[] = {
+    {"cmb II", 8, CF2_I_CMBCOEF_II_BANK0, NULL},
+    {"cmb QQ", 8, CF2_I_CMBCOEF_QQ_BANK0, NULL},
+    {"cmb QI", 8, CF2_I_CMBCOEF_QI_BANK0, NULL},
+    {"cmb IQ", 8, CF2_I_CMBCOEF_IQ_BANK0, NULL}
+  };
+
+  static cf2_loc_t cf2_loc_cmb_bank1[] = {
+    {"cmb II", 8, CF2_I_CMBCOEF_II_BANK1, NULL},
+    {"cmb QQ", 8, CF2_I_CMBCOEF_QQ_BANK1, NULL},
+    {"cmb QI", 8, CF2_I_CMBCOEF_QI_BANK1, NULL},
+    {"cmb IQ", 8, CF2_I_CMBCOEF_IQ_BANK1, NULL}
+  };
+
+  static cf2_bank_t cf2_cmb_banks[] = {
+    { 0, 4, cf2_loc_cmb_bank0 },
+    { 1, 4, cf2_loc_cmb_bank1 },
+    { 0,0,0 }
+  };
+
+  /*----------------------------------------------------------------
+   * equalizer filter coefficients
+   *----------------------------------------------------------------
+   */
+
+  static cf2_loc_t cf2_loc_equ_bank0[] = {	/* bank 0 */
+    {"equ II", 32, CF2_I_EQUCOEF_II_BANK0, NULL},
+    {"equ QQ", 32, CF2_I_EQUCOEF_QQ_BANK0, NULL},
+    {"equ QI", 32, CF2_I_EQUCOEF_QI_BANK0, NULL},
+    {"equ IQ", 32, CF2_I_EQUCOEF_IQ_BANK0, NULL}
+  };
+
+  static cf2_loc_t cf2_loc_equ_bank1[] = {	/* bank 1 */
+    {"equ II", 32, CF2_I_EQUCOEF_II_BANK1, NULL},
+    {"equ QQ", 32, CF2_I_EQUCOEF_QQ_BANK1, NULL},
+    {"equ QI", 32, CF2_I_EQUCOEF_QI_BANK1, NULL},
+    {"equ IQ", 32, CF2_I_EQUCOEF_IQ_BANK1, NULL}
+  };
+
+  static cf2_bank_t cf2_equ_banks[] = {
+    { 0, 4, cf2_loc_equ_bank0 },
+    { 1, 4, cf2_loc_equ_bank1 },
+    { 0,0,0 }
+  };
+
+  /*----------------------------------------------------------------
+   * interpolation filter coefficients
+   *----------------------------------------------------------------
+   */
+
+  static cf2_loc_t cf2_loc_int_bank0[] = {
+    {"int I", 16, CF2_I_INTCOEF_I_BANK0, NULL},
+    {"int Q", 16, CF2_I_INTCOEF_Q_BANK0, NULL}
+  };
+
+  static cf2_loc_t cf2_loc_int_bank1[] = {
+    {"int I", 16, CF2_I_INTCOEF_I_BANK1, NULL},
+    {"int Q", 16, CF2_I_INTCOEF_Q_BANK1, NULL}
+  };
+
+  static cf2_loc_t cf2_loc_int_bank2[] = {
+    {"int I", 16, CF2_I_INTCOEF_I_BANK2, NULL},
+    {"int Q", 16, CF2_I_INTCOEF_Q_BANK2, NULL}
+  };
+
+  static cf2_loc_t cf2_loc_int_bank3[] = {
+    {"int I", 16, CF2_I_INTCOEF_I_BANK3, NULL},
+    {"int Q", 16, CF2_I_INTCOEF_Q_BANK3, NULL}
+  };
+
+  static cf2_bank_t cf2_int_banks[] = {
+    { 0, 2, cf2_loc_int_bank0 },
+    { 1, 2, cf2_loc_int_bank1 },
+    { 2, 2, cf2_loc_int_bank2 },
+    { 3, 2, cf2_loc_int_bank3 },
+    { 0,0,0 }
+  };
+
+  /*----------------------------------------------------------------
+   * all filters...
+   *----------------------------------------------------------------
+   */
+
+  static cf2_bank_t *cf2_all_banks[3] = {
+    cf2_cmb_banks,
+    cf2_equ_banks,
+    cf2_int_banks
+  };
+
+/*================================================================*/
+
+typedef struct
+{
+  long		number;
+  DEVSUPFUN	report;
+  DEVSUPFUN	init;
+  DEVSUPFUN	init_record;
+  DEVSUPFUN	get_ioint_info;
+  DEVSUPFUN	action;
+} P2RfCf2Dset;
+
+P2RfCf2Dset devP2RfCf2 = {5, NULL, NULL, InitRecord, NULL, Action};
+
+epicsExportAddress(dset,devP2RfCf2);
+
+/*--------------------------------*/
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  long            status;
+} Cf2RstBlk;
+
+/*--------------------------------*/
+
+typedef struct
+{
+  char           *id;		/* id string */
+  cf2_bank_t     *bank;		/* ptr to bank struct */
+  double         *field;	/* ptr to starting record field */
+
+  uchar          *lbut1;	/* ptr to load button */
+  uchar          *sbut1;	/* ptr to save button */
+
+  uchar          *lbut2;	/* ptr to load button */
+  uchar          *sbut2;	/* ptr to save button */
+
+  char           *filename;	/* set to one of the following */
+  char           *comment;	/* set to one of the following */
+
+  char           *file1;
+  char           *file2;
+  char           *comm1;
+  char           *comm2;
+  ushort	 *stat1;
+  ushort	 *stat2;
+
+} Cf2CoefPrm;
+
+/*--------------------------------*/
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  Cf2CoefPrm     *prm;
+  long            status;
+} Cf2CoefBlk;
+
+/*--------------------------------*/
+
+typedef struct
+{
+  char           *id;
+  int             index;
+  int             count;
+  char           *file;
+} Cf2MemPrm;
+
+/*--------------------------------*/
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  Cf2MemPrm      *prm;
+  long            status;
+  int             abortFlg;
+} Cf2HistBlk;
+
+/*--------------------------------*/
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  Cf2MemPrm      *prm;
+  long            status;
+  int             abortFlg;
+} Cf2LdMemBlk;
+
+/*--------------------------------*/
+
+typedef struct
+{
+  void           *drvPvt;
+  P2RfCf2Record  *rec;
+
+  unsigned int    intPrc;
+
+  Cf2RstBlk       resetBlk;
+
+  Cf2CoefBlk      svCoefBlk;
+  Cf2CoefBlk      ldCoefBlk;
+
+  Cf2CoefPrm      equ0Prm;
+  Cf2CoefPrm      equ1Prm;
+
+  Cf2CoefPrm      cmb0Prm;
+  Cf2CoefPrm      cmb1Prm;
+
+  Cf2CoefPrm      int0Prm;
+  Cf2CoefPrm      int1Prm;
+  Cf2CoefPrm      int2Prm;
+  Cf2CoefPrm      int3Prm;
+
+  Cf2MemPrm       memPrm;	/* used by both hist & ldMem blks ... */
+
+  Cf2HistBlk      histBlk;
+  Cf2LdMemBlk     ldMemBlk;
+
+} Cf2Board;
+
+/********************************************************************************/
+/********************************************************************************/
+
+/* Forward references */
+
+static void  LoadCoefCallback   (Cf2CoefBlk*);
+static void  SaveCoefCallback   (Cf2CoefBlk*);
+static void  LdMemCallback      (Cf2LdMemBlk*);
+
+static long  InitFields         (Cf2Board*, int);
+static long  ColdInit           (Cf2Board*, P2RfCf2Record*);
+static long  WarmInit           (Cf2Board*, P2RfCf2Record*);
+
+#if 0
+static void  Read_IntStatus     (Cf2Board*, P2RfCf2Record*);
+#endif
+
+static void check_gethist(P2RfCf2Record *,
+			  uchar         *,
+			  ushort        *,
+			  int            ,
+			  char          *,
+			  int            );
+
+static void check_loadplay(P2RfCf2Record *,
+			   uchar         *,
+			   ushort        *,
+			   int            ,
+			   char          *,
+			   int            );
+
+static void update_coef_all  (P2RfCf2Record*);
+static void update_coef_bank (P2RfCf2Record*, Cf2CoefPrm*, int);
+
+static void verify_coef_all  (P2RfCf2Record*);
+static void verify_coef_bank (P2RfCf2Record*, Cf2CoefPrm*, int);
+
+static void check_loadsave   (P2RfCf2Record*, int, int, Cf2CoefPrm*, int);
+
+static long SpawnLdCoefs (P2RfCf2Record  *,
+                          unsigned char  *,
+                          Cf2CoefBlk     *,
+                          Cf2CoefPrm     *,
+                          char           *,
+                          char           *,
+                          unsigned short *);
+
+static long SpawnSvCoefs (P2RfCf2Record  *,
+                          unsigned char  *,
+                          Cf2CoefBlk     *,
+                          Cf2CoefPrm     *,
+                          char           *,
+                          char           *,
+                          unsigned short *);
+
+static long SpawnLdMem (P2RfCf2Record  *,
+                        unsigned char  *,
+                        Cf2LdMemBlk    *,
+                        Cf2MemPrm      *,
+			int             ,
+                        char           *,
+                        unsigned short *);
+
+static Status devCf2_ReadCoefFile(
+	void            *,
+	Cf2CoefPrm      *,
+	char            *,
+	int              );
+
+static Status devCf2_WriteCoefFile(
+	void            *,
+	Cf2CoefPrm      *,
+	char            *,
+	int              );
+
+
+static long  SpawnReset       (P2RfCf2Record*, Cf2RstBlk*);
+
+static void  ResetCallback    (Cf2RstBlk*);
+
+static void  Cf2Isr           (void*, unsigned short);
+
+static void  Cf2Shutdown      (void*);
+
+static long  SpawnGetHist     (P2RfCf2Record*,
+			       unsigned char*,
+			       Cf2HistBlk*,
+			       Cf2MemPrm*,
+			       unsigned int,
+			       char*,
+			       unsigned short*);
+
+static void  GetHistCallback  (Cf2HistBlk*);
+
+
+/**********************************************************************************
+ * macros for commonly-used operations
+ **********************************************************************************
+ */
+
+/*================================================================================
+ *   [Read,Write] VME <-> module record field
+ *================================================================================
+ */
+
+#define READREG(REG,VAR) \
+  P2RF_ReadVme  (drvPvt, CF2_I_##REG, (VAR));
+
+#define WRITEREG(REG,VAR) \
+  LAZMO_WriteVme (drvPvt, CF2_I_##REG, (VAR));
+
+/*--------------------------------------------------------------------------------*/
+
+/*================================================================
+ * DBPOST: db_post_events()
+ *================================================================
+ */
+/*---------------------------------------------*/
+#define DBPOST(_FIELD_)				\
+    db_post_events (rec,			\
+		    &(rec->_FIELD_),		\
+		    DBE_VALUE | DBE_LOG		\
+		   )				\
+/*---------------------------------------------*/
+
+/*================================================================
+ * DBSET: set rec field, then DBPOST()
+ *================================================================
+ */
+/*---------------------------------------------*/
+#define DBSET(_FIELD_,_VAL_)		\
+    rec->_FIELD_ = _VAL_;			\
+    DBPOST(_FIELD_);				\
+/*---------------------------------------------*/
+
+/*================================================================
+ *  DBUPD: If-Changed-Update-Rec-And-Post
+ *================================================================
+ */
+/*---------------------------------------------*/
+#define DBUPD(_FIELD_,_VAL_)			\
+    if ((rec->_FIELD_) != _VAL_) {		\
+      DBSET(_FIELD_,_VAL_);			\
+    }						\
+/*---------------------------------------------*/
+
+/**********************************************************************************/
+
+static void Cf2Isr (void           *brdArg,
+                    unsigned short  intStat)
+/*
+ *   Description
+ *   -----------
+ *   Device specific routine to handle interrupts generated by the module.
+ *   It runs in the context of the Interrupt Service Routine.  Thus all
+ *   the rules for coding at IPL apply.
+ *
+ *   In this case, alarms are set depending on the interrupt type.
+ *
+ *   Parameters
+ *   ----------
+ *       brdArg - A pointer to the device private structure
+ *      intStat - The interrupt status mask
+ *
+ *   Returns
+ *   -------
+ *   nothing
+ */
+{
+  /*Function("Cf2Isr");*/
+
+#if 0
+  Cf2Board       *brd = (Cf2Board *) brdArg;
+  P2RfCf2Record  *rec = brd->rec;
+
+  /* Update mask of interrupts set */
+  if (intStat & (intStat ^ rec->istt))  /* Is bit already set in istt? */
+  {
+    rec->istt |= intStat;
+
+    /* Process forward links */
+    brd->intPrc++;
+    scanOnce ((dbCommon *)rec);
+  }
+#endif
+}
+
+/********************************************************************************/
+
+static void Cf2Shutdown (void  *brdArg)
+/*
+ *   Description
+ *   -----------
+ *   Device specific routine to run at shutdown time.
+ *
+ *   Parameters
+ *   ----------
+ *       brdArg - A pointer to the device private structure
+ *
+ *   Returns
+ *   -------
+ *   nothing
+ */
+{
+  /*Function("Cf2Shutdown");*/
+}
+
+/********************************************************************************/
+
+static long InitRecord (P2RfCf2Record  *rec)
+/*
+ *   Description
+ *   -----------
+ *   Initialize the record.  Many fields of the record are filled with data from
+ *   the hardware.  Depending on the start-up type (cold or warm) some record
+ *   fields will either set up the hardware or get their values from a restore
+ *   file.  Interrupts from the board are enabled at the end of the
+ *   initialization.
+ *
+ *   Parameters
+ *   ----------
+ *          rec - A pointer to the record
+ *
+ *   Returns
+ *   -------
+ *   status
+ */
+{
+  Function ("InitRecord");
+
+  struct vxiio   *vxiIo = NULL;
+  Cf2Board       *brd;
+  long            status;
+  void           *drvPvt;
+  char           *msg   = "CF2 module initialization failed";
+
+  int             i;
+
+  static char  buf[P2RF_K_BUFSIZE];
+
+  /* rec.out must be of type VXI_IO */
+  if (rec->out.type != VXI_IO) {
+    recGblRecordError (S_db_badField, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "Illegal OUT field"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return(S_db_badField);
+  }
+
+  /* Allocate the device private block */
+  if ((brd = calloc (1, sizeof (*brd))) == NULL) {
+    recGblRecordError (ERROR, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN,
+                                     "No memory for CF2 board descriptor"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Register the module to get a driver handle */
+  vxiIo = &rec->out.value.vxiio;
+  status = P2RF_RegisterModule(vxiIo->flag,
+			       vxiIo->frame,
+			       vxiIo->slot,
+			       vxiIo->la,
+			       CF2_K_MODEL,
+			       CF2_K_NAME,
+			       CF2_K_DRAWING,
+			       Cf2Isr,
+			       brd,
+			       Cf2Shutdown,
+			       brd,
+			       &drvPvt);
+  if (status) {
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "P2RF_RegisterModule"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (status);
+  }
+
+  /* Set up the device private block and save a pointer to it in the record */
+  brd->drvPvt = drvPvt;
+  brd->rec    = rec;
+  rec->dpvt   = brd;
+
+
+  /* ---------------- init callback stuff ---------------- */
+
+  /* reset */
+  callbackSetCallback ((void(*)())ResetCallback,     &brd->resetBlk.callback);
+  callbackSetPriority (           priorityHigh,      &brd->resetBlk.callback);
+  callbackSetUser     (           rec,               &brd->resetBlk.callback);
+  brd->resetBlk.drvPvt = drvPvt;
+
+  /* coef save */
+  callbackSetCallback ((void(*)())SaveCoefCallback,  &brd->svCoefBlk.callback);
+  callbackSetPriority (           priorityLow,       &brd->svCoefBlk.callback);
+  callbackSetUser     (           rec,               &brd->svCoefBlk.callback);
+  brd->svCoefBlk.drvPvt = drvPvt;
+
+  /* coef load */
+  callbackSetCallback ((void(*)())LoadCoefCallback,  &brd->ldCoefBlk.callback);
+  callbackSetPriority (           priorityLow,       &brd->ldCoefBlk.callback);
+  callbackSetUser     (           rec,               &brd->ldCoefBlk.callback);
+  brd->ldCoefBlk.drvPvt = drvPvt;
+
+  /*--------------------------------*/
+
+  /* get history */
+  callbackSetCallback ((void(*)())GetHistCallback,   &brd->histBlk.callback);
+  callbackSetPriority (           priorityLow,       &brd->histBlk.callback);
+  callbackSetUser     (           rec,               &brd->histBlk.callback);
+  brd->histBlk.drvPvt = drvPvt;
+
+  /* load play-mem  */
+  callbackSetCallback ((void(*)())LdMemCallback,     &brd->ldMemBlk.callback);
+  callbackSetPriority (           priorityLow,       &brd->ldMemBlk.callback);
+  callbackSetUser     (           rec,               &brd->ldMemBlk.callback);
+  brd->ldMemBlk.drvPvt = drvPvt;
+
+  /* common prm */
+  {
+    Cf2MemPrm *prm = &brd->memPrm;
+    prm->id        = NULL;		/* filled in when button pushed */
+    prm->index     = NULL;		/* filled in when button pushed */
+  }
+
+
+  /* ---- init coefficient parameter blocks ---- */
+
+/*--------------------------------------------------------------*/
+#define COEFBLKINIT(LC,UC,BANK,FIELD,L1,S1,F1,C1,Z1,L2,S2,F2,C2,Z2)\
+  {								\
+    Cf2CoefPrm *prm = &brd->LC##BANK##Prm;			\
+								\
+    prm->id     =        CF2_K_##UC##_ID;			\
+    prm->bank   =        &cf2_##LC##_banks[BANK];		\
+    prm->field  =        &rec->FIELD;	/* first coef field */	\
+								\
+    prm->lbut1  =        &rec->L1;	/* load */		\
+    prm->sbut1  =        &rec->S1;	/* save */		\
+    prm->file1  = (char*)&rec->F1;	/* filename */		\
+    prm->comm1  = (char*)&rec->C1;	/* comment */		\
+    prm->stat1  =        &rec->Z1;	/* status */		\
+								\
+    prm->lbut2  =        &rec->L2;				\
+    prm->sbut2  =        &rec->S2;				\
+    prm->file2  = (char*)&rec->F2;				\
+    prm->comm2  = (char*)&rec->C2;				\
+    prm->stat2  =        &rec->Z2;				\
+  }								\
+/*--------------------------------------------------------------*/
+
+  COEFBLKINIT( cmb,CMB,0,c000, cl10,cs10,cf10,cc10,cz10, cl20,cs20,cf20,cc20,cz20);
+  COEFBLKINIT( cmb,CMB,1,c100, cl11,cs11,cf11,cc11,cz11, cl21,cs21,cf21,cc21,cz21);
+
+  COEFBLKINIT( equ,EQU,0,e000, el10,es10,ef10,ec10,ez10, el20,es20,ef20,ec20,ez20);
+  COEFBLKINIT( equ,EQU,1,e100, el11,es11,ef11,ec11,ez11, el21,es21,ef21,ec21,ez21);
+
+  /* for int, repeat file1/etc... will be ignored */
+  COEFBLKINIT( int,INT,0,i0ia, il00,is00,if00,ic00,iz00, il00,is00,if00,ic00,iz00);
+  COEFBLKINIT( int,INT,1,i1ia, il01,is01,if01,ic01,iz01, il01,is01,if01,ic01,iz01);
+  COEFBLKINIT( int,INT,2,i2ia, il02,is02,if02,ic02,iz02, il02,is02,if02,ic02,iz02);
+  COEFBLKINIT( int,INT,3,i3ia, il03,is03,if03,ic03,iz03, il03,is03,if03,ic03,iz03);
+
+#undef COEFBLKINIT
+
+  /* alloc local mem for copies of coefficients ("old") values
+   */
+
+  for (i = 0; i < 3; i++) {		/* for all filters... */
+
+    cf2_bank_t *pbank = cf2_all_banks[i];	/* get ptr to filter's bank array */
+
+    while (pbank->nloc > 0) {			/* for all banks... */
+      cf2_loc_t *ploc = pbank->ploc;			/* ptr to cf2_loc array */
+      int        nloc = pbank->nloc;			/* len of cf2_loc array */
+
+      while (nloc--) {					/* for all address blocks... */
+
+	if (NULL == (ploc->pval = calloc(ploc->count,sizeof(double)))) {
+	  recGblRecordError (ERROR, rec,
+			     P2RF_Sprintf (buf, __FILE__, FN,
+					   "malloc() failed for CF2 coef array"));
+	  strncpy (rec->val, msg, sizeof (rec->val));
+	  return (ERROR);
+	}
+
+#if 0
+printf("(devP2RfCf2.c::InitRecord) calloc %s: 0x%08X (%d words)\n",
+       ploc->name,ploc->pval,ploc->count);
+#endif
+
+	if (NULL == (ploc->pkk = calloc(ploc->count,sizeof(ushort)))) {
+	  recGblRecordError (ERROR, rec,
+			     P2RF_Sprintf (buf, __FILE__, FN,
+					   "malloc() failed for CF2 coef array"));
+	  strncpy (rec->val, msg, sizeof (rec->val));
+	  return (ERROR);
+	}
+
+	ploc++; 
+      }
+      pbank++;						/* next bank for this filter */
+    }
+  }
+
+  /* Initialize the module and the database fields
+   *  ... also loads all h/w coef regs via ColdInit()
+   */
+  if ((status = InitFields (brd, P2RF_K_COLDSTART))) {
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+    free (brd);
+    rec->dpvt = NULL;
+    if (!rec->stik) {
+      strncpy (rec->val, msg, sizeof (rec->val));
+    }
+    return (ERROR);
+  }
+
+#if 0
+  /* Enable module interrupts and update the database copy */
+  P2RF_ModIntEnable (drvPvt);
+  READREG(INTCTRL, &rec->ictl);
+#endif
+
+#ifdef DEBUG
+  printf("(devP2RfCf2.c) InitRecord done (OK).................\n");
+#endif
+
+  return (OK);
+}
+
+/********************************************************************************/
+
+static long InitFields (Cf2Board *brd,
+                        int       initType)
+/*
+ *   Description
+ *   -----------
+ *   Function to initialize the fields in the database record and/or the module,
+ *   depending on the initialization type.
+ *
+ *   Parameters
+ *   ----------
+ *          brd - A pointer to the device private block
+ *     initType - Type of initialization.
+ *
+ *   Returns
+ *   -------
+ *   Status
+ */
+{
+  /*Function ("InitFields");*/
+
+  P2RfCf2Record  *rec    = brd->rec;
+  void           *drvPvt = brd->drvPvt;
+  long            status;
+
+  unsigned short  sernHi;
+  unsigned short  sernLo;
+
+  /* reset "sticky error" flag */
+  rec->stik = 0;
+
+  /* Reset the module, if it's a cold startup.  This takes a while... */
+  if (initType == P2RF_K_COLDSTART) P2RF_ResetModule(drvPvt);
+
+  /* Load the record fields with device data */
+  READREG(MANID,     &rec->mid );
+  READREG(MODELNO,   &rec->mtyp);
+  READREG(STATUS,    &rec->mstt);
+  READREG(OFFSET,    &rec->a24o);
+  READREG(ATTRIBUTE, &rec->vatt);
+
+  READREG(SERIALHI,  &sernHi   );
+  READREG(SERIALLO,  &sernLo   );
+  rec->sern = (sernHi << 16) | sernLo;
+
+  READREG(VERSION,   &rec->vern);
+  rec->verh = P2RF_HWVER(rec->vern);  /* upper nibble of hardware version */
+  rec->verf = P2RF_FWVER(rec->vern);  /* lower nibble of firmware version */
+
+  /*================================================================
+   * from Bill Ross 3/31/2005:
+   * The model number is still 0x101.  The way to tell the Comb Version-2
+   * from a Comb Version-1 is by looking at the Version Number Register.
+   * It will show 0x1121 for the new Version-2 Comb.  (The old Comb reads
+   * 0x1111.)
+   *================================================================
+   */
+  if (rec->vern != 0x1121) return ERROR;	/* not a version 2 Comb (CF2) */
+
+  READREG(SUBCLASS,  &rec->vscl);
+
+  /* Write some registers if we're doing a grounds-up initialization */
+  if (initType == P2RF_K_COLDSTART) status = ColdInit (brd, rec);
+  else                              status = WarmInit (brd, rec);
+
+  /* set some bits in MCTL ... first, copy from MSTT */
+  rec->mctl  = rec->mstt & (CF2_M_SFTRST | CF2_M_SYSFAILINH | CF2_M_A24A32);
+  rec->mctl |= CF2_M_DDCRCOEF;
+  rec->mctl |= CF2_M_RSIODCM;
+  rec->mctl |= CF2_M_DSIO;
+  rec->mctl |= CF2_M_DSIOLOOP;
+  rec->mctl |= CF2_M_ANATYPE; /* 2 fields */
+
+  WRITEREG(CONTROL,  rec->mctl);
+  READREG(STATUS,   &rec->mstt);
+
+  /*
+  |  Reading the Interrupt Status Register clears the outstanding Software
+  |  Interrupt Status bit, but does not clear the pending interrupt.  Thus
+  |  reading the register here would confuse the ISR when interrupts are
+..............................?
+  |  enabled and the pending software interrupt is taken: the ISR would
+  |  not be able to find the source of the interrupt.
+  */
+
+  /* Update the database copy of the Comb Status and Comb control registers */
+  READREG(COMBSTAT, &rec->cstt);
+  READREG(COMBCTRL, &rec->cctl);
+
+  return (status);
+}
+
+/********************************************************************************/
+
+static long ColdInit (Cf2Board      *brd,
+                      P2RfCf2Record *rec)
+/*
+ *   Description
+ *   -----------
+ *   Initialization to run when starting up from scratch.
+ *
+ *   Parameters
+ *   ----------
+ *          brd - A pointer to the board descriptor
+ *          rec - A pointer to the record
+ *
+ *   Returns
+ *   -------
+ *   status
+ */
+{
+#if 0
+  Function ("ColdInit");
+#endif
+
+  register void  *drvPvt = brd->drvPvt;
+
+#if 0
+  unsigned short  reg;
+  long            status;
+#endif
+
+  int             i;
+
+  ushort          mode;
+
+#ifdef DEBUG
+printf("(devP2RfCf2.c) ColdInit...\n");
+#endif
+
+  /* --- init h/w regs and module rec copies --- */
+
+#if 0
+...int ctl init
+...put in LOAD state
+...bits 0-2/0x20 -> always 0x7
+#endif
+
+     /*FIX FIX FIX........... init w/CW??  right phase...*/
+
+  /* setup int ctl
+   */
+  rec->ictl = 0; 
+  recBFSET(ictl,INTLEVEL,P2RF_K_INTLEVEL); 
+  rec->ictl ^= -1;				/* invert all bits */
+  recBFSET(ictl,IALLMSK,~(rec->imsk));		/* bits are inverted */
+  WRITEREG(INTCTRL, rec->ictl);
+  rec->oimk = rec->imsk;
+  DBPOST(imsk);
+  DBPOST(ictl);
+
+  rec->jctl = 0;			/* JTAG Control */
+  WRITEREG(JTAGCTL,rec->jctl);
+  DBPOST(jctl);
+
+  rec->cctl = 0;			/* Comb Control ... */
+  recBFSET(cctl,DIARECENB,1);		/* history buffer record ON */
+  recBFSET(cctl,HISRECENB,1);		/* diag buffer record ON */
+  recBFSET(cctl,HISRUNSEL,0x7);		/* stop trigger always 1s */
+  WRITEREG(COMBCTRL,rec->cctl);
+  /* post() below */
+
+  rec->dmon = 0;			/* Data Monitor Select */
+  WRITEREG(DATAMONSEL,rec->dmon);
+  DBPOST(dmon);
+
+  rec->gdel = 0;			/* One-Turn Delay */
+  WRITEREG(ONETURNDELAY,rec->gdel);
+
+
+  /*----------------------------------------------------------------
+   * zero out all h/w coefficients... update_coef()
+   * will repopulate the h/w from record fields
+   *----------------------------------------------------------------
+   */
+
+  mode = rec->mode;			/* save current state... */
+  rec->mode = cf2Load;			/* ... and set to LOAD */
+  READREG(COMBCTRL, &rec->cctl);
+  recBFSET(cctl,STATE,rec->mode);
+  WRITEREG(COMBCTRL, rec->cctl);
+  DBPOST(cctl);
+
+  for (i = 0; i < 3; i++) {		/* for all filters... */
+    cf2_bank_t *pbank = cf2_all_banks[i];	/* get ptr to filter's bank array */
+
+    while (pbank->nloc > 0) {			/* for all banks... */
+      cf2_loc_t *ploc = pbank->ploc;			/* ptr to cf2_loc array */
+      int        nloc = pbank->nloc;			/* len of cf2_loc array */
+
+      while (nloc--) {					/* for all address blocks... */
+
+	double *pval  = ploc->pval;
+	int     index = ploc->index;			/* h/w address */
+	int     count = ploc->count;			/* word count */
+
+#ifdef DEBUG
+	printf("(devP2RfCf2.c) clearing %s... @@ 0x%08X\n",ploc->name,index<<1);
+#endif
+	while (count--) {
+	  P2RF_WriteVme (drvPvt, index++, 0x0000);	/* zero h/w reg */
+	  *pval++ = 0.0;				/* ... and local copy */
+	}
+	ploc++;						/* next block of addresses */
+      }
+      pbank++;						/* next bank for this filter */
+    }
+  }
+
+  /*----------------------------------------------------------------
+   * update h/w with local coef values (they were init by save/restore)
+   *   ... any different from zero will be loaded
+   *----------------------------------------------------------------
+   */
+  update_coef_all (rec);
+
+  /*----------------------------------------------------------------
+   * verify all h/w coef regs... compare desired -v- actual
+   *----------------------------------------------------------------
+   */
+  verify_coef_all (rec);
+
+  /* restore saved module state
+   */
+  rec->mode = mode;
+  recBFSET(cctl,STATE,rec->mode);
+  WRITEREG(COMBCTRL, rec->cctl);
+  DBPOST(cctl);
+
+  return (rec->stik ? ERROR : OK);	/* obey sticky error */
+}
+
+/********************************************************************************/
+
+static long WarmInit (Cf2Board       *brd,
+                      P2RfCf2Record  *rec)
+/*
+   Description
+   -----------
+   Initialization routine to run when the module is still running
+   satisfactorily.  This function will (when it is written) bring
+   the EPICS database in synch with the module.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  /* Note that we can't access A24 registers whilst Comb is running */
+
+  /* Restore the Equalizer Coefficient fields from reboot parameter file? */
+
+  /* Determine the current mode of the module */
+  {
+    Cf2State      mode[] = {cf2Load, cf2Run, cf2Single, cf2Idle};
+    unsigned int  state  = (rec->cctl & CF2_M_STATE) >> CF2_V_STATE;
+
+    rec->mode = state < CF2_K_STATECNT ? mode[state] : cf2Invalid;
+  }
+
+  return (OK);
+}
+
+/********************************************************************************/
+
+static long Action (P2RfCf2Record    *rec)
+/*
+ *   Description
+ *   -----------
+ *   This is the action routine for the CF2.  It handles the several states
+ *   that the module can be in.  The module's state can be changed by modifying
+ *   the .MODE field of the record.  The available states are:
+ *
+ *   cf2Load - Put the Comb Control register in the LOAD state.  In this
+ *             state various module registers are accessable that other-
+ *             wise aren't.  This state is used to read the module's
+ *             history buffer, reload coefficient tables, and change the
+ *             one-turn delay.
+ *
+ *   cf2Run  - Start normal operation (comb and equalizer filtering) of
+ *             the module.
+ *
+ *   cf2Single - ...
+ *
+ *   cf2Idle - ...
+ *
+ *   Additionally, an asynchronous module reset mechanism is implemented.  This
+ *   feature toggles the software reset line on the VXI interface chip.  Since it
+ *   takes a while (on the order of a second) for the reset to complete, the
+ *   module must not be touched during its assertion.  To implement this, the
+ *   record is processed asynchronously.  When the reset completes, the database
+ *   fields are updated with the current state of the module.
+ *
+ *   Parameters
+ *   ----------
+ *          rec - A pointer to the record structure
+ *
+ *   Returns
+ *   -------
+ *   0 or 2 for successful returns, else a status
+ */
+{
+#if 0
+  Function ("Action");
+#endif
+
+  Cf2Board       *brd    = NULL;
+  void           *drvPvt;
+
+#if 0
+  unsigned short  reg;
+  Cf2State        state  = cf2Invalid;
+  unsigned short  cctl;
+#endif
+
+  int             i;
+  int             n;
+
+#if 0
+{
+ static int foo = 0;
+ printf("\n*** Action! %d ***\n\n",foo++);
+}
+#endif
+
+  /* If initialization failed let the system know */
+  if ((brd = rec->dpvt) == NULL) return (ERROR);
+  drvPvt = brd->drvPvt;
+
+#if 0 /* interrupts? */
+... see devP2RfCfm.c for example
+#endif
+
+  /* If requested, do a "software reset" on the module */
+  if (rec->mrst) return (SpawnReset (rec, &brd->resetBlk));
+
+  /* initialize the message buffer if we're not doing completion processing
+   *   ... only if sticky error isn't set
+   */
+  if (!rec->stik) {
+    if (!rec->pact) strncpy (rec->val, "Success", sizeof (rec->val));
+  }
+
+  /*================================================================
+   * read some A16 regs to keep db (& displays) up to date
+   *================================================================
+   */
+
+  READREG(STATUS ,      &rec->mstt); DBPOST(mstt);
+  READREG(CONTROL,      &rec->mctl); DBPOST(mctl);
+
+  READREG(INTSTAT,      &rec->istt); DBPOST(istt);
+  READREG(INTCTRL,      &rec->ictl); DBPOST(ictl);
+
+  READREG(COMBCTRL,     &rec->cctl); DBPOST(cctl);
+
+  /* done below as part of error counts...
+   *   READREG(COMBSTAT,     &rec->cstt); DBPOST(cstt);
+   */
+
+  READREG(DATAMONSEL  , &rec->dmon); DBPOST(dmon);
+  READREG(ONETURNDELAY, &rec->gdel); DBPOST(gdel);
+
+  READREG(JTAGCTL ,     &rec->jctl); DBPOST(jctl);
+  READREG(JTAGDATA,     &rec->jdat); DBPOST(jdat);
+
+
+  /* update interrupt control reg if requested
+   */
+  if (rec->imsk != rec->oimk) {
+    recBFSET(ictl,IALLMSK,~(rec->imsk));	/* bits are inverted */
+    WRITEREG(INTCTRL, rec->ictl);
+    rec->oimk = rec->imsk;
+    DBPOST(ictl);
+  }
+
+  /*================================================================
+   * grab latched overflow status bits before they get cleared, for displays
+   *================================================================
+   */
+
+
+#if 1 /* use CSTT */
+#define CF2_M_ALLOVF \
+  ( CF2_M_ICMBOVF | CF2_M_IEQUOVF | CF2_M_IADCOVF \
+  | CF2_M_QCMBOVF | CF2_M_QEQUOVF | CF2_M_QADCOVF )
+  READREG(COMBSTAT,&rec->cstt);
+  rec->ovfl = (rec->cstt & CF2_M_ALLOVF) ? 1 : 0;	/* set OVFL, for module SEVR */
+#else /* use ISTT */
+#define CF2_M_ALLOVFLMSK \
+  ( CF2_M_ICMBOVFLMSK | CF2_M_IEQUOVFLMSK | CF2_M_IADCOVFLMSK \
+  | CF2_M_QCMBOVFLMSK | CF2_M_QEQUOVFLMSK | CF2_M_QADCOVFLMSK )
+  rec->ovfl = (rec->istt & CF2_M_ALLOVFLMSK) ? 1 : 0;	/* set OVFL, for module SEVR */
+#endif
+  DBPOST(ovfl);
+
+
+  /*================================================================
+   * error counts
+   *================================================================
+   */
+
+  /* accumulate error counts from h/w... accumulators are DOUBLEs
+   */
+
+  READREG(EC_SERNOTRDY, &rec->spnr);	rec->ecn1 += rec->spnr;
+  READREG(EC_SERRXBADY, &rec->sprx);	rec->ecn2 += rec->sprx;
+
+  READREG(EC_ICMBOVFL,  &rec->icov);	rec->ecn3 += rec->icov;
+  READREG(EC_IEQUOVFL,  &rec->ieov);	rec->ecn4 += rec->ieov;
+  READREG(EC_IADCOVFL,  &rec->iaov);	rec->ecn5 += rec->iaov;
+
+  READREG(EC_QCMBOVFL,  &rec->qcov);	rec->ecn6 += rec->qcov;
+  READREG(EC_QEQUOVFL,  &rec->qeov);	rec->ecn7 += rec->qeov;
+  READREG(EC_QADCOVFL,  &rec->qaov);	rec->ecn8 += rec->qaov;
+
+  /* reset h/w error counts & overflow status bits
+   */
+  WRITEREG(COMBSTAT,0x0);
+#if 0
+  READREG(COMBSTAT,&rec->cstt); ... wipes out overflow bits
+#endif
+
+  /* check error count reset button
+   */
+  if (rec->ecnr) {
+    double *p = &rec->ecn1;
+    int i;
+    for (i = 0; i < 8; i++) *p++ = 0;	/* reset accumulators */
+    DBSET(ecnr,0);			/* ... and the button */
+  }
+
+  /* update db... error counts will show most recent value
+   */
+
+  DBPOST(cstt);
+
+  DBPOST(spnr); DBPOST(ecn1);
+  DBPOST(sprx); DBPOST(ecn2);
+
+  DBPOST(icov); DBPOST(ecn3);
+  DBPOST(ieov); DBPOST(ecn4);
+  DBPOST(iaov); DBPOST(ecn5);
+
+  DBPOST(qcov); DBPOST(ecn6);
+  DBPOST(qeov); DBPOST(ecn7);
+  DBPOST(qaov); DBPOST(ecn8);
+
+
+
+  /*================================================================
+   * process GUI selections
+   *================================================================
+   */
+
+  /*-------------------------------
+   * (less-than-)one-turn delay
+   *-------------------------------
+   */
+/* one-turn-delay nSec -> ticks conversion */
+#define OTD_NS2TICKS  6.368172		/* ns... == [1 / (476Mhz * (8 / 97))] / 4 */
+
+  {
+    /* round to nearest quantum */
+    ushort z = (ushort)( ((double)rec->fifo + (OTD_NS2TICKS/2)) / OTD_NS2TICKS );
+    recBFSET(gdel,FIFOALL,z);
+    DBPOST(fifo);
+  }
+
+  /* check db... "one-turn-delay" overrides the bank-select buttons */
+  rec->xibs = recBFGET(gdel,INTBNKSEL);
+  recBFSET(gdel,INTBNKSEL,rec->xibs);
+  DBPOST(xibs);				/* sync display IBS btn */
+
+  /*-------------------------------
+   * I/O type -- analog/serial
+   *-------------------------------
+   */
+  recBFSET(mctl,DSIO,(rec->xiot?0:1));	/* sense is inverted */
+  DBPOST(xiot);
+
+  /*-------------------------------
+   * analog input type
+   *-------------------------------
+   */
+  {
+    ushort z = 0;
+    switch (rec->xana) {
+    case 0: z = 0x3; break;  		/* RFP */
+    case 1: z = 0x1; break; 		/* front panel */
+    case 2: z = 0x2; break; 		/* loopback */
+    }
+    recBFSET(mctl,ANATYPE,z);
+    DBPOST(xana);
+  }
+
+  /*-------------------------------
+   * comb filter bank select
+   *-------------------------------
+   */
+  recBFSET(cctl,CMBBNKSEL,rec->xcbs);
+  {
+    uchar *p = &rec->cbs0;
+    rec->cbs0 = rec->cbs1 = 0;
+    if (rec->mode == cf2Run) {
+      p[rec->xcbs & 0x1] = 1;
+    }
+  }
+  DBPOST(xcbs);
+  DBPOST(cbs0);
+  DBPOST(cbs1);
+
+  /*-------------------------------
+   * equalizer filter bank select
+   *-------------------------------
+   */
+  recBFSET(cctl,EQUBNKSEL,rec->xebs);
+  {
+    uchar *p = &rec->ebs0;
+    rec->ebs0 = rec->ebs1 = 0;
+    if (rec->mode == cf2Run) {
+      p[rec->xebs & 0x1] = 1;
+    }
+  }
+  DBPOST(xebs);
+  DBPOST(ebs0);
+  DBPOST(ebs1);
+
+  /*-------------------------------
+   * interpolation filter bank select
+   *-------------------------------
+   */
+  recBFSET(gdel,INTBNKSEL,rec->xibs);
+  /* DBPOST(xibs); ... feed back to btn ... done above */
+  {
+    uchar *p = &rec->ibs0;
+    rec->ibs0 = rec->ibs1 = rec->ibs2 = rec->ibs3 = 0;
+    if (rec->mode == cf2Run) {
+      p[rec->xibs & 0x3] = 1;
+    }
+  }
+  DBPOST(xibs);
+  DBPOST(ibs0);
+  DBPOST(ibs1);
+  DBPOST(ibs2);
+  DBPOST(ibs3);
+
+  /*-------------------------------
+   * pre-DAC data alignment
+   *-------------------------------
+   */
+  recBFSET(cctl,SGP,rec->xdaa);
+  DBPOST(xdaa);			/* for CW */
+
+
+#ifdef DBG
+/*** DEBUG *** DEBUG *** DEBUG *** DEBUG *** DEBUG *** DEBUG *** DEBUG ***/
+/*** DEBUG *** DEBUG *** DEBUG *** DEBUG *** DEBUG *** DEBUG *** DEBUG ***/
+
+  if (rec->dbg & 0x3) {		/* simulate h/w mem buf turn-off */
+    {ushort z = (rec->dbg & 0x1) ? 1 : 0;  if (z) recBFSET(cctl,HISRECENB,0);}
+    {ushort z = (rec->dbg & 0x2) ? 1 : 0;  if (z) recBFSET(cctl,DIARECENB,0);}
+  }
+
+/*** DEBUG *** DEBUG *** DEBUG *** DEBUG *** DEBUG *** DEBUG *** DEBUG ***/
+/*** DEBUG *** DEBUG *** DEBUG *** DEBUG *** DEBUG *** DEBUG *** DEBUG ***/
+#endif
+
+
+  /*-------------------------------
+   * history & diagnostic memory record enables
+   *  ... differentiate between gui- and hardware- (ie. fault) caused changes
+   *  ... each changes the other, but h/w bit takes precedence
+   *  ... ultimate h/w settings are fed back to gui buttons by DB record magic
+   *  ... DBPOSTs of buttons come after MSTP processing below
+   *-------------------------------
+   */
+
+#define BUFBUTT(_CTL_,_FIELD_) \
+  {											\
+    ushort z = recBFGET(cctl,_CTL_);		/* get h/w bit */			\
+    if (z != rec->y##_FIELD_) {			/* if h/w changed from PREVIOUS */	\
+      rec->x##_FIELD_ = z;			/* ... change gui button */		\
+    }											\
+    if (rec->x##_FIELD_ != rec->y##_FIELD_) {	/* then, if gui button changed */	\
+      recBFSET(cctl,_CTL_,rec->x##_FIELD_);	/* ... update h/w (possibly unchanged) */ \
+    }											\
+    rec->y##_FIELD_ = rec->x##_FIELD_;		/* save (new?) current state */		\
+  }
+/****************************************************************/
+
+  BUFBUTT(HISRECENB,hir);
+  BUFBUTT(DIARECENB,dir);
+
+#undef BUFBUTT
+
+
+  /*-------------------------------
+   * history/diag mem record STOP
+   * ... provided to assure simultaneity of hist & diag stoppage
+   *-------------------------------
+   */
+  if (rec->mstp) {
+    recBFSET(cctl,DIARECENB,0);		/* both off */
+    recBFSET(cctl,HISRECENB,0);
+    rec->xdir = rec->ydir = 0;		/* DB will update gui buttons if needed... */
+    rec->xhir = rec->yhir = 0;
+    rec->mstp = 0;
+    DBPOST(mstp);
+  }
+
+  /* now post the buttons
+   */
+  DBPOST(xdir);
+  DBPOST(xhir);
+
+  /*-------------------------------
+   * digital gain: 1 or 4
+   *-------------------------------
+   */
+  recBFSET(cctl,EDIG4,rec->xdga);
+  DBPOST(xdga);
+
+  /*-------------------------------
+   * digital DC removal
+   * ... affects 2 different regs
+   *-------------------------------
+   */
+  {
+    ushort z = (rec->xddc > 0) ? 1 : 0;		/* "enable" */
+    recBFSET(cctl,EDDCR,z);
+    if (z) {				/* if enabled, also update DDCR coef select */
+      ushort m = rec->xddc - 1;		/* [1..4] => [0..3] */
+      recBFSET(mctl,DDCRCOEF,m);
+    }
+    DBPOST(xddc);
+  }
+
+  /*-------------------------------
+   * interpolation filter enable
+   *-------------------------------
+   */
+  recBFSET(gdel,INTFILENB,rec->xifo);
+  DBPOST(xifo);
+
+  /*-------------------------------
+   * serial loopback enable
+   *-------------------------------
+   */
+  recBFSET(mctl,DSIOLOOP,(rec->xslb?0:1));	/* sense is inverted */
+  DBPOST(xslb);
+
+  /*-------------------------------
+   * module run state
+   *-------------------------------
+   */
+  recBFSET(cctl,STATE,rec->mode);
+  DBPOST(mode);
+
+  /*-------------------------------
+   * history buffer source select
+   *-------------------------------
+   */
+  recBFSET(dmon,IQMONSRC,rec->xhbs);
+  DBPOST(xhbs);
+
+  /*-------------------------------
+   * diag mem 1 source select
+   *-------------------------------
+   */
+  {
+    ushort z = rec->xd1s;
+    if (z > 3) z += 4;		/* map 4+ -> 8+ */
+    recBFSET(dmon,MON1SRC,z);
+    DBPOST(xd1s);
+  }
+
+  /*-------------------------------
+   * diag mem 2 source select
+   *-------------------------------
+   */
+  {
+    ushort z = rec->xd2s;
+    if (z > 3) z += 4;		/* map 4+ -> 8+ */
+    recBFSET(dmon,MON2SRC,z);
+    DBPOST(xd2s);
+  }
+
+  /*-------------------------------
+   * scope sync source select
+   *-------------------------------
+   */
+  recBFSET(dmon,SCOPESYNC,rec->xsys);
+  DBPOST(xsys);
+
+  /*-------------------------------
+   * SIO/DCM Reset button
+   *-------------------------------
+   */
+  if (rec->sior) {
+    recBFSET(mctl,RSIODCM,1);  WRITEREG(CONTROL,rec->mctl);	/* toggle ctl bit */
+    recBFSET(mctl,RSIODCM,0);  WRITEREG(CONTROL,rec->mctl);	/* ... */
+    DBSET(sior,0);		/* reset gui button */
+  }
+
+  /*-------------------------------
+   * Serial Rx Reset button
+   *-------------------------------
+   */
+  if (rec->srxr) {
+    recBFSET(cctl,RSPR,1);  WRITEREG(COMBCTRL,rec->cctl);	/* toggle ctl bit */
+    recBFSET(cctl,RSPR,0);  WRITEREG(COMBCTRL,rec->cctl);	/* ... */
+    DBSET(srxr,0);		/* reset gui button */
+  }
+
+  /* write final reg values to h/w & db
+   */
+  WRITEREG(CONTROL,     rec->mctl);	DBPOST(mctl);
+  WRITEREG(COMBCTRL,    rec->cctl);	DBPOST(cctl);
+  WRITEREG(ONETURNDELAY,rec->gdel);	DBPOST(gdel);
+  WRITEREG(DATAMONSEL,  rec->dmon);	DBPOST(dmon);
+
+
+  /*----------------------------------------------------------------
+   * process requests to read out module's history buffer
+   * ... only one allowed at a time (parms are shared)
+   *----------------------------------------------------------------
+   */
+
+  check_gethist  (rec, &rec->ihgt, &rec->ihst, rec->ihsz,        rec->ihfn, CF2_I_IHIST_RW    );
+  check_gethist  (rec, &rec->qhgt, &rec->qhst, rec->qhsz,        rec->qhfn, CF2_I_QHIST_RW    );
+
+  check_gethist  (rec, &rec->d1gt, &rec->d1st, rec->d1sz,        rec->d1fn, CF2_I_MON1_DIAG_RW);
+  check_gethist  (rec, &rec->d2gt, &rec->d2st, rec->d2sz,        rec->d2fn, CF2_I_MON2_DIAG_RW);
+
+  /* "play" mem files are fixed size */
+  check_loadplay (rec, &rec->ipgt, &rec->ipst, CF2_K_PLAYMEMLEN, rec->ipfn, CF2_I_IPLAY_RW    );
+  check_loadplay (rec, &rec->qpgt, &rec->qpst, CF2_K_PLAYMEMLEN, rec->qpfn, CF2_I_QPLAY_RW    );
+
+
+  /*----------------------------------------------------------------
+   * check for file load/save requests
+   *----------------------------------------------------------------
+   */
+
+  for (i = 0; i < 2; i++) {		/* 0=load, 1=save */
+
+    for (n = 0; n < 2; n++) {		/* for (file1,file2) */
+      check_loadsave (rec, i, n, &brd->cmb0Prm, rec->xcbs);
+      check_loadsave (rec, i, n, &brd->cmb1Prm, rec->xcbs);
+      check_loadsave (rec, i, n, &brd->equ0Prm, rec->xebs);
+      check_loadsave (rec, i, n, &brd->equ1Prm, rec->xebs);
+    }
+
+    check_loadsave (rec, i, 0, &brd->int0Prm, rec->xibs);
+    check_loadsave (rec, i, 0, &brd->int1Prm, rec->xibs);
+    check_loadsave (rec, i, 0, &brd->int2Prm, rec->xibs);
+    check_loadsave (rec, i, 0, &brd->int3Prm, rec->xibs);
+
+    /*... break out if button pushed? multiple concurrent spawns possible? */
+  }
+
+  /*----------------------------------------------------------------
+   * update h/w with changed coef fields, from GUI/CA/load
+   *----------------------------------------------------------------
+   */
+  update_coef_all (rec);
+  verify_coef_all (rec);
+
+  /*----------------------------------------------------------------
+   * Action() done!
+   *  ... if sticky error set, re-assert it
+   *----------------------------------------------------------------
+   */
+  if (rec->stik) {
+    recGblSetSevr (rec, UDF_ALARM, INVALID_ALARM);
+  }
+
+  return (0);
+}
+
+/********************************************************************************/
+/********************************************************************************/
+/********************************************************************************/
+
+/*================================================================
+ * update changed coefs in ALL banks
+ *  ... write changed values out to h/w
+ *================================================================
+ */
+
+static void update_coef_all(P2RfCf2Record  *rec)
+{
+  Cf2Board    *brd = rec->dpvt;
+
+  update_coef_bank (rec, &brd->cmb0Prm, rec->xcbs);
+  update_coef_bank (rec, &brd->cmb1Prm, rec->xcbs);
+
+  update_coef_bank (rec, &brd->equ0Prm, rec->xebs);
+  update_coef_bank (rec, &brd->equ1Prm, rec->xebs);
+
+  update_coef_bank (rec, &brd->int0Prm, rec->xibs);
+  update_coef_bank (rec, &brd->int1Prm, rec->xibs);
+  update_coef_bank (rec, &brd->int2Prm, rec->xibs);
+  update_coef_bank (rec, &brd->int3Prm, rec->xibs);
+}
+
+
+/*================================================================
+ * update changed coefs in ONE bank of ONE filter
+ *================================================================
+ */
+
+static void update_coef_bank (P2RfCf2Record  *rec,
+			     Cf2CoefPrm     *prm,
+			     int             curbank)
+{
+  /* this code relies on the record's fields being in coefficient order... 
+   */
+
+/*Function ("update_coef_bank");*/
+
+  Cf2Board    *brd    = rec->dpvt;
+  void        *drvPvt = brd->drvPvt;
+
+  cf2_bank_t  *pbank  = prm->bank;
+  double      *pfield = prm->field;
+
+  cf2_loc_t   *ploc = pbank->ploc;
+  int          nloc = pbank->nloc;
+
+  int          k,i;
+  ushort       kk;
+  double       z;
+
+  /* not allowed if in RUN & active bank... UNLESS forced?  FIX FIX FIX ?
+   */
+  int          allowed = (rec->mode != cf2Run) || (pbank->num != curbank);
+
+  while (nloc--) {
+
+    double *pval   = ploc->pval;
+    ushort *pkk    = ploc->pkk;
+    int     index  = ploc->index;
+    int     count  = ploc->count;
+
+#if 0
+    printf("(update_coef_bank) bank: %s\n",ploc->name);
+#endif
+
+    for (i = 0; i < count; i++) {
+
+      if (*pfield != *pval) {		/* changed? */
+
+	if (!allowed) {			/* if not allowed, restore to previous value */
+	  *pfield = *pval;
+	}
+	else {
+
+	  /* limit to [-2,+2]
+	   */
+	  z = *pfield;
+	  z = max(z, -2.000);
+	  z = min(z,  2.000);
+
+	  /* map [-2,+2] to +/- 16 bits
+	   *
+	   * 100..0 = -2.000   = (1 << 15)
+	   * 111..1 = -epsilon = (1 << 16) - 1
+	   * 000..0 =  0.000   = 0
+	   * 011..1 =  1.999   = (1 << 15) - 1
+	   */
+
+	  k = (z * (1 << 15) / 2.0) + ((z < 0) ? -0.5 : 0.5);	/* round towards zero */
+	  k = max(k, -32768);
+	  k = min(k,  32767);
+	  kk = (ushort)k;
+
+	  LAZMO_WriteVme (drvPvt, index, kk);
+
+#if 0
+	  printf("(update_coef) %s addr 0x%08X: coef %d changed from %f to %f (0x%04X)\n",
+		 ploc->name,(index<<1),i,*pval,z,kk);
+#endif
+
+	  /* save new "current" values for comparison next time
+	   */
+	  *pval = *pfield;
+	  *pkk = kk;
+	}
+	/* update DB subscribers */
+	db_post_events (rec, pfield, DBE_VALUE | DBE_LOG);
+      }
+
+      pfield++;		/* record field double ptr */
+      pval++;		/* current val double ptr */
+      pkk++;		/* current val ushort ptr */
+      index++;		/* reg address */
+    }
+    ploc++;	/* next block of coefs */
+  }
+}
+
+/********************************************************************************/
+/********************************************************************************/
+
+/*================================================================
+ * verify coef regs
+ *================================================================
+ */
+
+static void verify_coef_all(P2RfCf2Record  *rec)
+{
+  Cf2Board    *brd = rec->dpvt;
+
+  verify_coef_bank (rec, &brd->cmb0Prm, rec->xcbs);
+  verify_coef_bank (rec, &brd->cmb1Prm, rec->xcbs);
+
+  verify_coef_bank (rec, &brd->equ0Prm, rec->xebs);
+  verify_coef_bank (rec, &brd->equ1Prm, rec->xebs);
+
+  verify_coef_bank (rec, &brd->int0Prm, rec->xibs);
+  verify_coef_bank (rec, &brd->int1Prm, rec->xibs);
+  verify_coef_bank (rec, &brd->int2Prm, rec->xibs);
+  verify_coef_bank (rec, &brd->int3Prm, rec->xibs);
+}
+
+
+/*================================================================
+ * verify ONE BANK of coef regs
+ *================================================================
+ */
+
+static void verify_coef_bank (P2RfCf2Record  *rec,
+			      Cf2CoefPrm     *prm,
+			      int             curbank)
+{
+  /* this code relies on the record's fields being in coefficient order... 
+   */
+
+/*Function ("verify_coef_bank");*/
+
+  Cf2Board    *brd    = rec->dpvt;
+  void        *drvPvt = brd->drvPvt;
+
+  cf2_bank_t  *pbank  = prm->bank;
+  double      *pfield = prm->field;
+
+  cf2_loc_t   *ploc = pbank->ploc;
+  int          nloc = pbank->nloc;
+
+  int          bank = pbank->num;	/* bank # */
+
+  int          i;
+  ushort       kk,kk2;
+
+  int          errcnt = 0;		/* readback error count */
+
+  static char  buf[P2RF_K_BUFSIZE];	/* msg buf */
+
+  while (nloc--) {
+
+    double *pval   = ploc->pval;
+    ushort *pkk    = ploc->pkk;
+    int     index  = ploc->index;
+    int     count  = ploc->count;
+
+#if 0
+    printf("(verify_coef_bank) bank: %s\n",ploc->name);
+#endif
+
+    for (i = 0; i < count; i++) {
+
+      kk = *pkk;				/* expected value */
+      LAZMO_ReadVme (drvPvt, index, &kk2);	/* read coef reg */
+
+      if (kk2 != kk) {		/* check readback */
+	if (errcnt++ == 0) {	/* only notify once per bank... */
+
+	  sprintf(buf, "Readback %s %d %04X:%04X/%04x/%04X",	/* addr:write/read/error */
+		  ploc->name,bank,index<<1, kk, kk2, (kk ^ kk2));
+
+	  strncpy (rec->val, buf, sizeof (rec->val));
+	  recGblSetSevr (rec, UDF_ALARM, INVALID_ALARM);
+	  rec->stik = 1;	/* set "sticky error" so next process doesn't clear it */
+	  DBPOST(stik);
+	}
+      }
+      pfield++;
+      pval++;
+      pkk++;
+      index++;
+    }
+    ploc++;	/* next block of coefs */
+  }
+}
+
+/********************************************************************************/
+/********************************************************************************/
+
+/*================================================================
+ * check for coefficient load/save request (one button)
+ *================================================================
+ */
+
+static void check_loadsave (P2RfCf2Record  *rec,
+			    int             what,	/* 0=load,  1=save */
+			    int             fnum,	/* 0=file1, 1=file2 */
+			    Cf2CoefPrm     *prm,
+			    int             curbank)
+{
+  Cf2Board  *brd = rec->dpvt;
+
+  char   *filename = fnum ? prm->file2 : prm->file1;
+  char   *comment  = fnum ? prm->comm2 : prm->comm1;
+  ushort *status   = fnum ? prm->stat2 : prm->stat1;
+
+  uchar  *sbut     = fnum ? prm->sbut2 : prm->sbut1;
+  uchar  *lbut     = fnum ? prm->lbut2 : prm->lbut1;
+  uchar  *button   = what ? sbut : lbut;
+
+  int     allowed  = (rec->mode != cf2Run) || (prm->bank->num != curbank);
+
+  static char  buf[P2RF_K_BUFSIZE];
+
+  if (*button) {
+
+    if (!allowed) {
+      sprintf (buf, "Not allowed");
+      strncpy (rec->val,  buf, sizeof (rec->val));
+      strncpy (rec->oval, buf, sizeof (rec->oval));
+      db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+      *button = 0;	/* reset button */
+      return;
+    }
+
+
+#ifdef DEBUG
+printf(">>> (check_loadsave) what(%d) first_name(%s)\n",
+       what,
+       prm->bank->ploc->name);
+#endif
+
+    switch (what) {
+
+    case 0:			/* load */
+
+      SpawnLdCoefs (rec,
+		    button,
+		    &brd->ldCoefBlk,
+		    prm,
+		    filename,
+		    comment,
+		    status);
+      break;
+
+    case 1:			/* save */
+      SpawnSvCoefs (rec,
+		    button,
+		    &brd->svCoefBlk,
+		    prm,
+		    filename,
+		    comment,
+		    status);
+      break;
+
+    }
+  }
+}
+
+/********************************************************************************/
+/********************************************************************************/
+
+#if 0
+static void Read_IntStatus(Cf2Board       *brd,
+                           P2RfCf2Record  *rec)
+/*
+ *   Description
+ *   -----------
+ *   This function reads the interrupt status register on the VXI module in A16 space.
+ *   Please note that this register should NOT normally be read in this manner, since it is cleared
+ *   on a read. However, interrupts are currently disabled on the Comb module (see: IMSK=0)
+ *   so polling this register is a way to report when an interrupt has occured.
+ *
+ *   Parameters
+ *   ----------
+ *          brd - A pointer to the board descriptor
+ *          rec - A pointer to the record
+ *
+ *   Returns
+ *   -------
+ *   N/A
+ */
+{
+#if DEBUG
+  Function ("Read_IntStatus");
+#endif
+  unsigned short intStat=0;
+
+  /* Read the interrupt status register */
+  P2RF_ReadVme (brd->drvPvt, CF2_I_INTSTAT, &intStat);
+
+#if DEBUG   
+  Dbg (epicsPrintf ("%s (%s): intStat = %08x\n",__FILE__, FN, intStat));
+#endif
+
+  /* Is bit already set in istt field of the db? */
+  if (intStat & (intStat ^ rec->istt)) 
+  {
+    rec->istt |= intStat;
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+  }
+  return;
+}
+#endif
+
+/********************************************************************************/
+/********************************************************************************/
+
+static long SpawnReset (P2RfCf2Record  *rec,
+                        Cf2RstBlk      *blk)
+/*
+ *   Description
+ *   -----------
+ *   This function initiates and completes the module reset.
+ *
+ *   Parameters
+ *   ----------
+ *          rec - A pointer to the record
+ *          blk - A pointer to the reset block
+ *
+ *   Returns
+ *   -------
+ *   0 for success
+ */
+{
+  Function ("SpawnReset");
+
+  static char  buf[P2RF_K_BUFSIZE];
+
+  if (!rec->pact)
+  {
+    /* Let operator know what's happening */
+    strncpy (rec->val,  "Software Reset: active", sizeof (rec->val));
+    strncpy (rec->oval, "Software Reset: active", sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow reprocessing of record before reset completes */
+    rec->pact = TRUE;
+
+    /* Disable module interrupts during software reset */
+    P2RF_ModIntDisable (blk->drvPvt);
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+
+      /* don't override sticky error */
+      if (!rec->stik) {
+	strncpy (rec->val, "Attempt to initialize module failed", sizeof (rec->val));
+      }
+
+      recGblSetSevr (rec, UDF_ALARM, INVALID_ALARM);
+    }
+    else
+    {
+      /* Re-enable module interrupts */
+      P2RF_ModIntEnable (blk->drvPvt);
+      strncpy (rec->val, "Software reset: done", sizeof (rec->val));
+    }
+
+    /* Reset the reset request so we don't redo it on the next process pass */
+    rec->mrst = 0;
+  }
+
+  return (0);
+}
+
+/********************************************************************************/
+
+static void ResetCallback (Cf2RstBlk  *blk)
+/*
+ *   Description
+ *   -----------
+ *   This is the callback routine that is invoked by the callback facility
+ *   when a module software reset it requested.  It invokes completion processing
+ *   of the associated record.
+ *
+ *   Parameters
+ *   ----------
+ *          blk - A pointer to the reset block
+ *
+ *   Returns
+ *   -------
+ *   nothing
+ */
+{
+  /* Function ("ResetCallback");*/
+
+  struct dbCommon  *rec;
+  struct rset      *rSet;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((rec = callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Reset and update the record and the module */
+  blk->status = InitFields ((Cf2Board *) rec->dpvt, P2RF_K_COLDSTART);
+
+  /* Complete processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     (rec);
+}
+
+/********************************************************************************/
+/********************************************************************************/
+
+static long SpawnLdCoefs (P2RfCf2Record  *rec,
+                          unsigned char  *button,
+                          Cf2CoefBlk     *blk,
+                          Cf2CoefPrm     *prm,
+                          char           *filename,
+                          char           *comment,
+                          unsigned short *stat)
+/*
+ *   Description
+ *   -----------
+ *   This function initiates and completes the loading of coefficients
+ *   on the module.
+ *
+ *   Parameters
+ *   ----------
+ *          rec - ptr to record
+ *       button - ptr to record field that initiated this action
+ *          blk - ptr to coefficient block
+ *          prm - ptr to coefficient parameter block
+ *         file - ptr to name of file that contains coefficients to load
+ *         stat - ptr to a record field in which to return status info
+ *
+ *   Returns
+ *   -------
+ *   0 for success
+ */
+{
+  Function ("SpawnLdCoefs");
+
+  static char  buf[P2RF_K_BUFSIZE];
+
+  if (!rec->pact) {
+    sprintf (buf, "Load %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before coef load completes */
+    rec->pact = TRUE;
+
+    /* Save the filename & comment ptrs in the parameter block */
+    prm->filename = filename;
+    prm->comment  = comment;
+
+    /* Point the coefficient block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else {
+    if (blk->status) {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_ReadCoefFile",
+                                       prm->id, prm->filename));
+      *stat = WRITE_ALARM;
+    }
+    else {
+      sprintf (buf, "Load %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+      *stat = NO_ALARM;
+
+      /* post new comment */
+      db_post_events (rec, comment, DBE_VALUE | DBE_LOG);
+    }
+
+    /* write new coefs to h/w, if they're different */
+    update_coef_all(rec);
+
+    /* post status */
+    db_post_events (rec, stat,    DBE_VALUE | DBE_LOG);
+
+    /* Reset button so we don't redo it on the next process pass */
+    *button = 0;
+  }
+
+  return (0);
+}
+
+/********************************************************************************/
+
+/* "LOAD" (file -> coef) callback
+ */
+
+static void LoadCoefCallback (Cf2CoefBlk *blk)
+{
+  /*Function ("LoadCoefCallback");*/
+
+  P2RfCf2Record    *rec;
+  struct rset      *rSet;
+  Cf2CoefPrm       *prm = blk->prm;
+
+  if ((callbackGetUser (rec, &blk->callback)) == NULL) return;	/* no rec ptr */
+
+  rSet = rec->rset;
+
+  taskDelay (sysClkRateGet() / 10);		/* delay to let db_post_events flush */
+
+  dbScanLock ((struct dbCommon *) rec);		/* lock record */
+
+  blk->status = 
+    devCf2_ReadCoefFile (blk->drvPvt,
+			 prm,
+			 rec->val,
+			 sizeof (rec->val));
+
+  (*rSet->process) (rec);			/* complete record processing */
+
+  dbScanUnlock ((struct dbCommon *) rec);	/* unlock record */
+}
+
+/********************************************************************************/
+
+/*--------------------------------------------------------------------------------
+ * devCf2_ReadCoefFile(), adapted from drvP2RfVxi.c::P2RF_ReadCoefFile()
+ *  ... rewritten to use "cf2_bank_t" struct to figure out where the coefs are
+ *  ... reads one value per line; ignores rest of line
+ *  ... allows blank lines between values
+ *  ... allows comment lines (beginning with "#")
+ *  ... reads one "comment" line after last coefficient
+ *  ... forces h/w write of every coef by jamming *pval with bogus value
+ *--------------------------------------------------------------------------------
+ */
+
+static Status devCf2_ReadCoefFile(
+	void            *p2Rf,
+	Cf2CoefPrm      *prm,
+	char            *msgBuf,
+	int              msgBufLen
+)
+{
+  Function ("devCf2_ReadCoefFile");
+     
+  char       *id      = prm->id;	/* ID string (to compare with file) */
+  char       *file    = prm->filename;	/* input file name */
+  cf2_bank_t *bank    = prm->bank;	/* destination... one filter BANK */
+  double     *pfield  = prm->field;	/* starting field */
+  char       *comment = prm->comment;	/* file comment rec field (read from file) */
+
+  cf2_loc_t *ploc = bank->ploc;		/* ptr to loc array */
+  int        nloc = bank->nloc;		/* bank loc count */
+
+  FILE      *fp;
+  char      *msg = "";
+  char       buf[132];
+  double     z;
+
+#if 1 /* (why not?) */
+  if (comment) *comment = '\0';		/* clear it */
+#endif
+
+  if ((fp = fopen(file, "r")) == 0) {
+    msg = "file open error (read)";
+    P2RF_Printf(__FILE__, FN, "%s: %s, file %s", "Comb2", msg, file);
+    goto Error;
+  }
+
+  /* read ID string */
+
+  buf[0] = '\0';
+  if ((fgets(buf,sizeof(buf),fp) == NULL) || (strstr(buf,id) == NULL)) {
+    msg = "ID error";
+    P2RF_Printf(__FILE__, FN, "%s: %s, file \"%s\"","Comb2", msg, file);
+    P2RF_Printf(__FILE__, FN, "expected ID: \"%s\"", id);
+    P2RF_Printf(__FILE__, FN, "not found in \"%s\"", buf);
+    goto Error;
+  }
+
+  while (nloc-- > 0) {
+
+    double *pval  = ploc->pval;
+    int     count = ploc->count;
+    int     n = 0;
+
+    while (count > 0) {
+
+      if (fgets(buf, 132, fp) == NULL) {
+	msg = "unexpected EOF";
+	goto Error;
+      }
+
+      /* if not empty or comment, get first number on line */
+      if ((strlen(buf) > 0) && (buf[0] != '#')) {
+	if (sscanf(buf, "%lf", &z) != 1) {
+	  msg = "input format error";
+	  goto Error;
+	}
+#ifdef DEBUG
+printf("  (devCf2_ReadCoefFile) reading coef #%d: %e\n",n,z);
+#endif
+
+	*pfield++ = z;		/* stuff into record field */
+	*pval++   = (z*0.5) + 1.0;	/* ... and force h/w update (catch 0 too) */
+
+	count--;
+	n++;
+
+      }
+
+    } /* end count */
+
+    ploc++;			/* next loc */
+
+  } /* end nloc */
+
+
+  if (comment) {
+    if (fgets(comment, CF2_K_COEF_CM_LEN, fp) == NULL) {
+      msg = "comment read error";
+      goto Error;
+    }
+    else {	/* remove trailing newline */
+      char *p = strchr(comment,'\n');
+      if (p) *p = 0;
+    }
+  }
+
+  if (fclose(fp)) {
+    msg = "close error";
+    goto Error;
+  }
+
+  if (msgBuf)  strncpy(msgBuf, msg, msgBufLen);
+  return OK;
+
+/* error exit */
+Error:
+  if (msgBuf) strncpy(msgBuf, msg, msgBufLen);
+  P2RF_Printf(__FILE__, FN, "%s: %s, file \"%s\"", "Comb2", msg, file);
+  return ERROR;
+}
+
+/********************************************************************************/
+/********************************************************************************/
+
+static long SpawnSvCoefs (P2RfCf2Record  *rec,
+                          unsigned char  *button,
+                          Cf2CoefBlk     *blk,
+                          Cf2CoefPrm     *prm,
+                          char           *filename,
+                          char           *comment,
+                          unsigned short *stat)
+/*
+ *   Description
+ *   -----------
+ *   This function initiates and completes the loading of coefficients
+ *   on the module.
+ *
+ *   Parameters
+ *   ----------
+ *          rec - ptr to record
+ *       button - ptr to record field that initiated this action
+ *          blk - ptr to coefficient block
+ *          prm - ptr to coefficient parameter block
+ *         file - ptr to name of file to save coefficients in
+ *         stat - ptr to a record field in which to return status info
+ *
+ *   Returns
+ *   -------
+ *   0 for success
+ */
+{
+  Function ("SpawnSvCoefs");
+
+  static char  buf[P2RF_K_BUFSIZE];
+
+  if (!rec->pact) {
+    sprintf (buf, "Save %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before coef load completes */
+    rec->pact = TRUE;
+
+    /* Save the file name and comment in the parameter block */
+    prm->filename = filename;
+    prm->comment  = comment;
+
+    /* Point the coefficient block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else {
+    if (blk->status) {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_WriteCoefFile",
+                                       prm->id, prm->filename));
+      *stat = READ_ALARM;
+    }
+    else {
+      sprintf (buf, "Save %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Reset button so we don't redo it on the next process pass */
+    *button = 0;
+  }
+
+  return (0);
+}
+
+/********************************************************************************/
+
+/* "SAVE" (coef -> file) callback
+ */
+
+static void SaveCoefCallback (Cf2CoefBlk *blk)	
+{
+  /*Function ("SaveCoefCallback");*/
+
+  P2RfCf2Record    *rec;
+  struct rset      *rSet;
+  Cf2CoefPrm       *prm = blk->prm;
+
+  if ((callbackGetUser (rec, &blk->callback)) == NULL) return;	/* no rec ptr */
+
+  rSet = rec->rset;
+
+  taskDelay (sysClkRateGet() / 10);		/* delay to let db_post_events flush */
+
+  dbScanLock ((struct dbCommon *) rec);		/* lock record */
+
+  blk->status = 
+    devCf2_WriteCoefFile (blk->drvPvt,
+			  prm,
+			  rec->val,
+			  sizeof (rec->val));
+
+  (*rSet->process) (rec);			/* complete record processing */
+
+  dbScanUnlock ((struct dbCommon *) rec);	/* unlock record */
+}
+
+/********************************************************************************/
+
+/*--------------------------------------------------------------------------------
+ * devCf2_WriteCoefFile(), adapted from devCf2_ReadCoefFile()
+ *--------------------------------------------------------------------------------
+ */
+
+static Status devCf2_WriteCoefFile(
+	void            *p2Rf,
+	Cf2CoefPrm      *prm,
+	char            *msgBuf,
+	int              msgBufLen
+)
+
+/*
+ * Description
+ * -----------
+ */
+
+{
+  Function ("devCf2_WriteCoefFile");
+
+  char        *id      = prm->id;	/* ID string (written to file) */
+  char        *file    = prm->filename;	/* input file name */
+  cf2_bank_t  *bank    = prm->bank;	/* destination... one filter BANK */
+  double      *pfield  = prm->field;	/* starting field */
+  char        *comment = prm->comment;	/* file comment rec field (written to file) */
+
+  FILE        *fp;
+  char        *msg = "";
+
+#if 0
+  static char   buf[132];
+#endif
+
+  cf2_loc_t *ploc;
+  int        nloc;
+  int        count;
+  int        i;
+
+  if ((fp = fopen(file, "w")) == 0) {
+    msg = "file open error (write)";
+    P2RF_Printf(__FILE__, FN, "%s: %s, file %s", "Comb2", msg, file);
+    goto Error;
+  }
+
+  if (fprintf(fp,"%s\n",id) < 0) {		/* write ID string */
+    msg = "ID write error";
+    P2RF_Printf(__FILE__, FN, "%s: %s, file \"%s\"","Comb2", msg, file);
+    goto Error;
+  }
+
+  nloc  = bank->nloc;		/* get bank loc count */
+  ploc  = bank->ploc;		/* get ptr to loc array */
+
+  while (nloc-- > 0) {
+
+    /* write loc name in comment */
+    if (fprintf(fp,"# %s\n",ploc->name) <= 0) {
+      msg = "write error";
+      goto Error;
+    }
+
+    count = ploc->count;	/* get # of words in loc */
+
+    i = 0;
+    while (count > 0) {
+
+#ifdef DEBUG
+printf("  (devCf2_WriteCoefFile) writing coef #%d\n",i);
+#endif
+
+      if (fprintf(fp,"%11.8f  # %d\n",*pfield++,i) <= 0) {
+        msg = "coef write error";
+        goto Error;
+      }
+
+      count--;
+      i++;
+
+    }
+
+    ploc++;			/* next loc */
+
+  } /* end nloc */
+
+  if (comment) {
+    if (fputs(comment,fp) == EOF) {
+      msg = "comment write error";
+      goto Error;
+    }
+  }
+
+  if (fclose(fp)) {
+    msg = "close error";
+    goto Error;
+  }
+
+  if (msgBuf) strncpy(msgBuf, msg, msgBufLen);
+  return OK;
+
+/* error exit */
+Error:
+  if (msgBuf) strncpy(msgBuf, msg, msgBufLen);
+  P2RF_Printf(__FILE__, FN, "%s: %s, file \"%s\"", "Comb2", msg, file);
+  return ERROR;
+}
+
+/********************************************************************************/
+/********************************************************************************/
+
+/*================================================================
+ * check for one "get history" request
+ *================================================================
+ */
+
+static void check_gethist(P2RfCf2Record *rec,
+			  uchar         *button,
+			  ushort        *status,
+			  int            size,
+			  char          *filename,
+			  int            index)	/* VME word address ("index") */
+{
+  if (*button) {
+
+    Cf2Board   *brd = rec->dpvt;
+    Cf2MemPrm  *prm = &brd->memPrm;
+
+    prm->id    = CF2_K_HIST_ID;		/* set ID string */
+    prm->index = index;			/* set port address */
+
+#ifdef DEBUG
+printf("  (check_gethist) file(%s) size(%d)\n",filename,size);
+#endif
+
+    SpawnGetHist(rec,
+		 button,
+		 &brd->histBlk,
+		 &brd->memPrm,
+		 size,
+		 filename,
+		 status);
+  }
+}
+
+/********************************************************************************/
+
+static long SpawnGetHist (P2RfCf2Record  *rec,
+                          unsigned char  *button,
+                          Cf2HistBlk     *blk,
+                          Cf2MemPrm      *prm,
+                          unsigned int    blkCnt,
+                          char           *file,
+                          unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the retrieval of module history.
+
+   Parameters
+   ----------
+          rec - ptr to the record
+      button - ptr to the record field that initiated this action
+          blk - ptr to the history block
+          prm - ptr to the history parameter block
+       blkCnt - Number of blocks of history to record
+         file - The file to record the history in
+         stat - ptr to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnGetHist");
+
+  static char  buf[P2RF_K_BUFSIZE];
+
+#ifdef DEBUG
+  printf("  (SpawnGetHist) file(%s) size(%d)\n",file,blkCnt);
+#endif
+ 
+  if (!rec->pact)
+  {
+    sprintf (buf, "Get %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val,  DBE_VALUE | DBE_LOG);
+
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing before get-history completes */
+    rec->pact = TRUE;
+
+    /* Save block count and file name in parameter block and reset abort flag */
+    prm->count    = min(blkCnt,CF2_K_HISTMEMLEN);
+    prm->file     = file;
+    blk->abortFlg = FALSE;
+
+    /* Point the history block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN, "%s failed",
+                                       "P2RF_RecordMemory"));
+      *stat = READ_ALARM;
+    }
+    else
+    {
+      sprintf (buf, "Get %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Reset button so we don't redo it on the next process pass */
+    *button = 0;
+  }
+
+  return (0);
+}
+
+/********************************************************************************/
+
+static void GetHistCallback (Cf2HistBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to read the modules history memory.  It invokes
+   completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - ptr to the get-history block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /*Function ("GetHistCallback");*/
+
+  P2RfCf2Record    *rec;
+  struct rset      *rSet;
+  Cf2MemPrm        *prm = blk->prm;
+
+  /* just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  taskDelay (sysClkRateGet () / 10);	/* delay a bit to let db_post_events flush */
+
+  dbScanLock ((struct dbCommon *) rec);
+
+
+#ifdef DEBUG
+  printf("  (GetHistCallback) file(%s) size(%d)\n",prm->file,prm->count);
+#endif
+ 
+  blk->status = P2RF_RecordMemory_noPreRead (blk->drvPvt,
+					     prm->id,
+					     prm->index,
+					     prm->count,
+					     prm->file,
+					     &blk->abortFlg,
+					     rec->val,
+					     sizeof (rec->val));
+
+#if 0
+  /* Pulse the Memory Trigger Reset bit to re-enable history triggers */
+  LAZMO_WriteVme (blk->drvPvt, CFM_I_COMBCTRL, rec->cctl | CFM_M_MEMTRGRST);
+  LAZMO_WriteVme (blk->drvPvt, CFM_I_COMBCTRL, rec->cctl);
+#endif
+
+  /* complete record processing */
+  (*rSet->process) (rec);
+
+  /* unlock record */
+  dbScanUnlock ((struct dbCommon *) rec);
+}
+
+/********************************************************************************/
+/********************************************************************************/
+
+/*================================================================
+ * check for one "load play mem" request
+ *================================================================
+ */
+
+static void check_loadplay(P2RfCf2Record *rec,
+			   uchar         *button,
+			   ushort        *status,
+			   int            size,
+			   char          *filename,
+			   int            index)	/* VME "index" */
+{
+  if (*button) {
+
+    Cf2Board   *brd = rec->dpvt;
+    Cf2MemPrm  *prm = &brd->memPrm;
+
+    prm->id    = CF2_K_PLAY_ID;		/* set ID string */
+    prm->index = index;			/* set port address */
+
+#if 0
+printf("  (check_loadplay) file(%s) size(%d)\n",filename,size);
+#endif
+ 
+    SpawnLdMem (rec,
+		button,
+		&brd->ldMemBlk,
+		&brd->memPrm,
+		size,
+		filename,
+		status);
+  }
+}
+
+/********************************************************************************/
+
+static long SpawnLdMem (P2RfCf2Record  *rec,
+                        unsigned char  *request,
+                        Cf2LdMemBlk    *blk,
+                        Cf2MemPrm      *prm,
+			int             size,
+                        char           *file,
+                        unsigned short *stat)
+/*
+ *    Description
+ *    -----------
+ *    This function initiates and completes the loading of the RAM blocks
+ *    on the module.
+ * 
+ *    Parameters
+ *    ----------
+ *           rec - A pointer to the record
+ *       request - A pointer to the record field that initiated this action
+ *           blk - A pointer to the reset block
+ *           prm - A pointer to the RAM parameter block
+ *          file - The file that contains the coefficients to load
+ *          stat - A pointer to a record field in which to return status info
+ * 
+ *    Returns
+ *    -------
+ *    0 for success
+ */
+{
+  Function ("SpawnLdMem");
+
+  static char  buf[P2RF_K_BUFSIZE];
+
+#if 0
+printf("  (SpawnLdMem) file(%s) size(%d)\n",file,size);
+#endif
+ 
+  if (!rec->pact)
+  {
+    sprintf (buf, "Load %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val,  DBE_VALUE | DBE_LOG);
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before load-table completes */
+    rec->pact = TRUE;
+
+    /* Save block count and file name in parameter block and reset abort flag */
+    prm->count    = size;	/* this size is in WORDS, not blocks (sheesh) */
+    prm->file     = file;
+    blk->abortFlg = FALSE;
+
+    /* Point the RAM block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_LoadTblFile", prm->id, prm->file));
+      *stat = WRITE_ALARM;
+    }
+    else
+    {
+      sprintf (buf, "Load %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+/********************************************************************************/
+
+static void LdMemCallback (Cf2LdMemBlk *blk)
+/*
+ *    Description
+ *    -----------
+ *    This is the callback routine that is invoked by the callback facility
+ *    when a request is made to load one of the module's RAMs.  It invokes
+ *    completion processing of the associated record.
+ * 
+ *    Parameters
+ *    ----------
+ *           blk - A pointer to the load-RAM block
+ * 
+ *    Returns
+ *    -------
+ *    nothing
+ */
+{
+  /*Function ("LdMemCallback");*/
+
+  P2RfCf2Record    *rec;
+  struct rset      *rSet;
+  Cf2MemPrm        *prm = blk->prm;
+
+#if 0
+printf("  (LdMemCallback) file(%s) size(%d)\n",prm->file,prm->count);
+#endif
+ 
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Load the RAM */
+  blk->status = P2RF_LoadTblFile (blk->drvPvt,
+				  prm->id, 
+				  prm->index,
+                                  prm->file, 
+				  prm->count, 
+				  &blk->abortFlg,
+                                  rec->val, 
+				  sizeof (rec->val));
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+
+/********************************************************************************/
+/********************************************************************************/
+/********************************************************************************/
+
+/* end */
+@
+
+
+1.5
+log
+@Turn hist/diag buffers ON in module reset
+@
+text
+@d98 1
+d103 1
+a103 1
+#include <module_types.h>
+d111 2
+d352 2
+d645 1
+a645 1
+    scanOnce (rec);
+@
+
+
+1.4
+log
+@Added CF2 (comb-2) files
+@
+text
+@a203 2
+#define COEF_FORCE (1.e99)	/* coef "old" value that will force h/w update */
+
+d1049 4
+a1052 2
+  rec->cctl = 0;			/* Comb Control */
+  recBFSET(cctl,HISRUNSEL,0x7);		/* ... stop trigger always 1s */
+d2334 1
+a2334 1
+	*pval++   = COEF_FORCE;	/* ... and force h/w update */
+@
+
+
+1.3
+log
+@Sync to today's boot image... includes continuous CF2 coefficient
+readback & verify.  Stn goes purple if any verify fails.
+@
+text
+@d1 1
+d6 1
+a6 1
+ *	bit  2 (0x4) :: simulate coef readback failure
+d1454 1
+a1454 1
+#if 1
+d1628 2
+a1629 2
+  check_gethist  (rec, &rec->ihgt, &rec->ihst, rec->ihsz, rec->ihfn, CF2_I_IHIST_RW);
+  check_gethist  (rec, &rec->qhgt, &rec->qhst, rec->qhsz, rec->qhfn, CF2_I_QHIST_RW);
+d1631 2
+a1632 2
+  check_gethist  (rec, &rec->d1gt, &rec->d1st, rec->d1sz, rec->d1fn, CF2_I_MON1_DIAG_RW);
+  check_gethist  (rec, &rec->d2gt, &rec->d2st, rec->d2sz, rec->d2fn, CF2_I_MON2_DIAG_RW);
+d1635 2
+a1636 2
+  check_loadplay (rec, &rec->ipgt, &rec->ipst, CF2_K_PLAYMEMLEN, rec->ipfn, CF2_I_IPLAY_RW);
+  check_loadplay (rec, &rec->qpgt, &rec->qpst, CF2_K_PLAYMEMLEN, rec->qpfn, CF2_I_QPLAY_RW);
+d2608 1
+a2608 1
+			  int            index)	/* VME "index" */
+d2681 1
+a2681 1
+    /* Don't allow record reprocessing record before get-history completes */
+@
+
+
+1.2
+log
+@Fixed inadvertent coef clear on module reset.
+@
+text
+@d222 2
+a223 1
+    double *pval;	/* ptr to "old" values ... malloc'd @@ init */
+d490 6
+a495 2
+static void check_coef_all   (P2RfCf2Record*);
+static void check_coef_bank  (P2RfCf2Record*, Cf2CoefPrm*, int);
+d838 1
+d852 8
+a860 1
+
+d875 3
+a877 1
+    strncpy (rec->val, msg, sizeof (rec->val));
+d923 3
+d1053 1
+a1053 1
+  DBPOST(cctl);
+d1064 1
+a1064 1
+   * zero out all h/w coefficients... check_coef()
+d1071 1
+a1071 1
+  READREG(COMBCTRL, rec->cctl);
+d1074 1
+d1103 1
+a1103 1
+   * update h/w with local coef values (init by save/restore)
+d1107 8
+a1114 2
+  check_coef_all (rec);
+  
+d1120 1
+d1122 1
+a1122 1
+  return (OK);
+a1226 3
+  /* Initialize the message buffer if we're not doing completion processing */
+  if (!rec->pact) strncpy (rec->val, "Success", sizeof (rec->val));
+
+d1234 6
+d1664 2
+a1665 1
+  check_coef_all (rec);
+d1669 1
+d1672 4
+d1684 1
+a1684 1
+ * check for changed record fields in ALL banks
+d1689 1
+a1689 1
+static void check_coef_all(P2RfCf2Record  *rec)
+d1693 2
+a1694 2
+  check_coef_bank (rec, &brd->cmb0Prm, rec->xcbs);
+  check_coef_bank (rec, &brd->cmb1Prm, rec->xcbs);
+d1696 2
+a1697 2
+  check_coef_bank (rec, &brd->equ0Prm, rec->xebs);
+  check_coef_bank (rec, &brd->equ1Prm, rec->xebs);
+d1699 4
+a1702 4
+  check_coef_bank (rec, &brd->int0Prm, rec->xibs);
+  check_coef_bank (rec, &brd->int1Prm, rec->xibs);
+  check_coef_bank (rec, &brd->int2Prm, rec->xibs);
+  check_coef_bank (rec, &brd->int3Prm, rec->xibs);
+d1707 1
+a1707 1
+ * check for changed record fields in ONE bank of ONE filter
+d1711 1
+a1711 1
+static void check_coef_bank (P2RfCf2Record  *rec,
+d1715 1
+a1715 1
+  /* this code relies on the record's fields to be in coefficient order... 
+d1718 1
+a1718 1
+  Function ("check_coef_bank");
+d1730 1
+a1730 1
+  ushort       kk,kk2;
+a1732 4
+  int          errcnt = 0;		/* readback error count */
+
+  static char  buf[P2RF_K_BUFSIZE];	/* msg buf */
+
+d1740 1
+d1745 1
+a1745 1
+    printf("(check_coef_bank) bank: %s\n",ploc->name);
+d1779 2
+a1780 2
+printf("(check_coef) %s addr 0x%08X: coef %d changed from %f to %f (0x%04X)\n",
+       ploc->name,(index<<1),i,*pval,z,kk);
+d1783 17
+d1801 2
+d1804 46
+a1849 9
+#if 0
+.................................................................................
+.................................................................................
+	  /* read back to verify...
+	   *   ... first read from (addr^1) to change bus
+	   *   ... (addr^1) should still be a valid coef addr since they're all 0-xxxF
+	   */
+	  LAZMO_ReadVme (drvPvt, (index ^ 1), &kk2);
+	  LAZMO_ReadVme (drvPvt,  index     , &kk2);	/* coef readback */
+d1851 2
+d1854 1
+a1854 3
+	  if (rec->dbg & 0x4) {		/* simulate failure */
+	      kk2 = kk ^ 0x5555;
+	  }
+d1856 1
+a1856 1
+	  if (kk2 != kk) {		/* check readback */
+d1858 1
+a1858 1
+	    if (errcnt++ == 0) {	/* only notify once per bank... */
+d1860 7
+a1866 3
+#if 0 /* gratuitous verbosity */
+	      recGblRecordError (ERROR, rec,
+				 P2RF_Sprintf (buf, __FILE__, FN, "check_coef"));
+d1869 1
+a1869 2
+	      sprintf(buf, "rdbk err -- a%04X:w%04X/r%04x/e%04X",	/* addr:write/read/error */
+		      index, kk, kk2, (kk ^ kk2));
+d1871 2
+a1872 7
+	      strncpy (rec->val, buf, sizeof (rec->val));
+	      recGblSetSevr (rec, UDF_ALARM, INVALID_ALARM);
+	    }
+	  }
+.................................................................................
+.................................................................................
+#endif /* READBACK */
+d1874 2
+d1877 2
+d1880 4
+a1883 1
+	  *pval = *pfield;		/* save new "old" value */ 
+a1884 3
+
+	/* update DB subscribers */
+	db_post_events (rec, pfield, DBE_VALUE | DBE_LOG);
+a1885 1
+
+d1888 1
+d2064 6
+a2069 1
+      strncpy (rec->val, "Attempt to initialize module failed", sizeof (rec->val));
+a2075 1
+
+d2207 2
+a2208 2
+    /* write new coefs to h/w, if they're different! */
+    check_coef_all(rec);
+@
+
+
+1.1
+log
+@Initial import of COMB-2 (Cf2) support.
+@
+text
+@d1 23
+a23 9
+/* rec->dbg:
+ *	bit 0 (0x01) :: fake off HIS mem cctl bit
+ *	bit 1 (0x02) :: fake off DIA mem cctl bit
+ *	bit 3 (0x04)
+ *	bit 4 (0x08)
+ *	bit 5 (0x10)
+ *	bit 6 (0x20)
+ *	bit 7 (0x40)
+ *	bit 8 (0x80)
+d27 1
+a27 1
+#define DEBUG 1
+a111 1
+
+d117 1
+a117 2
+
+#define P2RF_ReadVme(a,b,c) \
+d119 1
+d121 5
+a125 1
+#endif
+d129 1
+a129 1
+/*printf("  (P2RF_WriteVme) 0x%X 0x%X (%d)\n",((int)b<<1),c,c);*/ \
+a688 1
+  int             startType;
+a738 13
+  /* Figure out the restart type -- To be determined */
+  startType = P2RF_K_COLDSTART;
+
+  /* Initialize the module and the database fields depending on startup type */
+  if ((status = InitFields (brd, startType)))
+  {
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+a780 3
+  /*--------------------------------*/
+
+
+d853 2
+a854 5
+  /*----------------------------------------------------------------
+   * update h/w with local coef values
+   *   ... any different from zero will be loaded (ColdInit() zeroed the h/w)
+   *   ... temporarily set module state to LOAD to allow writing all banks
+   *----------------------------------------------------------------
+d856 1
+a856 8
+ {
+   ushort m = rec->mode;	/* save current state */
+   rec->mode = cf2Load;
+   recBFSET(cctl,STATE,rec->mode);
+   WRITEREG(COMBCTRL, rec->cctl);
+   check_coef_all (rec);	/* load coefficients */
+   rec->mode = m;		/* restore run state */
+ }
+d858 7
+d1001 2
+d1045 2
+a1046 1
+  /* zero out all h/w coefficients... check_coef()
+d1048 1
+d1051 6
+d1059 1
+d1063 1
+d1066 3
+a1068 2
+	int index = ploc->index;			/* h/w address */
+	int count = ploc->count;			/* word count */
+d1074 2
+a1075 1
+	  P2RF_WriteVme (drvPvt, index++, 0x0000);
+a1076 1
+
+d1083 13
+d1683 2
+d1695 1
+a1695 1
+  ushort       kk;
+d1698 5
+a1702 1
+  /* not allowed if in RUN & active bank... UNLESS forced?  FIX FIX FIX ...
+d1743 1
+a1743 1
+#if 1
+a1744 1
+#endif
+d1751 39
+d1792 2
+@
+

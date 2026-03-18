@@ -1,0 +1,120 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-0:1.2
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2011.12.07.01.02.24;	author saa;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.39;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.39;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Changes for 3.14.11 build.
+@
+text
+@#==============================================================
+#
+#  Abs:  Makefile for EPICS RF IOC components
+#      
+#  Name: Makefile.Vx 
+#
+#  Facility:  SLAC/PEPII
+#
+#
+#  Auth: 05-Feb-2002, K. Luchini       (LUCHINI)
+#  Rev:  dd-mmm-yyyy, Reviewer's Name (USERNAME)
+#--------------------------------------------------------------
+#  Mod:
+#         dd-mmm-yyyy, First Lastname (USERNAME)
+#           comments
+#
+#==============================================================
+#
+TOP = ../../../..
+include $(TOP)/config/CONFIG_APP.Vxi
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+#
+USR_INCLUDES += -I ..  -I $(EPICS_SITE)/include 
+
+# Sequences and other channel access applications
+SRCS.c += ../rf_tuner_loop.st
+SRCS.c += ../rf_hvps_loop.st
+SRCS.c += ../rf_states.st
+SRCS.c += ../rf_dac_loop.st
+SRCS.c += ../rf_calib.st
+SRCS.c += ../rf_msgs.st
+
+# Objects and executables
+OBJS += rf_tuner_loop.o
+OBJS += rf_hvps_loop.o
+OBJS += rf_states.o
+OBJS += rf_dac_loop.o
+OBJS += rf_calib.o
+OBJS += rf_msgs.o
+
+PROD += rf_tuner_loop.o
+PROD += rf_hvps_loop.o
+PROD += rf_states.o
+PROD += rf_dac_loop.o
+PROD += rf_calib.o
+PROD += rf_msgs.o
+
+include $(TOP)/config/RULES.Vx
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+
+
+
+
+
+
+
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

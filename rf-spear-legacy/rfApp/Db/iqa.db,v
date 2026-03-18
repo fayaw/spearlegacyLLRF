@@ -1,0 +1,185 @@
+head	1.4;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.4
+	RF-SPEAR-R0-3-1:1.4
+	RF-SPEAR-R0-3-0:1.4
+	RF-SPEAR-R0-2-0:1.4
+	RF-SPEAR-R0-1-0:1.4
+	RF-SPEAR-R0-0-3:1.4
+	RF-SPEAR-R0-0-2:1.4
+	RF-SPEAR-R0-0-1:1.4
+	RF-SPEAR-R0-0-0:1.4
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.4
+	RF-3-13-10:1.4.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.4
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.4
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.4
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.4
+date	2006.11.07.18.54.26;	author lazmo;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.06.15.00.34.41;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.27.01.17.01;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.43;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.43;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@swapped ZNAM/ONAM in :AMPMODE
+@
+text
+@grecord(bo,"$(R):STN:IQA$(M):AMPMODE") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:IQA$(M):MODU.AMPM  PP NMS")
+	field(ZNAM,"1_chan")
+	field(ONAM,"8_chan")
+}
+grecord(bo,"$(R):STN:IQA$(M):IFMODE") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:IQA$(M):MODU.IFM  PP NMS")
+	field(ZNAM,"8 chan")
+	field(ONAM,"1 chan")
+}
+grecord(mbbiDirect,"$(R):STN:IQA$(M):AMPFLTSTT") {
+	field(DTYP,"Soft Channel")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:IQA$(M):MODU.TFST  NPP MS")
+}
+grecord(mbbiDirect,"$(R):STN:IQA$(M):INTSTATE") {
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(R):STN:IQA$(M):AMPFLTSTT.VAL  PP MS")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:IQA$(M):MODU.ISTT  NPP MS")
+}
+grecord(mbboDirect,"$(R):STN:IQA$(M):INTACK") {
+	field(DTYP,"Soft Channel")
+	field(NOBT,"16")
+	field(OUT,"$(R):STN:IQA$(M):MODU.IACK  PP NMS")
+}
+grecord(p2RfIqa,"$(R):STN:IQA$(M):MODU") {
+	field(DTYP,"PEP-II RF IQA")
+	field(FLNK,"$(R):STN:IQA$(M):INTSTATE.PROC  PP MS")
+	field(OUT,"#V0 C$(S) S0 @@(null)")
+	field(PREC,"3")
+	field(IMSK,"248")
+	field(STI,"7")
+	field(SSI,"6")
+	field(FO,"7")
+	field(RCO,"2")
+	field(AT0,"1.25")
+	field(AT1,"1.25")
+	field(AT2,"1.25")
+	field(AT3,"1.25")
+	field(AT4,"1.25")
+	field(AT5,"1.25")
+	field(AT6,"1.25")
+	field(AT7,"1.25")
+	field(ASS,"1")
+	field(AHFS,"/dat/iqaAmpHistory.dat")
+	field(AHSZ,"512")
+	field(AMD,"0.001")
+	field(IQED,"2")
+	field(IQMD,"2")
+	field(IQHF,"/dat/iqaIqHistory.dat")
+	field(IQHS,"512")
+	field(UPDT,"1")
+	field(IFC,"1")
+	field(LENB,"$(RCE)")
+	field(DCF0,"$(TBL)")
+	field(DCF1,"/tbl/iqaDdf_50Hz.rpt")
+	field(DCF2,"/tbl/iqaDdf_50Hz.rpt")
+	field(DCF3,"/tbl/iqaDdf_50Hz.rpt")
+	field(DCF4,"/tbl/iqaDdf_50Hz.rpt")
+	field(DCF5,"/tbl/iqaDdf_50Hz.rpt")
+	field(DCF6,"/tbl/iqaDdf_50Hz.rpt")
+	field(DCF7,"/tbl/iqaDdf_50Hz.rpt")
+}
+@
+
+
+1.3
+log
+@Add initial value for IMSK, AHSZ, and IQHS.
+@
+text
+@d5 2
+a6 2
+	field(ZNAM,"8_chan")
+	field(ONAM,"1_chan")
+@
+
+
+1.2
+log
+@Rename
+@
+text
+@d36 1
+d51 1
+d56 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 7
+d10 1
+d15 5
+d21 1
+a25 4
+grecord(mbbiDirect,"$(R):STN:IQA$(M):AMPFLTSTT") {
+	field(NOBT,"16")
+	field(INP,"$(R):STN:IQA$(M):MODU.TFST  NPP MS")
+}
+d27 1
+d32 1
+d36 2
+a37 2
+	field(STI,"6")
+	field(SSI,"7")
+d57 1
+a57 1
+	field(DCF0,"/tbl/iqaDdf_23KHz.rpt")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

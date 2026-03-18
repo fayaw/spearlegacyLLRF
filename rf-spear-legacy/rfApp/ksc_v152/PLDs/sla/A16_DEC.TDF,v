@@ -1,0 +1,178 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.04;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.04;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@TITLE "V150 A16 REGISTER DECODER AND STROBE GENERATOR		REV A.0";
+
+SUBDESIGN A16_DEC (
+
+	A[5..1],
+	WTINT,
+	RDINT		:INPUT;
+
+	WT_ROM,
+	WT_LOGAD,
+	WT_CSR,
+	WT_SIGNAL,
+	WT_DATALO,
+	WT_MODID,
+	WT_INTSTA,
+	WT_INTCNTL,
+	WT_TRIGMSK,
+	WT_TRIGCLR,
+	WT_TRGSRC,
+	WT_TIMERCFG,
+	WT_EXTENDED,
+	WT_LOCINT,
+	WT_MISCCNTL,
+	
+	RD_ROM,
+	RD_ID,
+	RD_CSR,
+	RD_PROTOCOL,
+	RD_RESPONSE,
+	RD_DATALO,
+	RD_MODID,
+	RD_INTSTA,
+	RD_INTCNTL,
+	RD_TRIGINT,
+	RD_LOCINT,
+	SEL_SGNL,
+	RD_SIGNAL,
+	RD_INTID		:OUTPUT;)
+
+
+VARIABLE
+
+	ADDR[5..0]		:NODE;
+
+BEGIN
+	ADDR[5..0] = (A5, A4, A3, A2, A1, x);
+
+
+WT_ROM = WTINT & (ADDR[] == H"02")
+	   # WTINT & (ADDR[] == H"20")
+	   # WTINT & (ADDR[] == H"22")
+	   # WTINT & (ADDR[] == H"24")
+	   # WTINT & (ADDR[] == H"26")
+	   # WTINT & (ADDR[] == H"3E");
+
+WT_LOGAD =  WTINT & (ADDR[] == H"00");
+
+WT_CSR =  WTINT & (ADDR[] == H"04");
+
+WT_SIGNAL =  WTINT & (ADDR[] == H"08");
+
+WT_DATALO =  WTINT & (ADDR[] == H"0E");
+
+WT_MODID =  WTINT & (ADDR[] == H"28");
+
+WT_INTSTA =  WTINT & (ADDR[] == H"2A");
+
+WT_INTCNTL =  WTINT & (ADDR[] == H"2C");
+
+WT_TRIGMSK =  WTINT & (ADDR[] == H"2E");
+
+WT_TRIGCLR =  WTINT & (ADDR[] == H"30");
+
+WT_TRGSRC =  WTINT & (ADDR[] == H"32");
+
+WT_TIMERCFG =  WTINT & (ADDR[] == H"34");
+
+WT_EXTENDED =  WTINT & (ADDR[] == H"38");
+
+WT_LOCINT =  WTINT & (ADDR[] == H"3A");
+
+WT_MISCCNTL =  WTINT & (ADDR[] == H"3C");
+
+RD_ROM =  RDINT & (ADDR[] == H"02")		 
+	   #  RDINT & (ADDR[] == H"20")
+	   #  RDINT & (ADDR[] == H"22")
+	   #  RDINT & (ADDR[] == H"24")
+	   #  RDINT & (ADDR[] == H"26")
+	   #  RDINT & (ADDR[] == H"3E");
+
+
+RD_ID =  RDINT & (ADDR[] == H"00");
+
+RD_CSR =  RDINT & (ADDR[] == H"04");
+
+RD_PROTOCOL =  RDINT & (ADDR[] == H"08");
+
+RD_RESPONSE =  RDINT & (ADDR[] == H"0A");
+
+RD_DATALO =  RDINT & (ADDR[] == H"0E");
+
+RD_MODID =  RDINT & (ADDR[] == H"28");
+
+RD_INTSTA =  RDINT & (ADDR[] == H"2A");
+
+RD_INTCNTL =  RDINT & (ADDR[] == H"2C");
+
+RD_TRIGINT =  RDINT & (ADDR[] == H"2E");
+
+RD_LOCINT =  RDINT & (ADDR[] == H"3A");
+
+SEL_SGNL = (ADDR[] == H"08");
+
+RD_SIGNAL = RDINT & (ADDR[] == H"3C");
+
+RD_INTID = RDINT & (ADDR[] == H"38");
+
+END;
+
+
+
+	
+	
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

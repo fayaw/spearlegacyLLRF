@@ -1,0 +1,153 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.04;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.04;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@TITLE "V150 A16 REGISTERS DTACK GENERATOR		REV A.0";
+
+SUBDESIGN ACK_SEQ (
+	CLOCK,
+	RESET,
+	MATCH,
+	DS,
+	ERR,
+	WRITE		:INPUT;
+
+	HOLD_ADR,
+	RDINT,
+	WTINT,
+	DTACK,
+	BERR		:OUTPUT; )
+
+VARIABLE
+
+CONTROL : MACHINE OF BITS (HOLD_ADR,RDINT,WTINT,DTACK,BERR)
+		WITH STATES (
+
+	POWER_UP = B"00000",
+		 ST0 = B"00000",
+		 ST1 = B"00000",
+		 ST2 = B"00001",
+		 ST3 = B"11000",
+		 ST4 = B"11000",
+		 ST5 = B"11000",
+		 ST6 = B"11000",
+		 ST7 = B"11010",
+		 ST8 = B"10100",
+		 ST9 = B"10100",
+		ST10 = B"10100",
+		ST11 = B"10010");
+
+BEGIN
+
+	 CONTROL.CLK = CLOCK;
+	 CONTROL.RESET = RESET;
+
+CASE (CONTROL) IS
+
+	WHEN POWER_UP =>
+		CONTROL = ST0;
+	WHEN ST0 =>
+		IF (DS & MATCH) THEN
+			CONTROL = ST1;
+		ELSE
+			CONTROL = ST0;
+		END IF;
+	WHEN ST1 =>
+		IF (DS & MATCH & ERR) THEN
+			CONTROL = ST2;
+		ELSIF (DS & MATCH & WRITE & !ERR) THEN
+			CONTROL = ST8;
+		ELSIF (DS & MATCH & !WRITE & !ERR) THEN
+			CONTROL = ST3;
+		ELSE
+			CONTROL = ST0;
+		END IF;
+	WHEN ST2 =>
+		IF (DS) THEN
+			CONTROL = ST2;
+		ELSE
+			CONTROL = ST0;
+		END IF;
+	WHEN ST3 =>
+		CONTROL = ST4;
+	WHEN ST4 =>
+		CONTROL = ST5;
+	WHEN ST5 =>
+		CONTROL = ST6;
+	WHEN ST6 =>
+		CONTROL = ST7;
+	WHEN ST7 =>
+		IF (DS) THEN
+			CONTROL = ST7;
+		ELSE
+			CONTROL = ST0;
+		END IF;
+	WHEN ST8 =>
+		CONTROL = ST9;
+	WHEN ST9 =>
+		CONTROL = ST10;
+	WHEN ST10 =>
+		CONTROL = ST11;
+	WHEN ST11 =>
+		IF (DS) THEN 
+			CONTROL = ST11;
+		ELSE
+			CONTROL = ST0;
+		END IF;
+	END CASE;
+END;
+
+	
+	
+
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

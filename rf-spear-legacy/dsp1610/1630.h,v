@@ -1,0 +1,84 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2014.06.18.17.01.37;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@copied from /afs/slac/package/dsp1610.
+@
+text
+@#ifndef D1630_H
+#define D1630_H
+/*
+ *	DSP1630 registers and conditions which were removed from the as1600
+ *	grammar to make the assembler truly generic:
+ */
+
+
+	/* shortcut to defining the chip's peripherals */
+	/* simply define or undef the identifier for the */
+	/* particular unit to include or exclude it */
+
+/* DSP1630 has the following peripherals ... */
+#define		_PIO_	/* Parallel Port Interface */
+#define		_SIO_	/* Serial Port Interface */
+#define		_CIO_	/* CODEC Interface */
+
+#define		powerc	reg56	/* Power Control Register */
+
+/* pertaining to the PIO */
+#ifdef	_PIO_
+	/* registers */
+#define		pioc	reg28
+#define		pdx0	reg29
+#define		pdx1	reg30
+#define		pdx2	reg14
+#define		pdx3	reg15
+#define		pdx4	reg44
+#define		pdx5	reg45
+#define		pdx6	reg46
+#define		pdx7	reg47
+#endif
+
+#ifdef _SIO_
+	/* registers */
+#define		sioc	reg24
+#define		srta	reg25
+#define		sdx	reg26
+#define		tdms	reg27
+#define		saddx	reg35
+#endif
+
+#ifdef _CIO_
+#define		cdx	reg34
+#define		cioc0	reg54
+#define		cioc1	reg55
+#define		cioc2	reg39
+	/* conditionals */
+#define		adfpf	uflag28
+#define		dafpe	uflag29
+#endif
+
+.core1_1	/* this directive enables the new core x=y= */
+		/* instructions in the as1600 parser.  */
+#endif /* D1630_H */
+@

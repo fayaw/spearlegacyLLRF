@@ -1,0 +1,603 @@
+head	1.10;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.10
+	RF-SPEAR-R0-3-1:1.10
+	RF-SPEAR-R0-3-0:1.10
+	RF-SPEAR-R0-2-0:1.10
+	RF-SPEAR-R0-1-0:1.10
+	RF-SPEAR-R0-0-3:1.10
+	RF-SPEAR-R0-0-2:1.10
+	RF-SPEAR-R0-0-1:1.10
+	RF-SPEAR-R0-0-0:1.10
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.10
+	RF-3-13-10:1.9.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.9
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.8
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.7
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.10
+date	2011.12.07.00.27.54;	author saa;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2010.08.27.22.55.57;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2009.12.12.00.13.40;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2006.01.25.23.44.56;	author lazmo;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2004.01.29.18.11.34;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2004.01.05.19.45.01;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.08.26.23.55.31;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.02.27.02.24.02;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.27.01.16.56;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.10
+log
+@Remove reference to gdct.  Add cf2.db.
+@
+text
+@#==============================================================
+#
+#  Name: README
+#
+#  Rem:  The files in this directory are EPICS Database
+#        files created by using emacs or the database generation tool
+#        vdct.  gdct no longer supported.
+#
+#  Tool: emacs and vdct (EPICS Extensions)
+#
+#  Side: For all subroutine records, see comments in the source 
+#        dirctory (ie: $RF/rfApp/src/db/subIQ.c and subSys.c) for
+#        a description of inputs and outputs plus the equation if
+#        applicable.
+# 
+#        VXI Module Database Files      (original author - Ric Claus)
+#        LLRF Production Database Files (original author - Stephanie Allison)
+#
+#  Auth: dd-mmm-yyyy, Stephanie Allison (SAA)
+#  Rev:  dd-mmm-yyyy, Reviewer's Name   (USERNAME)
+#
+#--------------------------------------------------------------
+#  Mod:
+#       dd-mmm-yyyy, First Lastname     (USERNAME):
+#          comments
+#
+#==============================================================
+#
+Filename                     Description
+--------------------         ----------------------
+README                       This file
+
+rf_vxi_modules_All.substitutions  Substitutions for VXI modules with clock in slot2
+rf_vxi_modules_4CV.substitutions  Substitutions for 4CV VXI modules  
+rf_vxi_modules_LAB.substitutions  Substitutions for VXI modules for (lab ioc's only) w/clock in slot2
+rf_vxi_modules2_LAB.substitutions Substitutions for VXI modules for (lab ioc's only) w/clock in slot5
+
+aim.db                       SLAC VXI Arc Interlock Module
+cfm.db                       SLAC VXI Comb Filter Module version 1 (instantiate one per CFM)
+cf2.db                       SLAC VXI Comb Filter Module version 2 (instantiate one per CFM)
+clk.db                       SLAC VXI Clock Module
+gvf.db                       SLAC VXI Gap Voltage Feed Forward Module
+iqa.db                       SLAC VXI I,Q, and Amplitude Module (instantiate one per IQA)
+rfp.db                       SLAC VXI RF Processing Module
+
+iqaGet.db                    Database for acquiring IQ data (for use by lab ioc's only)
+rfp_dacs.db                  Database for RFP Module DACs   (for use by lab ioc's only)
+
+rf_beam_her.substitutions    Substitutions for HER beam current and status
+rf_beam_ler.substitutions    Substitutions for LER beam current and status
+rf_beam_spear.substitutions  Substitutions for Spear beam current and status
+rf_beam.db                   Database for beam current and status for PEPII HER and LER
+rf_beam_spr.db               Database for beam current and status for Spear
+
+rf_analog_All.substitutions  Substitutions for RF PLC analog inputs & assoc interlocks
+rf_analog_4CV.substitutions  Substitutions for 4CV RF PLC analog inputs & assoc interlocks
+rf_temp_All.substitutions    Substitutions for RF PLC temperture inputs
+rf_temp_4CV.substitutions    Substitutions for 4CV RF PLC temperture inputs
+rf_analog.db                 Database for RF PLC analog with interlocks (except vacm, ionp curr)
+rf_analog_log.db             Database for RF PLC vacuum and ion pump current
+rf_temp.db                   Database for RF PLC temperature
+
+rf_digital_All.substitutions Substitutions for RF VXI digital inputs
+rf_digital_4CV.substitutions Substitutions for 4CV RF VXI digital inputs
+rf_digital_2CV.substitutions Substitutions for 2CV RF VXI digital inputs
+rf_digital_hvps.db           Database for HVPS VXI digital inputs
+rf_digital_modu.db           Database for RF PLC digital input/output module status
+rf_digital_plc.db            Database for RF PLC non-interlocked digital inputs
+rf_ab_module.db              Database for RF PLC thermocouple and analog module read status
+rf_interlock.db              Database for RF PLC interlocked digital inputs
+rf_interlock_vxi.db          Database for RF VXI module interlocked digital (except ampl and arc faults)
+rf_sumy_plc.db               Database for RF PLC summary inputs
+
+rf_iqa_All.substitutions     Substitutions for IQA processing
+rf_iqa_4CV.substitutions     Substitutions for 4CV IQA processing
+rf_iqa.db                    Database for IQA phase and power or gap voltage, amplitudes faults
+rf_iqa_module.db             Database for IQA data acquisition and channel selection logic
+rf_iqa_scale.db              Database for IQA calibration sequences, scale factor calcs,
+                               amplitude threshhold calc and set, scaled I and Q calc
+
+rf_stn_All.substitutions     Substitutions for VxWorks statistics
+rf_stn_2CV.substitutions     Substitutions for 2CV station pvs (all  arc interlocks)
+rf_stn_4CV.substitutions     Substitutions for 4CV station pvs (some arc interlocks)
+rf_stn_4CVAll.substitutions  Substitutions for 4CV station pvs (all  arc interlocks)
+rf_ab_4CV.substitutions      Substitutions for Allen-Bradley 4CV station pvs
+rf_ab_2CV.substitutions      Substitutions for Allen-Bradley 2CV station pvs
+rf_interlock_arc.db          Database for RF VXI Fast Interlock module ARC fault inputs 
+
+rf_fbck.db                 Database for station control and status for DAC, comb, and direct loops, 
+                           ripple loop tracking, taxi link status, tune drive power,
+                           gap feed forward station voltage, RFP diff node station voltage
+
+rf_hvps.db                 Database for station contactor control logic, hvps analog inputs and outputs,
+                           hvps binary outputs, maximum voltage logic, power and 
+                           perveance calcs, DCM table status, voltage loop constants/status,
+                           oil temperature and constants.
+
+rf_klys.db                 Database for station drive and forward power histories, klys gain, collector power, 
+                           and efficiency calcs, filament power, ripple loop ampl, RF PLC 
+                           non-interlock analog inputs, power constants, delta counts and
+                           voltages for feedback loops
+
+rf_stn.db                  Database for station remote/local control logic, DCM record, AB reset, region, IOC,
+                           ring ID, station reset logic, station state control outputs,
+                           SIP summary status, fault file outputs, NIRP status, beam and
+                           beam abort status, RF 476 MHz ref status
+
+rf_stn_cav.db              Database for station overall tuner loop and load angle control records, gap voltage
+                           calculations, and calibration sequences, direct loop phase,
+                           comb loop phase, station phase, cavity parameter limit checking
+
+rf_cav.db                  Database for station directivity calc and constants, cavity power, coupling factor,
+                           strength, and freq offset calcs, tuner loop status and outputs, 
+                           histories for phases, freq offset, tuner posn, phase error, and 
+                           load angle offset, freq error, load angle error, and delta posn
+                           calcs, load angle offset calc, stepper motor control, disable,
+                           initialization and stop logic 
+
+rf_dac.substitutions       Substitutions for RFP DAC pvs
+rf_rfp_fourdacs.db         Database for RFP module DAC calc and set for II, IQ, QI, QQ
+rf_rfp_twodacs.db          Database for RFP module DAC calc and set for I and Q
+
+rf_sumy_4CV.db             Database for 4CV summary and fanout pvs
+rf_sumy_2CV.db             Database for 2CV summary and fanout pvs
+rf_sumy_arc_2CV.db         Database for 2CV arc interlock summary and fanout pvs (all  channels)
+rf_sumy_arc_4CV.db         Database for 4CV arc interlock summary and fanout pvs (some channels)
+rf_sumy_arc_4CVAll.db      Database for 4CV arc interlock summary and fanout pvs (all  channels)
+rf_sumy_cav.db             Database for cavity summary and fanout pvs
+rf_sumy_circ.db            Database for circ summary and fanout pvs
+rf_sumy_hvps.db            Database for high voltage summary and fanout pvs
+rf_sumy_klys.db            Database for klystron summary and fanout pvs
+rf_sumy_stn.db             Database for station summary and fanout pvs
+rf_sumy_stn_pep.db         Database for SPEAR-only station summary and fanout pvs
+rf_sumy_stn_spr.db         Database for PEPII-only station summary and fanout pvs
+rf_sumy_wg.db              Database for wave guide summary and fanout pvs
+@
+
+
+1.9
+log
+@Move rfreport to DbIoc.
+@
+text
+@d6 2
+a7 2
+#        files created by using the database generation tool
+#        gdct or vdct.
+d9 1
+a9 1
+#  Tool:  gdct and vdct (EPICS Extensions)
+d39 2
+a40 1
+cfm.db                       SLAC VXI Comb Filter Module (instantiate one per CFM)
+d123 13
+a135 13
+rf_sumy_4CV.db             Database for 4CV summary and fanout pvs (text files...no gdct support)
+rf_sumy_2CV.db             Database for 2CV summary and fanout pvs (text files...no gdct support)
+rf_sumy_arc_2CV.db         Database for 2CV arc interlock summary and fanout pvs (all  channels) (text files...no gdct support)
+rf_sumy_arc_4CV.db         Database for 4CV arc interlock summary and fanout pvs (some channels) (text files...no gdct support)
+rf_sumy_arc_4CVAll.db      Database for 4CV arc interlock summary and fanout pvs (all  channels) (text files...no gdct support)
+rf_sumy_cav.db             Database for cavity summary and fanout pvs (text files...no gdct support)
+rf_sumy_circ.db            Database for circ summary and fanout pvs (text files...no gdct support)
+rf_sumy_hvps.db            Database for high voltage summary and fanout pvs (text files...no gdct support)
+rf_sumy_klys.db            Database for klystron summary and fanout pvs (text files...no gdct support)
+rf_sumy_stn.db             Database for station summary and fanout pvs (text files...no gdct support)
+rf_sumy_stn_pep.db         Database for SPEAR-only station summary and fanout pvs (text files...no gdct support)
+rf_sumy_stn_spr.db         Database for PEPII-only station summary and fanout pvs (text files...no gdct support)
+rf_sumy_wg.db              Database for wave guide summary and fanout pvs (text files...no gdct support)
+@
+
+
+1.8
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@a18 7
+#        After any database or substitutions has been updated the developer
+#        should also generate a new database PV list.
+#        To generate this report execute the following command from the
+#        unix shell:
+#
+#        rfreport
+#
+@
+
+
+1.7
+log
+@Updates for Comb-2 (CF2) support.
+@
+text
+@a10 2
+#  Loc:  /afs/slac/g/cd/soft/ref/epics/<epics_version>/ioc/rfApp/Db
+#
+d12 1
+a12 1
+#        dirctory (ie: $RF/epicsApp/src/subIQ.c and subSys.c) for
+d14 1
+a14 7
+#        applicable. I did NOT put this information in the database also.
+#
+#        A copy of each template is generated for each station and installed
+#        into $(TOP)/db with the prefix of the station name substituted
+#        for the prefix "rf_" of the original template file. After any 
+#        rf_<desc>.template is modified, the developer is required to
+#        run buildPROD for both dev and prod or buildSRF for SPEAR.
+d19 3
+a21 3
+#        After any database or template has been updated the developer
+#        should also generate a new database PV list in $CD_DATA/db/rf.pv_all
+#        To generate this report execute the following command form the
+d24 1
+a24 11
+#        rf_report
+#
+#        Please note that the above report generates a PV list for all
+#        rf stations. This report is used by the SLC control system to
+#        verify that channels (PV names) exist.  The executable "rf_report"
+#        should be in PATH if the users had source the appropriate epics
+#        setup script and/or the ESD setup script (ie: ENVS.csh). Individual
+#        reports for each rf station do exist using the following naming
+#        convension:
+#
+#        <microname>_report   (for example: hr81_report)
+d40 4
+a43 13
+build                        Master script to generate db templates from an rf template
+buildDEV                     Master script to generate db templates for lab ioc's from an rf template
+build4CV                     Script to execute to build all production 4CV station templates (some arc interlocks)
+build4CVAll                  Script to execute to build all production 4CV station templates (all  arc interlocks)
+build2CV                     Script to execute to build all production 2CV station templates
+buildLAB                     Script to execute to build all development LAB ioc templates
+buildPROD                    Script to execute to build both 4CV and 2CV production templates
+buildSRF                     Script to execute to build SPEAR (4CV) production and development templates
+
+rf_vxi_modules.template      Template for VXI modules with clock in slot2
+rf_vxi_modules_4CV.template  Template for 4CV VXI modules  
+rf_vxi_modules_LAB.template  Template for VXI modules for (lab ioc's only) w/clock in slot2
+rf_vxi_modules2_LAB.template Template for VXI modules for (lab ioc's only) w/clock in slot5
+d55 3
+a57 3
+rf_beam_her.template         Template for HER beam current and status
+rf_beam_ler.template         Template for LER beam current and status
+rf_beam_spr.template         Template for Spear beam current and status
+d61 33
+a93 33
+rf_analog.template         Template for RF PLC analog inputs & assoc interlocks
+rf_analog_4CV.template     Template for 4CV RF PLC analog inputs & assoc interlocks
+rf_temp.template           Template for RF PLC temperture inputs
+rf_temp_4CV.template       Template for 4CV RF PLC temperture inputs
+rf_analog.db               Database for RF PLC analog with interlocks (except vacm, ionp curr)
+rf_analog_log.db           Database for RF PLC vacuum and ion pump current
+rf_temp.db                 Database for RF PLC temperature
+
+rf_digital.template        Template for RF VXI digital inputs
+rf_digital_4CV.template    Template for 4CV RF VXI digital inputs
+rf_digital_2CV.template    Template for 2CV RF VXI digital inputs
+rf_digital_hvps.db         Database for HVPS VXI digital inputs
+rf_digital_modu.db         Database for RF PLC digital input/output module status
+rf_digital_plc.db          Database for RF PLC non-interlocked digital inputs
+rf_ab_module.db            Database for RF PLC thermocouple and analog module read status
+rf_interlock.db            Database for RF PLC interlocked digital inputs
+rf_interlock_vxi.db        Database for RF VXI module interlocked digital (except ampl and arc faults)
+rf_sumy_plc.db             Database for RF PLC summary inputs
+
+rf_iqa.template            Template for IQA processing
+rf_iqa_4CV.template        Template for 4CV IQA processing
+rf_iqa.db                  Database for IQA phase and power or gap voltage, amplitudes faults
+rf_iqa_module.db           Database for IQA data acquisition and channel selection logic
+rf_iqa_scale.db            Database for IQA calibration sequences, scale factor calcs,
+                           amplitude threshhold calc and set, scaled I and Q calc
+
+rf_stn.template            Template for VxWorks statistics
+rf_stn_2CV.template        Template for 2CV station pvs (all  arc interlocks)
+rf_stn_4CV.template        Template for 4CV station pvs (some arc interlocks)
+rf_stn_4CVAll.template     Template for 4CV station pvs (all  arc interlocks)
+rf_ab_4CV.template         Template for Allen-Bradley 4CV station pvs
+rf_ab_2CV.template         Template for Allen-Bradley 2CV station pvs
+rf_interlock_arc.db        Database for RF VXI Fast Interlock module ARC fault inputs 
+d125 1
+a125 1
+rf_dac.template            Template for RFP DAC pvs
+@
+
+
+1.6
+log
+@Add new files to list.
+@
+text
+@d66 1
+d71 1
+d78 1
+d121 1
+d125 1
+d130 1
+d135 1
+d140 1
+d144 1
+@
+
+
+1.5
+log
+@SPEAR uses all arc interlock channels available on the new arc interlock
+module (vacuum and air side for all 4 cavities).  SPEAR uses the arc channel
+reserved for MPS.  All arc interlock records moved out of rf_digital*.template
+and into rf_stn*.template (where 4CVAll uses all channels).  Arc summaries are
+moved out of rf_sumy_(2CV,4CV).db into rf_sumy_arc_(2CV,4CV,4CVAll).db.
+@
+text
+@d65 1
+a65 1
+buildSRF                     Script to execute to build SPEAR (4CV) production templates
+d157 2
+@
+
+
+1.4
+log
+@Added "CAVV_LIM" (cavity overvoltage) state to the HVPS loop status.
+Added buildSRF for SPEAR RF and updated the README for it.
+@
+text
+@d60 2
+a61 1
+build4CV                     Script to execute to build all production 4CV station templates
+a100 1
+rf_interlock_arc.db        Database for RF VXI Fast Interlock module ARC fault inputs 
+d109 1
+a109 1
+                           Database fpr amplitude threshhold calc and set, scaled I and Q calc
+d112 3
+a114 2
+rf_stn_4CV.template        Template for 4CV station pvs
+rf_stn_2CV.template        Template for 2CV station pvs
+d117 1
+d149 3
+@
+
+
+1.3
+log
+@Add additional comments
+@
+text
+@d22 1
+a22 1
+#        run buildPROD for both dev and prod.
+d64 1
+@
+
+
+1.2
+log
+@Rename
+@
+text
+@d11 1
+a11 1
+#  Loc:  /afs/slac/g/cd/soft/ref/ioc/prod/rfApp/Db
+d27 17
+d64 1
+a64 1
+rf_vxi_modules.template      Template for VXI modules  
+d66 2
+a67 1
+rf_vxi_test_modules.template Template for VXI modules for (lab ioc's only)
+d80 1
+a80 1
+rf_beam_pep.db               Database for beam current and status for PEPII HER and LER
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d9 1
+a9 1
+#  Tool:  gdct (EPICS Extensions)
+d11 1
+a11 1
+#  Loc:  /afs/slac/g/cd/soft/ref/epics/<epics_version>/ioc/rfApp/Db
+d13 8
+a20 8
+#  Side: For all subroutine records, see comments in the source
+#        dirctory (ie: $RF_SRC) for a description of inputs and
+#        outputs plus the equation if applicable. I did NOT put this
+#        information in the database also.
+#
+#        A copy of each template is generated for each rf station and 
+#        installed into $(TOP)/db with the prefix of the station name substituted
+#        for the prefix "rf_" of the original template file. After any
+d22 2
+a23 9
+#        run the following script:
+#
+#               buildPROD  - From this directory to build rf station templates
+#               buildLAB   - From this directory to build rf lab station templates
+#               rf_report  - Generate PV report for ALL rf stations refelcting any db changes
+#
+#        The template files are used to generaate the PV reports for
+#        each rf station which is stored in $CD-DATA/db/rf.all_pv
+#
+d37 97
+a133 95
+VXI Module Database Files (original author - Ric Claus)
+-------------------------------------------------------
+aim.db - Arc Interlock Module
+cfm.db - Comb Filter Module (instantiate one per CFM)
+clk.db - Clock Module
+gvf.db - Gap Voltage Feed Forward Module
+iqa.db - I,Q, and Amplitude Module (instantiate one per IQA)
+rfp.db - RF Processing Module
+          Used in RF lab IOCs only for testing:
+iqaGet.db, iqCvt.db - Acquire and Process IQ Data
+rfp_dacs.db         - RF Processing Module DACs (author - SAA)
+
+Production Database Files (original author - Stephanie Allison)
+---------------------------------------------------------------
+
+  RF PLC analog inputs and associated interlocks:
+rf_analog.template
+rf_analog_HER.template
+rf_temp.template
+rf_temp_HER.template
+rf_analog.db        - RF PLC analog with interlocks (except vacm, ionp curr)
+rf_analog_log.db    - RF PLC vacuum and ion pump current
+rf_temp.db          - RF PLC temperature
+
+  RF PLC and VXI digital inputs:
+rf_digital.template
+rf_digital_HER.template
+rf_digital_LER.template
+rf_digital_hvps.db  - HVPS digital
+rf_digital_modu.db  - RF PLC digital input/output module status
+rf_digital_plc.db   - RF PLC non-interlocked digital
+rf_ab_module.db     - RF PLC thermocouple and analog module read status
+rf_interlock.db     - RF PLC interlocked digital
+rf_interlock_arc.db - RF Fast Interlock module ARC fault
+rf_interlock_vxi.db - RF VXI module interlocked digital (except ampl and arc faults)
+rf_sumy_plc.db      - RF PLC summary
+
+  IQA processing:
+rf_iqa.template
+rf_iqa_HER.template
+rf_iqa.db           - IQA phase and power or gap voltage, amplitudes faults
+rf_iqa_module.db    - IQA data acquisition and channel selection logic
+rf_iqa_scale.db     - IQA calibration sequences, scale factor calcs,
+                      amplitude threshhold calc and set, scaled I and Q calc
+
+  Station PVs:
+rf_stn_HER.template
+rf_stn_LER.template
+rf_fbck.db - Control and status for DAC, comb, and direct loops, 
+             ripple loop tracking, taxi link status, tune drive power,
+             gap feed forward station voltage, RFP diff node station voltage
+rf_hvps.db - Contactor control logic, hvps analog inputs and outputs,
+             hvps binary outputs, maximum voltage logic, power and 
+             perveance calcs, DCM table status, voltage loop constants/status,
+             oil temperature and constants.
+rf_klys.db - drive and forward power histories, klys gain, collector power, 
+             and efficiency calcs, filament power, ripple loop ampl, RF PLC 
+             non-interlock analog inputs, power constants, delta counts and
+             voltages for feedback loops
+rf_stn.db  - Remote/local control logic, DCM record, AB reset, region, IOC,
+             ring ID, station reset logic, station state control outputs,
+             SIP summary status, fault file outputs, NIRP status, beam and
+             beam abort status, RF 476 MHz ref status
+rf_stn_cav.db - Overall tuner loop and load angle control records, gap voltage
+                calculations, and calibration sequences, direct loop phase,
+                comb loop phase, station phase, cavity parameter limit checking
+rf_cav.db  - Directivity calc and constants, cavity power, coupling factor,
+             strength, and freq offset calcs, tuner loop status and outputs, 
+             histories for phases, freq offset, tuner posn, phase error, and 
+             load angle offset, freq error, load angle error, and delta posn
+             calcs, load angle offset calc, stepper motor control, disable,
+             initialization and stop logic 
+
+  Allen Bradley Diagnostic PVs:
+rf_adapter.db       - Allen-Bradley Adapter Status
+rf_adapter_card.db  - Allen Bradley Adapter Card Status
+rf_dcm_table.db     - RF PLC DCM Table Status
+
+  RFP DAC PVs:
+rf_dac.template
+rf_rfp_fourdacs.db  - RFP module DAC calc and set for II, IQ, QI, QQ
+rf_rfp_twodacs.db   - RFP module DAC calc and set for I and Q
+
+  Summary and fanout PVs (ascii text files - no gdct support):
+rf_sumy_HER.db
+rf_sumy_LER.db
+rf_sumy_cav.db
+rf_sumy_circ.db
+rf_sumy_hvps.db
+rf_sumy_klys.db
+rf_sumy_stn.db
+rf_sumy_wg.db
+
+
+
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

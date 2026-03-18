@@ -1,0 +1,109 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.10.02.02.13.16;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.10.02.02.13.16;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@%SIGNAL
+PIN   9 =  d16_isel 
+PIN  12 =  d8_read 
+PIN   1 =  dir 
+PIN  13 =  dir_out 
+PIN  19 =  g_n 
+PIN  14 =  sout 
+PIN   6 =  sp1 
+PIN   7 =  sp2 
+PIN   8 =  sp3 
+PIN   2 =  vmas_n 
+PIN   4 =  vmds0_n 
+PIN   3 =  vmds1_n 
+PIN   5 =  vmwrite_n 
+PIN  18 =  vxas_n 
+PIN  16 =  vxds0_n 
+PIN  17 =  vxds1_n 
+PIN  15 =  vxwrite_n 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+d8_read =>
+    !vmds0_n & vmds1_n & vmwrite_n & !vxas_n
+
+dir_out =>
+    dir
+  # g_n
+
+sout =>
+    sp1
+  # sp2
+  # sp3
+
+vme_ds16_n =>
+    vmds0_n
+  # vmds1_n
+
+vxas_n =>
+    vmas_n
+
+vxds0_n =>
+    vmds0_n
+
+vxds1_n =>
+    !d16_isel & vmds1_n
+  # d16_isel & vmds0_n
+
+vxwrite_n =>
+    vmwrite_n
+
+%END
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

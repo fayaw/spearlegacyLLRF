@@ -1,0 +1,123 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_0:1.1.1.1
+	R_epics_3_14_6_spear0:1.1.1.1
+	R_3_14_1_spear1:1.1.1.1
+	R1:1.1.1.1
+	B1:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	95.01.14.01.32.33;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	95.01.14.01.32.33;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@               Non-VXI Device Configuration Editor
+               -----------------------------------
+   
+Use this editor to statically assign address space and interrupt lines
+to non-VXI devices. The Resource Manager needs information about the
+static attributes of the installed non-VXI devices in order to avoid
+conflicts when it dynamically configures the VXI devices.
+
+Field Description:
+------------------
+PseudoLA: Logical address of non-VXI device (0x100 and 0x1ff, hex)
+
+Device Name: Device name, 12-character ASCII name
+
+Frame: Logical address of frame extender (VXI-MXI) (hex)
+
+Slot: Slot number (hex)
+
+MfrId: Manufacturer number, 4 characters (hex)
+
+Model Code: Model number, 4 characters (hex)
+
+DevClass: 0 = Memory, 1 = Extended, 2 = Message-Based, 3 = Register-Based
+
+Model Name: 12-character ASCII name
+
+Mfr Name: Manufacturer name, 12-character ASCII name
+
+a16membase: Base of A16 memory (hex)
+
+a16memsize: Size of A16 memory (hex bytes)
+
+a24membase: Base of A24 memory (hex)
+
+a24memsize: Size of A24 memory (hex bytes)
+
+a32membase: Base of A32 memory (hex)
+
+a32memsize: Size of A32 memory (hex bytes)
+
+Irq Level: Interrupt levels (bit vec, bits 0-6 for levels 1-7, hex)
+
+IrqHandle: Interrupt Handlers (bit vec, bits 0-6 for levels 1-7, hex)
+
+InSystem: If the device is presently in the system (0=no, 1=yes)
+
+Usage
+-----
+This editor supports the following commands:
+
+(1) list      [<index#>,[<index#>]] - lists all the entries in the 
+                                      specified range.
+(2) display   [<index#>,[<index#>]] - displays the entries in detail.
+(3) add                             - lets you add an entry.
+(4) duplicate  <index#>             - lets you duplicate an entry.
+(5) modify     <index#>,<field#>    - lets you modify an existing entry.
+(6) delete     <index#>             - lets you delete an entry.
+(7) show       <field#>             - shows information about the field.
+(8) save                            - lets you save the information.
+(9) abort                           - lets you exit the editor, 
+                                      ignoring the changes made.
+(10) exit                           - lets you exit the editor.
+(11) help                           - gives help on that editor.
+
+
+@
+
+
+1.1.1.1
+log
+@RF IOC startup files.
+@
+text
+@@

@@ -1,0 +1,727 @@
+head	1.8;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.8
+	RF-SPEAR-R0-3-1:1.8
+	RF-SPEAR-R0-3-0:1.8
+	RF-SPEAR-R0-2-0:1.8
+	RF-SPEAR-R0-1-0:1.8
+	RF-SPEAR-R0-0-3:1.8
+	RF-SPEAR-R0-0-2:1.8
+	RF-SPEAR-R0-0-1:1.8
+	RF-SPEAR-R0-0-0:1.8
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.8
+	RF-3-13-10:1.8.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.8
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.8
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.7
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.8
+date	2010.02.08.22.02.26;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2008.05.19.15.46.05;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2007.03.20.16.26.40;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2004.09.30.23.19.59;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.06.15.00.32.17;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.08.05.22.58.06;	author lazmo;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.27.01.16.57;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.8
+log
+@Changes to add low limits to all temperatures.
+@
+text
+@grecord(ai,"$(R):CRATE:1P5:VOLT") {
+	field(DESC,"VXI Crate +5 Voltage")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(INP,"$(R):STN:AIM:MODU.RF15  NPP MS")
+	field(PREC,"2")
+	field(EGU,"V")
+	field(HOPR,"10.025")
+	field(HIHI,"5.5")
+	field(LOLO,"4.5")
+	field(HIGH,"5.35")
+	field(LOW,"4.65")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(HYST,".025")
+	field(ADEL,".025")
+	field(MDEL,".025")
+}
+grecord(ai,"$(R):CRATE:M12:VOLT") {
+	field(DESC,"VXI Crate -12 Voltage")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(INP,"$(R):STN:AIM:MODU.RF13  NPP MS")
+	field(PREC,"2")
+	field(EGU,"V")
+	field(LOPR,"-25.")
+	field(HIHI,"-10.8")
+	field(LOLO,"-13.2")
+	field(HIGH,"-11.16")
+	field(LOW,"-12.84")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(HYST,".05")
+	field(ADEL,".05")
+	field(MDEL,".05")
+}
+grecord(ai,"$(R):CRATE:M24:VOLT") {
+	field(DESC,"VXI Crate -24 Voltage")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(INP,"$(R):STN:AIM:MODU.RF11  NPP MS")
+	field(PREC,"2")
+	field(EGU,"V")
+	field(LOPR,"-51.25")
+	field(HIHI,"-21.6")
+	field(LOLO,"-26.4")
+	field(HIGH,"-22.32")
+	field(LOW,"-25.68")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(HYST,".1")
+	field(ADEL,".1")
+	field(MDEL,".1")
+}
+grecord(ai,"$(R):CRATE:M2:VOLT") {
+	field(DESC,"VXI Crate -2 Voltage")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(INP,"$(R):STN:AIM:MODU.RF17  NPP MS")
+	field(PREC,"2")
+	field(EGU,"V")
+	field(LOPR,"-2.5")
+	field(HIHI,"-1.80")
+	field(LOLO,"-2.20")
+	field(HIGH,"-1.86")
+	field(LOW,"-2.14")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(HYST,".0125")
+	field(ADEL,".0125")
+	field(MDEL,".0125")
+}
+grecord(ai,"$(R):CRATE:M5:VOLT") {
+	field(DESC,"VXI Crate -5 Voltage")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(INP,"$(R):STN:AIM:MODU.RF16  NPP MS")
+	field(PREC,"2")
+	field(EGU,"V")
+	field(LOPR,"-7.525")
+	field(HIHI,"-4.68")
+	field(LOLO,"-5.72")
+	field(HIGH,"-4.83")
+	field(LOW,"-5.57")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(HYST,".025")
+	field(ADEL,".025")
+	field(MDEL,".025")
+}
+grecord(ai,"$(R):CRATE:P12:VOLT") {
+	field(DESC,"VXI Crate +12 Voltage")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(INP,"$(R):STN:AIM:MODU.RF12  NPP MS")
+	field(PREC,"2")
+	field(EGU,"V")
+	field(HOPR,"27.5")
+	field(HIHI,"13.2")
+	field(LOLO,"10.8")
+	field(HIGH,"12.84")
+	field(LOW,"11.16")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(HYST,".05")
+	field(ADEL,".05")
+	field(MDEL,".05")
+}
+grecord(ai,"$(R):CRATE:P24:VOLT") {
+	field(DESC,"VXI Crate +24 Voltage")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(INP,"$(R):STN:AIM:MODU.RF10  NPP MS")
+	field(PREC,"2")
+	field(EGU,"V")
+	field(HOPR,"53.75")
+	field(HIHI,"26.4")
+	field(LOLO,"21.6")
+	field(HIGH,"25.68")
+	field(LOW,"22.32")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(HYST,".10")
+	field(ADEL,".10")
+	field(MDEL,".10")
+}
+grecord(ai,"$(R):CRATE:P5:VOLT") {
+	field(DESC,"VXI Crate +5 Voltage")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(INP,"$(R):STN:AIM:MODU.RF14  NPP MS")
+	field(PREC,"2")
+	field(EGU,"V")
+	field(HOPR,"10.025")
+	field(HIHI,"5.5")
+	field(LOLO,"4.5")
+	field(HIGH,"5.35")
+	field(LOW,"4.65")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(HYST,".025")
+	field(ADEL,".025")
+	field(MDEL,".025")
+}
+grecord(ai,"$(R):CRATE:VXI:TEMP") {
+	field(DESC,"VXI Crate Temp")
+	field(DTYP,"Soft Channel")
+	field(INP,"$(R):STN:AIM:MODU.RF0D  NPP MS")
+	field(PREC,"1")
+	field(EGU,"C")
+	field(HOPR,"100.")
+	field(LOPR,"-5.8")
+	field(HIHI,"45")
+	field(HIGH,"36")
+	field(LOLO,"20")
+	field(LOW,"25")
+	field(HHSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LLSV,"MAJOR")
+	field(LSV,"MINOR")
+	field(HYST,".5")
+	field(ADEL,".1")
+	field(MDEL,".1")
+}
+grecord(bo,"$(R):STN:AIM:FILAMENT") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(DOL,"0")
+	field(OUT,"$(R):STN:AIM:MODU.FOO  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+	field(ZSV,"MAJOR")
+}
+grecord(bo,"$(R):STN:AIM:FRCBMABT") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(DOL,"0")
+	field(OUT,"$(R):STN:AIM:MODU.FBA  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+}
+grecord(bo,"$(R):STN:AIM:FRCFLT") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(DOL,"0")
+	field(OUT,"$(R):STN:AIM:MODU.FF  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+	field(OSV,"MAJOR")
+}
+grecord(bo,"$(R):STN:AIM:HCTL") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:AIM:MODU.HCTL  PP MS")
+	field(ZNAM,"On")
+	field(ONAM,"Off")
+}
+grecord(bo,"$(R):STN:AIM:HGET") {
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:AIM:MODU.HGET  PP MS")
+}
+grecord(bo,"$(R):STN:AIM:HMUX") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(VAL,"1")
+	field(OUT,"$(R):STN:AIM:MODU.HMUX  PP MS")
+	field(ZNAM,"HVPS_ARC")
+	field(ONAM,"HVPS")
+}
+grecord(bo,"$(R):STN:AIM:READAS") {
+	field(SCAN,"10 second")
+	field(DTYP,"Soft Channel")
+	field(DOL,"1")
+	field(OUT,"$(R):STN:AIM:MODU.RDAS  PP MS")
+	field(ZNAM,"NoRead")
+	field(ONAM,"Read")
+}
+grecord(bo,"$(R):STN:AIM:SOLENOID") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:AIM:MODU.SOO  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+	field(ZSV,"MAJOR")
+}
+grecord(fanout,"$(R):STN:AIM:FANO1") {
+	field(FLNK,"$(R):STN:AIM:FANO2.VAL  PP MS")
+	field(LNK1,"$(R):STN:AIM:FSTFLT.VAL  PP MS")
+	field(LNK2,"$(R):STN:AIM:ARCCURSTT.VAL  PP MS")
+	field(LNK3,"$(R):STN:AIM:ARCLTDSTT.VAL  PP MS")
+	field(LNK4,"$(R):STN:AIM:ARCENBSTT.VAL  PP MS")
+	field(LNK5,"$(R):STN:AIM:FSTINTSTT.VAL  PP MS")
+	field(LNK6,"$(R):STN:AIM:INTSTATE.VAL  PP MS")
+}
+grecord(fanout,"$(R):STN:AIM:FANO2") {
+	field(FLNK,"$(R):STN:AIM:FANO3.VAL  PP MS")
+	field(LNK1,"$(R):CRATE:M2:VOLT.VAL  PP MS")
+	field(LNK2,"$(R):CRATE:M5:VOLT.VAL  PP MS")
+	field(LNK3,"$(R):CRATE:1P5:VOLT.VAL  PP MS")
+	field(LNK4,"$(R):CRATE:P5:VOLT.VAL  PP MS")
+}
+grecord(fanout,"$(R):STN:AIM:FANO3") {
+	field(LNK1,"$(R):CRATE:M12:VOLT.VAL  PP MS")
+	field(LNK2,"$(R):CRATE:P12:VOLT.VAL  PP MS")
+	field(LNK3,"$(R):CRATE:M24:VOLT.VAL  PP MS")
+	field(LNK4,"$(R):CRATE:P24:VOLT.VAL  PP MS")
+	field(LNK5,"$(R):CRATE:VXI:TEMP.VAL  PP MS")
+}
+grecord(mbbiDirect,"$(R):STN:AIM:ARCCURSTT") {
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:AIM:MODU.ACST  NPP MS")
+}
+grecord(mbbiDirect,"$(R):STN:AIM:ARCENBSTT") {
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:AIM:MODU.AFES  NPP MS")
+}
+grecord(mbbiDirect,"$(R):STN:AIM:ARCLTDSTT") {
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:AIM:MODU.ALST  NPP MS")
+}
+grecord(mbbiDirect,"$(R):STN:AIM:FSTFLT") {
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:AIM:MODU.FFLT  NPP MS")
+}
+grecord(mbbiDirect,"$(R):STN:AIM:FSTINTSTT") {
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:AIM:MODU.FSTT  NPP MS")
+}
+grecord(mbbiDirect,"$(R):STN:AIM:INTSTATE") {
+	field(DTYP,"Soft Channel")
+	field(FLNK,"0")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:AIM:MODU.ISTT  NPP MS")
+}
+grecord(mbboDirect,"$(R):STN:AIM:INTACK") {
+	field(DTYP,"Soft Channel")
+	field(NOBT,"16")
+	field(OUT,"$(R):STN:AIM:MODU.IACK  PP NMS")
+}
+grecord(p2RfAim,"$(R):STN:AIM:MODU") {
+	field(DTYP,"PEP-II RF AIM")
+	field(FLNK,"$(R):STN:AIM:FANO1.VAL  PP MS")
+	field(OUT,"#V0 C$(S) S0 @@")
+	field(PREC,"2")
+	field(IMSK,"47")
+	field(HBFN,"/dat/aimHist.dat")
+	field(D0IF,"/tbl/aimDas0.inst")
+	field(D1IF,"/tbl/aimDas0.inst")
+	field(TL1,"150")
+	field(TL2,"150")
+	field(TL3,"255")
+	field(TL4,"150")
+	field(TL5,"150")
+	field(TL6,"150")
+	field(TL7,"150")
+	field(TL8,"150")
+	field(TL9,"150")
+	field(TLA,"150")
+	field(TLB,"150")
+	field(TLC,"255")
+}
+@
+
+
+1.7
+log
+@Change degC to C.
+@
+text
+@d169 4
+a172 2
+	field(HIHI,"43")
+	field(HIGH,"42")
+d175 2
+@
+
+
+1.6
+log
+@Add fields for precision, deltas, and hysterisis - override defaults so that
+1 decimal place is shown for this temperature and alarms are filtered.
+@
+text
+@d166 1
+a166 1
+	field(EGU,"degC")
+@
+
+
+1.5
+log
+@Add zero and one names for new history-related records.  Default MUX to HVPS-only.
+@
+text
+@d165 1
+d173 3
+@
+
+
+1.4
+log
+@Initialize the second DAS file to the same as the first.  Provide typical
+initial values for the trip limits.
+@
+text
+@d203 2
+d213 1
+d215 2
+@
+
+
+1.3
+log
+@
+Renamed RF2* -> RF1*
+Renamed RF13 -> RF0D
+Renamed GHIS -> HGET
+Renamed MUX0 -> HMUX
+@
+text
+@d301 13
+a313 1
+	field(D1IF,"/tbl/aimDas1.inst")
+@
+
+
+1.2
+log
+@Rename
+@
+text
+@d1 1
+a1 1
+record(ai,"$(R):CRATE:1P5:VOLT") {
+d5 1
+a5 1
+	field(INP,"$(R):STN:AIM:MODU.RF25  PP MS")
+d21 1
+a21 1
+record(ai,"$(R):CRATE:M12:VOLT") {
+d25 1
+a25 1
+	field(INP,"$(R):STN:AIM:MODU.RF23  NPP MS")
+d41 1
+a41 1
+record(ai,"$(R):CRATE:M24:VOLT") {
+d45 1
+a45 1
+	field(INP,"$(R):STN:AIM:MODU.RF21  NPP MS")
+d61 1
+a61 1
+record(ai,"$(R):CRATE:M2:VOLT") {
+d65 1
+a65 1
+	field(INP,"$(R):STN:AIM:MODU.RF27  PP MS")
+d81 1
+a81 1
+record(ai,"$(R):CRATE:M5:VOLT") {
+d85 1
+a85 1
+	field(INP,"$(R):STN:AIM:MODU.RF26  PP MS")
+d101 1
+a101 1
+record(ai,"$(R):CRATE:P12:VOLT") {
+d105 1
+a105 1
+	field(INP,"$(R):STN:AIM:MODU.RF22  NPP MS")
+d121 1
+a121 1
+record(ai,"$(R):CRATE:P24:VOLT") {
+d125 1
+a125 1
+	field(INP,"$(R):STN:AIM:MODU.RF20  NPP MS")
+d141 1
+a141 1
+record(ai,"$(R):CRATE:P5:VOLT") {
+d145 1
+a145 1
+	field(INP,"$(R):STN:AIM:MODU.RF24  PP MS")
+d161 1
+a161 1
+record(ai,"$(R):CRATE:VXI:TEMP") {
+d164 1
+a164 1
+	field(INP,"$(R):STN:AIM:MODU.RF13  NPP MS")
+d173 1
+a173 1
+record(bo,"$(R):STN:AIM:FILAMENT") {
+d182 1
+a182 1
+record(bo,"$(R):STN:AIM:FRCBMABT") {
+d190 1
+a190 1
+record(bo,"$(R):STN:AIM:FRCFLT") {
+d199 6
+a204 1
+grecord(bo,"$(R):STN:AIM:GHIS") {
+d206 1
+a206 1
+	field(OUT,"$(R):STN:AIM:MODU.GHIS  PP MS")
+d208 1
+a208 1
+grecord(bo,"$(R):STN:AIM:MUX0") {
+d211 1
+a211 1
+	field(OUT,"$(R):STN:AIM:MODU.MUX0  PP MS")
+d213 1
+a213 1
+record(bo,"$(R):STN:AIM:READAS") {
+d221 1
+a221 1
+record(bo,"$(R):STN:AIM:SOLENOID") {
+d252 1
+a252 1
+record(mbbiDirect,"$(R):STN:AIM:ARCCURSTT") {
+d258 1
+a258 1
+record(mbbiDirect,"$(R):STN:AIM:ARCENBSTT") {
+d264 1
+a264 1
+record(mbbiDirect,"$(R):STN:AIM:ARCLTDSTT") {
+d270 1
+a270 1
+record(mbbiDirect,"$(R):STN:AIM:FSTFLT") {
+d276 1
+a276 1
+record(mbbiDirect,"$(R):STN:AIM:FSTINTSTT") {
+d282 1
+a282 1
+record(mbbiDirect,"$(R):STN:AIM:INTSTATE") {
+d288 1
+a288 1
+record(mbboDirect,"$(R):STN:AIM:INTACK") {
+d293 1
+a293 2
+record(p2RfAim,"$(R):STN:AIM:MODU") {
+	field(DESC,"Arc Interlock Module")
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 1
+grecord(ai,"$(R):CRATE:1P5:VOLT") {
+d4 2
+a5 2
+	field(FLNK,"$(R):CRATE:M5:VOLT.VAL  PP MS")
+	field(INP,"$(R):STN:AIM:MODU.RF15  NPP MS")
+d21 1
+a21 1
+grecord(ai,"$(R):CRATE:M12:VOLT") {
+d24 2
+a25 2
+	field(FLNK,"$(R):CRATE:P5:VOLT.VAL  PP MS")
+	field(INP,"$(R):STN:AIM:MODU.RF13  NPP MS")
+d41 1
+a41 1
+grecord(ai,"$(R):CRATE:M24:VOLT") {
+d44 2
+a45 2
+	field(FLNK,"$(R):CRATE:P12:VOLT.VAL  PP MS")
+	field(INP,"$(R):STN:AIM:MODU.RF11  NPP MS")
+d61 1
+a61 1
+grecord(ai,"$(R):CRATE:M2:VOLT") {
+d64 2
+a65 2
+	field(FLNK,"$(R):CRATE:VXI:TEMP.VAL  PP MS")
+	field(INP,"$(R):STN:AIM:MODU.RF17  NPP MS")
+d81 1
+a81 1
+grecord(ai,"$(R):CRATE:M5:VOLT") {
+d84 2
+a85 2
+	field(FLNK,"$(R):CRATE:M2:VOLT.VAL  PP MS")
+	field(INP,"$(R):STN:AIM:MODU.RF16  NPP MS")
+d101 1
+a101 1
+grecord(ai,"$(R):CRATE:P12:VOLT") {
+d104 2
+a105 2
+	field(FLNK,"$(R):CRATE:M12:VOLT.VAL  PP MS")
+	field(INP,"$(R):STN:AIM:MODU.RF12  NPP MS")
+d121 1
+a121 1
+grecord(ai,"$(R):CRATE:P24:VOLT") {
+d124 2
+a125 2
+	field(FLNK,"$(R):CRATE:M24:VOLT.VAL  PP MS")
+	field(INP,"$(R):STN:AIM:MODU.RF10  NPP MS")
+d141 1
+a141 1
+grecord(ai,"$(R):CRATE:P5:VOLT") {
+d144 2
+a145 2
+	field(FLNK,"$(R):CRATE:1P5:VOLT.VAL  PP MS")
+	field(INP,"$(R):STN:AIM:MODU.RF14  NPP MS")
+d161 1
+a161 1
+grecord(ai,"$(R):CRATE:VXI:TEMP") {
+d164 1
+a164 1
+	field(INP,"$(R):STN:AIM:MODU.RF07  NPP MS")
+d173 1
+a173 1
+grecord(bo,"$(R):STN:AIM:FILAMENT") {
+d182 1
+a182 1
+grecord(bo,"$(R):STN:AIM:FRCBMABT") {
+d190 1
+a190 1
+grecord(bo,"$(R):STN:AIM:FRCFLT") {
+d199 10
+a208 1
+grecord(bo,"$(R):STN:AIM:READAS") {
+d212 1
+a212 1
+	field(OUT,"$(R):STN:AIM:MODU.RDAS  PP NMS")
+d216 1
+a216 1
+grecord(bo,"$(R):STN:AIM:SOLENOID") {
+d224 24
+a247 1
+grecord(mbbiDirect,"$(R):STN:AIM:ARCCURSTT") {
+d249 1
+a249 1
+	field(FLNK,"$(R):STN:AIM:FSTFLT.VAL  PP MS")
+d253 1
+a253 1
+grecord(mbbiDirect,"$(R):STN:AIM:ARCENBSTT") {
+d255 1
+a255 1
+	field(FLNK,"$(R):STN:AIM:ARCLTDSTT.VAL  PP MS")
+d259 1
+a259 1
+grecord(mbbiDirect,"$(R):STN:AIM:ARCLTDSTT") {
+d261 1
+a261 1
+	field(FLNK,"$(R):STN:AIM:ARCCURSTT.VAL  PP MS")
+d265 1
+a265 1
+grecord(mbbiDirect,"$(R):STN:AIM:FSTFLT") {
+d267 1
+a267 1
+	field(FLNK,"$(R):CRATE:P24:VOLT.VAL  PP MS")
+d271 1
+a271 1
+grecord(mbbiDirect,"$(R):STN:AIM:FSTINTSTT") {
+d273 1
+a273 1
+	field(FLNK,"$(R):STN:AIM:ARCENBSTT.VAL  PP MS")
+d277 1
+a277 1
+grecord(mbbiDirect,"$(R):STN:AIM:INTSTATE") {
+d279 1
+a279 1
+	field(FLNK,"$(R):STN:AIM:FSTINTSTT.VAL  PP MS")
+d283 1
+a283 1
+grecord(mbboDirect,"$(R):STN:AIM:INTACK") {
+d288 2
+a289 1
+grecord(p2RfAim,"$(R):STN:AIM:MODU") {
+d291 1
+a291 1
+	field(FLNK,"$(R):STN:AIM:INTSTATE.VAL  PP MS")
+d294 2
+a295 1
+	field(IMSK,"255")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

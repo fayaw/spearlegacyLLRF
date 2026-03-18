@@ -1,0 +1,159 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.02;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.02;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 1
+The length of the symbol table is: 13
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+
+The number of name info structs is : 92
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	IdL3	!	17	25	:100	"Z
+#	IdL3	!	17	25	:101	"[
+$	IdL3	!	17	25	:102	"\
+%	IdL3	!	17	25	:103	"]
+&	IdL3	!	17	25	:104	"^
+'	IdL3	!	17	25	:105	"_
+(	IdL3	!	17	25	:106	"`
+)	IdL3	!	17	25	:107	"a
+*	IdL3	!	17	25	:108	"b
++	IdL3	!	17	25	:109	"c
+,	IdL3	!	17	25	:110	"d
+-	IdL3	!	17	25	:111	"e
+.	IdL3	!	17	25	:112	"f
+/	IdL3	!	17	25	:113	"g
+0	IdL3	!	17	25	:114	"h
+1	IdL3	!	17	25	:115	"i
+2	IdL3	!	15	25	:68	":
+3	IdL3	!	15	25	:69	";
+4	IdL3	!	15	25	:70	"<
+5	IdL3	!	15	25	:71	"=
+6	IdL3	!	15	25	:72	">
+7	IdL3	!	15	25	:73	"?
+8	IdL3	!	15	25	:74	"@@
+9	IdL3	!	15	25	:75	"A
+:	IdL3	!	15	25	:76	"B
+;	IdL3	!	15	25	:77	"C
+<	IdL3	!	15	25	:78	"D
+=	IdL3	!	15	25	:79	"E
+>	IdL3	!	15	25	:80	"F
+?	IdL3	!	15	25	:81	"G
+@@	IdL3	!	15	25	:82	"H
+A	IdL3	!	15	25	:83	"I
+B	IdL3	!	15	25	:84	"J
+C	IdL3	!	15	25	:85	"K
+D	IdL3	!	15	25	:86	"L
+E	IdL3	!	15	25	:87	"M
+F	IdL3	!	15	25	:88	"N
+G	IdL3	!	15	25	:89	"O
+H	IdL3	!	15	25	:90	"P
+I	IdL3	!	15	25	:91	"Q
+J	IdL3	!	17	25	:92	"R
+K	IdL3	!	17	25	:93	"S
+L	IdL3	!	17	25	:94	"T
+M	IdL3	!	17	25	:95	"U
+N	IdL3	!	17	25	:96	"V
+O	IdL3	!	17	25	:97	"W
+P	IdL3	!	17	25	:98	"X
+Q	IdL3	!	17	25	:99	"Y
+R	IdLM	!	17	17	OUTD0	"9
+S	IdLM	!	17	17	OUTD1	"8
+T	IdLM	!	17	17	OUTD10	"/
+U	IdLM	!	17	17	OUTD11	".
+V	IdLM	!	18	23	OUTD12	"-
+W	IdLM	!	18	23	OUTD13	",
+X	IdLM	!	18	23	OUTD14	"+
+Y	IdLM	!	18	23	OUTD15	"*
+Z	IdLM	!	17	17	OUTD2	"7
+[	IdLM	!	17	17	OUTD3	"6
+\	IdLM	!	17	17	OUTD4	"5
+]	IdLM	!	17	17	OUTD5	"4
+^	IdLM	!	17	17	OUTD6	"3
+_	IdLM	!	17	17	OUTD7	"2
+`	IdLM	!	17	17	OUTD8	"1
+a	IdLM	!	17	17	OUTD9	"0
+b	$rX8+	!	OUTD[15..0]	"l
+c	IdLL	!	5	3	SELECT	o
+d	IdLL	!	7	9	TI_SRC0	")
+e	IdLL	!	7	9	TI_SRC1	"(
+f	IdLL	!	7	9	TI_SRC10	}
+g	IdLL	!	7	9	TI_SRC11	|
+h	IdLL	!	7	9	TI_SRC2	"'
+i	IdLL	!	7	9	TI_SRC3	"&
+j	IdLL	!	7	9	TI_SRC4	"%
+k	IdLL	!	7	9	TI_SRC5	"$
+l	IdLL	!	7	9	TI_SRC6	"#
+m	IdLL	!	7	9	TI_SRC7	""
+n	IdLL	!	7	9	TI_SRC8	"!
+o	IdLL	!	7	9	TI_SRC9	~
+p	$rX8+	!	TI_SRC[11..0]	"k
+q	IdLL	!	6	7	TSRC0	{
+r	IdLL	!	6	7	TSRC1	z
+s	IdLL	!	6	7	TSRC10	q
+t	IdLL	!	6	7	TSRC11	p
+u	IdLL	!	6	7	TSRC2	y
+v	IdLL	!	6	7	TSRC3	x
+w	IdLL	!	6	7	TSRC4	w
+x	IdLL	!	6	7	TSRC5	v
+y	IdLL	!	6	7	TSRC6	u
+z	IdLL	!	6	7	TSRC7	t
+{	IdLL	!	6	7	TSRC8	s
+|	IdLL	!	6	7	TSRC9	r
+}	$rX8+	!	TSRC[11..0]	"j
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

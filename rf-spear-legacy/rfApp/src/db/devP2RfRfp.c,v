@@ -1,0 +1,2708 @@
+head	1.6;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.6
+	RF-SPEAR-R0-3-1:1.6
+	RF-SPEAR-R0-3-0:1.6
+	RF-SPEAR-R0-2-0:1.6
+	RF-SPEAR-R0-1-0:1.6
+	RF-SPEAR-R0-0-3:1.6
+	RF-SPEAR-R0-0-2:1.6
+	RF-SPEAR-R0-0-1:1.6
+	RF-SPEAR-R0-0-0:1.6
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.6
+	RF-3-13-10:1.5.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.5
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.5
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.5
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.6
+date	2011.12.07.01.21.54;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2004.10.12.16.36.52;	author lazmo;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.09.21.00.11.14;	author lazmo;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.01.22.00.37.55;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.11.19.04.00;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.6
+log
+@Changes for 3.14.11 (export) and compiler warnings.
+@
+text
+@/*
+** ++
+**
+**  Facility:  DEV - DEVice support
+**
+**  Abstract:
+**      EPICS device support for the PEP-II RF RF-Processing Module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Low Level RF Group
+**
+**  History:
+**      Sep 23, 2004  [LAZMO] - Moved "mctl |= RFP_M_INTCOMP" out of "rec->rfoo" conditional
+**	June 25, 2004 [LAZMO] - Added db_post_events() to .lod & .dlod, for rf_calib.st
+**	September 11, 1996 - Created
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#include <vxWorks.h>
+#include <sysLib.h>
+#include <stdlib.h>
+#include <types.h>
+#include <stdioLib.h>
+#include <string.h>
+#include <taskLib.h>
+#include <math.h>
+#include <logLib.h>
+
+#include <cvtTable.h>
+#include <dbDefs.h>
+#include <dbAccess.h>
+#include <dbEvent.h>
+#include <recGbl.h>
+#include <recSup.h>
+#include <devSup.h>
+#include <link.h>
+#include <alarm.h>
+/*#include <module_types.h>*/
+#include <callback.h>
+#include <epicsPrint.h>
+
+#include <p2RfLib.h>
+#include <drvP2RfVxi.h>
+#include <p2RfRfpDef.h>
+#include <p2RfRfpRecord.h>
+
+#include "epicsExport.h"
+
+int octal_dac=0;
+
+
+
+#define RFP_V_INTSELECT    RFP_V_INVRFREF
+#define RFP_M_INTSELECT   (RFP_M_INVRFREF | RFP_M_INVCLKS  | \
+                           RFP_M_ADCOFLW  | RFP_M_RIPLPERR | RFP_M_DSPMSG   | \
+                           RFP_M_INVSMOP  | RFP_M_INVOP    | RFP_M_SOFTWARE)
+
+typedef struct p2RfRfpRecord   P2RfRfpRecord;
+
+static long InitRecord (P2RfRfpRecord *);
+static long Action     (P2RfRfpRecord *);
+
+
+typedef struct
+{
+  long		number;
+  DEVSUPFUN	report;
+  DEVSUPFUN	init;
+  DEVSUPFUN	init_record;
+  DEVSUPFUN	get_ioint_info;
+  DEVSUPFUN	action;
+} P2RfRfpDset;
+
+P2RfRfpDset devP2RfRfp = {5, NULL, NULL, InitRecord, NULL, Action};
+
+epicsExportAddress(dset,devP2RfRfp);
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  long            status;
+}  RfpRstBlk;
+
+typedef struct _DspComBlk
+{
+  volatile unsigned short  blkId;
+  volatile unsigned short  vers;
+  volatile unsigned short  chkSum;
+  volatile unsigned short  status;
+  volatile unsigned short  sttArg[STT_K_ARGCNT];
+  volatile unsigned short  dspMsg;
+  volatile unsigned short  dspArg;
+  volatile unsigned short  cpuMsg;
+  volatile unsigned short  cpuArg;
+  volatile unsigned short  comLen;
+}  DspComBlk;
+
+typedef struct
+{
+  char           *id;
+  int             index;
+  int             count;
+  short          *consts;
+}  RfpDspMsgPrm;
+
+typedef struct
+{
+  CALLBACK             callback;
+  void                *drvPvt;
+  volatile DspComBlk  *comBlk;
+  RfpDspMsgPrm        *prm;
+  long                 status;
+}  RfpDspMsgBlk;
+
+typedef struct
+{
+  int             index;
+  char           *file;
+}  RfpDspPrm;
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  RfpDspPrm      *prm;
+  long            status;
+}  RfpDspBlk;
+
+typedef struct
+{
+  char           *id;
+  int             index;
+  int             count;
+  char           *file;
+  short          *buffer;
+}  RfpMemPrm;
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  RfpMemPrm      *prm;
+  long            status;
+  int             abortFlg;
+}  RfpRamBlk;
+
+typedef struct
+{
+  void           *drvPvt;
+  P2RfRfpRecord  *rec;
+  RfpRstBlk       resetBlk;
+  RfpDspMsgBlk    dspMsgBlk;
+  RfpDspBlk       dspBlk;
+  RfpRamBlk       getRamBlk;
+  RfpRamBlk       ldRamBlk;
+  unsigned int    intPrc;
+
+  RfpDspMsgPrm    dspMsgPrm;
+  RfpDspPrm       dspPrm;
+  RfpMemPrm       sigIPrm;
+  RfpMemPrm       sigQPrm;
+  RfpMemPrm       cavIPrm;
+  RfpMemPrm       cavQPrm;
+  RfpMemPrm       dacIPrm;
+  RfpMemPrm       dacQPrm;
+}  RfpBoard;
+
+/* Forward references */
+static long  SpawnReset      (P2RfRfpRecord *, RfpRstBlk *);
+static void  ResetCallback   (RfpRstBlk *);
+static void  DspMsgCallback  (RfpDspMsgBlk *);
+static long  SpawnLdDsp      (P2RfRfpRecord *, unsigned char *, RfpDspBlk *,
+                              RfpDspPrm *, char *, unsigned short *);
+static void  LdDspCallback   (RfpDspBlk *);
+static long  SpawnGetRam     (P2RfRfpRecord *, unsigned char *, RfpRamBlk *,
+                              RfpMemPrm *, unsigned int, char *,
+                              unsigned short *);
+static void  GetRamCallback  (RfpRamBlk *);
+static long  SpawnLdRam      (P2RfRfpRecord *, unsigned char *, RfpRamBlk *,
+                              RfpMemPrm *, char *, unsigned short *);
+static void  LdRamCallback   (RfpRamBlk *);
+static void  RfpIsr          (void *, unsigned short);
+static void  RfpShutdown     (void *);
+static long  InitFields      (RfpBoard *, int);
+static long  ColdInit        (RfpBoard *, P2RfRfpRecord *);
+static long  WarmInit        (RfpBoard *, P2RfRfpRecord *);
+static int   CheckDspOK      (long);
+static void  ActLddo         (RfpBoard *, void *, P2RfRfpRecord  *);
+static void  ActLdas         (RfpBoard *, void *, P2RfRfpRecord  *);
+static void  ActLdpg         (RfpBoard *, void *, P2RfRfpRecord  *);
+static void  ActLdphc        (RfpBoard *, void *, P2RfRfpRecord  *);
+static void  ActLdahc        (RfpBoard *, void *, P2RfRfpRecord  *);
+static void  ActGerp         (RfpBoard *, void *, P2RfRfpRecord  *);
+static void  FeedbackSigMux  (P2RfRfpRecord *rec, unsigned short *rctl, unsigned short *mctl);
+
+static void RfpIsr (void           *brdArg,
+                    unsigned short  intStat)
+/*
+   Description
+   -----------
+   Device specific routine to handle interrupts generated by the module.
+   It runs in the context of the Interrupt Service Routine.  Thus all
+   the rules for coding at IPL apply.
+
+   In this case, alarms are set depending on the interrupt type.
+
+   Parameters
+   ----------
+       brdArg - A pointer to the device private structure
+      intStat - The interrupt status mask
+
+   Returns
+   -------
+   nothing
+*/
+{
+#if 0
+  Function ("RfpIsr");
+#endif
+
+  RfpBoard       *brd = (RfpBoard *) brdArg;
+  P2RfRfpRecord  *rec = brd->rec;
+
+
+#if 0
+  if (intStat & RFP_M_INVRFREF)
+    logMsg("%s: Invalid RF Reference clock\n", (int)FN,0,0,0,0,0);
+  if (intStat & RFP_M_INVCLKS)
+    logMsg("%s: Invalid 80, 40, 10 MHz and/or ripple clock(s)\n",(int) FN,0,0,0,0,0);
+
+  if (intStat & RFP_M_ADCOFLW)
+    logMsg ("%s: ADC overflow detected\n", (int)FN,0,0,0,0,0);
+  if (intStat & RFP_M_RIPLPERR)
+    logMsg ("%s: Ripple loop serial link error\n", (int)FN,0,0,0,0,0);
+
+  if (intStat & RFP_M_DSPMSG)
+    logMsg ("%s: Message from DSP\n",(int) FN,0,0,0,0,0);
+
+  if (intStat & RFP_M_INVSMOP)
+    logMsg ("%s: Invalid State Machine operation\n", (int)FN,0,0,0,0,0);
+  if (intStat & RFP_M_INVOP)
+    logMsg ("%s: Invalid operation\n", (int)FN,0,0,0,0,0);
+  if (intStat & RFP_M_SOFTWARE)
+    logMsg ("%s: Software interrupt\n", (int)FN,0,0,0,0,0);
+#endif
+
+  /* Handle messages from the DSP */
+  if (intStat & RFP_M_DSPMSG)
+  {
+    /* Invoke the DSP message handling callback */
+    callbackRequest (&brd->dspMsgBlk.callback);
+
+    /* Take the DSP message bit down in the interrupt mask */
+    /*    intStat ^= RFP_M_DSPMSG; */
+  }
+
+  /* Update mask of interrupts set */
+  if ((intStat & (intStat ^ rec->istt)) || (intStat & RFP_M_DSPMSG))  /* Is bit already set in istt? */
+  {
+    rec->istt |= intStat;
+
+    /* Process forward links */
+    brd->intPrc++;
+    scanOnce ((dbCommon *)rec);
+  }
+}
+
+
+
+static long DspFindComBlk (void                *drvPvt,
+                           volatile DspComBlk **comBlk)
+/*
+   Description
+   -----------
+   Routine to find the location of the Communications Block in the DSP's
+   external RAM.  The pointer is returned as an absolute pointer.
+
+   Parameters
+   ----------
+       drvPvt - A pointer to the driver-private block
+       comBlk - A location in which to return the Communications Block pointer
+
+   Returns
+   -------
+   OK or ERROR if if the Block ID and/or version numbers have bad values
+*/
+{
+  Function ("DspFindComBlk");
+
+
+  /* Get the pointer to the communications block */
+  if (P2RF_DspFindComBlk (drvPvt, (volatile void **) comBlk) == OK)
+  {
+    /* Check the comBlk ID and version numbers */
+    if ((*comBlk)->blkId != DSP_K_COMBLKID)
+    {
+      P2RF_Printf (__FILE__, FN,
+                   "DSP has different comBlk ID %u than the expected %u",
+                   (*comBlk)->blkId, DSP_K_COMBLKID);
+      return (ERROR);
+    }
+    if ((*comBlk)->vers  != DSP_K_COMVERS)
+    {
+      P2RF_Printf (__FILE__, FN,
+                   "DSP has different comBlk version %u than the expected %u",
+                   (*comBlk)->vers, DSP_K_COMVERS);
+      return (ERROR);
+    }
+  }
+
+  return (OK);
+}
+
+
+
+static void DspMsgCallback (RfpDspMsgBlk *blk)
+/*
+   Description
+   -----------
+   This function handles messages from the on-board DSP.  It is invoked
+   by the callback facility when a DSP message interrupt is received.
+
+   Parameters
+   ----------
+          blk - A pointer to the DSP message handling block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  Function ("DspMsgCallback");
+
+  P2RfRfpRecord        *rec;
+  volatile DspComBlk   *comBlk = blk->comBlk;
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+
+  /* If the comBlk pointer is not yet initialized, initialize it */
+  if (comBlk == NULL)
+  {
+    if (DspFindComBlk (blk->drvPvt, &comBlk) != OK)
+    {
+      P2RF_Printf (__FILE__, FN, "Could not find a valid communications block");
+      return;
+    }
+
+    blk->comBlk = comBlk;
+  }
+
+  /* Decide what to do, given the message */
+  switch (comBlk->dspMsg)
+  {
+    case CMD_K_READY:
+    {
+      RfpBoard             *brd    = rec->dpvt;
+      void                 *drvPvt = brd->drvPvt;
+      volatile DspComBlk   *comBlk = brd->dspMsgBlk.comBlk;
+
+        if (comBlk->status == STT_OKAY)
+        {
+          blk->status = OK;
+  	  /*
+	  ** Load all of the DSP data. Since the DSP can only do one at a time,
+          ** tarry a tad between sends. Since it runs ~23KHz it doesn't have to
+	  ** be much.
+	  */
+          ActLdas(brd, drvPvt, rec);
+          taskDelay (4);
+          ActLdpg(brd, drvPvt, rec);
+          taskDelay (4);
+          ActLddo(brd, drvPvt, rec);
+          taskDelay (4);
+          ActLdphc(brd, drvPvt, rec);
+          taskDelay (4);
+          ActLdahc(brd, drvPvt, rec);
+        }
+        else
+        {
+          strncpy (rec->val, "DSP did not come up with OKAY status",
+                  sizeof (rec->val));
+          P2RF_Printf (__FILE__, FN, "DSP did not comup with OKAY status");
+          blk->status = ERROR;
+        }
+    }
+    break;
+
+    case CMD_K_SVDATA:
+    {
+      RfpDspMsgPrm  *prm = blk->prm;
+      int            startIdx = prm->index;
+      int            endIdx   = EXT2IDX ((long) comBlk);
+      int            begIdx   = comBlk->dspArg - RFP_A_ERAM;
+      long           status;
+
+      if ((status = P2RF_SaveDspMemory (blk->drvPvt,
+                                        startIdx, begIdx, endIdx, rec->ddsf,
+                                        rec->val, sizeof (rec->val))) == OK)
+      {
+        rec->sdst = NO_ALARM;
+
+        /* Load the response */
+        comBlk->cpuMsg = CMD_K_SVDATA; /* Done saving */
+
+        /* Tell DSP to read our response.  OK if rctl changes underneath us */
+        P2RF_WriteVme (blk->drvPvt, RFP_I_RFCTRL, rec->rctl | RFP_M_MSGTODSP);
+        P2RF_WriteVme (blk->drvPvt, RFP_I_RFCTRL, rec->rctl);
+      }
+      else
+      {
+        rec->sdst = WRITE_ALARM;
+        db_post_events (rec, &rec->sdst, DBE_VALUE | DBE_LOG);
+      }
+    }
+    break;
+
+    case CMD_K_ERROR:
+      strncpy (rec->val, "DSP crashed", sizeof (rec->val));
+      P2RF_Printf (__FILE__, FN, "DSP crashed with error status %h04x",
+                   comBlk->status);
+      blk->status = ERROR;
+      break;
+  }
+}
+
+
+
+static void RfpShutdown (void  *brdArg)
+/*
+   Description
+   -----------
+   Device specific routine to run at shutdown time.
+
+   Parameters
+   ----------
+       brdArg - A pointer to the device private structure
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("RfpShutdown"); */
+}
+
+
+
+static long InitRecord (P2RfRfpRecord  *rec)
+/*
+   Description
+   -----------
+   Initialize the record.  Many fields of the record are filled with data from
+   the hardware.  Depending on the start-up type (cold or warm) some record
+   fields will either set up the hardware or get their values from a restore
+   file.  Interrupts from the board are enabled at the end of the
+   initialization.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("InitRecord");
+
+  struct vxiio   *vxiIo = NULL;
+  RfpBoard       *brd;
+  long            status;
+  void           *drvPvt;
+  char           *msg   = "RFP module initialization failed";
+  int             startType;
+  unsigned short  reg;
+
+
+  /* rec.out must be of type VXI_IO */
+  if (rec->out.type != VXI_IO)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (S_db_badField, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "Illegal OUT field"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return(S_db_badField);
+  }
+
+  /* Allocate the device private block */
+  if ((brd = calloc (1, sizeof (*brd))) == NULL)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (ERROR, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN,
+                                     "No memory for RFP board descriptor"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Register the module to get a driver handle */
+  vxiIo = &rec->out.value.vxiio;
+  if ( (status = P2RF_RegisterModule (vxiIo->flag, vxiIo->frame, vxiIo->slot,
+                                    vxiIo->la,
+                                    RFP_K_MODEL, RFP_K_NAME, RFP_K_DRAWING,
+                                    RfpIsr, brd, RfpShutdown, brd,
+                                    &drvPvt)) )
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "P2RF_RegisterModule"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (status);
+  }
+
+  /* Set up the device private block and save a pointer to it in the record */
+  brd->drvPvt = drvPvt;
+  brd->rec    = rec;
+  rec->dpvt   = brd;
+
+  /* Initialize the callback facility for the reset function*/
+  brd->resetBlk.drvPvt = drvPvt;
+  callbackSetCallback ((void*)ResetCallback, &brd->resetBlk.callback);
+  callbackSetPriority (priorityHigh,         &brd->resetBlk.callback);
+  callbackSetUser     (rec,                  &brd->resetBlk.callback);
+
+  /* Initialize the callback facility for loading the DSP */
+  brd->dspBlk.drvPvt = drvPvt;
+  callbackSetCallback ((void*)LdDspCallback, &brd->dspBlk.callback);
+  callbackSetPriority (priorityLow,          &brd->dspBlk.callback);
+  callbackSetUser     (rec,                  &brd->dspBlk.callback);
+
+  /* Load the static part of the DSP parameter block */
+  {
+    RfpDspPrm  *prm = &brd->dspPrm;
+
+    prm->index = RFP_I_DSPMEM;
+  }
+
+  /* Initialize the callback facility for handleing DSP messages */
+  brd->dspMsgBlk.drvPvt = drvPvt;
+  brd->dspMsgBlk.comBlk = NULL;
+  brd->dspMsgBlk.status = ERROR;  /* Mark as error 'till READY msg recv`d */
+  callbackSetCallback ((void*)DspMsgCallback, &brd->dspMsgBlk.callback);
+  callbackSetPriority (priorityHigh,          &brd->dspMsgBlk.callback);
+  callbackSetUser     (rec,                   &brd->dspMsgBlk.callback);
+
+  /* Load the static part of the DSP message parameter block */
+  {
+    RfpDspMsgPrm  *prm = &brd->dspMsgPrm;
+
+    prm->index  = RFP_I_DSPMEM;
+
+    brd->dspMsgBlk.prm = prm;
+  }
+
+  /* Initialize the callback facility for the get-RAM function */
+  brd->getRamBlk.drvPvt = drvPvt;
+  callbackSetCallback ((void*)GetRamCallback, &brd->getRamBlk.callback);
+  callbackSetPriority (priorityLow,           &brd->getRamBlk.callback);
+  callbackSetUser     (rec,                   &brd->getRamBlk.callback);
+
+  /* Load the static part of the signal I RAM parameter block */
+  {
+    RfpMemPrm  *prm = &brd->sigIPrm;
+
+    prm->id    = RFP_K_SIGIRAMID;
+    prm->index = RFP_I_SIGIRAM;
+  }
+
+  /* Load the static part of the signal Q RAM parameter block */
+  {
+    RfpMemPrm  *prm = &brd->sigQPrm;
+
+    prm->id    = RFP_K_SIGQRAMID;
+    prm->index = RFP_I_SIGQRAM;
+  }
+
+  /* Load the static part of the cavity I RAM parameter block */
+  {
+    RfpMemPrm  *prm = &brd->cavIPrm;
+
+    prm->id    = RFP_K_CAVIRAMID;
+    prm->index = RFP_I_CAVIRAM;
+  }
+
+  /* Load the static part of the cavity Q RAM parameter block */
+  {
+    RfpMemPrm  *prm = &brd->cavQPrm;
+
+    prm->id    = RFP_K_CAVQRAMID;
+    prm->index = RFP_I_CAVQRAM;
+  }
+
+  /* Initialize the callback facility for the load-RAM function */
+  brd->ldRamBlk.drvPvt = drvPvt;
+  callbackSetCallback ((void*)LdRamCallback, &brd->ldRamBlk.callback);
+  callbackSetPriority (priorityLow,          &brd->ldRamBlk.callback);
+  callbackSetUser     (rec,                  &brd->ldRamBlk.callback);
+
+  /* Load the static part of the DAC I RAM parameter block */
+  {
+    RfpMemPrm  *prm = &brd->dacIPrm;
+
+    prm->id    = RFP_K_DACIRAMID;
+    prm->index = RFP_I_DACIRAM;
+  }
+
+  /* Load the static part of the DAC Q RAM parameter block */
+  {
+    RfpMemPrm  *prm = &brd->dacQPrm;
+
+    prm->id    = RFP_K_DACQRAMID;
+    prm->index = RFP_I_DACQRAM;
+  }
+
+  /* Figure out the restart type -- To be determined */
+  startType = P2RF_K_COLDSTART;
+
+  /* Initialize the module and the database fields depending on startup type */
+  if ( (status = InitFields (brd, P2RF_K_COLDSTART)) )
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Enable module interrupts and update the database copy */
+  P2RF_ModIntEnable (drvPvt);
+  P2RF_ReadVme (brd->drvPvt, RFP_I_INTCTRL, &reg);
+  if (reg != rec->ictl ) {
+    rec->ictl = reg;
+    db_post_events (rec, &rec->ictl, DBE_VALUE | DBE_LOG);
+  }
+  return (OK);
+}
+
+
+
+static long InitFields (RfpBoard *brd,
+                        int       initType)
+/*
+   Description
+   -----------
+   Function to initialize the fields in the database record and/or the module,
+   depending on the initialization type.
+
+   Parameters
+   ----------
+          brd - A pointer to the device private block
+     initType - Type of initialization.
+
+   Returns
+   -------
+   Status
+*/
+{
+  /*  Function ("InitFields");*/
+
+  P2RfRfpRecord  *rec    = brd->rec;
+  void           *drvPvt = brd->drvPvt;
+  unsigned short      sernHi;
+  unsigned short      sernLo;
+  long                status;
+
+  /* Reset the module, if it's a cold startup.  This takes a while... */
+  if (initType == P2RF_K_COLDSTART)  P2RF_ResetModule (drvPvt);
+
+  /* Load the record fields with device data */
+  P2RF_ReadVme (drvPvt, RFP_I_MANID,     &rec->mid );
+  P2RF_ReadVme (drvPvt, RFP_I_MODELNO,   &rec->mtyp);
+  P2RF_ReadVme (drvPvt, RFP_I_STATUS,    &rec->mstt);
+  P2RF_ReadVme (drvPvt, RFP_I_OFFSET,    &rec->a24o);
+  P2RF_ReadVme (drvPvt, RFP_I_ATTRIBUTE, &rec->vatt);
+  P2RF_ReadVme (drvPvt, RFP_I_SERIALHI,  &sernHi   );
+  P2RF_ReadVme (drvPvt, RFP_I_SERIALLO,  &sernLo   );
+  rec->sern = (sernHi << 16) | sernLo;
+  P2RF_ReadVme (drvPvt, RFP_I_VERSION,   &rec->vern);
+  P2RF_ReadVme (drvPvt, RFP_I_SUBCLASS,  &rec->vscl);
+
+  /* Resman wrote 0xfffc to module control register; take down software int */
+  rec->mctl = rec->mstt & (RFP_M_SFTRST | RFP_M_SYSFAILINH | RFP_M_A24A32);
+  
+  /* Get hardware and firmware version (lower nibble) from the version register */
+  rec->verh = P2RF_HWVER( rec->vern );
+  rec->verf = P2RF_FWVER( rec->vern );
+
+  /* Write some registers if we're doing a grounds-up initialization */
+  if (initType == P2RF_K_COLDSTART)    status = ColdInit (brd, rec);
+  else                                 status = WarmInit (brd, rec);
+
+
+  /* Update the database copy of the RFP Status and control registers */
+  P2RF_ReadVme (drvPvt, RFP_I_STATUS, &rec->mstt);
+  db_post_events (rec, &rec->rstt, DBE_VALUE | DBE_LOG);
+  P2RF_ReadVme  (drvPvt, RFP_I_CONTROL,  &rec->mctl);
+
+  /* Update the database copy of the RFP Status and control registers */
+  P2RF_ReadVme (drvPvt, RFP_I_RFSTAT, &rec->rstt);
+  db_post_events (rec, &rec->rstt, DBE_VALUE | DBE_LOG);
+  P2RF_ReadVme (drvPvt, RFP_I_RFCTRL, &rec->rctl);
+
+  /* Update the readback for the feedback signal mux */
+  rec->sfmx = FBSIGMUX_READ(rec);
+  db_post_events (rec, &rec->sfmx, DBE_VALUE | DBE_LOG);
+
+  /* Update the current state of the DACs Output */
+  rec->sdac = (rec->mctl & (RFP_V_DACINJPT-1)) | (rec->rctl & RFP_V_DACSON);
+  db_post_events (rec, &rec->sdac, DBE_VALUE | DBE_LOG);
+  /*
+  |  Reading the Interrupt Status Register clears the outstanding Software
+  |  Interrupt Status bit, but does not clear the pending interrupt.  Thus
+  |  reading the register here would confuse the ISR when interrupts are
+  |  enabled and the pending software interrupt is taken: the ISR would
+  |  not be able to find the source of the interrupt.
+  */
+
+  return (status);
+}
+
+
+
+static long ColdInit (RfpBoard      *brd,
+                      P2RfRfpRecord *rec)
+/*
+   Description
+   -----------
+   Initialization function to run when starting up from scratch.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("ColdInit");
+
+  register void  *drvPvt = brd->drvPvt;
+  unsigned short  reg;
+  long            status;
+
+  /* Don't allow database access to the interrupt level */
+  reg = (P2RF_K_INTLEVEL << RFP_V_INTLEVEL) & RFP_M_INTLEVEL;
+
+  /* Initialize the Interrupt Control Register from the database */
+  reg = ~(reg | ((rec->imsk << RFP_V_INTSELECT) & RFP_M_INTSELECT));
+  P2RF_WriteVme (drvPvt, RFP_I_INTCTRL,reg );
+  if ( rec->oimk != rec->imsk ) {
+    rec->oimk = rec->imsk;
+  }
+  if ( rec->ictl != reg ) {
+    rec->ictl = reg;
+    db_post_events (rec, &rec->ictl, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Verify that the Interrupt Control Register data latched */
+  P2RF_ReadVme (drvPvt, RFP_I_INTCTRL, &reg);
+  if ( rec->ictl != reg ) {
+    epicsPrintf ("%s - Interrupt Control register readback error: wrt %04x, rd %04x, xor %04x\n",
+                     FN, reg, rec->ictl, reg ^ rec->ictl);
+    strncpy (rec->val, "Interrupt Control register readback error",
+             sizeof (rec->val));
+  }
+
+  /* Get module into LOAD state via a RESET, pulse the serial link error and rf falut reset bits */
+  reg = (RFP_K_RESET << RFP_V_MODE) | RFP_M_SERLNKRST | RFP_M_RFFLTRST;
+  P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, reg);
+  P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, RFP_K_LOAD << RFP_V_MODE);
+
+  /* Load and start DSP executable */
+  {
+    RfpDspPrm    *prm = &brd->dspPrm;
+
+    /* Reset the DSP */
+    P2RF_ReadVme  (drvPvt, RFP_I_RFCTRL, &reg);
+    P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, reg & ~RFP_M_NOTDSPRST);
+
+    /* Load the DSP */
+    if ((status = P2RF_LoadDsp (drvPvt, prm->index, rec->dspe, TRUE,
+                                rec->val, sizeof (rec->val))) == OK)
+    {
+      rec->dstt = NO_ALARM;
+    }
+    else
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (ERROR, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s, file = %s, status = %08x",
+                                       "P2RF_LoadDsp", rec->dspe, status));
+      rec->dstt = UDF_ALARM;
+    }
+  }
+
+  /* Clear any alarm status on the data save file */
+  rec->sdst = NO_ALARM;
+
+  /* Initialize all octal DACs to their DB values */
+  {
+    unsigned short  idx;
+    unsigned short  last=RFP_I_CLCQQ;
+    short          *dac = &rec->c1ii;
+    
+    if ( rec->verh >= RFP_K_VER2VERN ) last=RFP_I_MDRV;
+    for (idx = RFP_I_CCC1II; idx <= last; dac++, idx++)
+    {
+      P2RF_WriteVme (drvPvt, idx, ((*dac) + RFP_K_OCTDACOS) << RFP_V_OCTDAC);
+    }
+  }
+
+  /* Load the DAC I and Q memories */
+  {
+    RfpMemPrm    *prm = &brd->dacIPrm;
+
+    prm->count             = RFP_K_DACRAMCNT;
+    brd->ldRamBlk.abortFlg = FALSE;
+
+    /* Load the table */
+    if ((status = P2RF_LoadTblFile (drvPvt, prm->id, prm->index,
+                                    rec->dirf, prm->count,
+                                    &brd->ldRamBlk.abortFlg,
+                                    rec->val, sizeof (rec->val))) == OK)
+    {
+      rec->dist = NO_ALARM;
+    }
+    else
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed, file = %s",
+                                       "P2RF_LoadTblFile", rec->dirf));
+      rec->dist = UDF_ALARM;
+    }
+  }
+
+  {
+    RfpMemPrm    *prm = &brd->dacQPrm;
+
+    prm->count             = RFP_K_DACRAMCNT;
+    brd->ldRamBlk.abortFlg = FALSE;
+
+    /* Load the table */
+    if ((status = P2RF_LoadTblFile (drvPvt, prm->id, prm->index,
+                                    rec->dqrf, prm->count,
+                                    &brd->ldRamBlk.abortFlg,
+                                    rec->val, sizeof (rec->val))) == OK)
+    {
+      rec->dqst = NO_ALARM;
+    }
+    else
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed, file = %s",
+                                       "P2RF_LoadTblFile", rec->dqrf));
+      rec->dqst = UDF_ALARM;
+    }
+  }
+
+  /* Initialize the RF Processing module's control register  */
+  reg  = (rec->dle  << RFP_V_DIRLPENB)  & RFP_M_DIRLPENB;
+  reg |= (rec->cle  << RFP_V_CMBLPENB)  & RFP_M_CMBLPENB;
+  reg |= (rec->rle  << RFP_V_RIPLPENB)  & RFP_M_RIPLPENB;
+  reg |= (rec->csmx << RFP_V_CAVSELMUX) & RFP_M_CAVSELMUX;  
+  FeedbackSigMux( rec, &reg, &rec->mctl ); /* Set feedback signal mux   */
+
+ /* Get the operating mode */
+  switch (rec->mode)
+  {
+    case rfpReset:
+    case rfpLoad:
+      reg |= rec->mode << RFP_V_MODE;
+      break;
+
+    case rfpRun:
+      reg |= rec->mode << RFP_V_MODE;
+      if (rec->dacs)  reg |= RFP_M_DACSOUT   << RFP_V_MODE;
+      if (rec->ssct)  reg |= RFP_M_SGLSHTCNT << RFP_V_MODE;
+      break;
+
+    default:
+      reg |= RFP_K_LOAD << RFP_V_MODE;
+      break;
+  }
+
+  /* Potentially set Dacs */
+  if (rec->dinj)  rec->mctl |= RFP_M_DACINJPT;
+
+  /* Boot the DSP */
+  if (rec->dstt == NO_ALARM)  reg |= RFP_M_NOTDSPRST;
+
+  /* Update the module and the database */
+  rec->rctl = reg;
+  P2RF_WriteVme (drvPvt, RFP_I_RFCTRL,rec->rctl);
+
+  /* Update bits A2 of the feedback mux setting
+   * which is found in the Control Register. 
+   * Bits A0 and A1 are found in the RF Control Register 
+   * on version 1 only.
+   */ 
+  P2RF_WriteVme (drvPvt, RFP_I_CONTROL, rec->mctl);
+
+  return (OK);
+}
+
+
+
+static long WarmInit (RfpBoard       *brd,
+                      P2RfRfpRecord  *rec)
+/*
+   Description
+   -----------
+   Initialization routine to run when the module is still running
+   satisfactorily.  This function will (when it is written) bring
+   the EPICS database in synch with the module.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  {
+    unsigned char mode[] = {0, 1, 2, 2, 0, 1, 2, 2};
+    unsigned char dacs[] = {0, 0, 0, 0, 0, 0, 1, 1};
+    unsigned char ssct[] = {0, 0, 0, 1, 0, 0, 0, 1};
+    unsigned int  state  = (rec->rctl & RFP_M_MODE) >> RFP_V_MODE;
+
+    rec->mode = mode[state];
+    rec->dacs = dacs[state];
+    rec->ssct = ssct[state];
+    rec->dinj = (rec->mctl & RFP_M_DACINJPT) >> RFP_V_DACINJPT;
+  }
+
+  return (OK);
+}
+
+
+
+static long Action (P2RfRfpRecord    *rec)
+/*
+   Description
+   -----------
+   This is the action routine for the RFP.  It handles the several states
+   that the module can be in.  The module's state can be changed by modifying
+   the .MODE field of the record.
+
+   Additionally, an asynchronous module reset mechanism implemented.  This
+   feature toggles the software reset line on the VXI interface chip.  Since it
+   takes a while (on the order of a second) for the reset to complete, the
+   module must not be touched during its assertion.  To implement this, the
+   record is processed asynchronously.  When the reset completes, the database
+   fields are updated with the current state of the module
+
+   Parameters
+   ----------
+          rec - A pointer to the record structure
+
+   Returns
+   -------
+   0 or 2 for successful returns, else a status */
+{
+  Function ("Action");
+
+
+  RfpBoard       *brd    = NULL;
+  void           *drvPvt;
+  unsigned short  mctl;
+  unsigned short  rctl;
+  RfpState        state  = rfpInvalid;
+  unsigned short  reg;
+  unsigned short  rstt;
+  unsigned short  sdac;
+  unsigned short  mstt;
+
+  /* If initialization failed let the system know */
+  if ((brd = rec->dpvt) == NULL)  return (ERROR);
+  drvPvt = brd->drvPvt;
+
+  /* If processing was invoked by an interrupt, handle it */
+  if (brd->intPrc)
+  {
+    /* Update client value of interrupt status field */
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+
+    /* Don't loose invocation count on multiple interrupts */
+    brd->intPrc--;
+
+    /* Update the database copy of the RF Module status register */
+    P2RF_ReadVme (drvPvt, RFP_I_RFSTAT,  &rec->rstt);
+    db_post_events (rec, &rec->rstt, DBE_VALUE | DBE_LOG);
+
+    return (0);
+  }
+
+  /* Initialize the message buffer if we're not doing completion processing */
+  if (!rec->pact)  strncpy (rec->val, "Success", sizeof (rec->val));
+
+  /* If requested, do a "software reset" on the module */
+  if (rec->mrst) {
+     return (SpawnReset (rec, &brd->resetBlk));
+  }
+
+  /* If operator disabled interrupts update interrupt status DB field */
+  P2RF_ReadVme (brd->drvPvt, RFP_I_INTCTRL, &reg);
+  if ((reg & RFP_M_INTSELECT) == RFP_M_INTSELECT)
+  {
+    P2RF_ReadVme (brd->drvPvt, RFP_I_INTSTAT, &rec->istt);
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+  }
+  if ( reg != rec->ictl ) {
+     rec->ictl = reg;
+     db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+  }
+
+
+  /* Let the operator acknowledge that the interrupts have been seen */
+  if (rec->iack)
+  {
+    rec->istt &= ~rec->iack;            /* Take only requested bits down */
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+    rec->iack = 0;
+    db_post_events (rec, &rec->iack, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Update the interrupt control register if there was a change request */
+  if (rec->imsk != rec->oimk)
+  {
+    rec->oimk = rec->imsk;
+    rec->ictl = (rec->ictl & ~RFP_M_INTSELECT) |
+      ((~rec->imsk << RFP_V_INTSELECT) & RFP_M_INTSELECT);
+    printf("IMSK Change: New=0x%4.4x (%hd) Old=0x%4.4x (%hd) ICTL 0x%4.4x\n",
+             rec->imsk,rec->imsk,rec->oimk,rec->oimk,reg);
+    P2RF_WriteVme (drvPvt, RFP_I_INTCTRL, rec->ictl);
+    db_post_events (rec, &rec->ictl, DBE_VALUE | DBE_LOG);
+
+   /* Verify that the Interrupt Control Register data latched */
+    P2RF_ReadVme (drvPvt, RFP_I_INTCTRL, &reg);
+    if ( rec->ictl != reg ) {
+      epicsPrintf ("%s - Interrupt Control register readback error: wrt %04x, rd %04x, xor %04x\n",
+                     FN, reg, rec->ictl, reg ^ rec->ictl);
+      strncpy (rec->val, "Interrupt Control register readback error",
+                sizeof (rec->val));
+    }
+  }
+
+  /* Get the current state of the module */
+  P2RF_ReadVme (drvPvt, RFP_I_RFCTRL,  &rctl);
+  P2RF_ReadVme (drvPvt, RFP_I_CONTROL, &mctl);
+  mctl &= (RFP_M_SYSFAILINH | RFP_M_SFTINT | RFP_M_A24A32);
+
+  /* Potentially modify the RF Control Register */
+  rctl &= ~(RFP_M_MODE      | RFP_M_RFENB    | RFP_M_OPMODE   |
+            RFP_M_DIRLPENB  | RFP_M_CMBLPENB | RFP_M_RIPLPENB |
+            RFP_M_CAVSELMUX | RFP_M_FBSIGMUX);
+
+  /* Check if the RF Control register needs updating */
+  {
+    RfpState      mode[] = {rfpReset, rfpLoad, rfpRun, rfpRun,
+                            rfpReset, rfpLoad, rfpRun, rfpRun};
+    unsigned int  iState = (rctl & RFP_M_MODE) >> RFP_V_MODE;
+
+    /* Potentially modify the RF Control Register */
+    rctl &= ~(RFP_M_MODE      | RFP_M_RFENB    | RFP_M_OPMODE   |
+              RFP_M_DIRLPENB  | RFP_M_CMBLPENB | RFP_M_RIPLPENB |
+              RFP_M_CAVSELMUX | RFP_M_FBSIGMUX);
+
+    /* Potentially select a new operating mode */
+    switch (rec->mode)
+    {
+      case rfpReset:
+      case rfpLoad:
+        iState = rec->mode;
+        break;
+
+      case rfpRun:
+        iState = rec->mode;
+        if (rec->dacs)  iState |= RFP_M_DACSOUT;
+        if (rec->ssct)  iState |= RFP_M_SGLSHTCNT;
+        break;
+
+      default:
+        state = rfpInvalid;
+        break;
+    }
+    rctl      |= iState << RFP_V_MODE;
+    state      = mode[iState];
+ 
+    /* Potentiall set Dacs Ouptput type */
+    if (rec->dinj) mctl |= RFP_M_DACINJPT;
+
+    /* Potentially set the anlog ripple loop */
+    if (rec->rlon) mctl |= RFP_M_RLON;
+
+    /* Potentially select feedback signal mux */
+    FeedbackSigMux( rec,&rctl,&mctl );
+
+    /* Potentially enable RF the ripple loop, integral and lead compensation */
+    if (rec->rfoo)
+    {
+      rctl                |= RFP_M_RFENB;
+      if (rec->rle)  rctl |= RFP_M_RIPLPENB;
+    }
+    if (rec->ice)    mctl |= RFP_M_INTCOMP;
+
+    if (!rec->lce)   mctl |= RFP_M_LEADCOMP;
+
+    /* Select the operating mode */
+    if (rec->tnop)   rctl |= RFP_M_OPMODE;
+
+    /* Enable the direct and comb loop */
+    if (rec->dle)    rctl |= RFP_M_DIRLPENB;
+    if (rec->cle)    rctl |= RFP_M_CMBLPENB;
+
+    /* Select a different cavity and/or feedback signal */
+    rctl |= (rec->csmx << RFP_V_CAVSELMUX) & RFP_M_CAVSELMUX;
+    rctl |= (rec->fsmx << RFP_V_FBSIGMUX)  & RFP_M_FBSIGMUX;
+
+    /* Update the module and the database versions of RF Control register*/
+    if (rctl != rec->rctl)
+    {
+      P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, rctl);
+      P2RF_ReadVme  (drvPvt, RFP_I_RFCTRL, &rec->rctl);
+      db_post_events (rec, &rec->rctl, DBE_VALUE | DBE_LOG);
+
+      /* Make sure that the register changed to what we set it to */
+      if (rctl != rec->rctl)
+      {
+        epicsPrintf ("%s - RF Control register readback error: wrt %04x, rd %04x, xor %04x\n",
+                     FN, rctl, rec->rctl, rctl ^ rec->rctl);
+        strncpy (rec->val, "RF Control register readback error",
+                 sizeof (rec->val));
+      }
+    }
+
+    /* Update the module and the database versions of Module Control register*/
+    if (mctl != rec->mctl)
+    {
+      rec->mctl = mctl;
+      P2RF_WriteVme (drvPvt, RFP_I_CONTROL, rec->mctl);
+      db_post_events (rec, &rec->mctl, DBE_VALUE | DBE_LOG);
+
+      /* Update the database version of the Module Status Register */
+      P2RF_ReadVme (drvPvt, RFP_I_STATUS, &rec->mstt);
+      db_post_events (rec, &rec->mstt, DBE_VALUE | DBE_LOG);
+    }
+
+    /* Update the database Dacs status field */
+    sdac = (rec->mctl & (RFP_V_DACINJPT-1)) | (rec->rctl & RFP_V_DACSON);
+    if (sdac != rec->sdac)
+    {
+       rec->sdac = sdac;
+       db_post_events (rec, &rec->sdac, DBE_VALUE | DBE_LOG);
+    }  
+
+  }
+
+  /* Reset Serial Link, Memory Collision and RF Faults */
+  if (rec->rffr)
+  {
+    rec->rffr = 0;
+
+    P2RF_WriteVme (drvPvt, RFP_I_RFCTRL,
+                   rec->rctl | RFP_M_SERLNKRST | RFP_M_RFFLTRST);
+    P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, rec->rctl);
+  }
+
+  /* Update the database copy of the RF Module status register */
+  P2RF_ReadVme (drvPvt, RFP_I_RFSTAT,  &rstt);
+  if ( rstt != rec->rstt ) 
+  {
+    rec->rstt = rstt;
+    db_post_events (rec, &rec->rstt, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Update the database copy of the Status register */
+  P2RF_ReadVme (drvPvt, RFP_I_STATUS, &mstt );
+  mstt &= RFP_M_STATUS;
+  if ( mstt != rec->mstt ) 
+  {
+    rec->mstt = mstt;
+    db_post_events (rec, &rec->mstt, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Read the current state of the feedback signal mux
+   * and then update the dtabase copy 
+   */
+  if ( FBSIGMUX_READ(rec) != rec->sfmx ) 
+  {
+    rec->sfmx = FBSIGMUX_READ(rec);
+    db_post_events (rec, &rec->sfmx, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Process the request to stop state machine data taking in continuous mode */
+  if (rec->scdt)
+  {
+    P2RF_WriteVme (drvPvt, RFP_I_SMSTOPDT, NULL);
+    rec->scdt = 0;
+  }
+
+  /* Load and start DSP executable */
+  if (rec->ldsp)  return (SpawnLdDsp (rec, &rec->ldsp, &brd->dspBlk,
+                                      &brd->dspPrm, rec->dspe, &rec->dstt));
+
+  /* Load all octal DACs, if requested */
+  if (rec->lod)
+  {
+    unsigned short        idx;
+    unsigned short        last=RFP_I_CLCQQ;
+    short                *dac    = &rec->c1ii;
+    short                 val;
+    short                 chk;
+
+    if ( rec->verh >= RFP_K_VER2VERN ) last = RFP_I_MDRV;
+    for (idx = RFP_I_CCC1II; idx <= last; dac++, idx++)
+    {
+      val = ((*dac) + RFP_K_OCTDACOS) << RFP_V_OCTDAC;
+
+      octal_dac=1;
+      P2RF_WriteVme (drvPvt, idx,  val);
+      P2RF_ReadVme  (drvPvt, idx, (unsigned short *) &chk);
+      octal_dac=0;
+      if (val != chk)
+      {
+        epicsPrintf ("%s, Octal DAC readback error: idx %hd, wrt %hd, rd %hd, xor %hd\n",
+                     FN, idx, val, chk, val ^ chk);
+        strncpy (rec->val, "Octal DAC readback error", sizeof (rec->val));
+      }
+    }
+    rec->lod = 0;
+    db_post_events (rec, &rec->lod, DBE_VALUE | DBE_LOG);	/* for rf_calib.st */
+  }
+
+  /*
+  ** Check for requests to load various DSP Ripple loop data. All data must 
+  ** be loaded after the DSP is initialized, hence we make them separate
+  ** routines which can also be called when the CMD_K_READY message comes
+  ** back from the DSP after it's been booted.
+  */
+
+  if (rec->ldas)          /* Load DSP amplitude setpoint */
+  {
+    ActLdas(brd, drvPvt, rec);
+    rec->ldas = 0;
+  }
+
+  if (rec->ldpg)          /* Load DSP Phase gain */
+  {
+    ActLdpg(brd, drvPvt, rec);
+    rec->ldpg = 0;
+  }
+
+  if (rec->dlod)          /* Load DSP DAC offsets */
+  {
+    ActLddo(brd, drvPvt, rec);
+    rec->dlod = 0;
+    db_post_events (rec, &rec->dlod, DBE_VALUE | DBE_LOG);	/* for rf_calib.st */
+  }
+
+  if (rec->ldpc)          /* Load DSP Phase Harmonic coefficients */
+  {
+    ActLdphc(brd, drvPvt, rec);
+    rec->ldpc = 0;
+  }
+
+  if (rec->ldac)          /* Load DSP Amplitude Harmonic coefficients */
+  {
+    ActLdahc(brd, drvPvt, rec);
+    rec->ldac = 0;
+  }
+
+  if (rec->gerp)          /* Get Ripple run-time parameters */
+  {
+    ActGerp(brd, drvPvt, rec);
+    rec->gerp = 0;
+  }
+
+  /* Don't attempt to get or load RAMs if wrong module state */
+  if (state != rfpLoad)
+  {
+    char *msg = NULL;
+
+    if ((rec->gsir) || (rec->gsqr))
+    {
+      msg = "Get Signal RAM: Module not in LOAD mode";
+      if (rec->gsir)
+      {
+        rec->gsir = 0;
+        rec->sist = WRITE_ALARM;
+        db_post_events (rec, &rec->sist, DBE_VALUE | DBE_LOG);
+      }
+      if (rec->gsqr)
+      {
+        rec->gsqr = 0;
+        rec->sqst = WRITE_ALARM;
+        db_post_events (rec, &rec->sqst, DBE_VALUE | DBE_LOG);
+      }
+    }
+    if ((rec->gcir) || (rec->gcqr))
+    {
+      msg = "Get Cavity RAM: Module not in LOAD mode";
+      if (rec->gcir)
+      {
+        rec->gcir = 0;
+        rec->cist = WRITE_ALARM;
+        db_post_events (rec, &rec->cist, DBE_VALUE | DBE_LOG);
+      }
+      if (rec->gcqr)
+      {
+        rec->gcqr = 0;
+        rec->cqst = WRITE_ALARM;
+        db_post_events (rec, &rec->cqst, DBE_VALUE | DBE_LOG);
+      }
+    }
+    if ((rec->ldir) || (rec->ldqr))
+    {
+      msg = "Load DAC RAM: Module not in LOAD mode";
+      if (rec->ldir)
+      {
+        rec->ldir = 0;
+        rec->dist = WRITE_ALARM;
+        db_post_events (rec, &rec->dist, DBE_VALUE | DBE_LOG);
+      }
+      if (rec->ldqr)
+      {
+        rec->ldqr = 0;
+        rec->dqst = WRITE_ALARM;
+        db_post_events (rec, &rec->dqst, DBE_VALUE | DBE_LOG);
+      }
+    }
+
+    if (msg)  strncpy (rec->val, msg, sizeof (rec->val));
+    return (0);
+  }
+
+  /* Process requests to read out the module's signal I or Q RAM */
+  if (rec->gsir)  return (SpawnGetRam (rec, &rec->gsir, &brd->getRamBlk,
+                                       &brd->sigIPrm, rec->rmsz, rec->sirf,
+                                       &rec->sist));
+  if (rec->gsqr)  return (SpawnGetRam (rec, &rec->gsqr, &brd->getRamBlk,
+                                       &brd->sigQPrm, rec->rmsz, rec->sqrf,
+                                       &rec->sqst));
+
+  /* Process requests to read out the module's cavity I or Q RAM */
+  if (rec->gcir)  return (SpawnGetRam (rec, &rec->gcir, &brd->getRamBlk,
+                                       &brd->cavIPrm, rec->rmsz, rec->cirf,
+                                       &rec->cist));
+  if (rec->gcqr)  return (SpawnGetRam (rec, &rec->gcqr, &brd->getRamBlk,
+                                       &brd->cavQPrm, rec->rmsz, rec->cqrf,
+                                       &rec->cqst));
+
+  /* Process requests to load the module's DAC I or Q RAM */
+  if (rec->ldir)  return (SpawnLdRam  (rec, &rec->ldir, &brd->ldRamBlk,
+                                       &brd->dacIPrm, rec->dirf,
+                                       &rec->dist));
+  if (rec->ldqr)  return (SpawnLdRam  (rec, &rec->ldqr, &brd->ldRamBlk,
+                                       &brd->dacQPrm, rec->dqrf,
+                                       &rec->dqst));
+
+  return (0);
+}
+
+
+/**
+ ** Action routines to load various DSP memories. Called on demand from
+ ** a display and on startup after the DSP has been booted and is ready
+ ** to rock 'n roll.
+ */
+
+/*
+** Common routine to insure DSP is alive and well.
+*/
+static int CheckDspOK(long status)
+{
+  int retval = TRUE;  /* Assume all will be well */
+
+  if (status != OK)
+  {
+     epicsPrintf ("Rfp module DSP error. Can't load parameter(s).\n");
+     retval = FALSE;
+  }
+  return retval;
+}
+/*
+** Load Amplitude setpoint
+*/
+static void  ActLdas         (RfpBoard *brd, void *drvPvt, 
+                              P2RfRfpRecord  *rec)
+{
+  volatile DspComBlk   *comBlk = brd->dspMsgBlk.comBlk;
+
+  /*
+  ** The DSP expects the setpoint in Q13 format. Q13 format is a fixed point
+  ** 16 bit number with 13 bits after the decimal. We limit check through
+  ** an analog output and so assume it's in range 
+  */
+
+  short  amsp = (short) (rec->amsp * (float) (1 << 13)); /* Q13 */
+
+  if (CheckDspOK(brd->dspMsgBlk.status))
+  {
+    comBlk->cpuMsg = CMD_K_AMSP;
+    comBlk->cpuArg = amsp;       /* The arg is the value */
+
+    /* Tell DSP to read our message */
+    P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, rec->rctl | RFP_M_MSGTODSP);
+    P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, rec->rctl);
+  }
+  return;
+}
+/*
+** Load Phase Gain
+*/
+static void  ActLdpg         (RfpBoard *brd, void *drvPvt,
+                              P2RfRfpRecord  *rec)
+{
+  volatile DspComBlk   *comBlk = brd->dspMsgBlk.comBlk;
+  short  phsg = (short) (rec->phsg * (float) (1 << 14)); /* Q14 */
+
+  if (CheckDspOK(brd->dspMsgBlk.status))
+  {
+    comBlk->cpuMsg = CMD_K_PHSG;
+    comBlk->cpuArg = phsg;         /* The arg is the value */
+
+    /* Tell DSP to read our message */
+    P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, rec->rctl | RFP_M_MSGTODSP);
+    P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, rec->rctl);
+  }
+  return;
+}
+/*
+** Load DSP Klystron Modulator DAC offsets 
+*/
+static void  ActLddo       (RfpBoard *brd, void *drvPvt,
+                            P2RfRfpRecord  *rec)
+{
+  volatile DspComBlk   *comBlk = brd->dspMsgBlk.comBlk;
+
+  if (CheckDspOK(brd->dspMsgBlk.status))
+  {
+    P2RF_WriteVme (drvPvt, RFP_I_DSPMEM + 0, rec->kmii << 4);
+    P2RF_WriteVme (drvPvt, RFP_I_DSPMEM + 1, rec->kmiq << 4);
+    P2RF_WriteVme (drvPvt, RFP_I_DSPMEM + 2, rec->kmqi << 4);
+    P2RF_WriteVme (drvPvt, RFP_I_DSPMEM + 3, rec->kmqq << 4);
+
+    comBlk->cpuMsg = CMD_K_DACO;
+    comBlk->cpuArg = DSP_A_ERAM;
+
+    /* Tell DSP to read our message */
+    P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, rec->rctl | RFP_M_MSGTODSP);
+    P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, rec->rctl);
+  }
+  return;
+}
+/*
+** Load Phase Harmonic Coefficients.
+*/
+static void  ActLdphc         (RfpBoard *brd, void *drvPvt, 
+                              P2RfRfpRecord  *rec)
+{
+  Function ("ActLdphc");        /* Our name for error msg */
+  volatile DspComBlk   *comBlk = brd->dspMsgBlk.comBlk;
+  long     status;              /* Read file status */
+  char     loaderr[40];         /* Error msg from ReadConstsFile */
+  short    consts[NUMHARMS*4];  /* Number of harmonics currently supported */
+
+  rec->pcst = UDF_ALARM;
+  db_post_events (rec, &rec->pcst, DBE_VALUE | DBE_LOG);
+
+  if (CheckDspOK(brd->dspMsgBlk.status))
+  {
+    if ((status = P2RF_ReadConstsFile (drvPvt, RFP_K_PHARMID,  rec->pcdf,
+                                     NUMHARMS*4, consts,
+                                     loaderr, sizeof (loaderr), 1)) == OK)
+    {
+      P2RF_LoadConsts (drvPvt, consts, NUMHARMS*4, RFP_I_DSPMEM);
+
+      comBlk->cpuMsg = CMD_K_PHARM;
+      comBlk->cpuArg = DSP_A_ERAM;
+      comBlk->comLen = NUMHARMS;
+      /* Tell DSP to read our message */
+      P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, rec->rctl | RFP_M_MSGTODSP);
+      P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, rec->rctl);
+      rec->pcst = NO_ALARM;
+      db_post_events (rec, &rec->pcst, DBE_VALUE | DBE_LOG);
+    }
+    else
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (status, rec,
+          P2RF_Sprintf (buf, __FILE__, FN,
+          "%s failed - id = %s, msg is: %s file = %s",
+                                       "P2RF_ReadConstsFile",
+                                       RFP_K_PHARMID, loaderr, rec->pcdf));
+      rec->pcst =  UDF_ALARM;
+    }
+  }
+  return;
+}
+/*
+** Load Amplitude Harmonic Coefficients.
+*/
+static void  ActLdahc         (RfpBoard *brd, void *drvPvt, 
+                              P2RfRfpRecord  *rec)
+{
+  Function ("ActLdahc");        /* Our name for error msg */
+  volatile DspComBlk   *comBlk = brd->dspMsgBlk.comBlk;
+  long     status;              /* Read file status */
+  char     loaderr[40];         /* Error msg from ReadConstsFile */
+  short    consts[NUMHARMS*4];  /* Number of harmonics currently supported */
+
+  rec->acst = UDF_ALARM;
+  db_post_events (rec, &rec->acst, DBE_VALUE | DBE_LOG);
+
+  if (CheckDspOK(brd->dspMsgBlk.status))
+  {
+    if ((status = P2RF_ReadConstsFile (drvPvt, RFP_K_AHARMID,  rec->acdf,
+                                     NUMHARMS*4, consts,
+                                     loaderr, sizeof (loaderr), 1)) == OK)
+    {
+      P2RF_LoadConsts (drvPvt, consts, NUMHARMS*4, RFP_I_DSPMEM);
+
+      comBlk->cpuMsg = CMD_K_AHARM;
+      comBlk->cpuArg = DSP_A_ERAM;
+      comBlk->comLen = NUMHARMS;
+      /* Tell DSP to read our message */
+      P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, rec->rctl | RFP_M_MSGTODSP);
+      P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, rec->rctl);
+      rec->acst = NO_ALARM;
+      db_post_events (rec, &rec->acst, DBE_VALUE | DBE_LOG);
+    }
+    else
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (status, rec,
+          P2RF_Sprintf (buf, __FILE__, FN,
+          "%s failed - id = %s, msg is: %s file = %s",
+                                       "P2RF_ReadConstsFile",
+                                       RFP_K_AHARMID, loaderr, rec->acdf));
+      rec->acst =  UDF_ALARM;
+    }
+  }
+  return;
+}
+
+/*
+** Get Runtime ripple parameters.
+*/
+static void  ActGerp         (RfpBoard *brd, void *drvPvt,
+                              P2RfRfpRecord  *rec)
+{
+  unsigned short  riparam;
+
+  if (CheckDspOK(brd->dspMsgBlk.status))
+  {
+    /*
+    ** Read various ripple loop parameters from eram, convert them, put 'em
+    ** in the record and post the events.
+    */
+    P2RF_ReadVme  (drvPvt, RIP_A_IREF,  &riparam);
+    rec->iref = ((float) (short) riparam)/6550.; /* Convert +/- 5 volts */
+    db_post_events (rec, &rec->iref, DBE_VALUE | DBE_LOG);
+
+    P2RF_ReadVme  (drvPvt, RIP_A_QREF,  &riparam);
+    rec->qref = ((float) (short) riparam)/6550.; /* Convert +/- 5 volts */
+    db_post_events (rec, &rec->qref, DBE_VALUE | DBE_LOG);
+
+    P2RF_ReadVme  (drvPvt, RIP_A_PREF,  &riparam);
+    rec->pref = (float) (short) riparam / (float) (1 << 12);
+    db_post_events (rec, &rec->pref, DBE_VALUE | DBE_LOG);
+
+    P2RF_ReadVme  (drvPvt, RIP_A_IKLS,  &riparam);
+    rec->ikls = (float) (short) riparam;
+    db_post_events (rec, &rec->ikls, DBE_VALUE | DBE_LOG);
+
+    P2RF_ReadVme  (drvPvt, RIP_A_QKLS,  &riparam);
+    rec->qkls = (float) (short) riparam;
+    db_post_events (rec, &rec->qkls, DBE_VALUE | DBE_LOG);
+
+    P2RF_ReadVme  (drvPvt, RIP_A_PKLS,  &riparam);
+    rec->pkls = (float) (short) riparam / (float) (1 << 12);
+    db_post_events (rec, &rec->pkls, DBE_VALUE | DBE_LOG);
+
+    P2RF_ReadVme  (drvPvt, RIP_A_PERR,  &riparam);
+    rec->perr = (float) (short) riparam / (float) (1 << 12);
+    db_post_events (rec, &rec->perr, DBE_VALUE | DBE_LOG);
+
+    P2RF_ReadVme  (drvPvt, RIP_A_PERP,  &riparam);
+    rec->perp = (float) (short) riparam / (float) (1 << 13);
+    db_post_events (rec, &rec->perp, DBE_VALUE | DBE_LOG);
+
+    P2RF_ReadVme  (drvPvt, RIP_A_AERR,  &riparam);
+    rec->aerr = (float) (short) riparam;
+    db_post_events (rec, &rec->aerr, DBE_VALUE | DBE_LOG);
+
+    P2RF_ReadVme  (drvPvt, RIP_A_POUT,  &riparam);
+    rec->pout = (float) (short) riparam / (float) (1 << 13);
+    db_post_events (rec, &rec->pout, DBE_VALUE | DBE_LOG);
+
+    P2RF_ReadVme  (drvPvt, RIP_A_POUP,  &riparam);
+    rec->poup = (float) (short) riparam / (float) (1 << 13);
+    db_post_events (rec, &rec->poup, DBE_VALUE | DBE_LOG);
+
+    P2RF_ReadVme  (drvPvt, RIP_A_AOUT,  &riparam);
+    rec->aout = (float) (short) riparam / (float) (1 << 10);
+    db_post_events (rec, &rec->aout, DBE_VALUE | DBE_LOG);
+  
+    /* Read new ADC's for ver 3 or later. These registers
+     * mirror the data read by the DSP Parallel I/O in A24 space.
+     */
+    if ( rec->verh >= RFP_K_VER2VERN ){
+      /* Read quad ADC-ADC0 (I Error) */
+      P2RF_ReadVme  (drvPvt, RFP_I_ADCIERR,  &riparam);
+      rec->ierr = (float) (short) riparam /6550.; /* Convert +/- 5 volts */
+      db_post_events (rec, &rec->ierr, DBE_VALUE | DBE_LOG);  
+
+      /* Read quad ADC-ADC1 (Q Error) */
+      P2RF_ReadVme  (drvPvt, RFP_I_ADCQERR,  &riparam);
+      rec->qerr = (float) (short) riparam /6550.; /* Convert +/- 5 volts */
+      db_post_events (rec, &rec->qerr, DBE_VALUE | DBE_LOG); 
+
+      /* Read quad ADC-ADC2 (I Klystron) */
+      P2RF_ReadVme  (drvPvt, RFP_I_ADCIKLY,  &riparam);
+      rec->ikly = (float) (short) riparam /6550.; /* Convert +/- 5 volts */
+      db_post_events (rec, &rec->ikly, DBE_VALUE | DBE_LOG); 
+
+      /* Read quad ADC-ADC3 (Q Klystron) */
+      P2RF_ReadVme  (drvPvt, RFP_I_ADCQKLY,  &riparam);
+      rec->qkly = (float) (short) riparam /6550.; /* Convert +/- 5 volts */
+      db_post_events (rec, &rec->qkly, DBE_VALUE | DBE_LOG); 
+    }
+  }
+  return;
+}
+
+
+
+static long SpawnReset (P2RfRfpRecord  *rec,
+                        RfpRstBlk      *blk)
+/*
+   Description
+   -----------
+   This function initiates and completes the module reset.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+          blk - A pointer to the reset block
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnReset");
+  unsigned short reg;
+
+  if (!rec->pact)
+  {
+    /* Let operator know what's happening */
+    strncpy (rec->val,  "Software Reset: active", sizeof (rec->val));
+    strncpy (rec->oval, "Software Reset: active", sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow reprocessing of record before reset completes */
+    rec->pact = TRUE;
+
+    /* Disable module interrupts during software reset */
+    P2RF_ModIntDisable (blk->drvPvt);
+    P2RF_ReadVme (blk->drvPvt, RFP_I_INTCTRL, &reg);
+    if (reg != rec->ictl ) {
+      rec->ictl = reg;
+      db_post_events (rec, &rec->ictl, DBE_VALUE | DBE_LOG);
+    }
+    printf("After P2RF_ModIntEnable: ICTL 0x%4.4x\n",rec->ictl);
+
+    /* Do the deed */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+      strncpy (rec->val, "Attempt to initialize module failed", sizeof (rec->val));
+      recGblSetSevr (rec, UDF_ALARM, INVALID_ALARM);
+    }
+    else
+    {
+      /* Re-enable module interrupts */
+      P2RF_ModIntEnable (blk->drvPvt);
+      P2RF_ReadVme (blk->drvPvt, RFP_I_INTCTRL, &reg);
+      if (reg != rec->ictl ) {
+        rec->ictl = reg;
+        db_post_events (rec, &rec->ictl, DBE_VALUE | DBE_LOG);
+      }
+      printf("After P2RF_ModIntEnable: ICTL 0x%4.4x\n",rec->ictl);
+
+      strncpy (rec->val, "Software reset: done", sizeof (rec->val));
+    }
+
+    /* Reset the reset request so we don't redo it on the next process pass */
+    rec->mrst = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void ResetCallback (RfpRstBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a module software reset it requested.  It invokes completion processing
+   of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the reset block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("ResetCallback"); */
+
+  struct dbCommon  *rec;
+  struct rset      *rSet;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((rec = callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Reset and update the record and the module */
+  blk->status = InitFields ((RfpBoard *) rec->dpvt, P2RF_K_COLDSTART);
+
+  /* Complete processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     (rec);
+}
+
+
+
+static long SpawnLdDsp (P2RfRfpRecord  *rec,
+                        unsigned char  *request,
+                        RfpDspBlk      *blk,
+                        RfpDspPrm      *prm,
+                        char           *file,
+                        unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the loading of the DSP on the module.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the DSP block
+          prm - A pointer to the DSP parameter block
+         file - The file that contains the DSP executable to load
+         stat - A pointer to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnLdDsp");
+
+
+  if (!rec->pact)
+  {
+    /* Let operator know what's happening */
+    strncpy (rec->val,  "Load DSP: active", sizeof (rec->val));
+    strncpy (rec->oval, "Load DSP: active", sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before DSP-load completes */
+    rec->pact = TRUE;
+
+    /* Save the file name in the parameter block */
+    prm->file = file;
+
+    /* Point the DSP block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (ERROR, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - file = %s, status = %08x",
+                                       "P2RF_LoadDsp",
+                                       prm->file, blk->status));
+      *stat = WRITE_ALARM;
+    }
+    else
+    {
+      strncpy (rec->val, "Load DSP: done", sizeof (rec->val));
+
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void LdDspCallback (RfpDspBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to load and start the module's DSP.  It invokes
+   completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the DSP block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("LdDspCallback"); */
+
+  P2RfRfpRecord    *rec;
+  struct rset      *rSet;
+  unsigned short    reg;
+  RfpDspPrm        *prm = blk->prm;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Reset the DSP */
+  P2RF_ReadVme  (blk->drvPvt, RFP_I_RFCTRL, &reg);
+  P2RF_WriteVme (blk->drvPvt, RFP_I_RFCTRL, reg & ~RFP_M_NOTDSPRST);
+
+  /* Load the DSP */
+  if ((blk->status = P2RF_LoadDsp (blk->drvPvt, prm->index, prm->file, TRUE,
+                                   rec->val, sizeof (rec->val))) == OK)
+  {
+    /* Boot the DSP */
+    P2RF_WriteVme (blk->drvPvt, RFP_I_RFCTRL, reg | RFP_M_NOTDSPRST);
+  }
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+
+
+
+#ifdef GARBAGE
+static long SpawnCopyRam (P2RfRfpRecord  *rec,
+                          void          **prm,
+                          RfpRamCopyBlk  *blk)
+/*
+   Description
+   -----------
+   This function initiates and completes copying of the module RAMs to
+   a private buffer.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+          prm - A pointer to the record field that initiated this action
+          blk - A pointer to the record block
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnCopyRam");
+
+
+  if (!rec->pact)
+  {
+    /* Check the request for validity */
+    P2RfBufDsc  *ramDsc = *prm;
+
+    if ((ramDsc->self != ramDsc) && ramDsc->buffer != NULL)
+    {
+      strncpy (rec->val,  "Bad RAM copy request", sizeof (rec->val));
+      strncpy (rec->oval, "Bad RAM copy request", sizeof (rec->oval));
+      db_post_events (rec, &rec->val,  DBE_VALUE | DBE_LOG);
+      epicsPrintf ("%s - Bad RAM copy request: idx = %u\n", FN, ramDsc->index);
+    }
+    else
+    {
+      /* Don't allow record reprocessing record before get-history completes */
+      rec->pact = TRUE;
+
+      /* Point the RAM block to the RAM copy descriptor */
+      blk->prm = ramDsc;
+
+      /* Invoke the call-back */
+      callbackRequest (&blk->callback);
+
+      return (0);
+    }
+  }
+
+  /* Notify client that the request is complete */
+  *prm = NULL;
+  db_post_events (rec, prm,  DBE_VALUE | DBE_LOG);
+
+  return (0);
+}
+
+
+
+static void CopyRamCallback (RfpRamCopyBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to copy one of the module's RAMs to a private
+   buffer.  It invokes completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the get-history block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("GetRamCallback"); */
+
+  P2RfRfpRecord    *rec;
+  struct rset      *rSet;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Preload the state machine address counter */
+  P2RF_WriteVme (blk->drvPvt, RFP_I_SMPRELD, NULL);
+
+  /* Read the history memory and record it */
+  P2RF_CopyMemory (blk->drvPvt, prm->index, blk->prm);
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+#endif
+
+
+
+static long SpawnGetRam (P2RfRfpRecord  *rec,
+                         unsigned char  *request,
+                         RfpRamBlk      *blk,
+                         RfpMemPrm      *prm,
+                         unsigned int    blkCnt,
+                         char           *file,
+                         unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the retrieval of the module RAMs.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the record block
+          prm - A pointer to the record parameter block
+       blkCnt - Number of blocks of record buffer to record
+         file - The file to record the record buffer in
+         stat - A pointer to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnGetRam");
+
+  char  buf[P2RF_K_BUFSIZE];
+
+
+  if (!rec->pact)
+  {
+    sprintf (buf, "Get %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val,  DBE_VALUE | DBE_LOG);
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before get-history completes */
+    rec->pact = TRUE;
+
+    /* Save block count and file name in parameter block and reset abort flag */
+    prm->count    = blkCnt < RFP_K_RAMBLKCNT ? blkCnt : RFP_K_RAMBLKCNT;
+    prm->file     = file;
+    blk->abortFlg = FALSE;
+
+    /* Point the RAM block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - file = %s",
+                                       "P2RF_RecordMemory", prm->file));
+      *stat = READ_ALARM;
+    }
+    else
+    {
+      sprintf (buf, "Get %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void GetRamCallback (RfpRamBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to read one of the module's RAMs.  It invokes
+   completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the get-history block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("GetRamCallback"); */
+
+  P2RfRfpRecord    *rec;
+  struct rset      *rSet;
+  RfpMemPrm        *prm = blk->prm;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Preload the state machine address counter */
+  P2RF_WriteVme (blk->drvPvt, RFP_I_SMPRELD, NULL);
+
+  /* Read the history memory and record it */
+  blk->status = P2RF_RecordMemory (blk->drvPvt, prm->id, prm->index,
+                                   prm->count, prm->file, &blk->abortFlg,
+                                   rec->val, sizeof (rec->val));
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+
+
+
+static long SpawnLdRam (P2RfRfpRecord  *rec,
+                        unsigned char  *request,
+                        RfpRamBlk      *blk,
+                        RfpMemPrm      *prm,
+                        char           *file,
+                        unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the loading of the RAM blocks
+   on the module.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the reset block
+          prm - A pointer to the RAM parameter block
+         file - The file that contains the coefficients to load
+         stat - A pointer to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnLdRam");
+
+  char  buf[P2RF_K_BUFSIZE];
+
+
+  if (!rec->pact)
+  {
+    sprintf (buf, "Load %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val,  DBE_VALUE | DBE_LOG);
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before load-table completes */
+    rec->pact = TRUE;
+
+    /* Save block count and file name in parameter block and reset abort flag */
+    prm->count    = RFP_K_DACRAMCNT;
+    prm->file     = file;
+    blk->abortFlg = FALSE;
+
+    /* Point the RAM block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_LoadTblFile", prm->id, prm->file));
+      *stat = WRITE_ALARM;
+    }
+    else
+    {
+      sprintf (buf, "Load %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void LdRamCallback (RfpRamBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to load one of the module's RAMs.  It invokes
+   completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the load-RAM block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("LdRamCallback"); */
+
+  P2RfRfpRecord    *rec;
+  struct rset      *rSet;
+  RfpMemPrm        *prm = blk->prm;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Load the RAM */
+  blk->status = P2RF_LoadTblFile (blk->drvPvt, prm->id, prm->index,
+                                  prm->file, prm->count, &blk->abortFlg,
+                                  rec->val, sizeof (rec->val));
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+
+
+static void FeedbackSigMux (P2RfRfpRecord *rec, unsigned short *rctl, unsigned short *mctl)
+/*
+   Description
+   -----------
+   This function sets the feedback signal mux based on the database field FSMX. The feedback
+   signal mux bits A0-A1 are located in two registers, bit A0-A1 in the RF Control Register and the 
+   bits A2 in the Control Register. It is important to note that the mux settings for 
+   the RFP hw version 2 or later allow mux settings values 0-7 while eariler version of this module only
+   provide for mux settings 0-3. So this function check to set that these limits have been
+   followed. If an invalid setting is attempted, the old feedback signal mux setting found in
+   the database field OFMX is restore to the FSMX field.
+
+   Valid Mux Settings are:
+       0 - Total
+       1 - Comb Out
+       2 - Noise 1
+       3 - Drive
+       4 - Ripple Monitor   ( ver 2 or later)
+       5 - Error Sum        ( ver 2 or later)
+       6 - Noise 2          ( ver 2 or later)
+       7 - Spare            ( ver 2 or later)
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+         rctl - The RF Control Register 
+         mctl - The Control Register
+
+   Returns
+   -------
+   None
+*/
+{
+  /* Function ("FeedbackSigMux"); */
+
+  if ( (rec->fsmx > menuFsmx_Drive) && (rec->verh < RFP_K_VER2VERN) ) 
+  {
+     rec->fsmx = rec->ofmx;
+  }
+
+  /* Save old feedback signal mux */
+  rec->ofmx = rec->fsmx;
+  if ( rec->fsmx > menuFsmx_Drive )
+  {
+    *mctl |= RFP_M_FBSIGMUX2;
+  }
+  else 
+  {
+     *mctl &= ~RFP_M_FBSIGMUX2;
+  }
+ 
+  *rctl |= (rec->fsmx << RFP_V_FBSIGMUX);
+}
+
+
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d61 1
+d66 1
+a66 1
+#include <module_types.h>
+d75 2
+d78 1
+d104 2
+d293 1
+a293 1
+    scanOnce (rec);
+d556 3
+a558 3
+  callbackSetCallback (ResetCallback, &brd->resetBlk.callback);
+  callbackSetPriority (priorityHigh, &brd->resetBlk.callback);
+  callbackSetUser     (rec, &brd->resetBlk.callback);
+d562 3
+a564 3
+  callbackSetCallback (LdDspCallback, &brd->dspBlk.callback);
+  callbackSetPriority (priorityLow, &brd->dspBlk.callback);
+  callbackSetUser     (rec, &brd->dspBlk.callback);
+d577 3
+a579 3
+  callbackSetCallback (DspMsgCallback, &brd->dspMsgBlk.callback);
+  callbackSetPriority (priorityHigh, &brd->dspMsgBlk.callback);
+  callbackSetUser     (rec, &brd->dspMsgBlk.callback);
+d592 3
+a594 3
+  callbackSetCallback (GetRamCallback, &brd->getRamBlk.callback);
+  callbackSetPriority (priorityLow, &brd->getRamBlk.callback);
+  callbackSetUser     (rec, &brd->getRamBlk.callback);
+d630 3
+a632 3
+  callbackSetCallback (LdRamCallback, &brd->ldRamBlk.callback);
+  callbackSetPriority (priorityLow, &brd->ldRamBlk.callback);
+  callbackSetUser     (rec, &brd->ldRamBlk.callback);
+d801 1
+a801 1
+    epicsPrintf ("%s - Interrupt Control register readback error: wrt %h04x, rd %h04x, xor %h04x\n",
+d1103 1
+a1103 1
+      epicsPrintf ("%s - Interrupt Control register readback error: wrt %h04x, rd %h04x, xor %h04x\n",
+d1192 1
+a1192 1
+        epicsPrintf ("%s - RF Control register readback error: wrt %h04x, rd %h04x, xor %h04x\n",
+@
+
+
+1.4
+log
+@Added :STN:RFP:CALABORT PV for rf_calib.st.
+Changed fields SXST/SVST in :STN:RFP:FBSIG.
+Added db_post_events() for .lod & .dlod.
+@
+text
+@d13 1
+a1159 1
+      if (rec->ice)  mctl |= RFP_M_INTCOMP;
+d1161 2
+@
+
+
+1.3
+log
+@Double taskDelays during load of DSP parameters for PPC.
+@
+text
+@d13 1
+d926 2
+a927 2
+   /* Potentially set Dacs */
+   if (rec->dinj)  rec->mctl |= RFP_M_DACINJPT;
+d1113 1
+a1113 1
+   /* Check if the RF Control register needs updating */
+d1149 1
+a1149 1
+    if (rec->rlon)  mctl |= RFP_M_RLON;
+d1286 1
+d1312 1
+@
+
+
+1.2
+log
+@Additions for hw vers 2
+@
+text
+@d391 1
+a391 1
+          taskDelay (2);
+d393 1
+a393 1
+          taskDelay (2);
+d395 1
+a395 1
+          taskDelay (2);
+d397 1
+a397 1
+          taskDelay (2);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d53 1
+d215 1
+a216 1
+
+d238 1
+a238 1
+#if DBG
+d246 1
+a246 1
+#if DBG
+d248 1
+a248 1
+    epicsPrintf ("%s: Invalid RF Reference clock\n", FN);
+d250 1
+a250 1
+    epicsPrintf ("%s: Invalid 80, 40, 10 MHz and/or ripple clock(s)\n", FN);
+d253 1
+a253 1
+    epicsPrintf ("%s: ADC overflow detected\n", FN);
+d255 1
+a255 1
+    epicsPrintf ("%s: Ripple loop serial link error\n", FN);
+d258 1
+a258 1
+    epicsPrintf ("%s: Message from DSP\n", FN);
+d261 1
+a261 1
+    epicsPrintf ("%s: Invalid State Machine operation\n", FN);
+d263 1
+a263 1
+    epicsPrintf ("%s: Invalid operation\n", FN);
+d265 1
+a265 1
+    epicsPrintf ("%s: Software interrupt\n", FN);
+d275 1
+a275 1
+    intStat ^= RFP_M_DSPMSG;
+d279 1
+a279 1
+  if (intStat & (intStat ^ rec->istt))  /* Is bit already set in istt? */
+d497 1
+d660 5
+a664 2
+  P2RF_ReadVme (brd->drvPvt, RFP_I_INTCTRL,  &rec->ictl);
+
+d692 3
+a694 4
+  unsigned short  sernHi;
+  unsigned short  sernLo;
+  long            status;
+
+d711 7
+a721 4
+  /* Resman wrote 0xfffc to module control register; take down software int */
+  rec->mctl = rec->mstt & (RFP_M_SFTRST | RFP_M_SYSFAILINH | RFP_M_A24A32);
+  P2RF_WriteVme (drvPvt, RFP_I_CONTROL,  rec->mctl);
+  P2RF_ReadVme  (drvPvt, RFP_I_STATUS,  &rec->mstt);
+d723 17
+a747 4
+  /* Update the database copy of the RFP Status and control registers */
+  P2RF_ReadVme (drvPvt, RFP_I_RFSTAT, &rec->rstt);
+  P2RF_ReadVme (drvPvt, RFP_I_RFCTRL, &rec->rctl);
+
+a775 1
+
+d780 9
+a788 3
+  rec->ictl = ~(reg | ((rec->imsk << RFP_V_INTSELECT) & RFP_M_INTSELECT));
+  P2RF_WriteVme (drvPvt, RFP_I_INTCTRL, rec->ictl);
+  rec->oimk = rec->imsk;
+d790 10
+a799 1
+  /* Get module into LOAD state via a RESET */
+d836 1
+d838 3
+a840 2
+
+    for (idx = RFP_I_CCC1II; idx <= RFP_I_CLCQQ; dac++, idx++)
+d903 2
+a904 2
+  reg |= (rec->csmx << RFP_V_CAVSELMUX) & RFP_M_CAVSELMUX;
+  reg |= (rec->fsmx << RFP_V_FBSIGMUX)  & RFP_M_FBSIGMUX;
+d906 1
+a906 1
+  /* Get the operating mode */
+d925 3
+a931 1
+  P2RF_WriteVme (drvPvt, RFP_I_RFCTRL, reg);
+d933 8
+a965 1
+  /* Determine the current mode of the module */
+d975 1
+d1008 1
+d1015 3
+a1017 1
+
+d1047 3
+a1049 1
+  if (rec->mrst)  return (SpawnReset (rec, &brd->resetBlk));
+d1062 5
+d1087 2
+d1091 9
+d1107 6
+a1112 1
+  /* Check if the RF Control register needs updating */
+d1143 9
+d1201 9
+d1223 24
+a1246 2
+  P2RF_ReadVme (drvPvt, RFP_I_RFSTAT,  &rec->rstt);
+  db_post_events (rec, &rec->rstt, DBE_VALUE | DBE_LOG);
+d1263 1
+d1268 2
+a1269 1
+    for (idx = RFP_I_CCC1II; idx <= RFP_I_CLCQQ; dac++, idx++)
+d1486 2
+a1487 2
+static void  ActLddo         (RfpBoard *brd, void *drvPvt,
+                              P2RfRfpRecord  *rec)
+d1661 25
+d1710 1
+a1710 1
+
+d1724 6
+d1749 6
+d2322 57
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

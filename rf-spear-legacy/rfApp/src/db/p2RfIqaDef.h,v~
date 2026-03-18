@@ -1,0 +1,659 @@
+head	1.4;
+access;
+symbols
+	R3_13_6:1.1.1.1 CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.4
+date	2003.07.29.18.39.32;	author khkim;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.02.11.18.58.59;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.01.22.20.15.41;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.49;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.49;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.4
+log
+@made chages
+@
+text
+@/*
+** ++
+**
+**  Facility:  IQA - IQ & A Module
+**
+**  Abstract:
+**      Parameter and register definitions for the IQ & A module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II RF Project
+**
+**   History:
+**      June 21, 1996 - Created
+**      21-Oct-2003, K. H. Kim:
+**          Add some parameters for version 3 of IQA.
+**            1) IQ data dual-port memory enable bit in processing control register
+**            2) IQ history enable bit in processing register
+**          Changed the meaning for bit 8 and bit 9 in interrupt control register for version 3 hardware.
+**      14-Apr-2003, K. H. KIM:
+**          Exclude following 3 procdure from interrupt handling for version 3 hardware
+**            1) DDF data NOT update
+**            2) IQSLIP
+**            3) DDF data overflow
+**            
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef P2RFIQADEF_H
+#define P2RFIQADEF_H
+
+#include <drvP2RfVxi.h>
+
+#define IQA_K_MAKE        P2RF_K_MAKE
+#define IQA_K_MODEL       0x102
+#define IQA_K_NAME       "I/Q & A Detector"
+#define IQA_K_DRAWING    "340-302"
+
+#define IQA_K_CHANCNT     8
+#define IQA_K_RIPCHAN     0             /* Channel ripple loop can be on */
+
+/* Amount of time IQA needs to complete software reset */
+#define IQA_K_RESETTMO    (1 * sysClkRateGet ())
+
+/* Size of the history memories in 1K blocks */
+#define IQA_K_HISTMEMLEN  512
+
+/* IQA module version number */
+#define IQA_K_VER3VERN   0x3
+/* Make sure that the trigtger control register database fields
+ * for the lower byte SN0-SN2 (ssi) and ST0-ST2 (sti) are setu
+ * properly for each version of the iqa module.
+ */
+#define IQA_K_SSI(ver)   ((ver) < IQA_K_VER3VERN ? 7 : 6)
+#define IQA_K_STI(ver)   ((ver) < IQA_K_VER3VERN ? 6 : 7)
+
+/* IQ data flag indicating that DDF data not ready at the
+ * time that data is being written into the fifo for that channel
+ */
+#define IQA_K_IQINVALIDVAL  0x8000
+
+
+/* A16 space register: */
+#define IQA_A_MANID       0x00          /* ID/LA register */
+#define IQA_I_MANID       STD2IDX (IQA_A_MANID)
+#define IQA_A_MODELNO     0x02          /* Device type register */
+#define IQA_I_MODELNO     STD2IDX (IQA_A_MODELNO)
+#define IQA_A_STATUS      0x04          /* Status register */
+#define IQA_I_STATUS      STD2IDX (IQA_A_STATUS)
+#define IQA_A_CONTROL     0x04          /* Control register */
+#define IQA_I_CONTROL     STD2IDX (IQA_A_CONTROL)
+#define IQA_A_OFFSET      0x06          /* A24 offset register */
+#define IQA_I_OFFSET      STD2IDX (IQA_A_OFFSET)
+#define IQA_A_ATTRIBUTE   0x08          /* Attribute register */
+#define IQA_I_ATTRIBUTE   STD2IDX (IQA_A_ATTRIBUTE)
+#define IQA_A_SERIALHI    0x0a          /* Serial number high register */
+#define IQA_I_SERIALHI    STD2IDX (IQA_A_SERIALHI)
+#define IQA_A_SERIALLO    0x0c          /* Serial number low register */
+#define IQA_I_SERIALLO    STD2IDX (IQA_A_SERIALLO)
+#define IQA_A_VERSION     0x0e          /* Version number register */
+#define IQA_I_VERSION     STD2IDX (IQA_A_VERSION)
+#define IQA_A_INTSTAT     0x1a          /* Interrupt status register */
+#define IQA_I_INTSTAT     STD2IDX (IQA_A_INTSTAT)
+#define IQA_A_INTCTRL     0x1c          /* Interrupt control register */
+#define IQA_I_INTCTRL     STD2IDX (IQA_A_INTCTRL)
+#define IQA_A_SUBCLASS    0x1e          /* Subclass register */
+#define IQA_I_SUBCLASS    STD2IDX (IQA_A_SUBCLASS)
+
+#define IQA_A_TRIGCTRL    0x20          /* Trigger control register */
+#define IQA_I_TRIGCTRL    STD2IDX (IQA_A_TRIGCTRL)
+#define IQA_A_FLTENBSTT   0x22          /* Fault enable status register */
+#define IQA_I_FLTENBSTT   STD2IDX (IQA_A_FLTENBSTT)
+
+/* Control and Status Register */
+#define IQA_V_SFTRST      0
+#define IQA_M_SFTRST     (0x0001 << IQA_V_SFTRST)
+#define IQA_V_SYSFAILINH  1
+#define IQA_M_SYSFAILINH (0x0001 << IQA_V_SYSFAILINH)
+#define IQA_V_PASSED      2
+#define IQA_M_PASSED     (0x0001 << IQA_V_PASSED)
+#define IQA_V_READY       3
+#define IQA_M_READY      (0x0001 << IQA_V_READY)
+#define IQA_V_SFTINT      5
+#define IQA_M_SFTINT     (0x0001 << IQA_V_SFTINT)
+#define IQA_V_MODIDCOMPL  14
+#define IQA_M_MODIDCOMPL (0x0001 << IQA_V_MODIDCOMPL)
+#define IQA_V_A24A32      15
+#define IQA_M_A24A32     (0x0001 << IQA_V_A24A32)
+
+/* Interrupt Status and Control Registers */
+#define IQA_V_INTLA       0
+#define IQA_M_INTLA      (0x00ff << IQA_V_INTLA)
+#define IQA_V_INTLEVEL    3
+#define IQA_M_INTLEVEL   (0x0007 << IQA_V_INTLEVEL)
+#define IQA_V_INTMASK     7
+#define IQA_M_INTMASK    (0x0001 << IQA_V_INTMASK)
+#define IQA_V_DDFDATRDY   8
+#define IQA_M_DDFDATRDY  (0x0001 << IQA_V_DDFDATRDY)
+#define IQA_V_DDFOVRWRT   9
+#define IQA_M_DDFOVRWRT  (0x0001 << IQA_V_DDFOVRWRT)
+#define IQA_V_DDFOVRFLW   10
+#define IQA_M_DDFOVRFLW  (0x0001 << IQA_V_DDFOVRFLW)
+#define IQA_V_AMPTHRFLT   11
+#define IQA_M_AMPTHRFLT  (0x0001 << IQA_V_AMPTHRFLT)
+#define IQA_V_INV10MHZ    12
+#define IQA_M_INV10MHZ   (0x0001 << IQA_V_INV10MHZ)
+#define IQA_V_INV20MHZ    13
+#define IQA_M_INV20MHZ   (0x0001 << IQA_V_INV20MHZ)
+#define IQA_V_INVADX      14
+#define IQA_M_INVADX     (0x0001 << IQA_V_INVADX)
+#define IQA_V_SOFTWARE    15
+#define IQA_M_SOFTWARE   (0x0001 << IQA_V_SOFTWARE)
+
+/* Don't include record processing for DDF data ready, overwrite or overflow */
+#define IQA_M_INTSTAT     (IQA_M_DDFDATRDY | IQA_M_DDFOVRWRT | IQA_M_DDFOVRFLW)
+
+/* Don't include record processing for DDF data NOT updated,
+ * IQSLIP or DDF data overflow */
+/* #define IQA_M_INTSTATV3   (IQA_M_DDFDATANOUPD | IQA_M_IQSLIP | IQA_M_DDFOVRFLW) */
+#define IQA_M_INTSTATV3 0
+#define IQA_INTSTAT(ver)  ((ver)<IQA_K_VER3VERN ? IQA_M_INTSTAT : IQA_M_INTSTATV3)
+
+/* Interrupt Status and Control register for Ver. 3 */
+#define IQA_V_DDFDATANOUPD 8
+#define IQA_M_DDFDATANOUPD (0x0001 << IQA_V_DDFDATANOUPD)
+#define IQA_V_IQSLIP       9
+#define IQA_M_IQSLIP       (0x0001 << IQA_V_IQSLIP)
+
+
+/* Trigger Control Register */
+#define IQA_V_STPTRGSEL   0
+#define IQA_M_STPTRGSEL   (0x0007 << IQA_V_STPTRGSEL)
+#define IQA_V_STPTRGENB   3
+#define IQA_M_STPTRGENB   (0x0001 << IQA_V_STPTRGENB)
+#define IQA_V_SSITRGSEL   4
+#define IQA_M_SSITRGSEL   (0x0007 << IQA_V_SSITRGSEL)
+#define IQA_V_SSITRGENB   7
+#define IQA_M_SSITRGENB   (0x0001 << IQA_V_SSITRGENB)
+#define IQA_V_FLTTRGSEL   8
+#define IQA_M_FLTTRGSEL   (0x0007 << IQA_V_FLTTRGSEL)
+#define IQA_V_FLTTRGENB   11
+#define IQA_M_FLTTRGENB   (0x0001 << IQA_V_FLTTRGENB)
+#define IQA_V_RCKTRGSEL   12
+#define IQA_M_RCKTRGSEL   (0x0007 << IQA_V_RCKTRGSEL)
+#define IQA_V_RCKTRGENB   15
+#define IQA_M_RCKTRGENB   (0x0001 << IQA_V_RCKTRGENB)
+
+/* Fault Enable Status Register (Read-only) */
+#define IQA_V_FLTENB       0
+#define IQA_M_FLTENB      (0x00ff << IQA_V_FLTENB)
+#define IQA_V_THRDETBW     8
+#define IQA_M_THRDETBW    (0x00ff << IQA_V_THRDETBW)
+
+/* A24 space registers: */
+
+/* Amplitude registers */
+#define IQA_K_ATCNTPERV   (256.0 / 5.0) /* Counts per Volt */
+#define IQA_V_AMPTHR       0
+#define IQA_M_AMPTHR      (0x00ff << IQA_V_AMPTHR)
+
+#define IQA_A_AMPTHR0	  0x0000        /* Amp thresh 0 register */
+#define IQA_I_AMPTHR0     EXT2IDX (IQA_A_AMPTHR0)
+#define IQA_A_AMPTHR1	  0x0002        /* Amp thresh 1 register */
+#define IQA_I_AMPTHR1     EXT2IDX (IQA_A_AMPTHR1)
+#define IQA_A_AMPTHR2	  0x0004        /* Amp thresh 2 register */
+#define IQA_I_AMPTHR2     EXT2IDX (IQA_A_AMPTHR2)
+#define IQA_A_AMPTHR3	  0x0006        /* Amp thresh 3 register */
+#define IQA_I_AMPTHR3     EXT2IDX (IQA_A_AMPTHR3)
+#define IQA_A_AMPTHR4	  0x0008        /* Amp thresh 4 register */
+#define IQA_I_AMPTHR4     EXT2IDX (IQA_A_AMPTHR4)
+#define IQA_A_AMPTHR5	  0x000a        /* Amp thresh 5 register */
+#define IQA_I_AMPTHR5     EXT2IDX (IQA_A_AMPTHR5)
+#define IQA_A_AMPTHR6	  0x000c        /* Amp thresh 6 register */
+#define IQA_I_AMPTHR6     EXT2IDX (IQA_A_AMPTHR6)
+#define IQA_A_AMPTHR7	  0x000e        /* Amp thresh 7 register */
+#define IQA_I_AMPTHR7     EXT2IDX (IQA_A_AMPTHR7)
+
+/* Use TAG and DATA field and mask for both data and memory registers */
+#define IQA_K_ADVPERCNT  (2.0 / 2048.0) /* Volts per count */
+#define IQA_V_AMPTAG      0
+#define IQA_M_AMPTAG     (0x0007 << IQA_V_AMPTAG)
+#define IQA_V_AMPDATA     4
+#define IQA_M_AMPDATA    (0x0fff << IQA_V_AMPDATA)
+#define AMPCHAN(rval)     ((rval) & IQA_M_AMPTAG)
+#define AMPDATA(rval)     (((rval) & IQA_M_AMPDATA) >> IQA_V_AMPDATA)
+#define AMPCHAN_VALID(chan)  ((((chan)>=0) && ((chan)<IQA_K_CHANCNT)) ? 1 : 0) 
+
+#define IQA_K_AMPOS       0x0800
+
+/* Amplitude data register */
+#define IQA_A_AMPDATA	  0x0010        /* Amp data register */
+#define IQA_I_AMPDATA     EXT2IDX (IQA_A_AMPDATA)
+
+/* Amplitude data register for Ver. 3 */
+#define IQA_A_AMPDATA0    0x0020       /* Amp data register for CH1 */
+#define IQA_I_AMPDATA0    EXT2IDX(IQA_A_AMPDATA0)
+#define IQA_A_AMPDATA1    0x0022       /* Amp data register for CH2 */
+#define IQA_I_AMPDATA1    EXT2IDX(IQA_A_AMPDATA1)  
+#define IQA_A_AMPDATA2    0x0024       /* Amp data register for CH3 */
+#define IQA_I_AMPDATA2    EXT2IDX(IQA_A_AMPDATA2)
+#define IQA_A_AMPDATA3    0x0026       /* Amp data register for CH4 */
+#define IQA_I_AMPDATA3    EXT2IDX(IQA_A_AMPDATA3)
+#define IQA_A_AMPDATA4    0x0028       /* Amp data register for CH5 */
+#define IQA_I_AMPDATA4    EXT2IDX(IQA_A_AMPDATA4)
+#define IQA_A_AMPDATA5    0x002a       /* Amp data register for CH6 */
+#define IQA_I_AMPDATA5    EXT2IDX(IQA_A_AMPDATA5)
+#define IQA_A_AMPDATA6    0x002c       /* Amp data register for CH7 */
+#define IQA_I_AMPDATA6    EXT2IDX(IQA_A_AMPDATA6)
+#define IQA_A_AMPDATA7    0x002e       /* Amp data register for CH8 */
+#define IQA_I_AMPDATA7    EXT2IDX(IQA_A_AMPDATA7)
+
+/* Amplitude history memory register */
+#define IQA_A_AMPMEM	  0x0012        /* Amp memory register */
+#define IQA_I_AMPMEM      EXT2IDX (IQA_A_AMPMEM)
+#define IQA_K_AMPHISTID   "IQA Amplitude History"
+
+/* Amplitude Control registers */
+#define IQA_V_AMPMEMMOD   0
+#define IQA_M_AMPMEMMOD  (0x0001 << IQA_V_AMPMEMMOD)
+#define IQA_V_SIGSEL      1
+#define IQA_M_SIGSEL     (0x0007 << IQA_V_SIGSEL)
+#define IQA_V_CLRFAULT    4
+#define IQA_M_CLRFAULT   (0x0001 << IQA_V_CLRFAULT)
+#define IQA_A_AMPCTL	  0x0014        /* Amp control register */
+#define IQA_I_AMPCTL      EXT2IDX (IQA_A_AMPCTL)
+
+/* Amplitude Control register */
+#define IQA_V_AMPDPMENB   6       /* dual-port memory enable flag (1=enb, 0=dis) */
+#define IQA_M_AMPDPMENB  (0x0001 << IQA_V_AMPDPMENB)
+#define IQA_V_AMPMODE     5       /* scan mode (1=8 channel, 0= 1 channel) */
+#define IQA_M_AMPMODE    (0x0001 << IQA_V_AMPMODE)
+#define AMPMODE(state)   ((state)==0 ? 0 : 1)
+
+#define IQA_V_CURFAULT    0
+#define IQA_M_CURFAULT   (0x00ff << IQA_V_CURFAULT)
+#define IQA_V_LATFAULT    8
+#define IQA_M_LATFAULT   (0x00ff << IQA_V_LATFAULT)
+#define IQA_A_FLTSTAT	  0x0016        /* Amp fault status register */
+#define IQA_I_FLTSTAT     EXT2IDX (IQA_A_FLTSTAT)
+
+/* The new IQA module has First Fault Status register */
+#define IQA_A_FIRSTFLTSTAT   0x0018
+#define IQA_I_FIRSTFLTSTAT   EXT2IDX (IQA_A_FIRSTFLTSTAT)
+
+/* I/Q registers */
+#define IQA_A_I0DATA	  0x0040        /* I0 data register */
+#define IQA_I_I0DATA      EXT2IDX (IQA_A_I0DATA)
+#define IQA_A_Q0DATA	  0x0042        /* Q0 data register */
+#define IQA_I_Q0DATA      EXT2IDX (IQA_A_Q0DATA)
+#define IQA_A_I1DATA	  0x0044        /* I1 data register */
+#define IQA_I_I1DATA      EXT2IDX (IQA_A_I1DATA)
+#define IQA_A_Q1DATA	  0x0046        /* Q1 data register */
+#define IQA_I_Q1DATA      EXT2IDX (IQA_A_Q1DATA)
+#define IQA_A_I2DATA	  0x0048        /* I2 data register */
+#define IQA_I_I2DATA      EXT2IDX (IQA_A_I2DATA)
+#define IQA_A_Q2DATA	  0x004a        /* Q2 data register */
+#define IQA_I_Q2DATA      EXT2IDX (IQA_A_Q2DATA)
+#define IQA_A_I3DATA	  0x004c        /* I3 data register */
+#define IQA_I_I3DATA      EXT2IDX (IQA_A_I3DATA)
+#define IQA_A_Q3DATA	  0x004e        /* Q3 data register */
+#define IQA_I_Q3DATA      EXT2IDX (IQA_A_Q3DATA)
+#define IQA_A_I4DATA	  0x0050        /* I4 data register */
+#define IQA_I_I4DATA      EXT2IDX (IQA_A_I4DATA)
+#define IQA_A_Q4DATA	  0x0052        /* Q4 data register */
+#define IQA_I_Q4DATA      EXT2IDX (IQA_A_Q4DATA)
+#define IQA_A_I5DATA	  0x0054        /* I5 data register */
+#define IQA_I_I5DATA      EXT2IDX (IQA_A_I5DATA)
+#define IQA_A_Q5DATA	  0x0056        /* Q5 data register */
+#define IQA_I_Q5DATA      EXT2IDX (IQA_A_Q5DATA)
+#define IQA_A_I6DATA	  0x0058        /* I6 data register */
+#define IQA_I_I6DATA      EXT2IDX (IQA_A_I6DATA)
+#define IQA_A_Q6DATA	  0x005a        /* Q6 data register */
+#define IQA_I_Q6DATA      EXT2IDX (IQA_A_Q6DATA)
+#define IQA_A_I7DATA	  0x005c        /* I7 data register */
+#define IQA_I_I7DATA      EXT2IDX (IQA_A_I7DATA)
+#define IQA_A_Q7DATA	  0x005e        /* Q7 data register */
+#define IQA_I_Q7DATA      EXT2IDX (IQA_A_Q7DATA)
+
+#define IQA_A_DATARDY	  0x0060        /* IQ data ready register */
+#define IQA_I_DATARDY     EXT2IDX (IQA_A_DATARDY)
+#define IQA_A_DATAOWRT	  0x0062        /* IQ data overwrite register */
+#define IQA_I_DATAOWRT    EXT2IDX (IQA_A_DATAOWRT)
+#define IQA_A_DATAOFLW	  0x0064        /* IQ data overflow register */
+#define IQA_I_DATAOFLW    EXT2IDX (IQA_A_DATAOFLW)
+#define IQA_A_DDFCTL	  0x0066        /* DDF control register */
+#define IQA_I_DDFCTL      EXT2IDX (IQA_A_DDFCTL)
+
+/* IQA Data NOT Updated Fault register */
+#define IQA_A_DATANOUPD   0x0060        /* IQ data not updated fault */
+#define IQA_I_DATANOUPD   EXT2IDX (IQA_A_DATANOUPD)
+
+#define IQA_V_DDFNRST     0             /* NOT Reset (TRUE = 0) */
+#define IQA_M_DDFNRST    (0x00ff << IQA_V_DDFNRST)
+#define IQA_V_DDFSTRT     8
+#define IQA_M_DDFSTRT    (0x00ff << IQA_V_DDFSTRT)
+
+#define IQA_M_DDFCHNMSK   ((1 << IQA_K_CHANCNT) - 1)
+#define IQA_K_DDFRSTMSK   0
+#define IQA_K_DDFSTRTMSK  IQA_M_DDFCHNMSK
+
+#define IQA_K_RDYALL      IQA_M_DDFCHNMSK
+#define IQA_K_RDYNOTRIP   (IQA_M_DDFCHNMSK & 0xfffc)
+
+/* I/Q history memory register */
+#define IQA_A_IQMEM	  0x0068        /* IQ memory register */
+#define IQA_I_IQMEM       EXT2IDX (IQA_A_IQMEM)
+#define IQA_K_IQHISTID    "IQA I/Q History"
+
+/* I/Q Processing control register */
+#define IQA_A_IQCTL	  0x006a        /* IQ control register */
+#define IQA_I_IQCTL       EXT2IDX (IQA_A_IQCTL)
+#define IQA_V_UPDRATE     0
+#define IQA_M_UPDRATE    (0x00ff << IQA_V_UPDRATE)
+#define IQA_V_IQMEMMOD    8
+#define IQA_M_IQMEMMOD   (0x0001 << IQA_V_IQMEMMOD)
+#define IQA_V_IFCHNSEL    9
+#define IQA_M_IFCHNSEL   (0x0007 << IQA_V_IFCHNSEL)
+#define IQA_V_IFMODE      12
+#define IQA_M_IFMODE     (0x0001 << IQA_V_IFMODE)
+#define IQA_V_LNKENB      13
+#define IQA_M_LNKENB     (0x0001 << IQA_V_LNKENB)
+
+/* New register bit for IQA ver.3
+ * The IQ data Dual-port meory enable bit */
+#define IQA_V_IQDPMENB      14
+#define IQA_M_IQDPMENB     (0x0001 << IQA_V_IQDPMENB)
+#define IQA_V_IQHSTENB      15
+#define IQA_M_IQHSTENB     (0x0001 << IQA_V_IQHSTENB)
+
+#define IQA_K_FSTCLKENB   0x01ff        /* Fast clock enable */
+
+/* DDF registers */
+#define IQA_A_I0F	  0x0080        /* I0 F register */
+#define IQA_I_I0F         EXT2IDX (IQA_A_I0F)
+#define IQA_A_I0FC	  0x0082        /* I0 FC register */
+#define IQA_I_I0FC        EXT2IDX (IQA_A_I0FC)
+#define IQA_A_I0H1	  0x0084        /* I0 H1 register */
+#define IQA_I_I0H1        EXT2IDX (IQA_A_I0H1)
+#define IQA_A_I0H2	  0x0086        /* I0 H2 register */
+#define IQA_I_I0H2        EXT2IDX (IQA_A_I0H2)
+#define IQA_A_Q0F	  0x0088        /* Q0 F register */
+#define IQA_I_Q0F         EXT2IDX (IQA_A_Q0F)
+#define IQA_A_Q0FC	  0x008a        /* Q0 FC register */
+#define IQA_I_Q0FC        EXT2IDX (IQA_A_Q0FC)
+#define IQA_A_Q0H1	  0x008c        /* Q0 H1 register */
+#define IQA_I_Q0H1        EXT2IDX (IQA_A_Q0H1)
+#define IQA_A_Q0H2	  0x008e        /* Q0 H2 register */
+#define IQA_I_Q0H2        EXT2IDX (IQA_A_Q0H2)
+#define IQA_A_I1F	  0x0090        /* I1 F register */
+#define IQA_I_I1F         EXT2IDX (IQA_A_I1F)
+#define IQA_A_I1FC	  0x0092        /* I1 FC register */
+#define IQA_I_I1FC        EXT2IDX (IQA_A_I1FC)
+#define IQA_A_I1H1	  0x0094        /* I1 H1 register */
+#define IQA_I_I1H1        EXT2IDX (IQA_A_I1H1)
+#define IQA_A_I1H2	  0x0096        /* I1 H2 register */
+#define IQA_I_I1H2        EXT2IDX (IQA_A_I1H2)
+#define IQA_A_Q1F	  0x0098        /* Q1 F register */
+#define IQA_I_Q1F         EXT2IDX (IQA_A_Q1F)
+#define IQA_A_Q1FC	  0x009a        /* Q1 FC register */
+#define IQA_I_Q1FC        EXT2IDX (IQA_A_Q1FC)
+#define IQA_A_Q1H1	  0x009c        /* Q1 H1 register */
+#define IQA_I_Q1H1        EXT2IDX (IQA_A_Q1H1)
+#define IQA_A_Q1H2	  0x009e        /* Q1 H2 register */
+#define IQA_I_Q1H2        EXT2IDX (IQA_A_Q1H2)
+#define IQA_A_I2F	  0x00a0        /* I2 F register */
+#define IQA_I_I2F         EXT2IDX (IQA_A_I2F)
+#define IQA_A_I2FC	  0x00a2        /* I2 FC register */
+#define IQA_I_I2FC        EXT2IDX (IQA_A_I2FC)
+#define IQA_A_I2H1	  0x00a4        /* I2 H1 register */
+#define IQA_I_I2H1        EXT2IDX (IQA_A_I2H1)
+#define IQA_A_I2H2	  0x00a6        /* I2 H2 register */
+#define IQA_I_I2H2        EXT2IDX (IQA_A_I2H2)
+#define IQA_A_Q2F	  0x00a8        /* Q2 F register */
+#define IQA_I_Q2F         EXT2IDX (IQA_A_Q2F)
+#define IQA_A_Q2FC	  0x00aa        /* Q2 FC register */
+#define IQA_I_Q2FC        EXT2IDX (IQA_A_Q2FC)
+#define IQA_A_Q2H1	  0x00ac        /* Q2 H1 register */
+#define IQA_I_Q2H1        EXT2IDX (IQA_A_Q2H1)
+#define IQA_A_Q2H2	  0x00ae        /* Q2 H2 register */
+#define IQA_I_Q2H2        EXT2IDX (IQA_A_Q2H2)
+#define IQA_A_I3F	  0x00b0        /* I3 F register */
+#define IQA_I_I3F         EXT2IDX (IQA_A_I3F)
+#define IQA_A_I3FC	  0x00b2        /* I3 FC register */
+#define IQA_I_I3FC        EXT2IDX (IQA_A_I3FC)
+#define IQA_A_I3H1	  0x00b4        /* I3 H1 register */
+#define IQA_I_I3H1        EXT2IDX (IQA_A_I3H1)
+#define IQA_A_I3H2	  0x00b6        /* I3 H2 register */
+#define IQA_I_I3H2        EXT2IDX (IQA_A_I3H2)
+#define IQA_A_Q3F	  0x00b8        /* Q3 F register */
+#define IQA_I_Q3F         EXT2IDX (IQA_A_Q3F)
+#define IQA_A_Q3FC	  0x00ba        /* Q3 FC register */
+#define IQA_I_Q3FC        EXT2IDX (IQA_A_Q3FC)
+#define IQA_A_Q3H1	  0x00bc        /* Q3 H1 register */
+#define IQA_I_Q3H1        EXT2IDX (IQA_A_Q3H1)
+#define IQA_A_Q3H2	  0x00be        /* Q3 H2 register */
+#define IQA_I_Q3H2        EXT2IDX (IQA_A_Q3H2)
+#define IQA_A_I4F	  0x00c0        /* I4 F register */
+#define IQA_I_I4F         EXT2IDX (IQA_A_I4F)
+#define IQA_A_I4FC	  0x00c2        /* I4 FC register */
+#define IQA_I_I4FC        EXT2IDX (IQA_A_I4FC)
+#define IQA_A_I4H1	  0x00c4        /* I4 H1 register */
+#define IQA_I_I4H1        EXT2IDX (IQA_A_I4H1)
+#define IQA_A_I4H2	  0x00c6        /* I4 H2 register */
+#define IQA_I_I4H2        EXT2IDX (IQA_A_I4H2)
+#define IQA_A_Q4F	  0x00c8        /* Q4 F register */
+#define IQA_I_Q4F         EXT2IDX (IQA_A_Q4F)
+#define IQA_A_Q4FC	  0x00ca        /* Q4 FC register */
+#define IQA_I_Q4FC        EXT2IDX (IQA_A_Q4FC)
+#define IQA_A_Q4H1	  0x00cc        /* Q4 H1 register */
+#define IQA_I_Q4H1        EXT2IDX (IQA_A_Q4H1)
+#define IQA_A_Q4H2	  0x00ce        /* Q4 H2 register */
+#define IQA_I_Q4H2        EXT2IDX (IQA_A_Q4H2)
+#define IQA_A_I5F	  0x00d0        /* I5 F register */
+#define IQA_I_I5F         EXT2IDX (IQA_A_I5F)
+#define IQA_A_I5FC	  0x00d2        /* I5 FC register */
+#define IQA_I_I5FC        EXT2IDX (IQA_A_I5FC)
+#define IQA_A_I5H1	  0x00d4        /* I5 H1 register */
+#define IQA_I_I5H1        EXT2IDX (IQA_A_I5H1)
+#define IQA_A_I5H2	  0x00d6        /* I5 H2 register */
+#define IQA_I_I5H2        EXT2IDX (IQA_A_I5H2)
+#define IQA_A_Q5F	  0x00d8        /* Q5 F register */
+#define IQA_I_Q5F         EXT2IDX (IQA_A_Q5F)
+#define IQA_A_Q5FC	  0x00da        /* Q5 FC register */
+#define IQA_I_Q5FC        EXT2IDX (IQA_A_Q5FC)
+#define IQA_A_Q5H1	  0x00dc        /* Q5 H1 register */
+#define IQA_I_Q5H1        EXT2IDX (IQA_A_Q5H1)
+#define IQA_A_Q5H2	  0x00de        /* Q5 H2 register */
+#define IQA_I_Q5H2        EXT2IDX (IQA_A_Q6H2)
+#define IQA_A_I6F	  0x00e0        /* I6 F register */
+#define IQA_I_I6F         EXT2IDX (IQA_A_I6F)
+#define IQA_A_I6FC	  0x00e2        /* I6 FC register */
+#define IQA_I_I6FC        EXT2IDX (IQA_A_I6FC)
+#define IQA_A_I6H1	  0x00e4        /* I6 H1 register */
+#define IQA_I_I6H1        EXT2IDX (IQA_A_I6H1)
+#define IQA_A_I6H2	  0x00e6        /* I6 H2 register */
+#define IQA_I_I6H2        EXT2IDX (IQA_A_I6H2)
+#define IQA_A_Q6F	  0x00e8        /* Q6 F register */
+#define IQA_I_Q6F         EXT2IDX (IQA_A_Q6F)
+#define IQA_A_Q6FC	  0x00ea        /* Q6 FC register */
+#define IQA_I_Q6FC        EXT2IDX (IQA_A_Q6FC)
+#define IQA_A_Q6H1	  0x00ec        /* Q6 H1 register */
+#define IQA_I_Q6H1        EXT2IDX (IQA_A_Q6H1)
+#define IQA_A_Q6H2	  0x00ee        /* Q6 H2 register */
+#define IQA_I_Q6H2        EXT2IDX (IQA_A_Q6H2)
+#define IQA_A_I7F	  0x00f0        /* I7 F register */
+#define IQA_I_I7F         EXT2IDX (IQA_A_I7F)
+#define IQA_A_I7FC	  0x00f2        /* I7 FC register */
+#define IQA_I_I7FC        EXT2IDX (IQA_A_I7FC)
+#define IQA_A_I7H1	  0x00f4        /* I7 H1 register */
+#define IQA_I_I7H1        EXT2IDX (IQA_A_I7H1)
+#define IQA_A_I7H2	  0x00f6        /* I7 H2 register */
+#define IQA_I_I7H2        EXT2IDX (IQA_A_I7H2)
+#define IQA_A_Q7F	  0x00f8        /* Q7 F register */
+#define IQA_I_Q7F         EXT2IDX (IQA_A_Q7F)
+#define IQA_A_Q7FC	  0x00fa        /* Q7 FC register */
+#define IQA_I_Q7FC        EXT2IDX (IQA_A_Q7FC)
+#define IQA_A_Q7H1	  0x00fc        /* Q7 H1 register */
+#define IQA_I_Q7H1        EXT2IDX (IQA_A_Q7H1)
+#define IQA_A_Q7H2	  0x00fe        /* Q7 H2 register */
+#define IQA_I_Q7H2        EXT2IDX (IQA_A_Q7H2)
+
+#define IQA_K_DDFCOEFID   "Harris DDF HSP43220" /*"IQA DDF Coefficients"*/
+
+#endif
+@
+
+
+1.3
+log
+@Added macros
+@
+text
+@a12 1
+**      Oct  21, 2002,- Added parameters for version 3 of iqa (Kuhkee Kim)
+d14 11
+d164 2
+a165 1
+#define IQA_M_INTSTATV3   (IQA_M_DDFDATANOUPD | IQA_M_IQSLIP | IQA_M_DDFOVRFLW)
+d372 2
+@
+
+
+1.2
+log
+@Phase 2 upgrade of IQA modules
+@
+text
+@d13 1
+d64 13
+a76 10
+/* appended by KHKIM     October 21, 2002 */
+#define IQA_K_OLDVERN    0x1111
+#define IQA_K_VER3VERN   0x1113
+#define IQA_V_HWVMASK    0x00ff     /* Hardware version Mask */
+#define IQA_V_FWVMASK    0xff00     /* Firmware version Mask */
+#define IQA_K_FWVOFFS    8
+#define IQA_GET_HWV(ver)  ( ver & IQA_V_HWVMASK)
+#define IQA_GET_FWV(ver)  ((ver & IQA_V_FWVMASK)>>IQA_K_FWVOFFS) 
+/* end of inserting */
+#define IQA_K_IQINVALIDVAL  0x1000
+d149 8
+a157 1
+/* Appended by KHKIM    October 21, 2002 */
+a161 2
+/* end of inserting */
+
+d218 3
+a228 1
+/* Appended by KHKIM, October 21, 2002 */
+a244 1
+/* end of inserting */
+d261 2
+a262 4
+  /* The new IQA module has Amplitude dual-port memory enable bit on 
+   * Amplitude Control register */
+  /* Inserted by KHKIM    October 22, 2002 */
+#define IQA_V_AMPDPMENB   6
+d264 1
+a264 6
+  /* end of modification */
+
+  /* The new IQA module has Amplitude Scan mode bit on
+   * Amplitude Control register */
+  /* Inserted by KHKIM    October 22, 2002 */
+#define IQA_V_AMPMODE     5
+d266 1
+a266 1
+  /* end of modification */
+d275 1
+a275 2
+  /* The new IQA module has First Fault Status register */
+  /* Inserted by KHKIM    October 31, 2002 */
+a277 1
+  /* end of modification */
+a322 1
+/* appended by KHKIM   October 21, 2002 */
+a324 2
+/* end of inserting */
+
+d356 3
+a358 3
+  /* New register bit for IQA ver.3
+   * The IQ data Dual-port meory enable bit 
+   * Inserted by KHKIM    October 22, 2002 */
+a360 1
+  /* end of modification */
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d62 12
+d145 10
+d216 20
+d251 14
+d272 6
+d321 7
+d358 6
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

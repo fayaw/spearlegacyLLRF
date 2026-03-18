@@ -1,0 +1,1684 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.56.48;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.56.48;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Project Information                                       c:\v150\bdir_buf.rpt
+
+MAX+plus II Compiler Report File
+Version 8.1 9/12/97
+Compiled: 08/03/99 09:52:06
+
+Copyright (C) 1991-1997 Altera Corporation
+Any megafunction design, and related net list (encrypted or decrypted),
+support information, device programming or simulation file, and any other
+associated documentation or information provided by Altera or a partner
+under Altera's Megafunction Partnership Program may be used only to
+program PLD devices (but not masked PLD devices) from Altera.  Any other
+use of such megafunction design, net list, support information, device
+programming or simulation file, or any other related documentation or
+information is prohibited for any other purpose, including, but not
+limited to modification, reverse engineering, de-compiling, or use with
+any other silicon devices, unless such use is explicitly licensed under
+a separate agreement with Altera or a megafunction partner.  Title to
+the intellectual property, including patents, copyrights, trademarks,
+trade secrets, or maskworks, embodied in any such megafunction design,
+net list, support information, device programming or simulation file, or
+any other related documentation or information provided by Altera or a
+megafunction partner, remains with Altera, the megafunction partner, or
+their respective licensors.  No other licenses, including any licenses
+needed under any third party's intellectual property, are provided herein.
+
+
+
+***** Project compilation was successful
+
+
+
+
+** DEVICE SUMMARY **
+
+Chip/                     Input   Output   Bidir         Shareable
+POF       Device          Pins    Pins     Pins     LCs  Expanders  % Utilized
+
+bdir_buf  EPM5130QC        39       37       0      88      37          68 %
+
+User Pins:                 39       37       0  
+
+
+
+Project Information                                       c:\v150\bdir_buf.rpt
+
+** PIN/LOCATION/CHIP ASSIGNMENTS **
+
+                  Actual                  
+    User       Assignments                
+Assignments   (if different)     Node Name
+
+bdir_buf@@100                      A_BBSY_AST
+bdir_buf@@72                       IACFAIL_A
+bdir_buf@@71                       IACFAIL_B
+bdir_buf@@70                       IBBSY_A
+bdir_buf@@67                       IBBSY_B
+bdir_buf@@66                       IBERR_A
+bdir_buf@@65                       IBERR_B
+bdir_buf@@64                       IBR0_A
+bdir_buf@@61                       IBR0_B
+bdir_buf@@60                       IBR1_A
+bdir_buf@@59                       IBR1_B
+bdir_buf@@22                       IBR2_A
+bdir_buf@@21                       IBR2_B
+bdir_buf@@20                       IBR3_A
+bdir_buf@@17                       IBR3_B
+bdir_buf@@15                       IDTACK_A
+bdir_buf@@14                       IDTACK_B
+bdir_buf@@11                       IIACK_A
+bdir_buf@@10                       IIACK_B
+bdir_buf@@9                        IIRQ1_A
+bdir_buf@@8                        IIRQ1_B
+bdir_buf@@7                        IIRQ2_A
+bdir_buf@@6                        IIRQ2_B
+bdir_buf@@5                        IIRQ3_A
+bdir_buf@@4                        IIRQ3_B
+bdir_buf@@3                        IIRQ4_A
+bdir_buf@@2                        IIRQ4_B
+bdir_buf@@1                        IIRQ5_A
+bdir_buf@@30                       IIRQ5_B
+bdir_buf@@29                       IIRQ6_A
+bdir_buf@@28                       IIRQ6_B
+bdir_buf@@40                       IIRQ7_A
+bdir_buf@@39                       IIRQ7_B
+bdir_buf@@36                       ISYSFAIL_A
+bdir_buf@@50                       ISYSFAIL_B
+bdir_buf@@49                       ISYSRESET_A
+bdir_buf@@48                       ISYSRESET_B
+bdir_buf@@99                       OACFAIL_A
+bdir_buf@@98                       OACFAIL_B
+bdir_buf@@97                       OBBSY_A
+bdir_buf@@96                       OBBSY_B
+bdir_buf@@58                       OBERR_A
+bdir_buf@@95                       OBERR_B
+bdir_buf@@90                       OBR0_A
+bdir_buf@@89                       OBR0_B
+bdir_buf@@86                       OBR1_A
+bdir_buf@@85                       OBR1_B
+bdir_buf@@80                       OBR2_A
+bdir_buf@@79                       OBR2_B
+bdir_buf@@78                       OBR3_A
+bdir_buf@@77                       OBR3_B
+bdir_buf@@76                       ODTACK_A
+bdir_buf@@84                       ODTACK_B
+bdir_buf@@57                       OIACK_A
+bdir_buf@@56                       OIACK_B
+bdir_buf@@55                       OIRQ1_A
+bdir_buf@@54                       OIRQ1_B
+bdir_buf@@47                       OIRQ2_A
+bdir_buf@@46                       OIRQ2_B
+bdir_buf@@35                       OIRQ3_A
+bdir_buf@@34                       OIRQ3_B
+bdir_buf@@27                       OIRQ4_A
+bdir_buf@@26                       OIRQ4_B
+bdir_buf@@25                       OIRQ5_A
+bdir_buf@@33                       OIRQ5_B
+bdir_buf@@32                       OIRQ6_A
+bdir_buf@@31                       OIRQ6_B
+bdir_buf@@24                       OIRQ7_A
+bdir_buf@@45                       OIRQ7_B
+bdir_buf@@53                       OSYSFAIL_A
+bdir_buf@@23                       OSYSFAIL_B
+bdir_buf@@42                       OSYSRESET_A
+bdir_buf@@41                       OSYSRESET_B
+bdir_buf@@16                       RESET_L
+bdir_buf@@52                       SYSFAIL_INH
+bdir_buf@@51                       20M_CLK
+
+
+Project Information                                       c:\v150\bdir_buf.rpt
+
+** FILE HIERARCHY **
+
+
+
+|singbuf:138|
+|singbuf:175|
+|singbuf:93|
+|singbuf:151|
+|singbuf:33|
+|singbuf:23|
+|sysfail:147|
+|buff_with_clk:154|
+|buff_with_clk:165|
+|buff_with_clk:164|
+|buff_with_clk:163|
+|buff_with_clk:162|
+|buff_with_clk:166|
+|buff_with_clk:167|
+|buff_with_clk:171|
+|buff_with_clk:160|
+|buff_with_clk:158|
+|buff_with_clk:157|
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+***** Logic for device 'bdir_buf' compiled without errors.
+
+
+
+
+Device: EPM5130QC
+
+Device Options:
+    Security                                   = OFF
+
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** ERROR SUMMARY **
+
+Info: Chip 'bdir_buf' in device 'EPM5130QC' has less than 20% of pins available for future logic changes -- if your project is likely to change, Altera recommends using a larger device
+                                                          
+                 A                                        
+                 _ O O                                    
+                 B A A           R R             O R R R  
+                 B C C O O O     E E             D E E E  
+                 S F F B B B     S S O O     O O T S S S  
+                 Y A A B B E     E E B B     B B A E E E  
+                 _ I I S S R     R R R R     R R C R R R  
+                 A L L Y Y R V V V V 0 0 G G 1 1 K V V V  
+                 S _ _ _ _ _ C C E E _ _ N N _ _ _ E E E  
+                 T A B A B B C C D D A B D D A B B D D D  
+               ------------------------------------------_ 
+              / 100  98  96  94  92  90  88  86  84  82   |_ 
+             /     99  97  95  93  91  89  87  85  83  81    | 
+    IIRQ5_A |  1                                          80 | OBR2_A 
+    IIRQ4_B |  2                                          79 | OBR2_B 
+    IIRQ4_A |  3                                          78 | OBR3_A 
+    IIRQ3_B |  4                                          77 | OBR3_B 
+    IIRQ3_A |  5                                          76 | ODTACK_A 
+    IIRQ2_B |  6                                          75 | RESERVED 
+    IIRQ2_A |  7                                          74 | RESERVED 
+    IIRQ1_B |  8                                          73 | RESERVED 
+    IIRQ1_A |  9                                          72 | IACFAIL_A 
+    IIACK_B | 10                                          71 | IACFAIL_B 
+    IIACK_A | 11                                          70 | IBBSY_A 
+        GND | 12                                          69 | VCC 
+        GND | 13                                          68 | VCC 
+   IDTACK_B | 14                                          67 | IBBSY_B 
+   IDTACK_A | 15                                          66 | IBERR_A 
+    RESET_L | 16                EPM5130QC                 65 | IBERR_B 
+     IBR3_B | 17                                          64 | IBR0_A 
+        VCC | 18                                          63 | GND 
+        VCC | 19                                          62 | GND 
+     IBR3_A | 20                                          61 | IBR0_B 
+     IBR2_B | 21                                          60 | IBR1_A 
+     IBR2_A | 22                                          59 | IBR1_B 
+ OSYSFAIL_B | 23                                          58 | OBERR_A 
+    OIRQ7_A | 24                                          57 | OIACK_A 
+    OIRQ5_A | 25                                          56 | OIACK_B 
+    OIRQ4_B | 26                                          55 | OIRQ1_A 
+    OIRQ4_A | 27                                          54 | OIRQ1_B 
+    IIRQ6_B | 28                                          53 | OSYSFAIL_A 
+    IIRQ6_A | 29                                          52 | SYSFAIL_INH 
+    IIRQ5_B | 30                                          51 | 20M_CLK 
+            |      32  34  36  38  40  42  44  46  48  50  _| 
+             \   31  33  35  37  39  41  43  45  47  49   | 
+              \------------------------------------------- 
+                 O O O O O I G G I I O O V V O O O I I I  
+                 I I I I I S N N I I S S C C I I I S S S  
+                 R R R R R Y D D R R Y Y C C R R R Y Y Y  
+                 Q Q Q Q Q S     Q Q S S     Q Q Q S S S  
+                 6 6 5 3 3 F     7 7 R R     7 2 2 R R F  
+                 _ _ _ _ _ A     _ _ E E     _ _ _ E E A  
+                 B A B B A I     B A S S     B B A S S I  
+                           L         E E           E E L  
+                           _         T T           T T _  
+                           A         _ _           _ _ B  
+                                     B A           B A    
+
+
+N.C. = Not Connected.
+VCC = Dedicated power pin, which MUST be connected to VCC.
+GND = Dedicated ground pin or unused dedicated input, which MUST be connected to GND.
+RESERVED = Unused I/O pin, which MUST be left unconnected.
+
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** RESOURCE USAGE **
+
+                                                Shareable     External
+Logic Array Block     Logic Cells   I/O Pins    Expanders   Interconnect
+
+A:     LC1 - LC16     0/16(  0%)   8/ 8(100%)   0/32(  0%)   0/24(  0%) 
+B:    LC17 - LC32     9/16( 56%)   8/ 8(100%)   1/32(  3%)  11/24( 45%) 
+C:    LC33 - LC48    10/16( 62%)   8/ 8(100%)   3/32(  9%)   7/24( 29%) 
+D:    LC49 - LC64    15/16( 93%)   8/ 8(100%)   6/32( 18%)   7/24( 29%) 
+E:    LC65 - LC80    16/16(100%)   8/ 8(100%)  12/32( 37%)   9/24( 37%) 
+F:    LC81 - LC96     7/16( 43%)   5/ 8( 62%)   1/32(  3%)   6/24( 25%) 
+G:   LC97 - LC112    15/16( 93%)   5/ 8( 62%)   5/32( 15%)   1/24(  4%) 
+H:  LC113 - LC128    16/16(100%)   6/ 8( 75%)   9/32( 28%)   2/24(  8%) 
+
+
+Total dedicated input pins used:                20/20     (100%)
+Total I/O pins used:                            56/64     ( 87%)
+Total logic cells used:                         88/128    ( 68%)
+Total shareable expanders used:                 37/256    ( 14%)
+Average fan-in:                                  4.35
+Total fan-in:                                   383
+
+Total input pins required:                      39
+Total output pins required:                     37
+Total bidirectional pins required:               0
+Total logic cells required:                     88
+Total flipflops required:                       56
+Total shareable expanders in database:          37
+
+Synthesized logic cells:                         8/ 128   (  6%)
+
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** INPUTS **
+
+                                         Shareable
+                                         Expanders    Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared  INP  FBK  OUT  FBK  Name
+  72      -   -       INPUT               0      0     0    0    1    2  IACFAIL_A
+  71      -   -       INPUT               0      0     0    0    2    3  IACFAIL_B
+  70      -   -       INPUT               0      0     0    0    2    2  IBBSY_A
+  67      -   -       INPUT               0      0     0    0    3    3  IBBSY_B
+  66      -   -       INPUT               0      0     0    0    1    2  IBERR_A
+  65      -   -       INPUT               0      0     0    0    2    3  IBERR_B
+  64      -   -       INPUT               0      0     0    0    1    1  IBR0_A
+  61      -   -       INPUT               0      0     0    0    1    1  IBR0_B
+  60      -   -       INPUT               0      0     0    0    1    1  IBR1_A
+  59      -   -       INPUT               0      0     0    0    1    1  IBR1_B
+  22      -   -       INPUT               0      0     0    0    1    1  IBR2_A
+  21      -   -       INPUT               0      0     0    0    1    1  IBR2_B
+  20      -   -       INPUT               0      0     0    0    1    1  IBR3_A
+  17      -   -       INPUT               0      0     0    0    1    1  IBR3_B
+  15      -   -       INPUT               0      0     0    0    1    2  IDTACK_A
+  14      -   -       INPUT               0      0     0    0    2    3  IDTACK_B
+  11      -   -       INPUT               0      0     0    0    1    2  IIACK_A
+  10      -   -       INPUT               0      0     0    0    2    3  IIACK_B
+   9      -   -       INPUT               0      0     0    0    1    1  IIRQ1_A
+   8    (8)  (A)      INPUT               0      0     0    0    1    1  IIRQ1_B
+   7    (7)  (A)      INPUT               0      0     0    0    1    1  IIRQ2_A
+   6    (6)  (A)      INPUT               0      0     0    0    1    1  IIRQ2_B
+   5    (5)  (A)      INPUT               0      0     0    0    1    1  IIRQ3_A
+   4    (4)  (A)      INPUT               0      0     0    0    1    1  IIRQ3_B
+   3    (3)  (A)      INPUT               0      0     0    0    1    1  IIRQ4_A
+   2    (2)  (A)      INPUT               0      0     0    0    1    1  IIRQ4_B
+   1    (1)  (A)      INPUT               0      0     0    0    1    1  IIRQ5_A
+  30   (24)  (B)      INPUT               0      0     0    0    1    1  IIRQ5_B
+  29   (23)  (B)      INPUT               0      0     0    0    1    1  IIRQ6_A
+  28   (22)  (B)      INPUT               0      0     0    0    1    1  IIRQ6_B
+  40   (40)  (C)      INPUT               0      0     0    0    1    1  IIRQ7_A
+  39   (39)  (C)      INPUT               0      0     0    0    1    1  IIRQ7_B
+  36   (38)  (C)      INPUT               0      0     0    0    2    1  ISYSFAIL_A
+  50   (56)  (D)      INPUT               0      0     0    0    1    0  ISYSFAIL_B
+  49   (55)  (D)      INPUT               0      0     0    0    1    2  ISYSRESET_A
+  48   (54)  (D)      INPUT               0      0     0    0    2    3  ISYSRESET_B
+  16      -   -       INPUT               0      0     0    0   37   35  RESET_L
+  52   (66)  (E)      INPUT               0      0     0    0    2    1  SYSFAIL_INH
+  51   (65)  (E)      INPUT               0      0     0    0   22   22  20M_CLK
+
+
+Code:
+
+s = Synthesized pin or logic cell
++ = Synchronous flipflop
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+^ = Increased input delay
+$ = Driven by fast output logic cell
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** OUTPUTS **
+
+                                         Shareable
+                                         Expanders    Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared  INP  FBK  OUT  FBK  Name
+ 100    120    H     OUTPUT   s           0      0     3    4    0    0  A_BBSY_AST
+  99    119    H     OUTPUT               0      0     2    3    0    0  OACFAIL_A
+  98    118    H     OUTPUT   s           0      0     3    4    1    2  OACFAIL_B
+  97    117    H     OUTPUT               0      0     2    3    0    0  OBBSY_A
+  96    116    H     OUTPUT   s           0      0     3    4    1    2  OBBSY_B
+  58     72    E     OUTPUT               0      0     2    3    0    0  OBERR_A
+  95    115    H     OUTPUT   s           0      0     3    4    1    2  OBERR_B
+  90    104    G         FF       !       0      0     3    2    0    0  OBR0_A
+  89    103    G         FF       !       0      0     3    1    0    0  OBR0_B
+  86    102    G         FF       !       0      0     3    2    0    0  OBR1_A
+  85    101    G         FF       !       0      0     3    1    0    0  OBR1_B
+  80     88    F         FF       !       0      0     3    2    0    0  OBR2_A
+  79     87    F         FF       !       0      0     3    1    0    0  OBR2_B
+  78     86    F         FF       !       0      0     3    2    0    0  OBR3_A
+  77     85    F         FF       !       0      0     3    1    0    0  OBR3_B
+  76     84    F     OUTPUT               0      0     2    3    0    0  ODTACK_A
+  84    100    G     OUTPUT   s           0      0     3    4    1    2  ODTACK_B
+  57     71    E     OUTPUT               0      0     2    3    0    0  OIACK_A
+  56     70    E     OUTPUT   s           0      0     3    4    1    2  OIACK_B
+  55     69    E         FF       !       0      0     3    2    0    0  OIRQ1_A
+  54     68    E         FF       !       0      0     3    1    0    0  OIRQ1_B
+  47     53    D         FF       !       0      0     3    2    0    0  OIRQ2_A
+  46     52    D         FF       !       0      0     3    1    0    0  OIRQ2_B
+  35     37    C         FF       !       0      0     3    2    0    0  OIRQ3_A
+  34     36    C         FF       !       0      0     3    1    0    0  OIRQ3_B
+  27     21    B         FF       !       0      0     3    2    0    0  OIRQ4_A
+  26     20    B         FF       !       0      0     3    1    0    0  OIRQ4_B
+  25     19    B         FF       !       0      0     3    2    0    0  OIRQ5_A
+  33     35    C         FF       !       0      0     3    1    0    0  OIRQ5_B
+  32     34    C         FF       !       0      0     3    2    0    0  OIRQ6_A
+  31     33    C         FF       !       0      0     3    1    0    0  OIRQ6_B
+  24     18    B         FF       !       0      0     3    2    0    0  OIRQ7_A
+  45     51    D         FF       !       0      0     3    1    0    0  OIRQ7_B
+  53     67    E     OUTPUT   s           0      0     4    2    1    2  OSYSFAIL_A
+  23     17    B     OUTPUT               0      0     3    2    0    0  OSYSFAIL_B
+  42     50    D     OUTPUT               0      0     2    3    0    0  OSYSRESET_A
+  41     49    D     OUTPUT   s           0      0     3    4    1    2  OSYSRESET_B
+
+
+Code:
+
+s = Synthesized pin or logic cell
++ = Synchronous flipflop
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+^ = Increased input delay
+$ = Driven by fast output logic cell
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** BURIED LOGIC **
+
+                                         Shareable
+                                         Expanders    Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared  INP  FBK  OUT  FBK  Name
+   -     96    F        DFF              1      0     3    1    2    1  |buff_with_clk:154|:1
+   -     95    F        DFF              0      0     3    1    1    1  |buff_with_clk:154|:9
+   -     64    D        DFF              1      0     3    1    2    1  |buff_with_clk:157|:1
+   -     63    D        DFF              0      0     3    1    1    1  |buff_with_clk:157|:9
+   -    112    G        DFF              1      0     3    1    2    1  |buff_with_clk:158|:1
+   -    111    G        DFF              0      0     3    1    1    1  |buff_with_clk:158|:9
+   -    110    G        DFF              1      0     3    1    2    1  |buff_with_clk:160|:1
+   -    109    G        DFF              0      0     3    1    1    1  |buff_with_clk:160|:9
+   -     62    D        DFF              1      0     3    1    2    1  |buff_with_clk:162|:1
+   -     32    B        DFF              0      0     3    1    1    1  |buff_with_clk:162|:9
+   -     48    C        DFF              1      0     3    1    2    1  |buff_with_clk:163|:1
+   -     47    C        DFF              0      0     3    1    1    1  |buff_with_clk:163|:9
+   -     46    C        DFF              1      0     3    1    2    1  |buff_with_clk:164|:1
+   -     31    B        DFF              0      0     3    1    1    1  |buff_with_clk:164|:9
+   -     30    B        DFF              1      0     3    1    2    1  |buff_with_clk:165|:1
+   -     29    B        DFF              0      0     3    1    1    1  |buff_with_clk:165|:9
+   -     45    C        DFF              1      0     3    1    2    1  |buff_with_clk:166|:1
+   -     44    C        DFF              0      0     3    1    1    1  |buff_with_clk:166|:9
+   -     61    D        DFF              1      0     3    1    2    1  |buff_with_clk:167|:1
+   -     60    D        DFF              0      0     3    1    1    1  |buff_with_clk:167|:9
+   -     80    E        DFF              1      0     3    1    2    1  |buff_with_clk:171|:1
+   -     79    E        DFF              0      0     3    1    1    1  |buff_with_clk:171|:9
+   -    108    G      LCELL              0      0     1    0    2    2  |singbuf:23|:83
+   -     59    D      LCELL              0      0     1    0    1    1  |singbuf:23|:85
+   -    128    H        DFF              1      0     2    2    2    1  |singbuf:23|DIS_B (|singbuf:23|:86)
+   -    127    H        DFF              2      0     3    4    1    0  |singbuf:23|DIS_A (|singbuf:23|:87)
+   -    126    H      LCELL              0      0     1    0    2    2  |singbuf:33|:83
+   -    125    H      LCELL              0      0     1    0    1    1  |singbuf:33|:85
+   -    124    H        DFF              1      0     2    2    2    1  |singbuf:33|DIS_B (|singbuf:33|:86)
+   -    123    H        DFF              2      0     3    4    1    0  |singbuf:33|DIS_A (|singbuf:33|:87)
+   -    107    G      LCELL              0      0     1    0    2    2  |singbuf:93|:83
+   -    106    G      LCELL              0      0     1    0    1    1  |singbuf:93|:85
+   -    105    G        DFF              1      0     2    2    2    1  |singbuf:93|DIS_B (|singbuf:93|:86)
+ (83)    99    G        DFF              2      0     3    4    1    0  |singbuf:93|DIS_A (|singbuf:93|:87)
+ (82)    98    G      LCELL              0      0     1    0    2    2  |singbuf:138|:83
+   -     78    E      LCELL              0      0     1    0    1    1  |singbuf:138|:85
+   -     77    E        DFF              1      0     2    2    2    1  |singbuf:138|DIS_B (|singbuf:138|:86)
+   -     76    E        DFF              2      0     3    4    1    0  |singbuf:138|DIS_A (|singbuf:138|:87)
+   -     58    D      LCELL              0      0     1    0    2    2  |singbuf:151|:83
+   -     57    D      LCELL              0      0     1    0    1    1  |singbuf:151|:85
+ (50)    56    D        DFF              1      0     2    2    2    1  |singbuf:151|DIS_B (|singbuf:151|:86)
+ (49)    55    D        DFF              2      0     3    4    1    0  |singbuf:151|DIS_A (|singbuf:151|:87)
+   -    122    H      LCELL              0      0     1    0    3    2  |singbuf:175|:83
+   -    121    H      LCELL              0      0     1    0    2    1  |singbuf:175|:85
+ (92)   114    H        DFF              1      0     2    2    3    1  |singbuf:175|DIS_B (|singbuf:175|:86)
+ (91)   113    H        DFF              2      0     3    4    2    0  |singbuf:175|DIS_A (|singbuf:175|:87)
+   -     75    E      LCELL              0      0     0    1    1    0  |sysfail:147|:35
+   -     74    E      LCELL              0      0     0    1    0    1  |sysfail:147|:36
+   -     73    E      LCELL              4      0     0    1    0    1  |sysfail:147|:37
+ (52)    66    E      LCELL              0      0     0    1    2    1  |sysfail:147|:38
+ (51)    65    E      LCELL              4      0     3    2    0    1  |sysfail:147|:47
+
+
+Code:
+
+s = Synthesized pin or logic cell
++ = Synchronous flipflop
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+^ = Increased input delay
+$ = Driven by fast output logic cell
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'B':
+
+                           Logic cells placed in LAB 'B'
+        +----------------- LC32 |buff_with_clk:162|:9
+        | +--------------- LC31 |buff_with_clk:164|:9
+        | | +------------- LC30 |buff_with_clk:165|:1
+        | | | +----------- LC29 |buff_with_clk:165|:9
+        | | | | +--------- LC21 OIRQ4_A
+        | | | | | +------- LC20 OIRQ4_B
+        | | | | | | +----- LC19 OIRQ5_A
+        | | | | | | | +--- LC18 OIRQ7_A
+        | | | | | | | | +- LC17 OSYSFAIL_B
+        | | | | | | | | | 
+        | | | | | | | | |   Other LABs fed by signals
+        | | | | | | | | |   that feed LAB 'B'
+LC      | | | | | | | | | | A B C D E F G H |     Logic cells that feed LAB 'B':
+LC32 -> - - - - - - - @@ - | - @@ - * - - - - | <-- |buff_with_clk:162|:9
+LC31 -> - - - - - - @@ - - | - @@ * - - - - - | <-- |buff_with_clk:164|:9
+LC30 -> - - @@ @@ @@ @@ - - - | - @@ - - - - - - | <-- |buff_with_clk:165|:1
+LC29 -> - - @@ - @@ - - - - | - @@ - - - - - - | <-- |buff_with_clk:165|:9
+LC21 -> - - - - - - - - - | - @@ - - - - - - | <-- OIRQ4_A
+LC20 -> - - - - - - - - - | - @@ - - - - - - | <-- OIRQ4_B
+LC19 -> - - - - - - - - - | - @@ - - - - - - | <-- OIRQ5_A
+LC18 -> - - - - - - - - - | - @@ - - - - - - | <-- OIRQ7_A
+LC17 -> - - - - - - - - - | - @@ - - - - - - | <-- OSYSFAIL_B
+
+Pin
+72   -> - - - - - - - - - | - - - - - - - @@ | <-- IACFAIL_A
+71   -> - - - - - - - - - | - - - - - - - @@ | <-- IACFAIL_B
+70   -> - - - - - - - - - | - - - - - - - @@ | <-- IBBSY_A
+67   -> - - - - - - - - - | - - - - - - - @@ | <-- IBBSY_B
+66   -> - - - - - - - - - | - - - @@ - - - @@ | <-- IBERR_A
+65   -> - - - - - - - - - | - - - - @@ - @@ @@ | <-- IBERR_B
+64   -> - - - - - - - - - | - - - - - - @@ - | <-- IBR0_A
+61   -> - - - - - - - - - | - - - - - - @@ - | <-- IBR0_B
+60   -> - - - - - - - - - | - - - - - - @@ - | <-- IBR1_A
+59   -> - - - - - - - - - | - - - - - - @@ - | <-- IBR1_B
+22   -> - - - - - - - - - | - - - @@ - @@ - - | <-- IBR2_A
+21   -> - - - - - - - - - | - - - @@ - @@ - - | <-- IBR2_B
+20   -> - - - - - - - - - | - - - - - @@ - - | <-- IBR3_A
+17   -> - - - - - - - - - | - - - - - @@ - - | <-- IBR3_B
+15   -> - - - - - - - - - | - - - - - - @@ - | <-- IDTACK_A
+14   -> - - - - - - - - - | - - - - - @@ @@ - | <-- IDTACK_B
+11   -> - - - - - - - - - | - - - - @@ - - - | <-- IIACK_A
+10   -> - - - - - - - - - | - - - - @@ - @@ - | <-- IIACK_B
+9    -> - - - - - - - - - | - - - - @@ - - - | <-- IIRQ1_A
+3    -> - - * - - * - - - | - * - - - - - - | <-- IIRQ4_A
+2    -> - - - * * - - - - | - * - - - - - - | <-- IIRQ4_B
+30   -> - * - - - - * - - | - * - - - - - - | <-- IIRQ5_B
+39   -> * - - - - - - * - | - * - - - - - - | <-- IIRQ7_B
+36   -> - - - - - - - - * | - * - - * - - - | <-- ISYSFAIL_A
+16   -> @@ @@ @@ @@ @@ @@ @@ @@ @@ | - @@ @@ @@ @@ @@ @@ @@ | <-- RESET_L
+52   -> - - - - - - - - * | - * - - * - - - | <-- SYSFAIL_INH
+51   -> * * * * * * * * - | - * * * * * * - | <-- 20M_CLK
+LC62 -> * - - - - - - * - | - * - @@ - - - - | <-- |buff_with_clk:162|:1
+LC46 -> - * - - - - * - - | - * @@ - - - - - | <-- |buff_with_clk:164|:1
+LC67 -> - - - - - - - - * | - * - - @@ - - - | <-- OSYSFAIL_A
+LC66 -> - - - - - - - - * | - * - - @@ - - - | <-- |sysfail:147|:38
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+@@ = The input pin or logic cell feeds the logic cell (or LAB) using direct interconnect.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'C':
+
+                             Logic cells placed in LAB 'C'
+        +------------------- LC48 |buff_with_clk:163|:1
+        | +----------------- LC47 |buff_with_clk:163|:9
+        | | +--------------- LC46 |buff_with_clk:164|:1
+        | | | +------------- LC45 |buff_with_clk:166|:1
+        | | | | +----------- LC44 |buff_with_clk:166|:9
+        | | | | | +--------- LC37 OIRQ3_A
+        | | | | | | +------- LC36 OIRQ3_B
+        | | | | | | | +----- LC35 OIRQ5_B
+        | | | | | | | | +--- LC34 OIRQ6_A
+        | | | | | | | | | +- LC33 OIRQ6_B
+        | | | | | | | | | | 
+        | | | | | | | | | |   Other LABs fed by signals
+        | | | | | | | | | |   that feed LAB 'C'
+LC      | | | | | | | | | | | A B C D E F G H |     Logic cells that feed LAB 'C':
+LC48 -> @@ @@ - - - - - - @@ @@ | - - @@ - - - - - | <-- |buff_with_clk:163|:1
+LC47 -> @@ - - - - - - - @@ - | - - @@ - - - - - | <-- |buff_with_clk:163|:9
+LC46 -> - - @@ - - - - @@ - - | - * @@ - - - - - | <-- |buff_with_clk:164|:1
+LC45 -> - - - @@ @@ @@ @@ - - - | - - @@ - - - - - | <-- |buff_with_clk:166|:1
+LC44 -> - - - @@ - @@ - - - - | - - @@ - - - - - | <-- |buff_with_clk:166|:9
+LC37 -> - - - - - - - - - - | - - @@ - - - - - | <-- OIRQ3_A
+LC36 -> - - - - - - - - - - | - - @@ - - - - - | <-- OIRQ3_B
+LC35 -> - - - - - - - - - - | - - @@ - - - - - | <-- OIRQ5_B
+LC34 -> - - - - - - - - - - | - - @@ - - - - - | <-- OIRQ6_A
+LC33 -> - - - - - - - - - - | - - @@ - - - - - | <-- OIRQ6_B
+
+Pin
+72   -> - - - - - - - - - - | - - - - - - - @@ | <-- IACFAIL_A
+71   -> - - - - - - - - - - | - - - - - - - @@ | <-- IACFAIL_B
+70   -> - - - - - - - - - - | - - - - - - - @@ | <-- IBBSY_A
+67   -> - - - - - - - - - - | - - - - - - - @@ | <-- IBBSY_B
+66   -> - - - - - - - - - - | - - - @@ - - - @@ | <-- IBERR_A
+65   -> - - - - - - - - - - | - - - - @@ - @@ @@ | <-- IBERR_B
+64   -> - - - - - - - - - - | - - - - - - @@ - | <-- IBR0_A
+61   -> - - - - - - - - - - | - - - - - - @@ - | <-- IBR0_B
+60   -> - - - - - - - - - - | - - - - - - @@ - | <-- IBR1_A
+59   -> - - - - - - - - - - | - - - - - - @@ - | <-- IBR1_B
+22   -> - - - - - - - - - - | - - - @@ - @@ - - | <-- IBR2_A
+21   -> - - - - - - - - - - | - - - @@ - @@ - - | <-- IBR2_B
+20   -> - - - - - - - - - - | - - - - - @@ - - | <-- IBR3_A
+17   -> - - - - - - - - - - | - - - - - @@ - - | <-- IBR3_B
+15   -> - - - - - - - - - - | - - - - - - @@ - | <-- IDTACK_A
+14   -> - - - - - - - - - - | - - - - - @@ @@ - | <-- IDTACK_B
+11   -> - - - - - - - - - - | - - - - @@ - - - | <-- IIACK_A
+10   -> - - - - - - - - - - | - - - - @@ - @@ - | <-- IIACK_B
+9    -> - - - - - - - - - - | - - - - @@ - - - | <-- IIRQ1_A
+5    -> - - - * - - * - - - | - - * - - - - - | <-- IIRQ3_A
+4    -> - - - - * * - - - - | - - * - - - - - | <-- IIRQ3_B
+1    -> - - * - - - - * - - | - - * - - - - - | <-- IIRQ5_A
+29   -> * - - - - - - - - * | - - * - - - - - | <-- IIRQ6_A
+28   -> - * - - - - - - * - | - - * - - - - - | <-- IIRQ6_B
+16   -> @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ | - @@ @@ @@ @@ @@ @@ @@ | <-- RESET_L
+51   -> * * * * * * * * * * | - * * * * * * - | <-- 20M_CLK
+LC31 -> - - * - - - - - - - | - @@ * - - - - - | <-- |buff_with_clk:164|:9
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+@@ = The input pin or logic cell feeds the logic cell (or LAB) using direct interconnect.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'D':
+
+                                       Logic cells placed in LAB 'D'
+        +----------------------------- LC64 |buff_with_clk:157|:1
+        | +--------------------------- LC63 |buff_with_clk:157|:9
+        | | +------------------------- LC62 |buff_with_clk:162|:1
+        | | | +----------------------- LC61 |buff_with_clk:167|:1
+        | | | | +--------------------- LC60 |buff_with_clk:167|:9
+        | | | | | +------------------- LC53 OIRQ2_A
+        | | | | | | +----------------- LC52 OIRQ2_B
+        | | | | | | | +--------------- LC51 OIRQ7_B
+        | | | | | | | | +------------- LC50 OSYSRESET_A
+        | | | | | | | | | +----------- LC49 OSYSRESET_B
+        | | | | | | | | | | +--------- LC59 |singbuf:23|:85
+        | | | | | | | | | | | +------- LC58 |singbuf:151|:83
+        | | | | | | | | | | | | +----- LC57 |singbuf:151|:85
+        | | | | | | | | | | | | | +--- LC56 |singbuf:151|DIS_B
+        | | | | | | | | | | | | | | +- LC55 |singbuf:151|DIS_A
+        | | | | | | | | | | | | | | | 
+        | | | | | | | | | | | | | | |   Other LABs fed by signals
+        | | | | | | | | | | | | | | |   that feed LAB 'D'
+LC      | | | | | | | | | | | | | | | | A B C D E F G H |     Logic cells that feed LAB 'D':
+LC64 -> @@ @@ - - - - - - - - - - - - - | - - - @@ - * - - | <-- |buff_with_clk:157|:1
+LC63 -> @@ - - - - - - - - - - - - - - | - - - @@ - * - - | <-- |buff_with_clk:157|:9
+LC62 -> - - @@ - - - - @@ - - - - - - - | - * - @@ - - - - | <-- |buff_with_clk:162|:1
+LC61 -> - - - @@ @@ @@ @@ - - - - - - - - | - - - @@ - - - - | <-- |buff_with_clk:167|:1
+LC60 -> - - - @@ - @@ - - - - - - - - - | - - - @@ - - - - | <-- |buff_with_clk:167|:9
+LC53 -> - - - - - - - - - - - - - - - | - - - @@ - - - - | <-- OIRQ2_A
+LC52 -> - - - - - - - - - - - - - - - | - - - @@ - - - - | <-- OIRQ2_B
+LC51 -> - - - - - - - - - - - - - - - | - - - @@ - - - - | <-- OIRQ7_B
+LC50 -> - - - - - - - - - - - - - - - | - - - @@ - - - - | <-- OSYSRESET_A
+LC49 -> - - - - - - - - @@ @@ - - - @@ @@ | - - - @@ - - - - | <-- OSYSRESET_B
+LC59 -> - - - - - - - - - - - - - - - | - - - @@ - - - * | <-- |singbuf:23|:85
+LC58 -> - - - - - - - - @@ @@ - - - @@ @@ | - - - @@ - - - - | <-- |singbuf:151|:83
+LC57 -> - - - - - - - - - @@ - - - - @@ | - - - @@ - - - - | <-- |singbuf:151|:85
+LC56 -> - - - - - - - - @@ @@ - - - - @@ | - - - @@ - - - - | <-- |singbuf:151|DIS_B
+LC55 -> - - - - - - - - - @@ - - - - - | - - - @@ - - - - | <-- |singbuf:151|DIS_A
+
+Pin
+72   -> - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- IACFAIL_A
+71   -> - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- IACFAIL_B
+70   -> - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- IBBSY_A
+67   -> - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- IBBSY_B
+66   -> - - - - - - - - - - @@ - - - - | - - - @@ - - - @@ | <-- IBERR_A
+65   -> - - - - - - - - - - - - - - - | - - - - @@ - @@ @@ | <-- IBERR_B
+64   -> - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IBR0_A
+61   -> - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IBR0_B
+60   -> - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IBR1_A
+59   -> - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IBR1_B
+22   -> @@ - - - - - - - - - - - - - - | - - - @@ - @@ - - | <-- IBR2_A
+21   -> - @@ - - - - - - - - - - - - - | - - - @@ - @@ - - | <-- IBR2_B
+20   -> - - - - - - - - - - - - - - - | - - - - - @@ - - | <-- IBR3_A
+17   -> - - - - - - - - - - - - - - - | - - - - - @@ - - | <-- IBR3_B
+15   -> - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IDTACK_A
+14   -> - - - - - - - - - - - - - - - | - - - - - @@ @@ - | <-- IDTACK_B
+11   -> - - - - - - - - - - - - - - - | - - - - @@ - - - | <-- IIACK_A
+10   -> - - - - - - - - - - - - - - - | - - - - @@ - @@ - | <-- IIACK_B
+9    -> - - - - - - - - - - - - - - - | - - - - @@ - - - | <-- IIRQ1_A
+7    -> - - - * - - * - - - - - - - - | - - - * - - - - | <-- IIRQ2_A
+6    -> - - - - * * - - - - - - - - - | - - - * - - - - | <-- IIRQ2_B
+40   -> - - * - - - - * - - - - - - - | - - - * - - - - | <-- IIRQ7_A
+49   -> - - - - - - - - - * - - * - * | - - - * - - - - | <-- ISYSRESET_A
+48   -> - - - - - - - - * * - * - * * | - - - * - - - - | <-- ISYSRESET_B
+16   -> @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ - - - @@ @@ | - @@ @@ @@ @@ @@ @@ @@ | <-- RESET_L
+51   -> * * * * * * * * - - - - - - - | - * * * * * * - | <-- 20M_CLK
+LC32 -> - - * - - - - - - - - - - - - | - @@ - * - - - - | <-- |buff_with_clk:162|:9
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+@@ = The input pin or logic cell feeds the logic cell (or LAB) using direct interconnect.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'E':
+
+                                         Logic cells placed in LAB 'E'
+        +------------------------------- LC80 |buff_with_clk:171|:1
+        | +----------------------------- LC79 |buff_with_clk:171|:9
+        | | +--------------------------- LC72 OBERR_A
+        | | | +------------------------- LC71 OIACK_A
+        | | | | +----------------------- LC70 OIACK_B
+        | | | | | +--------------------- LC69 OIRQ1_A
+        | | | | | | +------------------- LC68 OIRQ1_B
+        | | | | | | | +----------------- LC67 OSYSFAIL_A
+        | | | | | | | | +--------------- LC78 |singbuf:138|:85
+        | | | | | | | | | +------------- LC77 |singbuf:138|DIS_B
+        | | | | | | | | | | +----------- LC76 |singbuf:138|DIS_A
+        | | | | | | | | | | | +--------- LC75 |sysfail:147|:35
+        | | | | | | | | | | | | +------- LC74 |sysfail:147|:36
+        | | | | | | | | | | | | | +----- LC73 |sysfail:147|:37
+        | | | | | | | | | | | | | | +--- LC66 |sysfail:147|:38
+        | | | | | | | | | | | | | | | +- LC65 |sysfail:147|:47
+        | | | | | | | | | | | | | | | | 
+        | | | | | | | | | | | | | | | |   Other LABs fed by signals
+        | | | | | | | | | | | | | | | |   that feed LAB 'E'
+LC      | | | | | | | | | | | | | | | | | A B C D E F G H |     Logic cells that feed LAB 'E':
+LC80 -> @@ @@ - - - @@ @@ - - - - - - - - - | - - - - @@ - - - | <-- |buff_with_clk:171|:1
+LC79 -> @@ - - - - @@ - - - - - - - - - - | - - - - @@ - - - | <-- |buff_with_clk:171|:9
+LC72 -> - - - - - - - - - - - - - - - - | - - - - @@ - - - | <-- OBERR_A
+LC71 -> - - - - - - - - - - - - - - - - | - - - - @@ - - - | <-- OIACK_A
+LC70 -> - - - @@ @@ - - - - @@ @@ - - - - - | - - - - @@ - - - | <-- OIACK_B
+LC69 -> - - - - - - - - - - - - - - - - | - - - - @@ - - - | <-- OIRQ1_A
+LC68 -> - - - - - - - - - - - - - - - - | - - - - @@ - - - | <-- OIRQ1_B
+LC67 -> - - - - - - - @@ - - - - - @@ - @@ | - * - - @@ - - - | <-- OSYSFAIL_A
+LC78 -> - - - - @@ - - - - - @@ - - - - - | - - - - @@ - - - | <-- |singbuf:138|:85
+LC77 -> - - - @@ @@ - - - - - @@ - - - - - | - - - - @@ - - - | <-- |singbuf:138|DIS_B
+LC76 -> - - - - @@ - - - - - - - - - - - | - - - - @@ - - - | <-- |singbuf:138|DIS_A
+LC75 -> - - - - - - - @@ - - - - - - - - | - - - - @@ - - - | <-- |sysfail:147|:35
+LC74 -> - - - - - - - - - - - @@ - - - - | - - - - @@ - - - | <-- |sysfail:147|:36
+LC73 -> - - - - - - - - - - - - - - @@ - | - - - - @@ - - - | <-- |sysfail:147|:37
+LC66 -> - - - - - - - @@ - - - - - - - @@ | - * - - @@ - - - | <-- |sysfail:147|:38
+LC65 -> - - - - - - - - - - - - @@ - - - | - - - - @@ - - - | <-- |sysfail:147|:47
+
+Pin
+72   -> - - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- IACFAIL_A
+71   -> - - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- IACFAIL_B
+70   -> - - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- IBBSY_A
+67   -> - - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- IBBSY_B
+66   -> - - - - - - - - - - - - - - - - | - - - @@ - - - @@ | <-- IBERR_A
+65   -> - - @@ - - - - - - - - - - - - - | - - - - @@ - @@ @@ | <-- IBERR_B
+64   -> - - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IBR0_A
+61   -> - - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IBR0_B
+60   -> - - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IBR1_A
+59   -> - - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IBR1_B
+22   -> - - - - - - - - - - - - - - - - | - - - @@ - @@ - - | <-- IBR2_A
+21   -> - - - - - - - - - - - - - - - - | - - - @@ - @@ - - | <-- IBR2_B
+20   -> - - - - - - - - - - - - - - - - | - - - - - @@ - - | <-- IBR3_A
+17   -> - - - - - - - - - - - - - - - - | - - - - - @@ - - | <-- IBR3_B
+15   -> - - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IDTACK_A
+14   -> - - - - - - - - - - - - - - - - | - - - - - @@ @@ - | <-- IDTACK_B
+11   -> - - - - @@ - - - @@ - @@ - - - - - | - - - - @@ - - - | <-- IIACK_A
+10   -> - - - @@ @@ - - - - @@ @@ - - - - - | - - - - @@ - @@ - | <-- IIACK_B
+9    -> @@ - - - - - @@ - - - - - - - - - | - - - - @@ - - - | <-- IIRQ1_A
+8    -> - * - - - * - - - - - - - - - - | - - - - * - - - | <-- IIRQ1_B
+36   -> - - - - - - - * - - - - - - - * | - * - - * - - - | <-- ISYSFAIL_A
+50   -> - - - - - - - * - - - - - - - - | - - - - * - - - | <-- ISYSFAIL_B
+16   -> @@ @@ @@ @@ @@ @@ @@ @@ - @@ @@ - - - - @@ | - @@ @@ @@ @@ @@ @@ @@ | <-- RESET_L
+52   -> - - - - - - - * - - - - - - - * | - * - - * - - - | <-- SYSFAIL_INH
+51   -> * * - - - * * - - - - - - - - - | - * * * * * * - | <-- 20M_CLK
+LC115-> - - * - - - - - - - - - - - - - | - - - - * - - @@ | <-- OBERR_B
+LC108-> - - * - - - - - - - - - - - - - | - - - - * - @@ * | <-- |singbuf:23|:83
+LC128-> - - * - - - - - - - - - - - - - | - - - - * - - @@ | <-- |singbuf:23|DIS_B
+LC98 -> - - - * * - - - - * * - - - - - | - - - - * - @@ - | <-- |singbuf:138|:83
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+@@ = The input pin or logic cell feeds the logic cell (or LAB) using direct interconnect.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'F':
+
+                       Logic cells placed in LAB 'F'
+        +------------- LC96 |buff_with_clk:154|:1
+        | +----------- LC95 |buff_with_clk:154|:9
+        | | +--------- LC88 OBR2_A
+        | | | +------- LC87 OBR2_B
+        | | | | +----- LC86 OBR3_A
+        | | | | | +--- LC85 OBR3_B
+        | | | | | | +- LC84 ODTACK_A
+        | | | | | | | 
+        | | | | | | |   Other LABs fed by signals
+        | | | | | | |   that feed LAB 'F'
+LC      | | | | | | | | A B C D E F G H |     Logic cells that feed LAB 'F':
+LC96 -> @@ @@ - - @@ @@ - | - - - - - @@ - - | <-- |buff_with_clk:154|:1
+LC95 -> @@ - - - @@ - - | - - - - - @@ - - | <-- |buff_with_clk:154|:9
+LC88 -> - - - - - - - | - - - - - @@ - - | <-- OBR2_A
+LC87 -> - - - - - - - | - - - - - @@ - - | <-- OBR2_B
+LC86 -> - - - - - - - | - - - - - @@ - - | <-- OBR3_A
+LC85 -> - - - - - - - | - - - - - @@ - - | <-- OBR3_B
+LC84 -> - - - - - - - | - - - - - @@ - - | <-- ODTACK_A
+
+Pin
+72   -> - - - - - - - | - - - - - - - @@ | <-- IACFAIL_A
+71   -> - - - - - - - | - - - - - - - @@ | <-- IACFAIL_B
+70   -> - - - - - - - | - - - - - - - @@ | <-- IBBSY_A
+67   -> - - - - - - - | - - - - - - - @@ | <-- IBBSY_B
+66   -> - - - - - - - | - - - @@ - - - @@ | <-- IBERR_A
+65   -> - - - - - - - | - - - - @@ - @@ @@ | <-- IBERR_B
+64   -> - - - - - - - | - - - - - - @@ - | <-- IBR0_A
+61   -> - - - - - - - | - - - - - - @@ - | <-- IBR0_B
+60   -> - - - - - - - | - - - - - - @@ - | <-- IBR1_A
+59   -> - - - - - - - | - - - - - - @@ - | <-- IBR1_B
+22   -> - - - @@ - - - | - - - @@ - @@ - - | <-- IBR2_A
+21   -> - - @@ - - - - | - - - @@ - @@ - - | <-- IBR2_B
+20   -> @@ - - - - @@ - | - - - - - @@ - - | <-- IBR3_A
+17   -> - @@ - - @@ - - | - - - - - @@ - - | <-- IBR3_B
+15   -> - - - - - - - | - - - - - - @@ - | <-- IDTACK_A
+14   -> - - - - - - @@ | - - - - - @@ @@ - | <-- IDTACK_B
+11   -> - - - - - - - | - - - - @@ - - - | <-- IIACK_A
+10   -> - - - - - - - | - - - - @@ - @@ - | <-- IIACK_B
+9    -> - - - - - - - | - - - - @@ - - - | <-- IIRQ1_A
+16   -> @@ @@ @@ @@ @@ @@ @@ | - @@ @@ @@ @@ @@ @@ @@ | <-- RESET_L
+51   -> * * * * * * - | - * * * * * * - | <-- 20M_CLK
+LC64 -> - - * * - - - | - - - @@ - * - - | <-- |buff_with_clk:157|:1
+LC63 -> - - * - - - - | - - - @@ - * - - | <-- |buff_with_clk:157|:9
+LC100-> - - - - - - * | - - - - - * @@ - | <-- ODTACK_B
+LC107-> - - - - - - * | - - - - - * @@ - | <-- |singbuf:93|:83
+LC105-> - - - - - - * | - - - - - * @@ - | <-- |singbuf:93|DIS_B
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+@@ = The input pin or logic cell feeds the logic cell (or LAB) using direct interconnect.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'G':
+
+                                       Logic cells placed in LAB 'G'
+        +----------------------------- LC112 |buff_with_clk:158|:1
+        | +--------------------------- LC111 |buff_with_clk:158|:9
+        | | +------------------------- LC110 |buff_with_clk:160|:1
+        | | | +----------------------- LC109 |buff_with_clk:160|:9
+        | | | | +--------------------- LC104 OBR0_A
+        | | | | | +------------------- LC103 OBR0_B
+        | | | | | | +----------------- LC102 OBR1_A
+        | | | | | | | +--------------- LC101 OBR1_B
+        | | | | | | | | +------------- LC100 ODTACK_B
+        | | | | | | | | | +----------- LC108 |singbuf:23|:83
+        | | | | | | | | | | +--------- LC107 |singbuf:93|:83
+        | | | | | | | | | | | +------- LC106 |singbuf:93|:85
+        | | | | | | | | | | | | +----- LC105 |singbuf:93|DIS_B
+        | | | | | | | | | | | | | +--- LC99 |singbuf:93|DIS_A
+        | | | | | | | | | | | | | | +- LC98 |singbuf:138|:83
+        | | | | | | | | | | | | | | | 
+        | | | | | | | | | | | | | | |   Other LABs fed by signals
+        | | | | | | | | | | | | | | |   that feed LAB 'G'
+LC      | | | | | | | | | | | | | | | | A B C D E F G H |     Logic cells that feed LAB 'G':
+LC112-> @@ @@ - - - - @@ @@ - - - - - - - | - - - - - - @@ - | <-- |buff_with_clk:158|:1
+LC111-> @@ - - - - - @@ - - - - - - - - | - - - - - - @@ - | <-- |buff_with_clk:158|:9
+LC110-> - - @@ @@ @@ @@ - - - - - - - - - | - - - - - - @@ - | <-- |buff_with_clk:160|:1
+LC109-> - - @@ - @@ - - - - - - - - - - | - - - - - - @@ - | <-- |buff_with_clk:160|:9
+LC104-> - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- OBR0_A
+LC103-> - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- OBR0_B
+LC102-> - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- OBR1_A
+LC101-> - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- OBR1_B
+LC100-> - - - - - - - - @@ - - - @@ @@ - | - - - - - * @@ - | <-- ODTACK_B
+LC108-> - - - - - - - - - - - - - - - | - - - - * - @@ * | <-- |singbuf:23|:83
+LC107-> - - - - - - - - @@ - - - @@ @@ - | - - - - - * @@ - | <-- |singbuf:93|:83
+LC106-> - - - - - - - - @@ - - - - @@ - | - - - - - - @@ - | <-- |singbuf:93|:85
+LC105-> - - - - - - - - @@ - - - - @@ - | - - - - - * @@ - | <-- |singbuf:93|DIS_B
+LC99 -> - - - - - - - - @@ - - - - - - | - - - - - - @@ - | <-- |singbuf:93|DIS_A
+LC98 -> - - - - - - - - - - - - - - - | - - - - * - @@ - | <-- |singbuf:138|:83
+
+Pin
+72   -> - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- IACFAIL_A
+71   -> - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- IACFAIL_B
+70   -> - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- IBBSY_A
+67   -> - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- IBBSY_B
+66   -> - - - - - - - - - - - - - - - | - - - @@ - - - @@ | <-- IBERR_A
+65   -> - - - - - - - - - @@ - - - - - | - - - - @@ - @@ @@ | <-- IBERR_B
+64   -> - - @@ - - @@ - - - - - - - - - | - - - - - - @@ - | <-- IBR0_A
+61   -> - - - @@ @@ - - - - - - - - - - | - - - - - - @@ - | <-- IBR0_B
+60   -> @@ - - - - - - @@ - - - - - - - | - - - - - - @@ - | <-- IBR1_A
+59   -> - @@ - - - - @@ - - - - - - - - | - - - - - - @@ - | <-- IBR1_B
+22   -> - - - - - - - - - - - - - - - | - - - @@ - @@ - - | <-- IBR2_A
+21   -> - - - - - - - - - - - - - - - | - - - @@ - @@ - - | <-- IBR2_B
+20   -> - - - - - - - - - - - - - - - | - - - - - @@ - - | <-- IBR3_A
+17   -> - - - - - - - - - - - - - - - | - - - - - @@ - - | <-- IBR3_B
+15   -> - - - - - - - - @@ - - @@ - @@ - | - - - - - - @@ - | <-- IDTACK_A
+14   -> - - - - - - - - @@ - @@ - @@ @@ - | - - - - - @@ @@ - | <-- IDTACK_B
+11   -> - - - - - - - - - - - - - - - | - - - - @@ - - - | <-- IIACK_A
+10   -> - - - - - - - - - - - - - - @@ | - - - - @@ - @@ - | <-- IIACK_B
+9    -> - - - - - - - - - - - - - - - | - - - - @@ - - - | <-- IIRQ1_A
+16   -> @@ @@ @@ @@ @@ @@ @@ @@ @@ - - - @@ @@ - | - @@ @@ @@ @@ @@ @@ @@ | <-- RESET_L
+51   -> * * * * * * * * - - - - - - - | - * * * * * * - | <-- 20M_CLK
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+@@ = The input pin or logic cell feeds the logic cell (or LAB) using direct interconnect.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'H':
+
+                                         Logic cells placed in LAB 'H'
+        +------------------------------- LC120 A_BBSY_AST
+        | +----------------------------- LC119 OACFAIL_A
+        | | +--------------------------- LC118 OACFAIL_B
+        | | | +------------------------- LC117 OBBSY_A
+        | | | | +----------------------- LC116 OBBSY_B
+        | | | | | +--------------------- LC115 OBERR_B
+        | | | | | | +------------------- LC128 |singbuf:23|DIS_B
+        | | | | | | | +----------------- LC127 |singbuf:23|DIS_A
+        | | | | | | | | +--------------- LC126 |singbuf:33|:83
+        | | | | | | | | | +------------- LC125 |singbuf:33|:85
+        | | | | | | | | | | +----------- LC124 |singbuf:33|DIS_B
+        | | | | | | | | | | | +--------- LC123 |singbuf:33|DIS_A
+        | | | | | | | | | | | | +------- LC122 |singbuf:175|:83
+        | | | | | | | | | | | | | +----- LC121 |singbuf:175|:85
+        | | | | | | | | | | | | | | +--- LC114 |singbuf:175|DIS_B
+        | | | | | | | | | | | | | | | +- LC113 |singbuf:175|DIS_A
+        | | | | | | | | | | | | | | | | 
+        | | | | | | | | | | | | | | | |   Other LABs fed by signals
+        | | | | | | | | | | | | | | | |   that feed LAB 'H'
+LC      | | | | | | | | | | | | | | | | | A B C D E F G H |     Logic cells that feed LAB 'H':
+LC120-> @@ - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- A_BBSY_AST
+LC119-> - - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- OACFAIL_A
+LC118-> - @@ @@ - - - - - - - @@ @@ - - - - | - - - - - - - @@ | <-- OACFAIL_B
+LC117-> - - - - - - - - - - - - - - - - | - - - - - - - @@ | <-- OBBSY_A
+LC116-> - - - @@ @@ - - - - - - - - - @@ @@ | - - - - - - - @@ | <-- OBBSY_B
+LC115-> - - - - - @@ @@ @@ - - - - - - - - | - - - - * - - @@ | <-- OBERR_B
+LC128-> - - - - - @@ - @@ - - - - - - - - | - - - - * - - @@ | <-- |singbuf:23|DIS_B
+LC127-> - - - - - @@ - - - - - - - - - - | - - - - - - - @@ | <-- |singbuf:23|DIS_A
+LC126-> - @@ @@ - - - - - - - @@ @@ - - - - | - - - - - - - @@ | <-- |singbuf:33|:83
+LC125-> - - @@ - - - - - - - - @@ - - - - | - - - - - - - @@ | <-- |singbuf:33|:85
+LC124-> - @@ @@ - - - - - - - - @@ - - - - | - - - - - - - @@ | <-- |singbuf:33|DIS_B
+LC123-> - - @@ - - - - - - - - - - - - - | - - - - - - - @@ | <-- |singbuf:33|DIS_A
+LC122-> @@ - - @@ @@ - - - - - - - - - @@ @@ | - - - - - - - @@ | <-- |singbuf:175|:83
+LC121-> @@ - - - @@ - - - - - - - - - - @@ | - - - - - - - @@ | <-- |singbuf:175|:85
+LC114-> @@ - - @@ @@ - - - - - - - - - - @@ | - - - - - - - @@ | <-- |singbuf:175|DIS_B
+LC113-> @@ - - - @@ - - - - - - - - - - - | - - - - - - - @@ | <-- |singbuf:175|DIS_A
+
+Pin
+72   -> - - @@ - - - - - - @@ - @@ - - - - | - - - - - - - @@ | <-- IACFAIL_A
+71   -> - @@ @@ - - - - - @@ - @@ @@ - - - - | - - - - - - - @@ | <-- IACFAIL_B
+70   -> @@ - - - @@ - - - - - - - - @@ - @@ | - - - - - - - @@ | <-- IBBSY_A
+67   -> @@ - - @@ @@ - - - - - - - @@ - @@ @@ | - - - - - - - @@ | <-- IBBSY_B
+66   -> - - - - - @@ - @@ - - - - - - - - | - - - @@ - - - @@ | <-- IBERR_A
+65   -> - - - - - @@ @@ @@ - - - - - - - - | - - - - @@ - @@ @@ | <-- IBERR_B
+64   -> - - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IBR0_A
+61   -> - - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IBR0_B
+60   -> - - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IBR1_A
+59   -> - - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IBR1_B
+22   -> - - - - - - - - - - - - - - - - | - - - @@ - @@ - - | <-- IBR2_A
+21   -> - - - - - - - - - - - - - - - - | - - - @@ - @@ - - | <-- IBR2_B
+20   -> - - - - - - - - - - - - - - - - | - - - - - @@ - - | <-- IBR3_A
+17   -> - - - - - - - - - - - - - - - - | - - - - - @@ - - | <-- IBR3_B
+15   -> - - - - - - - - - - - - - - - - | - - - - - - @@ - | <-- IDTACK_A
+14   -> - - - - - - - - - - - - - - - - | - - - - - @@ @@ - | <-- IDTACK_B
+11   -> - - - - - - - - - - - - - - - - | - - - - @@ - - - | <-- IIACK_A
+10   -> - - - - - - - - - - - - - - - - | - - - - @@ - @@ - | <-- IIACK_B
+9    -> - - - - - - - - - - - - - - - - | - - - - @@ - - - | <-- IIRQ1_A
+16   -> @@ @@ @@ @@ @@ @@ @@ @@ - - @@ @@ - - @@ @@ | - @@ @@ @@ @@ @@ @@ @@ | <-- RESET_L
+LC108-> - - - - - * * * - - - - - - - - | - - - - * - @@ * | <-- |singbuf:23|:83
+LC59 -> - - - - - * - * - - - - - - - - | - - - @@ - - - * | <-- |singbuf:23|:85
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+@@ = The input pin or logic cell feeds the logic cell (or LAB) using direct interconnect.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:                              c:\v150\bdir_buf.rpt
+bdir_buf
+
+** EQUATIONS **
+
+IACFAIL_A : INPUT;
+IACFAIL_B : INPUT;
+IBBSY_A  : INPUT;
+IBBSY_B  : INPUT;
+IBERR_A  : INPUT;
+IBERR_B  : INPUT;
+IBR0_A   : INPUT;
+IBR0_B   : INPUT;
+IBR1_A   : INPUT;
+IBR1_B   : INPUT;
+IBR2_A   : INPUT;
+IBR2_B   : INPUT;
+IBR3_A   : INPUT;
+IBR3_B   : INPUT;
+IDTACK_A : INPUT;
+IDTACK_B : INPUT;
+IIACK_A  : INPUT;
+IIACK_B  : INPUT;
+IIRQ1_A  : INPUT;
+IIRQ1_B  : INPUT;
+IIRQ2_A  : INPUT;
+IIRQ2_B  : INPUT;
+IIRQ3_A  : INPUT;
+IIRQ3_B  : INPUT;
+IIRQ4_A  : INPUT;
+IIRQ4_B  : INPUT;
+IIRQ5_A  : INPUT;
+IIRQ5_B  : INPUT;
+IIRQ6_A  : INPUT;
+IIRQ6_B  : INPUT;
+IIRQ7_A  : INPUT;
+IIRQ7_B  : INPUT;
+ISYSFAIL_A : INPUT;
+ISYSFAIL_B : INPUT;
+ISYSRESET_A : INPUT;
+ISYSRESET_B : INPUT;
+RESET_L  : INPUT;
+SYSFAIL_INH : INPUT;
+20M_CLK  : INPUT;
+
+-- Node name is 'A_BBSY_AST' = '|singbuf:175|~36~1~2' 
+-- Equation name is 'A_BBSY_AST', type is output 
+ A_BBSY_AST = LCELL( _EQ001 $  _EQ002);
+  _EQ001 = !A_BBSY_AST & !IBBSY_A & !IBBSY_B & !_LC113 & !_LC114 & !_LC121 & 
+             !_LC122 &  RESET_L;
+  _EQ002 = !IBBSY_A & !_LC113 & !_LC121 &  RESET_L;
+
+-- Node name is 'OACFAIL_A' 
+-- Equation name is 'OACFAIL_A', location is LC119, type is output.
+ OACFAIL_A = LCELL( _EQ003 $  GND);
+  _EQ003 = !IACFAIL_B & !_LC124 & !_LC126 & !OACFAIL_B &  RESET_L;
+
+-- Node name is 'OACFAIL_B' = '|singbuf:33|~36~1' 
+-- Equation name is 'OACFAIL_B', type is output 
+ OACFAIL_B = LCELL( _EQ004 $  _EQ005);
+  _EQ004 = !IACFAIL_A & !IACFAIL_B & !_LC123 & !_LC124 & !_LC125 & !_LC126 & 
+             !OACFAIL_B &  RESET_L;
+  _EQ005 = !IACFAIL_A & !_LC123 & !_LC125 &  RESET_L;
+
+-- Node name is 'OBBSY_A' 
+-- Equation name is 'OBBSY_A', location is LC117, type is output.
+ OBBSY_A = LCELL( _EQ006 $  GND);
+  _EQ006 = !IBBSY_B & !_LC114 & !_LC122 & !OBBSY_B &  RESET_L;
+
+-- Node name is 'OBBSY_B' = '|singbuf:175|~36~1' 
+-- Equation name is 'OBBSY_B', type is output 
+ OBBSY_B = LCELL( _EQ007 $  _EQ002);
+  _EQ007 = !IBBSY_A & !IBBSY_B & !_LC113 & !_LC114 & !_LC121 & !_LC122 & 
+             !OBBSY_B &  RESET_L;
+
+-- Node name is 'OBERR_A' 
+-- Equation name is 'OBERR_A', location is LC072, type is output.
+ OBERR_A = LCELL( _EQ008 $  GND);
+  _EQ008 = !IBERR_B & !_LC108 & !_LC128 & !OBERR_B &  RESET_L;
+
+-- Node name is 'OBERR_B' = '|singbuf:23|~36~1' 
+-- Equation name is 'OBERR_B', type is output 
+ OBERR_B = LCELL( _EQ009 $  _EQ010);
+  _EQ009 = !IBERR_A & !IBERR_B & !_LC059 & !_LC108 & !_LC127 & !_LC128 & 
+             !OBERR_B &  RESET_L;
+  _EQ010 = !IBERR_A & !_LC059 & !_LC127 &  RESET_L;
+
+-- Node name is 'OBR0_A' = '|buff_with_clk:160|:3' 
+-- Equation name is 'OBR0_A', type is output 
+OBR0_A   = _LC104~NOT;
+_LC104~NOT = DFF( _EQ011 $  _LC110, !20M_CLK,  _EQ012,  VCC);
+  _EQ011 =  _LC109 &  _LC110;
+  _EQ012 = !IBR0_B &  RESET_L;
+
+-- Node name is 'OBR0_B' = '|buff_with_clk:160|:2' 
+-- Equation name is 'OBR0_B', type is output 
+OBR0_B   = _LC103~NOT;
+_LC103~NOT = DFF(!_LC110 $  GND, !20M_CLK,  _EQ013,  VCC);
+  _EQ013 = !IBR0_A &  RESET_L;
+
+-- Node name is 'OBR1_A' = '|buff_with_clk:158|:3' 
+-- Equation name is 'OBR1_A', type is output 
+OBR1_A   = _LC102~NOT;
+_LC102~NOT = DFF( _EQ014 $  _LC112, !20M_CLK,  _EQ015,  VCC);
+  _EQ014 =  _LC111 &  _LC112;
+  _EQ015 = !IBR1_B &  RESET_L;
+
+-- Node name is 'OBR1_B' = '|buff_with_clk:158|:2' 
+-- Equation name is 'OBR1_B', type is output 
+OBR1_B   = _LC101~NOT;
+_LC101~NOT = DFF(!_LC112 $  GND, !20M_CLK,  _EQ016,  VCC);
+  _EQ016 = !IBR1_A &  RESET_L;
+
+-- Node name is 'OBR2_A' = '|buff_with_clk:157|:3' 
+-- Equation name is 'OBR2_A', type is output 
+OBR2_A   = _LC088~NOT;
+_LC088~NOT = DFF( _EQ017 $  _LC064, !20M_CLK,  _EQ018,  VCC);
+  _EQ017 =  _LC063 &  _LC064;
+  _EQ018 = !IBR2_B &  RESET_L;
+
+-- Node name is 'OBR2_B' = '|buff_with_clk:157|:2' 
+-- Equation name is 'OBR2_B', type is output 
+OBR2_B   = _LC087~NOT;
+_LC087~NOT = DFF(!_LC064 $  GND, !20M_CLK,  _EQ019,  VCC);
+  _EQ019 = !IBR2_A &  RESET_L;
+
+-- Node name is 'OBR3_A' = '|buff_with_clk:154|:3' 
+-- Equation name is 'OBR3_A', type is output 
+OBR3_A   = _LC086~NOT;
+_LC086~NOT = DFF( _EQ020 $  _LC096, !20M_CLK,  _EQ021,  VCC);
+  _EQ020 =  _LC095 &  _LC096;
+  _EQ021 = !IBR3_B &  RESET_L;
+
+-- Node name is 'OBR3_B' = '|buff_with_clk:154|:2' 
+-- Equation name is 'OBR3_B', type is output 
+OBR3_B   = _LC085~NOT;
+_LC085~NOT = DFF(!_LC096 $  GND, !20M_CLK,  _EQ022,  VCC);
+  _EQ022 = !IBR3_A &  RESET_L;
+
+-- Node name is 'ODTACK_A' 
+-- Equation name is 'ODTACK_A', location is LC084, type is output.
+ ODTACK_A = LCELL( _EQ023 $  GND);
+  _EQ023 = !IDTACK_B & !_LC105 & !_LC107 & !ODTACK_B &  RESET_L;
+
+-- Node name is 'ODTACK_B' = '|singbuf:93|~36~1' 
+-- Equation name is 'ODTACK_B', type is output 
+ ODTACK_B = LCELL( _EQ024 $  _EQ025);
+  _EQ024 = !IDTACK_A & !IDTACK_B & !_LC099 & !_LC105 & !_LC106 & !_LC107 & 
+             !ODTACK_B &  RESET_L;
+  _EQ025 = !IDTACK_A & !_LC099 & !_LC106 &  RESET_L;
+
+-- Node name is 'OIACK_A' 
+-- Equation name is 'OIACK_A', location is LC071, type is output.
+ OIACK_A = LCELL( _EQ026 $  GND);
+  _EQ026 = !IIACK_B & !_LC077 & !_LC098 & !OIACK_B &  RESET_L;
+
+-- Node name is 'OIACK_B' = '|singbuf:138|~36~1' 
+-- Equation name is 'OIACK_B', type is output 
+ OIACK_B = LCELL( _EQ027 $  _EQ028);
+  _EQ027 = !IIACK_A & !IIACK_B & !_LC076 & !_LC077 & !_LC078 & !_LC098 & 
+             !OIACK_B &  RESET_L;
+  _EQ028 = !IIACK_A & !_LC076 & !_LC078 &  RESET_L;
+
+-- Node name is 'OIRQ1_A' = '|buff_with_clk:171|:3' 
+-- Equation name is 'OIRQ1_A', type is output 
+OIRQ1_A  = _LC069~NOT;
+_LC069~NOT = DFF( _EQ029 $  _LC080, !20M_CLK,  _EQ030,  VCC);
+  _EQ029 =  _LC079 &  _LC080;
+  _EQ030 = !IIRQ1_B &  RESET_L;
+
+-- Node name is 'OIRQ1_B' = '|buff_with_clk:171|:2' 
+-- Equation name is 'OIRQ1_B', type is output 
+OIRQ1_B  = _LC068~NOT;
+_LC068~NOT = DFF(!_LC080 $  GND, !20M_CLK,  _EQ031,  VCC);
+  _EQ031 = !IIRQ1_A &  RESET_L;
+
+-- Node name is 'OIRQ2_A' = '|buff_with_clk:167|:3' 
+-- Equation name is 'OIRQ2_A', type is output 
+OIRQ2_A  = _LC053~NOT;
+_LC053~NOT = DFF( _EQ032 $  _LC061, !20M_CLK,  _EQ033,  VCC);
+  _EQ032 =  _LC060 &  _LC061;
+  _EQ033 = !IIRQ2_B &  RESET_L;
+
+-- Node name is 'OIRQ2_B' = '|buff_with_clk:167|:2' 
+-- Equation name is 'OIRQ2_B', type is output 
+OIRQ2_B  = _LC052~NOT;
+_LC052~NOT = DFF(!_LC061 $  GND, !20M_CLK,  _EQ034,  VCC);
+  _EQ034 = !IIRQ2_A &  RESET_L;
+
+-- Node name is 'OIRQ3_A' = '|buff_with_clk:166|:3' 
+-- Equation name is 'OIRQ3_A', type is output 
+OIRQ3_A  = _LC037~NOT;
+_LC037~NOT = DFF( _EQ035 $  _LC045, !20M_CLK,  _EQ036,  VCC);
+  _EQ035 =  _LC044 &  _LC045;
+  _EQ036 = !IIRQ3_B &  RESET_L;
+
+-- Node name is 'OIRQ3_B' = '|buff_with_clk:166|:2' 
+-- Equation name is 'OIRQ3_B', type is output 
+OIRQ3_B  = _LC036~NOT;
+_LC036~NOT = DFF(!_LC045 $  GND, !20M_CLK,  _EQ037,  VCC);
+  _EQ037 = !IIRQ3_A &  RESET_L;
+
+-- Node name is 'OIRQ4_A' = '|buff_with_clk:165|:3' 
+-- Equation name is 'OIRQ4_A', type is output 
+OIRQ4_A  = _LC021~NOT;
+_LC021~NOT = DFF( _EQ038 $  _LC030, !20M_CLK,  _EQ039,  VCC);
+  _EQ038 =  _LC029 &  _LC030;
+  _EQ039 = !IIRQ4_B &  RESET_L;
+
+-- Node name is 'OIRQ4_B' = '|buff_with_clk:165|:2' 
+-- Equation name is 'OIRQ4_B', type is output 
+OIRQ4_B  = _LC020~NOT;
+_LC020~NOT = DFF(!_LC030 $  GND, !20M_CLK,  _EQ040,  VCC);
+  _EQ040 = !IIRQ4_A &  RESET_L;
+
+-- Node name is 'OIRQ5_A' = '|buff_with_clk:164|:3' 
+-- Equation name is 'OIRQ5_A', type is output 
+OIRQ5_A  = _LC019~NOT;
+_LC019~NOT = DFF( _EQ041 $  _LC046, !20M_CLK,  _EQ042,  VCC);
+  _EQ041 =  _LC031 &  _LC046;
+  _EQ042 = !IIRQ5_B &  RESET_L;
+
+-- Node name is 'OIRQ5_B' = '|buff_with_clk:164|:2' 
+-- Equation name is 'OIRQ5_B', type is output 
+OIRQ5_B  = _LC035~NOT;
+_LC035~NOT = DFF(!_LC046 $  GND, !20M_CLK,  _EQ043,  VCC);
+  _EQ043 = !IIRQ5_A &  RESET_L;
+
+-- Node name is 'OIRQ6_A' = '|buff_with_clk:163|:3' 
+-- Equation name is 'OIRQ6_A', type is output 
+OIRQ6_A  = _LC034~NOT;
+_LC034~NOT = DFF( _EQ044 $  _LC048, !20M_CLK,  _EQ045,  VCC);
+  _EQ044 =  _LC047 &  _LC048;
+  _EQ045 = !IIRQ6_B &  RESET_L;
+
+-- Node name is 'OIRQ6_B' = '|buff_with_clk:163|:2' 
+-- Equation name is 'OIRQ6_B', type is output 
+OIRQ6_B  = _LC033~NOT;
+_LC033~NOT = DFF(!_LC048 $  GND, !20M_CLK,  _EQ046,  VCC);
+  _EQ046 = !IIRQ6_A &  RESET_L;
+
+-- Node name is 'OIRQ7_A' = '|buff_with_clk:162|:3' 
+-- Equation name is 'OIRQ7_A', type is output 
+OIRQ7_A  = _LC018~NOT;
+_LC018~NOT = DFF( _EQ047 $  _LC062, !20M_CLK,  _EQ048,  VCC);
+  _EQ047 =  _LC032 &  _LC062;
+  _EQ048 = !IIRQ7_B &  RESET_L;
+
+-- Node name is 'OIRQ7_B' = '|buff_with_clk:162|:2' 
+-- Equation name is 'OIRQ7_B', type is output 
+OIRQ7_B  = _LC051~NOT;
+_LC051~NOT = DFF(!_LC062 $  GND, !20M_CLK,  _EQ049,  VCC);
+  _EQ049 = !IIRQ7_A &  RESET_L;
+
+-- Node name is 'OSYSFAIL_A' = '|sysfail:147|~40~1' 
+-- Equation name is 'OSYSFAIL_A', type is output 
+ OSYSFAIL_A = LCELL( _EQ050 $ !_LC075);
+  _EQ050 = !ISYSFAIL_A & !_LC066 & !_LC075 & !OSYSFAIL_A & !SYSFAIL_INH
+         #  ISYSFAIL_B & !_LC075
+         # !_LC075 & !RESET_L;
+
+-- Node name is 'OSYSFAIL_B' 
+-- Equation name is 'OSYSFAIL_B', location is LC017, type is output.
+ OSYSFAIL_B = LCELL( _EQ051 $  GND);
+  _EQ051 = !ISYSFAIL_A & !_LC066 & !OSYSFAIL_A &  RESET_L & !SYSFAIL_INH;
+
+-- Node name is 'OSYSRESET_A' 
+-- Equation name is 'OSYSRESET_A', location is LC050, type is output.
+ OSYSRESET_A = LCELL( _EQ052 $  GND);
+  _EQ052 = !ISYSRESET_B & !_LC056 & !_LC058 & !OSYSRESET_B &  RESET_L;
+
+-- Node name is 'OSYSRESET_B' = '|singbuf:151|~36~1' 
+-- Equation name is 'OSYSRESET_B', type is output 
+ OSYSRESET_B = LCELL( _EQ053 $  _EQ054);
+  _EQ053 = !ISYSRESET_A & !ISYSRESET_B & !_LC055 & !_LC056 & !_LC057 & 
+             !_LC058 & !OSYSRESET_B &  RESET_L;
+  _EQ054 = !ISYSRESET_A & !_LC055 & !_LC057 &  RESET_L;
+
+-- Node name is '|buff_with_clk:154|:1' 
+-- Equation name is '_LC096', type is buried 
+_LC096   = DFF( IBR3_A $  GND,  _EQ055,  VCC,  RESET_L);
+  _EQ055 =  _X001 &  20M_CLK;
+  _X001  = EXP(!_LC095 &  _LC096);
+
+-- Node name is '|buff_with_clk:154|:9' 
+-- Equation name is '_LC095', type is buried 
+_LC095   = DFF( IBR3_B $  GND,  _EQ056,  VCC,  RESET_L);
+  _EQ056 =  _LC096 &  20M_CLK;
+
+-- Node name is '|buff_with_clk:157|:1' 
+-- Equation name is '_LC064', type is buried 
+_LC064   = DFF( IBR2_A $  GND,  _EQ057,  VCC,  RESET_L);
+  _EQ057 =  _X002 &  20M_CLK;
+  _X002  = EXP(!_LC063 &  _LC064);
+
+-- Node name is '|buff_with_clk:157|:9' 
+-- Equation name is '_LC063', type is buried 
+_LC063   = DFF( IBR2_B $  GND,  _EQ058,  VCC,  RESET_L);
+  _EQ058 =  _LC064 &  20M_CLK;
+
+-- Node name is '|buff_with_clk:158|:1' 
+-- Equation name is '_LC112', type is buried 
+_LC112   = DFF( IBR1_A $  GND,  _EQ059,  VCC,  RESET_L);
+  _EQ059 =  _X003 &  20M_CLK;
+  _X003  = EXP(!_LC111 &  _LC112);
+
+-- Node name is '|buff_with_clk:158|:9' 
+-- Equation name is '_LC111', type is buried 
+_LC111   = DFF( IBR1_B $  GND,  _EQ060,  VCC,  RESET_L);
+  _EQ060 =  _LC112 &  20M_CLK;
+
+-- Node name is '|buff_with_clk:160|:1' 
+-- Equation name is '_LC110', type is buried 
+_LC110   = DFF( IBR0_A $  GND,  _EQ061,  VCC,  RESET_L);
+  _EQ061 =  _X004 &  20M_CLK;
+  _X004  = EXP(!_LC109 &  _LC110);
+
+-- Node name is '|buff_with_clk:160|:9' 
+-- Equation name is '_LC109', type is buried 
+_LC109   = DFF( IBR0_B $  GND,  _EQ062,  VCC,  RESET_L);
+  _EQ062 =  _LC110 &  20M_CLK;
+
+-- Node name is '|buff_with_clk:162|:1' 
+-- Equation name is '_LC062', type is buried 
+_LC062   = DFF( IIRQ7_A $  GND,  _EQ063,  VCC,  RESET_L);
+  _EQ063 =  _X005 &  20M_CLK;
+  _X005  = EXP(!_LC032 &  _LC062);
+
+-- Node name is '|buff_with_clk:162|:9' 
+-- Equation name is '_LC032', type is buried 
+_LC032   = DFF( IIRQ7_B $  GND,  _EQ064,  VCC,  RESET_L);
+  _EQ064 =  _LC062 &  20M_CLK;
+
+-- Node name is '|buff_with_clk:163|:1' 
+-- Equation name is '_LC048', type is buried 
+_LC048   = DFF( IIRQ6_A $  GND,  _EQ065,  VCC,  RESET_L);
+  _EQ065 =  _X006 &  20M_CLK;
+  _X006  = EXP(!_LC047 &  _LC048);
+
+-- Node name is '|buff_with_clk:163|:9' 
+-- Equation name is '_LC047', type is buried 
+_LC047   = DFF( IIRQ6_B $  GND,  _EQ066,  VCC,  RESET_L);
+  _EQ066 =  _LC048 &  20M_CLK;
+
+-- Node name is '|buff_with_clk:164|:1' 
+-- Equation name is '_LC046', type is buried 
+_LC046   = DFF( IIRQ5_A $  GND,  _EQ067,  VCC,  RESET_L);
+  _EQ067 =  _X007 &  20M_CLK;
+  _X007  = EXP(!_LC031 &  _LC046);
+
+-- Node name is '|buff_with_clk:164|:9' 
+-- Equation name is '_LC031', type is buried 
+_LC031   = DFF( IIRQ5_B $  GND,  _EQ068,  VCC,  RESET_L);
+  _EQ068 =  _LC046 &  20M_CLK;
+
+-- Node name is '|buff_with_clk:165|:1' 
+-- Equation name is '_LC030', type is buried 
+_LC030   = DFF( IIRQ4_A $  GND,  _EQ069,  VCC,  RESET_L);
+  _EQ069 =  _X008 &  20M_CLK;
+  _X008  = EXP(!_LC029 &  _LC030);
+
+-- Node name is '|buff_with_clk:165|:9' 
+-- Equation name is '_LC029', type is buried 
+_LC029   = DFF( IIRQ4_B $  GND,  _EQ070,  VCC,  RESET_L);
+  _EQ070 =  _LC030 &  20M_CLK;
+
+-- Node name is '|buff_with_clk:166|:1' 
+-- Equation name is '_LC045', type is buried 
+_LC045   = DFF( IIRQ3_A $  GND,  _EQ071,  VCC,  RESET_L);
+  _EQ071 =  _X009 &  20M_CLK;
+  _X009  = EXP(!_LC044 &  _LC045);
+
+-- Node name is '|buff_with_clk:166|:9' 
+-- Equation name is '_LC044', type is buried 
+_LC044   = DFF( IIRQ3_B $  GND,  _EQ072,  VCC,  RESET_L);
+  _EQ072 =  _LC045 &  20M_CLK;
+
+-- Node name is '|buff_with_clk:167|:1' 
+-- Equation name is '_LC061', type is buried 
+_LC061   = DFF( IIRQ2_A $  GND,  _EQ073,  VCC,  RESET_L);
+  _EQ073 =  _X010 &  20M_CLK;
+  _X010  = EXP(!_LC060 &  _LC061);
+
+-- Node name is '|buff_with_clk:167|:9' 
+-- Equation name is '_LC060', type is buried 
+_LC060   = DFF( IIRQ2_B $  GND,  _EQ074,  VCC,  RESET_L);
+  _EQ074 =  _LC061 &  20M_CLK;
+
+-- Node name is '|buff_with_clk:171|:1' 
+-- Equation name is '_LC080', type is buried 
+_LC080   = DFF( IIRQ1_A $  GND,  _EQ075,  VCC,  RESET_L);
+  _EQ075 =  _X011 &  20M_CLK;
+  _X011  = EXP(!_LC079 &  _LC080);
+
+-- Node name is '|buff_with_clk:171|:9' 
+-- Equation name is '_LC079', type is buried 
+_LC079   = DFF( IIRQ1_B $  GND,  _EQ076,  VCC,  RESET_L);
+  _EQ076 =  _LC080 &  20M_CLK;
+
+-- Node name is '|singbuf:23|:87' = '|singbuf:23|DIS_A' 
+-- Equation name is '_LC127', type is buried 
+_LC127   = DFF( GND $  GND,  _EQ077,  RESET_L,  _EQ078);
+  _EQ077 =  _X012;
+  _X012  = EXP(!IBERR_A & !_LC059);
+  _EQ078 =  _X013;
+  _X013  = EXP(!IBERR_B & !_LC108 & !_LC128 & !OBERR_B &  RESET_L);
+
+-- Node name is '|singbuf:23|:86' = '|singbuf:23|DIS_B' 
+-- Equation name is '_LC128', type is buried 
+_LC128   = DFF( GND $  GND,  _EQ079,  RESET_L, !OBERR_B);
+  _EQ079 =  _X014;
+  _X014  = EXP(!IBERR_B & !_LC108);
+
+-- Node name is '|singbuf:23|:83' 
+-- Equation name is '_LC108', type is buried 
+_LC108   = LCELL( IBERR_B $  GND);
+
+-- Node name is '|singbuf:23|:85' 
+-- Equation name is '_LC059', type is buried 
+_LC059   = LCELL( IBERR_A $  GND);
+
+-- Node name is '|singbuf:33|:87' = '|singbuf:33|DIS_A' 
+-- Equation name is '_LC123', type is buried 
+_LC123   = DFF( GND $  GND,  _EQ080,  RESET_L,  _EQ081);
+  _EQ080 =  _X015;
+  _X015  = EXP(!IACFAIL_A & !_LC125);
+  _EQ081 =  _X016;
+  _X016  = EXP(!IACFAIL_B & !_LC124 & !_LC126 & !OACFAIL_B &  RESET_L);
+
+-- Node name is '|singbuf:33|:86' = '|singbuf:33|DIS_B' 
+-- Equation name is '_LC124', type is buried 
+_LC124   = DFF( GND $  GND,  _EQ082,  RESET_L, !OACFAIL_B);
+  _EQ082 =  _X017;
+  _X017  = EXP(!IACFAIL_B & !_LC126);
+
+-- Node name is '|singbuf:33|:83' 
+-- Equation name is '_LC126', type is buried 
+_LC126   = LCELL( IACFAIL_B $  GND);
+
+-- Node name is '|singbuf:33|:85' 
+-- Equation name is '_LC125', type is buried 
+_LC125   = LCELL( IACFAIL_A $  GND);
+
+-- Node name is '|singbuf:93|:87' = '|singbuf:93|DIS_A' 
+-- Equation name is '_LC099', type is buried 
+_LC099   = DFF( GND $  GND,  _EQ083,  RESET_L,  _EQ084);
+  _EQ083 =  _X018;
+  _X018  = EXP(!IDTACK_A & !_LC106);
+  _EQ084 =  _X019;
+  _X019  = EXP(!IDTACK_B & !_LC105 & !_LC107 & !ODTACK_B &  RESET_L);
+
+-- Node name is '|singbuf:93|:86' = '|singbuf:93|DIS_B' 
+-- Equation name is '_LC105', type is buried 
+_LC105   = DFF( GND $  GND,  _EQ085,  RESET_L, !ODTACK_B);
+  _EQ085 =  _X020;
+  _X020  = EXP(!IDTACK_B & !_LC107);
+
+-- Node name is '|singbuf:93|:83' 
+-- Equation name is '_LC107', type is buried 
+_LC107   = LCELL( IDTACK_B $  GND);
+
+-- Node name is '|singbuf:93|:85' 
+-- Equation name is '_LC106', type is buried 
+_LC106   = LCELL( IDTACK_A $  GND);
+
+-- Node name is '|singbuf:138|:87' = '|singbuf:138|DIS_A' 
+-- Equation name is '_LC076', type is buried 
+_LC076   = DFF( GND $  GND,  _EQ086,  RESET_L,  _EQ087);
+  _EQ086 =  _X021;
+  _X021  = EXP(!IIACK_A & !_LC078);
+  _EQ087 =  _X022;
+  _X022  = EXP(!IIACK_B & !_LC077 & !_LC098 & !OIACK_B &  RESET_L);
+
+-- Node name is '|singbuf:138|:86' = '|singbuf:138|DIS_B' 
+-- Equation name is '_LC077', type is buried 
+_LC077   = DFF( GND $  GND,  _EQ088,  RESET_L, !OIACK_B);
+  _EQ088 =  _X023;
+  _X023  = EXP(!IIACK_B & !_LC098);
+
+-- Node name is '|singbuf:138|:83' 
+-- Equation name is '_LC098', type is buried 
+_LC098   = LCELL( IIACK_B $  GND);
+
+-- Node name is '|singbuf:138|:85' 
+-- Equation name is '_LC078', type is buried 
+_LC078   = LCELL( IIACK_A $  GND);
+
+-- Node name is '|singbuf:151|:87' = '|singbuf:151|DIS_A' 
+-- Equation name is '_LC055', type is buried 
+_LC055   = DFF( GND $  GND,  _EQ089,  RESET_L,  _EQ090);
+  _EQ089 =  _X024;
+  _X024  = EXP(!ISYSRESET_A & !_LC057);
+  _EQ090 =  _X025;
+  _X025  = EXP(!ISYSRESET_B & !_LC056 & !_LC058 & !OSYSRESET_B &  RESET_L);
+
+-- Node name is '|singbuf:151|:86' = '|singbuf:151|DIS_B' 
+-- Equation name is '_LC056', type is buried 
+_LC056   = DFF( GND $  GND,  _EQ091,  RESET_L, !OSYSRESET_B);
+  _EQ091 =  _X026;
+  _X026  = EXP(!ISYSRESET_B & !_LC058);
+
+-- Node name is '|singbuf:151|:83' 
+-- Equation name is '_LC058', type is buried 
+_LC058   = LCELL( ISYSRESET_B $  GND);
+
+-- Node name is '|singbuf:151|:85' 
+-- Equation name is '_LC057', type is buried 
+_LC057   = LCELL( ISYSRESET_A $  GND);
+
+-- Node name is '|singbuf:175|:87' = '|singbuf:175|DIS_A' 
+-- Equation name is '_LC113', type is buried 
+_LC113   = DFF( GND $  GND,  _EQ092,  RESET_L,  _EQ093);
+  _EQ092 =  _X027;
+  _X027  = EXP(!IBBSY_A & !_LC121);
+  _EQ093 =  _X028;
+  _X028  = EXP(!IBBSY_B & !_LC114 & !_LC122 & !OBBSY_B &  RESET_L);
+
+-- Node name is '|singbuf:175|:86' = '|singbuf:175|DIS_B' 
+-- Equation name is '_LC114', type is buried 
+_LC114   = DFF( GND $  GND,  _EQ094,  RESET_L, !OBBSY_B);
+  _EQ094 =  _X029;
+  _X029  = EXP(!IBBSY_B & !_LC122);
+
+-- Node name is '|singbuf:175|:83' 
+-- Equation name is '_LC122', type is buried 
+_LC122   = LCELL( IBBSY_B $  GND);
+
+-- Node name is '|singbuf:175|:85' 
+-- Equation name is '_LC121', type is buried 
+_LC121   = LCELL( IBBSY_A $  GND);
+
+-- Node name is '|sysfail:147|:35' 
+-- Equation name is '_LC075', type is buried 
+_LC075   = LCELL( _LC074 $  GND);
+
+-- Node name is '|sysfail:147|:36' 
+-- Equation name is '_LC074', type is buried 
+_LC074   = LCELL( _LC065 $  GND);
+
+-- Node name is '|sysfail:147|:37' 
+-- Equation name is '_LC073', type is buried 
+_LC073   = LCELL( _EQ095 $  GND);
+  _EQ095 =  _X030;
+  _X030  = EXP( _X031);
+  _X031  = EXP( _X032);
+  _X032  = EXP( _X033);
+  _X033  = EXP( OSYSFAIL_A);
+
+-- Node name is '|sysfail:147|:38' 
+-- Equation name is '_LC066', type is buried 
+_LC066   = LCELL( _LC073 $  GND);
+
+-- Node name is '|sysfail:147|:47' 
+-- Equation name is '_LC065', type is buried 
+_LC065   = LCELL( _EQ096 $  GND);
+  _EQ096 =  _X034;
+  _X034  = EXP( _X035);
+  _X035  = EXP( _X036);
+  _X036  = EXP( _X037);
+  _X037  = EXP(!ISYSFAIL_A & !_LC066 & !OSYSFAIL_A &  RESET_L & !SYSFAIL_INH);
+
+
+
+--     Shareable expanders that are duplicated in multiple LABs:
+--     (none)
+
+
+
+
+Project Information                                       c:\v150\bdir_buf.rpt
+
+** COMPILATION SETTINGS & TIMES **
+
+Processing Menu Commands
+------------------------
+
+Design Doctor                             = off
+
+Logic Synthesis:
+
+   Synthesis Type Used                    = Standard
+
+   Default Synthesis Style                = NORMAL
+
+      Logic option settings in 'NORMAL' style for 'MAX5000' family
+
+      DECOMPOSE_GATES                     = on
+      DUPLICATE_LOGIC_EXTRACTION          = on
+      MINIMIZATION                        = full
+      MULTI_LEVEL_FACTORING               = on
+      NOT_GATE_PUSH_BACK                  = on
+      REDUCE_LOGIC                        = on
+      REFACTORIZATION                     = on
+      REGISTER_OPTIMIZATION               = on
+      RESYNTHESIZE_NETWORK                = on
+      SOFT_BUFFER_INSERTION               = on
+      SUBFACTOR_EXTRACTION                = on
+      XOR_SYNTHESIS                       = on
+      IGNORE_SOFT_BUFFERS                 = off
+      USE_LPM_FOR_AHDL_OPERATORS          = off
+
+   Other logic synthesis settings:
+
+      Automatic Global Clock              = on
+      Automatic Global Clear              = on
+      Automatic Global Preset             = on
+      Automatic Global Output Enable      = on
+      Automatic Fast I/O                  = on
+      Automatic Register Packing          = off
+      Automatic Open-Drain Pins           = on
+      Automatic Implement in EAB          = off
+      One-Hot State Machine Encoding      = off
+      Optimize                            = 5
+
+Default Timing Specifications: None
+
+Cut All Bidir Feedback Timing Paths       = on
+Cut All Clear & Preset Timing Paths       = on
+
+Ignore Timing Assignments                 = off
+
+Functional SNF Extractor                  = off
+
+Linked SNF Extractor                      = off
+Timing SNF Extractor                      = on
+Optimize Timing SNF                       = off
+Generate AHDL TDO File                    = off
+Fitter Settings                           = NORMAL
+Smart Recompile                           = off
+Total Recompile                           = off
+
+Interfaces Menu Commands
+------------------------
+
+EDIF Netlist Writer                       = off
+Verilog Netlist Writer                    = off
+VHDL Netlist Writer                       = off
+
+Compilation Times
+-----------------
+
+   Compiler Netlist Extractor             00:00:01
+   Database Builder                       00:00:00
+   Logic Synthesizer                      00:00:04
+   Partitioner                            00:00:01
+   Fitter                                 00:00:01
+   Timing SNF Extractor                   00:00:00
+   Assembler                              00:00:00
+   --------------------------             --------
+   Total Time                             00:00:07
+
+
+Memory Allocated
+-----------------
+
+Peak memory allocated during compilation  = 2,794K
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

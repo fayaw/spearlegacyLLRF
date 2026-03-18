@@ -1,0 +1,91 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	RF-SPEAR-R0-0-0:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1
+	RF-3-13-10:1.1.0.2;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.05.14.23.44.51;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Generic parms and macros
+@
+text
+@/*
+** ++
+**
+**  Facility:  GENLIB - Generic Macro/Parameters Library
+**
+**  Abstract:
+**      Set generic macros and parameters
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Longitudinal Feedback Project
+**
+**  Revision History:
+**	July  6, 1993 - Created.
+**
+** --
+*/
+
+#ifndef GENLIB_H
+#define GENLIB_H
+
+#ifdef VXWORKS
+#  include <vxWorks.h>
+#  include <stdioLib.h>
+#  include <fioLib.h>
+#else
+#  include <stdio.h>
+#  include <stdlib.h>
+#  include <malloc.h>
+#endif
+
+#define NIL   (void *)(0)
+#ifndef NULL
+ #define NULL           0
+#endif
+#define TRUE           1
+#define FALSE          0
+#define SUCCESS        0
+#define FAILURE        1
+
+#define Min(a,b)       ((a) < (b) ? (a) : (b))
+#define Max(a,b)       ((a) > (b) ? (a) : (b))
+#define lsizeof(var)   (sizeof (var) >> 2)
+
+#ifdef DBG
+#define myMalloc(size,FN) \
+   ({void *__p = malloc((size));\
+    printf ("%s: malloc: size %ld, %p\n", (FN), (size), __p);\
+    __p;  })
+#define myFree(__p,FN) \
+      ({printf ("%s: free: %p\n",(FN), (__p)); \
+        free((__p)); })
+#else
+#  define myMalloc(size,FN) malloc(size)
+#  define myFree(size,FN)   free(size)
+#endif
+
+#endif /* GENLIB_H */
+@

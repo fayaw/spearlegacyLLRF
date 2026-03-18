@@ -1,0 +1,261 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  devnam.c
+
+  Manipulate device names and ID codes
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include <vxWorks.h>
+#include <limits.h>
+
+#include "resman.h"
+
+
+/* Add an entry to the circular linked list of devices. */
+void createDeviceEntry(mfrName_t **tail,
+	char *strDev, char *strMfr, char *strModel,
+	unsigned short la, unsigned short mf,
+	unsigned short slot, unsigned short node)
+{
+        mfrName_t *this = malloc(sizeof(mfrName_t));
+
+	assert(this);
+	strcpy(this->device, strDev);
+	strcpy(this->manufr, strMfr);
+	strcpy(this->model, strModel);
+	this->id_la = la;
+	this->code_mf = mf;
+	this->slot = slot;
+	this->node = node;
+	this->found = 0;
+        if (*tail == NULL) {
+                this->next = this;
+        } else {
+                this->next = (*tail)->next;
+                (*tail)->next = this;
+        }
+        *tail = this;
+}
+
+/* Read device names and IDs from a file. */
+void getDeviceNames(char *path, mfrName_t **tail)
+{
+   FILE *fpDevice;
+   char fn[PATH_MAX];
+   char strDev[16], strMfr[16], strModel[16];
+   unsigned short la, mf, slot, node;
+   strcpy( fn, path );
+   strcat( fn, "device.tbl" );
+   if( (fpDevice = fopen( fn, "r" )) == NULL )
+   {
+#ifdef WARN_VERBOSE
+      WARN "Could not open ");
+      perror( fn );
+#endif
+      return;
+   }
+   while( !feof(fpDevice) )
+   {
+      if(fscanf(fpDevice, "%[^,], %[^,], %[^,], %hx, %hx, %hx, %hx\n",
+         strDev, strMfr, strModel, &la, &mf, &slot, &node) == 7)
+      {
+         TrimSp(strDev);
+         TrimSp(strMfr);
+         TrimSp(strModel);
+         createDeviceEntry(tail, strDev, strMfr, strModel, la, mf, slot, node);
+      }
+      else
+      {
+         WARN "%s entries may be missing the GI Node field.\n", fn);
+      }  /* endif 7 fields */
+   }  /* endwhile !feof */
+
+   fclose( fpDevice );
+   return;
+}
+
+/* ALL SPECIFIED ITEMS MUST MATCH;  BLANK/NULL STRINGS OR -1'S IN
+ * spec's FIELDS MEAN THAT ONE DOESN'T HAVE TO MATCH THE VALUE IN
+ * THE device's CORRESPONDING FIELD.
+ */
+
+unsigned short deviceMatches( mfrName_t *spec, mfrName_t *device ) 
+{
+   /* If this device has already been found, don't use/
+//   if( spec->found == 1 )  // Removed - T Stabrawa 6/3/1999
+//      return 0;*/
+
+   /* IF MANUFACTURER'S NAME ISN'T BLANK, CHECK FOR MATCH */
+   if( spec->manufr[0] != '\0' || !isspace(spec->manufr[0]) )
+   {
+      if( strcmp( spec->manufr, device->manufr ) != 0 )
+      {
+/*/printf("deviceMatches:manuf name doesn't match\n");*/
+/*/printf("spec->manufr %s, device->manufr %s.\n",spec->manufr,device->manufr);*/
+         return( 0 );
+      }
+   }
+   /* IF MODEL NAME ISN'T BLANK, CHECK FOR MATCH */
+   if( spec->model[0] != '\0' || !isspace(spec->model[0]) )
+   {
+      if( strcmp( spec->model, device->model ) != 0 )
+      {
+/*/printf("deviceMatches:model name doesn't match\n");*/
+/*/printf("spec->model %s, device->model %s\n",spec->model,device->model);*/
+         return( 0 );
+      }
+   }
+   /* IF LOGICAL ADDRESS ISN'T 0xFFFF, CHECK FOR MATCH */
+   if( spec->id_la != 0xFFFF )
+   {
+      if( spec->id_la != device->id_la )
+      {
+/*/printf("deviceMatches:la doesn't match\n");*/
+/*/printf("spec->id_la %d, device->id_la %d\n",spec->id_la,device->id_la);*/
+         return( 0 );
+      }
+   }
+   /* IF MAINFRAME ISN'T 0xFFFF, CHECK FOR MATCH */
+   if( spec->code_mf != 0xFFFF )
+   {
+      if( spec->code_mf != device->code_mf )
+      {
+/*/printf("deviceMatches:mainframe doesn't match\n");*/
+/*/printf("spec->code_mf %d, device->code_mf %d\n",spec->code_mf,device->code_mf);*/
+         return( 0 );
+      }
+   }
+   /* IF SLOT ISN'T 0xFFFF, CHECK FOR MATCH */
+   if( spec->slot != 0xFFFF )
+   {
+      if( spec->slot != device->slot )
+      {
+/*/printf("deviceMatches:slot doesn't match\n");*/
+/*/printf("spec->slot %d, device->slot %d\n",spec->slot,device->slot);*/
+         return( 0 );
+      }
+   }
+   /* IF GI NODE ISN'T 0xFFFF, CHECK FOR MATCH */
+   if( spec->node != 0xFFFF )
+   {
+      if( spec->node != device->node )
+      {
+/*/printf("deviceMatches:gi node doesn't match\n");*/
+/*/printf("spec->node %d, device->node %d\n",spec->node,device->node);*/
+         return( 0 );
+      }
+   }
+
+/* ALL PASSED, SO RETURN 'TRUE'  // Added new meaning to true return
+                                   // T Stabrawa 6/3/1999
+                                   // See also deviceToName()*/
+   spec -> found += 1;		/*/ number of devices of this type found*/
+   return( spec -> found );
+/*/   spec -> found = 1;		/* NO   // orig line*/
+/*/   return( 1 );                         // orig line*/
+}
+
+int deviceToName( mfrName_t *list, mfrName_t *device, char *pn )
+{
+   mfrName_t *this = list->next;
+   short unsigned numDev;
+   char * append;
+
+   do
+   {
+      if( ( numDev = deviceMatches( this, device ) ) == 1 )
+      {
+         strcpy( pn, this->device );
+/*printf("deviceToName:TN_FOUND pn %s\n",pn);*/
+	 return( TN_FOUND );
+      }
+      else if ( numDev != 0 ) /*/ Added - T Stabrawa 6/3/1999*/
+      {                       /*/ See also deviceMatches()*/
+         strcpy( pn, this->device );
+         append = strchr( pn, ' ' );
+         if (append != 0)
+            sprintf( append, "_%u", numDev);
+         else /*/ base device name is full 12 characters*/
+            sprintf( pn, "%s_%d", this->device, numDev );
+/*printf("deviceToName:TN_FOUND pn %s\n",pn);*/
+	 return( TN_FOUND );
+      }
+      this = this->next;
+   } while (this != list->next);
+
+   /* Give each device a unique string using LA & node # (3/6/96) */
+   sprintf( pn, "DEVICE_%02X_%02X", device->id_la, device->node );
+/*printf("deviceToName:TN_DEFAULT pn %s\n",pn);*/
+   return( TN_DEFAULT );
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

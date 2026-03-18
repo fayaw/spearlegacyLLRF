@@ -1,0 +1,385 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.01.10.23.22.49;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.49;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  GVF - Gap Voltage Feed forward module
+**
+**  Abstract:
+**      Parameter and register definitions for the Gap Volatage Feed
+**      Forward module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II RF Project
+**
+**   History:
+**      August 21, 1996 - Created
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef P2RFGVFDEF_H
+#define P2RFGVFDEF_H
+
+#include <drvP2RfVxi.h>
+
+#define GVF_K_MAKE        P2RF_K_MAKE
+#define GVF_K_MODEL       0x105
+#define GVF_K_NAME       "Gap Voltage Feed Forward"
+#define GVF_K_DRAWING    "340-305"
+
+/* Amount of time GVF needs to complete software reset */
+#define GVF_K_RESETTMO   (1 * sysClkRateGet ())
+
+/* A16 space registers: */
+#define GVF_A_MANID       0x00          /* ID/LA register */
+#define GVF_I_MANID       STD2IDX (GVF_A_MANID)
+#define GVF_A_MODELNO     0x02          /* Device type register */
+#define GVF_I_MODELNO     STD2IDX (GVF_A_MODELNO)
+#define GVF_A_STATUS      0x04          /* Status register */
+#define GVF_I_STATUS      STD2IDX (GVF_A_STATUS)
+#define GVF_A_CONTROL     0x04          /* Control register */
+#define GVF_I_CONTROL     STD2IDX (GVF_A_CONTROL)
+#define GVF_A_OFFSET      0x06          /* A24 offset register */
+#define GVF_I_OFFSET      STD2IDX (GVF_A_OFFSET)
+#define GVF_A_ATTRIBUTE   0x08          /* Attribute register */
+#define GVF_I_ATTRIBUTE   STD2IDX (GVF_A_ATTRIBUTE)
+#define GVF_A_SERIALHI    0x0a          /* Serial number high register */
+#define GVF_I_SERIALHI    STD2IDX (GVF_A_SERIALHI)
+#define GVF_A_SERIALLO    0x0c          /* Serial number low register */
+#define GVF_I_SERIALLO    STD2IDX (GVF_A_SERIALLO)
+#define GVF_A_VERSION     0x0e          /* Version number register */
+#define GVF_I_VERSION     STD2IDX (GVF_A_VERSION)
+#define GVF_A_INTSTAT     0x1a          /* Interrupt status register */
+#define GVF_I_INTSTAT     STD2IDX (GVF_A_INTSTAT)
+#define GVF_A_INTCTRL     0x1c          /* Interrupt control register */
+#define GVF_I_INTCTRL     STD2IDX (GVF_A_INTCTRL)
+#define GVF_A_SUBCLASS    0x1e          /* Subclass register */
+#define GVF_I_SUBCLASS    STD2IDX (GVF_A_SUBCLASS)
+
+#define GVF_A_GFFCTRL     0x20          /* Gap Feed Forward Control register */
+#define GVF_I_GFFCTRL     STD2IDX (GVF_A_GFFCTRL)
+#define GVF_A_GFFSTAT0    0x22          /* Gap Feed Forward Status register 1 */
+#define GVF_I_GFFSTAT0    STD2IDX (GVF_A_GFFSTAT0)
+#define GVF_A_GFFSTAT1    0x24          /* Gap Feed Forward Status register 2 */
+#define GVF_I_GFFSTAT1    STD2IDX (GVF_A_GFFSTAT1)
+
+/* Control and Status Register */
+#define GVF_V_SFTRST      0
+#define GVF_M_SFTRST     (0x0001 << GVF_V_SFTRST)
+#define GVF_V_SYSFAILINH  1
+#define GVF_M_SYSFAILINH (0x0001 << GVF_V_SYSFAILINH)
+#define GVF_V_PASSED      2
+#define GVF_M_PASSED     (0x0001 << GVF_V_PASSED)
+#define GVF_V_READY       3
+#define GVF_M_READY      (0x0001 << GVF_V_READY)
+#define GVF_V_SFTINT      5
+#define GVF_M_SFTINT     (0x0001 << GVF_V_SFTINT)
+#define GVF_V_MODIDCOMPL  14
+#define GVF_M_MODIDCOMPL (0x0001 << GVF_V_MODIDCOMPL)
+#define GVF_V_A24A32      15
+#define GVF_M_A24A32     (0x0001 << GVF_V_A24A32)
+
+/* Interrupt Status and Control Registers */
+#define GVF_V_INTLA       0
+#define GVF_M_INTLA      (0x00ff << GVF_V_INTLA)
+#define GVF_V_INTLEVEL    3
+#define GVF_M_INTLEVEL   (0x0007 << GVF_V_INTLEVEL)
+#define GVF_V_INTMASK     7
+#define GVF_M_INTMASK    (0x0001 << GVF_V_INTMASK)
+#define GVF_V_SFTWERR     8
+#define GVF_M_SFTWERR    (0x0001 << GVF_V_SFTWERR)
+#define GVF_V_HDWERR      9
+#define GVF_M_HDWERR     (0x0001 << GVF_V_HDWERR)
+#define GVF_V_TAXIERR     10
+#define GVF_M_TAXIERR    (0x0001 << GVF_V_TAXIERR)
+#define GVF_V_TAXISYNC    11
+#define GVF_M_TAXISYNC   (0x0001 << GVF_V_TAXISYNC)
+#define GVF_V_LFBLINK     12
+#define GVF_M_LFBLINK    (0x0001 << GVF_V_LFBLINK)
+#define GVF_V_XFRFNEND    13
+#define GVF_M_XFRFNEND   (0x0001 << GVF_V_XFRFNEND)
+#define GVF_V_DSPMSG      14
+#define GVF_M_DSPMSG     (0x0001 << GVF_V_DSPMSG)
+#define GVF_V_SOFTWARE    15
+#define GVF_M_SOFTWARE   (0x0001 << GVF_V_SOFTWARE)
+
+/* Gap Feed Forward Control Register */
+#define GVF_V_MEMTRGSEL   0
+#define GVF_M_MEMTRGSEL  (0x0007 << GVF_V_MEMTRGSEL)
+#define GVF_V_OUTTRGSEL   3
+#define GVF_M_OUTTRGSEL  (0x0003 << GVF_V_OUTTRGSEL)
+#define GVF_V_MSGTODSP    5
+#define GVF_M_MSGTODSP   (0x0001 << GVF_V_MSGTODSP)
+#define GVF_V_DATAALIGN   6
+#define GVF_M_DATAALIGN  (0x0007 << GVF_V_DATAALIGN)
+#define GVF_V_EQCOEFSEL   9
+#define GVF_M_EQCOEFSEL  (0x0001 << GVF_V_EQCOEFSEL)
+#define GVF_V_STATE       10
+#define GVF_M_STATE      (0x000f << GVF_V_STATE)
+#define GVF_V_MEMTRGRST   14
+#define GVF_M_MEMTRGRST  (0x0001 << GVF_V_MEMTRGRST)
+#define GVF_V_NOTDSPRST   15
+#define GVF_M_NOTDSPRST  (0x0001 << GVF_V_NOTDSPRST)
+
+/* Possible states the STATE field can be in */
+#define GVF_K_LOAD        0x0
+#define GVF_K_LOADTF      0x1
+#define GVF_K_LOAD1       0x2
+#define GVF_K_TFL0G1      0x3
+#define GVF_K_RUNL1G1     0x4
+#define GVF_K_TEST1       0x5
+#define GVF_K_RUNL0G1     0x6
+#define GVF_K_TFL1G1      0x7
+#define GVF_K_LOAD2       0x8
+#define GVF_K_LOAD3       0x9
+#define GVF_K_LOAD4       0xa
+#define GVF_K_TFL0G0      0xb
+#define GVF_K_RUNL1G0     0xc
+#define GVF_K_TEST2       0xd
+#define GVF_K_RUNL0G0     0xe
+#define GVF_K_TFL1G0      0xf
+
+#define GVF_K_STATECNT    16
+
+/* Enumerate the states the module can be in */
+typedef enum {gvfLoad = 0, gvfRun, gvfTest, gvfInvalid = -1} GvfState;
+
+/* Gap Feed Forward Status Register 1 */
+#define GVF_V_IOBIT       0
+#define GVF_M_IOBIT      (0x00ff << GVF_V_IOBIT)
+#define GVF_V_MEMTRG      1
+#define GVF_M_MEMTRG     (0x0001 << GVF_V_MEMTRG) /* Overlap! */
+#define GVF_V_DSPVECT     8
+#define GVF_M_DSPVECT    (0x000f << GVF_V_DSPVECT)
+#define GVF_V_FIFOPAF     12
+#define GVF_M_FIFOPAF    (0x0001 << GVF_V_FIFOPAF)
+#define GVF_V_FIFOPAE     13
+#define GVF_M_FIFOPAE    (0x0001 << GVF_V_FIFOPAE)
+#define GVF_V_TFEND       14
+#define GVF_M_TFEND      (0x0001 << GVF_V_TFEND)
+
+/* Gap Feed Forward Status Register 2 */
+#define GVF_V_BUSY        0
+#define GVF_M_BUSY       (0x003f << GVF_V_BUSY)
+#define GVF_V_INVA16ADX   6
+#define GVF_M_INVA16ADX  (0x0001 << GVF_V_INVA16ADX)
+#define GVF_V_INVA24ADX   7
+#define GVF_M_INVA24ADX  (0x0001 << GVF_V_INVA24ADX)
+#define GVF_V_FIFOEF      8
+#define GVF_M_FIFOEF     (0x0001 << GVF_V_FIFOEF)
+#define GVF_V_FIFOFF      9
+#define GVF_M_FIFOFF     (0x0001 << GVF_V_FIFOFF)
+#define GVF_V_ADROFLW     10
+#define GVF_M_ADROFLW    (0x0001 << GVF_V_ADROFLW)
+#define GVF_V_FIROFLW     11
+#define GVF_M_FIROFLW    (0x0001 << GVF_V_FIROFLW)
+#define GVF_V_TAXIOFLW    12
+#define GVF_M_TAXIOFLW   (0x0001 << GVF_V_TAXIOFLW)
+#define GVF_V_NOFIBER     13
+#define GVF_M_NOFIBER    (0x0001 << GVF_V_NOFIBER)
+#define GVF_V_NOFIBLNK    13
+#define GVF_M_NOFIBLNK   (0x0001 << GVF_V_NOFIBLNK)
+#define GVF_V_MSGFRMDSP   14
+#define GVF_M_MSGFRMDSP  (0x0001 << GVF_V_MSGFRMDSP)
+#define GVF_V_GENBPTRG    15
+#define GVF_M_GENBPTRG   (0x0001 << GVF_V_GENBPTRG)
+
+/* A24 space registers: */
+
+/* DSP Memory */
+#define GVF_A_DSPMEM      0x0000
+#define GVF_I_DSPMEM      EXT2IDX (GVF_A_DSPMEM)
+#define GVF_K_DSPTBLID    "GVF DSP constants"
+
+#define GVF_K_EQTAPS      32
+
+/* The following are GVF DSP algorithm dependent */
+#define GVF_A_IREF        0x7fc4
+#define GVF_I_IREF        EXT2IDX (GVF_A_IREF)
+#define GVF_A_QREF        0x7fc6
+#define GVF_I_QREF        EXT2IDX (GVF_A_QREF)
+#define GVF_A_AMPREF      0x7fc8
+#define GVF_I_AMPREF      EXT2IDX (GVF_A_AMPREF)
+#define GVF_A_PHSREF      0x7fca
+#define GVF_I_PHSREF      EXT2IDX (GVF_A_PHSREF)
+#define GVF_A_AVEPHS      0x7fcc
+#define GVF_I_AVEPHS      EXT2IDX (GVF_A_AVEPHS)
+
+#define GVF_V_REF         4
+#define GVF_M_REF         (0x0fff << GVF_V_REF)
+
+/* I don't like the following in here since it must be included in the
+|  DSP code as well.  However, how do you ensure that the two versions
+|  remain up to date with one another without including some sort of
+|  common header file?  Where should it live?
+*/
+#define CMD_K_NOOP       0x0000         /* No operation command */
+#define CMD_K_READY      0x0001         /* DSP is ready for action */
+#define CMD_K_TEST       0x0002         /* For testing */
+#define CMD_K_ERROR      0x0003         /* DSP had an error condition */
+#define CMD_K_LDTBL      0x0004         /* Load coefficient tables */
+#define CMD_K_SVDATA     0x0005         /* DSP wants ERAM data saved */
+#define CMD_K_APHASE	 0x0006		/* Save average phase	*/
+#define CMD_K_LDREF      0x0007		/* Load ref tables */
+#define CMD_K_UREF       0x0008		/* Update ref tables */
+#define CMD_K_NFUNC      0x0009		/* For new function */
+#define CMD_K_DONE       0xffff         /* Sent when done */
+
+#define DSP_K_COMBLKID   0x0002         /* Communications block ID      */
+#define DSP_K_COMVERS    0x0002         /* Communications block version */
+
+/* Usage definitions */
+#define STT_K_ARGCNT          8         /* Number of arguments for Status */
+
+/* Status definitions */
+#define STT_NONE         0x0000         /* Status uninitialized           */
+#define STT_OKAY         0xa500         /* dsp working                    */
+#define STT_UNINIINT     0x5a00         /* Spurious interrupt             */
+#define STT_DATARDY      0xa501         /* data ready for reading in ERAM */
+#define STT_ERRPIO       0xa503         /* Error in PIO                   */
+#define STT_ERRINT       0xa504         /* error interrupt                */
+#define STT_ERRXRAM      0xa505         /* error ext. ram                 */
+#define STT_ERRIRAM      0xa506         /* error internal ram             */
+#define STT_ENDOFJOB     0xa508         /* correct end of job             */
+#define STT_INVCPUMSG    0xa509         /* Invalid CPU message received   */
+#define STT_MISUPDATE    0xa50a         /* Missed update or meassge   	  */
+#define STT_WTREF        0xa50b         /* Wait for reference update   	  */
+#define STT_WRNGTERM     0xa50c         /* Wrong termination of the progr */
+#define STT_INT3RCVD     0xa5a5         /* Int3 received                  */
+
+#define DATA_TO_WR       0xa502         /* dsp works, data to write       */
+#define STT_NOTWORK      0xdead         /* dsp not begin to run           */
+
+/* I don't like the previous defines.  They should be moved */
+
+/* COS and SIN Look-up tables */
+#define GVF_A_COSLUT      0x8000
+#define GVF_I_COSLUT      EXT2IDX (GVF_A_COSLUT)
+#define GVF_A_SINLUT      0xa000
+#define GVF_I_SINLUT      EXT2IDX (GVF_A_SINLUT)
+
+#define GVF_K_LUTSIZE     (4*1024)      /* shorts */
+#define GVF_K_AMPLITUDE   32752.0
+
+/* Equalizer Coefficients and Control Registers */
+#define GVF_K_EQCOEFFMIN -1.0
+#define GVF_K_EQCOEFFMAX  1.0
+#define GVF_K_EQCOEFIMIN  0x8000
+#define GVF_K_EQCOEFIMAX  0x7fff
+
+#define GVF_A_EQCOEF0     0xC000
+#define GVF_I_EQCOEF0     EXT2IDX (GVF_A_EQCOEF0)
+#define GVF_A_EQCOEF1     0xC040
+#define GVF_I_EQCOEF1     EXT2IDX (GVF_A_EQCOEF1)
+#define GVF_K_EQCOEFCNT   32
+#define GVF_A_EQCTRL      0xC100
+#define GVF_I_EQCTRL      EXT2IDX (GVF_A_EQCTRL)
+#ifdef REVERSE_BITS
+#  define GVF_K_EQCTRLVAL   0x0035
+#else
+#  define GVF_K_EQCTRLVAL   0xac00
+#endif
+#define GVF_K_EQCOEFID    "GVF Equalizer Coefficients"
+
+/* FIFO Control Registers */
+#define GVF_A_FIFOEMP     0xc200
+#define GVF_I_FIFOEMP     EXT2IDX (GVF_A_FIFOEMP)
+#define GVF_A_FIFOFULL    0xc202
+#define GVF_I_FIFOFULL    EXT2IDX (GVF_A_FIFOFULL)
+#define GVF_A_FIFODLY     0xc204
+#define GVF_I_FIFODLY     EXT2IDX (GVF_A_FIFODLY)
+
+#define GVF_K_TICK        101.89        /* nsec/FIFO tick */
+
+/* On board record memory register */
+#define GVF_A_RCRDMEM     0xc206
+#define GVF_I_RCRDMEM     EXT2IDX (GVF_A_RCRDMEM)
+#define GVF_K_RCRDMEMLEN  512           /* 1K blocks */
+#define GVF_K_RCRDMEMID   "GVF Record Memory"
+
+/* On board play memory register */
+#define GVF_A_PLAYMEM     0xc208
+#define GVF_I_PLAYMEM     EXT2IDX (GVF_A_PLAYMEM)
+#define GVF_K_PLAYMEMCNT  (512*1024)
+#define GVF_K_PLAYMEMID   "GVF Play Memory"
+
+#endif
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

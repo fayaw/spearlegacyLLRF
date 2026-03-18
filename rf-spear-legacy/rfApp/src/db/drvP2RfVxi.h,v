@@ -1,0 +1,246 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  P2RF - PEP-II RF code
+**
+**  Abstract:
+**      Header file for routines using the PEP-II RF driver
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Low Level RF Group
+**
+**  History:
+**      May 1, 1995 - Created
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+**----------------------------------------------------------------
+**  Mods: 
+**         30-Oct-2002,   Mike Laznovsky (LAZMO)
+**            added P2RF_RecordMemory_noPreRead() 
+**            added P2RF_RecordMemory_common()
+**----------------------------------------------------------------
+*/
+
+#ifndef DRVP2RFVXI_H
+#define DRVP2RFVXI_H
+
+#include <p2RfLib.h>
+#include <dbScan.h>
+
+#define P2RF_M_SPACE         0x80000000
+#define P2RF_M_A16           (~P2RF_M_SPACE)
+#define P2RF_M_A24           0xffffffff
+#define P2RF_K_A16           (P2RF_M_SPACE)
+#define P2RF_K_A24           (0)
+
+#define ADX2IDX(adx,spc)     (((adx) >> 1) | (spc))
+#define IDX2ADX(idx)         (((idx) & (~P2RF_M_SPACE)) << 1)
+
+#define STD2IDX(adx)         ADX2IDX(adx, P2RF_K_A16)
+#define EXT2IDX(adx)         ADX2IDX(adx, P2RF_K_A24)
+
+#define P2RF_K_CONTROLLER    -1         /* Current controller */
+#define P2RF_K_MAKE          0xf00      /* VXI_MAKE_SLAC */
+#define P2RF_K_MANUFACTURER  "SLAC PEP-II RF"
+
+#define P2RF_K_INTLEVEL      5          /* Interrupt level */
+
+#define P2RF_M_NOCONVERT    (1 <<  0)   /* No conversion */
+#define P2RF_M_REVERSEBITS  (1 <<  1)   /* Reverse bit order */
+
+#define P2RF_K_COLDSTART     0          /* Initialize hardware */
+#define P2RF_K_WARMSTART     1          /* Hardware is still valid after boot */
+
+#define P2RF_K_RESETTMO      1          /* Reset timeout in seconds */
+
+/* Conversion algorithms */
+#define P2RF_K_NOCONVERT     0          /* None */
+#define P2RF_K_REVERSEBITS   1          /* Reverse bit order */
+
+/* Module Control/Status register bit definitions */
+#define P2RF_V_SOFTRESET     0
+#define P2RF_M_SOFTRESET    (0x0001 << P2RF_V_SOFTRESET)
+#define P2RF_V_SYSFAILINH    1
+#define P2RF_M_SYSFAILINH   (0x0001 << P2RF_V_SYSFAILINH)
+#define P2RF_V_PASSED        2
+#define P2RF_M_PASSED       (0x0001 << P2RF_V_PASSED)
+#define P2RF_V_READY         3
+#define P2RF_M_READY        (0x0001 << P2RF_V_READY)
+#define P2RF_V_SFTINT        5
+#define P2RF_M_SFTINT       (0x0001 << P2RF_V_SFTINT)
+#define P2RF_V_MODIDCMPL     14
+#define P2RF_M_MODIDCMPL    (0x0001 << P2RF_V_MODIDCMPL)
+#define P2RF_V_A24A32        15
+#define P2RF_M_A24A32       (0x0001 << P2RF_V_A24A32)
+
+/* Module Interrupt Control register bit definitions */
+#define P2RF_V_HANDLEVEL     0          /* Handler priority level */
+#define P2RF_M_HANDLEVEL    (0x0007 << P2RF_V_HANDLEVEL)
+#define P2RF_V_INTLEVEL      3          /* Interrupt priority level */
+#define P2RF_M_INTLEVEL     (0x0007 << P2RF_V_INTLEVEL)
+#define P2RF_V_HANDMASK      6          /* Handler mask for all handlers */
+#define P2RF_M_HANDMASK     (0x0001 << P2RF_V_HANDMASK)
+#define P2RF_V_INTMASK       7          /* Interrupt mask for all interrupts */
+#define P2RF_M_INTMASK      (0x0001 << P2RF_V_INTMASK)
+#define P2RF_V_MODDEFD       8          /* Module defined */
+#define P2RF_M_MODDEFD      (0x00ff << P2RF_V_MODDEFD)
+
+/* DDF Definitions */
+#define DDF_I_F              0
+#define DDF_I_FC             1
+#define DDF_I_H1             2
+#define DDF_I_H2             3
+
+#define DDF_K_FNAME         "F_REGISTER"
+#define DDF_V_FTAPS          0
+#define DDF_M_FTAPS         (0x01ff << DDF_V_FTAPS)
+#define DDF_V_FDRATE         9
+#define DDF_M_FDRATE        (0x000f << DDF_V_FDRATE)
+#define DDF_V_FESYM          13
+#define DDF_M_FESYM         (0x0001 << DDF_V_FESYM)
+#define DDF_V_FBYP           14
+#define DDF_M_FBYP          (0x0001 << DDF_V_FBYP)
+#define DDF_V_F0AD           15
+#define DDF_M_F0AD          (0x0001 << DDF_V_F0AD)
+
+#define DDF_K_FCNAME        "FC_REGISTER"
+#define DDF_V_FCLOW          0
+#define DDF_M_FCLOW         (0x000f << DDF_V_FCLOW)
+#define DDF_V_FCHIGH         4
+#define DDF_M_FCHIGH        (0xffff << DDF_V_FCHIGH)
+
+#define DDF_K_H1NAME        "H_REGISTER1"
+#define DDF_V_HDRATE         0
+#define DDF_M_HDRATE        (0x03ff << DDF_V_HDRATE)
+#define DDF_V_HBYP           10
+#define DDF_M_HBYP          (0x0001 << DDF_V_HBYP)
+#define DDF_V_FCLA           11
+#define DDF_M_FCLA          (0x0001 << DDF_V_FCLA)
+#define DDF_V_FDIS           12
+#define DDF_M_FDIS          (0x0001 << DDF_V_FDIS)
+
+#define DDF_K_H2NAME        "H_REGISTER2"
+#define DDF_V_STAGES         0
+#define DDF_M_STAGES        (0x0007 << DDF_V_STAGES)
+#define DDF_V_GROWTH         3
+#define DDF_M_GROWTH        (0x003f << DDF_V_GROWTH)
+
+#define DSP_A_ERAM       0x8000         /* Image of external RAM for linker */
+#define DSP_K_ESIZE      0x4000		/* 0x2000 = 8k, 0x4000 = 16k        */
+#define DSP_A_ETOP       (DSP_A_ERAM + DSP_K_ESIZE - 1)
+
+/* Forward references */
+Status  P2RF_RegisterModule (int, int, int, int, int, char *, char *,
+                             void (*) (void *, unsigned short), void *,
+                             void (*) (void *), void *, void **);
+Status  P2RF_RegisterClient (void   *);
+Status  P2RF_IntEnable      (void);
+Status  P2RF_IntDisable     (void);
+Status  P2RF_ModIntEnable   (void *);
+Status  P2RF_ModIntDisable  (void *);
+Status  P2RF_GetModuleLa    (unsigned int, unsigned int, unsigned int *);
+void    P2RF_ResetModule    (void *);
+void    P2RF_ReadVme        (void *, int, unsigned short *);
+void    P2RF_WriteVme       (void *, int, unsigned short);
+Status  P2RF_LoadConsts     (void *, short *, int, int);
+Status  P2RF_ReadConstsFile (void *, char *, char *, int, short *, char *, 
+                             int, int);
+Status  P2RF_LoadCoefs      (void *, float *, int, int, P2RfCvtBlk *);
+Status  P2RF_ReadCoefFile   (void *, char *, char *, int, float *, char *, int);
+Status  P2RF_LoadDdf        (void *, int, int, P2RfDdf *);
+Status  P2RF_ReadDdfFile    (void *, char *, char *, P2RfDdf *, char *, int);
+Status  P2RF_CopyMemory     (void *, int, P2RfBufDsc *);
+Status  P2RF_RecordMemory   (void *, char *, int, int, char *,
+                             int *, char *, int);
+Status  P2RF_RecordMemory_noPreRead (void*, char*, int, int, char*,
+                             int*, char*, int);
+Status  P2RF_RecordMemory_common    (void*, char*, int, int, char*, 
+                             int*, char*, int, int);
+Status  P2RF_LoadDsp        (void *, int, char *, int, char *, int);
+Status  P2RF_LoadTblFile    (void *, char *, int, char *, int,
+                             int *, char *, int);
+Status  P2RF_DspFindComBlk  (void *, volatile void **);
+Status  P2RF_SaveDspMemory  (void *, int, int, int, char *, char *, int);
+Status  P2RF_LoadRegFile    (void *, char *, char *, int, int, char *, int);
+
+#endif
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

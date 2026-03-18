@@ -1,0 +1,321 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.2
+date	2007.03.07.16.28.41;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.40;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.40;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Modified by W. Ross, SLAC, to fix '0' degree output for +/- 90 degree
+> angle (X=0, Y!=0).  Added one instruction.
+@
+text
+@/********************* The routine _atan follows ************************
+Name:           _atan
+		[atan.s - atan.o]
+
+Synopsis:       Implements the arc-tangent function of Y/X. Y and X are
+		two signed, 16 bit numbers.
+
+Performance and Memory Requirement:
+
+	Instruction cycles:     138 with BMU device [Call & return included].
+				143 with non BMU device [Call & return incl.].
+
+	Code:                   71 words of ROM with BMU device.
+				76 words of ROM with non BMU device.
+
+	Coefficients:           6 Words of RAM.
+	Local variables:        3 RAM locations.
+	Static variables:       0
+	Registers used: x, y, p, a0, a1, r0 [not modified], r2,
+			auc is initialized to 0.
+	Accuracy:       accurate to 3 or 4 decimal digits.
+
+Description:
+
+	Algorithm: atan(Y/X) = PI/2 + c1.D + c3.D^3 + ... + c9.D^9
+			     = PI/2 + (...((c9.D^2 + c7).D^2 + ...).D^2 + c1).D
+	Where D = [|Y| - |X|]/[|Y| + |X|].
+
+	BEGIN _atan
+	    Save sign of X and Y respectively in local and local+1.
+	    Get absolute value of X and Y.
+	    Determine |Y|+|X| and |Y|-|X|.
+	    Save the sign of the division D: sgn(D) = sgn(|Y|-|X|).
+	    Calculate D = [|Y|-|X|]/[Y|+|X|].
+	    Restore sign of D and save D in Q14 format.
+	    Calculate atan(|Y|/|X|), using D [See atan routine].
+	    Get atan(Y/X) according to sign of X and Y.
+	    Result in a0h in Q13 format.
+	END _atan.
+
+Inputs:         Y and X are signed, 16-bit numbers. Y is passed in a0h
+		and X in a1h.
+
+Outputs:        The return value is a signed, 16-bit number passed in a0h
+		in Q13 format in the range -pi to pi.
+
+Routines Called:        None.
+
+Originally written by Yves Nicoue (June 1992) using RAM only. Modified to
+use both RAM and EROM and also revised comments. This routine shows 16%
+improvement in instruction cycles and 29% improvement in memory requirements
+when BMU device is used and compared to the performance on DSP16A.
+Work by Aristos Nkansa-Kissi (Summer 1994).
+*************************************************************************
+3/31/06
+Modified by W. Ross, SLAC, to fix '0' degree output for +/- 90 degree
+angle (X=0, Y!=0).  Added one instruction.
+*************************************************************************
+Modified by L.Sapozhnikov, SLAC in order to change range from -pi/2 to pi/2
+to range from -pi to pi. Result of this change
+	Instruction cycles:     138 with BMU device [Call & return included].
+
+	Code:                   77 words of ROM with BMU device.
+*************************************************************************
+Modified by R. Claus, SLAC 6/28/97.  Fixed bug causing incorrect sign to be
+returned when Y and/or X is zero.  Also optimized above mod.
+Outstanding problem:  if Y and/or X is 0x8000 incorrect results are obtained.
+
+	Instruction cycles:     133-135 with BMU device [Call & return included].
+                                142-144 with non BMU device [Call & return incl.].
+
+	Code:                   >77 words of ROM with BMU device.
+                                ??? words of ROM with non BMU device.
+*************************************************************************/
+/*                                                                      */
+#include <1610.h>             /* Include the DSP16xx device             */
+			      /* header file.                           */
+
+.global _atan                 /* Declare routine as global.             */
+.rsect ".ram"                 /* Assemble in RAM.                       */
+
+_atan:  auc = 0x0             /* Clear low part of accumulators.        */
+	r2 = _atanc           /* Pointer to coefficients.               */
+        r0 = _atanl           /* Pointer to local storage               */
+			*r0++ = a0      /* Save sign of Y in local.     */
+			*r0++ = a1      /* Save sign of X in local+1.   */
+	a0 = a0
+	if mi a0 = -a0                  /* Get absolute values of Y     */
+	a1 = a1
+	if mi a1 = -a1                  /* and X.                       */
+	y = a1
+	a1 = a0 + y                     /* a1 = |Y| + |X| > 0.          */
+	a0 = a0 - y                     /* a0 = |Y| - |X|.              */
+
+		 /******* Now, calculate D. *******/
+
+			*r0 = a0        /* Sign of division in local+2. */
+	a0 = a0
+	if mi a0 = -a0                  /* Make a0 = abs(|Y| - |X|).    */
+	a1 = a1 >> 1                    /* |Y|+|X| is shifted to the    */
+	y = a1                          /* right by 1 bit to avoid      */
+	yl = a1l                        /* saturation in the division.  */
+	a0 = a0 >> 1
+	do 15 {
+		a0 = a0 << 1            /* The quotient is being cons-  */
+		a1 = a0 - y             /* tructed in a0l and the rema- */
+		if pl a0 = a1 + 1       /* inder (shifted n times) is   */
+	       }                        /* in a0h, y = |Y| + |X|.       */
+
+/**   The #ifdef command is used to differentiate between devices with
+      a BMU, from those without a BMU in the following lines of code.  **/
+
+#ifdef _BMU_
+	   /**     For BMU device.     **/
+
+	a0 = extractz(a0,0x0f00)        /* Take the quotient.           */
+#else
+	   /**   For non BMU device    **/
+
+	a1 = 0x0
+	a1l = 0x7fff
+	a0 = a1&a0
+#endif
+	a0 = a0 << 1
+			a1 = *r0        /* Take sign of D in local + 2. */
+	a1 = a1
+	if mi a0 = -a0                  /* Restore sign of D.           */
+
+/**   The #ifdef command is used to differentiate between devices with
+      a BMU, from those without a BMU in the following lines of code.  **/
+
+#ifdef _BMU_
+	   /**     For BMU device.     **/
+
+	a0 = a0 << 14                  /* Make a0 Q14 format.           */
+#else
+	a0 = a0 << 8                   /* Make                          */
+	a0 = a0 << 4                   /* a0                            */
+	a0 = a0 << 1                   /* Q14                           */
+	a0 = a0 << 1                   /* format.                       */
+#endif
+			*r0 = a0        /* In local+2, there is D (Q14).*/
+	x = a0
+	y = a0
+	p =  x * y                      /* y = x = a0h = D (Q12).       */
+	a0 = p
+
+/**   The #ifdef command is used to differentiate between devices with
+      a BMU, from those without a BMU in the following lines of code.  **/
+
+#ifdef _BMU_
+	a0 = a0 << 2                   /* a0 = D^2 in Q14.              */
+#else
+	a0 = a0 << 1                   /* a0 = D^2                      */
+	a0 = a0 << 1                   /* in Q14 format.                */
+#endif
+
+	x = a0                          /* x contains D^2 in Q14 format.*/
+
+			y = *r2++       /* Get c9 in Q14 format.        */
+	p = x * y                       /* Qx-2                         */
+	a0 = p          y = *r2++       /* c9.D^2 in Q12 format, Get c7.*/
+	a0 = a0 + y
+	y = a0                          /* c9.D^2 (Q12) + c7 (Q14).     */
+
+	p = x * y                       /* Q12  format for c7.D^2.      */
+	a0 = p          y = *r2++       /* Get c5 in Q14 format.        */
+
+/**   The #ifdef command is used to differentiate between devices with
+      a BMU, from those without a BMU in the following lines of code.  **/
+
+#ifdef _BMU_
+	a0 = a0 << 2                   /* Add 2 to format. c7.D^2=Q14   */
+#else
+	a0 = a0 << 1                   /* Add 2 to format. c7.D^2=Q14   */
+	a0 = a0 << 1                   /* without using BMU.            */
+#endif
+
+	a0 = a0 + y                     /* c9.D^4 (Q12) + c7.D^2 (Q14)  */
+	y = a0                          /* + c5 (Q14)                   */
+
+	p = x * y                       /* Qx-2: Q12 for c5.D^2         */
+	a0 = p          y = *r2++       /* Get c3 in Q14 format         */
+	a0 = a0 + y                     /* c9.D^6 (Q10) + c7.D^4 (Q12)  */
+	y = a0                          /* + c5.D^2 (Q12) + c3 (Q14)    */
+
+	p = x * y                       /* Qx-2: Q12 for c3.D^2         */
+	a0 = p          y = *r2++       /* Get c1 in Q14 format         */
+
+/**   The #ifdef command is used to differentiate between devices with
+      a BMU, from those without a BMU in the following lines of code.  **/
+
+#ifdef _BMU_
+	a0 = a0 << 2                    /* Add 2 to format: Q14=c3.D^2. */
+#else
+	a0 = a0 << 1                   /* Add 2 to format: Q14=c3.D^2.  */
+	a0 = a0 << 1                   /* without using BMU.            */
+#endif
+
+	a0 = a0 + y     x = *r0--       /* Get D in Q14 format          */
+	y = a0                          /* Now, r0 = local+1 (on X)     */
+
+	p = x * y                       /* Qx-2: Q12 for c1.D           */
+	a0 = p          y = *r2++       /* c9.D^9 (Q8) +...+ c1.D (Q12) */
+					/* Get c0 = PI/4 in Q13 format. */
+	a0 = a0 << 1                    /* a0 in Q13 format.            */
+	a0 = a0 + y                     /* atan(|Y|/|X|) in Q13 format. */
+
+			y = *r0--       /* Recall sign of X.            */
+	a1 = y		x = *r0         /* Test sign of X, recall sign of Y */
+        if eq goto _atanX0              /* if X=0 go handle special case    */
+        if pl goto _atan2               /* if X>0 range is [-pi/2, pi/2[    */
+        a0 = a0h - 0x6488               /* else [-pi,-pi/2] or [pi/2,pi[    */
+                                        /*   subtract pi/2 (q13)            */
+_atan2:	p = x * y
+        a1 = p
+	if le a0 = -a0                  /* If X.Y<=0 change sign.       */
+					/* Result in a0h in Q13 format. */
+	return
+
+_atanX0:                                /* Case X is zero               */
+        a1 = x                          /* Test Y (this did not set flags */
+	a1 = a1                         /* 3/30/06: This does set flags */
+        if eq goto _atanY0              /* if Y=0 go handle special case*/
+        if mi a0 = -a0                  /* if Y<0 change sign of result */
+					/* Result in a0h in Q13 format. */
+        return
+
+_atanY0:                                /* Case X and Y both zero       */
+        a0 = a0-a0                      /* Return zero as result        */
+					/* Result in a0h in Q13 format. */
+        return
+
+
+.rsect ".ram"                           /* Begin assembly in RAM.       */
+
+/* Coefficients: c1 =  0.999866                                         */
+/*               c3 = -0.3302995                                        */
+/*               c5 =  0.180141                                         */
+/*               c7 = -0.085133                                         */
+/*               c9 =  0.0208535                                        */
+
+_atanc: int  0.33365616!14              /* c9 * 2^4                     */
+	int -0.340532!14                /* c7 * 2^2                     */
+	int  0.720564!14                /* c5 * 2^2                     */
+	int -0.3302995!14               /* c3                           */
+	int  0.999866!14                /* c1                           */
+	int  0.785398163!13             /* c0 = PI/4                    */
+
+_atanl: 3*int                           /* 3 RAM locations for _atan.   */
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d55 4
+d222 2
+a223 1
+        a1 = x                          /* Test Y */
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

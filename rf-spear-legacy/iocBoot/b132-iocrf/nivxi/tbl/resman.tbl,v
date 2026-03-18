@@ -1,0 +1,65 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_0:1.1.1.1
+	R_epics_3_14_6_spear0:1.1.1.1
+	R_3_14_1_spear1:1.1.1.1
+	R1:1.1.1.1
+	B1:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	98.04.10.16.33.53;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	98.04.10.16.33.53;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@0,ROOT        ,ffff,0,0,ff6,Nat'l Insts ,f7,VXIcpu-030  ,2,0,3,ffffffff,0,0,0,40,200,0,ffff,8448,1,3
+1,Clock Module,0,0,2,f00,user custom ,106,Clock Module,1,fffe,0,220800,100,0,0,0,0,0,ffff,ffff,11,3
+2,Gap FdFwd   ,0,0,6,f00,user custom ,105,Gap FdFwd   ,1,fffe,0,210000,10000,0,0,0,0,0,ffff,ffff,11,3
+3,DEVICE_3    ,0,0,7,f00,user custom ,103,            ,1,fffe,0,200000,10000,0,0,0,0,0,ffff,ffff,11,3
+4,Comb Filter ,0,0,8,f00,user custom ,101,Comb Filter ,1,fffe,0,220400,400,0,0,0,0,0,ffff,ffff,11,3
+5,Comb Filter_2,0,0,9,f00,user custom ,101,Comb Filter ,1,fffe,0,220000,400,0,0,0,0,0,ffff,ffff,11,3
+6,IQ Detector ,0,0,a,f00,user custom ,102,IQ Detector ,1,fffe,0,220900,100,0,0,0,0,0,ffff,ffff,11,3
+@
+
+
+1.1.1.1
+log
+@RF IOC startup files.
+@
+text
+@@

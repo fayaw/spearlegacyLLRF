@@ -1,0 +1,157 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.08;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.08;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 1
+The length of the symbol table is: 13
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+
+The number of name info structs is : 90
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	IdL3	!	17	1	:100	"X
+#	IdL3	!	17	1	:101	"Y
+$	IdL3	!	65	3	:102	"Z
+%	IdL3	!	66	12	:103	"[
+&	IdL3	!	17	1	:104	"\
+'	IdL3	!	17	1	:105	"]
+(	IdL3	!	65	3	:106	"^
+)	IdL3	!	65	3	:107	"_
+*	IdL3	!	68	12	:108	"`
++	IdL3	!	17	1	:109	"a
+,	IdL3	!	17	1	:110	"b
+-	IdL3	!	20	2	:111	"c
+.	IdL3	!	21	4	:112	"d
+/	IdL3	!	21	4	:113	"e
+0	IdL3	!	22	3	:114	"f
+1	IdL3	!	22	3	:115	"g
+2	IdL3	!	23	3	:116	"h
+3	IdL3	!	23	3	:117	"i
+4	IdL3	!	24	3	:118	"j
+5	IdL3	!	24	3	:119	"k
+6	IdL3	!	25	3	:120	"l
+7	IdL3	!	25	3	:121	"m
+8	IdL3	!	26	3	:122	"n
+9	IdL3	!	26	3	:123	"o
+:	IdL3	!	27	3	:124	"p
+;	IdL3	!	27	3	:125	"q
+<	IdL3	!	32	17	:58	".
+=	IdL3	!	39	14	:59	"/
+>	IdL3	!	39	14	:60	"0
+?	IdL3	!	39	3	:61	"1
+@@	IdL3	!	17	1	:62	"2
+A	IdL3	!	17	1	:63	"3
+B	IdL3	!	17	1	:64	"4
+C	IdL3	!	39	3	:65	"5
+D	IdL3	!	39	3	:66	"6
+E	IdL3	!	41	13	:67	"7
+F	IdL3	!	41	23	:68	"8
+G	IdL3	!	41	32	:69	"9
+H	IdL3	!	41	3	:70	":
+I	IdL3	!	17	1	:71	";
+J	IdL3	!	17	1	:72	"<
+K	IdL3	!	41	3	:73	"=
+L	IdL3	!	41	3	:74	">
+M	IdL3	!	44	12	:75	"?
+N	IdL3	!	17	1	:76	"@@
+O	IdL3	!	17	1	:77	"A
+P	IdL3	!	47	10	:78	"B
+Q	IdL3	!	47	3	:79	"C
+R	IdL3	!	17	1	:80	"D
+S	IdL3	!	17	1	:81	"E
+T	IdL3	!	47	3	:82	"F
+U	IdL3	!	47	3	:83	"G
+V	IdL3	!	50	12	:84	"H
+W	IdL3	!	17	1	:85	"I
+X	IdL3	!	17	1	:86	"J
+Y	IdL3	!	17	1	:87	"K
+Z	IdL3	!	17	1	:88	"L
+[	IdL3	!	17	1	:89	"M
+\	IdL3	!	17	1	:90	"N
+]	IdL3	!	17	1	:91	"O
+^	IdL3	!	17	1	:92	"P
+_	IdL3	!	59	3	:93	"Q
+`	IdL3	!	60	12	:94	"R
+a	IdL3	!	17	1	:95	"S
+b	IdL3	!	17	1	:96	"T
+c	IdL3	!	59	3	:97	"U
+d	IdL3	!	59	3	:98	"V
+e	IdL3	!	62	12	:99	"W
+f	IdLL	!	4	2	CLOCK	m
+g	IdL#	!	17	51	CLR_INTS	v
+h	IdL#	!	17	1	CONTROL	"-
+i	IdLL	!	9	2	DS	r
+j	IdLM	!	11	2	DTACK	s
+k	IdL#	!	17	28	DTACK~	y
+l	IdLM	!	12	2	ENA_VECT	t
+m	IdL#	!	17	34	ENA_VECT~	x
+n	IdLL	!	8	2	IACKIN	q
+o	IdLM	!	13	2	IACKOUT	u
+p	IdL#	!	17	43	IACKOUT~	w
+q	IdLL	!	6	2	INT_MATCH	o
+r	IdLL	!	7	2	INT_REQ	p
+s	IdL3	!	20	2	POWER_UP	{
+t	IdLL	!	5	2	RESET	n
+u	IdL3	!	21	4	ST0	}
+v	IdL3	!	22	3	ST1	"!
+w	IdL3	!	23	3	ST2	"#
+x	IdL3	!	24	3	ST3	"%
+y	IdL3	!	25	3	ST4	"'
+z	IdL3	!	26	3	ST5	")
+{	IdL3	!	27	3	ST6	"+
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

@@ -1,0 +1,440 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	RF-SPEAR-R0-0-0:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1
+	RF-3-13-10:1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2006.01.25.23.54.20;	author lazmo;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial import of COMB-2 (Cf2) support.
+@
+text
+@/*
+** ++
+**
+**  Facility:  CF2 - Comb Filter Module (Version 2)
+**
+**  Abstract:
+**      Parameter and register definitions for the Comb module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II RF Project
+**
+**   History:
+**      March 2005  - Modified for COMB 2 by M. Laznovsky (LAZMO)
+**      May 09, 1996 - Created (as p2RfCfmDef.h)
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef P2RFCF2DEF_H
+#define P2RFCF2DEF_H
+
+#include <drvP2RfVxi.h>
+
+#define CF2_K_MAKE        P2RF_K_MAKE
+#define CF2_K_MODEL       0x101
+#define CF2_K_NAME       "Comb/Group Delay Equalizer V2"
+#define CF2_K_DRAWING    "..."
+
+
+/**************************************************************/
+/**************** register address definitions ****************/
+/**************************************************************/
+
+/* A16 registers */
+
+#define CF2_A_MANID        0x00          /* ID/LA register */
+#define CF2_A_MODELNO      0x02          /* Device type register */
+#define CF2_A_STATUS       0x04          /* Status register */
+#define CF2_A_CONTROL      0x04          /* Control register */
+#define CF2_A_OFFSET       0x06          /* A24 offset register */
+#define CF2_A_ATTRIBUTE    0x08          /* Attribute register */
+#define CF2_A_SERIALHI     0x0a          /* Serial number high register */
+#define CF2_A_SERIALLO     0x0c          /* Serial number low register */
+#define CF2_A_VERSION      0x0e          /* Version number register */
+
+#define CF2_A_INTSTAT      0x1a          /* Interrupt status register */
+#define CF2_A_INTCTRL      0x1c          /* Interrupt control register */
+#define CF2_A_SUBCLASS     0x1e          /* Subclass register */
+#define CF2_A_COMBCTRL     0x20          /* Comb control register */
+#define CF2_A_COMBSTAT     0x22          /* Comb status register */
+
+#define CF2_A_DATAMONSEL   0x24          /* Data Monitor Select */
+#define CF2_A_ONETURNDELAY 0x26	         /* Less-Than-One-Turn Delay */
+
+#define CF2_A_EC_SERNOTRDY 0x28          /* Error Count: Serial Port Not Ready */
+#define CF2_A_EC_SERRXBADY 0x2A          /* Error Count: Serial Rx Bad Symbol */
+
+#define CF2_A_EC_ICMBOVFL  0x2C          /* Error Count: I-Comb Overflow */
+#define CF2_A_EC_IEQUOVFL  0x2E          /* Error Count: I-Equalizer Overflow */
+#define CF2_A_EC_IADCOVFL  0x30          /* Error Count: I-ADC Overflow */
+#define CF2_A_EC_QCMBOVFL  0x32          /* Error Count: Q-Comb Overflow */
+#define CF2_A_EC_QEQUOVFL  0x34          /* Error Count: Q-Equalizer Overflow */
+#define CF2_A_EC_QADCOVFL  0x36          /* Error Count: Q-ADC Overflow */
+
+#define CF2_A_JTAGCTL      0x38          /* JTAG Control Port */
+#define CF2_A_JTAGDATA     0x3A          /* JTAG Data Port */
+
+#define CF2_I_MANID        STD2IDX (CF2_A_MANID)
+#define CF2_I_MODELNO      STD2IDX (CF2_A_MODELNO)
+#define CF2_I_STATUS       STD2IDX (CF2_A_STATUS)
+#define CF2_I_CONTROL      STD2IDX (CF2_A_CONTROL)
+#define CF2_I_OFFSET       STD2IDX (CF2_A_OFFSET)
+#define CF2_I_ATTRIBUTE    STD2IDX (CF2_A_ATTRIBUTE)
+#define CF2_I_SERIALHI     STD2IDX (CF2_A_SERIALHI)
+#define CF2_I_SERIALLO     STD2IDX (CF2_A_SERIALLO)
+#define CF2_I_VERSION      STD2IDX (CF2_A_VERSION)
+#define CF2_I_INTSTAT      STD2IDX (CF2_A_INTSTAT)
+#define CF2_I_INTCTRL      STD2IDX (CF2_A_INTCTRL)
+#define CF2_I_SUBCLASS     STD2IDX (CF2_A_SUBCLASS)
+#define CF2_I_COMBCTRL     STD2IDX (CF2_A_COMBCTRL)
+#define CF2_I_COMBSTAT     STD2IDX (CF2_A_COMBSTAT)
+#define CF2_I_DATAMONSEL   STD2IDX (CF2_A_DATAMONSEL)
+#define CF2_I_ONETURNDELAY STD2IDX (CF2_A_ONETURNDELAY)
+#define CF2_I_EC_SERNOTRDY STD2IDX (CF2_A_EC_SERNOTRDY)
+#define CF2_I_EC_SERRXBADY STD2IDX (CF2_A_EC_SERRXBADY)
+#define CF2_I_EC_ICMBOVFL  STD2IDX (CF2_A_EC_ICMBOVFL)
+#define CF2_I_EC_IEQUOVFL  STD2IDX (CF2_A_EC_IEQUOVFL)
+#define CF2_I_EC_IADCOVFL  STD2IDX (CF2_A_EC_IADCOVFL)
+#define CF2_I_EC_QCMBOVFL  STD2IDX (CF2_A_EC_QCMBOVFL)
+#define CF2_I_EC_QEQUOVFL  STD2IDX (CF2_A_EC_QEQUOVFL)
+#define CF2_I_EC_QADCOVFL  STD2IDX (CF2_A_EC_QADCOVFL)
+#define CF2_I_JTAGCTL      STD2IDX (CF2_A_JTAGCTL)
+#define CF2_I_JTAGDATA     STD2IDX (CF2_A_JTAGDATA)
+
+
+/**********************************************************/
+/**************** register bit definitions ****************/
+/**********************************************************/
+
+/* VXI Control and Status Register */
+
+#define CF2_V_SFTRST      0		/* Software Reset */
+#define CF2_V_SYSFAILINH  1		/* SYSFAIL Inhibit */
+#define CF2_V_PASSED      2		/* PASSED (always 1) */
+#define CF2_V_READY       3		/* Module Ready */
+#define CF2_V_SFTINT      5		/* Software Interrupt */
+#define CF2_V_DDCRCOEF    7		/* Digital DC Removal Coefficient Select */
+#define CF2_V_RSIODCM     9		/* Reset SIO/DCM */
+#define CF2_V_DSIO        10		/* Disable Serial I/O */
+#define CF2_V_DSIOLOOP    11		/* Disable Serial I/O Loopback */
+
+#define CF2_V_ANATYPE     12		/* Analog Input Type... covers next 2 bits */
+#define CF2_V_DANALOOP    12		/* Disable Analog Loopback */
+#define CF2_V_DFPIQIC     13		/* Disable Front Panel I/Q Input Connectors */
+
+#define CF2_V_MODIDCOMPL  14		/* VXI MODID (inverted) */
+#define CF2_V_A24A32      15		/* A24 Enable */
+
+#define CF2_M_SFTRST      (0x0001 << CF2_V_SFTRST)
+#define CF2_M_SYSFAILINH  (0x0001 << CF2_V_SYSFAILINH)
+#define CF2_M_PASSED      (0x0001 << CF2_V_PASSED)
+#define CF2_M_READY       (0x0001 << CF2_V_READY)
+#define CF2_M_SFTINT      (0x0001 << CF2_V_SFTINT)
+#define CF2_M_DDCRCOEF    (0x0003 << CF2_V_DDCRCOEF)
+#define CF2_M_RSIODCM     (0x0001 << CF2_V_RSIODCM)
+#define CF2_M_DSIO        (0x0001 << CF2_V_DSIO)
+#define CF2_M_DSIOLOOP    (0x0001 << CF2_V_DSIOLOOP)
+
+#define CF2_M_ANATYPE     (0x0003 << CF2_V_ANATYPE)
+#define CF2_M_DANALOOP    (0x0001 << CF2_V_DANALOOP)
+#define CF2_M_DFPIQIC     (0x0001 << CF2_V_DFPIQIC)
+
+#define CF2_M_MODIDCOMPL  (0x0001 << CF2_V_MODIDCOMPL)
+#define CF2_M_A24A32      (0x0001 << CF2_V_A24A32)
+
+
+/* Interrupt Status and Control Registers */
+
+#define CF2_V_INTLA       0	/* covers all 8 bits */
+#define CF2_V_INTLEVEL    3	/* ... */
+#define CF2_V_INTMASK     7	/* ... */
+
+#define CF2_V_IALLMSK     8
+#define CF2_V_ICMBOVFLMSK 8
+#define CF2_V_IEQUOVFLMSK 9
+#define CF2_V_IADCOVFLMSK 10
+#define CF2_V_INVADX      11
+#define CF2_V_QCMBOVFLMSK 12
+#define CF2_V_QEQUOVFLMSK 13
+#define CF2_V_QADCOVFLMSK 14
+#define CF2_V_SOFTWARE    15
+
+#define CF2_M_INTLA       (0x00FF << CF2_V_INTLA)	/* covers all 8 bits */
+#define CF2_M_INTLEVEL    (0x0007 << CF2_V_INTLEVEL)	/* ... */
+#define CF2_M_INTMASK     (0x0001 << CF2_V_INTMASK)	/* ... */
+
+#define CF2_M_IALLMSK     (0x00FF << CF2_V_IALLMSK)
+#define CF2_M_ICMBOVFLMSK (0x0001 << CF2_V_ICMBOVFLMSK)
+#define CF2_M_IEQUOVFLMSK (0x0001 << CF2_V_IEQUOVFLMSK)
+#define CF2_M_IADCOVFLMSK (0x0001 << CF2_V_IADCOVFLMSK)
+#define CF2_M_INVADX      (0x0001 << CF2_V_INVADX)
+#define CF2_M_QCMBOVFLMSK (0x0001 << CF2_V_QCMBOVFLMSK)
+#define CF2_M_QEQUOVFLMSK (0x0001 << CF2_V_QEQUOVFLMSK)
+#define CF2_M_QADCOVFLMSK (0x0001 << CF2_V_QADCOVFLMSK)
+#define CF2_M_SOFTWARE    (0x0001 << CF2_V_SOFTWARE)
+
+
+/* Comb Module Control Register (A16:0x20) */
+
+#define CF2_V_HISRUNSEL   0		/* Select History Buffer Run-Reset Line */
+#define CF2_V_EDDCR       3		/* Enable Digital DC Removal */
+#define CF2_V_EDIG4       4		/* Enable Digital Input Gain 4 */
+#define CF2_V_SGP         5		/* Shift Gain Position (Pre-DAC Data Alignment) */
+#define CF2_V_EQUBNKSEL   9		/* Equalizer Coefficient Bank Select */
+#define CF2_V_CMBBNKSEL   10		/* Comb Coefficient Bank Select */
+#define CF2_V_RSPR        11		/* Reset Serial Port Receiver */
+#define CF2_V_STATE       12		/* Module Operating Mode - load/run/single/idle */
+#define CF2_V_HISRECENB   14		/* History Buffer Record Enable */
+#define CF2_V_DIARECENB   15		/* Diagnostic Memory Record Enable */
+
+#define CF2_M_HISRUNSEL   (0x0007 << CF2_V_HISRUNSEL)
+#define CF2_M_EDDCR       (0x0001 << CF2_V_EDDCR)
+#define CF2_M_EDIG4       (0x0001 << CF2_V_EDIG4)
+#define CF2_M_SGP         (0x000F << CF2_V_SGP)
+#define CF2_M_EQUBNKSEL   (0x0001 << CF2_V_EQUBNKSEL)
+#define CF2_M_CMBBNKSEL   (0x0001 << CF2_V_CMBBNKSEL)
+#define CF2_M_RSPR        (0x0001 << CF2_V_RSPR)
+#define CF2_M_STATE       (0x0003 << CF2_V_STATE)
+#define CF2_M_HISRECENB   (0x0001 << CF2_V_HISRECENB)
+#define CF2_M_DIARECENB   (0x0001 << CF2_V_DIARECENB)
+
+/* Possible states the STATE field can be in */
+#define CF2_K_LOAD        0
+#define CF2_K_RUN         1
+#define CF2_K_SS          2
+#define CF2_K_IDLE        3
+
+#define CF2_K_STATECNT    4
+
+typedef enum {				/* enumerate module states */
+  cf2Invalid = -1,
+  cf2Load, cf2Run, cf2Single, cf2Idle
+} Cf2State;
+
+
+/* Comb Module Status Register (A16:0x22) */
+
+#define CF2_V_BPFAULT     0
+#define CF2_V_HISNOTREC   1
+#define CF2_V_DIANOTREC   2
+#define CF2_V_10MHZNOT    3
+#define CF2_V_40MHZNOT    4
+#define CF2_V_DSPNOT      5
+#define CF2_V_SERIONOT    6
+#define CF2_V_SERRXINV    7
+#define CF2_V_SERRXERR    8
+#define CF2_V_SERRXUNL    9
+#define CF2_V_ICMBOVF     10
+#define CF2_V_IEQUOVF     11
+#define CF2_V_IADCOVF     12
+#define CF2_V_QCMBOVF     13
+#define CF2_V_QEQUOVF     14
+#define CF2_V_QADCOVF     15
+
+#define CF2_M_BPFAULT     (0x0001 << CF2_V_BPFAULT     )
+#define CF2_M_HISNOTREC   (0x0001 << CF2_V_HISNOTREC   )
+#define CF2_M_DIANOTREC   (0x0001 << CF2_V_DIANOTREC   )
+#define CF2_M_10MHZNOT    (0x0001 << CF2_V_10MHZNOT    )
+#define CF2_M_40MHZNOT    (0x0001 << CF2_V_40MHZNOT    )
+#define CF2_M_DSPNOT      (0x0001 << CF2_V_DSPNOT      )
+#define CF2_M_SERIONOT    (0x0001 << CF2_V_SERIONOT    )
+#define CF2_M_SERRXINV    (0x0001 << CF2_V_SERRXINV    )
+#define CF2_M_SERRXERR    (0x0001 << CF2_V_SERRXERR    )
+#define CF2_M_SERRXUNL    (0x0001 << CF2_V_SERRXUNL    )
+#define CF2_M_ICMBOVF     (0x0001 << CF2_V_ICMBOVF     )
+#define CF2_M_IEQUOVF     (0x0001 << CF2_V_IEQUOVF     )
+#define CF2_M_IADCOVF     (0x0001 << CF2_V_IADCOVF     )
+#define CF2_M_QCMBOVF     (0x0001 << CF2_V_QCMBOVF     )
+#define CF2_M_QEQUOVF     (0x0001 << CF2_V_QEQUOVF     )
+#define CF2_M_QADCOVF     (0x0001 << CF2_V_QADCOVF     )
+
+/* Data Monitor Select Register (A16:0x24) */
+
+#define CF2_V_IQMONSRC     0
+#define CF2_V_SCOPESYNC    4
+#define CF2_V_MON1SRC      8
+#define CF2_V_MON2SRC      12
+
+#define CF2_M_IQMONSRC     (0x000F << CF2_V_IQMONSRC)
+#define CF2_M_SCOPESYNC    (0x000F << CF2_V_SCOPESYNC)
+#define CF2_M_MON1SRC      (0x000F << CF2_V_MON1SRC)
+#define CF2_M_MON2SRC      (0x000F << CF2_V_MON2SRC)
+
+
+/* Less-Than-One-Turn Delay Register (A16:0x26) */
+
+#define CF2_V_FIFOALL      0 /* covers bits 0-10 */
+#define CF2_V_INTBNKSEL    0
+#define CF2_V_FIFO40MHZ    2
+#define CF2_V_FIFO10MHZ    4
+
+#define CF2_V_INTFILENB    15
+
+#define CF2_M_FIFOALL      (0x07FF << CF2_V_FIFOALL)  /* bits 0-10 */
+#define CF2_M_INTBNKSEL    (0x0003 << CF2_V_INTBNKSEL)
+#define CF2_M_FIFO40MHZ    (0x0003 << CF2_V_FIFO40MHZ)
+#define CF2_M_FIFO10MHZ    (0x007F << CF2_V_FIFO10MHZ)
+
+#define CF2_M_INTFILENB    (0x0001 << CF2_V_INTFILENB)
+
+/****************************************************************/
+/****************************************************************/
+
+/*================================================================
+ * banks & banks o' coefficients, in memory order
+ * ... also 2x3 R/W ports thrown in
+ *================================================================
+ */
+
+/* A24 address */
+
+#define CF2_A_EQUCOEF_II_BANK0 0x0000	/* equalizer */
+#define CF2_A_EQUCOEF_II_BANK1 0x0080
+#define CF2_A_EQUCOEF_QI_BANK0 0x0100
+#define CF2_A_EQUCOEF_QI_BANK1 0x0180
+
+#define CF2_A_CMBCOEF_II_BANK0 0x0200	/* comb */
+#define CF2_A_CMBCOEF_II_BANK1 0x0210
+#define CF2_A_CMBCOEF_QI_BANK0 0x0220
+#define CF2_A_CMBCOEF_QI_BANK1 0x0230
+
+#define CF2_A_IHIST_RW         0x0260	/* I channel history mem r/w port */
+#define CF2_A_IPLAY_RW         0x0262	/* I channel play mem r/w port */
+#define CF2_A_MON1_DIAG_RW     0x0264	/* monitor 1 diagnostic mem r/w port */
+
+#define CF2_A_INTCOEF_I_BANK0  0x0280	/* interpolation */
+#define CF2_A_INTCOEF_I_BANK1  0x02A0
+#define CF2_A_INTCOEF_I_BANK2  0x02C0
+#define CF2_A_INTCOEF_I_BANK3  0x02E0
+
+#define CF2_A_EQUCOEF_QQ_BANK0 0x0400	/* equalizer */
+#define CF2_A_EQUCOEF_QQ_BANK1 0x0480
+#define CF2_A_EQUCOEF_IQ_BANK0 0x0500
+#define CF2_A_EQUCOEF_IQ_BANK1 0x0580
+
+#define CF2_A_CMBCOEF_QQ_BANK0 0x0600	/* comb */
+#define CF2_A_CMBCOEF_QQ_BANK1 0x0610
+#define CF2_A_CMBCOEF_IQ_BANK0 0x0620
+#define CF2_A_CMBCOEF_IQ_BANK1 0x0630
+
+#define CF2_A_QHIST_RW         0x0660	/* Q channel history mem r/w port */
+#define CF2_A_QPLAY_RW         0x0662	/* Q channel play mem r/w port */
+#define CF2_A_MON2_DIAG_RW     0x0664	/* monitor 2 diagnostic mem r/w port */
+
+#define CF2_A_INTCOEF_Q_BANK0  0x0680	/* interpolation */
+#define CF2_A_INTCOEF_Q_BANK1  0x06A0
+#define CF2_A_INTCOEF_Q_BANK2  0x06C0
+#define CF2_A_INTCOEF_Q_BANK3  0x06E0
+
+/* mapped address */
+
+#define CF2_I_EQUCOEF_II_BANK0 EXT2IDX(CF2_A_EQUCOEF_II_BANK0)
+#define CF2_I_EQUCOEF_II_BANK1 EXT2IDX(CF2_A_EQUCOEF_II_BANK1)
+#define CF2_I_EQUCOEF_QI_BANK0 EXT2IDX(CF2_A_EQUCOEF_QI_BANK0)
+#define CF2_I_EQUCOEF_QI_BANK1 EXT2IDX(CF2_A_EQUCOEF_QI_BANK1)
+
+#define CF2_I_CMBCOEF_II_BANK0 EXT2IDX(CF2_A_CMBCOEF_II_BANK0)
+#define CF2_I_CMBCOEF_II_BANK1 EXT2IDX(CF2_A_CMBCOEF_II_BANK1)
+#define CF2_I_CMBCOEF_QI_BANK0 EXT2IDX(CF2_A_CMBCOEF_QI_BANK0)
+#define CF2_I_CMBCOEF_QI_BANK1 EXT2IDX(CF2_A_CMBCOEF_QI_BANK1)
+
+#define CF2_I_IHIST_RW         EXT2IDX(CF2_A_IHIST_RW        )
+#define CF2_I_IPLAY_RW         EXT2IDX(CF2_A_IPLAY_RW        )
+#define CF2_I_MON1_DIAG_RW     EXT2IDX(CF2_A_MON1_DIAG_RW    )
+
+#define CF2_I_INTCOEF_I_BANK0  EXT2IDX(CF2_A_INTCOEF_I_BANK0 )
+#define CF2_I_INTCOEF_I_BANK1  EXT2IDX(CF2_A_INTCOEF_I_BANK1 )
+#define CF2_I_INTCOEF_I_BANK2  EXT2IDX(CF2_A_INTCOEF_I_BANK2 )
+#define CF2_I_INTCOEF_I_BANK3  EXT2IDX(CF2_A_INTCOEF_I_BANK3 )
+
+#define CF2_I_EQUCOEF_QQ_BANK0 EXT2IDX(CF2_A_EQUCOEF_QQ_BANK0)
+#define CF2_I_EQUCOEF_QQ_BANK1 EXT2IDX(CF2_A_EQUCOEF_QQ_BANK1)
+#define CF2_I_EQUCOEF_IQ_BANK0 EXT2IDX(CF2_A_EQUCOEF_IQ_BANK0)
+#define CF2_I_EQUCOEF_IQ_BANK1 EXT2IDX(CF2_A_EQUCOEF_IQ_BANK1)
+
+#define CF2_I_CMBCOEF_QQ_BANK0 EXT2IDX(CF2_A_CMBCOEF_QQ_BANK0)
+#define CF2_I_CMBCOEF_QQ_BANK1 EXT2IDX(CF2_A_CMBCOEF_QQ_BANK1)
+#define CF2_I_CMBCOEF_IQ_BANK0 EXT2IDX(CF2_A_CMBCOEF_IQ_BANK0)
+#define CF2_I_CMBCOEF_IQ_BANK1 EXT2IDX(CF2_A_CMBCOEF_IQ_BANK1)
+
+#define CF2_I_QHIST_RW         EXT2IDX(CF2_A_QHIST_RW        )
+#define CF2_I_QPLAY_RW         EXT2IDX(CF2_A_QPLAY_RW        )
+#define CF2_I_MON2_DIAG_RW     EXT2IDX(CF2_A_MON2_DIAG_RW    )
+
+#define CF2_I_INTCOEF_Q_BANK0  EXT2IDX(CF2_A_INTCOEF_Q_BANK0 )
+#define CF2_I_INTCOEF_Q_BANK1  EXT2IDX(CF2_A_INTCOEF_Q_BANK1 )
+#define CF2_I_INTCOEF_Q_BANK2  EXT2IDX(CF2_A_INTCOEF_Q_BANK2 )
+#define CF2_I_INTCOEF_Q_BANK3  EXT2IDX(CF2_A_INTCOEF_Q_BANK3 )
+
+/****************************************************************/
+
+/* ID strings for save files, padded to ODD length (+1 for later newline) for word alignment */
+
+#define CF2_K_CMB_ID    "CF2 Comb Coefficients"
+#define CF2_K_EQU_ID    "CF2 Equalizer Coefficients "
+#define CF2_K_INT_ID    "CF2 Interpolator Coefficients"
+
+/* these don't get newlines... */
+#define CF2_K_HIST_ID   "CF2 History "
+#define CF2_K_PLAY_ID   "CF2 Play Memory "
+
+/* max file sizes */
+#define CF2_K_HISTMEMLEN  512	/* 512K words [units = 1K words] */
+#define CF2_K_PLAYMEMLEN 2048	/* 2K words [units = words] */
+
+/****************************************************************/
+
+#endif /* P2RFCF2DEF_H */
+@

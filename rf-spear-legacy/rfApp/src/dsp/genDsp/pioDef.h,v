@@ -1,0 +1,145 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.01.10.23.22.40;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.40;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP - DSP code
+**
+**  Abstract:
+**      Definitions of DSP 1610 Parallel I/O parameters.
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Low Level RF Project
+**
+**   History:
+**      January 10, 1994 - Created
+**    4-9-96 - modified to adapt to specifics of gap feed forward board by
+**    L. Sapozhnikov
+**      October 10, 1996 - R. Claus: Separated board specific from general defs
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef PIODEF_H
+#define PIODEF_H
+
+/* Define PIO control register fields */
+#define PIO_V_STATUS          0         /* PIO status bits */
+#define PIO_V_INT             5         /* PIO interrupt bits */
+#define PIO_V_SC             10         /* Status/control mode */
+#define PIO_V_PIDS           11         /* PIDS pin is an input,0 or output,1 */
+#define PIO_V_PODS           12         /* PODS pin is an input,0 or output,1 */
+#define PIO_V_STROBE         13         /* Strobe width of PIDS and PODS */
+#define PIO_V_IBF            15         /* IBF interrupt status bit */
+
+#define PIO_M_STATUS         (0x001f << PIO_V_STATUS)
+#define PIO_M_INT            (0x001f << PIO_V_INT   )
+#define PIO_M_SC             (0x0001 << PIO_V_SC    )
+#define PIO_M_PIDS           (0x0001 << PIO_V_PIDS  )
+#define PIO_M_PODS           (0x0001 << PIO_V_PODS  )
+#define PIO_M_STROBE         (0x0003 << PIO_V_STROBE)
+#define PIO_M_IBF            (0x0001 << PIO_V_IBF   )
+
+#define PIO_V_INT0STT         0         /* INT0 status bit */
+#define PIO_V_PODSSTT         1         /* PODS status bit */
+#define PIO_V_PIDSSTT         2         /* PIDS status bit */
+#define PIO_V_OBESTT          3         /* OBE  status bit (SIO) */
+#define PIO_V_IBFSTT          4         /* IBF  status bit (SIO) */
+
+#define PIO_M_INT0STT        (1 << PIO_V_INT0STT)
+#define PIO_M_PODSSTT        (1 << PIO_V_PODSSTT)
+#define PIO_M_PIDSSTT        (1 << PIO_V_PIDSSTT)
+#define PIO_M_OBESTT         (1 << PIO_V_OBESTT )
+#define PIO_M_IBFSTT         (1 << PIO_V_IBFSTT )
+
+#define PIO_V_INT0INT         0         /* INT0 interrupt enable */
+#define PIO_V_PODSINT         1         /* PODS interrupt enable */
+#define PIO_V_PIDSINT         2         /* PIDS interrupt enable */
+#define PIO_V_OBEINT          3         /* OBE  interrupt enable (SIO) */
+#define PIO_V_IBFINT          4         /* IBF  interrupt enable (SIO) */
+
+#define PIO_M_INT0INT        (1 << PIO_V_INT0INT)
+#define PIO_M_PODSINT        (1 << PIO_V_PODSINT)
+#define PIO_M_PIDSINT        (1 << PIO_V_PIDSINT)
+#define PIO_M_OBEINT         (1 << PIO_V_OBEINT )
+#define PIO_M_IBFINT         (1 << PIO_V_IBFINT )
+
+#endif
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

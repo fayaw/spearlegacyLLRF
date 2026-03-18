@@ -1,0 +1,213 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.56.46;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.56.46;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@-- MAX+plus II Compiler Fit File      
+-- Version 8.1 9/12/97                
+-- Compiled: 08/03/99 09:52:06        
+
+-- Copyright (C) 1991-1997 Altera Corporation
+-- Any megafunction design, and related net list (encrypted or decrypted),
+-- support information, device programming or simulation file, and any other
+-- associated documentation or information provided by Altera or a partner
+-- under Altera's Megafunction Partnership Program may be used only to
+-- program PLD devices (but not masked PLD devices) from Altera.  Any other
+-- use of such megafunction design, net list, support information, device
+-- programming or simulation file, or any other related documentation or
+-- information is prohibited for any other purpose, including, but not
+-- limited to modification, reverse engineering, de-compiling, or use with
+-- any other silicon devices, unless such use is explicitly licensed under
+-- a separate agreement with Altera or a megafunction partner.  Title to
+-- the intellectual property, including patents, copyrights, trademarks,
+-- trade secrets, or maskworks, embodied in any such megafunction design,
+-- net list, support information, device programming or simulation file, or
+-- any other related documentation or information provided by Altera or a
+-- megafunction partner, remains with Altera, the megafunction partner, or
+-- their respective licensors.  No other licenses, including any licenses
+-- needed under any third party's intellectual property, are provided herein.
+
+CHIP "bdir_buf"
+BEGIN
+
+    DEVICE = "EPM5130QC";
+
+    "IACFAIL_A"                    : INPUT_PIN  = 72     ;
+    "IACFAIL_B"                    : INPUT_PIN  = 71     ;
+    "IBBSY_A"                      : INPUT_PIN  = 70     ;
+    "IBBSY_B"                      : INPUT_PIN  = 67     ;
+    "IBERR_A"                      : INPUT_PIN  = 66     ;
+    "IBERR_B"                      : INPUT_PIN  = 65     ;
+    "IBR0_A"                       : INPUT_PIN  = 64     ;
+    "IBR0_B"                       : INPUT_PIN  = 61     ;
+    "IBR1_A"                       : INPUT_PIN  = 60     ;
+    "IBR1_B"                       : INPUT_PIN  = 59     ;
+    "IBR2_A"                       : INPUT_PIN  = 22     ;
+    "IBR2_B"                       : INPUT_PIN  = 21     ;
+    "IBR3_A"                       : INPUT_PIN  = 20     ;
+    "IBR3_B"                       : INPUT_PIN  = 17     ;
+    "IDTACK_A"                     : INPUT_PIN  = 15     ;
+    "IDTACK_B"                     : INPUT_PIN  = 14     ;
+    "IIACK_A"                      : INPUT_PIN  = 11     ;
+    "IIACK_B"                      : INPUT_PIN  = 10     ;
+    "IIRQ1_A"                      : INPUT_PIN  = 9      ;
+    "IIRQ1_B"                      : INPUT_PIN  = 8      ; -- LC8
+    "IIRQ2_A"                      : INPUT_PIN  = 7      ; -- LC7
+    "IIRQ2_B"                      : INPUT_PIN  = 6      ; -- LC6
+    "IIRQ3_A"                      : INPUT_PIN  = 5      ; -- LC5
+    "IIRQ3_B"                      : INPUT_PIN  = 4      ; -- LC4
+    "IIRQ4_A"                      : INPUT_PIN  = 3      ; -- LC3
+    "IIRQ4_B"                      : INPUT_PIN  = 2      ; -- LC2
+    "IIRQ5_A"                      : INPUT_PIN  = 1      ; -- LC1
+    "IIRQ5_B"                      : INPUT_PIN  = 30     ; -- LC24
+    "IIRQ6_A"                      : INPUT_PIN  = 29     ; -- LC23
+    "IIRQ6_B"                      : INPUT_PIN  = 28     ; -- LC22
+    "IIRQ7_A"                      : INPUT_PIN  = 40     ; -- LC40
+    "IIRQ7_B"                      : INPUT_PIN  = 39     ; -- LC39
+    "ISYSFAIL_A"                   : INPUT_PIN  = 36     ; -- LC38
+    "ISYSFAIL_B"                   : INPUT_PIN  = 50     ; -- LC56
+    "ISYSRESET_A"                  : INPUT_PIN  = 49     ; -- LC55
+    "ISYSRESET_B"                  : INPUT_PIN  = 48     ; -- LC54
+    "RESET_L"                      : INPUT_PIN  = 16     ;
+    "SYSFAIL_INH"                  : INPUT_PIN  = 52     ; -- LC66
+    "20M_CLK"                      : INPUT_PIN  = 51     ; -- LC65
+    "A_BBSY_AST"                   : OUTPUT_PIN = 100    ; -- LC120
+    "OACFAIL_A"                    : OUTPUT_PIN = 99     ; -- LC119
+    "OACFAIL_B"                    : OUTPUT_PIN = 98     ; -- LC118
+    "OBBSY_A"                      : OUTPUT_PIN = 97     ; -- LC117
+    "OBBSY_B"                      : OUTPUT_PIN = 96     ; -- LC116
+    "OBERR_A"                      : OUTPUT_PIN = 58     ; -- LC72
+    "OBERR_B"                      : OUTPUT_PIN = 95     ; -- LC115
+    "OBR0_A"                       : OUTPUT_PIN = 90     ; -- LC104
+    "OBR0_B"                       : OUTPUT_PIN = 89     ; -- LC103
+    "OBR1_A"                       : OUTPUT_PIN = 86     ; -- LC102
+    "OBR1_B"                       : OUTPUT_PIN = 85     ; -- LC101
+    "OBR2_A"                       : OUTPUT_PIN = 80     ; -- LC88
+    "OBR2_B"                       : OUTPUT_PIN = 79     ; -- LC87
+    "OBR3_A"                       : OUTPUT_PIN = 78     ; -- LC86
+    "OBR3_B"                       : OUTPUT_PIN = 77     ; -- LC85
+    "ODTACK_A"                     : OUTPUT_PIN = 76     ; -- LC84
+    "ODTACK_B"                     : OUTPUT_PIN = 84     ; -- LC100
+    "OIACK_A"                      : OUTPUT_PIN = 57     ; -- LC71
+    "OIACK_B"                      : OUTPUT_PIN = 56     ; -- LC70
+    "OIRQ1_A"                      : OUTPUT_PIN = 55     ; -- LC69
+    "OIRQ1_B"                      : OUTPUT_PIN = 54     ; -- LC68
+    "OIRQ2_A"                      : OUTPUT_PIN = 47     ; -- LC53
+    "OIRQ2_B"                      : OUTPUT_PIN = 46     ; -- LC52
+    "OIRQ3_A"                      : OUTPUT_PIN = 35     ; -- LC37
+    "OIRQ3_B"                      : OUTPUT_PIN = 34     ; -- LC36
+    "OIRQ4_A"                      : OUTPUT_PIN = 27     ; -- LC21
+    "OIRQ4_B"                      : OUTPUT_PIN = 26     ; -- LC20
+    "OIRQ5_A"                      : OUTPUT_PIN = 25     ; -- LC19
+    "OIRQ5_B"                      : OUTPUT_PIN = 33     ; -- LC35
+    "OIRQ6_A"                      : OUTPUT_PIN = 32     ; -- LC34
+    "OIRQ6_B"                      : OUTPUT_PIN = 31     ; -- LC33
+    "OIRQ7_A"                      : OUTPUT_PIN = 24     ; -- LC18
+    "OIRQ7_B"                      : OUTPUT_PIN = 45     ; -- LC51
+    "OSYSFAIL_A"                   : OUTPUT_PIN = 53     ; -- LC67
+    "OSYSFAIL_B"                   : OUTPUT_PIN = 23     ; -- LC17
+    "OSYSRESET_A"                  : OUTPUT_PIN = 42     ; -- LC50
+    "OSYSRESET_B"                  : OUTPUT_PIN = 41     ; -- LC49
+    "|buff_with_clk:154|:1"        : LOCATION   = LC96   ;
+    "|buff_with_clk:154|:9"        : LOCATION   = LC95   ;
+    "|buff_with_clk:157|:1"        : LOCATION   = LC64   ;
+    "|buff_with_clk:157|:9"        : LOCATION   = LC63   ;
+    "|buff_with_clk:158|:1"        : LOCATION   = LC112  ;
+    "|buff_with_clk:158|:9"        : LOCATION   = LC111  ;
+    "|buff_with_clk:160|:1"        : LOCATION   = LC110  ;
+    "|buff_with_clk:160|:9"        : LOCATION   = LC109  ;
+    "|buff_with_clk:162|:1"        : LOCATION   = LC62   ;
+    "|buff_with_clk:162|:9"        : LOCATION   = LC32   ;
+    "|buff_with_clk:163|:1"        : LOCATION   = LC48   ;
+    "|buff_with_clk:163|:9"        : LOCATION   = LC47   ;
+    "|buff_with_clk:164|:1"        : LOCATION   = LC46   ;
+    "|buff_with_clk:164|:9"        : LOCATION   = LC31   ;
+    "|buff_with_clk:165|:1"        : LOCATION   = LC30   ;
+    "|buff_with_clk:165|:9"        : LOCATION   = LC29   ;
+    "|buff_with_clk:166|:1"        : LOCATION   = LC45   ;
+    "|buff_with_clk:166|:9"        : LOCATION   = LC44   ;
+    "|buff_with_clk:167|:1"        : LOCATION   = LC61   ;
+    "|buff_with_clk:167|:9"        : LOCATION   = LC60   ;
+    "|buff_with_clk:171|:1"        : LOCATION   = LC80   ;
+    "|buff_with_clk:171|:9"        : LOCATION   = LC79   ;
+    "|singbuf:23|:83"              : LOCATION   = LC108  ;
+    "|singbuf:23|:85"              : LOCATION   = LC59   ;
+    "|singbuf:23|:86"              : LOCATION   = LC128  ;  -- |singbuf:23|DIS_B
+    "|singbuf:23|:87"              : LOCATION   = LC127  ;  -- |singbuf:23|DIS_A
+    "|singbuf:33|:83"              : LOCATION   = LC126  ;
+    "|singbuf:33|:85"              : LOCATION   = LC125  ;
+    "|singbuf:33|:86"              : LOCATION   = LC124  ;  -- |singbuf:33|DIS_B
+    "|singbuf:33|:87"              : LOCATION   = LC123  ;  -- |singbuf:33|DIS_A
+    "|singbuf:93|:83"              : LOCATION   = LC107  ;
+    "|singbuf:93|:85"              : LOCATION   = LC106  ;
+    "|singbuf:93|:86"              : LOCATION   = LC105  ;  -- |singbuf:93|DIS_B
+    "|singbuf:93|:87"              : LOCATION   = LC99   ; -- PIN 83  -- |singbuf:93|DIS_A
+    "|singbuf:138|:83"             : LOCATION   = LC98   ; -- PIN 82
+    "|singbuf:138|:85"             : LOCATION   = LC78   ;
+    "|singbuf:138|:86"             : LOCATION   = LC77   ;  -- |singbuf:138|DIS_B
+    "|singbuf:138|:87"             : LOCATION   = LC76   ;  -- |singbuf:138|DIS_A
+    "|singbuf:151|:83"             : LOCATION   = LC58   ;
+    "|singbuf:151|:85"             : LOCATION   = LC57   ;
+    "|singbuf:151|:86"             : LOCATION   = LC56   ; -- PIN 50  -- |singbuf:151|DIS_B
+    "|singbuf:151|:87"             : LOCATION   = LC55   ; -- PIN 49  -- |singbuf:151|DIS_A
+    "|singbuf:175|:83"             : LOCATION   = LC122  ;
+    "|singbuf:175|:85"             : LOCATION   = LC121  ;
+    "|singbuf:175|:86"             : LOCATION   = LC114  ; -- PIN 92  -- |singbuf:175|DIS_B
+    "|singbuf:175|:87"             : LOCATION   = LC113  ; -- PIN 91  -- |singbuf:175|DIS_A
+    "|sysfail:147|:35"             : LOCATION   = LC75   ;
+    "|sysfail:147|:36"             : LOCATION   = LC74   ;
+    "|sysfail:147|:37"             : LOCATION   = LC73   ;
+    "|sysfail:147|:38"             : LOCATION   = LC66   ; -- PIN 52
+    "|sysfail:147|:47"             : LOCATION   = LC65   ; -- PIN 51
+
+END;
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

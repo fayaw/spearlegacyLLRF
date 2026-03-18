@@ -1,0 +1,139 @@
+head	1.6;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.6
+	RF-SPEAR-R0-3-1:1.6
+	RF-SPEAR-R0-3-0:1.6
+	RF-SPEAR-R0-2-0:1.6
+	RF-SPEAR-R0-1-0:1.6
+	RF-SPEAR-R0-0-3:1.6
+	RF-SPEAR-R0-0-2:1.6
+	RF-SPEAR-R0-0-1:1.6
+	RF-SPEAR-R0-0-0:1.6
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.5
+	RF-3-13-10:1.4.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.4
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.4
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.3;
+locks; strict;
+comment	@# @;
+
+
+1.6
+date	2012.09.18.19.10.20;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2011.12.07.00.30.03;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2009.09.16.22.38.09;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2009.01.15.01.12.58;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2008.05.06.19.22.45;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2008.04.23.15.54.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.6
+log
+@Move script to epics/app/spear/script.
+@
+text
+@TOP = ../..
+include $(TOP)/configure/CONFIG
+DIRS += dsp
+DIRS += base
+DIRS += diag
+DIRS += db
+DIRS += seq
+DIRS += rf
+include $(TOP)/configure/RULES_DIRS
+@
+
+
+1.5
+log
+@Makefiles in subdirectories are changed so that the check for solaris
+is no longer needed.  New subdirectories, base and rf, are added for
+3.14.11.
+@
+text
+@a2 2
+DIRS += script
+#ifeq ($(EPICS_HOST_ARCH),solaris-sparc-gnu)
+a8 1
+#endif
+@
+
+
+1.4
+log
+@Building the dsp directory so that the executables get installed.
+@
+text
+@d4 1
+a4 1
+ifeq ($(EPICS_HOST_ARCH),solaris-sparc-gnu)
+d6 1
+d10 2
+a11 1
+endif
+@
+
+
+1.3
+log
+@The dsp area can no longer be built.  The compiler doesn't work on solaris 10.
+@
+text
+@d5 1
+a5 1
+#DIRS += dsp
+@
+
+
+1.2
+log
+@Add the dsp directory.
+@
+text
+@d5 1
+a5 1
+DIRS += dsp
+@
+
+
+1.1
+log
+@For building all of the RF application.
+@
+text
+@a3 3
+# dsp must be built first (it has include files used by db).
+# However, it must be built separately since CONFIG_APP and 
+# CONFIG_APP.Dsp are not compatible.
+d5 1
+a5 1
+#DIRS += dsp
+@
+

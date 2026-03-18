@@ -1,0 +1,327 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.56.54;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.56.54;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Project Information                    c:\pl\v150pl\altera\buffer\bdir_buf.rpt
+
+MAX+plus II Compiler Report File
+Version 6.1 02/28/96
+Compiled: 05/30/96 06:48:14
+
+Copyright (c) 1996 by Altera Corporation.  All rights reserved.  This text
+contains proprietary, confidential information of Altera Corporation, and
+may be used, copied, and/or disclosed only pursuant to the terms of a
+valid software license agreement with Altera Corporation.  This copyright
+notice must be retained as part of this text at all times.
+
+
+
+***** Project compilation was successful
+
+
+
+
+** DEVICE SUMMARY **
+
+Chip/                     Input   Output   Bidir         Shareable
+POF       Device          Pins    Pins     Pins     LCs  Expanders  % Utilized
+
+bdir_buf  EPM5130QC        38       37       0      109     0           85 %
+
+User Pins:                 38       37       0  
+
+
+
+Project Information                    c:\pl\v150pl\altera\buffer\bdir_buf.rpt
+
+** PIN/LC/CHIP ASSIGNMENTS **
+
+                  Actual                  
+    User       Assignments                
+Assignments   (if different)     Node Name
+
+bdir_buf@@100                      A_BBSY_AST
+bdir_buf@@72                       IACFAIL_A
+bdir_buf@@71                       IACFAIL_B
+bdir_buf@@70                       IBBSY_A
+bdir_buf@@67                       IBBSY_B
+bdir_buf@@66                       IBERR_A
+bdir_buf@@65                       IBERR_B
+bdir_buf@@64                       IBR0_A
+bdir_buf@@61                       IBR0_B
+bdir_buf@@60                       IBR1_A
+bdir_buf@@59                       IBR1_B
+bdir_buf@@22                       IBR2_A
+bdir_buf@@21                       IBR2_B
+bdir_buf@@20                       IBR3_A
+bdir_buf@@17                       IBR3_B
+bdir_buf@@15                       IDTACK_A
+bdir_buf@@14                       IDTACK_B
+bdir_buf@@11                       IIACK_A
+bdir_buf@@10                       IIACK_B
+bdir_buf@@9                        IIRQ1_A
+bdir_buf@@8                        IIRQ1_B
+bdir_buf@@7                        IIRQ2_A
+bdir_buf@@6                        IIRQ2_B
+bdir_buf@@5                        IIRQ3_A
+bdir_buf@@4                        IIRQ3_B
+bdir_buf@@3                        IIRQ4_A
+bdir_buf@@2                        IIRQ4_B
+bdir_buf@@1                        IIRQ5_A
+bdir_buf@@30                       IIRQ5_B
+bdir_buf@@29                       IIRQ6_A
+bdir_buf@@28                       IIRQ6_B
+bdir_buf@@40                       IIRQ7_A
+bdir_buf@@39                       IIRQ7_B
+bdir_buf@@36                       ISYSFAIL_A
+bdir_buf@@50                       ISYSFAIL_B
+bdir_buf@@49                       ISYSRESET_A
+bdir_buf@@48                       ISYSRESET_B
+bdir_buf@@99                       OACFAIL_A
+bdir_buf@@98                       OACFAIL_B
+bdir_buf@@97                       OBBSY_A
+bdir_buf@@96                       OBBSY_B
+bdir_buf@@58                       OBERR_A
+bdir_buf@@95                       OBERR_B
+bdir_buf@@90                       OBR0_A
+bdir_buf@@89                       OBR0_B
+bdir_buf@@86                       OBR1_A
+bdir_buf@@85                       OBR1_B
+bdir_buf@@80                       OBR2_A
+bdir_buf@@79                       OBR2_B
+bdir_buf@@78                       OBR3_A
+bdir_buf@@77                       OBR3_B
+bdir_buf@@76                       ODTACK_A
+bdir_buf@@84                       ODTACK_B
+bdir_buf@@57                       OIACK_A
+bdir_buf@@56                       OIACK_B
+bdir_buf@@55                       OIRQ1_A
+bdir_buf@@54                       OIRQ1_B
+bdir_buf@@47                       OIRQ2_A
+bdir_buf@@46                       OIRQ2_B
+bdir_buf@@35                       OIRQ3_A
+bdir_buf@@34                       OIRQ3_B
+bdir_buf@@27                       OIRQ4_A
+bdir_buf@@26                       OIRQ4_B
+bdir_buf@@25                       OIRQ5_A
+bdir_buf@@33                       OIRQ5_B
+bdir_buf@@32                       OIRQ6_A
+bdir_buf@@31                       OIRQ6_B
+bdir_buf@@24                       OIRQ7_A
+bdir_buf@@45                       OIRQ7_B
+bdir_buf@@53                       OSYSFAIL_A
+bdir_buf@@23                       OSYSFAIL_B
+bdir_buf@@42                       OSYSRESET_A
+bdir_buf@@41                       OSYSRESET_B
+bdir_buf@@16                       RESET_L
+
+
+Device-Specific Information:           c:\pl\v150pl\altera\buffer\bdir_buf.rpt
+bdir_buf
+
+** ERROR SUMMARY **
+
+Info: Chip 'bdir_buf' in device 'EPM5130QC' has less than 20% of pins available for future logic changes -- if your project is likely to change, Altera recommends using a larger device
+                                                          
+                 A                                        
+                 _ O O                                    
+                 B A A           R R             O R R R  
+                 B C C O O O     E E             D E E E  
+                 S F F B B B     S S O O     O O T S S S  
+                 Y A A B B E     E E B B     B B A E E E  
+                 _ I I S S R     R R R R     R R C R R R  
+                 A L L Y Y R V V V V 0 0 G G 1 1 K V V V  
+                 S _ _ _ _ _ C C E E _ _ N N _ _ _ E E E  
+                 T A B A B B C C D D A B D D A B B D D D  
+               ------------------------------------------_ 
+              / 100  98  96  94  92  90  88  86  84  82   |_ 
+             /     99  97  95  93  91  89  87  85  83  81    | 
+    IIRQ5_A |  1                                          80 | OBR2_A 
+    IIRQ4_B |  2                                          79 | OBR2_B 
+    IIRQ4_A |  3                                          78 | OBR3_A 
+    IIRQ3_B |  4                                          77 | OBR3_B 
+    IIRQ3_A |  5                                          76 | ODTACK_A 
+    IIRQ2_B |  6                                          75 | RESERVED 
+    IIRQ2_A |  7                                          74 | RESERVED 
+    IIRQ1_B |  8                                          73 | RESERVED 
+    IIRQ1_A |  9                                          72 | IACFAIL_A 
+    IIACK_B | 10                                          71 | IACFAIL_B 
+    IIACK_A | 11                                          70 | IBBSY_A 
+        GND | 12                                          69 | VCC 
+        GND | 13                                          68 | VCC 
+   IDTACK_B | 14                                          67 | IBBSY_B 
+   IDTACK_A | 15                                          66 | IBERR_A 
+    RESET_L | 16                EPM5130QC                 65 | IBERR_B 
+     IBR3_B | 17                                          64 | IBR0_A 
+        VCC | 18                                          63 | GND 
+        VCC | 19                                          62 | GND 
+     IBR3_A | 20                                          61 | IBR0_B 
+     IBR2_B | 21                                          60 | IBR1_A 
+     IBR2_A | 22                                          59 | IBR1_B 
+ OSYSFAIL_B | 23                                          58 | OBERR_A 
+    OIRQ7_A | 24                                          57 | OIACK_A 
+    OIRQ5_A | 25                                          56 | OIACK_B 
+    OIRQ4_B | 26                                          55 | OIRQ1_A 
+    OIRQ4_A | 27                                          54 | OIRQ1_B 
+    IIRQ6_B | 28                                          53 | OSYSFAIL_A 
+    IIRQ6_A | 29                                          52 | SYSFAIL_INH 
+    IIRQ5_B | 30                                          51 | RESERVED 
+            |      32  34  36  38  40  42  44  46  48  50  _| 
+             \   31  33  35  37  39  41  43  45  47  49   | 
+              \------------------------------------------- 
+                 O O O O O I G G I I O O V V O O O I I I  
+                 I I I I I S N N I I S S C C I I I S S S  
+                 R R R R R Y D D R R Y Y C C R R R Y Y Y  
+                 Q Q Q Q Q S     Q Q S S     Q Q Q S S S  
+                 6 6 5 3 3 F     7 7 R R     7 2 2 R R F  
+                 _ _ _ _ _ A     _ _ E E     _ _ _ E E A  
+                 B A B B A I     B A S S     B B A S S I  
+                           L         E E           E E L  
+                           _         T T           T T _  
+                           A         _ _           _ _ B  
+                                     B A           B A    
+
+
+Device-Specific Information:           c:\pl\v150pl\altera\buffer\bdir_buf.rpt
+bdir_buf
+
+** INPUTS **
+
+                                         Shareable
+                                         Expanders    Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared  INP  FBK  OUT  FBK  Name
+  72      -   -       INPUT              0      0     0    0    1    1  IACFAIL_A
+  71      -   -       INPUT              0      0     0    0    1    1  IACFAIL_B
+  70      -   -       INPUT              0      0     0    0    1    1  IBBSY_A
+  67      -   -       INPUT              0      0     0    0    2    1  IBBSY_B
+  66      -   -       INPUT              0      0     0    0    1    1  IBERR_A
+  65      -   -       INPUT              0      0     0    0    1    1  IBERR_B
+  64      -   -       INPUT              0      0     0    0    1    1  IBR0_A
+  61      -   -       INPUT              0      0     0    0    1    1  IBR0_B
+  60      -   -       INPUT              0      0     0    0    1    1  IBR1_A
+  59      -   -       INPUT              0      0     0    0    1    1  IBR1_B
+  22      -   -       INPUT              0      0     0    0    1    1  IBR2_A
+  21      -   -       INPUT              0      0     0    0    1    1  IBR2_B
+  20      -   -       INPUT              0      0     0    0    1    1  IBR3_A
+  17      -   -       INPUT              0      0     0    0    1    1  IBR3_B
+  15      -   -       INPUT              0      0     0    0    1    1  IDTACK_A
+  14      -   -       INPUT              0      0     0    0    1    1  IDTACK_B
+  11      -   -       INPUT              0      0     0    0    1    1  IIACK_A
+  10      -   -       INPUT              0      0     0    0    1    1  IIACK_B
+   9      -   -       INPUT              0      0     0    0    1    1  IIRQ1_A
+   8    (8)  (A)      INPUT              0      0     0    0    1    1  IIRQ1_B
+   7    (7)  (A)      INPUT              0      0     0    0    1    1  IIRQ2_A
+   6    (6)  (A)      INPUT              0      0     0    0    1    1  IIRQ2_B
+   5    (5)  (A)      INPUT              0      0     0    0    1    1  IIRQ3_A
+   4    (4)  (A)      INPUT              0      0     0    0    1    1  IIRQ3_B
+   3    (3)  (A)      INPUT              0      0     0    0    1    1  IIRQ4_A
+   2    (2)  (A)      INPUT              0      0     0    0    1    1  IIRQ4_B
+   1    (1)  (A)      INPUT              0      0     0    0    1    1  IIRQ5_A
+  30   (24)  (B)      INPUT              0      0     0    0    1    1  IIRQ5_B
+  29   (23)  (B)      INPUT              0      0     0    0    1    1  IIRQ6_A
+  28   (22)  (B)      INPUT              0      0     0    0    1    1  IIRQ6_B
+  40   (40)  (C)      INPUT              0      0     0    0    1    1  IIRQ7_A
+  39   (39)  (C)      INPUT              0      0     0    0    1    1  IIRQ7_B
+  36   (38)  (C)      INPUT              0      0     0    0    1    1  ISYSFAIL_A
+  50   (56)  (D)      INPUT              0      0     0    0    1    1  ISYSFAIL_B
+  49   (55)  (D)      INPUT              0      0     0    0    1    1  ISYSRESET_A
+  48   (54)  (D)      INPUT              0      0     0    0    1    1  ISYSRESET_B
+  16      -   -       INPUT              0      0     0    0   37   36  RESET_L
+  52   (66)  (E)      INPUT              0      0     0    0    1    1  SYSFAIL_INH
+
+Device-Specific Information:           c:\pl\v150pl\altera\buffer\bdir_buf.rpt
+bdir_buf
+
+** OUTPUTS **
+
+                                         Shareable
+                                         Expanders    Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared  INP  FBK  OUT  FBK  Name
+ 100    120    H     OUTPUT              0      0     2    1    0    0  A_BBSY_AST
+  99    119    H     OUTPUT              0      0     2    1    0    0  OACFAIL_A
+  98    118    H     OUTPUT              0      0     2    1    0    0  OACFAIL_B
+  97    117    H     OUTPUT              0      0     2    1    0    0  OBBSY_A
+  96    116    H     OUTPUT              0      0     2    1    0    0  OBBSY_B
+  58     72    E     OUTPUT              0      0     2    1    0    0  OBERR_A
+  95    115    H     OUTPUT              0      0     2    1    0    0  OBERR_B
+  90    104    G     OUTPUT              0      0     2    1    0    0  OBR0_A
+  89    103    G     OUTPUT              0      0     2    1    0    0  OBR0_B
+  86    102    G     OUTPUT              0      0     2    1    0    0  OBR1_A
+  85    101    G     OUTPUT              0      0     2    1    0    0  OBR1_B
+  80     88    F     OUTPUT              0      0     2    1    0    0  OBR2_A
+  79     87    F     OUTPUT              0      0     2    1    0    0  OBR2_B
+  78     86    F     OUTPUT              0      0     2    1    0    0  OBR3_A
+  77     85    F     OUTPUT              0      0     2    1    0    0  OBR3_B
+  76     84    F     OUTPUT              0      0     2    1    0    0  ODTACK_A
+  84    100    G     OUTPUT              0      0     2    1    0    0  ODTACK_B
+  57     71    E     OUTPUT              0      0     2    1    0    0  OIACK_A
+  56     70    E     OUTPUT              0      0     2    1    0    0  OIACK_B
+  55     69    E     OUTPUT              0      0     2    1    0    0  OIRQ1_A
+  54     68    E     OUTPUT              0      0     2    1    0    0  OIRQ1_B
+  47     53    D     OUTPUT              0      0     2    1    0    0  OIRQ2_A
+  46     52    D     OUTPUT              0      0     2    1    0    0  OIRQ2_B
+  35     37    C     OUTPUT              0      0     2    1    0    0  OIRQ3_A
+  34     36    C     OUTPUT              0      0     2    1    0    0  OIRQ3_B
+  27     21    B     OUTPUT              0      0     2    1    0    0  OIRQ4_A
+  26     20    B     OUTPUT              0      0     2    1    0    0  OIRQ4_B
+  25     19    B     OUTPUT              0      0     2    1    0    0  OIRQ5_A
+  33     35    C     OUTPUT              0      0     2    1    0    0  OIRQ5_B
+  32     34    C     OUTPUT              0      0     2    1    0    0  OIRQ6_A
+  31     33    C     OUTPUT              0      0     2    1    0    0  OIRQ6_B
+  24     18    B     OUTPUT              0      0     2    1    0    0  OIRQ7_A
+  45     51    D     OUTPUT              0      0     2    1    0    0  OIRQ7_B
+  53     67    E     OUTPUT              0      0     2    1    0    0  OSYSFAIL_A
+  23     17    B     OUTPUT              0      0     3    1    0    0  OSYSFAIL_B
+  42     50    D     OUTPUT              0      0     2    1    0    0  OSYSRESET_A
+  41     49    D     OUTPUT              0      0     2    1    0    0  OSYSRESET_B
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

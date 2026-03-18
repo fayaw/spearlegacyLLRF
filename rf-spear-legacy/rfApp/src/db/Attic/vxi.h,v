@@ -1,0 +1,101 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-0:1.2
+	RF-3-13-10:1.2.0.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2003.08.26.15.09.02;	author saa;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.48;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.48;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Added rf_station_state.h (used to be part of rfApp/src/seq/rf_loop_defs.h).
+vxi.h is moved to EPICS site/src/diag.
+subIQ.c now includes rf_station_state.h instead of rf_loop_defs.h.
+@
+text
+@/* 
+ * Filename: vxi.h
+ *
+ * Rem:  Choose one of NICPU030, NIVXI or none if VXI protocol is done by software 
+ *
+ */
+void vxiinit(void);
+#if (CPU_FAMILY != PPC)
+#define SYNC 
+#define EIEIO
+#define EIEIO_SYNC
+#ifndef NICPU030
+   #define NICPU030
+#endif
+#include "nivxi.h"        /* Assumes niCpu030 BSP */
+#else
+#ifndef NIVXI
+  #define NIVXI           /* Assumes nivxi library */
+#endif
+# define EIEIO       __asm__ volatile ("eieio")
+# define EIEIO_SYNC  __asm__ volatile ("eieio;sync")
+# define SYNC         __asm__ volatile ("sync")
+
+#include "kscvxi.h"
+#ifndef nivxi_h
+  #define nivxi_h
+#endif
+
+/* Prototypes for commonly used VXI functions 
+void * GetVXIintHandler(UINT16 level);
+short  SetVXIintHandler(INT16 levels,void (*func)(short,unsigned short,unsigned long));
+short  EnableVXIint(INT16 controller,UINT16 levels); 
+short  RouteVXIint(INT16 controller,UINT16 s_route);
+short  DisableVXIint(INT16 controller,UINT16 levels);
+short  VXIin(UINT16 accessparms,UINT32 addr,UINT16 width,void *value);
+short  VXIout(UINT16 accessparms,UINT32 addr,UINT32 width,UINT32 value);
+short  VXIinit(void);
+short  InitVXIlibrary(void);
+short  SetMODID(UINT16 enable, UINT16 modid);
+*/
+#endif
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

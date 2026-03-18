@@ -1,0 +1,158 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.33.04;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.33.04;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#ifndef RM_portable_DEFINED
+#define RM_portable_DEFINED
+
+#define RM_UNIV_VSI0		0xf00
+#define RM_UNIV_VSI0_CTL	0xf00
+#define RM_UNIV_VSI0_BS		0xf04
+#define RM_UNIV_VSI0_BD		0xf08
+#define RM_UNIV_VSI0_TO		0xf0c
+
+#define RM_UNIV_VSI1		0xf14
+#define RM_UNIV_VSI1_CTL	0xf14
+#define RM_UNIV_VSI1_BS		0xf18
+#define RM_UNIV_VSI1_BD		0xf1c
+#define RM_UNIV_VSI1_TO		0xf20
+
+/* Offsets from RM_UNIV_VSI0 and RM_UNIV_VXI1 */
+#define RM_UNIV_VSI_CTL		0x0
+#define RM_UNIV_VSI_BS		0x4
+#define RM_UNIV_VSI_BD		0x8
+#define RM_UNIV_VSI_TO		0xc
+
+#define RM_UNIV_LINT_STAT	0x304
+
+#ifdef FORCE                          /* powercore 603/4 */
+   /* VXI MEMORY BLOCKS */
+   #define VXI_BLK_BASE_A24	0x20  /* A24 starts at 0x200000   */
+   #define VXI_BLK_SIZE_A24	0xe0  /*   its size is 0xe00000   */
+   #define VXI_BLK_BASE_A32	0x20  /* A32 starts at 0x20000000 */
+   #define VXI_BLK_SIZE_A32	0x30  /*   its size is 0x30000000 */
+
+   /* PCI mapping */
+   #define RM_PCI_MEM_2_CPU_CONV(adrs)        (adrs)
+   #define RM_PCI_IO_2_CPU_CONV(adrs)         (adrs + 0xfe000000)
+
+   /* Universe register access */
+   #define RM_UNIV_BASE		0xfe810000
+   #define RM_UNIV_A24	 	RM_UNIV_VSI1
+   #define RM_UNIV_A24_CTL	RM_UNIV_VSI1_CTL
+   #define RM_UNIV_A24_BS	RM_UNIV_VSI1_BS
+   #define RM_UNIV_A24_BD	RM_UNIV_VSI1_BD
+   #define RM_UNIV_A24_TO	RM_UNIV_VSI1_TO
+   #define RM_UNIV_A32		RM_UNIV_VSI0
+   #define RM_UNIV_A32_CTL	RM_UNIV_VSI0_CTL
+   #define RM_UNIV_A32_BS	RM_UNIV_VSI0_BS
+   #define RM_UNIV_A32_BD	RM_UNIV_VSI0_BD
+   #define RM_UNIV_A32_TO	RM_UNIV_VSI0_TO
+
+#elif defined DY4                     /* dy4 svme178 */
+   /* VXI MEMORY BLOCKS */
+   #define VXI_BLK_BASE_A24	0x20  /* A24 starts at 0x200000   */
+   #define VXI_BLK_SIZE_A24	0xd0  /*   its size is 0xd00000   */
+   #define VXI_BLK_BASE_A32	0x40  /* A32 starts at 0x40000000 */
+   #define VXI_BLK_SIZE_A32	0x20  /*   its size is 0x20000000 */
+
+   /* PCI mapping */
+   #define RM_PCI_MEM_2_CPU_CONV(adrs)        (adrs + 0x80000000)
+   #define RM_PCI_IO_2_CPU_CONV(adrs)         (adrs + 0x80000000)
+
+   /* Universe register access */
+   #define RM_UNIV_BASE		0x81001000
+   #define RM_UNIV_A24		RM_UNIV_VSI0
+   #define RM_UNIV_A24_CTL	RM_UNIV_VSI0_CTL
+   #define RM_UNIV_A24_BS	RM_UNIV_VSI0_BS
+   #define RM_UNIV_A24_BD	RM_UNIV_VSI0_BD
+   #define RM_UNIV_A24_TO	RM_UNIV_VSI0_TO
+   #define RM_UNIV_A32		RM_UNIV_VSI1
+   #define RM_UNIV_A32_CTL	RM_UNIV_VSI1_CTL
+   #define RM_UNIV_A32_BS	RM_UNIV_VSI1_BS
+   #define RM_UNIV_A32_BD	RM_UNIV_VSI1_BD
+   #define RM_UNIV_A32_TO	RM_UNIV_VSI1_TO
+
+#elif defined MV2400
+   /* VXI MEMORY BLOCKS */
+   #define VXI_BLK_BASE_A24	0x20  /* A24 starts at 0x200000   */
+   #define VXI_BLK_SIZE_A24	0xe0  /*   its size is 0xe00000   */
+   #define VXI_BLK_BASE_A32	0x08  /* A32 starts at 0x08000000 */
+   #define VXI_BLK_SIZE_A32	0x20  /*   its size is 0x20000000 */
+
+   /* PCI mapping */
+   #define RM_PCI_MEM_2_CPU_CONV(adrs)        (adrs)
+   #define RM_PCI_IO_2_CPU_CONV(adrs)         (adrs + 0xfe000000)
+
+   /* Universe register access */
+   #define RM_UNIV_BASE		0xFE000000
+   #define RM_UNIV_A24	 	RM_UNIV_VSI1
+   #define RM_UNIV_A24_CTL	RM_UNIV_VSI1_CTL
+   #define RM_UNIV_A24_BS	RM_UNIV_VSI1_BS
+   #define RM_UNIV_A24_BD	RM_UNIV_VSI1_BD
+   #define RM_UNIV_A24_TO	RM_UNIV_VSI1_TO
+   #define RM_UNIV_A32		RM_UNIV_VSI0
+   #define RM_UNIV_A32_CTL	RM_UNIV_VSI0_CTL
+   #define RM_UNIV_A32_BS	RM_UNIV_VSI0_BS
+   #define RM_UNIV_A32_BD	RM_UNIV_VSI0_BD
+   #define RM_UNIV_A32_TO	RM_UNIV_VSI0_TO
+
+#else
+#error - Board type not defined.  Must define either FORCE,DY4, or MV2400 to compile.
+#endif
+
+#define VXI_BLK_REMN_A24(adr)   (VXI_BLK_BASE_A24 + VXI_BLK_SIZE_A24 - (adr))
+#define VXI_BLK_REMN_A32(adr)   (VXI_BLK_BASE_A32 + VXI_BLK_SIZE_A32 - (adr))
+
+#endif
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

@@ -1,0 +1,144 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  infoFxn/findDev.c
+
+  This module provides findDevLA routine.
+***************************************************************************/
+
+#include <vxWorks.h>
+#include <string.h>
+
+#include <kscvxi.h>
+#include <devinfo.h>
+
+#include <libvar.h>
+
+
+/*==========================================================================
+  FindDevLA
+==========================================================================*/
+
+INT16 FindDevLA (INT8* namepat,
+		 INT16 manid,
+		 INT16 modelcode,
+		 INT16 devclass,
+		 INT16 slot,
+		 INT16 mainframe,
+		 INT16 cmdrla,
+		 INT16* la)
+
+{
+  UserLAEntry* entry;
+  UINT16 length;
+entry =  vxiDevHead;
+/*/printf("DevHead la is %d\n",entry->la);*/
+
+  for (entry = vxiDevHead;  entry;  entry = entry->next) 
+  {
+    if(*namepat)
+    {
+	/* Determine length of shortest string. */
+	if (strlen(namepat) < strlen(entry->DevName) )
+	   length = strlen(namepat);
+	else
+	   length = strlen(entry->DevName);
+    }
+     /*if (*namepat  &&  strcmp (entry->DevName, namepat) != 0)*/  /* NO */
+/*/printf("entry->DevName is %s.\nnamepat is %s.\n", entry->DevName, namepat);
+//printf("result of string compare is %d.\n",strncmp (entry->DevName, namepat, length) );*/
+    if (*namepat  && (strncmp (entry->DevName, namepat, length) != 0) )
+      continue;
+
+    if (manid >= 0  &&  entry->ManId != manid)
+      continue;
+
+    if (modelcode >= 0  &&  entry->ModelCode != modelcode)
+      continue;
+
+    if (devclass >= 0  &&  entry->DevClass != devclass)
+      continue;
+
+    if (slot >= 0  &&  entry->Slot != slot)
+      continue;
+
+    if (mainframe >= 0  &&  entry->Mainframe != mainframe)
+      continue;
+
+    if (cmdrla >= 0  &&  entry->Cmdr != cmdrla)
+      continue;
+
+    *la = entry->la;
+    return 0;
+  }
+
+  return -1;
+}
+
+		 
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

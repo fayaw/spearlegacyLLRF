@@ -1,0 +1,544 @@
+head	1.5;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.5
+	RF-SPEAR-R0-3-1:1.5
+	RF-SPEAR-R0-3-0:1.5
+	RF-SPEAR-R0-2-0:1.5
+	RF-SPEAR-R0-1-0:1.5
+	RF-SPEAR-R0-0-3:1.5
+	RF-SPEAR-R0-0-2:1.5
+	RF-SPEAR-R0-0-1:1.5
+	RF-SPEAR-R0-0-0:1.5
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.5
+	RF-3-13-10:1.5.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.5
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.5
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.4
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.5
+date	2009.12.12.00.13.42;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.01.29.18.13.50;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.01.05.19.45.02;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.27.01.17.03;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.43;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.43;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.5
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@#==============================================================
+#
+# Abs:  Database template for RF VXI Digitial Inputs
+#
+# Name:  rf_digital.substitutions
+#
+# Desc:  EPICS database template file for RF VXI
+#        Module Digital Inputs
+#
+# Side:  None
+#
+# Facility: SLAC/PEPII Low-Level RF
+#
+# Auth: dd-mmm-yyyy, Stephanie Allison (SAA)
+# Rev:  dd-mmm-yyyy, First Lastname  (USERNAME)
+#==============================================================
+#
+# Mod:
+#       06-Feb-2002, K. Luchini (LUCHINI):
+#         Added standard header and obtained
+#         db files from the top level db directory
+#         instead of epicsApp/Db
+#
+#==============================================================
+#
+file rf_interlock.db
+{
+#	                                                                     LTCH FRST DIG
+#	   STN     COMP      Quantity    Group    Next    Description           WORD WORD BIT   
+  pattern { S     , C      ,   Q       , G      , N  ,      D                  , WL , WF , B }
+	  {$(RRRS),WGAIR   ,:NIRPINPUT ,""      ,FANO,"NIRP Input  Status"     , 15 , 30 , 1 }
+	  {$(RRRS),KLYSCOLL,WATR:FLOW  ,""      ,SUMY,"Water Flow"             , 15 , 30 , 2 }
+	  {$(RRRS),KLYSBD01,WATR:FLOW  ,""      ,SUMY,"Water Flow"             , 15 , 30 , 3 }
+	  {$(RRRS),KLYSBD02,WATR:FLOW  ,""      ,SUMY,"Water Flow"             , 15 , 30 , 4 }
+	  {$(RRRS),KLYSBD03,WATR:FLOW  ,""      ,SUMY,"Water Flow"             , 15 , 30 , 5 }
+	  {$(RRRS),STNHCW1 ,:FLOW      ,FLOW    ,FANO,"Flow Return"            , 15 , 30 , 6 }
+	  {$(RRRS),KLYS    ,:VACMSTAT  ,""      ,VACM,"Vacuum Status"          , 15 , 30 , 8 }
+	  {$(RRRS),KLYSWNDW,AIR:FLOW   ,""      ,SUMY,"Air Flow"               , 15 , 30 , 9 }
+	  {$(RRRS),CIRC    ,WATR:TEMP  ,TEMP    ,SUMY,"Input Water Temp Status", 15 , 30 , 10}
+	  {$(RRRS),CIRC    ,WATR:DELT  ,TEMP    ,SUMY,"Water Delta Temp Status", 15 , 30 , 11}
+	  {$(RRRS),WGAIR   ,:PRESS     ,""      ,FANO,"Pressure Status"        , 15 , 30 , 12}
+	  {$(RRRS),CIRC    ,WATR:FLOW  ,FLOW    ,SUMY,"Water Flow"             , 15 , 30 , 14}
+	  {$(RRRS),WGAIR   ,:NIRPOUTPUT,""      ,FANO,"NIRP Output Status"     , 15 , 30 , 15}
+
+	  {$(RRRS),SOLNMAIN,:STAT      ,""      ,SUMY,"Interlock Status"       , 16 , 31 , 0 }
+	  {$(RRRS),SOLNBUCK,:STAT      ,""      ,SUMY,"Interlock Status"       , 16 , 31 , 1 }
+	  {$(RRRS),KLYSCOLL,:POWER     ,""      ,SUMY,"Power Fault"            , 16 , 31 , 2 }
+
+	  {$(RRRS),CAV1    ,WATR:FLOW  ,""      ,SUMY,"Raft Water Flow"        , 17 , 32 , 0 }
+	  {$(RRRS),CAV1    ,:VACMSTAT  ,""      ,VACM,"Vacuum Status"          , 17 , 32 , 1 }
+	  {$(RRRS),CAV1    ,:VACMTIMED ,""      ,VACM,"Timed Vacuum Status"    , 17 , 32 , 2 }
+	  {$(RRRS),CAV1    ,:VACMSPARE1,""      ,VACM,"Spare Vacuum Status"    , 17 , 32 , 3 }
+	  {$(RRRS),CAV1    ,:VACMSPARE2,""      ,VACM,"Spare Vacuum Status"    , 17 , 32 , 4 }
+	  {$(RRRS),CAV1IONP,:CURRSTAT  ,""      ,CURR,"Current Status"         , 17 , 32 , 5 }
+
+	  {$(RRRS),CAV2    ,WATR:FLOW  ,""      ,SUMY,"Raft Water Flow"        , 17 , 32 , 8 }
+	  {$(RRRS),CAV2    ,:VACMSTAT  ,""      ,VACM,"Vacuum Status"          , 17 , 32 , 9 }
+	  {$(RRRS),CAV2    ,:VACMTIMED ,""      ,VACM,"Timed Vacuum Status"    , 17 , 32 , 10}
+	  {$(RRRS),CAV2    ,:VACMSPARE1,""      ,VACM,"Spare Vacuum Status"    , 17 , 32 , 11}
+	  {$(RRRS),CAV2    ,:VACMSPARE2,""      ,VACM,"Spare Vacuum Status"    , 17 , 32 , 12}
+	  {$(RRRS),CAV2IONP,:CURRSTAT  ,""      ,CURR,"Current Status"         , 17 , 32 , 13}
+
+}
+file rf_digital_plc.db
+{
+#	                                                                   DIG  DIG  Zero    One       Zero     One
+#	   STN     COMP      Quantity    Group    Next    Description         WORD BIT  SEVR    SEVR      Name     Name
+  pattern { S     , C      ,   Q       , G      , N  ,      D                  , W, B,   ZS   ,  OS    ,   ZN   ,   ON   }
+	  {$(RRRS),STN     ,:KEY:STAT  ,SUMY    ,SEVR,"Local/Remote Key Posn"  ,15, 0,NO_ALARM,MAJOR   ,REMOTE  ,LOCAL   }
+	  {$(RRRS),HVPS    ,:ON:PLC    ,SUMY    ,SEVR,"PLC On"                 ,16, 3,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {$(RRRS),STN     ,RF:ON:PLC  ,SUMY    ,SEVR,"RF PLC On"              ,16, 4,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {$(RRRS),STN     ,:LOCAL:ON  ,PARK    ,CTRL,"Online/Offline"         ,16, 5,MAJOR   ,NO_ALARM,OFFLINE ,ONLINE  }
+	  {$(RRRS),KLYS    ,:TYPE:STAT ,SUMY    ,SEVR,"Type"                   ,16, 6,NO_ALARM,NO_ALARM,PHILLIPS,SLAC    }
+
+	  {$(RRRS),STN     ,:RESET:PLC ,SUMY    ,SEVR,"PLC Reset Readback"     ,35, 1,NO_ALARM,MAJOR   ,NORESET ,RESET   }
+	  {$(RRRS),FILAMENT,:ON:PLC    ,SUMY    ,LTCH,"PLC On"                 ,35, 2,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {$(RRRS),FILAMENT,:TIMEBYP:PLC,SUMY   ,SEVR,"PLC Time Bypass"        ,35, 3,NO_ALARM,MAJOR   ,NOBYPASS,BYPASS  }
+	  {$(RRRS),FILAMENT,:LOW:PLC   ,SUMY    ,SEVR,"Low  Status"            ,35, 4,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {$(RRRS),FILAMENT,:HIGH:PLC  ,SUMY    ,SEVR,"High Status"            ,35, 5,MAJOR   ,NO_ALARM,OFF     ,ON      }
+
+	  {$(RRRS),SOLNMAIN,:ON:PLC    ,SUMY    ,SEVR,"PLC On"                 ,35, 9,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {$(RRRS),SOLNBUCK,:ON:PLC    ,SUMY    ,SEVR,"PLC On"                 ,35,10,MAJOR   ,NO_ALARM,OFF     ,ON      }
+
+}
+file rf_sumy_plc.db
+{
+#	                                                                          DIG  DIG
+#	   STN     COMP      Quantity    Group    Next                               WORD BIT   
+  pattern { S     , C      ,   Q       , G      , N  ,                                W  , B }
+	  {$(RRRS),STN     ,""         ,PARK    ,STAT,                                35 , 0 }
+	  {$(RRRS),SOLNMAIN,""         ,""      ,LTCH,                                35 , 6 }
+	  {$(RRRS),SOLNBUCK,""         ,""      ,LTCH,                                35 , 7 }
+	  {$(RRRS),CAV     ,SPARE      ,""      ,LTCH,                                35 , 11}
+	  {$(RRRS),CAV     ,""         ,""      ,LTCH,                                35 , 12}
+	  {$(RRRS),KLYS    ,""         ,""      ,LTCH,                                35 , 13}
+	  {$(RRRS),WG      ,""         ,""      ,LTCH,                                35 , 14}
+	  {$(RRRS),STN     ,ILCK       ,""      ,LTCH,                                35 , 15}
+
+	  {$(RRRS),CAV1    ,""         ,""      ,LTCH,                                36 , 0 }
+	  {$(RRRS),CAV2    ,""         ,""      ,LTCH,                                36 , 1 }
+	  {$(RRRS),KLYS    ,ILCK       ,""      ,LTCH,                                36 , 4 }
+	  {$(RRRS),FILAMENT,""         ,""      ,LTCH,                                36 , 5 }
+	  {$(RRRS),SOLN    ,""         ,MAIN    ,LTCH,                                36 , 6 }
+	  {$(RRRS),WG01    ,""         ,""      ,LTCH,                                36 , 7 }
+	  {$(RRRS),WG      ,AIRPRESS   ,""      ,LTCH,                                36 , 10}
+	  {$(RRRS),CIRC    ,""         ,""      ,LTCH,                                36 , 11}
+	  {$(RRRS),STNFLOW ,""         ,""      ,LTCH,                                36 , 12}
+	  {$(RRRS),STNVACM ,""         ,""      ,LTCH,                                36 , 13}
+	  {$(RRRS),STNTEMP ,""         ,""      ,LTCH,                                36 , 14}
+	  {$(RRRS),STN     ,SPARE      ,""      ,LTCH,                                36 , 15}
+
+}
+file rf_ab_module.db
+{
+#	                                                                          DIG  DIG
+#	   STN     COMP      Quantity                                                WORD BIT   
+  pattern { S     , C      ,   Q       ,                                              W  , B }
+	  {$(RRRS),STN     ,R0G0:TEMP  ,                                              34 , 0 }
+	  {$(RRRS),STN     ,R0G1:TEMP  ,                                              34 , 1 }
+	  {$(RRRS),CAV1    ,R0G2:TEMP  ,                                              34 , 2 }
+	  {$(RRRS),CAV1    ,R0G3:TEMP  ,                                              34 , 3 }
+	  {$(RRRS),CAV1    ,R0G4:TEMP  ,                                              34 , 4 }
+	  {$(RRRS),CAV2    ,R0G5:TEMP  ,                                              34 , 5 }
+	  {$(RRRS),CAV2    ,R0G6:TEMP  ,                                              34 , 6 }
+	  {$(RRRS),CAV2    ,R0G7:TEMP  ,                                              34 , 7 }
+	  {$(RRRS),CAV3    ,R2G0:TEMP  ,                                              34 , 8 }
+	  {$(RRRS),CAV3    ,R2G1:TEMP  ,                                              34 , 9 }
+	  {$(RRRS),CAV3    ,R2G2:TEMP  ,                                              34 , 10}
+	  {$(RRRS),CAV4    ,R2G3:TEMP  ,                                              34 , 11}
+	  {$(RRRS),CAV4    ,R2G4:TEMP  ,                                              34 , 12}
+	  {$(RRRS),CAV4    ,R2G5:TEMP  ,                                              34 , 13}
+	  {$(RRRS),STN     ,R1G0:AI    ,                                              34 , 14}
+	  {$(RRRS),STN     ,R1G1:AI    ,                                              34 , 15}
+
+}
+file rf_digital_modu.db
+{
+#	                           
+#	   STN     COMP      Quantity     
+  pattern { S     , C      ,   Q       }
+	  {$(RRRS),STN     ,R3G0:DI    }
+	  {$(RRRS),STN     ,R3G1:DO    }
+	  {$(RRRS),CAV     ,R3G2:DI    }
+	  {$(RRRS),STN     ,R3G3:DO    }
+	  {$(RRRS),STNDUM  ,DCM:SUMY   }
+
+}
+file rf_digital_hvps.db
+{
+#                                                                    *WORD=CARD/2
+#	                                                                DIG  DIG  Zero    One       Zero     One
+#	   STN     COMP      Quantity    Group     Next    Description    CARD* BIT  SEVR    SEVR      Name     Name
+  pattern { S     , C      ,   Q         , G     , N  ,      D              , W, B,   ZS   ,  OS    ,   ZN   ,   ON   }
+	  {$(RRRS),""      ,VOLTULIM:STAT,STN    ,STAT,"Max Voltage Active" ,12, 0,NO_ALARM,NO_ALARM,INACTIVE,ACTIVE  }
+	  {$(RRRS),12KV    ,VOLT:STAT    ,STN    ,STAT,"Available"          ,12, 1,MAJOR   ,NO_ALARM,NOTAVAIL,AVAIL   }
+	  {$(RRRS),AC      ,POWER:STAT   ,STN    ,STAT,"Aux Power Status"   ,12, 2,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {$(RRRS),AC      ,CURR:LTCH    ,STN    ,LTCH,"Current Trip"       ,12, 3,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {$(RRRS),KLYS    ,ARC:LTCH     ,STN    ,LTCH,"Arc Detector"       ,12, 4,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+
+	  {$(RRRS),CONTACT ,CLOSE:STAT   ,CONTACT,STAT,"Close Status"       ,12, 5,MAJOR   ,NO_ALARM,OPEN    ,CLOSED  }
+	  {$(RRRS),CONTACT ,ON:STAT      ,CONTACT,STAT,"On Status"          ,12, 6,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {$(RRRS),CONTACT ,OPEN:STAT    ,CONTACT,STAT,"Open Status"        ,12, 7,NO_ALARM,MAJOR   ,CLOSED  ,OPEN    }
+	  {$(RRRS),CONTACT ,READY:STAT   ,CONTACT,STAT,"Ready Status"       ,12, 8,MAJOR   ,NO_ALARM,NOTREADY,READY   }
+
+	  {$(RRRS),""      ,CROWBAR:LTCH ,STN    ,LTCH,"Crowbar Fired Stat" ,12, 9,NO_ALARM,MAJOR   ,OK      ,FAULT   }
+	  {$(RRRS),DC      ,POWER:STAT   ,STN    ,STAT,"Aux Power Status"   ,12,10,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {$(RRRS),""      ,PANIC:LTCH   ,STN    ,LTCH,"Emergency Off"      ,12,11,NO_ALARM,MAJOR   ,OK      ,FAULT   }
+	  {$(RRRS),ENERFAST,ON:STAT      ,STN    ,STAT,"Fast Inhibit"       ,12,12,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {$(RRRS),ENERSLOW,START:STAT   ,STN    ,STAT,"Slow Start"         ,12,13,NO_ALARM,MAJOR   ,ACTIVE  ,INACTIVE}
+
+	  {$(RRRS),OIL     ,LEVEL:LTCH   ,STN    ,LTCH,"Level"              ,12,14,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {$(RRRS),OIL     ,TEMP:LTCH    ,TEMP   ,LTCH,"Temperature"        ,12,15,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {$(RRRS),""      ,TEMP:LTCH    ,TEMP   ,LTCH,"Over Temperature"   ,14, 0,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {$(RRRS),""      ,VOLT:LTCH    ,STN    ,LTCH,"Over Voltage"       ,14, 1,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+
+	  {$(RRRS),SCR1    ,ON:STAT      ,SCR    ,STAT,"On-Off Status"      ,14, 2,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {$(RRRS),SCR2    ,ON:STAT      ,SCR    ,STAT,"On-Off Status"      ,14, 3,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {$(RRRS),SUPPLY  ,ON:STAT      ,STN    ,STAT,"On-Off Status"      ,14, 4,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {$(RRRS),SUPPLY  ,READY:STAT   ,STN    ,STAT,"Ready  Status"      ,14, 5,MAJOR   ,NO_ALARM,NOTREADY,READY   }
+
+	  {$(RRRS),XFORM   ,PRESS:LTCH   ,STN    ,LTCH,"Over Pressure"      ,14, 6,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {$(RRRS),XFORM   ,VACM:LTCH    ,STN    ,LTCH,"Press/Vacuum"       ,14, 7,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {$(RRRS),""      ,PPS:STAT     ,STN    ,STAT,"PPS Status"         ,14, 8,NO_ALARM,MAJOR   ,PERMIT  ,NOPERMIT}
+	  {$(RRRS),""      ,OPENLOAD:LTCH,STN    ,LTCH,"Open Load"          ,14, 9,NO_ALARM,MAJOR   ,OK      ,FAULT   }
+	  {$(RRRS),XFORM   ,ARC:LTCH     ,STN    ,LTCH,"Arc Detector"       ,14,10,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+
+	  {$(RRRS),RF      ,CROWBAR:LTCH ,STN    ,LTCH,"Crowbar Request"    ,14,11,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {$(RRRS),""      ,SPARE3       ,STN    ,STAT,"Spare 3"            ,14,12,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {$(RRRS),""      ,SPARE4       ,STN    ,STAT,"Spare 4"            ,14,13,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {$(RRRS),""      ,SPARE5       ,STN    ,STAT,"Spare 5"            ,14,14,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {$(RRRS),""      ,SPARE6       ,STN    ,STAT,"Spare 6"            ,14,15,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+
+}
+#file rf_digital_hvps_out.db
+#{
+#                                                                             *WORD=CARD/2
+#	                                                                         DIG      Zero       One    Zero    One
+#	   STN     COMP           FLNK                          Description         CARD*    SEVR       SEVR   Name    Name HIGH
+# pattern { S     , C           , FLNK                     ,      D                  ,W     , ZS     ,   OS   , ZN    , ON  ,HI}
+#	  {$(RRRS),CONTACT:CLOSE,$(RRRS):HVPSCONTACT:SUMY:STAT,"Contactor State Control",6     ,MAJOR   ,NO_ALARM,OPEN   ,CLOSE,0 }
+#	  {$(RRRS),SCR:ON       ,$(RRRS):HVPSSCR:SUMY:STAT    ,"SCR Enable Switch"      ,8     ,MAJOR   ,NO_ALARM,OFF    ,ON   ,0 }
+#	  {$(RRRS),:RESET       ,0                         ,"Reset Control"          ,10    ,MAJOR   ,NO_ALARM,NORESET,RESET,3 }
+#}
+file rf_interlock_vxi.db
+{
+#	                                            LTCH FRST
+#	   STN     COMP Quantity    Description        BIT  BIT 
+  pattern { S     , C  ,   Q    ,      D              , BL, BF }
+	  {$(RRRS),STN , VXI    ,"VXI Backplane Fault", 1 , 8  }
+	  {$(RRRS),STN , ABHEART,"AB Heartbeat Fault" , 2 , 9  }
+	  {$(RRRS),STN , ABSUMY ,"AB Summary Fault"   , 3 , A  }
+	  {$(RRRS),STN , FORCED ,"Forced Fault"       , 4 , B  }
+}
+@
+
+
+1.4
+log
+@Change register that is used for logging the latched vxi backplane,
+AB summary, AB heartbeat, and forced faults.  Instead of the interrupt
+status register (where the faults are cleared on every read instead of
+when the reset button is pushed), we now use the fast interlock status
+register.
+@
+text
+@d5 1
+a5 1
+# Name:  RRRS_digital.template
+d26 1
+a26 1
+file db/rf_interlock.db
+d29 33
+a61 33
+#	   STN  COMP      Quantity    Group    Next    Description           WORD WORD BIT   
+  pattern { S  , C      ,   Q       , G      , N  ,      D                  , WL , WF , B }
+	  {RRRS,WGAIR   ,:NIRPINPUT ,""      ,FANO,"NIRP Input  Status"     , 15 , 30 , 1 }
+	  {RRRS,KLYSCOLL,WATR:FLOW  ,""      ,SUMY,"Water Flow"             , 15 , 30 , 2 }
+	  {RRRS,KLYSBD01,WATR:FLOW  ,""      ,SUMY,"Water Flow"             , 15 , 30 , 3 }
+	  {RRRS,KLYSBD02,WATR:FLOW  ,""      ,SUMY,"Water Flow"             , 15 , 30 , 4 }
+	  {RRRS,KLYSBD03,WATR:FLOW  ,""      ,SUMY,"Water Flow"             , 15 , 30 , 5 }
+	  {RRRS,STNHCW1 ,:FLOW      ,FLOW    ,FANO,"Flow Return"            , 15 , 30 , 6 }
+	  {RRRS,KLYS    ,:VACMSTAT  ,""      ,VACM,"Vacuum Status"          , 15 , 30 , 8 }
+	  {RRRS,KLYSWNDW,AIR:FLOW   ,""      ,SUMY,"Air Flow"               , 15 , 30 , 9 }
+	  {RRRS,CIRC    ,WATR:TEMP  ,TEMP    ,SUMY,"Input Water Temp Status", 15 , 30 , 10}
+	  {RRRS,CIRC    ,WATR:DELT  ,TEMP    ,SUMY,"Water Delta Temp Status", 15 , 30 , 11}
+	  {RRRS,WGAIR   ,:PRESS     ,""      ,FANO,"Pressure Status"        , 15 , 30 , 12}
+	  {RRRS,CIRC    ,WATR:FLOW  ,FLOW    ,SUMY,"Water Flow"             , 15 , 30 , 14}
+	  {RRRS,WGAIR   ,:NIRPOUTPUT,""      ,FANO,"NIRP Output Status"     , 15 , 30 , 15}
+
+	  {RRRS,SOLNMAIN,:STAT      ,""      ,SUMY,"Interlock Status"       , 16 , 31 , 0 }
+	  {RRRS,SOLNBUCK,:STAT      ,""      ,SUMY,"Interlock Status"       , 16 , 31 , 1 }
+	  {RRRS,KLYSCOLL,:POWER     ,""      ,SUMY,"Power Fault"            , 16 , 31 , 2 }
+
+	  {RRRS,CAV1    ,WATR:FLOW  ,""      ,SUMY,"Raft Water Flow"        , 17 , 32 , 0 }
+	  {RRRS,CAV1    ,:VACMSTAT  ,""      ,VACM,"Vacuum Status"          , 17 , 32 , 1 }
+	  {RRRS,CAV1    ,:VACMTIMED ,""      ,VACM,"Timed Vacuum Status"    , 17 , 32 , 2 }
+	  {RRRS,CAV1    ,:VACMSPARE1,""      ,VACM,"Spare Vacuum Status"    , 17 , 32 , 3 }
+	  {RRRS,CAV1    ,:VACMSPARE2,""      ,VACM,"Spare Vacuum Status"    , 17 , 32 , 4 }
+	  {RRRS,CAV1IONP,:CURRSTAT  ,""      ,CURR,"Current Status"         , 17 , 32 , 5 }
+
+	  {RRRS,CAV2    ,WATR:FLOW  ,""      ,SUMY,"Raft Water Flow"        , 17 , 32 , 8 }
+	  {RRRS,CAV2    ,:VACMSTAT  ,""      ,VACM,"Vacuum Status"          , 17 , 32 , 9 }
+	  {RRRS,CAV2    ,:VACMTIMED ,""      ,VACM,"Timed Vacuum Status"    , 17 , 32 , 10}
+	  {RRRS,CAV2    ,:VACMSPARE1,""      ,VACM,"Spare Vacuum Status"    , 17 , 32 , 11}
+	  {RRRS,CAV2    ,:VACMSPARE2,""      ,VACM,"Spare Vacuum Status"    , 17 , 32 , 12}
+	  {RRRS,CAV2IONP,:CURRSTAT  ,""      ,CURR,"Current Status"         , 17 , 32 , 13}
+d64 1
+a64 1
+file db/rf_digital_plc.db
+d67 13
+a79 13
+#	   STN  COMP      Quantity    Group    Next    Description         WORD BIT  SEVR    SEVR      Name     Name
+  pattern { S  , C      ,   Q       , G      , N  ,      D                  , W, B,   ZS   ,  OS    ,   ZN   ,   ON   }
+	  {RRRS,STN     ,:KEY:STAT  ,SUMY    ,SEVR,"Local/Remote Key Posn"  ,15, 0,NO_ALARM,MAJOR   ,REMOTE  ,LOCAL   }
+	  {RRRS,HVPS    ,:ON:PLC    ,SUMY    ,SEVR,"PLC On"                 ,16, 3,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {RRRS,STN     ,RF:ON:PLC  ,SUMY    ,SEVR,"RF PLC On"              ,16, 4,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {RRRS,STN     ,:LOCAL:ON  ,PARK    ,CTRL,"Online/Offline"         ,16, 5,MAJOR   ,NO_ALARM,OFFLINE ,ONLINE  }
+	  {RRRS,KLYS    ,:TYPE:STAT ,SUMY    ,SEVR,"Type"                   ,16, 6,NO_ALARM,NO_ALARM,PHILLIPS,SLAC    }
+
+	  {RRRS,STN     ,:RESET:PLC ,SUMY    ,SEVR,"PLC Reset Readback"     ,35, 1,NO_ALARM,MAJOR   ,NORESET ,RESET   }
+	  {RRRS,FILAMENT,:ON:PLC    ,SUMY    ,LTCH,"PLC On"                 ,35, 2,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {RRRS,FILAMENT,:TIMEBYP:PLC,SUMY   ,SEVR,"PLC Time Bypass"        ,35, 3,NO_ALARM,MAJOR   ,NOBYPASS,BYPASS  }
+	  {RRRS,FILAMENT,:LOW:PLC   ,SUMY    ,SEVR,"Low  Status"            ,35, 4,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {RRRS,FILAMENT,:HIGH:PLC  ,SUMY    ,SEVR,"High Status"            ,35, 5,MAJOR   ,NO_ALARM,OFF     ,ON      }
+d81 2
+a82 2
+	  {RRRS,SOLNMAIN,:ON:PLC    ,SUMY    ,SEVR,"PLC On"                 ,35, 9,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {RRRS,SOLNBUCK,:ON:PLC    ,SUMY    ,SEVR,"PLC On"                 ,35,10,MAJOR   ,NO_ALARM,OFF     ,ON      }
+d85 1
+a85 1
+file db/rf_sumy_plc.db
+d88 23
+a110 23
+#	   STN  COMP      Quantity    Group    Next                               WORD BIT   
+  pattern { S  , C      ,   Q       , G      , N  ,                                W  , B }
+	  {RRRS,STN     ,""         ,PARK    ,STAT,                                35 , 0 }
+	  {RRRS,SOLNMAIN,""         ,""      ,LTCH,                                35 , 6 }
+	  {RRRS,SOLNBUCK,""         ,""      ,LTCH,                                35 , 7 }
+	  {RRRS,CAV     ,SPARE      ,""      ,LTCH,                                35 , 11}
+	  {RRRS,CAV     ,""         ,""      ,LTCH,                                35 , 12}
+	  {RRRS,KLYS    ,""         ,""      ,LTCH,                                35 , 13}
+	  {RRRS,WG      ,""         ,""      ,LTCH,                                35 , 14}
+	  {RRRS,STN     ,ILCK       ,""      ,LTCH,                                35 , 15}
+
+	  {RRRS,CAV1    ,""         ,""      ,LTCH,                                36 , 0 }
+	  {RRRS,CAV2    ,""         ,""      ,LTCH,                                36 , 1 }
+	  {RRRS,KLYS    ,ILCK       ,""      ,LTCH,                                36 , 4 }
+	  {RRRS,FILAMENT,""         ,""      ,LTCH,                                36 , 5 }
+	  {RRRS,SOLN    ,""         ,MAIN    ,LTCH,                                36 , 6 }
+	  {RRRS,WG01    ,""         ,""      ,LTCH,                                36 , 7 }
+	  {RRRS,WG      ,AIRPRESS   ,""      ,LTCH,                                36 , 10}
+	  {RRRS,CIRC    ,""         ,""      ,LTCH,                                36 , 11}
+	  {RRRS,STNFLOW ,""         ,""      ,LTCH,                                36 , 12}
+	  {RRRS,STNVACM ,""         ,""      ,LTCH,                                36 , 13}
+	  {RRRS,STNTEMP ,""         ,""      ,LTCH,                                36 , 14}
+	  {RRRS,STN     ,SPARE      ,""      ,LTCH,                                36 , 15}
+d113 1
+a113 1
+file db/rf_ab_module.db
+d116 18
+a133 18
+#	   STN  COMP      Quantity                                                WORD BIT   
+  pattern { S  , C      ,   Q       ,                                              W  , B }
+	  {RRRS,STN     ,R0G0:TEMP  ,                                              34 , 0 }
+	  {RRRS,STN     ,R0G1:TEMP  ,                                              34 , 1 }
+	  {RRRS,CAV1    ,R0G2:TEMP  ,                                              34 , 2 }
+	  {RRRS,CAV1    ,R0G3:TEMP  ,                                              34 , 3 }
+	  {RRRS,CAV1    ,R0G4:TEMP  ,                                              34 , 4 }
+	  {RRRS,CAV2    ,R0G5:TEMP  ,                                              34 , 5 }
+	  {RRRS,CAV2    ,R0G6:TEMP  ,                                              34 , 6 }
+	  {RRRS,CAV2    ,R0G7:TEMP  ,                                              34 , 7 }
+	  {RRRS,CAV3    ,R2G0:TEMP  ,                                              34 , 8 }
+	  {RRRS,CAV3    ,R2G1:TEMP  ,                                              34 , 9 }
+	  {RRRS,CAV3    ,R2G2:TEMP  ,                                              34 , 10}
+	  {RRRS,CAV4    ,R2G3:TEMP  ,                                              34 , 11}
+	  {RRRS,CAV4    ,R2G4:TEMP  ,                                              34 , 12}
+	  {RRRS,CAV4    ,R2G5:TEMP  ,                                              34 , 13}
+	  {RRRS,STN     ,R1G0:AI    ,                                              34 , 14}
+	  {RRRS,STN     ,R1G1:AI    ,                                              34 , 15}
+d136 1
+a136 1
+file db/rf_digital_modu.db
+d139 7
+a145 7
+#	   STN  COMP      Quantity     
+  pattern { S  , C      ,   Q       }
+	  {RRRS,STN     ,R3G0:DI    }
+	  {RRRS,STN     ,R3G1:DO    }
+	  {RRRS,CAV     ,R3G2:DI    }
+	  {RRRS,STN     ,R3G3:DO    }
+	  {RRRS,STNDUM  ,DCM:SUMY   }
+d148 1
+a148 1
+file db/rf_digital_hvps.db
+d152 40
+a191 40
+#	   STN  COMP      Quantity    Group     Next    Description    CARD* BIT  SEVR    SEVR      Name     Name
+  pattern { S  , C      ,   Q         , G     , N  ,      D              , W, B,   ZS   ,  OS    ,   ZN   ,   ON   }
+	  {RRRS,""      ,VOLTULIM:STAT,STN    ,STAT,"Max Voltage Active" ,12, 0,NO_ALARM,NO_ALARM,INACTIVE,ACTIVE  }
+	  {RRRS,12KV    ,VOLT:STAT    ,STN    ,STAT,"Available"          ,12, 1,MAJOR   ,NO_ALARM,NOTAVAIL,AVAIL   }
+	  {RRRS,AC      ,POWER:STAT   ,STN    ,STAT,"Aux Power Status"   ,12, 2,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {RRRS,AC      ,CURR:LTCH    ,STN    ,LTCH,"Current Trip"       ,12, 3,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {RRRS,KLYS    ,ARC:LTCH     ,STN    ,LTCH,"Arc Detector"       ,12, 4,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+
+	  {RRRS,CONTACT ,CLOSE:STAT   ,CONTACT,STAT,"Close Status"       ,12, 5,MAJOR   ,NO_ALARM,OPEN    ,CLOSED  }
+	  {RRRS,CONTACT ,ON:STAT      ,CONTACT,STAT,"On Status"          ,12, 6,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {RRRS,CONTACT ,OPEN:STAT    ,CONTACT,STAT,"Open Status"        ,12, 7,NO_ALARM,MAJOR   ,CLOSED  ,OPEN    }
+	  {RRRS,CONTACT ,READY:STAT   ,CONTACT,STAT,"Ready Status"       ,12, 8,MAJOR   ,NO_ALARM,NOTREADY,READY   }
+
+	  {RRRS,""      ,CROWBAR:LTCH ,STN    ,LTCH,"Crowbar Fired Stat" ,12, 9,NO_ALARM,MAJOR   ,OK      ,FAULT   }
+	  {RRRS,DC      ,POWER:STAT   ,STN    ,STAT,"Aux Power Status"   ,12,10,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {RRRS,""      ,PANIC:LTCH   ,STN    ,LTCH,"Emergency Off"      ,12,11,NO_ALARM,MAJOR   ,OK      ,FAULT   }
+	  {RRRS,ENERFAST,ON:STAT      ,STN    ,STAT,"Fast Inhibit"       ,12,12,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {RRRS,ENERSLOW,START:STAT   ,STN    ,STAT,"Slow Start"         ,12,13,NO_ALARM,MAJOR   ,ACTIVE  ,INACTIVE}
+
+	  {RRRS,OIL     ,LEVEL:LTCH   ,STN    ,LTCH,"Level"              ,12,14,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {RRRS,OIL     ,TEMP:LTCH    ,TEMP   ,LTCH,"Temperature"        ,12,15,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {RRRS,""      ,TEMP:LTCH    ,TEMP   ,LTCH,"Over Temperature"   ,14, 0,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {RRRS,""      ,VOLT:LTCH    ,STN    ,LTCH,"Over Voltage"       ,14, 1,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+
+	  {RRRS,SCR1    ,ON:STAT      ,SCR    ,STAT,"On-Off Status"      ,14, 2,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {RRRS,SCR2    ,ON:STAT      ,SCR    ,STAT,"On-Off Status"      ,14, 3,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {RRRS,SUPPLY  ,ON:STAT      ,STN    ,STAT,"On-Off Status"      ,14, 4,MAJOR   ,NO_ALARM,OFF     ,ON      }
+	  {RRRS,SUPPLY  ,READY:STAT   ,STN    ,STAT,"Ready  Status"      ,14, 5,MAJOR   ,NO_ALARM,NOTREADY,READY   }
+
+	  {RRRS,XFORM   ,PRESS:LTCH   ,STN    ,LTCH,"Over Pressure"      ,14, 6,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {RRRS,XFORM   ,VACM:LTCH    ,STN    ,LTCH,"Press/Vacuum"       ,14, 7,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {RRRS,""      ,PPS:STAT     ,STN    ,STAT,"PPS Status"         ,14, 8,NO_ALARM,MAJOR   ,PERMIT  ,NOPERMIT}
+	  {RRRS,""      ,OPENLOAD:LTCH,STN    ,LTCH,"Open Load"          ,14, 9,NO_ALARM,MAJOR   ,OK      ,FAULT   }
+	  {RRRS,XFORM   ,ARC:LTCH     ,STN    ,LTCH,"Arc Detector"       ,14,10,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+
+	  {RRRS,RF      ,CROWBAR:LTCH ,STN    ,LTCH,"Crowbar Request"    ,14,11,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {RRRS,""      ,SPARE3       ,STN    ,STAT,"Spare 3"            ,14,12,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {RRRS,""      ,SPARE4       ,STN    ,STAT,"Spare 4"            ,14,13,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {RRRS,""      ,SPARE5       ,STN    ,STAT,"Spare 5"            ,14,14,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+	  {RRRS,""      ,SPARE6       ,STN    ,STAT,"Spare 6"            ,14,15,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+d194 1
+a194 1
+#file db/rf_digital_hvps_out.db
+d198 5
+a202 5
+#	   STN  COMP           FLNK                          Description         CARD*    SEVR       SEVR   Name    Name HIGH
+# pattern { S  , C           , FLNK                     ,      D                  ,W     , ZS     ,   OS   , ZN    , ON  ,HI}
+#	  {RRRS,CONTACT:CLOSE,RRRS:HVPSCONTACT:SUMY:STAT,"Contactor State Control",6     ,MAJOR   ,NO_ALARM,OPEN   ,CLOSE,0 }
+#	  {RRRS,SCR:ON       ,RRRS:HVPSSCR:SUMY:STAT    ,"SCR Enable Switch"      ,8     ,MAJOR   ,NO_ALARM,OFF    ,ON   ,0 }
+#	  {RRRS,:RESET       ,0                         ,"Reset Control"          ,10    ,MAJOR   ,NO_ALARM,NORESET,RESET,3 }
+d204 1
+a204 1
+file db/rf_interlock_vxi.db
+d207 6
+a212 6
+#	   STN  COMP Quantity    Description        BIT  BIT 
+  pattern { S  , C  ,   Q    ,      D              , BL, BF }
+	  {RRRS,STN , VXI    ,"VXI Backplane Fault", 1 , 8  }
+	  {RRRS,STN , ABHEART,"AB Heartbeat Fault" , 2 , 9  }
+	  {RRRS,STN , ABSUMY ,"AB Summary Fault"   , 3 , A  }
+	  {RRRS,STN , FORCED ,"Forced Fault"       , 4 , B  }
+@
+
+
+1.3
+log
+@SPEAR uses all arc interlock channels available on the new arc interlock
+module (vacuum and air side for all 4 cavities).  SPEAR uses the arc channel
+reserved for MPS.  All arc interlock records moved out of rf_digital*.template
+and into rf_stn*.template (where 4CVAll uses all channels).  Arc summaries are
+moved out of rf_sumy_(2CV,4CV).db into rf_sumy_arc_(2CV,4CV,4CVAll).db.
+@
+text
+@d206 7
+a212 11
+#                                                                                     LTCH    LTCH     LTCH  LTCH
+#	                                                          LTCH FRST LTCH FRST Zero    One      Zero  One
+#	   STN  COMP Quantity Group Next    Description           MBBI MBBI BIT  BIT  SEVR    SEVR     Name  Name
+  pattern { S  , C  ,   Q    , G ,   N   ,      D              ,   WL ,  WF  ,BL,BF,   LZS  ,  LOS   , LZN , LON }
+	  {RRRS,STN ,:FORCED ,"" ,VXI    ,"Forced Fault"       ,AIM   ,AIM   , B, B,NO_ALARM,MAJOR   ,OK   ,FAULT}
+	  {RRRS,STN ,:VXI    ,"" ,ABSUMY ,"VXI Backplane Fault",AIM   ,AIM   , 9, 8,NO_ALARM,MAJOR   ,OK   ,FAULT}
+	  {RRRS,STN ,:ABSUMY ,"" ,ABHEART,"AB Summary Fault"   ,AIM   ,AIM   , A, A,NO_ALARM,MAJOR   ,OK   ,FAULT}
+	  {RRRS,STN ,:ABHEART,"" ,CRATE  ,"AB Heartbeat Fault" ,AIM   ,AIM   , A, 9,NO_ALARM,MAJOR   ,OK   ,FAULT}
+	  {RRRS,STN ,:CRATE  ,"" ,ARCSUMY,"Crate Temp/Volt Tol",AIM   ,AIM   , C, C,NO_ALARM,MAJOR   ,OK   ,FAULT}
+	  {RRRS,STN ,:ARCSUMY,MPS,SUMY   ,"Arc Fault"          ,AIM   ,AIM   , 8, 8,NO_ALARM,MAJOR   ,OK   ,FAULT}
+
+@
+
+
+1.2
+log
+@Rename
+@
+text
+@a203 7
+file db/rf_interlock_arc.db
+{
+#	   STN  COMP Quantity Description   BIT  Next
+  pattern { S  , C  ,   Q    ,   D          , B , N  }
+	  {RRRS,KLYS,""      ,"Arc"         , 0 ,SUMY}
+	  {RRRS,CIRC,""      ,"Arc"         , 1 ,SUMY}
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 25
+d187 1
+a187 1
+	  {RRRS,""      ,SPARE2       ,STN    ,STAT,"Spare 2"            ,14,11,MAJOR   ,NO_ALARM,FAULT   ,OK      }
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

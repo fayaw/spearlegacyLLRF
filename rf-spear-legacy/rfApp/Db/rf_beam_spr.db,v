@@ -1,0 +1,281 @@
+head	1.11;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.11
+	RF-SPEAR-R0-3-1:1.11
+	RF-SPEAR-R0-3-0:1.10
+	RF-SPEAR-R0-2-0:1.8
+	RF-SPEAR-R0-1-0:1.8
+	RF-SPEAR-R0-0-3:1.8
+	RF-SPEAR-R0-0-2:1.7
+	RF-SPEAR-R0-0-1:1.7
+	RF-SPEAR-R0-0-0:1.7
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.7
+	RF-3-13-10:1.7.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.7
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.7
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.7;
+locks; strict;
+comment	@# @;
+
+
+1.11
+date	2020.09.13.00.41.19;	author scondam;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2018.10.15.17.14.34;	author scondam;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2017.07.11.20.02.53;	author spear;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2014.07.13.18.08.51;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2007.02.06.22.10.30;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2007.02.06.22.02.22;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2005.11.22.17.58.06;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.03.24.01.30.29;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.02.27.00.47.48;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2004.01.22.00.28.07;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.02.02.50;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.11
+log
+@Commit changes made in production in 2018 to CVS
+@
+text
+@grecord(ai,"$(R):STN:BEAM:CURR") {
+	field(DESC,"SPEAR Beam Current")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(R):STN:BEAM:STATINP.VAL  PP NMS")
+	field(INP,"SPEAR:BeamCurrAvg1S.VAL CPP MS")
+	field(PREC,"1")
+	field(EGU,"mA")
+	field(HOPR,"500")
+	field(MDEL,"0.1")
+}
+grecord(ao,"$(R):RF:CUTOFF") {
+	field(DESC,"SPEAR Beam Curr Limit")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(R):STN:BEAM:STATINP.VAL  PP NMS")
+	field(EGU,"mA")
+	field(DRVH,"550")
+	field(HOPR,"100")
+	field(MDEL,"-1")
+}
+grecord(bi,"$(R):STN:BEAM:STAT") {
+	field(DESC,"SPEAR Beam Avail")
+	field(DTYP,"Soft Channel")
+	field(INP,"$(R):STN:BEAM:STATINP.VAL  NPP MS")
+	field(ZSV,"MAJOR")
+	field(ZNAM,"OFF")
+	field(ONAM,"ON")
+}
+grecord(calc,"$(R):STN:BEAM:STATINP") {
+	field(DESC,"SPEAR Beam Curr Compare")
+	field(FLNK,"$(R):STN:BEAM:STAT.VAL  PP NMS")
+	field(CALC,"A<C?0:1")
+	field(INPA,"$(R):STN:BEAM:CURR.VAL  NPP")
+	field(INPB,"$(R):STN:BEAM:CURR.SEVR  NPP NMS")
+	field(INPC,"$(R):RF:CUTOFF.VAL  NPP NMS")
+}
+# Magic T post alarm limits need to be set based on outdoor ambient temp.
+# Normal diff between post and ambient is 42deg.  On cold days, just set
+# alarm limits to 75 (yellow) and 80 (red). 
+grecord(calcout,"$(R):HVPSOIL:TEMPHIHI") {
+	field(DESC,"HIHI Alarm Limit")
+	field(FLNK,"$(R):HVPSOIL:TEMPHIGH")
+	field(CALC,"A>50?D:((A+B+C)<D?D:(A+B+C))")
+#	field(INPA,"spr:TG09R2C4/AM1 CPP")
+#	field(INPA,"09G-TC:R2C04Temp CPP")
+	field(INPA,"116-TC:R1C04Temp CPP")
+	field(B,"42")
+	field(C,"15")
+# scondam: 18-Oct-2018: Changed limit per SPEAR3 elog entry 	961133	
+#	field(D,"80")
+	field(D,"90")
+	field(OUT,"$(R):HVPSOIL:TEMP.HIHI")
+}
+grecord(calcout,"$(R):HVPSOIL:TEMPHIGH") {
+	field(DESC,"HIGH Alarm Limit")
+	field(CALC,"A>50?D:((A+B+C)<D?D:(A+B+C))")
+	field(INPA,"$(R):HVPSOIL:TEMPHIHI.A")
+	field(INPB,"$(R):HVPSOIL:TEMPHIHI.B")
+	field(C,"10")
+# scondam: 18-Oct-2018: Changed limit per SPEAR3 elog entry 	961133		
+#	field(D,"75")
+	field(D,"85")
+	field(OUT,"$(R):HVPSOIL:TEMP.HIGH PP")
+}
+@
+
+
+1.10
+log
+@Per Domenico TC PV name changed from 09G-TC:R2C04Temp to 116-TC:R1C04Temp
+@
+text
+@d49 3
+a51 1
+	field(D,"80")
+d60 3
+a62 1
+	field(D,"75")
+@
+
+
+1.9
+log
+@Replace obsolete VMS TC PV with CAMAC TC PV
+@
+text
+@d45 2
+a46 1
+	field(INPA,"09G-TC:R2C04Temp CPP")	
+@
+
+
+1.8
+log
+@Add records to calculate magic T post temp based on ambient temp.
+@
+text
+@d44 2
+a45 1
+	field(INPA,"spr:TG09R2C4/AM1 CPP")
+@
+
+
+1.7
+log
+@Don't maximize beam current severity - use it as an separate input.
+@
+text
+@d37 22
+@
+
+
+1.6
+log
+@Don't check beam current severity.
+@
+text
+@d33 1
+a33 1
+	field(INPA,"$(R):STN:BEAM:CURR.VAL  NPP MS")
+@
+
+
+1.5
+log
+@Increased DRVH (upper limit) from 500 to 550 on beam cutoff for when
+the load angle offset calculation activates.  Affects SPEAR only.
+@
+text
+@d32 1
+a32 1
+	field(CALC,"B=3?0:A<C?0:1")
+@
+
+
+1.4
+log
+@Maximize severity so that a bad beam current makes the downstream calc be bad.
+@
+text
+@d17 1
+a17 1
+	field(DRVH,"500")
+@
+
+
+1.3
+log
+@Changed SPEAR beam current to be the 1 second calculation.
+@
+text
+@d24 1
+a24 1
+	field(INP,"$(R):STN:BEAM:STATINP.VAL  NPP NMS")
+d33 1
+a33 1
+	field(INPA,"$(R):STN:BEAM:CURR.VAL  NPP NMS")
+@
+
+
+1.2
+log
+@Corrected beam current and RF cutoff.
+@
+text
+@d5 1
+a5 1
+	field(INP,"SPEAR:BeamCurrAvg.VAL CPP MS")
+@
+
+
+1.1
+log
+@RF Beam Current
+@
+text
+@d2 1
+a2 1
+	field(DESC,"Spear Beam Current")
+d4 3
+a6 1
+	field(INP,"0")
+d8 1
+a8 1
+	field(HOPR,"2000")
+d11 10
+d22 1
+a22 1
+	field(DESC,"Spear Beam Avail")
+d24 1
+a24 1
+	field(INP,"0")
+d29 8
+@
+

@@ -1,0 +1,321 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  infoFxn/setInfo.c
+
+  This module provides setInfo routines.
+***************************************************************************/
+
+#include <vxWorks.h>
+#include <string.h>
+
+#include <kscvxi.h>
+#include <devinfo.h>
+
+#include <libvar.h>
+
+
+/*==========================================================================
+			    PRIVATE ROUTINES
+==========================================================================*/
+
+/*==========================================================================
+  findDevInfo
+==========================================================================*/
+
+static
+UserLAEntry* findDevInfo (INT16 la)
+{
+  UserLAEntry* entry;
+
+  for (entry = vxiDevHead;  entry;  entry = entry->next) {
+    if (entry->la == la)  return entry;
+  }
+
+  return NULL;
+}
+
+
+/*==========================================================================
+  parseLong
+==========================================================================*/
+
+static
+int parseLong (UserLAEntry* entry, int field, UINT32 value)
+{
+  switch (field) {
+  case DI_MEMBASE:
+    entry->MemBase = value;
+    break;
+  case DI_MEMSIZE:
+    entry->MemSize = value;
+    break;
+
+  default:
+    return (-1);
+  }
+
+  return 0;
+}
+
+
+/*==========================================================================
+  parseShort
+==========================================================================*/
+
+static
+int parseShort (UserLAEntry* entry, int field, UINT16 value)
+{
+  switch (field) {
+  case DI_CMDR:
+    entry->Cmdr = value;
+    break;
+  case DI_FRAME:
+    entry->Mainframe = value;
+    break;
+  case DI_SLOT:
+    entry->Slot = value;
+    break;
+  case DI_MANID:
+    entry->ManId = value;
+    break;
+  case DI_MODELCODE:
+    entry->ModelCode = value;
+    break;
+  case DI_DEVCLASS:
+    entry->DevClass = value;
+    break;
+  case DI_SUBCLASS:
+    entry->SubClass = value;
+    break;
+  case DI_MEMSPACE:
+    entry->MemSpace = value;
+    break;
+  case DI_MEMTYPE:
+    entry->MemType = value;
+    break;
+  case DI_IRQLEVEL:
+    entry->IrqLevel = value;
+    break;
+  case DI_IRQHANDLE:
+    entry->IrqHandle = value;
+    break;
+  case DI_EXTINFO:
+    entry->ExtInfo = value;
+    break;
+  case DI_ASYNCMODE:
+    entry->AsyncMode = value;
+    break;
+  case DI_RESPENA:
+    entry->RespEnable = value;
+    break;
+  case DI_PROT:
+    entry->Prot = value;
+    break;
+  case DI_FLAGS:
+    entry->Flags = value;
+    break;
+  case DI_STATUSSTATE:
+    entry->StatusState = value;
+    break;
+
+  default:
+    return (-1);
+  }
+
+  return 0;
+}
+
+
+/*==========================================================================
+  parseString
+==========================================================================*/
+
+static
+int parseString (UserLAEntry* entry, int field, UINT8* value)
+{
+  switch (field) {
+  case DI_DEVNAME:
+    strncpy (entry->DevName, value, 14-1);
+    break;
+  case DI_MANNAME:
+    strncpy (entry->ManName, value, 14-1);
+    break;
+  case DI_MODELNAME:
+    strncpy (entry->ModelName, value, 14-1);
+    break;
+
+  default:
+    return (-1);
+  }
+
+  return 0;
+}
+
+
+
+
+/*==========================================================================
+			    PUBLIC ROUTINES
+==========================================================================*/
+
+/*==========================================================================
+  SetDevInfo
+==========================================================================*/
+
+INT16 SetDevInfo (INT16 la, UINT16 field, void* value)
+{
+  UserLAEntry* entry;
+
+  if (entry = findDevInfo(la),  !entry)
+    return -1;
+
+  switch (field) {
+  case DI_DIENTRY:
+    *entry = *(UserLAEntry*)value;
+    return 0;
+
+  case DI_DEVNAME:
+  case DI_MANNAME:
+  case DI_MODELNAME:
+    return parseString (entry, field, value);
+
+  case DI_CMDR:
+  case DI_FRAME:
+  case DI_SLOT:
+  case DI_MANID:
+  case DI_MODELCODE:
+  case DI_DEVCLASS:
+  case DI_SUBCLASS:
+  case DI_MEMSPACE:
+  case DI_MEMTYPE:
+  case DI_IRQLEVEL:
+  case DI_IRQHANDLE:
+  case DI_EXTINFO:
+  case DI_ASYNCMODE:
+  case DI_RESPENA:
+  case DI_PROT:
+  case DI_FLAGS:
+  case DI_STATUSSTATE:
+    return parseShort (entry, field, *(UINT16*) value);
+
+  case DI_MEMBASE:
+  case DI_MEMSIZE:
+    return parseLong (entry, field, *(UINT32*) value);
+  }
+
+  return -2;
+}
+
+		 
+/*==========================================================================
+  SetDevInfoLong
+==========================================================================*/
+
+INT16 SetDevInfoLong (INT16 la, UINT16 field, UINT32 value)
+{
+  UserLAEntry* entry;
+
+  if (entry = findDevInfo(la),  !entry)
+    return -1;
+
+  return parseLong (entry, field, value);
+}
+
+
+/*==========================================================================
+  SetDevInfoShort
+==========================================================================*/
+
+INT16 SetDevInfoShort (INT16 la, UINT16 field, UINT16 value)
+{
+  UserLAEntry* entry;
+
+  if (entry = findDevInfo(la),  !entry)
+    return -1;
+
+  return parseShort (entry, field, value);
+}
+
+
+/*==========================================================================
+  SetDevInfoStr
+==========================================================================*/
+
+INT16 SetDevInfoStr (INT16 la, UINT16 field, UINT8* value)
+{
+  UserLAEntry* entry;
+
+  if (entry = findDevInfo(la),  !entry)
+    return -1;
+
+  return parseString (entry, field, value);
+}
+
+
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

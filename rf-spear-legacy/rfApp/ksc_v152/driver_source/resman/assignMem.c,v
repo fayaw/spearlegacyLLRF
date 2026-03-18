@@ -1,0 +1,270 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  assignMem.c
+
+  Auxiliary (old) routines for MXI Resource Manager's Configure system
+  A24/A32 address maps function (third of six parts) per section
+  C.4.1.3, Rule C.4.8 of VXIbus System Specification VXI-1, Rev. 1.4;
+
+  MXI functionality per section F.2 of Mainframe Extender Specification
+  VXI-6, Rev. 1.0; 2/7/91
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include "resman.h"
+
+
+#ifndef max
+#define max(a,b) ((a > b)? (a) : (b))
+#endif
+
+#if 0 /* Moved to resman.h */
+typedef struct block {
+  unsigned short base;
+  unsigned short size;
+  struct block  *next;
+} block_t;
+#endif
+
+typedef struct map {
+  unsigned short logAdr;
+  unsigned short memRqmt;
+} map_t;
+
+
+/*==========================================================================
+  memRqmtCompare
+==========================================================================*/
+
+int memRqmtCompare( const map_t *a, const map_t *b )
+{
+   if( (b)->memRqmt == (a)->memRqmt ) return 0;
+   else if( (b)->memRqmt < (a)->memRqmt ) return -1;
+   else return 1;
+}
+
+#if 0 /* This function has been replaced in allocMem.c */
+/*==========================================================================
+  findMemBlock 
+
+  Returns TRUE if it found a suitable block;
+          FALSE if nothing big enough is free.
+
+  Args:   root - pointer to linked list of free blocks (IN)
+          memRqmt - how much memory is needed (IN)
+          where - pointer to the base address of the block (OUT)
+==========================================================================*/
+
+unsigned short findMemBlock( block_t        *root, 
+                             unsigned short  memRqmt, 
+                             unsigned short *where )
+{
+   unsigned short found = FALSE;
+
+   while( !found && (root != NULL) )
+   {
+      if( root->size >= memRqmt )
+      {
+         found  = TRUE;
+         *where = root->base;
+         root->base += memRqmt;  /* update size of this block */
+         root->size -= memRqmt;  /* update size of this block */
+      }
+      else
+      {
+         root = root->next;
+      }
+   }
+   return( found );
+}
+#endif
+
+
+/*==========================================================================
+  findLAConfig
+==========================================================================*/
+
+config_t *findLAConfig( unsigned short logAdr, 
+                        config_t *root )
+{
+   config_t *thisLA;
+
+   for( thisLA = root; thisLA != NULL; thisLA = thisLA->next )
+   {
+      if( thisLA->logAdr == logAdr )
+      {
+         return( thisLA );
+      }
+   }
+   return( thisLA );
+}
+
+
+/*==========================================================================
+  assignMemory
+==========================================================================*/
+
+int assignMemory( unsigned short adrSpace,
+                  unsigned short mainframe,
+                  unsigned short base )
+{
+   block_t  rootAXX;
+   config_t *thisLA;
+   map_t    *memNeeds = NULL;
+   unsigned int aXXCount, aXXNeeded;
+   unsigned int i, j;
+   unsigned short vxiBase;
+   unsigned short blkBase;
+   unsigned short status;
+
+/* OPTIONAL:  READ MEMORY REQUIREMENTS OF NON-VXI DEVICES FROM FILE */
+
+/* CALCULATE A24 AND A32 OFFSETS SUCH THAT NO TWO DEVICE'S ADDRESS SPACES
+ * OVERLAP (START WITH LARGEST BLOCKS AND WORK DOWN TO SMALLEST ONES)
+ * A24 space should be   0x40_0000 ..   0xDF_FFFF
+ * A32 space should be 0x4000_0000 .. 0xDFFF_FFFF
+ */
+   rootAXX.base = base;
+   rootAXX.size = (0xA000 + 0x4000) - base;  /* CHECK THIS!!! */
+   rootAXX.next = (block_t *)NULL;
+
+/* DETERMINE WHICH DEVICES IMPLEMENT A24 OR A32 REGISTERS BY READING THE
+ * ADDRESS SPACE FIELD OF EACH DEVICE'S ID REGISTER (actually, from list)
+ * Here we count 'em so we know how much to malloc up later.
+ * Also, we take some statistics so we know how much A24 & A32 will be used.
+ */
+   aXXCount = aXXNeeded = 0;
+   for( thisLA = HEAD; thisLA != NULL; thisLA = thisLA->next )
+   {
+      if( (thisLA->adrSpace == adrSpace)
+          &&
+          (thisLA->mainframe == mainframe)
+        )
+      {
+         aXXCount++;
+         aXXNeeded += (1 << (15 - thisLA->memRqmt));
+      }
+   }
+
+/* MALLOC UP ENOUGH FOR ALL THE DEVICES WITH MEMORY
+ * BUT ONLY DO IT if there's at least 1 module with A24/A32 memory (15mar)
+ */
+ if( aXXCount )
+ {
+   assert(memNeeds = (map_t *)calloc( aXXCount, sizeof( map_t ) ));
+
+/* DETERMINE THE NUMBER OF A24 REGISTERS IMPLEMENTED BY EACH DEVICE
+ * BY READING THE REQUIRED MEMORY FIELD OF THE DEVICE'S DEVICE TYPE REGISTER
+ */
+   i = 0;
+   for( thisLA = HEAD; thisLA != NULL; thisLA = thisLA->next )
+   {
+      if( (thisLA->adrSpace == adrSpace)
+          &&
+          (thisLA->mainframe == mainframe)
+        )
+      {
+         memNeeds[i].logAdr  = thisLA->logAdr;
+         memNeeds[i].memRqmt = (1 << (15 - thisLA->memRqmt));
+         /*memNeeds[i].memRqmt = 0x800000L >> thisLA->memRqmt;*/
+         i++;
+      }
+   }  /* endfor all devices */
+
+/* CALCULATE A24 OFFSETS SUCH THAT NO TWO DEVICE'S ADDRESS SPACES
+ * OVERLAP (START WITH LARGEST BLOCKS AND WORK DOWN TO SMALLEST ONES)
+ */
+   qsort( memNeeds, i, sizeof( map_t ), (int(*)()) memRqmtCompare );
+   for( j = 0; j < i; j++ )
+   {
+      BreakLargeBlocks(memNeeds[j].memRqmt << 1); /*Break all larger blocks*/
+      status = findMemBlock( /* &rootAXX, */ /* no longer used */
+                             memNeeds[j].memRqmt,
+                             &blkBase );
+      if( status == FALSE )
+         WARN "Not enough VXI memory left for device @@ LA %3d (requires 0x%X)."
+            "\n", memNeeds[j].logAdr, memNeeds[j].memRqmt);
+      else
+      {
+         thisLA = findLAConfig( memNeeds[j].logAdr, HEAD );
+         thisLA->offset = blkBase;
+      }
+   }   /* endfor j */
+
+/* endif >= 1 device with memory */
+ }
+
+/* RELEASE ALLOCATED MEMORY & RETURN "ok" CODE (added 'if' 13jun95) */
+   if( memNeeds ) free( memNeeds );
+   return( 0 );
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

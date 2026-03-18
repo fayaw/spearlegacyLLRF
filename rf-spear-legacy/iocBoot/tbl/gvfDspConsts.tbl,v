@@ -1,0 +1,63 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R1_0:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.12.04.15.06.59;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.12.04.15.06.59;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@GVF DSP constants
+0xdead		Overlayed with current I_REF
+0xdead		Overlayed with current Q_REF
+0xffdf		I Adaption Rate,  hex format: si.ff,ffff,ffff,ffff
+0xffdf		Q Adaption Rate,  hex format: si.ff,ffff,ffff,ffff
+0x3fff		I Forget Factor,  hex format: si.ff,ffff,ffff,ffff
+0x3fff		Q Forget Factor,  hex format: si.ff,ffff,ffff,ffff
+131		Circular Buffer Loading Displacement, 0 <= d <= 143 (base 10)
+0x1f00		Displacement Vernier, hex format: si.ff,ffff,ffff,ffff
+@
+
+
+1.1.1.1
+log
+@initial import
+@
+text
+@@

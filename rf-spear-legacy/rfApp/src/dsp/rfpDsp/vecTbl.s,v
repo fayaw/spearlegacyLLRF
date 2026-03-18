@@ -1,0 +1,168 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.1
+date	2003.01.10.23.22.42;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.42;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP - DSP code
+**
+**  Abstract:
+**      DSP code to test interrupts both to and from a DSP board.
+**
+**  Author:
+**      R. Claus, SLAC/PEP-II Feedback Project
+**
+**  History:
+**      January 6, 1994 - Created
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+#include <1610.h>
+
+#include "dspDef.h"
+#include "comDef.h"
+#include "intDef.h"
+#include "sttDef.h"
+
+
+.extern SOS
+.global InitVecTbl
+
+
+.rsect ".ram"
+
+UnInitInt:
+/*
+   Description
+   -----------
+   Interrupt Service Routine that runs when an uninitialized interrupt
+   is triggered.  This ISR causes a bugcheck when it is called.  This
+   is meant to trap spurious interrupts.  Uninitialized vectors power
+   up containing zero, which is an opcode for branch to location zero,
+   in other words, reboot.  At least, I think.
+
+   Registers used
+   --------------
+	       r3 - General
+	       a0 - Scratch
+*/
+	r3     = Status                 /* Place to store status */
+	a0     = STT_UNINIINT           /* Error message */
+	*r3++  = a0                     /* Store it */
+	r3     = SttArg                 /* Place to store status arguments */
+	*r3++  = pr                     /* Address we vectored through */
+	*r3    = pi                     /* Address at which exception occured */
+	call     SOS                    /* Never returns */
+
+
+
+InitVecTbl:
+/*
+   Description
+   -----------
+   Routine to initialize unused interrupt vectors.  Unused vectors are
+   loaded with the UnInitInt ISR above.
+
+   Registers used
+   --------------
+	       r0 - Pointer into the vector table
+               r1 - Pointer to the instruction template
+	       a0 - Instruction template
+	       a1 - scratch
+*/
+	r0     = DSP_A_VECTBL           /* Address of vector table */
+	r1     = Inst                   /* Store instruction template in acc */
+	a0     = *r1
+	a0l    = 0                      /* Clear lower half */
+	*r0    = a1                     /* Overwrite Reset vector */
+	p      = 0
+	pl     = 0
+	do DSP_K_VECCNT {               /* Max number of vects to init */
+	  a1    = *r0                   /* Vect already initted? */
+	  a1 - p
+	  if eq a1 = a0                 /* No, load new instruction */
+	  *r0++ = a1                    /* Store instruction, next vector */
+	}
+	return
+
+/* Define the template instruction */
+Inst:   call     UnInitInt              /* Template instruction */
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

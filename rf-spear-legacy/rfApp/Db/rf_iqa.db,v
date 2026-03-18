@@ -1,0 +1,162 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2008.05.19.15.42.46;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.44;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.44;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Change Deg to deg.
+@
+text
+@grecord(ao,"$(S):$(C)$(Q):A:SMOO") {
+	field(DESC,"$(C) $(D) Smooth Fac")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(S):$(C)$(Q):$(QS).J  NPP NMS")
+	field(PREC,"3")
+	field(EGUF,"1")
+	field(DRVH,"1")
+	field(HOPR,"1")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(ao,"$(S):$(C)$(Q):PHASE:OFFS") {
+	field(DESC,"$(C) $(D) Phase Offset")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(S):$(C)$(Q):PHASE.C  NPP NMS")
+	field(PREC,"2")
+	field(EGUF,"180")
+	field(EGUL,"-180")
+	field(EGU,"deg")
+	field(DRVH,"180")
+	field(DRVL,"-180")
+	field(HOPR,"180")
+	field(LOPR,"-180")
+	field(MDEL,"-1")
+	field(IVOA,"Don't drive outputs")
+}
+grecord(bi,"$(S):$(C)$(Q):$(QS):FRST") {
+	field(DESC,"$(C) $(D) $(QS) Fault")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(S):$(C)$(G):$(N):FRST.PROC")
+	field(INP,"$(S):STN:$(W):FRST.B$(B) NPP MS")
+	field(OSV,"MAJOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(bi,"$(S):$(C)$(Q):$(QS):LTCH") {
+	field(DESC,"$(C) $(D) $(QS) Fault")
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(S):$(C)$(G):$(N):LTCH.PROC")
+	field(INP,"$(S):STN:$(W):LTCH.B$(B) NPP MS")
+	field(OSV,"MAJOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(sub,"$(S):$(C)$(Q):$(QS)") {
+	field(DESC,"$(C) $(D) $(QS)")
+	field(FLNK,"$(S):$(C)$(F)")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQpower")
+	field(INPA,"$(S):$(C)$(Q):$(IP)  NPP MS")
+	field(INPB,"$(S):$(C)$(Q):$(QP)  NPP MS")
+	field(INPC,"$(S):$(C)$(Q):IQ:SCALE.VAL  NPP MS")
+	field(INPE,"$(S):$(C)$(Q):VOLT:ULIM.F  NPP NMS")
+	field(INPF,"$(S):STN:STATE:RBCK.VAL  NPP NMS")
+	field(INPG,"$(S):STN:$(W):MODU.AD$(CH)  NPP NMS")
+	field(INPH,"$(S):$(C)$(Q):A:SCALE.VAL  NPP MS")
+	field(EGU,"$(E)")
+	field(HOPR,"$(H)")
+	field(HIHI,"$(H)")
+	field(LOLO,"-1E30")
+	field(HIGH,"$(H)")
+	field(LOW,"-1E30")
+	field(PREC,"$(P)")
+	field(BRSV,"INVALID")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MAJOR")
+	field(HSV,"MINOR")
+	field(LSV,"MINOR")
+	field(HYST,"0.99")
+	field(ADEL,"$(M)")
+	field(MDEL,"$(M)")
+}
+grecord(sub,"$(S):$(C)$(Q):PHASE") {
+	field(DESC,"$(C) $(D) Phase")
+	field(FLNK,"$(S):$(C)$(Q):$(QS).VAL  PP NMS")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQphase")
+	field(INPA,"$(S):$(C)$(Q):$(IP)  NPP MS")
+	field(INPB,"$(S):$(C)$(Q):$(QP)  NPP MS")
+	field(EGU,"deg")
+	field(HOPR,"180")
+	field(LOPR,"-180")
+	field(PREC,"$(PP)")
+	field(BRSV,"INVALID")
+	field(HYST,"0.99")
+	field(ADEL,"0.99")
+	field(MDEL,"0.1")
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d21 1
+a21 1
+	field(EGU,"Deg")
+d82 1
+a82 1
+	field(EGU,"Deg")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

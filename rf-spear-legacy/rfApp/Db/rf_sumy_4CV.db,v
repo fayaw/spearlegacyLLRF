@@ -1,0 +1,283 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.3.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.3
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.3
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.3;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2009.06.19.19.13.02;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2004.01.05.19.45.02;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.01.17.11;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Move station voltage calc to rf_stn_cav.db.
+@
+text
+@# Macros:
+#   S = Station (HR81, etc)
+# 
+record(fanout,"$(S):WGAIR:FANO:FRST") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):WG01:SUMY:FRST.PROC")
+	field(LNK2,"$(S):WG02:SUMY:FRST.PROC")
+	field(LNK3,"$(S):WG03:SUMY:FRST.PROC")
+}
+record(fanout,"$(S):WGAIR:FANO:LTCH") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):WGAIR:NIRP:STATC.PROC")
+	field(LNK2,"$(S):WG01:SUMY:LTCH.PROC")
+	field(LNK3,"$(S):WG02:SUMY:LTCH.PROC")
+	field(LNK4,"$(S):WG03:SUMY:LTCH.PROC")
+}
+record(fanout,"$(S):CAVTUNR:FANO:LTCH") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):CAV1TUNR:SUMY:LTCH.PROC")
+	field(LNK2,"$(S):CAV2TUNR:SUMY:LTCH.PROC")
+	field(LNK3,"$(S):CAV3TUNR:SUMY:LTCH.PROC")
+	field(LNK4,"$(S):CAV4TUNR:SUMY:LTCH.PROC")
+}
+record(fanout,"$(S):CAVTUNR:FANO:FRST") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):CAV1TUNR:SUMY:FRST.PROC")
+	field(LNK2,"$(S):CAV2TUNR:SUMY:FRST.PROC")
+	field(LNK3,"$(S):CAV3TUNR:SUMY:FRST.PROC")
+	field(LNK4,"$(S):CAV4TUNR:SUMY:FRST.PROC")
+}
+record(fanout,"$(S):CAVLOAD:ANGLE:FANO") {
+	field(DESC,"Ld Angle Offset Enable Fano")
+	field(LNK1,"$(S):CAV1LOAD:ANGLE:OFFS.PROC")
+	field(LNK2,"$(S):CAV2LOAD:ANGLE:OFFS.PROC")
+	field(LNK3,"$(S):CAV3LOAD:ANGLE:OFFS.PROC")
+	field(LNK4,"$(S):CAV4LOAD:ANGLE:OFFS.PROC")
+}
+record(fanout,"$(S):STNHCWTEMP:FANO:LTCH") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):CIRCTEMP:SUMY:LTCH.PROC")
+	field(LNK2,"$(S):WG02TEMP:SUMY:LTCH.PROC")
+}
+record(fanout,"$(S):STNHCWTEMP:FANO:FRST") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):CIRCTEMP:SUMY:FRST.PROC")
+	field(LNK2,"$(S):WG02TEMP:SUMY:FRST.PROC")
+}
+record(fanout,"$(S):STNHCW2FLOW:FANO:FRST") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):WG02:SUMY:FRST.VAL")
+	field(LNK2,"$(S):WG03:SUMY:FRST.VAL")
+}
+record(fanout,"$(S):STNHCW2FLOW:FANO:LTCH") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):WG02:SUMY:LTCH.VAL")
+	field(LNK2,"$(S):WG03:SUMY:LTCH.VAL")
+}
+record(fanout,"$(S):WG02HCWTEMP:FANO:LTCH") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):WG02TEMP:SUMY:LTCH.VAL")
+	field(LNK2,"$(S):WG03TEMP:SUMY:LTCH.VAL")
+}
+record(fanout,"$(S):WG02HCWTEMP:FANO:FRST") {
+	field(DESC,"Severity Fanout")
+	field(LNK1,"$(S):WG02TEMP:SUMY:FRST.VAL")
+	field(LNK2,"$(S):WG03TEMP:SUMY:FRST.VAL")
+}
+record(fanout,"$(S):STN:IQA3:LTCHFANO") {
+	field(DESC,"IQA3 Ampl Latch Fanout")
+	field(LNK1,"$(S):CAV3FRWD:POWER:LTCH.PROC")
+	field(LNK2,"$(S):CAV4FRWD:POWER:LTCH.PROC")
+	field(LNK3,"$(S):WG03LDFRWD:POWER:LTCH.PROC")
+	field(LNK4,"$(S):CAV3FRWD:POWER:FRST.PROC")
+	field(LNK5,"$(S):CAV4FRWD:POWER:FRST.PROC")
+	field(LNK6,"$(S):WG03LDFRWD:POWER:FRST.PROC")
+}
+record(fanout,"$(S):STN:IQA3:IQFANO") {
+	field(DESC,"IQA3 IQ Data Fanout")
+	field(FLNK,"$(S):STN:IQA3:SEL.VAL")
+	field(LNK1,"$(S):CAV3FRWD:SCLIQ.PROC")
+	field(LNK2,"$(S):CAV4FRWD:SCLIQ.PROC")
+	field(LNK3,"$(S):WG03LDFRWD:SCLIQ.PROC")
+	field(LNK4,"$(S):STN:VOLT.PROC")
+}
+record(fanout,"$(S):STN:IQA2:LTCHFANO") {
+	field(DESC,"IQA2 Ampl Latch Fanout")
+	field(LNK1,"$(S):CAV1FRWD:POWER:LTCH.PROC")
+	field(LNK2,"$(S):CAV2FRWD:POWER:LTCH.PROC")
+	field(LNK3,"$(S):WG02LDFRWD:POWER:LTCH.PROC")
+	field(LNK4,"$(S):CAV1FRWD:POWER:FRST.PROC")
+	field(LNK5,"$(S):CAV2FRWD:POWER:FRST.PROC")
+	field(LNK6,"$(S):WG02LDFRWD:POWER:FRST.PROC")
+}
+record(fanout,"$(S):STN:IQA2:IQFANO") {
+	field(DESC,"IQA2 IQ Data Fanout")
+	field(FLNK,"$(S):STN:IQA2:SEL.VAL")
+	field(LNK1,"$(S):CAV1FRWD:SCLIQ.PROC")
+	field(LNK2,"$(S):CAV2FRWD:SCLIQ.PROC")
+	field(LNK3,"$(S):WG02LDFRWD:SCLIQ.PROC")
+	field(LNK4,"$(S):STN:IQA3:GET.VAL")
+}
+record(fanout,"$(S):STN:IQA1:LTCHFANO") {
+	field(DESC,"IQA1 Ampl Latch Fanout")
+	field(FLNK,"$(S):STNREF:POWER:FANO.PROC")
+	field(LNK1,"$(S):CIRCLDFRWD:POWER:LTCH.PROC")
+	field(LNK2,"$(S):KLYSOUTFRWD:POWER:LTCH.PROC")
+	field(LNK3,"$(S):WG01LDFRWD:POWER:LTCH.PROC")
+	field(LNK4,"$(S):CIRCLDFRWD:POWER:FRST.PROC")
+	field(LNK5,"$(S):KLYSOUTFRWD:POWER:FRST.PROC")
+	field(LNK6,"$(S):WG01LDFRWD:POWER:FRST.PROC")
+}
+record(fanout,"$(S):STN:IQA1:IQFANO") {
+	field(DESC,"IQA1 IQ Data Fanout")
+	field(FLNK,"$(S):STN:IQA1:SEL.VAL")
+	field(LNK1,"$(S):CIRCLDFRWD:SCLIQ.PROC")
+	field(LNK2,"$(S):KLYSOUTFRWD:SCLIQ.PROC")
+	field(LNK3,"$(S):WG01LDFRWD:SCLIQ.PROC")
+	field(LNK4,"$(S):STNREF:SCLIQ.PROC")
+	field(LNK5,"$(S):STN:IQA2:GET.VAL")
+}
+record(fanout,"$(S):STN:STATE:FANO") {
+	field(DESC,"Station State Fanout")
+	field(LNK1,"$(S):CAV1REFL:VOLT:ULIM.PROC")
+	field(LNK2,"$(S):CAV2REFL:VOLT:ULIM.PROC")
+	field(LNK3,"$(S):CAV3REFL:VOLT:ULIM.PROC")
+	field(LNK4,"$(S):CAV4REFL:VOLT:ULIM.PROC")
+	field(LNK5,"$(S):CAVLOAD:ANGLE:SELMAX.PROC")
+}
+record(seq,"$(S):CAVLOAD:ANGLE:EMAXSEQ") {
+	field(DESC,"Load Angle Error Max Seq")
+	field(DOL1,"$(S):CAVLOAD:ANGLE:SELMAX.VAL NPP NMS")
+	field(LNK1,"$(S):CAV1LOAD:ANGLE:ERR.HIGH NPP NMS")
+	field(DOL2,"$(S):CAVLOAD:ANGLE:SELMIN.VAL NPP NMS")
+	field(LNK2,"$(S):CAV1LOAD:ANGLE:ERR.LOW NPP NMS")
+	field(DOL3,"$(S):CAVLOAD:ANGLE:SELMAX.VAL NPP NMS")
+	field(LNK3,"$(S):CAV2LOAD:ANGLE:ERR.HIGH NPP NMS")
+	field(DOL4,"$(S):CAVLOAD:ANGLE:SELMIN.VAL NPP NMS")
+	field(LNK4,"$(S):CAV2LOAD:ANGLE:ERR.LOW NPP NMS")
+	field(DOL5,"$(S):CAVLOAD:ANGLE:SELMAX.VAL NPP NMS")
+	field(LNK5,"$(S):CAV3LOAD:ANGLE:ERR.HIGH NPP NMS")
+	field(DOL6,"$(S):CAVLOAD:ANGLE:SELMIN.VAL NPP NMS")
+	field(LNK6,"$(S):CAV3LOAD:ANGLE:ERR.LOW NPP NMS")
+	field(DOL7,"$(S):CAVLOAD:ANGLE:SELMAX.VAL NPP NMS")
+	field(LNK7,"$(S):CAV4LOAD:ANGLE:ERR.HIGH NPP NMS")
+	field(DOL8,"$(S):CAVLOAD:ANGLE:SELMIN.VAL NPP NMS")
+	field(LNK8,"$(S):CAV4LOAD:ANGLE:ERR.LOW NPP NMS")
+}
+record(fanout,"$(S):CAV:FREQOFFSHIST:FANO") {
+	field(DESC,"Cavity History Fanout")
+	field(FLNK,"$(S):KLYSDRIVFRWD:POWER:HIST.PROC")
+	field(LNK1,"$(S):CAV1:FREQ:OFFSHIST.PROC")
+	field(LNK2,"$(S):CAV2:FREQ:OFFSHIST.PROC")
+	field(LNK3,"$(S):CAV3:FREQ:OFFSHIST.PROC")
+	field(LNK4,"$(S):CAV4:FREQ:OFFSHIST.PROC")
+}
+record(fanout,"$(S):CAV:STRENGTH:FANO") {
+	field(DESC,"Cavity Strength Fanout")
+	field(FLNK,"$(S):CAVLDANGERR:SUMY:SEVR.VAL")
+	field(LNK1,"$(S):CAV1:STRENGTH.PROC")
+	field(LNK2,"$(S):CAV2:STRENGTH.PROC")
+	field(LNK3,"$(S):CAV3:STRENGTH.PROC")
+	field(LNK4,"$(S):CAV4:STRENGTH.PROC")
+}
+@
+
+
+1.2
+log
+@SPEAR uses all arc interlock channels available on the new arc interlock
+module (vacuum and air side for all 4 cavities).  SPEAR uses the arc channel
+reserved for MPS.  All arc interlock records moved out of rf_digital*.template
+and into rf_stn*.template (where 4CVAll uses all channels).  Arc summaries are
+moved out of rf_sumy_(2CV,4CV).db into rf_sumy_arc_(2CV,4CV,4CVAll).db.
+@
+text
+@a163 15
+record(sub,"$(S):STN:VOLT") {
+	field(DESC,"Station Voltage")
+	field(FLNK,"$(S):STNVOLT:DAC:DELTA.VAL")
+	field(INAM,"subIQinit")
+	field(SNAM,"subIQamplStn")
+	field(INPA,"$(S):CAV1PROBE:AMPL.VAL  NPP MS")
+	field(INPB,"$(S):CAV2PROBE:AMPL.VAL  NPP MS")
+	field(INPC,"$(S):CAV3PROBE:AMPL.VAL  NPP MS")
+	field(INPD,"$(S):CAV4PROBE:AMPL.VAL  NPP MS")
+	field(EGU,"kV")
+	field(HOPR,"3500")
+	field(BRSV,"INVALID")
+	field(ADEL,"0.99")
+	field(MDEL,"0.99")
+}
+@
+
+
+1.1
+log
+@Rename
+@
+text
+@a3 14
+record(calc,"$(S):CAV1:ARC:LTCH") {
+	field(DESC,"CAV1 Arc Status Sum")
+	field(FLNK,"$(S):CAV1:SUMY:LTCH.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1_1:ARC:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):CAV1_2:ARC:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):CAV1:ARC:FRST") {
+	field(DESC,"CAV1 Arc Status Sum")
+	field(FLNK,"$(S):CAV1:SUMY:FRST.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):CAV1_1:ARC:FRST.SEVR NPP MS")
+	field(INPB,"$(S):CAV1_2:ARC:FRST.SEVR NPP MS")
+}
+a66 20
+}
+record(fanout,"$(S):STN:AIM:ARCFRSTFANO") {
+	field(DESC,"AIM Arc Latch Fanout")
+	field(LNK1,"$(S):KLYS:ARC:FRST.PROC")
+	field(LNK2,"$(S):CIRC:ARC:FRST.PROC")
+	field(LNK3,"$(S):CAV1_1:ARC:FRST.PROC")
+	field(FLNK,"$(S):CAV1_2:ARC:FRST.PROC")
+	field(LNK4,"$(S):CAV2:ARC:FRST.PROC")
+	field(LNK5,"$(S):CAV3:ARC:FRST.PROC")
+	field(LNK6,"$(S):CAV4:ARC:FRST.PROC")
+}
+record(fanout,"$(S):STN:AIM:ARCLTCHFANO") {
+	field(DESC,"AIM Arc Latch Fanout")
+	field(LNK1,"$(S):KLYS:ARC:LTCH.PROC")
+	field(LNK2,"$(S):CIRC:ARC:LTCH.PROC")
+	field(LNK3,"$(S):CAV1_1:ARC:LTCH.PROC")
+	field(FLNK,"$(S):CAV1_2:ARC:LTCH.PROC")
+	field(LNK4,"$(S):CAV2:ARC:LTCH.PROC")
+	field(LNK5,"$(S):CAV3:ARC:LTCH.PROC")
+	field(LNK6,"$(S):CAV4:ARC:LTCH.PROC")
+@
+

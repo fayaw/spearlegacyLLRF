@@ -1,0 +1,280 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  bldconfg.c
+
+  Build a config list entry for a VXI device at a given Logical Address
+  (LA) by reading its config registers & copying the data to the entry.
+  Called by rmIdentifyAux in both SC and DC phases.
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include "resman.h"
+
+
+/*
+* Entry Point
+*/
+
+int rmBuildConfig (unsigned short la,
+		   unsigned short mainframe)
+
+{
+  config_t *thisLA;
+
+  UINT16 data;
+  int status;
+
+  assert(thisLA = (config_t *)calloc(1,sizeof(config_t)));
+
+  if( TAIL != NULL ) {
+    TAIL->next = thisLA;
+  }
+
+  TAIL = thisLA;
+
+  if( HEAD == NULL ) {
+    HEAD = thisLA;
+  }
+
+  thisLA->next = (config_t *)NULL;
+  thisLA->logAdr = la;
+  thisLA->mainframe = mainframe;
+  thisLA->reset = thisLA->syfInhb = thisLA->aXXActv = 0;
+  thisLA->passed = thisLA->ready = 1;   /* we're assuming both ARE 1 */
+  thisLA->wsAMCResp = thisLA->wsCtrlResp = 0xFFFF;
+  thisLA->protocol = thisLA->cmdrLA = 0xFFFF;
+  thisLA->rdProtocol = 0xFFFF;
+  thisLA->subclass = thisLA->ctlrInfo  = 0;
+  thisLA->ihLevels = thisLA->intLevels = 0;
+  thisLA->nrHdlr   = thisLA->nrIntr    = 0;
+
+  /* GET DEVICE CLASS & MANUFACTURER ID FROM ID REGISTER (OFFSET 00) */
+#ifdef KSC_DEBUG1
+printf("rmBuildConfig:getting device class and manuf id for la %d\n",la);
+#endif
+
+  if (status = VXIinReg (la,0x00,&data),  status != 0) {
+
+	printf("VXIinReg failed reading la %d, reg 0x00, status = %d\n", la, status);
+    return -1;
+  }
+
+  thisLA->mfrID    = data & 0xFFFL;
+  thisLA->adrSpace = (data >> 12) & 3L;
+  thisLA->devClass = (data >> 14) & 3L;
+
+  /* GET MODEL CODE FROM DEVICE TYPE REGISTER (OFFSET 0x02) */
+#ifdef KSC_DEBUG1
+printf("rmBuildConfig:getting model code for la %d\n",la);
+#endif
+
+  if (status = VXIinReg (la,0x02,&data),  status != 0) {
+	printf("VXIinReg failed reading la %d, reg 0x02, status = %d\n", la, status);
+
+    return -1;
+  }
+
+  thisLA->modelID = data & 0xFFFL;
+  thisLA->memRqmt = data >> 12;
+
+  /* SWITCH BASED ON DEVICE CLASS */
+
+  switch( thisLA->devClass ) {
+  case DEVCL_EXTENDED:
+/*/    if (VERBOSE) printf("Extended Device ");*/
+
+    /* GET ITS SUBCLASS CODE(S) */
+#ifdef KSC_DEBUG1
+printf("rmBuildConfig:getting subclass code for la %d\n",la);
+#endif
+
+    if (status = VXIinReg (la,0x1E,&data),  status != 0) {
+	printf("VXIinReg failed reading la %d, reg 0x1E, status = %d\n", la, status);
+
+      return -1;
+    }
+
+    thisLA->subclass = data;
+
+    /* IS IT AN EXTENDER? */
+
+    if( thisLA->subclass == 0xFFFC ) {
+/*/      if (VERBOSE) printf( "(MXI extender) " );*/
+
+      if (status = VXIinReg (la,0x18,&data),  status != 0) {
+	printf("VXIinReg failed reading la %d, reg 0x18, status = %d\n", la, status);
+
+	return -1;
+      }
+
+      thisLA->ctlrInfo = data;
+    }
+    else {
+/*/      if (VERBOSE) printf( "(Subclass %04X) ", thisLA->subclass );*/
+    }
+
+    break;
+  case DEVCL_MESSAGE:
+/*/    if (VERBOSE) printf("Message-based Device ");*/
+
+    /* GET ITS PROTOCOL REGISTER */
+#ifdef KSC_DEBUG1
+printf("rmBuildConfig:getting protocol register for la %d\n",la);
+#endif
+
+    if (status = VXIinReg (la,0x08,&data),  status != 0) {
+	printf("VXIinReg failed reading la %d, reg 0x08, status = %d\n", la, status);
+
+      return -1;
+    }
+
+    thisLA->protocol = data;
+
+    /* GET ITS "READ PROTOCOL" RESPONSE */
+#ifdef KSC_DEBUG1
+printf("rmBuildConfig:getting read protocol response for la %d\n",la);
+#endif
+
+    if (status = WScmd (la,MBC_READ_PROTOCOL,TRUE,&data),
+	status != WS_RET_IODONE) {
+      return -1;
+    }
+
+    thisLA->rdProtocol = data;
+
+    /* IF PROTOCOL SHOWS IT'S A PROGRAMMABLE INTR HANDLER */
+
+    if( MBR_RP_PH( thisLA->rdProtocol ) ) {
+      /* FIND OUT HOW MANY HANDLERS IT HAS */
+#ifdef KSC_DEBUG1
+printf("rmBuildConfig:getting number of handlers for la %d\n",la);
+#endif
+
+      if (status = WScmd (la,MBC_READ_HANDLERS,TRUE,&data),
+	  status != WS_RET_IODONE) {
+	return -1;
+      }
+
+      thisLA->nrHdlr = data & 0x7;
+    }
+
+    /* IF PROTOCOL SHOWS IT'S A PROGRAMMABLE INTERRUPTER */
+
+    if( MBR_RP_PI( thisLA->rdProtocol ) ) {
+      /* FIND OUT HOW MANY INTERRUPTERS IT HAS */
+#ifdef KSC_DEBUG1
+printf("rmBuildConfig:getting number of interrupters for la %d\n",la);
+#endif
+
+      if (status = WScmd (la,MBC_READ_INTERRUPTERS,TRUE,&data),
+	  status != WS_RET_IODONE) {
+	return -1;
+      }
+
+      thisLA->nrIntr = data & 0x7;
+    }
+
+    /* ADD THE OTHER REGISTERS HERE: Wire AMC & Ctrl to Inactive */
+    thisLA->wsAMCResp = thisLA->wsCtrlResp = 0xFFFF;
+
+    break;
+  case DEVCL_MEMORY:
+/*/    if (VERBOSE) printf("Memory Device ");*/
+
+    /* GET ITS ATTRIBUTE REGISTER */
+#ifdef KSC_DEBUG1
+printf("rmBuildConfig:getting attribute register for la %d\n",la);
+#endif
+
+    if (status = VXIinReg (la,0x08,&data),  status != 0) {
+	printf("VXIinReg failed reading la %d, reg 0x08, status = %d\n", la, status);
+
+      return -1;
+    }
+
+    thisLA->memAttrib = data;
+
+    break;
+  case DEVCL_REGISTER:
+  default:
+/*/    if (VERBOSE) printf("Register-based Device ");*/
+    break;
+  }
+
+#ifdef KSC_DEBUG1
+printf("\n");
+#endif
+
+
+  return (0);
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

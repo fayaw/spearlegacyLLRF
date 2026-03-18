@@ -1,0 +1,3874 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	RF-SPEAR-R0-0-0:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1
+	RF-3-13-10:1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2006.01.25.23.54.20;	author lazmo;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial import of COMB-2 (Cf2) support.
+@
+text
+@#================================================
+#=== GENERATED FILE... do not edit!
+#=== fxplode v1.0
+#================================================
+#
+# #================================================================
+# # PEP-II COMB-2 module EPICS record cofficient definitions
+# # M. Laznovsky 2005-April-06
+# #
+# # To build "p2RfCf2RecordCoefs.dbd":
+# #
+# #     % fxplode p2RfCf2RecordCoefs.fxp >p2RfCf2RecordCoefs.dbd
+# #
+# # (fxplode currently found in ~lazmo/bin)
+# #
+# # Note that fields need to be parameterized in such a way that the 
+# # panels that use them can easily generate the correct field names
+# # (e.g. per-bank).
+# #
+# #================================================================
+# 
+# #################################################################
+# # coefficients
+# #################################################################
+# 
+# #================================================================
+# #
+# # comb coefficients
+# # 
+# # bank(0,1) * (II,QQ,QI,IQ) * (A,B) * (0,1,2,3) = 64 fields
+# #             ( 0, 1, 2, 3)   (0,1,........6,7)
+# # 
+# # Mapping:
+# #   B0,B1,B2,B3: C $(BANK) $(IQ) [0,1,2,3]
+# #    G,A1,A2,A3: C $(BANK) $(IQ) [4,5,6,7]
+# #
+# #      [0][0]
+# # C [0][1] .
+# #   [1][2] .
+# #      [3][7]
+# #
+# #
+# # VXI A24 addresses:
+# #
+# #   0x0200 - II bank 0
+# #   0x0210 - II bank 1
+# #   0x0220 - QI bank 0
+# #   0x0230 - QI bank 1
+# #
+# #   0x0600 - QQ bank 0
+# #   0x0610 - QQ bank 1
+# #   0x0620 - IQ bank 0
+# #   0x0630 - IQ bank 1
+# #
+# #================================================================
+# 
+# begin DBF_DOUBLE
+# prompt("cmb_coef")
+# promptgroup(GUI_COMMON)
+# pp(TRUE)
+# interest(1)
+# for C
+# for 0 1
+# for 0 1 2 3
+# for 0 1 2 3 4 5 6 7
+# end
+	field(C000,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C001,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C002,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C003,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C004,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C005,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C006,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C007,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C010,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C011,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C012,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C013,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C014,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C015,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C016,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C017,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C020,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C021,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C022,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C023,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C024,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C025,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C026,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C027,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C030,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C031,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C032,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C033,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C034,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C035,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C036,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C037,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C100,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C101,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C102,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C103,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C104,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C105,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C106,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C107,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C110,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C111,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C112,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C113,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C114,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C115,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C116,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C117,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C120,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C121,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C122,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C123,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C124,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C125,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C126,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C127,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C130,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C131,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C132,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C133,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C134,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C135,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C136,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(C137,DBF_DOUBLE) {
+		prompt("cmb_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+# 
+# #================================================================
+# # 
+# # equalizer coefficients
+# # 
+# # bank(0,1)* f(II,QQ,QI,IQ) * n(0..31) = 256 fields
+# #             ( 0, 1, 2, 3)
+# # 
+# # Address space is reserved for n(0..63), so s/w needs to skip over gaps 
+# # when reading/writing these regs in sequence.
+# #
+# # Can't use all-digit fields since field names are used as C identifiers
+# # (elements of module record struct)... so use "0-9,A-V".  Will need to come
+# # up with another scheme (split?) if it goes to 64 coefs.
+# #
+# #      [0][0]
+# # E [0][1] .
+# #   [1][2] .
+# #      [3][V]
+# #
+# # VXI A24 addresses:
+# #
+# #   0x0000 - II bank 0
+# #   0x0080 - II bank 1
+# #   0x0100 - QI bank 0
+# #   0x0180 - QI bank 1
+# #
+# #   0x0400 - QQ bank 0
+# #   0x0480 - QQ bank 1
+# #   0x0500 - IQ bank 0
+# #   0x0580 - IQ bank 1
+# #
+# #================================================================
+# 
+# begin DBF_DOUBLE
+# prompt("equ_coef")
+# promptgroup(GUI_COMMON)
+# pp(TRUE)
+# interest(1)
+# for E
+# for 0 1
+# for 0 1 2 3
+# for 0 1 2 3 4 5 6 7 8 9 A B C D E F G H I J K L M N O P Q R S T U V
+# end
+	field(E000,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E001,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E002,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E003,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E004,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E005,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E006,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E007,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E008,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E009,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00A,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00B,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00C,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00D,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00E,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00F,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00G,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00H,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00I,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00J,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00K,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00L,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00M,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00N,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00O,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00P,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00Q,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00R,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00S,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00T,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00U,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E00V,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E010,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E011,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E012,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E013,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E014,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E015,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E016,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E017,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E018,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E019,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01A,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01B,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01C,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01D,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01E,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01F,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01G,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01H,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01I,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01J,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01K,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01L,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01M,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01N,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01O,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01P,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01Q,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01R,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01S,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01T,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01U,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E01V,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E020,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E021,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E022,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E023,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E024,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E025,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E026,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E027,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E028,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E029,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02A,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02B,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02C,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02D,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02E,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02F,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02G,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02H,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02I,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02J,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02K,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02L,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02M,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02N,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02O,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02P,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02Q,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02R,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02S,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02T,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02U,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E02V,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E030,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E031,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E032,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E033,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E034,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E035,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E036,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E037,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E038,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E039,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03A,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03B,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03C,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03D,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03E,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03F,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03G,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03H,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03I,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03J,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03K,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03L,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03M,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03N,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03O,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03P,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03Q,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03R,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03S,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03T,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03U,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E03V,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E100,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E101,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E102,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E103,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E104,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E105,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E106,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E107,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E108,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E109,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10A,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10B,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10C,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10D,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10E,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10F,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10G,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10H,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10I,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10J,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10K,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10L,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10M,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10N,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10O,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10P,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10Q,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10R,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10S,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10T,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10U,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E10V,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E110,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E111,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E112,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E113,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E114,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E115,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E116,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E117,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E118,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E119,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11A,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11B,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11C,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11D,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11E,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11F,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11G,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11H,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11I,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11J,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11K,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11L,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11M,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11N,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11O,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11P,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11Q,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11R,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11S,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11T,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11U,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E11V,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E120,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E121,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E122,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E123,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E124,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E125,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E126,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E127,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E128,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E129,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12A,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12B,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12C,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12D,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12E,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12F,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12G,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12H,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12I,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12J,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12K,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12L,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12M,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12N,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12O,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12P,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12Q,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12R,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12S,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12T,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12U,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E12V,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E130,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E131,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E132,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E133,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E134,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E135,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E136,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E137,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E138,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E139,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13A,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13B,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13C,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13D,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13E,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13F,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13G,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13H,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13I,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13J,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13K,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13L,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13M,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13N,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13O,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13P,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13Q,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13R,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13S,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13T,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13U,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(E13V,DBF_DOUBLE) {
+		prompt("equ_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+# 
+# #================================================================
+# # 
+# # interpolation filter coefficients
+# # 
+# # bank(0,1,2,3) * (I,Q) * tap?(1,2,3,4) * (A,B,C,D) = 128 fields
+# #                             (A,B,...........,O,P)
+# # 
+# #    [0]   [A]
+# # [I][1][I] .
+# #    [2][Q] .
+# #    [3]   [P]
+# #
+# # VXI A24 addresses:
+# #
+# #   0x0280 - I bank 0
+# #   0x02A0 - I bank 1
+# #   0x02C0 - I bank 2
+# #   0x02E0 - I bank 3
+# #
+# #   0x0680 - Q bank 0
+# #   0x06A0 - Q bank 1
+# #   0x06C0 - Q bank 2
+# #   0x06E0 - Q bank 3
+# #
+# #================================================================
+# 
+# begin DBF_DOUBLE
+# prompt("int_coef")
+# promptgroup(GUI_COMMON)
+# pp(TRUE)
+# interest(1)
+# for I
+# for 0 1 2 3
+# for I Q
+# for A B C D E F G H I J K L M N O P
+# end
+	field(I0IA,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IB,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IC,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0ID,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IE,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IF,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IG,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IH,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0II,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IJ,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IK,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IL,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IM,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IN,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IO,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0IP,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QA,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QB,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QC,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QD,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QE,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QF,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QG,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QH,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QI,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QJ,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QK,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QL,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QM,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QN,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QO,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I0QP,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IA,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IB,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IC,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1ID,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IE,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IF,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IG,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IH,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1II,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IJ,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IK,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IL,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IM,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IN,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IO,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1IP,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QA,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QB,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QC,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QD,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QE,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QF,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QG,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QH,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QI,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QJ,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QK,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QL,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QM,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QN,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QO,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I1QP,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IA,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IB,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IC,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2ID,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IE,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IF,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IG,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IH,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2II,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IJ,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IK,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IL,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IM,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IN,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IO,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2IP,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QA,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QB,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QC,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QD,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QE,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QF,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QG,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QH,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QI,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QJ,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QK,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QL,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QM,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QN,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QO,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I2QP,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IA,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IB,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IC,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3ID,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IE,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IF,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IG,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IH,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3II,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IJ,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IK,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IL,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IM,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IN,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IO,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3IP,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QA,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QB,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QC,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QD,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QE,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QF,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QG,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QH,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QI,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QJ,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QK,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QL,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QM,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QN,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QO,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(I3QP,DBF_DOUBLE) {
+		prompt("int_coef")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+# 
+# #################################################################
+# # load/save buttons
+# #################################################################
+# 
+# #================================================================
+# #
+# # comb coefficient load/save buttons
+# #
+# # (load,save) * file(1,2) * bank(0,1) = 8 fields
+# #
+# # C [L][1][0]
+# #   [S][2][1]
+# #
+# #================================================================
+# 
+# begin DBF_UCHAR
+# prompt("comb coef button")
+# pp(TRUE)
+# interest(2)
+# for C
+# for L S
+# for 1 2
+# for 0 1
+# end
+	field(CL10,DBF_UCHAR) {
+		prompt("comb coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(CL11,DBF_UCHAR) {
+		prompt("comb coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(CL20,DBF_UCHAR) {
+		prompt("comb coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(CL21,DBF_UCHAR) {
+		prompt("comb coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(CS10,DBF_UCHAR) {
+		prompt("comb coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(CS11,DBF_UCHAR) {
+		prompt("comb coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(CS20,DBF_UCHAR) {
+		prompt("comb coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(CS21,DBF_UCHAR) {
+		prompt("comb coef button")
+		pp(TRUE)
+		interest(2)
+	}
+# 
+# #================================================================
+# #
+# # equalizer coefficient load/save buttons
+# #
+# # (load,save) * file(1,2) * bank(0,1) = 8 fields
+# #
+# # E [L][1][0]
+# #   [S][2][1]
+# #
+# #================================================================
+# 
+# begin DBF_UCHAR
+# prompt("equ coef button")
+# pp(TRUE)
+# interest(2)
+# for E
+# for L S
+# for 1 2
+# for 0 1
+# end
+	field(EL10,DBF_UCHAR) {
+		prompt("equ coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(EL11,DBF_UCHAR) {
+		prompt("equ coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(EL20,DBF_UCHAR) {
+		prompt("equ coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(EL21,DBF_UCHAR) {
+		prompt("equ coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(ES10,DBF_UCHAR) {
+		prompt("equ coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(ES11,DBF_UCHAR) {
+		prompt("equ coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(ES20,DBF_UCHAR) {
+		prompt("equ coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(ES21,DBF_UCHAR) {
+		prompt("equ coef button")
+		pp(TRUE)
+		interest(2)
+	}
+# 
+# #================================================================
+# #
+# # interpolation coefficient load/save buttons
+# #
+# # (load,save) * bank(0,1,2,3) = 8 fields
+# #
+# #         [0]
+# # I [L] 0 [1]
+# #   [S]   [2]
+# #         [3]
+# #
+# #================================================================
+# 
+# begin DBF_UCHAR
+# prompt("interp coef button")
+# pp(TRUE)
+# interest(2)
+# for I
+# for L S
+# for 0
+# for 0 1 2 3
+# end
+	field(IL00,DBF_UCHAR) {
+		prompt("interp coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(IL01,DBF_UCHAR) {
+		prompt("interp coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(IL02,DBF_UCHAR) {
+		prompt("interp coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(IL03,DBF_UCHAR) {
+		prompt("interp coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(IS00,DBF_UCHAR) {
+		prompt("interp coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(IS01,DBF_UCHAR) {
+		prompt("interp coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(IS02,DBF_UCHAR) {
+		prompt("interp coef button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(IS03,DBF_UCHAR) {
+		prompt("interp coef button")
+		pp(TRUE)
+		interest(2)
+	}
+# 
+# #################################################################
+# # load/save status
+# # SAME ORDER AS BUTTONS!
+# #################################################################
+# 
+# #================================================================
+# #
+# # comb coefficient load/save status
+# #
+# # file(1,2) * bank(0,1) = 4 fields
+# #
+# # C Z [1][0]
+# #     [2][1]
+# #
+# #================================================================
+# 
+# begin DBF_MENU
+# prompt("comb coef status")
+# special(SPC_NOMOD)
+# menu(menuAlarmStat)
+# initial("17")
+# for CZ
+# for 1 2
+# for 0 1
+# end
+	field(CZ10,DBF_MENU) {
+		prompt("comb coef status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(CZ11,DBF_MENU) {
+		prompt("comb coef status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(CZ20,DBF_MENU) {
+		prompt("comb coef status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(CZ21,DBF_MENU) {
+		prompt("comb coef status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+# 
+# #================================================================
+# #
+# # equalizer coefficient load/save status
+# #
+# # file(1,2) * bank(0,1) = 4 fields
+# #
+# # E Z [1][0]
+# #     [2][1]
+# #
+# #================================================================
+# 
+# begin DBF_MENU
+# prompt("equ coef status")
+# special(SPC_NOMOD)
+# menu(menuAlarmStat)
+# initial("17")
+# for EZ
+# for 1 2
+# for 0 1
+# end
+	field(EZ10,DBF_MENU) {
+		prompt("equ coef status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(EZ11,DBF_MENU) {
+		prompt("equ coef status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(EZ20,DBF_MENU) {
+		prompt("equ coef status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(EZ21,DBF_MENU) {
+		prompt("equ coef status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+# 
+# #================================================================
+# #
+# # interpolation coefficient load/save status
+# #
+# # bank(0,1,2,3) = 4 fields
+# #
+# #       [0]
+# # I Z 0 [1]
+# #       [2]
+# #       [3]
+# #
+# #================================================================
+# 
+# begin DBF_MENU
+# prompt("interp coef status")
+# special(SPC_NOMOD)
+# menu(menuAlarmStat)
+# initial("17")
+# for IZ0
+# for 0 1 2 3
+# end
+	field(IZ00,DBF_MENU) {
+		prompt("interp coef status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(IZ01,DBF_MENU) {
+		prompt("interp coef status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(IZ02,DBF_MENU) {
+		prompt("interp coef status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(IZ03,DBF_MENU) {
+		prompt("interp coef status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+# 
+# #################################################################
+# # load/save filenames
+# # SAME ORDER AS BUTTONS!
+# #################################################################
+# 
+# #================================================================
+# #
+# #
+# # comb coefficient filenames
+# #
+# # file(1,2) * bank(0,1) = 4 fields
+# #
+# # C F [1][0]
+# #     [2][1]
+# #
+# #================================================================
+# 
+# begin DBF_STRING
+# prompt("comb coef file")
+# promptgroup(GUI_COMMON)
+# size(40)
+# for CF
+# for 1 2
+# for 0 1
+# end
+	field(CF10,DBF_STRING) {
+		prompt("comb coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(CF11,DBF_STRING) {
+		prompt("comb coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(CF20,DBF_STRING) {
+		prompt("comb coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(CF21,DBF_STRING) {
+		prompt("comb coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+# 
+# #================================================================
+# #
+# # equalizer coefficient filenames 
+# #
+# # file(1,2) * bank(0,1) = 4 fields
+# #
+# # E F [1][0]
+# #     [2][1]
+# #
+# #================================================================
+# 
+# begin DBF_STRING
+# prompt("equ coef file")
+# promptgroup(GUI_COMMON)
+# size(40)
+# for EF
+# for 1 2
+# for 0 1
+# end
+	field(EF10,DBF_STRING) {
+		prompt("equ coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(EF11,DBF_STRING) {
+		prompt("equ coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(EF20,DBF_STRING) {
+		prompt("equ coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(EF21,DBF_STRING) {
+		prompt("equ coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+# 
+# #================================================================
+# #
+# # interpolation coefficient filenames
+# #
+# # bank(0,1,2,3) = 4 fields
+# #
+# #       [0]
+# # I F 0 [1]
+# #       [2]
+# #       [3]
+# #
+# #================================================================
+# 
+# begin DBF_STRING
+# prompt("interp coef file")
+# promptgroup(GUI_COMMON)
+# size(40)
+# for IF
+# for 0
+# for 0 1 2 3
+# end
+	field(IF00,DBF_STRING) {
+		prompt("interp coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(IF01,DBF_STRING) {
+		prompt("interp coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(IF02,DBF_STRING) {
+		prompt("interp coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(IF03,DBF_STRING) {
+		prompt("interp coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+# 
+# #################################################################
+# # load/save comments
+# # SAME ORDER AS BUTTONS!
+# #################################################################
+# 
+# #================================================================
+# #
+# # comb coefficient comments
+# #
+# # file(1,2) * bank(0,1) = 4 fields
+# #
+# # C C [1][0]
+# #     [2][1]
+# #
+# #================================================================
+# 
+# begin DBF_STRING
+# prompt("comb coef comment")
+# promptgroup(GUI_COMMON)
+# size(40)
+# for CC
+# for 1 2
+# for 0 1
+# end
+	field(CC10,DBF_STRING) {
+		prompt("comb coef comment")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(CC11,DBF_STRING) {
+		prompt("comb coef comment")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(CC20,DBF_STRING) {
+		prompt("comb coef comment")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(CC21,DBF_STRING) {
+		prompt("comb coef comment")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+# 
+# #================================================================
+# #
+# # equalizer coefficient comments
+# #
+# # file(1,2) * bank(0,1) = 8 fields
+# #
+# # E C [1][0]
+# #     [2][1]
+# #
+# #================================================================
+# 
+# begin DBF_STRING
+# prompt("equ coef comment")
+# promptgroup(GUI_COMMON)
+# size(40)
+# for EC
+# for 1 2
+# for 0 1
+# end
+	field(EC10,DBF_STRING) {
+		prompt("equ coef comment")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(EC11,DBF_STRING) {
+		prompt("equ coef comment")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(EC20,DBF_STRING) {
+		prompt("equ coef comment")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(EC21,DBF_STRING) {
+		prompt("equ coef comment")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+# 
+# #================================================================
+# #
+# # interpolation coefficient comments
+# #
+# # bank(0,1,2,3) = 4 fields
+# #
+# #       [0]
+# # I C 0 [1]
+# #       [2]
+# #       [3]
+# #
+# #================================================================
+# 
+# begin DBF_STRING
+# prompt("interp coef file")
+# promptgroup(GUI_COMMON)
+# size(40)
+# for IC0
+# for 0 1 2 3
+# end
+	field(IC00,DBF_STRING) {
+		prompt("interp coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(IC01,DBF_STRING) {
+		prompt("interp coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(IC02,DBF_STRING) {
+		prompt("interp coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(IC03,DBF_STRING) {
+		prompt("interp coef file")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+# 
+# #################################################################
+# # miscellaneous fields
+# #################################################################
+# 
+# #================================================================
+# #
+# # error counts
+# #
+# # 8 counts = 8 fields
+# #
+# #       [1]
+# # E C N  .
+# #       [8]
+# #
+# #================================================================
+# 
+# begin DBF_DOUBLE
+# prompt("error count")
+# promptgroup(GUI_COMMON)
+# for ECN
+# for 1 2 3 4 5 6 7 8
+# end
+	field(ECN1,DBF_DOUBLE) {
+		prompt("error count")
+		promptgroup(GUI_COMMON)
+	}
+	field(ECN2,DBF_DOUBLE) {
+		prompt("error count")
+		promptgroup(GUI_COMMON)
+	}
+	field(ECN3,DBF_DOUBLE) {
+		prompt("error count")
+		promptgroup(GUI_COMMON)
+	}
+	field(ECN4,DBF_DOUBLE) {
+		prompt("error count")
+		promptgroup(GUI_COMMON)
+	}
+	field(ECN5,DBF_DOUBLE) {
+		prompt("error count")
+		promptgroup(GUI_COMMON)
+	}
+	field(ECN6,DBF_DOUBLE) {
+		prompt("error count")
+		promptgroup(GUI_COMMON)
+	}
+	field(ECN7,DBF_DOUBLE) {
+		prompt("error count")
+		promptgroup(GUI_COMMON)
+	}
+	field(ECN8,DBF_DOUBLE) {
+		prompt("error count")
+		promptgroup(GUI_COMMON)
+	}
+# 
+# #
+# # error count reset button... put here just to keep it near the counts
+# #
+# begin DBF_UCHAR
+# prompt("error count reset")
+# pp(TRUE)
+# interest(2)
+# for ECNR
+# end
+	field(ECNR,DBF_UCHAR) {
+		prompt("error count reset")
+		pp(TRUE)
+		interest(2)
+	}
+# 
+# #================================================================
+# #
+# # main-panel stuff
+# #
+# #================================================================
+# 
+# #--------------------------------
+# # history/diagnostic memory record choice buttons
+# #  ... "Yxxx" versions are "previous" values
+# #--------------------------------
+# begin DBF_USHORT
+# prompt("mem rec choice button")
+# promptgroup(GUI_COMMON)
+# pp(TRUE)
+# initial("1")
+# for X Y
+# for DIR HIR
+# end
+	field(XDIR,DBF_USHORT) {
+		prompt("mem rec choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		initial("1")
+	}
+	field(XHIR,DBF_USHORT) {
+		prompt("mem rec choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		initial("1")
+	}
+	field(YDIR,DBF_USHORT) {
+		prompt("mem rec choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		initial("1")
+	}
+	field(YHIR,DBF_USHORT) {
+		prompt("mem rec choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		initial("1")
+	}
+# 
+# #--------------------------------
+# # other choice buttons
+# #--------------------------------
+# begin DBF_USHORT
+# prompt("panel choice button")
+# promptgroup(GUI_COMMON)
+# pp(TRUE)
+# for X
+# for ANA CBS DAA DGA DDC EBS IOT IBS IFO SLB D1S D2S HBS SYS
+# end
+	field(XANA,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XCBS,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XDAA,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XDGA,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XDDC,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XEBS,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XIOT,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XIBS,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XIFO,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XSLB,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XD1S,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XD2S,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XHBS,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(XSYS,DBF_USHORT) {
+		prompt("panel choice button")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+# 
+# #================================================================
+# #
+# # bank-select indicators... for gating display backgrounds
+# #
+# #================================================================
+# 
+# begin DBF_UCHAR
+# prompt("CMB bank select indicator")
+# for CBS
+# for 0 1
+# end
+	field(CBS0,DBF_UCHAR) {
+		prompt("CMB bank select indicator")
+	}
+	field(CBS1,DBF_UCHAR) {
+		prompt("CMB bank select indicator")
+	}
+# 
+# begin DBF_UCHAR
+# prompt("EQU bank select indicator")
+# for EBS
+# for 0 1
+# end
+	field(EBS0,DBF_UCHAR) {
+		prompt("EQU bank select indicator")
+	}
+	field(EBS1,DBF_UCHAR) {
+		prompt("EQU bank select indicator")
+	}
+# 
+# begin DBF_UCHAR
+# prompt("INT bank select indicator")
+# for IBS
+# for 0 1 2 3
+# end
+	field(IBS0,DBF_UCHAR) {
+		prompt("INT bank select indicator")
+	}
+	field(IBS1,DBF_UCHAR) {
+		prompt("INT bank select indicator")
+	}
+	field(IBS2,DBF_UCHAR) {
+		prompt("INT bank select indicator")
+	}
+	field(IBS3,DBF_UCHAR) {
+		prompt("INT bank select indicator")
+	}
+# 
+# #================================================================
+# #
+# # buffer-panel stuff
+# #
+# #================================================================
+# 
+# #--------------------------------
+# # file names
+# #--------------------------------
+# begin DBF_STRING
+# prompt("buffer filename")
+# promptgroup(GUI_COMMON)
+# size(40)
+# for IH QH D1 D2 IP QP
+# for FN
+# end
+	field(IHFN,DBF_STRING) {
+		prompt("buffer filename")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(QHFN,DBF_STRING) {
+		prompt("buffer filename")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(D1FN,DBF_STRING) {
+		prompt("buffer filename")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(D2FN,DBF_STRING) {
+		prompt("buffer filename")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(IPFN,DBF_STRING) {
+		prompt("buffer filename")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(QPFN,DBF_STRING) {
+		prompt("buffer filename")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+# 
+# #--------------------------------
+# # history-get/mem-load buttons
+# #--------------------------------
+# begin DBF_UCHAR
+# prompt("buffer button")
+# pp(TRUE)
+# interest(2)
+# for IH QH D1 D2 IP QP
+# for GT
+# end
+	field(IHGT,DBF_UCHAR) {
+		prompt("buffer button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(QHGT,DBF_UCHAR) {
+		prompt("buffer button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(D1GT,DBF_UCHAR) {
+		prompt("buffer button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(D2GT,DBF_UCHAR) {
+		prompt("buffer button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(IPGT,DBF_UCHAR) {
+		prompt("buffer button")
+		pp(TRUE)
+		interest(2)
+	}
+	field(QPGT,DBF_UCHAR) {
+		prompt("buffer button")
+		pp(TRUE)
+		interest(2)
+	}
+# 
+# #--------------------------------
+# # get/load status
+# #--------------------------------
+# begin DBF_MENU
+# prompt("buffer status")
+# special(SPC_NOMOD)
+# menu(menuAlarmStat)
+# initial("17")
+# for IH QH D1 D2 IP QP
+# for ST
+# end
+	field(IHST,DBF_MENU) {
+		prompt("buffer status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(QHST,DBF_MENU) {
+		prompt("buffer status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(D1ST,DBF_MENU) {
+		prompt("buffer status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(D2ST,DBF_MENU) {
+		prompt("buffer status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(IPST,DBF_MENU) {
+		prompt("buffer status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(QPST,DBF_MENU) {
+		prompt("buffer status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+# 
+# #--------------------------------
+# # file size, in Kwords (IP/QP not used)
+# #--------------------------------
+# begin DBF_ULONG
+# prompt("buffer size")
+# promptgroup(GUI_COMMON)
+# for IH QH D1 D2 IP QP
+# for SZ
+# end
+	field(IHSZ,DBF_ULONG) {
+		prompt("buffer size")
+		promptgroup(GUI_COMMON)
+	}
+	field(QHSZ,DBF_ULONG) {
+		prompt("buffer size")
+		promptgroup(GUI_COMMON)
+	}
+	field(D1SZ,DBF_ULONG) {
+		prompt("buffer size")
+		promptgroup(GUI_COMMON)
+	}
+	field(D2SZ,DBF_ULONG) {
+		prompt("buffer size")
+		promptgroup(GUI_COMMON)
+	}
+	field(IPSZ,DBF_ULONG) {
+		prompt("buffer size")
+		promptgroup(GUI_COMMON)
+	}
+	field(QPSZ,DBF_ULONG) {
+		prompt("buffer size")
+		promptgroup(GUI_COMMON)
+	}
+# 
+# #--------------------------------
+# #--------------------------------
+# 
+# # end
+# 567 fields, 0 duplicates
+@

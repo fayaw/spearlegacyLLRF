@@ -1,0 +1,241 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.12;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.12;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@-- MAX+plus II Compiler Fit File      
+-- Version 6.1 02/28/96               
+-- Compiled: 05/06/96 09:44:21        
+
+-- Copyright (c) 1996 by Altera Corporation.  All rights reserved.  This text
+-- contains proprietary, confidential information of Altera Corporation, and
+-- may be used, copied, and/or disclosed only pursuant to the terms of a
+-- valid software license agreement with Altera Corporation.  This copyright
+-- notice must be retained as part of this text at all times.
+
+CHIP "rd_mux"
+BEGIN
+
+    DEVICE = "EPM7128QC100";
+
+    "DATALO0"                      : INPUT_PIN  = 9      ; -- LC27
+    "DATALO1"                      : INPUT_PIN  = 38     ; -- LC51
+    "DATALO2"                      : INPUT_PIN  = 35     ; -- LC54
+    "DATALO3"                      : INPUT_PIN  = 63     ; -- LC94
+    "DATALO4"                      : INPUT_PIN  = 58     ; -- LC88
+    "DATALO5"                      : INPUT_PIN  = 56     ; -- LC85
+    "DATALO6"                      : INPUT_PIN  = 52     ; -- LC80
+    "DATALO7"                      : INPUT_PIN  = 51     ; -- LC78
+    "DATALO8"                      : INPUT_PIN  = 47     ; -- LC72
+    "DATALO9"                      : INPUT_PIN  = 46     ; -- LC70
+    "DATALO10"                     : INPUT_PIN  = 30     ; -- LC62
+    "DATALO11"                     : INPUT_PIN  = 31     ; -- LC61
+    "DATALO12"                     : INPUT_PIN  = 32     ; -- LC59
+    "DATALO13"                     : INPUT_PIN  = 33     ; -- LC57
+    "DATALO14"                     : INPUT_PIN  = 34     ; -- LC56
+    "DATALO15"                     : INPUT_PIN  = 44     ; -- LC69
+    "ENA_VECTOR"                   : INPUT_PIN  = 4      ; -- LC1
+    "ERR"                          : INPUT_PIN  = 49     ; -- LC75
+    "ERR_ISRC"                     : INPUT_PIN  = 62     ; -- LC93
+    "IR_ENA"                       : INPUT_PIN  = 89     ;
+    "IRQ_S1"                       : INPUT_PIN  = 64     ; -- LC96
+    "IRQ_S2"                       : INPUT_PIN  = 75     ; -- LC112
+    "IRQ_S3"                       : INPUT_PIN  = 73     ; -- LC109
+    "LA0"                          : INPUT_PIN  = 71     ; -- LC105
+    "LA1"                          : INPUT_PIN  = 90     ;
+    "LA2"                          : INPUT_PIN  = 59     ; -- LC89
+    "LA3"                          : INPUT_PIN  = 54     ; -- LC81
+    "LA4"                          : INPUT_PIN  = 50     ; -- LC77
+    "LA5"                          : INPUT_PIN  = 43     ; -- LC67
+    "LA6"                          : INPUT_PIN  = 42     ; -- LC65
+    "LA7"                          : INPUT_PIN  = 37     ; -- LC53
+    "LMON_IE"                      : INPUT_PIN  = 17     ; -- LC48
+    "LOC_ISRC"                     : INPUT_PIN  = 18     ; -- LC46
+    "MODID"                        : INPUT_PIN  = 10     ; -- LC25
+    "RD_CSR"                       : INPUT_PIN  = 3      ; -- LC3
+    "RDDATA_ISRC"                  : INPUT_PIN  = 11     ; -- LC24
+    "RD_DATALO"                    : INPUT_PIN  = 2      ; -- LC5
+    "RD_INTCNTL"                   : INPUT_PIN  = 1      ; -- LC6
+    "RD_INTSTA"                    : INPUT_PIN  = 100    ; -- LC8
+    "RD_LOCINT"                    : INPUT_PIN  = 12     ; -- LC22
+    "RD_RDY"                       : INPUT_PIN  = 15     ; -- LC19
+    "RD_RESPONSE"                  : INPUT_PIN  = 98     ; -- LC11
+    "RD_TRIGINT"                   : INPUT_PIN  = 99     ; -- LC9
+    "SFT_RST"                      : INPUT_PIN  = 48     ; -- LC73
+    "SYS_INH"                      : INPUT_PIN  = 27     ; -- LC33
+    "TI_ISRC0"                     : INPUT_PIN  = 26     ; -- LC35
+    "TI_ISRC1"                     : INPUT_PIN  = 24     ; -- LC38
+    "TI_ISRC2"                     : INPUT_PIN  = 22     ; -- LC41
+    "TI_ISRC3"                     : INPUT_PIN  = 39     ; -- LC49
+    "TI_ISRC4"                     : INPUT_PIN  = 29     ; -- LC64
+    "TI_ISRC5"                     : INPUT_PIN  = 16     ; -- LC17
+    "TI_ISRC6"                     : INPUT_PIN  = 14     ; -- LC21
+    "TI_ISRC7"                     : INPUT_PIN  = 6      ; -- LC32
+    "TI_ISRC8"                     : INPUT_PIN  = 25     ; -- LC37
+    "TI_ISRC9"                     : INPUT_PIN  = 23     ; -- LC40
+    "TI_ISRC10"                    : INPUT_PIN  = 21     ; -- LC43
+    "TI_ISRC11"                    : INPUT_PIN  = 19     ; -- LC45
+    "TRG_IE"                       : INPUT_PIN  = 7      ; -- LC30
+    "TRG_ISRC"                     : INPUT_PIN  = 8      ; -- LC29
+    "WTDATA_ISRC"                  : INPUT_PIN  = 96     ; -- LC13
+    "WT_RDY"                       : INPUT_PIN  = 95     ; -- LC14
+    "WTSGNL_ISRC"                  : INPUT_PIN  = 94     ; -- LC16
+    "RD0"                          : OUTPUT_PIN = 87     ; -- LC128
+    "RD1"                          : OUTPUT_PIN = 83     ; -- LC123
+    "RD2"                          : OUTPUT_PIN = 82     ; -- LC121
+    "RD3"                          : OUTPUT_PIN = 81     ; -- LC120
+    "RD4"                          : OUTPUT_PIN = 80     ; -- LC118
+    "RD5"                          : OUTPUT_PIN = 79     ; -- LC117
+    "RD6"                          : OUTPUT_PIN = 78     ; -- LC115
+    "RD7"                          : OUTPUT_PIN = 69     ; -- LC102
+    "RD8"                          : OUTPUT_PIN = 70     ; -- LC104
+    "RD9"                          : OUTPUT_PIN = 66     ; -- LC99
+    "RD10"                         : OUTPUT_PIN = 67     ; -- LC101
+    "RD11"                         : OUTPUT_PIN = 72     ; -- LC107
+    "RD12"                         : OUTPUT_PIN = 86     ; -- LC126
+    "RD13"                         : OUTPUT_PIN = 77     ; -- LC113
+    "RD14"                         : OUTPUT_PIN = 65     ; -- LC97
+    "RD15"                         : OUTPUT_PIN = 74     ; -- LC110
+    "XMT_DATA"                     : OUTPUT_PIN = 85     ; -- LC125
+    "~229~1"                       : LOCATION   = LC98   ;
+    "~233~1"                       : LOCATION   = LC109  ; -- PIN 73
+    "~235~1"                       : LOCATION   = LC100  ;
+
+END;
+
+INTERNAL_INFO "rd_mux"
+BEGIN
+	DEVICE = EPM7128QC100;
+	LC125   : LORAX = "G199R0";
+	LC110   : LORAX = "G139R0";
+	LC97    : LORAX = "G106R0";
+	LC113   : LORAX = "G53R0";
+	LC126   : LORAX = "G200R0";
+	LC107   : LORAX = "G197R0";
+	LC101   : LORAX = "G49R0";
+	LC99    : LORAX = "G108R0";
+	LC104   : LORAX = "G52R0";
+	LC102   : LORAX = "G50R0";
+	LC115   : LORAX = "G55R0";
+	LC117   : LORAX = "G110R0";
+	LC118   : LORAX = "G111R0";
+	LC120   : LORAX = "G113R0";
+	LC121   : LORAX = "G142R0";
+	LC123   : LORAX = "G144R0";
+	LC128   : LORAX = "G202R0";
+	OH2R0   : LORAX = "G148R0";
+	OH10R0  : LORAX = "G1R0";
+	OH4R0   : LORAX = "G204R0";
+	OH7R0   : LORAX = "G206R0";
+	OH5R0   : LORAX = "G205R0";
+	OH8R0   : LORAX = "G0R0";
+	OH21R0  : LORAX = "G151R0";
+	OH68R0  : LORAX = "G159R0";
+	OH24R0  : LORAX = "G60R0";
+	OH55R0  : LORAX = "G158R0";
+	OH56R0  : LORAX = "G66R0";
+	OH58R0  : LORAX = "G67R0";
+	OH74R0  : LORAX = "G70R0";
+	OH60R0  : LORAX = "G9R0";
+	OH44R0  : LORAX = "G63R0";
+	OH18R0  : LORAX = "G208R0";
+	OH61R0  : LORAX = "G10R0";
+	OH42R0  : LORAX = "G7R0";
+	OH13R0  : LORAX = "G58R0";
+	OH69R0  : LORAX = "G160R0";
+	OH45R0  : LORAX = "G64R0";
+	OH47R0  : LORAX = "G65R0";
+	OH39R0  : LORAX = "G212R0";
+	OH0R0   : LORAX = "G147R0";
+	OH71R0  : LORAX = "G161R0";
+	OH29R0  : LORAX = "G4R0";
+	OH36R0  : LORAX = "G210R0";
+	OH28R0  : LORAX = "G3R0";
+	OH77R0  : LORAX = "G13R0";
+	OH128R0 : LORAX = "G203R0";
+	OH31R0  : LORAX = "G5R0";
+	OH52R0  : LORAX = "G156R0";
+	OH79R0  : LORAX = "G14R0";
+	OH20R0  : LORAX = "G150R0";
+	OH64R0  : LORAX = "G216R0";
+	OH84R0  : LORAX = "G219R0";
+	OH108R0 : LORAX = "G18R0";
+	OH16R0  : LORAX = "G207R0";
+	OH66R0  : LORAX = "G217R0";
+	OH87R0  : LORAX = "G221R0";
+	OH111R0 : LORAX = "G20R0";
+	OH63R0  : LORAX = "G11R0";
+	OH76R0  : LORAX = "G12R0";
+	OH93R0  : LORAX = "G73R0";
+	OH95R0  : LORAX = "G74R0";
+	OH48R0  : LORAX = "G213R0";
+	OH92R0  : LORAX = "G72R0";
+	OH80R0  : LORAX = "G162R0";
+	OH53R0  : LORAX = "G157R0";
+	OH40R0  : LORAX = "G6R0";
+	OH12R0  : LORAX = "G57R0";
+	OH88R0  : LORAX = "G15R0";
+	OH32R0  : LORAX = "G153R0";
+	OH50R0  : LORAX = "G214R0";
+	OH37R0  : LORAX = "G211R0";
+	OH23R0  : LORAX = "G152R0";
+	OH129R0 : LORAX = "G146R0";
+	OH72R0  : LORAX = "G69R0";
+	OH26R0  : LORAX = "G61R0";
+	OH34R0  : LORAX = "G154R0";
+	OH15R0  : LORAX = "G59R0";
+	OH104R0 : LORAX = "G75R0";
+	LC98    : LORAX = "G107R0";
+	LC109   : LORAX = "G138R0";
+	LC100   : LORAX = "G109R0";
+END;
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

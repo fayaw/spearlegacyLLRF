@@ -1,0 +1,48 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1
+	allenBradley-R2-2-spear0:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2011.11.11.22.40.12;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Add individual dbd files (to be used in lieu of allenBradley.dbd).
+@
+text
+@include "abDcmRecord.dbd"
+device(ai,     INST_IO,devAiAbDcm,           "AB-1771DCM AI")
+device(ai,     INST_IO,devAiAbDcmUshortRaw,  "AB-1771DCM AI-16 bit raw")
+device(ai,     INST_IO,devAiAbDcmi2f,        "AB-1771DCM AI I to F")
+device(ai,     INST_IO,devAiAbDcm13bitRaw,   "AB-1771DCM AI-13 bit raw")
+device(ai,     INST_IO,devAiAbDcm12bitRaw,   "AB-1771DCM AI-12 bit raw")
+device(ao,     INST_IO,devAoAbDcm,           "AB-1771DCM AO")
+device(ao,     INST_IO,devAoAbDcmi2f,        "AB-1771DCM AO I to F")
+device(bi,     INST_IO,devBiAbDcm,           "AB-1771DCM BI")
+device(bo,     INST_IO,devBoAbDcm,           "AB-1771DCM BO")
+device(longin, INST_IO,devLiAbDcm,           "AB-1771DCM Longin")
+device(longout,INST_IO,devLoAbDcm,           "AB-1771DCM Longout")
+device(mbbi,   INST_IO,devMbbiAbDcm,         "AB-1771DCM MBBI")
+device(mbbo,   INST_IO,devMbboAbDcm,         "AB-1771DCM MBBO")
+
+@

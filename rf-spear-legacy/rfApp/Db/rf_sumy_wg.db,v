@@ -1,0 +1,133 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@# Macros:
+#   S = Station (HR81, etc)  
+#   C = Component           CIRC WG01 WG02 WG03
+#   W = Water Supply Temp   STN  CIRC STN  WG02
+#   F = Water Flow Circuit  HCW1 HCW1 HCW2 HCW2
+# 
+record(calc,"$(S):$(C)IQA:SUMY:FRST") {
+	field(DESC,"$(C) IQA Status Sum")
+	field(FLNK,"$(S):$(C):SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):$(C)LDFRWD:POWER:FRST.SEVR NPP MS")
+	field(INPB,"$(S):$(C)LDREFL:POWER:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):$(C)IQA:SUMY:LTCH") {
+	field(DESC,"$(C) IQA Status Sum")
+	field(FLNK,"$(S):$(C):SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):$(C)LDFRWD:POWER:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):$(C)LDREFL:POWER:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):$(C)IQA:SUMY:SEVR") {
+	field(DESC,"$(C) IQA Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPB,"$(S):$(C)LDFRWD:POWER.SEVR NPP MS")
+	field(INPF,"$(S):$(C)LDREFL:POWER.SEVR NPP MS")
+}
+record(calc,"$(S):$(C)TEMP:SUMY:FRST") {
+	field(DESC,"$(C) Temp Status Sum")
+	field(FLNK,"$(S):$(C):SUMY:FRST.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):$(W)HCW:TEMP:FRST.SEVR NPP MS")
+	field(INPB,"$(S):$(C)HCW:TEMP:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):$(C)TEMP:SUMY:LTCH") {
+	field(DESC,"$(C) Temp Status Sum")
+	field(FLNK,"$(S):$(C):SUMY:LTCH.VAL")
+	field(CALC,"0")
+	field(INPA,"$(S):$(W)HCW:TEMP:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):$(C)HCW:TEMP:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):$(C)TEMP:SUMY:SEVR") {
+	field(DESC,"$(C) Temp Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPA,"$(S):$(W)HCW:TEMP.SEVR NPP MS")
+	field(INPB,"$(S):$(C)HCW:TEMP.SEVR NPP MS")
+}
+record(calc,"$(S):$(C):SUMY:FRST") {
+	field(DESC,"$(C) Status Sum")
+	field(FLNK,"$(S):WGTEMP:SUMY:FRST.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):STN$(F):FLOW:FRST.SEVR NPP MS")
+	field(INPB,"$(S):$(C)TEMP:SUMY:FRST.SEVR NPP MS")
+	field(INPC,"$(S):WGAIR:PRESS:FRST.SEVR NPP MS")
+	field(INPE,"$(S):$(C)IQA:SUMY:FRST.SEVR NPP MS")
+	field(INPF,"$(S):WGAIR:NIRPINPUT:FRST.SEVR NPP MS")
+	field(INPG,"$(S):WGAIR:NIRPOUTPUT:FRST.SEVR NPP MS")
+}
+record(calc,"$(S):$(C):SUMY:LTCH") {
+	field(DESC,"$(C) Status Sum")
+	field(FLNK,"$(S):WGTEMP:SUMY:LTCH.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):STN$(F):FLOW:LTCH.SEVR NPP MS")
+	field(INPB,"$(S):$(C)TEMP:SUMY:LTCH.SEVR NPP MS")
+	field(INPC,"$(S):WGAIR:PRESS:LTCH.SEVR NPP MS")
+	field(INPD,"$(S):$(C):SUMY:PLC.SEVR NPP MS")
+	field(INPE,"$(S):$(C)IQA:SUMY:LTCH.SEVR NPP MS")
+	field(INPF,"$(S):WGAIR:NIRPINPUT:LTCH.SEVR NPP MS")
+	field(INPG,"$(S):WGAIR:NIRPOUTPUT:LTCH.SEVR NPP MS")
+}
+record(calc,"$(S):$(C):SUMY:SEVR") {
+	field(DESC,"$(C) Status Sum")
+	field(SCAN,"1 second")
+	field(CALC,"0")
+	field(INPB,"$(S):$(C)TEMP:SUMY:SEVR.SEVR NPP MS")
+	field(INPE,"$(S):$(C)IQA:SUMY:SEVR.SEVR NPP MS")
+}
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

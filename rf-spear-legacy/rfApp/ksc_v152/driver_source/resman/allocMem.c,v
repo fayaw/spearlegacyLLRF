@@ -1,0 +1,696 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+***************************************************************************/
+
+#undef DEBUG_MEMALLOC
+#undef MEMBLK_MULTI_MF
+
+/***************************************************************************
+  allocMem.c
+
+  This file contains routines used to implement a more robust VXI/VME
+  memory allocation technique similar to the "buddy system" as implemented
+  in the Linux kernel.
+
+  Note:  Since this resman seems to have no support for mxi extenders (entire
+  functions are commented out, I stopped working on windowing support.
+  Hopefully, if someone needs to add support for extenders in the future
+  code will be an example of how to use this allocation method to map
+  address windows.  (see #ifdefs for MEMBLK_MULTI_MF)
+ 
+  Suggestions for further development:
+  - mem_insertInOrder could be changed to prioritize differently (localization 
+    over lower address).  Recommended to minimize the window size with
+    arbitrarily placed nonvxi devices. 
+  - BreakLargeBlocks could be changed to break blocks to larger or smaller
+    sizes.  This was initially put in so that resman wouldn't favor a higher 
+    address block over a lower just because it was a smaller (but still huge)
+    block.  i.e. With A32 space from 0x2000 -> 0x5000, it would start mapping 
+    at 0x4000, because that block is smaller.
+  - After setting up a mainframe, reinitialize the freeBlocks and immediately 
+    request a block corresponding to the last address window set up.  This
+    will prevent findMemBlock from giving a block that belongs to a different 
+    mainframe, but hasn't been used. 
+  - mapMem.c will probably have to be fundamentally reorganized.  We can't
+    what size block will be needed for a mainframe until after mapping it
+    out, especially if nonvxi devices are used.
+
+ -------------------------------------------------------------------------
+
+  History: T Stabrawa  6/25/1999 - Initial coding.
+                       6/28/1999 - Started to add support for multiple
+                                   mainframes.
+
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include "resman.h"
+
+#if 0
+typedef struct block {
+  unsigned short base;
+  unsigned short size;
+  struct block  *next;
+} block_t;
+#endif
+
+/* hash table used to keep track of free blocks.  Each element of the array
+   is a list of free blocks of a given size.  Sizes are assigned in powers
+   of two starting with a unit block at index 0.  For A32 the unit block
+   would be 0x10000, for A24, 0x100. (The size of a unit block is irrelevant
+   to this allocation code.) */
+block_t* freeBlocks[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+
+#ifdef MEMBLK_MULTI_MF
+/* list used to keep track of which blocks have been assigned to devices.
+   This is used to determine an address window for a MXI extender.  See
+   CalculateMemBlockWindow() */
+block_t* usedBlocks = 0;
+
+/*Prototypes*/
+unsigned short findMemBlock1( unsigned short  memRqmt,
+                              unsigned short *where );
+unsigned short getMemBlock1( unsigned short memRqmt,
+                             unsigned short where );
+#endif
+
+/*==========================================================================
+  mem_insertInOrder
+
+  Utility function inserts a memory block structure into a linked list in
+  increasing base address order.
+
+  Returns: NONE
+
+  Args:    list - pointer to a linked list of block structures (IN/OUT)
+                  (This should typically be &freeBlocks[idxHash])
+           element - pointer to a block structure to be inserted (IN)
+==========================================================================*/
+
+void mem_insertInOrder( block_t** list,
+                        block_t* element )
+{
+   block_t** prevPtr;
+   block_t* current;
+
+   current = *list;
+   prevPtr = list;
+   while(current != 0)
+   {
+#ifdef DEBUG_MEMALLOC
+if (element->base == current->base)
+   WARN "Two blocks were assigned to address 0x%x\n", current->base);
+#endif
+      if (element->base < current->base)
+         break;
+      prevPtr = &((*prevPtr)->next);
+      current = current->next;
+   }
+
+   element->next = current;
+   *prevPtr = element;
+}
+
+/*==========================================================================
+  InitMemBlocks
+
+  Initializes the data structure that keeps track fo free blocks.  This
+  function must be called prior to calling findMemBlock or getMemBlock.
+
+  Returns: NONE
+
+  Args:    base - base address of available memory (IN)
+           size - size of available memory (IN)
+==========================================================================*/
+
+void InitMemBlocks( unsigned short base,
+                    unsigned short size )
+{
+   unsigned short found = FALSE;
+   unsigned short trySize;
+   unsigned addr;
+   short idxHash;
+   block_t* ptrBlock;
+
+   /* our recursize base case */
+   if (size == 0)
+      return;
+
+   /* find the first block of largest size in this range */
+   for(trySize = 1 << 15; trySize != 0; trySize >>= 1)
+   {
+      /* start looking at base, truncated to trySize's precision */
+      for( addr = ( base & (~(trySize-1)) );
+                addr < base + size; addr += trySize)
+      {
+         /* Truncating might put us a little before the base of memory */
+         if (addr < base)
+            continue;
+         /* If this aligned block will fit, set it up. */
+         if (addr + trySize <= base + size)
+         {
+#ifdef DEBUG_MEMALLOC
+      printf("Found a block of memory at 0x%x, size is 0x%x, ", addr, trySize);
+#endif
+            found = TRUE;
+            break;
+         }
+      }
+      if (found)
+	 break;
+   }
+
+   if (found == FALSE)  /* A little bug checking */
+   {
+#ifdef DEBUG_MEMALLOC
+      printf("ERROR: InitMemBlocks - unable to find aligned block.\n");
+#endif
+      return;
+   }
+
+   /*Figure out where our block fits into the hash table*/
+   for (idxHash=15; idxHash>=0; idxHash--)
+      if (trySize & (1 << idxHash))
+         break;
+
+#ifdef DEBUG_MEMALLOC
+      printf("idxHash is %d\n", idxHash);
+#endif
+
+   /* Create entry and insert it into the hash table */
+   assert(ptrBlock = (block_t*) malloc (sizeof(block_t)));
+   ptrBlock->base = addr;
+   ptrBlock->size = trySize;
+   mem_insertInOrder( &freeBlocks[idxHash], ptrBlock );
+
+   /* Recurively set up all blocks on either side of this block */
+   InitMemBlocks(base, addr - base);
+   InitMemBlocks(addr + trySize, (base + size) - (addr + trySize));
+
+}
+
+/*==========================================================================
+  findMemBlock - alternate version to that used in assignMem.c
+
+  Returns TRUE if it found a suitable block;
+          FALSE if nothing big enough is free.
+
+  Args:   memRqmt - how much memory is needed (IN)
+          where - pointer to the base address of the block (OUT)
+==========================================================================*/
+ 
+unsigned short findMemBlock( unsigned short  memRqmt,
+                             unsigned short *where )
+#ifdef MEMBLK_MULTI_MF
+{
+   unsigned short ret;
+   block_t*       ptrBlock;
+
+   ret = findMemBlock1(memRqmt, where);
+
+   if (ret == TRUE)
+   {
+      assert(ptrBlock = (block_t*) malloc (sizeof(block_t)));
+      ptrBlock->base = *where;
+      ptrBlock->size = memRqmt;
+      mem_insertInOrder( &usedBlocks, ptrBlock );
+   }
+
+   return ret;
+
+}
+
+/* Recursive helper function for findMemBlock */
+unsigned short findMemBlock1( unsigned short  memRqmt,
+                              unsigned short *where )
+#endif
+{
+   short idxHash;
+   block_t*       tmpPtrBlock;
+
+   if(memRqmt == 0)
+   {
+      printf("Error - requested empty block\n");
+      return FALSE;
+   }
+   /*Figure out where our block fits into the hash table*/
+   for (idxHash=15; idxHash>=0; idxHash--)
+      if (memRqmt & (1 << idxHash))
+         break;
+
+#ifdef DEBUG_MEMALLOC
+   printf("memRqmt is 0x%x, idxHash is %d\n", memRqmt, idxHash);
+#endif
+
+   if ( freeBlocks[idxHash] != 0 ) /* The page we are looking for exists */
+   {
+      /* Get its address */
+      *where = freeBlocks[idxHash]->base;
+
+      /* Remove block from freeBlocks, and deallocate its page memory */
+      tmpPtrBlock = freeBlocks[idxHash];
+      freeBlocks[idxHash] = freeBlocks[idxHash]->next;
+      free(tmpPtrBlock);
+#ifdef DEBUG_MEMALLOC
+      printf("Allocated 0x%x blocks of memory at 0x%x\n", memRqmt, *where);
+#endif
+      return TRUE;
+   }
+   else if (idxHash != 15) /* That wasn't our last chance to get a block*/
+   {
+#ifdef DEBUG_MEMALLOC
+      printf("Trying to find a larger block\n");
+#endif
+      /* Try to find a block twice the size of what we are looking for */
+#ifdef MEMBLK_MULTI_MF
+      if (findMemBlock1(memRqmt * 2, where) == FALSE)
+         return FALSE;
+#else
+      if (findMemBlock(memRqmt * 2, where) == FALSE)
+         return FALSE;
+#endif
+
+      /* Split this block in half.  First, store the second half in freeBlocks */
+#ifdef DEBUG_MEMALLOC
+      printf("Splitting block in half.  ");
+#endif
+      assert(tmpPtrBlock = (block_t*) malloc (sizeof(block_t)));
+      tmpPtrBlock->base = *where + memRqmt;
+      tmpPtrBlock->size = memRqmt;
+      mem_insertInOrder( &freeBlocks[idxHash], tmpPtrBlock );
+
+      /* Now return the address of the first half */
+      /* Since the address of the first half is the same as the larger block
+         containing it, *where already contains the address of the first half.*/
+      /* So we can simply return now. */
+#ifdef DEBUG_MEMALLOC
+      printf("Allocated 0x%x blocks of memory at 0x%x\n", memRqmt, *where);
+#endif
+      return TRUE;
+   }
+   else /* That was our last chance to find a block, it can't be done. */
+      return FALSE;
+
+}
+
+/*==========================================================================
+  getMemBlock - similar to findMemBlock, except this is used to set aside
+                a specific block of memory for nonvxi cards.
+ 
+  Returns TRUE if it found the correct block;
+          FALSE if block not available.
+ 
+  Args:   memRqmt - how much memory is needed (IN)
+          where - base address of the block (IN)
+==========================================================================*/
+
+unsigned short getMemBlock( unsigned short memRqmt,
+                            unsigned short where )
+#ifdef MEMBLK_MULTI_MF
+{
+   unsigned short ret;
+   block_t*       ptrBlock;
+
+   ret = getMemBlock1(memRqmt, where);
+
+   if (ret == TRUE)
+   {
+      assert(ptrBlock = (block_t*) malloc (sizeof(block_t)));
+      ptrBlock->base = where;
+      ptrBlock->size = memRqmt;
+      mem_insertInOrder( &usedBlocks, ptrBlock );
+   }
+
+   return ret;
+
+}
+
+/* Recursive helper function for getMemBlock */
+unsigned short getMemBlock1( unsigned short memRqmt,
+                             unsigned short where )
+#endif
+{
+   short idxHash;
+   unsigned short adrContainer;
+   unsigned short adrUnused;
+   block_t*       tmpPtrBlock;
+   block_t**      prevPtr;
+
+   if(memRqmt == 0)
+   {
+      printf("Error - requested empty block\n");
+      return FALSE;
+   }
+
+   /*Figure out where our block fits into the hash table*/
+   for (idxHash=15; idxHash>=0; idxHash--)
+      if (memRqmt & (1 << idxHash))
+         break;
+
+   if ( freeBlocks[idxHash] != 0 ) /* There are pages of the correct size */
+   {
+      tmpPtrBlock = freeBlocks[idxHash];
+      prevPtr = &freeBlocks[idxHash];
+      while (tmpPtrBlock != 0)
+      {
+         if (tmpPtrBlock->base == where)
+         {
+            /* Remove this block from freeBlocks and deallocate its page memory */
+            *prevPtr = tmpPtrBlock->next;
+            free(tmpPtrBlock);
+#ifdef DEBUG_MEMALLOC
+      printf("Allocated 0x%x blocks of memory at 0x%x\n", memRqmt, where);
+#endif
+            return TRUE;
+         }
+         /* This block didn't match, skip to the next one */
+         prevPtr = &tmpPtrBlock;
+         tmpPtrBlock = tmpPtrBlock->next;
+      }
+   }
+
+   if (idxHash != 15) /* That wasn't our last chance to get the block */
+   {
+      /* Block isn't available directly, let's try to find its container block */
+      /* Figure out how our block is aligned in its container */
+      if ( where % (memRqmt * 2) == 0 )     /* First half */
+      {
+	 adrContainer = where;
+	 adrUnused = where + memRqmt;
+      }
+      else                                  /* Second half */
+      {
+	 adrContainer = where - memRqmt;
+	 adrUnused = where - memRqmt;
+      }
+      /* Get the container block */
+#ifdef MEMBLK_MULTI_MF
+      if ( getMemBlock1( memRqmt * 2, adrContainer) == FALSE )
+	 return FALSE;
+#else
+      if ( getMemBlock( memRqmt * 2, adrContainer) == FALSE )
+	 return FALSE;
+#endif
+      /* Split this block in half.  First, store the unused half in freeBlocks */
+#ifdef DEBUG_MEMALLOC
+      printf("Splitting block in half.  ");
+#endif
+      assert(tmpPtrBlock = (block_t*) malloc (sizeof(block_t)));
+      tmpPtrBlock->base = adrUnused;
+      tmpPtrBlock->size = memRqmt;
+      mem_insertInOrder( &freeBlocks[idxHash], tmpPtrBlock );
+
+      /* Since hash table is intact, and our page has been removed, we're done.*/
+#ifdef DEBUG_MEMALLOC
+      printf("Allocated 0x%x blocks of memory at 0x%x\n", memRqmt, where);
+#endif
+      return TRUE;
+   }
+   else /* That was our last chance to find the block, it can't be done. */
+      return FALSE;
+}
+
+/*==========================================================================
+  BreakLargeBocks
+
+  Splits up the largest of blocks in our hash table to smaller sizes.  This
+  way, once we're sure we won't need to map any huge blocks(0x4000), we can
+  still assign our memory at the lowest address available.
+
+  Returns: NONE
+
+  Args:    size - size of smallest block to split (all larger sizes are split)
+==========================================================================*/
+
+void BreakLargeBlocks(unsigned short size)
+{
+   short idxHash;
+   block_t* ptrBlock1;
+   block_t* ptrBlock2;
+
+   if ( size == 0 ) /* Our recursive base case */
+      return;
+
+   /*Figure out where our block fits into the hash table*/
+   for (idxHash=15; idxHash>=0; idxHash--)
+      if (size & (1 << idxHash))
+         break;
+
+   /* recursive call to break all larger blocks */
+   BreakLargeBlocks(1 << (idxHash +1));
+
+   if ( size <= 0x800 ) /* Don't split small blocks, takes too long. */
+      return;
+
+   while (freeBlocks[idxHash])
+   {
+#ifdef DEBUG_MEMALLOC
+      printf("Splitting block at 0x%x,  original size is 0x%x\n",
+	     freeBlocks[idxHash]->base, freeBlocks[idxHash]->size);
+#endif
+
+      ptrBlock1 = freeBlocks[idxHash];
+      ptrBlock1->size >>= 1;
+      assert(ptrBlock2 = (block_t*) malloc (sizeof(block_t)));
+      ptrBlock2->base = ptrBlock1->base + ptrBlock1->size;
+      ptrBlock2->size = ptrBlock1->size;
+
+#ifdef DEBUG_MEMALLOC
+      printf(" - First block is at 0x%x, size is 0x%x\n",
+               ptrBlock1->base, ptrBlock1->size);
+      printf(" - Second block is at 0x%x, size is 0x%x\n",
+               ptrBlock2->base, ptrBlock2->size);
+#endif
+
+      freeBlocks[idxHash] = freeBlocks[idxHash]->next;
+      mem_insertInOrder( &freeBlocks[idxHash-1], ptrBlock2);
+      mem_insertInOrder( &freeBlocks[idxHash-1], ptrBlock1);
+   }
+
+}
+
+/*==========================================================================
+  DestroyMemBlocks
+
+  Deallocates memory associated with the data structure that keeps track of
+  free blocks.  This function should be called after finished allocating
+  blocks.
+
+  Returns: NONE
+
+  Args:    NONE
+==========================================================================*/
+
+void DestroyMemBlocks(void)
+{
+   unsigned short idxHash;
+   block_t*       tmpPtrBlock;
+
+   for (idxHash =0; idxHash < 16; idxHash++)
+      while(freeBlocks[idxHash])
+      {
+#ifdef DEBUG_MEMALLOC
+         printf("Freeing page entry for block at 0x%x, size is 0x%x\n",
+                freeBlocks[idxHash]->base, freeBlocks[idxHash]->size);
+#endif
+	 /* Remove block from freeBlocks, and deallocate its page memory */
+	 tmpPtrBlock = freeBlocks[idxHash];
+	 freeBlocks[idxHash] = freeBlocks[idxHash]->next;
+	 free(tmpPtrBlock);
+      }
+#ifdef MEMBLK_MULTI_MF
+   ResetMemBlockWindow();
+#endif
+
+}
+
+/*==========================================================================
+  ShowFreeBlocks (debugging tool)
+
+  Returns: NONE
+
+  Args:    NONE
+==========================================================================*/
+
+#ifdef DEBUG_MEMALLOC
+void ShowFreeBlocks(void)
+{
+   block_t*       tmpPtrBlock;
+   short          idxHash;
+
+   for (idxHash = 15; idxHash>=0; idxHash--)
+   {
+      tmpPtrBlock = freeBlocks[idxHash];
+      while(tmpPtrBlock != 0)
+      {
+         printf("Free block at 0x%x, size is 0x%x, idx Hash is %d\n",
+            tmpPtrBlock->base, tmpPtrBlock->size, idxHash);
+         tmpPtrBlock = tmpPtrBlock->next;
+      }
+   }
+}
+#endif
+
+#ifdef MEMBLK_MULTI_MF
+/*==========================================================================
+  Windowing functions
+
+  These are used to keep track of what range of memory has been used by each
+  mainframe.  Maybe the V151 resman has no (working) support for multiple
+  mainframes, but I wanted to be sure my code would be compatible.
+
+  Note: This support is currently incomplete.
+==========================================================================*/
+
+/*==========================================================================
+  ResetMemBlockWindow
+
+  Clears the list of used blocks.  This list is used to keep track of what
+  blocks of memory need to be accessible through the MXI extender.
+
+  Returns: NONE
+
+  Args:    NONE
+==========================================================================*/
+
+void ResetMemBlockWindow (void)
+{
+   block_t* tmpPtrBlock;
+
+   while(usedBlocks)
+   {
+#ifdef DEBUG_MEMALLOC
+      printf("Freeing usedBlocks entry for block at 0x%x, size is 0x%x\n",
+	     usedBlocks->base, usedBlocks->size);
+#endif
+      /* Remove block from usedBlocks, and deallocate its page memory */
+      tmpPtrBlock = usedBlocks;
+      usedBlocks = usedBlocks->next;
+      free(tmpPtrBlock);
+   }
+
+}
+
+/*==========================================================================
+  CalculateMemBlockWindow
+
+  Calculates the address window needed to access all devices in this
+  mainframe.  NOTE: Addressing windows, as returned by this function, will
+  not necessarily be aligned on proper boundaries.
+ 
+  Returns TRUE if a valid address window is returned;
+          FALSE if no memory has been used.
+ 
+  Args:   base - base address of the window (OUT)
+          size - size of the window (OUT)
+==========================================================================*/
+
+unsigned short CalculateMemBlockWindow( unsigned short* base,
+                                        unsigned short* size )
+{
+   block_t*       tmpPtrBlock;
+   unsigned short tmpbase = 0xffff;
+   unsigned short tmpmax = 0x0000;
+
+   tmpPtrBlock = usedBlocks;
+   while(tmpPtrBlock != 0)
+   {
+      if (tmpPtrBlock->base < tmpbase)
+         tmpbase = tmpPtrBlock->base;
+      if (tmpPtrBlock->base + tmpPtrBlock->size > tmpmax)
+         tmpmax = tmpPtrBlock->base + tmpPtrBlock->size;
+      tmpPtrBlock = tmpPtrBlock->next;
+   }
+
+   /* no memory used in this window */
+   if(tmpbase == 0xffff && tmpmax == 0x0000)
+      return FALSE;
+
+   *base = tmpbase;
+   *size = tmpmax - tmpbase;
+
+   return TRUE;
+
+}
+
+/*==========================================================================
+  ShowUsedBlocks (debugging tool)
+
+  Returns: NONE
+
+  Args:    NONE
+==========================================================================*/
+
+#ifdef DEBUG_MEMALLOC
+void ShowUsedBlocks(void)
+{
+   block_t*       tmpPtrBlock;
+
+   tmpPtrBlock = usedBlocks;
+   while(tmpPtrBlock != 0)
+   {
+      printf("Used block at 0x%x, size is 0x%x.\n",
+	 tmpPtrBlock->base, tmpPtrBlock->size);
+      tmpPtrBlock = tmpPtrBlock->next;
+   }
+}
+#endif    /* ifdef DEBUG_MEMALLOC */
+#endif    /* ifdef MEMBLK_MULTI_MF */
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

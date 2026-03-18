@@ -1,0 +1,1254 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**
+**  Facility:  DSP - DSP code
+**
+**  Abstract:
+**	This is the base code for gap voltage feedforward algorithm
+**
+**  Author:
+**	Leonid Sapozhnikov, W. Ross, SLAC/PEP-II Low Level RF Project
+**
+**  History:
+**	April 9, 1996 - Created
+**      June 30, 1997 - Ross: Update for GVFF Revision 1 Module
+**	July  8, 1997 - Ross: Changed to zero out I,Q_Y_BUF when not in ADAPT
+**	Aug  11, 1997 - Ross: Added initialization of lower circular buffers
+**	Oct   7, 1997 - Ross: Moved output phase constant to ext. table file
+**      Mar   5, 1998 - Ross: Implemented double precision mult in adaption alg
+**      Mar  12, 1998 - Ross: Added fractional displacement circ. buffer loading
+**
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+#include <1610.h>
+
+/* Our own header files */
+#include <dspDef.h>
+#include <comDef.h>
+#include <aucDef.h>
+#include <pioDef.h>
+#include <intDef.h>
+#include <bioDef.h>
+#include <sttDef.h>
+#include <timDef.h>
+#include <dspCmdDef.h>
+#include <jtgDef.h>
+#include <funcs.h>
+#include <macros.h>
+#include <gvffMisc.h>
+#include <gvff.h>
+
+.rsect ".ram"
+
+	.= VEC_A_RESET
+
+strt:	goto main	/* 0: reset vector */
+	goto int0_isr	/* 1: INT0 and parallel port interrupts */
+	goto err_isr	/* 2: software interrupt (icall) */
+	goto err_isr	/* 3: trap from hardware devl. system */
+
+	goto int1_isr	/* 4: INT1 */
+	nop
+	nop
+	nop
+
+	goto int2_isr	/* 8: INT2 */
+	nop
+	nop
+	nop
+
+	goto int3_isr	/* c: INT3 */
+	nop
+	nop
+	nop
+
+	goto tmr_isr	/* 10: timeout */
+	nop
+	nop
+	nop
+
+	goto err_isr	/* 14: IBF2 interrupt*/
+	nop
+	nop
+	nop
+
+	goto err_isr	/* 18: OBE2 interrupt*/
+	nop
+	nop
+	nop
+
+	goto err_isr	/* 1c: EMUXBOTH interrupt (S/W error) */
+	nop
+	nop
+	nop
+
+	goto err_isr	/* 20: (reserved) */
+	nop
+	nop
+	nop
+
+	goto err_isr	/* 24: (reserved) */
+	nop
+	nop
+	nop
+
+	goto err_isr	/* 28: (reserved) */
+	nop
+	nop
+	nop
+
+	goto err_isr	/* 2c: IBF (enabled by 'inc') */
+	nop
+	nop
+	nop
+
+	goto err_isr	/* 30: OBF (enabled by 'inc') */
+	nop
+	nop
+	nop
+
+	goto err_isr	/* 34: PIDS (enabled by 'inc') */
+	nop
+	nop
+	nop
+
+	goto err_isr	/* 38: PODS (enabled by 'inc') */
+	nop
+	nop
+	nop
+
+	nop
+	nop
+	nop
+	nop
+
+	nop
+	nop
+	nop
+	nop
+
+	nop
+	nop
+	goto err_isr	/* 46: Trap from user */
+
+/* INTERRUPT SERVICE ROUTINES: */
+
+	.= DSP_A_CODELOW		/* Skip the vector table	*/
+
+/* ISR's use YBASE as pointer to context stack. Do not change YBASE */
+
+/* INTERRUPT-0 ISR, set FIFO Data Ready flag, mask INT0, and return */
+int0_isr:
+	*(0)	= r3		/* save R3 pointer value in stack */
+	r3	= (DSP_A_ISRSTACK + 2)	/* point to third stack position */
+	*r3++	= psw		/* save ALU flags */
+	*r3++	= alf		/* save BMU flags */
+	*r3++	= a1l		/* save lower half of a1 */
+	*r3	= a1		/* save upper half of a1 */
+	*(1)	= r3		/* save location of top of stack */
+
+	r3	= A_DATA_RDY	/* set fifo data ready flag */
+	a1	= 0x0001
+	*r3	= a1
+	a1	= inc		/* mask INT0 */
+	a1	= a1h & INT_CLR( INT_M_INT0 )
+	inc	= a1
+
+	r3	= *(1)		/* retrieve top of stack address */
+	a1	= *r3--		/* restore upper word of a1 value */
+	a1l	= *r3--		/* restore lower word of a1 */
+	alf	= *r3--		/* restore BMU flags */
+	psw	= *r3--		/* restore ALU flags */	
+	r3	= *(0)		/* restore R3 pointer value */
+	ireturn
+
+/* INTERRUPT-1 ISR, set 'staer_tf' flag and return  */ 
+int1_isr:
+	*(0)	= r3		/* save R3 pointer value in stack */
+	r3	= (DSP_A_ISRSTACK + 2)	/* point to third stack position */
+	*r3++	= psw		/* save ALU flags */
+	*r3++	= alf		/* save BMU flags */
+	*r3++	= a1l		/* save lower half of a1 */
+	*r3	= a1		/* save upper half of a1 */
+	*(1)	= r3		/* save location of top of stack */
+
+	r3	= A_START_TF	/* set start_transfer_function request flag */
+	a1	= 0x0001
+	*r3	= a1
+
+	r3	= *(1)		/* retrieve top of stack address */
+	a1	= *r3--		/* restore upper word of a1 value */
+	a1l	= *r3--		/* restore lower word of a1 */
+	alf	= *r3--		/* restore BMU flags */
+	psw	= *r3--		/* restore ALU flags */	
+	r3	= *(0)		/* restore R3 pointer value */
+	ireturn
+
+/* INTERRUPT-2 ISR, set 'start_tst' flag and return  */ 
+int2_isr:
+	*(0)	= r3		/* save R3 pointer value in stack */
+	r3	= (DSP_A_ISRSTACK + 2)	/* point to third stack position */
+	*r3++	= psw		/* save ALU flags */
+	*r3++	= alf		/* save BMU flags */
+	*r3++	= a1l		/* save lower half of a1 */
+	*r3	= a1		/* save upper half of a1 */
+	*(1)	= r3		/* save location of top of stack */
+
+	r3	= A_START_TST	/* set start_test_mode request flag */
+	a1	= 0x0001
+	*r3	= a1
+
+	r3	= *(1)		/* retrieve top of stack address */
+	a1	= *r3--		/* restore upper word of a1 value */
+	a1l	= *r3--		/* restore lower word of a1 */
+	alf	= *r3--		/* restore BMU flags */
+	psw	= *r3--		/* restore ALU flags */	
+	r3	= *(0)		/* restore R3 pointer value */
+	ireturn
+
+/* INTERRUPT-3 ISR, set 'msg_waiting' flag and return  */ 
+int3_isr:
+	*(0)	= r3		/* save R3 pointer value in stack */
+	r3	= (DSP_A_ISRSTACK + 2)	/* point to third stack position */
+	*r3++	= psw		/* save ALU flags */
+	*r3++	= alf		/* save BMU flags */
+	*r3++	= a1l		/* save lower half of a1 */
+	*r3	= a1		/* save upper half of a1 */
+	*(1)	= r3		/* save location of top of stack */
+
+	r3	= A_MSG_WAITING	/* set message_2_DSP_waiting flag */
+	a1	= 0x0001
+	*r3	= a1
+
+	r3	= *(1)		/* retrieve top of stack address */
+	a1	= *r3--		/* restore upper word of a1 value */
+	a1l	= *r3--		/* restore lower word of a1 */
+	alf	= *r3--		/* restore BMU flags */
+	psw	= *r3--		/* restore ALU flags */	
+	r3	= *(0)		/* restore R3 pointer value */
+	ireturn
+
+
+/* TIMER INTERRUPT: Just set 'timeout' flag and return. */
+
+tmr_isr:
+	*(0)	= r3		/* save R3 pointer value in stack */
+	r3	= (DSP_A_ISRSTACK + 2)	/* point to third stack position */
+	*r3++	= psw		/* save ALU flags */
+	*r3++	= alf		/* save BMU flags */
+	*r3++	= a1l		/* save lower half of a1 */
+	*r3	= a1		/* save upper half of a1 */
+	*(1)	= r3		/* save location of top of stack */
+
+	r3	= A_TIME_FLG	/* set time_out flag */
+	a1	= 0x0001
+	*r3	= a1
+tm_rtn:	
+	r3	= *(1)		/* retrieve top of stack address */
+	a1	= *r3--		/* restore upper word of a1 value */
+	a1l	= *r3--		/* restore lower word of a1 */
+	alf	= *r3--		/* restore BMU flags */
+	psw	= *r3--		/* restore ALU flags */	
+	r3	= *(0)		/* restore R3 pointer value */
+	ireturn			/* timer is left in non-reload mode */
+
+
+/* UNKNOWN INTERRUPT: set error flag in internal Ram */ 
+err_isr:
+	*(0)	= r3		/* save R3 pointer value in stack */
+	r3	= (DSP_A_ISRSTACK + 2)	/* point to third stack position */
+	*r3++	= psw		/* save ALU flags */
+	*r3++	= alf		/* save BMU flags */
+	*r3++	= a1l		/* save lower half of a1 */
+	*r3	= a1		/* save upper half of a1 */
+	*(1)	= r3		/* save location of top of stack */
+
+	r3 	= A_INTR_ERR	/* unexpected interrupt occured */
+	a1 	= 0x0001	/*   set INTR_ERR flag to 1 */
+	*r3 	= a1
+
+	r3	= *(1)		/* retrieve top of stack address */
+	a1	= *r3--		/* restore upper word of a1 value */
+	a1l	= *r3--		/* restore lower word of a1 */
+	alf	= *r3--		/* restore BMU flags */
+	psw	= *r3--		/* restore ALU flags */	
+	r3	= *(0)		/* restore R3 pointer value */
+	ireturn
+
+/************************************************************************/
+
+main:
+	ybase	= DSP_A_ISRSTACK  	/* NEVER CHANGE THIS REGISTER */
+	call	InitReg			/* Initialize registers	*/
+/*	call	InitVecTbl		/* Initialize vector table */
+	call	ComInit			/* Initialize comm. block */
+
+	cbit	= BIO_OFF(BIO_V_BUFSEL)	/* Select lower buffer as output */
+
+/*************************************************************************/
+/*    When the DSP has IOBit7 set low, Int1 (TF_DSP), Int2 (TEST), and   */
+/*    Int3 (Msg_2_DSP) interrupt hardware is disabled. However, on the   */
+/*    Rev 1 GAP module, the state-indicating bits in the DSP's DSEL1     */
+/*    'status' register, RUN, TF_DSP, TEST, and MSG_2_DSP are not        */
+/*    masked by IOBit7, as in the Rev0 GAP module.                       */
+/*                                                                       */
+/*    When the GAP module is powered up, the Circular Buffers contain    */
+/*    an undefined waveform, and so the hardware powers up with the      */
+/*    output AtoD converters disabled and 0 volts are output for both    */
+/*    I and Q.  The first low to high transition of IOBit-7 enables      */
+/*    the AtoDs, and the circular buffer contents become the output      */
+/*    waveform.  Therefore IOBit-7 should not be raised until the buffers*/
+/*    are initialized, and thus DSP interrupts can not be enabled        */
+/*    until this time. Therefore, the software must poll the MSG_2_DSP   */
+/*    by reading the DSEL1 register to get the first LD_REF message from */
+/*    the Slot-0 Controller.                                             */
+/*************************************************************************/
+
+#ifndef JTAG
+	r0	= DSP_A_DSEL1		/* Assure Msg_2_DSP signal is '0' */
+gvff_wt0:
+	a0	= *r0			/* If not 0, wait */
+	a0h & DSEL1_M_MSG
+	if ne goto gvff_wt0
+
+	y	= CMD_K_READY		/* command, that DSP is ready */
+	a0	= STT_WTREF		/* Put wait for reference status */
+	p	= NULL			/* no data over com. block */
+	call	msg2vxi			/* Send message that DSP ready */
+
+	r0	= DSP_A_DSEL1
+gvff_ref:
+        a0	= *r0			/* Poll for 'msg2dsp' */
+	a0h & DSEL1_M_MSG		/* (interrupts are disabled) */
+        if eq goto gvff_ref		/* Wait here for message.*/
+	call	msg2dsp			/* Process message from controller */
+
+	r2	= CpuMsg		/* Check that LDREF message came back */
+	a0	= *r2
+	a0h - CMD_K_LDREF
+	if eq goto init_cbuf
+	y	= CMD_K_READY		/* command, that DSP is quitting */
+	a0	= STT_INVCPUMSG		/* Put invalid cpu message status */
+	p	= NULL			/* no data over com. block */
+	call	msg2vxi			/* Send message that DSP ready */
+prs_err:
+	goto prs_err			/* stop here */
+	
+
+#endif /* JTAG */
+
+init_cbuf:				/* Initialize upper circular buffers */
+	r0	= I_REF			/* constant I_REF at *R0 is loaded to */
+	a0	= *r0			/*   a0, then to upper I circular */
+	r1	= I_BUF_OUT_H		/*   buffer */
+	do BUF_HLF_SIZE {
+	  *r1++	= a0			/* put into circular buffer */
+	  *r1++	= a0			/* put into circular buffer */
+	}
+
+	r0	= Q_REF			/* constant Q_REF at *R0 is loaded to */
+	a0	= *r0			/*   a0, then to upper Q circular */
+	r1	= Q_BUF_OUT_H		/*   buffer */
+	do BUF_HLF_SIZE {
+	  *r1++	= a0			/* put into circular buffer */
+	  *r1++	= a0			/* put into circular buffer */
+	}
+
+	cbit	= BIO_ON(BIO_V_BUFSEL)	/* switch to upper buffer */
+	r0	= A_CBUF_SEL		/* set SEL flag: upper buf is output */
+	a0	= 0x0001
+	*r0	= a0
+
+	nop				/* buffer select signal is re-synched */
+	nop				/*  by the external 20MHz clock */
+	nop				/* these nop's give some time margin */
+	nop				/*  for the buffer change to occur */
+
+					/* Initialize lower circular buffers */
+	r0	= I_REF			/* constant I_REF at *R0 is loaded to */
+	a0	= *r0			/*   a0, then to lower I circular */
+	r1	= I_BUF_OUT_L		/*   buffer */
+	do BUF_HLF_SIZE {
+	  *r1++	= a0			/* put into circular buffer */
+	  *r1++	= a0			/* put into circular buffer */
+	}
+
+	r0	= Q_REF			/* constant Q_REF at *R0 is loaded to */
+	a0	= *r0			/*   a0, then to lower Q circular */
+	r1	= Q_BUF_OUT_L		/*   buffer */
+	do BUF_HLF_SIZE {
+	  *r1++	= a0			/* put into circular buffer */
+	  *r1++	= a0			/* put into circular buffer */
+	}
+
+init_ybuf:
+	a0	= a0 - a0		/* clear buffers I_Y_BUF and Q_Y_BUF */
+	r0	= I_Y_BUF
+	r1	= Q_Y_BUF
+	do BUF_HLF_SIZE {
+	  *r0++	= a0
+	  *r0++	= a0
+	  *r0++	= a0
+	  *r0++	= a0
+	  *r1++	= a0
+	  *r1++	= a0
+	  *r1++	= a0
+	  *r1++	= a0
+	}
+
+	r3	= DSP_A_DSEL2		/* memory address of DSEL2 */
+	r2	= A_INT0_DEL		/* location of int0 delay value */
+	a1	= *r2
+	*r3	= a1			/* load delay to DSEL2 location */
+
+	a1	= inc			/* enable int1, int2, and int3 */
+	a1	= a1h | INT_SET(INT_M_INT123)
+	inc	= a1
+
+	cbit	= BIO_ON(BIO_V_DSPRUN)	/* DSP ready to run */
+
+	y	= CMD_K_READY		/* comand, that DSP is ready */
+	a0	= STT_OKAY		/* Put OK status in argument */
+	p	= NULL			/* no data over com. block */
+	call	msg2vxi			/* Send message that DSP ready */
+
+	/* End of preloading section */
+
+gvff_poll:
+	/* This polling loop is structured to allow special DSP functions */
+	/* to be envoked whenever a change of operational mode is sensed. */
+	/* Currently, only changes from a 'running' mode to a 'load'      */
+	/* is handled specially by calling the 'parc_DSP' routine.        */
+
+	/* The DSP command bits RUN_DSP, TF_DSP, and TEST are mutually    */
+	/* exclusive as sourced by the hardware.  However due to          */
+	/* asynchronous sampling by the DSP, the DSEL1 register must be   */
+	/* debounced, by testing for two identical reads as done below:   */
+
+	/* First, check if host processor has signalled a new message */
+	r0	= A_MSG_WAITING
+	a0	= *r0
+	a0 & a0				/* set accumulator flags */
+	if eq goto get_state		/* if a message is waiting, */
+	a0	= a0 - a0		/*   clear the interrupt flag */
+	*r0	= a0
+	call	msg2dsp			/*   and process the message */
+
+get_state:
+	a0	= a0 - a0		/* clear state change interrupts */
+	r0	= A_START_TF
+	*r0	= a0
+	r0	= A_START_TST
+	*r0	= a0
+	r0	= DSP_A_DSEL1
+	r1	= A_PREV_DSEL1
+	a0	= *r0			/* Read DSP command reg */
+	a0	= a0h & DSEL1_M_CMD	/* Mask out MSG2DSP bit */
+	*r1	= a0			/* save as previous read */
+wait_cmd:
+	a0	= *r0			/* Read DSP command register again */
+	a0	= a0h & DSEL1_M_CMD	/* Mask out MSG2DSP bit */
+	a1	= *r1			/* compare to previous read until  */
+	a1 - a0				/*   two identical reads are found */
+	*r1	= a0			/* save latest read as previous read */
+	if ne goto wait_cmd		/*   branch on comparison result */
+
+	r0	= A_NEXT_MODE		/* update next command status */ 
+	*r0	= a0
+
+	r1	= A_CURR_MODE		/* switch to current process */
+	a0	= *r1
+	a0h - DSEL1_M_RUN
+	if eq goto run_state
+	a0h - DSEL1_M_TF
+	if eq goto tf_state
+	a0h - DSEL1_M_TEST
+	if eq goto test_state
+	
+load_state:
+	r1	= A_NEXT_MODE		/* check for transition out of LOAD */
+	a0	= *r1
+	r0	= A_CURR_MODE
+	*r0	= a0			/* update current command mode */
+	a0h - DSEL1_M_RUN
+	if eq goto load2run
+	a0h - DSEL1_M_TF
+	if eq goto load2tf
+	a0h - DSEL1_M_TEST
+	if eq goto load2test
+load_cont:				/* in LOAD state, DSP does nothing */
+	goto gvff_poll
+load2run:
+load2tf:
+load2test:
+	goto gvff_poll
+
+
+tf_state:
+	r1	= A_NEXT_MODE		/* check for transition out of TF */
+	a0	= *r1
+	r0	= A_CURR_MODE
+	*r0	= a0			/* update current command mode */
+	a0h - DSEL1_M_RUN
+	if eq goto tf2run
+	a0h - DSEL1_M_TF
+	if eq goto tf_cont
+	a0h - DSEL1_M_TEST
+	if eq goto tf2test
+tf2load:
+	call park_DSP
+	goto gvff_poll
+tf2run:
+tf2test:
+tf_cont:
+	call dsp_proc
+	goto gvff_poll
+
+test_state:
+	r1	= A_NEXT_MODE		/* check for transition out of TEST */
+	a0	= *r1
+	r0	= A_CURR_MODE
+	*r0	= a0			/* update current command mode */
+	a0h - DSEL1_M_RUN
+	if eq goto test2run
+	a0h - DSEL1_M_TF
+	if eq goto test2tf
+	a0h - DSEL1_M_TEST
+	if eq goto test_cont
+test2load:
+	call park_DSP
+	goto gvff_poll
+test2run:
+test2tf:
+test_cont:
+	call dsp_proc
+	goto gvff_poll
+
+run_state:
+	r1	= A_NEXT_MODE		/* check for transition out of RUN */
+	a0	= *r1
+	r0	= A_CURR_MODE
+	*r0	= a0			/* update current command mode */
+	a0h - DSEL1_M_RUN
+	if eq goto run_cont
+	a0h - DSEL1_M_TF
+	if eq goto run2tf
+	a0h - DSEL1_M_TEST
+	if eq goto run2test
+run2load:				
+	call park_DSP
+	goto gvff_poll
+run2tf:
+run2test:
+run_cont:
+	call dsp_proc
+	goto gvff_poll
+
+
+/* End of loop section */
+/* Should never be beyond this point */
+
+	y = CMD_K_ERROR			/* command, new average phase loaded */
+	a0 = STT_WRNGTERM
+	p = NULL			/* no data over com. block */
+	call msg2vxi			/* send message to VXI */
+
+end:	goto end			/* never should be here */
+
+
+/*****************************************************************************
+**
+** dsp_proc
+**
+** This routine is called once per main loop whenever the GVFF Board
+** state is in one of the LOAD_TF, RUN, or TEST modes, but not when
+** it is in any one of the LOAD modes.
+**
+** This routine clears the TASK_END signal (iobit-6) on each entry, and
+** sets it on each exit.
+**
+** The routine activates the Input Fifo circuits and collects 1,2, or 3
+** turns of error signal data (depending on the constant DSP_K_NTURNS), and
+** places the signal in I_ERR_BUF1,2,3 and Q_ERR_BUF1,2,3.
+** 
+** The routine computes the average of the N turns to generate one turn
+** of averaged error data, placing it in I_ERR_BUF1 and Q_ERR_BUF1.
+**
+** If the ~ADAPTIVE signal is high (iobit-0) the routine skips all adaptive
+** processing, and instead, clears the I_Y and Q_Y buffers.
+**
+** If the ~ADAPTIVE signal is low (iobit-0) the routine computes one iteration
+** of the adaptive process, updates the I_Y_BUF and Q_Y_BUF buffers.
+**
+** Regardless of ~ADAPTIVE signal, the dsp_proc routine sums the I_REF and
+** Q_REF dc offsets with the I_Y and Q_Y signals and loads the result into
+** the inactive circular buffers. It then switches output to the newly
+** loaded circular buffers.
+**
+*****************************************************************************/
+
+dsp_proc:
+	cbit  = BIO_OFF(BIO_V_TASKEND)	/* signal start of a RUN loop */
+
+	r0	= A_DATA_RDY		/* clear the Input FIFO Data Rdy flag */
+	a0	= 0x0000
+	*r0	= a0
+	ins	= INT_M_INT0		/* clear any residual int0 req status */
+	a0	= inc			/* unmask INT-0 interrupts */
+	a0	= a0h | INT_M_INT0
+	inc	= a0
+	cbit	= BIO_ON(BIO_V_FIFOENA)	/* Remove reset from input FIFOs */
+
+	r0	= A_DATA_RDY		/* Wait for INT0 ISR to set flag */
+wait_data:
+	a0	= *r0
+	a0 & a0
+	if eq goto wait_data
+
+	/* Collect 1 to 3 turns of error signal depending on */
+	/* defined value DSP_K_NTURNS */
+	/* During collection, invert sign bit since AtoD is Binary Offset */
+	/* NOTE: Input FIFOs place data in MSB 12-bits of 16-bit parallel port*/
+	/*  FIFO hardware also sets Bit0 LSB to constant 1 for Q channel only */
+	/*  Below, this '1' marker is dropped by arith. shift right 1-bit */
+
+	auc	= DSP_K_AUCINIT		/* assure p register is not shifted */
+	ar0	= DSP_K_PRESHIFT	/* number of bits to shift right */
+	r0	= I_ERR_BUF1		/* collect N turns of I Error data */
+	p	= DSP_K_SIGNBIT		/* to convert OffsetBin to 2s Comp */
+	*r0	= pdx0			/* NOTE: PDX0 address I FIFO output */
+	nop
+	nop
+	*r0	= pdx0			/* 2 reads needed to clear FIFO pipe */
+	nop
+	nop
+
+	do  BUF_HLF_SIZE {		/* start buffering real I data */
+	  a0	= pdx0
+	  a0	= a0 ^ p		/* flip sign for 2s comp conversion */
+	  a0	= a0 >> ar0		/* put AtoD LSB in a0h bit3 position */
+	  *r0++	= a0
+
+	  a0	= pdx0
+	  a0	= a0 ^ p		/* flip sign for 2s comp conversion */
+	  a0	= a0 >> ar0		/* put AtoD LSB in a0h bit3 position */
+	  *r0++	= a0
+	}
+	a0	= DSP_K_NTURNS		/* if averaging >1 turn, continue */
+	a0h - 0x0002
+	if mi goto i_err_rdy
+	redo BUF_HLF_SIZE		/* read 2nd turn from I-FIFO */
+	a0	= DSP_K_NTURNS		/* if averaging >2 turns, continue */
+	a0h - 0x0003
+	if mi goto i_err_rdy
+	redo BUF_HLF_SIZE		/* read 3rd turn from I-FIFO */
+i_err_rdy:
+
+	ar0	= DSP_K_PRESHIFT	/* number of bits to shift right */
+	r0	= Q_ERR_BUF1		/* collect N turns of Q Error data */
+	p	= DSP_K_SIGNBIT		/* to convert OffsetBin to 2s Comp */
+	*r0	= pdx5			/* NOTE: PDX5 address Q FIFO output */
+	nop
+	nop
+	*r0	= pdx5			/* 2 reads needed to clear FIFO pipe */
+	nop
+	nop
+
+	do  BUF_HLF_SIZE {		/* start buffering real Q data */
+	  a0	= pdx5
+	  a0	= a0 ^ p		/* flip sign for 2s comp conversion */
+	  a0	= a0 >> ar0		/* Put AtoD LSB in a0h bit2 position */
+	  *r0++	= a0
+
+	  a0	= pdx5
+	  a0	= a0 ^ p		/* flip sign for 2s comp conversion */
+	  a0	= a0 >> ar0		/* put AtoD LSB in a0h bit2 position */
+	  *r0++	= a0
+	}
+	a0	= DSP_K_NTURNS		/* if averaging >1 turn, continue */
+	a0h - 0x0002
+	if mi goto q_err_rdy
+	redo BUF_HLF_SIZE		/* read 2nd turn from Q-FIFO */
+	a0	= DSP_K_NTURNS		/* if averaging >2 turns, continue */
+	a0h - 0x0003
+	if mi goto q_err_rdy
+	redo BUF_HLF_SIZE		/* read 3rd turn from Q-FIFO */
+q_err_rdy:
+
+	/* assert ~FIFO_RESET after all desired IQ error data is read out: */
+
+	cbit	= BIO_OFF(BIO_V_FIFOENA)
+ 
+	/* Average over the N-turns to produce one turn of error data: */
+
+	/* In this code section AUC is set to cause a left shift of 2-bits */
+	/* between the P-reg and accumulators.  This makes the bit format of */
+	/* the X-reg to be <si.ffffffffffffff>, i.e. binary point is left of */
+	/* bit 14. */
+
+	auc	= DSP_K_AUCPx2		/* set P reg output shift 2 bits left */
+	a0	= DSP_K_NTURNS		/* switch based on number of turns */
+	a0h - 1
+	if eq goto avg_rdy
+	a0h - 2
+	if eq goto avg_2turns
+	a0h - 3
+	if eq goto avg_3turns
+
+avg_2turns:
+	x	= 0x2000		/* multiply factor is 1/2 */
+	a1	= a1 - a1		/* clear a1 */
+	a1l	= 0x8000		/* prepare a1 for rounding */
+
+	r0	= I_ERR_BUF1		/* destination pointer */
+	r1	= I_ERR_BUF1		/* turn 1 source pointer */
+	r2	= I_ERR_BUF2		/* turn 2 source pointer */
+
+	y	= *r1++
+	p = x*y  y = *r2++
+	do  BUF_HLF_SIZE {
+	  a0 = p  p = x*y  y = *r1++
+	  a0 = a0 + p  p = x*y  y = *r2++
+	  a0 = a0 + a1
+	  *r0++	= a0
+
+	  a0 = p  p = x*y  y = *r1++
+	  a0 = a0 + p  p = x*y  y = *r2++
+	  a0 = a0 + a1
+	  *r0++	= a0
+	}
+
+	r0	= Q_ERR_BUF1		/* destination pointer */
+	r1	= Q_ERR_BUF1		/* turn 1 source pointer */
+	r2	= Q_ERR_BUF2		/* turn 2 source pointer */
+
+	y	= *r1++
+	p = x*y  y = *r2++
+	redo  BUF_HLF_SIZE
+	goto avg_rdy
+
+avg_3turns:
+	x	= 0x1555		/* multiply factor is 1/3 */
+	a1	= a1 - a1		/* clear a1 */
+	a1l	= 0x8000		/* prepare a1 for rounding */
+
+	r0	= I_ERR_BUF1		/* destination pointer */
+	r1	= I_ERR_BUF1		/* turn 1 source pointer */
+	r2	= I_ERR_BUF2		/* turn 2 source pointer */
+	r3	= I_ERR_BUF3		/* turn 3 source pointer */
+
+	y	= *r1++
+	p = x*y  y = *r2++
+	do  BUF_HLF_SIZE {
+	  a0 = p  p = x*y  y = *r3++
+	  a0 = a0 + p  p = x*y  y = *r1++
+	  a0 = a0 + p  p = x*y  y = *r2++
+	  a0 = a0 + a1
+	  *r0++	= a0
+
+	  a0 = p  p = x*y  y = *r3++
+	  a0 = a0 + p  p = x*y  y = *r1++
+	  a0 = a0 + p  p = x*y  y = *r2++
+	  a0 = a0 + a1
+	  *r0++	= a0
+	}
+
+	r0	= Q_ERR_BUF1		/* destination pointer */
+	r1	= Q_ERR_BUF1		/* turn 1 source pointer */
+	r2	= Q_ERR_BUF2		/* turn 2 source pointer */
+	r3	= Q_ERR_BUF3		/* turn 3 source pointer */
+
+	y	= *r1++
+	p = x*y  y = *r2++
+	redo  BUF_HLF_SIZE
+
+avg_rdy:
+	auc	= DSP_K_AUCINIT		/* restore AUC to initial state */
+
+	/* If '~ADAPTIVE' bit, ioBit-0, is set, bypass the adaptive algorithm */
+
+	cbit=BIO_TESTT(BIO_V_ADAPT)	/* Test if an adaptive state is active*/
+	if somet goto non_adapt		/* if not skip adaptive code */
+
+	/* Determine DC component of averaged error signals */
+	/* AUC register must be set for no P-shift for the following section */
+
+find_dc:
+	x	= DSP_K_P00694		/* scale = 0.00694275  (1/144.035) */
+
+	r0	= I_ERR_BUF1		/* point to the averaged I_ERR buffer */
+	a0	= a0 - a0		/* clear A0 to accumulate DC value */
+	y	= *r0++			/* start filling the instruction pipe */
+	p = x*y  y = *r0++
+	do BUF_HLF_SIZE {
+	  a0 = a0 + p  p = x*y  y = *r0++
+	  a0 = a0 + p  p = x*y  y = *r0++
+	}
+	a1	= a1 - a1
+	a1l	= 0x8000		/* Add 1 in Bit-15 position to the */
+	a0	= a0 + a1		/* DC val in A0 for rounding */
+	r0	= I_DC			/* Save upper 16-bits DC val to I_DC  */
+	*r0	= a0
+
+	r0	= Q_ERR_BUF1		/* point to the averaged Q_ERR buffer */
+	a0	= a0 - a0		/* clear A0 to accumulate DC value */
+	y	= *r0++			/* start filling the instruction pipe */
+	p = x*y  y = *r0++
+	do BUF_HLF_SIZE {
+	  a0 = a0 + p  p = x*y  y = *r0++
+	  a0 = a0 + p  p = x*y  y = *r0++
+	}
+	a1	= a1 - a1
+	a1l	= 0x8000		/* Add 1 in Bit-15 position to the */
+	a0	= a0 + a1		/* DC val in A0 for rounding */
+	r0	= Q_DC			/* Save upper 16-bits DC val to Q_DC */
+	*r0	= a0
+
+
+	/* Compute difference equation Y[0:143] = bY[0:143] - cX[0:143] */
+	/* where c=I,Q_ADAPT_COEF, b= I,Q_FORG_FCT, and X= ERROR[0:143]-DC */
+
+	/* To make best use of mult-accum architecture, equation is */
+	/* restructured to Y[0:143] = cDC - cERROR[0:143] + bY[0:143] */
+
+	/* AUC register must be set for P-reg left-shift of 2 bits */
+	/* I,Q_ADPT_COEF and I,Q_FORG_FCT 16-bit words must be formatted as: */
+	/* <si.ffffffffffffff>, i.e., binary point is to right of bit-14 */
+
+diff_eq:
+	auc	= DSP_K_AUCPx2		/* set P-reg left-shift-2 mode */
+
+	r0	= I_ADPT_COEF		/* on each pass, put I coefficients */
+	r1	= I_FORG_FCT		/*  into consecutive locations */
+	r2	= I_ADPT		/*  to speed up inner loop */
+	do 1 {
+	  a0	= *r0
+	  *r2++	= a0
+	  a0	= *r1
+	  *r2	= a0
+	}
+
+	r0	= Q_ADPT_COEF		/* on each pass, put Q coefficients */
+	r1	= Q_FORG_FCT		/*  into consecutive locations */
+	r2	= Q_ADPT		/*  to speed up inner loop */
+	redo 1
+
+
+	/* compute the I_Y and Q_Y waveforms */
+
+	i	= 0			/* post incr value for pt register */
+	ar0	= 1			/* used for right shift in cache loop */
+	ar1	= 15			/* used for right shift in cache loop */
+
+	r0	= I_Y_BUF		/* pointer into Y buffer */
+	r1	= I_ERR_BUF1		/* pointer into error buffer */
+	r2	= I_FORG		/* pointer to coefficients */
+	pt	= I_DC			/* pointer to DC value */
+
+	y	= *r2--			/* y = FORG_FCT */
+
+	do BUF_HLF_SIZE {
+	  a0 = *r0++			/* load lsb of Y value into a1 */
+	  a0 = a0 >>> ar0		/* shift 0 into sign bit of lsb */
+	  x  = a0			/* x = lsw logical shifted right */
+	  p  = x*y x=*r0--		/* p = lsw(Y) * FORG_FCT, x=msw(Y) */
+	  a0=p p=x*y y=*r2++ x=*pt++i	/* a0 = lsw(Y)*FORG, p=msw(Y)*FORG */
+					/* y=ADPT_COEF  x=DC */
+	  a0 = a0 >> ar1		/* allign product's msb into a0's lsb */	
+	  a0=a0+p  p=x*y  x=*r1++	/* a0=(lsw(Y)+msw(Y))*FORG p=ADPT*DC */
+					/* y=ADPT_COEF  x=ERR_BUF */
+	  a0 = a0+p  p=x*y  y=*r2--	/* a0+=ADPT*DC p=ADPT*ERR y=FORG */
+	  a0 = a0-p			/* a0-=ADPT*ERR */
+	  *r0++ = a0l			/* save new 32-bit Y value */
+	  *r0++ = a0
+	}
+	redo BUF_HLF_SIZE		/* redo for second half of I_Y_BUF */
+
+	r0	= Q_Y_BUF		/* pointer into Y buffer */
+	r1	= Q_ERR_BUF1		/* pointer into error buffer */
+	r2	= Q_FORG		/* pointer to coeff. loaded into X */
+	pt	= Q_DC			/* pointer to DC value */
+
+	y	= *r2--			/* y = FORG_FCT */
+
+	redo BUF_HLF_SIZE		/* do for first half of Q_Y_BUF */
+	redo BUF_HLF_SIZE		/* redo for second half of Q_Y_BUF */
+
+
+	/* END of adaptive section */
+	goto add_dc			/* skip the non-adapt function below */
+
+
+
+	/* This section is called when ~ADAPTIVE signal (IOBit-0) is high */
+	/* Instead of updating the adaptive filter buffers, I_Y_BUF and   */
+	/* Q_Y_BUF, these buffers are cleared on every pass. */
+
+non_adapt:
+	r0	= I_Y_BUF		/* point to the Y buffers */
+	r1	= Q_Y_BUF
+	a0	= a0 - a0		/* clear a0 */
+	do BUF_HLF_SIZE {
+	  *r0++ = a0			/* clear the buffers */
+	  *r0++ = a0
+	  *r0++ = a0
+	  *r0++ = a0
+	  *r1++ = a0
+	  *r1++ = a0
+	  *r1++ = a0
+	  *r1++ = a0
+	}
+
+
+	/* Load Y to circ buffers, adding in I_REF and Q_REF from EPICs. */
+
+	/* Circular Buffers are loaded starting at an offset defined by the */
+	/* LD_REF Message parameter OUT_BUF_OFFSET, which must be within */
+	/* the range [0 to 143] decimal */
+
+	/* The adaptive waveform is first scaled up by 2 (shifted left) */
+	/*   to undo the down-scaling performed when the A-to-D input */
+	/*   (error signal) was read in */
+
+	/* The adaptive waveform is then interpolated between Y[n] and */
+	/*   Y[n+1] based on the LD_REF message parameter OUT_BUF_INTERP */
+	/*   OUT_BUF_INTERP must be in range [0x0 to 0x3FFF]  */
+
+	/* This interpolation is computed on-the-fly, and I_REF (or Q_REF) */
+	/*    is added to the interpolated value, and the result is loaded */
+	/*   into the currently inactive circular buffer */
+
+	/* OUT_BUF[ (n+offset) mod 144] = { 2*Y[n]*(1-OUT_BUF_INTERP) +    */
+	/*	2*Y[n+1]*OUT_BUF_INTERP } + REF      */
+
+add_dc:
+	r0	= OUT_BUF_INTERP	/* re-compute 1-OUT_BUF_INTERP each */
+	r1	= ONE_MIN_INTERP	/*  iteration in case new LDREF has */
+	a0	= *r0			/*  been received. a0= OUT_BUF_INTERP*/
+	a1	= 0x4000		/* a1 = 1 in si.fff...f format */
+	a1	= a1-a0			/* a1 = 1 - OUT_BUF_INTERP */
+	*r1++	= a1			/* put 1-INTERP and INTERP in */
+	*r1	= a0			/* consecutive locations */
+
+	r0	= (I_Y_END - 2) 	/* prefix last I_Y_BUF value to */
+	r1	= I_Y_MIN1		/* front of buffer for interpolation */
+	do 2 {
+	  a0	= *r0++
+	  *r1++	= a0
+	}
+	r0	= (Q_Y_END - 2)		/* prefix last Q_Y_BUF value to */
+	r1	= Q_Y_MIN1		/* front of buffer for interpolation */
+	redo 2
+
+	ar0	= DSP_K_PRESHIFT	/* set left-shift to undo input scale */
+
+	r0	= OUT_BUF_OFFSET	/* set increment, j, to buffer offset */
+	j	= *r0			/* MUST BE in range [0:143] (decimal) */
+
+	r0	= A_CBUF_SEL		/* determine active circular buffer */
+	a0	= *r0			/* A_CBUF_SEL=0 means low buf active */
+	a0 & a0				/* Update currently non-active buffer */
+	if eq goto low_actv
+
+hi_actv:
+	auc	= DSP_K_AUCPx2nc0	/* Set a0l to not clear on loading a0 */
+	r1	= I_BUF_OUT_L		/* Set R1 to circ buffer base plus */
+	a0	= *r1++j		/*   the offset in j (by dummy read) */
+	rb	= I_BUF_OUT_L		/* set limits for destination address */
+	re	= (I_BUF_OUT_L + BUF_SIZE_M1)
+
+	r0	= I_REF			/* load I_REF into A1 */
+	a1	= *r0
+	a1l	= 0x8000		/* used for rounding up on truncation */
+	r0	= I_Y_MIN1		/* source pointer to diff. eqn output */
+	r2	= INTERP		/* pointer to interpolation coef */
+
+	a0l	= *r0++
+	a0	= *r0++			/* get first sample from Y_BUF[-1]  */
+	a0	= a0 << ar0		/* undo original scale down, and */
+	a0	= a0 + a1		/* add I_REF (after scaling up) */
+	x	= a0 			/* x = Y[n-1]*2 + IREF (=Y'[n-1]) */
+	y	= *r2--			/* y = INTERP */
+	p	= x*y y=*r2++		/* p = Y'[n]*INTERP, y=ONE_MIN_INTERP */
+	do BUF_HLF_SIZE {
+	  a0l	= *r0++			/* get next Y_BUF sample (lsw) */
+	  a0	= *r0++			/* get next Y_BUF sample (msw) */
+	  a0	= a0 << ar0		/* undo original scale down shift */
+	  a0	= a0 + a1		/* add I_REF (after scaling up) */
+	  x	= a0			/* x = Y[n]*2 + I_REF (= Y'[n]) */
+	  a0	= p p=x*y y=*r2--	/* a0=Y'[n-1]*INTERP */
+					/* p=Y'[n]*ONE_MIN_INTERP, y=INTERP */
+	  a0	= a0 + p p=x*y y=*r2++	/* a0=Y'[n-1]*INTERP +   */
+					/*	Y'[n]*ONE_MIN_INTERP         */
+					/* P=Y'[n]*INTERP), y=ONE_MIN_INTERP*/
+	  *r1++	= a0			/* put into circular buffer */
+	}
+	redo BUF_HLF_SIZE
+	re	= 0			/* be sure circular addressing is off */
+	
+	r1	= Q_BUF_OUT_L		/* Set R1 to circ buffer base plus */
+	a0	= *r1++j		/*   the offset in j (by dummy read) */
+
+	rb	= Q_BUF_OUT_L		/* set limits for destination address */
+	re	= (Q_BUF_OUT_L + BUF_SIZE_M1)
+
+	r0	= Q_REF			/* load Q_REF into A1 */
+	a1	= *r0
+	a1l	= 0x8000		/* used for rounding up on truncation */
+	r0	= Q_Y_MIN1		/* source pointer to diff. eqn output */
+	r2	= INTERP		/* pointer to interpolation coef */
+
+	a0l	= *r0++
+	a0	= *r0++			/* get first sample from Y_BUF[-1]  */
+	a0	= a0 << ar0		/* undo original scale down, and */
+	a0	= a0 + a1		/* add Q_REF (after scaling up) */
+	x	= a0 			/* x = Y[n-1]*2 + IREF (=Y'[n-1]) */
+	y	= *r2--			/* y = INTERP */
+	p	= x*y y=*r2++		/* p = Y'[n]*INTERP, y=ONE_MIN_INTERP */
+	redo BUF_HLF_SIZE
+	redo BUF_HLF_SIZE
+	auc	= DSP_K_AUCPx2		/* set a0l to clear on loading a0 */
+	re	= 0			/* be sure circular addressing is off */
+	
+	cbit  = BIO_OFF(BIO_V_BUFSEL)	/* output from lower circular buffer */
+	r0	= A_CBUF_SEL		/* clear the buffer selection flag */
+	a0	= a0 - a0
+	*r0	= a0
+	goto	run_end
+
+low_actv:
+	auc	= DSP_K_AUCPx2nc0	/* Set a0l to not clear on loading a0 */
+	r1	= I_BUF_OUT_H		/* Set R1 to circ buffer base plus */
+	a0	= *r1++j		/*   the offset in j (by dummy read) */
+	rb	= I_BUF_OUT_H		/* set limits for destination address */
+	re	= (I_BUF_OUT_H + BUF_SIZE_M1)
+
+	r0	= I_REF			/* load I_REF into A1 */
+	a1	= *r0
+	a1l	= 0x8000		/* used for rounding up on truncation */
+	r0	= I_Y_MIN1		/* source pointer to diff. eqn output */
+	r2	= INTERP		/* pointer to interpolation coef */
+
+	a0l	= *r0++
+	a0	= *r0++			/* get first sample from Y_BUF[-1]  */
+	a0	= a0 << ar0		/* undo original scale down, and */
+	a0	= a0 + a1		/* add I_REF (after scaling up) */
+	x	= a0 			/* x = Y[n-1]*2 + IREF (=Y'[n-1]) */
+	y	= *r2--			/* y = INTERP */
+	p	= x*y y=*r2++		/* p = Y'[n]*INTERP, y=ONE_MIN_INTERP */
+	do BUF_HLF_SIZE {
+	  a0l	= *r0++			/* get next Y_BUF sample (lsw) */
+	  a0	= *r0++			/* get next Y_BUF sample (msw) */
+	  a0	= a0 << ar0		/* undo original scale down shift */
+	  a0	= a0 + a1		/* add I_REF (after scaling up) */
+	  x	= a0			/* x = Y[n]*2 + I_REF (= Y'[n]) */
+	  a0	= p p=x*y y=*r2--	/* a0=Y'[n-1]*INTERP */
+					/* p=Y'[n]*ONE_MIN_INTERP, y=INTERP */
+	  a0	= a0 + p p=x*y y=*r2++	/* a0=Y'[n-1]*INTERP +   */
+					/*	Y'[n]*ONE_MIN_INTERP         */
+					/* P=Y'[n]*INTERP), y=ONE_MIN_INTERP*/
+	  *r1++	= a0			/* put into circular buffer */
+	}
+	redo BUF_HLF_SIZE
+	re	= 0			/* be sure circular addressing is off */
+	
+	r1	= Q_BUF_OUT_H		/* Set R1 to circ buffer base plus */
+	a0	= *r1++j		/*   the offset in j (by dummy read) */
+	a1l	= 0x8000		/* used for rounding up on truncation */
+	rb	= Q_BUF_OUT_H		/* set limits for destination address */
+	re	= (Q_BUF_OUT_H + BUF_SIZE_M1)
+
+	r0	= Q_REF			/* load Q_REF into A1 */
+	a1	= *r0
+	r0	= Q_Y_MIN1		/* source pointer: diff. eqn output */
+	r2	= INTERP		/* pointer to interpolation coef */
+
+
+	a0l	= *r0++
+	a0	= *r0++			/* get first sample from Y_BUF[-1]  */
+	a0	= a0 << ar0		/* undo original scale down, and */
+	a0	= a0 + a1		/* add Q_REF (after scaling up) */
+	x	= a0 			/* x = Y[n-1]*2 + IREF (=Y'[n-1]) */
+	y	= *r2--			/* y = INTERP */
+	p	= x*y y=*r2++		/* p = Y'[n]*INTERP, y=ONE_MIN_INTERP */
+	redo BUF_HLF_SIZE
+	redo BUF_HLF_SIZE
+	auc	= DSP_K_AUCPx2		/* set a0l to clear on loading a0 */
+	re	= 0			/* be sure circular addressing is off */
+	
+	cbit  = BIO_ON(BIO_V_BUFSEL)	/* output from upper circular buffer */
+	r0	= A_CBUF_SEL		/* set the buffer selection flag */
+	a0	= 0x0001
+	*r0	= a0
+
+run_end:
+	auc	= DSP_K_AUCINIT		/* restore initial AUC value */
+	cbit  = BIO_ON(BIO_V_TASKEND)	/* set IOBIT6, end of algorithm loop */
+	return
+
+
+/******************************************************************************
+**
+** park_DSP
+** 
+** When implemented,
+** this routine will place the latest reference waveform into the non-active
+** circular buffer so that on DSP reset the waveform output remains continuous
+
+******************************************************************************/
+
+park_DSP:	/* to be implemented */
+	return
+
+.rsect ".ram"
+
+
+/******************************************************************************
+**
+** Internal RAM variables and buffers
+**
+******************************************************************************/
+
+A_INT0_DEL:	int DSP_K_INT0_DEL	/* In-FIFO amount of fill before INT0*/ 
+A_INTR_ERR:	int 0x0000		/* Number of unexpected interrupts */
+
+/* The following 4 flags are set by interrupts 0 thru 3 respectively: */
+A_DATA_RDY:	int 0x0000		/* Flag showing In-FIFO data available*/
+A_START_TF:	int 0x0000		/* Flag showing TF mode went active */
+A_START_TST:	int 0x0000		/* Flag showing TEST mode went active */
+A_MSG_WAITING:	int 0x0000		/* Flag showing Host sent a message */
+
+/* misc. program variables: */
+A_TIME_FLG:	int 0x0000		/* Flag showing Timer intrpt occured */
+A_CBUF_SEL:	int 0x0000		/* Indicates which circ-buf is output */
+A_CURR_MODE:	int 0x0000		/* Current command for DSP program */
+A_NEXT_MODE:	int 0x0000		/* Next command for DSP program */
+A_PREV_DSEL1:	int 0x0000		/* Used to debounce DSEL1 reads */
+
+/* Buffer for up to 3 turns of I_ERROR: */
+I_ERR_BUF1: 	BUF_SIZE*int 0x0000
+I_ERR_BUF2:	BUF_SIZE*int 0x0000
+I_ERR_BUF3:	BUF_SIZE*int 0x0000
+
+/* Buffer for up to 3 turns of Q_ERROR: */
+Q_ERR_BUF1: 	BUF_SIZE*int 0x0000	
+Q_ERR_BUF2:	BUF_SIZE*int 0x0000
+Q_ERR_BUF3:	BUF_SIZE*int 0x0000
+
+/* Buffer for adaptive compensation signal, prior to adding I_REF and Q_REF */ 
+I_Y_MIN1:	int 0x0000		/* for interpolation on Y circular */
+		int 0x0000		/*   buffer loading */
+I_Y_BUF: 	BUF_SIZE*int 0x0000	/* main I_Y buffer, 2-words/samp */
+		BUF_SIZE*int 0x0000
+I_Y_END:
+Q_Y_MIN1:	int 0x0000		/* for interpolation on Q circular */
+		int 0x0000		/*   buffer loading */
+Q_Y_BUF: 	BUF_SIZE*int 0x0000	/* main Q_Y buffer, 2-words/samp */
+		BUF_SIZE*int 0x0000
+Q_Y_END:
+
+I_DC:		int 0x0000	/* DC value of I_ERR waveform */
+Q_DC:		int 0x0000	/* DC value of Q_ERR waveform */
+
+I_ADPT:		int 0x0000	/* Coefficients rearranged for fast */
+I_FORG:		int 0x0000	/*   calculation of difference equation */
+Q_ADPT:		int 0x0000
+Q_FORG:		int 0x0000
+ONE_MIN_INTERP:	int 0x0000	/* Holds value 1 - OUT_BUF_INTERP */
+INTERP:		int 0x0000
+
+/* The following is initialized when a 'LDREF' message is received from host */
+/* On receiving any UREF (update ref) messages, I_REF and Q_REF are updated. */
+
+I_REF: 		int 0x0000
+Q_REF: 		int 0x0000
+I_ADPT_COEF: 	int 0x0000
+Q_ADPT_COEF: 	int 0x0000
+I_FORG_FCT: 	int 0x0000
+Q_FORG_FCT: 	int 0x0000
+OUT_BUF_OFFSET:	int 0x0000
+OUT_BUF_INTERP: int 0x0000
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

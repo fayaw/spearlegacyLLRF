@@ -1,0 +1,161 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	RF-SPEAR-R0-0-0:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2011.12.07.01.18.30;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Replace old 3.13 initHooks.c with 3.14.11-compliant p2RfInitHooks.c.
+@
+text
+@/* p2RfInitHooks.c	ioc initialization hooks */
+/*
+ *
+ * .01  10-Sep-1997	Robert C. Sass (RCS)
+ *                        Initialize Clock registers before epvxiResman is called.
+ * .02  09-Sep-2003     Kristi Luchini (LUCHINI)
+ *                        changed #if TARGET == MV2400 to #if CPU_FAMILY == PPC
+ * .03  09-Sep-2003     Kristi Luchini (LUCHINI)
+ *                        call reset_kscIsr() for any cpu, since function
+ *                        is empty for niCpu030 and this function is only
+ *                        temporary until Kinetic Systems fixes their 
+ *                        interrupt handler
+ * .04 19-Dec-2003      Kristi Luchini (LUCHINI)
+ *                        enable D16 IACK cycle for V152 with new register.
+ */
+
+
+#include <vxWorks.h>
+#include <stdlib.h>              /* getenv()   */
+#include <string.h>              /* strtol()   */
+#include <stdio.h>               /* printf()   */
+#include <taskLib.h>             /* taskDelay ()       */
+#include <sysLib.h>              /* sysClkRateGet()    */
+
+#include "drvP2RfVxi.h"          /* P2RF_IntEnable()   */
+#include "initHooks.h"
+#include "epicsExport.h"
+#include "errlog.h"
+
+
+/* Prototypes */
+long p2RfInitClk( long slot );
+int reset_kscIsr(void);          /* reset Kinetic Systems isr */
+static void p2RfInitHooks(initHookState callNumber);
+#if CPU == PPC604
+#define HAS_IACK_CTRL_REG 0x5300
+int v152_wt_iack_ctrl(unsigned short data);
+int v152_rd_iack_ctrl(unsigned short *data);
+#endif
+
+/*
+ *
+ * called by iocInit at various points during initialization
+ *
+ */
+
+/* If this function is loaded, iocInit calls this function
+ * at certain defined points during IOC initialization */
+static void p2RfInitHooks(initHookState callNumber)
+{
+       long      status;
+       char     *clkmacro_ps;         /* Pointer to clock macro definition */
+       char     *slot_ps;             /* Pointer to slot definition in CLKMACROS */
+       long      slot = 0;            /* Clock slot. Make default illegal */
+       unsigned short data;
+
+	switch (callNumber) {
+	case initHookAtBeginning :
+#ifdef DBG
+            printf ("INITHOOKatBeginning\n");
+#endif
+     	    /*
+	    ** Get slot of clock module. 
+	    ** Don't do this logic if CLKMACROS is not defined (not defined
+            ** for our test IOC).
+	    */
+            clkmacro_ps = getenv ("CLKMACROS");
+            if ( !clkmacro_ps )  break;
+   
+            slot_ps = strstr (clkmacro_ps, "S=");
+            if (slot_ps != NULL) {
+              slot_ps += 2;    /* Clock slot value */
+              slot = strtol(slot_ps, NULL, 10);
+            }
+            if ((slot == 0) || (slot > 12))
+	    {
+              errlogPrintf("!!CLKMACROS not defined or invalid macro syntax!!\n");
+              status = 99;  
+            }
+            else {
+               /* Initialize the clock module */
+               status = p2RfInitClk( slot );
+               if ( status!=OK ) 
+                  errlogPrintf("Failed to Initialize Clock Module in slot %hd\n",(int)slot);
+               else
+                  errlogPrintf("Successfully Initialzied Clock Module in slot %hd\n",(int)slot); 
+	    }
+	    break;
+
+	case initHookAfterScanInit :
+#ifdef DBG
+            printf ("INITHOOKafterScanInit\n");
+#endif
+ 
+           /* Set a D16 interrupt acknowledge for the desired interrupt level 
+            * in the interrupt acklowledge regsiter of the V152 cpu
+            */
+#if CPU == PPC604
+	    reset_kscIsr();   /* This does nothing for the niCpu030 */
+ 	    status = v152_rd_iack_ctrl( &data );
+            if (status==OK) {
+	      if ((data & 0xff00)==HAS_IACK_CTRL_REG) {
+                data |= (1 << P2RF_K_INTLEVEL) | 0x1;  
+                status = v152_wt_iack_ctrl( data );
+	      }
+            }
+#endif
+            P2RF_IntEnable ();
+            
+	case initHookAfterInterruptAccept :
+#ifdef DBG
+            printf ("INITHOOKafterInterruptAccept\n");
+#endif
+            /* Wait a couple of seconds before the CA server starts.
+             * Gives time for all PVs to go to good status.
+             */
+            taskDelay(sysClkRateGet()*2);
+	    break;
+	default:
+	    break;
+	}
+}
+void p2RfInitHooksRegister(void) {
+  initHookRegister((initHookFunction)p2RfInitHooks);
+}
+epicsExportRegistrar(p2RfInitHooksRegister);
+
+
+@

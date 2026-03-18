@@ -1,0 +1,193 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2016.10.04.00.12.36;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@For building base routines.
+@
+text
+@
+#include "iocsh.h"
+#include "epicsExport.h"
+
+void changePcbShow (void);
+void changeProtocolInputQMax(int ipQNewSize, int arpQNewSize);
+void changeIfSendQMax       (char *name, int len);
+void changeMtu              (char *ifName, int newSize);
+void changeSendQueueLength  (char *name, int len);
+void protocolQValuesShow (void);
+void ifQValuesShow(char *name);
+void endMibShow(char *devName,int unit);
+void endPoolShow(char *devName,int unit);
+#if 0
+void TIM_date (void);
+void TIM_rdate (void);
+void TIM_SetDate (unsigned long  secs);
+int TIM_SetRate( int rate );
+#endif
+
+/* changePcbShow */
+static const iocshFuncDef changePcbShowFuncDef =
+    {"changePcbShow",0};
+static void changePcbShowCallFunc(const iocshArgBuf *args)
+{
+    changePcbShow();
+}
+
+/* protocolQValuesShow */
+static const iocshFuncDef protocolQValuesShowFuncDef =
+    {"protocolQValuesShow",0};
+static void protocolQValuesShowCallFunc(const iocshArgBuf *args)
+{
+    protocolQValuesShow();
+}
+
+/* ifQValuesShow */
+static const iocshArg ifQValuesShowArg0 = { "name",iocshArgString};
+static const iocshArg * const ifQValuesShowArgs[] = {&ifQValuesShowArg0};
+static const iocshFuncDef ifQValuesShowFuncDef = {"ifQValuesShow",1,ifQValuesShowArgs};
+static void ifQValuesShowCallFunc(const iocshArgBuf *args)
+{
+  ifQValuesShow(args[0].sval);
+}
+
+/* endMibShow */
+static const iocshArg endMibShowArg0 = { "name",iocshArgString};
+static const iocshArg endMibShowArg1 = { "unit",iocshArgInt};
+static const iocshArg * const endMibShowArgs[] = {&endMibShowArg0,
+                                                  &endMibShowArg1};
+static const iocshFuncDef endMibShowFuncDef = {"endMibShow",2,endMibShowArgs};
+static void endMibShowCallFunc(const iocshArgBuf *args)
+{
+  endMibShow(args[0].sval, args[1].ival);
+}
+
+/* endPoolShow */
+static const iocshArg endPoolShowArg0 = { "name",iocshArgString};
+static const iocshArg endPoolShowArg1 = { "unit",iocshArgInt};
+static const iocshArg * const endPoolShowArgs[] = {&endPoolShowArg0,
+                                                   &endPoolShowArg1};
+static const iocshFuncDef endPoolShowFuncDef = {"endPoolShow",2,endPoolShowArgs};
+static void endPoolShowCallFunc(const iocshArgBuf *args)
+{
+  endPoolShow(args[0].sval, args[1].ival);
+}
+
+/* changeProtocolInputQMax */
+static const iocshArg changeProtocolInputQMaxArg0 = { "ipQNewSize",iocshArgInt};
+static const iocshArg changeProtocolInputQMaxArg1 = { "arpQNewSize",iocshArgInt};
+static const iocshArg * const changeProtocolInputQMaxArgs[] = {&changeProtocolInputQMaxArg0,
+                                                               &changeProtocolInputQMaxArg1};
+static const iocshFuncDef changeProtocolInputQMaxFuncDef = {"changeProtocolInputQMax",2,changeProtocolInputQMaxArgs};
+static void changeProtocolInputQMaxCallFunc(const iocshArgBuf *args)
+{
+  changeProtocolInputQMax(args[0].ival, args[1].ival);
+}
+
+/* changeIfSendQMax */
+static const iocshArg changeIfSendQMaxArg0 = { "name",iocshArgString};
+static const iocshArg changeIfSendQMaxArg1 = { "len",iocshArgInt};
+static const iocshArg * const changeIfSendQMaxArgs[] = {&changeIfSendQMaxArg0,
+                                                        &changeIfSendQMaxArg1};
+static const iocshFuncDef changeIfSendQMaxFuncDef = {"changeIfSendQMax",2,changeIfSendQMaxArgs};
+static void changeIfSendQMaxCallFunc(const iocshArgBuf *args)
+{
+  changeIfSendQMax(args[0].sval, args[1].ival);
+}
+
+/* changeMtu */
+static const iocshArg changeMtuArg0 = { "name",iocshArgString};
+static const iocshArg changeMtuArg1 = { "len",iocshArgInt};
+static const iocshArg * const changeMtuArgs[] = {&changeMtuArg0,
+                                                 &changeMtuArg1};
+static const iocshFuncDef changeMtuFuncDef = {"changeMtu",2,changeMtuArgs};
+static void changeMtuCallFunc(const iocshArgBuf *args)
+{
+  changeMtu(args[0].sval, args[1].ival);
+}
+
+/* changeSendQueueLength */
+static const iocshArg changeSendQueueLengthArg0 = { "name",iocshArgString};
+static const iocshArg changeSendQueueLengthArg1 = { "len",iocshArgInt};
+static const iocshArg * const changeSendQueueLengthArgs[] = {&changeSendQueueLengthArg0,
+                                                             &changeSendQueueLengthArg1};
+static const iocshFuncDef changeSendQueueLengthFuncDef = {"changeSendQueueLength",2,changeSendQueueLengthArgs};
+static void changeSendQueueLengthCallFunc(const iocshArgBuf *args)
+{
+  changeSendQueueLength(args[0].sval, args[1].ival);
+}
+
+#if 0
+/* TIM_date */
+static const iocshFuncDef TIM_dateFuncDef =
+    {"TIM_date",0};
+static void TIM_dateCallFunc(const iocshArgBuf *args)
+{
+    TIM_date();
+}
+
+/* TIM_rdate */
+static const iocshFuncDef TIM_rdateFuncDef =
+    {"TIM_rdate",0};
+static void TIM_rdateCallFunc(const iocshArgBuf *args)
+{
+    TIM_rdate();
+}
+
+/* TIM_SetDate */
+static const iocshArg TIM_SetDateArg0 = { "secs",iocshArgInt};
+static const iocshArg * const TIM_SetDateArgs[] = {&TIM_SetDateArg0};
+static const iocshFuncDef TIM_SetDateFuncDef = {"TIM_SetDate",1,TIM_SetDateArgs};
+static void TIM_SetDateCallFunc(const iocshArgBuf *args)
+{
+  TIM_SetDate((unsigned long)args[0].ival);
+}
+
+/* TIM_SetRate */
+static const iocshArg TIM_SetRateArg0 = { "rate",iocshArgInt};
+static const iocshArg * const TIM_SetRateArgs[] = {&TIM_SetRateArg0};
+static const iocshFuncDef TIM_SetRateFuncDef = {"TIM_SetRate",1,TIM_SetRateArgs};
+static void TIM_SetRateCallFunc(const iocshArgBuf *args)
+{
+  TIM_SetRate(args[0].ival);
+}
+#endif
+void rfBaseRegister(void)
+{
+    iocshRegister(&changePcbShowFuncDef,changePcbShowCallFunc);
+    iocshRegister(&protocolQValuesShowFuncDef,protocolQValuesShowCallFunc);
+    iocshRegister(&ifQValuesShowFuncDef,ifQValuesShowCallFunc);
+    iocshRegister(&endMibShowFuncDef,endMibShowCallFunc);
+    iocshRegister(&endPoolShowFuncDef,endPoolShowCallFunc);
+    iocshRegister(&changeProtocolInputQMaxFuncDef,changeProtocolInputQMaxCallFunc);
+    iocshRegister(&changeIfSendQMaxFuncDef,changeIfSendQMaxCallFunc);
+    iocshRegister(&changeMtuFuncDef,changeMtuCallFunc);
+    iocshRegister(&changeSendQueueLengthFuncDef,changeSendQueueLengthCallFunc);
+#if 0
+    iocshRegister(&TIM_dateFuncDef,TIM_dateCallFunc);
+    iocshRegister(&TIM_rdateFuncDef,TIM_rdateCallFunc);
+    iocshRegister(&TIM_SetDateFuncDef,TIM_SetDateCallFunc);
+    iocshRegister(&TIM_SetRateFuncDef,TIM_SetRateCallFunc);
+#endif
+}
+epicsExportRegistrar(rfBaseRegister);
+@

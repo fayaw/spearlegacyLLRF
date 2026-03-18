@@ -1,0 +1,492 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.3.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.3
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.3
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.3
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2003.09.10.23.50.26;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.11.19.32.31;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.45;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.45;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Add field RIST
+@
+text
+@# p2RfCfmRecord.ascii
+# share/ascii @@(#)p2RfCfmRecord.ascii	0.0     10/16/96
+#
+#       Original Author: Ric Claus
+#       Date:            6-6-96
+#
+#       Experimental Physics and Industrial Control System (EPICS)
+#
+#       Copyright 1996, The Board of Trustees of the Leland Stanford
+#       Junior University.  All rights reserved.
+#
+#	This software was produced under U.S. Government contract
+#       DE-AC03-76SF00515 at the Stanford Linear Accelerator Center.
+#
+#         The items furnished herewith were developed under the sponsorship
+#    of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+#    Leland Stanford Junior University, nor their employees, makes any war-
+#    ranty, express or implied, or assumes any liability or responsibility
+#    for accuracy, completeness or usefulness of any information, apparatus,
+#    product or process disclosed, or represents that its use will not in-
+#    fringe privately-owned rights.  Mention of any product, its manufactur-
+#    er, or suppliers shall not, nor is it intended to, imply approval, dis-
+#    approval, or fitness for any particular use.  The U.S. and the Univer-
+#    sity at all times retain the right to use and disseminate the furnished
+#    items for any purpose whatsoever.                       Notice 91 02 01
+#
+#
+#       Initial development by:
+#               The PEP-II Low Level RF Group
+#               Positron Electron Project upgrade
+#               Stanford Linear Accelerator Center
+#
+#  Modification Log:
+#  -----------------
+#  .01  06-12-96	ric	Created
+#  .02  10-11-96        ric     Converted from .ascii to .dbd format]
+#  .03  09-10-03        luchini Add rist field
+#       ...
+#
+recordtype(p2RfCfm) {
+	include "dbCommon.dbd"
+	field(VAL,DBF_STRING) {
+		prompt("Status message")
+		asl(ASL0)
+		pp(TRUE)
+		size(40)
+	}
+	field(OVAL,DBF_STRING) {
+		prompt("Previous Value")
+		special(SPC_NOMOD)
+		interest(3)
+		size(40)
+	}
+	field(OUT,DBF_OUTLINK) {
+		prompt("Output Specification")
+		promptgroup(GUI_OUTPUT)
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(PREC,DBF_SHORT) {
+		prompt("Display Precision")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+	field(MID,DBF_USHORT) {
+		prompt("Manufacturer ID")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(MTYP,DBF_USHORT) {
+		prompt("Model Type")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(MSTT,DBF_USHORT) {
+		prompt("Module Status")
+		special(SPC_NOMOD)
+	}
+	field(MCTL,DBF_USHORT) {
+		prompt("Module Control")
+		special(SPC_NOMOD)
+		pp(TRUE)
+	}
+	field(MRST,DBF_SHORT) {
+		prompt("Module Reset")
+		pp(TRUE)
+		interest(2)
+	}
+	field(A24O,DBF_USHORT) {
+		prompt("A24 Offset")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(VATT,DBF_USHORT) {
+		prompt("VXI Attributes")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(SERN,DBF_ULONG) {
+		prompt("Serial Number")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(VERN,DBF_USHORT) {
+		prompt("Version Number")
+		special(SPC_NOMOD)
+		interest(3)
+	} 
+#
+#  Hardware version and Firmware versiona
+#
+        field(VERH,DBF_USHORT) {
+                prompt("Hardware Version")
+                special(SPC_NOMOD)
+                interest(3)
+        }
+        field(VERF,DBF_USHORT) {
+                prompt("Firmware Version")
+                special(SPC_NOMOD)
+                interest(3)
+        }
+#
+#  end of modification
+#
+	field(ISTT,DBF_USHORT) {
+		prompt("Interrupt Status")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(2)
+	}
+	field(OIST,DBF_USHORT) {
+		prompt("Old Interrupt Status")
+		interest(3)
+	}
+	field(IACK,DBF_USHORT) {
+		prompt("Interrupt Oper Ack")
+		pp(TRUE)
+		interest(2)
+	}
+	field(ICTL,DBF_USHORT) {
+		prompt("Interrupt Control")
+		special(SPC_NOMOD)
+		interest(2)
+	}
+	field(IMSK,DBF_UCHAR) {
+		prompt("Interrupt Mask")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		base(HEX)
+		interest(1)
+	}
+	field(OIMK,DBF_UCHAR) {
+		prompt("Old Interrupt Mask")
+		interest(3)
+	}
+	field(VSCL,DBF_USHORT) {
+		prompt("VXI Subclass")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+#
+	field(CCTL,DBF_USHORT) {
+		prompt("Comb Control")
+		special(SPC_NOMOD)
+		pp(TRUE)
+	}
+	field(CSTT,DBF_USHORT) {
+		prompt("Comb Status")
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(MTL,DBF_UCHAR) {
+		prompt("Memory Trigger Sel")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(ITL,DBF_UCHAR) {
+		prompt("Input Trigger Sel")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		interest(1)
+	}
+	field(DA,DBF_UCHAR) {
+		prompt("Pre-DAC Data Alignmt")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(EBS,DBF_UCHAR) {
+		prompt("Eq Bank Select")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(CSS,DBF_UCHAR) {
+		prompt("Comb Set Select")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+		interest(1)
+	}
+	field(MODE,DBF_UCHAR) {
+		prompt("Module Mode")
+		promptgroup(GUI_COMMON)
+		asl(ASL0)
+		pp(TRUE)
+	}
+#
+	field(ECTL,DBF_USHORT) {
+		prompt("Equalizer Control")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(LE0C,DBF_UCHAR) {
+		prompt("Load Eq 0 Coefs")
+		pp(TRUE)
+		interest(2)
+	}
+	field(E0CF,DBF_STRING) {
+		prompt("Eq 0 Coefs File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(E0AS,DBF_MENU) {
+		prompt("Eq 0 Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+	field(LE1C,DBF_UCHAR) {
+		prompt("Load Eq 1 Coefs")
+		pp(TRUE)
+		interest(2)
+	}
+	field(E1CF,DBF_STRING) {
+		prompt("Eq 1 Coefs File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(E1AS,DBF_MENU) {
+		prompt("Eq 1 Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+#
+	field(LIMC,DBF_UCHAR) {
+		prompt("Load IIR MAC Coefs")
+		pp(TRUE)
+		interest(2)
+	}
+	field(IMCF,DBF_STRING) {
+		prompt("IIR MAC Coef File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(FSTT,DBF_MENU) {
+		prompt("IIR MAC Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+		initial("17")
+	}
+#
+	field(F0EO,DBF_USHORT) {
+		prompt("FIFO 0 Empty Offset")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		base(HEX)
+		interest(3)
+	}
+	field(F0FO,DBF_FLOAT) {
+		prompt("FIFO 0 Full Offset")
+		promptgroup(GUI_COMMON)
+		pp(TRUE)
+	}
+	field(OF0F,DBF_FLOAT) {
+		prompt("Old FIFO 0 Offset")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(F1EO,DBF_USHORT) {
+		prompt("FIFO 1 Empty Offset")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		base(HEX)
+		interest(3)
+	}
+	field(F1FO,DBF_USHORT) {
+		prompt("FIFO 1 Full Offset")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		base(HEX)
+		interest(3)
+		initial("185")
+	}
+	field(F2EO,DBF_USHORT) {
+		prompt("FIFO 2 Empty Offset")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		base(HEX)
+		interest(3)
+	}
+	field(F2FO,DBF_USHORT) {
+		prompt("FIFO 2 Full Offset")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		base(HEX)
+		interest(3)
+		initial("190")
+	}
+	field(F3EO,DBF_USHORT) {
+		prompt("FIFO 3 Empty Offset")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		base(HEX)
+		interest(3)
+	}
+	field(F3FO,DBF_USHORT) {
+		prompt("FIFO 3 Full Offset")
+		promptgroup(GUI_COMMON)
+		special(SPC_NOMOD)
+		base(HEX)
+		interest(3)
+		initial("185")
+	}
+#
+	field(IPRO,DBF_SHORT) {
+		prompt("Input Readout")
+		special(SPC_NOMOD)
+		pp(TRUE)
+		interest(3)
+	}
+#
+	field(HSIZ,DBF_ULONG) {
+		prompt("History Buffer Size")
+		promptgroup(GUI_COMMON)
+		initial("512")
+	}
+	field(HFIL,DBF_STRING) {
+		prompt("History File")
+		promptgroup(GUI_COMMON)
+		size(40)
+	}
+	field(GHST,DBF_UCHAR) {
+		prompt("Get History Buffer")
+		pp(TRUE)
+		interest(2)
+	}
+	field(HSTT,DBF_MENU) {
+		prompt("History Alarm Status")
+		special(SPC_NOMOD)
+		menu(menuAlarmStat)
+	}
+#
+	field(F0D,DBF_SHORT) {
+		prompt("FIFO 0 Data")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(F1D,DBF_SHORT) {
+		prompt("FIFO 1 Data")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(F2D,DBF_SHORT) {
+		prompt("FIFO 2 Data")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+	field(F3D,DBF_SHORT) {
+		prompt("FIFO 3 Data")
+		promptgroup(GUI_COMMON)
+		interest(3)
+	}
+#
+	field(ADEL,DBF_SHORT) {
+		prompt("Archive Deadband")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+	field(MDEL,DBF_SHORT) {
+		prompt("Monitor Deadband")
+		promptgroup(GUI_DISPLAY)
+		interest(1)
+	}
+	field(ALST,DBF_SHORT) {
+		prompt("Last IPRO Archived")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+	field(MLST,DBF_SHORT) {
+		prompt("Last IPRO Monitored")
+		special(SPC_NOMOD)
+		interest(3)
+	}
+#
+# RIST fields is used to read the Interrupt Status Id Registers.
+# This should NOT be used if interrupts are enabled on this board.
+#
+        field(RIST,DBF_UCHAR) {
+                prompt("Read Int Status ID Registers")
+                pp(TRUE)
+                interest(2)
+        }
+}
+@
+
+
+1.2
+log
+@Add fields VERH and VERF
+@
+text
+@d36 2
+a37 2
+#  .02  10-11-96        ric     Converted from .ascii to .dbd format
+#  .nn  mm-dd-yy        iii     Comment
+d396 9
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d108 17
+a124 1
+	}
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

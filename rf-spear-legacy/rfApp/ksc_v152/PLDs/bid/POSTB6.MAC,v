@@ -1,0 +1,138 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@;; @;
+
+
+1.1
+date	2003.06.03.22.56.52;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.56.52;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@162 236 setplot device ps
+225 467 setplot tile
+322 378 1 1
+322 378 setplot paper
+0 0 b
+314 440 setplot rotation
+318 422 90
+314 440 setplot fitrect
+318 422 10.5 7.58
+318 422 setplot corner
+316 392 2.0 6.4
+320 470 setplot scale
+314 440 .39
+232 468 setplot port
+0 0 file
+146 188 ainvis ss*
+146 188 ainvis pk*
+73 204 wri
+73 202 ]1
+74 203 setplot file
+232 468 enter
+231 462 mex plot
+83 182 sch .2
+83 182 [2
+83 182 [2
+83 182 wpu
+83 182 wcl
+180 262 ainvis ss*
+180 262 ainvis pk*
+180 262 wri
+180 262 ]1
+180 262 setplot file
+238 474 enter
+238 474 mex plot
+83 182 sch .3
+83 182 [2
+83 182 [2
+83 182 wpu
+83 182 wcl
+180 262 ainvis ss*
+180 262 ainvis pk*
+180 262 wri
+180 262 ]1
+180 262 setplot file
+238 474 enter
+238 474 mex plot
+83 182 sch .4
+83 182 [2
+83 182 [2
+83 182 wpu
+83 182 wcl
+180 262 ainvis ss*
+180 262 ainvis pk*
+180 262 wri
+180 262 ]1
+180 262 setplot file
+238 474 enter
+238 474 mex plot
+83 182 sch .5
+83 182 [2
+83 182 [2
+83 182 wpu
+83 182 wcl
+180 262 ainvis ss*
+180 262 ainvis pk*
+180 262 wri
+180 262 ]1
+180 262 setplot file
+238 474 enter
+238 474 mex plot
+83 182 sch .6
+83 182 [2
+83 182 [2
+83 182 wpu
+83 182 wcl
+180 262 ainvis ss*
+180 262 ainvis pk*
+180 262 wri
+180 262 ]1
+180 262 setplot file
+238 474 enter
+238 474 mex plot
+82 182 mclose
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

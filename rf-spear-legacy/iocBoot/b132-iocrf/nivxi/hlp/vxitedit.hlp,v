@@ -1,0 +1,122 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_0:1.1.1.1
+	R_epics_3_14_6_spear0:1.1.1.1
+	R_3_14_1_spear1:1.1.1.1
+	R1:1.1.1.1
+	B1:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	95.01.14.01.32.35;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	95.01.14.01.32.35;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@                           vxitedit
+                          ---------
+
+VXI Text Resource Editor (vxitedit) is an interactive program that
+incorporates several resource editors and displays such as:
+
+Resource Manager Display: Use this display to view the Resource
+Manager table information.
+
+Configuration Editor:  Use this editor to configure the VXIbus 
+interface hardware.
+
+Manufacturer Name Editor: Use this editor to update the list of 
+manufacturer names and numbers.
+
+Model Name Editor: Use this editor to update the list of model
+names, manufacturer names and model numbers.
+
+Device Name Editor: Use this editor to update the list of VXI
+devices in the system.
+
+Non-VXI Device Name Editor: Use this editor to update the list of
+non-VXI devices.
+
+Interrupt Configuration Editor: Use this editor to define individual
+and intra-mainframe interrupt configurations.
+
+Trigger Configuration Editor: Use this editor to define intra-
+mainframe trigger configurations.
+
+Utility Bus Configuration Editor: Use this editor to define utility
+bus configurations.
+
+Using vxitedit
+--------------
+vxitedit is a text-based program. It supports the following commands:
+
+(1) list      [<index#>,[<index#>]] - lists all the entries in the 
+				      specified range.
+(2) display   [<index#>,[<index#>]] - displays the entries in detail.
+(3) add                           - lets you add an entry.
+(4) duplicate   <index#>          - lets you duplicate an entry.
+(5) modify	<index#>,<field#> - lets you modify an existing entry.
+(6) delete	<index#>	  - lets you delete an entry.
+(7) show	<field#>	  - shows information about the field.
+(8) save			  - lets you save the information.
+(9) abort			  - lets you exit the editor, 
+				    ignoring the changes made.
+(10) exit			  - lets you exit the editor.
+(11) help			  - gives help on that editor.
+
+NUMBERS can be entered in vxitedit as:
+
+	50	-	decimal 50
+	0x50	-	hex	50
+
+Note:  All the numbers displayed in vxitedit except index# and field#
+-----  are in hex.
+
+HELP
+----
+You can obtain help on any editor by typing 'help'
+
+
+@
+
+
+1.1.1.1
+log
+@RF IOC startup files.
+@
+text
+@@

@@ -1,0 +1,171 @@
+head	1.5;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.5
+	RF-SPEAR-R0-1-0:1.5
+	RF-SPEAR-R0-0-3:1.5
+	RF-SPEAR-R0-0-2:1.5
+	RF-SPEAR-R0-0-0:1.5
+	RF-3-13-10:1.4.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.4
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.4
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.4
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.5
+date	2011.12.07.01.10.13;	author saa;	state dead;
+branches;
+next	1.4;
+
+1.4
+date	2006.02.08.00.38.14;	author lazmo;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2006.01.25.23.54.21;	author lazmo;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.01.22.20.15.41;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.5
+log
+@Not used in 3.14.11 build.
+@
+text
+@#==============================================================
+#
+#  Abs:  EPICS Database definition for PEPII RF
+#
+#  Name: rfInclude.dbd
+#
+#  Facility:  SLAC/PEPII Low-Level RF
+#
+#  Auth: dd-mmm-yyyy, Stephanie Allison (SAA)
+#  Rev:  dd-mmm-yyyy, First Lastname    (USERNAME)
+#
+#--------------------------------------------------------------
+#  Mod:
+#       dd-mmm-yyyy, First Lastname (USERNAME)
+#          comments
+#
+#==============================================================
+#
+include "base.dbd" 
+
+# Allen-Bradley
+include "drvAB.dbd"
+include "devABBINARY.dbd"
+include "devABStatus.dbd"
+include "devABSLCDCM.dbd"
+include "devABDCM.dbd"
+include "devSmAB1746Hstp.dbd"
+
+# PEP-II Rf Device and driver support
+##include "p2RfCfmRecord.dbd"
+include "p2RfCf2Record.dbd"
+include "p2RfGvfRecord.dbd"
+include "p2RfIqaRecord.dbd"
+include "p2RfRfpRecord.dbd"
+include "p2RfClkRecord.dbd"
+include "p2RfAimRecord.dbd"
+##device(p2RfCfm,VXI_IO,devP2RfCfm,"PEP-II RF CFM")
+device(p2RfCf2,VXI_IO,devP2RfCf2,"PEP-II RF CF2")
+device(p2RfIqa,VXI_IO,devP2RfIqa,"PEP-II RF IQA")
+device(p2RfGvf,VXI_IO,devP2RfGvf,"PEP-II RF GVF")
+device(p2RfRfp,VXI_IO,devP2RfRfp,"PEP-II RF RFP")
+device(p2RfClk,VXI_IO,devP2RfClk,"PEP-II RF CLK")
+device(p2RfAim,VXI_IO,devP2RfAim,"PEP-II RF AIM")
+#
+# VXI Driver support
+# Note: the drvVxi must come
+# before any VXI driver support.
+# This is so that the
+# resman VXI initialization
+# in drvEpvxi is exectued
+# prior to any other VXI support.
+driver(drvVxi)
+driver(drvP2RfVxi)
+@
+
+
+1.4
+log
+@Sync to today's boot image... includes continuous CF2 coefficient
+readback & verify.  Stn goes purple if any verify fails.
+@
+text
+@@
+
+
+1.3
+log
+@Initial import of COMB-2 (Cf2) support.
+@
+text
+@d30 1
+a30 1
+include "p2RfCfmRecord.dbd"
+d37 1
+a37 1
+device(p2RfCfm,VXI_IO,devP2RfCfm,"PEP-II RF CFM")
+@
+
+
+1.2
+log
+@Phase 2 upgrade of IQA modules
+@
+text
+@d4 1
+a4 1
+
+d31 1
+d38 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a29 1
+include "p2RfClkRecord.dbd"
+d34 1
+a35 1
+device(p2RfClk,VXI_IO,devP2RfClk,"PEP-II RF CLK")
+d40 1
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

@@ -1,0 +1,165 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@grecord(bo,"$(R):STN:GVF:EQBNKSEL") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:GVF:MODU.EBS  PP NMS")
+	field(ZNAM,"Bank 0")
+	field(ONAM,"Bank 1")
+	field(OSV,"MAJOR")
+}
+grecord(bo,"$(R):STN:GVF:GFFLOOP") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:GVF:MODU.GFFL  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+}
+grecord(bo,"$(R):STN:GVF:LFBLOOP") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:GVF:MODU.LFBL  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+}
+grecord(bo,"$(R):STN:GVF:REGTIMER") {
+	field(SCAN,"2 second")
+	field(DTYP,"Soft Channel")
+	field(DOL,"1")
+	field(OUT,"$(R):STN:GVF:MODU.TMCK  PP NMS")
+	field(ZNAM,"NoRead")
+	field(ONAM,"Read")
+}
+grecord(bo,"$(R):STN:GVF:XFERFN") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:GVF:MODU.TF  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+	field(OSV,"MAJOR")
+}
+grecord(mbbiDirect,"$(R):STN:GVF:GST1STATE") {
+	field(DTYP,"Soft Channel")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:GVF:MODU.GST1  NPP MS")
+}
+grecord(mbbiDirect,"$(R):STN:GVF:INTSTATE") {
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(R):STN:GVF:GST1STATE.VAL  PP MS")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:GVF:MODU.ISTT  NPP MS")
+}
+grecord(mbbo,"$(R):STN:GVF:DATAALIGN") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"3")
+	field(OUT,"$(R):STN:GVF:MODU.DA  PP NMS")
+	field(ONVL,"0x1")
+	field(TWVL,"0x2")
+	field(THVL,"0x3")
+	field(FRVL,"0x4")
+	field(FVVL,"0x5")
+	field(SXVL,"0x6")
+	field(SVVL,"0x7")
+	field(ZRST,"0")
+	field(ONST,"1")
+	field(TWST,"2")
+	field(THST,"3")
+	field(FRST,"4")
+	field(FVST,"5")
+	field(SXST,"6")
+	field(SVST,"7")
+	field(ONSV,"MAJOR")
+	field(TWSV,"MAJOR")
+	field(THSV,"MAJOR")
+	field(FRSV,"MAJOR")
+	field(FVSV,"MAJOR")
+	field(SXSV,"MAJOR")
+	field(SVSV,"MAJOR")
+}
+grecord(mbbo,"$(R):STN:GVF:STATE") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"2")
+	field(OUT,"$(R):STN:GVF:MODU.MODE  PP NMS")
+	field(ONVL,"0x1")
+	field(TWVL,"0x2")
+	field(ZRST,"Load")
+	field(ONST,"Run")
+	field(TWST,"Test")
+}
+grecord(mbboDirect,"$(R):STN:GVF:INTACK") {
+	field(DTYP,"Soft Channel")
+	field(NOBT,"16")
+	field(OUT,"$(R):STN:GVF:MODU.IACK  PP NMS")
+}
+grecord(p2RfGvf,"$(R):STN:GVF:MODU") {
+	field(DTYP,"PEP-II RF GVF")
+	field(FLNK,"$(R):STN:GVF:INTSTATE.PROC  PP MS")
+	field(OUT,"#V0 C$(S) S0 @@(null)")
+	field(PREC,"2")
+	field(IMSK,"0xc3")
+	field(MTL,"7")
+	field(DA,"1")
+	field(DSPE,"/dsp/dsptestGvf")
+	field(DSPT,"/tbl/gvfDspConsts.tbl")
+	field(PHSM,"180")
+	field(E0CF,"/tbl/gvfEqCoefs0.tbl")
+	field(E1CF,"/tbl/gvfEqCoefs1.tbl")
+	field(FO,"483.968")
+	field(RFIL,"/dat/gvfRcrdMem.dat")
+	field(PFIL,"/tbl/gvfPlayMem.tbl")
+}
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

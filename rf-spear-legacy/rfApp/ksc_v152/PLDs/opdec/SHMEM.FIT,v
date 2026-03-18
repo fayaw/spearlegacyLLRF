@@ -1,0 +1,152 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.18.20.23.46;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.18.20.23.46;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@-- MAX+plus II Compiler Fit File      
+-- Version 6.1 02/28/96               
+-- Compiled: 05/08/96 06:31:37        
+
+-- Copyright (c) 1996 by Altera Corporation.  All rights reserved.  This text
+-- contains proprietary, confidential information of Altera Corporation, and
+-- may be used, copied, and/or disclosed only pursuant to the terms of a
+-- valid software license agreement with Altera Corporation.  This copyright
+-- notice must be retained as part of this text at all times.
+
+CHIP "shmem"
+BEGIN
+
+    DEVICE = "EPM5130QC";
+
+    "AM0"                          : INPUT_PIN  = 72     ;
+    "AM1"                          : INPUT_PIN  = 71     ;
+    "AM2"                          : INPUT_PIN  = 70     ;
+    "AM3"                          : INPUT_PIN  = 67     ;
+    "AM4"                          : INPUT_PIN  = 66     ;
+    "AM5"                          : INPUT_PIN  = 65     ;
+    "A8"                           : INPUT_PIN  = 64     ;
+    "A9"                           : INPUT_PIN  = 8      ; -- LC8
+    "A10"                          : INPUT_PIN  = 7      ; -- LC7
+    "A11"                          : INPUT_PIN  = 6      ; -- LC6
+    "A12"                          : INPUT_PIN  = 5      ; -- LC5
+    "A13"                          : INPUT_PIN  = 4      ; -- LC4
+    "A14"                          : INPUT_PIN  = 3      ; -- LC3
+    "A15"                          : INPUT_PIN  = 2      ; -- LC2
+    "A21"                          : INPUT_PIN  = 1      ; -- LC1
+    "A22"                          : INPUT_PIN  = 30     ; -- LC24
+    "A23"                          : INPUT_PIN  = 29     ; -- LC23
+    "A24"                          : INPUT_PIN  = 28     ; -- LC22
+    "A25"                          : INPUT_PIN  = 27     ; -- LC21
+    "A26"                          : INPUT_PIN  = 26     ; -- LC20
+    "A27"                          : INPUT_PIN  = 25     ; -- LC19
+    "A28"                          : INPUT_PIN  = 24     ; -- LC18
+    "A29"                          : INPUT_PIN  = 23     ; -- LC17
+    "A30"                          : INPUT_PIN  = 40     ; -- LC40
+    "A31"                          : INPUT_PIN  = 39     ; -- LC39
+    "/DS"                          : INPUT_PIN  = 36     ; -- LC38
+    "ID0"                          : INPUT_PIN  = 61     ;
+    "ID1"                          : INPUT_PIN  = 60     ;
+    "ID2"                          : INPUT_PIN  = 59     ;
+    "ID3"                          : INPUT_PIN  = 22     ;
+    "ID4"                          : INPUT_PIN  = 21     ;
+    "ID5"                          : INPUT_PIN  = 20     ;
+    "ID6"                          : INPUT_PIN  = 17     ;
+    "ID7"                          : INPUT_PIN  = 15     ;
+    "ID8"                          : INPUT_PIN  = 14     ;
+    "ID14"                         : INPUT_PIN  = 11     ;
+    "ID15"                         : INPUT_PIN  = 10     ;
+    "/RESET"                       : INPUT_PIN  = 9      ;
+    "/WT_EXTENDED"                 : INPUT_PIN  = 16     ;
+    "D64_AMCODE"                   : OUTPUT_PIN = 81     ; -- LC97
+    "SHR_ACCESS"                   : OUTPUT_PIN = 91     ; -- LC113
+    "|a16_mth:16|:7"               : LOCATION   = LC96   ;
+    "|a16_mth:16|74374:3|:13"      : LOCATION   = LC95   ;
+    "|a16_mth:16|74374:3|:14"      : LOCATION   = LC112  ;
+    "|a16_mth:16|74374:3|:15"      : LOCATION   = LC128  ;
+    "|a16_mth:16|74374:3|:16"      : LOCATION   = LC127  ;
+    "|a16_mth:16|74374:3|:17"      : LOCATION   = LC126  ;
+    "|a16_mth:16|74374:3|:18"      : LOCATION   = LC111  ;
+    "|a16_mth:16|74374:3|:19"      : LOCATION   = LC110  ;
+    "|a16_mth:16|74374:3|:20"      : LOCATION   = LC125  ;
+    "|a16_mth:16|74688:12|:1"      : LOCATION   = LC94   ;
+    "|a16_mth:16|74688:12|:2"      : LOCATION   = LC124  ;
+    "|a16_mth:16|74688:12|:3"      : LOCATION   = LC123  ;
+    "|a16_mth:16|74688:12|:4"      : LOCATION   = LC122  ;
+    "|a16_mth:16|74688:12|:5"      : LOCATION   = LC121  ;
+    "|a16_mth:16|74688:12|:6"      : LOCATION   = LC109  ;
+    "|a16_mth:16|74688:12|:7"      : LOCATION   = LC108  ;
+    "|a24_mth:14|:7"               : LOCATION   = LC120  ; -- PIN 100
+    "|a24_mth:14|74374:3|:13"      : LOCATION   = LC107  ;
+    "|a24_mth:14|74374:3|:14"      : LOCATION   = LC106  ;
+    "|a24_mth:14|74374:3|:15"      : LOCATION   = LC93   ;
+    "|a24_mth:14|74688:12|:1"      : LOCATION   = LC105  ;
+    "|a24_mth:14|74688:12|:2"      : LOCATION   = LC104  ; -- PIN 90
+    "|a24_mth:14|74688:12|:3"      : LOCATION   = LC92   ;
+    "|a32_mth:1|:7"                : LOCATION   = LC119  ; -- PIN 99
+    "|a32_mth:1|74374:3|:13"       : LOCATION   = LC103  ; -- PIN 89
+    "|a32_mth:1|74374:3|:14"       : LOCATION   = LC91   ;
+    "|a32_mth:1|74374:3|:15"       : LOCATION   = LC102  ; -- PIN 86
+    "|a32_mth:1|74374:3|:16"       : LOCATION   = LC90   ;
+    "|a32_mth:1|74374:3|:17"       : LOCATION   = LC118  ; -- PIN 98
+    "|a32_mth:1|74374:3|:18"       : LOCATION   = LC101  ; -- PIN 85
+    "|a32_mth:1|74374:3|:19"       : LOCATION   = LC117  ; -- PIN 97
+    "|a32_mth:1|74374:3|:20"       : LOCATION   = LC116  ; -- PIN 96
+    "|a32_mth:1|74688:12|:1"       : LOCATION   = LC100  ; -- PIN 84
+    "|a32_mth:1|74688:12|:2"       : LOCATION   = LC89   ;
+    "|a32_mth:1|74688:12|:3"       : LOCATION   = LC99   ; -- PIN 83
+    "|a32_mth:1|74688:12|:4"       : LOCATION   = LC88   ; -- PIN 80
+    "|a32_mth:1|74688:12|:5"       : LOCATION   = LC115  ; -- PIN 95
+    "|a32_mth:1|74688:12|:6"       : LOCATION   = LC98   ; -- PIN 82
+    "|a32_mth:1|74688:12|:7"       : LOCATION   = LC114  ; -- PIN 92
+
+END;
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

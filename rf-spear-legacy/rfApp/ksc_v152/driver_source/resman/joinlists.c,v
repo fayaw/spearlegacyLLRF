@@ -1,0 +1,197 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***** Copyright (c) 1995, 1996 KineticSystems Corporation ***********
+*
+* File:     joinlists.c
+*
+* Description:  Add the nonvxi linked list entries into the
+*               regular linked list used by the rest of RESMAN.
+*
+*
+***********************************************************************/
+/*/#define KSC_DEBUG1*/
+#include <stdio.h>
+#include <stdlib.h>   /* for calloc */
+#include <assert.h>
+
+#define  KSC_MXI_RM  1
+#define  A24 0
+#define  A32 1
+#include "resman.h"
+#include "epvxi.h"
+
+int joinlists(/*/unsigned short giNode,*/
+	config_p *head,
+	config_p *tail,
+/*/	unsigned short verbose,*/
+	nonVxi_t *rootnvxi )
+{
+  unsigned short giNode;
+  nonVxi_t *nonvxiLA;
+  config_t *thisLA;
+  unsigned long  base ;
+  unsigned int temp;
+
+  giNode = 0;
+
+#ifdef KSC_DEBUG1
+   printf("Joining lists for NODE: %d \n", giNode);
+#endif
+
+if (rootnvxi == NULL) {
+   printf("*************\nNo nonvxi \n*************\n");
+ }
+
+ for(nonvxiLA = rootnvxi; nonvxiLA != NULL; nonvxiLA = nonvxiLA->next)
+ {
+
+   if ( (nonvxiLA->Node == giNode) && (nonvxiLA->sysBool == TRUE))
+   {
+#ifdef KSC_DEBUG1
+   printf("Non-VXI board present in GI-Node %d.  Adding LA %d to resman.tbl\n",giNode,nonvxiLA->pseudoLA);
+#endif
+  /*       MALLOC UP SOME SPACE FOR A NEW STRUCTURE & ADD IT TO THE LIST */
+    assert(thisLA = (config_t *)calloc(1, sizeof(config_t)));
+
+  /*       UPDATE THE POINTER *TO* THIS CELL, THEN POINT "tail" TO THIS CELL
+   *
+   *       This function is the single point at which the config linked list
+   *       and its two pointers, head & tail, are "CONStructed".
+   *       The head pointer is used by all the other RM routines that want to
+   *       march down the list; tail is basically around so this function
+   *       doesn't have to scan down the list each time it wants to add an
+   *       element.
+   *
+   *       The first time we ever make a config cell, we have to update both
+   *       head AND tail to point to it.  Thereafter, we adjust the "next"
+   *       pointer in the cell pointed to by tail (it was Null, and now points
+   *       to the new cell) before we update tail.
+   *
+   *       Note that the head & tail we're updating are actually declared in
+   *       rmShell, and have been passed down to here by reference.
+   *
+   *       AFTER FIRST CELL IS CREATED:
+   *
+   *       head -----> [  next --]---> NULL
+   *                   [         ]
+   *       tail -----> [_________]
+   *
+   *       AFTER SECOND CELL IS CREATED:
+   *
+   *                      tail ----+
+   *                               |
+   *       head -----> [  next --]-+-> [  next --]---> NULL
+   *                   [         ]     [         ]
+   *                   [_________]     [_________]
+   *
+   */
+    if (*head == NULL)
+        *head = thisLA;
+    if (*tail != NULL)
+        (*tail)->next = thisLA;
+    *tail = thisLA;
+    base = nonvxiLA->A16Base;
+    
+    thisLA->next = (config_t *)NULL;
+    thisLA->giNode = giNode;
+    thisLA->logAdr = nonvxiLA->pseudoLA;
+    thisLA->mainframe = nonvxiLA->mainframe;
+    thisLA->reset = thisLA->syfInhb = thisLA->aXXActv = 0;  /*8feb95*/
+    thisLA->passed = thisLA->ready = 1;   /* we're assuming both ARE 1 */
+    thisLA->wsAMCResp = thisLA->wsCtrlResp = 0xFFFF;
+    thisLA->protocol = thisLA->cmdrLA = 0xFFFF;
+    thisLA->rdProtocol = 0xFFFF;
+    thisLA->subclass = thisLA->ctlrInfo  = 0;
+    thisLA->ihLevels = nonvxiLA->hdlLevels;
+    thisLA->intLevels = nonvxiLA->intLevels;
+    thisLA->nrHdlr   = thisLA->nrIntr    = 0;
+    thisLA->mfrID    = nonvxiLA->mfgID;
+    thisLA->slot = nonvxiLA->slot;
+    if (nonvxiLA->A24Base != NULL)
+        thisLA->adrSpace = VXI_ADDR_EXT_A24;
+    else if (nonvxiLA->A32Base != NULL)
+        thisLA->adrSpace = VXI_ADDR_EXT_A32;
+    else
+        thisLA->adrSpace = VXI_ADDR_EXT_A16;
+    thisLA->devClass = nonvxiLA->devClass;
+    thisLA->modelID = nonvxiLA->model;
+
+    if (thisLA->adrSpace == VXI_ADDR_EXT_A24 && nonvxiLA->A24Size != 0) {
+        for (temp = nonvxiLA->A24Size, thisLA->memRqmt = 23;
+            (temp & 1) == 0;
+            temp >>= 1, thisLA->memRqmt--)
+            ;
+    } else if (thisLA->adrSpace == VXI_ADDR_EXT_A32
+        && (nonvxiLA->A32Size >> 8) != 0) {
+        for (temp = nonvxiLA->A32Size >> 8, thisLA->memRqmt = 23;
+            (temp & 1) == 0;
+            temp >>= 1, thisLA->memRqmt--)
+            ;
+    }
+    else
+        thisLA->memRqmt = 0;
+    if (thisLA->adrSpace == VXI_ADDR_EXT_A24)
+      thisLA->offset = nonvxiLA->A24Base >> 8; /*/ changed 12 to 8 NO 6/14/99*/
+    else if (thisLA->adrSpace == VXI_ADDR_EXT_A32)
+      thisLA->offset = nonvxiLA->A32Base >> 16;
+    else
+      thisLA->offset = 0;
+   } /*/end if(->Node == giNode)*/
+ } /*/end for loop*/
+
+ return 0;
+
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

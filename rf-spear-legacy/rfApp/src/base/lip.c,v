@@ -1,0 +1,737 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.2.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.3
+date	2011.12.07.00.53.40;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.05.14.23.58.13;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Changes to get rid of *Msgs.c files.  Also changes for 3.14.11 for bus.c.
+@
+text
+@/*
+** ++
+**
+**  Facility:  LIP - Library for Input Parsing
+**
+**  Abstract:
+**      This file contains a collection of routines for parsing input lines.
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Feedback Project
+**
+**  History:
+**	July  6, 1993 - Created.
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#ifdef VXWORKS
+#  include <vxWorks.h>
+#  include <stdioLib.h>
+#  include <stdlib.h>
+#  include <lstLib.h>
+#else
+#  include <stdio.h>
+#  include <stdlib.h>
+#  include <malloc.h>
+#  include "lstLib-unix.h"
+#endif
+
+
+#include <string.h>
+#include "sglLib.h"
+#include "genLib.h"
+#include "lipDef.h"
+#include "lipLib.h"
+#define LIP_MSG_GLOBAL
+#include "lip.msg"
+
+
+
+
+static void  AddItem      (LIST *, LipWrdDsc *, LIST *, LIST *, LIST *);
+static char *CompileValue (char *, LipWrdDsc *, LIST **);
+static LipWrdDsc *GetDsc  (LipWord *, LipWrdDsc *);
+
+
+LIST *LIP_CompileLine (char       *line,
+                       LipWrdDsc  *vrbDict,
+                       char       *oneChrDict)
+/*
+   Description
+   -----------
+   Compile a line into a doubly linked list of dictionary entries for each
+   word found on the line.  The routine loops over the words on the input
+   line and returns the doubly linked list.  If an error occurs, NIL is
+   returned.  Any list returned must be freed with LIP_Free.
+
+   Parameters
+   ----------
+        line - The line to compile
+     vrbDict - A pointer to a verb dictionary (= array of word descriptors)
+  oneChrDict - A list of one character words
+
+   Returns
+   -------
+   A pointer to a verb list, NIL if an error occured
+*/
+{
+#ifdef DBG
+  Function ("LIP_CompileLine");
+#endif
+
+  char        *LIP_FindWord (char *, char *, LipWord *);
+  LipWrdDsc   *LIP_LkupWord (LipWord *, LipWrdDsc *);
+
+  LipWord      Word;
+  LipWord     *word = &Word;
+  LipWrdDsc   *entry;
+  LipWrdDsc   *gblDict = NIL;
+  LipWrdDsc   *lclDict = NIL;
+  LipWrdDsc   *sbjDict = NIL;
+  LIST        *vrbLst  = NIL;
+  LIST        *gblLst  = NIL;
+  LIST        *lclLst  = NIL;
+  LIST        *sbjLst  = NIL;
+  int          error   = FALSE;
+
+
+  /* If no line is supplied, just return bad status */
+  if (line == NIL) return (vrbLst);
+
+  /* Initiallize the verb list */
+  vrbLst = (LIST *)myMalloc(sizeof(*vrbLst),FN);
+  lstInit (vrbLst);
+
+  /* Parse while there are still characters on the line */
+  while (*line && !error)
+  {
+    /* Find the first word in the line given terminators */
+    line = LIP_FindWord (line, oneChrDict, word);
+
+    /* Look up the meaning of the word in a dictionary */
+    switch (word->type)
+    {
+    case TYP_K_UNKNOWN:                 /* Here if rest of line is whitespace */
+      break;
+
+    case TYP_K_TEXT:
+      if ((entry = LIP_LkupWord (word, sbjDict)) != NIL)
+      {
+        lclLst = (LIST *)myMalloc (sizeof (*lclLst),FN);
+        lstInit (lclLst);
+        AddItem (sbjLst, entry, lclLst, NIL, NIL);
+
+        lclDict = entry->lclDict;
+        sbjDict = entry->sbjDict;
+
+        break;
+      }
+      if ((entry = LIP_LkupWord (word, vrbDict)) != NIL)
+      {
+        gblLst = (LIST *)myMalloc (sizeof (*gblLst),FN);
+        lclLst = (LIST *)myMalloc (sizeof (*lclLst),FN);
+        sbjLst = (LIST *)myMalloc (sizeof (*sbjLst),FN);
+
+        lstInit (gblLst);
+        lstInit (lclLst);
+        lstInit (sbjLst);
+
+        AddItem (vrbLst, entry, sbjLst, gblLst, lclLst);
+
+        gblDict = entry->gblDict;
+        lclDict = entry->lclDict;
+        sbjDict = entry->sbjDict;
+
+        break;
+      }
+      SGL_Error (LIP_UNDWRD, word->length, word->text);
+      error = TRUE;
+      break;
+
+    case TYP_K_MODIFIER:
+      {
+        LIST *list=NULL;
+        if      ((entry = LIP_LkupWord (word, lclDict)) != NIL)  list = lclLst;
+        else if ((entry = LIP_LkupWord (word, gblDict)) != NIL)  list = gblLst;
+        if (entry)
+        {
+          LIST *valLst;
+          if ((line = CompileValue (line, entry->sbjDict, &valLst)) != NIL)
+          {
+            AddItem (list, entry, valLst, NIL, NIL);
+            break;
+          }
+        }
+        else
+          SGL_Error (LIP_UNDWRD, word->length, word->text);
+        error = TRUE;
+      }
+      break;
+
+    case TYP_K_NUMBER:
+    case TYP_K_ABSRNGE:
+    case TYP_K_CNTDRNGE:
+    case TYP_K_STRING:
+      if ((entry = LIP_LkupWord (word, sbjDict)) != NIL)
+      {
+        lclLst = (LIST *)myMalloc (sizeof (*lclLst),FN);
+        lstInit (lclLst);
+        AddItem (sbjLst, entry, lclLst, NIL, NIL);
+        lclDict = entry->lclDict;
+        break;
+      }
+      SGL_Error (LIP_UNDWRD, word->length, word->text);
+      error = TRUE;
+      break;
+
+    case TYP_K_COMMENT:
+      if ((entry = LIP_LkupWord (word, vrbDict)) != NIL)
+      {
+        AddItem (vrbLst, entry, NIL, NIL, NIL);
+        break;
+      }
+      SGL_Error (LIP_UNDWRD, word->length, word->text);
+      error = TRUE;
+      break;
+
+    default:
+      SGL_Error (LIP_UNRTYP, word->type);
+      error = TRUE;
+      break;
+    }
+  }
+
+  if (error)  {  LIP_Free (vrbLst);  vrbLst = NIL;  }
+
+  return (vrbLst);
+}
+
+
+
+static void AddItem (LIST      *list,
+                     LipWrdDsc *entry,
+                     LIST      *subLst,
+                     LIST      *gblLst,
+                     LIST      *lclLst)
+{
+#ifdef DBG
+  Function ("AddItem");
+#endif
+  LipWrdNode  *item;
+
+  item         = (LipWrdNode *)myMalloc (sizeof (*item),FN);
+  item->word   = entry;
+  item->list   = subLst;
+  item->gblLst = gblLst;
+  item->lclLst = lclLst;
+  lstAdd (list, (NODE *) item);
+}
+
+
+
+static char *CompileValue (char      *line,
+                           LipWrdDsc *dict,
+                           LIST     **valLst)
+{
+#ifdef DBG
+  Function ("CompileValue");
+#endif
+  char        *LIP_FindWord (char *, char *, LipWord *);
+
+  char        *save;
+  LipWrdDsc   *entry;
+  LipWord      Word;
+  LipWord     *word  = &Word;
+  int          equal = FALSE;
+  int          open  = FALSE;
+  int          close = FALSE;
+  int          comma = FALSE;
+  int          range = FALSE;
+  int          done  = FALSE;
+
+  *valLst = NIL;
+
+  while (*line && !done)
+  {
+    /* Find the first word in the line given terminators */
+    save = line;
+    line = LIP_FindWord (line, "", word);
+
+    /* Build the value list */
+    switch (word->type)
+    {
+    case TYP_K_EQUAL:
+      if (equal)  {  SGL_Error (LIP_MULTEQ);  return (NIL);  }
+      *valLst = (LIST *)myMalloc (sizeof (**valLst),FN);
+      lstInit (*valLst);
+      equal = TRUE;
+      break;
+
+    case TYP_K_OPEN:
+      if (!equal)  {  SGL_Error (LIP_MISEQ);  return (NIL);  }
+      open = TRUE;
+      break;
+
+    case TYP_K_CLOSE:
+      close = TRUE;
+      done  = TRUE;
+      break;
+
+    case TYP_K_COMMA:
+      comma = TRUE;
+      break;
+
+    case TYP_K_ABSRNGE:
+    case TYP_K_CNTDRNGE:
+      if ((entry = LIP_LkupWord (word, dict)) == NIL)  return (save);
+      AddItem (*valLst, entry, NIL, NIL, NIL);    /* Store start of range */
+      range = TRUE;
+      break;
+
+    case TYP_K_NUMBER:                  /* Store end of range */
+      range = FALSE;
+    case TYP_K_STRING:
+      if ((entry = LIP_LkupWord (word, dict)) == NIL)  return (save);
+      if (!equal) {  SGL_Error (LIP_MISEQ);   return (NIL);  }
+      if (range)  {  SGL_Error (LIP_BADRNG);  return (NIL);  }
+      AddItem (*valLst, entry, NIL, NIL, NIL);
+      if (!open) return (line);         /* Return if not a list */
+      comma = FALSE;
+      break;
+
+    default:
+      return (save);
+    }
+  }
+
+  /* Signal possible syntax errors */
+  if (open && !close) {  SGL_Error (LIP_MISCLS);  return (NIL);  }
+  if (!open && close) {  SGL_Error (LIP_MISOPN);  return (NIL);  }
+  if (comma)          {  SGL_Error (LIP_MISVAL);  return (NIL);  }
+  if (range)          {  SGL_Error (LIP_BADRNG);  return (NIL);  }
+
+  return (line);
+}
+
+
+
+char *LIP_FindWord (char      *string,
+                    char      *oneChrWords,
+                    LipWord   *word)
+/*
+   Description
+   -----------
+   Find a word in a string.  A word is defined according to its terminators.
+   Leading whitespaces are ignored.  A number must start with a minus sign
+   or a digit.  Quoted strings must be terminated by a quote and are
+   considered a single word.  Single character words requiring no extra
+   termination may be defined.  Terminators are user defined.
+
+   Parameters
+   ----------
+      string - A string in which to find a word
+ oneChrWords - An array on single character words
+        word - A pointer to a word descriptor to fill in.
+
+   Returns
+   -------
+   A pointer into string that is one character past the end of the word found.
+*/
+{
+  char *chr = string;
+  char *start;
+
+  /* Ignore leading whitespaces */
+  while (*chr && strchr (" \t", *chr))  {  chr++;  }
+
+  /* Return if empty string */
+  word->type = TYP_K_UNKNOWN;
+  if (*chr == '\0')  return (chr);
+
+  /* Save start of word location */
+  start = chr;
+
+  /* Find the next terminator or end of string */
+  if (strchr ("#!", *chr))               /* Word is a comment */
+  {
+    while (*chr)  {  chr++;  };
+    word->type = TYP_K_COMMENT;
+  }
+  else if (*chr == '/')                 /* Word is a modifier */
+  {
+    start = ++chr;
+    while (*chr && !strchr (" \t/=", *chr))  {  chr++;  }
+    word->type = TYP_K_MODIFIER;
+  }
+  else if (strchr ("=(),", *chr))        /* Word is a seperator */
+  {
+    word->type = *chr++;
+  }
+  else if (strchr ("-0123456789", *chr)) /* Word is a number */
+  {
+    while (*chr && strchr ("-0123456789abcdefx", *chr))  {  chr++;  }
+    if      (*chr == ':') {  word->type = TYP_K_ABSRNGE;   chr++;  }
+    else if (*chr == ';') {  word->type = TYP_K_CNTDRNGE;  chr++;  }
+    else                  {  word->type = TYP_K_NUMBER;            }
+  }
+  else if (strchr ("'\"", *chr))         /* Word is a quoted string */
+  {
+    char terminator = *chr++;
+    while (*chr && *chr != terminator)  {  chr++;  }
+    if    (        *chr == terminator)  {  chr++;  }
+    word->type = TYP_K_STRING;
+  }
+  else if (strchr (oneChrWords, *chr))   /* Word is a single character */
+  {
+    chr++;
+    word->type = TYP_K_TEXT;
+  }
+  else                                  /* Word is a string */
+  {
+    while (*chr && !strchr (" \t/", *chr))  {  chr++;  }
+    word->type = TYP_K_TEXT;
+  }
+
+  word->length = chr - start;
+  word->text   = start;
+
+  return (chr);
+}
+
+
+
+LipWrdDsc *LIP_LkupWord (LipWord       *word,
+                         LipWrdDsc     *dictionary)
+/*
+   Description
+   -----------
+   Look up a word in the supplied dictionary.  Each entry in the dictionary
+   contains the word, its length, a count of the number of characters needed
+   to recognize it, a routine entry point and an argument that effect the
+   meaning of the word.
+
+   Some classes of legal words are not found in the dictionary.  These are
+   comments, quoted strings and numbers.  For these words, word descriptors
+   are dynamically allocated.
+
+   Parameters
+   ----------
+        word - A pointer to a word descriptor to be looked up
+  dictionary - A pointer to a dictionary to look the word up in
+
+   Returns
+   -------
+   A pointer to a word descriptor for word or NIL if it wasn't recognized.
+*/
+{
+  /* Function ("LIP_LkupWord"); */
+
+
+  LipWrdDsc *wordDsc = dictionary;
+
+  /* If no dictionary was supplied, just return */
+  if (dictionary == NIL) return (NIL);
+
+  /* Look for a unique match of the word in the word list */
+  switch (word->type)
+  {
+  case TYP_K_VERB:
+  case TYP_K_SUBJECT:
+  case TYP_K_TEXT:
+  case TYP_K_MODIFIER:
+    while (wordDsc->type != TYP_K_ENDDICT)
+    {
+      if (wordDsc->type == TYP_K_FILENAME)
+      {
+        return (GetDsc (word, wordDsc));
+      }
+      else if (strncmp (wordDsc->string, word->text, word->length) == NULL)
+      {
+        if (word->length < wordDsc->minLen)
+        {
+          SGL_Error (LIP_AMBWRD, word);
+          return (NIL);
+        }
+        return (wordDsc);
+      }
+      wordDsc++;
+    }
+    break;
+
+  case TYP_K_COMMENT:
+  case TYP_K_STRING:
+  case TYP_K_NUMBER:
+  case TYP_K_ABSRNGE:
+  case TYP_K_CNTDRNGE:
+    while (wordDsc->type != TYP_K_ENDDICT)
+    {
+      if (wordDsc->type == word->type)
+      {
+        return (GetDsc (word, wordDsc));
+      }
+      wordDsc++;
+    }
+    break;
+
+  case TYP_K_OPEN:
+  case TYP_K_COMMA:
+  case TYP_K_CLOSE:
+    while (wordDsc->type != TYP_K_ENDDICT)
+    {
+      if (wordDsc->type == TYP_K_LIST) return (wordDsc);
+      wordDsc++;
+    }
+    break;
+
+  default:
+    SGL_Error (LIP_UNRTYP, word->type);
+    break;
+  }
+  return (NIL);
+}
+
+
+
+static LipWrdDsc *GetDsc (LipWord         *word,
+                          LipWrdDsc       *wordDsc)
+{
+#ifdef DBG
+  Function ("GetDsc");
+#endif
+  size_t    len = word->length+1;    /* +1 for NULL term */
+
+
+  LipWrdDsc   *dsc  = (LipWrdDsc *)myMalloc (sizeof(*dsc),FN);
+  char        *wrd  = (char *)myMalloc (len,FN); 
+  strncpy (wrd, word->text, word->length);
+  wrd[word->length] = '\0';
+  *dsc              = *wordDsc;
+  dsc->string       = wrd;
+  dsc->size         = word->length;
+  return (dsc);
+}
+
+
+
+void LIP_Free (LIST    *list)
+/*
+   Description
+   -----------
+   Function for freeing lists returned by LIP_CompileLine.  The nodes in
+   the list may contain pointers to other lists, depending on the syntax
+   of the original line.  Each of these lists are also freed by this
+   routine using recursive invocation.  The routine behaves properly if
+   it is fed a null list.
+
+   Parameters
+   ----------
+         list - A list built by LIP_CompileLine.
+
+   Returns
+   -------
+   nothing.
+*/
+{
+#ifdef DBG
+  Function ("LIP_Free");
+#endif
+
+  if (list)
+  {
+    register LipWrdNode *node;
+
+    while ((node = (LipWrdNode *) lstGet (list)) != NIL)
+    {
+      register LipWrdDsc *word;
+
+      LIP_Free (node->gblLst);      node->gblLst = NIL;
+      LIP_Free (node->lclLst);      node->lclLst = NIL;
+      LIP_Free (node->list);        node->list   = NIL;
+
+      word = node->word;
+      if ((word->type == TYP_K_NUMBER  ) || (word->type == TYP_K_ABSRNGE) ||
+          (word->type == TYP_K_CNTDRNGE) || (word->type == TYP_K_STRING ) ||
+          (word->type == TYP_K_FILENAME) || (word->type == TYP_K_COMMENT)  )
+      {
+        if (word->string) myFree ((void *) word->string,FN);
+        if (word) myFree ((void *) word,FN);
+      }
+      myFree ((void *) node,FN);
+    }
+    lstFree (list);
+    myFree ((void *) list,FN);
+  }
+}
+@
+
+
+1.2
+log
+@Got rid of warnings
+@
+text
+@d63 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d52 1
+d60 1
+a64 10
+#define NIL   (void *)(0)
+#define NULL           0
+#define TRUE           1
+#define FALSE          0
+#define SUCCESS        0
+#define FAILURE        1
+
+#define Min(a,b)       ((a) < (b) ? (a) : (b))
+#define Max(a,b)       ((a) > (b) ? (a) : (b))
+#define lsizeof(var)   (sizeof (var) >> 2)
+a65 12
+#ifdef DBG
+#  define myMalloc(size) \
+  ({void *__p = malloc (size); \
+    printf ("%s: malloc: size %u, 0x%x\n", FN, size, (unsigned long) __p); \
+    __p; })
+#  define myFree(__p) \
+  ({printf ("%s: free: 0x%x\n", FN, (unsigned long) __p); \
+    free (__p); })
+#else
+#  define myMalloc(size) malloc(size)
+#  define myFree(size)   free(size)
+#endif
+d67 4
+a70 3
+  static void  AddItem      (LIST *, LipWrdDsc *, LIST *, LIST *, LIST *);
+  static char *CompileValue (char *, LipWrdDsc *, LIST **);
+  static LipWrdDsc *GetDsc  (LipWord *, LipWrdDsc *);
+d119 1
+a119 1
+  vrbLst = (LIST *) myMalloc (sizeof (*vrbLst));
+d137 1
+a137 1
+        lclLst = (LIST *) myMalloc (sizeof (*lclLst));
+d148 3
+a150 3
+        gblLst = (LIST *) myMalloc (sizeof (*gblLst));
+        lclLst = (LIST *) myMalloc (sizeof (*lclLst));
+        sbjLst = (LIST *) myMalloc (sizeof (*sbjLst));
+d170 1
+a170 1
+        LIST *list;
+d194 1
+a194 1
+        lclLst = (LIST *) myMalloc (sizeof (*lclLst));
+a236 1
+
+d239 1
+a239 1
+  item         = (LipWrdNode *) myMalloc (sizeof (*item));
+a255 1
+
+d282 1
+a282 1
+      *valLst = (LIST *) myMalloc (sizeof (**valLst));
+d444 2
+a445 3
+#ifdef DBG
+  Function ("LIP_LkupWord");
+#endif
+d518 2
+d521 2
+a522 2
+  LipWrdDsc   *dsc  = (LipWrdDsc *) myMalloc (sizeof (*dsc));
+  char        *wrd  = (char *) myMalloc (word->length + 1); /* +1 for NULL term */
+d573 2
+a574 2
+        if (word->string) myFree ((void *) word->string);
+        if (word)         myFree ((void *) word);
+d576 1
+a576 1
+      myFree ((void *) node);
+d579 1
+a579 1
+    myFree ((void *) list);
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

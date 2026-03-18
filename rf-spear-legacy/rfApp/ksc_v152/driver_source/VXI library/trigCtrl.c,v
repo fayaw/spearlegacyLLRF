@@ -1,0 +1,783 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  trigFxn/trigCtrl.c
+
+  This module provides VXI trigger control.
+***************************************************************************/
+
+#include <vxWorks.h>
+
+#include <kscvxi.h>
+
+#include <libvar.h>
+#include <bus.h>
+
+
+/*==========================================================================
+			    PRIVATE ROUTINES
+==========================================================================*/
+
+
+/*==========================================================================
+  getTrigId
+
+  Return hardware-specific trigger id for corresponding line number
+==========================================================================*/
+
+static
+int getTrigId (UINT16 line)
+{
+  if (line < 8)				/** 8 ttl lines **/
+    return (line);
+
+  if (line < 10)			/** 2 ecl lines **/
+    return (line);
+
+  if (line >= 40  &&  line < 42)	/** 2 front panel lines **/
+    return (line -40 +10);
+
+  return (-1);
+}
+
+
+/*==========================================================================
+			    PUBLIC ROUTINES
+==========================================================================*/
+
+
+/*==========================================================================
+  DisableTrigSense
+
+
+  ARGUMENTS
+
+  INT16 ctrl;			controller id
+  UINT16 line;			trigger line
+
+
+  RETURN VALUE
+
+  INT16				status code
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+==========================================================================*/
+
+INT16 DisableTrigSense
+(INT16 ctrl, UINT16 line)
+{
+  int trig_id;
+
+  if (trig_id = getTrigId(line), trig_id < 0)
+    return -3;  /** line not supp **/
+
+  vxiTrigAction[trig_id] = 0;
+
+  vxiTrigEnbMask &= ~(1 << trig_id);
+  PUT_MY_REG (0x2E, vxiTrigEnbMask);
+
+  return (0);
+}
+
+
+/*==========================================================================
+  EnableTrigSense
+
+
+  ARGUMENTS
+
+  INT16 ctrl;			controller id
+  UINT16 line;			trigger line
+  UINT16 prot;
+
+
+  RETURN VALUE
+
+  INT16				status code
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+==========================================================================*/
+
+INT16 EnableTrigSense (INT16 ctrl, UINT16 line, UINT16 prot)
+{
+
+  int trig_id;
+  int int_level;
+  UINT16 int_ctrl_reg;
+
+  if (trig_id = getTrigId(line), trig_id < 0)
+    return -3;  /** line not supp **/
+
+/*/  if (prot == 1  ||  prot == 3  ||  prot >= 7)*/
+  if(prot >= 7)
+    return -5;  /** OFF/STOP prot not supp **/
+
+  if (vxiTrigAction[trig_id])
+    return -7;  /** in use **/
+  
+  vxiTrigAction[trig_id] = prot;
+
+  vxiTrigEnbMask |= (1 << trig_id);
+
+  PUT_MY_REG (0x2E, vxiTrigEnbMask);
+
+   /* Enable trigger in interrupt */
+   int_level = 0;
+   EnableVXIint(-1, 1<<int_level ); 
+
+/*/   PUT_MY_REG(0x2c, 0x230); //trig in int en, int req en, int level 0*/
+   int_ctrl_reg = ( vxiTrigEnbMask != 0 ? 0x0000 : 0x100 ) |
+                  ( vxiMonEnbMask  != 0 ? 0x0000 : 0x200 ) |
+                  ( 0x30 ); /* Enable onto VMEbus, irq 1 */
+   PUT_MY_REG (0x2c, int_ctrl_reg);
+	
+  return (0);
+}
+
+
+/*==========================================================================
+  GetTrigHandler
+
+
+  ARGUMENTS
+
+  UINT16 line;			trigger line
+
+
+  RETURN VALUE
+
+  NIVXI_HTRIG*			handler func
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+==========================================================================*/
+
+FUNCPTR* GetTrigHandler
+(UINT16 line)
+{
+  int trig_id;
+
+  if (trig_id = getTrigId(line), trig_id < 0)
+   
+    return (FUNCPTR*) 0;  /** line not supp **/
+
+  return ((FUNCPTR*) vxiTrigHandler[line]);
+}
+
+
+/*==========================================================================
+  MapTrigToTrig
+
+
+  ARGUMENTS
+
+  INT16 ctrl;			controller id
+  UINT16 src;			source trigger line
+  UINT16 dst;			destination trigger line
+  UINT16 mode;
+
+
+  RETURN VALUE
+
+  INT16				status code
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+==========================================================================*/
+
+INT16 MapTrigToTrig
+(INT16 ctrl, UINT16 src, UINT16 dst, UINT16 mode)
+{
+  int srcId, dstId;
+  int int_level;
+  UINT16 int_ctrl_reg;
+
+  if (srcId = getTrigId(src), srcId < 0  &&  src != 50  &&  src != 51)
+    return -8;  /** line not supp **/
+
+  if (dstId = getTrigId(dst), dstId < 0)
+    return -9;  /** line not supp **/
+
+  if (srcId >= 0) {
+    /*----------------------------------------------------------------------
+      physical source...
+    ----------------------------------------------------------------------*/
+    if (vxiTrigAction[srcId])
+      return -11;  /** in use **/
+  
+    vxiTrigAction[srcId] = 0x8000 | dstId;
+
+    vxiTrigEnbMask |= (1 << srcId);  /*/debug - added 5/24/99 T Stabrawa*/
+    PUT_MY_REG (0x2E, vxiTrigEnbMask);
+
+    /* Enable trigger in interrupt */
+    int_level = 0;
+    EnableVXIint(-1, 1<<int_level ); 
+
+/*/    PUT_MY_REG(0x2c, 0x230); //trig in int en, int req en, int level 0*/
+    int_ctrl_reg = ( vxiTrigEnbMask != 0 ? 0x0000 : 0x100 ) |
+		   ( vxiMonEnbMask  != 0 ? 0x0000 : 0x200 ) |
+		   ( 0x30 ); /* Enable onto VMEbus, irq 1 */
+    PUT_MY_REG (0x2c, int_ctrl_reg);
+
+  }
+  else {
+    /*----------------------------------------------------------------------
+      counter source...
+    ----------------------------------------------------------------------*/
+    vxiTrigCntrMap |= (1 << dstId);
+  }
+
+  return (0);
+}
+
+
+/*==========================================================================
+  SetTrigHandler
+
+
+  ARGUMENTS
+
+  UINT16 line;			trigger line
+  NIVXI_HTRIG* func;		handler func
+
+
+  RETURN VALUE
+
+  INT16				status code
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+==========================================================================*/
+
+INT16 SetTrigHandler
+(UINT16 lines, FUNCPTR* func)
+{
+   int i;
+
+   for(i=0; i<16; i++)
+   {
+
+      /* Check each bit if set. */
+      if(lines & (1<<i))
+      { 
+         /* Only lines 0 thru 9 are valid. */
+         if(i< 10)
+	 {
+/*/	    printf("SetTrigHandler:Line %d is set\n",i);*/
+	    vxiTrigHandler[i] = (VOIDFUNCPTR) func;
+	 }
+	 else
+	 {
+/*/	    printf("SetTrigHandler:No Hardware Support for line %d\n",i);*/
+	    return -1;
+	 }
+      }
+   }
+
+   return (0);
+}
+
+
+/*==========================================================================
+  SrcTrig
+
+
+  ARGUMENTS
+
+  INT16 ctrl;			controller id
+  UINT16 line;			trigger line
+  UINT16 prot;			protocol 
+  INT32 timo;			timeout in milliseconds
+
+
+  RETURN VALUE
+
+  INT16				status code
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+==========================================================================*/
+
+INT16 SrcTrig
+(INT16 ctrl, UINT16 line, UINT16 prot, INT32 timo)
+{
+  int trig_id;
+
+  if (trig_id = getTrigId(line),  trig_id < 0) {
+    if (line == 50  &&  prot == 4) {
+      /*--------------------------------------------------------------------
+	special case for sourcing timed sync events
+      --------------------------------------------------------------------*/
+      if (vxiTrigCntrMap == 0)
+	return -12;
+
+      PUT_MY_REG (0x3C, 0x8000);	/** select Ctrl **/
+      PUT_MY_REG (0x34, 0x8000 | vxiTrigCntrMap);
+
+      return (0);
+    }
+      
+    return (-3);
+  }
+
+  switch (prot) {
+  case 0:
+    { /*--------------------------------------------------------------------
+	protocol ON
+      --------------------------------------------------------------------*/
+      PUT_MY_REG (0x32, 0x0000 | (1 << trig_id));
+    }
+
+    break;
+  case 1:
+    { /*--------------------------------------------------------------------
+	protocol OFF
+      --------------------------------------------------------------------*/
+      PUT_MY_REG (0x32, 0x4000 | (1 << trig_id));
+    }
+
+    break;
+  case 2:
+    { /*--------------------------------------------------------------------
+	protocol START
+      --------------------------------------------------------------------*/
+      PUT_MY_REG (0x32, 0x0000 | (1 << trig_id));
+    }
+
+    break;
+  case 3:
+    { /*--------------------------------------------------------------------
+	protocol STOP
+      --------------------------------------------------------------------*/
+      PUT_MY_REG (0x32, 0x4000 | (1 << trig_id));
+    }
+
+    break;
+  case 4:
+    { /*--------------------------------------------------------------------
+	protocol SYNC
+      --------------------------------------------------------------------*/
+      PUT_MY_REG (0x32, 0x8000 | (1 << trig_id));
+    }
+
+    break;
+  case 5:
+    { /*--------------------------------------------------------------------
+	protocol SEMI-SYNC
+      --------------------------------------------------------------------*/
+      PUT_MY_REG (0x32, 0x8000 | (1 << trig_id));
+    }
+
+    break;
+  case 6:
+    { /*--------------------------------------------------------------------
+	protocol ASYNC
+      --------------------------------------------------------------------*/
+      PUT_MY_REG (0x32, 0x8000 | (1 << trig_id));
+    }
+
+    break;
+  case 7:
+    { /*--------------------------------------------------------------------
+	protocol SEMI-SYNC w/ wait for ack
+      --------------------------------------------------------------------*/
+      PUT_MY_REG (0x32, 0x8000 | (1 << trig_id));
+    }
+
+    break;
+  case 8:
+    { /*--------------------------------------------------------------------
+	protocol ASYNC w/ wait for ack
+      --------------------------------------------------------------------*/
+      PUT_MY_REG (0x32, 0x8000 | (1 << trig_id));
+    }
+
+    break;
+  default:
+    { /*--------------------------------------------------------------------
+	unknown
+      --------------------------------------------------------------------*/
+      return (-3);
+    }
+  }
+
+
+  return (0);
+}
+
+
+/*==========================================================================
+  SrcECLtrig
+  SrcTTLtrig
+==========================================================================*/
+
+INT16 srcECLtrig (INT16 ctrl, UINT16 line, UINT16 prot, INT32 timo)
+{  return SrcTrig(ctrl,line,prot,timo);  }
+
+INT16 srcTTLtrig (INT16 ctrl, UINT16 line, UINT16 prot, INT32 timo)
+{  return SrcTrig(ctrl,line,prot,timo);  }
+
+
+/*==========================================================================
+  TrigAssertConfig
+
+
+  ARGUMENTS
+
+  INT16 ctrl;			controller id
+  UINT16 line;			trigger line
+  UINT16 mode;
+
+
+  RETURN VALUE
+
+  INT16				status code
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+==========================================================================*/
+
+INT16 TrigAssertConfig
+(INT16 ctrl, UINT16 line, UINT16 mode)
+{
+  /*------------------------------------------------------------------------
+    no hardware support for configuring the clock edges upon which
+    trigger is asserted.
+  ------------------------------------------------------------------------*/
+
+  return (-1);
+}
+
+
+/*==========================================================================
+  TrigCntrConfig
+
+
+  ARGUMENTS
+
+  INT16 ctrl;			controller id
+  UINT16 mode;
+  UINT16 src;
+  UINT16 count;
+
+
+  RETURN VALUE
+
+  INT16				status code
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+==========================================================================*/
+
+INT16 TrigCntrConfig
+(INT16 ctrl, UINT16 mode, UINT16 src, UINT16 count)
+{
+  /*------------------------------------------------------------------------
+    The counter hardware is limited to...
+
+      src:	CLK10 (10MHz)
+      sink:	ttl,ecl,fp trigger lines
+
+    This routine will configure the counter, MapTrigToTrig with source
+    line 50 will select the trigger(s) sourced, and SrcTrig with line
+    50 will start counter.
+  ------------------------------------------------------------------------*/
+
+  if (src != 70)
+    return -3;
+
+  if (mode == 3) {
+    /*----------------------------------------------------------------------
+      stop counter
+    ----------------------------------------------------------------------*/
+    PUT_MY_REG (0x3C, 0x8000);	/** select Ctrl **/
+    PUT_MY_REG (0x34, 0x0000);
+  }
+
+  else if (mode == 0  ||  mode == 1) {
+    /*----------------------------------------------------------------------
+      reload counter
+    ----------------------------------------------------------------------*/
+    PUT_MY_REG (0x3C, 0x1000);   /** select Timer Hi **/
+    PUT_MY_REG (0x34, 0);
+
+    PUT_MY_REG (0x3C, 0x0000);   /** select Timer Lo **/
+    PUT_MY_REG (0x34, count);
+  }
+
+  else
+    return -10;
+  
+  return (0);
+}
+
+
+/*==========================================================================
+  TrigExtConfig
+
+
+  ARGUMENTS
+
+  INT16 ctrl;			controller id
+  UINT16 line;			trigger line
+  UINT16 mode;
+
+
+  RETURN VALUE
+
+  INT16				status code
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+==========================================================================*/
+
+INT16 TrigExtConfig
+(INT16 ctrl, UINT16 line, UINT16 mode)
+{
+  /*------------------------------------------------------------------------
+    no "crosspoint switch" exists (as in NI hardware); external triggers
+    may be directly sensed or sourced by specifying line 40 (A) or 41 (B)
+    to the sense/source routines.
+  ------------------------------------------------------------------------*/
+
+  return (-1);
+}
+
+
+/*==========================================================================
+  TrigTickConfig
+
+
+  ARGUMENTS
+
+  INT16 ctrl;			controller id
+  UINT16 mode;
+  UINT16 src;
+  UINT16 tcnt1;
+  UINT16 tcnt2;
+
+
+  RETURN VALUE
+
+  INT16				status code
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+==========================================================================*/
+
+INT16 TrigTickConfig
+(INT16 ctrl, UINT16 mode, UINT16 src, UINT16 tcnt1, UINT16 tcnt2)
+{
+  /*------------------------------------------------------------------------
+    no hardware support for counting incoming trigger events.
+  ------------------------------------------------------------------------*/
+
+  return (-1);
+}
+
+
+/*==========================================================================
+  UnMapTrigToTrig
+
+
+  ARGUMENTS
+
+  INT16 ctrl;			controller id
+  UINT16 src;			source trigger line
+  UINT16 dst;			destination trigger line
+
+
+  RETURN VALUE
+
+  INT16				status code
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+==========================================================================*/
+
+INT16 UnMapTrigToTrig
+(INT16 ctrl, UINT16 src, UINT16 dst)
+{
+  int srcId, dstId;
+
+  if (srcId = getTrigId(src), srcId < 0  &&  src != 50  &&  src != 51)
+    return -8;  /** line not supp **/
+
+  if (dstId = getTrigId(dst), dstId < 0)
+    return -9;  /** line not supp **/
+
+  if (srcId >= 0) {
+    /*----------------------------------------------------------------------
+      physical source...
+    ----------------------------------------------------------------------*/
+    vxiTrigAction[srcId] = 0;
+
+    vxiTrigEnbMask &= ~(1 << srcId);
+    PUT_MY_REG (0x2E, vxiTrigEnbMask);
+
+  }
+  else {
+    /*----------------------------------------------------------------------
+      counter source...
+    ----------------------------------------------------------------------*/
+    vxiTrigCntrMap &= ~(1 << dstId);
+  }
+
+  return (0);
+}
+
+
+/*==========================================================================
+  DefaultTrigHandler
+
+
+  ARGUMENTS
+
+  INT16 ctrl;			controller id
+  UINT16 line;			trigger line
+  UINT16 type;			conditioning effect
+
+
+  RETURN VALUE
+
+  None.
+
+
+  DESCRIPTION
+
+
+
+  DIAGNOSTICS
+
+==========================================================================*/
+
+void DefaultTrigHandler (INT16 ctrl, UINT16 line, UINT16 type)
+{
+#ifdef DEBUG_INTR
+  logMsg ("VXI TRIGGER: line %d, type %d\n", line, type);
+#endif
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

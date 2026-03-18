@@ -1,0 +1,157 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  drvFxn/ksv151.c
+
+  This module provides KSV151 VXI access routines.
+***************************************************************************/
+
+#include <vxWorks.h>
+#include <kscvxi.h>
+
+#include <bus.h>
+#include <buscntl.h>
+
+
+/*==========================================================================
+			     V151 REGISTERS
+==========================================================================*/
+
+#define  V151_SUFFIX_HI		0x20
+#define  V151_SUFFIX_LO		0x22
+#define  V151_SERNUM_HI		0x24
+#define  V151_SERNUM_LO		0x26
+#define  V151_MODID		0x28
+#define  V151_INT_STAT		0x2A
+#define  V151_INT_CTRL		0x2C
+#define  V151_TRIG_INT		0x2E
+#define  V151_TRIG_CLR		0x30
+#define  V151_TRIG_SRC		0x32
+#define  V151_TRIG_TMR		0x34
+#define  V151_INT_ACKD		0x38
+#define  V151_MISC_CTRL		0x3C
+#define  V151_READ_SIG		0x3C
+
+
+/*==========================================================================
+			    MEMBER ROUTINES
+==========================================================================*/
+
+/*==========================================================================
+  chkModId
+==========================================================================*/
+
+static
+unsigned chkModId (int la)
+{
+  UINT16 value;
+
+  if (VXIoutReg (la, V151_MODID, 0x0000))  return (-1);
+  if (VXIinReg (la, V151_MODID, &value))  return (-1);
+
+/*vxMemProbe(0xfbffc028,0,2,&value);*/
+
+  return (value & 0x1FFF);
+}
+
+
+/*==========================================================================
+  clrModId
+==========================================================================*/
+
+static
+int clrModId (int la)
+{
+  if (VXIoutReg (la, V151_MODID, 0x0000))  return (-1);
+  return 0;
+}
+
+
+/*==========================================================================
+  setModId
+==========================================================================*/
+
+static
+int setModId (int la, unsigned val)
+{
+  if (VXIoutReg (la, V151_MODID, 0x2000 | (val & 0x1FFF)))  return (-1);
+  return 0;
+}
+
+
+/*==========================================================================
+			       BUS OBJECT
+==========================================================================*/
+
+BusCntl KSV151_BUS = {
+  chkModId,
+  clrModId,
+  setModId,
+};
+
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

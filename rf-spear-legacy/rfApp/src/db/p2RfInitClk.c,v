@@ -1,0 +1,376 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2011.12.07.01.21.55;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.46;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.46;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Changes for 3.14.11 (export) and compiler warnings.
+@
+text
+@/*
+=============================================================
+
+  Abs:  PEP-II RF Clock Module Initialization 
+
+
+  Name: p2RfInitClk.c
+
+          * indicates static routines
+
+  Proto: None
+
+  Auth: dd-mmm-yyyy, Bob Sass         (RCS)
+  Rev : dd-mmm-yyyy, Reviewer's Name  (USERNAME)
+
+-------------------------------------------------------------
+  Mod:
+        28-Feb-2002, K. Luchini     (LUCHINI)
+           extracted code from initHooks.c
+
+=============================================================
+*/
+
+#include <vxWorks.h>             /* OK,ERROR              */
+#include <stdlib.h>              /* For getenv prototype  */
+
+#include <p2RfClkDef.h>          /* Clock registers       */
+#include <vxi.h>
+#include <errlog.h>
+
+#define A16_LA_FF     0xffc0
+#define HW_VERSION_0  0
+#define HW_VERSION_1  1
+#define HW_VERSION_2  2
+
+
+/* Local prototypes */
+static long vxi_rd_version( unsigned long adrs,unsigned short *pver );
+static long vxi_wt_ctrl( unsigned long adrs,unsigned short value );
+static long vxi_wt_39MHZ_PPL( unsigned long adrs, unsigned short data );
+static long vxi_wt_471MHZ_PPL( unsigned long adrs, unsigned short data );
+static long vxi_wt_delay( unsigned long adrs, unsigned short data );
+
+
+long p2RfInitClk(long slot)
+{
+      /*
+      ** Defines and local variables for early init of clockid registers. Before Resman,
+      ** all modules respond to logical address FF. Only the one whose modid line is set should
+      ** respond.
+      */
+      long      status = OK;    /* return status         */
+      UINT16    enable=1;       /* set modid line        */
+      UINT16    disable=0;      /* clear modid lin       */
+      UINT16    modid;          /* bit-mask for slot no. */
+      UINT16    version=0;      /* Board version         */
+      UINT16    wt_value;
+      UINT32    adrs = A16_LA_FF;
+
+
+       /* Initialize VXI Library. 
+	* Note: if the vxi library has already been initialized 
+	* the status return is set to 1.
+        */
+       vxiinit();
+       status = InitVXIlibrary();
+       if ( status<0 ) {
+          errlogPrintf("Failed to initialize VXI Library\n");
+          return(status);
+       }
+     
+       /* Set MODID for clock module */
+       modid  = 1 << slot;
+       status = SetMODID(enable,modid);  
+       if ( status !=OK ) {
+          errlogPrintf("Failed to set MODID on slot %d\n",(int)slot);
+          return(status);
+       }
+
+       /* Read module  version number */
+      status = vxi_rd_version( adrs,&version );
+      if ( status==OK ) {
+         version &= 0xF;     /* We're only interested in H/W version */
+#ifdef DBG    
+         errlogPrintf("Found Clock Module hardware version %d - slot %d\n",(int)version,(int)slot);
+#endif
+         switch( version ) {
+   	   case HW_VERSION_0:  /* Version 0 */
+	   case HW_VERSION_1:  /* Version 1 */
+             /*
+             ** Set up the control register
+	     ** and the 2 phase-locked loop clocks. The clock module
+	     ** must be initialized before all other RF VXI modules.
+	     ** who expect a clock. Otherwise, the other boards 
+             ** will be unhappy.
+             */
+             wt_value = 0x0800;
+             status = vxi_wt_ctrl( adrs,wt_value );
+             if (status==OK) status = vxi_wt_39MHZ_PPL(adrs, CLK_K_39CONST );
+             if (status==OK) status = vxi_wt_471MHZ_PPL(adrs,CLK_K_471NORM );
+             break;
+
+           case HW_VERSION_2:  /* Version 2 or later */
+           default:  
+             wt_value = 0xc00;
+             status = vxi_wt_delay( adrs,wt_value );
+             break;
+         }/* End of switch statement */
+      }
+      else
+         errlogPrintf("Failed to read Clock Module Version Register - slot %d\n",
+                 (int)slot);
+
+   /* Clear Clock modid unconditionally */
+   SetMODID(disable,modid); 
+   return(status);
+}
+
+static long vxi_rd_version( unsigned long adrs,unsigned short *pver )
+ {
+   long              status = OK;
+   unsigned short    bcnt = 2;            /* byte count */
+   unsigned short    space = 1;           /* Address space, set to A16 initially */
+   unsigned long     reg = 0;
+
+   /*
+   ** Get version of clock module.
+   */
+   *pver = 0;
+   reg = adrs + CLK_A_VERSION;
+   status = VXIin(space,reg,bcnt,(void *)pver);
+   return( status );   
+ }
+
+
+
+static long vxi_wt_ctrl( unsigned long adrs,unsigned short data )
+{
+   long              status;
+   unsigned short    bcnt = 2;            /* byte count */
+   unsigned short    space = 1;           /* Address space, set to A16 initially */
+   unsigned long     reg = 0;
+   unsigned short    rd_value=0;
+
+
+   reg    = adrs + CLK_A_CLKCTRL;
+   status = VXIout(space,reg,bcnt,data);
+   if (status == OK) {
+      status = VXIin(space,reg,bcnt,(void *)&rd_value);
+      if ((status!=OK) ||(rd_value!=data)) 
+         errlogPrintf("Failed to set Clock Module CTRL Register (0x%x):  RBK=0x%hx  WT=0x%hx  STATUS=%hd\n",
+               (int)reg,(int)rd_value,(int)data,(int)status);
+#ifdef DBG
+      else
+         errlogPrintf("Successfully set Clock Module CTRL Register (0x%x):  WT=0x%hx\n",
+                (int)reg,(int)data);	 
+#endif
+   }
+   else
+       errlogPrintf("Failed to set Clock Module CTRL Register (0x%x):  WT=%hd\n",(int)reg,(int)data);
+   return(status);
+}
+
+
+static long vxi_wt_39MHZ_PPL( unsigned long adrs, unsigned short data )
+{
+   long              status;
+   unsigned short    bcnt = 2;            /* byte count */
+   unsigned short    space = 1;           /* Address space, set to A16 initially */
+   unsigned long     reg = 0;
+   unsigned short    rd_value=0; 
+
+      
+   reg = adrs + CLK_A_39MHZPLL;
+   status = VXIout(space,reg,bcnt,data);
+   if (status == OK) {
+        status = VXIin(space,reg,bcnt,(void *)&rd_value);
+        if ((status!=OK) || (rd_value!=data)) 
+           errlogPrintf("Failed to set Clock Module 39.3 MHz PPL Register (0x%hx):  RBK=0x%hx  WT=0x%hx STATUS=%hd\n",
+                  (int)reg,(int)rd_value,(int)data,(int)status); 
+#ifdef DBG
+        else
+           errlogPrintf("Successfully set Clock Module 39.3 MHz PPL Register (0x%hx): WT=0x%hx\n",
+                  (int)reg,(int)data);
+#endif
+   }
+   else 
+      errlogPrintf("Failed to set Clock Module 39.3 MHz PLL Register (0x%x):  WT=0x%hx\n",
+             (int)reg,(int)data);
+   return(status);
+}
+
+static long vxi_wt_471MHZ_PPL( unsigned long adrs, unsigned short data )
+{
+   long              status;
+   unsigned short    bcnt = 2;            /* byte count */
+   unsigned short    space = 1;           /* Address space, set to A16 initially */
+   unsigned long     reg = 0;
+   unsigned short    rd_value=0;
+
+   reg = adrs + CLK_A_471MHZPLL; /* ???should this really be 0x2c instead of 0x2a ???*/
+                                 /* maybe version dependent */
+   status = VXIout(space,reg,bcnt,data);
+   if ( status==OK ) {
+      status = VXIin(space,reg,bcnt,(void *)&rd_value);
+      if ((status!=OK) || (rd_value!=data)) 
+          errlogPrintf("Failed Clock Module 471.1 MHz PLL Register (0x%hx): RBK=0x%hx  WT=0x%hx  STATUS=%d\n",
+                 (int)reg,(int)rd_value,(int)data,(int)status);
+#ifdef DBG
+      else
+          errlogPrintf("Successfully set Clock Module 471.1 MHz PLL Register (0x%hx):  WT=0x%hx\n",
+                 (int)reg,(int)data);
+#endif
+   }
+   else
+      errlogPrintf("Failed to set Clock Module 471.1 MHz PLL Register (0x%x):  WT=0x%hx\n",
+             (int)reg,(int)data);
+   return( status );
+}
+
+static long vxi_wt_delay( unsigned long adrs, unsigned short data )
+{
+   long           status = OK;
+   unsigned short rd_value;
+   unsigned short bcnt = 2;
+   unsigned short space = 1;           /* Address space, set to A16 initially */
+   unsigned long  reg = 0;
+   
+
+   reg  = adrs + CLK_A_V2DLYCTRL;
+   status = VXIout(space,reg,bcnt,data);
+   if (status==OK) {
+      status = VXIin(space,reg,bcnt,(void *)&rd_value); 
+      if ((status!=OK) || (rd_value!=data))
+          errlogPrintf("Failed to set Clock Module Delay CTRL Register (0x%hx): RBK=0x%hx  WT=0x%hx STATUS=%hd\n",
+                 (int)reg,(int)rd_value,(int)data,(int)status);
+#ifdef DBG
+      else
+          errlogPrintf("Successfully set Clock Module Delay CTRL Register (0x%hx): WT=0x%hx\n",
+                 (int)reg,(int)data);                    
+#endif
+   }
+   else 
+       errlogPrintf("Failed to set Clock Module Delay CTRL Register (0x%hx): WT=%0xhx (%hd)\n",
+               (int)reg,(int)data,(int)data);
+   return(status);
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@a25 1
+#include <logLib.h>              /* logMsg                */
+d29 1
+d68 1
+a68 1
+          logMsg("Failed to initialize VXI Library\n",0,0,0,0,0,0);
+d76 1
+a76 1
+          logMsg("Failed to set MODID on slot %d\n",(int)slot,0,0,0,0,0);
+d85 1
+a85 1
+         logMsg("Found Clock Module hardware version %d - slot %d\n",(int)version,(int)slot,0,0,0,0);
+d111 2
+a112 2
+         logMsg("Failed to read Clock Module Version Register - slot %d\n",
+                 (int)slot,0,0,0,0,0);
+d151 2
+a152 2
+         logMsg("Failed to set Clock Module CTRL Register (0x%x):  RBK=0x%hx  WT=0x%hx  STATUS=%hd\n",
+               (int)reg,(int)rd_value,(int)data,(int)status,0,0);
+d155 2
+a156 2
+         logMsg("Successfully set Clock Module CTRL Register (0x%x):  WT=0x%hx\n",
+                (int)reg,(int)data,0,0,0,0);	 
+d160 1
+a160 1
+       logMsg("Failed to set Clock Module CTRL Register (0x%x):  WT=%hd\n",(int)reg,(int)data,0,0,0,0);
+d179 2
+a180 2
+           logMsg("Failed to set Clock Module 39.3 MHz PPL Register (0x%hx):  RBK=0x%hx  WT=0x%hx STATUS=%hd\n",
+                  (int)reg,(int)rd_value,(int)data,(int)status,0,0); 
+d183 2
+a184 2
+           logMsg("Successfully set Clock Module 39.3 MHz PPL Register (0x%hx): WT=0x%hx\n",
+                  (int)reg,(int)data,0,0,0,0);
+d188 2
+a189 2
+      logMsg("Failed to set Clock Module 39.3 MHz PLL Register (0x%x):  WT=0x%hx\n",
+             (int)reg,(int)data,0,0,0,0);
+d207 2
+a208 2
+          logMsg("Failed Clock Module 471.1 MHz PLL Register (0x%hx): RBK=0x%hx  WT=0x%hx  STATUS=%d\n",
+                 (int)reg,(int)rd_value,(int)data,(int)status,0,0);
+d211 2
+a212 2
+          logMsg("Successfully set Clock Module 471.1 MHz PLL Register (0x%hx):  WT=0x%hx\n",
+                 (int)reg,(int)data,0,0,0,0);
+d216 2
+a217 2
+      logMsg("Failed to set Clock Module 471.1 MHz PLL Register (0x%x):  WT=0x%hx\n",
+             (int)reg,(int)data,0,0,0,0);
+d235 2
+a236 2
+          logMsg("Failed to set Clock Module Delay CTRL Register (0x%hx): RBK=0x%hx  WT=0x%hx STATUS=%hd\n",
+                 (int)reg,(int)rd_value,(int)data,(int)status,0,0);
+d239 2
+a240 2
+          logMsg("Successfully set Clock Module Delay CTRL Register (0x%hx): WT=0x%hx\n",
+                 (int)reg,(int)data,0,0,0,0);                    
+d244 2
+a245 2
+       logMsg("Failed to set Clock Module Delay CTRL Register (0x%hx): WT=%0xhx (%hd)\n",
+               (int)reg,(int)data,(int)data,0,0,0);
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

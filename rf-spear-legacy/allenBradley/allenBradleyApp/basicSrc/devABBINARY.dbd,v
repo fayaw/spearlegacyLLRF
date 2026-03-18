@@ -1,0 +1,53 @@
+head	1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1
+	RF-SPEAR-R0-3-1:1.1
+	RF-SPEAR-R0-3-0:1.1
+	RF-SPEAR-R0-2-0:1.1
+	RF-SPEAR-R0-1-0:1.1
+	RF-SPEAR-R0-0-3:1.1
+	RF-SPEAR-R0-0-2:1.1
+	RF-SPEAR-R0-0-1:1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1
+	allenBradley-R2-2-spear0:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2011.11.11.22.40.06;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Add individual dbd files (to be used in lieu of allenBradley.dbd).
+@
+text
+@#-- AllenBradley Binary Status
+
+device(bi,AB_IO,devBiAb,  "AB-Binary Input")
+device(bi,AB_IO,devBiAb16,"AB-16 bit BI")
+device(bi,AB_IO,devBiAb32,"AB-32 bit BI")
+device(bo,AB_IO,devBoAb,  "AB-Binary Output")
+device(bo,AB_IO,devBoAb16,"AB-16 bit BO")
+device(bo,AB_IO,devBoAb32,"AB-32 bit BO")
+device(mbbi,AB_IO,devMbbiAb,  "AB-Binary Input")
+device(mbbi,AB_IO,devMbbiAb16,"AB-16 bit BI")
+device(mbbi,AB_IO,devMbbiAb32,"AB-32 bit BI")
+device(mbbiDirect,AB_IO,devMbbiDirectAb,  "AB-Binary Input")
+device(mbbiDirect,AB_IO,devMbbiDirectAb16,"AB-16 bit BI")
+device(mbbiDirect,AB_IO,devMbbiDirectAb32,"AB-32 bit BI")
+device(mbbo,AB_IO,devMbboAb,  "AB-Binary Output")
+device(mbbo,AB_IO,devMbboAb16,"AB-16 bit BO")
+device(mbbo,AB_IO,devMbboAb32,"AB-32 bit BO")
+device(mbboDirect,AB_IO,devMbboDirectAb,  "AB-Binary Output")
+device(mbboDirect,AB_IO,devMbboDirectAb16,"AB-16 bit BO")
+device(mbboDirect,AB_IO,devMbboDirectAb32,"AB-32 bit BO")
+@

@@ -1,0 +1,191 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.10.02.17.52.04;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.10.02.17.52.04;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Name      v152_u35;
+Partno    ATF16V8B-10SC;
+Date      9-22-2003;
+Revision  A;
+Designer  John Dusatko;
+Company   SLAC;
+Assembly  A;
+Location  Stanford;
+Device    G16V8as;
+
+
+/******************************************************************/
+/* Notes on device mode selection:					    		  */
+/* Device = G16V8 is supposed to let the compiler auto-select the */
+/* global OLMC mode. It doesn't appear to work here because it    */ 
+/* allow pin 19 to be used as an input, which becomes an output   */
+/* ONLY when in complex mode because its feedback is removed.	  */
+/* So it seems like the crappy CUPL compiler is doing this!	      */
+/* 									    						  */
+/* Mode control settings:						    			  */
+/* 	Mode			CUPL "Device" Value			    			  */
+/* 	Registered		G16V8MS				    					  */
+/* 	Complex		G16V8MA				    						  */
+/* 	Simple			G16V8AS				    					  */
+/* 									    						  */
+/* 									    						  */
+/* To get this damn thing to work properly, I forced the complier */
+/* to use the SIMPLE mode						    			  */
+/******************************************************************/
+
+/* */
+/* */
+/* */
+
+
+
+/*****************************************************************/
+/*		Stanford Linear Accelerator Center			   			 */
+/*			PEP-II / SPEAR3				   						 */
+/*		Low Level RF System Upgrade				   				 */
+/*									   							 */
+/* 									   							 */
+/*									   							 */
+/* This design is to modify the interrupt acknowledge (IACK)     */
+/* cycle on the Kinetic Systems V152 Slot-0 Controller           */
+/*									   							 */
+/* This device will replace U35, a 74FCT245 on the V152          */
+/*									   							 */
+/* The V152 has been modified to provide controllability of the  */
+/* type of databus transaction (D16 or D8(O) to occur. In its	 */
+/* unmodified state, the V152 only generates D8(O) cycles. Our   */
+/* SLAC LLRF VXI modules only respond to D16 IACK cycles. The    */
+/* mod creates a way to selectively enable the IACK response for */
+/* a specific IRQn level to be either D8(O) or D16.		   		 */
+/*									   							 */
+/* This device implements the selection logic for the VME/VXI	 */
+/* Data Stobe DSn* signals.						   				 */
+/*									   							 */
+/* This design basically MUXes DS1. When a D16 IACK is desired,  */
+/* the MUX is set to select DS0* to drive DS1*. When a regular   */
+/* VME D8(O) IACK is desired, the MUX is set to so that DS1*     */
+/* drives DS1* normally.						   				 */
+/*									   							 */
+/* ---> IMPORTANT NOTE!!!						   				 */
+/* Once this mode has been implemented, the V152 can be used	 */
+/* in bus MASTER mode *ONLY*.						   			 */
+/*									   							 */
+/*****************************************************************/
+
+/*****************************************************************/
+/*				CHANGE History									 */
+/*																 */
+/* 10-1-2003: JED swapped pins 3 & 4 to correct mistake			 */
+/*																 */
+/*****************************************************************/
+
+
+/*  inputs  */
+
+/* tri-state enables */
+pin 19 = g_n;
+
+/* bidir control */
+pin 1 = dir;
+
+/* VME inputs */
+pin 2 = vmas_n;
+pin 4 = vmds0_n; /* note pin order is different! */
+pin 3 = vmds1_n; /* note pin order is different! */
+pin 5 = vmwrite_n;
+
+/* spare inputs */
+pin 6 = sp1;
+pin 7 = sp2;
+pin 8 = sp3;
+
+/* Mux select ctrl from U7 FPGA */
+pin 9 = d16_isel;
+
+
+/*  outputs  */
+
+/* VXI output */
+pin 18 = vxas_n; 	/* buffered version of vmas_n */
+pin 17 = vxds1_n;	/* special MUXed version of vmds1_n */
+pin 16 = vxds0_n;	/* buffered version of vmds0_n */
+pin 15 = vxwrite_n;	/* buffered version of vmwrite_n */
+
+
+/* Misc outputs -- unconnected pins, put stuff here for fun */
+pin 14 = sout;	/* ORd sum of spare inputs */
+pin 13 = dir_out;	/* OR of g_n and dir */
+pin 12 = d8_read;	/* OR of DS1 & DS0 before MUX */
+
+/* pin 11 = d8_read;	*/ /* active when a D8(O) read is performed */
+
+
+
+/* equations */
+
+vxas_n = vmas_n;   /* buffer as_n */
+
+vxds0_n = vmds0_n;   /* buffer ds0_n */
+
+vxwrite_n = vmwrite_n;   /* buffer write_n */
+
+
+vxds1_n = ((vmds1_n & !d16_isel) # (vmds0_n & d16_isel)); /* the DS1_n MUX */
+
+ /* random logic */
+sout = sp1 # sp2 # sp3; /* doing someting with the unused signals */
+
+dir_out = dir # g_n;
+
+vme_ds16_n = vmds0_n # vmds1_n;
+
+d8_read = !vxas_n & vmwrite_n & vmds1_n & !vmds0_n;@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

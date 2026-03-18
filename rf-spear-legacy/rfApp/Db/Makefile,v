@@ -1,0 +1,258 @@
+head	1.9;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.9
+	RF-SPEAR-R0-3-1:1.9
+	RF-SPEAR-R0-3-0:1.9
+	RF-SPEAR-R0-2-0:1.9
+	RF-SPEAR-R0-1-0:1.9
+	RF-SPEAR-R0-0-3:1.9
+	RF-SPEAR-R0-0-2:1.9
+	RF-SPEAR-R0-0-1:1.9
+	RF-SPEAR-R0-0-0:1.9
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.9
+	RF-3-13-10:1.7.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.7
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.5
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.9
+date	2012.07.20.21.15.54;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2011.12.07.00.24.46;	author saa;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2010.08.24.16.07.03;	author saa;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2010.08.17.23.14.16;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2010.02.22.22.55.15;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2009.12.12.00.13.40;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2009.08.10.22.24.15;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2008.04.23.17.22.14;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.42;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.9
+log
+@Add crate information required by IOCManager displays and new ALH.
+@
+text
+@TOP=../..
+include $(TOP)/configure/CONFIG
+
+#----------------------------------------------------
+# Add databases, templates, substitutions like this
+DB += $(IOCSTATS)/db/iocAdminVxWorks.db
+DB += crat_vxi_13slot.db
+DB += rf_ab_2CV.db
+DB += rf_ab_4CV.db
+DB += rf_analog_All.db
+DB += rf_analog_4CV.db
+DB += rf_beam_her.db
+DB += rf_beam_ler.db
+DB += rf_beam_spear.db
+DB += rf_dac.db
+DB += rf_digital_All.db
+DB += rf_digital_4CV.db
+DB += rf_iqa_All.db
+DB += rf_iqa_4CV.db
+DB += rf_stn_All.db
+DB += rf_stn_2CV.db
+DB += rf_stn_4CV.db
+DB += rf_stn_4CVAll.db
+DB += rf_temp_All.db
+DB += rf_temp_4CV.db
+DB += rf_vxi_modules_All.db
+DB += rf_vxi_modules2_LAB.db
+DB += rf_vxi_modules_4CV.db
+DB += rf_vxi_modules_LAB.db
+#
+include $(TOP)/configure/RULES
+#----------------------------------------
+#  ADD RULES AFTER THIS LINE
+@
+
+
+1.8
+log
+@Not used.
+@
+text
+@d7 1
+@
+
+
+1.7
+log
+@Use IOCSTATS macro for location of iocAdmin databases.
+@
+text
+@a22 1
+DB += rf_stn_LAB.db
+@
+
+
+1.6
+log
+@Remove srf1.template and put extra lines in rfreport instead.
+@
+text
+@d6 1
+a6 1
+DB += $(EPICS_SITE)/db/iocAdmin.db
+@
+
+
+1.5
+log
+@Remove unused file.
+@
+text
+@a29 1
+DB += srf1.template
+@
+
+
+1.4
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@a15 1
+DB += rf_digital_2CV.db
+@
+
+
+1.3
+log
+@Install iocAdmin for vxWorks.
+@
+text
+@d7 25
+a31 50
+DB += VXStats.db
+DB += ab_dcm_table.db
+DB += ab_adapter.db
+DB += ab_adapter_card.db
+#
+DB += aim.db
+DB += cf2.db
+DB += clk.db
+DB += gvf.db
+DB += iqGet.db
+DB += iqa.db
+DB += rf_ab_module.db
+DB += rf_analog.db
+DB += rf_analog_log.db
+DB += rf_beam.db
+DB += rf_beam_spr.db
+DB += rf_cav.db
+DB += rf_digital_hvps.db
+DB += rf_digital_modu.db
+DB += rf_digital_plc.db
+DB += rf_fbck.db
+DB += rf_hvps.db
+DB += rf_interlock.db
+DB += rf_interlock_arc.db
+DB += rf_interlock_vxi.db
+DB += rf_iqa.db
+DB += rf_iqa_module.db
+DB += rf_iqa_scale.db
+DB += rf_klys.db
+DB += rf_rfp_fourdacs.db
+DB += rf_rfp_twodacs.db
+DB += rf_stn.db
+DB += rf_stn_cav.db
+DB += rf_sumy_2CV.db
+DB += rf_sumy_4CV.db
+DB += rf_sumy_arc_2CV.db
+DB += rf_sumy_arc_4CV.db
+DB += rf_sumy_arc_4CVAll.db
+DB += rf_sumy_cav.db
+DB += rf_sumy_circ.db
+DB += rf_sumy_hvps.db
+DB += rf_sumy_klys.db
+DB += rf_sumy_plc.db
+DB += rf_sumy_stn.db
+DB += rf_sumy_stn_pep.db
+DB += rf_sumy_stn_spr.db
+DB += rf_sumy_wg.db
+DB += rf_temp.db
+DB += rfp.db
+DB += rfp_dacs.db
+@
+
+
+1.2
+log
+@Change to 3.14 style.  Add databases from commonApp.
+@
+text
+@d6 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d2 58
+a59 2
+include $(TOP)/config/CONFIG_APP
+include $(TOP)/config/RULES_ARCHS
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

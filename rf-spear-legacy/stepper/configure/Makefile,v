@@ -1,0 +1,95 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	stepper-R1-1-spear0:1.2
+	stepper-R1-1:1.1.1.1
+	stepper:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2011.11.11.22.33.10;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2000.07.06.19.34.41;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2000.07.06.19.34.41;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Use standard 3.14 Makefile.
+@
+text
+@# Makefile
+
+TOP=..
+
+include $(TOP)/configure/CONFIG
+
+# Set the following to NO to disable consistency checking of
+# the support applications defined in $(TOP)/configure/RELEASE
+CHECK_RELEASE = YES
+
+TARGETS = $(CONFIG_TARGETS)
+CONFIGS += $(subst ../,,$(wildcard $(CONFIG_INSTALLS)))
+
+include $(TOP)/configure/RULES
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 1
+a1 3
+#
+# Makefile,v 1.1 2000/07/06 19:34:41 mrk Exp
+#
+d7 6
+a12 1
+TARGETS = CONFIG_APP_INCLUDE
+a15 8
+ifeq ($(wildcard $(TOP)/configure/RELEASE.$(EPICS_HOST_ARCH)),$(TOP)/configure/RELEASE.$(HOST_ARCH))
+CONFIG_APP_INCLUDE: $(TOP)/configure/RELEASE.$(EPICS_HOST_ARCH)
+endif
+
+CONFIG_APP_INCLUDE: $(TOP)/configure/RELEASE $(TOP)/configure/CONFIG_APP
+	$(RM) $@@
+	@@$(PERL) $(TOOLS)/makeConfigAppInclude.pl $(T_A) $@@ $(TOP)
+
+@
+
+
+1.1.1.1
+log
+@Stepper motor software from:
+http://www.aps.anl.gov/asd/people/mrk/epics/modules/mechanism/stepper/
+@
+text
+@@

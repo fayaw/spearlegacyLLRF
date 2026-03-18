@@ -1,0 +1,1212 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.1
+date	2003.01.10.23.22.42;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.42;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/* 
+** ++
+**
+**  Facility:  DSP - DSP code
+**
+**  Abstract:
+**      DSP code to implement the ripple loop
+**
+**  Author:
+**      R. Claus & P. Corredoura, SLAC/PEP-II Low Level RF Project
+**
+**  History:
+**        Sep   11, 2000 - Robert C. Sass
+**                         Add reference phase offset changeable from EPICS.
+**        Jan   13, 1998 - Robert C. Sass
+**                         Because I/QKlys are delayed ~1msec but I/Qref
+**                         are delayed only ~44usec., pipeline I/Qref so
+**                         ref and klys are ~from the same time.
+**        Nov   19, 1997 - Robert C. Sass
+**                         Many changes and cleanup.
+**        Nov    6, 1997 - Robert C. Sass
+**                         Use AmpSet for open loop.
+**        Oct    3, 1997 - Add new downloads. R. Sass
+**        Sept  23, 1997 - Change calc of Phase error to:
+**                         PhsErr = PhsRef - PhsKly
+**        April 18, 1997 - Interlaced reading Qref, Qkly, Ikly,Iref
+**        April 17, 1997 - New version started.  Further attempts at
+**                         optimization so that we can add more harmonics.
+**        October 20, 1996 - Created
+**
+**         Add slow harmonics, only one of which is processed each cycle. 
+**         For the harmonics near 60 Hz, the coefficients are very close 
+**         to 2.0 and the 16 bit word resolution so they don't work very 
+**         well even at 12 KHz. We want to run at 23 KHz so we can cancel 
+**         higher harmonics where they REALLY don't work well. By Adding 8 
+**         slow harmonics, we have an effective sampling rate of ~3 KHz and 
+**         so have reasonable coefficients to cancel harmonics up to ~1.5 KHz.
+**
+**         Nov 23, 1997 - Robert C. Sass
+**                        Fix a few slow harmonic bugs. The last bug!!
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+/*
+** Notes:
+**      In the code below, Iref, Qref, I and Q are received as 16 bit 2's
+**      complement numbers.  The arctan function doesn't care about the
+**      magnitude of these numbers and properly returns the arc tangent of Q/I
+**      in the range [-PI to PI] in q13 format.  
+**
+**      The code was written so that it is fairly easy to adjust the number
+**      of harmonics treated.  However, there are some consequences outside
+**      of the time the calculation takes.  The estimator loop accumulates
+**      its answer in q11 format which runs from [-16.0 to 16.0[.  With
+**      twelve harmonics this number may saturate for both the phase and
+**      amplitude estimators.  This is not necessarily bad since the filter
+**      manages to overcome this problem and comes out of saturation.  With
+**      the expected signal levels, the problem of saturation should not occur.
+**      Thus, note that it may be necessary to adjust the amount of head room
+**      available to the accumulator by lowering its precision when changing
+**      the number of harmonics.  The head room required is also a function
+**      of the input signal levels.
+**
+**      The four functions "Message to DSP", "Open/Close Ripple Loop", "Ripple
+**      Clock", and "Rear Panel Trigger" are implemented in hardware as both
+**      interrupts and BIO bits on the RFP board.  "Message to DSP", "Ripple
+**      Clock" and "Rear Panel Trigger" all need to be acted upon when there
+**      has been an edge indicating that they are asserted.  "Open/Close Ripple
+**      Loop" is a level sensitive signal.  Edge sensitive signals must be
+**      handled by interrupt.  Polling BIO bits can not reliably detect an
+**      edge.   So, unfortunately (since it takes more cycles) we have to
+**      handle three of the four functions by setting a flag in an ISR.
+**      Fortunately, we have enough unused registers (i, j, k) that can serve
+**      the purpose of holding a flag.  At the moment there is nothing to do
+**      for the "Rear Panel Trigger" signal, so nothing is implemented for it.
+**
+**      Debugging data can be made to appear in the ERAM by defining the DBG
+**      macro.  The overall operation of the algorithm is not affected by this,
+**      but the total time it takes clearly is.
+**
+**      Describe taking data and moving the ii file data source to whatever
+**      point you want to test.  Oh, yeah, forgot about this.  Well, gotta
+**      move on.  Maybe we'll get to this some day.  In the mean time: Sorry!
+**
+**      -- 4/18/97
+**      I really oughta reread the above notes and cut out what's no longer
+**      valid and update the rest, if necessary, but not now.
+**
+**      A word about the Reference I and Q acquisition:
+**      Since the ADC used to digitize the reference signal is slow, data
+**      won't be ready at the PDB until 7 CKOs later.  Thus the read from the
+**      pdx register will load garbage the first time and upon completion load
+**      the parallel input register with garbage from the changing data on the
+**      PDB.  Thus the next read (after 7 CKOs) will load garbage but strobe
+**      valid data into the parallel input register.  A third read is then
+**      necessary to get a hold of the valid data.
+**
+**      Interlacing of the code to read the PDB:
+**      To eliminate time wasted in a previous version of this code by doing
+**      nops between setting up PSEL lines and reading the pdx register (for
+**      Qref and Iref), I've interlaced the code in perhaps a nonobvious way.
+**      We now set up the PSEL lines to read Qref during the strobe to update
+**      the quad DACs.  Other work is then done before reading the pdx register
+**      twice more (according to the method described above) to get valid data.
+**      This other work must take at least 7 CKOs.
+**
+**      Next the klystron data is read since it is immediatly ready.  Before
+**      launching into the data phase and amplitude calculations, we set up
+**      the PSEL lines in preparation to reading Iref.  Since the data phase
+**      and amplitude calculations take more then 7 CKOs, the Iref data will
+**      be ready at the parallel port by the time they're completed.  Then
+**      we read the corresponding pdx register twice more to get valid data.
+**
+**
+*/
+
+
+#include <1610.h>
+
+#include "dspDef.h"
+#include "aucDef.h"
+#include "intDef.h"
+#include "bioDef.h"
+#include "pioDef.h"
+#include "sttDef.h"
+#include "timDef.h"
+#include "vecDef.h"
+
+#include "comDef.h"
+#include "dspCmdDef.h"
+
+.extern _sin
+.extern _cos
+.extern _atan
+.extern _lusqrt
+	
+#define RIPPLE_CLOCK                    /* Use Ripple Clock to trigger algo */
+
+/*#define DBG                           /* Turn this on to get output in ERAM */
+/*
+** A note about telling the IOC about how many harmonics we have. Because of the
+** way the cache loop is done, because the Amplitude coefficients have no DC 
+** term, there must be 4 extra zero coefficients after the fast terms. It's 
+** in the array at the end. Just tell the IOC there is one more fast term 
+** than we actually process.
+*/
+#define NUMFHARMS   34              /* Number of Fast harmonics     */
+#define NUMFHARMS4 136              /* Need 4 values for each Fast harmonic */
+#define NUMSHARMS    4              /* Number of Slow harmonics     */
+#define NUMSHARMS4  16              /* Need 4 values for each Slow harmonic */
+#define NUMSHARMSM1  (NUMSHARMS-1)  /* For 0 based decrementing */
+#define Dacs  DSP_A_DACS            /* Location of DAC registers */
+#define INT_MASK  (INT_M_MSG2DSP)
+#define NUMREFPIPE2 72              /* 2 times (I & Q) ref pipeline depth */
+                                    /* was set to 72 before 11/17/99      */
+                                    /* changed to get loop working with   */
+                                    /* the direct loop                    */
+/* Open loop values: */
+#define DAC_K_II_QQ  0xbff              /* 2.50 V */
+#define DAC_K_IQ_QI  0x800              /* 0.00 V */
+
+/* Some zeroes */
+#define ZERO   0.0!13
+#define PHS_0 ZERO
+#define AMP_0 ZERO
+
+
+/*
+** Nota Bene!!!
+** Some notes on eram. When the DSP is booted, the code is initially loaded
+** into eram starting at address 0. The DSP then loads it into its ram and
+** we're off and running. Now messages twixt the IOC and the DSP are passed
+** in this eram area but since code is initially loaded here you can't
+** initialize anything here lest it's explicitly done in the DSP code.
+** Furthermore, I needed to load a large data table into eram without
+** adding a new message to do so.
+**
+** So what I did in lusqrt.s is to assemble this table at an eram address that 
+** is beyond any code or DSP ram data. This could then get loaded with the 
+** DSP code but since they would be separated, there would be no conflict. 
+** At the present time, that value is 0x800 plus the end of this eram. 
+** current ram length is ~0x600 words so if you add 0x200 more words of code 
+** and/or data you'll have to increase that number.
+*/
+
+.rsect ".eram"
+
+	.= DSP_A_ERAM
+/*
+** Buffers for data from VXI message interface. Both Phase and Ampl coefficients
+** use the same space since they can't be simultaneously loaded. Turns out 
+** that the VXI access is so much slower than the 23KHz rate that there's no 
+** chance of conflict. The labels are here just for reference.
+*/
+Daco_IOC:          4*int              /* DAC offsets from IOC */
+Coef_IOC: NUMFHARMS4*int              /* One array for Coefficients from IOC */
+		   4*int              /* A dummy for the cache loop */
+	  NUMSHARMS4*int
+/*
+** End of data from VXI interface. Since the IOC reads some of the following 
+** data, start it at a fixed offset so we don't have to change indexes 
+** whenever we change the number of harmonics. That also means if you fiddle 
+** with any of these you must change the offsets in p2RfRfpDef.h.
+*/
+.=0x200
+IQPArSav: 4*int 0.0                   /* Place to save reference I & Q (q16)*/
+				      /* Phase (q13) & Amplitude (q15) */
+IQPAkSav: 4*int 0.0                   /* Place to save Klystron I & Q (q16),*/
+				      /* Phase (q13) & Amplitude (q15) Error*/
+
+Wsave:    4*int 0.0                   /* II, IQ, QI, QQ DAC weights */
+
+PhsErr:   int                         /* Phase Error is saved here */
+	  int                         /* Phase Error modulo PI is here */
+AmpErr:   int                         /* Amplitude Error is saved here */
+PhsOut:   int                         /* Phase Estimate is saved here */
+	  int                         /* Phase Estimate modulo PI is here */
+AmpOut:   int                         /* Amplitude Estimate is saved here */
+	  int                         /* Gain Adjusted Amplitude Estimate */
+	  int 0xdead
+
+
+.rsect ".ram"
+
+/*********** Interrupt and exception vectors ***********/
+	.= VEC_A_RESET
+start:  goto main                     /* Jump to main routine */
+
+	.= VEC_A_MSG2DSP
+	goto  Msg2Dsp                   /* 2 Message to DSP */
+
+/* 
+** We check the ins register for an interrupt in FinishUp so this ISR need 
+** do nada.
+*/
+	.= DSP_A_CODELOW
+Msg2Dsp:
+	ireturn                         /* dismiss it */
+
+/*********** Main program ************/
+main:
+	call    InitReg                 /* Initialize registers */
+	call    InitVecTbl              /* Initialize vector table */
+	call    ComInit                 /* Initialize comm. block */
+
+	ybase = YBase                   /* Refer offsets to IRAM */
+	ar1   = 2                       /* To convert from q11 to q13 */
+	ar2   = 3                       /* To convert from q10 to q13 */
+
+	ins   = 0xffff                  /* Clear all interrupts */
+
+	cbit  = BIO_ON(BIO_V_DSPRUN)    /* DSP ready to run */
+
+	r2    = Status                  /* Declare status OKAY    */
+	a0    = STT_OKAY
+	*r2   = a0
+
+	r2    = SttArg                  /* Address of status arguments */
+	a0    = 0x4DAC                  /* Declare ERAM to DACs capability */
+	*r2   = a0
+
+	r2    = DspMsg                  /* Send message to CPU */
+	a0    = CMD_K_READY             /* Indicate DSP is ready & running */
+	*r2   = a0
+	cbit  = BIO_SET(BIO_V_MSG2CPU) 
+	cbit  = BIO_CLEAR(BIO_V_MSG2CPU)  /* Interrupt CPU; we're ready */ 
+
+	r0    = Junk                    /* Don't write on something useful */
+	c1    = -NUMSHARMSM1        /* c1 is used for the slow harmonic index */
+
+/****** Top of Ripple Loop ******/
+Loop:
+	cbit  = BIO_OFF(BIO_V_GEN1)     /* 2 LED off to measure loop time */
+
+#ifdef RIPPLE_CLOCK
+/****** Look for a low to high Ripple Clock transition ******/
+RClow:  cbit  = BIO_TESTT(BIO_V_RIPCLK) /* 2 Get current state of Ripple Clock*/
+	if allt goto RClow              /* 3 If high, wait for it to go low */
+
+RChigh: cbit  = BIO_TESTT(BIO_V_RIPCLK) /* 2 Get current state of Ripple Clock*/
+	if allf goto RChigh             /* 3 If low, wait for it to go high */
+/*minT=7, maxT=12, meas'd*/
+
+#else /* RIPPLE_CLOCK */
+	goto    FinishUp                /* 2 Go handle message */
+#endif /* RIPPLE_CLOCK */
+
+Ripple:                                 /* Jump here if s/w ripple clock trig */
+	cbit  = BIO_ON(BIO_V_GEN1)      /* 2 Light LED to measure loop time */
+
+
+#ifdef RFP
+	r2    = DSP_A_UPDDACS           /* 2+12 Register to update the DACs */
+	*r2   = a0                      /* 2 Strobe it - value doesn't matter */
+#endif /* RFP */
+
+	cbit  = BIO_TESTT(BIO_V_RIPLOOP)/* 2 Check state of Ripple Loop */
+	if allt goto Closed             /* 3 Jump if Loop is closed */
+
+/****** Start of Ripple Loop with open loop values ******/
+Open:   auc   = 0xc                     /* Set auc to allow unsigned ops */
+/*      y     = DAC_K_II_QQ << 4        /*   II, QQ */
+/* Multiply II QQ by Amplitude Setpoint  */
+	a0    = *(AmpSet - YBase)       /* Amplitude Set-Point */
+	a0l   = 0
+	a0    = a0 >> 1                 /* Make Q 12 for multiply */
+	y     = a0
+	yl    = a0l
+	x     = 0x7ff0                  /* 2K-1 12 bit range */
+	p     = x * y
+	a0    = p
+	y     = 0x800
+	a0    = a0 + y
+	a0l   = 0
+	a0    = a0 << 4
+	y     = a0           /* II, QQ multiplied by AmpSet */
+/* End AmpSet multiply */
+	a0    = DAC_K_IQ_QI << 4        /*   IQ, QI */
+	r0    = DacOs                   /*   Point to DAC offsets */
+	r2    = Dacs                    /*   Point to II DAC */
+	a1    = *r0++                   /*   II offset */
+	a1    = a1 + y                  /*   IIos + II */
+	*r2++ = a1                      /*   II DAC */
+	a1    = *r0++                   /*   IQ offset */
+	a1    = a1 + a0                 /*   IQos + IQ */
+	*r2++ = a1                      /*   IQ DAC */
+	a1    = *r0++                   /*   QI offset */
+	a1    = a1 + a0                 /*   QIos + QI */
+	*r2++ = a1                      /*   QI DAC */
+	a1    = *r0                     /*   QQ offset */
+	a1    = a1 + y                  /*   QQos + QQ */
+	*r2   = a1                      /*   QQ DAC */
+
+	r1    = Wsave                   /*   Save results to ERAM */
+	r2    = Dacs                    /*   Point to DAC IO */
+	a0    = *r2++                   /*   Read II DAC */
+	*r1++ = a0
+	a0    = *r2++                   /*   Read IQ DAC */
+	*r1++ = a0
+	a0    = *r2++                   /*   Read QI DAC */
+	*r1++ = a0
+	a0    = *r2                     /*   Read QQ DAC */
+	*r1   = a0
+/*
+** Clear history except for DC Phase
+*/
+	a1    = HistEnd                 /* Last of history */
+	a0    = a1h - HistStart         /* # words to clear */
+	a1    = ZERO
+	r1    = HistStart
+ClearL:
+	*r1++ = a1                      /* zero a word */
+	a0   = a0h - 1
+	if ne goto ClearL               /* Until done */ 
+
+	auc   = 0                       /* Restore auc */
+
+	goto    FinishUp                /* 2 Finish up */
+/*** End of Open Loop Ripple Loop ***/  /* 30 */
+
+
+/****** Start of Ripple Loop with closed loop values ******/
+Closed:
+
+/* Retrieve data from parallel ports */
+/*t=31.2*/
+	r3    = IQPAk                   /* 2 Adx to save kly I,Q, Phs,Amp  */
+	*r3   = pdx0                    /* 2 Set up to read Ikly */
+	*r3++ = pdx1                    /* 2 Get Ikly from parallel port, q16 */
+				      /*   and set PSEL up to read Qkly */
+	*r3   = pdx1                    /* 2 Get Qkly from parallel port, q16 */
+/*t=44.2*/
+
+	r0    = IQPAk
+	r1    = IQPAkSav
+	a0    = *r0++                   /* Ikly */
+	*r1++ = a0
+	a0    = *r0++                   /* Qkly */
+	*r1++ = a0
+
+/* Calculate atan2 (Qkly, Ikly) */
+	a0    = *r3--                   /* 1 Recall Qkly */
+	a1    = *r3++                   /* 1 Recall Ikly */
+
+/*t=82*/
+	call _atan    /* meas'd 155 */  /* 131 PhsKly=a0=atan2(Qkly/Ikly), q13*/
+
+	a1    = a0 >> 1                 /* 1 Convert to q12 to make room for */
+				      /*   Kly Phase, Ref Phase sum        */
+	*r1++   = a1                    /* Save PhsKly in ERAM */
+
+	a1    = a1:aa1                  /* 1 Save PhsKly */
+
+/* Calculate atan2 (Qref, Iref) */
+	r1    = IQPAr                   /* 2 Adx at which ref I, Q live */
+	a1    = *r1++                   /* 1 Recall Iref */
+	a1    = a1 << 2                 /* 1 atan not good when inp near MSB */
+	a0    = *r1--                   /* 1 Recall Qref */
+	a0    = a0 << 2                 /* 1 atan not good when inp near MSB */
+
+/*t=264*/
+	call _atan  /* meas'd 156 */    /* 131 PhsRef=a0=atan2(Qref/Iref), q13*/
+
+	a0    = a0 >> 1                 /* 1 Convert to q12 to make room for */
+				      /*   Phase, Ref Phase sum         */
+	a1    = a1:aa1                  /* 1 Recall PhsKly */
+
+	r2    = IQPArSav + 2
+	*r2   = a0                      /* Save PhsRef in ERAM */
+
+	auc   = 0x7c
+	a1    = a0 - a1                 /* 1 PhsErr = PhsRef - PhsKly */
+        r2    = PhsRefOff               /* Phase Reference Offset from EPICS */
+	a0    = *r2
+	a1    = a1 - a0                 /* Adjust error by offset */
+	r2    = PhsErr
+	*r2   = a1                      /* Save PhsErr in ERAM */
+
+/* Bring phase error into range [-Pi to Pi] */
+/*t=422*/
+	y     = 3.141592654!12          /* 2 Pi */
+	a0    = a1 - y                  /* 1 Phase less than Pi? */
+	if le goto LessPi               /* 3 If not jump */
+	a1    = a0 - y                  /* 1 Subtract another Pi */
+	goto InRng                      /* 2 done */
+LessPi: a0    = a1 + y                /* 1 Phase less than -Pi? */
+	if gt goto InRng                /* 3 If not, we're done*/
+	a1    = a0 + y                  /* 1 Add another Pi */
+InRng:  a1    = a1 << 1               /* 1 Convert back to q13 */
+/*t=436*/
+				      /*   Phase Error in range [-Pi, Pi] */
+	r2    = PhsErr + 1
+	*r2   = a1                      /* Phase Error in range [-Pi, Pi] */
+
+/* Calculate AmpKly = sqrt (Ikly**2 + Qkly**2) in range [-2.0 to 2.0[ */
+	auc   = 0x7c
+		      y=*r3               /* 1 Recall Qkly (q15) */
+		      x=*r3--             /* 1 Recall Qkly (q15) */
+	    p=x*y y=*r3               /* 1 Qkly**2 (q14), Recall Ikly (q15) */
+	a0=p          x=*r3++           /* 1 Accum Qkly**2 (q15), Recall Ikly */
+		p=x*y   *r3++             /* 1 Ikly**2 (q14) */
+	a0=a0+p       *r3++=a1          /* 1 Qkly**2+Ikly**2 q14; Save PhsErr */
+/*t=446*/
+      call _lusqrt  /* sqrt with lookup tbl.  AmpKly=sqrt(Qkly**2+Ikly**2) */
+
+/* No need to calculate AmpRef since it isn't used */
+
+	*r3   = a0                      /* 1 Store AmpErr = AmpKly */
+
+	r2    = AmpErr
+	*r2++ = a0                      /* Save AmpErr in ERAM */
+
+	auc   = 0x3c                    /* 2 Disable a0l and a1l clearing */
+				      /*   and saturation */
+
+/* Phase estimator */
+/*t=548*/
+	r3    = *(PhsTs - YBase)        /* 2 Point to current Time Set */
+	r0    = *r3++                   /* 2 Pointer to out_h(Z) */
+	r1    = *r3++                   /* 2 Pointer to out_h(Z-1) */
+	r2    = *r3++                   /* 2 Pointer to out_h(Z-2) */
+	r3    = PhsI                    /* 2 in(Z-1), in(Z-2) */
+	pt    = Coefs_PhsDC             /* 2 Phase Coefficients start with DC */
+
+  /* Do DC term first */
+		      y=*r3   x=*pt++   /* 2                in(Z-1),    Coef 0*/
+		p=x*y y=*r1++ x=*pt++   /* 2       product, out_DC(Z-1),Coef 2*/
+	a0=p    p=x*y   *r2++           /* 1 Save, product, out_DC(Z-2)       */
+	a0=a0+p                         /* 1 Sum */
+/*t=570*/
+
+/* Bring DC compponent of phase estimator into range [-Pi to Pi] */
+/*t=566*/
+	y     = 3.141592654!11          /* 2 Pi */
+PosDc:  a1    = a0 - y                /* 1 Subtract 1st Pi, Phs > than Pi? */
+	if le goto NegDc                /* 3 If not jump */
+	a0    = a1 - y                  /* 2 Subtract second Pi */
+	goto DoneDc                     /* 2 Done */
+NegDc:  a1    = a0 + y                /* 1 Add first Pi, Phase <= than -Pi? */
+	if gt goto DoneDc               /* 3 If not, we're done*/
+	a0    = a1 + y                  /* 2 Add second Pi */
+DoneDc:
+	a0    = a0 << ar1               /* 1 Convert to q13 */
+	*r0++ = a0                      /* 2 Save out_DC(Z) in q13 format */
+	a1 = a0                         /* DC Q13 to a1  */
+	a1 = a1:aa1                     /* Save in aa1 for after cache loop */
+	a1 = 0                          /* Use to accum harmonic terms */
+/*t=584*/
+
+  /* Now for the Fast harmonic terms */
+  /* The first two instructions are outside of the cache loop so that they */
+  /* can also be inserted at the end of the loop where they get executed */
+  /* for free.  If they were in the loop, they would cost an additional two */
+  /* cycles per cached iteration. */
+	/* Be careful with the precision issues when changing NUMFHARMS here! */
+	/* in(Z-1), in(Z-2) are q13. Coefs 0,1 are q14 ==> product is q11 */
+	/* out_h(Z-1), out_h(Z-2) are q13.  Coefs 2,3 are q14 ==> prod is q11 */
+/*t=582*/
+	    y=*r3++ x=*pt++           /* 2              in(Z-1),    Coef 0 */
+      p=x*y y=*r3-- x=*pt++           /* 2        prod, in(Z-2),    Coef 1 */
+	do NUMFHARMS {                  /* 1 Estimate Phase */
+	a0=p    p=x*y y=*r1++ x=*pt++   /* 2/1 Acc, prod, out_h(Z-1), Coef 2 */
+	a0=a0+p p=x*y y=*r2++ x=*pt++   /* 2/1 Sum, prod, out_h(Z-2), Coef 3 */
+	a0=a0+p p=x*y y=*r3++ x=*pt++   /* 2/1 Sum, prod  in(Z-1),    Coef 0 */
+	a0=a0+p p=x*y y=*r3-- x=*pt++   /* 2/1 Sum, prod, in(Z-2),    Coef 1 */
+	a0    = a0 << ar1               /* 1 Convert to q13 */
+	a1    = a1 + a0                 /* 1 Accumulate (q13) */
+	*r0++ = a0                      /* 2 Save out_h(Z) (q13) */
+	}
+	a0  = a1 >> 3                   /* Scale harm term Q13 to 1/2 Radian */
+	a0  = a0:aa0                    /* Save in aa0 */
+/*
+** Do next slow harmonic Phase term. At this point aa0 has result of the fast
+** harmonics and aa1 has the DC term.
+*/
+	r3    = SPhsTp                  /* Pointer to current Phase pointers */
+	r0    = *r3++                   /* Pointer to out_h(Z)  */
+	r1    = *r3++                   /* Pointer to out_h(Z-1) */
+	r2    = *r3++                   /* Pointer to out_h(Z-2) */
+	pt    = *r3++                   /* Pointer to current coefficient set */
+	r3    = *r3                     /* Reload in(Z-1), in(Z-2) */
+		y=*r3++ x=*pt++         /*                in(Z-1),    Coef 0 */
+		p=x*y y=*r3++ x=*pt++   /*          prod, in(Z-2),    Coef 1 */
+	a0=p    p=x*y y=*r1++ x=*pt++   /* 2/1 Acc, prod, out_h(Z-1), Coef 2 */
+	a0=a0+p p=x*y y=*r2   x=*pt++   /* 2/1 Sum, prod, out_h(Z-2), Coef 3 */
+	a0=a0+p p=x*y
+	a0=a0+p
+	a0    = a0 << ar1               /* 1 Convert to q13 */
+	*r0++ = a0                      /* 2 Save out_h(Z) (q13) */
+	*r2++ = a0                      /* out_h(Z-2) becomes Z next cycle */
+/*
+** Update pointers to next harmonic for next pass
+*/
+	a0     = r3                      /* Save Z-1, Z-2 pointer */
+	r3    = SPhsTp                  /* Pointer to current Phase pointers */
+	*r3++ = r0                      /* out_h(Z)   */
+	*r3++ = r1                      /* out_h(Z-1) */
+	*r3++ = r2                      /* out_h(Z-2) */
+	*r3++ = pt                      /* coefficients_h */
+	*r3   = a0                      /* Z-1, Z-2 pointer */
+/*
+** Shift Z-1 to Z-2 and load new Z-1
+*/
+	y   = 2
+	a0   = a0 - y                  /* Point to Z-1 */
+	r3   = a0
+	a0   = *r3++                   /* Get Z-1 */
+	*r3-- = a0                     /* Save in Z-2, point Z-1 */
+	r0   =  IQPAk + 2              /* Point to Phs in */
+	a0  = *r0
+	*r3 = a0                       /* Save new Z-1 */
+/*
+** Now sum up all the slow outputs. Can't use the cache loop here 'cause
+** it's re-executed for the amplitude term.
+*/
+	a0   = a0 - a0
+	r3   = *(SPhsTs - YBase)        /* Point to phase outputs */
+	r3   = *r3                      /* Point to output data */
+	c0   = -NUMSHARMSM1
+SloPhsL:
+	p    = *r3++
+	a0   = a0 + p
+	if c0lt goto SloPhsL            /* Add up the slow phase terms */
+	a0    = a0 >> 3                 /* Scale to 1/2 Radian for sum */
+/*t=752*/
+/*
+** Now sum up the fast, slow and DC terms.
+*/
+	a1  = a1:aa1                    /* Retrieve DC term Q13 */
+	a1  = a1 + a0                   /* Add the slow harmonic */
+	a0  = a0:aa0                    /* Retrieve the fast harmonic sum */
+	a1  = a1 + a0                   /* Add it in */
+	r1    = PhsOut                  /* Save Output Phase in ERAM Q13 */
+	*r1++ = a1
+
+/* Bring phase (q10 => [-32.0,32.0[) into range -Pi to Pi => 5 iterations max */
+/*t=750*/
+/*
+** We think this is unnecessary but leave it ifed out in case we need to
+** restore it.
+*/
+#if 0
+	y     = 3.141592654!13          /* 2 Pi */
+Pos:    a0    = a1 - y                /* 1 Subtract 1st Pi, Phase > than Pi?*/
+	if le goto Neg                  /* 3 If not jump */
+	a1    = a0 - y                  /* 2 Subtract second Pi */
+	goto Pos                        /* 2 Go see if it's okay now */
+Neg:    a0    = a1 + y                /* 2 Add 1st Pi, Phase <= than -Pi? */
+	if gt goto Done                 /* 3 If not, we're done*/
+	a1    = a0 + y                  /* 2 Add second Pi */
+	goto Neg                        /* 2 Go see if it's okay now */
+Done:
+				 /* 10 if no change, 28 if worst case */
+#endif
+/*t=762*/
+
+	*r1   = a1                      /* Save Output Phase mod Pi in ERAM */
+	a1    = a1:aa1                  /* 1 Save Output Phase in aa1 */
+
+/* Amplitude estimator */
+	r3    = *(AmpTs - YBase)        /* 2 Point to current Time Set */
+	r0    = *r3++                   /* 2 Pointer to out_h(Z) */
+	r1    = *r3++                   /* 2 Pointer to out_h(Z-1) */
+	r2    = *r3++                   /* 2 Pointer to out_h(Z-2) */
+	r3    = AmpI                    /* 2 in(Z-1), in(Z-2) */
+	pt    = Coefs_AmpF              /* 2 Amplitude Coefficients */
+	a1    = a1 - a1                 /* 1 Clr accumulated Output Amplitude */
+
+
+	/* in(Z-1), in(Z-2) are q13. Coefs 0,1 are q14 ==> product is q11 */
+	/* out_h(Z-1), out_h(Z-2) are q13.  Coefs 2,3 are q14 ==> prod is q11 */
+	    y=*r3++ x=*pt++           /* 2              in(Z-1),    Coef 0 */
+      p=x*y y=*r3-- x=*pt++           /* 2        prod, in(Z-2),    Coef 1 */
+/*t=780*/
+	redo  NUMFHARMS
+/*t=942*/
+/*
+** Now do the slow harmonic amplitude. a1 has the sum of the fast harmonics.
+*/
+	r3    = SAmpTp                  /* Pointer to current pointers */
+	r0    = *r3++                   /* Pointer to out_h(Z) */
+	r1    = *r3++                   /* Pointer to out_h(Z-1) */
+	r2    = *r3++                   /* Pointer to out_h(Z-2) */
+	pt    = *r3++                   /* Pointer to current coefficient set */
+	r3    = *r3                     /* Reload in(Z-1), in(Z-2) */
+	      y=*r3++ x=*pt++         /*                in(Z-1),    Coef 0 */
+	      p=x*y y=*r3++ x=*pt++   /*          prod, in(Z-2),    Coef 1 */
+	a0=p    p=x*y y=*r1++ x=*pt++   /* 2/1 Acc, prod, out_h(Z-1), Coef 2 */
+	a0=a0+p p=x*y y=*r2   x=*pt++   /* 2/1 Sum, prod, out_h(Z-2), Coef 3 */
+	a0=a0+p p=x*y
+	a0=a0+p
+	a0    = a0 << ar1               /* 1 Convert to q13 */
+	*r0++ = a0                      /* 2 Save out_h(Z) (q13) */
+	*r2++ = a0                      /* out_h(Z-2) becomes Z next cycle */
+/*
+** Update pointers to next harmonic for next pass
+*/
+	a0     = r3                      /* Save Z-1, Z-2 pointer */
+	r3    = SAmpTp                  /* Pointer to current pointers */
+	*r3++ = r0                      /* out_h(Z)   */
+	*r3++ = r1                      /* out_h(Z-1) */
+	*r3++ = r2                      /* out_h(Z-2) */
+	*r3++ = pt                      /* coefficients_h */
+	*r3   = a0                      /* Z-1, Z-2 pointer */
+/*
+** Shift Z-1 to Z-2 and load new Z-1
+*/
+	y    = 2
+	a0   = a0 - y                  /* Point to Z-1 */
+	r3   = a0
+	a0   = *r3++                   /* Get Z-1 */
+	*r3-- = a0                     /* Save in Z-2, point Z-1 */
+	r0   =  IQPAk + 3              /* Point to Amp in */
+	a0  = *r0
+	*r3 = a0                       /* Save new Z-1 */
+/*
+** Now sum up all the slow outputs.
+*/
+	a0   = a0 - a0
+	r3   = *(SAmpTs - YBase)        /* Point to Amp outputs */
+	r3   = *r3                      /* Point to output data */
+	do NUMSHARMS {
+	    p    = *r3++
+	    a0   = a0 + p
+	}       
+	a1    = a1 + a0                 /* Add the slow harmonic term */      
+	r0    = AmpOut                  /* Save Output Amplitude in ERAM */
+	*r0++ = a1
+
+	a0    = *(AmpSet - YBase)       /* 2 Amplitude Set-Point */
+	a1    = a1 + a0                 /* 1 Total Amplitude Output (q13) */
+	*r0   = a1                      /* Save Adjusted Amplitude in ERAM */
+
+	a1    = a1:aa1                  /* 1 Retrieve PhsOut and save AmpOut */
+
+/* Weight calculations */
+/*t=944*/
+	c0    = 0                       /* 2 Clear change sign flag */
+	y     = 1.570596327!13          /* 2 Pi/2 */
+	a0    = a1 - y                  /* 1 Subtract 1st Pi/2, Is phs > Pi/2?*/
+	if le  goto okay1               /* 3 Okay1, if not */
+	a1    = a0 - y                  /* 1 Sub 2nd Pi/2, range: -Pi/2, Pi/2*/
+	c0    = -2                      /* 2 Remember to change sign... */
+	goto okay                       /* 2 ... 2 to compensate for c0++ */
+
+okay1:  a0    = a1 + y                /* 1 Add 1st Pi/2, Is phs > Pi/2?*/
+	if gt  goto okay                /* 3 Okay2, if not */
+	a1    = a0 + y                  /* 1 Add 2nd Pi/2, range: -Pi/2, Pi/2 */
+	c0    = -2                      /* 2 Remember to change sign... */
+				      /* 14 ... 2 to compensate for c0++ */
+
+okay:                                 /* 12 if no change */
+	a1    = a1 << 1                 /* 1 Convert to q14 */
+
+	call _cos /* meas'd 44 */       /* 40 a0 = cos (a1=PhsOut) */
+	if c0lt  a0 = -a0               /* 1 Change sign (test does postinc!) */
+/*t=1002*/
+
+	a0    = a0:aa0                  /* 1 Save cos (PhsOut) */
+	call _sin /* meas'd 44 */       /* 38 a0 = sin (a1=PhsOut) */
+	if c0lt  a0 = -a0               /* 1 Change sign (test does postinc!) */
+/*t=1048*/
+
+	/* AmpOut is Q14 so all Q numbers following are wrong */
+/* Calculate II, IQ, QI and QQ from Phase & Amplitude and scale for DACs */
+	auc   = 0x7c                    /* 2 Be sure to get all bits */
+	a1    = a1:aa1                  /* 1 Retrieve AmpOut; q13 [0.0,4.0] */
+	a1    = a1                      /* Set cond codes */
+	if mi goto orem
+	y     = 0x1fff
+	a1    = a1 & y
+	goto  DoneT
+orem:
+	y     = 0xe000
+	a1    = a1 | y
+DoneT:
+	y     = a1                      /* 2 Output Amplitude */
+	x     = a0                      /* 2 sin (PhsOut) (q14) */
+	      p=x*y                     /* 1 Calculate prod q11 [-16.0,16.0] */
+	a0    = a0:aa0                  /* 1 Retrieve cos (PhsOut) (q14) */
+	x     = a0                      /* 2 cos (PhsOut) */
+	a0=p  p=x*y                     /* 1 Calculate prod q11 [-16.0,16.0] */
+	a1=p                            /* 1 AmpOut * cos (PhsOut) */
+	a0    = a0h + 0x800             /* 2 Convert IQ, QI to offset binary */
+	a1    = a1h + 0x800             /* 2 Convert II, QQ to offset binary */
+				      /* a0, a1 range [0.0 to 128.0] */
+	a0    = a0 << 4                 /* 1 Put result in upper 12 bits */
+	a1    = a1 << 4                 /* 1 Put result in upper 12 bits */
+/*t=1068*/
+
+/* Write output to the DACs, but don't update them yet */
+/*t=1066*/
+	y     = a0                      /* 2 Prepare to reuse a0 */
+	r2    = Dacs                    /* 2 Point to II */
+	r0    = DacOs                   /* 2 Location of DAC offsets */
+	a0    = *r0++                   /* 2 II offset */
+	a0    = a0 + a1                 /* 1 AmpOut * cos (PhsOut) + IIos */
+	*r2++ = a0                      /* 2+12 Write to DAC channel */
+	a0    = *r0++                   /* 2 IQ offset */
+	a0    = a0 + y                  /* 1 AmpOut * sin (PhsOut) + IQos */
+	*r2++ = a0                      /* 2+12 Write to DAC channel */
+	a0    = *r0++                   /* 2 QI offset */
+	a0    = a0 + y                  /* 1 AmpOut * sin (PhsOut) + QIos */
+	*r2++ = a0                      /* 2+12 Write to DAC channel */
+	a0    = *r0++                   /* 2 QQ offset */
+	a0    = a0 + a1                 /* 1 AmpOut * cos (PhsOut) + QQos */
+	*r2   = a0                      /* 2+12 Write to DAC channel */
+/*t=1142*/
+
+#ifdef DBG
+	r1    = Wsave                   /*   Save results to ERAM */
+	r2    = Dacs                    /*   Point to DAC IO */
+	a0    = *r2++                   /*   Read II DAC */
+	*r1++ = a0
+	a0    = *r2++                   /*   Read IQ DAC */
+	*r1++ = a0
+	a0    = *r2++                   /*   Read QI DAC */
+	*r1++ = a0
+	a0    = *r2                     /*   Read QQ DAC */
+	*r1   = a0
+#endif /* DBG */
+
+/* Update outs for fast harmonics */
+/*t=1138*/
+	auc   = 0                       /* 2 Restore auc */
+	a0    = *(PhsTs - YBase)        /* 2 Current Time Set Pointer */
+	a0    = a0h + 6                 /* 2 Point to next Time Set */
+	y     = PAstart                 /* 2 First in list*/
+	a0h - PAend                     /* 2 Set condition codes*/
+	if eq  a0 = y                   /* 1 Reset to beginning of list */
+	*(PhsTs - YBase) = a0           /* 2 Save next Time Set ptr, phases */
+	a0    = a0h + 3                 /* 2 Point to Amplitudes */
+	*(AmpTs - YBase) = a0           /* 2 Save next Time Set ptr, amps */
+/*t=1158*/
+
+/*
+** Check if we need to update slow pointers. Swap pointers to next set if so.
+*/
+      if c1lt goto Updateins          /* If need slow harmonic pointer update */
+	c1    = -NUMSHARMSM1            /* Reset slow harmonic counter */
+	a0    = *(SPhsTs - YBase)       /* 2 Current Time Set Pointer */
+	a0    = a0h + 10                /* 2 Point to next Time Set */
+	y     = SPAstart                /* 2 First in list*/
+	a0h - SPAend                    /* 2 Set condition codes*/
+	if eq  a0 = y                   /* 1 Reset to beginning of list */
+	*(SPhsTs - YBase) = a0          /* 2 Save next Time Set ptr, phases */
+	a0    = a0h + 5                 /* 2 Point to Amplitudes */
+	*(SAmpTs - YBase) = a0          /* 2 Save next Time Set ptr, amps */
+/*
+** Now reinit the 10 pointers; out Z, Z-1, Z-2 & coefs for phase and amplitude.
+*/
+      r2   = SPhsTp                   /* Destination */
+      r3   = *(SPhsTs - YBase)        /* Source */
+      do 10 {
+	  a0    = *r3++
+	  *r2++ = a0
+      }
+/* Update ins */
+Updateins:
+	r2    = IQPAk + 3               /* 2 Point to amp in(Z) */
+	r3    = AmpI                    /* 2 Point to amp in(Z-1) */
+	y     = *r3++                   /* 1 Get amp in(Z-1) */
+	*r3-- = y                       /* 2 Save amp in(Z-1) as in(Z-2) */
+	y     = *r2--                   /* 1 Get amp in(Z) */
+	*r3-- = y                       /* 2 Save amp in(Z)   as in(Z-1) */
+	*r3--                           /* 1 Point to phase in(Z-1) */
+	y     = *r3++                   /* 1 Get phase in(Z-1) */
+	*r3-- = y                       /* 2 Save phase in(Z-1) as in(Z-2) */
+	y     = *r2                     /* 1 Get phs in(Z)*/
+	*r3   = y                       /* 2 Save phase in(Z)   as in(Z-1) */
+/*t=1184*/
+
+	auc   = 0x7c                    /* 2 Don't allow saturation */
+/*
+** Update IRef & QRef. Put oldest values into working IQPAr and IQPArSav (Eram).
+*/
+	r0    = *(RefPipePtr - YBase)   /* Current (oldest) pipeline ptr */
+	r1    = IQPAr                   /* 2 Adx to save ref I,Q */
+	r2    = IQPArSav
+	a0    = *r0++                   /* Use oldest IRef this interation */
+	*r1++ = a0
+	*r2++ = a0
+	a0    = *r0--                   /* Use oldest QRef; back to IRef */
+	*r1++ = a0
+	*r2++ = a0
+/*
+** r0 now points to the oldest values which we overwrite.
+*/
+	*r0   = pdx2                    /* 2 Garf loaded while PDB not stable */
+	nop                             /*  Wait seven cycles for valid data */
+	nop
+	nop
+	nop
+	nop
+	nop
+	*r0   = pdx2                    /* 2 Pump valid Iref into pipeline */
+	a0    = pdx3                    /* 2 Read valid Iref, set up for Qref */
+	y     = 0x8000                  /* 2 */
+	a0    = a0 - y                  /* 1 Convert from offset binary */
+	*r0++ = a0                      /* 2 store */
+	nop                             /* 1 Wait for data to be valid */
+	*r0   = pdx3                    /* 2 Pump valid Qref into pipeline */
+	a0    = pdx0                    /* 2 Get Qref from parallel port, q16 */
+	a0    = a0 - y                  /* 1 Convert from offset binary */
+	*r0++ = a0                      /* 2 store */
+/*
+** Check for wrap and update pointer.
+*/
+	a0   = r0                      /* Get pipe ptr */
+	y    = RefPipeStart            /* In case we wrap */
+	a0h - RefPipeEnd
+	if eq a0 = y                   /* Reset ptr to start */
+	*(RefPipePtr - YBase) = a0     /* Save new pipe ptr */
+
+/****** Check for and handle messages ******/
+FinishUp:
+	auc   = 0               /* 2 Reset auc */
+	a0    = ins             /* 2 Look for a pending message int */
+	a0h & INT_MASK          /* 2 Set condition codes */
+	if eq goto Next1        /* 3 If none, go check next signal */
+	ins   = INT_MASK        /* Reset the interrupt */
+
+	r2    = CpuMsg          /* Point to cmd message from CPU */
+	a0    = *r2++           /* Get cmd and increment to arg */
+	a0h - CMD_K_AMSP        /* Load new Amplitude Setpoint? */
+	if ne goto Cphsg        /* Nope, check phase gain */
+	a0    = *r2             /* Get CpuArg; amp setpoint value  */
+	*(AmpSet - YBase) = a0  /* Save new Amplitude Setpoint value */
+	goto Next1              /* Can do only one cmd at a time */
+Cphsg:  a0h - CMD_K_PHSG        /* Load new DC Phase Gain? */
+	if ne goto Cdaco        /* No, check dac offsets */
+	a0    = *r2             /* Get CpuArg phase gain */
+	r0    = Coefs_PhsDC     /* Get addr of DC Phase gain */
+	*r0   = a0              /* Save new Phase Gain */
+	goto Next1              /* Can do only one cmd at a time */
+/*
+** From here on, CpuArg is an offset to the data, not the single data word.
+*/
+Cdaco:  a0h - CMD_K_DACO      /* Load new DAC offsets? */
+	if ne goto Cpharm       /* No, check phase harmonics */
+	a0    = *r2             /* Get CpuArg; ERAM address */
+	r2    = a0
+	r0    = DacOs           /*   Address of DAC offsets */
+
+	auc   = 0x7c            /* 2 Be sure to get all bits */
+
+	a0    = *r2++           /*   II offset */
+	*r0++ = a0              /*   Store */
+	a0    = *r2++           /*   IQ offset */
+	*r0++ = a0              /*   Store */
+	a0    = *r2++           /*   QI offset */
+	*r0++ = a0              /*   Store */
+	a0    = *r2++           /*   QQ offset */
+	*r0++ = a0              /*   Store */
+
+	auc   = 0               /*   Reset auc */
+	goto Next1
+Cpharm: a0h - CMD_K_PHARM     /* Load new Phase harmonic coefficients? */
+	if ne goto Caharm
+	a0    = *r2++           /* Get CpuArg; offset and inc to comLen */
+	r1    = a0              /* Start of ERAM data from CPU */
+	a0    = *r2             /* comLen = # of harmonics */
+	a0    = -a0             /* Negate for loop test */
+	c0    = a0              /* Counter for loop */
+	r0    = Coefs_PhsF      /* Address of all phase harmonic coefficients */
+	if c0lt goto mpharm     /* Do initial post increment */
+mpharm:                         /* 4 numbers/harmonic */
+	a0    = *r1++
+	*r0++ = a0
+	a0    = *r1++
+	*r0++ = a0
+	a0    = *r1++
+	*r0++ = a0
+	a0    = *r1++
+	*r0++ = a0
+	if c0lt goto mpharm     /* Test does post increment */
+	goto Next1
+Caharm: a0h - CMD_K_AHARM     /* Load new Amplitude harmonic coefficients? */
+	if ne goto Cphso
+	a0    = *r2++           /* Get CpuArg; offset and inc to comLen */
+	r1    = a0              /* Start of ERAM data from CPU */
+	a0    = *r2             /* comLen = # of harmonics */
+	a0    = -a0             /* Negate for loop test */
+	c0    = a0              /* Counter for loop */
+	r0    = Coefs_AmpF      /* Address of all Amplitude coefficients */
+	if c0lt goto maharm     /* Do initial post increment */
+maharm:                         /* 4 numbers/harmonic */
+	 a0    = *r1++
+	*r0++ = a0
+	 a0    = *r1++
+	*r0++ = a0
+	 a0    = *r1++
+	*r0++ = a0
+	 a0    = *r1++
+	*r0++ = a0
+	if c0lt goto maharm
+	goto Next1
+Cphso:				/* Load new phase reference offset? */
+	 a0h - CMD_K_PHSO
+	 if ne goto Ctest
+	 a0    = *r2            /* Get CpuArg phase ref offset */
+	 r0    = PhsRefOff      /* Address of our copy */
+	*r0    = a0             /* Storeit */
+	goto Next1	
+Ctest:   a0h - CMD_K_TEST       /*   For testing w/o Ripple Clock */
+	if eq goto Ripple
+
+	/* If it's an unrecognized message, ignore it. */
+
+Next1:
+/*t=1260, no actions*/
+	goto Loop                       /* 2 */
+					/* 30+6+327+69+NH*9+19+NH*9+4+22+40+ */
+					/* + 2+38+18+14+2+15+17+4 */
+					/* = 623+NH*18 */
+					/* = 15.575 + NH*0.45 uS */
+					/* = 20.975 uS for NH=12 */
+					/* ==> ~ 47 KHz maximum data rate */
+					/* ==> ~ NH=65 at 20 KHz data rate */
+/*t=1260 = 31.5 total - with Ikly, Qkly, Iref and Qref being written to ERAM */
+/*t=1172 = 29.3 total - without ERAM access */
+
+
+/****** Routine to initialize registers ******/
+InitReg:
+	inc  = DSP_K_INTINIT            /* Disable interrupts */
+	auc  = DSP_K_AUCINIT            /* Set up Arithmetic Unit */
+	mwait= DSP_K_MEMWAIT            /* Number of wait states for ERAM */
+	pioc = DSP_K_PIOINIT            /* Set up PIO */
+	sbit = DSP_K_BIODIR             /* Set up BIO bit directions */
+	cbit = DSP_K_BIOINIT            /* Set up BIO outputs */
+
+	timer0 = NULL                   /* Timer count-down register */
+	timerc = DSP_K_TIMINIT          /* Timer is off */
+
+	y      = 0
+	yl     = 0                      /* Don't trip on upper bits */
+	p      = 0
+	pl     = 0                      /* Don't trip on upper bits */
+	a0     = 0
+	a0l    = 0                      /* Don't trip on upper bits */
+	a1     = 0
+	a1l    = 0                      /* Don't trip on upper bits */
+
+	return
+
+
+/****** Local variables and constants ******/
+.rsect ".ram"
+
+DacOs: int  (119 << 4)               /* II DAC offset */
+       int  (121 << 4)               /* IQ DAC offset */
+       int  (114 << 4)               /* QI DAC offset */
+       int  (114 << 4)               /* QQ DAC offset */
+
+PhsI:  int 0.0!13, 0.0!13            /* Phase     in(Z-1), in(Z-2) */
+AmpI:  int 0.0!13, 0.0!13            /* Amplitude in(Z-1), in(Z-2) */
+
+	.= (. + 0x1f) & 0xffe0         /* Keeps lower 5 bits of ybase 0 */
+YBase:
+/* ******** Begin YBase struct ************** */
+/* This struct must be less than 32 words in size in order for its elements */
+/* to be addressable with the direct addressing mode.  Not all of the */
+/* elements are used with direct addressing, however */
+
+AmpSet: int 0.5!13                      /* Amplitude set point [-1.0, 1.0] */
+
+/* Begin Struct */                      /* Fields must remain contiguous */
+IQPAk:  int 0.0!15, 0.0!15, 0.0!13, 0.0!13 /* Input Ikly, Qkly, PhsErr, AmpErr*/
+IQPAr:  int 0.0!15, 0.0!15                 /* Input Iref, Qref */
+PhsRef: int 0.0!12                      /* Reference Phase in range [-PI, PI] */
+AmpRef: int 0.0!15                      /* Reference Ampl  in range [-1,  1] */
+/* End Struct */
+
+PhsTs:  int PhsTs0                      /* Fast Time Set pointers */
+AmpTs:  int AmpTs0                      /* Start with Time Set 0 */
+
+/*
+** These are current pointers to the slow harmonic time set on which we're
+** currently working.
+*/
+SPhsTs:  int SPhsTs0                   /* Init Slow Time Set Phs pointer */
+SAmpTs:  int SAmpTs0                   /* Init Slow Time Set Amp pointer */
+/*
+** Initialize all the per-iteration pointers. These must me contiguous.
+*/
+SPhsTp: int SPhsO_0
+	int SPhsO_1
+	int SPhsO_2
+	int Coefs_PhsS
+	int SPhsZ12 
+SAmpTp: int SAmpO_0
+	int SAmpO_1
+	int SAmpO_2
+	int Coefs_AmpS
+	int SAmpZ12
+/*
+** Reference pipeline pointer.
+*/ 
+RefPipePtr: int RefPipeStart  /* Pointer to Current reference values in pipe */
+
+/* *********** End YBase struct ************* */
+
+/* Begin Fast harmonic time set pointers. Fields must remain contiguous */
+PAstart:
+
+PhsTs0: int PhsO_0, PhsO_1, PhsO_2      /* Time Set 0 */
+AmpTs0: int AmpO_0, AmpO_1, AmpO_2
+
+PhsTs1: int PhsO_2, PhsO_0, PhsO_1      /* Time Set 1 */
+AmpTs1: int AmpO_2, AmpO_0, AmpO_1
+
+PhsTs2: int PhsO_1, PhsO_2, PhsO_0      /* Time Set 2 */
+AmpTs2: int AmpO_1, AmpO_2, AmpO_0
+
+PAend:                                  /* End of fast list marker */
+/* End Struct */
+
+
+/* Begin Slow harmonic time set pointers. Fields must remain contiguous */
+SPAstart:
+
+SPhsTs0: int SPhsO_0, SPhsO_1, SPhsO_2, Coefs_PhsS, SPhsZ12 /* Time Set 0 */
+SAmpTs0: int SAmpO_0, SAmpO_1, SAmpO_2, Coefs_AmpS, SAmpZ12
+
+SPhsTs1: int SPhsO_2, SPhsO_0, SPhsO_1, Coefs_PhsS, SPhsZ12  /* Time Set 1 */
+SAmpTs1: int SAmpO_2, SAmpO_0, SAmpO_1, Coefs_AmpS, SAmpZ12
+
+SPhsTs2: int SPhsO_1, SPhsO_2, SPhsO_0, Coefs_PhsS, SPhsZ12  /* Time Set 2 */
+SAmpTs2: int SAmpO_1, SAmpO_2, SAmpO_0, Coefs_AmpS, SAmpZ12
+
+SPAend:                                  /* End of slow list marker */
+/* End Struct */
+
+/*
+** History arrays for fast and slow harmonics.
+*/
+
+PhsO_0:           int ZERO              /* out_DC(ts0) */
+HistStart:
+	NUMFHARMS*int ZERO              /* out_h(ts0) */
+PhsO_1:           int PHS_0             /* out_DC(ts1) */
+	NUMFHARMS*int PHS_0             /* out_h(ts1) */
+PhsO_2:           int PHS_0             /* out_DC(ts2) */
+	NUMFHARMS*int PHS_0             /* out_h(ts2) */
+
+AmpO_0: NUMFHARMS*int AMP_0            /* out_h(ts0) */
+AmpO_1: NUMFHARMS*int AMP_0            /* out_h(ts1) */
+AmpO_2: NUMFHARMS*int AMP_0            /* out_h(ts2) */
+
+/*
+** The slow ones.
+*/
+
+SPhsO_0: NUMSHARMS*int ZERO            /* out_h(ts0) */
+SPhsO_1: NUMSHARMS*int PHS_0           /* out_h(ts1) */
+SPhsO_2: NUMSHARMS*int PHS_0           /* out_h(ts2) */
+
+SAmpO_0: NUMSHARMS*int AMP_0           /* out_h(ts0) */
+SAmpO_1: NUMSHARMS*int AMP_0           /* out_h(ts1) */
+SAmpO_2: NUMSHARMS*int AMP_0           /* out_h(ts2) */
+
+SPhsZ12: NUMSHARMS*int ZERO            /* in z-1 z-2 */ 
+	 NUMSHARMS*int ZERO
+SAmpZ12: NUMSHARMS*int ZERO
+	 NUMSHARMS*int ZERO
+HistEnd:
+
+/* Phase reference offset and coefficients */
+	
+PhsRefOff:   int   0.0!12     /* Reference Phase Offset */
+Coefs_PhsDC: int   0.0005,    1.0 /*  DC Phase gain */
+Coefs_PhsF:                   /* Fast 23KHz Phase coefficients */
+      NUMFHARMS4*int ZERO
+	       4*int ZERO     /* Extra ZERO set to keep cache loop happy */
+Coefs_PhsS:                   /* Slow 23KHz/NUMSHARMS Phase coefficients */
+      NUMSHARMS4*int ZERO
+
+/* Amplitude coefficients */
+Coefs_AmpF:                   /* Fast 23KHz Amplitude coefficients */ 
+      NUMFHARMS4*int ZERO
+	       4*int ZERO     /* Extra ZERO set to keep cache loop happy */
+Coefs_AmpS:                   /* Slow 23KHz/NUMSHARMS Amplitude coefficients */ 
+      NUMSHARMS4*int ZERO
+/* I/Q reference pipeline */
+RefPipeStart:
+      NUMREFPIPE2*int ZERO
+RefPipeEnd:
+Junk:   int
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

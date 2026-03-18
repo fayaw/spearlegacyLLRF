@@ -1,0 +1,820 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.2.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.3
+date	2011.12.07.00.53.40;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.05.14.23.58.15;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Changes to get rid of *Msgs.c files.  Also changes for 3.14.11 for bus.c.
+@
+text
+@/*
+** ++
+**
+**  Facility:  SGL - Signaling library
+**
+**  Abstract:
+**      This file will contain a library of routines for signalling conditions.
+**
+**  !!!!!  I've kludged around in here.  The problem is apparently that
+**         stdout and stderr are pointer into the TID, so you can't cache
+**         them in a static SGLhndl without screwing up other tasks.  Don't
+**         know how to fix this yet, so for now output goes directly to
+**         stdout and stderr without a logging capability.
+**
+**  Comments of May 17, 1994 after trying to fix this library yet again...
+**    I'm not sure this library is really worth the effort to fix.  The only
+**    place it's really used is in Vbb and I don't anticipate too many other
+**    interactive I/O programs like it in the future.  So for the meantime,
+**    I've forced SGL_Output to output to stdout and SGL_Error to logMsg.
+**    SGL_Report remains the same.
+**    I think I've come up with two solutions for the problem.  ("The problem"
+**    is that I would like to be able to redirect stdout, stderr and a log
+**    FILE descriptor on the fly, without having to pass a SGL handle to each
+**    of the SGL routines.  logMsg sort of does what we want and is therefore
+**    appropriate in the stderr case, but since it wants to prepend some stuff
+**    to the output line, it is not appropriate for regular output.
+**    One solution is to store a pointer to the task specific SGL handle in
+**    TCB.  WRS gives us 4 spare locations to do this.  Problems with this are
+**    useage of the TCB spare resource, no guarantee that WRS will let us do
+**    this in the future, possibly no way to tell that SGL handle is uninited,
+**    or maybe doesn't even exist, as in the case of a subroutine being called
+**    from the shell.
+**    A second solution is to keep a static doubly linked list header.  Then
+**    every task that calls SGL_Init would add a link to the list.  Each link
+**    would contain a pointer to the output, error and log FILE descriptors,
+**    and the task ID.  SGL_Output and SGL_Error would then traverse the list
+**    looking for the TID of the caller and if found use the output, error
+**    and/or log FILE descriptors found therein.  If not found, they would use
+**    stdout, stderr and NILL, respectively.  Problems with this are that it
+**    takes CPU to traverse the list, worst case is when there is no entry for
+**    the task (not terrible, but kinda gross), have to figure out how to deal
+**    with the case where a task crashed and left an entry and a new, different
+**    task comes up with the old TID.  SGL_Init could detect a stale handle with
+**    an if (first) sort of mechanism, but SGL_Init has to be called for that.
+**    Have to deal with SGL_Init being called multiple times from the same task.
+**    Probably okay to just update the handle in these two (sort of the same)
+**    cases.
+**
+**    OK, enough time wasted on this stuff for a while.
+**
+**    April 13, 1995 - I wanted to get messages back to EPICS, so I added the
+**    call-back stuff.  Only one entry is allowed, and there is no protection
+**    against multiple calls to SGL_Init.  If SGL_Init isn't called, the
+**    SGL routines boil down to a simple logMsg.
+**
+**    Still need to add a delete function to change the effects of SGL_Init.
+**
+**    September 11, 1995 - More reworking.  Calling SGL_Init must be left as
+**    optional because there are times that things are run from the shell that
+**    shouldn't have to call to SGL_Init.  So there is now one static header
+**    for all those types of situations.
+**    The problem with leaving only one header is that if multiple tasks try
+**    to signal at the same time, the message buffer would get overwritten.  So
+**    to prevent this, we now allow for each task to call SGL_Init and get its
+**    own handle which includes its own message buffer.  Doing that also
+**    conveniently allowed each SGL_Init caller to be able to register its own
+**    call-back and logging stream.
+**    If a task is about to exit, it should free its signal handle by calling
+**    SGL_Free.  The list of handles is kept in the static one.
+**    So now my concern is that there may be some reenterancy problems.  Not
+**    sure if this is real or not.
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Feedback Project
+**
+**  History:
+**	August     6, 1993 - Created.
+**      March     22, 1994 - Bugs.  See kludge comment above.
+**      May       17, 1994 - Made _Output and _Error jackets for printf and
+**                           logMsg, respectively.  Made _Init a noop.
+**      April     13, 1995 - Added call-back stuff
+**      August    16, 1995 - Added timestamp and finding of function name
+**      September 11, 1995 - Allowed for tasks to get private handles, _Free.
+**      March     17, 1997 - Add string.h for strlen()
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#ifdef VXWORKS
+#  include <vxWorks.h>
+#  include <stdlib.h>
+#  include <logLib.h>
+#  include <lstLib.h>
+#  include <sysLib.h>
+#  include <a_out.h>
+#  include <sysSymTbl.h>
+#  include <symLib.h>
+#  include <time.h>
+#  include <taskLib.h>
+#  include <intLib.h>
+#else
+#  include "vxWorks-unix.h"
+#  include "lstLib-unix.h"
+#  include <malloc.h>
+#  include <time.h>
+
+#  define  logMsg  printf
+#endif
+
+#include <stdio.h>
+#include <string.h>
+#define SGL_MSG_GLOBAL
+#include "sgl.msg"
+#include "genLib.h"
+
+
+typedef unsigned long  Status;
+
+#define SGL_Error   SGL_Status
+
+typedef struct _SglHndl
+{
+  union
+  {
+    LIST            list;
+    NODE            node;
+  }                 sgl;
+  int               tid;
+  FILE             *log;
+  Status          (*rtn) ();
+  void             *arg;
+  char              buffer[160];
+  struct _SglHndl  *self;
+} SglHndl;
+
+
+static SglHndl *GetHandle (void);
+static void     InitHandle (SglHndl *, FILE *, Status (*)(), void *);
+static char    *BuildFmt  (char *, int, int, const char *, char *);
+#ifdef VXWORKS
+static Status   LogMsg    (SglHndl *, char *, char*, void **);
+#else
+static Status   LogMsg    (SglHndl *, char *, char*, void *, void *, void *,
+                                                     void *, void *, void *);
+#endif
+static SglHndl  SglHandle;
+
+
+
+void *SGL_Init (FILE    *log,
+                Status (*rtn) (),
+                void    *arg)
+/*
+   Description
+   -----------
+   Initialize the Signalling facility.  This routine can be run by a task in
+   order to set up its own, private callback routine and buffer.  This is
+   useful if there are multiple signalling tasks running.  If there is only
+   one signalling task or there is no concern about signalled messages stomping
+   on one another, then this routine need not be called.  Usually, this routine
+   is not called from tShell, for example.
+   This routine may be called multiple times to change the logging file or
+   the call-back.
+
+   Parameter
+   ---------
+         log - An open file stream to be added to the logging facility,
+               NIL to leave existing entry unchanged.
+         rtn - A call-back routine to run when the SGL routines are called,
+               NIL to leave existing entry unchanged.
+         arg - An argument for this routine.
+
+   Call-back is as follows:
+     (*rtn) (arg, prm0, prm1, prm2, prm3, prm4, prm5);
+   Return values are ignored.
+
+   Returns
+   -------
+   A SGL handle pointer
+*/
+{
+  Status      SGL_Error (Status, void *,void *,void *,void *,void *,void *);
+
+  SglHndl        *hndl = NIL;
+
+
+  /* Initialize the signal handle if it hasn't been done yet */
+  if (SglHandle.sgl.list.count == NULL)  lstInit (&SglHandle.sgl.list);
+
+  /* If this task already has a signal handle, use it */
+  if ((hndl = GetHandle ()) == &SglHandle)
+  {
+    /* Get a cleared SGL handle for this task */
+    if ((hndl = (SglHndl *) calloc (1, sizeof (*hndl))) == NIL)
+    {
+      SGL_Error (SGL_NOHNDLMEM, NIL, NIL, NIL, NIL, NIL, NIL);
+      return (NIL);
+    }
+  }
+
+  /* Initialize the handle */
+  InitHandle (hndl, log, rtn, arg);
+
+  /* Add the task's handle to the list */
+  lstAdd (&SglHandle.sgl.list, &hndl->sgl.node);
+
+  return (hndl);
+}
+
+
+
+void *SGL_SysInit (FILE    *log,
+                   Status (*rtn) (),
+                   void    *arg)
+/*
+   Description
+   -----------
+   Initialize the Signalling facility system-wide defaults.  Like SGL_Init,
+   this routine need not be called by a task that will signal messages.  It
+   should be called by a task that is part of a group of tasks in which all
+   tasks should use the same call-back routine.
+   This routine may be called multiple times to change the logging file or
+   the call-back.
+
+   Parameter
+   ---------
+         log - An open file stream to be added to the logging facility,
+               NIL to leave existing entry unchanged.
+         rtn - A call-back routine to run when the SGL routines are called,
+               NIL to leave existing entry unchanged.
+         arg - An argument for this routine.
+
+   Call-back is as follows:
+     (*rtn) (arg, prm0, prm1, prm2, prm3, prm4, prm5);
+   Return values are ignored.
+
+   Returns
+   -------
+   A SGL handle pointer
+*/
+{
+  InitHandle (&SglHandle, log, rtn, arg);
+
+  return (&SglHandle);
+}
+
+
+
+static void InitHandle (SglHndl *hndl,
+                        FILE    *log,
+                        Status (*rtn) (),
+                        void    *arg)
+{
+  Status SGL_Error (Status, void *, void *, void *, void *, void *, void *);
+
+#ifdef VXWORKS
+  /* Store the task's ID */
+  hndl->tid = taskIdSelf ();
+
+  /* Add a log file to the logging list, if there is one */
+  if (log)
+  {
+    if (logFdAdd (fileno (log)) != OK)
+    {
+      SGL_Error (SGL_FILADDFLD, NIL, NIL, NIL, NIL, NIL, NIL);
+      hndl->log = NIL;
+    }
+    else
+    {
+      /* Remove the previous logging stream, if there was one */
+      if (hndl->log)  logFdDelete (fileno (hndl->log));
+
+      hndl->log = log;
+    }
+  }
+#else
+  hndl->tid = NULL;
+  hndl->log = NIL;
+#endif
+
+  /* Store the call-back routine particulars if one was supplied */
+  if (rtn != NIL)
+  {
+    hndl->rtn = rtn;
+    hndl->arg = arg;
+  }
+
+  /* Save a pointer the handle to try and detect corruption */
+  hndl->self = hndl;
+}
+
+
+
+Status SGL_Free (void *handle)
+/*
+   Description
+   -----------
+   Free the resources used by a signal handle.  The routine should be called
+   when a task is about to terminate.
+
+   Parameters
+   ----------
+       handle - A SGL handle pointer from SGL_Init
+
+   Returns
+   -------
+   Status
+*/
+{
+  Status SGL_Error (Status, void *, void *, void *, void *, void *, void *);
+
+  SglHndl *hndl = (SglHndl *) handle;
+
+
+  /* Just return if no handle is supplied */
+  if (hndl == NIL)  return (SUCCESS);
+
+  /* Make sure the handle has not been corrupted */
+  if (hndl->self == hndl)
+  {
+#ifdef VXWORKS
+    /* Take the logging stream out of the log list */
+    if (hndl->log) logFdDelete (fileno (hndl->log));
+#endif
+
+    /* Return if the system default handle is supplied */
+    if (hndl == &SglHandle)  return (SUCCESS);
+
+    /* Remove the entry from the list of handles */
+    lstDelete (&SglHandle.sgl.list, &hndl->sgl.node);
+
+    /* Free the memory allocated to the handle */
+    free (hndl);
+  }
+  else
+    return (SGL_Error (SGL_CRPTHNDL, hndl, NIL, NIL, NIL, NIL, NIL));
+
+  return (SUCCESS);
+}
+
+
+
+Status SGL_Output (char       *msg,
+                   void       *arg0,
+                   void       *arg1,
+                   void       *arg2,
+                   void       *arg3,
+                   void       *arg4,
+                   void       *arg5)
+/*
+   Description
+   -----------
+   Function to output a message to the error log.  The message takes the
+   form of a printf format string and can have up to six arguments.
+
+   Parameter
+   ---------
+         msg - A pointer to a printf format string.
+      arg0-5 - A set of up to six arguments satisfying the format string.
+
+   Returns
+   -------
+   A pointer to the message that was reported.
+*/
+{
+#ifdef VXWORKS
+  return (LogMsg (GetHandle (), msg, msg, &arg0));
+#else
+  return (LogMsg (GetHandle (), msg, msg,  arg0, arg1, arg2, arg3, arg4, arg5));
+#endif
+}
+
+
+
+Status SGL_Status (Status      status,
+                   void       *arg0,
+                   void       *arg1,
+                   void       *arg2,
+                   void       *arg3,
+                   void       *arg4,
+                   void       *arg5)
+/*
+   Description
+   -----------
+   Function to output a status message to the error log.  The message takes
+   the form of a printf format string and can have up to six arguments.  The
+   function name used in the message is found from the nearest global entry
+   point before the return PC address.
+
+   Parameter
+   ---------
+         msg - A pointer to a printf format string.
+      arg0-5 - A set of up to six arguments satisfying the format string.
+
+   Returns
+   -------
+   A pointer to the message that was reported.
+*/
+{
+  SglHndl        *hndl = GetHandle ();
+  char           *fmt;
+
+
+  /* Build the format string to log */
+  fmt = BuildFmt (hndl->buffer, sizeof (hndl->buffer),
+                  *(&status - 1), NIL, (char *) status);
+
+  /* Log the message */
+#ifdef VXWORKS
+  return (LogMsg (hndl, fmt, (char *) status, &arg0));
+#else
+  return (LogMsg (hndl, fmt, (char *) status,  arg0, arg1, arg2,
+                                               arg3, arg4, arg5));
+#endif
+}
+
+
+
+Status SGL_StatusFn (Status      status,
+                     const char *fn,
+                     void       *arg0,
+                     void       *arg1,
+                     void       *arg2,
+                     void       *arg3,
+                     void       *arg4,
+                     void       *arg5)
+/*
+   Description
+   -----------
+   Function to signal a status message to the error log.  The message takes
+   the form of a printf format string and can have up to six arguments.  The
+   function name to use in the message is to be supplied as an argument.
+
+   Parameter
+   ---------
+      status - A pointer to a printf format string.
+          fn - The function name to use in the message
+      arg0-5 - A set of up to six arguments satisfying the format string.
+
+   Returns
+   -------
+   A status value.
+*/
+{
+  SglHndl        *hndl = GetHandle ();
+  char           *fmt;
+
+
+  /* Build the format string to log */
+  fmt = BuildFmt (hndl->buffer, sizeof(hndl->buffer), NULL, fn, (char *)status);
+
+  /* Log the message */
+#ifdef VXWORKS
+  return (LogMsg (hndl, fmt, (char *) status, &arg0));
+#else
+  return (LogMsg (hndl, fmt, (char *) status, arg0, arg1, arg2,
+                                              arg3, arg4, arg5));
+#endif
+}
+
+
+
+#if 0
+/*
+  SGL_Error is replaced by #define SGL_Error SGL_Status in sglLib.h since
+  currently the two do the same thing.  Maybe some day they'll be different.
+*/
+Status SGL_Error (Status      status,
+                  void       *arg0,
+                  void       *arg1,
+                  void       *arg2,
+                  void       *arg3,
+                  void       *arg4,
+                  void       *arg5)
+/*
+   Description
+   -----------
+   Function to signal a status message to the error log.  The message takes
+   the form of a printf format string and can have up to six arguments.  The
+   function name used in the message is found from the nearest global entry
+   point before the return PC address.
+
+   Parameter
+   ---------
+      status - A pointer to a printf format string.
+      arg0-5 - A set of up to six arguments satisfying the format string.
+
+   Returns
+   -------
+   A status value.
+*/
+{
+  SglHndl        *hndl = GetHandle ();
+  char           *fmt;
+
+
+  /* Build the format string to log */
+  fmt = BuildFmt (hndl->buffer, sizeof (hndl->buffer),
+                  *(&status - 1), NIL, (char *) status);
+
+  /* Log the message */
+#ifdef VXWORKS
+  return (LogMsg (hndl, fmt, (char *) status, &arg0));
+#else
+  return (LogMsg (hndl, fmt, (char *) status,  arg0, arg1, arg2,
+                                               arg3, arg4, arg5));
+#endif
+}
+#endif
+
+
+
+Status SGL_Report (FILE       *out,
+                   FILE       *log,
+                   char       *msg,
+                   void       *arg0,
+                   void       *arg1,
+                   void       *arg2,
+                   void       *arg3,
+                   void       *arg4,
+                   void       *arg5)
+/*
+   Description
+   -----------
+   Function to report a signal by outputing a message.  The message can
+   optionally go to an output stream and or a logging stream.  The message
+   takes the form of a printf format string and can have up to six arguments.
+
+   Parameter
+   ---------
+         out - A pointer to the output  stream or NIL if none.
+         log - A pointer to the logging stream or NIL if none.
+         msg - A pointer to a printf format string.
+      arg0-6 - A set of up to six arguments satisfying the format string.
+
+   Returns
+   -------
+   A status value (actually the address of the message reported).
+*/
+{
+  SglHndl *hndl   = GetHandle ();
+  Status   status = (Status) msg;
+
+
+  if (msg)
+  {
+    /* Output the message on the out descriptor */
+    if (out)
+    {
+      fprintf (out, msg, arg0, arg1, arg2, arg3, arg4, arg5);
+      fflush  (out);
+    }
+
+    /* Output the message on the log descriptor */
+    if (log)
+    {
+      fprintf (log, msg, arg0, arg1, arg2, arg3, arg4, arg5);
+      fflush  (log);
+    }
+  }
+
+  /* Call the call-back routine, if there is one */
+  if (hndl)
+  {
+    if (hndl->rtn)
+      status = (*hndl->rtn) (hndl->arg, msg,
+                             arg0, arg1, arg2, arg3, arg4, arg5);
+  }
+
+  return (status);
+}
+
+
+
+static SglHndl *GetHandle (void)
+{
+#ifdef VXWORKS
+  int      tid  = taskIdSelf ();
+#else
+  int      tid  = NULL;
+#endif
+  SglHndl *hndl;
+
+
+  /* If the list is empty, return the default handle */
+  if (SglHandle.sgl.list.count == NULL)  return (&SglHandle);
+
+  /* Search for the handle with the task ID in it of the calling task */
+  hndl = (SglHndl *) lstFirst (&SglHandle.sgl.list);
+  while (hndl->tid != tid)
+  {
+    /* If handle was not found in the list, so return the default one */
+    if ((hndl = (SglHndl *) lstNext (&hndl->sgl.node)) == NIL)
+      return (&SglHandle);
+  }
+
+  return (hndl);
+}
+
+
+
+static char *BuildFmt (char       *buffer,
+                       int         bufSize,
+                       int         pc,
+                       const char *fn,
+                       char       *fmt)
+{
+  time_t          ts;
+  int             l;
+
+
+  /* Get the time and format it */
+  time (&ts);
+  l = strftime (buffer, bufSize, "%a %c ", localtime (&ts));
+
+#ifdef VXWORKS
+  /* Find the nearest global function name preceding the return PC */
+  if (fn == NIL)
+  {
+    int       symValue;
+    SYM_TYPE  symType;
+    symFindByValueAndType (sysSymTbl, pc, &buffer[l], &symValue, &symType,
+                           N_TEXT | N_EXT, N_TEXT | N_EXT);
+    l = strlen (buffer);
+
+    fn = "";
+  }
+#endif
+
+  /* Build the format string */
+  sprintf (&buffer[l], "%s:\n  %s\n", fn, fmt);
+
+  return (buffer);
+}
+
+
+
+#ifdef VXWORKS
+static Status LogMsg (SglHndl *hndl,
+                      char    *fmt,
+                      char    *msg,
+                      void    *args[6])
+{
+  Status status = (Status) msg;
+
+
+  /* Log the message */
+  logMsg (fmt, (int) args[0], (int) args[1], (int) args[2],
+               (int) args[3], (int) args[4], (int) args[5]);
+#if 0
+  printf (fmt, (int) args[0], (int) args[1], (int) args[2],
+               (int) args[3], (int) args[4], (int) args[5]);
+#endif
+
+  /* Don't do the rest of this stuff if we're running at interrupt level */
+  if (intContext ()) return (status);
+
+  /* Flush the log file(s), if there is one */
+  if (hndl->log)      fflush (hndl->log);
+  if (SglHandle.log)  fflush (SglHandle.log);
+
+  /* Call the task specific or system wide call-back routine, if there is one */
+  if (hndl->rtn)
+    status = (*hndl->rtn) (hndl->arg, msg, args[0], args[1], args[2],
+                                           args[3], args[4], args[5]);
+  else if (SglHandle.rtn)
+    status = (*SglHandle.rtn) (SglHandle.arg, msg, args[0], args[1], args[2],
+                                                   args[3], args[4], args[5]);
+
+  return (status);
+}
+#else
+static Status LogMsg (SglHndl *hndl,
+                      char    *fmt,
+                      char    *msg,
+                      void    *args0,
+                      void    *args1,
+                      void    *args2,
+                      void    *args3,
+                      void    *args4,
+                      void    *args5)
+{
+  Status status = (Status) msg;
+
+
+  /* Log the message */
+  logMsg (fmt, (int) args0, (int) args1, (int) args2,
+               (int) args3, (int) args4, (int) args5);
+
+  /* Flush the log file(s), if there is one */
+  if (hndl->log)      fflush (hndl->log);
+  if (SglHandle.log)  fflush (SglHandle.log);
+
+  /* Call the task specific or system wide call-back routine, if there is one */
+  if (hndl->rtn)
+    status = (*hndl->rtn) (hndl->arg, msg, args0, args1, args2,
+                                           args3, args4, args5);
+  else if (SglHandle.rtn)
+    status = (*SglHandle.rtn) (SglHandle.arg, msg, args0, args1, args2,
+                                                   args3, args4, args5);
+
+  return (status);
+}
+#endif
+@
+
+
+1.2
+log
+@Got rid of warnings
+@
+text
+@d139 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d140 1
+a141 10
+#define NIL   (void *)(0)
+#define NULL           0
+#define TRUE           1
+#define FALSE          0
+#define SUCCESS        0
+#define FAILURE        1
+
+#define Min(a,b)       ((a) < (b) ? (a) : (b))
+#define Max(a,b)       ((a) > (b) ? (a) : (b))
+#define lsizeof(var)   (sizeof (var) >> 2)
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

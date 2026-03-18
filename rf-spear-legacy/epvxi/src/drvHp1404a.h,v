@@ -1,0 +1,110 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	EPVXI-2:1.1.1.1
+	EPVXI-1:1.1.1.1
+	EPVXI:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2005.02.15.14.25.46;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2005.02.15.14.25.46;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*************************************************************************\
+* Copyright (c) 2002 The University of Chicago, as Operator of Argonne
+*     National Laboratory.
+* Copyright (c) 2002 The Regents of the University of California, as
+*     Operator of Los Alamos National Laboratory.
+* EPICS BASE Versions 3.13.7
+* and higher are distributed subject to a Software License Agreement found
+* in file LICENSE that is included with this distribution. 
+\*************************************************************************/
+/* base/src/drv drvHp1404a.h,v 1.1.1.1 2005/02/15 14:25:46 mrk Exp */
+/*
+ * drvHp1404a.h 
+ *
+ *      HP E1404A VXI bus slot zero translator
+ *      device dependent routines header file
+ *
+ *      share/src/drv/@@(#)drvHp1404a.h	1.1 8/27/93
+ *
+ *      Author Jeffrey O. Hill
+ *      Date            030692
+ */
+
+typedef long    hpE1404Stat;
+
+hpE1404Stat hpE1404Init(void);
+
+hpE1404Stat hpE1404SignalConnect(
+        unsigned        la,
+        void            (*pSignalCallback)(int16_t signal)
+);
+
+hpE1404Stat hpE1404RouteTriggerECL(
+unsigned        la,             /* slot zero device logical address     */
+unsigned        enable_map,     /* bits 0-5  correspond to trig 0-5     */
+                                /* a 1 enables a trigger                */
+                                /* a 0 disables a trigger               */
+unsigned        io_map         /* bits 0-5  correspond to trig 0-5     */
+                                /* a 1 sources the front panel          */
+                                /* a 0 sources the back plane           */
+);
+
+hpE1404Stat hpE1404RouteTriggerTTL(
+unsigned        la,             /* slot zero device logical address     */
+unsigned        enable_map,     /* bits 0-5  correspond to trig 0-5     */
+                                /* a 1 enables a trigger                */
+                                /* a 0 disables a trigger               */
+unsigned        io_map         /* bits 0-5  correspond to trig 0-5     */
+                                /* a 1 sources the front panel          */
+                                /* a 0 sources the back plane           */
+);
+
+#define VXI_HP_MODEL_E1404_REG_SLOT0    0x10
+#define VXI_HP_MODEL_E1404_REG          0x110
+#define VXI_HP_MODEL_E1404_MSG          0x111
+
+
+@
+
+
+1.1.1.1
+log
+@epvxi from Marty Kraimer via tech-talk on Feb 15, 2005.
+@
+text
+@@

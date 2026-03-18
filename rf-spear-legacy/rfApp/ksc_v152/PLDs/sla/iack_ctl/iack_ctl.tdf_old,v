@@ -1,0 +1,172 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.07.30.01.29.50;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.07.30.01.29.50;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@TITLE "iack_ctl, JED/SLAC";
+
+%
+
+	July 2003
+	Modification to KSC V152 CPU
+	John Dusatko
+
+	-This module is an add-on to the KSC V152 SLA FPGA design
+
+	
+
+
+%
+
+
+--define any constants here;
+
+--CONSTANT	STD_SNAP_REC_MODE	=	H"0";
+
+
+SUBDESIGN iack_ctl
+(
+		--inputs
+		reset				:	INPUT; --power-on reset from U7
+
+		as/					:	INPUT; --VXIbus address strobe
+
+		iack/				:	INPUT; --VXIbus interrupt acknowledge
+
+		rd_int				:	INPUT; --FPGA internal read strobe / from slave>a16_ack state machine
+
+		wr_int				:	INPUT; --FPGA internal write strobe / from slave>a16_ack state machine
+
+
+		id[15..0]			:	INPUT; --internal VXI databus
+
+		a[15..1]			:	INPUT; --internal VXI addr bus
+
+
+
+		--outputs
+		d16_isel			:	OUTPUT; --select ctrl to DSn* mux in GAL16V8
+
+		iak_ctrl[15..0]		:	OUTPUT; --output of IACK_CTRL register for readback
+
+		rd_iackctrl			:	OUTPUT; --read strobe to rd_mux block
+
+)
+
+
+
+
+
+VARIABLE
+
+		iack_ctrl[7..0]		: DFF; --IACK data mode control register
+
+		iack_ctrl[15..8]	: NODE; --unused upper byte
+
+		wr_ictlreg			: NODE; --decoded write strobe to the IACK_CTRL reg
+
+
+		adr[5..0]			:NODE; --right-justified address bus for ease of design
+
+
+
+
+		--dv_32r				: DFF;
+		--wren_go				: DFF;
+		--lrs_ena_r			: NODE;
+		--rec_mde[2..0]		: NODE;
+
+
+
+BEGIN
+
+-----------------------------------------------
+
+-------------------------------
+--re-define the address bus for easier use
+	adr[5..0] = (a5, a4, a3, a2, a1, x);
+
+
+-------------------------------
+--IACK_CTRL register
+	iack_ctrl[7..0].clk		=	wr_ictlreg;
+	iack_ctrl[7..0].r		=	reset;
+
+	iack_ctrl[7..0].d		=	id[7..0]; --only use lower byte
+
+
+	--register write strobe logic
+	wr_ictlreg			= wr_int & (adr[] == H"36");
+
+	--register read strobe logic
+	rd_ictlreg			= rd_int & (adr[] == H"36");
+
+
+	--form the readback value
+	--gets sent to the rd_mux.tdf block
+	iak_ctrl[15..8]		= H"00";	--upper byte is unused, set to 0x00
+
+	iak_ctrl[7..0]		= iack_ctrl[7..0];
+
+
+
+-------------------------------
+--D16 mode enable logic
+
+
+
+
+
+-----------------------------------------------
+END;
+
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

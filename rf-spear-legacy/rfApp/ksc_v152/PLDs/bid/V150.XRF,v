@@ -1,0 +1,886 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.56.56;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.56.56;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page   1
+
+  Symbol Synopsis:
+
+     MO - MOdule symbol        ME - MEga file directory
+     CO - COmposite symbol     RO - Read Only directory
+     NA - Not Available        RW - Read Write directory
+
+    Symbol Name    Type   Directory                                   Creation
+     28C04A         CO     RW   c:\vlproj\v150i2                    19-JAN-93
+     2PSTRAP        CO     RO   m:\CONN_LIB                          1-NOV-91
+     3PSTRAP        CO     RO   m:\CONN_LIB                          1-NOV-91
+     74ALS174       CO     RO   m:\74ALS                            19-JUL-91
+     74ALS273       CO     RO   m:\74ALS                            19-JUL-91
+     74AS756        CO     RW   c:\vlproj\v150i2                     1-APR-92
+     74F04          CO     RO   m:\74F                              30-JUL-91
+     74F06          CO     RW   c:\vlproj\v150i2                    22-MAY-96
+     74F08          CO     RO   m:\74F                              19-JUL-91
+     74F125         CO     RO   m:\74F                               1-NOV-91
+     74F126         CO     RO   m:\74F                               1-NOV-91
+     74F174         CO     RO   m:\74F                              19-JUL-91
+     74F240         CO     RW   c:\vlproj\v150i2                    17-MAY-96
+     74F74          CO     RO   m:\74F                              11-FEB-92
+     74FCT244       CO     RW   c:\vlproj\v150i2                    15-MAY-96
+     74FCT245       CO     RW   c:\vlproj\v150i2                    15-MAY-96
+     74FCT374       CO     RW   c:\vlproj\v150i2                    11-JUN-96
+     74FCT652       CO     RW   c:\vlproj\v150i2                    17-MAY-96
+     74LS14         CO     RO   m:\74LS                             19-JUL-91
+     BDIR_BUF       CO     RW   c:\vlproj\v150i2                    30-MAY-96
+     BYP_CAP        MO     RO   m:\KSCLIB                           13-JAN-92
+     CAP_100        MO     RO   m:\KSCLIB                           17-FEB-92
+     CAP_200        MO     RO   m:\KSCLIB                           17-FEB-92
+     DI_400         MO     RO   m:\KSCLIB                           27-AUG-92
+     ENET           MO     RW   c:\vlproj\v150i2                    20-MAY-96
+     EPC1213        CO     RW   c:\vlproj\v150i2                    15-MAY-96
+     FLX_CON        MO     RW   c:\vlproj\v150i2                    26-JAN-95
+     FPCON          MO     RW   c:\vlproj\v150i2                    17-MAY-96
+     FUSE           MO     RO   m:\KSCLIB                           14-JAN-92
+     LM555          CO     RO   m:\KSCLIB                            1-NOV-91
+     MC10116        MO     RW   c:\vlproj\v150i2                    12-OCT-93
+     MC10123        CO     RW   c:\vlproj\v150i2                    12-OCT-93
+     MC10124        CO     RW   c:\vlproj\v150i2                    12-OCT-93
+     MC10124B       CO     RW   c:\vlproj\v150i2                    18-MAY-94
+     MC10125        MO     RW   c:\vlproj\v150i2                    14-JAN-93
+     OPDEC          CO     RW   c:\vlproj\v150i2                    20-MAY-96
+     P1_INT         MO     RW   c:\vlproj\v150i2                    14-MAY-96
+     P2_INT         MO     RW   c:\vlproj\v150i2                    14-MAY-96
+     PCAP_150       MO     RO   m:\KSCLIB                           28-APR-92
+     RES_400        MO     RO   m:\KSCLIB                           17-FEB-92
+     RP106PFA       MO     RW   c:\vlproj\v150i2                    16-MAY-96
+     RP106PFB       MO     RW   c:\vlproj\v150i2                    16-MAY-96
+     RP106PFC       MO     RW   c:\vlproj\v150i2                    29-JUL-96
+     RP108NFA       MO     RW   c:\vlproj\v150i2                    26-JAN-93
+     RP110PFA       MO     RW   c:\vlproj\v150i2                    16-MAY-96
+     RP110PFB       MO     RO   m:\KSCLIB                            1-NOV-91
+     SCSI_CON       MO     RW   c:\vlproj\v150i2                    19-JUN-96
+     SLV_TRIG       CO     RW   c:\vlproj\v150i2                    11-JUN-96
+     SWS5P          CO     RW   c:\vlproj\v150i2                    16-MAY-96
+     SWS8P          CO     RO   m:\KSCLIB                           16-APR-92
+     VK200          MO     RO   m:\KSCLIB                            1-NOV-91
+     VXI_P1         MO     RO   m:\CONN_LIB                         20-FEB-92
+     VXI_P2         MO     RO   m:\CONN_LIB                         20-FEB-92
+     XTALC          MO     RO   m:\KSCLIB                           15-NOV-91
+
+    Symbol Name    Occurrences   Packages   Components
+
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page   2
+
+     28C04A           2            2         U13 U14
+     2PSTRAP          6            6         STP3 STP4 STP5 STP6 STP7 STP8
+     3PSTRAP          2            2         STP1 STP2
+     74ALS174         1            1         U19
+     74ALS273         1            1         U31
+     74AS756          14           7         U32 U5 U55 U56 U57 U58 U59
+     74F04            6            1         U17
+     74F06            2            1         U12
+     74F08            4            1         U18
+     74F125           4            1         U47
+     74F126           4            1         U60
+     74F174           1            1         U1
+     74F240           2            1         U41
+     74F74            1            1         U16
+     74FCT244         22           11        U10 U11 U25 U30 U33 U34 U39 U40 U49
+                                             U8 U9
+     74FCT245         14           14        U15 U2 U3 U35 U36 U4 U42 U43 U44
+                                             U45 U46 U48 U50 U51
+     74FCT374         2            2         U21 U22
+     74FCT652         2            2         U20 U29
+     74LS14           2            1         U6
+     BDIR_BUF         1            1         U23
+     BYP_CAP          42           42        C10 C11 C12 C13 C14 C15 C16 C17 C18
+                                             C19 C2 C20 C21 C22 C23 C24 C25 C26
+                                             C27 C28 C29 C3 C30 C31 C32 C33 C34
+                                             C35 C36 C37 C38 C39 C4 C40 C41 C42
+                                             C47 C5 C6 C7 C8 C9
+     CAP_100          2            2         C49 C51
+     CAP_200          2            2         C50 C52
+     DI_400           5            5         D1 D2 D3 D4 D5
+     ENET             12           1         P9
+     EPC1213          1            1         U28
+     FLX_CON          8            1         P5
+     FPCON            6            1         P6
+     FUSE             4            4         FU1 FU2 FU3 FU4
+     LM555            1            1         U26
+     MC10116          3            1         U53
+     MC10123          1            1         U38
+     MC10124          2            1         U37
+     MC10124B         2            1         U52
+     MC10125          3            1         U54
+     OPDEC            1            1         U24
+     P1_INT           94           1         P3
+     P2_INT           70           1         P4
+     PCAP_150         6            6         C1 C43 C44 C45 C46 C48
+     RES_400          16           16        R1 R10 R11 R12 R13 R14 R15 R16 R2
+                                             R3 R4 R5 R6 R7 R8 R9
+     RP106PFA         4            1         RP4
+     RP106PFB         3            1         RP8
+     RP106PFC         4            1         RP9
+     RP108NFA         8            2         RP5 RP6
+     RP110PFA         18           2         RP1 RP2
+     RP110PFB         11           2         RP3 RP7
+     SCSI_CON         66           1         P7
+     SLV_TRIG         1            1         U7
+     SWS5P            1            1         SW2
+     SWS8P            1            1         SW1
+     VK200            3            3         L1 L2 L3
+     VXI_P1           94           1         P1
+     VXI_P2           78           1         P2
+     XTALC            1            1         U27
+
+  Component Instance Synopsis:
+
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page   3
+
+    Comp Name    Symbol Name   Occurrences   Sheet
+     C1           PCAP_150       1            1
+     C10          BYP_CAP        1            1
+     C11          BYP_CAP        1            1
+     C12          BYP_CAP        1            1
+     C13          BYP_CAP        1            1
+     C14          BYP_CAP        1            1
+     C15          BYP_CAP        1            1
+     C16          BYP_CAP        1            1
+     C17          BYP_CAP        1            1
+     C18          BYP_CAP        1            1
+     C19          BYP_CAP        1            1
+     C2           BYP_CAP        1            1
+     C20          BYP_CAP        1            1
+     C21          BYP_CAP        1            1
+     C22          BYP_CAP        1            1
+     C23          BYP_CAP        1            1
+     C24          BYP_CAP        1            1
+     C25          BYP_CAP        1            1
+     C26          BYP_CAP        1            1
+     C27          BYP_CAP        1            1
+     C28          BYP_CAP        1            1
+     C29          BYP_CAP        1            1
+     C3           BYP_CAP        1            1
+     C30          BYP_CAP        1            1
+     C31          BYP_CAP        1            1
+     C32          BYP_CAP        1            1
+     C33          BYP_CAP        1            1
+     C34          BYP_CAP        1            1
+     C35          BYP_CAP        1            1
+     C36          BYP_CAP        1            1
+     C37          BYP_CAP        1            1
+     C38          BYP_CAP        1            1
+     C39          BYP_CAP        1            1
+     C4           BYP_CAP        1            1
+     C40          BYP_CAP        1            1
+     C41          BYP_CAP        1            1
+     C42          BYP_CAP        1            1
+     C43          PCAP_150       1            1
+     C44          PCAP_150       1            1
+     C45          PCAP_150       1            1
+     C46          PCAP_150       1            1
+     C47          BYP_CAP        1            1
+     C48          PCAP_150       1            1
+     C49          CAP_100        1            6
+     C5           BYP_CAP        1            1
+     C50          CAP_200        1            6
+     C51          CAP_100        1            5
+     C52          CAP_200        1            5
+     C6           BYP_CAP        1            1
+     C7           BYP_CAP        1            1
+     C8           BYP_CAP        1            1
+     C9           BYP_CAP        1            1
+     D1           DI_400         1            5
+     D2           DI_400         1            5
+     D3           DI_400         1            5
+     D4           DI_400         1            5
+     D5           DI_400         1            6
+     FU1          FUSE           1            1
+     FU2          FUSE           1            1
+     FU3          FUSE           1            1
+     FU4          FUSE           1            6
+     L1           VK200          1            1
+
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page   4
+
+    Comp Name    Symbol Name   Occurrences   Sheet
+     L2           VK200          1            1
+     L3           VK200          1            1
+     P1           VXI_P1         23           5
+     P1           VXI_P1         39           4
+     P1           VXI_P1         18           2
+     P1           VXI_P1         14           1
+     P2           VXI_P2         13           6
+     P2           VXI_P2         12           5
+     P2           VXI_P2         24           4
+     P2           VXI_P2         29           1
+     P3           P1_INT         23           5
+     P3           P1_INT         39           4
+     P3           P1_INT         18           2
+     P3           P1_INT         14           1
+     P4           P2_INT         39           6
+     P4           P2_INT         24           4
+     P4           P2_INT         7            1
+     P5           FLX_CON        8            3
+     P6           FPCON          6            5
+     P7           SCSI_CON       66           6
+     P9           ENET           12           6
+     R1           RES_400        1            1
+     R10          RES_400        1            6
+     R11          RES_400        1            6
+     R12          RES_400        1            6
+     R13          RES_400        1            6
+     R14          RES_400        1            6
+     R15          RES_400        1            6
+     R16          RES_400        1            6
+     R2           RES_400        1            6
+     R3           RES_400        1            6
+     R4           RES_400        1            6
+     R5           RES_400        1            6
+     R6           RES_400        1            6
+     R7           RES_400        1            6
+     R8           RES_400        1            6
+     R9           RES_400        1            6
+     RP1          RP110PFA       9            2
+     RP2          RP110PFA       9            2
+     RP3          RP110PFB       9            3
+     RP4          RP106PFA       4            3
+     RP5          RP108NFA       6            5
+     RP6          RP108NFA       2            5
+     RP7          RP110PFB       2            5
+     RP8          RP106PFB       3            6
+     RP9          RP106PFC       4            5
+     STP1         3PSTRAP        1            3
+     STP2         3PSTRAP        1            3
+     STP3         2PSTRAP        1            5
+     STP4         2PSTRAP        1            5
+     STP5         2PSTRAP        1            5
+     STP6         2PSTRAP        1            5
+     STP7         2PSTRAP        1            5
+     STP8         2PSTRAP        1            5
+     SW1          SWS8P          1            3
+     SW2          SWS5P          1            6
+     U1           74F174         1            3
+     U10          74FCT244       2            2
+     U11          74FCT244       2            2
+     U12          74F06          2            5
+     U13          28C04A         1            3
+     U14          28C04A         1            3
+
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page   5
+
+    Comp Name    Symbol Name   Occurrences   Sheet
+     U15          74FCT245       1            3
+     U16          74F74          1            5
+     U17          74F04          2            6
+     U17          74F04          2            4
+     U17          74F04          2            3
+     U18          74F08          1            6
+     U18          74F08          1            5
+     U18          74F08          1            4
+     U18          74F08          1            3
+     U19          74ALS174       1            6
+     U2           74FCT245       1            3
+     U20          74FCT652       1            6
+     U21          74FCT374       1            4
+     U22          74FCT374       1            4
+     U23          BDIR_BUF       1            2
+     U24          OPDEC          1            4
+     U25          74FCT244       2            2
+     U26          LM555          1            6
+     U27          XTALC          1            3
+     U28          EPC1213        1            3
+     U29          74FCT652       1            6
+     U3           74FCT245       1            3
+     U30          74FCT244       2            6
+     U31          74ALS273       1            6
+     U32          74AS756        2            5
+     U33          74FCT244       2            5
+     U34          74FCT244       2            5
+     U35          74FCT245       1            5
+     U36          74FCT245       1            5
+     U37          MC10124        2            5
+     U38          MC10123        1            5
+     U39          74FCT244       2            6
+     U4           74FCT245       1            3
+     U40          74FCT244       2            6
+     U41          74F240         2            5
+     U42          74FCT245       1            4
+     U43          74FCT245       1            4
+     U44          74FCT245       1            4
+     U45          74FCT245       1            4
+     U46          74FCT245       1            4
+     U47          74F125         4            5
+     U48          74FCT245       1            4
+     U49          74FCT244       2            6
+     U5           74AS756        2            3
+     U50          74FCT245       1            4
+     U51          74FCT245       1            4
+     U52          MC10124B       2            5
+     U53          MC10116        3            5
+     U54          MC10125        3            5
+     U55          74AS756        2            2
+     U56          74AS756        2            2
+     U57          74AS756        2            2
+     U58          74AS756        2            2
+     U59          74AS756        2            2
+     U6           74LS14         2            5
+     U60          74F126         4            5
+     U7           SLV_TRIG       1            3
+     U8           74FCT244       2            2
+     U9           74FCT244       2            2
+
+  Net Instance Synopsis:
+    Net Name                 Type   Occurrences   Sheet
+
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page   6
+
+     10M_CLK                 Local    2            5
+     10M_CLK                 Local    1            3
+     20M_CLK                 Local    1            5
+     20M_CLK                 Local    2            3
+     A1                      Local    2            4
+     A1                      Local    2            3
+     A10                     Local    3            4
+     A10                     Local    1            3
+     A11                     Local    3            4
+     A11                     Local    1            3
+     A12                     Local    3            4
+     A12                     Local    1            3
+     A13                     Local    3            4
+     A13                     Local    1            3
+     A14                     Local    3            4
+     A14                     Local    1            3
+     A15                     Local    3            4
+     A15                     Local    1            3
+     A16                     Local    2            4
+     A17                     Local    2            4
+     A18                     Local    2            4
+     A19                     Local    2            4
+     A2                      Local    2            4
+     A2                      Local    2            3
+     A20                     Local    2            4
+     A21                     Local    3            4
+     A22                     Local    3            4
+     A23                     Local    3            4
+     A24                     Local    3            4
+     A25                     Local    3            4
+     A26                     Local    3            4
+     A27                     Local    3            4
+     A28                     Local    3            4
+     A29                     Local    3            4
+     A3                      Local    2            4
+     A3                      Local    2            3
+     A30                     Local    3            4
+     A31                     Local    3            4
+     A4                      Local    2            4
+     A4                      Local    2            3
+     A5                      Local    2            4
+     A5                      Local    2            3
+     A6                      Local    2            4
+     A6                      Local    1            3
+     A7                      Local    2            4
+     A7                      Local    1            3
+     A8                      Local    3            4
+     A8                      Local    1            3
+     A9                      Local    3            4
+     A9                      Local    1            3
+     AM0                     Local    2            5
+     AM0                     Local    1            4
+     AM0                     Local    1            3
+     AM1                     Local    2            5
+     AM1                     Local    1            4
+     AM1                     Local    1            3
+     AM2                     Local    2            5
+     AM2                     Local    1            4
+     AM3                     Local    2            5
+     AM3                     Local    1            4
+     AM3                     Local    1            3
+     AM4                     Local    2            5
+     AM4                     Local    1            4
+
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page   7
+
+    Net Name                 Type   Occurrences   Sheet
+     AM4                     Local    1            3
+     AM5                     Local    2            5
+     AM5                     Local    1            4
+     AM5                     Local    1            3
+     A_BBSY_AST              Local    1            4
+     A_BBSY_AST              Local    1            2
+     B_IRQ1                  Local    2            3
+     B_IRQ2                  Local    2            3
+     B_IRQ3                  Local    2            3
+     B_IRQ4                  Local    2            3
+     B_IRQ5                  Local    2            3
+     B_IRQ6                  Local    2            3
+     B_IRQ7                  Local    2            3
+     CLK10_DIR               Local    2            6
+     CLK10_DIR               Local    2            5
+     ID0                     Local    3            6
+     ID0                     Local    3            4
+     ID0                     Local    4            3
+     ID1                     Local    3            6
+     ID1                     Local    3            4
+     ID1                     Local    4            3
+     ID10                    Local    3            6
+     ID10                    Local    2            4
+     ID10                    Local    4            3
+     ID11                    Local    3            6
+     ID11                    Local    2            4
+     ID11                    Local    4            3
+     ID12                    Local    3            6
+     ID12                    Local    2            4
+     ID12                    Local    4            3
+     ID13                    Local    3            6
+     ID13                    Local    2            4
+     ID13                    Local    4            3
+     ID14                    Local    2            6
+     ID14                    Local    3            4
+     ID14                    Local    4            3
+     ID15                    Local    2            6
+     ID15                    Local    3            4
+     ID15                    Local    4            3
+     ID2                     Local    3            6
+     ID2                     Local    3            4
+     ID2                     Local    4            3
+     ID3                     Local    3            6
+     ID3                     Local    3            4
+     ID3                     Local    4            3
+     ID4                     Local    3            6
+     ID4                     Local    3            4
+     ID4                     Local    4            3
+     ID5                     Local    3            6
+     ID5                     Local    3            4
+     ID5                     Local    4            3
+     ID6                     Local    3            6
+     ID6                     Local    3            4
+     ID6                     Local    4            3
+     ID7                     Local    3            6
+     ID7                     Local    3            4
+     ID7                     Local    4            3
+     ID8                     Local    3            6
+     ID8                     Local    3            4
+     ID8                     Local    4            3
+     ID9                     Local    3            6
+     ID9                     Local    2            4
+
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page   8
+
+    Net Name                 Type   Occurrences   Sheet
+     ID9                     Local    4            3
+     IRQ1                    Local    1            3
+     IRQ1                    Local    4            2
+     IRQ2                    Local    1            3
+     IRQ2                    Local    4            2
+     IRQ3                    Local    1            3
+     IRQ3                    Local    4            2
+     IRQ4                    Local    1            3
+     IRQ4                    Local    4            2
+     IRQ5                    Local    1            3
+     IRQ5                    Local    4            2
+     IRQ6                    Local    1            3
+     IRQ6                    Local    4            2
+     IRQ7                    Local    1            3
+     IRQ7                    Local    4            2
+     LADR1                   Local    3            3
+     LADR2                   Local    3            3
+     LADR3                   Local    3            3
+     LADR4                   Local    3            3
+     LADR5                   Local    3            3
+     MID0                    Local    5            6
+     MID0                    Local    1            3
+     MID1                    Local    4            6
+     MID10                   Local    4            6
+     MID11                   Local    4            6
+     MID12                   Local    4            6
+     MID2                    Local    4            6
+     MID3                    Local    4            6
+     MID4                    Local    4            6
+     MID5                    Local    4            6
+     MID6                    Local    4            6
+     MID7                    Local    4            6
+     MID8                    Local    4            6
+     MID9                    Local    4            6
+     PUP_H                   Local    2            6
+     PUP_H                   Local    1            2
+     RCV_AS                  Local    1            5
+     RCV_AS                  Local    1            4
+     RCV_BERR                Local    1            4
+     RCV_BERR                Local    5            2
+     RCV_DS                  Local    1            5
+     RCV_DS                  Local    1            4
+     RCV_DS                  Local    2            3
+     RCV_DTACK               Local    2            4
+     RCV_DTACK               Local    5            2
+     RCV_IACK                Local    1            4
+     RCV_IACK                Local    4            2
+     RCV_IACKIN              Local    1            5
+     RCV_IACKIN              Local    1            3
+     RCV_SYSRESET            Local    1            3
+     RCV_SYSRESET            Local    4            2
+     RCV_WRITE               Local    1            5
+     RCV_WRITE               Local    1            4
+     RCV_WRITE               Local    1            3
+     RD_INTID                Local    2            4
+     RD_INTID                Local    1            3
+     RD_MODID                Local    4            6
+     RD_MODID                Local    1            3
+     RD_SIGNAL               Local    2            6
+     RD_SIGNAL               Local    1            3
+     RESET_L                 Local    2            6
+     RESET_L                 Local    1            4
+
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page   9
+
+    Net Name                 Type   Occurrences   Sheet
+     RESET_L                 Local    1            3
+     RESET_L                 Local    1            2
+     SFT_RESET               Local    1            6
+     SFT_RESET               Local    1            3
+     SLOT0_H                 Local    2            6
+     SLOT0_H                 Local    1            3
+     SW10                    Local    3            3
+     SW11                    Local    3            3
+     SW12                    Local    3            3
+     SW13                    Local    3            3
+     SW6                     Local    3            3
+     SW7                     Local    3            3
+     SW8                     Local    3            3
+     SW9                     Local    3            3
+     SYSFAIL_INH             Local    1            3
+     SYSFAIL_INH             Local    1            2
+     SYS_CNTRLR              Local    2            6
+     SYS_CNTRLR              Local    4            5
+     TBERR_H                 Local    1            3
+     TBERR_H                 Local    1            2
+     TDTACK_H                Local    1            3
+     TDTACK_H                Local    1            2
+     TIACKOUT_L              Local    1            5
+     TIACKOUT_L              Local    1            3
+     TRGIN0                  Local    1            5
+     TRGIN0                  Local    1            3
+     TRGIN1                  Local    1            5
+     TRGIN1                  Local    1            3
+     TRGIN10                 Local    1            5
+     TRGIN10                 Local    1            3
+     TRGIN11                 Local    1            5
+     TRGIN11                 Local    1            3
+     TRGIN2                  Local    1            5
+     TRGIN2                  Local    1            3
+     TRGIN3                  Local    1            5
+     TRGIN3                  Local    1            3
+     TRGIN4                  Local    1            5
+     TRGIN4                  Local    1            3
+     TRGIN5                  Local    1            5
+     TRGIN5                  Local    1            3
+     TRGIN6                  Local    1            5
+     TRGIN6                  Local    1            3
+     TRGIN7                  Local    1            5
+     TRGIN7                  Local    1            3
+     TRGIN8                  Local    1            5
+     TRGIN8                  Local    1            3
+     TRGIN9                  Local    1            5
+     TRGIN9                  Local    1            3
+     TRGOUT0                 Local    1            5
+     TRGOUT0                 Local    1            3
+     TRGOUT1                 Local    1            5
+     TRGOUT1                 Local    1            3
+     TRGOUT10                Local    1            5
+     TRGOUT10                Local    1            3
+     TRGOUT11                Local    1            5
+     TRGOUT11                Local    1            3
+     TRGOUT2                 Local    1            5
+     TRGOUT2                 Local    1            3
+     TRGOUT3                 Local    1            5
+     TRGOUT3                 Local    1            3
+     TRGOUT4                 Local    1            5
+     TRGOUT4                 Local    1            3
+
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page  10
+
+    Net Name                 Type   Occurrences   Sheet
+     TRGOUT5                 Local    1            5
+     TRGOUT5                 Local    1            3
+     TRGOUT6                 Local    1            5
+     TRGOUT6                 Local    1            3
+     TRGOUT7                 Local    1            5
+     TRGOUT7                 Local    1            3
+     TRGOUT8                 Local    1            5
+     TRGOUT8                 Local    1            3
+     TRGOUT9                 Local    1            5
+     TRGOUT9                 Local    1            3
+     VMED0                   Local    2            4
+     VMED1                   Local    2            4
+     VMED10                  Local    2            4
+     VMED11                  Local    2            4
+     VMED12                  Local    2            4
+     VMED13                  Local    2            4
+     VMED14                  Local    2            4
+     VMED15                  Local    2            4
+     VMED16                  Local    2            4
+     VMED17                  Local    2            4
+     VMED18                  Local    2            4
+     VMED19                  Local    2            4
+     VMED2                   Local    2            4
+     VMED20                  Local    2            4
+     VMED21                  Local    2            4
+     VMED22                  Local    2            4
+     VMED23                  Local    2            4
+     VMED24                  Local    2            4
+     VMED25                  Local    2            4
+     VMED26                  Local    2            4
+     VMED27                  Local    2            4
+     VMED28                  Local    2            4
+     VMED29                  Local    2            4
+     VMED3                   Local    2            4
+     VMED30                  Local    2            4
+     VMED31                  Local    2            4
+     VMED4                   Local    2            4
+     VMED5                   Local    2            4
+     VMED6                   Local    2            4
+     VMED7                   Local    2            4
+     VMED8                   Local    2            4
+     VMED9                   Local    2            4
+     VXID0                   Local    2            4
+     VXID0                   Local    1            3
+     VXID1                   Local    2            4
+     VXID1                   Local    1            3
+     VXID10                  Local    2            4
+     VXID10                  Local    1            3
+     VXID11                  Local    2            4
+     VXID11                  Local    1            3
+     VXID12                  Local    2            4
+     VXID12                  Local    1            3
+     VXID13                  Local    2            4
+     VXID13                  Local    1            3
+     VXID14                  Local    2            4
+     VXID14                  Local    1            3
+     VXID15                  Local    2            4
+     VXID15                  Local    1            3
+     VXID16                  Local    2            4
+     VXID17                  Local    2            4
+     VXID18                  Local    2            4
+     VXID19                  Local    2            4
+
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page  11
+
+    Net Name                 Type   Occurrences   Sheet
+     VXID2                   Local    2            4
+     VXID2                   Local    1            3
+     VXID20                  Local    2            4
+     VXID21                  Local    2            4
+     VXID22                  Local    2            4
+     VXID23                  Local    2            4
+     VXID24                  Local    2            4
+     VXID25                  Local    2            4
+     VXID26                  Local    2            4
+     VXID27                  Local    2            4
+     VXID28                  Local    2            4
+     VXID29                  Local    2            4
+     VXID3                   Local    2            4
+     VXID3                   Local    1            3
+     VXID30                  Local    2            4
+     VXID31                  Local    2            4
+     VXID4                   Local    2            4
+     VXID4                   Local    1            3
+     VXID5                   Local    2            4
+     VXID5                   Local    1            3
+     VXID6                   Local    2            4
+     VXID6                   Local    1            3
+     VXID7                   Local    2            4
+     VXID7                   Local    1            3
+     VXID8                   Local    2            4
+     VXID8                   Local    1            3
+     VXID9                   Local    2            4
+     VXID9                   Local    1            3
+     VXI_A1                  Local    2            4
+     VXI_A10                 Local    2            4
+     VXI_A11                 Local    2            4
+     VXI_A12                 Local    2            4
+     VXI_A13                 Local    2            4
+     VXI_A14                 Local    2            4
+     VXI_A15                 Local    2            4
+     VXI_A16                 Local    2            4
+     VXI_A17                 Local    2            4
+     VXI_A18                 Local    2            4
+     VXI_A19                 Local    2            4
+     VXI_A2                  Local    2            4
+     VXI_A20                 Local    2            4
+     VXI_A21                 Local    2            4
+     VXI_A22                 Local    2            4
+     VXI_A23                 Local    2            4
+     VXI_A24                 Local    2            4
+     VXI_A25                 Local    2            4
+     VXI_A26                 Local    2            4
+     VXI_A27                 Local    2            4
+     VXI_A28                 Local    2            4
+     VXI_A29                 Local    2            4
+     VXI_A3                  Local    2            4
+     VXI_A30                 Local    2            4
+     VXI_A31                 Local    2            4
+     VXI_A4                  Local    2            4
+     VXI_A5                  Local    2            4
+     VXI_A6                  Local    2            4
+     VXI_A7                  Local    2            4
+     VXI_A8                  Local    2            4
+     VXI_A9                  Local    2            4
+     WT_EXTENDED             Local    1            4
+     WT_EXTENDED             Local    1            3
+     WT_MODID                Local    2            6
+
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page  12
+
+    Net Name                 Type   Occurrences   Sheet
+     WT_MODID                Local    1            3
+     WT_SIGNAL               Local    2            6
+     WT_SIGNAL               Local    1            3
+     XMT_ADDR                Local    1            5
+     XMT_ADDR                Local    5            4
+     XMT_LWORD               Local    2            5
+     XMT_LWORD               Local    1            4
+     XMT_STB                 Local    1            5
+     XMT_STB                 Local    1            4
+
+  Nets Cross-Referenced On This Run:
+    Net Name                 Sheet   Attribute Added
+     XMT_ADDR                  4      XREF=5/1A
+     XMT_ADDR                  5      XREF=4/3C
+     SLOT0_H                   3      XREF=6/3A
+     SLOT0_H                   6      XREF=3/2B
+     IRQ1                      2      XREF=3/4A
+     IRQ1                      3      XREF=2/4A
+     IRQ2                      2      XREF=3/4A
+     IRQ2                      3      XREF=2/4A
+     IRQ3                      2      XREF=3/4A
+     IRQ3                      3      XREF=2/4A
+     RCV_IACKIN                3      XREF=5/4A
+     RCV_IACKIN                5      XREF=3/3A
+     TIACKOUT_L                3      XREF=5/4A
+     TIACKOUT_L                5      XREF=3/3D
+     RCV_DTACK                 2      XREF=4/4B
+     RCV_DTACK                 4      XREF=2/3B
+     IRQ4                      2      XREF=3/4A
+     IRQ4                      3      XREF=2/4A
+     RCV_DS                    3      XREF=5/2A
+     RCV_DS                    4      XREF=5/2A
+     RCV_DS                    5      XREF=3/3A,4/4B
+     IRQ5                      2      XREF=3/4A
+     IRQ5                      3      XREF=2/4A
+     IRQ6                      2      XREF=3/4A
+     IRQ6                      3      XREF=2/4A
+     IRQ7                      2      XREF=3/4A
+     IRQ7                      3      XREF=2/4A
+     RCV_IACK                  2      XREF=4/4B
+     RCV_IACK                  4      XREF=2/3A
+     CLK10_DIR                 5      XREF=6/4B
+     CLK10_DIR                 6      XREF=5/1D
+     WT_EXTENDED               3      XREF=4/4B
+     WT_EXTENDED               4      XREF=3/2D
+     RCV_WRITE                 3      XREF=5/2B
+     RCV_WRITE                 4      XREF=5/2B
+     RCV_WRITE                 5      XREF=3/3A,4/4B
+     RD_MODID                  3      XREF=6/4A
+     RD_MODID                  6      XREF=3/2D
+     XMT_LWORD                 4      XREF=5/3A
+     XMT_LWORD                 5      XREF=4/2D
+     RD_SIGNAL                 3      XREF=6/2A
+     RD_SIGNAL                 6      XREF=3/2D
+     20M_CLK                   3      XREF=5/1D
+     20M_CLK                   5      XREF=3/3B
+     TDTACK_H                  2      XREF=3/3D
+     TDTACK_H                  3      XREF=2/4A
+     RCV_SYSRESET              2      XREF=3/3A
+     RCV_SYSRESET              3      XREF=2/4A
+     XMT_STB                   4      XREF=5/2B
+     XMT_STB                   5      XREF=4/3C
+
+V150.XRF     Sun July 28, 1996      Viewlogic Cross Reference  V4.0     Page  13
+
+    Net Name                 Sheet   Attribute Added
+     RCV_AS                    4      XREF=5/2B
+     RCV_AS                    5      XREF=4/4A
+     10M_CLK                   3      XREF=5/1C
+     10M_CLK                   5      XREF=3/3A
+     RESET_L                   2      XREF=6/4D
+     RESET_L                   3      XREF=6/4D
+     RESET_L                   4      XREF=6/4D
+     RESET_L                   6      XREF=2/2A,3/3A,4/4B
+     TBERR_H                   2      XREF=3/2D
+     TBERR_H                   3      XREF=2/4A
+     RD_INTID                  3      XREF=4/2A
+     RD_INTID                  4      XREF=3/2D
+     A_BBSY_AST                2      XREF=4/4B
+     A_BBSY_AST                4      XREF=2/4D
+     WT_SIGNAL                 3      XREF=6/2A
+     WT_SIGNAL                 6      XREF=3/2D
+     SYSFAIL_INH               2      XREF=3/2D
+     SYSFAIL_INH               3      XREF=2/4B
+     SYS_CNTRLR                5      XREF=6/4B
+     SYS_CNTRLR                6      XREF=5/1C
+     SFT_RESET                 3      XREF=6/3A
+     SFT_RESET                 6      XREF=3/3D
+     PUP_H                     2      XREF=6/3D
+     PUP_H                     6      XREF=2/4A
+     RCV_BERR                  2      XREF=4/4B
+     RCV_BERR                  4      XREF=2/3A
+     WT_MODID                  3      XREF=6/3A
+     WT_MODID                  6      XREF=3/2D
+
+  Nets Not Cross-Referenced On This Run:
+    Net Name
+     VCC                       
+     GND                       
+
+  XREF Command line:           C:\WORKVIEW\XRF.EXE V150 
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

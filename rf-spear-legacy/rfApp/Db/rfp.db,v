@@ -1,0 +1,480 @@
+head	1.5;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.5
+	RF-SPEAR-R0-3-1:1.5
+	RF-SPEAR-R0-3-0:1.5
+	RF-SPEAR-R0-2-0:1.5
+	RF-SPEAR-R0-1-0:1.5
+	RF-SPEAR-R0-0-3:1.5
+	RF-SPEAR-R0-0-2:1.5
+	RF-SPEAR-R0-0-1:1.5
+	RF-SPEAR-R0-0-0:1.5
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.5
+	RF-3-13-10:1.5.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.5
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.5
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.5
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.5
+date	2005.04.05.00.17.34;	author lazmo;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2004.09.21.00.08.51;	author lazmo;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.06.15.00.41.04;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.27.01.17.16;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.47;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.5
+log
+@Updated RFP calibration PVs.
+@
+text
+@grecord(bo,"$(R):STN:RFP:ARIPPLELOOP") {
+	field(DESC,"Analog Ripple Loop")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:RFP:MODU.RLON  PP NMS")
+	field(ZNAM,"Not Active")
+	field(ONAM,"Active")
+	field(ZSV,"MAJOR")
+}
+grecord(bo,"$(R):STN:RFP:COMBLOOP") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:RFP:MODU.CLE  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+}
+grecord(bo,"$(R):STN:RFP:DACS") {
+	field(DESC,"Dacs Output On/Off Control")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:RFP:MODU.DACS  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+}
+grecord(bo,"$(R):STN:RFP:DINJ") {
+	field(DESC,"Dacs Output Control")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:RFP:MODU.DINJ  PP NMS")
+	field(ZNAM,"Noise 1")
+	field(ONAM,"Noise 2")
+}
+grecord(bo,"$(R):STN:RFP:DIRECTLOOP") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:RFP:MODU.DLE  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+}
+grecord(bo,"$(R):STN:RFP:DOODCALIB") {
+	field(DESC,"Calibrate button")
+	field(DTYP,"Soft Channel")
+	field(ZNAM,"Calibrate")
+	field(ONAM,"Abort")
+}
+grecord(bo,"$(R):STN:RFP:INTCOMP") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:RFP:MODU.ICE  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+}
+grecord(bo,"$(R):STN:RFP:LEADCOMP") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:RFP:MODU.LCE  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+}
+grecord(bo,"$(R):STN:RFP:RFENABLE") {
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:RFP:MODU.RFOO  PP NMS")
+	field(ZNAM,"OFF")
+	field(ONAM,"ON")
+}
+grecord(bo,"$(R):STN:RFP:RIPPLELOOP") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:RFP:MODU.RLE  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+	field(ZSV,"MAJOR")
+}
+grecord(bo,"$(R):STN:RFP:RUNMODE") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:RFP:MODU.TNOP  PP NMS")
+	field(ZNAM,"Tune")
+	field(ONAM,"Operate")
+}
+grecord(bo,"$(R):STN:RFP:SSCONT") {
+	field(DESC,"RF Run Mode")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(OUT,"$(R):STN:RFP:MODU.SSCT  PP NMS")
+	field(ZNAM,"Single Shot")
+	field(ONAM,"Continuous")
+}
+grecord(mbbiDirect,"$(R):STN:RFP:INTSTATE") {
+	field(DTYP,"Soft Channel")
+	field(FLNK,"$(R):STN:RFP:RFSTATUS.VAL  PP MS")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:RFP:MODU.ISTT  NPP NMS")
+}
+grecord(mbbiDirect,"$(R):STN:RFP:RFSTATUS") {
+	field(DTYP,"Soft Channel")
+	field(NOBT,"16")
+	field(INP,"$(R):STN:RFP:MODU.RSTT  NPP NMS")
+}
+grecord(mbbo,"$(R):STN:RFP:CAVSEL") {
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"2")
+	field(OUT,"$(R):STN:RFP:MODU.CSMX  PP NMS")
+	field(ONVL,"0x1")
+	field(TWVL,"0x2")
+	field(THVL,"0x3")
+	field(ZRST,"1")
+	field(ONST,"2")
+	field(TWST,"3")
+	field(THST,"4")
+}
+grecord(mbbo,"$(R):STN:RFP:FBSIG") {
+	field(DESC,"Feedback Signal Mux Ctrl")
+	field(PINI,"YES")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"3")
+	field(OUT,"$(R):STN:RFP:MODU.FSMX  PP NMS")
+	field(ONVL,"0x1")
+	field(TWVL,"0x2")
+	field(THVL,"0x3")
+	field(FRVL,"0x4")
+	field(FVVL,"0x5")
+	field(SXVL,"0x6")
+	field(SVVL,"0x7")
+	field(ZRST,"Total")
+	field(ONST,"Comb Out")
+	field(TWST,"Noise 1")
+	field(THST,"Drive")
+	field(FRST,"Ripple Mon")
+	field(FVST,"Error Sum")
+	field(SXST,"Ground")
+	field(SVST,"Klystron")
+}
+grecord(mbbo,"$(R):STN:RFP:STATE") {
+	field(DESC,"RF Operating Mode")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"2")
+	field(OUT,"$(R):STN:RFP:MODU.MODE  PP NMS")
+	field(ONVL,"0x1")
+	field(TWVL,"0x2")
+	field(THVL,"0")
+	field(ZRST,"Reset")
+	field(ONST,"Load")
+	field(TWST,"Run")
+}
+grecord(mbbo,"$(R):STN:RFP:CALSTATUS") {
+	field(DESC,"last calibration status")
+	field(DTYP,"Soft Channel")
+	field(NOBT,"15")
+	field(ONVL,"1")
+	field(TWVL,"2")
+	field(THVL,"3")
+	field(FRVL,"4")
+	field(ZRST,"OK")
+	field(ONST,"ERROR")
+	field(TWST,"ABORT")
+	field(THST,"COMBERR")
+	field(FRST,"NORF")
+	field(ONSV,"MAJOR")
+	field(TWSV,"MAJOR")
+	field(THSV,"MAJOR")
+	field(FRSV,"MAJOR")
+}
+grecord(mbboDirect,"$(R):STN:RFP:INTACK") {
+	field(DTYP,"Soft Channel")
+	field(NOBT,"16")
+	field(OUT,"$(R):STN:RFP:MODU.IACK  PP NMS")
+}
+grecord(stringin,"$(R):STN:RFP:CALTIME") {
+	field(DTYP,"Soft Channel")
+}
+grecord(stringin,"$(R):STN:RFP:CALMSG") {
+	field(DTYP,"Soft Channel")
+}
+grecord(p2RfRfp,"$(R):STN:RFP:MODU") {
+	field(DESC,"RFP Module")
+	field(DTYP,"PEP-II RF RFP")
+	field(FLNK,"$(R):STN:RFP:INTSTATE.PROC  PP MS")
+	field(OUT,"#V0 C$(S) S0 @@(null)")
+	field(PREC,"4")
+	field(IMSK,"197")
+	field(DSPE,"/dsp/rippleRfp")
+	field(DDSF,"/dat/ripple.dat")
+	field(AMSP,"0.5")
+	field(PHSG,"0.005")
+	field(PCDF,"/tbl/PhaseCoefs.tbl")
+	field(ACDF,"/tbl/AmplCoefs.tbl")
+	field(C1II,"1000")
+	field(C1QQ,"1000")
+	field(C2II,"1000")
+	field(C2QQ,"1000")
+	field(C3II,"1000")
+	field(C3QQ,"1000")
+	field(C4II,"1000")
+	field(C4QQ,"1000")
+	field(CO1I,"6")
+	field(CO1Q,"-310")
+	field(CO2I,"204")
+	field(CO2Q,"-645")
+	field(CO3I,"213")
+	field(CO3Q,"284")
+	field(CO4I,"-402")
+	field(CO4Q,"-488")
+	field(GO1I,"-395")
+	field(GO1Q,"-380")
+	field(GO2I,"-695")
+	field(GO2Q,"-450")
+	field(GO3I,"-285")
+	field(GO3Q,"-960")
+	field(GO4I,"-105")
+	field(GO4Q,"-800")
+	field(DLIO,"-707")
+	field(DLQO,"728")
+	field(DLII,"-2000")
+	field(DLQQ,"-2000")
+	field(TMIS,"2")
+	field(TMQS,"1")
+	field(KLIO,"560")
+	field(KLQO,"505")
+	field(RFIO,"1100")
+	field(RFQO,"100")
+	field(CSIO,"-280")
+	field(CSQO,"-590")
+	field(RMSZ,"50")
+	field(SIRF,"$(SI)")
+	field(SQRF,"$(SQ)")
+	field(CIRF,"$(CI)")
+	field(CQRF,"$(CQ)")
+	field(DIRF,"$(TI)")
+	field(DQRF,"$(TQ)")
+}
+@
+
+
+1.4
+log
+@Added :STN:RFP:CALABORT PV for rf_calib.st.
+Changed fields SXST/SVST in :STN:RFP:FBSIG.
+@
+text
+@a0 6
+grecord(bo,"$(R):STN:RFP:CALABORT") {
+	field(DESC,"Calibration Abort button")
+	field(DTYP,"Soft Channel")
+	field(ZNAM,"Abort")
+	field(ONAM,"Aborting")
+}
+d44 1
+a44 1
+	field(ONAM,"Calibrating")
+d147 18
+d170 4
+a173 1
+grecord(stringin,"$(R):STN:RFP:CALIBSTATUS") {
+@
+
+
+1.3
+log
+@Correct initial value of DSPE (DSP download file) and PHSG
+(ripple loop DC phase gain).  Add initial values of IMSK and RMSZ (RAM size).
+@
+text
+@d1 6
+d47 1
+d138 2
+a139 2
+	field(SXST,"Noise 2")
+	field(SVST,"Spare")
+a173 1
+	field(RMSZ,"50")
+d210 1
+@
+
+
+1.2
+log
+@Rename
+@
+text
+@d160 2
+a161 1
+	field(DSPE,"/dsp/rampDacsRfp")
+d164 1
+a164 1
+	field(PHSG,"-0.0005")
+d167 1
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d1 2
+a2 1
+grecord(bo,"$(R):STN:RFP:SSCONT") {
+d4 5
+a8 3
+	field(OUT,"$(R):STN:RFP:MODU.SSCT  PP NMS")
+	field(ZNAM,"Single Shot")
+	field(ONAM,"Continuous")
+d10 1
+a10 1
+grecord(bo,"$(R):STN:RFP:RUNMODE") {
+d12 4
+a15 3
+	field(OUT,"$(R):STN:RFP:MODU.TNOP  PP NMS")
+	field(ZNAM,"Tune")
+	field(ONAM,"Operate")
+d17 2
+a18 1
+grecord(bo,"$(R):STN:RFP:RIPPLELOOP") {
+d20 2
+a21 1
+	field(OUT,"$(R):STN:RFP:MODU.RLE  PP NMS")
+a23 1
+	field(ZSV,"MAJOR")
+d25 7
+a31 4
+grecord(bo,"$(R):STN:RFP:RFENABLE") {
+	field(OUT,"$(R):STN:RFP:MODU.RFOO  PP NMS")
+	field(ZNAM,"OFF")
+	field(ONAM,"ON")
+d33 1
+a33 1
+grecord(bo,"$(R):STN:RFP:LEADCOMP") {
+d35 2
+a36 1
+	field(OUT,"$(R):STN:RFP:MODU.LCE  PP NMS")
+d40 5
+d47 1
+d52 1
+a52 1
+grecord(bo,"$(R):STN:RFP:DIRECTLOOP") {
+d54 2
+a55 1
+	field(OUT,"$(R):STN:RFP:MODU.DLE  PP NMS")
+d59 7
+a65 1
+grecord(bo,"$(R):STN:RFP:DACS") {
+d67 2
+a68 1
+	field(OUT,"$(R):STN:RFP:MODU.DACS  PP NMS")
+d71 1
+d73 1
+a73 1
+grecord(bo,"$(R):STN:RFP:COMBLOOP") {
+d75 4
+a78 3
+	field(OUT,"$(R):STN:RFP:MODU.CLE  PP NMS")
+	field(ZNAM,"Off")
+	field(ONAM,"On")
+d80 7
+a86 3
+grecord(bo,"$(R):STN:RFP:DOODCALIB") {
+	field(ZNAM,"Calibrate")
+	field(ONAM,"Calibrating")
+d89 1
+d95 1
+d99 3
+a101 1
+grecord(mbbo,"$(R):STN:RFP:STATE") {
+d103 1
+a103 1
+	field(OUT,"$(R):STN:RFP:MODU.MODE  PP NMS")
+d106 5
+a110 3
+	field(ZRST,"Reset")
+	field(ONST,"Load")
+	field(TWST,"Run")
+d113 1
+d115 2
+a116 1
+	field(NOBT,"2")
+d121 4
+d127 1
+a127 1
+	field(TWST,"Noise")
+d129 4
+d134 3
+a136 2
+grecord(mbbo,"$(R):STN:RFP:CAVSEL") {
+	field(PINI,"YES")
+d138 1
+a138 1
+	field(OUT,"$(R):STN:RFP:MODU.CSMX  PP NMS")
+d141 4
+a144 5
+	field(THVL,"0x3")
+	field(ZRST,"1")
+	field(ONST,"2")
+	field(TWST,"3")
+	field(THST,"4")
+d147 1
+d152 1
+d155 2
+d202 6
+a207 6
+	field(SIRF,"/dat/rfpSigIRam.dat")
+	field(SQRF,"/dat/rfpSigQRam.dat")
+	field(CIRF,"/dat/rfpCavIRam.dat")
+	field(CQRF,"/dat/rfpCavQRam.dat")
+	field(DIRF,"/tbl/rfpDacIRam.tbl")
+	field(DQRF,"/tbl/rfpDacQRam.tbl")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

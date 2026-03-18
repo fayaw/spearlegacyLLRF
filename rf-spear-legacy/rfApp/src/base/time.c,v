@@ -1,0 +1,505 @@
+head	1.5;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.5
+	RF-SPEAR-R0-3-1:1.5
+	RF-SPEAR-R0-3-0:1.5
+	RF-SPEAR-R0-2-0:1.5
+	RF-SPEAR-R0-1-0:1.5
+	RF-SPEAR-R0-0-3:1.5
+	RF-SPEAR-R0-0-2:1.5
+	RF-SPEAR-R0-0-1:1.5
+	RF-SPEAR-R0-0-0:1.5
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.5
+	RF-3-13-10:1.5.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.5
+date	2002.12.16.19.40.40;	author luchini;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2002.12.13.22.19.50;	author luchini;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2002.12.13.22.14.29;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2002.05.14.23.58.15;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.5
+log
+@Rename TS_NTP_INET to TS_RDATE_SERVER and TS_NTP_IPPORT to TS_RDATE_IPPORT
+@
+text
+@/*
+** ++
+**
+**  Facility:  TIME
+**
+**  Abstract:
+**      Functions to set up the clock
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Longitudinal Feedback Project
+**
+**  History:
+**      March  22, 2001 - Added TIM_SetRate
+**	August 16, 1995 - Created from code I found in comp.os.vxworks by
+**                        Warren Jasper (wjasper@@tx.ncsu.edu)
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#include <vxWorks.h>
+#include <sysLib.h>
+#include <string.h>
+#include <sysLib.h>
+#include <time.h>
+#include <timers.h>
+#include <socket.h>
+#include <sockLib.h>
+#include <bootLib.h>
+#include <envLib.h>
+#include <in.h>
+#include <stdio.h>
+#include <hostLib.h>
+#include <ioLib.h>
+#include <drv/timer/timerDev.h>       /* for sysClkRateGet,sysClkRateSet  */
+#include <private/timerLibP.h>        /* for clock_setres                 */
+#include <logLib.h>                   /* for logMsg                       */
+#include <stdlib.h>                   /* for atoi                         */
+
+/* extern char *   sysBootLine; */   /* address of boot line */
+
+#define IPPORT_TIMESERVER 37
+#define SERVER            (char *) ((char *) &sysBootParams + 20)
+
+
+
+void TIM_date (void)
+/*
+   Description
+   -----------
+   Routine like UNIX' date function
+
+   Parameters
+   ----------
+   none
+
+   Returns
+   -------
+   none
+*/
+{
+  time_t tp;
+
+  tp = time (0);
+  printf (ctime (&tp));
+}
+
+
+
+#if 0
+void TIM_SetDateFromEpics (void)
+/*
+   Description
+   -----------
+   Set the time from the EPICS routines.  iocCore must be loaded, TSconfigure
+   and iocInit must be called.
+   The EPICS epoch is 1/1/1990, so to convert to the VxWorks epoch (1/1/1970)
+   we will add 20 years in seconds.
+
+   Parameters
+   ----------
+   none
+
+   Returns
+   -------
+   none
+*/
+{
+  struct timespec tp;
+
+  TScurrentTimeStamp (&tp);
+
+  tp.tv_sec += 631152000;             /* 20*365.25*24*60*60 = 20 years */
+
+  clock_settime (CLOCK_REALTIME, &tp);
+  printf ("The new time is set to: ");
+  TIM_date ();
+}
+
+
+
+void TIM_CmpDateWithEpics (void)
+/*
+   Description
+   -----------
+   Really a routine for testing, but we'll leave it for the time being.
+   This routine reports the difference between the VxWorks and EPICS
+   clock counters for both the seconds and nanoseconds parts of the structure.
+   This is how I found the 20 year difference in counting styles even though
+   the claim is that the VxWorks epoch = the Unix epoch = January 1, 1900 and
+   the EPICS epoch is January 1, 1990.  It seems to me that the VxWorks epoch
+   is really January 1, 1970.
+
+   Parameters
+   ----------
+   none
+
+   Returns
+   -------
+   none
+*/
+{
+  void TIM_rdate (void);
+
+  struct timespec tp1;
+  struct timespec tp2;
+
+  TIM_rdate ();
+
+  clock_gettime (CLOCK_REALTIME, &tp1);
+  TScurrentTimeStamp (&tp2);
+
+  printf ("clock - epics: sec = %u, nsec = %u\n",
+          tp1.tv_sec - tp2.tv_sec, tp1.tv_nsec - tp2.tv_nsec);
+}
+#endif
+
+
+
+void TIM_SetDate (unsigned long  secs)
+/*
+   Description
+   -----------
+   Set the clock according to user input
+
+   Parameters
+   ----------
+         secs - Number of seconds since Jaunuary 1, 1900
+
+   Returns
+   -------
+   none
+*/
+{
+  /* Assume the time is in GMT */
+  struct timespec tp;
+
+  tp.tv_sec  = secs;
+  tp.tv_nsec = 0;
+
+  clock_settime (CLOCK_REALTIME, &tp);
+  printf ("The new time is set to: ");
+  TIM_date ();
+}
+
+
+
+void TIM_rdate (void)
+/*
+   Description
+   -----------
+   Routine like UNIX' rdate function.  This function gets the time from
+   the boot host.
+
+   Parameters
+   ----------
+   none
+
+   Returns
+   -------
+   none
+*/
+{
+  struct sockaddr_in  sockaddr;
+  struct timespec     tp;
+  int                 s;
+  unsigned long       t;
+  char               *buffer=NULL;
+  char               *hostname=NULL;
+  int                 nbytes;
+  int                 nread;
+  unsigned long       offset = 0x83AA7E80;  /* 2208988800 (dec)*/
+
+
+  memset ((char *)(&sockaddr), NULL, sizeof (sockaddr));
+  sockaddr.sin_family = AF_INET;
+
+  buffer = getenv("TS_RDATE_IPPORT");
+  if ( !buffer ) 
+    /* use default port */
+    sockaddr.sin_port   = htons (IPPORT_TIMESERVER);
+  else 
+    /* use the specified port */
+    sockaddr.sin_port = (unsigned short)atoi(buffer);
+
+  hostname = getenv("TS_RDATE_SERVER");
+  if ( hostname==NULL ) {
+    /* use boot host if the environment variable not set */
+    sockaddr.sin_addr.s_addr = hostGetByName(SERVER);
+    hostname = (char *)SERVER;
+  }
+  else 
+    sockaddr.sin_addr.s_addr = hostGetByName(hostname);
+
+  if ((s = socket (AF_INET, SOCK_STREAM, 0)) == ERROR)
+  {
+    perror ("TIM_rdate: socket () error");
+    return;
+  }
+
+  if (connect (s, (struct sockaddr *) &sockaddr, sizeof (sockaddr)) == ERROR)
+  {
+    close (s);
+    perror ("TIM_rdate: connect () to socket error");
+#ifdef DBG
+    printf("TIM_rdate: server=%s  ip=%ld port=%.2d  family=%.2d\n",
+            hostname,
+            sockaddr.sin_addr.s_addr,
+            sockaddr.sin_port,
+            sockaddr.sin_family);
+#endif
+    return;
+  }
+  buffer = (char *) &t;
+  nbytes = sizeof (t);
+  while (nbytes)
+  {
+    if ((nread = read (s, buffer, nbytes)) == ERROR )
+    {
+      close (s);
+      perror ("TIM_rdate: read () error on socket");
+      return;
+    }
+    nbytes -= nread;
+    buffer += nread;
+  }
+  close (s);
+
+  /*
+  | There are 2208988800 = (70*365+17)*24*60*60 (17 leap years with 366 days)
+  | seconds between 1/1/1900 (the UNIX epoch) and 1/1/1970 (the VxWorks epoch).
+  */
+
+  tp.tv_sec = (long) (ntohl (t) - offset);
+  tp.tv_nsec = 0;
+#ifdef DBG
+  printf ("rdate: host secs since 1/1/1900 = %08lx, tgt secs since 1/1/1970 = %08lx\n", t, tp.tv_sec);
+#endif
+  clock_settime (CLOCK_REALTIME, &tp);
+}
+
+
+int TIM_SetRate( int rate ) 
+/*
+   Description
+   -----------
+   This function sets a new clock rate and ensures that
+   time of dat clock stays in sync by calling clock_setres()
+   after setting the new rate.
+
+   Parameters
+   ----------
+        rate - Number of ticks per second.
+
+   Returns
+   -------
+   long 
+          OK    - Successful Operation
+          ERROR - Operation Failed
+          -2    - Warning, set odd clock rate          
+*/
+{
+   int             status = ERROR;
+   int             cur_rate;
+   clockid_t       clock_id = CLOCK_REALTIME;
+   struct timespec ts_s;
+
+  /* Clock rate can only be set betweek 30Hz and 1000Hz */
+   if ( (rate<30) || (rate>1000)) {
+      logMsg("Attempt to set invalid clock rate of %dHz (30Hz-1000Hz)\n",
+             rate,0,0,0,0,0);
+   }
+   else {  
+     if ( rate & 1 ) 
+        logMsg("Warning! Unexpected results occur when setting an odd % of ticks per second\n",
+               0,0,0,0,0,0);
+     cur_rate = sysClkRateGet();
+     status   = sysClkRateSet( rate );
+     if ( status!=OK ) 
+       logMsg("Failed to set clock rate to %dHz\n",rate,0,0,0,0,0);
+     else {
+       ts_s.tv_sec  = 0;                       
+       ts_s.tv_nsec = (long)(1000000000/rate);
+       status = clock_setres(clock_id,&ts_s);
+       if ( status!=OK )
+         logMsg("Failed to set clock resolution\n",0,0,0,0,0,0);
+       else
+         logMsg("Successfully set clock rate from %dHz to %dHz\n",
+                cur_rate,rate,0,0,0,0);
+     }
+   }
+   return(status);
+}
+
+@
+
+
+1.4
+log
+@Removed unused variable bootParms in TIM_rdate
+@
+text
+@a64 1
+#include "genLib.h"
+d224 1
+a224 1
+  buffer = getenv("TS_NTP_IPPORT");
+d232 1
+a232 1
+  hostname = getenv("TS_NTP_INET");
+@
+
+
+1.3
+log
+@Added TS_NTP_IPPORT to TIM_rdate
+@
+text
+@a219 1
+  BOOT_PARAMS         bootParms;
+@
+
+
+1.2
+log
+@Got rid of warnings
+@
+text
+@d64 1
+d215 2
+a216 2
+  char               *buffer;
+  char                host_addr[BOOT_ADDR_LEN];
+a224 1
+  sockaddr.sin_port   = htons (IPPORT_TIMESERVER);
+d226 10
+a235 2
+  buffer = getenv("TS_NTP_INET");
+  if  ((buffer==NULL) || (strlen(buffer)==0)) {
+d237 2
+a238 3
+    bootStringToStruct(sysBootLine,&bootParms);
+    /* bootParms.had = host IP address */
+    strncpy(host_addr,bootParms.had,BOOT_ADDR_LEN);
+d240 2
+a241 3
+  else
+    strncpy(host_addr,buffer,BOOT_ADDR_LEN);
+  sockaddr.sin_addr.s_addr = hostGetByName (host_addr);
+d254 2
+a255 2
+    printf("TIM_rdate: server=%s  host=%ld port=%.2d  family=%.2d\n",
+            (char *)SERVER,
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d48 1
+d55 2
+d64 1
+d66 1
+a66 11
+
+#define NIL   (void *)(0)
+#define NULL           0
+#define TRUE           1
+#define FALSE          0
+#define SUCCESS        0
+#define FAILURE        1
+
+#define Min(a,b)       ((a) < (b) ? (a) : (b))
+#define Max(a,b)       ((a) > (b) ? (a) : (b))
+#define lsizeof(var)   (sizeof (var) >> 2)
+d215 1
+d218 2
+d226 10
+a235 1
+  sockaddr.sin_addr.s_addr = hostGetByName (SERVER);
+d247 7
+d276 1
+a276 1
+  tp.tv_sec = (ntohl (t) - 2208988800);
+d279 1
+a279 1
+  printf ("rdate: host secs since 1/1/1900 = %08x, tgt secs since 1/1/1970 = %08x\n", t, tp.tv_sec);
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

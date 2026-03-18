@@ -1,0 +1,86 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2002.04.08.23.17.46;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.46;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#ifndef PARAMS_H
+    #define PARAMS_H
+
+    #include <stdio.h>
+    
+    #define CR	      0xa
+
+    enum boolean
+    {
+	false,
+	true
+    };
+
+    enum types
+    {
+	INT,
+	INT_LIST,
+	FLT,
+	FLT_LIST,
+	STRING
+    };
+
+    typedef struct tagvar
+    {
+	char *section;
+	char *varname;
+	int type;
+	void *value;
+    } var;
+
+    int misc_get_param(FILE *pfile, char *section, char *var, void **ret,
+    int type);
+
+#endif /* PARAMS_H */
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

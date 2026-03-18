@@ -1,0 +1,135 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.56.58;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.56.58;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@|
+|  Copyright (c) 1991 Viewlogic Systems, Inc.
+|
+
+|
+| Set the default display characteristics for each object
+| Object  Color Fillstyle Linestyle
+| ------  ----- --------- ---------
+  NET        1       1        1             | BLUE SOLID SOLID  (BIT-COMP OF)
+  COMPONENT  2       0        1             | GREEN HOLLOW SOLID  (COMPONENT)
+  ATTRIBUTE 11       0        1             | WHITE HOLLOW SOLID
+  LABEL     11       1        1             | WHITE SOLID SOLID
+  PIN       11       0        1             | LT. GREY HOLLOW SOLID
+  VECTOR    14       1        1             | YELLOW SOLID SOLID 
+  BOX        2       0        1             | GREEN HOLLOW SOLID
+  LINE       2       0        1             | GREEN HOLLOW SOLID
+  CIRCLE     2       0        1             | GREEN HOLLOW SOLID
+  ARC        2       0        1             | GREEN HOLLOW SOLID
+  TEXT      15       0        1             | WHITE HOLLOW SOLID
+
+|
+| Set the scale display characteristics for attribute scaling.
+| Note that Fillstyle will be used for scaling in monochrome systems.
+| Object  Color Fillstyle 
+| ------  ----- --------- 
+                            | Lowest end of scale
+SCALE0     1       1        |  BLUE        SOLID
+SCALE1     3       1        |  CYAN        SOLID
+SCALE2     5       1        |  MAGENTA     SOLID
+SCALE3     4       1        |  RED         SOLID
+SCALE4    14       1        |  YELLOW      SOLID
+SCALE5    15       1        |  WHITE       SOLID        
+                            | Highest end of scale.
+
+
+| set the display characteristics for the selection layer
+SELECTION_LAYER 15 0 1      | WHITE HOLLOW SOLID
+
+| set the display characteristics for the border layer
+BORDER_LAYER 15 0 1         | WHITE HOLLOW SOLID
+BACKSIDE_COLOR 4            | Other side components RED
+
+| Default values
+GRID 100               | Grid spacing
+HISTSIZE 10            | Draw size
+TEXTSIZE 35            | Text size
+TEXTORIGIN 5           | Text origin
+COMPORIEN 1            | Default component orientation
+AUTOLOG 10             | Autolog value
+SDISTANCE 20           | Selection distance (in pixels)
+PADSIZE 25             | Pad size in mils
+EQ_IC 14               | number of pins used to calculate equivalent ic
+DRC_SPACE 50           | Min spacing between component in mils
+TEXT_THRESHOLD 3       | Text threshold
+OFFSET 10000           | Display offset
+
+| Default modes
+GRIDON 0               | Grid display OFF
+BORDERON 1             | Border display ON
+HEADERON 1             | Header display ON 
+COMPTEXTON 0           | Component text, labels and attributes OFF
+TEXTON 1               | Text ON
+ATTRON 1               | Attributes ON
+LABELON 1              | labels ON
+DETAIL 0               | detail OFF
+BELL 0                 | bell OFF                         
+DISPHIST 0             | Display histogram OFF
+FRCVECT 0              | Display force vectors OFF
+SCALECALCON 1          | Automatic calculation of scale boundaries ON
+RATON       2          | Ratsnest display SELECT
+
+UNDO 1                 | Undo ON
+NETLENGTH 1            | display netlength ON
+DEVTYPE 0              | Display component device type OFF
+REFDES 0               | Display refdes OFF
+PADS 0                 | Display pads OFF
+
+
+DIR 0 E:\VLPROJ\SNOOP\
+
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

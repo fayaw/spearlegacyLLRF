@@ -1,0 +1,177 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.12;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.12;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@TITLE "V150 READ DATA MUX											REV A.0";
+
+SUBDESIGN RD_MUX (
+	RD_ID,
+	RD_CSR,
+	RD_PROTOCOL,
+	RD_RESPONSE,
+	RD_DATALO,
+	RD_INTSTA,
+	RD_INTCNTL,
+	RD_TRIGINT,
+	RD_LOCINT,
+	ENA_VECTOR,
+	MODID,
+	SYS_INH,
+	SFT_RST,
+	ERR,
+	RD_RDY,
+	WT_RDY,
+	DATALO[15..0],
+	LOC_ISRC,
+	TRG_ISRC,
+	LA[7..0],
+	LMON_IE,
+	TRG_IE,
+	IR_ENA,
+	IRQ_S3,
+	IRQ_S2,
+	IRQ_S1,
+	TI_ISRC[11..0],
+	ERR_ISRC,
+	WTDATA_ISRC,
+	RDDATA_ISRC,
+	WTSGNL_ISRC			:INPUT;
+
+	XMT_DATA,
+	RD[15..0]			:OUTPUT;)
+
+BEGIN
+
+XMT_DATA = RD_ID
+		 # RD_CSR
+		 # RD_PROTOCOL
+		 # RD_RESPONSE
+		 # RD_DATALO
+		 # RD_INTSTA
+		 # RD_INTCNTL
+		 # RD_TRIGINT
+		 # RD_LOCINT
+		 # ENA_VECTOR;
+
+
+IF(RD_ID) THEN
+	RD[15..0] = B"1011111100101001";
+  END IF;
+
+IF (RD_CSR) THEN
+	RD[15] = B"0";
+	RD[14] = MODID;
+	RD[13..2] = B"111111111111";
+	RD[1] = SYS_INH;
+	RD[0] = SFT_RST;
+  END IF;
+
+IF (RD_PROTOCOL) THEN
+	RD[15..0] = B"0001111111111111";
+  END IF;
+
+IF (RD_RESPONSE) THEN
+	RD[15..12] = B"0100";
+	RD[11] = ERR;
+	RD[10] = RD_RDY;
+	RD[9] = WT_RDY;
+	RD[8..0] = B"111111111";
+  END IF;
+
+IF (RD_DATALO) THEN
+	RD[15..0] = DATALO[15..0];
+  END IF;
+
+IF (RD_INTSTA) THEN
+	RD[15..10] = B"000000";
+	RD[9] = LOC_ISRC;
+	RD[8] = TRG_ISRC;
+	RD[7..0] = B"11111111";
+  END IF;
+
+IF (RD_INTCNTL) THEN
+	RD[15..10] = B"111111";
+	RD[9] = LMON_IE;
+	RD[8] = TRG_IE;
+	RD[7] = IR_ENA;
+	RD[6] = B"1";
+	RD[5] = IRQ_S3;
+	RD[4] = IRQ_S2;
+	RD[3] = IRQ_S1;
+	RD[2..0] = B"111";
+  END IF;
+
+IF (RD_TRIGINT) THEN
+	RD[15..12] = B"0000";
+	RD[11..0] = TI_ISRC[11..0];
+  END IF;
+
+IF (RD_LOCINT) THEN
+	RD[15..8] = B"00000000";
+	RD[7] = ERR_ISRC;
+	RD[6] = WTDATA_ISRC;
+	RD[5] = RDDATA_ISRC;
+	RD[4] = WTSGNL_ISRC;
+	RD[3..0] = B"0000";
+  END IF;
+
+IF (ENA_VECTOR) THEN
+	RD[15..10] = B"000000";
+	RD[9] = LOC_ISRC;
+	RD[8] = TRG_ISRC;
+	RD[7..0] = LA[7..0];
+  END IF;
+END;
+
+			 
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

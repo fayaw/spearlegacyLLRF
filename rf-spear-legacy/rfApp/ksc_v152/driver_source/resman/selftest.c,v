@@ -1,0 +1,149 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.32.44;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  rmshell.c
+
+  System Self-Test & Diagnostics Management portion of Resource Manager
+  (second of six parts) per sections C.4.1 & C.4.1.2, Rules C.4.4, C.4.6
+  and C.4.7 of VXIbus System Specification VXI-1, Rev. 1.4; 4/21/92
+***************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "resman.h"
+
+
+/*
+ * Entry point
+ */
+
+int rmSelfTest( time_t sfDelay )
+{
+   config_t *thisLA;
+   UINT16 data, allPassed;
+   int la, modID, found, i;
+   int status;
+
+
+/* WAIT UNTIL ALL SELF-TESTS HAVE COMPLETED
+ * (all devices have set their Passed bits to 1 
+ *  OR >= 5 seconds have elapsed since de-assertion of SYSRESET*)
+ * NOTE:  this includes any time used by the Identify Devices step 
+ */
+   do
+   {
+      allPassed = 4L;
+      for( la = 0; la < NVXIADDR; la++ )
+      {
+       if( laPresent[la] != LA_NOT_SEEN )
+       {
+        /* 
+         * READ STATUS REGISTER FOR THIS L.A. 
+         */
+	 status = VXIinReg (la, 0x04, &data);
+         allPassed &= data;
+       }
+      } /* endfor la */
+   }
+   while( !allPassed && (time((time_t *)NULL) < sfDelay) ); /* 2/14/96 */
+
+/* FORCE ALL FAILED DEVICES INTO THE "SOFT RESET" STATE (Reset bit = 1)
+ * WITH SYSFAIL* ASSERTION INHIBITED (Sysfail Inhibit = 1).
+ * --> See Rule C.4.4, which mandates setting device dependent bits to 1
+ *     unless ResMan knows about the device.  This ResMan doesn't know
+ *     about ANY device-dependent Control register bit assignments.
+ */
+   for( la = 0; la < NVXIADDR; la++ )
+   {
+      if( laPresent[la] != LA_NOT_SEEN )
+      {
+        /*
+         *  READ STATUS REGISTER FOR CURRENT L.A. 
+         */
+
+	status = VXIinReg (la, 0x04, &data);
+
+	if( (data & 4L) == 0L )
+	{
+	  WARN "Device at LA %3d in slot %2d did not pass self-test.\n"
+	    "    It is now in Soft Reset state.\n", la, laPresent[la]);
+
+	  status = VXIoutReg (la, 0x04, 0x7FFF);
+
+	  thisLA = findLAConfig( la, HEAD );
+	  thisLA->reset = thisLA->syfInhb = 1;
+	  thisLA->passed = 0;
+	  thisLA->ready = data >> 3;
+	}  /* endif not passed */
+      }  /* endif present */
+    } /* endfor la */
+
+   return( 0 );
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

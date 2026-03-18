@@ -1,0 +1,3131 @@
+head	1.11;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.11
+	RF-SPEAR-R0-3-1:1.11
+	RF-SPEAR-R0-3-0:1.11
+	RF-SPEAR-R0-2-0:1.11
+	RF-SPEAR-R0-1-0:1.11
+	RF-SPEAR-R0-0-3:1.11
+	RF-SPEAR-R0-0-2:1.11
+	RF-SPEAR-R0-0-1:1.11
+	RF-SPEAR-R0-0-0:1.11
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.11
+	RF-3-13-10:1.10.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.10
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.10
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.10
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.11
+date	2011.12.07.01.21.53;	author saa;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2004.04.10.00.01.17;	author lazmo;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2004.01.05.22.25.35;	author saa;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2003.09.11.22.57.43;	author luchini;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2003.09.11.18.49.44;	author luchini;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2003.08.27.02.28.49;	author lazmo;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.08.23.01.00.42;	author lazmo;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.08.14.22.41.18;	author lazmo;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.08.05.19.11.07;	author lazmo;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.11.22.26.08;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.11
+log
+@Changes for 3.14.11 (export) and compiler warnings.
+@
+text
+@/*
+** ++
+**
+**  Facility:  DEV - DEVice support
+**
+**  Abstract:
+**      EPICS device support for the PEP-II RF Arc Detector / Fast
+**      Interlock Module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Low Level RF Group
+**
+**  History:
+**	January 7, 1997 - Created
+**	February 2003   - [lazmo] Added support for both 7- and 12-channel
+**			  Arc Module versions, gated by "AIM_ISnCH" macros
+**	August, 14 2003 - [lazmo] Fixed Arc Voltage sign-propagation 
+**	March 29, 2004  - [lazmo] Removed "Invalid Operation Address" (INVOP) stuff
+**
+**  Copyright:
+**                                Copyright 1997
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#define DBG1x1 (rec->dbg1 & 0x1)	/* DBG1 bit 0x1: for printf() etc. */
+#define DBG1x2 (rec->dbg1 & 0x2)	/* DBG1 bit 0x2: for printf() etc. */
+
+#include <vxWorks.h>
+#include <taskLib.h>          /* VxWorks taskDelay            */
+#include <sysLib.h>
+#include <stdlib.h>
+#include <types.h>
+#include <stdioLib.h>
+#include <string.h>
+  
+#include <epicsPrint.h>
+#include <cvtTable.h>
+#include <dbDefs.h>
+#include <dbAccess.h>
+#include <dbEvent.h>
+#include <recGbl.h>
+#include <recSup.h>
+#include <devSup.h>
+#include <link.h>
+#include <alarm.h>
+/*#include <module_types.h>*/
+#include <callback.h>
+
+#include <p2RfLib.h>
+#include <drvP2RfVxi.h>
+#include <p2RfAimDef.h>
+#include <p2RfAimRecord.h>
+
+#include "epicsExport.h"
+
+#define AIM_V_INTSELECT    AIM_V_ARCDETD
+
+#define AIM_M_INTSELECT   (AIM_M_ARCDETD  | AIM_M_VXIBPFLT   | \
+                           AIM_M_ABFLT    | AIM_M_FRCDFLTINT | \
+                           AIM_M_TEMPVOLT | AIM_M_SOFTWARE)
+/* AIM_M_INVOP removed from mask 2004-03-29 [lazmo] */
+
+/*
+** Defines for reading DAS registers
+*/
+#define  TVREG      12      /* Reg # in DAS chips of temps, voltages etc. */
+#define  NUMTVREG   8
+#define  REGANDMASK 0xE000
+#define  REGBITPOS  13
+#define  VALANDMASK 0xFFF 
+#define  MAX12BIT   4095
+#define  MAX11BIT   2047
+#define  NUMARCOMP  7
+#define  PEAKREADS  50
+#define  MINTRIPLVL 10
+#define  MAXTRIPLVL 255
+
+typedef struct p2RfAimRecord   P2RfAimRecord;
+
+static long InitRecord (P2RfAimRecord *);
+static long Action     (P2RfAimRecord *);
+
+
+typedef struct
+{
+  long		number;
+  DEVSUPFUN	report;
+  DEVSUPFUN	init;
+  DEVSUPFUN	init_record;
+  DEVSUPFUN	get_ioint_info;
+  DEVSUPFUN	action;
+} P2RfAimDset;
+
+P2RfAimDset devP2RfAim = {5, NULL, NULL, InitRecord, NULL, Action};
+
+epicsExportAddress(dset,devP2RfAim);
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  long            status;
+}  AimRstBlk;
+
+typedef struct
+{
+  char           *id;
+  int             count;
+  int             index;
+  char           *file;
+}  AimDasPrm;
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  AimDasPrm      *prm;
+  long            status;
+}  AimDasBlk;
+
+typedef struct			/* 12-channel */
+{
+  char           *id;
+  int             index;
+  int             count;
+  char           *file;
+  short          *buffer;
+}  AimMemPrm;
+
+typedef struct			/* 12-channel */
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  AimMemPrm      *prm;
+  long            status;
+  int             abortFlg;
+}  AimRamBlk;
+
+typedef struct
+{
+  void           *drvPvt;
+  P2RfAimRecord  *rec;
+  AimRstBlk       resetBlk;
+  AimDasBlk       dasBlk[2];
+  AimRamBlk       getRamBlk;	/* 12-channel */
+  AimMemPrm       hisPrm;	/* 12-channel */
+  unsigned int    intPrc;
+  unsigned short  firstFault;
+  unsigned short  invOpAdx;
+  AimDasPrm       dasPrm[2];
+}  AimBoard;
+
+
+/*** Forward references ***/
+
+static long  SpawnReset      (P2RfAimRecord *, AimRstBlk *);
+static void  ResetCallback   (AimRstBlk *);
+
+/*----------------------------------------------------------------
+ * 7-channel AIM DAS readout
+ *----------------------------------------------------------------
+ */
+static long  SpawnLdDas    (P2RfAimRecord  *,
+			    unsigned char  *,
+			    AimDasBlk      *,
+                            AimDasPrm      *,
+			    char           *,
+			    unsigned short *);
+
+static void  LdDasCallback (AimDasBlk      *);
+
+/*----------------------------------------------------------------
+ * 12-channel AIM History-Buffer readout
+ *----------------------------------------------------------------
+ */
+static long  SpawnGetRam     (P2RfAimRecord  *,
+			      unsigned char  *,
+			      AimRamBlk      *,
+                              AimMemPrm      *,
+			      unsigned int    ,
+			      char           *,
+                              unsigned short *);
+
+static void  GetRamCallback  (AimRamBlk      *);
+
+
+static void  AimIsr          (void *, unsigned short);
+static void  AimShutdown     (void *);
+
+static long  InitFields      (AimBoard *, int);
+static long  ColdInit        (AimBoard *, P2RfAimRecord *);
+static long  WarmInit        (AimBoard *, P2RfAimRecord *);
+
+
+/* Channel-number to bit-mask conversion table... needed because channels 1-8
+ * are not adjacent to 9-12 in the 12-channel AIM version (at least after they're
+ * shifted by software, to support old s/w & DBs), so a simple shift wouldn't work.
+ */
+static int chan2bit[] = {
+  0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040, 0x0080,	/* channels 1-8  */
+  0x1000, 0x2000, 0x4000, 0x8000,					/* channels 9-12 */
+  0x0100								/* spare (12-ch) */
+};
+
+
+/****************************************************************/
+/*   ICURAP: If-Changed-Update-Rec-And-Post                     */
+/****************************************************************/
+#define ICURAP(_VAL, _FIELD)			\
+    if (_VAL != (rec->_FIELD)) {		\
+      rec->_FIELD = _VAL;			\
+      db_post_events (rec,			\
+		      &(rec->_FIELD),		\
+		      DB_POST_PARMS		\
+		     );				\
+    }
+#define DB_POST_PARMS	(DBE_VALUE | DBE_LOG)	/* common db_post_events() parms */
+/****************************************************************/
+
+
+static void AimIsr (void           *brdArg,
+                    unsigned short  intStat)
+/*
+   Description
+   -----------
+   Device specific routine to handle interrupts generated by the module.
+   It runs in the context of the Interrupt Service Routine.  Thus all
+   the rules for coding at IPL apply.
+
+   Parameters
+   ----------
+       brdArg - A pointer to the device private structure
+      intStat - The interrupt status mask
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("AimIsr"); */
+
+  AimBoard       *brd = (AimBoard *) brdArg;
+  P2RfAimRecord  *rec = brd->rec;
+
+  /* Scan record to update some fields and to process forward links */
+  rec->istt = intStat;
+  brd->intPrc++;
+  scanOnce ((dbCommon *)rec);
+
+#if 0
+  if (intStat & AIM_M_ARCDETD)
+    logMsg ("%s: Arc detected\n", (int)FN,0,0,0,0,0);
+  if (intStat & AIM_M_VXIBPFLT)
+    logMsg ("%s: VXI Backplane Fault Trigger\n", (int)FN,0,0,0,0,0);
+  if (intStat & AIM_M_TEMPVOLT)
+    logMsg ("%s: Crate temperature or voltage out of tolerance\n", (int)FN,0,0,0,0,0);
+  if (intStat & AIM_M_ABFLT)
+    logMsg ("%s: Allen-Bradley Fault\n", (int)FN,0,0,0,0,0);
+  if (intStat & AIM_M_INVOP)
+    logMsg ("%s: Invalid operation: adx = %h04x\n",(int)FN,(int)( brd->invOpAdx),0,0,0,0);
+  if (intStat & AIM_M_SOFTWARE)
+    logMsg ("%s: Software interrupt\n", (int)FN,0,0,0,0,0);
+#endif
+}
+
+
+static void AimShutdown (void  *brdArg)
+/*
+   Description
+   -----------
+   Device specific routine to run at shutdown time.
+
+   Parameters
+   ----------
+       brdArg - A pointer to the device private structure
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("AimShutdown"); */
+}
+
+
+static long InitRecord (P2RfAimRecord  *rec)
+/*
+   Description
+   -----------
+   Initialize the record.  Many fields of the record are filled with data from
+   the hardware.  Depending on the start-up type (cold or warm) some record
+   fields will either set up the hardware or get their values from a restore
+   file.  Interrupts from the board are enabled at the end of the
+   initialization.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("InitRecord");
+  struct vxiio   *vxiIo = NULL;
+  AimBoard       *brd;
+  long            status;
+  void           *drvPvt;
+  char           *msg   = "AIM module initialization failed";
+  int             startType;
+
+  /* rec.out must be of type VXI_IO */
+  if (rec->out.type != VXI_IO)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (S_db_badField, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "Illegal OUT field"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return(S_db_badField);
+  }
+
+  /* Allocate the device private block */
+  if ((brd = calloc (1, sizeof (*brd))) == NULL)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (ERROR, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN,
+                                     "No memory for AIM board descriptor"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Register the module to get a driver handle */
+  vxiIo = &rec->out.value.vxiio;
+  if ( (status = P2RF_RegisterModule (vxiIo->flag, vxiIo->frame, vxiIo->slot,
+                                    vxiIo->la,
+                                    AIM_K_MODEL, AIM_K_NAME, AIM_K_DRAWING,
+                                    AimIsr, brd, AimShutdown, brd,
+                                    &drvPvt)) )
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "P2RF_RegisterModule"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (status);
+  }
+
+  /* Set up the device private block and save a pointer to it in the record */
+  brd->drvPvt = drvPvt;
+  brd->rec    = rec;
+  rec->dpvt   = brd;
+
+  /* Initialize the callback facility for the reset function */
+  callbackSetCallback ((void*)ResetCallback, &brd->resetBlk.callback);
+  callbackSetPriority (priorityHigh,         &brd->resetBlk.callback);
+  callbackSetUser     (rec,                  &brd->resetBlk.callback);
+  brd->resetBlk.drvPvt = drvPvt;
+
+  /* sneak in an early VME read of the board version number here... copied from
+   * initFields() below; we need it here so AIM_IS<n>CH macros will work!
+   */
+
+  P2RF_ReadVme (drvPvt, AIM_I_VERSION, &rec->vern);
+  rec->verh = P2RF_HWVER(rec->vern);
+  rec->verf = P2RF_FWVER(rec->vern);
+
+  /*----------------------------------------------------------------
+   * support for 7-channel DAS readout
+   *----------------------------------------------------------------
+   */
+  if (AIM_IS7CH) {
+    /* Initialize the callback facility for loading DAS chip 1 */
+    callbackSetCallback ((void*)LdDasCallback, &brd->dasBlk[0].callback);
+    callbackSetPriority (priorityLow,          &brd->dasBlk[0].callback);
+    callbackSetUser     (rec,                  &brd->dasBlk[0].callback);
+    brd->dasBlk[0].drvPvt = drvPvt;
+
+    /* Load the static part of the DAS parameter block */
+    {
+      AimDasPrm *prm = &brd->dasPrm[0];
+      prm->id        = AIM_K_DASID;
+      prm->index     = AIM_I_DAS1;
+    }
+
+    /* Initialize the callback facility for loading DAS chip 2 */
+    callbackSetCallback ((void*)LdDasCallback, &brd->dasBlk[1].callback);
+    callbackSetPriority (priorityLow,          &brd->dasBlk[1].callback);
+    callbackSetUser     (rec,                  &brd->dasBlk[1].callback);
+    brd->dasBlk[1].drvPvt = drvPvt;
+
+    /* Load the static part of the DAS parameter block */
+    {
+      AimDasPrm *prm = &brd->dasPrm[1];
+      prm->id        = AIM_K_DASID;
+      prm->index     = AIM_I_DAS2;
+    }
+  } /* end if (AIM_IS7CH) */
+
+  /*----------------------------------------------------------------
+   * support for 12-channel AIM history-buffer readout 
+   *----------------------------------------------------------------
+   */
+  if (AIM_IS12CH) {
+    /* Initialize the callback facility for the History-Buffer read function */
+    brd->getRamBlk.drvPvt = drvPvt;
+    callbackSetCallback ((void*)GetRamCallback, &brd->getRamBlk.callback);
+    callbackSetPriority (priorityLow,           &brd->getRamBlk.callback);
+    callbackSetUser     (rec,                   &brd->getRamBlk.callback);
+
+    /* Load the static part of the history-buffer parameter block */
+    {
+      AimMemPrm *prm = &brd->hisPrm;
+      prm->id    = AIM_K_HISBUFID;
+      prm->index = AIM_I_HISBUF;
+    }
+  } /* end if (AIM_IS12CH) */
+
+  /* Figure out the restart type -- To be determined */
+  startType = P2RF_K_COLDSTART;
+
+  /* Initialize the module and the database fields depending on startup type */
+  if ( (status = InitFields (brd, startType)) )
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Enable module interrupts and update the database copy */
+  P2RF_ModIntEnable (drvPvt);
+  P2RF_ReadVme (drvPvt, AIM_I_INTCTRL, &rec->ictl);
+
+  return (OK);
+}
+
+
+static long InitFields (AimBoard *brd,
+                        int       initType)
+/*
+   Description
+   -----------
+   Function to initialize the fields in the database record and/or the module,
+   depending on the initialization type.
+
+   Parameters
+   ----------
+          brd - A pointer to the device private block
+     initType - Type of initialization.
+
+   Returns
+   -------
+   Status
+*/
+{
+  /* Function ("InitFields"); */
+
+  P2RfAimRecord  *rec    = brd->rec;
+  void           *drvPvt = brd->drvPvt;
+  long            status;
+  unsigned short  sernHi;
+  unsigned short  sernLo;
+
+  /* Reset the module, if it's a cold startup.  This takes a while... */
+  if (initType == P2RF_K_COLDSTART)  P2RF_ResetModule (drvPvt);
+
+  /* Load the record fields with device data */
+  P2RF_ReadVme (drvPvt, AIM_I_MANID,     &rec->mid );
+  P2RF_ReadVme (drvPvt, AIM_I_MODELNO,   &rec->mtyp);
+  P2RF_ReadVme (drvPvt, AIM_I_STATUS,    &rec->mstt);
+  P2RF_ReadVme (drvPvt, AIM_I_OFFSET,    &rec->a24o);
+  P2RF_ReadVme (drvPvt, AIM_I_ATTRIBUTE, &rec->vatt);
+
+  P2RF_ReadVme (drvPvt, AIM_I_SERIALHI,  &sernHi   );
+  P2RF_ReadVme (drvPvt, AIM_I_SERIALLO,  &sernLo   );
+  rec->sern = (sernHi << 16) | sernLo;
+
+  P2RF_ReadVme (drvPvt, AIM_I_VERSION,   &rec->vern);
+  P2RF_ReadVme (drvPvt, AIM_I_SUBCLASS,  &rec->vscl);
+
+  rec->verh = P2RF_HWVER(rec->vern);
+  rec->verf = P2RF_FWVER(rec->vern);
+
+  rec->nchn = AIM_K_CHANCNT;
+
+  /* Write some registers if we're doing a grounds-up initialization */
+  if (initType == P2RF_K_COLDSTART)    status = ColdInit (brd, rec);
+  else                                 status = WarmInit (brd, rec);
+
+  /* Resman wrote 0xfffc to module control register; take down software int */
+  rec->mctl = rec->mstt & (AIM_M_SFTRST | AIM_M_SYSFAILINH | AIM_M_A24A32);
+  P2RF_WriteVme (drvPvt, AIM_I_CONTROL,  rec->mctl);
+  P2RF_ReadVme  (drvPvt, AIM_I_STATUS,  &rec->mstt);
+
+  /*
+  |  Reading the Interrupt Status Register clears the outstanding Software
+  |  Interrupt Status bit, but does not clear the pending interrupt.  Thus
+  |  reading the register here would confuse the ISR when interrupts are
+  |  enabled and the pending software interrupt is taken: the ISR would
+  |  not be able to find the source of the interrupt.
+  */
+
+  /* Update the database copy of the module Status and control registers */
+  P2RF_ReadVme (drvPvt, AIM_I_FISTAT, &rec->fstt);
+  P2RF_ReadVme (drvPvt, AIM_I_FICTRL, &rec->fctl);
+
+  return (status);
+}
+
+
+static long ColdInit (AimBoard      *brd,
+                      P2RfAimRecord *rec)
+/*
+   Description
+   -----------
+   Initialization file to run when starting up from scratch.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("ColdInit");
+
+  long            status = OK;
+  long         tl_status = OK;		/* trip level status */
+
+  register void  *drvPvt = brd->drvPvt;
+  unsigned short  reg;
+
+  /* Don't allow database access to the interrupt level */
+  reg = (P2RF_K_INTLEVEL << AIM_V_INTLEVEL) & AIM_M_INTLEVEL;
+
+  /* Initialize the Interrupt Control Register from the database */
+  rec->ictl = ~(reg | ((rec->imsk << AIM_V_INTSELECT) & AIM_M_INTSELECT));
+  P2RF_WriteVme (drvPvt, AIM_I_INTCTRL, rec->ictl);
+  rec->oimk = rec->imsk;
+
+  /* Read the Arc Channel Fault Enable Status */
+  P2RF_ReadVme (drvPvt, AIM_I_FLTENBSTT, &reg);
+  rec->qfes = reg;			/* save unadulterated contents */
+  rec->afes = reg & AIM_M_FLTENBSTT;
+
+  /* Read the Arc Current Status and look at enabled channels only */
+  P2RF_ReadVme (drvPvt, AIM_I_ARCCURSTT, &reg);
+  rec->qcst = reg;			/* save unadulterated contents */
+
+  reg ^= AIM_M_ARCCURSTT_FLT;		/* Convert to low when FAULTED */
+  rec->acst = reg & rec->afes;
+
+  /* Read the Arc Latched Status and look at enabled channels only */
+  P2RF_ReadVme (drvPvt, AIM_I_ARCLTDSTT, &reg);
+  rec->qlst = reg;			/* save unadulterated contents */
+  rec->alst = reg & rec->afes;          /* Bit(s) are low when FAULTED */
+
+  /* Load the default trip levels */
+  {
+    unsigned short *tl   = &rec->tl1;	/* trip level values */
+    unsigned short *tlp  = &rec->tlp1;	/* trip level previous values */
+    unsigned short *tlr  = &rec->tlr1;	/* trip level readback values */
+    unsigned short *tlam = &rec->tlam;	/* trip level readback alarm mask */
+    unsigned short *tlas = &rec->tlas;	/* trip level readback alarm mask (sticky) */
+
+    unsigned short  lvl;
+    int             chan;
+
+    *tlam = 0;						/* init readback alarm mask */
+    *tlas = 0;
+
+    for (chan = 0; chan < AIM_K_CHANCNT; chan++)
+    {
+      lvl = ((*tl) << AIM_V_TRIPLVL) & AIM_M_TRIPLVL;	/* trip level */
+      *tlp = *tl;					/* "previous" trip level */
+
+      /* for 12-channel AIM, add channel number... these bits aren't writable as such,
+       * but we add them here so the readback test will work
+       */
+      if (AIM_IS12CH) lvl |= (chan << AIM_V_TRIPLVL_CHAN);
+
+      /* Make sure that the register changed to what we set it to */
+      P2RF_WriteVme (drvPvt, chan + AIM_I_TRIPLVL1, lvl);
+      P2RF_ReadVme  (drvPvt, chan + AIM_I_TRIPLVL1, &reg);
+
+      if (AIM_IS12CH) reg &= AIM_M_TRIPLVL_ALL;		/* fix 12-chan version */
+
+      *tlr =  (reg & AIM_M_TRIPLVL) >> AIM_V_TRIPLVL;	/* init trip level readback (w/o chan#) */
+
+      if (reg != lvl) {					/* init readback alarm */
+	*tlam |= (1 << chan);	/* (this could also mean that chan# may have read back wrong) */
+	*tlas |= (1 << chan);
+      }
+
+      if (reg != lvl)
+      {
+        char  buf[P2RF_K_BUFSIZE];
+
+        recGblRecordError (
+	   -1, rec,
+	   P2RF_Sprintf (
+		buf, __FILE__, FN,
+		"Arc Trip Level register readback error: "
+		"idx %hi, wrt %h04x, rd %h04x, xor %h04x\n",
+		chan + AIM_I_TRIPLVL1,
+		lvl, reg, reg ^ lvl)
+	   );
+
+        strncpy (rec->val, "Arc Trip Level register readback error",
+                 sizeof (rec->val));
+
+	tl_status = ERROR;
+      }
+    }
+    tl++, tlp++, tlr++;
+  }
+
+  /* Read the data file and load the two DAS chips */
+  if (AIM_IS7CH)
+  {
+    AimDasPrm  *prm = &brd->dasPrm[0];
+
+    rec->d0as = NO_ALARM;
+    if ((status = P2RF_LoadRegFile (drvPvt, prm->id, rec->d0if,
+                                    prm->index, FALSE,
+                                    rec->val, sizeof (rec->val))) != OK)
+    {
+      char  buf[P2RF_K_BUFSIZE];
+      recGblRecordError (status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_LoadRegFile",
+                                       prm->id, rec->d0if));
+      rec->d0as = UDF_ALARM;
+    }
+
+    /* Next chip */
+    prm++;
+
+    rec->d1as = NO_ALARM;
+    if ((status = P2RF_LoadRegFile (drvPvt, prm->id, rec->d1if,
+                                    prm->index, FALSE,
+                                    rec->val, sizeof (rec->val))) != OK)
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_LoadRegFile",
+                                       prm->id, rec->d1if));
+      rec->d1as = UDF_ALARM;
+    }
+  } /* end AIM_IS7CH */
+
+  if (tl_status != OK) status = tl_status;
+
+  return (status);
+}
+
+
+static long WarmInit (AimBoard       *brd,
+                      P2RfAimRecord  *rec)
+/*
+   Description
+   -----------
+   Initialization routine to run when the module is still running
+   satisfactorily.  This function will (when it is written) bring
+   the EPICS database in synch with the module.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  /* Function ("WarmInit"); */
+
+  return (OK);
+}
+
+
+static long Action (P2RfAimRecord    *rec)
+/*
+   Description
+   -----------
+   This is the action routine for the AIM.  An asynchronous module reset
+   mechanism is implemented.  This feature toggles the software reset line on
+   the VXI interface chip.  Since it takes a while (on the order of a second)
+   for the reset to complete, the module must not be touched during its
+   assertion.  To implement this, the record is processed asynchronously.  When
+   the reset completes, the database fields are updated with the current state
+   of the module
+
+   Parameters
+   ----------
+          rec - A pointer to the record structure
+
+   Returns
+   -------
+   0 or 2 for successful returns, else a status */
+{
+  Function ("Action");
+
+  AimBoard       *brd    = NULL;
+  void           *drvPvt;
+  unsigned short  fctl;
+  unsigned short  reg;
+
+  /* If initialization failed let the system know */
+  if ((brd = rec->dpvt) == NULL)  return (ERROR);
+  drvPvt = brd->drvPvt;
+
+  /* If processing was invoked by an interrupt, handle it */
+  if (brd->intPrc)
+  {
+    /* Read the First Fault register */
+    if (rec->istt & (AIM_M_ARCDETD | AIM_M_VXIBPFLT |
+                     AIM_M_ABFLT   | AIM_M_FRCDFLTINT))
+    {
+      P2RF_ReadVme (drvPvt, AIM_I_FIRSTFLT, &brd->firstFault);
+      rec->qflt = brd->firstFault;		/* save original */
+
+      brd->firstFault ^= AIM_M_ARCFLT;		/* Get all bits high TRUE */
+
+      /* Report enabled channels only */
+      brd->firstFault &= rec->afes | (AIM_M_VXIFLT   | AIM_M_ABHBFLT |
+                                      AIM_M_ABSUMFLT | AIM_M_FRCD_FLT);
+    }
+
+#if 0 /* remove, per Mike Browne... "useless function" [lazmo 2004-03-29] */
+    /* Read the Invalid Operation Address register */
+    if (rec->istt & AIM_M_INVOP) {
+      P2RF_ReadVme (drvPvt, AIM_I_INVOPADX, &brd->invOpAdx);
+      brd->invOpAdx = (brd->invOpAdx << 1) & AIM_M_INVOPADX;
+    }
+#endif
+
+    /* Update client value of interrupt status field */
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DB_POST_PARMS);
+      rec->oist = rec->istt;
+
+      db_post_events (rec, &rec->qflt, DB_POST_PARMS);	/* post original */
+      ICURAP (brd->firstFault, fflt);
+      ICURAP (brd->invOpAdx, ioax);
+    }
+
+    /* Update the database copy of the fast interlock status register */
+    P2RF_ReadVme (drvPvt, AIM_I_FISTAT,  &rec->fstt);
+    db_post_events (rec, &rec->fstt, DB_POST_PARMS);
+
+    /* Read the Arc Current Status and look at enabled channels only */
+    P2RF_ReadVme (drvPvt, AIM_I_ARCCURSTT, &reg);
+
+    ICURAP (reg, qcst);			/* save/post original */
+
+    reg ^= AIM_M_ARCCURSTT_FLT;		/* Convert to low FAULTED */
+    reg &= rec->afes;
+
+    ICURAP (reg, acst);
+
+    /* Read the Arc Latched Status and look at enabled channels only */
+    P2RF_ReadVme (drvPvt, AIM_I_ARCLTDSTT, &reg);
+
+    ICURAP (reg, qlst);			/* save/post original */
+
+    reg &= rec->afes;                   /* Register is low FAULTED */
+    ICURAP (reg, alst);
+
+    /* Don't lose invocation count on multiple interrupts */
+    brd->intPrc--;
+
+    return (0);
+  }
+
+  /* Initialize the message buffer if we're not doing completion processing */
+  if (!rec->pact)    strncpy (rec->val, "Success", sizeof (rec->val));
+
+  /* If requested, do a "software reset" on the module */
+  if (rec->mrst)  return (SpawnReset (rec, &brd->resetBlk));
+
+  /* If operator disabled interrupts update interrupt status DB field */
+  P2RF_ReadVme (drvPvt, AIM_I_INTCTRL, &reg);
+  if ((reg & AIM_M_INTSELECT) == AIM_M_INTSELECT)
+  {
+    P2RF_ReadVme (drvPvt, AIM_I_INTSTAT, &rec->istt);
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DB_POST_PARMS);
+      rec->oist = rec->istt;
+
+      /* Read the First Fault register */
+      if (rec->istt & (AIM_M_ARCDETD | AIM_M_VXIBPFLT |
+                       AIM_M_ABFLT   | AIM_M_FRCDFLTINT))
+      {
+        P2RF_ReadVme (drvPvt, AIM_I_FIRSTFLT, &brd->firstFault);
+
+	ICURAP (brd->firstFault, qflt);	/* save/post original */
+
+        brd->firstFault ^= AIM_M_ARCFLT; /* Bit is high when faulted */
+
+        /* Report enabled channels only */
+        brd->firstFault &= rec->afes | (AIM_M_VXIFLT   | AIM_M_ABHBFLT |
+                                        AIM_M_ABSUMFLT | AIM_M_FRCD_FLT);
+
+	ICURAP (brd->firstFault, fflt);
+      }
+
+#if 0 /* remove, per Mike Browne... "useless function" [lazmo 2004-03-29] */
+      /* If there was an invalid operation, update Invalid Operation Address */
+      if (rec->istt & AIM_M_INVOP) {
+	P2RF_ReadVme (drvPvt, AIM_I_INVOPADX, &brd->invOpAdx);
+	brd->invOpAdx = (brd->invOpAdx << 1) & AIM_M_INVOPADX;
+	ICURAP (brd->invOpAdx, ioax);
+      }
+#endif
+
+    }
+  }
+
+  /* Let the operator acknowledge that the interrupts have been seen */
+  if (rec->iack)
+  {
+    rec->istt &= ~rec->iack;            /* Take only requested bits down */
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DB_POST_PARMS);
+      rec->oist = rec->istt;
+    }
+    rec->iack = 0;
+    db_post_events (rec, &rec->iack, DB_POST_PARMS);
+  }
+
+  /* Update the interrupt control register if there was a change request */
+  if (rec->imsk != rec->oimk)
+  {
+    rec->oimk = rec->imsk;
+    rec->ictl = (rec->ictl & ~AIM_M_INTSELECT) |
+              ((~rec->imsk << AIM_V_INTSELECT) & AIM_M_INTSELECT);
+    P2RF_WriteVme (drvPvt, AIM_I_INTCTRL, rec->ictl);
+    db_post_events (rec, &rec->ictl, DB_POST_PARMS);
+  }
+
+  /* Get the current state of the module */
+  P2RF_ReadVme (drvPvt, AIM_I_FICTRL, &fctl);
+
+  /* Potentially modify some bits in the Fast Interlock Control register */
+  fctl &= ~(AIM_M_SOLENOID | AIM_M_HVPS     | AIM_M_FILAMENT | AIM_M_FILTMOOVRD |
+            AIM_M_FRCDFLT  | AIM_M_FLTRESET | AIM_M_FRCBMABT | AIM_M_RSTBMABT );
+
+  if (AIM_IS12CH) {				/* 12ch: hist buf bits */
+    fctl &= ~( AIM_M_ADCMUX | AIM_M_ADCCTL );
+  }
+
+  /* Potentially turn solenoid on or off */
+  fctl  |= ((rec->soo  ? 1 : 0) << AIM_V_SOLENOID)   & AIM_M_SOLENOID;
+
+  /* Potentially request HVPS to turn on */
+  fctl  |= ((rec->hvps ? 1 : 0) << AIM_V_HVPS)       & AIM_M_HVPS;
+  rec->hvps = 0;
+
+  /* Potentially turn the klystron filament on or off */
+  fctl  |= ((rec->foo  ? 1 : 0) << AIM_V_FILAMENT)   & AIM_M_FILAMENT;
+
+  /* Potentially request filament timeout override */
+  fctl  |= ((rec->ftor ? 1 : 0) << AIM_V_FILTMOOVRD) & AIM_M_FILTMOOVRD;
+  rec->ftor = 0;
+
+  /* Potentially force a fault */
+  fctl  |= ((rec->ff   ? 1 : 0) << AIM_V_FRCDFLT)    & AIM_M_FRCDFLT;
+
+  /* Potentially reset faults */
+  if (rec->rstf)
+  {
+    rec->rstf = 0;
+
+    fctl  |= AIM_M_FLTRESET;
+
+    /* Acknowledge the fault interrupt(s) */
+    rec->istt &= ~(AIM_M_ARCDETD    | AIM_M_VXIBPFLT | AIM_M_ABFLT |
+                   AIM_M_FRCDFLTINT | AIM_M_TEMPVOLT);
+
+    rec->oist &= ~(AIM_M_ARCDETD    | AIM_M_VXIBPFLT | AIM_M_ABFLT |
+                   AIM_M_FRCDFLTINT | AIM_M_TEMPVOLT);
+
+    db_post_events (rec, &rec->istt, DB_POST_PARMS);
+  }
+
+  /* Potentially force a beam abort */
+  fctl  |= ((rec->fba  ? 1 : 0) << AIM_V_FRCBMABT)   & AIM_M_FRCBMABT;
+
+  /* Potentially reset beam abort */
+  fctl  |= ((rec->rba  ? 1 : 0) << AIM_V_RSTBMABT)   & AIM_M_RSTBMABT;
+  rec->rba = 0;
+
+  /* 12-channel AIM: Set history buffer control bits */
+  if (AIM_IS12CH) {
+    fctl |= (rec->hmux ? AIM_M_ADCMUX : 0);
+    fctl |= (rec->hctl ? AIM_M_ADCCTL : 0);
+  }
+
+  /* Update module and database versions of Fast Interlock Control register */
+  if (fctl != rec->fctl)
+  {
+    /* strobed bits */
+    unsigned short fiCtl = fctl & ~(AIM_M_HVPS     | AIM_M_FILTMOOVRD |
+                                    AIM_M_FLTRESET | AIM_M_RSTBMABT);
+
+    P2RF_WriteVme (drvPvt, AIM_I_FICTRL, fctl);
+
+    /* Resensitize some bits to low-high transitions by taking them down */
+    if (fiCtl != fctl)    P2RF_WriteVme (drvPvt, AIM_I_FICTRL, fiCtl);
+
+    P2RF_ReadVme  (drvPvt, AIM_I_FICTRL, &rec->fctl);
+    db_post_events (rec, &rec->fctl, DB_POST_PARMS);
+
+    /* Make sure that the register changed to what we set it to */
+    if (fiCtl != rec->fctl)
+    {
+      epicsPrintf ("%s - Fast Interlock Control register readback error: wrt 0x%04X, rd 0x%04X, xor 0x%04X\n",
+                   FN, fiCtl, rec->fctl, fiCtl ^ rec->fctl);
+      strncpy (rec->val, "Fast Interlock Control register readback error",
+               sizeof (rec->val));
+    }
+  }
+
+  /* process trip test requests, and update trip levels */
+  {
+    unsigned char  *tt   = &rec->tt1;	/* trip test buttons */
+
+    unsigned short *tl   = &rec->tl1;	/* trip level values */
+    unsigned short *tlp  = &rec->tlp1;	/* trip level previous values */
+    unsigned short *tlr  = &rec->tlr1;	/* trip level readback values */
+    unsigned short *tlam = &rec->tlam;	/* trip level readback alarm mask */
+    unsigned short *tlas = &rec->tlas;	/* trip level readback alarm mask (sticky) */
+
+    unsigned short  lvl, rbk, ambit;
+    int             chan;
+
+    for (chan = 0;
+	 chan < AIM_K_CHANCNT;
+	 chan++, tt++, tl++, tlp++, tlr++) {
+
+      ambit = (1 << chan);				/* alarm bit, for masks */
+
+      /* Trip Test - value written is immaterial */
+      if (*tt) {					/* button pushed? */
+        P2RF_WriteVme (drvPvt, chan + AIM_I_TRIPTEST1, 0);
+        *tt = 0;					/* resensitize button */
+      }
+
+      /* enforce limits on trip level */
+      if (*tl < MINTRIPLVL) {*tl = MINTRIPLVL; db_post_events (rec, tl, DB_POST_PARMS);}
+      if (*tl > MAXTRIPLVL) {*tl = MAXTRIPLVL; db_post_events (rec, tl, DB_POST_PARMS);}
+
+      /* update trip level if different from previous */
+      lvl = (*tl << AIM_V_TRIPLVL) & AIM_M_TRIPLVL;	/* desired trip level, from GUI */
+      if (*tl != *tlp) {
+	*tlp = *tl;						/* update "previous" */
+	db_post_events (rec, tlp, DB_POST_PARMS);		/* update DB */
+        P2RF_WriteVme (drvPvt, chan + AIM_I_TRIPLVL1, lvl);	/* write reg */
+      }
+
+      /* verify current trip level (this is done every time) */
+      P2RF_ReadVme  (drvPvt, chan + AIM_I_TRIPLVL1, &reg);
+      reg &= AIM_M_TRIPLVL;				/* isolate level */
+
+      rbk = reg >> AIM_V_TRIPLVL;
+      if (rbk != *tlr) {				/* if not same as previous readback... */
+	*tlr = rbk;					/* update readback DB field */
+	db_post_events (rec, tlr, DB_POST_PARMS);
+      }
+
+      /* if readback is different from desired, set alarm and post error if first time */
+      if (reg != lvl) {
+	if ((*tlam & ambit) == 0) {			/* first time bad? */
+	  *tlam |= ambit;				/* ... set bit in alarm mask */
+	  *tlas |= ambit;				/* ... also in sticky mask */
+	  db_post_events (rec, tlam, DB_POST_PARMS);
+	  db_post_events (rec, tlas, DB_POST_PARMS);
+
+	  /* channels are numbered 0+ in h/w, 1+ in s/w & displays :(( */
+	  epicsPrintf(
+	     "%s - Arc Trip Level register readback error: chan %d, wrt 0x%04X, rd 0x%04X, xor 0x%04X\n",
+	     FN, chan+1, lvl, reg, reg ^ lvl);
+
+if (DBG1x2) printf(" >>> Trip Level rbck err: wrt 0x%04X, rd 0x%04X, xor 0x%04X\n", lvl, reg, reg^lvl);
+
+	  strncpy(rec->val,
+		  "Arc Trip Level register readback error",
+		  sizeof(rec->val));
+
+#if 0 /*don't... but if you want to, here's where to do it */
+	  P2RF_WriteVme (drvPvt, chan + AIM_I_TRIPLVL1, lvl);	/* write good value again */
+#endif
+	}
+      }
+      else {			/* readback is OK; reset alarm if it was set */
+	if (*tlam & ambit) {
+	  *tlam &= (-1 ^ ambit);			/* reset bit in mask */
+	  db_post_events (rec, tlam, DB_POST_PARMS);
+				/* .TLAS is sticky -> never reset by s/w */
+	}
+      } /* end if (readback different) */
+
+    } /* end for (all channels) */
+  } /* end local block */
+
+  /* Update the database copy of the fast interlock status register */
+  P2RF_ReadVme (drvPvt, AIM_I_FISTAT,  &rec->fstt);
+  db_post_events (rec, &rec->fstt, DB_POST_PARMS);
+
+  /* Read the Arc Channel Fault Enable Status */
+  P2RF_ReadVme (drvPvt, AIM_I_FLTENBSTT, &reg);
+
+  ICURAP (reg, qfes);			/* save/post original */
+
+  reg &= AIM_M_FLTENBSTT;
+  ICURAP (reg, afes);
+
+  /* Refresh the First Fault database copy */
+  P2RF_ReadVme (drvPvt, AIM_I_FIRSTFLT, &brd->firstFault);
+
+  ICURAP (brd->firstFault, qflt);	/* save/post original */
+
+  brd->firstFault ^= AIM_M_ARCFLT;      /* Convert so set bit means fault */
+
+  /* Report enabled channels only */
+  brd->firstFault &= rec->afes | (AIM_M_VXIFLT   | AIM_M_ABHBFLT |
+                                  AIM_M_ABSUMFLT | AIM_M_FRCD_FLT);
+
+  ICURAP (brd->firstFault, fflt);
+
+  /* Read the Arc Current Status and look at enabled channels only */
+  P2RF_ReadVme (drvPvt, AIM_I_ARCCURSTT, &reg);
+
+  ICURAP (reg, qcst);			/* save/post original */
+
+  reg ^= AIM_M_ARCCURSTT_FLT;		/* Convert to low FAULTED */
+  reg &= rec->afes;
+
+  ICURAP (reg, acst);
+
+  /* Read the Arc Latched Status and look at enabled channels only */
+  P2RF_ReadVme (drvPvt, AIM_I_ARCLTDSTT, &reg);
+
+  ICURAP (reg, qlst);			/* save/post original */
+
+  reg &= rec->afes;                     /* Register is low FAULTED */
+  ICURAP (reg, alst);
+
+  if (AIM_IS7CH) {
+
+    /* Process request to load DAS 0 instructions */
+    if (rec->ld0f)  return (SpawnLdDas (rec, &rec->ld0f, &brd->dasBlk[0],
+					&brd->dasPrm[0], rec->d0if, &rec->d0as));
+
+    /* Process request to load DAS 1 instructions */
+    if (rec->ld1f)  return (SpawnLdDas (rec, &rec->ld1f, &brd->dasBlk[1],
+					&brd->dasPrm[1], rec->d1if, &rec->d1as));
+    /*
+    ** Read registers for Aim diagnostic display.
+    */
+    if (rec->rrd0)
+      {
+	rec->rrd0 = 0;
+	if (rec->rid0 > 13)
+	  {
+	    rec->rid0 = 0;
+	    db_post_events (rec, &rec->rid0, DBE_VALUE);
+	  }
+	P2RF_ReadVme (drvPvt, brd->dasPrm[0].index + rec->rid0, &rec->rdd0);
+	db_post_events (rec, &rec->rdd0, DBE_VALUE);
+      }
+
+    if (rec->rrd1)
+      {
+	rec->rrd1 = 0;
+	if (rec->rid1 > 13)
+	  {
+	    rec->rid1 = 0;
+	    db_post_events (rec, &rec->rid1, DBE_VALUE);
+	  }
+	P2RF_ReadVme (drvPvt, brd->dasPrm[1].index + rec->rid1, &rec->rdd1);
+	db_post_events (rec, &rec->rdd1, DBE_VALUE);
+      }
+  } /* end AIM_IS7CH */
+
+  /*
+  ** Read all temps & voltages etc. from TVREG of both DAS chips. The 
+  ** subregister of each increments on read from 0-7
+  ** (...corresponding code for 12-channel AIM follows...)
+  */
+  if (AIM_IS7CH && rec->rdas)
+  {
+    /*----------------------------------------------------------------
+     * 7-channel AIM crate temp/voltage readout
+     *----------------------------------------------------------------
+     */
+
+    /* Le local variables */
+
+    /*
+    ** Set up pointers to raw and converted value for each DAS chip.
+    */
+    unsigned short tempreg;
+
+    unsigned short *das0s_p = &rec->rs00;
+    unsigned short *das1s_p = &rec->rs10;
+
+    float          *das0f_p = &rec->rf00;
+    float          *das1f_p = &rec->rf10;
+
+    int   dsr;          /* Looper for DAS sub-register within TVREG */
+
+    /*
+    ** Scale factors for crate voltage conversions.
+    */ 
+    static float vscale[NUMTVREG] = 
+              { 21.5, -20.5, 11., -10., 4.01, 4.01, -3.01, -1.};
+
+    /* Le Code */
+
+    rec->rdas = 0;	/* reset selection */
+
+    /*
+    ** For each DAS chip, read register TVREG until we hit the 7th channel. 
+    ** Then read the raw values and convert them. We could do this 
+    ** more cleverly but why bother?
+    */
+    dsr =NUMTVREG;  /* Prevent infinite loop */ 
+    do
+    {
+       P2RF_ReadVme (drvPvt, brd->dasPrm[0].index + TVREG, &tempreg);
+    } while ( ((tempreg & REGANDMASK) !=(7 << REGBITPOS)) && dsr-- >= 0);
+    dsr =NUMTVREG;  /* Prevent infinite loop */ 
+    do
+    {
+       P2RF_ReadVme (drvPvt, brd->dasPrm[1].index + TVREG, &tempreg);
+    } while ( ((tempreg & REGANDMASK) != (7 << REGBITPOS)) && dsr-- >= 0);
+
+/* offset from 7 -> 13, for crate temp */
+#define MAP7TO13 (13 - 7)
+
+    /*
+    ** Now read the rest of each into the raw value array.
+    */
+
+/*if (DBG1x1) printf("\nCrate stats (DAS0/DAS1):\n");*/
+
+    for (dsr=0; dsr <NUMTVREG; dsr++)
+    {
+       P2RF_ReadVme (drvPvt, brd->dasPrm[0].index + TVREG, das0s_p);
+       P2RF_ReadVme (drvPvt, brd->dasPrm[1].index + TVREG, das1s_p);
+
+/*if (DBG1x1) printf(" %2d:0x%04X/0x%04X%s",dsr,*das0s_p,*das1s_p,((dsr&3)==3)?"\n":"");*/
+
+       das0s_p++;
+       das1s_p++;
+    }
+
+    /*
+    ** Convert to E.U. and save as float.
+    */ 
+    das0s_p = &rec->rs00;
+    das1s_p = &rec->rs10;
+
+    for (dsr = 0; dsr < NUMTVREG; dsr++)
+    {
+      /* 
+      ** DAS0.  Arc detector peaks 0-6. Subregister 7 is the crate temp.
+      */
+      *das0f_p = (float)(*das0s_p & VALANDMASK) * 5.0 / MAX12BIT; 
+
+      if (dsr == 7) {		/* crate temp; cvt & move to RS/RF0D */
+	*(das0f_p+MAP7TO13) = 200.0 / 4.5 * (*das0f_p * 3.0 - 0.25) - 50.0; /* Temp Deg C */
+	*(das0s_p+MAP7TO13) = *das0s_p;
+	*das0f_p = 0.0;
+	*das0s_p = 0;
+      }
+
+      /* 
+      ** DAS 1. All voltages with varying scale factors.
+      */
+      *das1f_p = (float)(*das1s_p & VALANDMASK) * 2.5 / MAX12BIT * vscale[dsr];
+
+      /*
+      ** Post changes
+      */  
+      db_post_events (rec, das0s_p + ((dsr==7) ? MAP7TO13 : 0), DB_POST_PARMS);
+      db_post_events (rec, das1s_p                            , DB_POST_PARMS);
+
+      db_post_events (rec, das0f_p + ((dsr==7) ? MAP7TO13 : 0), DB_POST_PARMS);
+      db_post_events (rec, das1f_p                            , DB_POST_PARMS);
+
+      /* increment pointers */
+      das0s_p++;
+      das1s_p++;
+      das0f_p++;
+      das1f_p++;
+    }
+  }
+
+  if (AIM_IS12CH && rec->rdas) {	/* use RDAS also */
+
+    /*----------------------------------------------------------------
+     * 12-channel AIM crate temp/voltage & arc voltage readout
+     *----------------------------------------------------------------
+     */
+
+      /* 12-channel AIM module scale factors
+       *       +24V = reg * (+7.324e-3)
+       *       -24V = reg * (-7.324e-3)
+       *       +12V = reg * (+3.662e-3)
+       *       -12V = reg * (-3.662e-3)
+       *        +5V = reg * (+1.526e-3)
+       *        -2V = reg * (-0.610e-3)
+       *      -5.2V = reg * (-1.587e-3)
+       * Temp deg-C = reg * ( 3.662e-3)
+       *       (all are 12-bits, no sign)
+       */
+
+    /* DB fields Rx00-Rx07 extended to Rx00-Rx0D
+     */
+
+    unsigned short *pRS00 = &rec->rs00;		/* raw values */
+    unsigned short *pRS10 = &rec->rs10;
+
+    float          *pRF00 = &rec->rf00;		/* EU values */
+    float          *pRF10 = &rec->rf10;
+
+    unsigned short reg;
+    int i, j;
+
+    /* h/w index => DB offset map */
+    static int chan2db[8] = {
+      0, 1, 2, 3, 4,
+      7, 6,			/* -2V, -5.2V (swapped in 12-ch AIM) */
+      5				/* crate temperature */
+    };
+
+    /* crate temp & V raw => EU scaling...
+     * this array is indexed by DB offset, i.e., output of chan2db[]
+     */
+    static double crate_raw2eu[8] = {
+       7.324e-3, -7.324e-3,		/* +/- 24 */
+       3.662e-3, -3.662e-3,		/* +/- 12 */
+       1.526e-3,			/* +5     */
+       5.426e-2,			/* temperature; requires further calc */
+      -1.587e-3,			/* -5.2   */
+      -0.610e-3				/* -2     */
+    };
+    
+    rec->rdas = 0;	/* reset selection */
+
+    /********************************
+     * 12-channel Crate Temp & Voltages
+     ********************************
+     */
+
+    for (i = 0; i < 8; i++) {		/* start out zero, to catch missing readouts */
+      pRS10[i] = 0;
+      pRF10[i] = 0.0;
+    }
+
+/* make two passes through, to up the odds of getting them all... h/w problem?
+ * ... (sometimes doesn't read all values) ...
+ */
+
+/*if (DBG1x1) printf("\nCrate stats:\n");*/
+
+    for (i = 0; i < 8*2; i++) {
+      P2RF_ReadVme (drvPvt, AIM_I_CRTVOL, &reg);
+      j = (reg & AIM_M_CRTCHAN) >> AIM_V_CRTCHAN;	/* extract index & cvt to DB */
+
+/*if (DBG1x1) printf(" %2d:0x%04X%s",j,reg,((i&7)==7)?"\n":"");*/
+
+      if (j <= 7) {					/* ignore if bogus */
+	j  = chan2db[j];
+	pRS10[j] = reg;								/* raw */
+	pRF10[j] = ((reg & AIM_M_CRTVOL) >> AIM_V_CRTVOL) * crate_raw2eu[j];	/* EU */
+      }
+    }
+
+    /* fix temperature; original calc was: tempC = ((reg * 0.001221) - 1.375) * 44.44
+     *                         reduced to: tempC =  (reg * 0.05426 ) - 61.11
+     */
+    pRF10[5] -= 61.11;
+
+    /* move crate temp from RS/RF15 to where it belongs (RS/RF0D), & post it
+     */
+    pRS00[13] = pRS10[5];
+    pRF00[13] = pRF10[5];
+    db_post_events (rec, &pRS00[13], DB_POST_PARMS);
+    db_post_events (rec, &pRF00[13], DB_POST_PARMS);
+
+    /* copy +5V value to 2nd (non-existent in 12-chan AIM) +5V loc
+     */
+    pRS10[5] = pRS10[4];
+    pRF10[5] = pRF10[4];
+
+    /* post all crate voltages
+     */
+    for (j = 0; j < 8; j++) {
+      db_post_events (rec, &pRS10[j], DB_POST_PARMS);
+      db_post_events (rec, &pRF10[j], DB_POST_PARMS);
+    }
+
+    /********************************
+     * 12-ch Arc Voltages
+     ********************************
+     */
+
+    for (i = 0; i < 12; i++) {		/* start out zero, to catch missing readouts */
+      pRS00[i] = 0;
+      pRF00[i] = 0.0;
+    }
+
+    /* sync to channel 0... should not be strictly necessary, but hey
+     */
+    i = 16;
+    do {
+      P2RF_ReadVme (drvPvt, AIM_I_ARCVOL, &reg);
+      j = (reg & AIM_M_ARCCHAN) >> AIM_V_ARCCHAN;	/* extract chan # */
+    } while ( (j != 0) && (i-- >= 0) );
+
+    /* make two passes, to up the odds of getting them all... h/w problem?
+     * ... (sometimes doesn't read all values) ...
+     */
+
+    for (i = 0; i < 16*2; i++) {	/* 0-11 are Arc Vs, 12-15 are HVPS (ignored for now) */
+      if (i > 0) {					/* already got first one */
+	P2RF_ReadVme (drvPvt, AIM_I_ARCVOL, &reg);
+	j = (reg & AIM_M_ARCCHAN) >> AIM_V_ARCCHAN;	/* extract chan # */
+      }
+      if (j < AIM_K_CHANCNT) {				/* trap bogus channel #s */
+	pRS00[j] = reg;					/* raw */
+
+	/* arc V is signed quantity... map to real volts (per D.Brown)
+	 */
+	reg  = (reg & AIM_M_ARCVOL) >> AIM_V_ARCVOL;
+	if (reg & (1 << (AIM_M_ARCVOL_BITS - 1))) reg |= ((-1) << AIM_M_ARCVOL_BITS);  /* propagate sign */
+	reg += (1 << (AIM_M_ARCVOL_BITS - 1));		/* map [-Z,(Z-1)] to [0,(2*Z)-1] */
+
+	pRF00[j]  = (float)reg / ((1 << AIM_M_ARCVOL_BITS) - 1);	/* -> [0,1]         */
+	pRF00[j] *= (AIM_M_ARCVOL_MAXV - AIM_M_ARCVOL_MINV);		/* -> [0,(max-min)] */
+	pRF00[j] +=  AIM_M_ARCVOL_MINV;					/* -> [min,max]     */
+      }
+    }
+
+    /* now post them
+     */
+    for (j = 0; j < AIM_K_CHANCNT; j++) {
+      db_post_events (rec, &pRS00[j], DB_POST_PARMS);
+      db_post_events (rec, &pRF00[j], DB_POST_PARMS);
+    }
+  }
+
+  /*----------------------------------------------------------------
+   * Calibrate arc detector trip levels
+   *----------------------------------------------------------------
+   */
+  if (rec->calt) {
+    int             iarc;		/* arc channel looper  */
+    int             i, j;		/* read peak loopers */
+    short           sreg;		/* to read/store peaks */
+    unsigned short *tl;			/* trip levels */
+
+    /* Channel peak values */
+    short peakread[] = {
+      0,0,0,0,0,0,0,0,		/* ch 1-8  */
+      0,0,0,0,0,		/* ch 9-12 */
+      0,0,0			/* hedge for bogus channel nums (0xF mask) */
+    };
+
+    rec->calt = 0;	/* reset */
+
+    if ((rec->fstt & AIM_M_HVPSON) == 0) {
+
+      /* 12-channel AIM doesn't need the following alignment loop since there's
+       * no temperature value to skip over... it doesn't matter which channel we
+       * start on; each of them should be read the same number of times regardless
+       */
+      if (AIM_IS7CH) {
+	/* For the DAS0 registers, read register TVREG until we hit the 7th 
+	 * channel. The next read will start at 0 so we can read all 8 registers
+	 * using just the first 7 which have the peak outputs. 
+	 */
+	i = NUMTVREG;  /* Prevent infinite loop */ 
+	do {
+	  P2RF_ReadVme (drvPvt,
+			brd->dasPrm[0].index + TVREG, 
+			(unsigned short *)&sreg);
+	} while ( ((sreg & REGANDMASK) != (7 << REGBITPOS)) && i-- >= 0);
+      }
+
+      /* Now get the signed max of 50 reads of the detector peaks.
+       */
+      for (i = 0; i < PEAKREADS; i++) {
+
+	if (AIM_IS7CH) {
+	  /* 7-channel: we must read all registers even though the last is the temp
+	   * since they cycle in order
+	   */
+	  for (j = 0; j < NUMTVREG; j++) {
+	    P2RF_ReadVme (drvPvt,
+			  brd->dasPrm[0].index + TVREG, 
+			  (unsigned short *) &sreg);
+	    sreg <<= 3; sreg >>= 3;			/* sign extend */
+	    if (sreg > peakread[j]) peakread[j] = sreg;
+	  }
+	}
+
+	if (AIM_IS12CH) {
+	  /* 12-channel: arc voltages come out of repeated reads of a single
+	   * register and include channel number; crate temp is in a different reg
+	   */
+	  P2RF_ReadVme (drvPvt, AIM_I_ARCVOL, (unsigned short *)&sreg);
+
+	  j    = ((unsigned short)sreg & AIM_M_ARCCHAN) >> AIM_V_ARCCHAN;	/* get chan # */
+	  sreg = ((unsigned short)sreg & AIM_M_ARCVOL)  >> AIM_V_ARCVOL ;
+
+	  if (sreg > peakread[j]) peakread[j] = sreg;
+	}
+      }
+
+      /* Scale the peaks for each arc detector which exists on this station.
+       * We have 8 bits of trip level and 12 for noise so divide calculated
+       * result by 16 so it's properly scaled.
+       */
+
+      tl = &rec->tl1;
+      for (iarc = 0; iarc < AIM_K_CHANCNT; iarc++) {
+	*tl = 255;				/* init to "channel not valid this station" */
+        if ((rec->afes & chan2bit[iarc]) != 0) {
+          sreg = rec->casf * (float)peakread[iarc]; 
+	  if (sreg < MINTRIPLVL) sreg = MINTRIPLVL;
+	  if (sreg > MAXTRIPLVL) sreg = MAXTRIPLVL;
+          *tl = (unsigned short)sreg;
+        }
+        db_post_events (rec, tl++, DB_POST_PARMS);
+      }
+    }
+    else {
+       epicsPrintf("Can\'t calibrate arc trip levels while HVPS is permitted.\n");
+    }
+  } /* end if (AIM_IS7CH && rec->calt) */
+
+
+  /*
+  ** Test Arc Trip Levels.
+  */
+  if (rec->tstl)
+  {
+    /* Le local variables */
+    int iarc;                 /* arc channel looper  */
+    unsigned short reg;       /* Register */
+    unsigned short *ttl_p = &rec->ttl1; /* Tested trip levels */
+    unsigned short *tl_p  = &rec->tl1;  /* To save trip levels */
+    unsigned short lvl;       /* masked trip level to reg */
+    unsigned short savetl;    /* Saved previous trip level */
+
+    /*
+    ** Binary search vars
+    */
+    unsigned short top, bot, fence;
+
+    /*
+    ** Le Code
+    */
+
+    rec->tstl=0;
+
+    /*
+    ** Clear any arc faults by toggling the arc fault reset bit.
+    */
+    P2RF_ReadVme  (drvPvt, AIM_I_FICTRL, &reg); /* Get ctrl reg */
+
+    reg &= ~(AIM_M_FLTRESET);  /* Clear arc fault reset */
+    P2RF_WriteVme (drvPvt, AIM_I_FICTRL, reg);
+
+    reg |= AIM_M_FLTRESET;  /* Set arc fault reset */
+    P2RF_WriteVme (drvPvt, AIM_I_FICTRL, reg);
+
+    reg &= ~(AIM_M_FLTRESET);  /* Clear arc fault reset again */
+    P2RF_WriteVme (drvPvt, AIM_I_FICTRL, reg);
+
+    P2RF_ModIntDisable (drvPvt);  /* Disable interrupts */
+
+    for (iarc=0; iarc < AIM_K_CHANCNT; iarc++, ttl_p++)
+    {
+      if ( (rec->afes & chan2bit[iarc]) != 0) /* If channel enabled */
+      {
+        savetl = *tl_p++;  /* Save existing trip level */
+	/*
+	** Do a binary search to find the trip level twixt 0 - 255 
+	*/
+        top = 255; bot = 0; fence = (top-bot)/2;
+        do
+	{
+          lvl = (fence << AIM_V_TRIPLVL) & AIM_M_TRIPLVL;
+          P2RF_WriteVme (drvPvt, iarc + AIM_I_TRIPLVL1, lvl); /* Set level */
+          /* Read level back to ensure it's latched */
+          P2RF_ReadVme  (drvPvt, iarc + AIM_I_TRIPLVL1, &reg); 
+
+          P2RF_WriteVme (drvPvt, iarc + AIM_I_TRIPTEST1, 0);  /* Fire test */
+
+          P2RF_ReadVme (drvPvt, AIM_I_ARCLTDSTT, &reg); /* Get results */
+
+	  if ( (reg & chan2bit[iarc]) == 0) {
+            bot = fence;    /* Up the ante */
+            fence = (top-bot)/2 + bot;
+            P2RF_ReadVme (drvPvt, AIM_I_FICTRL, &reg);
+            reg  |= AIM_M_FLTRESET;  /* Reset Arc fault */  
+            P2RF_WriteVme (drvPvt, AIM_I_FICTRL, reg);
+            reg  &= ~AIM_M_FLTRESET; /* Clear reset so OK next time */
+            P2RF_WriteVme (drvPvt, AIM_I_FICTRL, reg);
+          }
+          else {    /* No trip */
+            top = fence;    /* Decrease the ante */
+            fence = (top-bot)/2 + bot;
+          }
+        } while ((top - bot) > 1);  /* Bracket trip */
+
+        *ttl_p = fence;             /* Store tested level */
+        P2RF_WriteVme (drvPvt, iarc + AIM_I_TRIPLVL1, savetl);/* Saved level */
+
+        /* Read level back to insure it's latched */
+        P2RF_ReadVme  (drvPvt, iarc + AIM_I_TRIPLVL1, &reg);
+
+	/*
+	** Clear any remaining arc faults
+	*/
+
+        P2RF_ReadVme (drvPvt, AIM_I_FICTRL, &reg);
+
+        reg  |= AIM_M_FLTRESET;  /* Reset Arc fault */  
+        P2RF_WriteVme (drvPvt, AIM_I_FICTRL, reg);
+
+        reg  &= ~AIM_M_FLTRESET; /* Clear reset so OK next time */
+        P2RF_WriteVme (drvPvt, AIM_I_FICTRL, reg);
+
+        db_post_events (rec, ttl_p, DB_POST_PARMS);
+
+      }   /* If channel enabled */
+    }     /* For all channels */
+
+    rec->rstf = 1;  /* Force fault reset */
+    db_post_events (rec, &rec->rstf, DB_POST_PARMS);
+    P2RF_ModIntEnable (drvPvt);  /* Re-enable interrupts */
+  }
+  
+  if (AIM_IS12CH) {
+    /* Process request to read out history buffer */
+    if (rec->hget) {
+      return SpawnGetRam (rec,
+			  &rec->hget,
+			  &brd->getRamBlk,
+			  &brd->hisPrm,
+			  rec->hbsz,
+			  rec->hbfn,
+			  &rec->hbst);
+    }
+  } /* end AIM_IS12CH */
+
+  return (0);
+}
+
+
+static long SpawnReset (P2RfAimRecord  *rec,
+                        AimRstBlk      *blk)
+/*
+   Description
+   -----------
+   This function initiates and completes the module reset.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+          blk - A pointer to the reset block
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnReset");
+
+  if (!rec->pact)
+  {
+    /* Let operator know what's happening */
+    strncpy (rec->val,  "Software Reset: active", sizeof (rec->val));
+    strncpy (rec->oval, "Software Reset: active", sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DB_POST_PARMS);
+
+    /* Don't allow reprocessing of record before reset completes */
+    rec->pact = TRUE;
+
+    /* Disable module interrupts during software reset */
+    P2RF_ModIntDisable (blk->drvPvt);
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+      strncpy (rec->val, "Attempt to initialize module failed", sizeof (rec->val));
+      recGblSetSevr (rec, UDF_ALARM, INVALID_ALARM);
+    }
+    else
+    {
+      /* Re-enable module interrupts */
+      P2RF_ModIntEnable (blk->drvPvt);
+
+      strncpy (rec->val, "Software reset: done", sizeof (rec->val));
+    }
+
+    /* Reset the reset request so we don't redo it on the next process pass */
+    rec->mrst = 0;
+  }
+
+  return (0);
+}
+
+
+static void ResetCallback (AimRstBlk  *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a module software reset it requested.  It invokes completion processing
+   of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the reset block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("ResetCallback"); */
+
+  struct dbCommon  *rec;
+  struct rset      *rSet;
+
+  /* Just return if record pointer isn't initialized */
+  if ((rec = callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Lock the record to prevent processing during reinitialization */
+  dbScanLock       (rec);
+
+  /* Reset and update the record and the module */
+  blk->status = InitFields ((AimBoard *) rec->dpvt, P2RF_K_COLDSTART);
+
+  /* Complete processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     (rec);
+}
+
+
+/* 7-channel ONLY */
+
+static long SpawnLdDas (P2RfAimRecord  *rec,
+                        unsigned char  *request,
+                        AimDasBlk      *blk,
+                        AimDasPrm      *prm,
+                        char           *file,
+                        unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the loading of the DAS chips
+   on the module.  For 7-channel ONLY.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the DAS block
+          prm - A pointer to the DAS parameter block
+         file - The file that contains the DAS instructions to load
+         stat - A pointer to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnLdDas");
+
+  char  buf[P2RF_K_BUFSIZE];
+
+  if (!rec->pact)
+  {
+    sprintf (buf, "Load %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DB_POST_PARMS);
+    *stat = NO_ALARM;
+    db_post_events (rec, stat, DB_POST_PARMS);
+
+    /* Don't allow record reprocessing record before coef load completes */
+    rec->pact = TRUE;
+
+    /* Save the file name in the parameter block */
+    prm->file = file;
+
+    /* Point the coefficient block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_LoadRegFile",
+                                       prm->id, prm->file));
+      *stat = UDF_ALARM;
+      db_post_events (rec, stat, DB_POST_PARMS);
+    }
+    else
+    {
+      sprintf (buf, "Load %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+    }
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+/* 7-channel ONLY */
+
+static void LdDasCallback (AimDasBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to load one of the module's Data Acquisition
+   System chips with instructions.  It invokes completion processing of
+   the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the DAS loading block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("LdDasCallback"); */
+
+  P2RfAimRecord    *rec;
+  struct rset      *rSet;
+  AimDasPrm        *prm = blk->prm;
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Read the data file and load the DAS chip */
+  blk->status = P2RF_LoadRegFile (blk->drvPvt, prm->id, prm->file,
+                                  prm->index, FALSE,
+                                  rec->val, sizeof (rec->val));
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+
+
+/* 12-channel ONLY ... derived from devP2RfRfp.c */
+
+static long SpawnGetRam (P2RfAimRecord  *rec,
+                         unsigned char  *request,
+                         AimRamBlk      *blk,
+                         AimMemPrm      *prm,
+                         unsigned int    blkCnt,
+                         char           *file,
+                         unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the retrieval of the module RAMs.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the record block
+          prm - A pointer to the record parameter block
+       blkCnt - Number of blocks of record buffer to record
+         file - The file to record the record buffer in
+         stat - A pointer to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnGetRam");
+
+  char  buf[P2RF_K_BUFSIZE];
+
+  if (!rec->pact)
+  {
+    sprintf (buf, "Get %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val,  DB_POST_PARMS);
+
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DB_POST_PARMS);
+
+    /* Don't allow record reprocessing record before get-history completes */
+    rec->pact = TRUE;
+
+    /* Save block count and file name in parameter block and reset abort flag */
+    prm->count    = (blkCnt < AIM_K_HISBLKCNT) ? blkCnt : AIM_K_HISBLKCNT;
+    prm->file     = file;
+    blk->abortFlg = FALSE;
+
+    /* Point the RAM block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - file = %s",
+                                       "P2RF_RecordMemory", prm->file));
+      *stat = READ_ALARM;
+    }
+    else
+    {
+      sprintf (buf, "Get %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DB_POST_PARMS);
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+/* 12-channel ONLY ... derived from devP2RfRfp.c */
+
+static void GetRamCallback (AimRamBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to read one of the module's RAMs.  It invokes
+   completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the get-history block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("GetRamCallback"); */
+
+  P2RfAimRecord    *rec;
+  struct rset      *rSet;
+  AimMemPrm        *prm = blk->prm;
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock ((struct dbCommon *) rec);
+
+#if 0 /* no such thing in AIM... readout address is reset by fault (or timeout?) */
+  /* Preload the state machine address counter */
+  P2RF_WriteVme (blk->drvPvt, AIM_I_SMPRELD, NULL);
+#endif
+
+  /* Read the history memory and record it */
+  blk->status = P2RF_RecordMemory_noPreRead (blk->drvPvt,
+					     prm->id,
+					     prm->index,
+					     prm->count,
+					     prm->file,
+					     &blk->abortFlg,
+					     rec->val,
+					     sizeof (rec->val));
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+@
+
+
+1.10
+log
+@[lazmo 2004-04-09] Removed references to "INVOP" register; not valid
+    for new AIM.
+@
+text
+@d64 1
+d69 1
+a69 1
+#include <module_types.h>
+d77 2
+d119 2
+d271 1
+a271 1
+  scanOnce (rec);
+d383 3
+a385 3
+  callbackSetCallback (ResetCallback, &brd->resetBlk.callback);
+  callbackSetPriority (priorityHigh,  &brd->resetBlk.callback);
+  callbackSetUser     (rec,           &brd->resetBlk.callback);
+d402 3
+a404 3
+    callbackSetCallback (LdDasCallback, &brd->dasBlk[0].callback);
+    callbackSetPriority (priorityLow, &brd->dasBlk[0].callback);
+    callbackSetUser     (rec, &brd->dasBlk[0].callback);
+d415 3
+a417 3
+    callbackSetCallback (LdDasCallback, &brd->dasBlk[1].callback);
+    callbackSetPriority (priorityLow, &brd->dasBlk[1].callback);
+    callbackSetUser     (rec, &brd->dasBlk[1].callback);
+d435 3
+a437 3
+    callbackSetCallback (GetRamCallback, &brd->getRamBlk.callback);
+    callbackSetPriority (priorityLow,    &brd->getRamBlk.callback);
+    callbackSetUser     (rec,            &brd->getRamBlk.callback);
+@
+
+
+1.9
+log
+@Changes by Mike Laznovsky to change the sense of the "external MPS" bit.
+@
+text
+@d18 1
+d77 1
+d80 2
+a81 1
+                           AIM_M_TEMPVOLT | AIM_M_INVOP      | AIM_M_SOFTWARE)
+d766 1
+d768 1
+a768 2
+    if (rec->istt & AIM_M_INVOP)
+    {
+d772 1
+d846 1
+d849 2
+a850 2
+        P2RF_ReadVme (drvPvt, AIM_I_INVOPADX, &brd->invOpAdx);
+        brd->invOpAdx = (brd->invOpAdx << 1) & AIM_M_INVOPADX;
+d853 2
+@
+
+
+1.8
+log
+@Remove second instance of reading A24 Invalid op addr
+@
+text
+@d14 4
+a17 9
+**	January 7, 1997    - [claus]   Created
+**	February 2003      - [lazmo]   Added support for both 7- and 12-channel
+**			               Arc Module versions, gated by "AIM_ISnCH" macros
+**	August    14, 2003 - [lazmo]   Fixed Arc Voltage sign-propagation  
+**      September 11, 2003 - [luchini] In Action() function, comment out code that
+**                                     reads the A24 address of where an invalid op
+**                                     has occurred. This feature does not work in
+**                                     the new version of the AIM, and is not useful
+**                                     in the old version of the AIM.
+d578 1
+a578 1
+  reg ^= AIM_M_ARCFLT;                  /* Convert to low when FAULTED */
+d763 1
+a763 1
+    /* Read the Invalid Operation Address register 
+d768 1
+a768 1
+    } */
+d790 1
+a790 1
+    reg ^= AIM_M_ARCFLT;                /* Convert to low FAULTED */
+d842 1
+a842 1
+      /* If there was an invalid operation, update Invalid Operation Address 
+d847 1
+a847 1
+	} */
+d1069 1
+a1069 1
+  reg ^= AIM_M_ARCFLT;                  /* Convert to low FAULTED */
+@
+
+
+1.7
+log
+@Comment out read A24 reg when an invalid op occurs
+@
+text
+@d768 1
+a768 1
+    /* Read the Invalid Operation Address register */
+d773 1
+a773 1
+    }
+@
+
+
+1.6
+log
+@Removed .TLAn; renamed .TLAZ to .TLAS
+@
+text
+@d14 9
+a22 4
+**	January 7, 1997 - Created
+**	February 2003   - [lazmo] Added support for both 7- and 12-channel
+**			  Arc Module versions, gated by "AIM_ISnCH" macros
+**	August, 14 2003 - [lazmo] Fixed Arc Voltage sign-propagation 
+d847 1
+a847 1
+      /* If there was an invalid operation, update Invalid Operation Address */
+d852 1
+a852 1
+      }
+@
+
+
+1.5
+log
+@Added support for trip-level readback alarms (.TLPn,.TLRn,.TLAn,.TLAM,.TLAZ)
+@
+text
+@a590 1
+    unsigned short *tla  = &rec->tla1;	/* trip level readback alarms */
+d592 1
+a592 1
+    unsigned short *tlaz = &rec->tlaz;	/* trip level readback alarm mask (sticky) */
+d598 1
+a598 1
+    *tlaz = 0;
+d619 2
+a620 5
+	*tla   = 1;			/* (this could mean that chan# read back wrong, too...) */
+	*tlam |= (1 << chan);
+	*tlaz |= (1 << chan);
+      } else {
+	*tla   = 0;
+d643 1
+a643 1
+    tl++, tlp++, tlr++, tla++;
+a963 1
+    unsigned short *tla  = &rec->tla1;	/* trip level readback alarms */
+d965 1
+a965 1
+    unsigned short *tlaz = &rec->tlaz;	/* trip level readback alarm mask (sticky) */
+d967 1
+a967 1
+    unsigned short  lvl, rbk;
+d972 3
+a974 1
+	 chan++, tt++, tl++, tlp++, tlr++, tla++) {
+d987 1
+a987 1
+
+d989 2
+a990 6
+
+	*tlp = *tl;					/* update "previous" */
+	db_post_events (rec, tlp, DB_POST_PARMS);
+
+	lvl = (*tl << AIM_V_TRIPLVL) & AIM_M_TRIPLVL;	/* desired trip level, from GUI */
+
+d992 1
+a992 1
+        P2RF_ReadVme  (drvPvt, chan + AIM_I_TRIPLVL1, &reg);	/* read back to verify */
+d994 3
+a996 1
+	reg &= AIM_M_TRIPLVL;				/* isolate level */
+d998 5
+a1002 5
+	rbk = reg >> AIM_V_TRIPLVL;
+	if (rbk != *tlr) {				/* if not same as previous readback... */
+	  *tlr = rbk;					/* update readback field */
+          db_post_events (rec, tlr, DB_POST_PARMS);
+	}
+d1004 12
+a1015 12
+	/* if readback is different from desired, set alarm and post error if first time */
+	if (reg != lvl) {
+	  if (*tla == 0) {				/* first time bad? */
+	    *tla = 1;					/* ... set alarm */
+	    *tlam |= (1 << chan);			/* ... also in mask */
+	    *tlaz |= (1 << chan);			/* ... also in sticky mask */
+	    db_post_events (rec, tla,  DB_POST_PARMS);
+	    db_post_events (rec, tlam, DB_POST_PARMS);
+	    db_post_events (rec, tlaz, DB_POST_PARMS);
+
+	    epicsPrintf("%s - Arc Trip Level register readback error: wrt 0x%04X, rd 0x%04X, xor 0x%04X\n",
+			FN, lvl, reg, reg ^ lvl);
+d1019 14
+a1032 4
+	    strncpy(rec->val,
+		    "Arc Trip Level register readback error",
+		    sizeof(rec->val));
+	  }
+d1034 1
+a1034 9
+	else {						/* readback OK */
+	  if (*tla != 0) {
+	    *tla = 0;					/* ... reset alarm */
+	    *tlam &= (-1 ^ (1 << chan));		/* ... also in mask */
+	    db_post_events (rec, tla,  DB_POST_PARMS);
+	    db_post_events (rec, tlam, DB_POST_PARMS);
+	    /* .TLAZ is never reset by s/w */
+	  }
+	} /* end if (readback different) */
+a1035 1
+      } /* end if (reg != lvl) */
+@
+
+
+1.4
+log
+@Fixed Arc Voltage sign propagation bug.
+@
+text
+@d48 1
+a74 1
+
+d221 3
+a223 6
+/* macros to perform common code...
+ *   ICURAP: If-Changed-Update-Rec-And-Post
+ */
+
+#define DB_POST_PARMS	(DBE_VALUE | DBE_LOG)	/* common db_post_events() parms */
+
+d232 2
+d374 1
+a374 1
+  /* Initialize the callback facility for the reset function*/
+d588 7
+a594 1
+    unsigned short *tl  = &rec->tl1;
+d598 3
+d603 2
+a604 2
+      /* Trip Level */
+      lvl = ((*tl) & AIM_M_TRIPLVL) << AIM_V_TRIPLVL;
+d617 10
+d647 1
+a647 1
+    tl++;
+d961 1
+a961 1
+  /* Trip those channels requested and update the trip levels */
+d963 10
+a972 3
+    unsigned char  *tt  = &rec->tt1;
+    unsigned short *tl  = &rec->tl1;
+    unsigned short  lvl;
+d975 3
+a977 1
+    for (chan = 0; chan < AIM_K_CHANCNT; tt++, tl++, chan++) {
+d980 1
+a980 1
+      if (*tt) {
+d982 1
+a982 1
+        *tt = 0;                        /* Resensitize */
+d985 5
+a989 1
+      lvl = (*tl & AIM_M_TRIPLVL) << AIM_V_TRIPLVL;
+d991 51
+a1041 24
+      /* read current Trip Level */
+      P2RF_ReadVme (drvPvt, chan + AIM_I_TRIPLVL1, &reg);
+      reg &= AIM_M_TRIPLVL;
+
+      /* update if different from desired */
+      if (reg != lvl) {
+        /* Make sure that the register changed to what we set it to */
+        P2RF_WriteVme (drvPvt, chan + AIM_I_TRIPLVL1, lvl);
+        P2RF_ReadVme  (drvPvt, chan + AIM_I_TRIPLVL1, &reg);
+	reg &= AIM_M_TRIPLVL;
+        if (reg != lvl)
+        {
+          epicsPrintf ("%s - Arc Trip Level register readback error: wrt 0x%04X, rd 0x%04X, xor 0x%04X\n",
+                       FN, lvl, reg, reg ^ lvl);
+          strncpy (rec->val, "Arc Trip Level register readback error",
+                   sizeof (rec->val));
+
+          /* Put database trip level copy to readback value if unsuccessful */
+          *tl = reg;
+          db_post_events (rec, tl, DB_POST_PARMS);
+        }
+      }
+    }
+  }
+d1308 1
+a1308 1
+      j  = (reg & AIM_M_CRTCHAN) >> AIM_V_CRTCHAN;	/* extract index & cvt to DB */
+d1401 1
+a1401 1
+    unsigned short *tl_p;		/* trip levels */
+d1466 1
+a1466 1
+      tl_p = &rec->tl1;
+d1468 1
+a1468 1
+	*tl_p = 255;				/* init to "channel not valid this station" */
+d1473 1
+a1473 1
+          *tl_p = (unsigned short)sreg;
+d1475 1
+a1475 1
+        db_post_events (rec, tl_p++, DB_POST_PARMS);
+d1535 1
+a1535 1
+          lvl = (fence & AIM_M_TRIPLVL) << AIM_V_TRIPLVL;
+@
+
+
+1.3
+log
+@
+      August 5, 2003  - [lazmo] fixed RS/RFxx field naming (+ changes to displays)
+        (and earlier)           logMsg() -> epicsPrintf()
+@
+text
+@d14 1
+a14 4
+**
+**	August 5, 2003	- [lazmo] fixed RS/RFxx field naming (+ changes to displays)
+**	  (and earlier)		  logMsg() -> epicsPrintf()
+**
+d17 1
+a17 2
+**
+**	January 7, 1997 - Created
+d1318 1
+@
+
+
+1.2
+log
+@Changes for new aim module by Lazmo
+@
+text
+@d14 4
+a17 1
+**	January 7, 1997 - Created
+d21 2
+d51 1
+a51 1
+#define DBG1 (rec->dbg1)	/* for printf() etc. */
+d60 1
+a60 2
+#include <logLib.h>  
+
+a239 1
+
+a285 1
+
+a466 1
+
+a678 1
+
+a703 1
+
+d871 2
+a872 2
+  if (AIM_IS12CH) {			/* 12ch: reset hist buf mux */
+    fctl &= ~( AIM_M_ADCMUX0 );
+d916 1
+a916 1
+  /* 12-channel AIM: Set ADC mux (for history buf) */
+d918 2
+a919 1
+    fctl |= (rec->mux0 ? AIM_M_ADCMUX0 : 0);
+d940 1
+a940 1
+      epicsPrintf ("%s - Fast Interlock Control register readback error: wrt %h04x, rd %h04x, xor %h04x\n",
+d976 1
+a976 1
+          epicsPrintf ("%s - Arc Trip Level register readback error: wrt %h04x, rd %h04x, xor %h04x\n",
+d1089 1
+a1089 1
+    unsigned short *das1s_p = &rec->rs20;
+d1092 1
+a1092 1
+    float          *das1f_p = &rec->rf20;
+d1122 3
+d1128 3
+d1135 5
+a1139 2
+       db_post_events (rec, das0s_p++, DB_POST_PARMS);
+       db_post_events (rec, das1s_p++, DB_POST_PARMS);
+d1141 1
+d1146 1
+a1146 1
+    das1s_p = &rec->rs20;
+d1155 1
+a1155 3
+#define MAP7TO13 (13 - 7)	/* offset to get from 7 to 13 */
+      if (dsr == 7) {
+	/* to support new 12-ch AIM db, move crate temp to RF/RS13 */
+d1168 1
+a1168 1
+      ** Post changes (special case for crate temp)
+d1170 5
+a1174 2
+      db_post_events (rec, das0f_p + ((dsr == 7) ? MAP7TO13 : 0), DB_POST_PARMS);
+      db_post_events (rec, das1f_p + ((dsr == 7) ? MAP7TO13 : 0), DB_POST_PARMS);
+d1203 1
+a1203 2
+    /* DB fields Rx00-Rx07 extended to Rx00-Rx13,
+     * and Rx10-Rx17 renamed to Rx20-27
+d1207 1
+a1207 1
+    unsigned short *pRS20 = &rec->rs20;
+d1210 1
+a1210 1
+    float          *pRF20 = &rec->rf20;
+d1242 2
+a1243 2
+      pRS20[i] = 0;
+      pRF20[i] = 0.0;
+d1250 2
+d1255 3
+d1260 2
+a1261 2
+	pRS20[j] = reg;								/* raw */
+	pRF20[j] = ((reg & AIM_M_CRTVOL) >> AIM_V_CRTVOL) * crate_raw2eu[j];	/* EU */
+d1268 1
+a1268 1
+    pRF20[5] -= 61.11;
+d1270 1
+a1270 2
+    /* move crate temp from RS/RF25 to where it belongs, RS/RF13
+     * ... also copy +5V reading to 2nd (non-existent in 12-chan AIM) +5V loc
+d1272 3
+a1274 3
+    pRS00[13] = pRS20[5];	pRS20[5] = pRS20[4];
+    pRF00[13] = pRF20[5];	pRF20[5] = pRF20[4];
+    db_post_events (rec, &pRS00[13], DB_POST_PARMS);	/* post temperature */
+d1277 5
+d1285 2
+a1286 2
+      db_post_events (rec, &pRS20[j], DB_POST_PARMS);
+      db_post_events (rec, &pRF20[j], DB_POST_PARMS);
+d1441 1
+d1446 1
+d1450 1
+d1452 1
+d1457 1
+d1460 1
+d1463 1
+d1468 1
+d1482 1
+a1482 1
+          /* Read level back to insure it's latched */
+d1484 1
+d1534 1
+a1534 1
+    if (rec->ghis) {
+d1536 1
+a1536 1
+			  &rec->ghis,
+a1547 1
+
+d1650 2
+a1652 1
+
+d1663 1
+a1663 1
+   on the module. For 7-channel ONLY.
+a1730 1
+
+d1777 2
+a1779 1
+
+a1790 1
+   From 12-channel ONLY ... derived from devP2RfRfp.
+d1864 2
+a1873 2
+   For 12-channel ONLY ... derived from devP2RfRfp.c
+
+a1919 1
+
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d15 2
+d46 1
+d55 2
+a56 1
+  
+d74 1
+a74 1
+#define MAP7TO13 (13 - 7)	/* offset to get from 7 to 13 */
+d89 1
+d169 1
+a170 1
+/* Forward references */
+d173 18
+a190 7
+static long  SpawnLdDas      (P2RfAimRecord  *,
+			      unsigned char  *,
+			      AimDasBlk      *,
+                              AimDasPrm      *,
+			      char           *,
+			      unsigned short *);
+static void  LdDasCallback   (AimDasBlk      *);
+d198 1
+d200 2
+d204 1
+d215 3
+a217 2
+  0x0001, 0x0002, 0x0004, 0x0008, 0x0010, 0x0020, 0x0040,	/* channels 1-7  */
+  0x0080, 0x1000, 0x2000, 0x4000, 0x8000			/* channels 9-12 */
+d221 14
+d236 2
+d257 2
+a258 3
+#if 0
+  Function ("AimIsr");
+#endif
+d269 1
+a269 1
+    epicsPrintf ("%s: Arc detected\n", FN);
+d271 1
+a271 1
+    epicsPrintf ("%s: VXI Backplane Fault Trigger\n", FN);
+d273 1
+a273 1
+    epicsPrintf ("%s: Crate temperature or voltage out of tolerance\n", FN);
+d275 1
+a275 1
+    epicsPrintf ("%s: Allen-Bradley Fault\n", FN);
+d277 1
+a277 1
+    epicsPrintf ("%s: Invalid operation: adx = %h04x\n", FN, brd->invOpAdx);
+d279 1
+a279 1
+    epicsPrintf ("%s: Software interrupt\n", FN);
+d284 1
+d300 1
+a300 3
+#if 0
+  Function ("AimShutdown");
+#endif
+d303 1
+a303 1
+
+a330 1
+
+d379 2
+a380 2
+  callbackSetPriority (priorityHigh, &brd->resetBlk.callback);
+  callbackSetUser     (rec, &brd->resetBlk.callback);
+d386 1
+d388 2
+d466 1
+d485 2
+a486 3
+#if 0
+  Function ("InitFields");
+#endif
+a492 1
+
+d510 4
+a513 1
+  rec->nchn = AIM_IS7CH ? 7 : 12;
+d539 1
+a539 1
+
+d560 2
+a564 1
+
+d573 1
+a573 1
+  /* Read the Arc Channel Fault Enable Status; compensate for 12-channel AIM */
+d575 1
+a575 2
+  AIM_FIX12CH(reg);
+
+d580 1
+a580 1
+  AIM_FIX12CH(reg);
+d587 1
+a587 2
+  AIM_FIX12CH(reg);
+
+d615 11
+a625 5
+        recGblRecordError (-1, rec,
+                           P2RF_Sprintf (buf, __FILE__, FN,
+                              "Arc Trip Level register readback error: idx %hi, wrt %h04x, rd %h04x, xor %h04x\n",
+                              chan + AIM_I_TRIPLVL1,
+                              lvl, reg, reg ^ lvl));
+d628 2
+d673 2
+d679 1
+d699 2
+a700 3
+#if 0
+  Function ("WarmInit");
+#endif
+d705 1
+a732 1
+
+d740 1
+a740 1
+  /* Read the First Fault register */
+d744 2
+a745 2
+      P2RF_ReadVme (brd->drvPvt, AIM_I_FIRSTFLT, &brd->firstFault);
+      AIM_FIX12CH(brd->firstFault);
+d747 1
+a747 1
+      brd->firstFault ^= AIM_M_ARCFLT;    /* Get all bits high TRUE */
+d757 1
+a757 1
+      P2RF_ReadVme (brd->drvPvt, AIM_I_INVOPADX, &brd->invOpAdx);
+d760 1
+d764 1
+a764 1
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+d767 3
+a769 13
+      /* Update database first fault register copy, if necessary */
+      if (brd->firstFault != rec->fflt)
+      {
+        rec->fflt = brd->firstFault;
+        db_post_events (rec, &rec->fflt, DBE_VALUE | DBE_LOG);
+      }
+
+      /* Update the database invalid operation address, if necessary */
+      if (brd->invOpAdx != rec->ioax)
+      {
+        rec->ioax = brd->invOpAdx;
+        db_post_events (rec, &rec->ioax, DBE_VALUE | DBE_LOG);
+      }
+d774 1
+a774 1
+    db_post_events (rec, &rec->fstt, DBE_VALUE | DBE_LOG);
+d777 3
+a779 2
+    P2RF_ReadVme (brd->drvPvt, AIM_I_ARCCURSTT, &reg);
+    AIM_FIX12CH(reg);
+d784 1
+a784 6
+    /* Update the database copy of the arc current status register */
+    if (reg != rec->acst)
+    {
+      rec->acst = reg;
+      db_post_events (rec, &rec->acst, DBE_VALUE | DBE_LOG);
+    }
+d787 3
+a789 2
+    P2RF_ReadVme (brd->drvPvt, AIM_I_ARCLTDSTT, &reg);
+    AIM_FIX12CH(reg);
+d792 1
+a792 7
+
+    /* Update the database copy of the arc latched status register */
+    if (reg != rec->alst)
+    {
+      rec->alst = reg;
+      db_post_events (rec, &rec->alst, DBE_VALUE | DBE_LOG);
+    }
+d813 1
+a813 1
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+d818 1
+a818 1
+                       AIM_M_ABFLT | AIM_M_FRCDFLTINT))
+d821 2
+a822 1
+	AIM_FIX12CH(brd->firstFault);
+d830 1
+a830 6
+        /* Update database first fault register copy, if necessary */
+        if (brd->firstFault != rec->fflt)
+        {
+          rec->fflt = brd->firstFault;
+          db_post_events (rec, &rec->fflt, DBE_VALUE | DBE_LOG);
+        }
+d834 1
+a834 2
+      if (rec->istt & AIM_M_INVOP)
+      {
+d837 1
+a837 7
+
+        /* Update the database invalid operation address, if necessary */
+        if (brd->invOpAdx != rec->ioax)
+        {
+          rec->ioax = brd->invOpAdx;
+          db_post_events (rec, &rec->ioax, DBE_VALUE | DBE_LOG);
+        }
+d848 1
+a848 1
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+d852 1
+a852 1
+    db_post_events (rec, &rec->iack, DBE_VALUE | DBE_LOG);
+d862 1
+a862 1
+    db_post_events (rec, &rec->ictl, DBE_VALUE | DBE_LOG);
+d872 2
+a873 5
+  if (AIM_IS12CH) {
+    fctl &= ~(  AIM_M_ADCMUX0
+	      | AIM_M_ADCMUX1
+	      | AIM_M_ADCMUX2
+	      | AIM_M_ADCMUX3 );
+d903 1
+d906 2
+a907 1
+    db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+d917 1
+a917 1
+  /* 12-channel AIM: Set ADC MUX0-3 (for history buf) */
+a919 3
+    fctl |= (rec->mux1 ? AIM_M_ADCMUX1 : 0);
+    fctl |= (rec->mux2 ? AIM_M_ADCMUX2 : 0);
+    fctl |= (rec->mux3 ? AIM_M_ADCMUX3 : 0);
+d935 1
+a935 1
+    db_post_events (rec, &rec->fctl, DBE_VALUE | DBE_LOG);
+d983 1
+a983 1
+          db_post_events (rec, tl, DBE_VALUE | DBE_LOG);
+d991 1
+a991 1
+  db_post_events (rec, &rec->fstt, DBE_VALUE | DBE_LOG);
+d993 1
+a993 1
+  /* Read the Arc Channel Fault Enable Status; compensate for 12-channel AIM */
+d995 2
+a996 1
+  AIM_FIX12CH(reg);
+d999 1
+a999 5
+  if (reg != rec->afes)
+  {
+    rec->afes = reg;
+    db_post_events (rec, &rec->afes, DBE_VALUE | DBE_LOG);
+  }
+d1003 2
+a1004 1
+  AIM_FIX12CH(brd->firstFault);
+d1012 1
+a1012 6
+  /* Update database first fault register copy, if necessary */
+  if (brd->firstFault != rec->fflt)
+  {
+    rec->fflt = brd->firstFault;
+    db_post_events (rec, &rec->fflt, DBE_VALUE | DBE_LOG);
+  }
+d1016 2
+a1017 1
+  AIM_FIX12CH(reg);
+d1021 2
+a1022 5
+  if (reg != rec->acst)
+  {
+    rec->acst = reg;
+    db_post_events (rec, &rec->acst, DBE_VALUE | DBE_LOG);
+  }
+d1026 2
+a1027 1
+  AIM_FIX12CH(reg);
+d1030 1
+a1030 5
+  if (reg != rec->alst)
+  {
+    rec->alst = reg;
+    db_post_events (rec, &rec->alst, DBE_VALUE | DBE_LOG);
+  }
+d1052 1
+a1052 1
+	P2RF_ReadVme (brd->drvPvt, brd->dasPrm[0].index + rec->rid0, &rec->rdd0);
+d1064 1
+a1064 1
+	P2RF_ReadVme (brd->drvPvt, brd->dasPrm[1].index + rec->rid1, &rec->rdd1);
+d1114 1
+a1114 1
+       P2RF_ReadVme (brd->drvPvt, brd->dasPrm[0].index + TVREG, &tempreg);
+d1119 1
+a1119 1
+       P2RF_ReadVme (brd->drvPvt, brd->dasPrm[1].index + TVREG, &tempreg);
+d1127 4
+a1130 4
+       P2RF_ReadVme (brd->drvPvt, brd->dasPrm[0].index + TVREG, das0s_p);
+       P2RF_ReadVme (brd->drvPvt, brd->dasPrm[1].index + TVREG, das1s_p);
+       db_post_events (rec, das0s_p++, DBE_VALUE | DBE_LOG);
+       db_post_events (rec, das1s_p++, DBE_VALUE | DBE_LOG);
+d1145 1
+d1162 2
+a1163 2
+      db_post_events (rec, das0f_p+((dsr==7)?MAP7TO13:0), DBE_VALUE | DBE_LOG);
+      db_post_events (rec, das1f_p+((dsr==7)?MAP7TO13:0), DBE_VALUE | DBE_LOG);
+d1181 9
+a1189 9
+       *       +24V = (read back) * (+7.324e-3)
+       *       -24V = (read back) * (-7.324e-3)
+       *       +12V = (read back) * (+3.662e-3)
+       *       -12V = (read back) * (-3.662e-3)
+       *        +5V = (read back) * (+1.526e-3)
+       *        -2V = (read back) * (-0.610e-3)
+       *      -5.2V = (read back) * (-1.587e-3)
+       * Temp deg-C = (read back) * ( 3.662e-3)
+       *       (all 12-bits, no sign)
+d1191 1
+a1191 1
+    
+d1205 1
+a1205 1
+    /* index => DB offset map */
+d1207 3
+a1209 1
+      0, 1, 2, 3, 4, 6, 7, 5	/* 5 is read out from #7; will become crate temp */
+d1212 4
+a1215 2
+    /* crate temp & V raw => EU scaling (DB offsets, not reg index) */
+    static double temp_raw2eu[8] = {
+d1219 3
+a1221 2
+       3.662e-3,			/* temperature; will be moved */
+      -0.610e-3, -1.587e-3,		/* -2, -5.2 */
+d1227 1
+a1227 3
+     * 12-ch Crate Temp & Voltages 
+     * Note: this register MUST be 
+     * read sequentially.
+a1229 2
+    for (i = 0; i < 8; i++) {
+      P2RF_ReadVme (drvPvt, AIM_I_CRTVOL, &reg);
+d1231 4
+a1234 4
+      /* extract index & cvt to DB offset...
+       */
+      j = (reg & AIM_M_CRTCHAN) >> AIM_V_CRTCHAN;
+      j  = chan2db[j & 0x7];	/* 0x7 just to be safe */
+d1236 3
+a1238 2
+      pRS20[j] = reg;								/* raw */
+      pRF20[j] = ((reg & AIM_M_CRTVOL) >> AIM_V_CRTVOL) * temp_raw2eu[j];	/* EU */
+d1240 7
+a1246 9
+      if (j != 5) {	/* skip temp for now */
+        pRS20[j] = reg;								/* raw */
+        pRF20[j] = ((reg & AIM_M_CRTVOL) >> AIM_V_CRTVOL) * temp_raw2eu[j];	/* EU */
+	db_post_events (rec, &pRS20[j], DBE_VALUE | DBE_LOG);
+	db_post_events (rec, &pRF20[j], DBE_VALUE | DBE_LOG);
+      }
+      else {
+        /* Convert templerature to degree C */
+        pRF20[j] = ((reg & AIM_M_CRTVOL) * .001221 - 1.375)/.0225;	/* EU */
+d1248 1
+d1250 4
+a1253 1
+    }
+d1255 2
+a1256 3
+    /* in 12-channel AIM, crate Vs & temperature come out of the same reg...
+     * clean up crate temp by moving it from RS/RF25 to where it belongs, RS/RF13
+     * (RS/RF25 will be zero for 12-ch AIM)
+d1258 4
+a1261 4
+    pRS00[13] = pRS20[5];	pRS20[5] = 0;
+    pRF00[13] = pRF20[5];	pRF20[5] = 0.0;
+    db_post_events (rec, &pRS00[13], DBE_VALUE | DBE_LOG);
+    db_post_events (rec, &pRF00[13], DBE_VALUE | DBE_LOG);
+d1263 6
+d1275 6
+a1280 2
+    /* sync to channel 0 ... not strictly necessary, but as of this writing (13-Nov-2002)
+     * the channel # appears to inc all the way to 15 before wrapping around, which is too high
+d1282 1
+a1282 1
+    i = AIM_K_CHANCNT;
+d1284 2
+a1285 2
+      P2RF_ReadVme (brd->drvPvt, AIM_I_ARCVOL, &reg);
+      j = (reg & AIM_M_ARCCHAN) >> AIM_V_ARCCHAN;			/* get chan # */
+d1288 3
+a1290 2
+    for (i = 0; i < AIM_K_CHANCNT; i++) {
+      if (i > 0) P2RF_ReadVme (drvPvt, AIM_I_ARCVOL, &reg);		/* already got first one */
+d1292 7
+a1298 1
+      j = (reg & AIM_M_ARCCHAN) >> AIM_V_ARCCHAN;			/* get chan # */
+d1300 8
+a1307 5
+      if (j < AIM_K_CHANCNT) {		/* trap bogus channel #s */
+	pRS00[j] = reg;							/* raw */
+	pRF00[j] = (((reg & AIM_M_ARCVOL) >> AIM_V_ARCVOL) * 5.0) / MAX12BIT; 
+	db_post_events (rec, &pRS00[j], DBE_VALUE | DBE_LOG);
+	db_post_events (rec, &pRF00[j], DBE_VALUE | DBE_LOG);
+d1309 1
+d1311 5
+d1326 1
+a1326 1
+    short           temp;		/* to read/store peaks */
+d1351 1
+a1351 1
+	  P2RF_ReadVme (brd->drvPvt,
+d1353 2
+a1354 2
+			(unsigned short *)&temp);
+	} while ( ((temp & REGANDMASK) != (7 << REGBITPOS)) && i-- >= 0);
+d1366 1
+a1366 1
+	    P2RF_ReadVme (brd->drvPvt,
+d1368 3
+a1370 3
+			  (unsigned short *) &temp);
+	    temp <<= 3; temp >>= 3;			/* sign extend */
+	    if (temp > peakread[j]) peakread[j] = temp;
+d1378 1
+a1378 1
+	  P2RF_ReadVme (drvPvt, AIM_I_ARCVOL, (unsigned short *)&temp);
+d1380 2
+a1381 2
+	  j    = ((unsigned short)temp & AIM_M_ARCCHAN) >> AIM_V_ARCCHAN;	/* get chan # */
+	  temp = ((unsigned short)temp & AIM_M_ARCVOL)  >> AIM_V_ARCVOL ;
+d1383 1
+a1383 1
+	  if (temp > peakread[j]) peakread[j] = temp;
+d1385 1
+a1385 3
+
+      } /* end i:PEAKREADS */
+
+d1396 4
+a1399 4
+          temp = rec->casf * (float)peakread[iarc]; 
+	  if (temp < MINTRIPLVL) temp = MINTRIPLVL;
+	  if (temp > MAXTRIPLVL) temp = MAXTRIPLVL;
+          *tl_p = (unsigned short)temp;
+d1401 1
+a1401 1
+        db_post_events (rec, tl_p++, DBE_VALUE | DBE_LOG);
+d1419 1
+a1419 1
+    unsigned short *tl_p = &rec->tl1;   /* To save trip levels */
+a1459 1
+	  AIM_FIX12CH(reg);
+d1461 1
+a1461 2
+          if ( (reg & chan2bit[iarc]) == 0)
+          {
+d1470 1
+a1470 2
+          else     /* No trip */
+	  {
+d1485 1
+d1487 1
+d1490 1
+d1493 3
+a1495 1
+        db_post_events (rec, ttl_p, DBE_VALUE | DBE_LOG);
+d1500 1
+a1500 1
+    db_post_events (rec, &rec->rstf, DBE_VALUE | DBE_LOG);
+d1521 1
+d1546 1
+a1546 1
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+d1583 1
+a1583 1
+
+d1601 2
+a1602 3
+#if 0
+  Function ("ResetCallback");
+#endif
+d1624 1
+d1635 1
+a1635 1
+   on the module.
+a1654 1
+
+d1662 1
+a1662 1
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+d1664 1
+a1664 1
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+d1688 1
+a1688 1
+      db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+d1704 3
+d1725 2
+a1726 3
+#if 0
+  Function ("LdDasCallback");
+#endif
+a1730 1
+
+d1751 1
+d1763 1
+a1783 1
+
+d1791 1
+a1791 1
+    db_post_events (rec, &rec->val,  DBE_VALUE | DBE_LOG);
+d1794 1
+a1794 1
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+d1827 1
+a1827 1
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+d1836 1
+d1845 2
+d1856 2
+a1857 3
+#if 0
+  Function ("GetRamCallback");
+#endif
+a1861 1
+
+d1872 5
+d1893 1
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

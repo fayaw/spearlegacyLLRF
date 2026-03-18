@@ -1,0 +1,167 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.01.10.23.22.40;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.40;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP - DSP code
+**
+**  Abstract:
+**      Definitions of DSP 1610 Bit I/O parameters.
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Feedback Project
+**
+**   History:
+**      January 7, 1994 - Created
+**      April   9, 1996 - L. Sapozhnikov: Modified to adapt to specifics of
+**                                        gap feed forward board
+**    October   2, 1996 - R. Claus: Modified with board type macro
+**    October  10, 1996 - R. Claus: Sperated general defs from board specifics
+**
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#ifndef BIODEF_H
+#define BIODEF_H
+
+/* sbit and cbit register definitions for setting up BIO */
+#define SBT_V_VALUE           0         /* sbit value field */
+#define SBT_V_DIR             8         /* sbit direction field */
+#define CBT_V_DATAPAT         0         /* cbit data/pattern */
+#define CBT_V_MODEMASK        8         /* cbit mode/mask */
+
+#define SBT_M_VALUE          (0x00ff << SBT_V_VALUE   )
+#define SBT_M_DIR            (0x00ff << SBT_V_DIR     )
+#define CBT_M_DATAPAT        (0x00ff << CBT_V_DATAPAT )
+#define CBT_M_MODEMASK       (0x00ff << CBT_V_MODEMASK)
+
+#define BIO_K_CLEAR           0         /* Clear */
+#define BIO_K_SET             1         /* Set */
+#define BIO_K_OFF             0         /* Off */
+#define BIO_K_ON              1         /* On */
+#define BIO_K_FALSE           0         /* Off */
+#define BIO_K_TRUE            1         /* On */
+#define BIO_K_DISABLE         0         /* Disable */
+#define BIO_K_ENABLE          1         /* Enable */
+#define BIO_K_DATA            0         /* Put DATA on output */
+#define BIO_K_DONTCARE        0         /* Don't care */
+#define BIO_K_TOGGLE          1         /* Toggle output */
+#define BIO_K_INPUT           0         /* Input */
+#define BIO_K_OUTPUT          1         /* Output */
+
+#define BIO_INPUT(bit)         ((BIO_K_INPUT   << (bit)) << SBT_V_DIR)
+#define BIO_OUTPUT(bit)        ((BIO_K_OUTPUT  << (bit)) << SBT_V_DIR)
+
+#define BIO_DATA(bit, value)  ((~((~(DSP_K_BIODIR)) | \
+                               ((1       << (bit))  << CBT_V_MODEMASK))) | \
+                               (((value) << (bit))  << CBT_V_DATAPAT))
+#define BIO_DATA2(bit1, bit2, value)  ((~((~(DSP_K_BIODIR))              | \
+			       ((1	 << (bit1)) << CBT_V_MODEMASK)   | \
+                               ((1       << (bit2)) << CBT_V_MODEMASK))) | \
+                               (((value) << (bit1)) << CBT_V_DATAPAT)    | \
+                               (((value) << (bit2)) << CBT_V_DATAPAT))
+#define BIO_TOGGLE(bit)       ((DSP_K_BIODIR) | \
+                               ((1       << (bit))  << CBT_V_DATAPAT ))
+#define BIO_TESTF(bit)        ((DSP_K_BIODIR) | \
+                               ((1       << (bit))  << CBT_V_MODEMASK) | \
+                               ((FALSE   << (bit))  << CBT_V_DATAPAT))
+#define BIO_TESTT(bit)        ((DSP_K_BIODIR) | \
+                               ((1       << (bit))  << CBT_V_MODEMASK) | \
+                               ((TRUE    << (bit))  << CBT_V_DATAPAT))
+#define BIO_TESTT2(bit1,bit2)  ((DSP_K_BIODIR) | \
+                               ((1       << (bit1))  << CBT_V_MODEMASK) | \
+                               ((TRUE    << (bit1))  << CBT_V_DATAPAT)  | \
+                               ((1       << (bit2))  << CBT_V_MODEMASK) | \
+                               ((TRUE    << (bit2))  << CBT_V_DATAPAT))
+#define BIO_CLEAR(bit)          (BIO_DATA ((bit), BIO_K_FALSE))
+#define BIO_SET(bit)            (BIO_DATA ((bit), BIO_K_TRUE))
+#define BIO_OFF(bit)            (BIO_DATA ((bit), BIO_K_OFF))
+#define BIO_ON(bit)             (BIO_DATA ((bit), BIO_K_ON))
+#define BIO_FALSE(bit)          (BIO_DATA ((bit), BIO_K_FALSE))
+#define BIO_TRUE(bit)           (BIO_DATA ((bit), BIO_K_TRUE))
+#define BIO_DISABLE(bit)        (BIO_DATA ((bit), BIO_K_DISABLE))
+#define BIO_ENABLE(bit)         (BIO_DATA ((bit), BIO_K_ENABLE))
+#define BIO_DONTCARE(bit)       (BIO_DATA ((bit), BIO_K_X))
+#define BIO_SET2(bit1, bit2)	(BIO_DATA2 ((bit1), (bit2), BIO_K_SET))
+#define BIO_OFF2(bit1, bit2)	(BIO_DATA2 ((bit1), (bit2), BIO_K_OFF))
+
+#endif
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

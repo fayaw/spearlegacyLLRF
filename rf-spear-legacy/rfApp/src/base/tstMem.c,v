@@ -1,0 +1,195 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.2
+	tag1:1.1.1.1
+	tag2:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.2
+date	2002.05.14.23.58.16;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2002.04.08.23.17.45;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Got rid of warnings
+@
+text
+@/*
+** ++
+**
+**  Facility:  TST
+**
+**  Abstract:
+**      Run a set of diagnostics on a SLAC PEP-II RF Modules
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II RF Project
+**
+**  History:
+**      August 29, 1996 - Created
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#include <vxWorks.h>
+#include <stdioLib.h>
+
+#include "sglLib.h"
+#include "busLib.h"
+#include "mtlLib.h"
+#include "memTest.h"
+#include "genLib.h"
+
+
+const char
+Tst_MemFld[] = "Memory test %s failed at adx %08x",
+Tst_MemTst[] = "Memory test: %s";
+
+#define TST_MEMFLD      (Status) &Tst_MemFld
+#define TST_MEMTST      (Status) &Tst_MemTst
+
+
+Status TstMem (unsigned long  address,
+               unsigned int   count,
+               unsigned int   loop)
+/*
+   Description
+   -----------
+   Diagnostic suite for the SLAC PEP-II RF Modules.
+   This function requires a resource manager to have run to assign A24
+   address space to the module
+
+   NB - Currently you must supply the address and number of words you
+        want to test.  Some day we may get around to reducing this to
+        just having to supply the Logical Address.  This function would
+        then have to figure out where the module's A24 space is and its
+        length.
+
+   NB - At the moment this function doesn't work because MemTest
+        increments the tested address.  The PEP-II RF modules have
+        memories that are accessed through a single address through
+        write and increment/read and decrement type hardware.
+
+   Parameter
+   ---------
+     address - A24 address to start testing at
+       count - Number of words to test
+        loop - Number of times to loop over each test.  Zero implies once.
+
+   Returns
+   -------
+   SUCCESS or some failure status.
+*/
+{
+  /* Sanity checks */
+  if (loop == 0) loop = 1;
+
+  /* Memory tests */
+  SGL_Status (TST_MEMTST, "Constant");
+  if (MemTest (SPC_K_A24, address, count, SIZ_K_SHORT,
+               MTL_K_CONSTANT,   0xdeadbeef, loop, TRUE))
+    return (SGL_Error (TST_MEMFLD, "Constant",   address));
+
+  SGL_Status (TST_MEMTST, "Bit");
+  if (MemTest (SPC_K_A24, address, count, SIZ_K_SHORT,
+               MTL_K_BIT,        0x00000001, loop, TRUE))
+    return (SGL_Error (TST_MEMFLD, "Bit",        address));
+
+  SGL_Status (TST_MEMTST, "Increment");
+  if (MemTest (SPC_K_A24, address, count, SIZ_K_SHORT,
+               MTL_K_INCREMENT,  0x12488241, loop, TRUE))
+    return (SGL_Error (TST_MEMFLD, "Increment",  address));
+
+  SGL_Status (TST_MEMTST, "Complement");
+  if (MemTest (SPC_K_A24, address, count, SIZ_K_SHORT,
+               MTL_K_COMPLEMENT, 0xa5a55a5a, loop, TRUE))
+    return (SGL_Error (TST_MEMFLD, "Complement", address));
+
+  return (SUCCESS);
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d52 1
+a53 10
+#define NIL   (void *)(0)
+#define NULL           0
+#define TRUE           1
+#define FALSE          0
+#define SUCCESS        0
+#define FAILURE        1
+
+#define Min(a,b)       ((a) < (b) ? (a) : (b))
+#define Max(a,b)       ((a) > (b) ? (a) : (b))
+#define lsizeof(var)   (sizeof (var) >> 2)
+@
+
+
+1.1.1.1
+log
+@First version of EPICS site - taken from R3.13.2.
+@
+text
+@@

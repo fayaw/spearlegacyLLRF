@@ -1,0 +1,327 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.58.34;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.58.34;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@NDB006
+The number of symbol table entries is: 25
+The length of the symbol table is: 337
+
+Index Hierarchy Path
+----- --------------
+!	&null_hpath&
+.	|trg_isrc:6.
+;	|trg_isrc:6|
+H	|trg_isrc:23.
+V	|trg_isrc:23|
+d	|trg_isrc:22.
+r	|trg_isrc:22|
+""	|trg_isrc:21.
+"0	|trg_isrc:21|
+">	|trg_isrc:20.
+"L	|trg_isrc:20|
+"Z	|trg_isrc:19.
+"h	|trg_isrc:19|
+"v	|trg_isrc:18.
+#&	|trg_isrc:18|
+#4	|trg_isrc:5.
+#A	|trg_isrc:5|
+#N	|trg_isrc:4.
+#[	|trg_isrc:4|
+#h	|trg_isrc:3.
+#u	|trg_isrc:3|
+$$	|trg_isrc:2.
+$1	|trg_isrc:2|
+$>	|trg_isrc:1.
+$K	|trg_isrc:1|
+
+The number of name info structs is : 236
+
+InsOrder BitField SymTableIndex NextSyn SynParent Loc ChainType NextChain ChainParent FanOut DirExp ParExp ShareExp NodeName
+-------- -------- ------------- ------- --------- --- --------- --------- ----------- ------ ------ ------ -------- --------
+"	IFkI	!	:25	#6
+#	IU\(	!	"e	ID0	"$
+$	IU\(	!	"V	ID1	"#
+%	IU\(	!	"n	ID10	x
+&	IU\(	!	"#	ID11	w
+'	IU\(	!	"G	ID2	""
+(	IU\(	!	"8	ID3	"!
+)	IU\(	!	x	ID4	~
+*	IU\(	!	i	ID5	}
++	IU\(	!	#L	ID6	|
+,	IU\(	!	#=	ID7	{
+-	IU\(	!	#.	ID8	z
+.	IU\(	!	"}	ID9	y
+/	$rX8+	!	ID[11..0]	#8
+0	IU\(	!	"f	INTENA0	v
+1	IU\(	!	"W	INTENA1	u
+2	IU\(	!	"o	INTENA10	l
+3	IU\(	!	"$	INTENA11	k
+4	IU\(	!	"H	INTENA2	t
+5	IU\(	!	"9	INTENA3	s
+6	IU\(	!	y	INTENA4	r
+7	IU\(	!	j	INTENA5	q
+8	IU\(	!	#M	INTENA6	p
+9	IU\(	!	#>	INTENA7	o
+:	IU\(	!	#/	INTENA8	n
+;	IU\(	!	"~	INTENA9	m
+<	$rX8+	!	INTENA[11..0]	#7
+=	IU\(	!	"%	RESET_L	"&
+>	IFkc	!	TISRC0	">
+?	IFkc	!	TISRC1	"=
+@@	IFkc	!	TISRC10	"4
+A	IFkc	!	TISRC11	"3
+B	IFkc	!	TISRC2	"<
+C	IFkc	!	TISRC3	";
+D	IFkc	!	TISRC4	":
+E	IFkc	!	TISRC5	"9
+F	IFkc	!	TISRC6	"8
+G	IFkc	!	TISRC7	"7
+H	IFkc	!	TISRC8	"6
+I	IFkc	!	TISRC9	"5
+J	$rX8+	!	TISRC[11..0]	#:
+K	IFkc	!	TRG_ISRC	"?
+L	IU\(	!	"i	TSRC0	"2
+M	IU\(	!	"Z	TSRC1	"1
+N	IU\(	!	"r	TSRC10	"(
+O	IU\(	!	"'	TSRC11	"'
+P	IU\(	!	"K	TSRC2	"0
+Q	IU\(	!	"<	TSRC3	"/
+R	IU\(	!	|	TSRC4	".
+S	IU\(	!	m	TSRC5	"-
+T	IU\(	!	#P	TSRC6	",
+U	IU\(	!	#A	TSRC7	"+
+V	IU\(	!	#2	TSRC8	"*
+W	IU\(	!	##	TSRC9	")
+X	$rX8+	!	TSRC[11..0]	#9
+Y	IU\(	!	"(	WT_TRGCLR	"%
+Z	IN#r	$>	&	DATA_BIT	#5
+[	IN#r	$>	3	INTENA	#0
+\	I\r8	$>	"+	=	RESET_L	#3
+]	I\lm	$>	"&	~	TRG_ISRC	#1
+^	IN#r	$>	O	TRG_SRC	#2
+_	I\r8	$>	".	Y	WT_TRGCLR	#4
+`	IN#r	"v	*	DATA_BIT	"p
+a	IN#r	"v	7	INTENA	"k
+b	I\r8	"v	q	=	RESET_L	"n
+c	I\lm	"v	l	f	TRG_ISRC	"l
+d	IN#r	"v	S	TRG_SRC	"m
+e	I\r8	"v	t	Y	WT_TRGCLR	"o
+f	IUV3	#&	c	:2	$<
+g	IFkI	#&	:4	$=
+h	IFkI	#&	:6	$>
+i	I\r8	#&	`	*	DATA_BIT	$8
+j	I\r8	#&	a	7	INTENA	$:
+k	I\r8	#&	z	=	RESET_L	$9
+l	IN$+	#&	f	TRG_ISRC	$<
+m	I\r8	#&	d	S	TRG_SRC	$6
+n	I\r8	#&	}	Y	WT_TRGCLR	$7
+o	IN#r	"Z	)	DATA_BIT	"i
+p	IN#r	"Z	6	INTENA	"d
+q	I\r8	"Z	"1	=	RESET_L	"g
+r	I\lm	"Z	{	u	TRG_ISRC	"e
+s	IN#r	"Z	R	TRG_SRC	"f
+t	I\r8	"Z	"4	Y	WT_TRGCLR	"h
+u	IUV3	"h	r	:2	$.
+v	IFkI	"h	:4	$/
+w	IFkI	"h	:6	$0
+x	I\r8	"h	o	)	DATA_BIT	$*
+y	I\r8	"h	p	6	INTENA	$,
+z	I\r8	"h	":	=	RESET_L	$+
+{	IN$+	"h	u	TRG_ISRC	$.
+|	I\r8	"h	s	R	TRG_SRC	$(
+}	I\r8	"h	"=	Y	WT_TRGCLR	$)
+~	IUV3	$K	]	:2	%$
+"!	IFkI	$K	:4	%%
+""	IFkI	$K	:6	%&
+"#	I\r8	$K	Z	&	DATA_BIT	$~
+"$	I\r8	$K	[	3	INTENA	%"
+"%	I\r8	$K	"p	=	RESET_L	%!
+"&	IN$+	$K	~	TRG_ISRC	%$
+"'	I\r8	$K	^	O	TRG_SRC	$|
+"(	I\r8	$K	"s	Y	WT_TRGCLR	$}
+")	IN#r	$$	%	DATA_BIT	#.
+"*	IN#r	$$	2	INTENA	#)
+"+	I\r8	$$	"v	=	RESET_L	#,
+",	I\lm	$$	"q	"k	TRG_ISRC	#*
+"-	IN#r	$$	N	TRG_SRC	#+
+".	I\r8	$$	"y	Y	WT_TRGCLR	#-
+"/	IN#r	">	(	DATA_BIT	"b
+"0	IN#r	">	5	INTENA	"]
+"1	I\r8	">	"@@	=	RESET_L	"`
+"2	I\lm	">	";	"5	TRG_ISRC	"^
+"3	IN#r	">	Q	TRG_SRC	"_
+"4	I\r8	">	"C	Y	WT_TRGCLR	"a
+"5	IUV3	"L	"2	:2	#~
+"6	IFkI	"L	:4	$!
+"7	IFkI	"L	:6	$"
+"8	I\r8	"L	"/	(	DATA_BIT	#z
+"9	I\r8	"L	"0	5	INTENA	#|
+":	I\r8	"L	"I	=	RESET_L	#{
+";	IN$+	"L	"5	TRG_ISRC	#~
+"<	I\r8	"L	"3	Q	TRG_SRC	#x
+"=	I\r8	"L	"L	Y	WT_TRGCLR	#y
+">	IN#r	""	'	DATA_BIT	"[
+"?	IN#r	""	4	INTENA	"V
+"@@	I\r8	""	"O	=	RESET_L	"Y
+"A	I\lm	""	"J	"D	TRG_ISRC	"W
+"B	IN#r	""	P	TRG_SRC	"X
+"C	I\r8	""	"R	Y	WT_TRGCLR	"Z
+"D	IUV3	"0	"A	:2	#p
+"E	IFkI	"0	:4	#q
+"F	IFkI	"0	:6	#r
+"G	I\r8	"0	">	'	DATA_BIT	#l
+"H	I\r8	"0	"?	4	INTENA	#n
+"I	I\r8	"0	"X	=	RESET_L	#m
+"J	IN$+	"0	"D	TRG_ISRC	#p
+"K	I\r8	"0	"B	P	TRG_SRC	#j
+"L	I\r8	"0	"[	Y	WT_TRGCLR	#k
+"M	IN#r	d	$	DATA_BIT	"T
+"N	IN#r	d	1	INTENA	"O
+"O	I\r8	d	"^	=	RESET_L	"R
+"P	I\lm	d	"Y	"S	TRG_ISRC	"P
+"Q	IN#r	d	M	TRG_SRC	"Q
+"R	I\r8	d	"a	Y	WT_TRGCLR	"S
+"S	IUV3	r	"P	:2	#b
+"T	IFkI	r	:4	#c
+"U	IFkI	r	:6	#d
+"V	I\r8	r	"M	$	DATA_BIT	#^
+"W	I\r8	r	"N	1	INTENA	#`
+"X	I\r8	r	"g	=	RESET_L	#_
+"Y	IN$+	r	"S	TRG_ISRC	#b
+"Z	I\r8	r	"Q	M	TRG_SRC	#\
+"[	I\r8	r	"j	Y	WT_TRGCLR	#]
+"\	IN#r	H	#	DATA_BIT	"M
+"]	IN#r	H	0	INTENA	"H
+"^	I\r8	H	#E	=	RESET_L	"K
+"_	I\lm	H	"h	"b	TRG_ISRC	"I
+"`	IN#r	H	L	TRG_SRC	"J
+"a	I\r8	H	#H	Y	WT_TRGCLR	"L
+"b	IUV3	V	"_	:2	#T
+"c	IFkI	V	:4	#U
+"d	IFkI	V	:6	#V
+"e	I\r8	V	"\	#	DATA_BIT	#P
+"f	I\r8	V	"]	0	INTENA	#R
+"g	I\r8	V	#N	=	RESET_L	#Q
+"h	IN$+	V	"b	TRG_ISRC	#T
+"i	I\r8	V	"`	L	TRG_SRC	#N
+"j	I\r8	V	#Q	Y	WT_TRGCLR	#O
+"k	IUV3	$1	",	:2	$t
+"l	IFkI	$1	:4	$u
+"m	IFkI	$1	:6	$v
+"n	I\r8	$1	")	%	DATA_BIT	$p
+"o	I\r8	$1	"*	2	INTENA	$r
+"p	I\r8	$1	#!	=	RESET_L	$q
+"q	IN$+	$1	"k	TRG_ISRC	$t
+"r	I\r8	$1	"-	N	TRG_SRC	$n
+"s	I\r8	$1	#$	Y	WT_TRGCLR	$o
+"t	IN#r	#h	.	DATA_BIT	#'
+"u	IN#r	#h	;	INTENA	#"
+"v	I\r8	#h	#'	=	RESET_L	#%
+"w	I\lm	#h	#"	"z	TRG_ISRC	##
+"x	IN#r	#h	W	TRG_SRC	#$
+"y	I\r8	#h	#*	Y	WT_TRGCLR	#&
+"z	IUV3	#u	"w	:2	$f
+"{	IFkI	#u	:4	$g
+"|	IFkI	#u	:6	$h
+"}	I\r8	#u	"t	.	DATA_BIT	$b
+"~	I\r8	#u	"u	;	INTENA	$d
+#!	I\r8	#u	#0	=	RESET_L	$c
+#"	IN$+	#u	"z	TRG_ISRC	$f
+##	I\r8	#u	"x	W	TRG_SRC	$`
+#$	I\r8	#u	#3	Y	WT_TRGCLR	$a
+#%	IN#r	#N	-	DATA_BIT	"~
+#&	IN#r	#N	:	INTENA	"y
+#'	I\r8	#N	#6	=	RESET_L	"|
+#(	I\lm	#N	#1	#+	TRG_ISRC	"z
+#)	IN#r	#N	V	TRG_SRC	"{
+#*	I\r8	#N	#9	Y	WT_TRGCLR	"}
+#+	IUV3	#[	#(	:2	$X
+#,	IFkI	#[	:4	$Y
+#-	IFkI	#[	:6	$Z
+#.	I\r8	#[	#%	-	DATA_BIT	$T
+#/	I\r8	#[	#&	:	INTENA	$V
+#0	I\r8	#[	#?	=	RESET_L	$U
+#1	IN$+	#[	#+	TRG_ISRC	$X
+#2	I\r8	#[	#)	V	TRG_SRC	$R
+#3	I\r8	#[	#B	Y	WT_TRGCLR	$S
+#4	IN#r	#4	,	DATA_BIT	"w
+#5	IN#r	#4	9	INTENA	"r
+#6	I\r8	#4	b	=	RESET_L	"u
+#7	I\lm	#4	#@@	#:	TRG_ISRC	"s
+#8	IN#r	#4	U	TRG_SRC	"t
+#9	I\r8	#4	e	Y	WT_TRGCLR	"v
+#:	IUV3	#A	#7	:2	$J
+#;	IFkI	#A	:4	$K
+#<	IFkI	#A	:6	$L
+#=	I\r8	#A	#4	,	DATA_BIT	$F
+#>	I\r8	#A	#5	9	INTENA	$H
+#?	I\r8	#A	k	=	RESET_L	$G
+#@@	IN$+	#A	#:	TRG_ISRC	$J
+#A	I\r8	#A	#8	U	TRG_SRC	$D
+#B	I\r8	#A	n	Y	WT_TRGCLR	$E
+#C	IN#r	.	+	DATA_BIT	"F
+#D	IN#r	.	8	INTENA	"A
+#E	IN#r	.	=	RESET_L	"D
+#F	I\lm	.	#O	#I	TRG_ISRC	"B
+#G	IN#r	.	T	TRG_SRC	"C
+#H	IN#r	.	Y	WT_TRGCLR	"E
+#I	IUV3	;	#F	:2	#F
+#J	IFkI	;	:4	#G
+#K	IFkI	;	:6	#H
+#L	I\r8	;	#C	+	DATA_BIT	#B
+#M	I\r8	;	#D	8	INTENA	#D
+#N	I\r8	;	\	=	RESET_L	#C
+#O	IN$+	;	#I	TRG_ISRC	#F
+#P	I\r8	;	#G	T	TRG_SRC	#@@
+#Q	I\r8	;	_	Y	WT_TRGCLR	#A
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

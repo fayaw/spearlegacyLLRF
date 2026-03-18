@@ -1,0 +1,112 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_0:1.1.1.1
+	R_epics_3_14_6_spear0:1.1.1.1
+	R_3_14_1_spear1:1.1.1.1
+	R1:1.1.1.1
+	B1:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	95.01.14.01.32.34;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	95.01.14.01.32.34;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@                   Resource Manager Display
+                   ------------------------
+
+Use This editor to view the Resource Manager table. It displays
+all the information about all the VXI devices present in the system.
+
+Field Description:
+------------------
+Log Addr: Logical address of the device (hex) 
+
+Device Name: Device name
+
+Cmdr LA: Logical address of the commander (hex) 
+
+Frame: Logical address of frame extender (VXI-MXI) (hex)
+
+Slot: Slot number (hex)
+
+MfrId: Manufacturer number (hex)
+
+Mfr Name: Manufacturer name
+
+ModNo: Model number (hex)
+
+Model Name: Model name
+
+DevClass: 0 = MEM,  1 = EXT, 2 = MBD, 3 = RBD
+
+SubCls: Sub Class (hex)
+
+MemSpace: Address Space
+
+MemBase: Base of the memory (hex)
+
+MemSize: Size of the memory (hex)
+
+IrqLevel: Interrupt levels for device (bit vector, hex)
+
+IrqHandle: Interrupt Handlers for device (bit vector, hex)
+
+Servants:  Displays servants of the device 
+
+Usage
+-----
+This editor supports the following commands:
+
+(1) list      [<index#>,[<index#>]] - lists all the entries in the 
+                                      specified range.
+(2) display   [<index#>,[<index#>]] - displays the entries in details.
+(3) exit                            - lets you exit the editor.
+(4) help                            - gives help on that editor.
+
+
+
+@
+
+
+1.1.1.1
+log
+@RF IOC startup files.
+@
+text
+@@

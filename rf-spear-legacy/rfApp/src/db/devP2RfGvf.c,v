@@ -1,0 +1,2572 @@
+head	1.6;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.6
+	RF-SPEAR-R0-3-1:1.6
+	RF-SPEAR-R0-3-0:1.6
+	RF-SPEAR-R0-2-0:1.6
+	RF-SPEAR-R0-1-0:1.6
+	RF-SPEAR-R0-0-3:1.6
+	RF-SPEAR-R0-0-2:1.6
+	RF-SPEAR-R0-0-1:1.6
+	RF-SPEAR-R0-0-0:1.6
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.6
+	RF-3-13-10:1.5.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.5
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.5
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.5
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.6
+date	2011.12.07.01.21.54;	author saa;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2003.09.10.01.33.10;	author luchini;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2003.09.10.01.27.48;	author luchini;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2003.02.11.19.34.47;	author luchini;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.02.11.19.22.08;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.44;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.6
+log
+@Changes for 3.14.11 (export) and compiler warnings.
+@
+text
+@/*
+** ++
+**
+**  Facility:  DEV - DEVice support
+**
+**  Abstract:
+**      EPICS device support for the PEP-II RF Gap Voltage Feed Forward Module
+**
+**  Author:
+**	R. Claus, SLAC/PEP-II Low Level RF Group
+**
+**  History:
+**      February 11, 2003 - Update new fields verh and verf in InitFields (K. Luchini)
+**	August 21, 1996   - Created
+**
+**  Copyright:
+**                                Copyright 1996
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+
+
+#include <vxWorks.h>
+#include <sysLib.h>
+#include <stdlib.h>
+#include <types.h>
+#include <stdioLib.h>
+#include <string.h>
+#include <math.h>
+#include <taskLib.h>
+#include <logLib.h>
+
+#include <cvtTable.h>
+#include <dbDefs.h>
+#include <dbAccess.h>
+#include <dbEvent.h>
+#include <recGbl.h>
+#include <recSup.h>
+#include <devSup.h>
+#include <link.h>
+#include <alarm.h>
+/*#include <module_types.h>*/
+#include <callback.h>
+
+#include <p2RfLib.h>
+#include <drvP2RfVxi.h>
+#include <p2RfGvfDef.h>
+#include <p2RfGvfRecord.h>
+
+#include <epicsPrint.h>
+
+#include "epicsExport.h"
+
+
+#define GVF_V_INTSELECT    GVF_V_SFTWERR
+#define GVF_M_INTSELECT   (GVF_M_XFRFNEND | GVF_M_DSPMSG   | \
+                           GVF_M_TAXIERR  | GVF_M_TAXISYNC | GVF_M_LFBLINK | \
+                           GVF_M_SFTWERR  | GVF_M_HDWERR   | GVF_M_SOFTWARE)
+
+typedef struct p2RfGvfRecord   P2RfGvfRecord;
+
+static long InitRecord (P2RfGvfRecord *);
+static long Action     (P2RfGvfRecord *);
+
+
+typedef struct
+{
+  long		number;
+  DEVSUPFUN	report;
+  DEVSUPFUN	init;
+  DEVSUPFUN	init_record;
+  DEVSUPFUN	get_ioint_info;
+  DEVSUPFUN	action;
+} P2RfGvfDset;
+
+P2RfGvfDset devP2RfGvf = {5, NULL, NULL, InitRecord, NULL, Action};
+
+epicsExportAddress(dset,devP2RfGvf);
+
+/*
+** These DSP constants must match the order expected by the DSP code.
+*/
+typedef struct
+{
+  short           iRef;
+  short           qRef;
+  short           iAdaptCoef;
+  short           qAdaptCoef;
+  short           iForgetFactor;
+  short           qForgetFactor;
+  short           bufOffset;
+  short           bufRemain;
+}  GvfDspConsts;
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  long            status;
+}  GvfRstBlk;
+
+typedef struct _DspComBlk
+{
+  volatile unsigned short  blkId;
+  volatile unsigned short  vers;
+  volatile unsigned short  dspMsg;
+  volatile unsigned short  dspArg;
+  volatile unsigned short  dspLbl;
+  volatile unsigned short  chkSum;
+  volatile unsigned short  dspComLen;
+  volatile unsigned short  status;
+  volatile unsigned short  sttArg[STT_K_ARGCNT];
+  volatile unsigned short  cpuMsg;
+  volatile unsigned short  cpuArg;
+  volatile unsigned short  cpuLbl;
+  volatile unsigned short  cpuComLen;
+}  DspComBlk;
+
+typedef struct
+{
+  char           *id;
+  int             index;
+  int             count;
+  short          *consts;
+}  GvfDspMsgPrm;
+
+typedef struct
+{
+  CALLBACK             callback;
+  void                *drvPvt;
+  volatile DspComBlk  *comBlk;
+  GvfDspMsgPrm        *prm;
+  long                 status;
+}  GvfDspMsgBlk;
+
+typedef struct
+{
+  int             index;
+  char           *file;
+}  GvfDspPrm;
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  GvfDspPrm      *prm;
+  long            status;
+}  GvfDspBlk;
+
+typedef struct
+{
+  int             cosIdx;
+  int             sinIdx;
+  int             count;
+  double          phase;
+  double          phaseMax;
+  double          phaseOffset;
+  double          amplitude;
+}  GvfLutPrm;
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  GvfLutPrm      *prm;
+  long            status;
+}  GvfLutBlk;
+
+typedef struct
+{
+  char           *id;
+  float          *coefs;
+  int             count;
+  int             index;
+  P2RfCvtBlk      cvtBlk;
+  char           *file;
+}  GvfCoefPrm;
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  GvfCoefPrm     *prm;
+  long            status;
+}  GvfCoefBlk;
+
+typedef struct
+{
+  char           *id;
+  int             index;
+  int             count;
+  char           *file;
+}  GvfMemPrm;
+
+typedef struct
+{
+  CALLBACK        callback;
+  void           *drvPvt;
+  GvfMemPrm      *prm;
+  long            status;
+  int             abortFlg;
+}  GvfMemBlk;
+
+typedef struct
+{
+  void           *drvPvt;
+  P2RfGvfRecord  *rec;
+  GvfRstBlk       resetBlk;
+  GvfDspMsgBlk    dspMsgBlk;
+  GvfDspBlk       dspBlk;
+  GvfLutBlk       lutBlk;
+  GvfCoefBlk      coefBlk;
+  GvfMemBlk       rcrdBlk;
+  GvfMemBlk       playBlk;
+  unsigned int    intPrc;
+
+  GvfDspMsgPrm    dspMsgPrm;
+  GvfDspConsts    dspConsts;
+  GvfDspPrm       dspPrm;
+  GvfLutPrm       lutPrm;
+  GvfCoefPrm      eq0Prm;
+  float           eqCoefs0[GVF_K_EQCOEFCNT];
+  GvfCoefPrm      eq1Prm;
+  float           eqCoefs1[GVF_K_EQCOEFCNT];
+  GvfMemPrm       rcrdPrm;
+  GvfMemPrm       playPrm;
+}  GvfBoard;
+
+/* Forward references */
+static long  SpawnReset      (P2RfGvfRecord *, GvfRstBlk *);
+static void  ResetCallback   (GvfRstBlk *);
+static void  DspMsgCallback  (GvfDspMsgBlk *);
+static long  SpawnLdDsp      (P2RfGvfRecord *, unsigned char *, GvfDspBlk *,
+                              GvfDspPrm *, char *, unsigned short *);
+static void  LdDspCallback   (GvfDspBlk *);
+static long  SpawnLdLut      (P2RfGvfRecord *, unsigned char *, GvfLutBlk *,
+                              GvfLutPrm *, double, double, double, double);
+static void  LdLutCallback   (GvfLutBlk *);
+static long  SpawnLdCoefs    (P2RfGvfRecord *, unsigned char *, GvfCoefBlk *,
+                              GvfCoefPrm *, char *, unsigned short *);
+static void  LdCoefCallback  (GvfCoefBlk *);
+static long  SpawnGetRcrd    (P2RfGvfRecord *, unsigned char *, GvfMemBlk *,
+                              GvfMemPrm *, unsigned int, char *,
+                              unsigned short *);
+static void  GetRcrdCallback (GvfMemBlk *);
+static long  SpawnLdPlay     (P2RfGvfRecord *, unsigned char *, GvfMemBlk *,
+                              GvfMemPrm *, char *, unsigned short *);
+static void  LdPlayCallback  (GvfMemBlk *);
+static void  GvfIsr          (void *, unsigned short);
+static void  GvfShutdown     (void *);
+static long  InitFields      (GvfBoard *, int);
+static long  ColdInit        (GvfBoard *, P2RfGvfRecord *);
+static long  WarmInit        (GvfBoard *, P2RfGvfRecord *);
+static long  LoadCosSinLut   (void *, double, double, double, double,
+			      int, int, int);
+static long  DspFindComBlk   (void *, volatile DspComBlk **);
+
+
+static void GvfIsr (void           *brdArg,
+                    unsigned short  intStat)
+/*
+   Description
+   -----------
+   Device specific routine to handle interrupts generated by the module.
+   It runs in the context of the Interrupt Service Routine.  Thus all
+   the rules for coding at IPL apply.
+
+   In this case, alarms are set depending on the interrupt type.
+
+   Parameters
+   ----------
+       brdArg - A pointer to the device private structure
+      intStat - The interrupt status mask
+
+   Returns
+   -------
+   nothing
+*/
+{
+#if 0
+  Function ("GvfIsr");
+#endif
+
+  GvfBoard       *brd = (GvfBoard *) brdArg;
+  P2RfGvfRecord  *rec = brd->rec;
+
+
+#if 0
+  if (intStat & GVF_M_SFTWERR)
+    logMsg ("%s: Software error\n", (int)FN,0,0,0,0,0);
+  if (intStat & GVF_M_HDWERR)
+    logMsg ("%s: Hardware error\n",(int) FN,0,0,0,0,0 );
+  if (intStat & GVF_M_TAXIERR)
+    logMsg ("%s: TAXI error\n", (int)FN,0,0,0,0,0);
+  if (intStat & GVF_M_TAXISYNC)
+    logMsg ("%s: TAXI Synchronization error\n", (int)FN,0,0,0,0,0);
+  if (intStat & GVF_M_LFBLINK)
+    logMsg ("%s: LFB Link Error\n", (int)FN,0,0,0,0,0);
+  if (intStat & GVF_M_XFRFNEND)
+    logMsg ("%s: Transfer Function End\n",(int) FN,0,0,0,0,0);
+  if (intStat & GVF_M_DSPMSG)
+    logMsg ("%s: Message from DSP\n",(int) FN,0,0,0,0,0);
+  if (intStat & GVF_M_SOFTWARE)
+    logMsg ("%s: Software interrupt\n", (int)FN,0,0,0,0,0);
+#endif
+
+  /* Handle messages from the DSP */
+  if (intStat & GVF_M_DSPMSG)
+  {
+    /* Invoke the DSP message handling callback */
+    callbackRequest (&brd->dspMsgBlk.callback);
+
+    /* Take the DSP message bit down in the interrupt mask */
+    intStat ^= GVF_M_DSPMSG;
+  }
+
+  /* Update mask of interrupts set */
+  if (intStat & (intStat ^ rec->istt))  /* Is bit already set in istt? */
+  {
+    rec->istt |= intStat;
+
+    /* Process forward links */
+    brd->intPrc++;
+    scanOnce ((dbCommon *)rec);
+  }
+}
+
+
+
+static long DspFindComBlk (void                *drvPvt,
+                           volatile DspComBlk **comBlk)
+/*
+   Description
+   -----------
+
+   Parameters
+   ----------
+
+   Returns
+   -------
+
+*/
+{
+  Function ("DspFindComBlk");
+
+
+  /* Get the pointer to the communications block */
+  if (P2RF_DspFindComBlk (drvPvt, (volatile void **) comBlk) == OK)
+  {
+    /* Check the comBlk ID and version numbers */
+    if ((*comBlk)->blkId != DSP_K_COMBLKID)
+    {
+      P2RF_Printf (__FILE__, FN,
+                   "DSP has different comBlk ID %u than the expected %u",
+                   (*comBlk)->blkId, DSP_K_COMBLKID);
+      return (ERROR);
+    }
+    if ((*comBlk)->vers  != DSP_K_COMVERS)
+    {
+      P2RF_Printf (__FILE__, FN,
+                   "DSP has different comBlk version %u than the expected %u",
+                   (*comBlk)->vers, DSP_K_COMVERS);
+      return (ERROR);
+    }
+  }
+
+  return (OK);
+}
+
+
+
+static void DspMsgCallback (GvfDspMsgBlk *blk)
+/*
+   Description
+   -----------
+   This function handles messages from the on-board DSP.  It is invoked
+   by the callback facility when a DSP message interrupt is received.
+
+   Parameters
+   ----------
+          blk - A pointer to the DSP message handling block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  Function ("DspMsgCallback");
+
+  P2RfGvfRecord        *rec;
+  volatile DspComBlk   *comBlk = blk->comBlk;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+
+  /* If the comBlk pointer is not yet initialized, initialize it */
+  if (comBlk == NULL)
+  {
+    if (DspFindComBlk (blk->drvPvt, &comBlk) != OK)
+    {
+      P2RF_Printf (__FILE__, FN, "Could not find a valid communications block");
+      return;
+    }
+
+    blk->comBlk = comBlk;
+  }
+
+  /* Decide what to do, given the message */
+  switch (comBlk->dspMsg)
+  {
+    /*
+    ** The CMD_K_READY messages are used only during the initialization sequence.
+    */
+    case CMD_K_READY:
+    {
+      /*
+      ** Send reference constants. Get OKAY response.
+      */
+      if (comBlk->dspArg == STT_WTREF)
+      {
+        GvfDspMsgPrm  *prm = blk->prm;
+        long           status;
+
+        epicsPrintf ("STT_READY message received from GVF DSP.\n");
+        if ((status = P2RF_ReadConstsFile (blk->drvPvt, prm->id, rec->dspt,
+                                           prm->count, prm->consts,
+                                           rec->val, sizeof (rec->val), 0)) == OK)
+        {
+	  prm->consts[0] = (rec->iref << GVF_V_REF) & GVF_M_REF;
+	  prm->consts[1] = (rec->qref << GVF_V_REF) & GVF_M_REF;
+	  /*
+	  ** Temp kludge check the buffer offset.
+	  */
+          if (prm->consts[6] < 0)
+             prm->consts[6] = 0;
+          if (prm->consts[6] > 143)
+             prm->consts[6] = 143;
+          P2RF_LoadConsts (blk->drvPvt, prm->consts, prm->count, prm->index);
+          rec->dtst = NO_ALARM;
+          /* Load the response: Reference table and address */
+	  comBlk->cpuLbl = 0;           /* Init sequence number */
+	  comBlk->cpuMsg = CMD_K_LDREF; /* Table type */
+          comBlk->cpuArg = DSP_A_ERAM + (prm->index & 0xffff); /* Location it was loaded at */
+          comBlk->cpuComLen = prm->count;
+
+          /* 
+	  ** Tell DSP to read our response. Don't lower line until DSP responds
+	  ** with an OKAY since it polls the MSGTODSP line. After initialization
+	  ** MSGTODSP generates an interrupt so we don't need this machination.
+	  */
+          P2RF_WriteVme (blk->drvPvt, GVF_I_GFFCTRL, rec->gctl | GVF_M_MSGTODSP);
+        }
+        else
+        {
+          char  buf[P2RF_K_BUFSIZE];
+
+          recGblRecordError (status, rec,
+                             P2RF_Sprintf (buf, __FILE__, FN,
+                                           "%s failed - id = %s, file = %s",
+                                           "P2RF_ReadConstsFile",
+                                           prm->id, rec->dspt));
+          rec->dtst = UDF_ALARM;
+        }
+      }
+      /*
+      ** OK Response to WTREF msg.
+      */
+      else if (comBlk->dspArg == STT_OKAY)
+      {
+         rec->gctl &= ~GVF_M_MSGTODSP;    /* Insure MSGTODSP line is low */
+         P2RF_WriteVme (blk->drvPvt, GVF_I_GFFCTRL, rec->gctl); /* Lower MSGTODSP */
+	 epicsPrintf ("STT_OKAY message received from GVF DSP.\n");
+      }
+      /*
+      **  DSP is unhappy with our LDREF message.
+      */
+      else if (comBlk->dspArg == STT_INVCPUMSG)
+      {
+         epicsPrintf 
+	   ("Gap Voltage DSP sent INVCPUMSG reponse during initialization.\n" );
+      }
+      else
+      {
+         P2RF_WriteVme (blk->drvPvt, GVF_I_GFFCTRL, rec->gctl); /* Lower MSGTODSP */
+	 epicsPrintf ("Unexpected CMD_K_READY message from DSP in GVF module.\n");
+      }
+    }
+    break;
+
+#if 0                                   /* Needs timeout */
+    case CMD_K_NFUNC:
+      /* Delay a bit to let db_post_events flush */
+      taskDelay (sysClkRateGet () / 10);
+
+      /* Lock the record to prevent processing during critical times */
+      dbScanLock       ((struct dbCommon *) rec);
+
+      /* Complete the record processing */
+      (*rSet->process) (rec);
+
+      /* Unlock the record */
+      dbScanUnlock     ((struct dbCommon *) rec);
+      break;
+#endif
+      /*
+      ** Error message from DSP.
+      */
+    case CMD_K_ERROR:
+      strncpy (rec->val, "DSP crashed", sizeof (rec->val));
+      P2RF_Printf (__FILE__, FN, "DSP crashed with error status %h04x",
+                   comBlk->status);
+      break;
+      /*
+      ** Unknown message from DSP.
+      */
+    default:
+      epicsPrintf ("Unknown message 0x%X received from DSP.\n",comBlk->dspMsg);
+      break;
+
+  }
+}
+
+
+
+static void GvfShutdown (void  *brdArg)
+/*
+   Description
+   -----------
+   Device specific routine to run at shutdown time.
+
+   Parameters
+   ----------
+       brdArg - A pointer to the device private structure
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("GvfShutdown"); */
+}
+
+
+
+static long InitRecord (P2RfGvfRecord  *rec)
+/*
+   Description
+   -----------
+   Initialize the record.  Many fields of the record are filled with data from
+   the hardware.  Depending on the start-up type (cold or warm) some record
+   fields will either set up the hardware or get their values from a restore
+   file.  Interrupts from the board are enabled at the end of the
+   initialization.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("InitRecord");
+
+  struct vxiio   *vxiIo = NULL;
+  GvfBoard       *brd;
+  long            status;
+  void           *drvPvt;
+  char           *msg   = "GVF module initialization failed";
+  int             startType;
+
+
+  /* rec.out must be of type VXI_IO */
+  if (rec->out.type != VXI_IO)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (S_db_badField, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "Illegal OUT field"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return(S_db_badField);
+  }
+
+  /* Allocate the device private block */
+  if ((brd = calloc (1, sizeof (*brd))) == NULL)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (ERROR, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN,
+                                     "No memory for GVF board descriptor"));
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Register the module to get a driver handle */
+  vxiIo = &rec->out.value.vxiio;
+  status = P2RF_RegisterModule (vxiIo->flag, vxiIo->frame, vxiIo->slot,
+                                vxiIo->la,
+                                GVF_K_MODEL, GVF_K_NAME, GVF_K_DRAWING,
+                                GvfIsr, brd, GvfShutdown, brd,
+				&drvPvt);
+  if (status) 
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "P2RF_RegisterModule"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (status);
+  }
+
+  /* Set up the device private block and save a pointer to it in the record */
+  brd->drvPvt = drvPvt;
+  brd->rec    = rec;
+  rec->dpvt   = brd;
+
+  /* Initialize the callback facility for the reset function*/
+  callbackSetCallback ((void*)ResetCallback, &brd->resetBlk.callback);
+  callbackSetPriority (priorityHigh,         &brd->resetBlk.callback);
+  callbackSetUser     (rec,                  &brd->resetBlk.callback);
+  brd->resetBlk.drvPvt = drvPvt;
+
+  /* Initialize the callback facility for loading the DSP */
+  brd->dspBlk.drvPvt = drvPvt;
+  callbackSetCallback ((void*)LdDspCallback, &brd->dspBlk.callback);
+  callbackSetPriority (priorityLow,          &brd->dspBlk.callback);
+  callbackSetUser     (rec,                  &brd->dspBlk.callback);
+
+  /* Load the static part of the DSP parameter block */
+  {
+    GvfDspPrm  *prm = &brd->dspPrm;
+
+    prm->index = GVF_I_DSPMEM;
+  }
+
+  /* Initialize the callback facility for handleing DSP messages */
+  brd->dspMsgBlk.drvPvt = drvPvt;
+  brd->dspMsgBlk.comBlk = NULL;
+  callbackSetCallback ((void*)DspMsgCallback, &brd->dspMsgBlk.callback);
+  callbackSetPriority (priorityHigh,          &brd->dspMsgBlk.callback);
+  callbackSetUser     (rec,                   &brd->dspMsgBlk.callback);
+
+  /* Load the static part of the DSP message parameter block */
+  {
+    GvfDspMsgPrm  *prm = &brd->dspMsgPrm;
+
+    prm->index  = GVF_I_DSPMEM;
+    prm->id     = GVF_K_DSPTBLID;
+    prm->count  = wSizeOf (brd->dspConsts);
+    prm->consts = (short *) &brd->dspConsts;
+
+    brd->dspMsgBlk.prm = prm;
+  }
+
+  /* Initialize the callback facility for loading the LUTs */
+  brd->lutBlk.drvPvt = drvPvt;
+  callbackSetCallback ((void*)LdLutCallback, &brd->lutBlk.callback);
+  callbackSetPriority (priorityLow,          &brd->lutBlk.callback);
+  callbackSetUser     (rec,                  &brd->lutBlk.callback);
+
+  /* Load the static part of the LUT parameter block */
+  {
+    GvfLutPrm  *prm = &brd->lutPrm;
+
+    prm->cosIdx = GVF_I_COSLUT;
+    prm->sinIdx = GVF_I_SINLUT;
+    prm->count  = GVF_K_LUTSIZE;
+  }
+
+  /* Initialize the callback facility for loading coefficients */
+  brd->coefBlk.drvPvt = drvPvt;
+  callbackSetCallback ((void*)LdCoefCallback, &brd->coefBlk.callback);
+  callbackSetPriority (priorityLow,           &brd->coefBlk.callback);
+  callbackSetUser     (rec,                   &brd->coefBlk.callback);
+
+  /* Load the static part of the coefficient parameter block */
+  {
+    GvfCoefPrm  *prm = &brd->eq0Prm;
+
+    prm->id            = GVF_K_EQCOEFID;
+    prm->coefs         = brd->eqCoefs0;
+    prm->count         = GVF_K_EQCOEFCNT;
+    prm->index         = GVF_I_EQCOEF0;
+    prm->cvtBlk.fMin   = GVF_K_EQCOEFFMIN;
+    prm->cvtBlk.fMax   = GVF_K_EQCOEFFMAX;
+    prm->cvtBlk.iMin   = (short)GVF_K_EQCOEFIMIN;
+    prm->cvtBlk.iMax   = GVF_K_EQCOEFIMAX;
+    prm->cvtBlk.iOff   = 0;
+    prm->cvtBlk.cvtRtn = NULL;
+    prm->cvtBlk.cvtArg = NULL;
+  }
+
+  {
+    GvfCoefPrm  *prm = &brd->eq1Prm;
+
+    prm->id            = GVF_K_EQCOEFID;
+    prm->coefs         = brd->eqCoefs1;
+    prm->count         = GVF_K_EQCOEFCNT;
+    prm->index         = GVF_I_EQCOEF1;
+    prm->cvtBlk.fMin   = GVF_K_EQCOEFFMIN;
+    prm->cvtBlk.fMax   = GVF_K_EQCOEFFMAX;
+    prm->cvtBlk.iMin   = (short)GVF_K_EQCOEFIMIN;
+    prm->cvtBlk.iMax   = GVF_K_EQCOEFIMAX;
+    prm->cvtBlk.iOff   = 0;
+    prm->cvtBlk.cvtRtn = NULL;
+    prm->cvtBlk.cvtArg = NULL;
+  }
+
+  /* Initialize the callback facility for the get-record-memory  function */
+  brd->rcrdBlk.drvPvt = drvPvt;
+  callbackSetCallback ((void*)GetRcrdCallback, &brd->rcrdBlk.callback);
+  callbackSetPriority (priorityLow,            &brd->rcrdBlk.callback);
+  callbackSetUser     (rec,                    &brd->rcrdBlk.callback);
+
+  /* Load the static part of the record parameter block */
+  {
+    GvfMemPrm  *prm = &brd->rcrdPrm;
+
+    prm->id    = GVF_K_RCRDMEMID;
+    prm->index = GVF_I_RCRDMEM;
+  }
+
+  /* Initialize the callback facility for the load-play-memory  function */
+  brd->playBlk.drvPvt = drvPvt;
+  callbackSetCallback ((void*)LdPlayCallback, &brd->playBlk.callback);
+  callbackSetPriority (priorityLow,           &brd->playBlk.callback);
+  callbackSetUser     (rec,                   &brd->playBlk.callback);
+
+  /* Load the static part of the play parameter block */
+  {
+    GvfMemPrm  *prm = &brd->playPrm;
+
+    prm->id    = GVF_K_PLAYMEMID;
+    prm->index = GVF_I_PLAYMEM;
+    prm->count = GVF_K_PLAYMEMCNT;
+  }
+
+  /* Figure out the restart type -- To be determined */
+  startType = P2RF_K_COLDSTART;
+
+  /* Initialize the module and the database fields depending on startup type */
+  status = InitFields (brd, startType);
+  if (status)
+  {
+    char  buf[P2RF_K_BUFSIZE];
+
+    recGblRecordError (status, rec,
+                       P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+    free (brd);
+    rec->dpvt = NULL;
+    strncpy (rec->val, msg, sizeof (rec->val));
+    return (ERROR);
+  }
+
+  /* Enable module interrupts and update the database copy */
+  P2RF_ModIntEnable (drvPvt);
+  P2RF_ReadVme (brd->drvPvt, GVF_I_INTCTRL,  &rec->ictl);
+
+  return (OK);
+}
+
+
+
+static long LoadCosSinLut (void         *drvPvt,
+                           double        phase,
+                           double        phaseMax,
+			   double        phaseOffset,
+			   double        amplitude,
+                           register int  cIdx,
+                           register int  sIdx,
+                           register int  cnt)
+/*
+   Description
+   -----------
+   Generate the cosine and sine lookup tables
+
+   Parameters
+   ----------
+      drvPvt -
+       phase - The requested phase range in degrees/full-scale
+    phaseMax - Phase Limit
+ phaseOffset -
+   amplitude -
+        cIdx -
+        sIdx -
+         cnt -
+
+   Returns
+   -------
+
+*/
+{
+  /*  double  angle = phase * PI / 360.0; */   /* (phase/2) * 2 * PI/360 */
+  double angle      = 0.0;
+  double angleToUse;
+  double delta  = (-phase     * PI/180.0) / cnt;
+  double offset = phaseOffset * PI/180.0;
+  double limit  = (phaseMax   * PI/180.0) / 2.0; 
+
+  if (limit < 0.0) limit = -limit;
+  while (cnt--)
+  {
+    angleToUse = angle + offset;
+    if      (angleToUse >  limit) angleToUse =  limit;
+    else if (angleToUse < -limit) angleToUse = -limit;
+    P2RF_WriteVme (drvPvt, cIdx++, (short) (amplitude * cos (angleToUse)));
+    P2RF_WriteVme (drvPvt, sIdx++, (short) (amplitude * sin (angleToUse)));
+    if (cnt == 2048) angle  = (phase/2.0) * PI/180.0; 
+    else             angle += delta;
+  }
+
+  return (0);
+}
+
+
+
+static long InitFields (GvfBoard  *brd,
+                        int        initType)
+/*
+   Description
+   -----------
+   Function to initialize the fields in the database record and/or the module,
+   depending on the initialization type.
+
+   Parameters
+   ----------
+          brd - A pointer to the device private block
+     initType - Type of initialization.
+
+   Returns
+   -------
+   Status
+*/
+{
+  /*  Function ("InitFields");*/
+
+  P2RfGvfRecord  *rec    = brd->rec;
+  void           *drvPvt = brd->drvPvt;
+  unsigned short  sernHi;
+  unsigned short  sernLo;
+  long            status;
+
+
+  /* Reset the module, if it's a cold startup.  This takes a while... */
+  if (initType == P2RF_K_COLDSTART)  P2RF_ResetModule (drvPvt);
+
+  /* Load the record fields with device data */
+  P2RF_ReadVme (drvPvt, GVF_I_MANID,     &rec->mid );
+  P2RF_ReadVme (drvPvt, GVF_I_MODELNO,   &rec->mtyp);
+  P2RF_ReadVme (drvPvt, GVF_I_STATUS,    &rec->mstt);
+  P2RF_ReadVme (drvPvt, GVF_I_OFFSET,    &rec->a24o);
+  P2RF_ReadVme (drvPvt, GVF_I_ATTRIBUTE, &rec->vatt);
+  P2RF_ReadVme (drvPvt, GVF_I_SERIALHI,  &sernHi   );
+  P2RF_ReadVme (drvPvt, GVF_I_SERIALLO,  &sernLo   );
+  rec->sern = (sernHi << 16) | sernLo;
+  P2RF_ReadVme (drvPvt, GVF_I_VERSION,   &rec->vern);
+  rec->verh = P2RF_HWVER(rec->vern); /* lower nibble of hardware version */
+  rec->verf = P2RF_FWVER(rec->vern); /* lower nibble of firmware version */
+  P2RF_ReadVme (drvPvt, GVF_I_SUBCLASS,  &rec->vscl);
+
+  /* Write some registers if we're doing a grounds-up initialization */
+  if (initType == P2RF_K_COLDSTART)    status = ColdInit (brd, rec);
+  else                                 status = WarmInit (brd, rec);
+
+  /* Resman wrote 0xfffc to module control register; take down software int */
+  rec->mctl = rec->mstt & (GVF_M_SFTRST | GVF_M_SYSFAILINH | GVF_M_A24A32);
+  P2RF_WriteVme (drvPvt, GVF_I_CONTROL,  rec->mctl);
+  P2RF_ReadVme  (drvPvt, GVF_I_STATUS,  &rec->mstt);
+
+  /*
+  |  Reading the Interrupt Status Register clears the outstanding Software
+  |  Interrupt Status bit, but does not clear the pending interrupt.  Thus
+  |  reading the register here would confuse the ISR when interrupts are
+  |  enabled and the pending software interrupt is taken: the ISR would
+  |  not be able to find the source of the interrupt.
+  */
+
+  /* Update the database copy of the Gap Status and Gap control registers */
+  P2RF_ReadVme (drvPvt, GVF_I_GFFSTAT0, &rec->gst0);
+  rec->ost0 = rec->gst0;          /* Save a copy to check for changes */
+  P2RF_ReadVme (drvPvt, GVF_I_GFFSTAT1, &rec->gst1);
+  rec->ost1 = rec->gst1;          /* Save a copy to check for changes */
+  P2RF_ReadVme (drvPvt, GVF_I_GFFCTRL,  &rec->gctl);
+
+  return (status);
+}
+
+
+
+static long ColdInit (GvfBoard      *brd,
+                      P2RfGvfRecord *rec)
+/*
+   Description
+   -----------
+   Initialization function to run when starting up from scratch.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  Function ("ColdInit");
+
+  register void  *drvPvt = brd->drvPvt;
+  unsigned short  reg;
+  long            status;
+
+
+  /* Don't allow database access to the interrupt level */
+  reg = (P2RF_K_INTLEVEL << GVF_V_INTLEVEL) & GVF_M_INTLEVEL;
+
+  /* Initialize the Interrupt Control Register from the database */
+  rec->ictl = ~(reg | ((rec->imsk << GVF_V_INTSELECT) & GVF_M_INTSELECT));
+  P2RF_WriteVme (drvPvt, GVF_I_INTCTRL, rec->ictl);
+  rec->oimk = rec->imsk;
+
+  /* Make sure module is in LOAD state */
+  P2RF_WriteVme (drvPvt, GVF_I_GFFCTRL, GVF_K_LOAD << GVF_V_STATE);
+
+  /* Load COS and SIN LUTs */
+  {
+    GvfLutPrm    *prm = &brd->lutPrm;
+
+    LoadCosSinLut (drvPvt, rec->phs, rec->phsm, rec->phso, rec->amp,
+                   prm->cosIdx, prm->sinIdx, prm->count);
+  }
+
+  /* Load and start DSP executable */
+  {
+    GvfDspPrm    *prm = &brd->dspPrm;
+
+    /* Reset the DSP */
+    P2RF_ReadVme  (drvPvt, GVF_I_GFFCTRL, &reg);
+    P2RF_WriteVme (drvPvt, GVF_I_GFFCTRL, reg & ~GVF_M_NOTDSPRST);
+
+    /* Load the DSP */
+    if ((status = P2RF_LoadDsp (drvPvt, prm->index, rec->dspe, FALSE,
+                                rec->val, sizeof (rec->val))) == OK)
+    {
+      rec->dstt = NO_ALARM;
+    }
+    else
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (ERROR, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s, file = %s, status = %08x",
+                                       "P2RF_LoadDsp", rec->dspe, status));
+      rec->dstt = UDF_ALARM;
+    }
+  }
+
+  /* Initialize the table file status */
+  rec->dtst = NO_ALARM;
+
+  /* Initialize the reference locations */
+  {
+/*
+**    short aref = rec->aref;
+**    short pref = (2.0 * PI) * rec->pref / 360.0;
+*/
+    P2RF_WriteVme (drvPvt, GVF_I_IREF, (rec->iref << GVF_V_REF) & GVF_M_REF);
+    P2RF_WriteVme (drvPvt, GVF_I_QREF, (rec->qref << GVF_V_REF) & GVF_M_REF);
+/*
+**    P2RF_WriteVme (drvPvt, GVF_I_AMPREF, aref);
+**    P2RF_WriteVme (drvPvt, GVF_I_PHSREF, pref);
+*/
+  }
+
+  /* Clear out the average phase location */
+  P2RF_WriteVme (drvPvt, GVF_I_AVEPHS, 0);
+
+  /* Initialize the Equalizer Control Register before loading coefficients */
+  P2RF_WriteVme (drvPvt, GVF_I_EQCTRL, GVF_K_EQCTRLVAL);
+  rec->ectl   = GVF_K_EQCTRLVAL;
+
+  /* Load Equalizer Coefficient set 0 from a file onto the module */
+  {
+    GvfCoefPrm    *prm = &brd->eq0Prm;
+
+    if ((status = P2RF_ReadCoefFile (drvPvt, prm->id, rec->e0cf,
+                                     prm->count, prm->coefs,
+                                     rec->val, sizeof (rec->val))) == OK)
+    {
+      P2RF_LoadCoefs (drvPvt, prm->coefs, prm->count, prm->index, &prm->cvtBlk);
+      rec->e0as = NO_ALARM;
+    }
+    else
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_ReadCoefFile",
+                                       prm->id, rec->e0cf));
+      rec->e0as = UDF_ALARM;
+    }
+  }
+
+  /* Load Equalizer Coefficient set 1 from a file onto the module */
+  {
+    GvfCoefPrm    *prm = &brd->eq1Prm;
+
+    if ((status = P2RF_ReadCoefFile (drvPvt, prm->id, rec->e1cf,
+                                     prm->count, prm->coefs,
+                                     rec->val, sizeof (rec->val))) == OK)
+    {
+      P2RF_LoadCoefs (drvPvt, prm->coefs, prm->count, prm->index, &prm->cvtBlk);
+      rec->e1as = NO_ALARM;
+    }
+    else
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_ReadCoefFile",
+                                       prm->id, rec->e1cf));
+      rec->e1as = UDF_ALARM;
+    }
+  }
+
+  /* One-Turn Delay FIFO registers */
+  {
+    short delay = 512 + 1 - (rec->fo / GVF_K_TICK);
+
+    P2RF_WriteVme (drvPvt, GVF_I_FIFOEMP,  delay);
+    P2RF_WriteVme (drvPvt, GVF_I_FIFOFULL, delay);
+  }
+
+  /* Initialize the Gap Control Register */
+  reg  = (rec->mtl  << GVF_V_MEMTRGSEL) & GVF_M_MEMTRGSEL;
+  reg |= (rec->otl  << GVF_V_OUTTRGSEL) & GVF_M_OUTTRGSEL;
+  reg |= (rec->da   << GVF_V_DATAALIGN) & GVF_M_DATAALIGN;
+  reg |= (rec->ebs  << GVF_V_EQCOEFSEL) & GVF_M_EQCOEFSEL;
+
+  /* Get the operating mode */
+  switch (rec->mode)
+  {
+    case gvfLoad:
+      if (rec->tf)  reg |= GVF_K_LOADTF << GVF_V_STATE;
+      else          reg |= GVF_K_LOAD   << GVF_V_STATE;
+      break;
+
+    case gvfRun:
+    {
+      unsigned int lfbGff[] =
+      {  GVF_K_RUNL0G0, GVF_K_RUNL0G1, GVF_K_RUNL1G0, GVF_K_RUNL1G1,
+         GVF_K_TFL0G0,  GVF_K_TFL0G1,  GVF_K_TFL1G0,  GVF_K_TFL1G1  };
+
+      reg |= (lfbGff[((rec->tf   && 1) << 2) |
+                     ((rec->lfbl && 1) << 1) |
+                     ((rec->gffl && 1) << 0)]) << GVF_V_STATE;
+    }
+    break;
+
+    case gvfTest:
+      if (rec->gffl)  reg |= GVF_K_TEST1 << GVF_V_STATE;
+      else            reg |= GVF_K_TEST2 << GVF_V_STATE;
+      break;
+
+    default:
+      reg |= GVF_K_LOAD << GVF_V_STATE;
+  }
+
+  /* Enable history buffer recording if the transfer function is ON */
+  if (rec->tf) reg |= GVF_M_MEMTRGRST;
+
+  /* Boot the DSP */
+  if (rec->dstt == NO_ALARM)  reg |= GVF_M_NOTDSPRST;
+
+  /* Update the module and the database */
+  P2RF_WriteVme (drvPvt, GVF_I_GFFCTRL, reg);
+  rec->gctl = reg;
+
+  return (OK);
+}
+
+
+
+static long WarmInit (GvfBoard       *brd,
+                      P2RfGvfRecord  *rec)
+/*
+   Description
+   -----------
+   Initialization routine to run when the module is still running
+   satisfactorily.  This function will (when it is written) bring
+   the EPICS database in synch with the module.
+
+   Parameters
+   ----------
+          brd - A pointer to the board descriptor
+          rec - A pointer to the record
+
+   Returns
+   -------
+   status
+*/
+{
+  /* Note that we can't access A24 registers whilst Gap is running */
+
+  /* Restore the Equalizer Coefficient fields from reboot parameter file? */
+
+  /* Determine the current mode of the module */
+  {
+    unsigned char mode[] = {0, 0, 0, 1, 1, 2, 1, 1, 0, 0, 0, 1, 1, 2, 1, 1};
+    unsigned char tf[]   = {0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1};
+    unsigned char lfbl[] = {0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1};
+    unsigned char gffl[] = {0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0};
+    unsigned int iState = (rec->gctl & GVF_M_STATE) >> GVF_V_STATE;
+
+    rec->mode = mode[iState];
+    rec->tf   = tf[iState];
+    rec->lfbl = lfbl[iState];
+    rec->gffl = gffl[iState];
+  }
+
+  return (OK);
+}
+
+
+
+static long Action (P2RfGvfRecord    *rec)
+/*
+   Description
+   -----------
+   This is the action routine for the GVF.  It handles the several states
+   that the module can be in.  The module's state can be changed by modifying
+   the .MODE field of the record.
+
+   Additionally, an asynchronous module reset mechanism implemented.  This
+   feature toggles the software reset line on the VXI interface chip.  Since it
+   takes a while (on the order of a second) for the reset to complete, the
+   module must not be touched during its assertion.  To implement this, the
+   record is processed asynchronously.  When the reset completes, the database
+   fields are updated with the current state of the module
+
+   Parameters
+   ----------
+          rec - A pointer to the record structure
+
+   Returns
+   -------
+   0 or 2 for successful returns, else a status */
+{
+  /*  Function ("Action");*/
+
+  GvfBoard       *brd    = NULL;
+  void           *drvPvt;
+  unsigned short  gctl;
+  GvfState        state  = gvfInvalid;
+  unsigned short  reg;
+  unsigned short  lmask;
+  unsigned short  smask;
+
+  /* If initialization failed let the system know */
+  if ((brd = rec->dpvt) == NULL)  return (ERROR);
+  drvPvt = brd->drvPvt;
+
+  /* If processing was invoked by an interrupt, handle it */
+  if (brd->intPrc)
+  {
+    /* Update client value of interrupt status field */
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+
+    /* Don't loose invocation count on multiple interrupts */
+    brd->intPrc--;
+
+    /* Update the database copy of the Gap status registers */
+    P2RF_ReadVme (drvPvt, GVF_I_GFFSTAT0,  &rec->gst0);
+    db_post_events (rec, &rec->gst0, DBE_VALUE | DBE_LOG);
+
+    return (0);
+  }
+  /* Initialize the message buffer if we're not doing completion processing */
+  if (!rec->pact)  strncpy (rec->val, "Success", sizeof (rec->val));
+
+  /* If requested, do a "software reset" on the module */
+  if (rec->mrst)  return (SpawnReset (rec, &brd->resetBlk));
+
+  /* If operator disabled interrupts update interrupt status DB field */
+  P2RF_ReadVme (brd->drvPvt, GVF_I_INTCTRL, &reg);
+  if ((reg & GVF_M_INTSELECT) == GVF_M_INTSELECT)
+  {
+    P2RF_ReadVme (brd->drvPvt, GVF_I_INTSTAT, &rec->istt);
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+  }
+
+  /* Let the operator acknowledge that the interrupts have been seen */
+  if (rec->iack)
+  {
+    rec->istt &= ~rec->iack;            /* Only take requested bits down */
+    if (rec->istt != rec->oist)
+    {
+      db_post_events (rec, &rec->istt, DBE_VALUE | DBE_LOG);
+      rec->oist = rec->istt;
+    }
+    rec->iack = 0;
+    db_post_events (rec, &rec->iack, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Update the interrupt control register if there was a change request */
+  if (rec->imsk != rec->oimk)
+  {
+    rec->oimk = rec->imsk;
+    rec->ictl = (rec->ictl & ~GVF_M_INTSELECT) |
+      ((~rec->imsk << GVF_V_INTSELECT) & GVF_M_INTSELECT);
+    P2RF_WriteVme (drvPvt, GVF_I_INTCTRL, rec->ictl);
+    db_post_events (rec, &rec->ictl, DBE_VALUE | DBE_LOG);
+  }
+
+  /* Get the current state of the module */
+  P2RF_ReadVme (drvPvt, GVF_I_GFFCTRL, &gctl);
+
+  /* Check if the Gap Control Register needs updating */
+  {
+    GvfState     mode[] = {gvfLoad,    gvfLoad,    gvfLoad,    gvfRun,
+                           gvfRun,     gvfTest,    gvfRun,     gvfRun,
+                           gvfLoad,    gvfLoad,    gvfLoad,    gvfRun,
+                           gvfRun,     gvfTest,    gvfRun,     gvfRun};
+    unsigned int iState = (gctl & GVF_M_STATE) >> GVF_V_STATE;
+    GvfState   stateOld = mode[iState];
+
+    /* Look at only those bits that are modifiable */
+    gctl &= ~(GVF_M_STATE     | GVF_M_EQCOEFSEL | 
+              GVF_M_DATAALIGN | GVF_M_MEMTRGRST);
+
+    /* Potentially select a new operating mode */
+    switch (rec->mode)
+    {
+      case gvfLoad:
+        if (rec->tf)  iState = GVF_K_LOADTF;
+        else          iState = GVF_K_LOAD;
+        break;
+
+        case gvfRun:
+        {
+          unsigned int lfbGff[] =
+          {  GVF_K_RUNL0G0, GVF_K_RUNL0G1, GVF_K_RUNL1G0, GVF_K_RUNL1G1,
+             GVF_K_TFL0G0,  GVF_K_TFL0G1,  GVF_K_TFL1G0,  GVF_K_TFL1G1  };
+
+          iState = lfbGff[((rec->tf   && 1) << 2) |
+                          ((rec->lfbl && 1) << 1) |
+                          ((rec->gffl && 1) << 0)];
+        }
+        break;
+
+        case gvfTest:
+          if (rec->gffl)  iState = GVF_K_TEST1;
+          else            iState = GVF_K_TEST2;
+          break;
+
+    default: /* iState remains at the previous value */
+          break;
+    }
+    gctl  |= iState << GVF_V_STATE;
+    state  = mode[iState];
+
+    /* Potentially select a different equalizer coefficient bank */
+    gctl  |= (rec->ebs << GVF_V_EQCOEFSEL) & GVF_M_EQCOEFSEL;
+
+    /* Potentially select a different pre-DAC data alignment */
+    gctl  |= (rec->da << GVF_V_DATAALIGN) & GVF_M_DATAALIGN;
+
+    /* If the transfer function is on, set the memory trigger
+       reset to prevent a fault from freezing recorded memory. */
+
+    if (rec->tf) gctl |= GVF_M_MEMTRGRST;
+
+    /* If the state is changing from load to run, reset recorded 
+       memory by toggling the memory trigger reset bit */
+
+    else if ((state == gvfRun) && (stateOld == gvfLoad))
+    {
+      rec->gctl = gctl | GVF_M_MEMTRGRST;
+      P2RF_WriteVme (drvPvt, GVF_I_GFFCTRL, rec->gctl);
+    }
+
+    /* Update the module and the database */
+    if (gctl != rec->gctl)
+    {
+      rec->gctl = gctl;
+      P2RF_WriteVme (drvPvt, GVF_I_GFFCTRL, rec->gctl);
+      db_post_events (rec, &rec->gctl, DBE_VALUE | DBE_LOG);
+    }
+  }
+
+  /* Update the one-turn delay, if requested */
+  if (rec->fo != rec->ofo)
+  {
+    if (state != gvfRun)
+    {
+      short delay = (rec->fo / GVF_K_TICK);
+
+      /* Hitting both Empty and Full registers is required black magic */
+      P2RF_WriteVme (drvPvt, GVF_I_FIFOEMP,  delay);
+      P2RF_WriteVme (drvPvt, GVF_I_FIFOFULL,512- delay);
+      rec->ofo = rec->fo;
+    }
+    else
+    {
+      /*                 "0123456789112345678921234567893123456789" */
+      strncpy (rec->val, "One-turn delay: Module not in LOAD mode", sizeof (rec->val));
+      rec->fo = rec->ofo;
+      db_post_events (rec, &rec->fo, DBE_VALUE | DBE_LOG);
+      recGblSetSevr (rec, WRITE_ALARM, MINOR_ALARM);
+    }
+  }
+
+  if (rec->pdsp)
+  {
+    strncpy (rec->val, "Not implemented yet", sizeof (rec->val));
+    rec->pdsp = 0;
+    rec->udsp = 0;
+    return (0);
+  }
+
+  /* 
+  ** Send the constants from the file in dspt to the DSP.
+  */
+  if (rec->udsp)
+  {
+    volatile DspComBlk *comBlk = brd->dspMsgBlk.comBlk;
+    GvfDspMsgPrm       *prm    = &brd->dspMsgPrm;
+    void               *drvPvt = brd->dspMsgBlk.drvPvt;
+    long               status;
+
+    rec->udsp = 0;
+    if ((status = P2RF_ReadConstsFile (drvPvt, prm->id, rec->dspt,
+                                       prm->count, prm->consts,
+                                       rec->val, sizeof (rec->val), 0)) == OK)
+    {
+      prm->consts[0] = (rec->iref << GVF_V_REF) & GVF_M_REF;
+      prm->consts[1] = (rec->qref << GVF_V_REF) & GVF_M_REF;
+      /*
+      ** Temp kludge check the buffer offset.
+      */
+      if (prm->consts[6] < 0)
+        prm->consts[6] = 0;
+      if (prm->consts[6] > 143)
+        prm->consts[6] = 143;
+      P2RF_LoadConsts (drvPvt, prm->consts, prm->count, prm->index);
+      rec->dtst = NO_ALARM;
+
+      /* Load the response: Reference table and address */
+      comBlk->cpuLbl++;           /* Bump sequence number */
+      comBlk->cpuMsg = CMD_K_LDREF; /* Table type */
+      comBlk->cpuArg = DSP_A_ERAM + (prm->index & 0xffff); /* Location */
+      comBlk->cpuComLen = prm->count;
+      /*
+      ** Interrupt DSP so it'll read the new reference values.
+      */
+      P2RF_WriteVme (drvPvt, GVF_I_GFFCTRL, rec->gctl | GVF_M_MSGTODSP);
+      P2RF_WriteVme (drvPvt, GVF_I_GFFCTRL, rec->gctl);
+    }
+    else      /* Error reading constants file */
+    {
+/*
+**      char  buf[P2RF_K_BUFSIZE];
+*/
+      epicsPrintf ("GVF action udsp failed to read constants file %s.\n", rec->dspt);
+/*
+**      recGblRecordError (status, rec,
+**                         P2RF_Sprintf (buf, __FILE__, FN,
+**                                       "%s failed - id = %s, file = %s",
+**                                       "P2RF_ReadConstsFile",
+**                                          prm->id, rec->dspt));
+*/
+      rec->dtst = UDF_ALARM;
+    }
+  }  
+
+#if 0
+  /* Update the DSP parameter table, if requested */
+  if (rec->udsp)  return (SpawnLdDspTbl (rec, &rec->udsp, &brd->dspMsgBlk,
+                                         &brd->dspMsgPrm, rec->dspt,
+                                         &rec->dtst));
+
+  /* Ping the DSP to see if it is alive */
+  if (rec->pdsp)  return (SpawnPingDsp  (rec, &rec->pdsp, &brd->dspMsgBlk,
+                                         &brd->dspMsgPrm, CMD_K_NFUNC, NIL));
+
+static long SpawnPingDsp (*rec, *request, *blk, *prm, msg, arg)
+{
+
+  if (!rec->pact)
+  {
+    P2RF_Msg2Dsp (drvPvt, msg, arg);
+    rec->pact = TRUE;
+  }
+  else
+  {
+    strncpy (rec->val, "DSP responds", sizeof (rec->val));
+    rec->pact = FALSE;
+  }
+
+  *request = 0;
+}
+#endif
+
+  /* Load I & Q references. Send message to DSP with updated iref & qref. */
+  if (rec->lref)
+  { 
+  /*
+  ** Some local pointers for ease-of-use.
+  */
+    volatile DspComBlk *comBlk = brd->dspMsgBlk.comBlk;
+    GvfDspMsgPrm       *prm    = &brd->dspMsgPrm;
+    void               *drvPvt = brd->dspMsgBlk.drvPvt;
+
+    rec->lref = 0;
+    prm->consts[0] = (rec->iref << GVF_V_REF) & GVF_M_REF;
+    prm->consts[1] = (rec->qref << GVF_V_REF) & GVF_M_REF;
+    P2RF_LoadConsts (drvPvt, prm->consts, 2, prm->index); /* To GVF VME memory */
+    comBlk->cpuLbl++;            /* Bump sequence number */
+    comBlk->cpuMsg = CMD_K_UREF; /* Update reference */
+    comBlk->cpuArg = DSP_A_ERAM + (prm->index & 0xffff); /* Location of data */
+    comBlk->cpuComLen = 2;       /* 2 lousy 16 bit words */
+    /* 
+    ** Tell DSP to read our response. Raise/lower MSGTODSP to generate interrupt.
+    */
+    P2RF_WriteVme (drvPvt, GVF_I_GFFCTRL, rec->gctl | GVF_M_MSGTODSP);
+    P2RF_WriteVme (drvPvt, GVF_I_GFFCTRL, rec->gctl);
+  }
+
+  /* Update average phase !? Needed?? */
+  P2RF_ReadVme (drvPvt, GVF_I_AVEPHS, &reg);
+  rec->avph = 360.0 * reg / (2.0 * PI);
+  db_post_events (rec, &rec->avph, DBE_VALUE | DBE_LOG);
+
+  /* 
+  ** Check for changes in status reg 1 & 2; taxi error or fir overflow.
+  ** There is a kludge sequence in rfmsgs.st to check for taxi error
+  ** and poke the LFB single taxi resynch button if needed.
+  */
+  if (rec->tmck)
+  {
+    rec->tmck = 0;
+    /* Update the database copy of the Gap status registers. Post if changed */
+    P2RF_ReadVme (drvPvt, GVF_I_GFFSTAT0,  &rec->gst0);
+    if (rec->gst0 != rec->ost0)
+    {
+      rec->ost0 = rec->gst0;
+      db_post_events (rec, &rec->gst0, DBE_VALUE | DBE_LOG);
+    }
+    P2RF_ReadVme (drvPvt, GVF_I_GFFSTAT1,  &rec->gst1);
+    if ((rec->gst1 & GVF_M_TAXIOFLW) || (rec->gst1 != rec->ost1)) 
+    {
+      rec->ost1 = rec->gst1;
+      db_post_events (rec, &rec->gst1, DBE_VALUE | DBE_LOG);
+    }
+  }
+
+  /* Don't attempt to get record buf or load coefs if wrong module state */
+  if (state != gvfLoad)
+  {
+    char *msg = NULL;
+
+    if (rec->llut)
+    {
+      msg = "Load LUTs: Module not in LOAD mode";
+      rec->llut = 0;
+    }
+    if (rec->ldsp)
+    {
+      msg = "Load DSP: Module not in LOAD mode";
+      rec->ldsp = 0;
+    }
+    if (rec->lpb)
+    {
+      msg =  "Load Play buf: Module not in LOAD mode";
+      rec->lpb = 0;
+      rec->pstt = WRITE_ALARM;
+      db_post_events (rec, &rec->pstt, DBE_VALUE | DBE_LOG);
+    }
+    if (rec->grb)
+    {
+      msg = "Get Rcrd Buf: Module not in LOAD mode";
+      rec->grb = 0;
+      rec->rstt = WRITE_ALARM;
+      db_post_events (rec, &rec->rstt, DBE_VALUE | DBE_LOG);
+    }
+    if ((rec->le0c) || (rec->le1c))
+    {
+      msg = "Coef Load: Module not in LOAD mode";
+      if (rec->le0c)
+      {
+        rec->le0c = 0;
+        rec->e0as = WRITE_ALARM;
+        db_post_events (rec, &rec->e0as, DBE_VALUE | DBE_LOG);
+      }
+      if (rec->le1c)
+      {
+        rec->le1c = 0;
+        rec->e1as = WRITE_ALARM;
+        db_post_events (rec, &rec->e1as, DBE_VALUE | DBE_LOG);
+      }
+    }
+
+    if (msg)  strncpy (rec->val, msg, sizeof (rec->val));
+    return (0);
+  }
+
+  /* Load and start DSP executable */
+  if (rec->ldsp)  return (SpawnLdDsp   (rec, &rec->ldsp, &brd->dspBlk,
+                                        &brd->dspPrm, rec->dspe, &rec->dstt));
+
+  /* Process request to read out the module's record buffer */
+  if (rec->grb)   return (SpawnGetRcrd (rec, &rec->grb, &brd->rcrdBlk,
+                                        &brd->rcrdPrm, rec->rsiz, rec->rfil,
+                                        &rec->rstt));
+
+  /* Reload sine and cosine LUTs */
+  if (rec->llut)  return (SpawnLdLut   (rec, &rec->llut, &brd->lutBlk,
+                                        &brd->lutPrm, rec->phs, rec->phsm,
+					rec->phso, rec->amp));
+
+  /* Process request to load lower equalizer coefficients */
+  if (rec->le0c)  return (SpawnLdCoefs (rec, &rec->le0c, &brd->coefBlk,
+                                        &brd->eq0Prm, rec->e0cf, &rec->e0as));
+
+  /* Process load upper equalizer coefficients request */
+  if (rec->le1c)  return (SpawnLdCoefs (rec, &rec->le1c, &brd->coefBlk,
+                                        &brd->eq1Prm, rec->e1cf, &rec->e1as));
+
+  /* Load PLAY memory */
+  if (rec->lpb)
+  {
+   /* Toggle transfer function (TF) mode to reset address B4 load */
+     smask = (unsigned short)(GVF_M_STATE << GVF_V_STATE);
+     reg = rec->gctl & ~smask;
+     P2RF_WriteVme (drvPvt, GVF_I_GFFCTRL, reg);
+     lmask = (unsigned short)(GVF_K_LOADTF << GVF_V_STATE);
+     reg = rec->gctl & (~smask | lmask);
+     P2RF_WriteVme (drvPvt, GVF_I_GFFCTRL, reg);
+     P2RF_WriteVme (drvPvt, GVF_I_GFFCTRL, rec->gctl); /* Restore  */
+     return (SpawnLdPlay  (rec, &rec->lpb, &brd->playBlk,
+                                     &brd->playPrm, rec->pfil, &rec->pstt));
+     rec->lpb = 0;
+  }
+  return (0);
+}
+
+
+
+static long SpawnReset (P2RfGvfRecord  *rec,
+                        GvfRstBlk      *blk)
+/*
+   Description
+   -----------
+   This function initiates and completes the module reset.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+          blk - A pointer to the reset block
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnReset");
+
+
+  if (!rec->pact)
+  {
+    /* Let operator know what's happening */
+    strncpy (rec->val,  "Software Reset: active", sizeof (rec->val));
+    strncpy (rec->oval, "Software Reset: active", sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow reprocessing of record before reset completes */
+    rec->pact = TRUE;
+
+    /* Disable module interrupts during software reset */
+    P2RF_ModIntDisable (blk->drvPvt);
+
+    /* Do the deed */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN, "InitFields"));
+      strncpy (rec->val, "Attempt to initialize module failed", sizeof (rec->val));
+      recGblSetSevr (rec, UDF_ALARM, INVALID_ALARM);
+    }
+    else
+    {
+      /* Re-enable module interrupts */
+      P2RF_ModIntEnable (blk->drvPvt);
+
+      strncpy (rec->val, "Software reset: done", sizeof (rec->val));
+    }
+
+    /* Reset the reset request so we don't redo it on the next process pass */
+    rec->mrst = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void ResetCallback (GvfRstBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a module software reset it requested.  It invokes completion processing
+   of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the reset block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("ResetCallback"); */
+
+  struct dbCommon  *rec;
+  struct rset      *rSet;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((rec = callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Reset and update the record and the module */
+  blk->status = InitFields ((GvfBoard *) rec->dpvt, P2RF_K_COLDSTART);
+
+  /* Complete processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     (rec);
+}
+
+
+
+static long SpawnLdDsp (P2RfGvfRecord  *rec,
+                        unsigned char  *request,
+                        GvfDspBlk      *blk,
+                        GvfDspPrm      *prm,
+                        char           *file,
+                        unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the loading of the DSP on the module.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the DSP block
+          prm - A pointer to the DSP parameter block
+         file - The file that contains the DSP executable to load
+         stat - A pointer to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnLdDsp");
+
+
+  if (!rec->pact)
+  {
+    /* Let operator know what's happening */
+    strncpy (rec->val,  "Load DSP: active", sizeof (rec->val));
+    strncpy (rec->oval, "Load DSP: active", sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before DSP-load completes */
+    rec->pact = TRUE;
+
+    /* Save the file name in the parameter block */
+    prm->file = file;
+
+    /* Point the coefficient block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      char  buf[P2RF_K_BUFSIZE];
+
+      recGblRecordError (ERROR, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - file = %s, status = %08x",
+                                       "P2RF_LoadDsp",
+                                       prm->file, blk->status));
+      *stat = WRITE_ALARM;
+    }
+    else
+    {
+      strncpy (rec->val, "Load DSP: done", sizeof (rec->val));
+
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void LdDspCallback (GvfDspBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to load and start the module's DSP.  It invokes
+   completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the DSP block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("LdDspCallback"); */
+
+  P2RfGvfRecord    *rec;
+  struct rset      *rSet;
+  unsigned short    reg;
+  GvfDspPrm        *prm = blk->prm;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Reset the DSP */
+  P2RF_ReadVme  (blk->drvPvt, GVF_I_GFFCTRL, &reg);
+  P2RF_WriteVme (blk->drvPvt, GVF_I_GFFCTRL, reg & ~GVF_M_NOTDSPRST);
+
+  /* Load the DSP */
+  if ((blk->status = P2RF_LoadDsp (blk->drvPvt, prm->index, prm->file, FALSE,
+                                   rec->val, sizeof (rec->val))) == OK)
+  {
+    /* Boot the DSP */
+    P2RF_WriteVme (blk->drvPvt, GVF_I_GFFCTRL, reg | GVF_M_NOTDSPRST);
+  }
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+
+
+
+static long SpawnLdLut (P2RfGvfRecord  *rec,
+                        unsigned char  *request,
+                        GvfLutBlk      *blk,
+                        GvfLutPrm      *prm,
+                        double          phase,
+                        double          phaseMax,
+                        double          phaseOffset,
+                        double          amplitude)
+/*
+   Description
+   -----------
+   This function initiates and completes the loading of the sine
+   and cosine look-up-tables on the module.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the LUT block
+          prm - A pointer to the LUT parameter block
+        phase - The phase range  to use in calculating the sine and cosine LUTs
+     phaseMax - The phase limit  to use in calculating the sine and cosine LUTs
+  phaseOffset - The phase offset to use in calculating the sine and cosine LUTs
+    amplitude - The amplitude    to use in calculating the sine and cosine LUTs
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  /*  Function ("SpawnLdLut");*/
+
+
+  if (!rec->pact)
+  {
+    /* Let operator know what's happening */
+    strncpy (rec->val,  "Load LUTs: active", sizeof (rec->val));
+    strncpy (rec->oval, "Load LUTs: active", sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before DSP-load completes */
+    rec->pact = TRUE;
+
+    /* Save the constants in the parameter block */
+    prm->phase       = phase;
+    prm->phaseMax    = phaseMax;
+    prm->phaseOffset = phaseOffset;
+    prm->amplitude   = amplitude;
+
+    /* Point the coefficient block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    strncpy (rec->val, "Load LUTs: done", sizeof (rec->val));
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void LdLutCallback (GvfLutBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to load the module's sine and cosine look-up
+   tables.  It invokes completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the LUT block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("LdLutCallback"); */
+
+  P2RfGvfRecord    *rec;
+  struct rset      *rSet;
+  GvfLutPrm        *prm = blk->prm;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Load the LUTs */
+  blk->status = LoadCosSinLut (blk->drvPvt, prm->phase, prm->phaseMax,
+                               prm->phaseOffset, prm->amplitude,
+                               prm->cosIdx, prm->sinIdx, prm->count);
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+
+
+
+static long SpawnLdCoefs (P2RfGvfRecord  *rec,
+                          unsigned char  *request,
+                          GvfCoefBlk     *blk,
+                          GvfCoefPrm     *prm,
+                          char           *file,
+                          unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the loading of coefficients
+   on the module.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the coefficient block
+          prm - A pointer to the coefficient parameter block
+         file - The file that contains the coefficients to load
+         stat - A pointer to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnLdCoefs");
+
+  char  buf[P2RF_K_BUFSIZE];
+
+
+  if (!rec->pact)
+  {
+    sprintf (buf, "Load %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before DDF-load completes */
+    rec->pact = TRUE;
+
+    /* Save the file name in the parameter block */
+    prm->file = file;
+
+    /* Point the coefficient block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_ReadCoefFile",
+                                       prm->id, prm->file));
+      *stat = WRITE_ALARM;
+    }
+    else
+    {
+      sprintf (buf, "Load %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void LdCoefCallback (GvfCoefBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to load the module's equalizer coefficients.  It
+   invokes completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the load-coefficients block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("LdCoefCallback"); */
+
+  P2RfGvfRecord    *rec;
+  struct rset      *rSet;
+  GvfCoefPrm       *prm = blk->prm;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Read and load the coefficients */
+  if ((blk->status = P2RF_ReadCoefFile (blk->drvPvt, prm->id, prm->file,
+                                        prm->count, prm->coefs,
+                                        rec->val, sizeof (rec->val))) == OK)
+  {
+    blk->status = P2RF_LoadCoefs (blk->drvPvt, prm->coefs, prm->count,
+                                  prm->index, &prm->cvtBlk);
+  }
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+
+
+
+static long SpawnGetRcrd (P2RfGvfRecord  *rec,
+                          unsigned char  *request,
+                          GvfMemBlk      *blk,
+                          GvfMemPrm      *prm,
+                          unsigned int    blkCnt,
+                          char           *file,
+                          unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the retrieval of the module
+   record buffer.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the record block
+          prm - A pointer to the record parameter block
+       blkCnt - Number of blocks of record buffer to record
+         file - The file to record the record buffer in
+         stat - A pointer to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnGetRcrd");
+
+  char  buf[P2RF_K_BUFSIZE];
+
+
+  if (!rec->pact)
+  {
+    sprintf (buf, "Get %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val,  DBE_VALUE | DBE_LOG);
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before get-history completes */
+    rec->pact = TRUE;
+
+    /* Save block count and file name in parameter block and reset abort flag */
+    prm->count    = blkCnt < GVF_K_RCRDMEMLEN ? blkCnt : GVF_K_RCRDMEMLEN;
+    prm->file     = file;
+    blk->abortFlg = FALSE;
+
+    /* Point the history block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - file = %s",
+                                       "P2RF_RecordMemory", prm->file));
+      *stat = READ_ALARM;
+    }
+    else
+    {
+      sprintf (buf, "Get %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void GetRcrdCallback (GvfMemBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to read the module's record memory.  It invokes
+   completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the get-record memory block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("GetRcrdCallback"); */
+
+  P2RfGvfRecord    *rec;
+  struct rset      *rSet;
+  GvfMemPrm        *prm = blk->prm;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Read the record memory and record it */
+  blk->status = P2RF_RecordMemory (blk->drvPvt, prm->id, prm->index,
+                                   prm->count, prm->file, &blk->abortFlg,
+                                   rec->val, sizeof (rec->val));
+
+  /* Pulse the Memory Trigger Reset bit to re-enable record triggers */
+  P2RF_WriteVme (blk->drvPvt, GVF_I_GFFCTRL, rec->gctl | GVF_M_MEMTRGRST);
+  P2RF_WriteVme (blk->drvPvt, GVF_I_GFFCTRL, rec->gctl);
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+
+
+
+static long SpawnLdPlay (P2RfGvfRecord  *rec,
+                         unsigned char  *request,
+                         GvfMemBlk      *blk,
+                         GvfMemPrm      *prm,
+                         char           *file,
+                         unsigned short *stat)
+/*
+   Description
+   -----------
+   This function initiates and completes the loading of the module
+   play buffer.
+
+   Parameters
+   ----------
+          rec - A pointer to the record
+      request - A pointer to the record field that initiated this action
+          blk - A pointer to the record block
+          prm - A pointer to the record parameter block
+         file - The file to record the record buffer in
+         stat - A pointer to a record field in which to return status info
+
+   Returns
+   -------
+   0 for success
+*/
+{
+  Function ("SpawnLdPlay");
+
+  char  buf[P2RF_K_BUFSIZE];
+
+
+  if (!rec->pact)
+  {
+    sprintf (buf, "Load %s: active", prm->id);
+
+    /* Let operator know what's happening */
+    strncpy (rec->val,  buf, sizeof (rec->val));
+    strncpy (rec->oval, buf, sizeof (rec->oval));
+    db_post_events (rec, &rec->val, DBE_VALUE | DBE_LOG);
+    *stat = UDF_ALARM;
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Don't allow record reprocessing record before load completes */
+    rec->pact = TRUE;
+
+    /* Save file name in parameter block and reset abort flag */
+    prm->file     = file;
+    blk->abortFlg = FALSE;
+
+    /* Point the play block to the proper parameter block */
+    blk->prm = prm;
+
+    /* Invoke the call-back */
+    callbackRequest (&blk->callback);
+  }
+  else
+  {
+    if (blk->status)
+    {
+      recGblRecordError (blk->status, rec,
+                         P2RF_Sprintf (buf, __FILE__, FN,
+                                       "%s failed - id = %s, file = %s",
+                                       "P2RF_LoadTblFile", prm->id, prm->file));
+      *stat = WRITE_ALARM;
+    }
+    else
+    {
+      sprintf (buf, "Load %s: done", prm->id);
+      strncpy (rec->val, buf, sizeof (rec->val));
+
+      *stat = NO_ALARM;
+    }
+    db_post_events (rec, stat, DBE_VALUE | DBE_LOG);
+
+    /* Reset request so we don't redo it on the next process pass */
+    *request = 0;
+  }
+
+  return (0);
+}
+
+
+
+static void LdPlayCallback (GvfMemBlk *blk)
+/*
+   Description
+   -----------
+   This is the callback routine that is invoked by the callback facility
+   when a request is made to load the module's play memory.  It invokes
+   completion processing of the associated record.
+
+   Parameters
+   ----------
+          blk - A pointer to the get-record memory block
+
+   Returns
+   -------
+   nothing
+*/
+{
+  /* Function ("LdPlayCallback"); */
+
+  P2RfGvfRecord    *rec;
+  struct rset      *rSet;
+  GvfMemPrm        *prm = blk->prm;
+
+
+  /* Just return if record pointer isn't initialized */
+  if ((callbackGetUser (rec, &blk->callback)) == NULL)  return;
+  rSet = rec->rset;
+
+  /* Delay a bit to let db_post_events flush */
+  taskDelay (sysClkRateGet () / 10);
+
+  /* Lock the record to prevent processing during critical times */
+  dbScanLock       ((struct dbCommon *) rec);
+
+  /* Load the play memory */
+  blk->status = P2RF_LoadTblFile (blk->drvPvt, prm->id, prm->index,
+                                  prm->file, prm->count, &blk->abortFlg,
+                                  rec->val, sizeof (rec->val));
+
+  /* Complete the record processing */
+  (*rSet->process) (rec);
+
+  /* Unlock the record */
+  dbScanUnlock     ((struct dbCommon *) rec);
+}
+@
+
+
+1.5
+log
+@Remove debug
+@
+text
+@d60 1
+d65 1
+a65 1
+#include <module_types.h>
+d75 2
+d101 2
+d347 1
+a347 1
+    scanOnce (rec);
+d541 1
+a541 1
+      epicsPrintf ("Unknown message %x received from DSP.\n");
+d646 3
+a648 3
+  callbackSetCallback (ResetCallback, &brd->resetBlk.callback);
+  callbackSetPriority (priorityHigh, &brd->resetBlk.callback);
+  callbackSetUser     (rec, &brd->resetBlk.callback);
+d653 3
+a655 3
+  callbackSetCallback (LdDspCallback, &brd->dspBlk.callback);
+  callbackSetPriority (priorityLow, &brd->dspBlk.callback);
+  callbackSetUser     (rec, &brd->dspBlk.callback);
+d667 3
+a669 3
+  callbackSetCallback (DspMsgCallback, &brd->dspMsgBlk.callback);
+  callbackSetPriority (priorityHigh, &brd->dspMsgBlk.callback);
+  callbackSetUser     (rec, &brd->dspMsgBlk.callback);
+d685 3
+a687 3
+  callbackSetCallback (LdLutCallback, &brd->lutBlk.callback);
+  callbackSetPriority (priorityLow, &brd->lutBlk.callback);
+  callbackSetUser     (rec, &brd->lutBlk.callback);
+d700 3
+a702 3
+  callbackSetCallback (LdCoefCallback, &brd->coefBlk.callback);
+  callbackSetPriority (priorityLow, &brd->coefBlk.callback);
+  callbackSetUser     (rec, &brd->coefBlk.callback);
+d739 3
+a741 3
+  callbackSetCallback (GetRcrdCallback, &brd->rcrdBlk.callback);
+  callbackSetPriority (priorityLow, &brd->rcrdBlk.callback);
+  callbackSetUser     (rec, &brd->rcrdBlk.callback);
+d753 3
+a755 3
+  callbackSetCallback (LdPlayCallback, &brd->playBlk.callback);
+  callbackSetPriority (priorityLow, &brd->playBlk.callback);
+  callbackSetUser     (rec, &brd->playBlk.callback);
+d1470 1
+a1470 1
+  /* Update average phase ??!! Needed?? */
+@
+
+
+1.4
+log
+@ioc/rfApp/src/diag/Makefile.Vx
+@
+text
+@a426 4
+#if DEBUG
+     printf( "%s: Dsp Messgage: 0x%hx",FN,comBlk->dspMsg);
+#endif
+
+@
+
+
+1.3
+log
+@Update new field verh and verf in InitFields
+@
+text
+@d427 4
+@
+
+
+1.2
+log
+@Replaced epicsPrintf with logMsg in ISR
+@
+text
+@d13 2
+a14 1
+**	August 21, 1996 - Created
+d880 2
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d53 1
+d307 1
+a307 1
+    epicsPrintf ("%s: %s error\n", FN, "Software");
+d309 1
+a309 1
+    epicsPrintf ("%s: %s error\n", FN, "Hardware");
+d311 1
+a311 1
+    epicsPrintf ("%s: %s error\n", FN, "TAXI");
+d313 1
+a313 1
+    epicsPrintf ("%s: %s error\n", FN, "TAXI Synchronization");
+d315 1
+a315 1
+    epicsPrintf ("%s: %s Error\n", FN, "LFB Link");
+d317 1
+a317 1
+    epicsPrintf ("%s: Transfer Function End\n", FN);
+d319 1
+a319 1
+    epicsPrintf ("%s: Message from DSP\n", FN);
+d321 1
+a321 1
+    epicsPrintf ("%s: Software interrupt\n", FN);
+d617 6
+a622 5
+  if (status = P2RF_RegisterModule (vxiIo->flag, vxiIo->frame, vxiIo->slot,
+                                    vxiIo->la,
+                                    GVF_K_MODEL, GVF_K_NAME, GVF_K_DRAWING,
+                                    GvfIsr, brd, GvfShutdown, brd,
+                                    &drvPvt))
+d764 2
+a765 1
+  if (status = InitFields (brd, startType))
+d1181 2
+d1566 2
+a1567 2
+     reg = (rec->gctl & ~(GVF_M_STATE << GVF_V_STATE) 
+           | (GVF_K_LOAD << GVF_V_STATE));
+d1569 2
+a1570 2
+     reg = (rec->gctl & ~(GVF_M_STATE << GVF_V_STATE) 
+            | (GVF_K_LOADTF << GVF_V_STATE));
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

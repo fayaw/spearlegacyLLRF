@@ -1,0 +1,178 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@! @;
+
+
+1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.01.10.23.22.41;	author greg;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/*
+** ++
+**
+**  Facility:  DSP - DSP code
+**
+**  Abstract:
+**	This file contain routines for interrupt 0 , adaptive feedforward
+**	algorithm .
+**
+**  Author:
+**	Leonid Sapozhnikov
+**
+**  History:
+**	4-18-96
+**
+**  Copyright:
+**                                Copyright 1995
+**                                      by
+**                         The Board of Trustees of the
+**                       Leland Stanford Junior University.
+**                              All rights reserved.
+**
+**
+**         Work supported by the U.S. Department of Energy under contract
+**       DE-AC03-76SF00515.
+**
+**                               Disclaimer Notice
+**
+**        The items furnished herewith were developed under the sponsorship
+**   of the U.S. Government.  Neither the U.S., nor the U.S. D.O.E., nor the
+**   Leland Stanford Junior University, nor their employees, makes any war-
+**   ranty, express or implied, or assumes any liability or responsibility
+**   for accuracy, completeness or usefulness of any information, apparatus,
+**   product or process disclosed, or represents that its use will not in-
+**   fringe privately-owned rights.  Mention of any product, its manufactur-
+**   er, or suppliers shall not, nor is it intended to, imply approval, dis-
+**   approval, or fitness for any particular use.  The U.S. and the Univer-
+**   sity at all times retain the right to use and disseminate the furnished
+**   items for any purpose whatsoever.                       Notice 91 02 01
+**
+** --
+*/
+
+#include <1610.h>
+#include <dspDef.h>
+#include <pioDef.h>
+#include <bioDef.h>
+#include <intDef.h>
+#include <aucDef.h>
+#include <gvffMisc.h>
+
+
+.global equaliz
+.extern EQUAL_COEF	
+
+.rsect ".ram"
+
+equaliz:
+/*
+   Description
+   -----------
+   Equalizer - function to compensate phase response for LPF.   
+	Inputs:
+	--------
+		r2 -  pointer to data in
+	Outputs:
+	--------
+		none
+	Registers:
+	---------
+		pt  - pointer to coefficients
+		r2 -  pointer to data in
+		r3 -  pointer to data out
+		a0 - scratch
+		ar0 - scratch
+		p - scratch
+		j - scratch
+		auc - scratch
+		c0 - scratch
+
+
+
+*/
+
+	a0 = auc
+	ar0 = a0			/* Save auc register */
+	auc = 0x2
+	a0 = r3
+	r2 = a0
+	pt = EQUAL_COEF
+	j = EQUAL_TAPS_1	/* Should -EQUAL_TAPS, but function of implem*/
+
+	a0 = a0 - a0
+	p = a0
+	 y = *r2++ x = *pt++
+
+	do EQUAL_TAPS {
+		a0=a0+p  p = y*x  y = *r2++  x = *pt++
+	}
+	*r3++ = a0		 	 /* write result back */
+
+	c0 = BUF_SIZE_CNT
+equaliz_1: 
+	pt = EQUAL_COEF
+	a0 = a0 -a0
+	*r2++j		  /* return pointer back to next data for filtering */
+	redo EQUAL_TAPS_R /* EQUAL_TAPS+1 times, a0=0, p=0 */
+	*r3++ = a0	  /* write result back */
+	if c0lt goto equaliz_1
+
+	c0 = BUF_SIZE_CNT_1
+equaliz_2: 
+	pt = EQUAL_COEF
+	a0 = a0 -a0
+	*r2++j		  /* return pointer back to next data for filtering */
+	redo EQUAL_TAPS_R /* EQUAL_TAPS+1 times, a0=0, p=0 */
+	*r3++ = a0	  /* write result back */
+	if c0lt goto equaliz_2
+
+	a0 = ar0
+	auc = a0			/* Restore auc register */
+	
+        return
+@
+
+
+1.1.1.1
+log
+@Initial Import of ioc R3.13.6
+@
+text
+@@

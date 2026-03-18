@@ -1,0 +1,533 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@ * @;
+
+
+1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.05.05.18.34.06;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@/***************************************************************************
+
+  NI-VXI LIBRARY
+
+		DSPCon, Inc.
+		380 FootHill Road
+		Bridgewater, NJ 08807
+	
+		e-mail: info@@dspcon.com
+
+  (C) Copyright 1997 DSPCon, Inc.  All rights reserved.
+  Use of copyright notice is precautionary and does not imply publication
+***************************************************************************/
+
+/***************************************************************************
+  coreFxn/baseIntr.c
+
+  This module provides unified VXI interrupt/signal/trigger handling.
+***************************************************************************/
+#undef DEBUG_INTR 
+
+#include <vxWorks.h>
+#ifdef FORCE                          /* powercore 603/4 */
+#include "/usr1/vxworks/wind/target/config/pcore603/pcore60x.h"
+#include "/usr1/vxworks/wind/target/config/force/h/vme/frcUniverseVme.h"
+#elif defined DY4                     /* dy4 svme178 */
+#include "/usr1/vxworks/wind/target/config/svme178/svme178.h"
+#elif defined MV2400
+#include <mv2400.h>
+#else
+#error - Board type not defined.  Must define either FORCE,DY4 or MV2400 to compile.
+#endif
+
+#include <intLib.h>
+#include <iv.h>
+#include <logLib.h>
+#include <stdio.h>
+
+#include <kscvxi.h>
+
+#include <portable.h>
+#include <libvar.h>
+#include <bus.h>
+
+/*==========================================================================
+  
+  The KSCorp V151 interface module will generate interrupts for the single
+  board computer on three conditions:
+
+  1)  VXI interrupt sourced by another card.
+  2)  Signal written to our SIGNAL register.
+  3)  Selected trigger line rising edge.
+
+  Cases (2) and (3) generate an interupt at the level programmed into
+  (0x2C) and the V151 logical address (usually zero).
+
+  Case (1) generates an interrupt at the level and vector dictated by
+  the interrupting card; note that the vector is, by VXI spec, the card's
+  logical address.
+
+  Since the single board computer will always interrupt the cpu at the
+  vector passed on the VME bus (it CANNOT autovector vme interrupts), 
+  the logical addresses between 1 and 63 (reserved by motorola for cpu use)
+  shall not be able to interrupt us.  Furthermore, the following table
+  includes vectors used by the single board computer for local devices,
+  which are also excluded from use.
+
+==========================================================================*/
+#if 0	
+// Does not apply to the V151
+#define NO_RES_VEC 17	
+
+static int ReservedVector[] = {
+  0x40, 0x41, 0x42, 0x43, 		/*  64, 65, 66, 67, */
+  0x44, 0x45, 0x46, 0x47,		/*  68, 69, 70, 71, */
+  0x90, 0x91, 0x92, 0x93, 		/* 144,145,146,147, */
+  0x94, 0x95, 0x96, 0x97,		/* 148,149,150,151, */
+  0
+};
+#endif 
+
+static int TrigLineId[] = {
+  0, 1, 2, 3, 4, 5, 6, 7,	/** TTL **/
+  8, 9,				/** ECL **/
+  40,				/** FP 1 **/
+  41				/** FP 2 **/
+};
+
+/* Globals */
+UINT16 LEVEL;	
+UINT32 STATID;	
+
+/*==========================================================================
+  vxiBaseIsr
+==========================================================================*/
+/* This interrupt handler is connected to the VME_INT_VEC vector, so that it
+is invoked when a VME interrupt occurs. It is also connected to vectors 15 
+through 255 so that no interrupt is uninitialized.
+For the VME_INT_VEC vector, when this ISR is invoked for a VME interrupt,
+it will index into the array of function pointers, vxiIntHandler[], and invoke
+the proper handler. If no handler has been setup, the DefaultVXIintHandler() 
+will be invoked. 
+==========================================================================*/
+
+void vxiBaseIsr (void)	
+{
+  INT16 controller = -1;
+  UINT32 statusId;
+  UINT16 level;		
+  UINT32 status;
+  int i;
+
+#ifdef DEBUG_INTR
+  logMsg("In BaseIsr\n",0,0,0,0,0,0);
+#endif
+
+  statusId = GET_MY_REG(0x38);
+
+    /* Read interrupt status from chip. */    
+    status = vxiUnivRegRd( VXI_UNIV_LINT_STAT );
+    LEVEL = (status & 0xff) >> 1;
+
+
+#ifdef DEBUG_INTR
+   logMsg("stat id is 0x%x, LEVEL is 0x%x\n", statusId,LEVEL,0,0,0,0);
+#endif
+
+    if ( vxiTrigEnbMask != 0 && (LEVEL & 0x1) && (statusId & 0x100) ) 
+    {
+      /*--------------------------------------------------------------------
+	trigger interrupt...
+      --------------------------------------------------------------------*/
+      UINT16 trig = GET_MY_REG(0x2E);
+      int k;
+
+      PUT_MY_REG (0x30,trig);			/** clear flags **/
+      PUT_MY_REG (0x2E,vxiTrigEnbMask);		/** reset intr enb **/
+
+#ifdef DEBUG_INTR
+      logMsg("went to trig, trig is %d\n",trig,0,0,0,0,0);
+#endif
+      for (k=0; k < 12; k++) 
+      {
+	if (trig & (1 << k)) 
+        {
+	  if (vxiTrigAction[k] & 0x8000) 
+          {
+	    /*--------------------------------------------------------------
+	      map trigger...pulse mapped line
+	    --------------------------------------------------------------*/
+
+#ifdef DEBUG_INTR
+            logMsg("Writing 0x%x to SourceTrigger Register\n", 
+                       0x8000 | (1 << (vxiTrigAction[k] & 0x1F)),0,0,0,0,0);
+#endif
+
+	    PUT_MY_REG (0x32, 0x8000 | (1 << (vxiTrigAction[k] & 0x1F)));
+	  }
+	  else if (vxiTrigAction[k]) 
+          {
+	    /*--------------------------------------------------------------
+	      sense trigger...notify handler
+	    --------------------------------------------------------------*/
+
+#ifdef DEBUG_INTR
+            logMsg("Sensed trig, k is %d\n",k,0,0,0,0,0);
+#endif
+
+	    vxiTrigHandler[k] (0, TrigLineId[k], 0x0001);
+	  }
+	}
+      } /* end of for(k) */
+
+      LEVEL ^= 0x1;	/*Do not also handle this as a regular interrupt*/
+      return;
+    } /* end of if(statusID & 0x100) */   /*end of trigger handling*/
+
+    if ( vxiMonEnbMask !=0 && (LEVEL & 0x1) == 0x1 && (statusId & 0x200) )
+    {
+      /*--------------------------------------------------------------------
+	location monitor interrupt
+      --------------------------------------------------------------------*/
+      UINT16 mon = GET_MY_REG(0x3A);
+
+      if (mon & 0x10)  /* Signal occurred */
+      {
+        UINT16 signal;
+        UINT16 type;
+        int la;
+
+        PUT_MY_REG(0x3A, mon | vxiMonEnbMask);	/** clear/reset intr enb **/
+        LEVEL ^= 0x1;	/*Do not also handle this as a regular interrupt*/
+	signal = GET_MY_REG(0x3C);
+
+	type = (signal >> 8) & 0x7F;
+	la = signal & 0xFF;
+
+#ifdef DEBUG_INTR
+        logMsg("went to loc mon, signal is 0x%x\n", signal,0,0,0,0,0);
+#endif
+
+	if (signal & (1 << 15)) /* Event signal */
+        {
+          if (type == 0x7f)  /* No cause given event */
+          {
+             if (vxiSigRoute[la] & 0x100)
+		vxiSigHandler[la] (signal);
+          }
+          else if (type == 0x7d) /* Request true event */
+          {
+             if (vxiSigRoute[la] & 0x200)
+		vxiSigHandler[la] (signal);
+          }
+          else if (type == 0x7c) /* Request false event */
+          {
+             if (vxiSigRoute[la] & 0x400)
+		vxiSigHandler[la] (signal);
+          }
+          else if ((type & 0x40) == 0) /* User defined event */
+          {
+             if (vxiSigRoute[la] & 0x4000)
+		vxiSigHandler[la] (signal);
+          }
+          else if (type >= 0x65 && type <= 0x75) /* Shared memory events */
+          {
+             if (vxiSigRoute[la] & 0x1000)
+		vxiSigHandler[la] (signal);
+          }
+          else                 /* VXI reserved events */
+             if (vxiSigRoute[la] & 0x2000)
+		vxiSigHandler[la] (signal);
+        } /* END of if Event signal */
+        else  /* Response signal */
+        {
+	   if ( vxiSigRoute[la] & (type ^ 0x09) & 0x3f )
+	     vxiSigHandler[la] (signal);
+        }
+      } /* END if Signal occurred */
+
+      return;
+    } /* end of if(statusId & 0x200) */		/*end of location monitor handling*/
+
+    /*----------------------------------------------------------------------
+      all others...
+    ----------------------------------------------------------------------*/
+#ifdef DEBUG_INTR
+    logMsg("vxiBaseIsr:LEVEL is 0x%x\n",LEVEL,0,0,0,0,0);
+#endif
+    if(LEVEL != 0 /* && interrupts are enabled */)
+    {      
+	/*/ Start with highest priority*/
+	for (i = 0; i < 7; i++)
+	{
+	    level = 6-i;
+
+	    if ( LEVEL & (1 << (level)) )
+	    {
+#ifdef DEBUG_INTR
+                logMsg("level is %d\n", level+1,0,0,0,0,0);
+#endif
+		LEVEL ^= (1<<level);	/*Clear interrupt flag*/
+
+		/* Get contents of status ID register */
+		switch(level+1)
+		{
+		case 1:
+                   STATID = vxiUnivRegRd( VXI_UNIV_V1_STATID );
+		   break;
+		case 2:
+                   STATID = vxiUnivRegRd( VXI_UNIV_V2_STATID );
+		   break;
+		case 3:
+                   STATID = vxiUnivRegRd( VXI_UNIV_V3_STATID );
+		   break;
+		case 4:
+                   STATID = vxiUnivRegRd( VXI_UNIV_V4_STATID );
+		   break;
+		case 5:
+                   STATID = vxiUnivRegRd( VXI_UNIV_V5_STATID );
+		   break;
+		case 6:
+                   STATID = vxiUnivRegRd( VXI_UNIV_V6_STATID );
+		   break;
+		case 7:
+                   STATID = vxiUnivRegRd( VXI_UNIV_V7_STATID );
+		   break;
+		default:
+                   STATID = vxiUnivRegRd( VXI_UNIV_V7_STATID );
+		   break;
+		}
+#ifdef DEBUG_INTR
+logMsg("STATID = 0x%x\n",STATID,0,0,0,0,0);
+#endif
+		vxiIntHandler[level] (controller,level+1,STATID);
+/*/		break;*/
+	    }
+	}
+    } /*END of if LEVEL*/
+
+    /* Clear Register */
+    vxiUnivRegWr( VXI_UNIV_LINT_STAT, status );
+}
+
+
+/*==========================================================================
+  vxiIntrInit
+==========================================================================*/
+/* Forward declaration */
+void kscIntHandler();
+
+#ifdef FORCE                          /* powercore 603/4 */
+void sysUniverseIntHandler();
+#elif defined DY4                     /* dy4 svme178 */
+void sysUniverseIntr (void);
+#elif defined MV2400
+void sysUnivVmeIntr(void);
+#else
+#error - Board type not defined.  Must define either FORCE or DY4 to compile.
+#endif
+
+int vxiIntrInit (void)
+{
+  int k, m;
+  m = 0;
+
+#if 0	/*/ ***********************  NO 2/5/01*/
+#ifdef DEBUG_INTR
+    printf("In vxiIntrInit\n");
+#endif
+ 
+#ifdef FORCE                          /* powercore 603/4 */
+  /* Setup the universe chip to call our handler before theirs. */
+  intConnect (INUM_TO_IVEC(VME_INT_VEC), kscIntHandler, 0);   // NO
+
+  /*--------------------------------------------------------------------
+    The following two lines have been commented out of the function
+    sysVmeHwInit2() because we need to connect our handler before theirs.
+  ----------------------------------------------------------------------*/
+  /* Connect Universe interrupts. */
+  (void)intConnect (INUM_TO_IVEC(VME_INT_VEC), sysUniverseIntHandler, 0);
+  (void)intConnect (INUM_TO_IVEC(VME_INT_VEC), vxiBaseIsr, 0);
+
+  /* Enable Universe interrupts in interrupt controller. */
+  intEnable (VME_INT_LVL);
+#elif defined DY4                     /* dy4 svme178 */
+  /* Setup the universe chip to call our handler before theirs. */
+  intConnect (INUM_TO_IVEC(UNIVERSE_INT_VEC), kscIntHandler, 0);
+
+  (void)intConnect (INUM_TO_IVEC(UNIVERSE_INT_VEC), sysUniverseIntr, 0);
+  (void)intConnect (INUM_TO_IVEC(UNIVERSE_INT_VEC), vxiBaseIsr, LEVEL);
+
+  /* Enable Universe interrupts in interrupt controller. */
+  intEnable (UNIVERSE_INT_LVL);
+#else
+#error - Board type not defined.  Must define either FORCE or DY4 to compile.
+#endif
+
+#endif	// ***********************  NO 2/5/01
+
+
+
+   /*/ Vector 255 is reserved now for our handler.....	*/
+   (void)intConnect (INUM_TO_IVEC(255), vxiBaseIsr, 0);
+
+#ifdef DEBUG_INTR
+    printf("Setting up default ISRs\n");
+#endif
+
+  for (k=0;  k <7;  k++) 
+  {
+    vxiIntHandler[k] = (VOIDFUNCPTR) DefaultVXIintHandler;
+  }
+
+  for (k=0;  k < 256; k++) 
+  {
+    vxiSigHandler[k] = (VOIDFUNCPTR) DefaultSignalHandler;
+  }
+
+  for (k=0; k < 10; k++) 
+  {
+    vxiTrigHandler[k] = (VOIDFUNCPTR) DefaultTrigHandler;
+  }
+
+#if 0
+  /* Set the vectors to vxiBaseIsr. */
+//  for (k=16; k < 256; k++)	//NO
+//  {
+//    match = 0;
+//    for(m=0; m<NO_RES_VEC; m++)
+//    {
+//      if (ReservedVector[m] == k)
+//      {
+//	match = 1;
+//        break;
+//      }
+//    }
+//    if(!match)
+//    {
+//	intConnect(INUM_TO_IVEC(k), vxiBaseIsr, 0);	// NO
+//    }
+//  }
+#endif
+ 
+  /*----------------------------------------------------------------
+  This stuff has been commented out because it was hardcoding level 7
+  to be enabled.
+  PUT_MY_REG (0x2C, 0xFC47 | ((~7 & 0x7) << 3));  orig
+  sysIntEnable(7);  orig
+  If the ~7 is changed to ~(level), where level is a variable
+   indicating desired interrupt level, then this makes sense!
+   example:
+   level = 5;
+   PUT_MY_REG (0x2C, 0xFC47 | ((~(level) & 0x7) << 3));
+   sysIntEnable (level); orig
+  -------------------------------------------------------------------*/ 
+#ifdef DEBUG_INTR
+    printf("vxiIntrInit complete!!\n");
+#endif
+
+   return 0;
+}
+
+/*==========================================================================
+  kscIntHandler
+============================================================================
+This handler was created to be invoked whenever a VME interrupt occurs. It 
+will be called just prior to sysUniverseIntHandler(). This handler read the 
+LINT_STAT register of the universe chip to determine the level and status
+id of the interrupt. This has to be done first because sysUniverseIntHandler
+resets that register.
+===========================================================================*/
+void kscIntHandler()
+{
+    UINT32		status;
+    int			i;
+
+#ifdef DEBUG_INTR
+    logMsg("In kscIntHandler\n",0,0,0,0,0,0);
+#endif
+
+    /* Read interrupt status from chip. */    
+    status = vxiUnivRegRd( VXI_UNIV_LINT_STAT );
+
+#ifdef DEBUG_INTR
+    logMsg("lintStat is 0x%x\n",status,0,0,0,0,0);
+#endif
+
+    /* Check if VME interrupt. */
+#ifdef FORCE                          /* powercore 603/4 */
+    if ((status & LINT_EN_VME_MASK) != 0)
+#elif defined DY4                     /* dy4 svme178 */
+    if ((status & 0x000000fe) != 0)
+#elif defined MV2400
+    if ((status & 0x000000fe) != 0)     /*mv2400 */
+#else
+#error - Board type not defined.  Must define either FORCE or DY4 or MV2400 to compile.
+#endif
+
+    {
+	/* Handle each VME Bus interrupt */
+	LEVEL = (status & 0xff) >> 1;
+
+	for (i = 0; i < 7; i++)
+	{
+	    if (((status >> (7 - i)) & 0x01) == 0x01)
+	    {
+		/* Save level for use in vxiBaseIsr. */
+
+#ifdef DEBUG_INTR
+                logMsg("LEVEL is 0x%x\n",LEVEL,0,0,0,0,0);
+#endif
+
+	    }
+	} /* end of for */
+    } /* end if VME interrupt*/
+
+  return;
+}
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

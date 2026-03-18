@@ -1,0 +1,1077 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.18.20.23.46;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.18.20.23.46;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Project Information                      c:\pl\v170pl\altera\opdec\control.rpt
+
+MAX+plus II Compiler Report File
+Version 6.1 02/28/96
+Compiled: 05/08/96 06:55:21
+
+Copyright (c) 1996 by Altera Corporation.  All rights reserved.  This text
+contains proprietary, confidential information of Altera Corporation, and
+may be used, copied, and/or disclosed only pursuant to the terms of a
+valid software license agreement with Altera Corporation.  This copyright
+notice must be retained as part of this text at all times.
+
+
+
+***** Project compilation was successful
+
+
+
+
+** DEVICE SUMMARY **
+
+Chip/                     Input   Output   Bidir         Shareable
+POF       Device          Pins    Pins     Pins     LCs  Expanders  % Utilized
+
+control   EPM7096QC100-15  44       3        0      44      17          45 %
+
+User Pins:                 44       3        0  
+
+
+
+Project Information                      c:\pl\v170pl\altera\opdec\control.rpt
+
+** PROJECT COMPILATION MESSAGES **
+
+Warning: Ignored unnecessary INPUT pin 'ID13'
+Warning: Ignored unnecessary INPUT pin 'ID12'
+Warning: Ignored unnecessary INPUT pin 'ID11'
+Warning: Ignored unnecessary INPUT pin 'ID10'
+Warning: Ignored unnecessary INPUT pin 'ID9'
+Warning: Can't run "Multichip Partitioner": all network licenses are in use
+
+
+Project Information                      c:\pl\v170pl\altera\opdec\control.rpt
+
+** AUTO GLOBAL SIGNALS **
+
+
+
+INFO: Signal '/RESET' chosen for auto global Clear
+
+
+Project Information                      c:\pl\v170pl\altera\opdec\control.rpt
+
+** FILE HIERARCHY **
+
+
+
+|xcvrcntl:2|
+|shmem:8|
+|shmem:8|a32_mth:1|
+|shmem:8|a32_mth:1|74374:3|
+|shmem:8|a32_mth:1|74688:12|
+|shmem:8|74139:2|
+|shmem:8|amcode:6|
+|shmem:8|a24_mth:14|
+|shmem:8|a24_mth:14|74374:3|
+|shmem:8|a24_mth:14|74688:12|
+|shmem:8|a16_mth:16|
+|shmem:8|a16_mth:16|74374:3|
+|shmem:8|a16_mth:16|74688:12|
+|shmem:8|7475:21|
+
+
+Device-Specific Information:             c:\pl\v170pl\altera\opdec\control.rpt
+control
+
+***** Logic for device 'control' compiled without errors.
+
+
+
+
+Device: EPM7096QC100-15
+Turbo: ON
+Security: OFF
+                            /                              
+                            W                              
+                            T                              
+                            _                              
+                            E               R R     R R R  
+                            X               E E     E E E  
+                            T       /       S S     S S S  
+                            E       R       E E     E E E  
+                          N N       E       R R N   R R R  
+                  A A A G . D A V G S G G G V V . V V V V  
+                  M M M N C E M C N E N N N E E C C E E E  
+                  5 4 3 D . D 1 C D T D D D D D . C D D D  
+                ------------------------------------------_ 
+               / 100  98  96  94  92  90  88  86  84  82   |_ 
+              /     99  97  95  93  91  89  87  85  83  81    | 
+         /AS |  1                                          80 | RESERVED 
+          A8 |  2                                          79 | RESERVED 
+        ID15 |  3                                          78 | RESERVED 
+        ID14 |  4                                          77 | RESERVED 
+         VCC |  5                                          76 | GND 
+         AM0 |  6                                          75 | RESERVED 
+         A24 |  7                                          74 | XMT_DATA 
+         /DS |  8                                          73 | XMT_ADDR 
+        N.C. |  9                                          72 | N.C. 
+         ID6 | 10                                          71 | RESERVED 
+         A12 | 11                                          70 | RESERVED 
+         ID5 | 12                                          69 | RESERVED 
+         GND | 13                                          68 | VCC 
+         ID4 | 14                                          67 | RESERVED 
+         A11 | 15                                          66 | RESERVED 
+         ID3 | 16             EPM7096QC100-15              65 | RESERVED 
+         A10 | 17                                          64 | RESERVED 
+         ID2 | 18                                          63 | RESERVED 
+         ID1 | 19                                          62 | RESERVED 
+         VCC | 20                                          61 | GND 
+          A9 | 21                                          60 | RESERVED 
+         ID0 | 22                                          59 | RESERVED 
+      /DTACK | 23                                          58 | RESERVED 
+        N.C. | 24                                          57 | N.C. 
+         A23 | 25                                          56 | RESERVED 
+         A25 | 26                                          55 | A27 
+         AM2 | 27                                          54 | A28 
+         GND | 28                                          53 | VCC 
+         A22 | 29                                          52 | RESERVED 
+         A26 | 30                                          51 | DRV_BBSY 
+             |      32  34  36  38  40  42  44  46  48  50  _| 
+              \   31  33  35  37  39  41  43  45  47  49   | 
+               \------------------------------------------- 
+                  A A A I A V N A I G V / A N G X R A R /  
+                  2 2 1 D 1 C . 1 D N C W 3 . N M E 3 E B  
+                  9 1 5 8 4 C C 3 7 D C R 0 C D T S 1 S E  
+                              .         I   .   _ E   E R  
+                                        T       S R   R R  
+                                        E       T V   V    
+                                                B E   E    
+                                                  D   D    
+                                                           
+                                                           
+                                                           
+                                                           
+
+
+N.C. = Not Connected.
+VCC = Dedicated power pin, which MUST be connected to VCC.
+GND = Dedicated ground pin or unused dedicated input, which MUST be connected to GND.
+RESERVED = Unused I/O pin, which MUST be left unconnected.
+
+
+
+Device-Specific Information:             c:\pl\v170pl\altera\opdec\control.rpt
+control
+
+** RESOURCE USAGE **
+
+                                                Shareable     External
+Logic Array Block     Logic Cells   I/O Pins    Expanders   Interconnect
+
+A:     LC1 - LC16     0/16(  0%)  12/12(100%)   0/16(  0%)   0/36(  0%) 
+B:    LC17 - LC32     1/16(  6%)  12/12(100%)  12/16( 75%)  32/36( 88%) 
+C:    LC33 - LC48     8/16( 50%)  12/12(100%)   0/16(  0%)  16/36( 44%) 
+D:    LC49 - LC64    16/16(100%)   8/12( 66%)   2/16( 12%)  30/36( 83%) 
+E:    LC65 - LC80    16/16(100%)   0/12(  0%)   3/16( 18%)   9/36( 25%) 
+F:    LC81 - LC96     3/16( 18%)   2/12( 16%)   1/16(  6%)  31/36( 86%) 
+
+
+Total dedicated input pins used:                 1/4    ( 25%)
+Total I/O pins used:                            46/72   ( 63%)
+Total logic cells used:                         44/96   ( 45%)
+Total shareable expanders used:                 17/96   ( 17%)
+Total Turbo logic cells used:                   44/96   ( 45%)
+Total shareable expanders not available (n/a):   1/96   (  1%)
+
+Total input pins required:                      44
+Total output pins required:                      3
+Total bidirectional pins required:               0
+Total logic cells required:                     44
+Total flipflops required:                       22
+Total shareable expanders in database:          15
+
+Synthesized logic cells:                         2/  96 (  2%)
+
+
+
+Device-Specific Information:             c:\pl\v170pl\altera\opdec\control.rpt
+control
+
+** INPUTS **
+
+                                         Shareable
+                                         Expanders     Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared n/a INP  FBK  OUT  FBK  Name
+   6    (4)  (A)      INPUT              0      0   0    0    0    1    2  AM0
+  94   (16)  (A)      INPUT              0      0   0    0    0    1    2  AM1
+  27   (45)  (C)      INPUT              0      0   0    0    0    1    0  AM2
+  98   (13)  (A)      INPUT              0      0   0    0    0    1    2  AM3
+  99   (12)  (A)      INPUT              0      0   0    0    0    1    2  AM4
+ 100   (11)  (A)      INPUT              0      0   0    0    0    1    2  AM5
+   1    (9)  (A)      INPUT              0      0   0    0    0    2    0  /AS
+   2    (8)  (A)      INPUT              0      0   0    0    0    0    2  A8
+  21   (20)  (B)      INPUT              0      0   0    0    0    0    1  A9
+  17   (24)  (B)      INPUT              0      0   0    0    0    0    1  A10
+  15   (27)  (B)      INPUT              0      0   0    0    0    0    1  A11
+  11   (30)  (B)      INPUT              0      0   0    0    0    0    1  A12
+  38   (35)  (C)      INPUT              0      0   0    0    0    0    1  A13
+  35   (36)  (C)      INPUT              0      0   0    0    0    0    1  A14
+  33   (38)  (C)      INPUT              0      0   0    0    0    0    1  A15
+  32   (40)  (C)      INPUT              0      0   0    0    0    0    1  A21
+  29   (44)  (C)      INPUT              0      0   0    0    0    0    1  A22
+  25   (48)  (C)      INPUT              0      0   0    0    0    0    1  A23
+   7    (3)  (A)      INPUT              0      0   0    0    0    0    2  A24
+  26   (46)  (C)      INPUT              0      0   0    0    0    0    1  A25
+  30   (43)  (C)      INPUT              0      0   0    0    0    0    1  A26
+  55   (62)  (D)      INPUT              0      0   0    0    0    0    1  A27
+  54   (61)  (D)      INPUT              0      0   0    0    0    0    1  A28
+  31   (41)  (C)      INPUT              0      0   0    0    0    0    1  A29
+  43   (51)  (D)      INPUT              0      0   0    0    0    0    1  A30
+  48   (54)  (D)      INPUT              0      0   0    0    0    0    1  A31
+  50   (57)  (D)      INPUT              0      0   0    0    0    1    0  /BERR
+  51   (59)  (D)      INPUT              0      0   0    0    0    1    0  DRV_BBSY
+   8    (1)  (A)      INPUT              0      0   0    0    0    2    2  /DS
+  23   (17)  (B)      INPUT              0      0   0    0    0    1    0  /DTACK
+  22   (19)  (B)      INPUT              0      0   0    0    0    0    3  ID0
+  19   (21)  (B)      INPUT              0      0   0    0    0    0    3  ID1
+  18   (22)  (B)      INPUT              0      0   0    0    0    0    3  ID2
+  16   (25)  (B)      INPUT              0      0   0    0    0    0    2  ID3
+  14   (28)  (B)      INPUT              0      0   0    0    0    0    2  ID4
+  12   (29)  (B)      INPUT              0      0   0    0    0    0    2  ID5
+  10   (32)  (B)      INPUT              0      0   0    0    0    0    2  ID6
+  39   (33)  (C)      INPUT              0      0   0    0    0    0    2  ID7
+  34   (37)  (C)      INPUT              0      0   0    0    0    0    3  ID8
+   4    (5)  (A)      INPUT              0      0   0    0    0    0   22  ID14
+   3    (6)  (A)      INPUT              0      0   0    0    0    0   22  ID15
+  91      -   -       INPUT              0      0   0    0    0    0    0  /RESET
+  42   (49)  (D)      INPUT              0      0   0    0    0    1    0  /WRITE
+  95   (14)  (A)      INPUT              0      0   0    0    0    0   22  /WT_EXTENDED
+
+
+Code:
+
+s = Synthesized pin or logic cell
+t = Turbo logic cell
++ = Synchronous flipflop
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+
+
+Device-Specific Information:             c:\pl\v170pl\altera\opdec\control.rpt
+control
+
+** OUTPUTS **
+
+                                         Shareable
+                                         Expanders     Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared n/a INP  FBK  OUT  FBK  Name
+  73     81    F     OUTPUT     t        0      0   0    7    1    0    0  XMT_ADDR
+  74     83    F     OUTPUT     t        0      0   0    2    2    0    0  XMT_DATA
+  46     52    D     OUTPUT   s t        0      0   0    5    1    3    0  XMT_STB
+
+
+Code:
+
+s = Synthesized pin or logic cell
+t = Turbo logic cell
++ = Synchronous flipflop
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+
+
+Device-Specific Information:             c:\pl\v170pl\altera\opdec\control.rpt
+control
+
+** BURIED LOGIC **
+
+                                         Shareable
+                                         Expanders     Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared n/a INP  FBK  OUT  FBK  Name
+ (58)    65    E       DFFE     t        1      1   0    4    0    0    2  |shmem:8|a16_mth:16|:7
+ (60)    68    E       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a16_mth:16|74374:3|:13
+   -     66    E       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a16_mth:16|74374:3|:14
+ (47)    53    D       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a16_mth:16|74374:3|:15
+   -     55    D       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a16_mth:16|74374:3|:16
+   -     58    D       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a16_mth:16|74374:3|:17
+ (64)    72    E       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a16_mth:16|74374:3|:18
+ (66)    75    E       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a16_mth:16|74374:3|:19
+   -     74    E       DFFE     t        1      1   0    4    0    0    2  |shmem:8|a16_mth:16|74374:3|:20
+ (55)    62    D       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a16_mth:16|74688:12|:1
+   -     63    D       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a16_mth:16|74688:12|:2
+ (56)    64    D       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a16_mth:16|74688:12|:3
+ (42)    49    D       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a16_mth:16|74688:12|:4
+   -     50    D       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a16_mth:16|74688:12|:5
+ (54)    61    D       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a16_mth:16|74688:12|:6
+ (50)    57    D       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a16_mth:16|74688:12|:7
+ (67)    76    E       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a24_mth:14|:7
+ (69)    77    E       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a24_mth:14|74374:3|:13
+   -     79    E       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a24_mth:14|74374:3|:14
+ (70)    78    E       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a24_mth:14|74374:3|:15
+ (52)    60    D       SOFT     t        0      0   0    1    1    0    1  |shmem:8|a24_mth:14|74688:12|:1
+ (43)    51    D       SOFT     t        0      0   0    1    1    0    1  |shmem:8|a24_mth:14|74688:12|:2
+   -     47    C       SOFT     t        0      0   0    1    1    0    1  |shmem:8|a24_mth:14|74688:12|:3
+ (65)    73    E       DFFE     t        1      1   0    4    0    0    2  |shmem:8|a32_mth:1|:7
+ (71)    80    E       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a32_mth:1|74374:3|:13
+   -     71    E       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a32_mth:1|74374:3|:14
+ (51)    59    D       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a32_mth:1|74374:3|:15
+ (49)    56    D       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a32_mth:1|74374:3|:16
+ (48)    54    D       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a32_mth:1|74374:3|:17
+ (62)    69    E       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a32_mth:1|74374:3|:18
+ (63)    70    E       DFFE     t        1      1   0    4    0    0    1  |shmem:8|a32_mth:1|74374:3|:19
+ (59)    67    E       DFFE     t        1      1   0    4    0    0    2  |shmem:8|a32_mth:1|74374:3|:20
+ (29)    44    C       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a32_mth:1|74688:12|:1
+ (30)    43    C       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a32_mth:1|74688:12|:2
+   -     42    C       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a32_mth:1|74688:12|:3
+   -     39    C       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a32_mth:1|74688:12|:4
+ (35)    36    C       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a32_mth:1|74688:12|:5
+ (38)    35    C       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a32_mth:1|74688:12|:6
+ (39)    33    C       SOFT     t        0      0   0    1    1    0    2  |shmem:8|a32_mth:1|74688:12|:7
+ (75)    84    F       SOFT   s t        1      0   1    8   19    0    1  |shmem:8|~20~1
+ (22)    19    B      LCELL     t       12      0   0    8   24    1    2  |shmem:8.SHR_ACCESS (|shmem:8|7475:21|:7)
+
+
+Code:
+
+s = Synthesized pin or logic cell
+t = Turbo logic cell
++ = Synchronous flipflop
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+
+
+Device-Specific Information:             c:\pl\v170pl\altera\opdec\control.rpt
+control
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'B':
+
+           Logic cells placed in LAB 'B'
+        +- LC19 |shmem:8.SHR_ACCESS
+        | 
+        |   Other LABs fed by signals
+        |   that feed LAB 'B'
+LC      | | A B C D E F |     Logic cells that feed LAB 'B':
+LC19 -> * | - * - - - * | <-- |shmem:8.SHR_ACCESS
+
+Pin
+6    -> * | - * - - - * | <-- AM0
+94   -> * | - * - - - * | <-- AM1
+98   -> * | - * - - - * | <-- AM3
+99   -> * | - * - - - * | <-- AM4
+100  -> * | - * - - - * | <-- AM5
+2    -> * | - * - - - * | <-- A8
+7    -> * | - * - - - * | <-- A24
+8    -> * | - * - * - * | <-- /DS
+91   -> - | - - - - - - | <-- /RESET
+LC65 -> * | - * - - - * | <-- |shmem:8|a16_mth:16|:7
+LC74 -> * | - * - - - * | <-- |shmem:8|a16_mth:16|74374:3|:20
+LC62 -> * | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:1
+LC63 -> * | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:2
+LC64 -> * | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:3
+LC49 -> * | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:4
+LC50 -> * | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:5
+LC61 -> * | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:6
+LC57 -> * | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:7
+LC76 -> * | - * - - - - | <-- |shmem:8|a24_mth:14|:7
+LC60 -> * | - * - - - - | <-- |shmem:8|a24_mth:14|74688:12|:1
+LC51 -> * | - * - - - - | <-- |shmem:8|a24_mth:14|74688:12|:2
+LC47 -> * | - * - - - - | <-- |shmem:8|a24_mth:14|74688:12|:3
+LC73 -> * | - * - - - * | <-- |shmem:8|a32_mth:1|:7
+LC67 -> * | - * - - - * | <-- |shmem:8|a32_mth:1|74374:3|:20
+LC44 -> * | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:1
+LC43 -> * | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:2
+LC42 -> * | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:3
+LC39 -> * | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:4
+LC36 -> * | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:5
+LC35 -> * | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:6
+LC33 -> * | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:7
+LC84 -> * | - * - - - - | <-- |shmem:8|~20~1
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:             c:\pl\v170pl\altera\opdec\control.rpt
+control
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'C':
+
+                         Logic cells placed in LAB 'C'
+        +--------------- LC47 |shmem:8|a24_mth:14|74688:12|:3
+        | +------------- LC44 |shmem:8|a32_mth:1|74688:12|:1
+        | | +----------- LC43 |shmem:8|a32_mth:1|74688:12|:2
+        | | | +--------- LC42 |shmem:8|a32_mth:1|74688:12|:3
+        | | | | +------- LC39 |shmem:8|a32_mth:1|74688:12|:4
+        | | | | | +----- LC36 |shmem:8|a32_mth:1|74688:12|:5
+        | | | | | | +--- LC35 |shmem:8|a32_mth:1|74688:12|:6
+        | | | | | | | +- LC33 |shmem:8|a32_mth:1|74688:12|:7
+        | | | | | | | | 
+        | | | | | | | |   Other LABs fed by signals
+        | | | | | | | |   that feed LAB 'C'
+LC      | | | | | | | | | A B C D E F |     Logic cells that feed LAB 'C':
+
+Pin
+32   -> * - - - - - - - | - - * - - - | <-- A21
+26   -> - - - - - - - * | - - * - - - | <-- A25
+30   -> - - - - - - * - | - - * - - - | <-- A26
+55   -> - - - - - * - - | - - * - - - | <-- A27
+54   -> - - - - * - - - | - - * - - - | <-- A28
+31   -> - - - * - - - - | - - * - - - | <-- A29
+43   -> - - * - - - - - | - - * - - - | <-- A30
+48   -> - * - - - - - - | - - * - - - | <-- A31
+91   -> - - - - - - - - | - - - - - - | <-- /RESET
+LC78 -> * - - - - - - - | - - * - - - | <-- |shmem:8|a24_mth:14|74374:3|:15
+LC80 -> - * - - - - - - | - - * - - - | <-- |shmem:8|a32_mth:1|74374:3|:13
+LC71 -> - - * - - - - - | - - * - - - | <-- |shmem:8|a32_mth:1|74374:3|:14
+LC59 -> - - - * - - - - | - - * - - - | <-- |shmem:8|a32_mth:1|74374:3|:15
+LC56 -> - - - - * - - - | - - * - - - | <-- |shmem:8|a32_mth:1|74374:3|:16
+LC54 -> - - - - - * - - | - - * - - - | <-- |shmem:8|a32_mth:1|74374:3|:17
+LC69 -> - - - - - - * - | - - * - - - | <-- |shmem:8|a32_mth:1|74374:3|:18
+LC70 -> - - - - - - - * | - - * - - - | <-- |shmem:8|a32_mth:1|74374:3|:19
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:             c:\pl\v170pl\altera\opdec\control.rpt
+control
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'D':
+
+                                         Logic cells placed in LAB 'D'
+        +------------------------------- LC53 |shmem:8|a16_mth:16|74374:3|:15
+        | +----------------------------- LC55 |shmem:8|a16_mth:16|74374:3|:16
+        | | +--------------------------- LC58 |shmem:8|a16_mth:16|74374:3|:17
+        | | | +------------------------- LC62 |shmem:8|a16_mth:16|74688:12|:1
+        | | | | +----------------------- LC63 |shmem:8|a16_mth:16|74688:12|:2
+        | | | | | +--------------------- LC64 |shmem:8|a16_mth:16|74688:12|:3
+        | | | | | | +------------------- LC49 |shmem:8|a16_mth:16|74688:12|:4
+        | | | | | | | +----------------- LC50 |shmem:8|a16_mth:16|74688:12|:5
+        | | | | | | | | +--------------- LC61 |shmem:8|a16_mth:16|74688:12|:6
+        | | | | | | | | | +------------- LC57 |shmem:8|a16_mth:16|74688:12|:7
+        | | | | | | | | | | +----------- LC60 |shmem:8|a24_mth:14|74688:12|:1
+        | | | | | | | | | | | +--------- LC51 |shmem:8|a24_mth:14|74688:12|:2
+        | | | | | | | | | | | | +------- LC59 |shmem:8|a32_mth:1|74374:3|:15
+        | | | | | | | | | | | | | +----- LC56 |shmem:8|a32_mth:1|74374:3|:16
+        | | | | | | | | | | | | | | +--- LC54 |shmem:8|a32_mth:1|74374:3|:17
+        | | | | | | | | | | | | | | | +- LC52 XMT_STB
+        | | | | | | | | | | | | | | | | 
+        | | | | | | | | | | | | | | | |   Other LABs fed by signals
+        | | | | | | | | | | | | | | | |   that feed LAB 'D'
+LC      | | | | | | | | | | | | | | | | | A B C D E F |     Logic cells that feed LAB 'D':
+LC53 -> - - - - - * - - - - - - - - - - | - - - * - - | <-- |shmem:8|a16_mth:16|74374:3|:15
+LC55 -> - - - - - - * - - - - - - - - - | - - - * - - | <-- |shmem:8|a16_mth:16|74374:3|:16
+LC58 -> - - - - - - - * - - - - - - - - | - - - * - - | <-- |shmem:8|a16_mth:16|74374:3|:17
+LC52 -> - - - - - - - - - - - - - - - * | - - - * - * | <-- XMT_STB
+
+Pin
+1    -> - - - - - - - - - - - - - - - * | - - - * - * | <-- /AS
+21   -> - - - - - - - - - * - - - - - - | - - - * - - | <-- A9
+17   -> - - - - - - - - * - - - - - - - | - - - * - - | <-- A10
+15   -> - - - - - - - * - - - - - - - - | - - - * - - | <-- A11
+11   -> - - - - - - * - - - - - - - - - | - - - * - - | <-- A12
+38   -> - - - - - * - - - - - - - - - - | - - - * - - | <-- A13
+35   -> - - - - * - - - - - - - - - - - | - - - * - - | <-- A14
+33   -> - - - * - - - - - - - - - - - - | - - - * - - | <-- A15
+29   -> - - - - - - - - - - - * - - - - | - - - * - - | <-- A22
+25   -> - - - - - - - - - - * - - - - - | - - - * - - | <-- A23
+50   -> - - - - - - - - - - - - - - - * | - - - * - - | <-- /BERR
+51   -> - - - - - - - - - - - - - - - * | - - - * - - | <-- DRV_BBSY
+8    -> - - - - - - - - - - - - - - - * | - * - * - * | <-- /DS
+23   -> - - - - - - - - - - - - - - - * | - - - * - - | <-- /DTACK
+16   -> - - * - - - - - - - - - - - * - | - - - * - - | <-- ID3
+14   -> - * - - - - - - - - - - - * - - | - - - * - - | <-- ID4
+12   -> * - - - - - - - - - - - * - - - | - - - * - - | <-- ID5
+4    -> * * * - - - - - - - - - * * * - | - - - * * - | <-- ID14
+3    -> * * * - - - - - - - - - * * * - | - - - * * - | <-- ID15
+91   -> - - - - - - - - - - - - - - - - | - - - - - - | <-- /RESET
+95   -> * * * - - - - - - - - - * * * - | - - - * * - | <-- /WT_EXTENDED
+LC68 -> - - - * - - - - - - - - - - - - | - - - * - - | <-- |shmem:8|a16_mth:16|74374:3|:13
+LC66 -> - - - - * - - - - - - - - - - - | - - - * - - | <-- |shmem:8|a16_mth:16|74374:3|:14
+LC72 -> - - - - - - - - * - - - - - - - | - - - * - - | <-- |shmem:8|a16_mth:16|74374:3|:18
+LC75 -> - - - - - - - - - * - - - - - - | - - - * - - | <-- |shmem:8|a16_mth:16|74374:3|:19
+LC77 -> - - - - - - - - - - * - - - - - | - - - * - - | <-- |shmem:8|a24_mth:14|74374:3|:13
+LC79 -> - - - - - - - - - - - * - - - - | - - - * - - | <-- |shmem:8|a24_mth:14|74374:3|:14
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:             c:\pl\v170pl\altera\opdec\control.rpt
+control
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'E':
+
+                                         Logic cells placed in LAB 'E'
+        +------------------------------- LC65 |shmem:8|a16_mth:16|:7
+        | +----------------------------- LC68 |shmem:8|a16_mth:16|74374:3|:13
+        | | +--------------------------- LC66 |shmem:8|a16_mth:16|74374:3|:14
+        | | | +------------------------- LC72 |shmem:8|a16_mth:16|74374:3|:18
+        | | | | +----------------------- LC75 |shmem:8|a16_mth:16|74374:3|:19
+        | | | | | +--------------------- LC74 |shmem:8|a16_mth:16|74374:3|:20
+        | | | | | | +------------------- LC76 |shmem:8|a24_mth:14|:7
+        | | | | | | | +----------------- LC77 |shmem:8|a24_mth:14|74374:3|:13
+        | | | | | | | | +--------------- LC79 |shmem:8|a24_mth:14|74374:3|:14
+        | | | | | | | | | +------------- LC78 |shmem:8|a24_mth:14|74374:3|:15
+        | | | | | | | | | | +----------- LC73 |shmem:8|a32_mth:1|:7
+        | | | | | | | | | | | +--------- LC80 |shmem:8|a32_mth:1|74374:3|:13
+        | | | | | | | | | | | | +------- LC71 |shmem:8|a32_mth:1|74374:3|:14
+        | | | | | | | | | | | | | +----- LC69 |shmem:8|a32_mth:1|74374:3|:18
+        | | | | | | | | | | | | | | +--- LC70 |shmem:8|a32_mth:1|74374:3|:19
+        | | | | | | | | | | | | | | | +- LC67 |shmem:8|a32_mth:1|74374:3|:20
+        | | | | | | | | | | | | | | | | 
+        | | | | | | | | | | | | | | | |   Other LABs fed by signals
+        | | | | | | | | | | | | | | | |   that feed LAB 'E'
+LC      | | | | | | | | | | | | | | | | | A B C D E F |     Logic cells that feed LAB 'E':
+
+Pin
+22   -> - - - - - * - - - * - - - - - * | - - - - * - | <-- ID0
+19   -> - - - - * - - - * - - - - - * - | - - - - * - | <-- ID1
+18   -> - - - * - - - * - - - - - * - - | - - - - * - | <-- ID2
+10   -> - - * - - - - - - - - - * - - - | - - - - * - | <-- ID6
+39   -> - * - - - - - - - - - * - - - - | - - - - * - | <-- ID7
+34   -> * - - - - - * - - - * - - - - - | - - - - * - | <-- ID8
+4    -> * * * * * * * * * * * * * * * * | - - - * * - | <-- ID14
+3    -> * * * * * * * * * * * * * * * * | - - - * * - | <-- ID15
+91   -> - - - - - - - - - - - - - - - - | - - - - - - | <-- /RESET
+95   -> * * * * * * * * * * * * * * * * | - - - * * - | <-- /WT_EXTENDED
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:             c:\pl\v170pl\altera\opdec\control.rpt
+control
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'F':
+
+               Logic cells placed in LAB 'F'
+        +----- LC84 |shmem:8|~20~1
+        | +--- LC81 XMT_ADDR
+        | | +- LC83 XMT_DATA
+        | | | 
+        | | |   Other LABs fed by signals
+        | | |   that feed LAB 'F'
+LC      | | | | A B C D E F |     Logic cells that feed LAB 'F':
+
+Pin
+6    -> * * - | - * - - - * | <-- AM0
+94   -> * * - | - * - - - * | <-- AM1
+27   -> - * - | - - - - - * | <-- AM2
+98   -> * * - | - * - - - * | <-- AM3
+99   -> * * - | - * - - - * | <-- AM4
+100  -> * * - | - * - - - * | <-- AM5
+1    -> - * - | - - - * - * | <-- /AS
+2    -> * - - | - * - - - * | <-- A8
+7    -> * - - | - * - - - * | <-- A24
+8    -> * - * | - * - * - * | <-- /DS
+91   -> - - - | - - - - - - | <-- /RESET
+42   -> - - * | - - - - - * | <-- /WRITE
+LC65 -> * - - | - * - - - * | <-- |shmem:8|a16_mth:16|:7
+LC74 -> * - - | - * - - - * | <-- |shmem:8|a16_mth:16|74374:3|:20
+LC62 -> * - - | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:1
+LC63 -> * - - | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:2
+LC64 -> * - - | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:3
+LC49 -> * - - | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:4
+LC50 -> * - - | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:5
+LC61 -> * - - | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:6
+LC57 -> * - - | - * - - - * | <-- |shmem:8|a16_mth:16|74688:12|:7
+LC73 -> * - - | - * - - - * | <-- |shmem:8|a32_mth:1|:7
+LC67 -> * - - | - * - - - * | <-- |shmem:8|a32_mth:1|74374:3|:20
+LC44 -> * - - | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:1
+LC43 -> * - - | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:2
+LC42 -> * - - | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:3
+LC39 -> * - - | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:4
+LC36 -> * - - | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:5
+LC35 -> * - - | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:6
+LC33 -> * - - | - * - - - * | <-- |shmem:8|a32_mth:1|74688:12|:7
+LC19 -> * - * | - * - - - * | <-- |shmem:8.SHR_ACCESS
+LC52 -> - * * | - - - * - * | <-- XMT_STB
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:             c:\pl\v170pl\altera\opdec\control.rpt
+control
+
+** EQUATIONS **
+
+AM0      : INPUT;
+AM1      : INPUT;
+AM2      : INPUT;
+AM3      : INPUT;
+AM4      : INPUT;
+AM5      : INPUT;
+A8       : INPUT;
+A9       : INPUT;
+A10      : INPUT;
+A11      : INPUT;
+A12      : INPUT;
+A13      : INPUT;
+A14      : INPUT;
+A15      : INPUT;
+A21      : INPUT;
+A22      : INPUT;
+A23      : INPUT;
+A24      : INPUT;
+A25      : INPUT;
+A26      : INPUT;
+A27      : INPUT;
+A28      : INPUT;
+A29      : INPUT;
+A30      : INPUT;
+A31      : INPUT;
+DRV_BBSY : INPUT;
+ID0      : INPUT;
+ID1      : INPUT;
+ID2      : INPUT;
+ID3      : INPUT;
+ID4      : INPUT;
+ID5      : INPUT;
+ID6      : INPUT;
+ID7      : INPUT;
+ID8      : INPUT;
+ID14     : INPUT;
+ID15     : INPUT;
+/AS      : INPUT;
+/BERR    : INPUT;
+/DS      : INPUT;
+/DTACK   : INPUT;
+/RESET   : INPUT;
+/WRITE   : INPUT;
+/WT_EXTENDED : INPUT;
+
+-- Node name is 'XMT_ADDR' 
+-- Equation name is 'XMT_ADDR', location is LC081, type is output.
+ XMT_ADDR = LCELL( _EQ001 $  XMT_STB);
+  _EQ001 = !AM0 &  AM2 &  AM3 &  AM4 &  AM5 &  /AS &  XMT_STB
+         # !AM0 & !AM1 &  AM3 & !AM4 & !AM5 &  /AS &  XMT_STB;
+
+-- Node name is 'XMT_DATA' 
+-- Equation name is 'XMT_DATA', location is LC083, type is output.
+ XMT_DATA = LCELL( _EQ002 $  GND);
+  _EQ002 = !/DS &  _LC019 &  /WRITE
+         # !/WRITE &  XMT_STB;
+
+-- Node name is 'XMT_STB' = '|xcvrcntl:2|~10~1' 
+-- Equation name is 'XMT_STB', type is output 
+ XMT_STB = LCELL( _EQ003 $  VCC);
+  _EQ003 =  /AS &  /BERR & !DRV_BBSY &  /DS &  /DTACK
+         # !DRV_BBSY & !XMT_STB;
+
+-- Node name is '|shmem:8|a16_mth:16|:7' 
+-- Equation name is '_LC065', type is buried 
+_LC065   = DFFE( ID8 $  GND,  _EQ004, GLOBAL( /RESET),  VCC,  VCC);
+  _EQ004 =  _X001;
+  _X001  = EXP(!ID14 &  ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a16_mth:16|74374:3|:13' 
+-- Equation name is '_LC068', type is buried 
+_LC068   = DFFE( ID7 $  GND,  _EQ005,  VCC,  VCC,  VCC);
+  _EQ005 =  _X001;
+  _X001  = EXP(!ID14 &  ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a16_mth:16|74374:3|:14' 
+-- Equation name is '_LC066', type is buried 
+_LC066   = DFFE( ID6 $  GND,  _EQ006,  VCC,  VCC,  VCC);
+  _EQ006 =  _X001;
+  _X001  = EXP(!ID14 &  ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a16_mth:16|74374:3|:15' 
+-- Equation name is '_LC053', type is buried 
+_LC053   = DFFE( ID5 $  GND,  _EQ007,  VCC,  VCC,  VCC);
+  _EQ007 =  _X001;
+  _X001  = EXP(!ID14 &  ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a16_mth:16|74374:3|:16' 
+-- Equation name is '_LC055', type is buried 
+_LC055   = DFFE( ID4 $  GND,  _EQ008,  VCC,  VCC,  VCC);
+  _EQ008 =  _X001;
+  _X001  = EXP(!ID14 &  ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a16_mth:16|74374:3|:17' 
+-- Equation name is '_LC058', type is buried 
+_LC058   = DFFE( ID3 $  GND,  _EQ009,  VCC,  VCC,  VCC);
+  _EQ009 =  _X001;
+  _X001  = EXP(!ID14 &  ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a16_mth:16|74374:3|:18' 
+-- Equation name is '_LC072', type is buried 
+_LC072   = DFFE( ID2 $  GND,  _EQ010,  VCC,  VCC,  VCC);
+  _EQ010 =  _X001;
+  _X001  = EXP(!ID14 &  ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a16_mth:16|74374:3|:19' 
+-- Equation name is '_LC075', type is buried 
+_LC075   = DFFE( ID1 $  GND,  _EQ011,  VCC,  VCC,  VCC);
+  _EQ011 =  _X001;
+  _X001  = EXP(!ID14 &  ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a16_mth:16|74374:3|:20' 
+-- Equation name is '_LC074', type is buried 
+_LC074   = DFFE( ID0 $  GND,  _EQ012,  VCC,  VCC,  VCC);
+  _EQ012 =  _X001;
+  _X001  = EXP(!ID14 &  ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a16_mth:16|74688:12|:1' 
+-- Equation name is '_LC062', type is buried 
+_LC062   = LCELL( _LC068 $ !A15);
+
+-- Node name is '|shmem:8|a16_mth:16|74688:12|:2' 
+-- Equation name is '_LC063', type is buried 
+_LC063   = LCELL( _LC066 $ !A14);
+
+-- Node name is '|shmem:8|a16_mth:16|74688:12|:3' 
+-- Equation name is '_LC064', type is buried 
+_LC064   = LCELL( _LC053 $ !A13);
+
+-- Node name is '|shmem:8|a16_mth:16|74688:12|:4' 
+-- Equation name is '_LC049', type is buried 
+_LC049   = LCELL( _LC055 $ !A12);
+
+-- Node name is '|shmem:8|a16_mth:16|74688:12|:5' 
+-- Equation name is '_LC050', type is buried 
+_LC050   = LCELL( _LC058 $ !A11);
+
+-- Node name is '|shmem:8|a16_mth:16|74688:12|:6' 
+-- Equation name is '_LC061', type is buried 
+_LC061   = LCELL( _LC072 $ !A10);
+
+-- Node name is '|shmem:8|a16_mth:16|74688:12|:7' 
+-- Equation name is '_LC057', type is buried 
+_LC057   = LCELL( _LC075 $ !A9);
+
+-- Node name is '|shmem:8|a24_mth:14|:7' 
+-- Equation name is '_LC076', type is buried 
+_LC076   = DFFE( ID8 $  GND,  _EQ013, GLOBAL( /RESET),  VCC,  VCC);
+  _EQ013 =  _X002;
+  _X002  = EXP( ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a24_mth:14|74374:3|:13' 
+-- Equation name is '_LC077', type is buried 
+_LC077   = DFFE( ID2 $  GND,  _EQ014,  VCC,  VCC,  VCC);
+  _EQ014 =  _X002;
+  _X002  = EXP( ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a24_mth:14|74374:3|:14' 
+-- Equation name is '_LC079', type is buried 
+_LC079   = DFFE( ID1 $  GND,  _EQ015,  VCC,  VCC,  VCC);
+  _EQ015 =  _X002;
+  _X002  = EXP( ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a24_mth:14|74374:3|:15' 
+-- Equation name is '_LC078', type is buried 
+_LC078   = DFFE( ID0 $  GND,  _EQ016,  VCC,  VCC,  VCC);
+  _EQ016 =  _X002;
+  _X002  = EXP( ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a24_mth:14|74688:12|:1' 
+-- Equation name is '_LC060', type is buried 
+_LC060   = LCELL( _LC077 $ !A23);
+
+-- Node name is '|shmem:8|a24_mth:14|74688:12|:2' 
+-- Equation name is '_LC051', type is buried 
+_LC051   = LCELL( _LC079 $ !A22);
+
+-- Node name is '|shmem:8|a24_mth:14|74688:12|:3' 
+-- Equation name is '_LC047', type is buried 
+_LC047   = LCELL( _LC078 $ !A21);
+
+-- Node name is '|shmem:8|a32_mth:1|:7' 
+-- Equation name is '_LC073', type is buried 
+_LC073   = DFFE( ID8 $  GND,  _EQ017, GLOBAL( /RESET),  VCC,  VCC);
+  _EQ017 =  _X003;
+  _X003  = EXP(!ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a32_mth:1|74374:3|:13' 
+-- Equation name is '_LC080', type is buried 
+_LC080   = DFFE( ID7 $  GND,  _EQ018,  VCC,  VCC,  VCC);
+  _EQ018 =  _X003;
+  _X003  = EXP(!ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a32_mth:1|74374:3|:14' 
+-- Equation name is '_LC071', type is buried 
+_LC071   = DFFE( ID6 $  GND,  _EQ019,  VCC,  VCC,  VCC);
+  _EQ019 =  _X003;
+  _X003  = EXP(!ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a32_mth:1|74374:3|:15' 
+-- Equation name is '_LC059', type is buried 
+_LC059   = DFFE( ID5 $  GND,  _EQ020,  VCC,  VCC,  VCC);
+  _EQ020 =  _X003;
+  _X003  = EXP(!ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a32_mth:1|74374:3|:16' 
+-- Equation name is '_LC056', type is buried 
+_LC056   = DFFE( ID4 $  GND,  _EQ021,  VCC,  VCC,  VCC);
+  _EQ021 =  _X003;
+  _X003  = EXP(!ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a32_mth:1|74374:3|:17' 
+-- Equation name is '_LC054', type is buried 
+_LC054   = DFFE( ID3 $  GND,  _EQ022,  VCC,  VCC,  VCC);
+  _EQ022 =  _X003;
+  _X003  = EXP(!ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a32_mth:1|74374:3|:18' 
+-- Equation name is '_LC069', type is buried 
+_LC069   = DFFE( ID2 $  GND,  _EQ023,  VCC,  VCC,  VCC);
+  _EQ023 =  _X003;
+  _X003  = EXP(!ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a32_mth:1|74374:3|:19' 
+-- Equation name is '_LC070', type is buried 
+_LC070   = DFFE( ID1 $  GND,  _EQ024,  VCC,  VCC,  VCC);
+  _EQ024 =  _X003;
+  _X003  = EXP(!ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a32_mth:1|74374:3|:20' 
+-- Equation name is '_LC067', type is buried 
+_LC067   = DFFE( ID0 $  GND,  _EQ025,  VCC,  VCC,  VCC);
+  _EQ025 =  _X003;
+  _X003  = EXP(!ID14 & !ID15 & !/WT_EXTENDED);
+
+-- Node name is '|shmem:8|a32_mth:1|74688:12|:1' 
+-- Equation name is '_LC044', type is buried 
+_LC044   = LCELL( _LC080 $ !A31);
+
+-- Node name is '|shmem:8|a32_mth:1|74688:12|:2' 
+-- Equation name is '_LC043', type is buried 
+_LC043   = LCELL( _LC071 $ !A30);
+
+-- Node name is '|shmem:8|a32_mth:1|74688:12|:3' 
+-- Equation name is '_LC042', type is buried 
+_LC042   = LCELL( _LC059 $ !A29);
+
+-- Node name is '|shmem:8|a32_mth:1|74688:12|:4' 
+-- Equation name is '_LC039', type is buried 
+_LC039   = LCELL( _LC056 $ !A28);
+
+-- Node name is '|shmem:8|a32_mth:1|74688:12|:5' 
+-- Equation name is '_LC036', type is buried 
+_LC036   = LCELL( _LC054 $ !A27);
+
+-- Node name is '|shmem:8|a32_mth:1|74688:12|:6' 
+-- Equation name is '_LC035', type is buried 
+_LC035   = LCELL( _LC069 $ !A26);
+
+-- Node name is '|shmem:8|a32_mth:1|74688:12|:7' 
+-- Equation name is '_LC033', type is buried 
+_LC033   = LCELL( _LC070 $ !A25);
+
+-- Node name is '|shmem:8|7475:21|:7' = '|shmem:8.SHR_ACCESS' 
+-- Equation name is '_LC019', type is buried 
+_LC019   = LCELL( _EQ026 $  VCC);
+  _EQ026 = !_LC084 &  _X004 &  _X005 &  _X006 &  _X007 &  _X008 &  _X009 & 
+              _X010 &  _X011 &  _X012 &  _X013 &  _X014 &  _X015;
+  _X004  = EXP(!/DS &  _LC019);
+  _X005  = EXP( AM0 &  AM3 & !AM4 & !AM5 & !A24 &  /DS &  _LC033 &  _LC035 & 
+              _LC036 &  _LC039 &  _LC042 &  _LC043 &  _LC044 & !_LC067 & 
+              _LC073);
+  _X006  = EXP( AM0 & !AM1 &  AM3 & !AM4 &  AM5 & !A8 &  _LC019 &  _LC049 & 
+              _LC050 &  _LC057 &  _LC061 &  _LC062 &  _LC063 &  _LC064 & 
+              _LC065 & !_LC074);
+  _X007  = EXP( AM0 &  AM3 &  AM4 &  AM5 &  _LC019 &  _LC047 &  _LC051 &  _LC060 & 
+              _LC076);
+  _X008  = EXP( AM0 &  AM3 &  AM4 &  AM5 &  /DS &  _LC047 &  _LC051 &  _LC060 & 
+              _LC076);
+  _X009  = EXP(!AM0 &  AM1 &  AM3 &  AM4 &  AM5 &  _LC019 &  _LC047 &  _LC051 & 
+              _LC060 &  _LC076);
+  _X010  = EXP(!AM0 &  AM1 &  AM3 &  AM4 &  AM5 &  /DS &  _LC047 &  _LC051 & 
+              _LC060 &  _LC076);
+  _X011  = EXP( AM0 &  AM3 & !AM4 & !AM5 & !A24 &  _LC019 &  _LC033 &  _LC035 & 
+              _LC036 &  _LC039 &  _LC042 &  _LC043 &  _LC044 & !_LC067 & 
+              _LC073);
+  _X012  = EXP(!AM0 &  AM1 &  AM3 & !AM4 & !AM5 & !A24 &  /DS &  _LC033 &  _LC035 & 
+              _LC036 &  _LC039 &  _LC042 &  _LC043 &  _LC044 & !_LC067 & 
+              _LC073);
+  _X013  = EXP( AM0 &  AM3 & !AM4 & !AM5 &  A24 &  _LC019 &  _LC033 &  _LC035 & 
+              _LC036 &  _LC039 &  _LC042 &  _LC043 &  _LC044 &  _LC067 & 
+              _LC073);
+  _X014  = EXP( AM0 &  AM3 & !AM4 & !AM5 &  A24 &  /DS &  _LC033 &  _LC035 & 
+              _LC036 &  _LC039 &  _LC042 &  _LC043 &  _LC044 &  _LC067 & 
+              _LC073);
+  _X015  = EXP(!AM0 &  AM1 &  AM3 & !AM4 & !AM5 & !A24 &  _LC019 &  _LC033 & 
+              _LC035 &  _LC036 &  _LC039 &  _LC042 &  _LC043 &  _LC044 & 
+             !_LC067 &  _LC073);
+
+-- Node name is '|shmem:8|~20~1' 
+-- Equation name is '_LC084', type is buried 
+-- synthesized logic cell 
+_LC084   = LCELL( _EQ027 $  GND);
+  _EQ027 =  AM0 & !AM1 &  AM3 & !AM4 &  AM5 &  A8 &  /DS &  _LC049 &  _LC050 & 
+              _LC057 &  _LC061 &  _LC062 &  _LC063 &  _LC064 &  _LC065 & 
+              _LC074
+         #  AM0 & !AM1 &  AM3 & !AM4 &  AM5 &  A8 &  _LC019 &  _LC049 & 
+              _LC050 &  _LC057 &  _LC061 &  _LC062 &  _LC063 &  _LC064 & 
+              _LC065 &  _LC074
+         # !AM0 &  AM1 &  AM3 & !AM4 & !AM5 &  A24 &  /DS &  _LC033 &  _LC035 & 
+              _LC036 &  _LC039 &  _LC042 &  _LC043 &  _LC044 &  _LC067 & 
+              _LC073
+         # !AM0 &  AM1 &  AM3 & !AM4 & !AM5 &  A24 &  _LC019 &  _LC033 & 
+              _LC035 &  _LC036 &  _LC039 &  _LC042 &  _LC043 &  _LC044 & 
+              _LC067 &  _LC073
+         #  AM0 & !AM1 &  AM3 & !AM4 &  AM5 & !A8 &  /DS &  _LC049 &  _LC050 & 
+              _LC057 &  _LC061 &  _LC062 &  _LC063 &  _LC064 &  _LC065 & 
+             !_LC074;
+
+
+
+--     Shareable expanders that are duplicated in multiple LABs:
+--    _X001 occurs in LABs ---DE-
+--    _X003 occurs in LABs ---DE-
+
+
+
+
+Project Information                      c:\pl\v170pl\altera\opdec\control.rpt
+
+** COMPILATION SETTINGS & TIMES **
+
+Processing Menu Commands
+------------------------
+
+Design Doctor                             = off
+
+Logic Synthesis:
+
+   Synthesis Type Used                    = Standard
+
+   Default Synthesis Style                = NORMAL
+
+      Logic option settings in 'NORMAL' style for 'MAX7000' family
+
+      DECOMPOSE_GATES                     = on
+      DUPLICATE_LOGIC_EXTRACTION          = on
+      MINIMIZATION                        = full
+      MULTI_LEVEL_FACTORING               = on
+      NOT_GATE_PUSH_BACK                  = on
+      PARALLEL_EXPANDERS                  = off
+      REDUCE_LOGIC                        = on
+      REFACTORIZATION                     = on
+      REGISTER_OPTIMIZATION               = on
+      RESYNTHESIZE_NETWORK                = on
+      SLOW_SLEW_RATE                      = off
+      SOFT_BUFFER_INSERTION               = on
+      SUBFACTOR_EXTRACTION                = on
+      TURBO_BIT                           = on
+      XOR_SYNTHESIS                       = on
+      IGNORE_SOFT_BUFFERS                 = on
+      USE_LPM_FOR_AHDL_OPERATORS          = off
+
+   Other logic synthesis settings:
+
+      Automatic Global Clock              = on
+      Automatic Global Clear              = on
+      Automatic Global Preset             = on
+      Automatic Global Output Enable      = on
+      Automatic I/O Cell Registers        = off
+      Automatic Register Packing          = off
+      Automatic Open-Drain Pins           = on
+      Automatic Implement in EAB          = off
+      One-Hot State Machine Encoding      = off
+      Optimize                            = 5
+
+Default Timing Specifications: None
+
+Cut All Bidir Feedback Timing Paths       = on
+Cut All Clear & Preset Timing Paths       = on
+
+Ignore Timing Assignments                 = on
+
+Functional SNF Extractor                  = off
+
+Linked SNF Extractor                      = off
+Timing SNF Extractor                      = on
+Optimize Timing SNF                       = off
+Generate AHDL TDO File                    = off
+Fitter Settings                           = NORMAL
+Smart Recompile                           = off
+Total Recompile                           = off
+
+Interface Menu Commands
+-----------------------
+
+EDIF Netlist Writer                       = off
+Verilog Netlist Writer                    = off
+VHDL Netlist Writer                       = off
+
+Compilation Times
+-----------------
+
+   Compiler Netlist Extractor             00:00:01
+   Database Builder                       00:00:01
+   Logic Synthesizer                      00:00:01
+   Partitioner                            00:00:01
+   Fitter                                 00:00:03
+   Timing SNF Extractor                   00:00:00
+   Assembler                              00:00:01
+   --------------------------             --------
+   Total Time                             00:00:08
+
+
+Memory Allocated
+-----------------
+
+Peak memory allocated during compilation  = 3,690K
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

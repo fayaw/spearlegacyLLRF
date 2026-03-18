@@ -1,0 +1,189 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-0:1.2
+	RF-3-13-10:1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2011.12.07.01.17.19;	author saa;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2006.01.25.23.54.20;	author lazmo;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@No longer supporting these.  SPEAR has no CF2 module anyway.
+@
+text
+@#!/bin/sh
+#
+# 2006-01-10 changed "dim" to "for" [lazmo]
+# 2005-04-05 original [lazmo@@slac.stanford.edu]
+#
+# fxplode -- combinatorially generate EPICS field specs
+#
+# Usage:
+#       fxplode inputfile > outfile
+#
+# This script reads input of the form:
+#
+#       begin DBF_FLOAT
+#       prompt("int_coef")
+#       promptgroup(GUICOMMON)
+#       pp(TRUE)
+#       interest(1)
+#       for I Q
+#       for 0 1 2 3
+#       for 0 1 2 3
+#       for A B C
+#       end
+#
+# and outputs EPICS "record field" definitions suitable for inclusion in a 
+# .dbd file, generating all possible combinations of the (up to 4) nested "for"s.
+#
+# The "for" values need not be single characters, but any possible combinations 
+# must not exceed 4 chars total (EPICS field-name limit).
+#
+# Input is processed in blocks, starting with "begin" and ending with "end" lines:
+#
+#   lines starting with "begin" reset things, and save the field type
+#   lines starting with "for" specify one of up to 4 lists of nested substrings
+#   lines starting with "end" starts processing with current specs
+#   lines starting with "#" are ignored (and passed through)
+#   all other lines are saved to be output in each field spec for the current block
+#
+#   All input lines are also output as comments (prepended with "# ").
+#
+# The example above will output 2*4*4*3=96 field specs:
+#	
+#	field(I00A,DBF_FLOAT) {
+#		prompt("int_coef")
+#		promptgroup(GUICOMMON)
+#		pp(TRUE)
+#		interest(1)
+#	}
+#	field(I00B,DBF_FLOAT) { ...
+#	field(I00C,DBF_FLOAT) { ...
+#	  ... all the way to:
+#	field(Q33B,DBF_FLOAT) { ...
+#	field(Q33C,DBF_FLOAT) { ...
+#
+# A comment is added to the end to tell you how many fields were generated, and
+# if any duplicates were found... duplicates are listed, without a "#" so they cause
+# load errors, eh!
+#
+# See "ioc/rfApp/src/db/p2RfCf2RecordCoefs.fxp" for an example.
+
+cat $* | /bin/nawk '
+
+BEGIN {
+    print "#================================================"
+    print "#=== GENERATED FILE... do not edit!"
+    print "#=== fxplode v1.0"
+    print "#================================================"
+    print "#"
+    ntot = 0
+}
+
+{		# count all lines, and output as comments
+    lineno++
+    print "# " $0
+}
+
+/^#/ {		# skip input comments
+    next
+}
+
+{		# process all others
+    if ($1 == "begin") {
+	type = $2
+	for (x = 0; x < 4; x++) {
+	    din[x]   = 1
+	    dim[x 0] = ""
+	}
+	x = kex = 0
+	next
+    }
+    if ($1 == "for") {
+	din[x] = NF - 1
+	for (y = 0; y < NF-1; y++) {
+	    dim[x y] = $(y+2)
+	}
+	if (x++ >= 4) {
+	    print "too many \"for\"s (max 4)... line " lineno
+	    exit
+	}
+	next
+    }
+    if ($1 == "end") {
+	splode()
+	next
+    }
+    if (NF > 0) extra[kex++] = $0
+}
+
+END {		# done; check for duplicates
+    dup = 0
+    for (i = 0; i < ntot; i++) {
+	if (num[name[i]] > 1) {
+	    print "*** [fxplode] *** duplicate field: " name[i] " (" num[name[i]] " times)"
+	    dup++
+	}
+    }
+    print "# " ntot " fields, " dup " duplicates"
+}    
+
+function splode()
+{
+    for (i0 = 0; i0 < din[0]; i0++) {
+    for (i1 = 0; i1 < din[1]; i1++) {
+    for (i2 = 0; i2 < din[2]; i2++) {
+    for (i3 = 0; i3 < din[3]; i3++) {
+
+	name[ntot] = dim[0 i0] dim[1 i1] dim[2 i2] dim[3 i3]
+
+	num[name[ntot]]++
+
+	if (length(name[ntot]) > 4) {
+		print "*** [fxplode] *** field name too long (max 4): " name[ntot]
+	}
+	else {
+		print "\tfield(" name[ntot] "," type ") {"
+		for (k = 0; k < kex; k++) printf("\t\t%s\n", extra[k])
+		print "\t}"
+	}
+
+	ntot++
+
+    }}}}
+}
+'
+@
+
+
+1.1
+log
+@Initial import of COMB-2 (Cf2) support.
+@
+text
+@@
+

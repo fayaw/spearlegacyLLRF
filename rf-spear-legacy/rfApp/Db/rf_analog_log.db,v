@@ -1,0 +1,222 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2
+	R3_13_6:1.1.1.1
+	CD_SOFT:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2004.06.21.21.40.04;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.00.15.43;	author luchini;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.02.27.00.15.43;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Give cavity vacuums a precision of 9 so that CA server formatting will
+use scientific notation.
+@
+text
+@grecord(ai,"$(S):$(C)$(Q)LOG") {
+	field(DESC,"$(C) $(D)")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM AI-13 bit raw")
+	field(INP,"@@$(S):STN:DCM:MODU.T4[$(W)]")
+	field(PREC,"3")
+	field(LINR,"LINEAR")
+	field(EGUF,"$(EF)")
+	field(EGUL,"$(EL)")
+	field(EGU,"log$(E)")
+	field(HOPR,"$(HOE)")
+	field(LOPR,"$(LOE)")
+	field(ADEL,"0.02")
+	field(MDEL,"$(M)")
+}
+grecord(ai,"$(S):$(C)$(Q)LOG:LLIM") {
+	field(DESC,"$(C) $(D)")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM AI-13 bit raw")
+	field(FLNK,"$(S):$(C)$(Q):LLIM.VAL  PP NMS")
+	field(INP,"@@$(S):STN:DCM:MODU.T$(T)[$(WW)]")
+	field(PREC,"3")
+	field(LINR,"LINEAR")
+	field(EGUF,"$(EF)")
+	field(EGUL,"$(EL)")
+	field(EGU,"Log$(E)")
+}
+grecord(ai,"$(S):$(C)$(Q)LOG:ULIM") {
+	field(DESC,"$(C) $(D)")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM AI-13 bit raw")
+	field(FLNK,"$(S):$(C)$(Q):ULIM.VAL  PP NMS")
+	field(INP,"@@$(S):STN:DCM:MODU.T$(T)[$(WU)]")
+	field(PREC,"3")
+	field(LINR,"LINEAR")
+	field(EGUF,"$(EF)")
+	field(EGUL,"$(EL)")
+	field(EGU,"Log$(E)")
+}
+grecord(bi,"$(S):$(C)$(Q)LLIM:FRST") {
+	field(DESC,"$(C) $(D)")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM BI")
+	field(FLNK,"$(S):$(C)$(Q):FRST.VAL  PP NMS")
+	field(INP,"@@$(S):STN:DCM:MODU.T6[$(WF),$(BL)]")
+	field(OSV,"MAJOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(bi,"$(S):$(C)$(Q)LLIM:LTCH") {
+	field(DESC,"$(C) $(D)")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM BI")
+	field(FLNK,"$(S):$(C)$(Q):LTCH.VAL  PP NMS")
+	field(INP,"@@$(S):STN:DCM:MODU.T6[$(WL),$(BL)]")
+	field(OSV,"MAJOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(bi,"$(S):$(C)$(Q)ULIM:FRST") {
+	field(DESC,"$(C) $(D)")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM BI")
+	field(FLNK,"$(S):$(C)$(Q):FRST.VAL  PP NMS")
+	field(INP,"@@$(S):STN:DCM:MODU.T6[$(WF),$(BU)]")
+	field(OSV,"MAJOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(bi,"$(S):$(C)$(Q)ULIM:LTCH") {
+	field(DESC,"$(C) $(D)")
+	field(SCAN,"I/O Intr")
+	field(DTYP,"AB-1771DCM BI")
+	field(FLNK,"$(S):$(C)$(Q):LTCH.VAL  PP NMS")
+	field(INP,"@@$(S):STN:DCM:MODU.T6[$(WL),$(BU)]")
+	field(OSV,"MAJOR")
+	field(ZNAM,"OK")
+	field(ONAM,"FAULT")
+}
+grecord(calc,"$(S):$(C)$(Q):FRST") {
+	field(DESC,"$(C) $(D)")
+	field(FLNK,"$(S):$(C)$(G):SUMY:FRST.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):$(C)$(Q)ULIM:FRST.SEVR  NPP MS")
+	field(INPB,"$(S):$(C)$(Q)LLIM:FRST.SEVR  NPP MS")
+	field(INPC,"$(S):$(C)$(Q)STAT:FRST.SEVR NPP MS")
+	field(INPD,"$(S):$(C)$(Q)$(S2):FRST.SEVR NPP MS")
+}
+grecord(calc,"$(S):$(C)$(Q):LLIM") {
+	field(DESC,"$(C) $(D)")
+	field(CALC,"B*(10**A)")
+	field(INPA,"$(S):$(C)$(Q)LOG:LLIM.VAL  NPP MS")
+	field(INPB,"$(CV)")
+	field(EGU,"$(E)")
+	field(PREC,"$(P)")
+}
+grecord(calc,"$(S):$(C)$(Q):LTCH") {
+	field(DESC,"$(C) $(D)")
+	field(FLNK,"$(S):$(C)$(G):SUMY:LTCH.PROC")
+	field(CALC,"0")
+	field(INPA,"$(S):$(C)$(Q)ULIM:LTCH.SEVR  NPP MS")
+	field(INPB,"$(S):$(C)$(Q)LLIM:LTCH.SEVR  NPP MS")
+	field(INPC,"$(S):$(C)$(Q)STAT:LTCH.SEVR  NPP MS")
+	field(INPD,"$(S):$(C)$(Q)$(S2):LTCH.SEVR NPP MS")
+}
+grecord(calc,"$(S):$(C)$(Q):ULIM") {
+	field(DESC,"$(C) $(D)")
+	field(CALC,"B*(10**A)")
+	field(INPA,"$(S):$(C)$(Q)LOG:ULIM.VAL  NPP MS")
+	field(INPB,"$(CV)")
+	field(EGU,"$(E)")
+	field(PREC,"$(P)")
+}
+grecord(sub,"$(S):$(C)$(Q)") {
+	field(DESC,"$(C) $(D)")
+	field(INAM,"subSysInit")
+	field(SNAM,"subSysLog")
+	field(INPA,"$(S):$(C)$(Q)LOG.VAL  CPP MS")
+	field(INPB,"$(CV)")
+	field(INPC,"$(S):$(C)$(Q)LOG.MLST  NPP NMS")
+	field(INPD,"$(S):$(C)$(Q)LOG.ALST  NPP NMS")
+	field(EGU,"$(E)")
+	field(HOPR,"$(HO)")
+	field(LOPR,"$(LO)")
+	field(HIHI,"$(HH)")
+	field(LOLO,"$(LL)")
+	field(HIGH,"$(HI)")
+	field(LOW,"$(LW)")
+	field(PREC,"$(P)")
+	field(BRSV,"MAJOR")
+	field(HHSV,"MAJOR")
+	field(LLSV,"MINOR")
+	field(HSV,"MINOR")
+	field(LSV,"INVALID")
+	field(ADEL,"1000000")
+	field(MDEL,"1000000")
+}
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d6 1
+a6 1
+	field(PREC,"$(P)")
+d22 1
+a22 1
+	field(PREC,"$(P)")
+d34 1
+a34 1
+	field(PREC,"$(P)")
+d95 1
+a95 1
+	field(PREC,"2")
+d112 1
+a112 1
+	field(PREC,"2")
+d129 1
+a129 1
+	field(PREC,"2")
+@
+
+
+1.1.1.1
+log
+@Original Databases
+@
+text
+@@

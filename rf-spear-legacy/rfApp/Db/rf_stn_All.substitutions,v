@@ -1,0 +1,278 @@
+head	1.5;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.5
+	RF-SPEAR-R0-3-1:1.5
+	RF-SPEAR-R0-3-0:1.5
+	RF-SPEAR-R0-2-0:1.5
+	RF-SPEAR-R0-1-0:1.5
+	RF-SPEAR-R0-0-3:1.5
+	RF-SPEAR-R0-0-2:1.5
+	RF-SPEAR-R0-0-1:1.5
+	RF-SPEAR-R0-0-0:1.5
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.5
+	RF-3-13-10:1.4.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.4
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.4
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.3;
+locks; strict;
+comment	@# @;
+
+
+1.5
+date	2011.12.07.00.26.02;	author saa;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2009.12.12.00.13.42;	author saa;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2004.01.22.00.29.16;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2004.01.05.19.45.02;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.02.07.11;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.5
+log
+@VXStats.db replaced by iocAdminVxWorks.db which is loaded separately during
+the startup.
+@
+text
+@#==============================================================
+#
+# Abs:  Database template for RF Station PVs
+#
+# Name:  rf_stn.substitutions
+#
+# Desc:  EPICS database template for general RF station PVs
+#
+# Side:  None
+#
+# Facility: SLAC/PEPII Low-Level RF
+#
+# Auth: dd-mmm-yyyy, Stephanie Allison  (SAA)
+# Rev:  dd-mmm-yyyy, First Lastname     (USERNAME)
+#==============================================================
+#
+# Mod:
+#       dd-mmm-yyyy, First Lastname  (USERNAME):
+#         comments
+# 
+#==============================================================
+#
+file rf_fbck.db
+{
+  {S=$(RRRS)}
+}
+file rf_hvps.db
+{
+  {S=$(RRRS)}
+}
+file rf_sumy_hvps.db
+{
+  {S=$(RRRS)}
+}
+file rf_klys.db
+{
+  {S=$(RRRS)}
+}
+file rf_sumy_klys.db
+{
+  {S=$(RRRS)}
+}
+file rf_sumy_circ.db
+{
+  {S=$(RRRS)}
+}
+file rf_sumy_wg.db
+{
+#	           Wave  Water Supply Water Flow
+#	   STN     Guide   Temp       Circuit     
+  pattern { S     , C  ,    W       ,   F       }
+	  {$(RRRS),WG01,   CIRC     ,  HCW1     }
+}
+file rf_cav.db
+{
+#	               Step Mtr Ana Inp
+#	   STN     CAV  Card     Card   
+  pattern { S     , C  , M    ,   AI  }
+	  {$(RRRS),CAV1, 0    ,  R1G0 }
+	  {$(RRRS),CAV2, 2    ,  R1G0 }
+}
+file rf_sumy_cav.db
+{
+#	                   Step Mtr Ana Inp TC Inp TC Inp TC Inp
+#	   STN     CAV  IQA Card     Card   Card 1 Card 2 Card 3
+  pattern { S     , C  , I , M    ,   AI  ,  T1  ,  T2  ,  T3  }
+	  {$(RRRS),CAV1, 2 , 0    ,  R1G0 , R0G2 , R0G3 , R0G4 }
+	  {$(RRRS),CAV2, 2 , 2    ,  R1G0 , R0G5 , R0G6 , R0G7 }
+}
+file rf_interlock_arc.db
+{
+#	   STN     COMP Quantity Description   BIT   Next
+  pattern { S     , C  ,   Q    ,   D          , B ,  N  }
+	  {$(RRRS),KLYS,":ARC"  ,"Arc"         , 0 ,:SUMY}
+	  {$(RRRS),CIRC,":ARC"  ,"Arc"         , 1 ,:SUMY}
+}
+
+
+
+@
+
+
+1.4
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@a22 6
+# Vxworks Statisticts
+#
+file VXStats.db
+{
+   {STN=$(RRRS) ,INPA="$(RRRS):STN:AIM:MODU.FOO NPP NMS",INPG=0}
+}
+@
+
+
+1.3
+log
+@Added external MPS to SPEAR system summary and not to PEPII.
+@
+text
+@d5 1
+a5 1
+# Name:  RRRS_stn.template
+d25 1
+a25 1
+file db/VXStats.db
+d27 1
+a27 1
+   {STN=RRRS ,INPA="RRRS:STN:AIM:MODU.FOO NPP NMS",INPG=0}
+d29 1
+a29 1
+file db/rf_fbck.db
+d31 1
+a31 1
+  {S=RRRS}
+d33 1
+a33 1
+file db/rf_hvps.db
+d35 1
+a35 1
+  {S=RRRS}
+d37 1
+a37 1
+file db/rf_sumy_hvps.db
+d39 1
+a39 1
+  {S=RRRS}
+d41 1
+a41 1
+file db/rf_klys.db
+d43 1
+a43 1
+  {S=RRRS}
+d45 1
+a45 1
+file db/rf_sumy_klys.db
+d47 1
+a47 1
+  {S=RRRS}
+d49 1
+a49 1
+file db/rf_sumy_circ.db
+d51 1
+a51 1
+  {S=RRRS}
+d53 1
+a53 1
+file db/rf_sumy_wg.db
+d55 4
+a58 4
+#	        Wave  Water Supply Water Flow
+#	   STN  Guide   Temp       Circuit     
+  pattern { S  , C  ,    W       ,   F       }
+	  {RRRS,WG01,   CIRC     ,  HCW1     }
+d60 1
+a60 1
+file db/rf_cav.db
+d62 5
+a66 5
+#	            Step Mtr Ana Inp
+#	   STN  CAV  Card     Card   
+  pattern { S  , C  , M    ,   AI  }
+	  {RRRS,CAV1, 0    ,  R1G0 }
+	  {RRRS,CAV2, 2    ,  R1G0 }
+d68 1
+a68 1
+file db/rf_sumy_cav.db
+d70 5
+a74 5
+#	                Step Mtr Ana Inp TC Inp TC Inp TC Inp
+#	   STN  CAV  IQA Card     Card   Card 1 Card 2 Card 3
+  pattern { S  , C  , I , M    ,   AI  ,  T1  ,  T2  ,  T3  }
+	  {RRRS,CAV1, 2 , 0    ,  R1G0 , R0G2 , R0G3 , R0G4 }
+	  {RRRS,CAV2, 2 , 2    ,  R1G0 , R0G5 , R0G6 , R0G7 }
+d76 1
+a76 1
+file db/rf_interlock_arc.db
+d78 4
+a81 4
+#	   STN  COMP Quantity Description   BIT   Next
+  pattern { S  , C  ,   Q    ,   D          , B ,  N  }
+	  {RRRS,KLYS,":ARC"  ,"Arc"         , 0 ,:SUMY}
+	  {RRRS,CIRC,":ARC"  ,"Arc"         , 1 ,:SUMY}
+@
+
+
+1.2
+log
+@SPEAR uses all arc interlock channels available on the new arc interlock
+module (vacuum and air side for all 4 cavities).  SPEAR uses the arc channel
+reserved for MPS.  All arc interlock records moved out of rf_digital*.template
+and into rf_stn*.template (where 4CVAll uses all channels).  Arc summaries are
+moved out of rf_sumy_(2CV,4CV).db into rf_sumy_arc_(2CV,4CV,4CVAll).db.
+@
+text
+@d78 4
+a81 4
+#	   STN  COMP Quantity Description   BIT  Next
+  pattern { S  , C  ,   Q    ,   D          , B , N  }
+	  {RRRS,KLYS,":ARC"  ,"Arc"         , 0 ,SUMY}
+	  {RRRS,CIRC,":ARC"  ,"Arc"         , 1 ,SUMY}
+@
+
+
+1.1
+log
+@Station template
+@
+text
+@d3 1
+a3 1
+# Abs:  Database template for RF VxWorks Statisticts
+d7 1
+a7 1
+# Desc:  EPICS database template RF IOC Stats PV's
+d28 54
+@
+

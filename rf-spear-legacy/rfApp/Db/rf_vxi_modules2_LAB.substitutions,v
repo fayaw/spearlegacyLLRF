@@ -1,0 +1,170 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.2
+	RF-SPEAR-R0-3-1:1.2
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-2-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-1:1.2
+	RF-SPEAR-R0-0-0:1.2
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.2
+	RF-3-13-10:1.2.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.2
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.2
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2009.12.12.00.13.43;	author saa;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.02.13.40;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@#==============================================================
+#
+# Abs:   Database template for RF VXI Modules
+#
+# Name:  rf_vxi_modules2_LAB.substitutions
+#
+# Desc:  EPICS database template file for RF PLC
+#        temperatures pv's
+#
+# Side:  None
+#
+# Facility: SLAC/PEPII Low-Level RF
+#
+# Auth: dd-mmm-yyyy, Stephanie Allison (SAA)
+# Rev:  dd-mmm-yyyy, First Lastname    (USERNAME)
+#==============================================================
+#
+# Mod:
+#       19-Feb-2003, K. Luchini (LUCHINI):
+#         Added macros for rfp.db RAM files
+#       06-Feb-2002, K. Luchini (LUCHINI):
+#         Added standard header and obtained
+#         db files from the top level db directory
+#         instead of db. Added substitutions tobe used
+#         in the build script
+#
+#==============================================================
+#
+# RF Clock and RF Distribution Module
+#
+file clk.db
+{
+     {R=$(RRRS), S=5}
+}
+#
+# RF Gap Voltage Feed Forward Module
+#
+file gvf.db
+{ 
+     {R=$(RRRS), S=3}
+}
+#
+# RF RF-Processing Module
+#
+file rfp.db
+{
+#           STN       Slot  DAC I File               DAC Q File               Cavity I File    Cavity Q File   Signal I File  Signal Q File
+  pattern { R       , S   , TI                      ,TQ                      , CI            , CQ            , SI           , SQ            }
+          { $(RRRS) , 4   , "/tbl/NOISE_I_BL_SMALL" ,"/tbl/NOISE_Q_BL_SMALL" ,"/dat/CAVITY_I","/dat/CAVITY_Q","/dat/TOTAL_I","/dat/TOTAL_Q" }
+}
+#
+# RF Comb Filter Module
+#
+file cfm.db
+{
+     {R=$(RRRS), M=1, S=10}
+     {R=$(RRRS), M=2, S=11}
+}
+#
+# RF I/Q & Amplitude Detector Module
+#
+file iqa.db
+{
+     {R=$(RRRS), M=1, S=8,   RCE=1, TBL="/tbl/iqadf_23KHz.rpt"}
+}
+#
+# RF Arc Detector/Fast Interlock Module
+#
+file aim.db
+{
+    {R=$(RRRS),S=12}
+}
+
+
+
+
+@
+
+
+1.1
+log
+@RF VXI modules template for lab setup w/clk in slot5
+@
+text
+@d5 1
+a5 1
+# Name:  RRRS_vxi_modules2_LAB.template
+d31 1
+a31 1
+file db/clk.db
+d33 1
+a33 1
+     {R=RRRS, S=5}
+d38 1
+a38 1
+file db/gvf.db
+d40 1
+a40 1
+     {R=RRRS, S=3}
+d45 1
+a45 1
+file db/rfp.db
+d47 3
+a49 3
+#           STN    Slot  DAC I File               DAC Q File               Cavity I File    Cavity Q File   Signal I File  Signal Q File
+  pattern { R    , S   , TI                      ,TQ                      , CI            , CQ            , SI           , SQ            }
+          { RRRS , 4   , "/tbl/NOISE_I_BL_SMALL" ,"/tbl/NOISE_Q_BL_SMALL" ,"/dat/CAVITY_I","/dat/CAVITY_Q","/dat/TOTAL_I","/dat/TOTAL_Q" }
+d54 1
+a54 1
+file db/cfm.db
+d56 2
+a57 2
+     {R=RRRS, M=1, S=10}
+     {R=RRRS, M=2, S=11}
+d62 1
+a62 1
+file db/iqa.db
+d64 1
+a64 1
+     {R=RRRS, M=1, S=8,   RCE=1, TBL="/tbl/iqadf_23KHz.rpt"}
+d69 1
+a69 1
+file db/aim.db
+d71 1
+a71 1
+    {R=RRRS,S=12}
+@
+

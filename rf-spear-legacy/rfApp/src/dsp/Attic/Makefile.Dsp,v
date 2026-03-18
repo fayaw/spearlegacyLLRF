@@ -1,0 +1,69 @@
+head	1.2;
+access;
+symbols
+	RF-SPEAR-R0-3-0:1.2
+	RF-SPEAR-R0-1-0:1.2
+	RF-SPEAR-R0-0-3:1.2
+	RF-SPEAR-R0-0-2:1.2
+	RF-SPEAR-R0-0-0:1.2
+	RF-3-13-10:1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1;
+locks; strict;
+comment	@# @;
+
+
+1.2
+date	2011.12.07.00.31.09;	author saa;	state dead;
+branches;
+next	1.1;
+
+1.1
+date	2008.05.06.19.17.02;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@Changes for 3.14.11 build.
+@
+text
+@TOP = ../../../..
+include $(TOP)/config/CONFIG_APP.Dsp
+INSTALL_LOCATION = $(TOP)
+#----------------------------------------
+#  ADD MACRO DEFINITIONS AFTER THIS LINE
+
+ifeq ($(EPICS_HOST_ARCH),solaris-sparc-gnu)
+SCRIPTS += gvff
+SCRIPTS += dspmemtestGvf
+SCRIPTS += dsptestGvf
+SCRIPTS += wave_out
+SCRIPTS += dspmemtestRfp
+SCRIPTS += dsptestRfp
+SCRIPTS += rampDacsRfp
+SCRIPTS += constDacsRfp
+SCRIPTS += zeroDacsRfp
+SCRIPTS += loadDacsRfp
+SCRIPTS += rippleRfp
+SCRIPTS += sp3rippleRfp
+endif
+
+include $(TOP)/config/RULES.Dsp
+@
+
+
+1.1
+log
+@Install pre-built dsp files.  Once we upgrade to Solaris 10, we can no longer
+build dsp images.
+@
+text
+@@
+

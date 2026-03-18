@@ -1,0 +1,440 @@
+head	1.1;
+branch	1.1.1;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.1.1.1
+	RF-SPEAR-R0-3-1:1.1.1.1
+	RF-SPEAR-R0-3-0:1.1.1.1
+	RF-SPEAR-R0-2-0:1.1.1.1
+	RF-SPEAR-R0-1-0:1.1.1.1
+	RF-SPEAR-R0-0-3:1.1.1.1
+	RF-SPEAR-R0-0-2:1.1.1.1
+	RF-SPEAR-R0-0-1:1.1.1.1
+	RF-SPEAR-R0-0-0:1.1.1.1
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.1.1.1
+	RF-3-13-10:1.1.1.1.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.1.1.1
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.1.1.1
+	RF0:1.1.1.1
+	RF:1.1.1;
+locks; strict;
+comment	@# @;
+
+
+1.1
+date	2003.06.03.22.56.50;	author saa;	state Exp;
+branches
+	1.1.1.1;
+next	;
+
+1.1.1.1
+date	2003.06.03.22.56.50;	author saa;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+
+1.1
+log
+@Initial revision
+@
+text
+@Project Information                                  c:\v150\buff_with_clk.rpt
+
+MAX+plus II Compiler Report File
+Version 8.1 9/12/97
+Compiled: 07/30/99 09:46:10
+
+Copyright (C) 1991-1997 Altera Corporation
+Any megafunction design, and related net list (encrypted or decrypted),
+support information, device programming or simulation file, and any other
+associated documentation or information provided by Altera or a partner
+under Altera's Megafunction Partnership Program may be used only to
+program PLD devices (but not masked PLD devices) from Altera.  Any other
+use of such megafunction design, net list, support information, device
+programming or simulation file, or any other related documentation or
+information is prohibited for any other purpose, including, but not
+limited to modification, reverse engineering, de-compiling, or use with
+any other silicon devices, unless such use is explicitly licensed under
+a separate agreement with Altera or a megafunction partner.  Title to
+the intellectual property, including patents, copyrights, trademarks,
+trade secrets, or maskworks, embodied in any such megafunction design,
+net list, support information, device programming or simulation file, or
+any other related documentation or information provided by Altera or a
+megafunction partner, remains with Altera, the megafunction partner, or
+their respective licensors.  No other licenses, including any licenses
+needed under any third party's intellectual property, are provided herein.
+
+
+
+***** Project compilation was successful
+
+
+
+
+** DEVICE SUMMARY **
+
+Chip/                     Input   Output   Bidir         Shareable
+POF       Device          Pins    Pins     Pins     LCs  Expanders  % Utilized
+
+buff_with_clk
+      EPM5130QC            4        2        0      4       1           3  %
+
+User Pins:                 4        2        0  
+
+
+
+Device-Specific Information:                         c:\v150\buff_with_clk.rpt
+buff_with_clk
+
+***** Logic for device 'buff_with_clk' compiled without errors.
+
+
+
+
+Device: EPM5130QC
+
+Device Options:
+    Security                                   = OFF
+
+                  R R R R     R R R R     R R R R R R  
+                  E E E E     E E E E     E E E E E E  
+                  S S S S     S S S S     S S S S S S  
+                  E E E E     E E E E     E E E E E E  
+              O O R R R R     R R R R     R R R R R R  
+              U U V V V V V V V V V V G G V V V V V V  
+              T T E E E E C C E E E E N N E E E E E E  
+              A B D D D D C C D D D D D D D D D D D D  
+            ------------------------------------------_ 
+           / 100  98  96  94  92  90  88  86  84  82   |_ 
+          /     99  97  95  93  91  89  87  85  83  81    | 
+RESERVED |  1                                          80 | RESERVED 
+RESERVED |  2                                          79 | RESERVED 
+RESERVED |  3                                          78 | RESERVED 
+RESERVED |  4                                          77 | RESERVED 
+RESERVED |  5                                          76 | RESERVED 
+RESERVED |  6                                          75 | RESERVED 
+RESERVED |  7                                          74 | RESERVED 
+RESERVED |  8                                          73 | RESERVED 
+     GND |  9                                          72 | INA 
+     GND | 10                                          71 | INB 
+     GND | 11                                          70 | /RESET 
+     GND | 12                                          69 | VCC 
+     GND | 13                                          68 | VCC 
+     GND | 14                                          67 | 20M_CLK 
+     GND | 15                                          66 | GND 
+     GND | 16                EPM5130QC                 65 | GND 
+     GND | 17                                          64 | GND 
+     VCC | 18                                          63 | GND 
+     VCC | 19                                          62 | GND 
+     GND | 20                                          61 | GND 
+     GND | 21                                          60 | GND 
+     GND | 22                                          59 | GND 
+RESERVED | 23                                          58 | RESERVED 
+RESERVED | 24                                          57 | RESERVED 
+RESERVED | 25                                          56 | RESERVED 
+RESERVED | 26                                          55 | RESERVED 
+RESERVED | 27                                          54 | RESERVED 
+RESERVED | 28                                          53 | RESERVED 
+RESERVED | 29                                          52 | RESERVED 
+RESERVED | 30                                          51 | RESERVED 
+         |      32  34  36  38  40  42  44  46  48  50  _| 
+          \   31  33  35  37  39  41  43  45  47  49   | 
+           \------------------------------------------- 
+              R R R R R R G G R R R R V V R R R R R R  
+              E E E E E E N N E E E E C C E E E E E E  
+              S S S S S S D D S S S S C C S S S S S S  
+              E E E E E E     E E E E     E E E E E E  
+              R R R R R R     R R R R     R R R R R R  
+              V V V V V V     V V V V     V V V V V V  
+              E E E E E E     E E E E     E E E E E E  
+              D D D D D D     D D D D     D D D D D D  
+
+
+N.C. = Not Connected.
+VCC = Dedicated power pin, which MUST be connected to VCC.
+GND = Dedicated ground pin or unused dedicated input, which MUST be connected to GND.
+RESERVED = Unused I/O pin, which MUST be left unconnected.
+
+
+
+Device-Specific Information:                         c:\v150\buff_with_clk.rpt
+buff_with_clk
+
+** RESOURCE USAGE **
+
+                                                Shareable     External
+Logic Array Block     Logic Cells   I/O Pins    Expanders   Interconnect
+
+A:     LC1 - LC16     0/16(  0%)   0/ 8(  0%)   0/32(  0%)   0/24(  0%) 
+B:    LC17 - LC32     0/16(  0%)   0/ 8(  0%)   0/32(  0%)   0/24(  0%) 
+C:    LC33 - LC48     0/16(  0%)   0/ 8(  0%)   0/32(  0%)   0/24(  0%) 
+D:    LC49 - LC64     0/16(  0%)   0/ 8(  0%)   0/32(  0%)   0/24(  0%) 
+E:    LC65 - LC80     0/16(  0%)   0/ 8(  0%)   0/32(  0%)   0/24(  0%) 
+F:    LC81 - LC96     0/16(  0%)   0/ 8(  0%)   0/32(  0%)   0/24(  0%) 
+G:   LC97 - LC112     0/16(  0%)   0/ 8(  0%)   0/32(  0%)   0/24(  0%) 
+H:  LC113 - LC128     4/16( 25%)   2/ 8( 25%)   1/32(  3%)   0/24(  0%) 
+
+
+Total dedicated input pins used:                 4/20     ( 20%)
+Total I/O pins used:                             2/64     (  3%)
+Total logic cells used:                          4/128    (  3%)
+Total shareable expanders used:                  1/256    (  1%)
+Average fan-in:                                  4.50
+Total fan-in:                                    18
+
+Total input pins required:                       4
+Total output pins required:                      2
+Total bidirectional pins required:               0
+Total logic cells required:                      4
+Total flipflops required:                        4
+Total shareable expanders in database:           1
+
+Synthesized logic cells:                         0/ 128   (  0%)
+
+
+
+Device-Specific Information:                         c:\v150\buff_with_clk.rpt
+buff_with_clk
+
+** INPUTS **
+
+                                         Shareable
+                                         Expanders    Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared  INP  FBK  OUT  FBK  Name
+  72      -   -       INPUT               0      0     0    0    1    1  INA
+  71      -   -       INPUT               0      0     0    0    1    1  INB
+  70      -   -       INPUT               0      0     0    0    2    2  /RESET
+  67      -   -       INPUT               0      0     0    0    2    2  20M_CLK
+
+
+Code:
+
+s = Synthesized pin or logic cell
++ = Synchronous flipflop
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+^ = Increased input delay
+$ = Driven by fast output logic cell
+
+
+Device-Specific Information:                         c:\v150\buff_with_clk.rpt
+buff_with_clk
+
+** OUTPUTS **
+
+                                         Shareable
+                                         Expanders    Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared  INP  FBK  OUT  FBK  Name
+ 100    120    H         FF       !       0      0     3    2    0    0  OUTA
+  99    119    H         FF       !       0      0     3    1    0    0  OUTB
+
+
+Code:
+
+s = Synthesized pin or logic cell
++ = Synchronous flipflop
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+^ = Increased input delay
+$ = Driven by fast output logic cell
+
+
+Device-Specific Information:                         c:\v150\buff_with_clk.rpt
+buff_with_clk
+
+** BURIED LOGIC **
+
+                                         Shareable
+                                         Expanders    Fan-In    Fan-Out
+ Pin     LC  LAB  Primitive    Code   Total Shared  INP  FBK  OUT  FBK  Name
+   -    128    H        DFF              1      0     3    1    2    1  :1
+   -    127    H        DFF              0      0     3    1    1    1  :9
+
+
+Code:
+
+s = Synthesized pin or logic cell
++ = Synchronous flipflop
+! = NOT gate push-back
+r = Fitter-inserted logic cell
+^ = Increased input delay
+$ = Driven by fast output logic cell
+
+
+Device-Specific Information:                         c:\v150\buff_with_clk.rpt
+buff_with_clk
+
+** LOGIC CELL INTERCONNECTIONS **
+
+Logic Array Block 'H':
+
+                 Logic cells placed in LAB 'H'
+        +------- LC120 OUTA
+        | +----- LC119 OUTB
+        | | +--- LC128 :1
+        | | | +- LC127 :9
+        | | | | 
+        | | | |   Other LABs fed by signals
+        | | | |   that feed LAB 'H'
+LC      | | | | | A B C D E F G H |     Logic cells that feed LAB 'H':
+LC120-> - - - - | - - - - - - - @@ | <-- OUTA
+LC119-> - - - - | - - - - - - - @@ | <-- OUTB
+LC128-> @@ @@ @@ @@ | - - - - - - - @@ | <-- :1
+LC127-> @@ - @@ - | - - - - - - - @@ | <-- :9
+
+Pin
+72   -> - @@ @@ - | - - - - - - - @@ | <-- INA
+71   -> @@ - - @@ | - - - - - - - @@ | <-- INB
+70   -> @@ @@ @@ @@ | - - - - - - - @@ | <-- /RESET
+67   -> @@ @@ @@ @@ | - - - - - - - @@ | <-- 20M_CLK
+
+
+* = The logic cell or pin is an input to the logic cell (or LAB) through the PIA.
+@@ = The input pin or logic cell feeds the logic cell (or LAB) using direct interconnect.
+- = The logic cell or pin is not an input to the logic cell (or LAB).
+
+
+Device-Specific Information:                         c:\v150\buff_with_clk.rpt
+buff_with_clk
+
+** EQUATIONS **
+
+INA      : INPUT;
+INB      : INPUT;
+20M_CLK  : INPUT;
+/RESET   : INPUT;
+
+-- Node name is 'OUTA' = ':3' 
+-- Equation name is 'OUTA', type is output 
+OUTA     = _LC120~NOT;
+_LC120~NOT = DFF( _EQ001 $  _LC128, !20M_CLK,  _EQ002,  VCC);
+  _EQ001 =  _LC127 &  _LC128;
+  _EQ002 = !INB &  /RESET;
+
+-- Node name is 'OUTB' = ':2' 
+-- Equation name is 'OUTB', type is output 
+OUTB     = _LC119~NOT;
+_LC119~NOT = DFF(!_LC128 $  GND, !20M_CLK,  _EQ003,  VCC);
+  _EQ003 = !INA &  /RESET;
+
+-- Node name is ':1' 
+-- Equation name is '_LC128', type is buried 
+_LC128   = DFF( INA $  GND,  _EQ004,  VCC,  /RESET);
+  _EQ004 =  _X001 &  20M_CLK;
+  _X001  = EXP(!_LC127 &  _LC128);
+
+-- Node name is ':9' 
+-- Equation name is '_LC127', type is buried 
+_LC127   = DFF( INB $  GND,  _EQ005,  VCC,  /RESET);
+  _EQ005 =  _LC128 &  20M_CLK;
+
+
+
+--     Shareable expanders that are duplicated in multiple LABs:
+--     (none)
+
+
+
+
+Project Information                                  c:\v150\buff_with_clk.rpt
+
+** COMPILATION SETTINGS & TIMES **
+
+Processing Menu Commands
+------------------------
+
+Design Doctor                             = off
+
+Logic Synthesis:
+
+   Synthesis Type Used                    = Standard
+
+   Default Synthesis Style                = NORMAL
+
+      Logic option settings in 'NORMAL' style for 'MAX5000' family
+
+      DECOMPOSE_GATES                     = on
+      DUPLICATE_LOGIC_EXTRACTION          = on
+      MINIMIZATION                        = full
+      MULTI_LEVEL_FACTORING               = on
+      NOT_GATE_PUSH_BACK                  = on
+      REDUCE_LOGIC                        = on
+      REFACTORIZATION                     = on
+      REGISTER_OPTIMIZATION               = on
+      RESYNTHESIZE_NETWORK                = on
+      SOFT_BUFFER_INSERTION               = on
+      SUBFACTOR_EXTRACTION                = on
+      XOR_SYNTHESIS                       = on
+      IGNORE_SOFT_BUFFERS                 = off
+      USE_LPM_FOR_AHDL_OPERATORS          = off
+
+   Other logic synthesis settings:
+
+      Automatic Global Clock              = on
+      Automatic Global Clear              = on
+      Automatic Global Preset             = on
+      Automatic Global Output Enable      = on
+      Automatic Fast I/O                  = off
+      Automatic Register Packing          = off
+      Automatic Open-Drain Pins           = on
+      Automatic Implement in EAB          = off
+      One-Hot State Machine Encoding      = off
+      Optimize                            = 5
+
+Default Timing Specifications: None
+
+Cut All Bidir Feedback Timing Paths       = on
+Cut All Clear & Preset Timing Paths       = on
+
+Ignore Timing Assignments                 = off
+
+Functional SNF Extractor                  = off
+
+Linked SNF Extractor                      = off
+Timing SNF Extractor                      = on
+Optimize Timing SNF                       = off
+Generate AHDL TDO File                    = off
+Fitter Settings                           = NORMAL
+Smart Recompile                           = off
+Total Recompile                           = off
+
+Interfaces Menu Commands
+------------------------
+
+EDIF Netlist Writer                       = off
+Verilog Netlist Writer                    = off
+VHDL Netlist Writer                       = off
+
+Compilation Times
+-----------------
+
+   Compiler Netlist Extractor             00:00:00
+   Database Builder                       00:00:00
+   Logic Synthesizer                      00:00:02
+   Partitioner                            00:00:01
+   Fitter                                 00:00:00
+   Timing SNF Extractor                   00:00:00
+   Assembler                              00:00:00
+   --------------------------             --------
+   Total Time                             00:00:03
+
+
+Memory Allocated
+-----------------
+
+Peak memory allocated during compilation  = 4,005K
+@
+
+
+1.1.1.1
+log
+@KineticSystem V152 CPU support. 
+@
+text
+@@

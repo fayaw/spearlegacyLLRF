@@ -1,0 +1,174 @@
+head	1.3;
+access;
+symbols
+	RF-SPEAR-R0-3-2:1.3
+	RF-SPEAR-R0-3-1:1.3
+	RF-SPEAR-R0-3-0:1.3
+	RF-SPEAR-R0-2-0:1.3
+	RF-SPEAR-R0-1-0:1.3
+	RF-SPEAR-R0-0-3:1.3
+	RF-SPEAR-R0-0-2:1.3
+	RF-SPEAR-R0-0-1:1.3
+	RF-SPEAR-R0-0-0:1.3
+	R_epics_3_14_11_rtems_4_9_4_aug_13_2012:1.3
+	RF-3-13-10:1.3.0.4
+	R_epics_3_14_11_rtems_4_9_4_jul_25_2011:1.3
+	R_epics_3_14_8_2_rtems_4_9_1_aug_06_2010:1.3
+	R_epics_3_14_8_2_rtems_4_7_1_aug_10_2009:1.2;
+locks; strict;
+comment	@# @;
+
+
+1.3
+date	2009.12.12.00.13.43;	author saa;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2003.07.10.20.25.26;	author luchini;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2003.02.27.02.09.51;	author luchini;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.3
+log
+@Replace *.template files with *.substitutions files and build full
+databases using make.  The build scripts are no longer needed.
+@
+text
+@#==============================================================
+#
+# Abs:   Database template for RF LAB VXI Modules
+#
+# Name:  rf_vxi_modules_LAB.substitutions (LAB ioc's only)
+#
+# Desc:  EPICS database template to load databases 
+#        for acquire and process IQ Data and processing
+#        the RFP module.
+#
+# Side:  None
+#
+# Facility: SLAC/PEPII Low-Level RF
+#
+# Auth: 26-Aug-2002, Kristi Luchini  (LUCHINI)
+# Rev:  dd-mmm-yyyy, First Lastname  (USERNAME)
+#==============================================================
+#
+# Mod:
+#       11-Jul-2003, K. Luchini      (LUCHINI):
+#          Replace rfp_dacs.db with rf_rfp_twodacs.db
+#          and rf_rfp_fourdacs.db
+#
+#==============================================================
+#
+# For acquiring IQA Data
+file iqGet.db
+{
+    {R=$(RRRS),M=1,F=TRM}
+    {R=$(RRRS),M=2,F=TRM}
+}
+
+# For processing the RFP Module
+#file rfp_dacs.db
+#{
+#    {R=$(RRRS)}
+#}
+
+file rf_rfp_fourdacs.db
+{
+#
+#          STN      TYPE , Field
+  pattern { S     , TYPE ,F }
+          {$(RRRS),CAV1  ,C1}
+          {$(RRRS),CAV2  ,C2}
+          {$(RRRS),CAV3  ,C3}
+          {$(RRRS),CAV4  ,C4}
+          {$(RRRS),DIRECT,DL}
+          {$(RRRS),COMB  ,CL}
+}
+
+file rf_rfp_twodacs.db
+{
+#
+#          STN     TYPE IField,QField
+  pattern { S     ,TYPE,  IF    ,QF   }
+          {$(RRRS),TUNE,  TMIS  ,TMQS }
+          {$(RRRS),RLCOEF,RLII  ,RLIQ }
+          {$(RRRS),IREF  ,IREI  ,IREQ }
+}
+@
+
+
+1.2
+log
+@Replace rf_dacs.db with rf_rfp_twodacs.db & rf_rfp_fourdacs.db
+@
+text
+@d5 1
+a5 1
+# Name:  RRRS_vxi_modules_LAB.template (LAB ioc's only)
+d27 1
+a27 1
+file db/iqGet.db
+d29 2
+a30 2
+    {R=RRRS,M=1,F=TRM}
+    {R=RRRS,M=2,F=TRM}
+d34 1
+a34 1
+#file db/rfp_dacs.db
+d36 1
+a36 1
+#    {R=RRRS}
+d39 1
+a39 1
+file db/rf_rfp_fourdacs.db
+d42 8
+a49 8
+#          STN   TYPE , Field
+  pattern { S  , TYPE ,F }
+          {RRRS,CAV1  ,C1}
+          {RRRS,CAV2  ,C2}
+          {RRRS,CAV3  ,C3}
+          {RRRS,CAV4  ,C4}
+          {RRRS,DIRECT,DL}
+          {RRRS,COMB  ,CL}
+d52 1
+a52 1
+file db/rf_rfp_twodacs.db
+d55 5
+a59 5
+#          STN  TYPE IField,QField
+  pattern { S  ,TYPE,  IF    ,QF   }
+          {RRRS,TUNE,  TMIS  ,TMQS }
+          {RRRS,RLCOEF,RLII  ,RLIQ }
+          {RRRS,IREF  ,IREI  ,IREQ }
+@
+
+
+1.1
+log
+@RF VXI modules template for lab setup
+@
+text
+@d20 3
+a22 2
+#       dd-mmm-yyyy, First Lastname  (USERNAME):
+#          comment
+d34 19
+a52 1
+file db/rfp_dacs.db
+d54 6
+a59 1
+    {R=RRRS}
+@
+
