@@ -787,7 +787,7 @@ fprintf('  [%d/6] T1->Bridge1, T2->Bridge2\n', wireOK - cnt0);
 %       -> L2/LConn1        (main path)
 %       -> C_Filter/RConn1  (return)
 %       -> R_Damping/RConn1 (return)
-%       -> V_Measure/RConn1 (return)
+%       -> V_Measure/LConn2 (- terminal; V_Meas has both +/- as LConn)
 %       -> Crowbar/RConn1   (return)
 % =====================================================================
 fprintf('\n  --- DC Power Path ---\n');
@@ -832,7 +832,7 @@ catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] I_Measure -> Klystron: %s\n', M
 nodeB_dests = { phL2.LConn(1),  'L2';
                 phCF.RConn(1),  'C_Filter-';
                 phRD.RConn(1),  'R_Damping-';
-                phVM.RConn(1),  'V_Measure-';
+                phVM.LConn(2),  'V_Measure-';
                 phCB.RConn(1),  'Crowbar-' };
 for k = 1:size(nodeB_dests, 1)
     try
