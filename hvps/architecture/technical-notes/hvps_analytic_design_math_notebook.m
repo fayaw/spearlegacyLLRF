@@ -78,9 +78,12 @@ for k = 1:size(blocks,1)
     rectangle('Position',[x0 y0 w h],'FaceColor',clr,'EdgeColor','k','LineWidth',1.5);
     text(x0+w/2, y0+h/2, lbl, 'HorizontalAlignment','center','VerticalAlignment','middle','FontSize',9);
 end
+% Arrows between top-row blocks (right edge -> left edge of next block)
 arrows = [2.5 4.9 3.0 4.9; 5.2 4.9 5.8 4.9; 8.2 4.9 8.8 4.9; 11.0 4.9 11.6 4.9; 13.8 4.9 13.9 4.9];
 for k = 1:size(arrows,1)
-    annotation('arrow','X',[arrows(k,1)/16 arrows(k,3)/16],'Y',[arrows(k,2)/7 arrows(k,4)/7]);
+    dx = arrows(k,3) - arrows(k,1);
+    dy = arrows(k,4) - arrows(k,2);
+    quiver(arrows(k,1), arrows(k,2), dx, dy, 0, 'k', 'LineWidth', 1.5, 'MaxHeadSize', 0.8);
 end
 title('SPEAR3 HVPS Physical Subsystems and Notebook Equation Map','FontSize',14,'FontWeight','bold');
 
