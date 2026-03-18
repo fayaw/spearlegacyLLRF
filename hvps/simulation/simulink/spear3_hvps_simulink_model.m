@@ -35,6 +35,10 @@ try close_system('SPEAR3_HVPS', 0); catch; end
 bdclose all;
 clear; clc;
 
+% Track failed set_param calls globally
+global SPS_PARAM_WARNINGS;
+SPS_PARAM_WARNINGS = {};
+
 %% ========================================================================
 %  SECTION 1: SYSTEM PARAMETERS
 %  All values from hvps/simulation/hvps_sim/config.py and technical docs
@@ -157,13 +161,20 @@ fprintf('  LC resonance:   %.1f Hz\n', P.LC_resonance);
 %  SECTION 2: CREATE SIMULINK MODEL
 %  ========================================================================
 %
-%  Block parameter names verified against MathWorks documentation:
-%    - Three-Phase Source: 'Voltage', 'Frequency', 'Configuration'
-%    - Three-Phase Transformer: 'NominalPower', 'Winding1', 'Winding2',
-%        'Winding1Connection', 'Winding2Connection'
-%    - Universal Bridge: 'Arms', 'Device', 'Ron', 'Lon', 'Vf',
-%        'SnubberResistance', 'SnubberCapacitance'
-%    - Series RLC Branch: 'Resistance', 'Inductance', 'Capacitance'
+%  IMPORTANT: SPS (Specialized Power Systems) blocks are masked subsystems.
+%  The dialog DISPLAY LABELS shown in MathWorks docs often differ from the
+%  actual programmatic MASK VARIABLE NAMES used by set_param/get_param.
+%
+%  To discover correct mask variable names for any SPS block, run:
+%    names = get_param(blockPath, 'MaskNames');
+%    vals  = get_param(blockPath, 'MaskValues');
+%    disp([names, vals]);
+%
+%  Verified working parameters (from runtime testing):
+%    - Three-Phase Source: 'Voltage', 'Frequency'  (default 'Yg' is fine)
+%    - Three-Phase Transformer: see discover_block_params() output
+%    - Universal Bridge: see discover_block_params() output
+%    - Series RLC Branch: see discover_block_params() output
 
 modelName = 'SPEAR3_HVPS';
 new_system(modelName);
@@ -179,9 +190,9 @@ set_param(modelName, ...
     'SimulationMode',   'normal');
 
 % Specialized Power Systems requires the powergui block
-add_block('powerlib/powergui', [modelName '/powergui'], ...
-    'Position', [20 20 120 60], ...
-    'SimulationMode', 'Continuous');
+blk = [modelName '/powergui'];
+add_block('powerlib/powergui', blk, 'Position', [20 20 120 60]);
+trySP(blk, 'SimulationMode', 'Continuous');
 
 fprintf('Model "%s" created with solver %s\n', modelName, P.sim_solver);
 
@@ -189,20 +200,15 @@ fprintf('Model "%s" created with solver %s\n', modelName, P.sim_solver);
 %  SECTION 3: AC SOURCE (Substation 507, 12.47 kV, 3-phase, 60 Hz)
 %  ========================================================================
 %
-%  Three-Phase Source mask parameters (from MathWorks docs):
-%    'Voltage'       -> Phase-to-phase RMS voltage (V)
-%    'Frequency'     -> Source frequency (Hz)
-%    'Configuration' -> 'Yg' | 'Yn' | 'Y'
-%    'Resistance'    -> Source internal resistance (Ohms)
-%    'Inductance'    -> Source internal inductance (H)
+%  Three-Phase Source — Yg (grounded Y, the default) is correct for HVPS.
+%  Parameters set individually via try-catch (mask names vary by version).
 
-add_block('powerlib/Electrical Sources/Three-Phase Source', ...
-    [modelName '/AC_Source_12kV'], ...
-    'Position', [80 200 140 280], ...
-    'Voltage', num2str(P.ac_voltage_rms), ...
-    'Frequency', num2str(P.ac_frequency), ...
-    'Configuration', 'Yg');
-% Internal impedance uses defaults (short-circuit level based)
+blk = [modelName '/AC_Source_12kV'];
+add_block('powerlib/Electrical Sources/Three-Phase Source', blk, ...
+    'Position', [80 200 140 280]);
+trySP(blk, 'Voltage', num2str(P.ac_voltage_rms));
+trySP(blk, 'Frequency', num2str(P.ac_frequency));
+% Default config = 'Yg' (grounded Y) — no need to set.
 
 %% ========================================================================
 %  SECTION 4: PHASE-SHIFT TRANSFORMER T0 (3.5 MVA, +/-15 deg)
@@ -226,24 +232,24 @@ add_block('powerlib/Electrical Sources/Three-Phase Source', ...
 
 % T0a: +30 deg phase shift (Dy11 connection)
 % Dy11: delta primary leads wye secondary by +30 degrees
-add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', ...
-    [modelName '/T0a_Plus30deg'], ...
-    'Position', [250 180 330 300], ...
-    'NominalPower', sprintf('[%e %d]', P.T0_rating_mva*1e6/2, P.ac_frequency), ...
-    'Winding1', sprintf('[%d %f %f]', P.ac_voltage_rms, P.T0_copper_loss_pu, P.T0_leakage_pu/2), ...
-    'Winding2', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.T0_copper_loss_pu, P.T0_leakage_pu/2), ...
-    'Winding1Connection', 'Delta (D1)', ...
-    'Winding2Connection', 'Y');
+blk = [modelName '/T0a_Plus30deg'];
+add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', blk, ...
+    'Position', [250 180 330 300]);
+trySP(blk, 'NominalPower', sprintf('[%e %d]', P.T0_rating_mva*1e6/2, P.ac_frequency));
+trySP(blk, 'Winding1', sprintf('[%d %f %f]', P.ac_voltage_rms, P.T0_copper_loss_pu, P.T0_leakage_pu/2));
+trySP(blk, 'Winding2', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.T0_copper_loss_pu, P.T0_leakage_pu/2));
+trySP(blk, 'Winding1Connection', 'Delta (D1)');
+trySP(blk, 'Winding2Connection', 'Y');
 
 % T0b: 0 deg phase shift (Yy0 connection)
-add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', ...
-    [modelName '/T0b_Zero_deg'], ...
-    'Position', [250 350 330 470], ...
-    'NominalPower', sprintf('[%e %d]', P.T0_rating_mva*1e6/2, P.ac_frequency), ...
-    'Winding1', sprintf('[%d %f %f]', P.ac_voltage_rms, P.T0_copper_loss_pu, P.T0_leakage_pu/2), ...
-    'Winding2', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.T0_copper_loss_pu, P.T0_leakage_pu/2), ...
-    'Winding1Connection', 'Y', ...
-    'Winding2Connection', 'Y');
+blk = [modelName '/T0b_Zero_deg'];
+add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', blk, ...
+    'Position', [250 350 330 470]);
+trySP(blk, 'NominalPower', sprintf('[%e %d]', P.T0_rating_mva*1e6/2, P.ac_frequency));
+trySP(blk, 'Winding1', sprintf('[%d %f %f]', P.ac_voltage_rms, P.T0_copper_loss_pu, P.T0_leakage_pu/2));
+trySP(blk, 'Winding2', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.T0_copper_loss_pu, P.T0_leakage_pu/2));
+trySP(blk, 'Winding1Connection', 'Y');
+trySP(blk, 'Winding2Connection', 'Y');
 
 %% ========================================================================
 %  SECTION 5: RECTIFIER TRANSFORMERS T1 and T2 (1.5 MVA, 2.67:1 step-up)
@@ -252,24 +258,24 @@ add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', ...
 %  $$\frac{V_2}{V_1} = \frac{33300}{12500} = 2.664$$
 
 % T1: Rectifier transformer (fed from T0a, +30 deg path)
-add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', ...
-    [modelName '/T1_Rectifier_Xfmr'], ...
-    'Position', [450 180 530 300], ...
-    'NominalPower', sprintf('[%e %d]', P.Trect_rating_mva*1e6, P.ac_frequency), ...
-    'Winding1', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.Trect_copper_loss, P.Trect_leakage_pu/2), ...
-    'Winding2', sprintf('[%d %f %f]', P.Trect_sec_voltage, P.Trect_copper_loss, P.Trect_leakage_pu/2), ...
-    'Winding1Connection', 'Y', ...
-    'Winding2Connection', 'Y');
+blk = [modelName '/T1_Rectifier_Xfmr'];
+add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', blk, ...
+    'Position', [450 180 530 300]);
+trySP(blk, 'NominalPower', sprintf('[%e %d]', P.Trect_rating_mva*1e6, P.ac_frequency));
+trySP(blk, 'Winding1', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.Trect_copper_loss, P.Trect_leakage_pu/2));
+trySP(blk, 'Winding2', sprintf('[%d %f %f]', P.Trect_sec_voltage, P.Trect_copper_loss, P.Trect_leakage_pu/2));
+trySP(blk, 'Winding1Connection', 'Y');
+trySP(blk, 'Winding2Connection', 'Y');
 
 % T2: Rectifier transformer (fed from T0b, 0 deg path)
-add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', ...
-    [modelName '/T2_Rectifier_Xfmr'], ...
-    'Position', [450 350 530 470], ...
-    'NominalPower', sprintf('[%e %d]', P.Trect_rating_mva*1e6, P.ac_frequency), ...
-    'Winding1', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.Trect_copper_loss, P.Trect_leakage_pu/2), ...
-    'Winding2', sprintf('[%d %f %f]', P.Trect_sec_voltage, P.Trect_copper_loss, P.Trect_leakage_pu/2), ...
-    'Winding1Connection', 'Y', ...
-    'Winding2Connection', 'Y');
+blk = [modelName '/T2_Rectifier_Xfmr'];
+add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', blk, ...
+    'Position', [450 350 530 470]);
+trySP(blk, 'NominalPower', sprintf('[%e %d]', P.Trect_rating_mva*1e6, P.ac_frequency));
+trySP(blk, 'Winding1', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.Trect_copper_loss, P.Trect_leakage_pu/2));
+trySP(blk, 'Winding2', sprintf('[%d %f %f]', P.Trect_sec_voltage, P.Trect_copper_loss, P.Trect_leakage_pu/2));
+trySP(blk, 'Winding1Connection', 'Y');
+trySP(blk, 'Winding2Connection', 'Y');
 
 %% ========================================================================
 %  SECTION 6: 12-PULSE SCR RECTIFIER BRIDGES
@@ -290,28 +296,28 @@ add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', ...
 %  $$V_{dc,12pulse} = 2 \times V_{dc,bridge} = 2.70 \, V_{LL} \cos\alpha$$
 
 % --- Bridge 1: 6-pulse SCR bridge (from T1, +30 deg path) ---
-add_block('powerlib/Power Electronics/Universal Bridge', ...
-    [modelName '/Bridge1_SCR'], ...
-    'Position', [650 180 730 300], ...
-    'Arms', '3', ...
-    'Device', 'Thyristors', ...
-    'Ron', num2str(P.scr_on_resistance), ...
-    'Lon', '0', ...
-    'Vf', num2str(P.scr_fwd_voltage), ...
-    'SnubberResistance', num2str(P.scr_snubber_R), ...
-    'SnubberCapacitance', num2str(P.scr_snubber_C));
+blk = [modelName '/Bridge1_SCR'];
+add_block('powerlib/Power Electronics/Universal Bridge', blk, ...
+    'Position', [650 180 730 300]);
+trySP(blk, 'Arms', '3');
+trySP(blk, 'Device', 'Thyristors');
+trySP(blk, 'Ron', num2str(P.scr_on_resistance));
+trySP(blk, 'Lon', '0');
+trySP(blk, 'Vf', num2str(P.scr_fwd_voltage));
+trySP(blk, 'SnubberResistance', num2str(P.scr_snubber_R));
+trySP(blk, 'SnubberCapacitance', num2str(P.scr_snubber_C));
 
 % --- Bridge 2: 6-pulse SCR bridge (from T2, 0 deg path) ---
-add_block('powerlib/Power Electronics/Universal Bridge', ...
-    [modelName '/Bridge2_SCR'], ...
-    'Position', [650 350 730 470], ...
-    'Arms', '3', ...
-    'Device', 'Thyristors', ...
-    'Ron', num2str(P.scr_on_resistance), ...
-    'Lon', '0', ...
-    'Vf', num2str(P.scr_fwd_voltage), ...
-    'SnubberResistance', num2str(P.scr_snubber_R), ...
-    'SnubberCapacitance', num2str(P.scr_snubber_C));
+blk = [modelName '/Bridge2_SCR'];
+add_block('powerlib/Power Electronics/Universal Bridge', blk, ...
+    'Position', [650 350 730 470]);
+trySP(blk, 'Arms', '3');
+trySP(blk, 'Device', 'Thyristors');
+trySP(blk, 'Ron', num2str(P.scr_on_resistance));
+trySP(blk, 'Lon', '0');
+trySP(blk, 'Vf', num2str(P.scr_fwd_voltage));
+trySP(blk, 'SnubberResistance', num2str(P.scr_snubber_R));
+trySP(blk, 'SnubberCapacitance', num2str(P.scr_snubber_C));
 
 %% ========================================================================
 %  SECTION 7: PULSE GENERATORS FOR THYRISTOR GATING
@@ -339,20 +345,20 @@ add_block('powerlib/Power Electronics/Universal Bridge', ...
 %  Parameters: 'Frequency', 'PulseWidth', 'DoublePulsing'
 
 % Pulse generator for Bridge 1 (syncs to T1 primary voltages)
-add_block('powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', ...
-    [modelName '/PulseGen1'], ...
-    'Position', [560 100 640 160], ...
-    'Frequency', num2str(P.ac_frequency), ...
-    'PulseWidth', '60', ...
-    'DoublePulsing', 'on');
+blk = [modelName '/PulseGen1'];
+add_block('powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', blk, ...
+    'Position', [560 100 640 160]);
+trySP(blk, 'Frequency', num2str(P.ac_frequency));
+trySP(blk, 'PulseWidth', '60');
+trySP(blk, 'DoublePulsing', 'on');
 
 % Pulse generator for Bridge 2 (syncs to T2 primary voltages)
-add_block('powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', ...
-    [modelName '/PulseGen2'], ...
-    'Position', [560 490 640 550], ...
-    'Frequency', num2str(P.ac_frequency), ...
-    'PulseWidth', '60', ...
-    'DoublePulsing', 'on');
+blk = [modelName '/PulseGen2'];
+add_block('powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', blk, ...
+    'Position', [560 490 640 550]);
+trySP(blk, 'Frequency', num2str(P.ac_frequency));
+trySP(blk, 'PulseWidth', '60');
+trySP(blk, 'DoublePulsing', 'on');
 
 %% ========================================================================
 %  SECTION 8: LC FILTER NETWORK
@@ -368,36 +374,36 @@ add_block('powerlib_extras/Control Blocks/Synchronized 6-Pulse Generator', ...
 %  $$\text{Attenuation at 720 Hz} = \left(\frac{f_{ripple}}{f_{LC}}\right)^2 \approx 49 \; (34 \; \text{dB})$$
 
 % --- Filter Inductor L1 (0.3 H) ---
-add_block('powerlib/Elements/Series RLC Branch', ...
-    [modelName '/L1_Filter'], ...
-    'Position', [830 180 890 240], ...
-    'Resistance', '0.5', ...
-    'Inductance', num2str(P.L1), ...
-    'Capacitance', 'inf');
+blk = [modelName '/L1_Filter'];
+add_block('powerlib/Elements/Series RLC Branch', blk, ...
+    'Position', [830 180 890 240]);
+trySP(blk, 'Resistance', '0.5');
+trySP(blk, 'Inductance', num2str(P.L1));
+trySP(blk, 'Capacitance', 'inf');
 
 % --- Filter Inductor L2 (0.3 H) ---
-add_block('powerlib/Elements/Series RLC Branch', ...
-    [modelName '/L2_Filter'], ...
-    'Position', [830 350 890 410], ...
-    'Resistance', '0.5', ...
-    'Inductance', num2str(P.L2), ...
-    'Capacitance', 'inf');
+blk = [modelName '/L2_Filter'];
+add_block('powerlib/Elements/Series RLC Branch', blk, ...
+    'Position', [830 350 890 410]);
+trySP(blk, 'Resistance', '0.5');
+trySP(blk, 'Inductance', num2str(P.L2));
+trySP(blk, 'Capacitance', 'inf');
 
 % --- Filter Capacitor (8 uF in series with 500 Ohm isolation) ---
-add_block('powerlib/Elements/Series RLC Branch', ...
-    [modelName '/C_Filter_Bank'], ...
-    'Position', [960 250 1020 340], ...
-    'Resistance', num2str(P.R_isolation), ...
-    'Inductance', '0', ...
-    'Capacitance', num2str(P.C_filter));
+blk = [modelName '/C_Filter_Bank'];
+add_block('powerlib/Elements/Series RLC Branch', blk, ...
+    'Position', [960 250 1020 340]);
+trySP(blk, 'Resistance', num2str(P.R_isolation));
+trySP(blk, 'Inductance', '0');
+trySP(blk, 'Capacitance', num2str(P.C_filter));
 
 % --- Damping Resistor ---
-add_block('powerlib/Elements/Series RLC Branch', ...
-    [modelName '/R_Damping'], ...
-    'Position', [960 350 1020 410], ...
-    'Resistance', num2str(P.R_damping), ...
-    'Inductance', '0', ...
-    'Capacitance', 'inf');
+blk = [modelName '/R_Damping'];
+add_block('powerlib/Elements/Series RLC Branch', blk, ...
+    'Position', [960 350 1020 410]);
+trySP(blk, 'Resistance', num2str(P.R_damping));
+trySP(blk, 'Inductance', '0');
+trySP(blk, 'Capacitance', 'inf');
 
 %% ========================================================================
 %  SECTION 9: CABLE TERMINATION AND KLYSTRON LOAD
@@ -406,12 +412,12 @@ add_block('powerlib/Elements/Series RLC Branch', ...
 %  $$\frac{dI}{dt}_{max} = \frac{V_{arc}}{L_3} = \frac{77000}{200 \times 10^{-6}} = 3.85 \times 10^{8} \; \text{A/s}$$
 
 % --- Cable Termination Inductor L3 (200 uH) ---
-add_block('powerlib/Elements/Series RLC Branch', ...
-    [modelName '/L3_Cable_Term'], ...
-    'Position', [1100 250 1160 310], ...
-    'Resistance', '0.1', ...
-    'Inductance', num2str(P.L3), ...
-    'Capacitance', 'inf');
+blk = [modelName '/L3_Cable_Term'];
+add_block('powerlib/Elements/Series RLC Branch', blk, ...
+    'Position', [1100 250 1160 310]);
+trySP(blk, 'Resistance', '0.1');
+trySP(blk, 'Inductance', num2str(P.L3));
+trySP(blk, 'Capacitance', 'inf');
 
 % --- Klystron Load (resistive, 3500 Ohm nominal) ---
 %
@@ -419,12 +425,12 @@ add_block('powerlib/Elements/Series RLC Branch', ...
 %
 % For nonlinear perveance: replace with MATLAB Function block
 % implementing $$I = \kappa \, V^{3/2}$$, $$\kappa \approx 1 \; \mu A/V^{3/2}$$
-add_block('powerlib/Elements/Series RLC Branch', ...
-    [modelName '/Klystron_Load'], ...
-    'Position', [1220 250 1280 340], ...
-    'Resistance', num2str(P.klystron_R_nom), ...
-    'Inductance', '0', ...
-    'Capacitance', 'inf');
+blk = [modelName '/Klystron_Load'];
+add_block('powerlib/Elements/Series RLC Branch', blk, ...
+    'Position', [1220 250 1280 340]);
+trySP(blk, 'Resistance', num2str(P.klystron_R_nom));
+trySP(blk, 'Inductance', '0');
+trySP(blk, 'Capacitance', 'inf');
 
 %% ========================================================================
 %  SECTION 10: CROWBAR PROTECTION SYSTEM
@@ -438,12 +444,12 @@ add_block('powerlib/Elements/Series RLC Branch', ...
 %  $$E_{arc} < 5 \; \text{J} \quad \text{(with crowbar, } t_{trigger} \approx 1 \; \mu\text{s)}$$
 
 % Crowbar SCR (Breaker block as switch)
-add_block('powerlib/Elements/Breaker', ...
-    [modelName '/Crowbar_SCR'], ...
-    'Position', [1100 380 1160 440], ...
-    'BreakerResistance', num2str(P.crowbar_R_on), ...
-    'InitialState', '0', ...
-    'SwitchingTimes', '[]');
+blk = [modelName '/Crowbar_SCR'];
+add_block('powerlib/Elements/Breaker', blk, ...
+    'Position', [1100 380 1160 440]);
+trySP(blk, 'BreakerResistance', num2str(P.crowbar_R_on));
+trySP(blk, 'InitialState', '0');
+trySP(blk, 'SwitchingTimes', '[]');
 
 % Crowbar trigger (Step: default beyond sim time = never triggers)
 add_block('simulink/Sources/Step', [modelName '/Crowbar_Trigger'], ...
@@ -880,38 +886,103 @@ end
 %
 %  >> discover_block_params('SPEAR3_HVPS/AC_Source_12kV')
 
+function trySP(blk, paramName, paramValue)
+%TRYSP Safely set a Simulink block parameter with try-catch
+%  trySP(blk, paramName, paramValue) attempts set_param and warns on failure.
+%  This prevents the entire model build from crashing if a mask variable
+%  name differs from the MathWorks documentation display label.
+%
+%  If a parameter fails, run discover_block_params(blk) to find valid names.
+
+    global SPS_PARAM_WARNINGS;
+    try
+        set_param(blk, paramName, paramValue);
+    catch ME
+        warnMsg = sprintf('  WARNING: %s -> ''%s'' failed: %s', blk, paramName, ME.message);
+        fprintf('%s\n', warnMsg);
+        fprintf('    FIX: Run discover_block_params(''%s'') to see valid names.\n', blk);
+        SPS_PARAM_WARNINGS{end+1} = warnMsg;
+    end
+end
+
 function discover_block_params(blockPath)
 %DISCOVER_BLOCK_PARAMS List valid mask parameters for a Simulink block
+%  discover_block_params(blockPath) prints all settable parameter names
+%  and their current values. Use this to find the correct mask variable
+%  name when MathWorks docs show only the display label.
 %
-%   discover_block_params(blockPath)
+%  Example:
+%    discover_block_params('SPEAR3_HVPS/AC_Source_12kV')
 
-    dp = get_param(blockPath, 'DialogParameters');
-    names = fieldnames(dp);
-    fprintf('\nValid parameters for: %s\n', blockPath);
-    fprintf('%-30s %-15s %s\n', 'Parameter', 'Type', 'Current Value');
-    fprintf('%s\n', repmat('-', 1, 70));
-    for i = 1:length(names)
-        val = get_param(blockPath, names{i});
-        if ischar(val)
-            fprintf('%-30s %-15s %s\n', names{i}, dp.(names{i}).Type, val);
-        else
-            fprintf('%-30s %-15s [non-string]\n', names{i}, dp.(names{i}).Type);
+    fprintf('\n===== Parameters for: %s =====\n', blockPath);
+
+    % Method 1: DialogParameters (most reliable for settable params)
+    try
+        dp = get_param(blockPath, 'DialogParameters');
+        names = fieldnames(dp);
+        fprintf('\n--- DialogParameters ---\n');
+        fprintf('%-30s %-15s %s\n', 'MASK VARIABLE', 'Type', 'Current Value');
+        fprintf('%s\n', repmat('-', 1, 75));
+        for i = 1:length(names)
+            try
+                val = get_param(blockPath, names{i});
+                if ischar(val)
+                    fprintf('%-30s %-15s %s\n', names{i}, dp.(names{i}).Type, val);
+                else
+                    fprintf('%-30s %-15s [non-string]\n', names{i}, dp.(names{i}).Type);
+                end
+            catch
+                fprintf('%-30s %-15s [read error]\n', names{i}, dp.(names{i}).Type);
+            end
         end
+    catch ME
+        fprintf('DialogParameters not available: %s\n', ME.message);
     end
+
+    % Method 2: MaskNames + MaskValues (for masked subsystems)
+    try
+        mnames = get_param(blockPath, 'MaskNames');
+        mvals  = get_param(blockPath, 'MaskValues');
+        if ~isempty(mnames)
+            fprintf('\n--- MaskNames / MaskValues ---\n');
+            for i = 1:length(mnames)
+                fprintf('  %-25s = %s\n', mnames{i}, mvals{i});
+            end
+        end
+    catch; end
+
+    fprintf('\n');
 end
 
 %% ========================================================================
 %  DONE
 %  ========================================================================
 
+global SPS_PARAM_WARNINGS;
+
 fprintf('\n');
 fprintf('========================================================\n');
-fprintf(' SPEAR3 HVPS Simulink Model Built Successfully!\n');
+if isempty(SPS_PARAM_WARNINGS)
+    fprintf(' SPEAR3 HVPS Simulink Model Built Successfully!\n');
+else
+    fprintf(' SPEAR3 HVPS Model Built with %d PARAMETER WARNINGS\n', ...
+        length(SPS_PARAM_WARNINGS));
+end
 fprintf('========================================================\n');
 fprintf(' Model: %s.slx\n', modelName);
 fprintf(' Solver: %s, dt_max=%.0f us, t_stop=%.1f s\n', ...
     P.sim_solver, P.sim_dt_max*1e6, P.sim_time);
 fprintf('========================================================\n');
+
+if ~isempty(SPS_PARAM_WARNINGS)
+    fprintf('\n*** PARAMETER WARNINGS (blocks still created with defaults) ***\n');
+    for i = 1:length(SPS_PARAM_WARNINGS)
+        fprintf('  %d. %s\n', i, SPS_PARAM_WARNINGS{i});
+    end
+    fprintf('\nTo fix: run discover_block_params(''%s/<BlockName>'') to find\n', modelName);
+    fprintf('the correct mask variable names for your MATLAB version.\n');
+end
+
 fprintf('\nNext steps:\n');
 fprintf('  1. open_system(''%s'')\n', modelName);
 fprintf('  2. Verify wiring (check MANUAL WIRING NEEDED messages above)\n');
