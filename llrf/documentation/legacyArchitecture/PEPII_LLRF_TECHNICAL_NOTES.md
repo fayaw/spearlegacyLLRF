@@ -41,17 +41,23 @@ The PEP-II B Factory was an asymmetric electron-positron collider at SLAC consis
 | Parameter | High Energy Ring (HER) | Low Energy Ring (LER) |
 |-----------|----------------------|----------------------|
 | Beam Energy | 9.0 GeV | 3.1 GeV |
-| Design Beam Current | 1.0 A | 2.14 A |
+| Design Beam Current | 0.99 A (achieved ~950 mA) | 2.14 A (achieved ~1700 mA) |
 | RF Frequency | 476 MHz | 476 MHz |
 | Circumference | 2200 m | 2200 m |
 | Harmonic Number | 3492 | 3492 |
-| RF Voltage (total) | 14 MV | 3.4 MV |
-| Energy Loss/Turn | 3.6 MeV | 1.2 MeV |
-| Number of RF Stations | 5 (later expanded to 8+) | 2 (later expanded to 4+) |
-| Cavities per Station | 4 (HER) | 2 (LER) |
+| Revolution Frequency | 136.3 kHz | 136.3 kHz |
+| RF Voltage (total, CDR) | 18.5 MV | 5.1 MV |
+| Energy Loss/Turn | 3.57 MeV | 0.87 MeV |
+| Number of RF Stations | 6 (later expanded to 8+) | 2 (later expanded to 4+) |
+| Number of Cavities | 24 (4 per station) | 8–10 (2 per station) |
 | Klystron Power | 1.2 MW CW each | 1.2 MW CW each |
 
-> **Reference**: `ps3403305100.pdf` (PS-340-330-51-R0) — *PEP-II RF System Description*, Heinz Schwarz, July 1999.
+> **Reference**: `ps3403305100.pdf` (PS-340-330-51-R0) — *PEP-II RF System Description*, Heinz Schwarz, July 1999;  
+> SLAC/AP-99 — *Impedance Study for the PEP-II B-factory* (Heifets et al., March 1995), Table 1;  
+> LBL-34960 — *High-Power RF Cavity R&D* (Rimmer et al.), Table 1.  
+> **Note**: The CDR design values evolved during construction and operation. Beam currents shown  
+> are the CDR design targets; achieved currents at the end of PEP-II operation were approximately  
+> HER: 1.8 A, LER: 2.9 A with additional RF stations installed beyond the original complement.
 
 ### 1.2 Design Philosophy
 
@@ -88,10 +94,10 @@ Master Oscillator (476 MHz)
   LLRF System (VXI Crate)
        │
        ▼
-  120 W Drive Amplifier (+16 dBm → +30 dBm max)
+  120 W Solid-State Drive Amplifier (~+51 dBm max output)
        │
        ▼
-  1.2 MW Klystron (RF Modulator/Amplifier)
+  1.2 MW Klystron (typical ~50 W drive at saturation)
        │
        ▼
   Circulator (klystron protection from reflected power)
@@ -169,7 +175,7 @@ Cavity Probe (476 MHz, ~-10 dBm)
   I/Q Modulator → 476 MHz RF output
        │
        ▼
-  120 W Drive Amplifier → Klystron
+  120 W Drive Amplifier (~50 W typical) → Klystron
 ```
 
 ### 3.2 I/Q Detector Design
@@ -180,7 +186,7 @@ The digital I/Q demodulator was a key innovation designed by C. Ziomek and P. Co
 - **Local Oscillator**: 471.1 MHz (4.9 MHz IF)
 - **A/D Converter**: High-speed ADC digitizing the IF signal
 - **Sample Rate**: Up to 10 MHz (Fsample)
-- **Digital Processing**: FPGA-based I/Q extraction using 512K RAM
+- **Digital Processing**: Custom digital I/Q extraction using 512K RAM look-up tables
 - **Accuracy**: Better than 0.1° phase and 0.1% amplitude over 30 dB dynamic range
 - **Key advantage**: Eliminates analog I/Q errors (gain imbalance, quadrature errors, DC offsets)
 
@@ -220,18 +226,23 @@ The LLRF hardware for each station is housed in a single VXI crate with the foll
 |------|--------|----------|
 | 0 | EPICS Processor (Slot 0) | μProcessor — EPICS IOC, state sequencer |
 | 1 | Allen-Bradley VME Scanner | Interface to AB PLC (DH-485 network) |
-| 2 | Arc Detector/Interlocks | Arc detection, interlock summary, fault latch |
-| 3 | Clock & RF Distribution | 476 MHz reference distribution, LO generation |
-| 4 | RFP Module | RF Processing — feedback loops, modulator |
-| 5 | Gap Voltage Feed-Forward | 476 MHz gap voltage FF, ion clearing gap compensation |
-| 6 | Comb Filter (I) | I-channel comb filter with 1-turn delay |
-| 7 | Comb Filter (Q) | Q-channel comb filter with 1-turn delay |
-| 8 | IQ/Amplitude Detector #1 | Digital I/Q detection (8 inputs) |
-| 9 | IQ/Amplitude Detector #2 | Digital I/Q detection (8 inputs) |
-| 10 | IQ/Amplitude Detector #3 | Digital I/Q detection (8 inputs) |
-| 11 | Equalized Comb Filter | Delay equalizer for comb loop |
-| 12 | Spare | Reserved |
-| -- | Stepping Motor Controller ×4 | Tuner motor control (4 cavities) |
+| 2–3 | Spare (2 slots) | Reserved |
+| 4 | Arc Detector/Interlocks | Arc detection, interlock summary, fault latch |
+| 5 | Clock & RF Distribution | 476 MHz reference distribution, LO generation |
+| 6 | RFP Module | RF Processing — feedback loops, modulator |
+| 7 | Gap Voltage Feed-Forward | 476 MHz gap voltage FF, ion clearing gap compensation |
+| 8 | Comb Filter (I) | I-channel comb filter with 1-turn delay |
+| 9 | IQ/Amplitude Detector #1 | Digital I/Q detection (8 inputs) — *between comb I and Q* |
+| 10 | Comb Filter (Q) | Q-channel comb filter with 1-turn delay |
+| 11 | IQ/Amplitude Detector #2 | Digital I/Q detection (8 inputs) |
+| 12 | IQ/Amplitude Detector #3 | Digital I/Q detection (8 inputs) |
+| -- | Stepping Motor Controller ×4 | Tuner motor control (4 cavities, separate rack) |
+
+> **Note on slot ordering**: The Comb Filter (I) and Comb Filter (Q) modules are **not** in adjacent  
+> slots — an IQ/Amplitude Detector module is interleaved between them. This physical arrangement  
+> reflects the signal routing architecture where I-channel comb output feeds into the first IQA  
+> for monitoring before the Q-channel comb processes its data. Refer to Corredoura EPAC 2000  
+> (SLAC-PUB-8498) Figure 1 for the canonical crate layout diagram.
 
 **Additional I/O:**
 - **Fiber Optic Receivers** (2): Connection to longitudinal feedback system kicker
@@ -372,11 +383,14 @@ The **Direct Loop** is the most critical feedback loop:
 |-----------|-----------|-----------|-------------|
 | Type | Single-cell, normal-conducting copper | Same | Same (PEP-II design) |
 | Frequency | 476.0 MHz | 476.0 MHz | 476.3 MHz |
-| Max Gap Voltage | 1 MV | 1 MV | 800 kV (nominal) |
-| Unloaded Q₀ | ~30,000 | ~30,000 | ~30,000 |
-| Loaded Qₗ | 6,780 | 6,780 | Similar |
-| Shunt Impedance (R/Q) | 3.6 MΩ (circuit notation) | 3.6 MΩ | Similar |
-| Coupling Factor β | ~4.0 (design) | ~4.0 | Similar |
+| Design Gap Voltage (CDR) | 0.77 MV per cavity | 0.64 MV per cavity | ~0.8 MV per cavity |
+| Max Gap Voltage | ~1 MV | ~1 MV | 800 kV (nominal) |
+| Unloaded Q₀ | ≥30,000 (at 40°C, with ports) | ≥30,000 | ~30,000 |
+| Coupling Factor β | 3.6 (design, without beam) | 3.6 | Similar |
+| Loaded Qₗ | ~6,522 (= Q₀/(1+β)) | ~6,522 | Similar |
+| Shunt Impedance R_s | 3.5 MΩ (circuit def: V²/2P) | 3.5 MΩ | Similar |
+| R/Q (derived) | ~117 Ω (= R_s/Q₀) | ~117 Ω | Similar |
+| Wall Loss per Cavity (CDR) | 84.9 kW | 49.7 kW | — |
 | HOM Loads | 3 per cavity | 3 per cavity | 3 per cavity |
 | Movable Tuner | 1 per cavity | 1 per cavity | 1 per cavity |
 | Input Ceramic Window | 1 per cavity | 1 per cavity | 1 per cavity |
@@ -385,7 +399,12 @@ The **Direct Loop** is the most critical feedback loop:
 | Manufacturer | ACCEL Instruments GmbH (Germany) | Same | Same |
 
 > **Reference**: `ps3403305100.pdf` (PS-340-330-51-R0), page 4 — Parameter Table;  
-> `ps3403305300.pdf` (PS-340-330-53-R0) — *RF Cavity Low Power Calibration Procedure*.
+> `ps3403305300.pdf` (PS-340-330-53-R0) — *RF Cavity Low Power Calibration Procedure*;  
+> LBL-34960 (Rimmer et al.) Table 1 — R_s, β, Q₀, wall loss per cavity.  
+> **Notation**: R_s uses the circuit definition V²/2P (linac convention gives R_s_linac = V²/P = 7.0 MΩ).  
+> R/Q ≈ R_s/Q₀ = 3.5 MΩ / 30,000 ≈ 117 Ω (circuit) or ~233 Ω (linac).  
+> The loaded Q value of 6,522 is derived from Q₀=30,000 and β=3.6; measured values on individual  
+> cavities may differ by ~5% due to manufacturing variations and coupling adjustment.
 
 ### 6.2 Cavity Calibration Parameters
 
@@ -495,10 +514,10 @@ DAC Reference (I_REF, Q_REF from Gap Module)
   Quad DAC (fine gain control)
        │
        ▼
-  120 W Solid-State Drive Amplifier (+16 dBm → +30 dBm max)
+  120 W Solid-State Drive Amplifier (up to ~+51 dBm output)
        │
        ▼
-  Klystron (1.2 MW CW output)
+  Klystron (1.2 MW CW output; ~50 W drive at saturation)
 ```
 
 ### 8.2 Drive Power Limiting
@@ -615,7 +634,7 @@ The entire LLRF system runs under **EPICS** (Experimental Physics and Industrial
 
 ### 11.2 Allen-Bradley PLC Interface
 
-- **PLC Type**: Allen-Bradley (ControlLogix/SLC-500 family)
+- **PLC Type**: Allen-Bradley SLC-500 family (original PEP-II/SPEAR3 legacy)
 - **Communication**: DH-485 network via AB VME Scanner in VXI crate
 - **Functions**:
   - Temperature monitoring (thermocouples — 12 channels in separate crate)
@@ -671,8 +690,9 @@ EPICS Workstation (in support building)
 - **Klystron output** → Circulator → Power splitting network
 - **Circulator**: Protects klystron from reflected power; terminates into high-power load
 - **Power splitting**: Magic-Tee hybrid junctions
-  - HER: 3 Magic-Tees → 4 cavity feeds + 3 high-power loads (1.22 MW each)
-  - LER: 1 Magic-Tee → 2 cavity feeds + 1 high-power load
+  - HER: 3 Magic-Tees → 4 cavity feeds + high-power dummy loads on difference ports
+  - LER: 1 Magic-Tee → 2 cavity feeds + 1 high-power dummy load
+  - Load power rating sized for full reflected/imbalance power (worst-case: up to half of klystron output per load)
 - **Penetrations**: 4 waveguide runs through wall into tunnel (HER) or 2 (LER)
 - **Pressurization**: 0.25 psig instrument air (dried), pressure-switch interlocked
 
@@ -720,7 +740,7 @@ The RF cavity low-power calibration is performed before high-power operation:
    - Tightening correction: -0.5 dB before tightening
    - Acceptable variation: ±0.3 dB
 
-> **Reference**: `ps3403305300.pdf` (PS-340-330-53-R0) — *RF Cavity Low Power Calibration Procedure*, Heinz Schwarz, July 1999.
+> **Reference**: `ps3403305300.pdf` (PS-340-330-53-R0) — *RF Cavity Low Power Calibration Procedure*, Heinz Schwarz, July 1997.
 
 ---
 
@@ -882,7 +902,7 @@ All documents are located in `llrf/documentation/legacyArchitecture/`:
 | `ps3403305100.pdf` | PS-340-330-51-R0 | PEP-II RF System Description | 11 | H. Schwarz, 7/21/99 |
 | `ps3403305200.pdf` | PS-340-330-52-R0 | LLRF Feedback Loop Description | 8 | H. Schwarz, 7/21/99 |
 | `feedbackLoopDescriptionps3403305200.pdf` | PS-340-330-52-R0 | LLRF Feedback Loop Description (copy) | 8 | H. Schwarz, 7/21/99 |
-| `ps3403305300.pdf` | PS-340-330-53-R0 | RF Cavity Low Power Calibration Procedure | 4 | H. Schwarz, 7/2/97 |
+| `ps3403305300.pdf` | PS-340-330-53-R0 | RF Cavity Low Power Calibration Procedure | 4 | H. Schwarz, 7/2/1997 |
 | `ps3403305400.pdf` | PS-340-330-54-R0 | RF Station Safety Certification Check-Off List | 2 | H. Schwarz, 4/19/99 |
 | `ps3403305503.pdf` | PS-340-330-55-R3 | RF Station Safety Survey | 4 | A. Hill, 12/2/05 |
 | `ps3403305600.pdf` | PS-340-330-56-R0 | RF Non-Ionizing Radiation Safety Procedure | 4 | H. Schwarz, 4/19/99 |
@@ -922,11 +942,15 @@ Located in `llrf/legacyLLRF/`:
 | "Experience with the PEP-II RF System at High Beam Currents" | P. Corredoura et al. | 2000 | SLAC-PUB-8498, EPAC 2000 |
 | "Digital I/Q Demodulator" | C. Ziomek, P. Corredoura | 1995 | PAC 1995 |
 | "Operator Interface for the PEP-II Low Level RF Control System" | S. Allison, R. Claus | 1997 | PAC 1997 |
+| "Impedance Study for the PEP-II B-factory" | S. Heifets, K. Ko, C. Ng et al. | 1995 | SLAC/AP-99, March 1995 |
+| "RF Cavity Development for the PEP-II B Factory" | R. A. Rimmer | 1992 | LBL-33360 |
+| "High-Power RF Cavity R&D for the PEP-II B Factory" | R. Rimmer, G. Lambertson et al. | 1994 | LBL-34960 |
 | "The SPEAR3 RF System" | P. McIntosh | 2005 | SLAC-PUB, DOI: 10.2172/839730 |
 | "An Automated 476 MHz RF Cavity Processing Facility at SLAC" | P. McIntosh, A. Hill, H. Schwarz | 2003 | SLAC-PUB-10083 |
 | "Booster Synchrotron RF System Upgrade for SPEAR3" | S. Park, J. Corbett | 2010 | IPAC 2010 |
 | "Design of the SPEAR 3 Light Source" | R. Hettel et al. | 2001 | PAC 2001 |
 | "SSRL RF System Upgrade" | S. Park | 1999 | EPAC 1999 |
+| "PEP-II Asymmetric B Factory: R&D Results" | J. Dorfan, A. Hutton et al. | 1992 | SLAC-PUB-5785, LBL-PUB-32098 |
 
 ### 18.2 Journal Papers
 
