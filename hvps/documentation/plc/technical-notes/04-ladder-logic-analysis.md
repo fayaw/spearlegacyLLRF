@@ -338,16 +338,59 @@ All follow the pattern: Reset clears latch; interlock condition sets latch.
 
 ---
 
-## Rungs 0062–0075: Extended Display & Status
+## Rungs 0062–0075: Extended Display, Power-up & SCR Status
 
-- **0062:** O:2/128 — Enable Control Power when B3:0/6 (Enable)
-- **0063:** B3:1/8 — Aux Power On Display, O:1/106
-- **0064:** B3:1/2 — Disable Display
-- **0071:** B3:4/8, B3:5/10 — SCR 1 Latch/Status, O:1/114
-- **0072:** B3:4/9, B3:5/11 — SCR 2 Latch/Status, O:1/115
-- **0073:** B3:2/0 — Ground Switch Open
-- **0074:** B3:1/15 (Supply On), B3:1/14 (SCR On)
-- **0075:** B3:1/6 — SCR Off
+### Rung 0062 — AC Aux Power Control
+- **Condition:** B3:0/6 (Enable)
+- **Output:** O:2/0 (AC Bias Power Supply), O:1/98 (AC Aux Power to DCM)
+
+### Rung 0063 — Auxiliary Power On Display
+- **Conditions:** O:2/0 (AC Bias), O:2/1 (120VDC), B3:1/8 criteria
+- **Outputs:** B3:1/8 (Aux Pwr On Display), O:1/106 (Auxiliary Power to DCM)
+
+### Rung 0064 — Disable Display
+- **Condition:** B3:1/9 (Enable Display) is FALSE
+- **Output:** B3:1/2 (Disable Display)
+
+### Rungs 0065–0070 — Power-Up Timing Sequence
+These rungs implement a sequenced power-up using timers that fire in cascade after the system is enabled:
+
+| Rung | Timer | Configuration | Purpose |
+|------|-------|---------------|---------|
+| 0065 | T4:7 | Power-up contacts timer | System initialization timing |
+| 0066 | T10:0 | TON timer | Sequenced startup step |
+| 0067 | T10:1 | TON timer | Sequenced startup step |
+| 0068 | T10:2 | TON timer | Sequenced startup step |
+| 0069 | T10:3 | TON timer | Sequenced startup step |
+| 0070 | T10:4 | TON timer with DN check | Final startup step |
+
+### Rung 0071 — SCR 1 Status (H2 Half)
+- **Condition:** I:7/15 (Regulator Current Trip inverted — no trip)
+- **Outputs:**
+  - B3:4/8 (SCR 1 Latch)
+  - B3:5/10 (SCR 1 Status)
+  - O:1/115 (SCR 2 Status to DCM)
+
+### Rung 0072 — SCR 2 Status (H1 Half)
+- **Condition:** I:7/14 (Regulator Voltage Trip inverted — no trip)
+- **Outputs:**
+  - B3:4/9 (SCR 2 Latch)
+  - B3:5/11 (SCR 2 Status)
+  - O:1/114 (SCR 1 Status to DCM)
+
+### Rung 0073 — Ground Switch Open
+- **Condition:** I:6/13 (Emergency Off clear)
+- **Output:** B3:2/0 (Ground Switch Open)
+
+### Rung 0074 — Supply On / SCR On Status
+- **Conditions:** B3:0/4 (SCR On Latch), contactor and ready conditions
+- **Outputs:**
+  - B3:1/15 (Supply On)
+  - B3:1/14 (SCR On)
+
+### Rung 0075 — SCR Off Status
+- **Condition:** I:7/14 (Voltage Trip) active or B3:0/4 (SCR On) is FALSE
+- **Output:** B3:1/6 (SCR Off display)
 
 ---
 
@@ -355,30 +398,77 @@ All follow the pattern: Reset clears latch; interlock condition sets latch.
 
 ### Rungs 0076–0083 — Analog Input Processing
 
-| Rung | Input | Offset | Destination | Notes |
-|------|-------|--------|-------------|-------|
-| 0076 | Slot 8 IN 0 | +N7:19 | N7:12 | Feedback voltage (with offset) |
-| 0077 | — | — | — | Additional processing |
-| 0078 | Slot 9 IN 0 | +N7:9 | N7:14 | AC current (with offset) |
-| 0079 | — | — | — | Additional processing |
-| 0080 | Slot 9 IN 1 | — | N7:15 | Voltage Monitor 1 (negated) |
-| 0081 | Slot 9 IN 2 | — | N7:16 | Voltage Monitor 2 (negated) |
-| 0082 | Slot 9 IN 3 | ×1 | N7:17 | DC Current (multiply by 1) |
-| 0083 | — | — | — | Zero N7:17 if bit 15 set (overflow/negative) |
+These rungs read raw analog values from I/O modules and condition them for use in control and display.
 
-### Rungs 0084–0102 — Display Value Scaling
+#### Rung 0076 — Feedback Voltage (Regulator Card J3-1)
+- ADD I:8.0 + N7:19 (offset, typically -122) → N7:12
+- N7:12 is the offset-corrected regulator output voltage feedback
+- Source: AB-1746-NIO4V Slot 8, Input 0
 
-These rungs scale raw 16-bit values to engineering units for display using multipliers:
+#### Rung 0077 — Feedback Voltage Processing
+- MOV N7:12 → processed feedback for regulator voltage calculation (Rung 84)
 
-| Register | Multiplier Register | Multiplier Value | Scaled Output | Engineering Unit |
-|----------|---------------------|-----------------|---------------|------------------|
-| N7:12 → N7:2 | N7:22 | 10,075 | Regulator Voltage | kV (×10⁻²) |
-| N7:13 → N7:3 | N7:23 | 1,000 | Phase Angle Monitor | degrees (×10⁻¹) |
-| N7:14 → N7:4 | N7:24 | 4,600 | AC Current | A (×10⁻¹) |
-| N7:15 → N7:5 | N7:25 | 10,000 | Voltage Monitor 1 | kV (×10⁻²) |
-| N7:16 → N7:6 | N7:26 | 10,000 | Voltage Monitor 2 | kV (×10⁻²) |
-| N7:17 → N7:7 | N7:27 | 5,000 | DC Current | A (×10⁻¹) |
-| N7:15,N7:17 → N7:18 | N7:29 | 6 | Power | kW |
+#### Rung 0078 — AC Current Monitor (Regulator Card J3-2)
+- ADD I:9.0 + N7:9 (AC Amp Offset, typically -117) → N7:14
+- N7:14 is the offset-corrected AC current reading
+- Source: AB-1746-NI4 Slot 9, Input 0
+
+#### Rung 0079 — AC Current Processing
+- MOV N7:14 for further use in display and protection calculations
+
+#### Rung 0080 — Voltage Monitor 1 (Output Voltage from HVPS)
+- MOV I:9.1 → N7:15
+- NEG N7:15 (negated because sensor polarity is inverted)
+- Clear S:5 overflow bit
+- Source: AB-1746-NI4 Slot 9, Input 1 (parallel path to J1-1 of regulator card)
+
+#### Rung 0081 — Voltage Monitor 2 (Redundant Output Voltage)
+- MOV I:9.2 → N7:16
+- NEG N7:16 (negated)
+- Clear S:5 overflow bit
+- Source: AB-1746-NI4 Slot 9, Input 2
+
+#### Rung 0082 — DC Current Monitor (Danfysik)
+- MUL I:9.3 × 1 → N7:17
+- Source: AB-1746-NI4 Slot 9, Input 3 (Danfysik current transformer in grounding tank)
+- The multiply-by-1 is used instead of MOV (possibly for sign extension or math register clearing)
+
+#### Rung 0083 — DC Current Negative Detect
+- If N7:17 bit 15 = 1 (negative or overflow): MOV 0 → N7:17
+- Zeroes the DC current reading if it has gone negative
+
+### Rungs 0084–0103 — Display Value Scaling
+
+These rungs scale raw 16-bit values to engineering units for display. The general pattern is:
+1. MUL raw_value × multiplier (32-bit result, may overflow into S:13/S:14)
+2. Clear S:5 overflow bit
+3. DDV (Double Divide) by 32767 to get scaled 16-bit result
+4. Negative detect: if result bit 15 = 1, set to 0
+
+#### Scaling Multiplier Summary
+
+| Rung | Raw Source | Multiplier (Register) | Multiplier Value | Scaled Dest | Display Function |
+|------|-----------|----------------------|-----------------|-------------|------------------|
+| 0084–0085 | N7:12 → N7:2 | N7:22 | 10,075 | N7:2 | Regulator Voltage (kV ×10⁻²) |
+| 0086 (OSR) | N7:2 → N7:34 | N7:44 | 43 (div) | N7:34 | Plot Volts |
+| 0087 (OSR) | N7:2 → N7:37 | N7:47 | 320 (div) | N7:37 | Display Volts |
+| 0088–0089 | N7:13 → N7:3 | N7:23 | 1,000 | N7:3 | Phase Angle Monitor |
+| 0090–0091 | N7:14 → N7:4 | N7:24 | 4,600 | N7:4 | AC Current (A ×10⁻¹) |
+| 0093 (OSR) | N7:4 → N7:35 | N7:45 | 7 (div) | N7:35 | Plot Current |
+| 0094 (OSR) | N7:17 → N7:38 | N7:48 | 198 (div) | N7:38 | Display Current |
+| 0095 | N7:15 × N7:17 | — | V×I product | N7:18 | Power Calculation |
+| 0096 (OSR) | N7:18 → N7:39 | N7:49 | 162 (div) | N7:39 | Display Power (meter) |
+| 0097 (OSR) | N7:18 → N7:36 | N7:46 | 260 (div) | N7:36 | Plot Power |
+| 0098–0099 | N7:15 → N7:5 | N7:25 | 10,000 | N7:5 | Voltage Monitor 1 (kV ×10⁻²) |
+| 0100–0101 | N7:16 → N7:6 | N7:26 | 10,000 | N7:6 | Voltage Monitor 2 (kV ×10⁻²) |
+| 0102–0103 | N7:17 → N7:7 | N7:27 | 5,000 | N7:7 | DC Current (A ×10⁻¹) |
+
+#### Rung 0095 — Power Calculation Detail
+- MUL N7:15 (Voltage Mon 1) × N7:17 (DC Current) → N7:18
+- Clear S:5 overflow bit
+- DDV by 32767 → N7:18 (scaled power value)
+
+> **Note on negative detection:** Rungs 0085, 0091, 0099, 0101, 0103 all perform the pattern: if N7:x bit 15 = 1, MOV 0 → N7:x. This clamps the display values to zero if the scaling result is negative, preventing erroneous displays.
 
 ---
 
@@ -436,26 +526,73 @@ Loads operating constants:
 
 ---
 
-## Rungs 0114–0120: Miscellaneous & Subroutines
+## Rungs 0114–0119: Display, Reset, Phase Loss & Subroutine Calls
 
-### Rung 0114 — Power Calculation
-- Computes V × I product for display
+### Rung 0114 — Display Power Calculation
+- DIV N7:18 (Power) / N7:29 (divisor = 6) → N7:8 (Display Power)
+- Clear S:5 overflow bit
 
-### Rungs 0115–0118 — Status Bit Mapping to DCM
-- Various status bits mapped to O:1 DCM output words
-- Uses OSR-gated timing
+### Rung 0115 — Reset Controls on Power-Up and Reset Bit
+- **Conditions:** B3:0/11 (Reset Bit) and Momentary Reset
+- **Timer:** T4:0 (TON, 0.01s × 100 = 1 second)
+- **Control Reset from EPICS:** I:1/80 (Control Reset from 1747-DCM-FULL), gated by B3:12/8 (OSR)
+- **Power-up detection:** T4:7/TT (Power Up Contacts timing) OR S:1/15 (First Pass)
+- **Output:** COP #N7:90 → #O:3.0 (length 4) — copies temperature monitor reset data to output slot 3
 
-### Rung 0119–0120 — Subroutine Calls
-- JSR U:3 — COPY subroutine (I/O to B3)
-- JSR U:4 — SCALE subroutine
+### Rung 0116 — Enerpro Phase Loss Latch
+- **Conditions:** B3:1/11 (Contactor Closed) AND I:7/11 (Enerpro Phase Loss, inverted = loss detected)
+- **Output:** Latches B3:5/3 (_ENERPRO_PHASE_LOSS)
+- **Note:** Only triggers while contactor is closed, preventing false alarms during startup
+
+### Rung 0117 — COPY Subroutine Call (1280 ms period)
+- **Timing:** S:4/6 (1280 ms period), gated by B3:17/0 (OSR)
+- **Output:** JSR U:3 — Jump to COPY subroutine (LAD 3)
+
+### Rung 0118 — SCALE Subroutine Call (2560 ms period)
+- **Timing:** S:4/7 (2560 ms period), gated by B3:17/1 (OSR)
+- **Output:** JSR U:4 — Jump to SCALE subroutine (LAD 4)
+
+### Rung 0119 — END
+- Program end marker for LAD 2
 
 ---
 
-## Subroutine: COPY (LAD 3, 6 rungs)
+## Subroutine: COPY (LAD 3 — 6 rungs, 108 bytes)
 
-Copies I/O module data to B3 register array for touch panel display and interlock evaluation.
+**Purpose:** Copies I/O module word registers to B3 register array for GE QuickPanel touch panel display access. Called from Rung 0117 every 1280 ms.
 
-## Subroutine: SCALE (LAD 4, 5 rungs)
+**Title:** "COPY O0 AND I1 WORDS TO B3 FOR QUICKPANEL DISPLAY"
 
-Scales analog values using multipliers for display purposes.
+| LAD 3 Rung | Instruction | Source | Destination | Length | Description |
+|------------|-------------|--------|-------------|--------|-------------|
+| 0000 | COP | #I:2.0 | #B3:12 | 1 | Slot 2 inputs (1746-IO8: control power, phase ref, inductors) |
+| 0001 | COP | #I:6.0 | #B3:13 | 1 | Slot 6 inputs (1746-IB16: fiber optics, oil levels, PPS) |
+| 0002 | COP | #I:7.0 | #B3:14 | 1 | Slot 7 inputs (1746-IV16: contactor, transformer interlocks) |
+| 0003 | COP | #O:2.0 | #B3:15 | 1 | Slot 2 outputs (1746-IO8: power supply enables) |
+| 0004 | COP | #O:5.0 | #B3:16 | 1 | Slot 5 outputs (1746-OX8: SCR, contactor, crowbar relays) |
+| 0005 | END | — | — | — | Subroutine end |
+
+> **Key insight:** The B3:12–B3:16 mirror registers allow the touch panel to read all I/O status via a single B3 register block. The touch panel interlock display references identifiers like "1-B3:13/8" (Ground Tank Oil = I:6/8) which are these copied values.
+
+---
+
+## Subroutine: SCALE (LAD 4 — 5 rungs, 159 bytes)
+
+**Purpose:** Scales raw thermocouple values from the Slot 3 module (N7:100–N7:103) into display-friendly values (N7:110–N7:113) for the QuickPanel. Called from Rung 0118 every 2560 ms.
+
+**Title:** "SCALE THERMOCOUPLE VALUES FOR QUICKPANEL DISPLAY"
+
+All channels use the SCP (Scale with Parameters) instruction:
+- Input range: 0–999
+- Output range: 0–9999 (10× scale factor for display resolution)
+
+| LAD 4 Rung | Input | Output | Description | Sample Input Value |
+|------------|-------|--------|-------------|-------------------|
+| 0000 | N7:100 | N7:110 | TC1 — SCR Top Oil Temperature | 0 |
+| 0001 | N7:101 | N7:111 | TC2 — SCR Bottom Oil Temperature | 0 |
+| 0002 | N7:102 | N7:112 | TC3 — Crowbar Tank Oil Temperature | 192 |
+| 0003 | N7:103 | N7:113 | TC4 — Control Cabinet Air Temperature | 287 |
+| 0004 | END | — | Subroutine end | — |
+
+> **Note:** The sample input values shown (e.g., 192, 287 for TC3/TC4) are snapshot values from the PDF listing. Channels TC1 and TC2 show 0, which may indicate those thermocouples were disconnected during the program capture.
 

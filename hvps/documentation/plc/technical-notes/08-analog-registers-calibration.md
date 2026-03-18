@@ -107,12 +107,39 @@
 
 ### Thermocouple Readings
 
-| Register | Label | Sample Value (°C) |
-|----------|-------|-------------------|
-| N7:100 | TC Ch 0 (Phase Upper) | 55 |
-| N7:101 | TC Ch 1 (Phase Lower) | 56 |
-| N7:102 | TC Ch 2 (Crowbar Tank) | 40 |
-| N7:103 | TC Ch 3 (Control Cabinet) | 32 |
+Raw thermocouple inputs from Slot 3 (copied via COP in Rung 92):
+
+| Register | Raw Input | Label | Scaled Output | Sample Value |
+|----------|-----------|-------|---------------|-------------|
+| N7:100 | TC Ch 0 | SCR Top Oil (Phase Upper) | N7:110 = 55 | 0 (at capture) |
+| N7:101 | TC Ch 1 | SCR Bottom Oil (Phase Lower) | N7:111 = 56 | 0 (at capture) |
+| N7:102 | TC Ch 2 | Crowbar Tank Oil | N7:112 = 40 | 192 |
+| N7:103 | TC Ch 3 | Control Cabinet Air | N7:113 = 32 | 287 |
+| N7:104–N7:107 | TC Ch 4–7 | Additional sensors | (not scaled) | — |
+
+> **Note:** N7:100–N7:103 are raw values; N7:110–N7:113 are scaled (0–999 → 0–9999) by the SCALE subroutine (LAD 4) for QuickPanel display.
+
+### Temperature Interlock Thresholds
+
+| Register | Value | Function | Used In Rung |
+|----------|-------|----------|--------------|
+| N7:108 | 800 | TC Ch 0 upper temperature limit | 43 |
+| N7:109 | 800 | TC Ch 1 upper temperature limit | 43 |
+
+### Temperature Monitor Reset Data
+
+| Register | Function |
+|----------|----------|
+| N7:90–N7:93 | Temperature monitor reset data (copied to O:3.0–O:3.3 in Rung 115 during reset/power-up) |
+
+### Open Load Detection Thresholds (Rung 8)
+
+| Register | Label | Approximate Value | Function |
+|----------|-------|-------------------|----------|
+| N7:76 | Voltage threshold | ~5000 | N7:15 must exceed this for open-load detection |
+| N7:77 | DC current threshold | ~10 | N7:17 must be below this for open-load detection |
+| N7:78 | Voltage threshold 2 | ~5000 | N7:16 must exceed this for open-load detection |
+| N7:79 | AC current threshold | ~30 | N7:14 must be below this for open-load detection |
 
 ### Fuel Gauge Display Values
 

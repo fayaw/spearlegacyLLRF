@@ -22,7 +22,8 @@ The PLC controls a **SPEAR RF Klystron High Voltage Power Supply (HVPS)** used t
 | 0 | SLC 500 CPU | Main processor |
 | 1 | 1747-DCM (DCM-FULL) | Direct Communication Module — VXI/EPICS interface |
 | 2 | 1746-IO8 | 8-point digital I/O combo (12 kV, 240V power, GRD switch relay) |
-| 3 | Thermocouple Module | 8-channel temperature sensing (N7:100–N7:107) |
+| 3 | Thermocouple Module | 8-channel temperature sensing (N7:100–N7:107, 4 channels actively scaled to N7:110–N7:113) |
+| 4 | (empty) | Unused slot |
 | 5 | 1746-OX8 | 8-point relay output (SCR enable, contactor, crowbar, fast inhibit) |
 | 6 | 1746-IB16 | 16-point 24V DC digital input (fiber optic signals, oil levels, PPS) |
 | 7 | 1746-IV16 | 16-point 24V DC digital input (contactor status, transformer interlocks) |
@@ -139,8 +140,8 @@ The PLC program (**SSRLV6-4-05-10**) consists of three program files:
 | File | Name | Type | Rungs | Bytes | Description |
 |------|------|------|-------|-------|-------------|
 | 2 | (Main) | LADDER | 120 | 5,557 | Main control logic |
-| 3 | COPY | LADDER | 6 | 108 | I/O to B3 copy subroutine |
-| 4 | SCALE | LADDER | 5 | 159 | Value scaling subroutine |
+| 3 | COPY | LADDER | 6 | 108 | I/O to B3 copy subroutine — copies I:2, I:6, I:7, O:2, O:5 to B3:12–B3:16 for QuickPanel display |
+| 4 | SCALE | LADDER | 5 | 159 | Thermocouple scaling subroutine — scales N7:100–N7:103 to N7:110–N7:113 (SCP 0–999 → 0–9999) |
 
 ### Execution Timing
 

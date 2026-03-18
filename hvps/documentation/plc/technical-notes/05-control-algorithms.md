@@ -274,6 +274,46 @@ IF N7:1 negative or overflow: MOV 0 → N7:1
 
 ---
 
+## Measurement Validation Data (March 14, 2022)
+
+The following test-point measurements from `hvpsMeasurements20220314.xlsx` validate the N7:10/N7:11 relationship at various operating points:
+
+| vGap (V) | vHvps (kV) | N7:30 | N7:10 | N7:11 | N7:13 | N7:15 | TP4 (V) | TP7 (V) |
+|-----------|-----------|-------|-------|-------|-------|-------|---------|---------|
+| 2000 | 60.01 | 19570 | 19570 | 13167 | 10548 | 19702 | 6.01 | -0.3047 |
+| 2200 | 61.62 | 19932 | 19932 | 13300 | 10655 | 20190 | 6.162 | -0.3045 |
+| 2400 | 62.94 | 20266 | 20266 | 13422 | 10750 | 20655 | 6.291 | -0.3043 |
+| 2600 | 64.42 | 20616 | 20616 | 13550 | 10851 | 21104 | 6.439 | -0.3044 |
+| 2800 | 65.88 | 20980 | 20980 | 13683 | 10955 | 21540 | 6.585 | -0.3044 |
+| 3000 | 67.37 | 21350 | 21350 | 13819 | 11062 | 22068 | 6.726 | -0.3046 |
+| 3200 | 68.74 | 21721 | 21721 | 13955 | 11170 | 22543 | 6.871 | -0.3044 |
+
+**Observations:**
+- N7:30 equals N7:10 at all points (steady-state: filter has converged)
+- N7:40 = 12000, N7:41 = 6000 (confirmed constants)
+- The N7:11 calculation: `N7:11 = (N7:10 × 12000) / 32767 + 6000` matches measured values
+  - Example: N7:10 = 19570 → (19570 × 12000) / 32767 + 6000 ≈ 13163 (measured: 13167, close match)
+- TP7 voltage is nearly constant at -0.304 V across operating range
+
+### RSLogix 500 Instruction Set Context
+
+From the `PLC software discusion 1.docx`, key instruction behaviors relevant to these algorithms:
+
+| Instruction | Behavior Relevant to N7:10/N7:11 |
+|-------------|----------------------------------|
+| **MOV** | Copies single 16-bit integer from source to destination |
+| **COP** | Copies blocks of contiguous data (used for thermocouple array and register bank transfers) |
+| **MUL** | 16-bit × 16-bit with overflow into S:13 (LSW) / S:14 (MSW); N7:11 = min(32767, product) |
+| **DDV** | Divides 32-bit value in S:13:S:14 by 16-bit source; recovers full-precision result after overflow |
+| **OSR** | One Shot Rising — executes rung once per positive edge of timing bit; prevents multiple executions per scan |
+| **TON** | Timer On Delay — creates time delays after rung goes true (e.g., 3-second enable delay T4:5) |
+| **TOF** | Timer Off Delay — creates time delays after rung goes false (e.g., T4:14 current trip delay) |
+| **GRT** | Greater Than comparison — used for clamping and limit checks |
+
+> **Important B3 bit context:** B3:0/2 (Regulator On) is set in Rung 10 when SCR On Latch (B3:0/4) has been active for 3 seconds (T4:5/DN). B3:0/4 itself is set in Rung 4 after the full safety interlock chain is satisfied. The bit array B3 uses 16-bit words where `B3:x/y` denotes word x, bit y.
+
+---
+
 ## Open Questions from Original Analysis
 
 1. **Divide-by-zero in Rung 105:** Is N7:10 always guaranteed to be non-zero when Rung 105 executes?

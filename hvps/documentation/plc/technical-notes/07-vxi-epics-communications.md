@@ -147,6 +147,34 @@ The **1747-DCM (Direct Communication Module, FULL mode)** provides:
 
 ---
 
+## EPICS Value Encoding and Scaling
+
+### Signed vs Unsigned Encoding
+
+Two different encoding schemes are used for analog EPICS PVs:
+
+| Device Type | Encoding | Offset | Example |
+|-------------|----------|--------|---------|
+| **AB-SLC500DCM-Signed** | Offset binary (unsigned + 32768) | 32768 | 0xDCD3 → 56531 → (56531-32768) × 0.00305 = 72.4 kV |
+| **AB-1771DCM AI-13 bit raw** | 13-bit unsigned | 0 | 0x1B0A → 6922 × 0.02442 = 169.0... |
+
+### ESLO Scaling Factor Calculations
+
+The ESLO (Engineering Slope) converts raw integer values to engineering units:
+
+| PV | Raw Hex | Decimal | Subtract 32768 | ESLO | Result | Unit |
+|----|---------|---------|-----------------|------|--------|------|
+| HVPS Voltage | 0xDCD3 | 56531 | 23763 | 0.00305 | 72.5 | kV |
+| HVPS Current | 0xB81E | 47134 | 14366 | 0.00153 | 22.0 | A |
+| Regulator Voltage | 0xDC83 | 56451 | 23683 | 0.00305 | 72.2 | kV |
+| AC Current | 0x9D09 | 40201 | 7433 | 0.01526 | 113.4 | A |
+| RF PLC Voltage | 0x1B0A | 6922 | (no offset) | 0.02442 | 169.0 | (13-bit) |
+| RF PLC Current | 0x1711 | 5905 | (no offset) | 0.01221 | 72.1 | (13-bit) |
+
+> **Note:** The AB-SLC500DCM-Signed values use offset binary encoding where the raw value has 32768 added. The EPICS database subtracts 32768 and multiplies by ESLO to get engineering units. The AB-1771DCM values use a 13-bit raw format without offset.
+
+---
+
 ## Data Flow Summary
 
 ### EPICS → PLC (Commands)
