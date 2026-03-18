@@ -1,24 +1,27 @@
 # Klystron Heater Subsystem Upgrade Technical Note
 
-**Document ID**: SPEAR3-LLRF-TN-004
-**Title**: SCR-Based Klystron Cathode Heater Control System Upgrade
-**Author**: LLRF Upgrade Team
-**Date**: March 2026
-**Version**: 1.0
-**Status**: Design Phase
+**Document ID**: SPEAR3-LLRF-TN-004  
+**Title**: Commercial Programmable AC Supply for Klystron Cathode Heater Control System Upgrade  
+**Author**: LLRF Upgrade Team  
+**Date**: March 2026  
+**Version**: 2.0  
+**Status**: Design Phase  
 
 ---
 
 ## Executive Summary
 
-This technical note documents the design and implementation requirements for upgrading the SPEAR3 klystron cathode heater control system from the current aged variac/motor-based system to a modern SCR-based control system. The upgrade is part of the comprehensive LLRF9 system modernization and addresses reliability, precision, and integration requirements for the next generation RF control system.
+This technical note documents the design and implementation requirements for upgrading the SPEAR3 klystron cathode heater control system from the current aged variac/motor-based system to a modern **commercial programmable AC supply**. The upgrade is part of the comprehensive LLRF9 system modernization and addresses reliability, precision, and integration requirements for the next generation RF control system.
 
 **Key Upgrade Features**:
-- SCR-based heater power control with <100ms response time
-- Low-pass filter (120-180 Hz cutoff) for harmonic suppression
+- Commercial programmable AC supply with <100ms response time
+- Clean sine wave output (no custom filtering required)
 - True RMS voltage and current monitoring
 - Full EPICS integration with automated control sequences
 - Enhanced safety features and fault protection
+- **COTS solution** (no custom fabrication required)
+
+**Design Philosophy**: Rather than developing a custom SCR-based controller, the upgrade leverages a commercial off-the-shelf (COTS) programmable AC supply. This approach reduces development risk, eliminates custom fabrication costs, and provides proven reliability with >50,000 hour MTBF.
 
 ---
 
@@ -26,66 +29,58 @@ This technical note documents the design and implementation requirements for upg
 
 ### 1.1 Legacy PEP-II Era System
 
+**Reference Documentation**: `llrf/documentation/filamentHeater/FILAMENT_HEATER_TECHNICAL_NOTES.md` provides comprehensive technical analysis of the legacy system (SD-349-311-20 Rev E2).
+
 The current klystron heater control system is inherited from the PEP-II era and consists of:
 
-**Legacy vs. Upgrade System Comparison**:
+**Legacy System Architecture**:
 ```
-                    LEGACY SYSTEM (PEP-II Era)          vs.          UPGRADE SYSTEM (SCR-Based)
-                         SD-349-311-20                                    Modern Replacement
+                    LEGACY SYSTEM (PEP-II Era)
+                         SD-349-311-20
 
-┌─────────────────────────────────────────────┐    ┌─────────────────────────────────────────────┐
-│              CONTROL METHOD                 │    │              CONTROL METHOD                 │
-│  ┌─────────────────┐  ┌─────────────────┐   │    │  ┌─────────────────┐  ┌─────────────────┐   │
-│  │ Allen-Bradley   │  │ Motor-Driven    │   │    │  │ EPICS IOC       │  │ SCR Zero-       │   │
-│  │ PLC             │─►│ Variac          │   │    │  │ Python          │─►│ Crossing        │   │
-│  │ (Limited I/O)   │  │ (Mechanical)    │   │    │  │ Coordinator     │  │ Control         │   │
-│  └─────────────────┘  └─────────────────┘   │    │  └─────────────────┘  └─────────────────┘   │
-│                                             │    │                                             │
-│              POWER STAGE                    │    │              POWER STAGE                    │
-│  ┌─────────────────┐  ┌─────────────────┐   │    │  ┌─────────────────┐  ┌─────────────────┐   │
-│  │ 120 VAC         │  │ SS Relay        │   │    │  │ 120 VAC         │  │ SCR Power       │   │
-│  │ Phase C         │─►│ ON/OFF Only     │   │    │  │ Phase C         │─►│ Stage           │   │
-│  │                 │  │                 │   │    │  │                 │  │ (Proportional)  │   │
-│  └─────────────────┘  └─────────────────┘   │    │  └─────────────────┘  └─────────────────┘   │
-│           │                    │            │    │           │                    │            │
-│           ▼                    ▼            │    │           ▼                    ▼            │
-│  ┌─────────────────┐  ┌─────────────────┐   │    │  ┌─────────────────┐  ┌─────────────────┐   │
-│  │ Variac V1       │  │ Toroidal        │   │    │  │ LC Low-Pass     │  │ Isolation       │   │
-│  │ 1 KVA           │─►│ Transformer     │   │    │  │ Filter          │─►│ Transformer     │   │
-│  │ 0-140 VAC       │  │ 10:1 Ratio      │   │    │  │ (120-180 Hz)    │  │ (Retained)      │   │
-│  └─────────────────┘  └─────────────────┘   │    │  └─────────────────┘  └─────────────────┘   │
-│           │                    │            │    │           │                    │            │
-│           ▼                    ▼            │    │           ▼                    ▼            │
-│  ┌─────────────────┐  ┌─────────────────┐   │    │  ┌─────────────────┐  ┌─────────────────┐   │
-│  │ Motor M1        │  │ ~6.8 V RMS     │   │    │  │ True RMS        │  │ 6.8V/73A Output  │   │
-│  │ UP/DOWN         │  │ ~73 A           │   │    │  │ Monitoring      │  │ Precise         │   │
-│  │ Limit Switches  │  │ to Cathode      │   │    │  │ (AD637)         │  │ Regulation      │   │
-│  └─────────────────┘  └─────────────────┘   │    │  └─────────────────┘  └─────────────────┘   │
-│                                             │    │                                             │
-│              MONITORING                     │    │              MONITORING                     │
-│  ┌─────────────────┐  ┌─────────────────┐   │    │  ┌─────────────────┐  ┌─────────────────┐   │
-│  │ Texmate CT      │  │ Front Panel     │   │    │  │ Hall Effect     │  │ Digital         │   │
-│  │ Analog Meters   │  │ LEDs DS1/DS2    │   │    │  │ Sensors         │  │ Display         │   │
-│  │ Hours Counter   │  │ Manual Switches │   │    │  │ 16-bit ADC      │  │ EPICS PVs       │   │
-│  └─────────────────┘  └─────────────────┘   │    │  └─────────────────┘  └─────────────────┘   │
-└─────────────────────────────────────────────┘    └─────────────────────────────────────────────┘
-
-        PERFORMANCE COMPARISON
-
-Response Time:     Seconds to Minutes          vs.         <100 milliseconds
-Regulation:        ±1-2% (mechanical)          vs.         ±0.1% (digital)
-Reliability:       Mechanical wear             vs.         Solid-state
-Integration:       Limited EPICS               vs.         Full EPICS IOC
-Maintenance:       Regular service required    vs.         Minimal maintenance
-Harmonics:         Clean (variac)              vs.         Filtered (LC filter)
-Safety:            Basic protection            vs.         Comprehensive interlocks
+┌─────────────────────────────────────────────────┐
+│              CONTROL METHOD                     │
+│  ┌─────────────────┐  ┌─────────────────┐       │
+│  │ Allen-Bradley   │  │ Motor-Driven    │       │
+│  │ PLC             │►│ Variac          │       │
+│  │ (Limited I/O)   │  │ (Mechanical)    │       │
+│  └─────────────────┘  └─────────────────┘       │
+│                                                 │
+│              POWER STAGE                        │
+│  ┌─────────────────┐  ┌─────────────────┐       │
+│  │ 120 VAC         │  │ SS Relay        │       │
+│  │ Phase C         │►│ ON/OFF Only     │       │
+│  │                 │  │                 │       │
+│  └─────────────────┘  └─────────────────┘       │
+│           │                    │                │
+│           ▼                    ▼                │
+│  ┌─────────────────┐  ┌─────────────────┐       │
+│  │ Variac V1       │  │ Toroidal        │       │
+│  │ 1 KVA           │►│ Transformer     │       │
+│  │ 0-140 VAC       │  │ 10:1 Ratio      │       │
+│  └─────────────────┘  └─────────────────┘       │
+│           │                    │                │
+│           ▼                    ▼                │
+│  ┌─────────────────┐  ┌─────────────────┐       │
+│  │ Motor M1        │  │ ~6.8 V RMS     │       │
+│  │ UP/DOWN         │  │ ~73 A           │       │
+│  │ Limit Switches  │  │ to Cathode      │       │
+│  └─────────────────┘  └─────────────────┘       │
+│                                                 │
+│              MONITORING                         │
+│  ┌─────────────────┐  ┌─────────────────┐       │
+│  │ Texmate CT      │  │ Front Panel     │       │
+│  │ Analog Meters   │  │ LEDs DS1/DS2    │       │
+│  │ Hours Counter   │  │ Manual Switches │       │
+│  └─────────────────┘  └─────────────────┘       │
+└─────────────────────────────────────────────────┘
 ```
 
-**Current Specifications** (from comprehensive system analysis - SD-349-311-20):
+**Current Specifications** (verified from SD-349-311-20):
 ```
 Input Power: 120VAC, Phase C (from Hoffman Box B118)
-Output: ~6.8V RMS / ~73A actual operational (vs. 4.84V theoretical)
-Power Rating: ~500W actual operation (vs. ~100W theoretical)
+Output: ~6.8V RMS / ~73A actual operational
+Power Rating: ~500W actual operation (1000W max capability)
 Isolation: Transformer isolated for HV safety (up to 90 kV)
 Control: J1 connector → Fiber Optic → Allen-Bradley PLC → EPICS
 Variac: 1.00 KVA, 0-140 VAC motor-driven (V1)
@@ -97,7 +92,7 @@ Monitoring: Texmate CT, voltage divider, front panel meters
 
 **Performance Issues**:
 - **Slow Response**: Motor-driven variac requires seconds to minutes for adjustment
-- **Limited Precision**: Mechanical variac resolution ~1-2% of full scale
+- **Limited Precision**: Mechanical variac resolution ~±1% of full scale
 - **Aging Components**: 25+ year old system with increasing failure rates
 - **Manual Operation**: Requires operator intervention for power adjustments
 
@@ -119,12 +114,12 @@ Monitoring: Texmate CT, voltage divider, front panel meters
 
 ### 2.1 Electrical Specifications
 
-**SPEAR3 Klystron Heater Requirements** (based on current system analysis):
+**SPEAR3 Klystron Heater Requirements** (based on 25+ years operational data):
 ```
-Heater Voltage: 6.8V actual operational (5V nominal design)
-Heater Current: 73A actual operational (20A theoretical)
-Power Rating: 500W actual operational (100W theoretical)
-Regulation: ±0.1% (improved from current ±0.3%)
+Heater Voltage: 6.8V RMS (actual operational)
+Heater Current: 73A (actual operational)
+Power Rating: 500W nominal operation
+Regulation: ±0.1% (improved from current ±1%)
 Isolation: Up to 90 kV (HVPS cathode voltage)
 Response Time: <100ms (vs. seconds for variac)
 ```
@@ -154,14 +149,27 @@ Response Time: <100ms (vs. seconds for variac)
 
 ---
 
-## 3. SCR-Based Control System Design
+## 3. Commercial Programmable AC Supply Solution
 
-### 3.1 Control Architecture
+### 3.1 COTS Approach Advantages
 
-**Complete SCR-Based System Architecture**:
+**Design Philosophy** (from SPEAR3-LLRF-PDR-001):
+> "The parts cost is higher but there is no fabrication cost or effort — a fully COTS solution."
+
+**Key Benefits**:
+- **No Custom Fabrication**: Eliminates design, development, and manufacturing costs
+- **Proven Reliability**: Commercial units typically >50,000 hour MTBF
+- **Clean Sine Wave Output**: No harmonic filtering required
+- **Built-in Protection**: Overcurrent, overvoltage, thermal protection
+- **Standard Interfaces**: Ethernet, RS-485, analog I/O options
+- **Vendor Support**: Technical support, spare parts, documentation
+
+### 3.2 Commercial AC Supply Architecture
+
+**Complete Commercial AC Supply System Architecture**:
 ```
                         SPEAR3 KLYSTRON HEATER UPGRADE ARCHITECTURE
-                              (SCR-Based Replacement Design)
+                              (Commercial AC Supply Design)
 
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
 │                              CONTROL LAYER                                          │
@@ -178,666 +186,230 @@ Response Time: <100ms (vs. seconds for variac)
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
 │                             POWER CONTROL LAYER                                     │
 │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐                 │
-│  │ SCR Controller  │    │ Gate Drive      │    │ Zero-Crossing   │                 │
-│  │ Microcontroller │───►│ Optoisolators   │───►│ Detection       │                 │
-│  │ (ARM Cortex-M4) │    │ (MOC3021)       │    │ Logic           │                 │
+│  │ Commercial      │    │ Ethernet/       │    │ RF MPS          │                 │
+│  │ Programmable    │    │ RS-485          │    │ Integration     │                 │
+│  │ AC Supply       │◄──►│ Interface       │◄──►│ (Permit Logic)  │                 │
+│  │ (COTS Unit)     │    │ Module          │    │                 │                 │
 │  └─────────────────┘    └─────────────────┘    └─────────────────┘                 │
 │           │                       │                       │                        │
 │           ▼                       ▼                       ▼                        │
 │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐                 │
-│  │ Safety          │    │ SCR Power       │    │ Current/Voltage │                 │
-│  │ Interlocks      │    │ Stage           │    │ Monitoring      │                 │
-│  │ (Hardware)      │    │ (BTA20-600B)    │    │ (Hall Effect)   │                 │
+│  │ True RMS        │    │ Safety          │    │ Status          │                 │
+│  │ Monitoring      │    │ Interlocks      │    │ Indicators      │                 │
+│  │ (Built-in)      │    │ (Hardware)      │    │ (Local/Remote)  │                 │
 │  └─────────────────┘    └─────────────────┘    └─────────────────┘                 │
 └─────────────────────────────────────────────────────────────────────────────────────┘
                                    │
-                                   ▼ (Controlled AC Power)
+                                   ▼ (Clean AC Power)
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
 │                              POWER CONDITIONING                                     │
 │  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐                 │
-│  │ 120 VAC         │    │ LC Low-Pass     │    │ Isolation       │                 │
-│  │ Input           │───►│ Filter          │───►│ Transformer     │                 │
-│  │ (Phase C)       │    │ (120-180 Hz     │    │ (Retained from  │                 │
-│  │                 │    │ Cutoff)         │    │ Legacy Design)  │                 │
-│  └─────────────────┘    └─────────────────┘    └─────────────────┘                 │
-│                                   │                       │                        │
-│                                   ▼                       ▼                        │
-│  ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐                 │
-│  │ Harmonic        │    │ True RMS        │    │ 6.8V/73A Output  │                 │
-│  │ Analysis        │    │ Monitoring      │    │ to Klystron     │                 │
-│  │ (Spectrum)      │    │ (AD637)         │    │ Cathode         │                 │
+│  │ 120 VAC         │    │ Isolation       │    │ 6.8V/73A Output │                 │
+│  │ Input           │───►│ Transformer     │───►│ Precise         │                 │
+│  │ (Phase C)       │    │ (Retained from  │    │ Regulation      │                 │
+│  │                 │    │ Legacy System)  │    │                 │                 │
 │  └─────────────────┘    └─────────────────┘    └─────────────────┘                 │
 └─────────────────────────────────────────────────────────────────────────────────────┘
-
-                              UPGRADE ADVANTAGES
-
-    Response Time:    <100ms (vs. seconds for variac)
-    Regulation:       ±0.1% (vs. ±1-2% for variac)
-    Reliability:      Solid-state (vs. mechanical wear)
-    Integration:      Full EPICS (vs. limited monitoring)
-    Maintenance:      Minimal (vs. regular mechanical service)
 ```
 
-### 3.2 SCR Controller Specifications
+### 3.3 Key Design Considerations
 
-**Power Stage Design**:
-```
-Input: 120VAC, 60 Hz, single phase
-Output: 0-6.8V, 0-73A (continuously variable)
-Control Method: Zero crossing switching (recommended)
-Switching Frequency: 60 Hz (line frequency)
-Power Rating: 150W (25% overrating)
-Efficiency: >95% (solid-state switching)
-```
+**Commercial AC Supply Selection Criteria**:
+- **Power Rating**: ≥1000W (2x operational requirement for headroom)
+- **Voltage Range**: 0-150V AC (covers full operational range)
+- **Current Capability**: ≥10A (adequate for primary side of 10:1 transformer)
+- **Regulation**: ±0.1% or better
+- **Response Time**: <100ms for setpoint changes
+- **Communication**: Ethernet and/or RS-485 interface
+- **Protection**: Built-in overcurrent, overvoltage, thermal protection
 
-**Control Methods Comparison**:
-
-| Method | Advantages | Disadvantages | Recommendation |
-|--------|------------|---------------|----------------|
-| **Phase Angle Control** | Continuous power adjustment, smooth control | Higher harmonic content, EMI issues | Not recommended |
-| **Zero Crossing Control** | Lower harmonics, reduced EMI, simple control | Discrete power levels, some ripple | **Recommended** |
-
-**Zero Crossing Control Characteristics**:
-- 25% output: 1 cycle ON, 3 cycles OFF
-- 50% output: 1 cycle ON, 1 cycle OFF
-- 75% output: 3 cycles ON, 1 cycle OFF
-- 100% output: All cycles ON
-- Resolution: ~1.6% (1/60 cycle control)
-
-### 3.3 SCR Selection and Ratings
-
-**SCR Specifications**:
-```
-Voltage Rating: 600V (5x safety margin for 120VAC)
-Current Rating: 130A (1.75x safety margin for 73A)
-Gate Trigger: 5V, 50mA typical (gate signal unchanged)
-Turn-on Time: <1μs
-Turn-off Time: <50μs (at zero crossing)
-Package: TO-220 or TO-247 with heat sink
-```
-
-**Recommended Devices**:
-- **Primary**: STMicroelectronics BTA100-600B (100A, 600V, TO-220)
-- **Alternative**: Vishay VS-100TTS12 (100A, 1200V, TO-220)
-- **Gate Driver**: Fairchild MOC3021 optoisolator + gate resistor
+**Integration Features**:
+- **EPICS Compatibility**: Standard communication protocols
+- **Remote Monitoring**: Voltage, current, power, status via network
+- **Automated Sequences**: Programmable ramp profiles
+- **Fault Reporting**: Detailed fault codes and status
+- **Safety Interlocks**: Hardware and software protection layers
 
 ---
 
-## 4. Harmonic Analysis and Filtering
+## 4. System Integration
 
-### 4.1 Harmonic Generation
+### 4.1 RF MPS Integration
 
-**Zero Crossing Control Harmonic Content**:
-- **Fundamental**: 60 Hz (line frequency)
-- **Primary Harmonics**: 120 Hz, 180 Hz, 240 Hz, 300 Hz
-- **Worst Case**: 50% loading produces highest interharmonic content
-- **Harmonic Type**: Non-integer harmonics (interharmonics)
+**Heater Controller Role in RF MPS** (from PDR):
+> "Heater controller is part of RF MPS — klystron does not receive a permit to operate unless the heater has reached power level and timed out."
 
-**Harmonic Impact**:
-- **Klystron Performance**: Heater voltage ripple affects cathode emission stability
-- **EMI Concerns**: Harmonic radiation can interfere with sensitive RF measurements
-- **Power Quality**: Harmonics can cause voltage distortion in facility power
+**Integration Points**:
+- **Permit Logic**: Heater "ready" status required for RF permit
+- **Hardware Monitoring**: RMS voltage and current monitored by MPS
+- **Fault Response**: Heater faults trigger RF system protective actions
+- **Emergency Shutdown**: MPS emergency stop triggers immediate heater shutdown
 
-### 4.2 Low-Pass Filter Design
+### 4.2 HVPS Coordination
 
-**Filter Requirements**:
+**Critical Interlocks**:
+- **Startup Sequence**: Heater must be at operating temperature before HVPS enable
+- **Shutdown Sequence**: HVPS must be off before heater cooldown begins
+- **Fault Coordination**: HVPS faults trigger heater standby mode
+- **Status Sharing**: Heater status available to HVPS control logic
+
+### 4.3 EPICS Integration
+
+**Process Variables (PVs)**:
 ```
-Cutoff Frequency: 120-180 Hz (targets primary harmonics)
-Power Handling: 120W continuous
-Load Impedance: 0.093Ω (6.8V/73A)
-Attenuation: >20 dB at 120 Hz, >40 dB at 240 Hz
-Insertion Loss: <0.5 dB at 60 Hz
-```
+# Monitoring PVs
+SRF1:HTR:VOLT:RMS      # RMS voltage readback (V)
+SRF1:HTR:CURR:RMS      # RMS current readback (A)
+SRF1:HTR:PWR:RMS       # Calculated power (W)
+SRF1:HTR:STATUS        # System status
+SRF1:HTR:FAULT         # Fault conditions
 
-**Recommended Filter Topology - LC Low-Pass (2nd Order)**:
-```
-                        SCR HARMONIC FILTER DESIGN
-                           (120-180 Hz Cutoff)
-
-    SCR Output                                                    To Isolation
-    (Harmonics)                                                   Transformer
-         │                                                             │
-         ▼                                                             ▼
-    ┌─────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-    │ SCR     │    │ L1 = 10 mH  │    │ C1 = 100 μF │    │ Clean AC    │
-    │ Power   │───►│ Air Core    │───►│ 250V Rating │───►│ to Klystron │
-    │ Stage   │    │ 100A Rating  │    │ Low ESR     │    │ Heater      │
-    └─────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-                           │                   │
-                           └─────────┬─────────┘
-                                     │
-                                     ▼
-                              fc = 1/(2π√LC) ≈ 159 Hz
-
-                        FREQUENCY RESPONSE ANALYSIS
-
-    Attenuation vs. Frequency:
-    ┌─────────────────────────────────────────────────────────────┐
-    │  0 dB ┤                                                     │
-    │       │ ████████████                                        │
-    │ -10 dB┤             ████                                    │
-    │       │                 ████                                │
-    │ -20 dB┤                     ████ ← 120 Hz (>20 dB)         │
-    │       │                         ████                        │
-    │ -30 dB┤                             ████                    │
-    │       │                                 ████                │
-    │ -40 dB┤                                     ████ ← 240 Hz   │
-    │       │                                         ████        │
-    │ -50 dB┤                                             ████    │
-    │       └┬────┬────┬────┬────┬────┬────┬────┬────┬────┬───    │
-    │        60  120  180  240  300  360  420  480  540  600 Hz  │
-    └─────────────────────────────────────────────────────────────┘
-```
-
-**Alternative Multi-Stage Filter** (Higher Performance)**:
-```
-
-                        DUAL-STAGE LC FILTER DESIGN
-                         (Enhanced Harmonic Rejection)
-
-    SCR Output                                                    To Isolation
-    (Harmonics)                                                   Transformer
-         │                                                             │
-         ▼                                                             ▼
-    ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────────┐
-    │ SCR     │  │L1=5 mH  │  │C1=200μF │  │L2=2 mH  │  │ Ultra-Clean │
-    │ Power   │─►│Air Core │─►│250V     │─►│Air Core │─►│ AC Output   │
-    │ Stage   │  │100A      │  │Low ESR  │  │100A      │  │ <1% THD     │
-    └─────────┘  └─────────┘  └─────────┘  └─────────┘  └─────────────┘
-                      │           │           │
-                      └─────┬─────┘           │
-                            │                 │
-                     Stage 1: fc ≈ 159 Hz     │
-                                              │
-                                       Stage 2: fc ≈ 225 Hz
-
-    Overall Response: >60 dB attenuation at 240 Hz
-    Sharper rolloff, better harmonic suppression
-```
-
-**Component Specifications**:
-
-**Inductor Requirements**:
-- **Core Type**: Air core (prevents saturation at 73A DC)
-- **Wire Gauge**: AWG 4 (85A continuous rating, suitable for 73A)
-- **DC Resistance**: <10 mΩ (minimize power loss)
-- **Self-Resonant Frequency**: >1 kHz
-- **Mechanical**: Potted or encapsulated for vibration resistance
-
-**Capacitor Requirements**:
-- **Type**: Film capacitor (polypropylene preferred)
-- **Voltage Rating**: 250V (safety margin for transients)
-- **ESR**: <10 mΩ at 120 Hz
-- **Ripple Current**: >5A RMS at 120 Hz
-- **Temperature**: -40°C to +85°C operating range
-
----
-
-## 5. RMS Monitoring System
-
-### 5.1 Measurement Requirements
-
-**Monitoring Specifications**:
-```
-RMS Voltage: 0-10V range, ±0.1% accuracy
-RMS Current: 0-100A range, ±0.1% accuracy
-Power Calculation: V × I with <1% total error
-Update Rate: 10 Hz for EPICS integration
-Resolution: 16-bit ADC (0.0015% of full scale)
-```
-
-### 5.2 True RMS Measurement Design
-
-**Voltage Measurement**:
-```
-Input: 0-10V from voltage divider
-RMS Converter: Analog Devices AD637 (0.2% accuracy)
-Output: 0-10V DC proportional to RMS input
-ADC: 16-bit, 0-10V range
-Isolation: Transformer coupled for HV safety
-```
-
-**Current Measurement**:
-```
-Sensor: Hall effect current transducer (LEM HAS 50-S)
-Range: ±100A, 1:1000 ratio
-Output: ±100mA proportional to input current
-RMS Converter: AD637 with current-to-voltage conversion
-ADC: 16-bit, ±100mA range
-```
-
-**Power Calculation**:
-```
-Method: Digital multiplication (V_RMS × I_RMS)
-Processor: ARM Cortex-M4 microcontroller
-Accuracy: <1% total error including sensor and ADC errors
-Update Rate: 10 Hz synchronized with EPICS
-```
-
-### 5.3 EPICS Integration
-
-**Process Variable Database**:
-```
-SRF1:KLYS:HEATER:VOLT:RMS      # RMS voltage readback (V)
-SRF1:KLYS:HEATER:CURR:RMS      # RMS current readback (A)
-SRF1:KLYS:HEATER:PWR:RMS       # Calculated power (W)
-SRF1:KLYS:HEATER:CTRL:SP       # Power setpoint (0-100%)
-SRF1:KLYS:HEATER:CTRL:RB       # Power readback (%)
-SRF1:KLYS:HEATER:MODE          # Operating mode
-SRF1:KLYS:HEATER:STATUS        # System status
-SRF1:KLYS:HEATER:FAULT         # Fault conditions
-```
-
-**Control Interface**:
-```
-SRF1:KLYS:HEATER:ENABLE        # System enable/disable
-SRF1:KLYS:HEATER:RAMP:RATE     # Power ramp rate (%/s)
-SRF1:KLYS:HEATER:RAMP:START    # Start ramp sequence
-SRF1:KLYS:HEATER:RAMP:STOP     # Stop ramp sequence
-SRF1:KLYS:HEATER:EMERGENCY     # Emergency shutdown
+# Control PVs
+SRF1:HTR:ENABLE        # System enable/disable
+SRF1:HTR:VOLT:SP       # Voltage setpoint (V)
+SRF1:HTR:RAMP:RATE     # Voltage ramp rate (V/s)
+SRF1:HTR:RAMP:START    # Start ramp sequence
+SRF1:HTR:RAMP:STOP     # Stop ramp sequence
+SRF1:HTR:EMERGENCY     # Emergency shutdown
 ```
 
 ---
 
-## 6. Safety Systems and Fault Protection
+## 5. Operational Modes and Sequences
 
-### 6.1 Safety Features
+### 5.1 Operating Modes
 
-**Primary Protection Systems**:
-- **Overcurrent Protection**: Electronic current limiting at 22A (110% of rating)
-- **Overvoltage Protection**: Voltage limiting at 6V (120% of rating)
-- **Thermal Monitoring**: Heater temperature feedback via thermocouple
-- **Isolation Monitoring**: HV isolation integrity verification
-- **Ground Fault Detection**: Leakage current monitoring
+**1. OFF**: System disabled, no power to heater
+- Heater Power: 0W
+- Status: DISABLED
+- Permit: Not available
 
-**Emergency Shutdown Capabilities**:
-- **Hardware Interlock**: Independent hardware shutdown path
-- **Software Command**: EPICS emergency stop command
-- **Manual Switch**: Physical emergency stop button
-- **Automatic Triggers**: Fault condition automatic shutdown
-- **Response Time**: <10ms from fault detection to power removal
+**2. STANDBY**: Reduced power for cathode maintenance
+- Heater Power: 125W (25% of nominal)
+- Purpose: Maintain cathode temperature above ambient
+- Status: STANDBY
 
-### 6.2 Fault Detection and Response
+**3. WARMUP**: Controlled ramp to operating power
+- Heater Power: Ramping from 125W to 500W
+- Ramp Rate: Programmable (typically 2-5 minutes)
+- Status: WARMING
 
-**Monitored Fault Conditions**:
+**4. OPERATING**: Full operational power
+- Heater Power: 500W (100% of nominal)
+- Status: READY
+- Permit: Available for RF operation
 
-| Fault Type | Detection Method | Response | Recovery |
-|------------|------------------|----------|----------|
-| **Overcurrent** | Current sensor >22A | Immediate shutdown | Manual reset required |
-| **Overvoltage** | Voltage sensor >6V | Immediate shutdown | Automatic retry after 5s |
-| **Thermal** | Thermocouple >1100°C | Gradual power reduction | Automatic when temp <1050°C |
-| **Isolation** | Leakage current >1mA | Immediate shutdown | Manual inspection required |
-| **Communication** | EPICS timeout >10s | Hold last setpoint | Automatic when comm restored |
-| **Power Supply** | DC rail monitoring | Immediate shutdown | Automatic when power restored |
+**5. COOLDOWN**: Controlled power reduction
+- Heater Power: Ramping from 500W to 125W
+- Status: COOLING
 
-**Fault Logging**:
-- **Event Recording**: All faults logged with timestamp
-- **Trend Data**: Continuous monitoring data archived
-- **Alarm Generation**: EPICS alarms for all fault conditions
-- **Email Notification**: Critical faults trigger email alerts
+### 5.2 Automated Sequences
 
----
-
-## 7. Operational Modes and Control Sequences
-
-### 7.1 Operating Modes
-
-**Mode Definitions**:
-
-1. **OFF**: System disabled, no power to heater
-   - Heater Power: 0W
-   - Status: Safe for maintenance
-   - Transitions: Can go to STANDBY
-
-2. **STANDBY**: Reduced power for cathode maintenance
-   - Heater Power: 25W (25% of nominal)
-   - Purpose: Maintain cathode temperature above ambient
-   - Transitions: Can go to WARMUP or OFF
-
-3. **WARMUP**: Controlled ramp to operating temperature
-   - Heater Power: Ramping from 125W to 500W
-   - Duration: 5 minutes typical
-   - Ramp Rate: 15W/minute (configurable)
-   - Transitions: Automatic to OPERATING when complete
-
-4. **OPERATING**: Full power for normal klystron operation
-   - Heater Power: 500W (100% of nominal)
-   - Regulation: ±0.1% stability
-   - Transitions: Can go to COOLDOWN or emergency OFF
-
-5. **COOLDOWN**: Controlled ramp-down for shutdown
-   - Heater Power: Ramping from 500W to 125W
-   - Duration: 3 minutes typical
-   - Ramp Rate: 25W/minute (configurable)
-   - Transitions: Automatic to STANDBY when complete
-
-### 7.2 Automated Control Sequences
-
-**Startup Sequence** (OFF → OPERATING):
+**Startup Sequence**:
 ```python
-def startup_sequence():
-    # Phase 1: Enable system
+def heater_startup():
     set_mode("STANDBY")
-    wait_for_stable(30)  # 30 second stabilization
-
-    # Phase 2: Begin warmup
+    wait_for_stable_power(125W, timeout=60s)
+    
     set_mode("WARMUP")
-    ramp_power(125, 500, rate=75)  # 125W to 500W at 75W/min
-
-    # Phase 3: Verify operation
+    ramp_power(125W → 500W, rate=2W/s)
+    
     if heater_stable() and temp_in_range():
         set_mode("OPERATING")
         log_event("Heater startup complete")
-    else:
-        emergency_shutdown()
-        log_fault("Startup verification failed")
 ```
 
-**Shutdown Sequence** (OPERATING → OFF):
+**Shutdown Sequence**:
 ```python
-def shutdown_sequence():
-    # Phase 1: Begin cooldown
+def heater_shutdown():
+    if hvps_enabled():
+        raise Exception("HVPS must be disabled before heater shutdown")
+    
     set_mode("COOLDOWN")
-    ramp_power(500, 125, rate=125)  # 500W to 125W at 125W/min
-
-    # Phase 2: Standby period
+    ramp_power(500W → 125W, rate=1W/s)
+    
+    wait_for_stable_power(125W, timeout=300s)
     set_mode("STANDBY")
-    wait_for_stable(60)  # 1 minute cooldown
-
-    # Phase 3: Complete shutdown
-    set_mode("OFF")
     log_event("Heater shutdown complete")
 ```
 
 **Emergency Shutdown**:
 ```python
 def emergency_shutdown():
-    # Immediate power removal
-    disable_scr_gates()
-    set_power_setpoint(0)
+    disable_output()
     set_mode("OFF")
-
-    # Log emergency event
-    log_fault("Emergency shutdown activated")
     send_alarm("HEATER_EMERGENCY_SHUTDOWN")
-
-    # Require manual reset
-    require_manual_reset()
 ```
 
 ---
 
-## 8. Integration with LLRF9 Upgrade System
+## 6. Implementation Plan
 
-### 8.1 System Architecture Integration
+### 6.1 Hardware Procurement
 
-**Control Hierarchy**:
-```
-LLRF9 System Coordinator (Python/EPICS)
-    ├── RF Control Loops
-    ├── HVPS Control
-    ├── Tuner Control
-    └── Heater Control ← New SCR-based system
-```
+**Commercial AC Supply Specifications**:
+- **Vendor Options**: Evaluate suppliers (e.g., Magna-Power, Sorensen, TDK-Lambda)
+- **Power Rating**: 1000W minimum
+- **Voltage Range**: 0-150V AC
+- **Communication**: Ethernet + RS-485
+- **Protection**: Comprehensive built-in protection
 
-**Interface Requirements**:
-- **EPICS Integration**: Standard EPICS IOC with process variable database
-- **Network Communication**: Ethernet connection to LLRF9 coordinator
-- **Timing Synchronization**: 10 Hz update rate synchronized with other subsystems
-- **Status Reporting**: Real-time status and fault reporting to main coordinator
+### 6.2 Integration Timeline
 
-### 8.2 Coordination with Other Subsystems
+**Phase 1: Procurement and Testing**
+- Commercial AC supply procurement
+- Bench testing with dummy load
+- Communication interface development
 
-**HVPS Coordination**:
-- **Startup Sequence**: Heater must be at operating temperature before HVPS enable
-- **Shutdown Sequence**: HVPS must be off before heater cooldown begins
-- **Fault Coordination**: HVPS faults trigger heater standby mode
-- **Status Sharing**: Heater status available to HVPS control logic
+**Phase 2: Software Development**
+- EPICS IOC development
+- Python coordinator integration
+- Automated sequence programming
 
-**RF System Coordination**:
-- **Klystron Protection**: RF drive disabled if heater not at operating temperature
-- **Performance Optimization**: Heater power fine-tuning based on klystron performance
-- **Fault Response**: RF system faults can trigger heater protective actions
+**Phase 3: System Integration**
+- Installation in test environment
+- Integration with RF MPS
+- HVPS coordination testing
 
-**Machine Protection System (MPS)**:
-- **Interlock Integration**: Heater faults contribute to MPS decision logic
-- **Permit System**: Heater "ready" status required for RF permit
-- **Emergency Response**: MPS emergency stop triggers immediate heater shutdown
+**Phase 4: Commissioning**
+- Installation at SPEAR3
+- System commissioning
+- Operational validation
 
 ---
 
-## 9. Performance Specifications and Validation
+## 7. Conclusion
 
-### 9.1 Performance Targets
+The commercial programmable AC supply approach for the SPEAR3 klystron heater upgrade provides significant advantages over both the legacy variac system and custom SCR-based alternatives:
 
-**Electrical Performance**:
-```
-Voltage Regulation: ±0.1% (improvement from ±0.3%)
-Current Regulation: ±0.1%
-Power Stability: ±0.2% over 8 hours
-Response Time: <100ms (vs. seconds for variac)
-Efficiency: >95% (SCR switching + filter losses)
-```
+**Key Benefits**:
+- **Proven Reliability**: Commercial units with >50,000 hour MTBF
+- **No Development Risk**: COTS solution eliminates custom design risks
+- **Clean Power Output**: No harmonic filtering required
+- **Fast Response**: <100ms vs. seconds for legacy system
+- **Full Integration**: Complete EPICS integration with automated sequences
+- **Cost Effective**: Higher parts cost offset by elimination of development effort
 
-**Harmonic Performance**:
-```
-THD (Total Harmonic Distortion): <5%
-120 Hz Component: <2% of fundamental
-240 Hz Component: <1% of fundamental
-EMI Compliance: FCC Part 15 Class A
-```
+**Performance Improvements**:
+- **Response Time**: Seconds-Minutes → <100ms (100-1000x improvement)
+- **Regulation**: ±1% → ±0.1% (10x improvement)
+- **Reliability**: Mechanical wear → Solid-state (significant improvement)
+- **Integration**: Limited EPICS → Full automation (complete transformation)
 
-**Reliability Targets**:
-```
-MTBF (Mean Time Between Failures): >50,000 hours
-MTTR (Mean Time To Repair): <2 hours
-Availability: >99.9% (excluding scheduled maintenance)
-Component Life: >10 years for power electronics
-```
-
-### 9.2 Validation Testing Plan
-
-**Phase 1: Component Testing**:
-- SCR switching characteristics and thermal performance
-- Filter frequency response and power handling
-- RMS measurement accuracy and linearity
-- EPICS interface functionality and timing
-
-**Phase 2: System Integration Testing**:
-- Full system testing with dummy load
-- Harmonic analysis and EMI compliance
-- Fault injection and safety system response
-- Long-term stability and thermal cycling
-
-**Phase 3: Operational Validation**:
-- Installation and commissioning with actual klystron
-- Performance comparison with legacy system
-- Operator training and procedure validation
-- Long-term monitoring and reliability assessment
+This approach aligns with the overall LLRF upgrade philosophy of leveraging proven commercial solutions where possible while ensuring seamless integration with the modernized control system.
 
 ---
 
-## 10. Implementation Plan and Schedule
+## 8. References
 
-### 10.1 Project Phases
-
-**Phase 1: Design and Procurement** (3 months)
-- Finalize SCR controller circuit design
-- Design and specify low-pass filter components
-- Develop RMS monitoring system hardware
-- Create EPICS IOC software and PV database
-- Procure all components and materials
-
-**Phase 2: Development and Testing** (4 months)
-- Build and test SCR controller prototype
-- Construct and validate filter performance
-- Integrate RMS monitoring system
-- Develop and test EPICS interface
-- Conduct comprehensive system testing
-
-**Phase 3: Integration and Validation** (2 months)
-- Integration with LLRF9 upgrade system
-- Safety system integration and testing
-- EMI compliance testing and certification
-- Documentation and training material development
-
-**Phase 4: Installation and Commissioning** (1 month)
-- Install during scheduled maintenance outage
-- Parallel operation with legacy system
-- Performance validation and optimization
-- Operator training and system handover
-
-### 10.2 Risk Assessment and Mitigation
-
-**Technical Risks**:
-
-| Risk | Probability | Impact | Mitigation Strategy |
-|------|-------------|--------|-------------------|
-| **SCR switching noise** | Medium | Medium | Extensive filtering, EMI testing |
-| **Filter resonance** | Low | High | Careful design, simulation validation |
-| **EPICS integration issues** | Low | Medium | Early prototype testing |
-| **Thermal management** | Medium | Medium | Proper heat sinking, thermal analysis |
-
-**Schedule Risks**:
-- **Component availability**: Long lead times for specialized components
-- **Testing delays**: Complex system integration testing
-- **Installation window**: Limited maintenance outages for installation
-
-**Mitigation Strategies**:
-- Early procurement of long-lead-time components
-- Parallel development and testing activities
-- Backup installation windows identified
-- Comprehensive testing with dummy loads before klystron installation
+1. SPEAR3 LLRF Team, "SPEAR3 LLRF Upgrade System Physical Design Report," SPEAR3-LLRF-PDR-001 Rev 1, March 2026
+2. SPEAR3 LLRF Team, "Comprehensive SPEAR3 Klystron Filament Heater System Technical Documentation," llrf/documentation/filamentHeater/FILAMENT_HEATER_TECHNICAL_NOTES.md, March 2026
+3. P. Corredoura, "PEP2 RF KLY FILAMENT SCHEMATIC," SD-349-311-20 Rev E2, Stanford Linear Accelerator Center
+4. SPEAR3 LLRF Team, "Software Design Document," Designs/10_SOFTWARE_DESIGN_DOCUMENT.md, March 2026
+5. SPEAR3 LLRF Team, "Interface Chassis Design," Designs/11_INTERFACE_CHASSIS_DESIGN.md, March 2026
 
 ---
 
-## 11. Cost Analysis
-
-### 11.1 Component Costs (Estimated)
-
-**Power Electronics**:
-```
-SCR devices and gate drivers: $500
-Power transformer and isolation: $1,200
-Filter components (inductors, capacitors): $800
-Heat sinks and thermal management: $400
-Subtotal: $2,900
-```
-
-**Monitoring and Control**:
-```
-RMS measurement ICs and sensors: $600
-Microcontroller and ADC: $300
-EPICS IOC hardware: $1,500
-Enclosure and wiring: $800
-Subtotal: $3,200
-```
-
-**Development and Integration**:
-```
-PCB design and fabrication: $2,000
-Software development: $5,000
-Testing and validation: $3,000
-Documentation: $1,000
-Subtotal: $11,000
-```
-
-**Total Estimated Cost**: $17,100
-
-### 11.2 Cost-Benefit Analysis
-
-**Benefits**:
-- **Reduced Maintenance**: $5,000/year savings from eliminated mechanical components
-- **Improved Reliability**: $10,000/year savings from reduced downtime
-- **Enhanced Performance**: Improved klystron stability and lifetime
-- **Future-Proofing**: Compatible with modern control systems
-
-**Payback Period**: ~2 years based on maintenance and reliability savings
-
----
-
-## 12. Conclusion and Recommendations
-
-### 12.1 Summary
-
-The SCR-based klystron heater control system upgrade provides significant improvements over the current variac/motor-based system:
-
-**Key Improvements**:
-- **100x faster response time** (<100ms vs. seconds)
-- **3x better regulation** (±0.1% vs. ±0.3%)
-- **Solid-state reliability** vs. mechanical wear components
-- **Full EPICS integration** with automated control sequences
-- **Enhanced safety features** and comprehensive fault protection
-
-**Technical Innovation**:
-- Zero crossing SCR control minimizes harmonic generation
-- Multi-stage low-pass filtering ensures clean heater power
-- True RMS monitoring provides accurate power measurement
-- Automated control sequences optimize klystron performance
-
-### 12.2 Recommendations
-
-**Immediate Actions**:
-1. **Approve project funding** and proceed with Phase 1 design and procurement
-2. **Assign project team** with power electronics and EPICS expertise
-3. **Coordinate with LLRF9 upgrade schedule** for integrated installation
-4. **Begin component procurement** for long-lead-time items
-
-**Design Priorities**:
-1. **Emphasize reliability** - use proven components and conservative ratings
-2. **Minimize EMI** - comprehensive filtering and shielding design
-3. **Maximize safety** - redundant protection systems and fail-safe operation
-4. **Ensure maintainability** - modular design with accessible components
-
-**Future Considerations**:
-- **Expansion capability** for additional klystron stations
-- **Remote monitoring** integration with facility management systems
-- **Predictive maintenance** using trend analysis and machine learning
-- **Technology refresh** planning for 10+ year operational life
-
-This upgrade represents a critical modernization of the SPEAR3 RF system infrastructure, providing the reliability, precision, and integration capabilities required for next-generation accelerator operations.
-
----
-
-## References
-
-9. SPEAR3 LLRF Team, "Comprehensive SPEAR3 Klystron Filament Heater System Technical Documentation," llrf/documentation/filamentHeater/FILAMENT_HEATER_TECHNICAL_NOTES.md, March 2026
-   - Complete schematic analysis of SD-349-311-20
-   - Operational measurements and component specifications
-   - System hierarchy and signal routing documentation
-1. DESY/Budker INP, "Klystron Cathode Heater Power Supply System Based on the High-Voltage Gap Transformer," 2019
-2. Analog Devices, "AD637 High Precision, Wideband RMS-to-DC Converter," Datasheet
-3. STMicroelectronics, "BTA20-600B Triacs," Datasheet and Application Notes
-4. IEEE Std 519-2014, "Recommended Practice and Requirements for Harmonic Control in Electric Power Systems"
-5. EPICS Collaboration, "EPICS Application Developer's Guide," Version 3.16
-6. SLAC National Accelerator Laboratory, "PEP-II RF System Documentation," Historical Archives
-7. CPI Inc., "Klystron Theory and Application," Technical Manual
-8. Firmansyah, A., "Harmonic Content of Zero Cycling Thyristor Controlled Heater," LinkedIn Technical Article, 2022
-
----
-- **Revision 1.1**: Corrected legacy system specifications based on comprehensive schematic analysis
-  - Updated operational values: 6.8V RMS / 73A (vs. 4.84V / 20A theoretical)
-  - Added component specifications: 1.00 KVA variac, 10:1 transformer
-  - Corrected power rating: 500W actual (vs. 100W theoretical)
-- **Revision 1.2**: Comprehensive second-round review - corrected ALL remaining inconsistencies
-- **Revision 1.3**: Fixed formatting issues and remaining current sensor specifications
-  - Removed all trailing spaces throughout the document (major formatting cleanup)
-  - Updated RMS monitoring current range: 0-25A → 0-100A range for 73A operation
-  - Corrected current sensor specifications: ±25A → ±100A input range
-  - Updated sensor output: ±25mA → ±100mA proportional output
-  - Fixed ASCII table current ratings: 25A → 100A in component specifications
-  - Fixed Heater Requirements section: 6.8V actual operational, 73A actual, 500W actual
-  - Updated Industry Standard Comparison table with actual SPEAR3 values
-  - Corrected SCR component specifications: 130A rating, BTA100-600B/VS-100TTS12
-  - Updated load impedance calculation: 0.093Ω (6.8V/73A)
-  - Corrected filter specifications: AWG 4 wire for 73A, air core for 73A DC
-  - Updated warm-up sequences: 125W to 500W power ramps
-  - Corrected Python code examples with proper power levels
-  - Updated control signal path: J1 → Fiber Optic → A/B PLC → EPICS
-
-**Document Control**:
-- **Created**: March 2026
-- **Last Modified**: March 2026
-- **Next Review**: June 2026
-- **Distribution**: LLRF Upgrade Team, SPEAR3 Operations, Engineering Management
-- **Classification**: Internal Technical Document
+**Document History**:
+- **Version 1.0**: Initial SCR-based design concept
+- **Version 2.0**: Updated to commercial programmable AC supply approach per PDR specifications
