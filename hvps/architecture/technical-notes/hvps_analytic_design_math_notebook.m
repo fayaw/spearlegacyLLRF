@@ -56,35 +56,62 @@
 % Each block maps to a part of the power-conversion chain and the
 % associated governing equations developed in later sections.
 
-figure('Position', [100 100 1200 500]);
+figure('Position', [50 50 1500 600]);
 hold on; axis off;
-xlim([0 16]); ylim([0 7]);
+xlim([0 21]); ylim([0 8]);
 
+% --- Top row: main power-conversion chain ---
+%  Block:  x0    y0    w     h     label lines                                         color
 blocks = {
-    0.5, 4.3, 2.0, 1.2, {'3-Phase Input','12.47 kV, 60 Hz','Sections 0-2'}, [0.85 0.93 1.0];
-    3.0, 4.3, 2.2, 1.2, {'T0 / T1 / T2','Phase Shift, Step-Up','Sections 0-2'}, [0.87 0.92 0.84];
-    5.8, 4.3, 2.4, 1.2, {'Dual 6-Pulse Bridges','Star Point Control','Section 3'}, [0.99 0.90 0.80];
-    8.8, 4.3, 2.2, 1.2, {'12-Pulse DC Output','Vdc(alpha)','Sections 3-4'}, [0.96 0.84 0.96];
-    11.6, 4.3, 2.2, 1.2, {'LC Filter','Ripple Suppression','Section 6'}, [1.0 0.95 0.80];
-    13.9, 4.3, 1.5, 1.2, {'Klystron','Load','Section 5'}, [0.92 0.82 0.86];
-    3.8, 1.7, 2.6, 1.2, {'Ramp / Regulation','Working-Pt, Alpha','Section 4A'}, [0.81 0.89 0.95];
-    7.2, 1.7, 2.6, 1.2, {'Protection Model','Cap, Ind, RC','Section 7'}, [0.98 0.80 0.61];
-    10.6, 1.7, 3.0, 1.2, {'B118 Monitoring','Voltage,Current,T1,L2','Section 4B'}, [0.85 0.92 0.83];
+    0.3,  4.8,  2.8,  1.6,  {'3-Phase Input','12.47 kV, 60 Hz','Sections 0-2'},      [0.85 0.93 1.0];   % 1
+    3.6,  4.8,  3.0,  1.6,  {'T0 / T1 / T2','Phase Shift, Step-Up','Sections 0-2'},   [0.87 0.92 0.84];  % 2
+    7.1,  4.8,  3.2,  1.6,  {'Dual 6-Pulse Bridges','Star Point Control','Section 3'}, [0.99 0.90 0.80];  % 3
+   10.8,  4.8,  3.0,  1.6,  {'12-Pulse DC Output','Vdc(alpha)','Sections 3-4'},        [0.96 0.84 0.96];  % 4
+   14.3,  4.8,  2.8,  1.6,  {'LC Filter','Ripple Suppression','Section 6'},            [1.0  0.95 0.80];  % 5
+   17.8,  4.8,  2.8,  1.6,  {'Klystron Load','Beam Perveance','Section 5'},            [0.92 0.82 0.86];  % 6
+% --- Bottom row: support / monitoring ---
+    3.0,  1.6,  3.2,  1.6,  {'Ramp / Regulation','Working-Pt, Alpha','Section 4A'},    [0.81 0.89 0.95];  % 7
+    7.5,  1.6,  3.2,  1.6,  {'Protection Model','Cap, Ind, RC','Section 7'},           [0.98 0.80 0.61];  % 8
+   12.0,  1.6,  3.4,  1.6,  {'B118 Monitoring','Voltage, Current, T1, L2','Section 4B'},[0.85 0.92 0.83]; % 9
 };
 for k = 1:size(blocks,1)
     x0 = blocks{k,1}; y0 = blocks{k,2};
     w  = blocks{k,3};  h  = blocks{k,4};
     lbl = blocks{k,5}; clr = blocks{k,6};
-    rectangle('Position',[x0 y0 w h],'FaceColor',clr,'EdgeColor','k','LineWidth',1.5);
+    rectangle('Position',[x0 y0 w h],'FaceColor',clr,'EdgeColor','k','LineWidth',1.5,'Curvature',0.05);
     text(x0+w/2, y0+h/2, lbl, 'HorizontalAlignment','center','VerticalAlignment','middle','FontSize',9);
 end
-% Arrows between top-row blocks (right edge -> left edge of next block)
-arrows = [2.5 4.9 3.0 4.9; 5.2 4.9 5.8 4.9; 8.2 4.9 8.8 4.9; 11.0 4.9 11.6 4.9; 13.8 4.9 13.9 4.9];
-for k = 1:size(arrows,1)
-    dx = arrows(k,3) - arrows(k,1);
-    dy = arrows(k,4) - arrows(k,2);
-    quiver(arrows(k,1), arrows(k,2), dx, dy, 0, 'k', 'LineWidth', 1.5, 'MaxHeadSize', 0.8);
+
+% --- Horizontal arrows between top-row blocks (right edge -> left edge) ---
+%  From block edges:  1 right=3.1  2 left=3.6  2 right=6.6  3 left=7.1
+%                     3 right=10.3 4 left=10.8 4 right=13.8 5 left=14.3
+%                     5 right=17.1 6 left=17.8
+y_top_mid = 4.8 + 1.6/2;   % vertical center of top-row blocks = 5.6
+arrows_h = [3.1 y_top_mid 3.6 y_top_mid; ...
+            6.6 y_top_mid 7.1 y_top_mid; ...
+           10.3 y_top_mid 10.8 y_top_mid; ...
+           13.8 y_top_mid 14.3 y_top_mid; ...
+           17.1 y_top_mid 17.8 y_top_mid];
+for k = 1:size(arrows_h,1)
+    dx = arrows_h(k,3) - arrows_h(k,1);
+    dy = arrows_h(k,4) - arrows_h(k,2);
+    quiver(arrows_h(k,1), arrows_h(k,2), dx, dy, 0, 'k', 'LineWidth', 1.5, 'MaxHeadSize', 0.8);
 end
+
+% --- Vertical dashed arrows from bottom-row blocks up to top-row blocks ---
+%  Ramp/Regulation (block 7, center_x=4.6, top=3.2) --> Dual 6-Pulse (block 3, center_x=8.7, bottom=4.8)
+%  Protection Model (block 8, center_x=9.1, top=3.2) --> 12-Pulse DC (block 4, center_x=12.3, bottom=4.8)
+%  B118 Monitoring  (block 9, center_x=13.7, top=3.2) --> LC Filter  (block 5, center_x=15.7, bottom=4.8)
+vert_arrows = [4.6 3.2  8.7  4.8; ...    % Ramp -> Dual 6-Pulse
+               9.1 3.2 12.3  4.8; ...    % Protection -> 12-Pulse DC
+              13.7 3.2 15.7  4.8];        % B118 -> LC Filter
+for k = 1:size(vert_arrows,1)
+    dx = vert_arrows(k,3) - vert_arrows(k,1);
+    dy = vert_arrows(k,4) - vert_arrows(k,2);
+    quiver(vert_arrows(k,1), vert_arrows(k,2), dx, dy, 0, ...
+        'k', 'LineWidth', 1.2, 'LineStyle', '--', 'MaxHeadSize', 0.4);
+end
+
 title('SPEAR3 HVPS Physical Subsystems and Notebook Equation Map','FontSize',14,'FontWeight','bold');
 
 
