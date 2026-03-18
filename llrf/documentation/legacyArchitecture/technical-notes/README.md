@@ -61,7 +61,7 @@ See `05_CROSS_REFERENCE_INDEX.md` §5.5 and `04_LITERATURE_SYNTHESIS.md` §10 fo
 
 - **Understanding the system**: Start with `00_PEP-II_SPEAR3_LLRF_SYSTEM_REFERENCE.md`
 - **RF theory and math**: See `01_FEEDBACK_LOOP_ARCHITECTURE.md` §2 (mathematical framework)
-- **Feedback loop details**: See `01_FEEDBACK_LOOP_ARCHITECTURE.md` §3–10
+- **Feedback loop details**: See `01_FEEDBACK_LOOP_ARCHITECTURE.md` §3–11
 - **Hardware architecture**: See `02_VXI_HARDWARE_MODULE_REFERENCE.md` (legacy VXI §1–4, upgrade §5–11)
 - **Operational procedures**: See `04_LITERATURE_SYNTHESIS.md` §9
 - **Finding specific topics**: Use `05_CROSS_REFERENCE_INDEX.md` as the search index

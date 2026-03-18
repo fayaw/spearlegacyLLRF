@@ -392,7 +392,7 @@ For each cavity i:
 
 ## 3. Direct (Wideband) RF Feedback Loop — Implementation Details
 
-### 10.1 Purpose and Design
+### 3.1 Purpose and Design
 
 The direct loop is the **primary impedance reduction loop** (mathematical basis in Section 2.4 above). Without feedback, the cavity fundamental impedance seen by the beam is:
 
@@ -413,7 +413,7 @@ For G ≈ 100 (40 dB), the impedance is reduced from 3.9 MΩ to ~39 kΩ per cavi
 - Reducing coupled-bunch mode growth rates
 - Improving cavity field stability against beam current fluctuations
 
-### 2.2 Implementation Details
+### 3.2 Implementation Details
 
 The direct loop operates entirely at **IQ baseband**:
 
@@ -439,7 +439,7 @@ The direct loop operates entirely at **IQ baseband**:
 
 3. **Dynamic range management**: The baseband voltages must stay within the ±1V multiplier range. Exceeding this range causes polarity inversion → positive feedback → catastrophic instability.
 
-### 2.3 Gain Tracking (Klystron Saturation Compensation)
+### 3.3 Gain Tracking (Klystron Saturation Compensation)
 
 As klystron cathode voltage changes, its gain varies by up to 7 dB. The baseband modulator gain must be decreased proportionally:
 
@@ -451,7 +451,7 @@ This is implemented by the **quad DAC** in the RFP module, which sets the 2×2 m
 
 **Source Code Reference**: `rf_dac_loop.st` — the DAC loop adjusts these coefficients; `rf_calib.st` performs the initial calibration.
 
-### 2.4 Limiting Circuits (Post-Commissioning Addition)
+### 3.4 Limiting Circuits (Post-Commissioning Addition)
 
 From Corredoura 2000, two limiting circuits were added:
 
@@ -467,11 +467,11 @@ From Corredoura 2000, two limiting circuits were added:
 
 > ⚠️ **This loop is a PEP-II design element only. The Comb Filter Modules (CFM) were NOT used in the SPEAR3 legacy system (1999–2022) and are NOT present in the LLRF9 upgrade (2022–present). This section is retained for historical/reference purposes to document the inherited PEP-II architecture.**
 
-### 10.1 Purpose (PEP-II)
+### 4.1 Purpose (PEP-II)
 
 The comb loop provides **additional gain at revolution frequency harmonics** where coupled-bunch modes exist. The direct loop, while wideband, has finite gain that may not fully suppress all modes. The comb loop's high-Q notch characteristic provides >>20 dB additional gain at each revolution harmonic.
 
-### 10.2 Implementation
+### 4.2 Implementation
 
 Implemented in **dedicated VXI Comb Filter modules** (separate modules for I and Q channels):
 
@@ -498,7 +498,7 @@ where N = samples per revolution turn
 Frequency response peaks at: f = n × f_rev (n = 0, 1, 2, ...)
 ```
 
-### 10.3 Key Parameters
+### 4.3 Key Parameters
 
 | Parameter | PEP-II HER | PEP-II LER | SPEAR3 |
 |-----------|-----------|-----------|---------|
@@ -507,7 +507,7 @@ Frequency response peaks at: f = n × f_rev (n = 0, 1, 2, ...)
 | Comb teeth spacing | 136.3 kHz | 136.3 kHz | 1.2808 MHz |
 | Maximum harmonics in bandwidth | ~3700 | ~3700 | ~390 |
 
-### 3.4 Comb Loop Calibration
+### 4.4 Comb Loop Calibration
 
 `rf_calib.st` contains the calibration sequence for the comb filter:
 - `ZeroCombMults` state: Zeros the comb filter multiplier weights
@@ -520,7 +520,7 @@ Frequency response peaks at: f = n × f_rev (n = 0, 1, 2, ...)
 
 ## 5. Ripple Loop
 
-### 10.1 Purpose
+### 5.1 Purpose
 
 The HVPS uses SCR (thyristor) switching, producing ripple at:
 - **360 Hz** fundamental (6-pulse rectifier × 60 Hz)
@@ -528,7 +528,7 @@ The HVPS uses SCR (thyristor) switching, producing ripple at:
 
 This ripple modulates klystron cathode voltage → gain/phase modulation of RF output → cavity field perturbation.
 
-### 10.2 Implementation Evolution
+### 5.2 Implementation Evolution
 
 **Original Design**: DSP-based digital ripple cancellation. However, the significant delay in the digital IQ receiver combined with the 50 kHz bandwidth requirement proved challenging.
 
@@ -546,7 +546,7 @@ Analog Integrator Approach:
 
 **Post-commissioning upgrade** (proposed in Corredoura 2000): Dedicated analog wideband "ripple loop" separate from the direct loop, to avoid compromising direct loop stability.
 
-### 10.3 Source Code Reference
+### 5.3 Source Code Reference
 
 `rf_dac_loop.st`:
 - `ripple_loop_ampl` PV: Ripple loop amplitude setpoint
@@ -557,9 +557,9 @@ Analog Integrator Approach:
 
 ---
 
-## 5. Lead and Integral Compensation
+## 6. Lead and Integral Compensation
 
-### 10.1 Purpose
+### 6.1 Purpose
 
 These analog compensation networks improve the direct loop's frequency response:
 
@@ -567,7 +567,7 @@ These analog compensation networks improve the direct loop's frequency response:
 
 - **Integral compensation**: Adds high gain at low frequencies for zero steady-state error. Ensures the cavity field tracks the reference exactly at DC.
 
-### 10.2 Implementation
+### 6.2 Implementation
 
 Implemented in the **RFP module** as analog circuits:
 
@@ -579,7 +579,7 @@ Integral Compensation: H_int(s) = 1 + 1/(s·τ_int)
                        Adds integrator at low frequencies
 ```
 
-### 10.3 Source Code Reference
+### 6.3 Source Code Reference
 
 `rf_states.st`:
 - Lead compensation is enabled/disabled during state transitions
@@ -590,9 +590,9 @@ Integral Compensation: H_int(s) = 1 + 1/(s·τ_int)
 
 ---
 
-## 6. Tuner Loop (Mechanical Frequency Control)
+## 7. Tuner Loop (Mechanical Frequency Control)
 
-### 10.1 Purpose
+### 7.1 Purpose
 
 The cavity mechanical tuner adjusts the resonant frequency to optimize the impedance match. The optimal detuning angle depends on beam current:
 
@@ -605,7 +605,7 @@ where φ_s = synchronous phase angle
 
 At zero beam current, the cavity should be tuned to resonance (Δf = 0). As beam current increases, the tuner moves to compensate for the reactive beam loading.
 
-### 10.2 Implementation
+### 7.2 Implementation
 
 **Hardware**: SLO-SYN stepper motors (Superior Electric) driving cavity tuning plungers. Each cavity has an independent tuner.
 
@@ -620,7 +620,7 @@ At zero beam current, the cavity should be tuned to resonance (Δf = 0). As beam
 - Handles "bad load angle" conditions (tuner at wrong position)
 - Reset and set-home procedures for calibration
 
-### 10.3 Tuner in SPEAR3 Upgrade Context
+### 7.3 Tuner in SPEAR3 Upgrade Context
 
 The SPEAR3 upgrade replaces the SLO-SYN stepper system with a **Galil DMC-4143** motion controller:
 - Commissioned August 2025
@@ -632,13 +632,13 @@ The SPEAR3 upgrade replaces the SLO-SYN stepper system with a **Galil DMC-4143**
 
 ---
 
-## 7. DAC Loop (Setpoint Adjustment)
+## 8. DAC Loop (Setpoint Adjustment)
 
-### 10.1 Purpose
+### 8.1 Purpose
 
 The DAC loop is the **outer supervisory loop** that adjusts the IQ reference setpoints (via Octal DACs on the RFP module) to maintain the desired drive power or gap voltage.
 
-### 10.2 Operating Modes
+### 8.2 Operating Modes
 
 From `rf_dac_loop.st`:
 
@@ -650,7 +650,7 @@ From `rf_dac_loop.st`:
 | ON_CW (direct on, GVF available) | loop_on | GFF I/Q references | Gap voltage |
 | ON_CW (direct on, GVF unavailable) | loop_on | RFP diff node DACs | Gap voltage |
 
-### 10.3 Control Algorithm
+### 8.3 Control Algorithm
 
 From `rf_dac_loop_macs.h` — the `DAC_LOOP_SET` macro:
 
@@ -672,15 +672,15 @@ From `rf_dac_loop_macs.h` — the `DAC_LOOP_SET` macro:
 
 ---
 
-## 8. HVPS Loop (Klystron Voltage Regulation)
+## 9. HVPS Loop (Klystron Voltage Regulation)
 
-### 10.1 Purpose
+### 9.1 Purpose
 
 Controls the klystron cathode voltage to regulate either:
 - **Processing mode**: Gradually ramps voltage while conditioning cavities (monitoring vacuum, reflected power, and klystron forward power)
 - **Operating mode**: Adjusts voltage to maintain constant drive power (in TUNE) or gap voltage (in ON_CW with direct loop)
 
-### 10.2 Implementation
+### 9.2 Implementation
 
 From `rf_hvps_loop.st`:
 
@@ -705,7 +705,7 @@ Every cycle (~0.5s):
   ELSE → apply delta to HVPS setpoint
 ```
 
-### 10.3 Key Parameters
+### 9.3 Key Parameters
 
 From `rf_hvps_loop_defs.h`:
 - Maximum loop idle interval: 10 seconds
@@ -718,7 +718,7 @@ From `rf_hvps_loop_defs.h`:
 
 ---
 
-## 9. Gap Voltage Feed-Forward (GVF/GFF) — ⚠️ PEP-II ONLY
+## 10. Gap Voltage Feed-Forward (GVF/GFF) — ⚠️ PEP-II ONLY
 
 > ⚠️ **The GVF/GFF module is PEP-II hardware only. It was NOT used in the SPEAR3 legacy system (1999–2022) and is NOT present in the LLRF9 upgrade (2022–present). In SPEAR3, gap voltage control was handled by the DAC control loop in VxWorks software, not by a dedicated GVF module. There is no LFB (Longitudinal Feedback) system at SPEAR3. This section is retained for historical/reference purposes.**
 
@@ -751,9 +751,9 @@ and resync the LFB if it's set
 
 ---
 
-## 10. Loop Stability Analysis
+## 11. Loop Stability Analysis
 
-### 10.1 Open-Loop Transfer Function
+### 11.1 Open-Loop Transfer Function
 
 The overall direct loop transfer function (simplified):
 
@@ -768,7 +768,7 @@ where:
   G_delay     = e^(-s·τ_total) where τ_total ≈ 1 μs (cable + processing delays)
 ```
 
-### 10.2 Stability Margins
+### 11.2 Stability Margins
 
 The total loop delay (τ_total ≈ 1 μs) limits the achievable bandwidth:
 
@@ -778,7 +778,7 @@ Maximum stable bandwidth ≈ 1 / (4 × τ_total) ≈ 250 kHz
 
 With lead compensation, the actual crossover frequency can be pushed higher (~1 MHz) while maintaining adequate phase margin (>30°).
 
-### 10.3 Rivetta Simulation Model
+### 11.3 Rivetta Simulation Model
 
 Rivetta et al. (2007) developed a comprehensive time-domain simulation that captures:
 - Nonlinear klystron saturation characteristics
@@ -794,7 +794,7 @@ This model validated the LLRF design and explored stability limits at higher cur
 
 ---
 
-## 11. Cross-Reference to Legacy PDFs
+## 12. Cross-Reference to Legacy PDFs
 
 | PDF File | Pages | Likely Content (Reconstructed) |
 |----------|-------|-------------------------------|

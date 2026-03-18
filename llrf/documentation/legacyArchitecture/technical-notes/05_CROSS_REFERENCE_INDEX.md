@@ -24,22 +24,22 @@
 | Topic | Legacy PDF | Published Paper | Source Code | This Package |
 |-------|-----------|----------------|-------------|--------------|
 | Complete loop architecture | `feedbackLoopDescriptionps3403305200.pdf` | Corredoura 1999, Fig. 3 | All `.st` | `01_...LOOPS.md` §1 |
-| Direct (wideband) loop | `ps3403305200.pdf` pp.1-3 (est.) | Corredoura 1999; Fox 2010 §II | `rf_states.st` | `01_...LOOPS.md` §2 |
-| Comb (narrowband) loop | `ps3403305600.pdf` | Corredoura 1999; Fox 2010 §III | `rf_calib.st` | `01_...LOOPS.md` §3 |
-| Ripple loop | `ps3403305800.pdf` | Corredoura 2000 §6 | `rf_dac_loop.st` | `01_...LOOPS.md` §4 |
-| Lead compensation | `ps3403305700.pdf` | — | `rf_states.st` | `01_...LOOPS.md` §5 |
-| Integral compensation | `ps3403305700.pdf` | — | `rf_states.st` | `01_...LOOPS.md` §5 |
-| Tuner loop | `ps3403306001.pdf` | Corredoura 1999 | `rf_tuner_loop.st` | `01_...LOOPS.md` §6 |
-| DAC loop (setpoint) | `ps3403305300.pdf` | — | `rf_dac_loop.st` | `01_...LOOPS.md` §7 |
-| HVPS loop (voltage) | `ps3403305400.pdf` | — | `rf_hvps_loop.st` | `01_...LOOPS.md` §8 |
-| GVF / feed-forward | `ps3403305900.pdf` | Corredoura 1999 (woofer) | `rf_msgs.st` (TAXI) | `01_...LOOPS.md` §9 |
-| Loop stability analysis | `ps3403305200.pdf` | Rivetta 2007; Fox 2010 | — | `01_...LOOPS.md` §10 |
+| Direct (wideband) loop | `ps3403305200.pdf` pp.1-3 (est.) | Corredoura 1999; Fox 2010 §II | `rf_states.st` | `01_...LOOPS.md` §3 |
+| Comb (narrowband) loop | `ps3403305600.pdf` | Corredoura 1999; Fox 2010 §III | `rf_calib.st` | `01_...LOOPS.md` §4 |
+| Ripple loop | `ps3403305800.pdf` | Corredoura 2000 §6 | `rf_dac_loop.st` | `01_...LOOPS.md` §5 |
+| Lead compensation | `ps3403305700.pdf` | — | `rf_states.st` | `01_...LOOPS.md` §6 |
+| Integral compensation | `ps3403305700.pdf` | — | `rf_states.st` | `01_...LOOPS.md` §6 |
+| Tuner loop | `ps3403306001.pdf` | Corredoura 1999 | `rf_tuner_loop.st` | `01_...LOOPS.md` §7 |
+| DAC loop (setpoint) | `ps3403305300.pdf` | — | `rf_dac_loop.st` | `01_...LOOPS.md` §8 |
+| HVPS loop (voltage) | `ps3403305400.pdf` | — | `rf_hvps_loop.st` | `01_...LOOPS.md` §9 |
+| GVF / feed-forward | `ps3403305900.pdf` | Corredoura 1999 (woofer) | `rf_msgs.st` (TAXI) | `01_...LOOPS.md` §10 |
+| Loop stability analysis | `ps3403305200.pdf` | Rivetta 2007; Fox 2010 | — | `01_...LOOPS.md` §11 |
 
 ### 1.3 Hardware Modules
 
 | Topic | Legacy PDF | Published Paper | Source Code | This Package |
 |-------|-----------|----------------|-------------|--------------|
-| RFP module | `ps3403305100.pdf` | Corredoura 1999 | `rf_calib.st` (p2RfRfpDef.h) | `02_...HARDWARE.md` §2.1 |
+| RFP module | `ps3403305100.pdf` | Corredoura 1999 | `rf_calib.st` (p2RfRfpDef.h — PEP-II file, not in repo) | `02_...HARDWARE.md` §2.1 |
 | IQA modules | — | Ziomek & Corredoura 1995 | — | `02_...HARDWARE.md` §2.2 |
 | Comb filter modules | `ps3403305600.pdf` | — | `rf_calib.st` | `02_...HARDWARE.md` §2.3 |
 | GVF module | `ps3403305900.pdf` | — | `rf_dac_loop.st`, `rf_msgs.st` | `02_...HARDWARE.md` §2.4 |
@@ -202,7 +202,7 @@ Supporting files:
 | 11_INTERFACE_CHASSIS_DESIGN.md | Designs/ | 446 | Interface Chassis schematic-level design | Doc 02 §6 |
 | 5_KLYSTRON_HEATER_SUBSYSTEM_UPGRADE.md | Designs/ | 415 | Klystron heater control upgrade | — |
 | 8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md | Designs/ | 868 | PPS interface box design | Doc 02 §7A.8 |
-| A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md | Designs/ | 1,424 | Legacy SNL/EPICS source code analysis | Doc 01 §7, Doc 05 §2 |
+| A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md | Designs/ | 1,424 | Legacy SNL/EPICS source code analysis | Doc 01 §8, Doc 05 §2 |
 
 ### 5.4 Legacy PDFs (legacyArchitecture/)
 
@@ -210,7 +210,7 @@ Supporting files:
 |----------|----------------|---------|---------|
 | bd3403300000.pdf | BD-340-330-00 | Overall block diagram | Doc 02 §5.1, Doc 05 §5.1 |
 | bd3403300100.pdf | BD-340-330-01 | LLRF block diagram | Doc 00 §1.2 |
-| feedbackLoopDescriptionps3403305200.pdf | PS-340-330-52-R0 | Feedback loop description | Doc 01 §3–10 |
+| feedbackLoopDescriptionps3403305200.pdf | PS-340-330-52-R0 | Feedback loop description | Doc 01 §3–11 |
 | ps3403305100.pdf | PS-340-330-51-R0 | RF system description | Doc 00 §1.1 |
 | ps3403305300.pdf | PS-340-330-53-R0 | Cavity calibration procedure | Doc 03 |
 | ps3403305503.pdf | PS-340-330-55-R3 | Safety survey | Doc 03 |

@@ -133,7 +133,7 @@ These document the Machine Protection System wiring for the RF station.
 |-------|------------|--------------------|----|
 | System block diagram | `bd3403300000.pdf` | Corredoura SLAC-PUB-8498, Fig. 1 | — |
 | Feedback loop architecture | `feedbackLoopDescriptionps3403305200.pdf` | Corredoura SLAC-PUB-8498, Fig. 3 | All `.st` files |
-| RFP module specification | `ps3403305100.pdf` | Corredoura SLAC-PUB-8498 | `rf_calib.st` (p2RfRfpDef.h) |
+| RFP module specification | `ps3403305100.pdf` | Corredoura SLAC-PUB-8498 | `rf_calib.st` (p2RfRfpDef.h — PEP-II file, not in repo) |
 | Drive chain / modulator | `ps3403305503.pdf` | Corredoura 2000, Figs. 4-6 | — |
 | DAC loop | `ps3403305300.pdf` | — | `rf_dac_loop.st` |
 | HVPS loop | `ps3403305400.pdf` | — | `rf_hvps_loop.st` |

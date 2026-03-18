@@ -151,7 +151,7 @@ The dominant design driver for the PEP-II LLRF system is **heavy beam loading**.
 
 The LLRF feedback system addresses these by:
 - **Reducing effective cavity impedance** seen by the beam (direct loop reduces impedance by ~factor of 100)
-- **Filtering revolution harmonics** to suppress coupled-bunch mode growth (comb loop)
+- **Filtering revolution harmonics** to suppress coupled-bunch mode growth (comb loop — PEP-II only)
 - **Compensating klystron gain/phase variations** as power demand changes (baseband modulator / gain tracking)
 - **Canceling power supply ripple** that modulates klystron output (ripple loop)
 
@@ -206,8 +206,9 @@ Each PEP-II / SPEAR3 RF station consists of:
 │  │                                                            │  │
 │  │  ┌─────┐ ┌─────┐ ┌──────┐ ┌──────┐ ┌─────┐              │  │
 │  │  │COMB │ │COMB │ │ GVF  │ │ ARC/ │ │SPARE│              │  │
-│  │  │ (I) │ │ (Q) │ │ FFWD │ │INTLK │ │     │              │  │
+│  │  │(I)⚠│ │(Q)⚠│ │FFWD⚠│ │INTLK │ │     │              │  │
 │  │  └─────┘ └─────┘ └──────┘ └──────┘ └─────┘              │  │
+│  │  ⚠ = PEP-II ONLY (not used in SPEAR3)                    │  │
 │  │                                                            │  │
 │  │  Ethernet ◄──► EPICS IOC (VxWorks) ◄──► Channel Access    │  │
 │  └────────────────────────────────────────────────────────────┘  │
@@ -275,7 +276,7 @@ BANDWIDTH / RATE        LOOP                      FUNCTION
 ~1 MHz (analog)    ┌─ Direct Loop ──────────── Cavity field stabilization
                    │                            (impedance reduction ~100×)
                    │
-~10 kHz (analog/   ├─ Comb Loop ─────────────── Revolution harmonic filtering
+~10 kHz (analog/   ├─ Comb Loop [PEP-II ONLY] ─────────────── Revolution harmonic filtering
  digital DSP)      │                            (coupled-bunch suppression)
                    │
 ~50 kHz (analog)   ├─ Ripple Loop ───────────── HVPS switching ripple
@@ -341,7 +342,9 @@ f_BW(direct) >> f_BW(comb) >> f_BW(ripple) >> f_BW(DAC) >> f_BW(tuner)
 
 **Source Code**: Direct loop ON/OFF is controlled by `rf_states.st` variable `direct_loop`; the `rf_dac_loop.st` adjusts DAC setpoints differently depending on direct loop state.
 
-### 3.2 Comb (Narrowband) RF Feedback Loop
+### 3.2 Comb (Narrowband) RF Feedback Loop — ⚠️ PEP-II ONLY
+
+> ⚠️ **This loop was NOT used in the SPEAR3 legacy system and is NOT present in the LLRF9 upgrade. Retained for PEP-II historical reference.**
 
 **Purpose**: Provide additional gain at revolution frequency harmonics to further suppress coupled-bunch modes that the direct loop alone cannot fully damp.
 
@@ -389,7 +392,9 @@ f_BW(direct) >> f_BW(comb) >> f_BW(ripple) >> f_BW(DAC) >> f_BW(tuner)
 
 **Source Code**: `rf_hvps_loop.st` — states: init, off, proc, on.
 
-### 3.6 Gap Voltage Feed-Forward (GFF/GVF)
+### 3.6 Gap Voltage Feed-Forward (GFF/GVF) — ⚠️ PEP-II ONLY
+
+> ⚠️ **The GVF/GFF module is PEP-II hardware only. In SPEAR3, gap voltage control was handled by the DAC control loop in VxWorks software. Not present in LLRF9 upgrade.**
 
 **Purpose**: Provide a feed-forward path to stabilize gap voltage during beam transients, working in conjunction with the wideband feedback.
 
