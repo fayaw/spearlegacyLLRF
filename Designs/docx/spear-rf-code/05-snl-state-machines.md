@@ -1,6 +1,22 @@
 # SNL State Machine Programs — Control Logic Deep Dive
 
 **Document**: 05 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 2 — corrected with upgrade mapping from PDR)**
+
+---
+
+## UPGRADE CONTEXT
+
+The 6 SNL programs are the **primary spec extraction targets** for the upgrade. They define the operational procedures that the new Python/EPICS coordinator must replicate. Per PDR §14:
+
+| Legacy SNL | Upgrade Target | Status |
+|-----------|---------------|--------|
+| `rf_states.st` | Python/EPICS coordinator state machine | **SPEC-EXTRACT → rewrite** |
+| `rf_hvps_loop.st` | CompactLogix PLC ladder logic (B118) | **SPEC-EXTRACT → PLC code** |
+| `rf_tuner_loop.st` | LLRF9 built-in tuner (10 Hz phase) + Python load-angle | **SPEC-EXTRACT → configure + rewrite** |
+| `rf_calib.st` | LLRF9 built-in calibration (Dmitry's software) | Verify equivalence |
+| `rf_msgs.st` | EPICS logging + LLRF9 diagnostics | Reference |
+| `rf_dac_loop.st` | **ELIMINATED** — LLRF9 vector modulator | Per PDR §15.7: eliminated |
 
 ---
 
@@ -363,4 +379,3 @@ The TAXI serial link connects GVF modules and provides timing signals. rf_msgs.s
 - Alternatively: Python IOC (pyDevSup), C++ state machines, or EPICS sequencer v2
 - The macro-heavy style of rf_calib.st may benefit from a more modern approach
 - PV names in *_pvs.h files must be preserved exactly
-

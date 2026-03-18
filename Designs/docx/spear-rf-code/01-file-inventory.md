@@ -1,20 +1,31 @@
 # Complete File Inventory — 253 Files with Upgrade Verdicts
 
 **Document**: 01 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 2 — corrected for PEP-II module identification and upgrade architecture)**
 
-**Verdict Key**: **REMOVE** = No equivalent needed | **REFERENCE** = Behavior spec for new code | **RECREATE** = Must rewrite | **ADAPT** = Modify existing | **KEEP** = Reuse as-is
+**Verdict Key**: **ELIMINATED** = Replaced by LLRF9 or new hardware | **PEP-II ONLY** = Not used in SPEAR3 | **SPEC-EXTRACT** = Behavior spec for upgrade software | **REFERENCE** = Behavior spec for new code | **REUSE** = Directly reusable | **DONE** = Already replaced
 
 ---
 
-## Summary by Verdict
+## CORRECTION NOTICE (Rev 2)
 
-| Verdict | Files | Lines | % of Codebase |
-|---------|-------|-------|---------------|
-| REMOVE | 132 | ~41,000 | 50% |
-| REFERENCE | 45 | ~22,000 | 27% |
-| RECREATE | 52 | ~14,000 | 17% |
-| ADAPT / KEEP | 24 | ~5,430 | 6% |
-| **Total** | **253** | **~82,430** | **100%** |
+- **CFM, GVF/GFF, CF2 modules are PEP-II heritage, NOT active in SPEAR3.** The SPEAR3 VXI crate contains only: CPU, AB Scanner, Clock, RFP, 3× IQA, AIM. Software loaded GVF/CF2 databases from PEP-II template, but the physical modules are not installed.
+- **DSP firmware is ELIMINATED** — the LLRF9 FPGA replaces all DSP functions. These files are reference for understanding what the LLRF9 does internally, but no migration is needed.
+- **rf_dac_loop.st is ELIMINATED** — LLRF9 handles DAC/vector modulator control internally.
+- **Stepper motor code is ALREADY DONE** — Galil DMC-4143 commissioned August 2025.
+
+## Summary by Verdict (Revised)
+
+| Verdict | Files | Lines | % | Description |
+|---------|-------|-------|---|-------------|
+| ELIMINATED (LLRF9/new HW) | ~80 | ~35,000 | 42% | VXI driver, active device support, DSP, custom records |
+| PEP-II ONLY (not SPEAR3) | ~30 | ~10,000 | 12% | GVF, CFM, CF2 modules and associated code |
+| OBSOLETE INFRASTRUCTURE | ~60 | ~15,000 | 18% | VxWorks, KSC, VXI bus, base utilities |
+| SPEC EXTRACTION | ~30 | ~11,000 | 13% | SNL programs, HVPS/tuner logic, interlocks |
+| REUSABLE | ~10 | ~1,500 | 2% | subIQ.c, subSys.c, state definitions |
+| PV REFERENCE | 78+ | ~15,000 | 18% | EPICS databases and substitution files |
+| ALREADY DONE | ~5 | ~2,700 | 3% | Stepper motor (Galil commissioned) |
+| **Total** | **253** | **~82,430** | **100%** | |
 
 ---
 
@@ -53,15 +64,22 @@
 
 ### 1.4 Device Support Modules
 
+**Active in SPEAR3** (replaced by LLRF9):
+
 | File | Lines | Verdict | Notes |
 |------|-------|---------|-------|
-| `devP2RfCf2.c` | 2,970 | REFERENCE | Largest device support. InitRecord/Action/ColdInit/WarmInit/ISR. Comb filter coefficient loading, DDF management, multiple filter banks. |
-| `devP2RfRfp.c` | 2,389 | REFERENCE | RFP: octal DAC loading, DSP comm (ripple params: AMSP, PHSG, DACO, PHARM, AHARM), signal RAM read/write, mode transitions (RESET→LOAD→RUN). SpawnLdDsp, SpawnReset. |
-| `devP2RfGvf.c` | 2,350 | REFERENCE | GVF: feed-forward DSP, waveform RAM, TAXI link monitoring, LFB woofer control. |
-| `devP2RfIqa.c` | 2,260 | REFERENCE | IQA: I/Q register reads, DDF filter loading (F/FC/H sections), history memory capture, amplitude/phase processing. |
-| `devP2RfAim.c` | 1,982 | REFERENCE | AIM: 12-channel arc detection, fast interlock chain, fault file system (NUMFFILES=11), DAS instruction execution, filament monitoring. |
-| `devP2RfCfm.c` | 1,487 | REFERENCE | CFM: v1 comb filter, IIR coefficient loading from table files. |
-| `devP2RfClk.c` | 957 | REFERENCE | CLK: PLL initialization, clock status monitoring. Simplest device support. |
+| `devP2RfRfp.c` | 2,389 | ELIMINATED | RFP: octal DAC loading, DSP comm, signal RAM read/write, mode transitions. **Replaced by LLRF9 FPGA.** Reference for understanding legacy RF feedback behavior. |
+| `devP2RfIqa.c` | 2,260 | ELIMINATED | IQA: I/Q register reads, DDF filter loading, history memory capture. **Replaced by LLRF9 ADC/DSP.** |
+| `devP2RfAim.c` | 1,982 | ELIMINATED | AIM: 12-channel arc detection, fast interlock, fault files. **Replaced by Interface Chassis + Microstep-MIS arc detection.** Reference for interlock specification. |
+| `devP2RfClk.c` | 957 | ELIMINATED | CLK: PLL initialization, clock status. **Replaced by LLRF9 internal clock.** |
+
+**PEP-II heritage — NOT active in SPEAR3**:
+
+| File | Lines | Verdict | Notes |
+|------|-------|---------|-------|
+| `devP2RfCf2.c` | 2,970 | **PEP-II ONLY** | CF2 module not installed in SPEAR3 VXI crate (slot 5 = MPS Shutoff, not CF2). |
+| `devP2RfGvf.c` | 2,350 | **PEP-II ONLY** | GVF module not installed in SPEAR3 VXI crate (slot 3 = empty). Feed-forward was PEP-II specific. Per PDR §15.7: "used for PEP-II, not SPEAR3." |
+| `devP2RfCfm.c` | 1,487 | **PEP-II ONLY** | CFM comb filter module. Per PDR §15.7: "used for PEP-II multi-bunch stabilization, not applicable to SPEAR3." |
 
 ### 1.5 Shared Library & Subroutines
 
@@ -86,14 +104,14 @@
 
 ### 2.1 State Machine Programs
 
-| File | Lines | Verdict | Notes |
-|------|-------|---------|-------|
-| `rf_calib.st` | 3,345 | RECREATE | Largest SNL program. Octal DAC offset nulling, cavity modulator calibration, RF switch calibration. Heavy macro usage. |
-| `rf_states.st` | 2,227 | RECREATE | Master state machine: OFF→INITIALIZE→STANDBY→ON_CW→FAULT→FAULT_CLEAR. Controls all other subsystems. AIM fault file handling. |
-| `rf_tuner_loop.st` | 555 | RECREATE | Tuner motor control. 4 concurrent instances (C1-C4). States: IDLE→TRACKING→MOVING→SETTLING. |
-| `rf_msgs.st` | 352 | RECREATE | TAXI error monitoring, event logging, heartbeat. |
-| `rf_hvps_loop.st` | 343 | RECREATE | HVPS supervisory: voltage regulation, crowbar, contactor, fault monitoring via AB SLC-500. |
-| `rf_dac_loop.st` | 290 | RECREATE | Drive power ramping, gap voltage regulation, DAC loop control. |
+| File | Lines | Verdict | Upgrade Target | Notes |
+|------|-------|---------|---------------|-------|
+| `rf_states.st` | 2,227 | **SPEC-EXTRACT** | Python/EPICS coordinator | Master state machine: OFF→INITIALIZE→STANDBY→ON_CW→FAULT→FAULT_CLEAR. **Primary specification for the upgrade coordinator.** |
+| `rf_hvps_loop.st` | 343 | **SPEC-EXTRACT** | CompactLogix PLC code | HVPS supervisory: voltage regulation, crowbar, contactor. **Specification for new PLC ladder logic.** |
+| `rf_tuner_loop.st` | 555 | **SPEC-EXTRACT** | LLRF9 tuner + Python load-angle | Tuner motor control. 4 instances. **LLRF9 has built-in tuner PVs; Python handles load-angle offset.** |
+| `rf_calib.st` | 3,345 | REFERENCE | LLRF9 built-in calibration | Largest SNL. DAC offset nulling, cavity modulator calibration. **LLRF9's Dmitry software handles calibration.** Verify equivalence. |
+| `rf_msgs.st` | 352 | REFERENCE | EPICS logging + LLRF9 diag | TAXI error monitoring, event logging, heartbeat. Behavior reference for upgrade diagnostics. |
+| `rf_dac_loop.st` | 290 | **ELIMINATED** | LLRF9 internal | Drive power/gap voltage DAC loop. Per PDR §15.7: **"LLRF9 controls all via single vector sum"** — this loop is eliminated. |
 
 ### 2.2 SNL Support Headers
 
@@ -115,9 +133,11 @@
 
 ---
 
-## 3. DSP Firmware (rfApp/src/dsp/)
+## 3. DSP Firmware (rfApp/src/dsp/) — ALL ELIMINATED BY LLRF9
 
-### 3.1 RFP DSP (ripple rejection loop)
+> **NOTE**: All DSP firmware is **ELIMINATED** in the upgrade. The LLRF9 FPGA (Xilinx Spartan-6 or Artix-7) replaces all DSP functions with 270 ns loop delay digital processing. Per PDR §15.7, the ripple rejection loop is specifically eliminated because "LLRF9 digital feedback inherently rejects power-line ripple." These files serve only as historical reference for understanding what the LLRF9 does internally.
+
+### 3.1 RFP DSP (ripple rejection loop) — ELIMINATED
 
 | File | Lines | Verdict | Notes |
 |------|-------|---------|-------|
@@ -187,16 +207,18 @@
 
 ---
 
-## 4. Allen-Bradley PLC Subsystem (allenBradley/)
+## 4. Allen-Bradley PLC Subsystem (allenBradley/) — ELIMINATED
+
+> **NOTE**: ALL AB serial communication code is **ELIMINATED**. Per PDR §2.3: HVPS controller → CompactLogix PLC (Ethernet/IP), RF MPS → ControlLogix 1756 (Ethernet/IP), Tuner motors → Galil DMC-4143 (Ethernet). No AB serial scanner in the upgrade. All new PLCs communicate via Ethernet, not the VME AB scanner card.
 
 ### 4.1 Core Driver
 
 | File | Lines | Verdict | Notes |
 |------|-------|---------|-------|
-| `drvAb.c` | 2,039 | EVALUATE | Core AB serial communication driver. If AB PLCs remain → ADAPT (community driver may exist). If PLCs replaced → REMOVE. |
-| `drvAb.h` | 76 | EVALUATE | Driver API. |
-| `drvAB.dbd` | 4 | EVALUATE | Driver registration. |
-| `allenBradley.dbd` | 76 | EVALUATE | Combined DBD. |
+| `drvAb.c` | 2,039 | **ELIMINATED** | AB serial communication driver. Replaced by Ethernet/IP to CompactLogix/ControlLogix. |
+| `drvAb.h` | 76 | **ELIMINATED** | Driver API. |
+| `drvAB.dbd` | 4 | **ELIMINATED** | Driver registration. |
+| `allenBradley.dbd` | 76 | **ELIMINATED** | Combined DBD. |
 
 ### 4.2 PLC-5 / 1771-DCM Device Support
 
@@ -244,19 +266,17 @@
 
 ---
 
-## 5. Stepper Motor Subsystem (stepper/)
+## 5. Stepper Motor Subsystem (stepper/) — ALREADY REPLACED
+
+> **NOTE**: The stepper motor system has been **ALREADY REPLACED** by a Galil DMC-4143 4-axis motion controller, commissioned August 2025. Per PDR §10.3: "The tuner motor controller is being replaced with a modern motion controller." The Galil uses EPICS motor records over Ethernet. All legacy stepper motor code is historical only.
 
 | File | Lines | Verdict | Notes |
 |------|-------|---------|-------|
-| `steppermotorRecord.c` | 959 | EVALUATE | Custom record type. Consider replacing with standard EPICS motor record. |
-| `drvCompuSm.c` | 872 | EVALUATE | Compumotor driver — may not be used at SPEAR3. |
-| `drvOms.c` | 705 | EVALUATE | Oregon Micro Systems driver — may not be used at SPEAR3. |
-| `devSmCompumotor1830.c` | 82 | EVALUATE | Compumotor 1830 device support stub. |
-| `devSmOms6Axis.c` | 83 | EVALUATE | OMS 6-axis device support stub. |
-| `drvOms.h` | 74 | EVALUATE | OMS driver header. |
-| `steppermotor.h` | 66 | EVALUATE | Stepper motor record header. |
-| `steppermotorRecord.dbd` | 307 | EVALUATE | Record and device support definitions (307 lines — large). |
-| `Makefile` | 24 | EVALUATE | Build. |
+| `steppermotorRecord.c` | 959 | **DONE** | Custom stepper record → replaced by standard EPICS motor record + Galil DMC-4143. |
+| `devSmAB1746HSTP1.c` | 1,673 | **DONE** | AB 1746-HSTP1 driver → replaced by Galil Ethernet driver. |
+| `drvCompuSm.c` | 872 | **DONE** | Compumotor driver — not used at SPEAR3, historical only. |
+| `drvOms.c` | 705 | **DONE** | Oregon Micro Systems — not used at SPEAR3, historical only. |
+| Other files | ~560 | **DONE** | Headers, stubs, build files — all historical. |
 
 ---
 
@@ -339,4 +359,3 @@ See **[07-epics-databases.md](07-epics-databases.md)** for full analysis. All da
 | `config.ab` | ~60 | EVALUATE | AB scanner configuration (rack/group mapping). Keep if PLCs remain. |
 | `srf1.substitutions` | ~80 | RECREATE | Macro definitions for station SRF1: STN=SRF1, slot assignments, 4-cavity config. |
 | 57 table files (tbl/) | varies | **KEEP** | Waveform tables, DDF filter definitions, IIR coefficients. Physics data — reusable if data format compatible. |
-

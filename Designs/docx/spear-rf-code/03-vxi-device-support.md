@@ -1,14 +1,27 @@
 # VXI Driver & Device Support — Deep Dive
 
 **Document**: 03 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 2 — corrected for PEP-II modules and upgrade context)**
 
 ---
 
-## 1. Core VXI Driver (drvP2RfVxi.c — 2,671 lines)
+## UPGRADE CONTEXT
+
+**All VXI device support code is ELIMINATED in the upgrade.** The Dimtel LLRF9/476 (2 units, 18 RF channels, FPGA-based with 270 ns loop delay) replaces the entire VXI system: RFP module, 3× IQA modules, Clock module, and all associated DSP firmware.
+
+**PEP-II modules not active in SPEAR3**: GVF (slot 3 — empty in SRF1 crate), CF2 (slot 5 — MPS Shutoff in SRF1 crate), CFM (not in SRF1 crate). These device support files (devP2RfGvf.c, devP2RfCf2.c, devP2RfCfm.c) are PEP-II heritage code and are not discussed in detail here.
+
+**Active SPEAR3 VXI modules** (the ones that actually ran): RFP (slot 4), IQA ×3 (slots 7/9/11), AIM (slot 12), Clock (slot 2).
+
+This document remains valuable as **historical reference** for understanding what the LLRF9 must replicate functionally.
+
+---
+
+## 1. Core VXI Driver (drvP2RfVxi.c — 2,671 lines) — ELIMINATED
 
 ### 1.1 Purpose
 
-Single point of hardware abstraction between EPICS device support and VXI backplane. Every register read/write, DSP operation, and memory transfer flows through this driver.
+Single point of hardware abstraction between EPICS device support and VXI backplane. Every register read/write, DSP operation, and memory transfer flows through this driver. **Replaced by LLRF9 internal firmware and EPICS IOC.**
 
 ### 1.2 Key Data Structures
 
@@ -397,4 +410,3 @@ CF2 supports multiple filter bank configurations:
 | devP2RfCf2.c | 2,970 | Multi-bank coefficient management, IIR filter loading protocol |
 | devP2RfCfm.c | 1,487 | V1 comb filter coefficients (simpler than CF2) |
 | devP2RfClk.c | 957 | PLL configuration algorithm, ClkConsts(r,a,m,p) macro |
-

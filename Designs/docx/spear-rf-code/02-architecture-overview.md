@@ -1,6 +1,27 @@
 # Architecture Overview — PV Naming, Boot Sequence, Cross-Cutting Concerns
 
 **Document**: 02 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 2 — corrected with upgrade context and PV namespace mapping)**
+
+---
+
+## UPGRADE CONTEXT
+
+The legacy architecture (VxWorks + VXI + AB serial) is being replaced by a heterogeneous system:
+
+| Layer | Legacy | Upgrade |
+|-------|--------|---------|
+| Fast RF feedback | RFP analog module + DSP | LLRF9 FPGA (270 ns loop delay) |
+| Signal monitoring | IQA modules | LLRF9 ADC (18 channels) + Waveform Buffer (12 channels) |
+| HVPS control | SLC-500 PLC via AB serial | CompactLogix PLC via Ethernet/IP |
+| RF MPS | PLC-5 via AB serial | ControlLogix 1756 via Ethernet/IP |
+| Tuner control | AB 1746-HSTP1 via AB serial | Galil DMC-4143 via Ethernet (commissioned Aug 2025) |
+| Interlock coordination | Distributed (analog + PLC + wiring) | **New** Interface Chassis (hardware AND-gate) |
+| Supervisory software | SNL on VxWorks | Python/EPICS coordinator (soft IOC, ~1 Hz) |
+| Arc detection | VXI AIM module (partially functional) | **New** Microstep-MIS optical (12 sensors) |
+| PPS safety | Through HVPS controller (PLC in safety chain) | **New** dedicated PPS Interface Box |
+
+**Key point**: The VxWorks boot sequence, VXI initialization, and AB scanner communication are ALL eliminated. The upgrade uses standard EPICS IOCs on Linux communicating over Ethernet.
 
 ---
 
@@ -310,4 +331,3 @@ p2RfInitHooks.c ────► drvP2RfVxi.c ──► drvEpvxi.c ──► VXI 
 | VxWorks → Linux | fast_lock.h, all ISR code, boot sequence, build system |
 | EPICS 3.13 → 3.15+/7 | All custom records (field macros), device support (DSET changes), SNL (minor syntax), databases (record type changes) |
 | AB PLC → new controller | drvAb.c, all 1771DCM/SLCDCM device support, AB-specific .db files, stepper motor driver |
-

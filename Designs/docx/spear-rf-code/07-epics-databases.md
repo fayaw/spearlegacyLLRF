@@ -1,6 +1,24 @@
 # EPICS Database & PV Architecture
 
 **Document**: 07 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 2 — corrected with upgrade PV namespace and PEP-II module identification)**
+
+---
+
+## UPGRADE CONTEXT
+
+Legacy PV databases are a **critical reference for the upgrade**. The upgrade preserves the `SRF1:` prefix and uses structured subsystem prefixes:
+
+| Upgrade Subsystem | PV Prefix | Source |
+|-------------------|-----------|--------|
+| LLRF9 Unit 1 | `LLRF1:` | Built-in EPICS IOC (Dmitry) |
+| LLRF9 Unit 2 | `LLRF2:` | Built-in EPICS IOC (Dmitry) |
+| HVPS (CompactLogix) | `SRF1:HVPS:` | EPICS gateway |
+| RF MPS (ControlLogix) | `SRF1:MPS:` | EPICS gateway |
+| Tuner motors (Galil) | `SRF1:MTR:` | EPICS motor record IOC |
+| Waveform Buffer | `SRF1:WFBUF:` | Dedicated IOC |
+
+**Key deliverable**: Create a PV alias/migration mapping from legacy `SRF1:*` PVs to new PV names, preserving operator interface continuity.
 
 ---
 
@@ -10,15 +28,15 @@ The EPICS database is split across 78+ files in `rfApp/Db/`, organized by functi
 
 ### 1.1 VXI Module Records (Custom Record Types)
 
-| File | Record Type | Instance(s) | Description |
-|------|-------------|-------------|-------------|
-| `rfp.db` | p2RfRfpRecord | 1 per station | RF Processor module |
-| `gvf.db` | p2RfGvfRecord | 1 per station | Gap Voltage Feed-Forward module |
-| `iqa.db` | p2RfIqaRecord | 3 per station (fwd, refl, cav) | I/Q & Amplitude Detectors |
-| `aim.db` | p2RfAimRecord | 1 per station | Arc Interlock Module |
-| `clk.db` | p2RfClkRecord | 1 per station | Clock Module |
-| `cf2.db` | p2RfCf2Record | 1 per station | Comb Filter v2 |
-| `cfm.db` | p2RfCfmRecord | 1 per station | Comb Filter v1 |
+| File | Record Type | Instance(s) | Active in SPEAR3? | Description |
+|------|-------------|-------------|-------------------|-------------|
+| `rfp.db` | p2RfRfpRecord | 1 per station | **Yes** (slot 4) | RF Processor module — **ELIMINATED by LLRF9** |
+| `iqa.db` | p2RfIqaRecord | 3 per station (fwd, refl, cav) | **Yes** (slots 7/9/11) | I/Q & Amplitude Detectors — **ELIMINATED by LLRF9** |
+| `aim.db` | p2RfAimRecord | 1 per station | **Yes** (slot 12) | Arc Interlock Module — **ELIMINATED by Interface Chassis** |
+| `clk.db` | p2RfClkRecord | 1 per station | **Yes** (slot 2) | Clock Module — **ELIMINATED by LLRF9** |
+| `gvf.db` | p2RfGvfRecord | 1 per station | **No** (slot 3 empty) | **PEP-II ONLY** — GVF module not installed in SRF1 |
+| `cf2.db` | p2RfCf2Record | 1 per station | **No** (slot 5 = MPS Shutoff) | **PEP-II ONLY** — CF2 module not installed in SRF1 |
+| `cfm.db` | p2RfCfmRecord | 1 per station | **No** (not in SRF1 crate) | **PEP-II ONLY** — CFM comb filter not installed in SRF1 |
 
 ### 1.2 I/Q Signal Processing
 
@@ -214,4 +232,3 @@ These files encode **physics** — they define waveforms, filter characteristics
 3. **INP/OUT links** → New hardware addressing (not VXI addresses)
 4. **AB device support type** → New PLC communication method
 5. **Module-specific fields** → New register set for FPGA
-

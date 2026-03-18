@@ -1,10 +1,23 @@
 # PLC Integration & Stepper Motors
 
 **Document**: 06 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 2 — corrected with upgrade context)**
 
 ---
 
-## 1. Allen-Bradley PLC Architecture
+## UPGRADE CONTEXT
+
+| Legacy | Lines | Upgrade | Status |
+|--------|-------|---------|--------|
+| AB drvAb.c serial driver | 2,039 | **ELIMINATED** | All new PLCs use Ethernet/IP |
+| AB SLC-500 (HVPS) | — | CompactLogix PLC (Ethernet) | PDR §6.3 |
+| AB PLC-5 (RF MPS) | — | ControlLogix 1756 (Ethernet) | PDR §7.3 |
+| AB 1746-HSTP1 stepper | 1,673 | **DONE** — Galil DMC-4143 (commissioned Aug 2025) | PDR §10.3 |
+| Compumotor / OMS drivers | — | **ELIMINATED** — never used in SPEAR3 | Historical |
+
+---
+
+## 1. Allen-Bradley PLC Architecture — ELIMINATED
 
 ### 1.1 Physical Configuration
 
@@ -267,4 +280,3 @@ The custom `steppermotorRecord` should be **replaced by the standard EPICS motor
 - Has standardized PV naming (.VAL, .RBV, .DMOV, .VELO, .ACCL, etc.)
 
 If the physical stepper motors and 1746-HSTP1 modules are retained, a custom asyn driver for the motor record can replace `devSmAB1746HSTP1.c`.
-

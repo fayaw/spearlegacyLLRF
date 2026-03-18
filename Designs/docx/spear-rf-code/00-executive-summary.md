@@ -1,7 +1,23 @@
 # SPEAR3 Legacy LLRF Codebase — Executive Summary & Upgrade Decision Matrix
 
 **Document**: 00 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**Date**: March 2026
+**Date**: March 2026 (Rev 2 — corrected with upgrade system context from PDR)
+
+---
+
+## CORRECTION NOTICE (Rev 2)
+
+Rev 1 of this report contained errors that have been corrected:
+
+1. **CFM, GVF/GFF modules are PEP-II heritage — NOT used for SPEAR3**. The VXI crate template (`crat_vxi_13slot.db` in `srf1.substitutions`) shows slot 3 is empty and slot 5 is "MPS Shutoff". The `rf_vxi_modules_All.substitutions` loads `gvf.db` (slot 3) and `cf2.db` (slot 5) but these are PEP-II template artifacts — the physical modules are not present in the SPEAR3 SRF1 crate. PDR Section 2.1 confirms only: CPU, AB controller, Clock, RFP, three IQAs, and AIM are in the VXI crate.
+
+2. **The upgrade target is NOT a monolithic FPGA replacement**. It is a heterogeneous system: Dimtel LLRF9/476 (FPGA-based controller) + CompactLogix PLC (HVPS) + ControlLogix PLC (RF MPS) + Galil DMC-4143 (tuner motion) + Interface Chassis (hardware interlocks) + EPICS/Python/MATLAB coordinator.
+
+3. **Eliminated loops**: Per PDR Section 15.7, the following legacy loops are eliminated because the LLRF9 digital feedback handles them internally:
+   - Ripple rejection loop (DSP firmware)
+   - Comb filter loop (CFM — PEP-II only)
+   - Gap voltage feedback (GVF — PEP-II only)
+   - 4-way DAC branching loop (rf_dac_loop.st)
 
 ---
 
@@ -11,7 +27,7 @@
 |--------|-------|
 | Total source files | **253** |
 | Total lines of code | **82,430+** |
-| Custom EPICS record types | **7** (RFP, GVF, IQA, AIM, CLK, CF2, CFM) |
+| Custom EPICS record types | **7** (RFP, GVF, IQA, AIM, CLK, CF2, CFM) — but only **4 active in SPEAR3** (RFP, IQA, AIM, CLK) |
 | EPICS database files | **78+** (.db and .substitutions) |
 | SNL state machine programs | **6** (+ 12 header/macro files) |
 | DSP firmware programs | **4 directories** (~15,667 lines TMS320C16xx assembly) |
@@ -23,149 +39,142 @@
 | VXI controller | Kinetics Systems KSC V152 slot-0 |
 | Source control | CVS (files stored as RCS `,v` archives) |
 
-## 2. Architecture Summary
+### SPEAR3 SRF1 VXI Crate (Actual Physical Configuration)
+
+From `srf1.substitutions` crate template and PDR Section 2.1:
+
+| Slot | Module | In SPEAR3? | Record Type |
+|------|--------|-----------|-------------|
+| 0 | B132-IOCRF (KSC V152 CPU) | **Yes** | — |
+| 1 | AB Scanner (VME adapter) | **Yes** | — |
+| 2 | Clock | **Yes** | P2RfClkRecord |
+| 3 | *(empty — GVF defined in software but NOT installed)* | **No** | — |
+| 4 | RF Processing (RFP) | **Yes** | P2RfRfpRecord |
+| 5 | MPS Shutoff *(not CF2 — CF2 defined in software but NOT installed)* | **Not CF2** | — |
+| 6 | Link Passthru | — | — |
+| 7 | IQA1 (Forward) | **Yes** | P2RfIqaRecord |
+| 8 | *(empty)* | — | — |
+| 9 | IQA2 (Reflected) | **Yes** | P2RfIqaRecord |
+| 10 | *(empty)* | — | — |
+| 11 | IQA3 (Cavity) | **Yes** | P2RfIqaRecord |
+| 12 | Arc Interlock (AIM) | **Yes** | P2RfAimRecord |
+
+**Active SPEAR3 VXI modules**: CPU, AB Scanner, Clock, RFP, 3× IQA, AIM = **8 modules**
+
+## 2. Architecture — Legacy vs. Upgrade
+
+### 2.1 Legacy Architecture (What This Codebase Implements)
 
 ```
-Layer 7: Operator Displays & Archiver (Channel Access clients)
-         ─────────────────────────────────────────────────────
-Layer 6: SNL State Machines (6 programs, ~7,112 lines)
+Layer 6: SNL State Machines (6 programs)
          rf_states, rf_calib, rf_tuner_loop, rf_hvps_loop,
          rf_dac_loop, rf_msgs
-         ─────────────────────────────────────────────────────
-Layer 5: EPICS Database & Subroutine Records (78+ .db files)
-         subIQ.c (23 I/Q math functions)
-         subSys.c (11 system-level functions)
-         ─────────────────────────────────────────────────────
-Layer 4: Custom Record Types (7 types, ~2,371 lines)
-         p2RfRfpRecord, p2RfGvfRecord, p2RfIqaRecord,
-         p2RfAimRecord, p2RfClkRecord, p2RfCf2Record, p2RfCfmRecord
-         ─────────────────────────────────────────────────────
-Layer 3: Device Support (7 modules, ~15,059 lines)
-         devP2RfRfp, devP2RfGvf, devP2RfIqa, devP2RfAim,
-         devP2RfClk, devP2RfCf2, devP2RfCfm
-         ─────────────────────────────────────────────────────
-Layer 2: Core VXI Driver (drvP2RfVxi.c, 2,671 lines)
-         + AB PLC Driver (drvAb.c, 2,039 lines)
-         + Stepper Motor (steppermotorRecord.c, 959 lines)
-         ─────────────────────────────────────────────────────
-Layer 1: VXI Infrastructure (drvEpvxi.c, 4,622 lines)
-         + KSC V152 controller + VxWorks RTOS
-         ─────────────────────────────────────────────────────
-Layer 0: Hardware (VXI chassis, SLAC PEP-II RF modules,
-         AB PLCs, stepper motors, klystron, cavities)
+Layer 5: EPICS Database & Subroutines (subIQ.c, subSys.c)
+Layer 4: Custom Record Types (RFP, IQA, AIM, CLK active; GVF, CF2, CFM PEP-II heritage)
+Layer 3: Device Support (devP2RfRfp, devP2RfIqa, devP2RfAim, devP2RfClk active)
+Layer 2: Core VXI Driver (drvP2RfVxi.c) + AB PLC Driver (drvAb.c)
+Layer 1: VXI Infrastructure (drvEpvxi.c) + KSC V152 + VxWorks RTOS
+Layer 0: Hardware (VXI chassis, klystron, cavities, AB PLCs, stepper motors)
 ```
 
-## 3. VXI Chassis Slot Assignments (SRF1 Station)
+### 2.2 Upgrade Architecture (What the Legacy Code Informs)
 
-From `srf1.substitutions`:
-
-| Slot | Module | Record Type |
-|------|--------|-------------|
-| 0 | B132-IOCRF (KSC V152 CPU) | — |
-| 1 | AB Scanner (VME adapter) | — |
-| 2 | Clock | P2RfClkRecord |
-| 4 | RF Processing (RFP) | P2RfRfpRecord |
-| 5 | MPS Shutoff | — |
-| 6 | Link Passthru | — |
-| 7 | IQA1 (Forward) | P2RfIqaRecord |
-| 9 | IQA2 (Reflected) | P2RfIqaRecord |
-| 11 | IQA3 (Cavity) | P2RfIqaRecord |
-| 12 | Arc Interlock (AIM) | P2RfAimRecord |
-
-Additional modules (GVF, CF2/CFM) vary by station configuration.
-
-## 4. Upgrade Decision Matrix
-
-### 4.1 Verdict Categories
-
-| Verdict | Meaning |
-|---------|---------|
-| **REMOVE** | Hardware-specific code that has no equivalent in the new system. Will be entirely replaced by new hardware/firmware. |
-| **RECREATE** | Functional logic that must be preserved but rewritten for new hardware/OS/EPICS version. |
-| **ADAPT** | Code that can be adapted with moderate changes (e.g., API updates, OS porting). |
-| **KEEP** | Logic that is directly reusable or needs only minor changes. |
-| **REFERENCE** | Code that serves as the specification — the new implementation must replicate its behavior. |
-
-### 4.2 Subsystem Verdicts
-
-| Subsystem | Files | Lines | Verdict | Rationale |
-|-----------|-------|-------|---------|-----------|
-| **VXI Infrastructure** (epvxi/) | 8 | 7,401 | **REMOVE** | VXI bus is being replaced. No VXI in new system. |
-| **KSC V152 Controller** (ksc_v152/) | ~30 | ~5,000 | **REMOVE** | Slot-0 controller hardware is being replaced. |
-| **Core VXI Driver** (drvP2RfVxi.c/h) | 2 | 2,862 | **REMOVE** | VXI register abstraction has no equivalent in new system. However, the DSP communication protocol and table loading logic are **REFERENCE** material. |
-| **Device Support Modules** (devP2Rf*.c) | 7 | 15,059 | **REMOVE** → **REFERENCE** | These files encode the complete operational semantics of each module type. The new device support will be completely different (FPGA registers instead of VXI), but every control function, state machine, and DAC loading sequence documented here must be replicated. |
-| **Custom Record Types** (p2Rf*Record.c) | 7 | 2,203 | **REMOVE** → **RECREATE** | The record field definitions (which PVs exist, their types, and links) are the de-facto specification. New records will need equivalent fields to preserve the PV interface. |
-| **Register Definitions** (p2Rf*Def.h) | 7 | 2,747 | **REMOVE** → **REFERENCE** | Register maps are specific to old hardware. But they define the functional capabilities that new hardware must match. |
-| **DSP Firmware** (rfpDsp/, gvfDsp/, obsDsp/, genDsp/) | ~60 | 15,667 | **REMOVE** → **REFERENCE** | TMS320C16xx assembly is being replaced by FPGA. But the algorithms (ripple rejection, feed-forward, I/Q processing, sqrt, trig) must be replicated in FPGA firmware. |
-| **SNL State Machines** (rf_*.st) | 6 | 7,112 | **RECREATE** | Station state machine, calibration, tuner loop, HVPS loop, DAC loop, messaging — all must be reimplemented. SNL may or may not be the target language. These are the closest thing to a "specification" of operational procedures. |
-| **SNL Header/Macro Files** (rf_*_defs.h, etc.) | 12 | 1,151 | **RECREATE** | PV names, status definitions, control macros. These define the operator interface contract. |
-| **Signal Processing** (subIQ.c) | 1 | 965 | **KEEP** / **ADAPT** | Pure math functions (atan2, sqrt, power calculations). No hardware dependency. Can be reused directly or with minimal EPICS API updates. |
-| **System Calculations** (subSys.c) | 1 | 464 | **KEEP** / **ADAPT** | Frequency offset, phase combining, DC coefficient calculations. Hardware-independent math. |
-| **Allen-Bradley Drivers** (allenBradley/) | ~20 | ~7,500 | **EVALUATE** | Depends on whether AB PLCs are retained. If HVPS PLC is kept → ADAPT existing AB driver. If HVPS is replaced → REMOVE. Community AB drivers may be available for modern EPICS. |
-| **Stepper Motor** (stepper/) | 5 | 2,763 | **EVALUATE** | If cavity tuners keep AB 1746-HSTP1 → ADAPT. If stepper controller changes → use community motor record. Custom `steppermotorRecord` can likely be replaced by standard EPICS motor record. |
-| **EPICS Databases** (Db/) | 78 | ~15,000 | **RECREATE** | The .db files define the complete PV structure. New databases will differ in record types but must preserve the PV naming convention and operator interface. |
-| **Base Utilities** (rfApp/src/base/) | 45+ | ~10,000 | **REMOVE** | VXI bus browser, DSP download, bus access, memory test — all VxWorks/VME-specific. |
-| **Diagnostics** (rfApp/src/diag/) | 1 | 2,328 | **REMOVE** → **RECREATE** | VXI-specific diagnostics. New system needs equivalent diagnostics for new hardware. |
-| **Boot Configuration** (iocBoot/) | 10+ | ~1,000 | **RECREATE** | Startup scripts, AB config, VXI addressing — all must be recreated for new IOC. |
-| **Table/Coefficient Files** (iocBoot/tbl/) | 57 | — | **KEEP** | Waveform tables, DDF filter definitions, IIR coefficients. These encode physics — keep as-is if new hardware uses same data format. |
-| **Init Hooks** (p2RfInitClk.c, p2RfInitHooks.c) | 2 | 375 | **REMOVE** → **REFERENCE** | VXI clock module pre-initialization and boot sequence. Logic must be replicated for new system. |
-| **VxWorks Support** (fast_lock.h, misc) | 3 | ~300 | **REMOVE** | VxWorks-specific locking, RTOS-specific APIs. Replace with EPICS base OS-independence layer (epicsMutex, etc.). |
-
-### 4.3 Effort Estimates
-
-| Effort Level | Subsystems | Estimated Duration |
-|-------------|------------|-------------------|
-| **Zero effort** (direct reuse) | subIQ.c, subSys.c, table files | — |
-| **Small** (API updates) | Signal processing adaptation | 1-2 weeks |
-| **Medium** (significant rewrite) | SNL state machines, EPICS databases, stepper motor | 4-8 weeks |
-| **Large** (full reimplementation) | New device support, new record types, FPGA firmware | 3-6 months |
-| **N/A** (removed) | VXI infrastructure, KSC, VxWorks-specific code | — |
-
-## 5. Critical Dependencies
+From PDR Section 2.2 — the upgrade replaces all control electronics:
 
 ```
-                    ┌─────────────────────┐
-                    │   rf_states.st      │ ◄── Master state machine
-                    │ (stations: OFF,     │     controls everything
-                    │  STANDBY, ON_CW,    │
-                    │  FAULT)             │
-                    └──┬──┬──┬──┬──┬─────┘
-                       │  │  │  │  │
-         ┌─────────────┘  │  │  │  └──────────────┐
-         │                │  │  │                  │
-    ┌────▼─────┐   ┌──────▼──▼──▼──────┐   ┌──────▼──────┐
-    │rf_hvps   │   │  7 Custom Records  │   │rf_tuner     │
-    │_loop.st  │   │  (RFP,GVF,IQA,    │   │_loop.st ×4  │
-    │          │   │   AIM,CLK,CF2,CFM) │   │             │
-    └────┬─────┘   └──────┬─────────────┘   └──────┬──────┘
-         │                │                        │
-    ┌────▼─────┐   ┌──────▼─────────────┐   ┌──────▼──────┐
-    │AB SLC-500│   │  7 Device Support  │   │steppermotor │
-    │PLC via   │   │  + Core VXI Driver │   │Record via   │
-    │drvAb.c   │   │  + DSP Firmware    │   │AB 1746-HSTP1│
-    └──────────┘   └────────────────────┘   └─────────────┘
+Layer 4: EPICS/Python/MATLAB Coordinator (~1 Hz supervisory)
+         ← informed by rf_states.st, rf_hvps_loop.st, rf_tuner_loop.st
+Layer 3: RF MPS PLC (ControlLogix 1756, ~ms)
+         ← new system, informed by legacy AIM interlock logic
+Layer 2: Interface Chassis (<1 µs hardware AND-gate)
+         ← entirely new, no legacy equivalent
+Layer 1: LLRF9 FPGA (<1 µs, 270 ns loop delay)
+         ← replaces RFP + IQA + Clock + DSP firmware + analog feedback
+Layer 0: Same RF plant (klystron, cavities, waveguide) + new peripherals
+         Motor: Galil DMC-4143 (already commissioned!)
+         HVPS: CompactLogix PLC (replaces SLC-500)
+         Arc: Microstep-MIS optical (replaces non-functional legacy)
+         Waveform Buffer: new monitoring system
+         Heater: Programmable AC supply (replaces motor-driven variac)
 ```
 
-**Key dependency chain**: Any change to device support (Layer 3) requires updating the record types (Layer 4), which propagates to the database (Layer 5), which affects the SNL programs (Layer 6). This is unavoidable when replacing hardware.
+## 3. Legacy → Upgrade Mapping (Key Table)
 
-## 6. Upgrade Priority ("First 2 Weeks" Checklist)
+| Legacy Component | Lines | Upgrade Target | Migration Type | Priority |
+|------------------|-------|---------------|---------------|----------|
+| **rf_states.st** | 2,227 | Python/EPICS coordinator state machine | Spec extraction → rewrite | **High** |
+| **rf_hvps_loop.st** | 343 | CompactLogix PLC ladder logic | Spec extraction → PLC code | **High** |
+| **rf_tuner_loop.st** | 555 | LLRF9 built-in tuner + Python load-angle controller | Spec extraction → configure + rewrite | **High** |
+| **rf_calib.st** | 3,345 | LLRF9 built-in calibration (Dmitry's software) | Verify equivalence | Medium |
+| **rf_msgs.st** | 352 | EPICS logging + LLRF9 diagnostics | Spec extraction → EPICS records | Medium |
+| **rf_dac_loop.st** | 290 | **ELIMINATED** — LLRF9 handles internally | Document for reference only | Low |
+| **subIQ.c** (23 funcs) | 965 | EPICS coordinator calculations | Evaluate for reuse | Medium |
+| **subSys.c** (11 funcs) | 464 | EPICS coordinator calculations | Evaluate for reuse | Medium |
+| **devP2RfRfp.c** | 2,389 | **ELIMINATED** — LLRF9 replaces RFP module | Reference only | None |
+| **devP2RfIqa.c** | 2,260 | **ELIMINATED** — LLRF9 replaces IQA modules | Reference only | None |
+| **devP2RfAim.c** | 1,982 | **ELIMINATED** — replaced by Interface Chassis + Arc Detection | Reference for interlock spec | Low |
+| **devP2RfClk.c** | 957 | **ELIMINATED** — LLRF9 has internal clock | Reference only | None |
+| **DSP firmware** | 15,667 | **ELIMINATED** — LLRF9 FPGA handles all fast processing | None | None |
+| **devP2RfGvf/Cfm/Cf2** | 6,807 | **NOT APPLICABLE** — PEP-II only, never used in SPEAR3 | None | N/A |
+| **AB PLC drivers** | ~7,500 | **ELIMINATED** — new PLCs use Ethernet/IP | None | None |
+| **Stepper motor code** | 2,763 | Galil DMC-4143 + EPICS motor record | **Already commissioned** | Done |
+| **PV databases** | ~15,000 | PV alias mapping to new PV namespace | Direct extraction | **High** |
+| **Table/coefficient files** | 57 files | Evaluate for LLRF9 compatibility | Check data format | Low |
 
-1. **Define FPGA register map** — This determines new device support structure
-2. **Port subIQ.c and subSys.c** — Quick wins, preserves physics calculations
-3. **Extract PV naming convention** — Document every PV name from .db files and SNL pvs.h files
-4. **Map rf_states.st state transitions** — This is the operational specification
-5. **Catalog DSP algorithms** — Document ripple loop, feed-forward, and observer algorithms from assembly comments for FPGA implementation
+## 4. Upgrade Decision Matrix (Revised)
+
+### Codebase Breakdown by Upgrade Relevance
+
+| Category | Files | Lines | % | Description |
+|----------|-------|-------|---|-------------|
+| **ELIMINATED** (LLRF9 replaces) | ~80 | ~35,000 | 42% | VXI driver, device support, DSP firmware, custom records — all replaced by LLRF9 |
+| **PEP-II ONLY** (never used in SPEAR3) | ~30 | ~10,000 | 12% | GVF, CFM, CF2 device support, firmware, databases |
+| **OBSOLETE INFRASTRUCTURE** | ~60 | ~15,000 | 18% | VxWorks, KSC V152, VXI bus browser, base utilities |
+| **SPEC EXTRACTION** (informs new code) | ~30 | ~11,000 | 13% | SNL programs, HVPS/tuner loop logic, interlock specs |
+| **REUSABLE** (physics/math) | ~10 | ~1,500 | 2% | subIQ.c, subSys.c, station state definitions |
+| **PV REFERENCE** (preserves operator interface) | 78+ | ~15,000 | 18% | EPICS databases, substitution files, PV name patterns |
+| **ALREADY DONE** | ~5 | ~2,700 | 3% | Stepper motor → Galil (commissioned August 2025) |
+
+### Effort Estimates (Revised for Actual Upgrade)
+
+| Effort Level | Scope | Duration |
+|-------------|-------|----------|
+| **Zero** (direct reuse) | subIQ.c, subSys.c, table files | — |
+| **Small** (API updates) | Signal processing for EPICS coordinator | 1-2 weeks |
+| **Medium** (spec extraction + rewrite) | Python state machine (from rf_states.st), PV mapping | 4-8 weeks |
+| **Large** (new development) | EPICS coordinator, CompactLogix PLC code, Interface Chassis logic | 3-6 months |
+| **Already done** | Galil tuner controller (commissioned August 2025) | Done |
+| **External** (vendor) | LLRF9 firmware (Dmitry/Dimtel) | Vendor scope |
+
+## 5. Protection Chain (4-Layer Architecture)
+
+From PDR Section 17:
+
+| Layer | Subsystem | Response | Legacy Equivalent |
+|-------|-----------|----------|-------------------|
+| 1 | LLRF9 FPGA | <1 µs | RFP analog feedback (no software equivalent) |
+| 2 | Interface Chassis | <1 ms | AIM fast interlock chain (devP2RfAim.c) |
+| 3 | RF MPS PLC (ControlLogix) | ~ms | PLC-5 via AB scanner (drvAb.c) |
+| 4 | EPICS coordinator | ~1 Hz | SNL programs (rf_states.st, rf_hvps_loop.st) |
+
+## 6. "First 2 Weeks" Priority (Revised)
+
+1. **Extract rf_states.st state transitions** → write Python coordinator state machine spec
+2. **Extract rf_hvps_loop.st** → write CompactLogix PLC functional specification
+3. **Map legacy PV names to upgrade PV namespace** → create alias/migration table
+4. **Extract rf_tuner_loop.st** → verify LLRF9 built-in tuner matches legacy behavior
+5. **Evaluate subIQ.c/subSys.c** → which functions are needed in the EPICS coordinator?
 
 ## 7. Companion Documents
 
 | Document | Content |
 |----------|---------|
-| [01-file-inventory.md](01-file-inventory.md) | Complete 253-file catalog with verdicts |
-| [02-architecture-overview.md](02-architecture-overview.md) | PV naming, boot sequence, VxWorks patterns, build system |
-| [03-vxi-device-support.md](03-vxi-device-support.md) | VXI driver and all 7 device support modules |
-| [04-dsp-firmware.md](04-dsp-firmware.md) | TMS320C16xx firmware: ripple, feed-forward, observer |
-| [05-snl-state-machines.md](05-snl-state-machines.md) | All 6 SNL programs with state transition details |
-| [06-plc-stepper-motors.md](06-plc-stepper-motors.md) | Allen-Bradley drivers and stepper motor subsystem |
-| [07-epics-databases.md](07-epics-databases.md) | 78+ database files, PV structure, substitution patterns |
-| [08-signal-processing.md](08-signal-processing.md) | subIQ.c and subSys.c function-by-function analysis |
+| [01-file-inventory.md](01-file-inventory.md) | Complete 253-file catalog with revised verdicts |
+| [02-architecture-overview.md](02-architecture-overview.md) | PV naming, boot sequence, legacy→upgrade mapping |
+| [03-vxi-device-support.md](03-vxi-device-support.md) | VXI driver + device support (ELIMINATED by LLRF9) |
+| [04-dsp-firmware.md](04-dsp-firmware.md) | DSP algorithms (ELIMINATED by LLRF9 FPGA) |
+| [05-snl-state-machines.md](05-snl-state-machines.md) | SNL programs — primary spec extraction targets |
+| [06-plc-stepper-motors.md](06-plc-stepper-motors.md) | AB drivers (ELIMINATED) + stepper (ALREADY DONE) |
+| [07-epics-databases.md](07-epics-databases.md) | PV structure — critical for PV migration mapping |
+| [08-signal-processing.md](08-signal-processing.md) | subIQ.c + subSys.c — evaluate for coordinator reuse |
 

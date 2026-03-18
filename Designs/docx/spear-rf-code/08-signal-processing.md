@@ -1,6 +1,21 @@
 # Signal Processing & Physics Algorithms
 
 **Document**: 08 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 2 — added reuse evaluation for upgrade EPICS coordinator)**
+
+---
+
+## UPGRADE CONTEXT
+
+subIQ.c and subSys.c contain **pure-math functions** with no hardware dependencies. These are the most directly reusable components in the codebase.
+
+**Evaluation question**: Which of these functions are needed in the upgrade Python/EPICS coordinator?
+
+- Functions that compute quantities the **LLRF9 now handles internally** (I/Q processing, phase detection, amplitude calculation) may be redundant — the LLRF9 provides these as PV readbacks.
+- Functions that compute **system-level quantities** (klystron gain, reflected power ratio, beam loading) are likely still needed in the coordinator or MATLAB tools.
+- Functions that compute **calibration parameters** may be handled by Dmitry's LLRF9 calibration software.
+
+The coordinator operates at ~1 Hz and reads LLRF9 PVs (10 Hz scalars, 16k waveforms). It does NOT need to reimplement fast-loop algorithms.
 
 ---
 
@@ -236,4 +251,3 @@ The constants in `p2RfLib.h` should be preserved in a new shared header:
 - `P2RF_K_RFFREQ = 476000000` — this is a physical constant of the RF system
 - `P2RF_K_HARMNO(2) = 372` — this is the SPEAR3 harmonic number
 - These values are independent of the control system implementation
-

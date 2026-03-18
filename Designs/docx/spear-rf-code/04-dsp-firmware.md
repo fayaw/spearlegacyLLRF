@@ -1,6 +1,18 @@
 # DSP Firmware Analysis — TMS320C16xx Assembly
 
 **Document**: 04 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 2 — corrected: ALL DSP firmware ELIMINATED by LLRF9)**
+
+---
+
+## UPGRADE CONTEXT — ALL ELIMINATED
+
+**All DSP firmware is ELIMINATED in the upgrade.** The Dimtel LLRF9/476 FPGA (270 ns direct loop delay) replaces all DSP functions. Per PDR §15.7:
+- **Ripple rejection loop**: "LLRF9 digital feedback inherently rejects power-line ripple"
+- **GVF feed-forward**: "used for PEP-II, not SPEAR3" (GVF module not installed in SPEAR3 crate)
+- **Comb filter (CFM)**: "used for PEP-II multi-bunch stabilization, not applicable to SPEAR3"
+
+**No DSP algorithm migration is needed.** These files serve only as historical documentation of what the legacy system did. The LLRF9 implements its own algorithms designed by Dimtel (Dmitry).
 
 ---
 
@@ -10,7 +22,7 @@ The VXI modules use on-board TI TMS320C16xx fixed-point DSPs for real-time signa
 
 **Total DSP firmware**: ~15,667 lines across 4 directories and ~60 files.
 
-**Upgrade**: All DSP algorithms must be reimplemented in FPGA HDL (VHDL/Verilog). The assembly code serves as the authoritative specification for what the FPGA must do.
+**Status**: ALL ELIMINATED — LLRF9 FPGA handles all fast processing with 270 ns loop delay vs. legacy ~43 µs DSP cycle. No migration needed.
 
 ---
 
@@ -288,4 +300,3 @@ For the upgrade, each DSP algorithm maps to an FPGA module:
 | Communications block | Register file accessible via AXI/PCIe | **Low** |
 
 **Key Timing Constraint**: The ripple loop must complete all processing within one ripple clock period (~43 µs at 23 kHz). With FPGA clock rates of 100-250 MHz, this is easily achievable with pipelining.
-
