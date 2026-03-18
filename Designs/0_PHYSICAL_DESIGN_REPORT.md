@@ -129,43 +129,41 @@ The upgraded system replaces all control electronics while retaining the RF plan
    │   └─int.─┘    │            │           │  │          │          │        │          │
    │  (No IC)      │            │           │  │STATUS    │          │        │    ┌─────┴────────┐
    │               │            │           │  │fiber     │          │        │    │ Heater Ctrl  │
-   │               │            │           │  │          │          │        │    │Prog. AC Sup. │
-   │               │            │           │  │          │          │        │    │Controlled by │
-   │               │            │           │  │          │          │        │    │  RF MPS      │
-   │               │            │           │  │          │          │        │    └──────────────┘
-   │  to IC ───>   │            │           │  │          │  <─── to IC      │    (NOT connected
-   ▼  from above   ▼            ▼           ▼  │          ▲  from below ▲    ▲        to IC)
-  ┌────────────────────────────────────────────┴──────────────────────────────────────────────────┐
-  │                              INTERFACE CHASSIS (NEW)                                          │
-  │  First-fault detection | Optocoupler/galvanic isolation | Fiber I/O | AND-gate permit logic  │
-  └────────┬──────────────────────────────────────────────────────────────────────────────┬───────┘
-           │                                                                             │
-           │                                                                   3x fiber optic
-           │                                                                 SCR ENABLE│CROWBAR│STATUS
-           │                                                                     (bypass PLC)
-           │                                                                             │
-  ┌────────┴──────────────────────────────────────────────┐       ┌──────────────────────┴──────┐
-  │           MACHINE PROTECTION SAFETY SYSTEMS           │       │   HVPS (Power Section)      │
-  │ SPEAR MPS | Orbit Interlock | External Permits        │       │ transformer, rectifier,     │
-  │             (feed into Interface Chassis)              │       │ crowbar, thyristor stacks,  │
-  └───────────────────────────────────────────────────────┘       │ grounding tank, Ross sw,    │
-                                                                  │ filter inductors            │
-                                                                  └──────────────┬──────────────┘
-                                                                   PPS interlock signals
-                                                                 (HVPS contactor, Ross sw)
-                                                                                 │
-                                                                  ┌──────────────┴──────────────┐
-                                                                  │     PPS INTERFACE BOX       │
-                                                                  │ Bud enclosure, 4 relays,    │
-                                                                  │ status LEDs, lockable conn., │
-                                                                  │ HVPS contactor + Ross sw     │
-                                                                  └──────────────┬──────────────┘
-                                                                        PPS chain signals
-                                                                                 │
-                                                                  ┌──────────────┴──────────────┐
-                                                                  │         SPEAR PPS           │
-                                                                  │ Personnel Protection System  │
-                                                                  └─────────────────────────────┘
+   │               │            │           │  │(direct   │          │        │    │Prog. AC Sup. │
+   │               │            │           │  │ to HVPS  │          │        │    │Controlled by │
+   │               │            │           │  │ Power)   │          │        │    │  RF MPS      │
+   │  to IC ───>   │            │           │  │          │  <─── to IC      │    └──────────────┘
+   ▼  from above   ▼            ▼           ▼  │          ▲  from below ▲    ▲    (NOT connected
+  ┌────────────────────────────────────────────┐│┌─────────────────────────────────────────────────┐ to IC)
+  │                        INTERFACE CHASSIS   │││(NEW)                                            │
+  │  First-fault detection | Optocoupler/galv. │││isol. | Fiber I/O | AND-gate permit logic       │
+  └────────┬───────────────────────────────────┘│└──────────────────────────────────────┬──────────┘
+           │                                    │                                      │
+           │                                    │                            3x fiber optic
+           │                                    │                          SCR ENABLE│CROWBAR│STATUS
+           │                                    │                              (bypass PLC)
+           │                                    │                                      │
+  ┌────────┴──────────────────────────────────┐ │     ┌────────────────────────────────┴──────┐
+  │      MACHINE PROTECTION SAFETY SYSTEMS    │ │     │     HVPS (Power Section)              │
+  │ SPEAR MPS | Orbit Interlock | Ext Permits │ └────>│   transformer, rectifier, crowbar,    │
+  │        (feed into Interface Chassis)      │       │   thyristor stacks, grounding tank,   │
+  └───────────────────────────────────────────┘       │   Ross switch, filter inductors       │
+                                                      └───────────────┬────────────────────────┘
+                                                        PPS interlock signals
+                                                      (HVPS contactor, Ross sw)
+                                                                      │
+                                                      ┌───────────────┴────────────────────────┐
+                                                      │       PPS INTERFACE BOX                │
+                                                      │   Bud enclosure, 4 relays, status LEDs, │
+                                                      │   lockable conn., HVPS contactor +      │
+                                                      │   Ross switch ctrl                      │
+                                                      └───────────────┬────────────────────────┘
+                                                             PPS chain signals
+                                                                      │
+                                                      ┌───────────────┴────────────────────────┐
+                                                      │           SPEAR PPS                    │
+                                                      │   Personnel Protection System           │
+                                                      └───────────────────────────────────────┘
 ```
 
 **Key Architectural Principle**: The Interface Chassis implements **machine/equipment protection and operational interlocks** (LLRF/HVPS/RF MPS coordination), while personnel safety (PPS) functions are implemented exclusively in a completely separate, dedicated **PPS Interface Box**. These two safety-related subsystems are architecturally independent:
