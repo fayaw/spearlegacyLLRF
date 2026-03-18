@@ -73,8 +73,8 @@ See `05_CROSS_REFERENCE_INDEX.md` §5.5 and `04_LITERATURE_SYNTHESIS.md` §10 fo
 |---------|------|---------|
 | 1.0 | 2026-03-18 | Initial release: 6 documents, ~1,724 lines, legacy PDF + published literature + source code |
 | 2.0 | 2026-03-18 | Major update: +12 docx/xlsx sources extracted, +PDR integration, +mathematical framework, +operational insights. ~2,520 lines total (+46% growth) |
+| 2.1 | 2026-03-18 | Deep review: ⚠️ CFM/GVF/GFF corrected as PEP-II only (not used in SPEAR3). +HVPS controller details (regulator board signal flow, PLC LPF, phase angle calc, Enerpro interface). +Cavity tuner mechanicals (drive train, known failure modes, belt pulleys, limit switches). +RF calibration data (reflected power trips, DAC ranges, patch panel routing, klystron coupler). +PPS interface details. +9 additional docx and 7 additional xlsx sources integrated. +8 Designs/*.md reports cross-referenced. ~3,100+ lines total. |
 
 ---
 
-*Generated: 2026-03-18 | Version 2.0*
-
+*Generated: 2026-03-18 | Version 2.1*

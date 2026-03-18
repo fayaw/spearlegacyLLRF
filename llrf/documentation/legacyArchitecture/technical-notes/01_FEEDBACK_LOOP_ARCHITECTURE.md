@@ -463,9 +463,11 @@ From Corredoura 2000, two limiting circuits were added:
 
 ---
 
-## 4. Comb (Narrowband) RF Feedback Loop
+## 4. Comb (Narrowband) RF Feedback Loop — ⚠️ PEP-II ONLY
 
-### 10.1 Purpose
+> ⚠️ **This loop is a PEP-II design element only. The Comb Filter Modules (CFM) were NOT used in the SPEAR3 legacy system (1999–2022) and are NOT present in the LLRF9 upgrade (2022–present). This section is retained for historical/reference purposes to document the inherited PEP-II architecture.**
+
+### 10.1 Purpose (PEP-II)
 
 The comb loop provides **additional gain at revolution frequency harmonics** where coupled-bunch modes exist. The direct loop, while wideband, has finite gain that may not fully suppress all modes. The comb loop's high-Q notch characteristic provides >>20 dB additional gain at each revolution harmonic.
 
@@ -716,15 +718,17 @@ From `rf_hvps_loop_defs.h`:
 
 ---
 
-## 9. Gap Voltage Feed-Forward (GVF/GFF)
+## 9. Gap Voltage Feed-Forward (GVF/GFF) — ⚠️ PEP-II ONLY
 
-### 10.1 Purpose
+> ⚠️ **The GVF/GFF module is PEP-II hardware only. It was NOT used in the SPEAR3 legacy system (1999–2022) and is NOT present in the LLRF9 upgrade (2022–present). In SPEAR3, gap voltage control was handled by the DAC control loop in VxWorks software, not by a dedicated GVF module. There is no LFB (Longitudinal Feedback) system at SPEAR3. This section is retained for historical/reference purposes.**
+
+### 10.1 Purpose (PEP-II)
 
 The Gap Voltage Feed-Forward module provides:
 1. **I/Q reference values** for the gap voltage setpoint (used by direct loop as the reference target)
 2. **LFB woofer interface** — a fiber optic link from the longitudinal multi-bunch feedback system that provides a low-frequency "kick" signal to be summed into the station drive
 
-### 10.2 LFB Woofer (Longitudinal Feedback Integration)
+### 10.2 LFB Woofer (Longitudinal Feedback Integration) — PEP-II
 
 From Corredoura SLAC-PUB-8498:
 
@@ -732,7 +736,7 @@ From Corredoura SLAC-PUB-8498:
 
 The longitudinal feedback system (designed by Fox, Teytelman et al.) operates bunch-by-bunch at high bandwidth. For low-order modes (modes 0-10), the feedback system sends a signal via fiber optic to the LLRF, which modulates the station's drive to provide additional damping.
 
-### 10.3 TAXI Error Recovery
+### 10.3 TAXI Error Recovery — PEP-II
 
 The GVF module includes TAXI (serial data link) error monitoring. A TAXI error indicates loss of synchronization with the fiber optic link. From `rf_msgs.st`:
 
@@ -741,7 +745,9 @@ kludge sequence to monitor the state of the taxi error bit
 and resync the LFB if it's set
 ```
 
-**Cross-ref PDF**: `ps3403305900.pdf` (7 pages) — likely GVF module specification.
+**Note**: This code exists in the SPEAR3 legacy software (`rf_msgs.st`) but the TAXI link was never connected at SPEAR3.
+
+**Cross-ref PDF**: `ps3403305900.pdf` (7 pages) — GVF module specification (PEP-II design only).
 
 ---
 

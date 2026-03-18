@@ -113,13 +113,14 @@ Supporting files:
 |------|-----------|
 | AIM | Arc/Interlock Module — VXI module for arc detection and interlocks |
 | Baseband | Signal representation at zero center frequency (after demodulation from RF carrier) |
-| Comb loop | Narrowband feedback loop with gain peaks at revolution harmonics |
+| CFM | Comb Filter Module — ⚠️ **PEP-II ONLY, not used in SPEAR3** |
+| Comb loop | Narrowband feedback loop with gain peaks at revolution harmonics — ⚠️ **PEP-II ONLY** |
 | Coupled-bunch instability | Collective beam oscillation driven by cavity impedance at revolution harmonics |
 | Direct loop | Wideband feedback loop that reduces effective cavity impedance |
-| DSP | Digital Signal Processor — used in comb filter and ripple loop |
+| DSP | Digital Signal Processor — used in ripple loop (PEP-II: also comb filter) |
 | EPICS | Experimental Physics and Industrial Control System — distributed control framework |
-| GVF/GFF | Gap Voltage Feed-Forward — module providing voltage reference and LFB interface |
-| HVPS | High Voltage Power Supply — provides klystron cathode voltage (up to 65 kV) |
+| GVF/GFF | Gap Voltage Feed-Forward — ⚠️ **PEP-II ONLY, not used in SPEAR3**. Module providing voltage reference and LFB interface |
+| HVPS | High Voltage Power Supply — provides klystron cathode voltage (up to 90 kV, nominal 74.7 kV at 500 mA) |
 | IQ | In-phase / Quadrature — two-component representation of RF signal amplitude and phase |
 | IQA | IQ/Amplitude detector — VXI digital demodulation module |
 | LFB | Longitudinal Feedback — bunch-by-bunch feedback system for coupled-bunch damping |
@@ -132,7 +133,7 @@ Supporting files:
 | SNL | State Notation Language — EPICS real-time sequencer programming language |
 | SPEAR3 | Stanford Positron Electron Asymmetric Ring 3rd generation — 3 GeV light source |
 | SSRL | Stanford Synchrotron Radiation Lightsource |
-| TAXI | Serial data link interface for fiber optic communication (GVF ↔ LFB) |
+| TAXI | Serial data link interface for fiber optic communication (GVF ↔ LFB) — ⚠️ **PEP-II ONLY, not connected at SPEAR3** |
 | VXI | VMEbus eXtensions for Instrumentation — modular instrument bus standard |
 | Woofer | Low-frequency damping via RF station, driven by LFB system |
 
@@ -167,6 +168,14 @@ Supporting files:
 | RFSystemMPSRequirements.docx | hvps/architecture/designNotes/ | — | Protection philosophy, 5 crowbar trigger sources | Doc 02 §7.2, Doc 04 §9.4 |
 | interfacesBetweenRFSystemControllers.docx | hvps/architecture/designNotes/ | — | Interface Chassis interfaces, optocoupler specs (HCPL-2400) | Doc 02 §6.1–6.3 |
 | controllerFiberOpticConnections.docx | hvps/architecture/designNotes/ | J. Sebek, May 2022 | Enerpro trigger chain, driver board analysis, COMMANDS bus | Doc 02 §7.1–7.3 |
+| enerproBoardHvps.docx | hvps/controls/enerpro/ | J. Sebek | FCOG6100 Rev K, FCOAUX60, phase reference inputs, SIGHI | Doc 02 §7A.7 |
+| enerproDiscussion07072022.docx | hvps/controls/enerpro/ | Call with Enerpro (Rivera/Prince) | 3-resistor adapter, J7 connector, amplitude matching | Doc 02 §7A.7 |
+| EnerproVoltageandCurrentRegulatorBoardNotes.docx | hvps/architecture/designNotes/ | — | Regulator board INA117, divider scale factor, TP analysis | Doc 02 §7A.3, §7A.6 |
+| regulatorEnerproTestingNotes.docx | hvps/architecture/designNotes/ | — | SIGHI Thevenin model, TP7 measurements | Doc 02 §7A.3 |
+| plcNotesR1.docx | hvps/documentation/plc/ | — | PLC rung analysis, LPF, phase calculation | Doc 02 §7A.4–7A.5 |
+| HoffmanBoxPPSWiring.docx | pps/ | J. Sebek | PPS Burndy connector, switchgear cross-references | Doc 02 §7A.8 |
+| cavityTunerInspections20230613.docx | llrf/tuners/ | J. Sebek, Jun 2023 | Set screw failure mode, limit switches, mechanical details | Doc 02 §7B.1–7B.3 |
+| GalilCommissioning.docx | llrf/tuners/galil/ | — | DMC-4143 specs, motor ratings, firmware rev | Doc 02 §7B.1 |
 
 ### 5.2 Spreadsheet Data Sources (xlsx)
 
@@ -174,12 +183,26 @@ Supporting files:
 |-------------|----------|---------|---------|
 | RfSystemDocumentIndexR3.xlsx | llrf/documentation/ | 62 LLRF + 33 HVPS document entries with descriptions | Doc 02 §11.1–11.2 |
 | LocalPanelToXConnectMapping.xlsx | llrf/documentation/ | Pin-by-pin J2/J3 connector mapping to cross-connect X530 | Doc 02 §5.2 |
+| hvpsPlcLabels.xlsx | hvps/documentation/plc/ | 38 binary inputs + 12 binary outputs, full PLC I/O map | Doc 02 §7A.2 |
+| hvpsMeasurements20220314.xlsx | hvps/documentation/plc/ | Regulator test point calibration data (March 2022) | Doc 02 §7A.6 |
+| hvpsMonitorConnections.xlsx | hvps/documentation/wiringDiagrams/ | Monitor winding resistance measurements (HVPS1 + HVPS2) | Doc 02 §7A.7 |
+| reflectedPowerCalibrations.xlsx | llrf/calibrations/ | Reflected power trip setpoints (measured Feb 2021) | Doc 02 §7C.1 |
+| tuneModeDacCalibration.xlsx | llrf/calibrations/ | Tune mode DAC-to-power mapping | Doc 02 §7C.2 |
+| b132R11PatchPanel.xlsx | llrf/calibrations/ | 16 RF signal paths with coupler/cable losses | Doc 02 §7C.3 |
+| klystronCouplerDriveAmpCalibrations.xlsx | llrf/calibrations/ | Waveguide coupler 61.3 dB, frequency sweep | Doc 02 §7C.4 |
 
-### 5.3 Physical Design Report
+### 5.3 Design Reports (Designs/*.md)
 
-| Source File | Location | Content | Used In |
-|-------------|----------|---------|---------|
-| 0_PHYSICAL_DESIGN_REPORT.md | Designs/ | Complete SPEAR3 LLRF upgrade design (Rev 1, ~1400 lines) | Doc 00 §1.3/1.5, Doc 01 §2.8/2.9, Doc 02 §6–9, Doc 04 §9.5 |
+| Source File | Location | Lines | Content | Used In |
+|-------------|----------|-------|---------|---------|
+| 0_PHYSICAL_DESIGN_REPORT.md | Designs/ | 1,405 | Complete SPEAR3 LLRF upgrade design (Rev 1) | Doc 00 §1.3/1.5, Doc 01 §2.8/2.9, Doc 02 §6–9, Doc 04 §9.5 |
+| 4_HVPS_Engineering_Technical_Note.md | Designs/ | 1,877 | Complete HVPS system engineering reference | Doc 02 §7A (extensively) |
+| 3_LLRF9_SYSTEM_AND_SOFTWARE_REPORT.md | Designs/ | 1,277 | LLRF9 system and software | Doc 00 §1.5 |
+| 10_SOFTWARE_DESIGN_DOCUMENT.md | Designs/ | 1,561 | EPICS/Python control software architecture | — |
+| 11_INTERFACE_CHASSIS_DESIGN.md | Designs/ | 446 | Interface Chassis schematic-level design | Doc 02 §6 |
+| 5_KLYSTRON_HEATER_SUBSYSTEM_UPGRADE.md | Designs/ | 415 | Klystron heater control upgrade | — |
+| 8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md | Designs/ | 868 | PPS interface box design | Doc 02 §7A.8 |
+| A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md | Designs/ | 1,424 | Legacy SNL/EPICS source code analysis | Doc 01 §7, Doc 05 §2 |
 
 ### 5.4 Legacy PDFs (legacyArchitecture/)
 
