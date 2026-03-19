@@ -585,9 +585,12 @@ add_line(controlSys, 'Offset_Const/1', 'Enerpro_Offset/2');
 add_line(controlSys, 'Enerpro_Offset/1', 'Alpha_Sat/1');
 
 % --- Overcurrent Protection ---
-% If |I_measured| > OC_trip threshold, force alpha to alpha_max (shutdown).
-% Uses a Switch block:  if (I_measured < threshold) -> use normal alpha
-%                        else                        -> use alpha_max
+% If |I_measured| >= OC_trip threshold, force alpha to alpha_max (shutdown).
+% The Simulink Switch block only supports:
+%   'u2 >= Threshold' (default), 'u2 > Threshold', 'u2 ~= 0'
+% With 'u2 >= Threshold':
+%   Port 1 passes when u2 >= threshold  (overcurrent condition)
+%   Port 3 passes when u2 <  threshold  (normal operation)
 add_block('simulink/Math Operations/Abs', [controlSys '/I_Abs'], ...
     'Position', [100 115 130 140]);
 add_block('simulink/Sources/Constant', [controlSys '/OC_Threshold'], ...
@@ -596,20 +599,21 @@ add_block('simulink/Sources/Constant', [controlSys '/OC_Threshold'], ...
 add_block('simulink/Sources/Constant', [controlSys '/Alpha_Shutdown'], ...
     'Position', [730 145 770 165], ...
     'Value', num2str(P.alpha_max));
-add_block('simulink/Signal Routing/Switch', [controlSys '/OC_Switch'], ...
-    'Position', [830 75 870 140], ...
-    'Criteria', 'u2 < Threshold', ...
-    'Threshold', num2str(P.reg_OC_trip_A));
+ocSwitch = [controlSys '/OC_Switch'];
+add_block('simulink/Signal Routing/Switch', ocSwitch, ...
+    'Position', [830 75 870 140]);
+trySP(ocSwitch, 'Criteria',  'u2 >= Threshold');
+trySP(ocSwitch, 'Threshold', num2str(P.reg_OC_trip_A));
 
-% Overcurrent wiring:
-%  I_measured_A -> |Abs| -> Switch port 2 (threshold comparison)
-%  Normal alpha (from Alpha_Sat) -> Switch port 1 (passes when I < threshold)
-%  Alpha_Shutdown -> Switch port 3 (passes when I >= threshold)
-%  Switch output -> alpha_deg
+% Overcurrent wiring (ports swapped to match 'u2 >= Threshold' logic):
+%  I_measured_A -> |Abs| -> Switch port 2 (control: |I|)
+%  Alpha_Shutdown -> Switch port 1 (passes when |I| >= threshold)
+%  Normal alpha   -> Switch port 3 (passes when |I| <  threshold)
+%  Switch output  -> alpha_deg
 add_line(controlSys, 'I_measured_A/1', 'I_Abs/1');
-add_line(controlSys, 'Alpha_Sat/1', 'OC_Switch/1');
+add_line(controlSys, 'Alpha_Shutdown/1', 'OC_Switch/1');
 add_line(controlSys, 'I_Abs/1', 'OC_Switch/2');
-add_line(controlSys, 'Alpha_Shutdown/1', 'OC_Switch/3');
+add_line(controlSys, 'Alpha_Sat/1', 'OC_Switch/3');
 add_line(controlSys, 'OC_Switch/1', 'alpha_deg/1');
 
 %% ========================================================================
