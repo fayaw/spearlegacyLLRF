@@ -247,47 +247,47 @@ Phase:     φ = arctan(Q / I)
 Each PEP-II / SPEAR3 RF station consists of:
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    RF STATION BLOCK DIAGRAM                      │
-│                                                                  │
-│  ┌──────────┐      ┌───────────┐    ┌─────────┐    ┌──────────┐  │
-│  │  HVPS    │───▶ │  KLYSTRON │───▶│CIRCULATOR│───▶│ WAVEGUIDE│  │
-│  │ (65 kV)  │     │ (1.2 MW)  │    │         │    │ NETWORK  │  │
-│  └──────────┘     └─────┬─────┘    └────┬────┘    └────┬─────┘  │
-│                        │               │              │         │
-│                   ┌────┴────┐     ┌────┴────┐    ┌────┴────┐   │
-│                   │  Drive  │     │Reflected │    │ Forward │   │
-│                   │  Amp    │     │  Load    │    │ to Cav  │   │
-│                   │ (120 W) │     │         │    │ 1,2,3,4 │   │
-│                   └────┬────┘     └─────────┘    └────┬────┘   │
-│                        │                              │         │
-│  ┌─────────────────────┴──────────────────────────────┴──────┐  │
-│  │              VXI CRATE — LLRF SYSTEM                       │  │
-│  │                                                            │  │
-│  │  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐       │  │
-│  │  │ μP  │ │ CLK │ │ RFP │ │IQA-1│ │IQA-2│ │IQA-3│       │  │
-│  │  │Slot0│ │ RF  │ │     │ │     │ │     │ │     │       │  │
-│  │  └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘       │  │
-│  │                                                            │  │
-│  │  ┌─────┐ ┌─────┐ ┌──────┐ ┌──────┐ ┌─────┐              │  │
-│  │  │COMB │ │COMB │ │ GVF  │ │ ARC/ │ │SPARE│              │  │
-│  │  │(I)⚠│ │(Q)⚠│ │FFWD⚠│ │INTLK │ │     │              │  │
-│  │  └─────┘ └─────┘ └──────┘ └──────┘ └─────┘              │  │
-│  │  ⚠ = PEP-II ONLY (not used in SPEAR3)                    │  │
-│  │                                                            │  │
-│  │  Ethernet ◄──► EPICS IOC (VxWorks) ◄──► Channel Access    │  │
-│  └────────────────────────────────────────────────────────────┘  │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────────┐  │
-│  │  RF CAVITY ARRAY (×4)                                      │  │
-│  │  ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐                  │  │
-│  │  │Cav A │  │Cav B │  │Cav C │  │Cav D │    ◄── Beam     │  │
-│  │  │      │  │      │  │      │  │      │                   │  │
-│  │  │Probe │  │Probe │  │Probe │  │Probe │                   │  │
-│  │  │Tuner │  │Tuner │  │Tuner │  │Tuner │                   │  │
-│  │  └──────┘  └──────┘  └──────┘  └──────┘                  │  │
-│  └────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────┐
+│                    RF STATION BLOCK DIAGRAM                       │
+│                                                                   │
+│  ┌──────────┐      ┌───────────┐    ┌──────────┐     ┌──────────┐ │
+│  │  HVPS    │───▶ │  KLYSTRON │───▶│CIRCULATOR│───▶│ WAVEGUIDE│ │
+│  │ (90 kV)  │     │ (1.2 MW)  │     │          │     │ NETWORK  │ │
+│  └──────────┘     └─────┬─────┘     └─────┬────┘     └────┬─────┘ │
+│                         │                 │               │       │
+│                   ┌─────┴───┐     ┌───────┴──┐    ┌───────┴─┐     │
+│                   │  Drive  │     │Reflected │    │ Forward │     │
+│                   │  Amp    │     │  Load    │    │ to Cav  │     │
+│                   │ (120 W) │     │          │    │ 1,2,3,4 │     │
+│                   └────┬────┘     └──────────┘    └────┬────┘     │
+│                        │                               │          │
+│  ┌─────────────────────┴───────────────────────────────┴──────┐   │
+│  │              VXI CRATE — LLRF SYSTEM                       │   │
+│  │                                                            │   │
+│  │  ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐           │   │
+│  │  │ μP  │ │ CLK │ │ RFP │ │IQA-1│ │IQA-2│ │IQA-3│           │   │
+│  │  │Slot0│ │ RF  │ │     │ │     │ │     │ │     │           │   │
+│  │  └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘           │   │
+│  │                                                            │   │
+│  │  ┌─────┐ ┌─────┐ ┌──────┐ ┌──────┐ ┌─────┐                 │   │
+│  │  │COMB │ │COMB │ │ GVF  │ │ ARC/ │ │SPARE│                 │   │
+│  │  │(I)⚠│  │(Q)⚠│ │FFWD⚠│ │INTLK │ │     │                 │   │
+│  │  └─────┘ └─────┘ └──────┘ └──────┘ └─────┘                 │   │
+│  │  ⚠ = PEP-II ONLY (not used in SPEAR3)                     │   │
+│  │                                                            │   │
+│  │  Ethernet ◄──► EPICS IOC (VxWorks) ◄──► Channel Access     │   │
+│  └────────────────────────────────────────────────────────────┘   │
+│                                                                   │
+│  ┌────────────────────────────────────────────────────────────┐   │
+│  │  RF CAVITY ARRAY (×4)                                      │   │
+│  │  ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐                    │   │
+│  │  │Cav A │  │Cav B │  │Cav C │  │Cav D │    ◄── Beam        │   │
+│  │  │      │  │      │  │      │  │      │                    │   │
+│  │  │Probe │  │Probe │  │Probe │  │Probe │                    │   │
+│  │  │Tuner │  │Tuner │  │Tuner │  │Tuner │                    │   │
+│  │  └──────┘  └──────┘  └──────┘  └──────┘                    │   │
+│  └────────────────────────────────────────────────────────────┘   │
+└───────────────────────────────────────────────────────────────────┘
 ```
 
 **Source**: Corredoura, SLAC-PUB-8498, Fig. 1; Cross-ref: `bd3403300000.pdf`, `bd3403300100.pdf`
@@ -338,14 +338,14 @@ The LLRF system implements a **multi-rate hierarchical feedback architecture**:
 ```
 BANDWIDTH / RATE        LOOP                      FUNCTION
 ══════════════════════════════════════════════════════════════════
-~800 kHz (analog)   ┌─ Direct Loop ──────────── Cavity field stabilization
+~800 kHz (analog)  ┌─ Direct Loop ──────────── Cavity field stabilization
                    │                            (impedance reduction ~100×)
                    │
 ~2 MHz span,       ├─ Comb Loop [PEP-II ONLY] ─────────────── Revolution harmonic filtering
 ~10 kHz/tooth      │                            (coupled-bunch suppression)
 (digital DSP)      │
                    │
-~50 kHz (analog)   ├─ Ripple Loop ───────────── HVPS switching ripple
+~300 Hz (analog)   ├─ Ripple Loop ───────────── HVPS switching ripple
                    │                            cancellation
                    │
 ~10 kHz (analog)   ├─ Lead/Integral Comp ────── Phase margin improvement
@@ -357,7 +357,7 @@ BANDWIDTH / RATE        LOOP                      FUNCTION
 ~0.1 Hz (EPICS)    ├─ DAC Loop ──────────────── Setpoint adjustment
                    │                            (drive power / gap voltage)
                    │
-~0.01 Hz (EPICS)   ├─ Tuner Loop ────────────── Cavity resonance frequency
+~1 Hz (EPICS)      ├─ Tuner Loop ────────────── Cavity resonance frequency
                    │                            (stepper motor)
                    │
 Gain tracking      └─ Klystron Sat Loop ─────── Baseband modulator gain
@@ -368,8 +368,8 @@ Gain tracking      └─ Klystron Sat Loop ─────── Baseband modul
 **Critical stability requirement**: Each loop bandwidth must be separated by at least one decade to prevent inter-loop coupling:
 
 ```
-f_BW(direct) >> f_BW(comb span) >> f_BW(ripple) >> f_BW(HVPS) >> f_BW(DAC) >> f_BW(tuner)
-  ~800 kHz        ~2 MHz          ~50 kHz        ~1 Hz        ~0.1 Hz      ~0.01 Hz
+f_BW(comb span) >> f_BW(direct) >> f_BW(ripple) >> f_BW(HVPS) ~ f_BW(tuner) >> f_BW(DAC)
+  ~2 MHz        ~800 kHz          ~300 Hz        ~1 Hz        ~1 Hz          ~0.1 Hz
 ```
 
 **Source**: Corredoura SLAC-PUB-8498; Fox et al. Phys. Rev. ST Accel. Beams 13, 052802 (2010)
@@ -392,13 +392,13 @@ f_BW(direct) >> f_BW(comb span) >> f_BW(ripple) >> f_BW(HVPS) >> f_BW(DAC) >> f_
 
 **Block Diagram** (from Corredoura SLAC-PUB-8498, Fig. 3):
 ```
-                    ┌────────────┐
+                    ┌────────────────┐
   IQ Reference ──▶(+)──▶│  Gain     │──▶ IQ Modulator ──▶ Klystron
                   (-)    │  + Phase  │         ▲
                    ▲     │  Adjust   │         │ 476 MHz
-                   │     └────────────┘         │ Carrier
-                   │                            │
-                   │     ┌────────────┐         │
+                   │     └───────────┘         │ Carrier
+                   │                           │
+                   │     ┌────────────┐        │
                    └─────│ IQ Demod   │◀── Cavity Probe (vector sum)
                          └────────────┘
 ```
@@ -420,14 +420,14 @@ f_BW(direct) >> f_BW(comb span) >> f_BW(ripple) >> f_BW(HVPS) >> f_BW(DAC) >> f_
 **Implementation**: Digital FIR filter with one-turn delay, operating in parallel with the direct loop. The comb filter has high gain at revolution harmonics (spaced by f_rev = 1.28 MHz for SPEAR3, 136.3 kHz for PEP-II) and low gain between them.
 
 ```
-                         ┌─────────────────┐
+                          ┌──────────────────┐
   Error Signal ──▶──────▶│  Comb Filter     │──▶(+)──▶ Drive
-                         │  (1-turn delay)  │    ▲
-                         │  I and Q         │    │
-                         │  separate filters│    │
-                         └─────────────────┘    │
-                                                │
-                              Direct Loop Output─┘
+                          │  (1-turn delay)  │    ▲
+                          │  I and Q         │    │
+                          │  separate filters│    │
+                          └──────────────────┘    │
+                                                  │
+                              Direct Loop Output──┘
 ```
 
 **Key Parameters**:

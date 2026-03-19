@@ -4,7 +4,7 @@
 **Version**: 2.0
 **Date**: 2026-03-19
 **Classification**: Engineering Technical Reference
-**Reconstructed From**: SLAC-PUB-8498 (Corredoura 1999), arXiv:physics/0007029 (Corredoura 2000), Phys. Rev. ST Accel. Beams 13:052802 (Fox 2010), Phys. Rev. ST Accel. Beams 10:022801 (Rivetta 2007), Legacy source code (`llrf/legacyLLRF/`)
+**Reconstructed From**: SLAC-PUB-8498 (Corredoura 1999), arXiv:physics/0007029 (Corredoura 2000), Phys. Rev. ST Accel. Beams 13:052802 (Fox 2010), Phys. Rev. ST Accel. Beams 10:022801 (Rivetta 2007), Legacy source code (`spear-rf-code-legacy/rfApp/src/seq/`)
 **Cross-Reference PDF**: `feedbackLoopDescriptionps3403305200.pdf` (8 pages) — believed to document this content in the original SLAC drawing format
 
 ---
@@ -18,36 +18,36 @@ The PEP-II LLRF system implements **seven distinct feedback/control loops** oper
 Reconstructed from Corredoura SLAC-PUB-8498, Fig. 3 and arXiv:physics/0007029:
 
 ```
-                        ┌─────────────────────────────────────────────────┐
+                        ┌──────────────────────────────────────────────────┐
                         │          FEEDBACK LOOP ARCHITECTURE              │
                         │                                                  │
-  Station    ┌──────┐   │   ┌──────────┐                                  │
+  Station    ┌──────┐   │    ┌──────────┐                                  │
   Reference ─┤ IQ   ├───┼──▶│ Direct   │                                  │
-  (476 MHz)  │ Demod│   │   │ Loop     │  ┌────────┐                      │
-             └──────┘   │   │ (error)  ├─▶│ Σ      │   ┌────────────┐    │
-                        │   └──────────┘  │(summing)├──▶│ Baseband   │    │
-  Cavity     ┌──────┐   │                 │ node   │   │ Modulator  │    │
-  Probes ────┤Vector├───┼─────────────────▶│        │   │ (klystron  │    │
-  (×4)       │ Sum  │   │                 └───┬────┘   │ gain comp) │    │
-             │ IQ   │   │   ┌──────────┐     │        └─────┬──────┘    │
-             │ Demod│   │   │ Comb     │     │              │           │
-             └──────┘   │   │ Loop     ├─────┘              ▼           │
-                        │   │ (1-turn  │            ┌──────────────┐    │
-                        │   │  delay)  │            │ IQ RF        │    │
-                        │   └──────────┘            │ Modulator    │    │
-                        │                           │ (476 MHz     │    │
-                        │   ┌──────────┐            │  carrier)    │    │
-                        │   │ Ripple   │────────────▶│              │    │
-                        │   │ Loop     │            └──────┬───────┘    │
-                        │   └──────────┘                   │           │
-                        │                                  ▼           │
-                        │                     ┌──────────────────┐     │
-                        │                     │ Drive Amplifier  │     │
-                        │                     │ (120 W solid     │     │
-                        │                     │  state)          │     │
-                        │                     └────────┬─────────┘     │
-                        │                              │               │
-                        └──────────────────────────────┼───────────────┘
+  (476 MHz)  │ Demod│   │    │ Loop     │   ┌────────┐                     │
+             └──────┘   │    │ (error)  ├─▶ │ Σ      │    ┌────────────┐  │
+                        │    └──────────┘   │(summing)├──▶│ Baseband   │  │
+  Cavity     ┌──────┐   │                   │ node   │     │ Modulator │   │
+  Probes ────┤Vector├───┼─────────────────▶│        │     │ (klystron │   │
+  (×4)       │ Sum  │   │                   └───┬────┘    │ gain comp) │   │
+             │ IQ   │   │   ┌──────────┐        │         └─────┬──────┘   │
+             │ Demod│   │   │ Comb     │        │              │           │
+             └──────┘   │   │ Loop     ├────────┘              ▼           │
+                        │   │ (1-turn  │             ┌──────────────┐      │
+                        │   │  delay)  │             │ IQ RF        │      │
+                        │   └──────────┘             │ Modulator    │      │
+                        │                            │ (476 MHz     │      │
+                        │   ┌──────────┐             │  carrier)    │      │
+                        │   │ Ripple   │────────────▶│             │      │
+                        │   │ Loop     │             └──────┬───────┘     │
+                        │   └──────────┘                    │             │
+                        │                                   ▼             │
+                        │                     ┌──────────────────┐        │
+                        │                     │ Drive Amplifier  │        │
+                        │                     │ (120 W solid     │        │
+                        │                     │  state)          │        │
+                        │                     └────────┬─────────┘        │
+                        │                              │                  │
+                        └──────────────────────────────┼──────────────────┘
                                                        ▼
                                               ┌──────────────┐
                                               │  KLYSTRON    │
@@ -66,7 +66,7 @@ Reconstructed from Corredoura SLAC-PUB-8498, Fig. 3 and arXiv:physics/0007029:
   ═══════════════════
   ┌──────────┐    ┌──────────┐    ┌──────────┐
   │ DAC Loop │    │ HVPS Loop│    │Tuner Loop│
-  │ (~1 Hz)  │    │ (~0.5 Hz)│    │(~0.1 Hz) │
+  │ (~0.1 Hz)│    │ (~1 Hz)  │    │(~1 Hz)   │
   │ setpoint │    │ cathode  │    │ stepper  │
   │ adjust   │    │ voltage  │    │ motor    │
   └──────────┘    └──────────┘    └──────────┘
@@ -132,9 +132,9 @@ V_b = beam-induced voltage (opposes generator for above-transition energy)
 **Phasor diagram** (beam loading compensation):
 ```
                     V_cav (desired)
-                    ↗
-                   /
-                  / φ_s (synchronous phase)
+                   ↗
+                  /
+                 / φ_s (synchronous phase)
     V_g ────────O──────────────── beam direction
                  \
                   \ ψ (detuning angle)
@@ -145,10 +145,10 @@ V_b = beam-induced voltage (opposes generator for above-transition energy)
 **Required generator power** for a given gap voltage V_gap and beam current I_b:
 
 ```
-P_gen = V_gap² / (4·R_s/Q_L·Q_L) × (1 + β)² / β × [1 + (2·Q_L·Δf/f_0)²]
-      + I_b · V_gap · cos(φ_s)
-      ──────────────────────────   ──────────────────────
-      cavity wall loss term          beam acceleration term
+P_gen = V_gap² / (4·R_s/Q_L·Q_L) × (1 + β)² / β × [1 + (2·Q_L·Δf/f_0)²] + I_b · V_gap · cos(φ_s)
+      
+        ──────────────────────────────────────────────────────────────   ───────────────────────── 
+        cavity wall loss term                                             beam acceleration term
 ```
 
 **Optimum detuning** (minimizes reflected power, for a given I_b and V_gap):
@@ -420,11 +420,11 @@ The direct loop operates entirely at **IQ baseband**:
 ```
  I_ref ──(+)──▶ Gain_I ──┐
           (-)              │     ┌──────────────┐
-           ▲               ├────▶│ 2×2 Matrix   │──▶ I_drive
+           ▲               ├───▶│ 2×2 Matrix   │──▶ I_drive
            │               │     │ (phase/gain  │
  I_cav ────┘               │     │  rotation)   │──▶ Q_drive
                            │     └──────────────┘
- Q_ref ──(+)──▶ Gain_Q ──┘          ▲
+ Q_ref ──(+)──▶ Gain_Q ──┘           ▲
           (-)                        │
            ▲                    Phase Adjust
            │                    (compensate for
@@ -509,19 +509,19 @@ The comb loop provides **additional gain at revolution frequency harmonics** whe
 Implemented in **dedicated VXI Comb Filter modules** (separate modules for I and Q channels):
 
 ```
-                      ┌───────────────────────────────┐
+                       ┌───────────────────────────────┐
   Error ──▶──────────▶│     Comb Filter               │
   Signal               │                               │
-                       │  ┌─────┐   ┌─────┐           │
+                       │  ┌─────┐    ┌─────┐           │
                        │  │Delay│──▶│  Σ  │──┐        │──▶ Output
-                       │  │1 rev│   │     │  │        │
-                       │  │turn │   └──┬──┘  │        │
-                       │  └─────┘      │     │        │
-                       │      ▲        │     ▼        │
-                       │      └────────┘  ┌─────┐     │
-                       │                  │Gain │     │
-                       │                  │  g  │     │
-                       │                  └─────┘     │
+                       │  │1 rev│    │     │  │        │
+                       │  │turn │    └──┬──┘  │        │
+                       │  └─────┘       │     │        │
+                       │      ▲         │     ▼        │
+                       │      └─────────┘  ┌─────┐     │
+                       │                   │Gain │     │
+                       │                   │  g  │     │
+                       │                   └─────┘     │
                        └───────────────────────────────┘
 
 Transfer Function: H(z) = g / (1 - z^(-N))
@@ -837,14 +837,14 @@ Processing sequence: ON_FM at 1000 Hz first, then ON_CW with HVPS in PROC mode (
 The overall direct loop transfer function (simplified):
 
 ```
-G_OL(s) = G_gain × G_klystron(s) × G_cavity(s) × G_demod(s) × G_delay(s)
+G_OL(s) = G_gain × H_klystron(s) × H_cavity(s) × H_demod(s) × H_delay(s)
 
 where:
-  G_gain      = Adjustable baseband gain (set via Quad DAC)
-  G_klystron  = Klystron transfer function (nonlinear, depends on V_cathode)
-  G_cavity    = Cavity response: R_s / (1 + j·2·Q_L·Δω/ω₀)
-  G_demod     = IQ demodulator response (essentially flat to ~5 MHz)
-  G_delay     = e^(-s·τ_total) where τ_total ≈ 1 μs (cable + processing delays)
+  H_gain      = Adjustable baseband gain (set via Quad DAC)
+  H_klystron  = Klystron transfer function (nonlinear, depends on V_cathode)
+  H_cavity    = Cavity response: R_s / (1 + j·2·Q_L·Δω/ω₀)
+  H_demod     = IQ demodulator response (essentially flat to ~5 MHz)
+  H_delay     = e^(-s·τ_total) where τ_total ≈ 1 μs (cable + processing delays)
 ```
 
 ### 11.2 Stability Margins

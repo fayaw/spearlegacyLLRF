@@ -242,7 +242,7 @@ When the Direct Loop is OFF, the loop architecture simplifies significantly. The
 |------|:---------:|-----------------|-----------------|:---:|
 | Direct | 800 kHz | Klystron drive (I/Q) | Gap voltage reference DAC | ConfDirect |
 | Comb | 2 MHz | Klystron drive (additive) | Revolution harmonic sidebands | Config Comb |
-| Tuner | ~0.01 Hz (stepper) | Cavity tuner position | Resonance phase condition | Tune Cavs |
+| Tuner | ~1 Hz (stepper) | Cavity tuner position | Resonance phase condition | Tune Cavs |
 | HVPS (DL ON) | ~1 Hz | HVPS voltage setpoint | Drive power setpoint | — |
 | HVPS (DL OFF) | ~1 Hz | HVPS voltage setpoint | Gap voltage setpoint | — |
 | DAC (DL ON) | 0.1 Hz | Gap FF module DAC | Gap voltage setpoint | — |

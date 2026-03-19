@@ -24,7 +24,7 @@ The PEP-II LLRF system is housed in a standard VXI mainframe. For SPEAR3 (single
 | 6 | Comb Filter (I) | — | Digital comb filter for I-channel | ⚠️ **PEP-II ONLY — not used in SPEAR3** |
 | 7 | Comb Filter (Q) | — | Digital comb filter for Q-channel | ⚠️ **PEP-II ONLY — not used in SPEAR3** |
 | 8 | GVF (Gap Voltage Feed-Forward) | — | Gap voltage reference + LFB woofer interface | ⚠️ **PEP-II ONLY — not used in SPEAR3** |
-| 9 | ARC/Interlock Detector | — | Arc detection, interlock management, beam abort | **Active** |
+| 9 | ARC/Interlock Detector | — | Arc detection, interlock management, beam abort | **Active (but not functional)** |
 | 10-12 | Spare | — | Available for expansion | — |
 
 > ⚠️ **IMPORTANT**: The Comb Filter Modules (CFM, slots 6-7) and Gap Voltage Feed-Forward module (GVF/GFF, slot 8) are **PEP-II design elements only**. These modules were **never used in the SPEAR3 RF plant** (1999–2022 legacy system) and are **not present in the LLRF9 upgrade** (2022–present). They were physically present in the VXI crate as inherited hardware but were not populated or connected in the SPEAR3 configuration. All references to comb filter loops, GVF/GFF feed-forward, and LFB woofer interfaces in this documentation describe PEP-II functionality for historical/reference purposes only.
@@ -229,11 +229,11 @@ Located in: `llrf/documentation/legacyInterfaceModules/`
 ### 4.1 Analog Drive Chain (from Corredoura 2000, Fig. 4 and Fig. 6)
 
 ```
-                                    ┌──────────────────┐
+                                   ┌──────────────────┐
   Octal DAC  ──▶ Quad DAC Gain ──▶│ Baseband         │
   (I/Q setpts)                     │ Modulator        │
                                    │ (4× Gilbert-cell │
-  Direct Loop ─▶ Gain Stage ──────▶│  multipliers)    │──▶ Voltage-to-
+  Direct Loop ─▶ Gain Stage ─────▶│  multipliers)    │──▶ Voltage-to-
   Error Signal   (with limiter)    │                  │    Current Amp
                                    │ I-I  I-Q         │
   Phase Adjust ─▶ Rotation ──────▶│ Q-I  Q-Q         │     │
@@ -241,9 +241,9 @@ Located in: `llrf/documentation/legacyInterfaceModules/`
                                                             ▼
                                                     ┌──────────────┐
                  ┌──── Fixed Attenuators ◄──────────┤ IQ RF        │
-                 │                                   │ Modulator    │
-                 │                                   │ (476 MHz)    │
-                 ▼                                   └──────────────┘
+                 │                                  │ Modulator    │
+                 │                                  │ (476 MHz)    │
+                 ▼                                  └──────────────┘
          ┌──────────────┐                                   │
          │ 120 W Power  │◄──────────────────────────────────┘
          │ Amplifier    │
@@ -267,7 +267,7 @@ Located in: `llrf/documentation/legacyInterfaceModules/`
 
 ---
 
-## 5. Legacy Communication Architecture
+## 5. Legacy Communication Architecture For SPEAR3
 
 > **Reconstructed from**: `llrf/documentation/LLRFDocumentationNotesR2.docx` (J. Sebek, November 2021)
 
@@ -286,7 +286,7 @@ VXI Crate (B132)          MPS Rack (B132)              HVPS (B118)
                           └──────────────┘          │    Long-haul cable
                                                     │    (telephone term box
                           ┌──────────────┐          │     above HVPS
-                          │ SLC-500      │──daisy──┘     termination tank)
+                          │ SLC-500      │───daisy──┘     termination tank)
                           │ Tuner Ctrl   │
                           │ (1747-DCM)   │
                           └──────────────┘
@@ -485,7 +485,7 @@ PLC O:8.0 (N7:10)                       HVPS Output (−90 kV)
  INA117 Diff Amp ──► Trim + 24.9 kΩ     (5×20MΩ + 2×10kΩ∥)
  (reference)                              ──► INA117 Diff Amp
     │                                        │
-    └──► TP9                                └──► TP4
+    └──► TP9                                 └──► TP4
     │                                        │
     │         24.9 kΩ                        │    24.9 kΩ
     └──────────────► OP77 Summing ◄──────────┘
@@ -496,7 +496,7 @@ PLC O:8.0 (N7:10)                       HVPS Output (−90 kV)
                     Zener (±10V)
                          │
                     7.5 kΩ ──────────► SIGHI node
-                                          ▲
+                                         ▲
 PLC O:8.1 (N7:11) ─── 1 kΩ ──────────────┘
 
 SIGHI = (7.5 × V_PLC + 1.0 × V_REG) / 8.5
