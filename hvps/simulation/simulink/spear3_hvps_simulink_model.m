@@ -229,13 +229,13 @@ trySP(blk, 'Frequency', num2str(P.ac_frequency));
 % Default config = 'Yg' (grounded Y) — no need to set.
 
 %% ========================================================================
-%  SECTION 4: PHASE-SHIFT TRANSFORMER T0 (3.5 MVA, +/-15 deg)
+%  SECTION 4: PHASE-SHIFT TRANSFORMER T0 (3.5 MVA, +30/0 deg)
 %  ========================================================================
 %
-%  T0 creates two sets of 3-phase voltages with +15 and -15 degree shifts.
+%  T0 creates two sets of 3-phase voltages with +30 and 0 degree shifts.
 %  This is the key to 12-pulse operation (30 deg total -> cancels 5th/7th).
 %
-%  $$\Delta\phi = \pm 15^\circ \implies \phi_{total} = 30^\circ$$
+%  $$\Delta\phi_{T0a} = +30^\circ, \; \Delta\phi_{T0b} = 0^\circ \implies \phi_{total} = 30^\circ$$
 %  $$\text{Harmonics cancelled: } 5^\text{th}, 7^\text{th}, 17^\text{th}, 19^\text{th}, \ldots$$
 %
 %  Three-Phase Transformer (Two Windings) mask parameters:
@@ -256,7 +256,7 @@ add_block('powerlib/Elements/Three-Phase Transformer (Two Windings)', blk, ...
 trySP(blk, 'NominalPower', sprintf('[%e %d]', P.T0_rating_mva*1e6/2, P.ac_frequency));
 trySP(blk, 'Winding1', sprintf('[%d %f %f]', P.ac_voltage_rms, P.T0_copper_loss_pu, P.T0_leakage_pu/2));
 trySP(blk, 'Winding2', sprintf('[%d %f %f]', P.Trect_pri_voltage, P.T0_copper_loss_pu, P.T0_leakage_pu/2));
-trySP(blk, 'Winding1Connection', 'Delta (D1)');
+trySP(blk, 'Winding1Connection', 'Delta (D11)');
 trySP(blk, 'Winding2Connection', 'Y');
 
 % T0b: 0 deg phase shift (Yy0 connection)
@@ -496,7 +496,7 @@ add_block('simulink/Sources/In1', [controlSys '/I_measured_A'], ...
 
 % --- Output port ---
 add_block('simulink/Sinks/Out1', [controlSys '/alpha_deg'], ...
-    'Position', [800 100 830 115], 'Port', '1');
+    'Position', [900 100 930 115], 'Port', '1');
 
 % --- Voltage Setpoint (EPICS -> PLC N7:30) ---
 add_block('simulink/Sources/Constant', [controlSys '/V_Setpoint_kV'], ...
@@ -583,7 +583,34 @@ add_line(controlSys, 'PI_Regulator/1', 'Enerpro_Gain/1');
 add_line(controlSys, 'Enerpro_Gain/1', 'Enerpro_Offset/1');
 add_line(controlSys, 'Offset_Const/1', 'Enerpro_Offset/2');
 add_line(controlSys, 'Enerpro_Offset/1', 'Alpha_Sat/1');
-add_line(controlSys, 'Alpha_Sat/1', 'alpha_deg/1');
+
+% --- Overcurrent Protection ---
+% If |I_measured| > OC_trip threshold, force alpha to alpha_max (shutdown).
+% Uses a Switch block:  if (I_measured < threshold) -> use normal alpha
+%                        else                        -> use alpha_max
+add_block('simulink/Math Operations/Abs', [controlSys '/I_Abs'], ...
+    'Position', [100 115 130 140]);
+add_block('simulink/Sources/Constant', [controlSys '/OC_Threshold'], ...
+    'Position', [100 155 160 175], ...
+    'Value', num2str(P.reg_OC_trip_A));
+add_block('simulink/Sources/Constant', [controlSys '/Alpha_Shutdown'], ...
+    'Position', [730 145 770 165], ...
+    'Value', num2str(P.alpha_max));
+add_block('simulink/Signal Routing/Switch', [controlSys '/OC_Switch'], ...
+    'Position', [830 75 870 140], ...
+    'Criteria', 'u2 < Threshold', ...
+    'Threshold', num2str(P.reg_OC_trip_A));
+
+% Overcurrent wiring:
+%  I_measured_A -> |Abs| -> Switch port 2 (threshold comparison)
+%  Normal alpha (from Alpha_Sat) -> Switch port 1 (passes when I < threshold)
+%  Alpha_Shutdown -> Switch port 3 (passes when I >= threshold)
+%  Switch output -> alpha_deg
+add_line(controlSys, 'I_measured_A/1', 'I_Abs/1');
+add_line(controlSys, 'Alpha_Sat/1', 'OC_Switch/1');
+add_line(controlSys, 'I_Abs/1', 'OC_Switch/2');
+add_line(controlSys, 'Alpha_Shutdown/1', 'OC_Switch/3');
+add_line(controlSys, 'OC_Switch/1', 'alpha_deg/1');
 
 %% ========================================================================
 %  SECTION 12: MEASUREMENT AND INSTRUMENTATION
@@ -638,6 +665,27 @@ add_block('simulink/Sinks/To Workspace', [modelName '/WS_Alpha_deg'], ...
     'VariableName', 'alpha_deg_ws', ...
     'MaxDataPoints', 'inf', ...
     'SampleTime', '-1');
+
+% --- Sync Voltage Measurement for Pulse Generators (3-phase Vab at each bridge) ---
+% SPS pulse generators (Synchronized 6-Pulse / Thyristor Pulse Generator)
+% require a synchronization voltage signal from the AC side.  We measure
+% the line-to-line voltage at each rectifier transformer secondary.
+%
+% These are THREE-PHASE V-I MEASUREMENT blocks that output [Vabc; Iabc].
+% When not available, we fall back to individual Voltage Measurement blocks.
+%
+% For the primitive pulse generator, sync is handled internally via the
+% wt (omega*t) generator, so these blocks are only needed in SPS mode.
+
+% V_Sync for Bridge 1 (at T1 secondary / Bridge1 AC input)
+blk = [modelName '/V_Sync_Bridge1'];
+add_block('powerlib/Measurements/Voltage Measurement', blk, ...
+    'Position', [560 180 600 220]);
+
+% V_Sync for Bridge 2 (at T2 secondary / Bridge2 AC input)
+blk = [modelName '/V_Sync_Bridge2'];
+add_block('powerlib/Measurements/Voltage Measurement', blk, ...
+    'Position', [560 350 600 390]);
 
 %% ========================================================================
 %  SECTION 13: TOP-LEVEL WIRING (POWER & SIGNAL PATHS)
@@ -699,6 +747,8 @@ phKly  = get_param([modelName '/Klystron_Load'],        'PortHandles');
 phVM   = get_param([modelName '/V_Measure_DC'],         'PortHandles');
 phIM   = get_param([modelName '/I_Measure_DC'],         'PortHandles');
 phCB   = get_param([modelName '/Crowbar_SCR'],          'PortHandles');
+phVS1  = get_param([modelName '/V_Sync_Bridge1'],       'PortHandles');
+phVS2  = get_param([modelName '/V_Sync_Bridge2'],       'PortHandles');
 
 fprintf('  Port handles loaded for all blocks.\n\n');
 
@@ -766,6 +816,38 @@ for phase = 1:3
     end
 end
 fprintf('  [%d/6] T1->Bridge1, T2->Bridge2\n', wireOK - cnt0);
+
+% =====================================================================
+% (C.1) SYNC VOLTAGE MEASUREMENT (for pulse generator PLL)
+%       V_Sync blocks measure one phase of the AC voltage at each
+%       rectifier transformer secondary (Vab).  The + terminal connects
+%       to phase A of the transformer secondary; the - terminal connects
+%       to phase B.  The Simulink signal output feeds the pulse generator
+%       sync input.
+% =====================================================================
+fprintf('\n  --- Sync Voltage Measurement Wiring ---\n');
+
+% V_Sync_Bridge1: measure Vab at T1 secondary (phases A & B)
+try
+    add_line(modelName, phT1.RConn(1), phVS1.LConn(1), 'autorouting','on');
+    wireOK = wireOK + 1; fprintf('  [OK] T1 sec A -> V_Sync1+\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] T1 sec A -> V_Sync1+: %s\n', ME.message); end
+
+try
+    add_line(modelName, phT1.RConn(2), phVS1.LConn(2), 'autorouting','on');
+    wireOK = wireOK + 1; fprintf('  [OK] T1 sec B -> V_Sync1-\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] T1 sec B -> V_Sync1-: %s\n', ME.message); end
+
+% V_Sync_Bridge2: measure Vab at T2 secondary (phases A & B)
+try
+    add_line(modelName, phT2.RConn(1), phVS2.LConn(1), 'autorouting','on');
+    wireOK = wireOK + 1; fprintf('  [OK] T2 sec A -> V_Sync2+\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] T2 sec A -> V_Sync2+: %s\n', ME.message); end
+
+try
+    add_line(modelName, phT2.RConn(2), phVS2.LConn(2), 'autorouting','on');
+    wireOK = wireOK + 1; fprintf('  [OK] T2 sec B -> V_Sync2-\n');
+catch ME, wireFAIL = wireFAIL+1; fprintf('  [!!] T2 sec B -> V_Sync2-: %s\n', ME.message); end
 
 % =====================================================================
 % (D) DC POWER PATH — Series 12-pulse topology
@@ -904,15 +986,47 @@ if strcmp(pulse_gen_type, 'primitive')
     end
 else
     % SPS pulse generator mode
+    % SPS Thyristor Pulse Generator / Synchronized 6-Pulse Generator
+    % typically require both a firing angle (alpha) AND a sync voltage.
+    %   Port 1: alpha_deg (firing angle in degrees)
+    %   Port 2: sync voltage (Vab line-to-line from AC side)
+    % The sync voltage lets the PLL lock to the AC waveform.
     try
+        % alpha -> PulseGen input 1
         add_line(modelName, 'Control_System/1', 'PulseGen1/1');
         add_line(modelName, 'Control_System/1', 'PulseGen2/1');
+        wireOK = wireOK + 2;
+        fprintf('  [OK] alpha -> PG1, PG2\n');
+    catch ME, wireFAIL = wireFAIL+1;
+        fprintf('  [!!] alpha -> PG: %s\n', ME.message);
+    end
+    % Sync voltage -> PulseGen input 2
+    % V_Sync_Bridge1 measures Vab at T1 secondary for Bridge1
+    % V_Sync_Bridge2 measures Vab at T2 secondary for Bridge2
+    try
+        add_line(modelName, 'V_Sync_Bridge1/1', 'PulseGen1/2');
+        wireOK = wireOK + 1;
+        fprintf('  [OK] V_Sync_Bridge1 -> PG1 (sync)\n');
+    catch ME
+        wireFAIL = wireFAIL + 1;
+        fprintf('  [!!] Sync1 -> PG1: %s (some PG types use internal sync)\n', ME.message);
+    end
+    try
+        add_line(modelName, 'V_Sync_Bridge2/1', 'PulseGen2/2');
+        wireOK = wireOK + 1;
+        fprintf('  [OK] V_Sync_Bridge2 -> PG2 (sync)\n');
+    catch ME
+        wireFAIL = wireFAIL + 1;
+        fprintf('  [!!] Sync2 -> PG2: %s (some PG types use internal sync)\n', ME.message);
+    end
+    % PulseGen output -> Bridge gate
+    try
         add_line(modelName, 'PulseGen1/1', 'Bridge1_SCR/1');
         add_line(modelName, 'PulseGen2/1', 'Bridge2_SCR/1');
-        wireOK = wireOK + 4;
-        fprintf('  [OK] SPS gate wiring (alpha -> PG -> bridge)\n');
+        wireOK = wireOK + 2;
+        fprintf('  [OK] PG -> Bridge gates\n');
     catch ME, wireFAIL = wireFAIL+1;
-        fprintf('  [!!] SPS gate wiring: %s\n', ME.message);
+        fprintf('  [!!] PG -> Bridge gates: %s\n', ME.message);
     end
 end
 
@@ -1323,7 +1437,7 @@ function pgType = classifyPGPath(pth)
 end
 
 function build6PulseFromPrimitives(destPath, modelName, pos)
-%BUILD6PULSEFROMPRIMTIVES Create MATLAB Function block for 6-pulse gating.
+%BUILD6PULSEFROMPRIMITIVES Create MATLAB Function block for 6-pulse gating.
 %
 %  Inputs:  wt (rad, [0,2*pi]),  alpha_deg (firing angle in degrees)
 %  Output:  P  (6-element gate pulse vector)

@@ -113,6 +113,11 @@ KNOWN_VALID_PATHS = [
     'simulink/Discontinuities/Saturation',
     'simulink/Ports & Subsystems/Subsystem',
     'simulink/Commonly Used Blocks/Scope',
+    'simulink/Sources/Clock',
+    'simulink/Math Operations/Math Function',
+    'simulink/Math Operations/Abs',
+    'simulink/User-Defined Functions/MATLAB Function',
+    'simulink/Signal Routing/Switch',
 ]
 
 # Parameter names that look like display labels (suspect)
