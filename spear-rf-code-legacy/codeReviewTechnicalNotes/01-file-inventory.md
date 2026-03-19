@@ -1,7 +1,7 @@
 # Complete File Inventory — 253 Files with Upgrade Verdicts
 
-**Document**: 01 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**(Rev 3 — corrected legacy state machine names in rf_states.st entry)**
+**Document**: 01 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 3 — corrected legacy state machine names in rf_states.st entry; added file count methodology)**
 
 **Verdict Key**: **ELIMINATED** = Replaced by LLRF9 or new hardware | **PEP-II ONLY** = Not used in SPEAR3 | **SPEC-EXTRACT** = Behavior spec for upgrade software | **REFERENCE** = Behavior spec for new code | **REUSE** = Directly reusable | **DONE** = Already replaced
 
@@ -13,6 +13,21 @@
 - **DSP firmware is ELIMINATED** — the LLRF9 FPGA replaces all DSP functions. These files are reference for understanding what the LLRF9 does internally, but no migration is needed.
 - **rf_dac_loop.st is ELIMINATED** — LLRF9 handles DAC/vector modulator control internally.
 - **Stepper motor code is ALREADY DONE** — Galil DMC-4143 commissioned August 2025.
+
+## File Count Methodology
+
+> This inventory catalogs **253 functional source files** in `rfApp/src/` and associated directories — the files directly relevant to understanding the legacy LLRF control logic and planning the upgrade. The full repository contains significantly more files:
+>
+> | Category | Count | Location | Included in 253? |
+> |----------|-------|----------|-----------------|
+> | Functional code (`.c`, `.h`, `.st`, `.s`, `.db`, `.dbd`, `.substitutions`) | ~253 | `rfApp/src/`, `rfApp/Db/`, `rfApp/DbIoc/` | ✅ Yes |
+> | Operator display files (`.HIF`, `.ACF`, `.GDF`, `.CNF`, `.SYM`) | ~639 | `rfApp/src/display/`, `rfApp/HIF/` | ❌ No |
+> | Build/configuration files (`Makefile`, `configure/*`) | ~450+ | Various | ❌ No |
+> | VXI boot table/coefficient files | 57 | `iocBoot/tbl/` | ❌ No |
+> | IOC boot configuration (`st.cmd`, `*.substitutions`, `config.ab`) | ~3 | `iocBoot/b132-iocrf/` | ❌ No |
+> | Total RCS-managed files in repository | 2,285 | All directories | — |
+>
+> Display files, table files, and IOC boot configuration are discussed in [02-architecture-overview.md](02-architecture-overview.md) Sections 2 and 6.
 
 ## Summary by Verdict (Revised)
 

@@ -73,7 +73,7 @@ All PV names use EPICS macro substitution with the following variables:
 {STN}:CONT:CLOSE              — Contactor close command
 {STN}:CONT:OPEN               — Contactor open command
 ```
-> **Rev 3 correction**: Rev 2 listed these PVs as `{STN}:HVPS:VOLTS:*` (with S). The actual PV namespace uses `{STN}:HVPS:VOLT:*` (no S), verified against `rf_hvps_loop_pvs.h,v` and `rf_hvps.db,v`. See [09-cross-reference-errata.md](09-cross-reference-errata.md) Item 2.
+> **Rev 3 correction**: Rev 2 listed these PVs as `{STN}:HVPS:VOLTS:*` (with S). The actual PV namespace uses `{STN}:HVPS:VOLT:*` (no S), verified against `rf_hvps_loop_pvs.h,v` and `rf_hvps.db,v`.
 
 **Tuner Loop** (from rf_tuner_loop_pvs.h):
 ```
@@ -335,3 +335,97 @@ p2RfInitHooks.c ────► drvP2RfVxi.c ──► drvEpvxi.c ──► VXI 
 | VxWorks → Linux | fast_lock.h, all ISR code, boot sequence, build system |
 | EPICS 3.13 → 3.15+/7 | All custom records (field macros), device support (DSET changes), SNL (minor syntax), databases (record type changes) |
 | AB PLC → new controller | drvAb.c, all 1771DCM/SLCDCM device support, AB-specific .db files, stepper motor driver |
+
+---
+
+## 6. IOC Boot Configuration Source Files
+
+The following files in `iocBoot/b132-iocrf/` control the legacy IOC startup and are **not** inventoried in note 01 (which covers only the 253 functional source files) but are essential context for understanding the operational system.
+
+### 6.1 st.cmd — IOC Startup Script
+
+**File**: `iocBoot/b132-iocrf/st.cmd,v` (RCS, 18 revisions, last modified 2011-12-07 by saa)
+
+Key elements extracted from the latest revision:
+
+```
+1. ld < bin/vxWorks-ppc604_long/rf.munch     ← Load compiled application
+2. errlogInit(5000)                           ← Increase message queue from 1260 default
+3. putenv() — Set station-specific macros:
+     DATABASE_MACROS  = STN=SRF1
+     IQA3MACROS       = R=SRF1
+     C1..C4TUNRLOOP_MACROS = STN=SRF1,CAV=N,name=CNTUNRLOOP
+     AB_CONFIG_FILE   = /cmd/config.ab
+     RESTORE_*        = /sav/savedataNone
+4. dbLoadDatabase("dbd/rf.dbd") + register driver
+5. dbLoadRecords("db/srf1.db")                ← All .db files via substitution
+6. dbRestore("spear1",0,-1)                   ← Restore saved setpoints
+7. AB scanner: abConfigNlinks(1), abConfigVme(0,0xc00000,0x60,4)
+8. VXI address space: LA_BASE=0x01, LA_COUNT=13, A24/A32 windows
+9. iocInit()                                  ← Full EPICS initialization
+10. seq(&rf_states,...), seq(&rf_tuner_loop,...)×4, seq(&rf_hvps_loop,...),
+    seq(&rf_dac_loop,...), seq(&P2RF_Calib,...), seq(&rf_msgs,...)
+11. dbpf("SRF1:STN:ID"," ")                   ← Override station ID
+```
+
+**Upgrade relevance**: The Linux-based upgrade IOC will use a similar startup script pattern (standard EPICS `st.cmd`) but without VxWorks `ld`/`putenv` syntax. The macro definitions (STN=SRF1, cavity numbering) must be preserved. The AB scanner configuration will be replaced by CompactLogix/ControlLogix Ethernet I/O.
+
+### 6.2 srf1.substitutions — Database Macro Expansion
+
+**File**: `rfApp/DbIoc/srf1.substitutions,v` (5 revisions, last modified 2008)
+
+Defines the macros used to expand all `.db` template files for the SRF1 station:
+
+```
+Standard macros: RRRS=SRF1, RNG=SPEAR, ID=2, REG=1, PS=RF-SOLN-MAIN
+
+Files loaded (each with above macros):
+  rf_ab_4CV.db, rf_analog_All.db, rf_analog_4CV.db, rf_beam_spear.db,
+  rf_dac.db, rf_digital_All.db, rf_digital_4CV.db, rf_iqa_All.db,
+  rf_iqa_4CV.db, rf_stn_All.db, rf_stn_4CVAll.db, rf_temp_All.db,
+  rf_temp_4CV.db, rf_vxi_modules_All.db, rf_vxi_modules_4CV.db
+
+VXI crate slot assignment (crat_vxi_13slot.db):
+  Slot 0:  B132-IOCRF (CPU)
+  Slot 1:  AB Scanner
+  Slot 2:  Clock
+  Slot 3:  (empty — GVF slot from PEP-II, not installed)
+  Slot 4:  RF Processing (RFP)
+  Slot 5:  MPS Shutoff (CF2 slot — PEP-II heritage)
+  Slot 6:  Link Passthru
+  Slot 7:  IQA1 (Forward)
+  Slot 8:  (empty)
+  Slot 9:  IQA2 (Reflected)
+  Slot 10: (empty)
+  Slot 11: IQA3 (Cavity)
+  Slot 12: Arc Interlock (AIM)
+```
+
+### 6.3 Operator Display Files (Not Inventoried — Migration Scope)
+
+The repository contains **~639 operator display files** in multiple formats that will require migration to a modern display framework (CS-Studio/Phoebus, or EDM continuation) as part of the upgrade:
+
+| Format | Count | Description |
+|--------|-------|-------------|
+| `.HIF` | 158 | MEDM/EDM hierarchical display definitions |
+| `.ACF` | 158 | Access control/security files (paired with HIF) |
+| `.GDF` | 115 | Graphics display format files |
+| `.SYM` | 135 | Symbol/icon definitions |
+| `.CNF` | 73 | Configuration files |
+
+**Upgrade impact**: Display migration scope is substantial. These define the operator interface and encode PV names, alarm limits, and control widget layouts. A display migration plan should be developed separately.
+
+### 6.4 Table/Coefficient Files (`iocBoot/tbl/` — 57 files)
+
+These files are loaded by the VXI device support at IOC startup. Tech note 01 Section 11 lists them with verdict "KEEP" but they are categorized here by purpose:
+
+| Category | Example Files | SPEAR3 Relevant? | LLRF9 Compatibility |
+|----------|--------------|-------------------|-------------------|
+| IQ Calibration | `AmplCoefs.tbl`, `PhaseCoefs.tbl`, `Sp3AmpCoefs.tbl`, `Sp3PhsCoefs.tbl` | ✅ `Sp3*` files are SPEAR3-specific | Needs format assessment |
+| DSP Filter | `cfmIirCoefsHER.tbl`, `cfmIirCoefsLER.tbl` | ❌ PEP-II CFM only | N/A |
+| GVF Detuning | `gvfDspConsts.tbl`, `gvfHERdetun.tbl`, `gvfLERdetun.tbl` | ❌ PEP-II GVF only | N/A |
+| Test/Noise | `NOISE_I*`, `NOISE_Q*`, `SINE_*`, `SWEEP_*`, `TICKLE_*`, `WOOFER_NOISE.tbl` | Partially (`*_spear.out` files) | Needs format assessment |
+| AIM DAS | `aimDas0.inst`, `aimDas1.inst` | ✅ DAS instruction sequences | Eliminated (AIM removed) |
+| Drive Waveforms | `DRIVE_HER_I/Q`, `DRIVE_LER_I/Q` | ❌ PEP-II only | N/A |
+
+**Upgrade action needed**: Identify which SPEAR3-specific table files contain coefficients that must be translated to LLRF9's native coefficient format. The LLRF9 uses a different coefficient loading mechanism via its embedded EPICS IOC.

@@ -1,7 +1,7 @@
 # SNL State Machine Programs — Control Logic Deep Dive
 
-**Document**: 05 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**(Rev 3 — corrected legacy state machine names and state diagram from source code)**
+**Document**: 05 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 3 — corrected legacy state machine names and state diagram from source code; added HVPS collector protection)**
 
 ---
 
@@ -49,7 +49,7 @@ Authors: Robert C. Sass (PEP-II, 1997), M. Laznovsky, S. Allison (SPEAR3 modific
 
 ### 2.2 State Diagram (Corrected from Source Code)
 
-> **Rev 3 correction**: Rev 2 showed the **proposed upgrade** state machine (OFF→INITIALIZE→STANDBY→ON_CW→FAULT→FAULT_CLEAR from PDR Section 2.2). The actual legacy state machine is shown below. See [09-cross-reference-errata.md](09-cross-reference-errata.md) Item 1.
+> **Rev 3 correction**: Rev 2 showed the **proposed upgrade** state machine (OFF→INITIALIZE→STANDBY→ON_CW→FAULT→FAULT_CLEAR from PDR Section 2.2). The actual legacy state machine is shown below, extracted directly from `rf_station_state.h` and `rf_states.st,v`.
 
 **Primary States** (from `rf_station_state.h`): OFF=0, PARK=1, TUNE=2, ON_FM=3, ON_CW=4
 
@@ -340,6 +340,30 @@ Monitors and controls the High Voltage Power Supply via Allen-Bradley SLC-500 PL
 | 3 | OFF | HVPS commanded off |
 | 4 | FAULT | HVPS fault detected |
 | 5 | CROWBAR | Crowbar fired |
+
+### 5.4 HVPS Collector Power Protection (Coverage Gap)
+
+The legacy `rf_hvps_loop.st` implements **klystron collector power protection** — a critical safety function for the non-full-power collector klystron. This was not documented in the original tech notes and was identified during cross-reference with PDR §4.5 and §11.3.
+
+**Legacy implementation** (from `rf_hvps_loop.st` `proc` state):
+- **Trigger condition**: `klystron_forward_power > max_klystron_forward_power`
+- **Response**: HVPS voltage reduced by `delta_proc_voltage_down` per cycle
+- **Monitoring PVs**:
+  - `{STN}:HVPS:PCOLL_MAX` — configurable collector power limit setpoint
+  - `klystron_forward_power` — measured klystron forward power
+  - `max_klystron_forward_power` — calculated max forward power for current HVPS voltage
+- **Rate**: Executes every ~0.5 seconds (event-driven or every `HVPS_LOOP_MAX_INTERVAL` = 10 s max)
+- **Limitation**: Uses forward power as a **proxy** — does not calculate actual DC collector power
+
+**Upgrade replacement** (PDR §11.3, Waveform Buffer System):
+- **Direct calculation**: `Collector_Power = (HVPS_V × HVPS_I) − Klystron_Forward_Power`
+- **Measurement**: HVPS voltage divider + current transformer → Waveform Buffer ADC inputs
+- **Speed**: Continuous kHz-rate acquisition with hardware analog comparator trip (µs response)
+- **Two layers**:
+  1. **Fast (hardware)**: Analog comparator in Waveform Buffer → Interface Chassis permit trip
+  2. **Slow (software)**: RF MPS PLC (ControlLogix) calculation → SCR permit removal
+
+> **Upgrade action**: The CompactLogix PLC spec (B118 ladder logic) must replicate the collector protection function with the improved direct-power calculation. The legacy forward-power proxy tolerance margins should be documented as a baseline for commissioning validation. See PDR §4.5 for legacy implementation details and §11.3 for the upgrade approach.
 
 ---
 

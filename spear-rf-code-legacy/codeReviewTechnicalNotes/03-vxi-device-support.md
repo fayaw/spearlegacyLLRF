@@ -313,9 +313,9 @@ Each IQA has onboard history memory that captures time-series I/Q data. The `Get
 
 ## 5. AIM Device Support (devP2RfAim.c — 1,982 lines)
 
-### 5.1 Arc Detection (12 Channels)
+### 5.1 Arc Detection (12 Channels — Legacy AIM)
 
-The AIM monitors 12 arc detection channels. Each channel has:
+The legacy AIM module monitors 12 arc detection channels. Each channel has:
 - Enable/disable bit
 - Threshold setting
 - Latched fault status
@@ -324,6 +324,19 @@ The AIM monitors 12 arc detection channels. Each channel has:
 Board versions affect channel count:
 - Version 0: Fewer channels (early boards)
 - Version 1+: Full 12 channels
+
+> ⚠️ **PDR Discrepancy — Arc Sensor Count**: The legacy AIM supports 12 channels, but the upgrade PDR gives three different sensor counts:
+>
+> | PDR Section | Count | Context |
+> |-------------|-------|---------|
+> | Section 2 (line 126, 202) | **12** | Architecture diagram; "total 12 Microstep-MIS optical sensors" |
+> | Section 12.3 (line 965) | **6** | "There are **6 sensors** total (updated from original design)" — enumerated: 4 cavity + 1 klystron + 1 circulator |
+> | Section 12.4 (line 976) | **6** (implied) | "6-bit latch" and "6 status inputs" in signal path diagram |
+> | Section 19.2 (line 1327) | **10+1 spare** | Procurement: "10 sensors and 5 process + 1 sensor & 1 process for spare" |
+>
+> **Analysis**: Section 12.3 is the most detailed and explicitly says "(updated from original design)" — suggesting 12 was an earlier count revised to 6. The procurement of 10 sensors may be 6 deployed + 4 spares. The Software Design Document (Section 12) also uses 6 sensors.
+>
+> **Recommended action**: Design review should confirm the correct count. If 6, update PDR Sections 2 and 2.3. Interface Chassis and Arc Detection Chassis designs depend on this number.
 
 ### 5.2 Fast Interlock Chain
 
@@ -406,7 +419,33 @@ CF2 supports multiple filter bank configurations:
 | devP2RfRfp.c | 2,389 | Octal DAC loading sequence, DSP parameter list, signal RAM operations, mode transitions |
 | devP2RfGvf.c | 2,350 | Feed-forward algorithm interface, TAXI link handling, LFB woofer control |
 | devP2RfIqa.c | 2,260 | DDF filter structure, channel mux, history memory capture |
-| devP2RfAim.c | 1,982 | Arc detection (12 channels), fault file system, DAS instruction format, BATS handling |
+| devP2RfAim.c | 1,982 | Arc detection (12 legacy channels → 6 in upgrade; see §5.1 discrepancy note), fault file system, DAS instruction format, BATS handling |
 | devP2RfCf2.c | 2,970 | Multi-bank coefficient management, IIR filter loading protocol |
 | devP2RfCfm.c | 1,487 | V1 comb filter coefficients (simpler than CF2) |
 | devP2RfClk.c | 957 | PLL configuration algorithm, ClkConsts(r,a,m,p) macro |
+
+---
+
+## 9. Legacy-to-LLRF9 Signal Routing Reference
+
+The following table maps legacy VXI module signals to their LLRF9 equivalents as specified in PDR Section 5.3. This is essential for verifying signal continuity during commissioning — confirming that the same physical signal ends up at the same logical processing point in the upgrade system.
+
+### 9.1 Partial Signal Mapping (from PDR Section 3 and 5.3)
+
+| Legacy VXI Module | Legacy Signal | LLRF9 Unit | LLRF9 Board | LLRF9 Channel | PDR Signal # |
+|-------------------|--------------|-----------|------------|--------------|-------------|
+| IQA3 (Slot 11) — Cavity | Cav A Probe | Unit 1 | BRD1 | CH0 | Signal 1 |
+| IQA3 (Slot 11) — Cavity | Cav B Probe | Unit 1 | BRD1 | CH1 | Signal 2 |
+| RFP (Slot 4) — RF Processor | Drive Output | Unit 1 | BRD1 | OUT | Signal 5 |
+| IQA2 (Slot 9) — Reflected | Cav A Reflected | Unit 2 | BRD3 | CH0 | Signal 10 |
+| IQA2 (Slot 9) — Reflected | Cav B Reflected | Unit 2 | BRD3 | CH1 | Signal 12 |
+| IQA1 (Slot 7) — Forward | Kly Forward Power | Unit 2 | BRD3 | CH2 | Signal 15 |
+| IQA1 (Slot 7) — Forward | Kly Reflected Power | Unit 2 | BRD3 | CH3 | Signal 16 |
+
+> **Note**: This is a partial mapping showing key signals. The complete allocation across 2 LLRF9 units with 3 boards each (6 boards total, multiple channels per board) is in PDR Section 5.3 (Signal List). The LLRF9 architecture provides substantially more channel capacity than the legacy VXI system.
+
+### 9.2 Upgrade Impact
+
+- Engineers need this mapping to verify signal continuity during commissioning
+- Cable labeling should cross-reference both legacy slot numbers and LLRF9 unit/board/channel
+- PDR Section 5.3 is the authoritative source for the complete mapping; the legacy VXI slot assignments in `srf1.substitutions` (see [02-architecture-overview.md](02-architecture-overview.md) §6.2) provide the legacy side
