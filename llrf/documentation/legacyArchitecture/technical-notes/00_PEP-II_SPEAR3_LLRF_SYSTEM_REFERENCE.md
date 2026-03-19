@@ -86,7 +86,7 @@ As of 2026, the SPEAR3 LLRF system is undergoing a comprehensive upgrade (docume
 
 **Eliminated PEP-II feedback loops**: The following legacy loops are no longer needed in the LLRF9 architecture:
 - **Comb (Narrowband) RF Feedback Loop** — Used for PEP-II multi-bunch stabilization; not applicable to SPEAR3 single-station configuration
-- **Gap Voltage Feed-Forward (GVF)** — PEP-II cavity field stabilization; now handled by LLRF9 vector-sum feedback
+- **Gap Voltage Feed-Forward (GVF)** — PEP-II cavity field stabilization; PEPII only.
 - **Ripple Feedback Loop** — LLRF9 digital feedback inherently rejects power-line ripple
 - **4-way DAC branching** — LLRF9 controls via single vector sum output
 
