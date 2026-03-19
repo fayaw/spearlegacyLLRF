@@ -1,6 +1,7 @@
 # Signal Processing & Physics Algorithms
 
 **Document**: 08 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 4 — corrected systematic +1 line number offset in all 11 subSys.c function references; lines now point to function signatures)**
 **(Rev 3 — formula-level audit: corrected 13 formula/description errors against source code)**
 
 ---
@@ -165,20 +166,21 @@ epicsRegisterFunction(subIQampl);
 ### 3.1 Function Catalog
 
 > **Rev 3 note**: Six entries corrected after source-code audit. `subSysBeamCurr` removed (phantom — does not exist in source). `subSysInit` added as the actual 11th function.
+> **Rev 4 note**: All 11 line numbers corrected (+1 each). Previous values pointed to the closing `*/` of the multi-line doc comment block above each function, not the `static long subSys*()` signature line. Now corrected to reference the function definition line.
 
 | Function | Line | Description |
 |----------|------|-------------|
-| ✦ `subSysInit` | 109 | Initialization (no-op, returns OK) |
-| ✦ `subSysFreqOff` | 114 | Polynomial frequency offset estimate from tuner position and cavity voltage: `K = p0 + p1×ΔPos + p2×ΔPos² + p3×ΔPos³ + t1×V²` where ΔPos = current − home tuner position. Applies exponential smoothing. |
-| ✦ `subSysFreqErr` | 146 | Cavity park frequency error with Q-dependent scaling: `VAL = A × B × (C − D)` where A=90/(476e3×4) deg/kHz, B=loaded_Q, C=desired_park_freq, D=frequency_offset |
-| `subSysFreqOAvg` | 163 | Average of 4 cavity frequency offsets: `VAL = (A+B+C+D)/4` |
-| ✦ `subSysPhaseTot` | 177 | Total direct loop phase with rate-limited delta tracking: Computes delta phase from frequency offset `K = −0.000360 × group_delay × freq_offset × conv_const` (when loop and tracking on). Tracks total as `L = L + rate_limited(C + D + K − L)`, with ±180° wrap and first-time initialization. |
-| `subSysPhaseCmb` | 226 | Total comb loop phase: `K = −B×C` (delta from direct loop), `VAL = A + D + K` with ±180° wrap |
-| `subSysPhaseStn` | 247 | Station phase with rate-limited tracking: `VAL = L + rate_limited(A + C + D − L)` with ±180° wrap and first-time initialization |
-| ✦ `subSysDCcoeff` | 276 | Ripple loop DC gain coefficient tracking: Adjusts DC coefficient based on klystron gain deviation `(desired_gain − actual_gain)`. Uses `delta = D×10^((I+L)/20) − G` with deadband limiting. Tracks gain state (on/off transitions), resets on beam abort. |
-| `subSysDrivSel` | 353 | Drive power setpoint selection: Returns 1 (low beam current) or 2 (high beam current) based on klystron forward power with hysteresis |
-| ✦ `subSysLog` | 386 | Logarithmic-to-linear conversion for vacuum/ion pump readings: `VAL = B × 10^A`. Also manages EPICS monitor/archive delta propagation. |
-| `subSysABreset` | 429 | Allen-Bradley PLC reset: calls `ab_reset()` directly |
+| ✦ `subSysInit` | 110 | Initialization (no-op, returns OK) |
+| ✦ `subSysFreqOff` | 115 | Polynomial frequency offset estimate from tuner position and cavity voltage: `K = p0 + p1×ΔPos + p2×ΔPos² + p3×ΔPos³ + t1×V²` where ΔPos = current − home tuner position. Applies exponential smoothing. |
+| ✦ `subSysFreqErr` | 147 | Cavity park frequency error with Q-dependent scaling: `VAL = A × B × (C − D)` where A=90/(476e3×4) deg/kHz, B=loaded_Q, C=desired_park_freq, D=frequency_offset |
+| `subSysFreqOAvg` | 164 | Average of 4 cavity frequency offsets: `VAL = (A+B+C+D)/4` |
+| ✦ `subSysPhaseTot` | 178 | Total direct loop phase with rate-limited delta tracking: Computes delta phase from frequency offset `K = −0.000360 × group_delay × freq_offset × conv_const` (when loop and tracking on). Tracks total as `L = L + rate_limited(C + D + K − L)`, with ±180° wrap and first-time initialization. |
+| `subSysPhaseCmb` | 227 | Total comb loop phase: `K = −B×C` (delta from direct loop), `VAL = A + D + K` with ±180° wrap |
+| `subSysPhaseStn` | 248 | Station phase with rate-limited tracking: `VAL = L + rate_limited(A + C + D − L)` with ±180° wrap and first-time initialization |
+| ✦ `subSysDCcoeff` | 277 | Ripple loop DC gain coefficient tracking: Adjusts DC coefficient based on klystron gain deviation `(desired_gain − actual_gain)`. Uses `delta = D×10^((I+L)/20) − G` with deadband limiting. Tracks gain state (on/off transitions), resets on beam abort. |
+| `subSysDrivSel` | 354 | Drive power setpoint selection: Returns 1 (low beam current) or 2 (high beam current) based on klystron forward power with hysteresis |
+| ✦ `subSysLog` | 387 | Logarithmic-to-linear conversion for vacuum/ion pump readings: `VAL = B × 10^A`. Also manages EPICS monitor/archive delta propagation. |
+| `subSysABreset` | 430 | Allen-Bradley PLC reset: calls `ab_reset()` directly |
 
 ### 3.2 Key Algorithms
 
@@ -321,4 +323,3 @@ The following errors were identified during a formula-level audit of the C sourc
 11. **subSysFreqErr** — Was: `f_measured - f_setpoint`. Actual: `A×B×(C-D)` with loaded-Q scaling (not a simple subtraction)
 12. **subSysPhaseTot** — Was: `Σ Φ_cavity[i]`. Actual: rate-limited delta-phase tracking with initialization and ±180° wrapping
 13. **subSysDCcoeff** — Was: "coupling matrix element" with 2×2 I/Q matrix description. Actual: ripple loop DC gain coefficient tracking based on klystron gain deviation
-

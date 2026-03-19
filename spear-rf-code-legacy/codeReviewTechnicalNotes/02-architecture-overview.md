@@ -1,7 +1,8 @@
 # Architecture Overview — PV Naming, Boot Sequence, Cross-Cutting Concerns
 
 **Document**: 02 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**(Rev 3 — corrected HVPS PV naming error: VOLTS→VOLT)**
+**(Rev 4 — added CLKMACROS boot sequence clarification; see §2.1.1)**
+(Rev 3 — corrected HVPS PV naming error: VOLTS→VOLT)
 
 ---
 
@@ -189,6 +190,17 @@ VxWorks kernel boot (PPC604)
     │
     └── 11. CA server starts — system operational
 ```
+
+#### 2.1.1 ⚠️ CLKMACROS Boot Sequence Note (Rev 4 Clarification)
+
+The boot diagram above shows `CLKMACROS=S=2` in step 3 (putenv block). However, **this macro does not appear in the production `st.cmd`** as archived in RCS (`iocBoot/b132-iocrf/st.cmd,v`). The 11 putenv() calls actually present in `st.cmd` are: `IQA3MACROS`, `DATABASE_MACROS`, `C1TUNRLOOP_MACROS` through `C4TUNRLOOP_MACROS`, `AB_CONFIG_FILE`, `RESTORE_AB`, `RESTORE_VXI`, `RESTORE_INP`, and `RESTORE_FILENAME`.
+
+`CLKMACROS` is consumed by `p2RfInitHooks.c` (at `initHookAtBeginning`) via `getenv("CLKMACROS")`. If `getenv()` returns NULL, clock initialization is gracefully skipped (the function breaks out of the init hook). This means either:
+- **CLKMACROS is set through VxWorks boot parameters** (boot loader environment, not in the application st.cmd)
+- **A deployment wrapper script** sets it before st.cmd executes
+- **It is intentionally omitted** for configurations where the clock module is not installed
+
+This is a **latent rebuild hazard**: anyone rebuilding the IOC from RCS-tracked sources alone will not have CLKMACROS set, and clock initialization will silently not occur. The boot diagram retains CLKMACROS for completeness, but the reader should understand it originates from an external source, not from the application startup script.
 
 ### 2.2 Boot Order Dependencies (Critical for Upgrade)
 
