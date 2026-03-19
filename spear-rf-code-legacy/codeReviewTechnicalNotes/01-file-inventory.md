@@ -38,7 +38,7 @@
 | OBSOLETE INFRASTRUCTURE | ~60 | ~15,000 | 18% | VxWorks, KSC, VXI bus, base utilities |
 | SPEC EXTRACTION | ~30 | ~11,000 | 13% | SNL programs, HVPS/tuner logic, interlocks |
 | REUSABLE | ~10 | ~1,500 | 2% | subIQ.c, subSys.c, state definitions |
-| PV REFERENCE | 78+ | ~15,000 | 18% | EPICS databases and substitution files |
+| PV REFERENCE | 76 | ~15,000 | 18% | EPICS databases and substitution files |
 | ALREADY DONE | ~5 | ~2,700 | 3% | Stepper motor (Galil commissioned) |
 | **Total** | **253** | **~82,430** | **100%** | |
 

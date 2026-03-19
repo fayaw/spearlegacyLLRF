@@ -600,7 +600,7 @@ The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining
 
 > **Protection philosophy**: Any single source can disable SCR triggers or fire crowbar; redundancy ensures protection even with single-point failures. Filter inductor stored energy is safely discharged through Enerpro logic and secondary rectifiers. Source: `hvps/architecture/designNotes/RFSystemMPSRequirements.docx`
 
-- **Python Coordinator** (EPICS/Ethernet): Voltage setpoint, readbacks, fault status
+- **EPICS Coordinator** (Ethernet): Voltage setpoint, readbacks, fault status
 - **Waveform Buffer System**: HVPS voltage, current, inductor voltages monitored on 4 dedicated channels. HVPS voltage and current sent back to B132 as analog signals for RF MPS.
 - **Switchgear**: Existing field cables to vacuum contactor controller and grounding tank
 
@@ -849,7 +849,7 @@ The tuner motor controller is being replaced with a modern motion controller. Th
 
 **Upgraded tuner control loop**:
 - LLRF9 measures cavity probe phase relative to station reference (10 Hz, sub-degree resolution)
-- Python/EPICS coordinator processes phase data and computes motor commands
+- EPICS coordinator processes phase data and computes motor commands
 - Motor commands sent via EPICS motor records to motion controller
 - Motion controller drives stepper motors
 
@@ -872,7 +872,7 @@ The load angle offset loop is a supervisory function that balances gap voltage a
 - **LLRF9 Unit 1**: Provides 10 Hz phase measurements for all 4 cavities (BRD1: Cav 1,2; BRD2: Cav 3,4)
 - **Motion Controller**: EPICS motor records via Ethernet
 - **Stepper Motors**: Power and encoder cables to tunnel (existing field cabling)
-- **Python/EPICS Coordinator**: Tuner manager module processes phase data, commands motor moves, manages load angle
+- **EPICS Coordinator**: Tuner manager module processes phase data, commands motor moves, manages load angle
 
 ### 10.6 Risk Note
 
@@ -942,7 +942,7 @@ This provides direct collector power calculation vs. the legacy system's forward
 - **RF signal inputs**: RF detectors on cavity forward/reflected couplers (signal conditioned)
 - **HVPS signal inputs**: Voltage dividers and current transformers from HVPS
 - **Interface Chassis**: Comparator trip outputs (digital) feed into Interface Chassis permit logic
-- **Python/EPICS Coordinator**: Waveform readout, configuration, collector power trend monitoring
+- **EPICS Coordinator**: Waveform readout, configuration, collector power trend monitoring
 
 ---
 
@@ -1003,7 +1003,7 @@ Routing both paths to the Interface Chassis is cleaner than wiring the diagnosti
 - **Arc Detection Chassis → Interface Chassis**: 1 permit signal (OR of all 6 sensors, fail-safe active-high) + 6 latched status bits (one per sensor) + Test + Reset signals
 - **Interface Chassis → RF MPS PLC**: Arc permit state and 6-bit fired-detector ID included in the Interface Chassis fault status word
 - **RF MPS / EPICS**: Per-sensor trip status PVs, fired-detector identification, event count, latch reset command
-- **Python/EPICS Coordinator**: Reads arc fault status for operator displays and state machine fault handling
+- **EPICS Coordinator**: Reads arc fault status for operator displays and state machine fault handling
 
 ---
 
@@ -1300,7 +1300,7 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 #### Phase 2: Incremental Subsystem Integration
 
 - **Tuner Test with SPEAR Cavity**
-- **HVPS Integration**: Integrate HVPS PLC with Python/EPICS (test at test stand T18)
+- **HVPS Integration**: Integrate HVPS PLC with EPICS coordinator (test at test stand T18)
 - **RF MPS Integration**: Integrate RF MPS with LLRF9, waveform buffer, arc detector, HVPS PLC, interface chassis, and software coordinator with existing RF signals
 
 #### Phase 3: Critical Path Integration

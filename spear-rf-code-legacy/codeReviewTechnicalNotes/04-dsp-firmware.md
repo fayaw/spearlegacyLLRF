@@ -1,7 +1,7 @@
 # DSP Firmware Analysis — TMS320C16xx Assembly
 
 **Document**: 04 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**(Rev 2 — corrected: ALL DSP firmware ELIMINATED by LLRF9)**
+**(Rev 3 — corrected file/line counts against actual source; ALL DSP firmware ELIMINATED by LLRF9)**
 
 ---
 
@@ -20,7 +20,7 @@
 
 The VXI modules use on-board TI TMS320C16xx fixed-point DSPs for real-time signal processing at rates too fast for the EPICS IOC (which scans at ~1 Hz). All DSP code is written in assembly language and loaded at boot time via the VXI A24 bus.
 
-**Total DSP firmware**: ~15,667 lines across 4 directories and ~60 files.
+**Total DSP firmware**: ~16,763 lines across 4 subdirectories (rfpDsp, gvfDsp, obsDsp, genDsp) plus shared files in the parent dsp/ directory, totaling 102 files.
 
 **Status**: ALL ELIMINATED — LLRF9 FPGA handles all fast processing with 270 ns loop delay vs. legacy ~43 µs DSP cycle. No migration needed.
 
