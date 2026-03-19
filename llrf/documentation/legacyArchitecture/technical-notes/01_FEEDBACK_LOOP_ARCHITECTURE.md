@@ -1,8 +1,8 @@
 # PEP-II / SPEAR3 LLRF Feedback Loop Architecture — Detailed Technical Reconstruction
 
 **Document Number**: LLRF-REF-002
-**Version**: 1.0
-**Date**: 2026-03-18
+**Version**: 2.0
+**Date**: 2026-03-19
 **Classification**: Engineering Technical Reference
 **Reconstructed From**: SLAC-PUB-8498 (Corredoura 1999), arXiv:physics/0007029 (Corredoura 2000), Phys. Rev. ST Accel. Beams 13:052802 (Fox 2010), Phys. Rev. ST Accel. Beams 10:022801 (Rivetta 2007), Legacy source code (`llrf/legacyLLRF/`)
 **Cross-Reference PDF**: `feedbackLoopDescriptionps3403305200.pdf` (8 pages) — believed to document this content in the original SLAC drawing format
@@ -547,6 +547,15 @@ Frequency response peaks at: f = n × f_rev (n = 0, 1, 2, ...)
 - Iterative offset nulling to minimize DC offsets
 - Load/Run/Gain control via PVs
 
+**MATLAB Commissioning Routines** (from PS-340-330-52-R0):
+- **"Config Comb"**: Configures comb filter parameters (gain, delay equalization)
+- **"Make Equal"**: Sets the comb loop delay equalizer to match the one-turn delay to the actual revolution period. Critical for aligning comb teeth to revolution harmonics.
+- **"Make Poly"**: Generates polynomial fit of resonant frequency vs. tuner position, used by the tuner loop for feed-forward tuning table
+- **"Tune Cavs"**: Automated cavity tuning sequence
+- **"ConfWoofer"**: Configures woofer (sub-woofer/GVF) loop parameters for LFB interface
+
+> **Source**: `legacy-pdf-transcriptions/design-specifications/PS-340-330-52_LLRF_Feedback_Loop_Description.md`
+
 **Cross-ref PDF**: `ps3403305600.pdf` (4 pages) — RF Station Coupling & Cable Calibration Procedure (PS-340-330-56-R0). ⚠️ Note: This document is a cable loss measurement procedure, not a comb filter spec. Comb loop design details come from `feedbackLoopDescriptionps3403305200.pdf` (p. 5) and Corredoura SLAC-PUB-8498.
 
 ---
@@ -578,6 +587,12 @@ Analog Integrator Approach:
 ```
 
 **Post-commissioning upgrade** (proposed in Corredoura 2000): Dedicated analog wideband "ripple loop" separate from the direct loop, to avoid compromising direct loop stability.
+
+> **Actual operational use (cross-referenced with PS-340-330-52-R0)**: The original Feedback Loop Description (Schwarz/Corredoura, 1999) states that the Ripple Loop "is intended to remove amplitude and phase ripple in the klystron output power but **at the time it is only utilized to keep the low bandwidth phase across the klystron and drive amplifier constant as the klystron voltage is varied**." The Ripple Loop should be ON for all normal operation. This distinction is important: the loop as deployed served primarily as a **slow phase tracker** compensating for klystron phase shift at different operating voltages, rather than performing active wideband ripple cancellation.
+> **Source**: `legacy-pdf-transcriptions/design-specifications/PS-340-330-52_LLRF_Feedback_Loop_Description.md`
+
+**DSP Hardware**: The ripple loop DSP processing was implemented on an **AT&T DSP1610** processor with serial link and parallel bus interface, housed within the VXI crate RF modules.
+> **Source**: `legacy-pdf-transcriptions/block-diagrams/BD-340-330-01_PEP-II_Low_Level_RF_Configuration.md`
 
 ### 5.3 Source Code Reference
 

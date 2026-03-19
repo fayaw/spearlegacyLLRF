@@ -1,8 +1,8 @@
 # PEP-II / SPEAR3 LLRF System — Comprehensive Technical Reference
 
 **Document Number**: LLRF-REF-001
-**Version**: 2.0
-**Date**: 2026-03-18
+**Version**: 3.0
+**Date**: 2026-03-19
 **Classification**: Engineering Technical Reference — AI-Ready Documentation Package
 **Companion Documents**:
 - `Designs/0_PHYSICAL_DESIGN_REPORT.md` — SPEAR3 LLRF Upgrade PDR (Rev 1, March 2026)
@@ -340,8 +340,9 @@ BANDWIDTH / RATE        LOOP                      FUNCTION
 ~800 kHz (analog)   ┌─ Direct Loop ──────────── Cavity field stabilization
                    │                            (impedance reduction ~100×)
                    │
-~10 kHz (analog/   ├─ Comb Loop [PEP-II ONLY] ─────────────── Revolution harmonic filtering
- digital DSP)      │                            (coupled-bunch suppression)
+~2 MHz span,       ├─ Comb Loop [PEP-II ONLY] ─────────────── Revolution harmonic filtering
+~10 kHz/tooth      │                            (coupled-bunch suppression)
+(digital DSP)      │
                    │
 ~50 kHz (analog)   ├─ Ripple Loop ───────────── HVPS switching ripple
                    │                            cancellation
@@ -366,12 +367,15 @@ Gain tracking      └─ Klystron Sat Loop ─────── Baseband modul
 **Critical stability requirement**: Each loop bandwidth must be separated by at least one decade to prevent inter-loop coupling:
 
 ```
-f_BW(direct) >> f_BW(comb) >> f_BW(ripple) >> f_BW(HVPS) >> f_BW(DAC) >> f_BW(tuner)
-  ~800 kHz      ~10 kHz       ~50 kHz         ~1 Hz         ~0.1 Hz      ~0.01 Hz
+f_BW(direct) >> f_BW(comb span) >> f_BW(ripple) >> f_BW(HVPS) >> f_BW(DAC) >> f_BW(tuner)
+  ~800 kHz        ~2 MHz          ~50 kHz        ~1 Hz        ~0.1 Hz      ~0.01 Hz
 ```
 
 **Source**: Corredoura SLAC-PUB-8498; Fox et al. Phys. Rev. ST Accel. Beams 13, 052802 (2010)
 **Cross-ref**: `feedbackLoopDescriptionps3403305200.pdf` (8 pages), `01_FEEDBACK_LOOP_ARCHITECTURE.md`
+
+> **Bandwidth clarification (cross-referenced with PS-340-330-52-R0)**: The Comb Loop operates over a **2 MHz overall span** (per PS-52: "bandwidth of 2 MHz"). Within that span, each comb tooth has a per-tooth bandwidth of ~10 kHz. The Direct Loop's 800 kHz bandwidth refers to its closed-loop unity-gain crossover frequency, while the Comb Loop's 2 MHz span refers to the frequency range containing the revolution harmonics where the comb filter provides gain.
+> **Source**: `legacy-pdf-transcriptions/design-specifications/PS-340-330-52_LLRF_Feedback_Loop_Description.md`
 
 ---
 
