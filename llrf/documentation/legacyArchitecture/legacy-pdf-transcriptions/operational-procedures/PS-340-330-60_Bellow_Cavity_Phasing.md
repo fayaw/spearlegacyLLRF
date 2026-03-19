@@ -4,10 +4,11 @@
 |-------|-------|
 | **Document Number** | PS-340-330-60-R1 |
 | **Title** | Bellow Cavity Phasing Procedure |
+| **Author** | H.S. (Heinz Schwarz), 1/5/99 |
 | **Submitted by** | Heinz Schwarz, RF Engineer |
 | **Approved by** | Alan Hill, Area Manager |
 | **Organization** | Stanford Linear Accelerator Center |
-| **Date** | July 21, 1999 (R1 revision) |
+| **Date** | September 17, 1999 |
 | **Pages** | 5 |
 | **Source PDF** | `ps3403306001.pdf` |
 
@@ -15,80 +16,104 @@
 
 Station #: ____ Date: ____ Initial: ____
 
-## Bellow Cavity Phasing Procedure
+## Bellow Cavity Phasing — Procedure & Data
 
 ### 1) Introduction
 
-This procedure describes the phasing of cavities in a PEP-II RF station by adjusting waveguide bellows. Proper cavity phasing ensures that the RF phase of each cavity is in coincidence with beam arrival for maximum acceleration efficiency.
+The phase relationship between 4 (HER) or 2 (LER) cavities of each station has been optimized at installation to bring the RF phase of each cavity in coincidence with beam arrival.
 
-The procedure is closely related to the RF Station Cavity Phasing Procedure (PS-340-330-58-R0) and provides detailed instructions for the physical bellow adjustment process.
+Some touch-up adjustment may be required if the balance between the cavity gap voltages of a station is not constant under high beam current conditions. Small adjustments in the length of the bellows of the waveguide splitting network can correct this imbalance. The procedure is described below:
 
-### 2) Phasing Principle
+### 2) Measurement of Phase Error Procedure
 
-The cavities are spaced along the beam path at specific distances. The phase relationship between cavities must be maintained so that particles see the correct accelerating phase at each cavity. Phase errors are corrected by adjusting the length of the waveguide bellows connecting the power distribution network to each cavity.
+The **Load Angle Offset routine** is used to measure the magnitude of the phase offset of individual cavities of a station in reference to the beam.
 
-Key relationship:
-- Bellow length change: **0.085 inch per degree** of phase adjustment
+The set-up and measurement is done using the **Cavity Tuners Panel**:
 
-### 3) Equipment
+Initially with zero beam the **Cav Strength (%)** numbers need to be transferred to the **Setpoint (%)** data input box to set the idling condition of the cavities of a station.
 
-- Network Analyzer HP 8753
-- 120 W Drive Amplifier (gain 50 dB)
-- Coax/Waveguide Transition
-- Bellows adjustment tools
-- Phase measurement cables and adapters
+Next with a stored beam larger than the **Min Beam Curr (mA)** set on the same panel the Load Angle Offset routine can be turned **ON** to activate the **Load Angle Offset Loop** which moves the tuners to bring the Cav Strength (%) reading with beam back to the idling cavity strength. The phase offsets for each cavity can then be read as **Ld Angle Offset (Deg)** on the Cavity Tuner Panel. The Load Angle Offset Loop is an iterative loop which will take a few minutes to stabilize (The Ld Angle Error box will go yellow every time a tuner is asked to move).
 
-### 4) Procedure
+Record the Angle Offsets after the loop has stabilized in the Data table under 4).
 
-The procedure follows these steps:
+> **Note:** The Load Angle Offset routine has to be turned Off again after this measurement because it interferes with the Magic Detuning required for high beam current operation.
 
-1. Measure the phase of each cavity relative to cavity A (reference) using the network analyzer.
-2. Calculate the phase error (delta phase) for each cavity.
-3. Calculate the required bellow length change (delta length = 0.085 × delta phase in degrees).
-4. If delta phase is positive (advanced phase): make bellow longer.
-5. If delta phase is negative (delayed phase): make bellow shorter.
-6. Adjust bellows accordingly.
-7. Re-measure phases to verify corrections.
+### Page 3: Cavity Tuners EPICS Panel (Example)
 
-> **Important Note:** Bellow adjustment for cavity C also shifts cavity D and needs to be compensated for on cavity D bellow.
+*[Screenshot of EPICS Cavity Tuners panel for station HER RF 8-3 showing:]*
 
-### 5) Data Recording
+**Temperatures (deg C):**
 
-**Phase Measurements:**
+| Measurement | Cav A | Cav B | Cav C | Cav D |
+|-------------|-------|-------|-------|-------|
+| Fixed Tuner | 37 | 36 | 37 | 38 |
+| Movable Tuner | 33 | 37 | 39 | 37 |
+| Movable Tuner Bellows | 39 | 36 | 38 | 37 |
+| Loop Status | GOOD | GOOD | GOOD | GOOD |
+| Ld Angle Error (Deg) | -0.41 | -0.35 | 0.26 | 6.15 |
 
-| Signal Name | Nominal Phase | Measured Phase | Delta Phase | Δ Length (inch) |
-|-------------|:------------:|:-------------:|:-----------:|:--------------:|
-| Cavity A probe (Ref.) | 0° | 0° | 0 | 0 |
-| Cavity B probe | −90° | ____ | ____ | ____ |
-| Cavity C probe | +90° | ____ | ____ | ____ |
-| Cavity D probe | 0° | ____ | ____ | ____ |
+**Station State:** ON_CW
 
-**Post-Adjustment Verification:**
+Panel also shows: Cav Strength (%), Setpoint (%), Diagnostic Plots, Stn Voltage (kV), Min Beam Curr (mA), Cav Voltage (kV), Tuner Pos (mm).
 
-| Signal Name | Nominal Phase | Measured Phase (after) | Error |
-|-------------|:------------:|:---------------------:|:-----:|
-| Cavity A probe (Ref.) | 0° | 0° | 0° |
-| Cavity B probe | −90° | ____ | ____ |
-| Cavity C probe | +90° | ____ | ____ |
-| Cavity D probe | 0° | ____ | ____ |
+Example tuner readings from panel:
+
+| Cavity | Cav Voltage (kV) | Tuner Pos (mm) | Tuner Range |
+|--------|-----------------|----------------|-------------|
+| A | 700 | 2.14 | -30.000 to +20.000 |
+| B | 703 | 4.08 | -30.000 to +20.000 |
+| C | 700 | 0.88 | -30.000 to +20.000 |
+
+### 4) Data
+
+**Phase Measurement and Bellow Adjustment Data:**
+
+| Cavity | Ld Angle Offset (Deg) | Delta Phase = PhN − PhA | # bellow | Δ length (inch) = −0.085 × ΔPh |
+|--------|----------------------|------------------------|----------|-------------------------------|
+| A (Ref) | ____ | 0 | — | 0 |
+| B | ____ | ____ | ____ | ____ |
+| C | ____ | ____ | ____ | ____ |
+| D | ____ | ____ | ____ | ____ |
+
+**Calculate:** Delta Phase = PhN − PhA.
+
+- If Delta Phase is **positive**: make bellow **shorter**
+- If Delta Phase is **negative**: make bellow **longer**
+
+**Bellow change is 0.085 inch/degree.**
+
+> **Note:** Adjustment of bellow #1 for cavity C also shifts cavity D and needs to be compensated for by counter adjusting bellow #3.
+
+**Repeat if necessary:**
+
+| Cavity | Ld Angle Offset (Deg) | Delta Phase = PhN − PhA | # bellow | Δ length (inch) = −0.085 × ΔPh |
+|--------|----------------------|------------------------|----------|-------------------------------|
+| A (Ref) | ____ | 0 | — | 0 |
+| B | ____ | ____ | ____ | ____ |
+| C | ____ | ____ | ____ | ____ |
+| D | ____ | ____ | ____ | ____ |
+
+### Page 5: Bellow Layout Diagram
+
+*[Diagram showing HER 4-cavity waveguide bellow arrangement:]*
+
+```
+          Bellow #1
+    ──────────||──────────
+    │                     │
+    │    PEP 27.6         │     PEP 27.67
+    │    / tet            │     / tet
+    │                     │
+    ▼                     ▼
+  Cavity D    Cavity C    Cavity B    Cavity A
+
+  Date: ____
+  Bellow #2: ____  Bellow #1: ____  Bellow #3: ____
+```
+
+> The diagram shows the physical bellow positions in the waveguide splitting network for an HER station (4 cavities). Bellow #1 connects cavities C and D to the upstream magic tee; Bellow #2 and #3 connect individual cavities.
 
 ---
 
-## Pages 3–5: Additional Details and Diagrams
-
-### Page 3: Bellow Adjustment Details
-
-*[Detailed instructions for physical bellow adjustment including torque specifications and safety precautions]*
-
-### Page 4: Measurement Setup
-
-*[Diagram showing the physical arrangement of equipment for phase measurements]*
-
-### Page 5: Reference Information
-
-*[Additional reference information and revision notes]*
-
----
-
-> **Transcription Note**: This markdown was generated via OCR (Tesseract 5.3.0 at 300 DPI) from the scanned image-based PDF `ps3403306001.pdf`. Text content on pages 1–2 is high confidence. Pages 3–5 contain diagrams and supplementary details that are partially extractable; the original PDF should be consulted for complete content. This is revision R1 of the original document.
+> **Transcription Note**: This markdown was generated via OCR (Tesseract 5.3.0 at 300 DPI) from the scanned image-based PDF `ps3403306001.pdf`. Text content on pages 1–2 and 4 is high confidence. Page 3 contains an EPICS panel screenshot with partially extractable readings. Page 5 contains a bellow layout diagram. This is revision R1 of the original document.
 

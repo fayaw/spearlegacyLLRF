@@ -8,7 +8,7 @@
 | **Submitted by** | Heinz Schwarz, RF Engineer |
 | **Approved by** | Alan Hill, Area Manager |
 | **Organization** | Stanford Linear Accelerator Center |
-| **Date** | July 21, 1999 (R2 revision: 4/19/99) |
+| **Date** | January 20, 2000 (R2 revision: 4/19/99) |
 | **Pages** | 13 |
 | **Source PDF** | `ps3403306102.pdf` |
 
@@ -16,28 +16,66 @@
 
 ## RF Non-Ionizing Radiation Safety Procedure
 
-### 1) Background
+### Index
 
-The PEP-II RF system operates at **476 MHz**. This microwave frequency presents a potential non-ionizing radiation hazard wherever high power RF energy is transported through the waveguide network. The primary concern is leakage at waveguide joints and connections.
+1. Introduction
+2. Requirements
+3. Non-ionizing Radiation Safety approach
+4. Waveguide Network
+5. Coaxial Cables
+6. Assembly and Installation
+7. RF Field Survey
+8. Gas Pressurization System
+9. Klystron removal
+10. Re-certification annually and after major repair or downtime
+11. Waveguide Pressure Interlock Check
+12. Waveguide Safety Work Control Procedure
 
-### 2) Applicability
+PEP-II RF Waveguide Safety Work Control Form
 
-This procedure applies to all PEP-II RF stations in both the High Energy Ring (HER) and Low Energy Ring (LER).
+### 1) Introduction
 
-### 3) Radiation Limits
+*(See sketches: Layout Region 8 Support Building and Typical Cross-Sectional Layout of RF Station)*
 
-- Maximum allowable RF radiation level at 100 kW: **0.1 mW/cm²** at any accessible waveguide joint
-- Maximum allowable RF radiation level at full power (1.2 MW): **1.5 mW/cm²**
-- Ionizing radiation limit at klystron surface: **< 5 mR/hr** at 30 cm distance
-- Ionizing radiation limit on contact: **< 100 mR/hr**
+The RF system of PEP-II consists of 5 stations in the high energy ring (HER) and 3 stations in the low energy ring (LER). A station has the following components of interest to this procedure: A **1.2 MW CW klystron** with a **120 Watt drive amplifier**; a circulator with a **1.2 MW load**; a waveguide distribution network splitting the power **four-ways (HER)** and **two-ways (LER)** including one to three 1.2 MW loads; four or two penetration waveguides transmitting the RF into the tunnel; four (HER) or two (LER) cavities in the tunnel. The operating frequency is **476 MHz**.
 
-### 4) Responsibilities
+All RF fields are normally contained in metal enclosures like the klystron body, rectangular waveguide or resonant cavity. The klystron and RF cavity are vacuum vessels and do not leak RF fields if they are vacuum tight. Leakage out of the waveguide is normally limited to joints that are either defective, improperly assembled or insufficiently tightened.
 
-The RF Group is responsible for ensuring compliance with non-ionizing radiation safety requirements. RP Field Operations Group provides support for ionizing radiation surveys.
+A RF leak tight waveguide network is assured by taking the appropriate steps during assembly and installation and checking by inspectors after installation for proper assembly. A final RF survey using a calibrated radiation meter will be made for each joint accessible in the surface buildings. As an additional safety net most of the waveguide network is part of a pressurization system which will automatically shut off the RF power and abort the beam if the waveguide loses its pressurization due to a gas leak assumed to be accompanied by a RF leak.
 
-### 5) Cables and Connections
+### 2) Requirements
 
-All RF cables and connections shall be properly secured before any RF operation. The standard RF coax cables used in the system (1/4 inch Heliax and SMA pigtails) should be checked to verify that they are present and that the cables should not be disconnected while power is on.
+A personnel hazard is considered to exist when RF radiation (Non-ionizing Radiation) leaking from any source in the system exceeds a power density level of **1.5 mW/cm²** at the surface (for operating frequency: 476 MHz).
+
+**Reference:** American National Standard Safety Levels with Respect to Human Exposure to Radio Frequency Electromagnetic Fields, 300 kHz to 100 GHz. (ANSI C95.1-1982)
+
+### 3) Non-ionizing Radiation Safety approach
+
+The radiation integrity of the power system of PEP-II RF stations is being assured by the following methods:
+
+- Careful assembly of all parts followed by an inspection.
+- RF field survey of the fully assembled system.
+- Pressurization of waveguide network tied to interlock for pressure failure as additional safety net.
+
+### 4) Waveguide Network
+
+*(See Rectangular WG Network Region 8 Subassembly Drwg # SA-341-300-05)*
+
+The waveguide network consists of **WR2100 aluminum waveguide** with two types of flange seals. In the penetrations **PARKER SEALS** are used to seal for RF and gas leakage. This sealing method was used in PEP-I successfully and is reused in the PEP-II penetrations where the old waveguides are being reused.
+
+The rest of the installation uses **flat flanges paired up with grooved flanges containing Silicon Rubber O-rings**.
+
+Several parts of the waveguide network need special mention:
+
+1. The klystron RF output beyond the vacuum window has a transition from a **6 inch coaxial line to WR2100 waveguide** which is part of the pressurization system.
+2. A **1.2 MW circulator** was procured specified to be leak tight and is part of the pressurization system. A gas barrier on the downstream side of the circulator is inserted for protection of the circulator and is pressurized on both sides.
+3. **1.2 MW loads** are attached to circulator and magic tees through waveguide gas barriers. The loads have large water drain holes to prevent the waveguide network from filling with cooling water in case of a catastrophic load failure. The gas barrier is held in place between the load flange and the waveguide by long bolts. This joint is part of the pressurization system. Radiation safety will be assured by inspection and radiation survey.
+4. The **cavity window** has a special flange at the ceramic vacuum window sealed with O-rings which is part of the pressurization system.
+5. **Infrared monitors** measure the operating temperature of each cavity window through a monitor port. This port provides radiation shielding due to being beyond cutoff at the operating frequency. It will also be made leak tight for gas leaks.
+
+### 5) Coaxial Cables
+
+The coaxial cables between the **120 W drive amplifier** and the klystron have **warning labels** at each connector. The labels specify that there could be a power of up to **120 W** present and that the cables should not be disconnected while power is on.
 
 ### 6) Assembly and Installation
 
@@ -227,4 +265,3 @@ Located in Building 685 (Region 8 RF Support Building), adjacent to Rack # B685-
 ---
 
 > **Transcription Note**: This markdown was generated via OCR (Tesseract 5.3.0 at 300 DPI) from the scanned image-based PDF `ps3403306102.pdf` (13 pages). Text content on pages 1–7 and 10–13 is high confidence. Pages 8–9 contain facility layout diagrams with limited extractable text; the original PDF should be consulted for these pages. This is revision R2 of the original document.
-

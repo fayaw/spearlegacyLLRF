@@ -71,13 +71,24 @@ To long-term park the cavities a RF station can be changed into the **OFF-LINE**
 
 *[Screenshot of EPICS FEEDBACK panel]*
 
-### Page 7: Fig. 5 — FEEDBACK Options / Additional Controls
+### Page 7: OFF Mode and Cavity Processing
 
-*[Screenshot of additional EPICS feedback loop control options]*
+**OFF mode:** Turns RF off with the HVPS contactor closed and fires beam abort; cavity tuners are left in their previous position.
 
-> **Note:** Pages 3–7 are primarily screenshots of EPICS control panels. Due to OCR limitations on graphical interface screenshots, the detailed labels and values within these panels are not reliably extractable. Consult the original PDF for accurate panel layouts.
+**Processing cavities:**
+
+After an intentional or accidental vent or long shutdown, cavities are processed first in **ON_FM** mode at **1000 Hz** and then in **ON_CW** mode using the HVPS Loop OFF/PROC/ON buttons in **PROC**. In the PROC mode the station will automatically step up the HVPS voltage until one of the limiting parameters is reached and steps the voltage down when the limit is passed.
+
+The following table gives the nominal limit parameters:
+
+| Parameter | HER FM | HER CW | LER FM | LER CW |
+|-----------|--------|--------|--------|--------|
+| Max Cav Vacuum (Torr) | 1E-8 | 1E-8 | 1E-8 | 1E-8 |
+| Max Cav Gap Volt (kV) | 800 | 750 | 900 | 850 |
+| Max Klys Fwd Pwr (kW) | 540 | 450 | 330 | 290 |
+
+> **Note:** Pages 3–6 are primarily screenshots of EPICS control panels (KLYSTRON panel, RF STATION panel, HVPS panel, FEEDBACK panel). Due to OCR limitations on graphical interface screenshots, the detailed labels and values within these panels are not fully extractable. Consult the original PDF for accurate panel layouts.
 
 ---
 
 > **Transcription Note**: This markdown was generated via OCR (Tesseract 5.3.0 at 300 DPI) from the scanned image-based PDF `ps3403305900.pdf`. Text content on pages 1–2 is high confidence. Pages 3–7 contain EPICS control panel screenshots with limited extractable text; the original PDF should be consulted for accurate panel details.
-

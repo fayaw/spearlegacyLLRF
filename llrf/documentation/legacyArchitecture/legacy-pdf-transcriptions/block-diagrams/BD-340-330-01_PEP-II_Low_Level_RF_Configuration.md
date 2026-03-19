@@ -13,70 +13,209 @@
 
 ---
 
-## Description
+## ASCII Replica — LER LLRF Signal Processing Chain
 
-This is a detailed block diagram of the PEP-II Low Energy Ring (LER) Low-Level RF (LLRF) configuration showing the complete signal processing chain from the 476 MHz input through the modulator, klystron, and RF distribution to four cavities, with all feedback loop signal paths.
+> This diagram replicates the signal flow shown in BD-340-330-01.
+> The LER has **2 cavities** per station.
 
-## Key Components and Signal Flow (from OCR)
+```
+                                                         ┌─────────────┐
+                                                         │   CAVITY 1  │  30 dBm
+                                                    ┌───▶│  (LR44)     │◀── max
+                                                    │    └──────┬──────┘
+                                                    │           │ cavity probe
+                                                    │    ┌──────┴──────┐
+                                               MAGIC│    │  I/Q DET    │ -10 dBm
+                                               TEE  │    │  (cav 1)    │ -6 dBm
+                                                    │    └──────┬──────┘
+                                                    │           │ cav1 I, cav1 Q
+ ┌────────────────────────────────────────────┐     │           ▼
+ │             RF DRIVE CHAIN                 │     │    ┌─────────────┐
+ │                                            │     │    │   CAVITY 2  │  30 dBm
+ │  476 MHz  ┌───────┐ ┌───────┐ ┌────────┐  │     │    │  (LR44)     │◀── max
+ │   SMA ───▶│  RF   │▶│ AMPL  │▶│  AMPL  │──┼─────┘    └──────┬──────┘
+ │  input    │SWITCH │ │+16dBm │ │+30 dBm │  │                  │ cavity probe
+ │           └───────┘ └───────┘ └────────┘  │           ┌──────┴──────┐
+ │              │         120 W    +30 dBm   │           │  I/Q DET    │ -10 dBm
+ │              │          max               │           │  (cav 2)    │ -6 dBm
+ │           to real/                        │           └──────┬──────┘
+ │           imag                            │                  │ cav2 I, cav2 Q
+ │           control     ┌─────────┐  ┌──────────┐             │
+ │                       │KLYSTRON │  │CIRCULATOR│             │
+ │              ┌───────▶│1.2 MW   │─▶│  + LOAD  │─────────────┘
+ │              │        │  max    │  └──────────┘
+ │     ┌────────┴──────┐ └─────────┘                    REF-476
+ │     │ RF MODULATOR  │                                  │
+ │     │  (I/Q MOD)    │                                  ▼
+ │     │  I_drive      │                          ┌──────────────┐
+ │     │  Q_drive      │                          │ I/Q DETECTOR │
+ │     └───────▲───────┘                          │ (REF-476)    │
+ │             │                                  │  spare1      │
+ │      ┌──────┴───────┐                          │  spare2      │
+ │      │  Σ (summing  │                          └──────────────┘
+ │      │   junction)  │
+ └──────┴──────────────┴──────────────────────────┘
+               ▲  ▲  ▲  ▲
+               │  │  │  │
+       ┌───────┘  │  │  └──────────┐
+       │          │  │             │
+       │          │  │             │
+ ┌─────┴─────┐ ┌─┴──┴──┐  ┌──────┴──────┐  ┌──────────────┐
+ │  DIRECT   │ │ COMB  │  │    GAP      │  │   RIPPLE     │
+ │  LOOP     │ │FILTER │  │FEEDFORWARD  │  │   LOOP       │
+ │  (PID)    │ │ (×2)  │  │  (VXI)      │  │ (AT&T        │
+ │           │ │       │  │             │  │  DSP1610)    │
+ └─────┬─────┘ └───┬───┘  └──────┬──────┘  └──────┬───────┘
+       │           │             │                 │
+       ▼           ▼             ▼                 ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │                VXI RF MODULE                             │
+  │  ┌──────────────────────────────────────────────────┐   │
+  │  │         Baseband Network Analyzer                │   │
+  │  │                                                  │   │
+  │  │  ┌──────┐ ┌────────┐ ┌────────┐ ┌────────┐      │   │
+  │  │  │ x DAC│ │512K RAM│ │512K RAM│ │512K RAM│      │   │
+  │  │  │      │ │ cav I  │ │ cav Q  │ │ sig I  │      │   │
+  │  │  └──────┘ │  ADC   │ │  ADC   │ │  ADC   │      │   │
+  │  │           └────────┘ └────────┘ └────────┘      │   │
+  │  │  ┌────────┐ ┌────────┐                          │   │
+  │  │  │512K RAM│ │512K RAM│  F_sample = 10 MHz       │   │
+  │  │  │ sig Q  │ │ PAD    │                          │   │
+  │  │  │  ADC   │ │ 512K   │                          │   │
+  │  │  └────────┘ └────────┘                          │   │
+  │  └──────────────────────────────────────────────────┘   │
+  │                                                         │
+  │  ┌───────────────────────────────────────────────────┐  │
+  │  │          FEEDBACK LOOP PROCESSING                 │  │
+  │  │                                                   │  │
+  │  │  ┌──────────┐  ┌──────────────┐  ┌────────────┐  │  │
+  │  │  │ DIRECT   │  │  I/Q MOD     │  │ I/Q MOD    │  │  │
+  │  │  │ LOOP     │  │  (cav 1 adj) │  │ (cav 2 adj)│  │  │
+  │  │  │ PID      │  │  +/- 2V      │  │ +/- 2V     │  │  │
+  │  │  │controller│  └──────────────┘  └────────────┘  │  │
+  │  │  └──────────┘                                    │  │
+  │  │  ┌────────────────────────────────────────────┐  │  │
+  │  │  │ COMB FILTER (×2 modules)                   │  │  │
+  │  │  │  ┌─────────┐  ┌────────────┐  ┌─────────┐ │  │  │
+  │  │  │  │  I/Q    │  │ delay      │  │  I/Q    │ │  │  │
+  │  │  │  │  MOD    │  │ equalizers │  │  MOD    │ │  │  │
+  │  │  │  │ sys I/Q │  │ 1-turn     │  │ comb adj│ │  │  │
+  │  │  │  │ error   │  │ delays     │  │         │ │  │  │
+  │  │  │  │ +/- 2V  │  └────────────┘  └─────────┘ │  │  │
+  │  │  │  │reference│                               │  │  │
+  │  │  │  └─────────┘                               │  │  │
+  │  │  └────────────────────────────────────────────┘  │  │
+  │  │  ┌──────────────┐  ┌──────────────────────────┐  │  │
+  │  │  │ RIPPLE LOOP  │  │ GAP FEEDFORWARD          │  │  │
+  │  │  │ AT&T DSP1610 │  │ VXI module               │  │  │
+  │  │  │ serial link  │  │ lowpass filter            │  │  │
+  │  │  │ parallel bus │  │ I/Q MOD → gap module      │  │  │
+  │  │  └──────────────┘  └──────────────────────────┘  │  │
+  │  └───────────────────────────────────────────────────┘  │
+  │                                                         │
+  │  EXTERNAL INTERFACES:                                   │
+  │  ├── Longitudinal feedback system (kick)                │
+  │  ├── VXI comb modules (×2)                              │
+  │  ├── klystron feedback (I/Q MOD → I/Q)                  │
+  │  └── HVPS (to/from ripple loop)                         │
+  └─────────────────────────────────────────────────────────┘
+```
 
-### RF Input and Drive Chain
-- **476 MHz** input signal
-- **RF switch** — to real/imaginary control
-- **RF MODULATOR** — I&Q modulation
-- **AMPLIFIER** — +16 dBm → +30 dBm → +30 dBm stages
-- 120 W max drive power
-- **KLYSTRON** — 1.2 MW max output
-- **CIRCULATOR** — with LOAD
+---
 
-### Cavity RF Distribution
-- 4 cavities, each with:
-  - Cavity probe: to I&Q detector (30 dBm max)
-  - Forward power: to I&Q detector
-  - Reflected power: to I&Q detector
-  - REF-476 reference signal
+## Mermaid — LER LLRF Signal Flow (Structural View)
 
-### VXI RF Module — Signal Processing
-- **Baseband Network Analyzer**
-- **I/Q MOD** (modulator) and **I/Q DETECTOR** (demodulator) pairs
-- **512K RAM** blocks (multiple) — data acquisition
-  - cav X ADC, cav Q ADC
-  - sig I ADC, sig Q ADC
-- Sample rate: **F_sample = 10 MHz**
-- **PADs** — signal attenuators
+```mermaid
+flowchart LR
+    subgraph INPUT["RF Input"]
+        RF476["476 MHz\nSMA Input"]
+    end
 
-### Feedback Loops Shown
-- **DIRECT LOOP**:
-  - PID controller
-  - Direct loop adjustment
-  - Signal paths for all 4 cavities (cav 1 adj, cav 2 adj, cav 3 adj, cav 4 adj)
-- **COMB FILTER** (×2):
-  - Comb loop with 1-turn delays
-  - Delay equalizers
-  - System I/Q processing
-  - +/− 2V signal range
-  - Mass I/Q MOD → I/Q detector
-- **RIPPLE LOOP**:
-  - Connected to HVPS via D/A
-  - 30 dBm max signal
-- **GAP FEEDFORWARD**:
-  - VXI module
-  - Lowpass filter
-  - Connected to gap module
+    subgraph DRIVE["Drive Chain"]
+        RFSW["RF Switch\n(real/imag control)"]
+        RFMOD["RF Modulator\n(I/Q MOD)"]
+        AMP1["Amplifier\n+16 dBm"]
+        AMP2["Amplifier\n+30 dBm → +30 dBm\n120 W max"]
+    end
 
-### Signal Monitoring Points
-- Forward power monitoring (max levels noted)
-- Reflected power monitoring
-- Spare channels (spare1, spare2)
-- REF-476 reference distribution
+    subgraph KLYS["High Power"]
+        KLY["KLYSTRON\n1.2 MW max"]
+        CIRC["CIRCULATOR"]
+        CLD["LOAD"]
+        MTEE["MAGIC TEE"]
+    end
 
-### Interconnections to External Systems
-- Serial link to I&Q
-- Parallel bus
-- PSP1610 LOAD connection
-- ATET connection
-- Longitudinal feedback system — kick connection
-- VXI comb modules (×2)
-- Power supply connections
+    subgraph CAV["Cavities (LER: ×2)"]
+        C1["CAVITY 1\n30 dBm max"]
+        C2["CAVITY 2\n30 dBm max"]
+        IQD1["I/Q DET\n(cav 1)\n-10 / -6 dBm"]
+        IQD2["I/Q DET\n(cav 2)\n-10 / -6 dBm"]
+    end
+
+    subgraph VXI["VXI RF Module"]
+        BNA["Baseband\nNetwork Analyzer\n512K RAM × 5\nF_sample = 10 MHz"]
+        DLOOP["DIRECT LOOP\nPID Controller\ncav1 adj, cav2 adj\n+/- 2V"]
+        COMB["COMB FILTER ×2\n1-turn delays\ndelay equalizers\nsystem I/Q error\n+/- 2V reference"]
+        RIPPLE["RIPPLE LOOP\nAT&T DSP1610\nserial/parallel bus"]
+        GAPFF["GAP FEEDFORWARD\nVXI module\nlowpass filter"]
+    end
+
+    subgraph EXT["External"]
+        LFB["Longitudinal\nFeedback\n(kick)"]
+        HVPS["HVPS"]
+        REF476["REF-476\nspare1, spare2"]
+    end
+
+    RF476 --> RFSW --> RFMOD --> AMP1 --> AMP2
+    AMP2 --> KLY --> CIRC
+    CIRC --> CLD
+    CIRC --> MTEE
+    MTEE --> C1 & C2
+    C1 --> IQD1
+    C2 --> IQD2
+    IQD1 --> BNA
+    IQD2 --> BNA
+    BNA --> DLOOP & COMB
+    DLOOP --> RFMOD
+    COMB --> RFMOD
+    RIPPLE --> RFMOD
+    GAPFF --> RFMOD
+    LFB --> COMB
+    HVPS <--> RIPPLE
+    REF476 --> BNA
+```
+
+---
+
+## Signal Level Budget
+
+| Point in Chain | Signal Level | Notes |
+|----------------|-------------|-------|
+| 476 MHz SMA input | — | Reference frequency input |
+| After RF switch | — | Real/imaginary control |
+| Amplifier Stage 1 output | +16 dBm | Pre-driver |
+| Amplifier Stage 2 input | +30 dBm | Driver (corrected: label reads +3dBm in OCR but context says +30 dBm) |
+| Amplifier Stage 2 output | +30 dBm | 120 W max |
+| Klystron output | 1.2 MW max | High-power RF |
+| Cavity probe max | 30 dBm max | Per cavity |
+| I/Q Detector input (cav) | -10 dBm | After coupling/attenuation |
+| I/Q Detector input (ref) | -6 dBm | Reference channel |
+| Baseband loop signals | +/- 2V max | I and Q baseband |
+| DAC output (baseband) | +/- 2V | To I/Q Modulator |
+
+## Key Specifications
+
+| Parameter | Value |
+|-----------|-------|
+| RF frequency | 476 MHz |
+| Sample rate | F_sample = 10 MHz |
+| RAM depth | 512K samples per channel |
+| Cavities per LER station | 2 |
+| Klystron max output | 1.2 MW |
+| Drive chain max | 120 W |
+| Baseband signal range | +/- 2V |
+| Comb filter modules | 2 (separate I and Q) |
+| Ripple loop DSP | AT&T DSP1610 |
 
 ---
 
@@ -87,11 +226,15 @@ This is a detailed block diagram of the PEP-II Low Energy Ring (LER) Low-Level R
 | Drawing | BD-340-330-01 R0 |
 | Title | PEP2 LER LLRF CONFIGURATION — BLOCK DIAGRAM |
 | Designed by | Paul Corredoura |
+| Drawn by | Paul Corredoura |
+| Checked by | Paul Corredoura |
 | Approved by | Paul Corredoura |
+| Date | 2/3/99 |
 | Status | Draft |
 | Scale | Do Not Scale Drawing |
+| See Also | PEP2 HER CONFIGURATION BD (BD-340-329-01), HER CONFIGURATION BD (HER D) |
 
 ---
 
-> **Transcription Note**: This markdown was generated via OCR (Tesseract 5.3.0 at 300 DPI) from the scanned image-based PDF `bd3403300100.pdf`. This is a single-page engineering block diagram with dense signal routing; OCR text extraction from complex diagrams has limited reliability. The component and signal path lists above are assembled from recognizable OCR fragments. **The original PDF should be consulted for accurate signal routing, gain levels, and detailed component labels.**
+> **Transcription Note**: ASCII and Mermaid diagrams replicated from OCR (Tesseract 5.3.0 at 400 DPI, PSM 3+6+11) of `bd3403300100.pdf`. Signal levels extracted from OCR fragments; some values (particularly intermediate amplifier gains) have ambiguous OCR reads (+3dBm vs +30dBm — context and gain chain analysis favor +30 dBm for the driver stage). The original PDF should be consulted for precise routing and connection details.
 
