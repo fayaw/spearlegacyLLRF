@@ -1,7 +1,7 @@
 # EPICS Database & PV Architecture
 
 **Document**: 07 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**(Rev 2 — corrected with upgrade PV namespace and PEP-II module identification)**
+**(Rev 3 — corrected GVF software/hardware classification; added TAXI monitoring dependency)**
 
 ---
 
@@ -34,9 +34,30 @@ The EPICS database is split across 76 files in `rfApp/Db/`, organized by functio
 | `iqa.db` | p2RfIqaRecord | 3 per station (fwd, refl, cav) | **Yes** (slots 7/9/11) | I/Q & Amplitude Detectors — **ELIMINATED by LLRF9** |
 | `aim.db` | p2RfAimRecord | 1 per station | **Yes** (slot 12) | Arc Interlock Module — **ELIMINATED by Interface Chassis** |
 | `clk.db` | p2RfClkRecord | 1 per station | **Yes** (slot 2) | Clock Module — **ELIMINATED by LLRF9** |
-| `gvf.db` | p2RfGvfRecord | 1 per station | **No** (slot 3 empty) | **PEP-II ONLY** — GVF module not installed in SRF1 |
+| `gvf.db` | p2RfGvfRecord | 1 per station | **No** (slot 3 empty) | **PEP-II hardware ONLY** — GVF module not physically installed in SRF1 (see §1.1.1 below) |
 | `cf2.db` | p2RfCf2Record | 1 per station | **No** (slot 5 = MPS Shutoff) | **PEP-II ONLY** — CF2 module not installed in SRF1 |
 | `cfm.db` | p2RfCfmRecord | 1 per station | **No** (not in SRF1 crate) | **PEP-II ONLY** — CFM comb filter not installed in SRF1 |
+
+#### 1.1.1 ⚠️ GVF Software Dependency — TAXI Monitoring (Rev 3 Clarification)
+
+While no GVF hardware module is physically installed in SRF1 (slot 3 is empty), the GVF **software layer is active and functionally required**:
+
+1. **Database records ARE loaded**: `gvf.db` is instantiated via `rf_vxi_modules_All.substitutions` (line: `file gvf.db`), which is included by `srf1.substitutions` → `rf_vxi_modules_All.db`.
+
+2. **GVF process variables are actively consumed** by the TAXI monitoring state set `rf_msgsTAXI` in `rf_msgs.st` (lines 196–352):
+
+| PV Name | SNL Variable | Function |
+|---------|-------------|----------|
+| `{STN}:STN:GVF:MODU.GST1` | `gvfstat1` | GVF module status register — monitored continuously for TAXI overflow error bit (`GVF_M_TAXIOFLW`) |
+| `{STN}:STN:GVF:MODU.TMCK` | `taxichk` | TAXI timing check — written by SNL to force a status re-read |
+| `{STN}:STN:GVF:STATE` | `gvfstate` | GVF run state — used to gate TAXI error recovery (only acts when `gvfstate == RUN`) |
+| `{STN}:STN:GVF:LFBLOOP` | `gvfwoof` | LFB woofer loop control — used to gate TAXI recovery (only acts when loop is ON) |
+
+3. **Fault recovery action**: When a TAXI overflow error is detected **and** the GVF is in RUN state with the woofer loop active, the `rf_msgsTAXI` state set issues an LFB resync command to either `LFB0FSL:WF:SINGLE_SYNC` (SPEAR low-energy ring) or `LFB0FSH:WF:SINGLE_SYNC` (high-energy ring), depending on ring configuration. This is a **critical error-recovery mechanism**.
+
+**⚠️ Operational hazard**: The "PEP-II ONLY" label in the table above applies **strictly to the hardware module**. Removal of `gvf.db` from the database loading sequence or disabling the `rf_msgsTAXI` state set would **break TAXI error monitoring and LFB resync fault recovery**. This functional dependency must be preserved in the legacy system. (In the upgrade, TAXI monitoring is completely eliminated — the VXI serial link is replaced by LLRF9 Ethernet communication; see SDD §22.)
+
+---
 
 ### 1.2 I/Q Signal Processing
 

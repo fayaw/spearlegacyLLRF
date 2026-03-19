@@ -1,9 +1,56 @@
 # SPEAR3 Legacy LLRF Codebase — Executive Summary & Upgrade Decision Matrix
 
 **Document**: 00 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**Date**: March 2026 (Rev 3 — corrected legacy state machine names; added missing document references; added open discrepancies)
+**Date**: March 2026 (Rev 6 — corrected rf_states.st state count, replaced fabricated calibration macro, clarified tuner loop state diagram)
+(Rev 5 — extended TAXI terminology correction to SDD; added GVF software dependency cross-reference; added document hierarchy section)
+(Rev 4 — corrected cross-note consistency issues found during deep audit; see Rev 4 correction notice)
+(Rev 3 — corrected legacy state machine names; added missing document references; added open discrepancies)
 
 ---
+
+## CORRECTION NOTICE (Rev 6)
+
+Rev 6 addresses three issues found during a third-pass deep-dive, cross-referencing all SNL source files directly against Note 05 claims:
+
+16. **Note 05 §2.2 state count was off by one: 22→23.** The note reported "22-state legacy machine" but the actual `rf_states.st` source (verified via `grep "^[[:space:]]*state "`) contains **23 SNL states** across 3 concurrent state sets: 17 in `ss rf_states`, 5 in `ss rf_statesLP`, and 1 in `ss rf_statesFF`. The missing state was `s_init` — the one-time initialization state that reads the current state PV, configures IQA3 channel names, clears fault flags, and transitions immediately to `s_go_off`. The `s_init` state was not listed in the state tables and the total count was wrong by one. Both are now corrected: `s_init` has been added to the state enumeration with its purpose documented, and the upgrade mapping note updated to "23-state."
+
+17. **Note 05 §3.3 "Macro Pattern" code block was fabricated; "hundreds of states" claim was incorrect.** The section showed a `#define CALIB_MEAS(cavity, signal, ...) \ state calib_meas_##cavity##_##signal {...}` macro with the claim it "is expanded for each cavity × each measurement × each DAC combination, resulting in hundreds of states." Verification result: searching `rf_calib.st,v` for `CALIB_MEAS` returns **zero matches** — this macro does not exist. The actual source contains **28 hand-written SNL states** (Init, Startup, CombCheck, ... Done). Code repetition is reduced via **utility macros** (`CAL_MSG`, `CHECK_ABORT`, `SET_CAV_OFFSETS`, etc.) that reduce boilerplate *within* state bodies, not macros that generate states. Cavity × measurement iteration is handled by **nested `for` loops** within states. §3.3 has been rewritten with the actual code structure, complete state list, utility macro table, and a representative source code excerpt from `ZeroCavMults`.
+
+18. **Note 05 §4.2 tuner loop state diagram presented algorithmic control modes as SNL states.** The diagram showed TRACKING, MOVING, and SETTLING as separate boxes within the ON region, which could mislead a reader into searching for `state TRACKING`, `state MOVING`, and `state SETTLING` declarations. The actual `rf_tuner_loop.st` source contains **5 SNL states**: `loop_init`, `loop_unknown`, `loop_reset`, `loop_off`, `loop_on`. The TRACKING/MOVING/SETTLING behaviors are **algorithmic control modes** implemented via conditional branching within the single `loop_on` state, driven by variables `dmov_meas_count`, `sm_dmov`, `nomov_count`, and `loop_status`. A clarifying note has been added after the diagram explaining this distinction.
+
+---
+
+## CORRECTION NOTICE (Rev 5)
+
+Rev 5 addresses issues found during a second-pass deep-dive cross-referencing source code, design documents, and existing technical notes:
+
+11. **Note 07 §1.1 GVF software/hardware classification was misleading.** The table stated `gvf.db` is "PEP-II ONLY — GVF module not installed in SRF1". While the **hardware** is absent (slot 3 is empty), the GVF **database records ARE loaded** via `rf_vxi_modules_All.substitutions` and are **actively referenced** by the TAXI monitoring state set `rf_msgsTAXI` in `rf_msgs.st` (lines 196–352). Specific PVs: `{STN}:STN:GVF:MODU.GST1` (status), `{STN}:STN:GVF:MODU.TMCK` (TAXI timing check), `{STN}:STN:GVF:STATE` (run state), `{STN}:STN:GVF:LFBLOOP` (woofer loop). Removal of `gvf.db` would **break TAXI error monitoring and LFB resync fault recovery**. Table and new §1.1.1 added to Note 07.
+
+12. **SDD also contains CAMAC TAXI terminology errors (extending correction #10).** The SDD (§1.4 line 99 and §22 line 1500) propagates and amplifies the same error flagged in the PDR: "CAMAC TAXI monitoring" and "CAMAC TAXI eliminated with VXI". TAXI is a **VXI serial link protocol**, not a CAMAC feature. CAMAC is a completely different parallel bus standard not used in SPEAR3. Both the PDR (§2.1, 1 instance) and SDD (§1.4 and §22, 2 instances) require terminology correction. See correction #10 below for original PDR reference.
+
+13. **Note 02 boot sequence includes CLKMACROS which is NOT in st.cmd.** Note 02 §2.1 shows `putenv("CLKMACROS=S=2")` in the boot sequence putenv() block. However, this macro **does not appear in the production `st.cmd`** as archived in RCS (`iocBoot/b132-iocrf/st.cmd,v`). The 11 putenv() calls in st.cmd are: IQA3MACROS, DATABASE_MACROS, C1–C4 TUNRLOOP_MACROS, AB_CONFIG_FILE, RESTORE_AB, RESTORE_VXI, RESTORE_INP, RESTORE_FILENAME. CLKMACROS is consumed by `p2RfInitHooks.c` via `getenv("CLKMACROS")` and must be established through an external mechanism (VxWorks boot parameters or a deployment wrapper script). If not set, clock initialization is gracefully skipped. Clarification added to Note 02 §2.1.
+
+14. **Note 05 rf_calib.st line count discrepancy with design documents.** Both the PDR (§14.1) and SDD (§1.4) report `rf_calib.st` as "2,800+" lines. The actual RCS source is **3,345 lines** (as correctly stated in Note 05). This 545-line difference likely reflects either an earlier RCS revision snapshot in the design documents or a summary-level approximation. Precision footnote added to Note 05.
+
+15. **Note 08 §3.1 subSys.c line numbers: systematic +1 offset.** All 11 function line references in §3.1 point to the closing `*/` of the multi-line documentation comment block rather than the function signature (`static long subSys*()`). The actual function definitions are consistently 1 line below each cited number. All 11 references corrected to point to the function signature line.
+
+---
+
+## CORRECTION NOTICE (Rev 4)
+
+Rev 4 addresses issues found during a systematic source-code-to-notes cross-reference audit:
+
+5. **Note 05 HVPS status codes were fabricated.** Rev 3 listed 6 status codes (UNKNOWN, READY, ON, OFF, FAULT, CROWBAR) that do not exist anywhere in the source code. The actual `rf_hvps_loop_defs.h` defines **16 status codes** (0–15). See [05-snl-state-machines.md](05-snl-state-machines.md) §5.3 for the corrected table.
+
+6. **Note 05 HVPS PV names still had the VOLTS→VOLT error.** Rev 3 corrected this in Note 02 but failed to propagate the fix to Note 05 §5.2. Now corrected — the complete PV list from `rf_hvps_loop_pvs.h` replaces the partial/incorrect list.
+
+7. **Note 05 collector protection logic was oversimplified.** Rev 3 described the `proc` state as checking only `klystron_forward_power > max_klystron_forward_power`. The actual source checks **three independent conditions** (forward power, gap voltage severity, AND cavity vacuum severity). Also, the phantom PV `{STN}:HVPS:PCOLL_MAX` was replaced with the correct PV `{STN}:KLYSOUTFRWD:POWER:MAX`.
+
+8. **Note 03 LLRF9 signal mapping (§9.1) was incorrect.** Signal numbers, LLRF9 units, and board assignments did not match PDR Section 4.4. For example, "Cav A Probe" was listed as Signal 1 at Unit 1 BRD1 — it is actually Signal 13 at Unit 1 BRD1. All entries corrected.
+
+9. **DSP firmware line count clarification.** Note 00 §1 reports ~15,667 lines — this is the count of `.s` and `.h` assembly/header files only (73 files). Note 04 reports ~16,763 lines across 102 files — this includes Makefiles, linker scripts, and test files. Both counts are from the `rfApp/src/dsp/` directory tree. The full directory contains 103 RCS-tracked files totaling ~16,261 lines.
+
+10. **PDR §2.1 TAXI terminology error (not corrected — flagged for PDR/SDD revision).** PDR §2.1 (line 89) describes `rf_msgs.st` as "CAMAC TAXI error monitoring". SDD §1.4 (line 99) and §22 (line 1500) repeat and amplify this error with "CAMAC TAXI monitoring" and "CAMAC TAXI eliminated with VXI". TAXI is a **VXI serial link protocol** used by the GVF module for timing and error status signaling — it has nothing to do with CAMAC (a parallel bus standard not used in SPEAR3). The source code (`rf_msgs.st`, lines 196–352) correctly references the GVF TAXI error bit (`GVF_M_TAXIOFLW`) and prints "Gvf Taxi error detected". See Note 05 §7.2 for details. **Both PDR §2.1 and SDD §1.4, §22 require terminology correction.**
 
 ## CORRECTION NOTICE (Rev 3)
 
@@ -225,3 +272,18 @@ When discrepancies exist between sources, the following priority order applies:
 | [Designs/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md](../../Designs/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md) | **Authoritative legacy system reference** — correct state names, complete PV architecture, control loop analysis, state transition tables |
 | [Designs/10_SOFTWARE_DESIGN_DOCUMENT.md](../../Designs/10_SOFTWARE_DESIGN_DOCUMENT.md) | **Upgrade software architecture** — Python/PyEPICS/MATLAB coordinator design, legacy→upgrade code mapping (Section 22), PV contract reference |
 | [Designs/0_PHYSICAL_DESIGN_REPORT.md](../../Designs/0_PHYSICAL_DESIGN_REPORT.md) | **Master upgrade specification** — hardware architecture, signal list, channel allocation, protection chain |
+
+### Document Relationships & Cross-References (Rev 5)
+
+The Software Design Document (SDD, Rev 1, March 18, 2026) postdates the technical notes series and explicitly references legacy SNL program line counts from this series (SDD §1.4, lines 94–98). Cross-verification confirms alignment:
+
+| SNL Program | Notes Count | SDD Reference | Match |
+|-------------|-----------|---------------|-------|
+| `rf_states.st` | 2,227 | 2,227 | ✓ Exact |
+| `rf_hvps_loop.st` | 343 | 343 | ✓ Exact |
+| `rf_tuner_loop.st` | 555 | 555 | ✓ Exact |
+| `rf_dac_loop.st` | 290 | 290 | ✓ Exact |
+| `rf_msgs.st` | 352 | 352 | ✓ Exact |
+| `rf_calib.st` | 3,345 | "2,800+" | ⚠️ Notes more precise (see correction #14) |
+
+This confirms the technical notes serve as the **primary authoritative technical reference** for legacy system source-level details. When discrepancies exist between documentation sources, apply the hierarchy defined in §7.2: **Source Code > Technical Notes > Design Documents**.

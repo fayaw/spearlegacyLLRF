@@ -1,6 +1,7 @@
 # VXI Driver & Device Support — Deep Dive
 
 **Document**: 03 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 3 — corrected LLRF9 signal mapping table §9.1 against PDR Section 4.4; previous mapping had wrong signal numbers, units, and board assignments)**
 **(Rev 2 — corrected for PEP-II modules and upgrade context)**
 
 ---
@@ -432,19 +433,23 @@ CF2 supports multiple filter bank configurations:
 
 The following table maps legacy VXI module signals to their LLRF9 equivalents as specified in PDR Section 5.3. This is essential for verifying signal continuity during commissioning — confirming that the same physical signal ends up at the same logical processing point in the upgrade system.
 
-### 9.1 Partial Signal Mapping (from PDR Section 3 and 5.3)
+### 9.1 Partial Signal Mapping (from PDR Section 4.4 Signal List)
 
-| Legacy VXI Module | Legacy Signal | LLRF9 Unit | LLRF9 Board | LLRF9 Channel | PDR Signal # |
-|-------------------|--------------|-----------|------------|--------------|-------------|
-| IQA3 (Slot 11) — Cavity | Cav A Probe | Unit 1 | BRD1 | CH0 | Signal 1 |
-| IQA3 (Slot 11) — Cavity | Cav B Probe | Unit 1 | BRD1 | CH1 | Signal 2 |
-| RFP (Slot 4) — RF Processor | Drive Output | Unit 1 | BRD1 | OUT | Signal 5 |
-| IQA2 (Slot 9) — Reflected | Cav A Reflected | Unit 2 | BRD3 | CH0 | Signal 10 |
-| IQA2 (Slot 9) — Reflected | Cav B Reflected | Unit 2 | BRD3 | CH1 | Signal 12 |
-| IQA1 (Slot 7) — Forward | Kly Forward Power | Unit 2 | BRD3 | CH2 | Signal 15 |
-| IQA1 (Slot 7) — Forward | Kly Reflected Power | Unit 2 | BRD3 | CH3 | Signal 16 |
+> **Rev 3 correction**: Rev 2 had incorrect signal-number-to-board assignments throughout this table. For example, "Cav A Probe" was listed as Signal 1 at Unit 1 BRD1, but Signal 1 is actually Kly Output Forward Power at Unit 2 BRD2. Cav A Probe is Signal 13. All entries below are now corrected against PDR Section 4.4.
 
-> **Note**: This is a partial mapping showing key signals. The complete allocation across 2 LLRF9 units with 3 boards each (6 boards total, multiple channels per board) is in PDR Section 5.3 (Signal List). The LLRF9 architecture provides substantially more channel capacity than the legacy VXI system.
+| Legacy VXI Module | Legacy Signal | LLRF9 Unit | LLRF9 Board | PDR Signal # |
+|-------------------|--------------|-----------|------------|-------------|
+| IQA1 (Slot 7) — Forward | Kly Output Forward Power | Unit 2 | BRD2 | Signal 1 |
+| IQA1 (Slot 7) — Forward | Kly Output Reflected Power | Unit 2 | BRD2 | Signal 2 |
+| RFP (Slot 4) — RF Processor | Klystron Drive Power | Unit 2 | BRD1 | Signal 5 |
+| IQA3 (Slot 11) — Cavity | Cavity A Forward Power | Unit 1 | BRD1 | Signal 9 |
+| IQA2 (Slot 9) — Reflected | Cavity A Reflected Power | Unit 2 | BRD3 | Signal 10 |
+| IQA3 (Slot 11) — Cavity | Cavity B Forward Power | Unit 1 | BRD2 | Signal 11 |
+| IQA2 (Slot 9) — Reflected | Cavity B Reflected Power | Unit 2 | BRD3 | Signal 12 |
+| IQA3 (Slot 11) — Cavity | Cavity A Probe Signal | Unit 1 | BRD1 | Signal 13 |
+| IQA3 (Slot 11) — Cavity | Cavity B Probe Signal | Unit 1 | BRD1 | Signal 14 |
+
+> **Note**: This is a partial mapping showing the key signals that have direct legacy VXI equivalents. The complete allocation across 2 LLRF9 units with 3 boards each (6 boards total, multiple channels per board) is in PDR Section 4.4 (Signal List) and Section 5.3 (LLRF9 Board-Level Allocation). The LLRF9 architecture provides substantially more channel capacity than the legacy VXI system. Signals not listed here (e.g., WG Load powers, Cavity C/D, station reference) are either new to the upgrade or routed through the Waveform Buffer system.
 
 ### 9.2 Upgrade Impact
 

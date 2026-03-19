@@ -1,6 +1,9 @@
 # SNL State Machine Programs — Control Logic Deep Dive
 
 **Document**: 05 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 6 — corrected rf_states.st state count from 22→23 (added missing s_init); replaced fabricated CALIB_MEAS macro code block with accurate utility macro description and 28-state enumeration; added tuner loop state diagram clarification distinguishing 5 SNL states from 3 algorithmic control modes)**
+**(Rev 5 — added rf_calib.st line count precision footnote; see §3 footnote ¹)**
+**(Rev 4 — corrected HVPS PV naming error VOLTS→VOLT; replaced fabricated HVPS status codes with the 16 actual codes from source; corrected proc state protection logic to reflect 3-condition check; corrected phantom PV references; added loop state/control mode enumerations)**
 **(Rev 3 — corrected legacy state machine names and state diagram from source code; added HVPS collector protection)**
 
 ---
@@ -138,6 +141,11 @@ Authors: Robert C. Sass (PEP-II, 1997), M. Laznovsky, S. Allison (SPEAR3 modific
 - Any fault → `s_faultfiles` (captures signal RAM to `/dat/FAULTSigI_00..10`) → `s_go_off`
 - Fallback: `go_on_cw_to_tune` → returns to TUNE if operator requests or loop instability
 
+**Initialization State (1)**:
+| State | Purpose |
+|-------|---------|
+| `s_init` | One-time initialization: reads current state PV, configures IQA3 channel names, clears fault flags, sets `clock_resync = 1`. Always transitions immediately to `s_go_off`. |
+
 **Transition States (17 total)**:
 | State | Purpose |
 |-------|---------|
@@ -159,7 +167,9 @@ Authors: Robert C. Sass (PEP-II, 1997), M. Laznovsky, S. Allison (SPEAR3 modific
 | `s_go_tickleoff` | Tickle excitation off |
 | `s_go_tickleon` | Tickle excitation on |
 
-> **Note on upgrade mapping**: The proposed upgrade state machine (PDR §2.2: OFF→INITIALIZE→STANDBY→ON_CW→FAULT→FAULT_CLEAR) simplifies the 22-state legacy machine into 6 states. The legacy PARK+VXI-init maps to the upgrade's INITIALIZE. The legacy TUNE+ON_FM are collapsed into the upgrade's ramp-to-ON_CW sequence. The legacy fault-file capture becomes a substep of the upgrade's FAULT state. See `Designs/10_SOFTWARE_DESIGN_DOCUMENT.md` Section 22 for the complete legacy→upgrade state mapping.
+> **Total: 23 states** across 3 concurrent state sets — 1 initialization + 5 primary + 12 transition (in `ss rf_states`) + 5 loop-protection (in `ss rf_statesLP`) + 1 fault-file (in `ss rf_statesFF`, counted separately from the transition table but part of the 23 total; see `s_faultfiles` above). Note that `s_lp_check`, `s_gv_down`, `s_direct_ramp`, `s_comb_ramp`, and `s_gv_up` belong to `ss rf_statesLP`; `s_faultfiles` belongs to `ss rf_statesFF`; all others belong to `ss rf_states`.
+
+> **Note on upgrade mapping**: The proposed upgrade state machine (PDR §2.2: OFF→INITIALIZE→STANDBY→ON_CW→FAULT→FAULT_CLEAR) simplifies the 23-state legacy machine into 6 states. The legacy PARK+VXI-init maps to the upgrade's INITIALIZE. The legacy TUNE+ON_FM are collapsed into the upgrade's ramp-to-ON_CW sequence. The legacy fault-file capture becomes a substep of the upgrade's FAULT state. See `Designs/10_SOFTWARE_DESIGN_DOCUMENT.md` Section 22 for the complete legacy→upgrade state mapping.
 
 ### 2.4 Key Variables (PVs)
 
@@ -187,11 +197,13 @@ fault_file_num = (fault_file_num + 1) % NUMFFILES;
 
 ---
 
-## 3. rf_calib.st — Calibration Sequences (3,345 lines)
+## 3. rf_calib.st — Calibration Sequences (3,345 lines) ¹
 
 ### 3.1 Purpose
 
-Automated calibration of the RF signal chain. Uses C preprocessor macros extensively to reduce code repetition across 4 cavities.
+Automated calibration of the RF signal chain. Uses C preprocessor utility macros and nested `for` loops to reduce code repetition across 4 cavities. Contains 28 hand-written SNL states.
+
+> ¹ **Line count precision note (Rev 3)**: The PDR (§14.1) and SDD (§1.4) both report rf_calib.st as "2,800+" lines. The actual RCS-tracked source (`rfApp/src/rf_calib.st,v`) is **3,345 lines** — a 545-line difference. This discrepancy likely reflects an earlier RCS revision snapshot used when drafting the design documents, or a summary-level approximation. The count cited here (3,345) was verified directly against the latest RCS head revision and is the authoritative figure.
 
 ### 3.2 Calibration Procedures
 
@@ -215,20 +227,41 @@ Automated calibration of the RF signal chain. Uses C preprocessor macros extensi
 2. Measure amplitude and phase for each path
 3. Compute correction factors
 
-### 3.3 Macro Pattern
+### 3.3 Code Structure and Utility Macros
+
+The `rf_calib.st` program contains **28 hand-written SNL states** — not macro-generated states. All state declarations are explicit:
+
+`Init` → `Startup` → `CombCheck` → `Startup2` → `Setup` → `ZeroCavMults` → `ZeroDirMults` → `DirectInitial` → `ZeroCombMults` → `Combiner` → `Direct` → `SummingNodeI` → `SummingNodeQ` → `GainStageI` → `GainStageQ` → `TuneStage` → `ZeroKlysMults` → `DiffNodeOffsets` → `KlysStage` → `CompStage` → `Direct_Final` → `CombStage` → `KlysDemod` → `NullModulator` → `Finish` / `Abort` / `Abend` → `Done`
+
+Code repetition across the 4 cavities is reduced via **utility macros** that perform common operations *within* state bodies (not state-generating macros):
+
+| Macro | Purpose |
+|-------|---------|
+| `CAL_MSG(_S_)` | Logs calibration progress messages via `epicsPrintf` |
+| `CHECK_ABORT` | Tests `doCalib == 0` and jumps to `Abort` state via `goto ABORT` |
+| `SET_CAV_OFFSETS(_Z_,_D0_,_D1_,_D2_,_D3_)` | Sets multiplier DAC offsets for current cavity (II, QI, IQ, QQ) |
+| `MEASURE_*`, `ZERO_*`, `STAGE_*`, `NULL_*` | Measurement, zeroing, and calibration-stage subroutines |
+
+Configuration constants (also macros): `P2RF_K_CAVCNT` (4 cavities), `COUNT` (30000 averaging window), `MAX_ATTEMPTS` (50 iteration limit), signal-path selectors (`TOTAL`, `COMB_OUT`, `NOISE`, `DRIVE`, etc.).
+
+Within each state, **nested `for` loops** iterate over cavities and measurement combinations:
 
 ```c
-#define CALIB_MEAS(cavity, signal, ...)  \
-  state calib_meas_##cavity##_##signal { \
-    when (/* measurement ready */) {     \
-      /* read I/Q from IQA */            \
-      /* compute amplitude/phase */      \
-      /* store result */                 \
-    } state calib_next_##cavity          \
-  }
+state ZeroCavMults {
+    when (doCalib == 0) { } state Abort
+    when (calStatus != STT_OK) { } state Abend
+    when () {
+        CAL_MSG("ZeroCavMults");
+        for (cav = 0; cav < P2RF_K_CAVCNT; cav++) {
+            /* ... binary search to null multiplier offsets ... */
+            SET_CAV_OFFSETS(comOfset, delta, 0, delta, 0);
+            /* ... measure, iterate, converge ... */
+        }
+    } state ZeroDirMults
+}
 ```
 
-This pattern is expanded for each cavity × each measurement × each DAC combination, resulting in hundreds of states.
+The state count (28) is **static** regardless of cavity count or measurement combinations — iteration is handled by loops within states, not by state proliferation.
 
 ---
 
@@ -270,6 +303,8 @@ Runs as **4 concurrent instances**, one per cavity.
     └────────────────────────────────────────────────
 ```
 
+> **Important distinction**: The diagram above shows **5 actual SNL states**: `loop_init`, `loop_unknown`, `loop_reset`, `loop_off`, and `loop_on`. The labels "TRACKING," "MOVING," and "SETTLING" within the ON region are **not separate SNL state declarations** — they are **algorithmic control modes** implemented via conditional logic within the single `loop_on` state. The source code contains no `state TRACKING`, `state MOVING`, or `state SETTLING` declarations. Instead, these modes emerge from control-flow branching within `loop_on`'s `when` clauses, driven by state variables: `dmov_meas_count` (measurements since motor stopped), `sm_dmov` (stepper motor done-moving flag from AB controller), `nomov_count` (stuck-motor counter), and `loop_status` (current mode status code). A reader examining the source should look for these variables within `loop_on`, not for separate state blocks.
+
 ### 4.3 Control Algorithm
 
 ```
@@ -303,7 +338,7 @@ Runs as **4 concurrent instances**, one per cavity.
 |----|------|-----------|-------------|
 | `{STN}:CAVTUNR:LOOP:CTRL` | int | IN | Master loop control (all cavities) |
 | `{STN}:CAV{CAV}TUNR:LOOP:STATE` | int | OUT | Per-cavity state (OFF=0, PARK=1, ON=2) |
-| `{STN}:CAV{CAV}TUNR:LOOP:STATUS` | int | OUT | Status code (15 possible values) |
+| `{STN}:CAV{CAV}TUNR:LOOP:STATUS` | int | OUT | Status code (14 values, 0–13; see `rf_tuner_loop_defs.h`) |
 | `{STN}:CAV{CAV}TUNR:POSN` | float | IN | Current tuner position |
 | `{STN}:CAV{CAV}TUNR:POSN:CTRL` | float | OUT | Position setpoint |
 | `{STN}:CAV{CAV}TUNR:POSN:DELTA` | float | IN | Position delta from IQA |
@@ -319,41 +354,165 @@ Runs as **4 concurrent instances**, one per cavity.
 
 Monitors and controls the High Voltage Power Supply via Allen-Bradley SLC-500 PLC.
 
-### 5.2 Key Operations
+### 5.2 Key PV Connections (from `rf_hvps_loop_pvs.h`)
 
-| Operation | PVs Involved | Description |
-|-----------|-------------|-------------|
-| Voltage setpoint | `{STN}:HVPS:VOLTS:CTRL` | Write target voltage to PLC |
-| Voltage readback | `{STN}:HVPS:VOLTS:RBCK` | Read actual voltage from PLC |
-| Contactor control | `{STN}:CONT:CLOSE/OPEN` | Close/open HV contactor |
-| Crowbar arm | `{STN}:HVPS:CROWBAR:ARM` | Arm the crowbar protection |
-| Fault monitoring | `{STN}:HVPS:FAULT:*` | Monitor overcurrent, overvoltage, cooling |
-| Status reporting | `{STN}:HVPS:STATUS` | Overall HVPS status code |
+> **Rev 4 correction**: Rev 3 listed PVs as `{STN}:HVPS:VOLTS:CTRL` and `{STN}:HVPS:VOLTS:RBCK` (with 'S'). The actual PV namespace uses `{STN}:HVPS:VOLT:CTRL` and `{STN}:HVPS:VOLT` (no 'S'), verified against `rf_hvps_loop_pvs.h,v`. Rev 3 also listed phantom PVs (`PCOLL_MAX`, `CROWBAR:ARM`, `CONT:CLOSE/OPEN`, `HVPS:FAULT:*`, `HVPS:STATUS`) that do **not** appear in the SNL program's PV declarations. These may exist in the EPICS database layer (`.db` files) but are not part of the `rf_hvps_loop.st` SNL state machine. The table below lists only PVs actually declared in `rf_hvps_loop_pvs.h`.
 
-### 5.3 Status Definitions (from rf_hvps_loop_defs.h)
+| PV | Type | Mon | Description |
+|----|------|-----|-------------|
+| `{STN}:STN:STATE:RBCK` | int | Y | Station state readback |
+| `{STN}:HVPS:LOOP:CTRL` | int | Y | Loop control command (OFF=0, PROC=1, ON=2) |
+| `{STN}:HVPS:LOOP:STATE` | int | N | Loop state output (OFF=0, PROC=1, ON=2) |
+| `{STN}:HVPS:LOOP:STATUS` | int | N | Loop status output (0–15, see §5.3) |
+| `{STN}:HVPS:LOOP:STRING` | string | N | Status description string |
+| `{STN}:HVPS:LOOP:DELAY` | int | N | Startup delay (ticks) for fast turnon |
+| `{STN}:HVPS:LOOP:READY` | int | Y | External ready trigger (event flag) |
+| `{STN}:STN:RFP:MODU.SEVR` | int | Y | RF Processor severity |
+| `{STN}:STN:RFP:MODU.DLE` | int | Y | Direct loop enable |
+| `{STN}:KLYSOUTFRWD:POWER` | float | Y | Klystron forward power |
+| `{STN}:KLYSOUTFRWD:POWER:MAX` | float | Y | Max klystron forward power limit |
+| `{STN}:CAVVACM:SUMY:SEVR.SEVR` | int | Y | Cavity vacuum summary severity |
+| `{STN}:CAVVACM:CHECK` | int | Y | Cavity vacuum check |
+| `{STN}:STN:VOLT.SEVR` | int | Y | Gap voltage severity |
+| `{STN}:STN:VOLT:ERR.STAT` | int | Y | Gap voltage error status |
+| `{STN}:KLYSDRIVFRWD:POWER:ERR.STAT` | int | Y | Drive power error status |
+| `{STN}:CAVVOLT:CHECK` | int | Y | Cavity voltage check |
+| `{STN}:HVPS:VOLT:CTRL` | float | N | Voltage setpoint to PLC |
+| `{STN}:HVPS:VOLT` | float | Y | Voltage readback from PLC |
+| `{STN}:HVPS:VOLT:LOOP` | float | N | Voltage history output |
+| `{STN}:HVPS:LOOP:VOLTHIST.RES` | int | N | Reset voltage history |
+| `{STN}:HVPS:LOOP:VOLTDIFF` | float | Y | Allowed voltage difference |
+| `{STN}:HVPS:VOLT:MIN` | float | Y | Minimum voltage limit |
+| `{STN}:HVPS:VOLT:CTRL.DRVH` | float | Y | Maximum voltage limit (drive high) |
+| `{STN}:HVPS:LOOP:VOLTDOWN` | float | Y | Delta voltage down (proc mode) |
+| `{STN}:HVPS:LOOP:VOLTUP` | float | Y | Delta voltage up (proc mode) |
+| `{STN}:KLYSDRIVFRWD:HVPS:DELTA.SEVR` | float | Y | Drive-to-HVPS delta severity |
+| `{STN}:KLYSDRIVFRWD:HVPS:DELTA` | float | N | Drive-to-HVPS delta (on mode) |
+| `{STN}:STNVOLT:HVPS:DELTA` | float | N | Station-volt-to-HVPS delta (tune mode) |
 
-| Code | Status | Description |
-|------|--------|-------------|
-| 0 | UNKNOWN | Initial state |
-| 1 | READY | HVPS ready, contactor open |
-| 2 | ON | HVPS energized, contactor closed |
-| 3 | OFF | HVPS commanded off |
-| 4 | FAULT | HVPS fault detected |
-| 5 | CROWBAR | Crowbar fired |
+### 5.3 Loop States, Control Modes, and Status Definitions (from `rf_hvps_loop_defs.h`)
 
-### 5.4 HVPS Collector Power Protection (Coverage Gap)
+> **Rev 4 correction**: Rev 3 listed 6 status codes (UNKNOWN, READY, ON, OFF, FAULT, CROWBAR). **These were completely wrong** — none of the names READY, FAULT, or CROWBAR exist in the source code. The actual source defines **16 status codes** (0–15). The correct enumeration from `rf_hvps_loop_defs.h,v` is below.
 
-The legacy `rf_hvps_loop.st` implements **klystron collector power protection** — a critical safety function for the non-full-power collector klystron. This was not documented in the original tech notes and was identified during cross-reference with PDR §4.5 and §11.3.
+**Control Modes** (`hvps_loop_ctrl` values):
 
-**Legacy implementation** (from `rf_hvps_loop.st` `proc` state):
-- **Trigger condition**: `klystron_forward_power > max_klystron_forward_power`
-- **Response**: HVPS voltage reduced by `delta_proc_voltage_down` per cycle
-- **Monitoring PVs**:
-  - `{STN}:HVPS:PCOLL_MAX` — configurable collector power limit setpoint
-  - `klystron_forward_power` — measured klystron forward power
-  - `max_klystron_forward_power` — calculated max forward power for current HVPS voltage
-- **Rate**: Executes every ~0.5 seconds (event-driven or every `HVPS_LOOP_MAX_INTERVAL` = 10 s max)
-- **Limitation**: Uses forward power as a **proxy** — does not calculate actual DC collector power
+| Value | Name | Description |
+|-------|------|-------------|
+| 0 | HVPS_LOOP_CONTROL_OFF | Loop control is off |
+| 1 | HVPS_LOOP_CONTROL_PROC | Processing (ramp) mode |
+| 2 | HVPS_LOOP_CONTROL_ON | Active regulation mode |
+
+**Loop States** (`hvps_loop_state` values):
+
+| Value | Name | Description |
+|-------|------|-------------|
+| 0 | HVPS_LOOP_STATE_OFF | Loop is off |
+| 1 | HVPS_LOOP_STATE_PROC | Processing (ramping voltage up/down) |
+| 2 | HVPS_LOOP_STATE_ON | Active regulation |
+
+**Status Codes** (`hvps_loop_status` values — 16 codes, 0–15):
+
+| Code | Name | String | Description |
+|------|------|--------|-------------|
+| 0 | UNKNOWN | "HVPS loop in unknown status." | Initial/undefined state |
+| 1 | GOOD | "HVPS loop reporting good status." | Normal operation |
+| 2 | RFP_BAD | "RF Processor bad." | RF Processor module severity invalid |
+| 3 | CAVV_LIM | "Cavity voltage above limit." | Cavity voltage above limit (on state, increasing blocked) |
+| 4 | OFF | "HVPS loop is off." | Loop control is off |
+| 5 | VACM_BAD | "Bad vacuum." | Cavity vacuum severity invalid |
+| 6 | POWR_BAD | "Klystron forward power bad." | Klystron forward power severity invalid |
+| 7 | GAPV_BAD | "Gap voltage bad." | Gap voltage severity invalid |
+| 8 | GAPV_TOL | "Gap voltage out of tolerance." | Gap voltage error out of tolerance (on state) |
+| 9 | VOLT_LIM | "HVPS loop at HVPS voltage limit." | Requested voltage at max limit |
+| 10 | STN_OFF | "Station is OFF or PARKed." | Station state is OFF or PARK |
+| 11 | VOLT_TOL | "Readback voltage differs from Requested" | Readback–request mismatch exceeds allowed diff |
+| 12 | VOLT_BAD | "Readback HVPS voltage invalid." | HVPS voltage readback severity invalid |
+| 13 | DRIV_BAD | "Klystron Drive Power is bad." | Drive power severity invalid (on_cw + direct loop) |
+| 14 | ON_FM | "Station in ON_FM mode." | Station is in ON_FM mode (no regulation) |
+| 15 | DRIV_TOL | "Klystron Drive Power out of tolerance." | Drive power error out of tolerance (on_cw + direct loop) |
+
+**Constants**:
+- `HVPS_LOOP_MAX_INTERVAL` = 10.0 s — maximum time between cycles regardless of events
+- `HVPS_LOOP_MAX_VOLT_TOL` = 10 — tolerance violation count before status change
+
+### 5.4 HVPS State Machine Architecture (from `rf_hvps_loop.st`)
+
+The HVPS loop implements 4 states: `init`, `off`, `proc`, and `on`.
+
+```
+          ┌──────┐
+          │ init │──────────────────────────────────────────► off
+          └──────┘
+                                                              │
+          ┌────────────────────────────────────────────────────┤
+          │                                                    │
+          ▼                                                    ▼
+      ┌──────┐  (ctrl==PROC && stn!=OFF/PARK)             ┌──────┐
+      │ proc │◄───────────────────────────────────────────│  off  │
+      └──┬───┘                                            └──┬───┘
+         │                                                    │
+         │  (ctrl!=PROC)         (stn!=OFF/PARK && ctrl!=PROC)│
+         │──────────────────────────────► on ◄────────────────┘
+         │                                │
+         │◄──────(ctrl==PROC)─────────────┘
+         │                                │
+         │  (stn==OFF||PARK)              │  (stn==OFF||PARK)
+         └──────────► off ◄───────────────┘
+```
+
+### 5.5 HVPS Proc State — Processing/Protection Logic (Corrected)
+
+> **Rev 4 correction**: Rev 3 described the proc state as only checking `klystron_forward_power > max_klystron_forward_power`. The actual source code checks **three independent conditions** for voltage decrease. Rev 3 also referenced a phantom PV `{STN}:HVPS:PCOLL_MAX` — no such PV exists in `rf_hvps_loop_pvs.h`. The correct PV is `{STN}:KLYSOUTFRWD:POWER:MAX`.
+
+The `proc` state implements **cavity processing** — gradually ramping HVPS voltage while monitoring multiple safety conditions. Each cycle (event-driven via `hvps_loop_ready_ef`, or every `HVPS_LOOP_MAX_INTERVAL` = 10 s max):
+
+**Step 1 — Module health checks** (any failure blocks further action):
+1. RF Processor severity invalid → status = RFP_BAD
+2. Klystron forward power severity invalid → status = POWR_BAD
+3. Gap voltage severity invalid → status = GAPV_BAD
+4. Cavity vacuum severity invalid → status = VACM_BAD
+5. HVPS voltage readback severity invalid → status = VOLT_BAD
+
+**Step 2 — Voltage direction decision** (3 conditions for decrease, from source):
+```c
+if ((klystron_forward_power > max_klystron_forward_power) ||  /* Condition 1 */
+    (LOOP_MAJOR_SEVERITY(pvSeverity(gap_voltage_check)))  ||  /* Condition 2 */
+    (LOOP_MAJOR_SEVERITY(pvSeverity(cavity_vacuum_check))))   /* Condition 3 */
+{
+    delta_hvps_voltage = delta_proc_voltage_down;  /* Decrease */
+}
+else
+{
+    delta_hvps_voltage = delta_proc_voltage_up;    /* Increase */
+}
+```
+
+- **Condition 1**: Klystron forward power (`{STN}:KLYSOUTFRWD:POWER`) exceeds max forward power limit (`{STN}:KLYSOUTFRWD:POWER:MAX`)
+- **Condition 2**: Cavity gap voltage check (`{STN}:CAVVOLT:CHECK`) has MAJOR severity — gap voltage is above setpoint
+- **Condition 3**: Cavity vacuum check (`{STN}:CAVVACM:CHECK`) has MAJOR severity — worst cavity vacuum is too high
+
+**Step 3 — Voltage application** via `HVPS_LOOP_SET_VOLTAGE()` macro (from `rf_hvps_loop_macs.h`):
+1. Get current requested voltage
+2. Add delta (positive for increase, negative for decrease)
+3. Clamp to `[min_hvps_voltage, max_hvps_voltage]` range
+4. Check readback–requested difference against `allowed_hvps_voltage_diff`
+5. If difference exceeds limit for >10 cycles → status = VOLT_TOL
+6. Put new voltage to `{STN}:HVPS:VOLT:CTRL`
+
+**Rate**: Event-driven (external trigger via `hvps_loop_ready` PV) or maximum 10-second interval.
+
+**Limitation**: Uses forward power as a **proxy** for collector dissipation — does not calculate actual DC collector power. The `max_klystron_forward_power` setpoint must be configured conservatively.
+
+### 5.6 HVPS On State — Active Regulation
+
+The `on` state maintains HVPS voltage to keep klystron drive power or station gap voltage constant:
+
+- **ON_CW mode with direct loop**: Delta from `{STN}:KLYSDRIVFRWD:HVPS:DELTA` (negated) — adjusts HVPS voltage to stabilize drive power
+- **TUNE mode or direct loop off**: Delta from `{STN}:STNVOLT:HVPS:DELTA` — adjusts HVPS voltage to stabilize gap voltage
+- **Cavity voltage limit check**: If `gap_voltage_check` has MAJOR severity and delta is positive (increasing), blocks increase and reports CAVV_LIM after tolerance count exceeded
+- **Tolerance monitoring**: Checks `dp_error_stat` (drive power error) and `gv_error_stat` (gap voltage error) for out-of-tolerance conditions → DRIV_TOL or GAPV_TOL
+
+### 5.7 Upgrade Replacement Context
 
 **Upgrade replacement** (PDR §11.3, Waveform Buffer System):
 - **Direct calculation**: `Collector_Power = (HVPS_V × HVPS_I) − Klystron_Forward_Power`
@@ -425,7 +584,9 @@ The `DAC_LOOP_SET` macro (~50 lines) implements the core feedback:
 
 ### 7.2 TAXI Error Monitoring
 
-The TAXI serial link connects GVF modules and provides timing signals. rf_msgs.st polls TAXI error counters and alerts if error rate exceeds threshold.
+The TAXI serial link connects GVF modules and provides timing signals. The `rf_msgsTAXI` state set within `rf_msgs.st` monitors the GVF TAXI link status via `{STN}:STN:GVF:MODU.TMCK` and, upon detecting a TAXI overflow error (`GVF_M_TAXIOFLW`), sends a resync command to the LFB (Low-Frequency Feedback) system. The implementation dynamically assigns the LFB PV based on the ring being serviced.
+
+> **PDR terminology note**: PDR §2.1 (line 89) describes this as "CAMAC TAXI error monitoring". This is incorrect — TAXI is a VXI serial link protocol used by the GVF module, not a CAMAC feature. The source code (`rf_msgs.st,v`) explicitly references GVF module status bits and prints "Gvf Taxi error detected" on fault. CAMAC is a completely different bus standard not used in this system.
 
 ---
 
