@@ -229,4 +229,27 @@ See Doc 04, Section 10 for the complete bibliography with DOIs and OSTI identifi
 
 ---
 
+### 5.6 Legacy PDF Transcriptions (v2.2 — NEW)
+
+All 15 legacy PDFs have been transcribed to searchable markdown. Located in `legacy-pdf-transcriptions/`:
+
+| Transcription File | Source PDF | Category | Key Data Added to Technical Notes |
+|--------------------|-----------|----------|----------------------------------|
+| `design-specifications/PS-340-330-51_RF_System_Description.md` | `ps3403305100.pdf` | Design Spec | PEP-II nominal parameter table (Doc 00 §1.4a), equipment inventory (Doc 00 §1.4b), station configuration, cooling systems |
+| `design-specifications/PS-340-330-52_LLRF_Feedback_Loop_Description.md` | `feedbackLoopDescriptionps3403305200.pdf` | Design Spec | Direct loop sub-functions (Doc 01 §3.2a), alternate modes (Doc 01 §3.2b), optimized station phasing (Doc 01 §10a), loop summary table |
+| `block-diagrams/BD-340-330-00_PEP-II_LER_RF_Station_Block_Diagram.md` | `bd3403300000.pdf` | Block Diagram | PLC-5 I/O configuration (Doc 02 §13), DH-485 peripherals, interlock inputs, HVPS safety interfaces |
+| `block-diagrams/BD-340-330-01_PEP-II_Low_Level_RF_Configuration.md` | `bd3403300100.pdf` | Block Diagram | Signal level budget (Doc 02 §12), VXI module architecture, DSP1610 ripple loop, comb filter topology |
+| `block-diagrams/PEP-II_Low_Level_RF_Block_Diagram.md` | `blockDiagrambd3403290100-1.pdf` | Block Diagram | HER LLRF configuration (cross-reference to LER BD-340-330-01) |
+| `operational-procedures/PS-340-330-53_RF_Cavity_Low_Power_Calibration.md` | `ps3403305300.pdf` | Oper. Proc. | Cavity calibration constants (Doc 04 §9a.1): probe coupling formula, temp/vacuum corrections |
+| `operational-procedures/PS-340-330-54_RF_Station_Safety_Certification.md` | `ps3403305400.pdf` | Oper. Proc. | Safety limits (Doc 04 §9a.3): flange torque, radiation limits |
+| `operational-procedures/PS-340-330-55_RF_Station_Safety_Survey.md` | `ps3403305503.pdf` | Oper. Proc. | Annual survey requirements (Doc 04 §9a.3): ionizing/non-ionizing limits |
+| `operational-procedures/PS-340-330-56_RF_Station_Coupling_Cable_Calibration.md` | `ps3403305600.pdf` | Oper. Proc. | Signal path calibration data (Doc 04 §9a.2): all coupling/loss values |
+| `operational-procedures/PS-340-330-57_RF_Station_Full_Power_Test.md` | `ps3403305700.pdf` | Oper. Proc. | Full power test config (Doc 04 §9a.6): SHORT plate method |
+| `operational-procedures/PS-340-330-58_RF_Station_Cavity_Phasing.md` | `ps3403305800.pdf` | Oper. Proc. | Phasing parameters (Doc 04 §9a.5): waveguide spacing, phase tables |
+| `operational-procedures/PS-340-330-59_RF_Station_Turn_On_Procedure.md` | `ps3403305900.pdf` | Oper. Proc. | Turn-on parameters (Doc 04 §9a.4), processing limits (Doc 01 §10b), EPICS panels (Doc 02 §14) |
+| `operational-procedures/PS-340-330-60_Bellow_Cavity_Phasing.md` | `ps3403306001.pdf` | Oper. Proc. | Bellow adjustment (Doc 04 §9a.5): 0.085 inch/degree conversion |
+| `operational-procedures/PS-340-330-61_RF_Non_Ionizing_Radiation_Safety.md` | `ps3403306102.pdf` | Oper. Proc. | NIR safety (Doc 04 §9a.3): waveguide pressurization, ANSI limits |
+
+---
+
 *This cross-reference index is designed for AI retrieval. Query any topic above to find its authoritative sources across legacy documents, published papers, source code, and extracted engineering notes.*

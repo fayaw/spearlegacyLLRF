@@ -439,6 +439,39 @@ The direct loop operates entirely at **IQ baseband**:
 
 3. **Dynamic range management**: The baseband voltages must stay within the ±1V multiplier range. Exceeding this range causes polarity inversion → positive feedback → catastrophic instability.
 
+### 3.2a Direct Loop Sub-Functions (from PS-340-330-52-R0)
+
+The Direct Loop contains three configurable sub-functions accessible from the EPICS Feedback panel:
+
+1. **INTEGRAL COMPENSATION**: Smooths out ripple caused by the klystron high voltage power supply. Provides steady-state error elimination.
+
+2. **LEAD COMPENSATION**: Increases the bandwidth and gain of the direct loop. Provides additional phase margin at the gain crossover frequency.
+
+3. **FREQUENCY OFFSET TRACKING**: Compensates for the phase shift caused by detuning of the cavities during heavy beam loading. The cavity detuning introduces a frequency-dependent phase rotation that the feedback loop must accommodate. This sub-function is primarily used as a **diagnostic** for adjusting the waveguide network and should **not normally be activated** during routine operation.
+
+The MATLAB routine **"ConfDirect"** sets up the Direct Loop for proper loop phase, loop gain, and gain tracking. The closed-loop response can be measured in-situ using the built-in network analyzer via **"MeasDirCls"** — this measurement does **not** cause loss of stored beam.
+
+> **Source**: `legacy-pdf-transcriptions/design-specifications/PS-340-330-52_LLRF_Feedback_Loop_Description.md`
+
+### 3.2b Alternate Operating Modes (Direct Loop OFF)
+
+When the Direct Loop is OFF (station in ON_CW without beam, TUNE, or ON_FM mode), the loop hierarchy changes significantly:
+
+| Feature | Direct Loop ON | Direct Loop OFF |
+|---------|:-:|:-:|
+| Cavity impedance control | Direct + Comb + Woofer | None |
+| Gap voltage regulation | DAC Loop → DAC reference | HVPS Loop → HVPS voltage |
+| Drive power regulation | HVPS Loop → klystron voltage | DAC Loop → DAC level |
+| Typical beam current | > 0 mA (stored beam) | 0 mA (no beam) |
+| Comb Loop | Active | Inactive |
+| Gap FF | Active | Inactive |
+
+**HVPS Loop (Direct Loop OFF)**: Keeps the measured gap voltage equal to the requested "Station Gap Voltage" by adjusting the klystron high voltage — this is the reverse of its behavior when the Direct Loop is ON.
+
+**DAC Loop (Direct Loop OFF)**: Keeps the drive power at the requested level by adjusting the DAC in the Gap Voltage FF module — again, the reverse of its normal role.
+
+> **Source**: `legacy-pdf-transcriptions/design-specifications/PS-340-330-52_LLRF_Feedback_Loop_Description.md`, Section 4
+
 ### 3.3 Gain Tracking (Klystron Saturation Compensation)
 
 As klystron cathode voltage changes, its gain varies by up to 7 dB. The baseband modulator gain must be decreased proportionally:
@@ -750,6 +783,37 @@ and resync the LFB if it's set
 **Cross-ref PDF**: `ps3403305900.pdf` (7 pages) — RF Station Turn-On Procedure (PS-340-330-59-R0). ⚠️ Note: This document is a station turn-on procedure (including EPICS panel screenshots), not a GVF module spec. GVF design details come from `feedbackLoopDescriptionps3403305200.pdf` (pp. 6-7) and Corredoura SLAC-PUB-8498.
 
 ---
+
+## 10a. Optimized Station Phasing Routine
+
+A MATLAB optimization routine (**"Phase Stns"** button on EPICS Feedback panel) sets the correct phase for each station for maximum voltage gain. Key parameters:
+
+| Parameter | Value |
+|-----------|-------|
+| Minimum beam current required | **100 mA** |
+| Phase step size | **1/2 degree maximum** per iteration |
+| Number of iterations | **10** |
+| HER reference station | **8-3** (alternate: 12-3 if 8-3 is off) |
+| LER reference station | **4-4** |
+
+The routine equalizes the power contribution of each operational station in a ring by changing the station phase. One station per ring is designated as the fixed-phase reference. If optimum phasing is not achieved in one pass, the routine can be repeated.
+
+> **Note**: This routine is **PEP-II multi-station specific** — it is not applicable to the SPEAR3 single-station configuration.
+> **Source**: `legacy-pdf-transcriptions/design-specifications/PS-340-330-52_LLRF_Feedback_Loop_Description.md`, "Optimized Station Phasing Routine"
+
+## 10b. Cavity Processing Procedure Parameters
+
+From PS-340-330-59 (Turn-On Procedure), the cavity processing limits are:
+
+| Parameter | HER FM | HER CW | LER FM | LER CW |
+|-----------|--------|--------|--------|--------|
+| Max Cavity Vacuum | 1×10⁻⁸ Torr | 1×10⁻⁸ Torr | 1×10⁻⁸ Torr | 1×10⁻⁸ Torr |
+| Max Cavity Gap Voltage | 800 kV | 750 kV | 900 kV | 850 kV |
+| Max Klystron Fwd Power | 540 kW | 450 kW | 330 kW | 290 kW |
+
+Processing sequence: ON_FM at 1000 Hz first, then ON_CW with HVPS in PROC mode (auto voltage stepping).
+
+> **Source**: `legacy-pdf-transcriptions/operational-procedures/PS-340-330-59_RF_Station_Turn_On_Procedure.md`
 
 ## 11. Loop Stability Analysis
 

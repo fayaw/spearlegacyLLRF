@@ -835,3 +835,121 @@ See `Designs/0_PHYSICAL_DESIGN_REPORT.md`, Section 12 for the complete signal pa
 *See also: `03_LEGACY_PDF_CATALOG.md` for complete PDF inventory.*
 *See also: `04_LITERATURE_SYNTHESIS.md` for published paper analysis.*
 *See also: `Designs/0_PHYSICAL_DESIGN_REPORT.md` for complete upgrade system design.*
+
+---
+
+## 12. Signal Level Budget (from BD-340-330-01 Transcription)
+
+The following signal level budget is reconstructed from the LER LLRF Configuration block diagram (BD-340-330-01-R0, Corredoura 1/28/98):
+
+| Point in Chain | Signal Level | Notes |
+|----------------|-------------|-------|
+| 476 MHz SMA input | — | Reference frequency input |
+| Amplifier Stage 1 output | +16 dBm | Pre-driver |
+| Amplifier Stage 2 output | +30 dBm | 120 W max solid-state drive amplifier |
+| Klystron output | 1.2 MW max | High-power RF |
+| Cavity probe max | 30 dBm max | Per cavity |
+| I/Q Detector input (cavity) | −10 dBm | After coupling/attenuation |
+| I/Q Detector input (reference) | −6 dBm | Reference channel |
+| Baseband loop signals | ±2V max | I and Q baseband |
+| DAC output (baseband) | ±2V | To I/Q Modulator |
+
+**VXI RF Module Internal Architecture**:
+- **Baseband Network Analyzer**: 5 channels × 512K RAM (cav I, cav Q, sig I, sig Q, PAD), F_sample = **10 MHz**, excitation via x DAC
+- **Comb Filter**: 2 modules (separate I and Q paths), each containing: I/Q modulator (sys I/Q error, ±2V reference), 1-turn delays, delay equalizers, I/Q modulator (comb adj)
+- **Ripple Loop DSP**: AT&T **DSP1610** processor with serial link + parallel bus
+- **Gap Feedforward**: VXI module with **lowpass filter** on output, I/Q modulator → gap module
+
+> **Source**: `legacy-pdf-transcriptions/block-diagrams/BD-340-330-01_PEP-II_Low_Level_RF_Configuration.md`
+
+## 13. PLC-5 Control System Configuration (from BD-340-330-00 Transcription)
+
+The Allen Bradley PLC-5 provides the primary station control and interlock processing. Configuration from the LER RF Station block diagram (BD-340-330-00-R0):
+
+### 13.1 PLC-5 I/O Capacity
+
+| I/O Type | Channels | Notes |
+|----------|----------|-------|
+| Digital Output | 64 | Station control commands |
+| Digital Input | 64 | Interlock status inputs |
+| Thermocouple Input | 112 | Separate crate (dedicated thermocouple processor) |
+| Analog Input | 32 | Voltage/current/power monitoring |
+
+### 13.2 DH-485 Network Peripherals
+
+The PLC communicates with the following peripherals via Allen Bradley DH-485 network:
+
+| Peripheral | Parameters Monitored |
+|------------|---------------------|
+| Focus Supply #1 | Voltage, current |
+| Focus Supply #2 | Voltage, current |
+| Filament Supply | On/current limit, on/full current, voltage monitor, current monitor |
+| Tuner Motor Power Supply | Shared supply for all cavity tuners |
+
+### 13.3 PLC-to-HVPS Interface
+
+| Signal Direction | Signal |
+|-----------------|--------|
+| PLC → HVPS | HVPS on/off request, HVPS reset, open/close contactor |
+| HVPS → PLC | HVPS ready signal, contactor status, HVPS on/off status |
+
+### 13.4 PLC-to-RF Interface
+
+| Signal Direction | Signal |
+|-----------------|--------|
+| PLC → VXI | Fiber optic links, LED signals (fiber receiver) |
+| VXI → PLC | Via Allen Bradley VME scanner, DCM module, Remote I/O link |
+
+### 13.5 Interlock Inputs (from BD-340-330-00)
+
+| Interlock | Type | Response |
+|-----------|------|----------|
+| Primary air source | Pressure | Station trip |
+| Secondary air source | Pressure | Station trip |
+| Input water temperature | Temperature | To interlocks |
+| Water delta temperature | ΔT via pressure gauge | To interlocks |
+| Magnet over-temperature | Temperature | To interlocks |
+| High pump pressure | Local panel high-P sensor | To interlocks |
+| Air/waveguide pressure | Pressure controller | Station trip |
+| Beam abort | Signal | To analog monitor |
+| Magnet current | Current | To analog monitor |
+
+### 13.6 HVPS Safety Interfaces (from BD-340-330-00)
+
+| Interface | Type | Connection |
+|-----------|------|------------|
+| PPS (Personnel Protection System) | Status signal | PPS → HVPS |
+| Beam abort | Crowbar protection | Beam abort → HVPS crowbar |
+| Emergency off | Hardwired +24V | E-stop → HVPS |
+| Trigger control | Fiber optic | PLC → HVPS firing circuits |
+
+> **Source**: `legacy-pdf-transcriptions/block-diagrams/BD-340-330-00_PEP-II_LER_RF_Station_Block_Diagram.md`
+
+## 14. EPICS Control Panel Reference (from PS-340-330-59 Transcription)
+
+The legacy PEP-II LLRF system uses four primary EPICS operator panels, reconstructed from the Turn-On Procedure (PS-340-330-59-R0, pages 3–6):
+
+### 14.1 KLYSTRON Panel (Fig. 1)
+
+Monitors: filament voltage/current, filament time left (30 min warmup), solenoid current, body current, beam voltage/current, circulator load temperature, arc detector status, per-cavity forward/reflected power, gap voltage, and vacuum.
+
+### 14.2 RF STATION Panel (Fig. 2)
+
+Primary operator interface with station mode controls:
+- **ON_CW**: Normal beam operation (auto loop engagement: Ripple→Direct→Comb)
+- **ON_FM**: Pulsed mode at 1000 Hz for cavity processing
+- **OFF**: RF off, fires beam abort, tuners left in position
+- **PARK**: Detunes cavities **+340 kHz** from resonance
+- **OFF-LINE**: Station locked out, only essential interlocks active
+- **TUNE**: Cavity tuning procedures
+- Auto Reset Tries: up to **25 resets** for automatic recovery
+
+### 14.3 HVPS Panel (Fig. 3)
+
+HVPS voltage/current/power readback, efficiency display, voltage regulation mode (OFF/PROC/ON), contactor control. Manual reset interlocks: crowbar, transformer overtemp, waveguide pressure, beam abort.
+
+### 14.4 FEEDBACK Panel (Fig. 4)
+
+All loop status indicators and controls. MATLAB configuration buttons: ConfDirect, Config Comb, Tune Cavs, ConfWoofer, MeasDirCls, Make Equal, Make Poly, Phase Stns.
+
+> **Source**: `legacy-pdf-transcriptions/operational-procedures/PS-340-330-59_RF_Station_Turn_On_Procedure.md`

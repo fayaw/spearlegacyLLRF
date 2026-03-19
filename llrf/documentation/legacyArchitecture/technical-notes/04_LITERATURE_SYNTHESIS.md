@@ -262,6 +262,103 @@ From `fiberOpticCableSignalControlRev3.docx`, the HVPS protection design philoso
 
 ---
 
+## 9a. Quantitative Operational Data from Legacy Procedures (Transcription Cross-Reference)
+
+The following quantitative data is extracted from the newly available legacy PDF transcriptions (v2, 450 DPI OCR). These values represent the actual PEP-II operational parameters and calibration constants.
+
+### 9a.1 Cavity Low Power Calibration Constants (PS-340-330-53)
+
+| Parameter | Value | Notes |
+|-----------|-------|-------|
+| Nominal probe coupling | **99.6 dB** | Modified by per-cavity low-power test data |
+| Sampling loop power formula | Ps/Pinc = −51.8 dB + 10·log(Q₀/30000) + 10·log[4β/(1+β)²] + 0.6 dB | At 150 kW wall dissipation |
+| Example (Q₀=34000, β=4.0) | Ps/Pinc = **−52.6 dB** | |
+| Tightening compensation | **−0.5 dB** | Added before loop tightening |
+| Acceptable variation | **±0.3 dB** | After tightening |
+| Temperature correction | **−7.95 kHz/°C** | Correction to 35°C reference |
+| Vacuum correction | **+124 kHz** | Correction for vacuum vs N₂ atmosphere |
+| Target resonant frequency | **476,000 + 100 kHz** at 35°C & vacuum | |
+| Fixed tuner sensitivity | **30 kHz/mm** | ±2/−3 mm nominal range |
+| Movable tuner nominal position | **8 mm insertion** | Operating set point |
+| Teststand calibration | **−51.2 dB** | Gives 1.14 W at probe for 150 kW at Q₀=30000 |
+
+> **Source**: `legacy-pdf-transcriptions/operational-procedures/PS-340-330-53_RF_Cavity_Low_Power_Calibration.md`
+
+### 9a.2 Signal Path Calibration Data (PS-340-330-56)
+
+Nominal coupling and loss values for all RF signal paths at 476 MHz:
+
+| Signal Path | Coupling (dB) | Cable Loss (dB) | IQ Conversion Loss (dB) |
+|-------------|:---:|:---:|:---:|
+| Cavity probe | 99.6 | 1.0 | 13.15 |
+| Cavity forward coupler | 60.0 | 1.0 | 13.15 |
+| Cavity reflected coupler | 60.0 | 1.0 | 13.15 |
+| Klystron forward coupler | 30.0 | 1.0 | 13.15 |
+| Klystron reflected coupler | 60.0 | 1.0 | 13.15 |
+| Circulator load forward | 60.0 | 4.0 | 13.15 |
+| Circulator load reflected | 60.0 | 4.0 | 13.15 |
+| Magic Tee load forward/reflected | 60.0 | 1.0–4.0 | 13.15 |
+| Klystron drive forward | 30.0 | 1.0 | 13.15 |
+
+**Measurement method**: HP 8648 signal generator with 10 dB matching attenuator → 0 dBm through Heliax cable → HP 435 power meter at far end.
+
+> **Source**: `legacy-pdf-transcriptions/operational-procedures/PS-340-330-56_RF_Station_Coupling_Cable_Calibration.md`
+
+### 9a.3 Safety and Radiation Limits (PS-340-330-54, PS-340-330-55, PS-340-330-57, PS-340-330-61)
+
+| Parameter | Limit | Standard/Reference |
+|-----------|-------|-------------------|
+| Non-ionizing RF radiation (at 100 kW) | **< 0.1 mW/cm²** | ANSI C95.1-1982 |
+| Non-ionizing RF radiation (at full 1.2 MW) | **< 1.5 mW/cm²** | ANSI C95.1-1982 (personnel hazard threshold) |
+| Ionizing radiation (klystron, at 30 cm) | **< 5 mR/hr** | SLAC standard |
+| Ionizing radiation (klystron, on contact) | **< 100 mR/hr** | Per PS-340-330-55-R3 |
+| Waveguide flange torque | **> 25 ft-lbs** (cert.), **30 ft-lbs** (NIR proc.) | On 6 random accessible bolts |
+| Waveguide pressurization | **0.25 psig** | Interlock threshold |
+| Annual re-certification | Required | After major repair or downtime |
+| Personnel requirement during certification | **RWT-I certified** | All personnel in klystron radiation area |
+
+> **Sources**: `legacy-pdf-transcriptions/operational-procedures/PS-340-330-54_RF_Station_Safety_Certification.md`, `PS-340-330-55_RF_Station_Safety_Survey.md`, `PS-340-330-57_RF_Station_Full_Power_Test.md`, `PS-340-330-61_RF_Non_Ionizing_Radiation_Safety.md`
+
+### 9a.4 Station Turn-On Parameters (PS-340-330-59)
+
+| Parameter | Value |
+|-----------|-------|
+| Filament warmup timer | **30 min** (interlocks can be cleared after timer expires) |
+| Park frequency offset | **+340 kHz** from resonance |
+| Auto reset tries (max) | **25 resets** |
+| Beam operation loop sequence | Ripple Loop → Direct Loop → Comb Loop (automatic) |
+| HVPS manual reset interlocks | Crowbar, transformer overtemp, waveguide pressure, beam abort |
+| Manual reset location | HVPS SMART TOUCH panel, rack 2 |
+
+> **Source**: `legacy-pdf-transcriptions/operational-procedures/PS-340-330-59_RF_Station_Turn_On_Procedure.md`
+
+### 9a.5 Cavity Phasing Parameters (PS-340-330-58, PS-340-330-60)
+
+| Parameter | Value |
+|-----------|-------|
+| PEP waveguide electrical spacing | **27.6 inches** (PEP standard) |
+| Bellow adjustment sensitivity | **0.085 inch/degree** |
+| Phase correction rule (positive ΔPhase) | Make bellow **shorter** |
+| Phase correction rule (negative ΔPhase) | Make bellow **longer** |
+| Load Angle Offset min beam current | Per "Min Beam Curr (mA)" panel setting |
+| Tuner position range | −30.000 to +20.000 mm |
+| Typical fixed tuner temperature | 36–38°C (operating) |
+| Typical movable tuner temperature | 33–39°C (operating) |
+
+> **Note**: Bellow #1 adjustment for cavity C also shifts cavity D — counter-adjustment of bellow #3 is required.
+
+> **Sources**: `legacy-pdf-transcriptions/operational-procedures/PS-340-330-58_RF_Station_Cavity_Phasing.md`, `PS-340-330-60_Bellow_Cavity_Phasing.md`
+
+### 9a.6 Full Power Test Configuration (PS-340-330-57)
+
+For full-power klystron testing: a **SHORT** circuit plate is installed between the circulator and first Magic-Tee. All 1.2 MW klystron power is reflected into the circulator load. This configuration produces **no RF power in cavities** and therefore **no ionizing radiation in the tunnel**. The test validates:
+- HVPS operation up to 1.2 MW
+- Klystron full-power performance
+- Circulator load thermal capacity
+- Waveguide integrity under full power
+
+> **Source**: `legacy-pdf-transcriptions/operational-procedures/PS-340-330-57_RF_Station_Full_Power_Test.md`
+
 ## 10. Published Literature Reference List
 
 ### 10.1 Primary PEP-II LLRF References

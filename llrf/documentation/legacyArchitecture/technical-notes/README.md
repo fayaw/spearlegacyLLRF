@@ -38,9 +38,10 @@ This directory contains a comprehensive technical documentation package reconstr
 
 ## Source Material
 
-### Legacy PDFs (15 files, image-based)
+### Legacy PDFs (15 files, image-based) — ✅ ALL TRANSCRIBED
 Located in: `llrf/documentation/legacyArchitecture/`
 Total: 75 pages, ~6.0 MB
+**Transcriptions**: `llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/` (14 markdown files, ~2,600 lines)
 
 ### Engineering Design Documents (12 docx + 2 xlsx)
 Located in: `llrf/documentation/`, `llrf/architecture/`, `hvps/architecture/designNotes/`
@@ -77,4 +78,8 @@ See `05_CROSS_REFERENCE_INDEX.md` §5.5 and `04_LITERATURE_SYNTHESIS.md` §10 fo
 
 ---
 
-*Generated: 2026-03-18 | Version 2.1*
+| 2.2 | 2026-03-19 | Transcription cross-reference: All 15 legacy PDFs now transcribed (in `legacy-pdf-transcriptions/`). +PEP-II nominal parameter table from PS-340-330-51 (shunt impedance, loaded Q, sync phase, detuning). +Station count disambiguation (5 nominal HER vs 7 max). +Equipment inventory and cooling system details. +Direct loop sub-functions (integral comp, lead comp, frequency offset tracking). +Alternate operating modes (Direct Loop OFF). +Optimized Station Phasing Routine parameters. +Cavity processing limits. +Signal level budget from BD-340-330-01. +PLC-5 I/O configuration (64 DI, 64 DO, 112 TC, 32 AI). +DH-485 peripheral details. +EPICS panel reference (4 panels). +Quantitative operational data from PS-53 through PS-61 (calibration constants, safety limits, turn-on parameters, phasing data). +Complete transcription cross-reference table in Doc 05. ~3,800+ lines total. |
+
+---
+
+*Generated: 2026-03-19 | Version 2.2*

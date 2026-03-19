@@ -38,8 +38,11 @@ This document provides a **comprehensive, AI-ingestible technical reference** fo
 
 The PEP-II B-Factory at SLAC was an asymmetric electron-positron collider operating from 1999 to 2008. Its RF system operated at **476 MHz** and was designed to handle extreme beam loading conditions:
 
-- **High Energy Ring (HER)**: 9 GeV, up to 1.8 A stored current, 7 RF stations (4 cavities each)
-- **Low Energy Ring (LER)**: 3.1 GeV, up to 3.0 A stored current, 3 RF stations (2 cavities each)
+- **High Energy Ring (HER)**: 9 GeV, up to 1.8 A stored current, 5 nominal RF stations (4 cavities each) — later expanded to 7 stations during high-luminosity upgrades
+- **Low Energy Ring (LER)**: 3.1 GeV, up to 3.0 A stored current, 2 nominal RF stations (2 cavities each) — later expanded to 3 stations
+
+> **Clarification (cross-referenced with PS-340-330-51-R0)**: The original PEP-II RF system design (Schwarz, July 1999) specified **5 HER stations** (8HR1, 8HR3, 8HR5 in region 8/B685; 12HR1, 12HR3 in region 12/B725) and **2 LER stations** (4LR4, 4LR5 in region 4/B645, with a 3rd station 4LR3 partially installed). The higher counts (7 HER, 3 LER) reflect the final expanded operational configuration.
+> **Source**: `legacy-pdf-transcriptions/design-specifications/PS-340-330-51_RF_System_Description.md`
 
 The LLRF system was designed by **P. Corredoura, S. Allison, R. Sass, R. Tighe, and R. Claus** at SLAC (1996–1997) and evolved throughout PEP-II operation (1999–2008).
 
@@ -109,6 +112,67 @@ As of 2026, the SPEAR3 LLRF system is undergoing a comprehensive upgrade (docume
 | Klystron Type | | SLAC design | 476 MHz CW |
 | IF Frequency (LLRF) | f_IF | 4.9 MHz | 476 - 471.1 MHz LO |
 | LO Frequency | f_LO | 471.1 MHz | |
+
+### 1.4a PEP-II RF Cavity Nominal Parameter Table (Schwarz, 1998)
+
+The following parameters are from the original PEP-II design document PS-340-330-51-R0. These represent the **design operating point** and provide critical context for the SPEAR3 adaptation.
+
+| Parameter | Symbol | Unit | HER | LER |
+|-----------|--------|------|-----|-----|
+| Frequency | f₀ | MHz | 476 | 476 |
+| RF Voltage / Ring | V | MV | 14.00 | 3.40 |
+| Number of Cavities | n | — | 20 | 4 |
+| Cavities / Klystron | m | — | 4 | 2 |
+| Shunt Impedance (accel. notation) | Rₐ | MΩ | 7.5 | 7.5 |
+| Gap Voltage / Cavity | V_c | kV | 700.0 | 850.0 |
+| Cavity Wall Power | P_c | kW | 65.7 | 96.8 |
+| Beam Power / Cavity | P_b | kW | 186.3 | 408.3 |
+| Total Power / Cavity | P_totc | kW | 252.0 | 505.2 |
+| Forward Power / Cavity | P_fwd | kW | 252.0 | 519.7 |
+| Loaded Q | Q_L | — | 6,780 | 6,780 |
+| Optimum Coupling Factor (β=1+P_b/P_c) | β | — | 3.84 | 5.22 |
+| Synchronous Phase Angle | φ | degrees | 75.0 | 76.10 |
+| Detuning Angle | ψ | degrees | −66.0 | −74.52 |
+| Change in Resonant Frequency | Δf | kHz | −78.9 | −126.7 |
+| Generator Power / Cavity | P_g | kW | 252.0 | 519.7 |
+| Klystron Power | P_kly | kW | 1,049 | 1,082 |
+| Synchrotron Frequency | f_s | kHz | 6.10 | 3.67 |
+
+> **Source**: `legacy-pdf-transcriptions/design-specifications/PS-340-330-51_RF_System_Description.md` — transcribed from Schwarz parameter table dated 5/20/98.
+
+### 1.4b PEP-II RF Station Physical Infrastructure
+
+From PS-340-330-51, each PEP-II RF station includes:
+
+**Equipment Inventory per Station**:
+| Equipment | HER | LER | Location |
+|-----------|-----|-----|----------|
+| 1.2 MW Klystron | 1 | 1 | Surface building |
+| HVPS (2 MW, 90 kV, 23 A) | 1 | 1 | Exterior pad |
+| Circulator + Load | 1 | 1 | Surface building |
+| Magic-Tee splitters | 3 | 1 | Surface building |
+| 1.2 MW Waveguide Loads | 3 | 1 | Surface building |
+| Single-cell 476 MHz Cavities | 4 | 2 | Tunnel |
+| HOM Loads per cavity | 3 | 3 | Tunnel |
+| Movable Tuner per cavity | 1 | 1 | Tunnel |
+| Ceramic Window per cavity | 1 | 1 | Tunnel |
+| 400 l/s VACION Pump per cavity | 1 | 1 | Tunnel |
+| Equipment Racks | 6 | 6 | Surface building |
+| LLRF Blue Rack (air-conditioned) | 1 | 1 | Surface building |
+| Allen Bradley PLC-5 Control | 1 | 1 | In equipment racks |
+| EPICS Workstation | 1 | 1 | Surface building |
+| Grounding Switch (aluminum tank) | 1 | 1 | Adjacent to racks |
+
+**Cooling Systems** (3 circuits per region):
+| System | Medium | Temperature | Serves |
+|--------|--------|-------------|--------|
+| LCW Loop 1 | Low-Conductivity Water | 35°C (regulated) | Klystron |
+| LCW Loop 2 | Low-Conductivity Water | 35°C (regulated) | Cavities (tunnel) |
+| HCW Loop | High-Conductivity Water | Unregulated | Waveguide loads |
+
+**Master Oscillator**: Located in the PEP control room in region 8, connected to the Main Drive Line of the LINAC in sector 30 and to other PEP region RF stations via phase-stabilized RF distribution lines.
+
+> **Source**: `legacy-pdf-transcriptions/design-specifications/PS-340-330-51_RF_System_Description.md`; `legacy-pdf-transcriptions/block-diagrams/BD-340-330-00_PEP-II_LER_RF_Station_Block_Diagram.md`
 
 ### 1.5 LLRF9/476 Key Specifications (Upgrade System)
 

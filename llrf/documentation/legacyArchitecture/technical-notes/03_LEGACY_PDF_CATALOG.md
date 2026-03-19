@@ -51,6 +51,26 @@ The group `3403` corresponds to the PEP-II RF/LLRF system documentation.
 | 14 | `ps3403306001.pdf` | Oper. Procedure | 5 | 301 KB | **Bellow Cavity Phasing Procedure (PS-340-330-60-R1)** — Rev 1 procedure for fine-tuning cavity phase after initial installation, adjusts for gap voltage balance changes | ★★☆ |
 | 15 | `ps3403306102.pdf` | Oper. Procedure | 13 | 947 KB | **RF Non-Ionizing Radiation Safety Procedure (PS-340-330-61-R2)** — Rev 2 comprehensive NIR safety: waveguide network pressurization (0.25 psig), flange torque (30 ft-lbs), RF survey at 100 kW (<0.1 mW/cm²), klystron removal lockout, annual re-certification, Waveguide Safety Work Control Form | ★★☆ |
 
+### 2.1a Transcription Status (v2.2 Update)
+
+**All 15 legacy PDFs have been transcribed to searchable markdown** and are available in `legacy-pdf-transcriptions/`. Transcriptions include:
+
+| Category | Count | Transcription Directory |
+|----------|-------|------------------------|
+| Design Specifications | 2 | `legacy-pdf-transcriptions/design-specifications/` |
+| Operational Procedures | 9 | `legacy-pdf-transcriptions/operational-procedures/` |
+| Block Diagrams | 3 | `legacy-pdf-transcriptions/block-diagrams/` |
+| Duplicate (not transcribed) | 1 | `ps3403305200.pdf` = identical to `feedbackLoopDescriptionps3403305200.pdf` |
+
+**Key transcription files for cross-referencing**:
+- `PS-340-330-51_RF_System_Description.md` — Complete parameter tables, station layouts, cooling systems
+- `PS-340-330-52_LLRF_Feedback_Loop_Description.md` — All feedback loop descriptions with block diagrams
+- `BD-340-330-00_PEP-II_LER_RF_Station_Block_Diagram.md` — Complete station block diagram with PLC I/O counts
+- `BD-340-330-01_PEP-II_Low_Level_RF_Configuration.md` — LLRF signal processing chain with signal levels
+- `PS-340-330-59_RF_Station_Turn_On_Procedure.md` — EPICS panel reconstructions, startup sequence, processing limits
+
+OCR quality: v2 extraction at 450 DPI with multi-pass strategy. See `legacy-pdf-transcriptions/README.md` for detailed quality assessment per content type.
+
 ### 2.2 Document Characteristics
 
 - **All PDFs are image-based** (scanned engineering drawings/typewritten documents)
@@ -60,6 +80,8 @@ The group `3403` corresponds to the PEP-II RF/LLRF system documentation.
 - **Drawing date**: Estimated 1996-2005 based on source code dates and PEP-II timeline
 
 ### 2.3 Digitization Priority
+
+> **✅ Digitization complete**: All 15 PDFs have been OCR-transcribed (v2, 450 DPI). The priority ranking below is retained for historical reference but all documents are now searchable in markdown format.
 
 **Tier 1 (Critical — design specifications and core reference)**:
 1. `feedbackLoopDescriptionps3403305200.pdf` — Core control theory, all loops described (8 pp)
