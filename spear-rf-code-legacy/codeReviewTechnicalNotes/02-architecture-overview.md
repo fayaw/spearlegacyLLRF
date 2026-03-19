@@ -1,7 +1,7 @@
 # Architecture Overview — PV Naming, Boot Sequence, Cross-Cutting Concerns
 
 **Document**: 02 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**(Rev 2 — corrected with upgrade context and PV namespace mapping)**
+**(Rev 3 — corrected HVPS PV naming error: VOLTS→VOLT)**
 
 ---
 
@@ -63,13 +63,17 @@ All PV names use EPICS macro substitution with the following variables:
 {STN}:STN:RESET               — Station reset command
 ```
 
-**HVPS Control** (from rf_hvps_loop_pvs.h):
+**HVPS Control** (from rf_hvps_loop_pvs.h and rf_hvps.db):
 ```
-{STN}:HVPS:VOLTS:RBCK         — HVPS voltage readback
-{STN}:HVPS:VOLTS:CTRL         — HVPS voltage setpoint
+{STN}:HVPS:VOLT               — HVPS monitored voltage (actual measurement from hardware)
+{STN}:HVPS:VOLT:RBCK          — HVPS desired voltage readback (echoes setpoint via hardware)
+{STN}:HVPS:VOLT:CTRL          — HVPS desired voltage setpoint (operator command)
+{STN}:HVPS:VOLT:LOOP          — HVPS loop last-commanded voltage
+{STN}:HVPS:VOLT:MIN           — HVPS minimum allowed voltage
 {STN}:CONT:CLOSE              — Contactor close command
 {STN}:CONT:OPEN               — Contactor open command
 ```
+> **Rev 3 correction**: Rev 2 listed these PVs as `{STN}:HVPS:VOLTS:*` (with S). The actual PV namespace uses `{STN}:HVPS:VOLT:*` (no S), verified against `rf_hvps_loop_pvs.h,v` and `rf_hvps.db,v`. See [09-cross-reference-errata.md](09-cross-reference-errata.md) Item 2.
 
 **Tuner Loop** (from rf_tuner_loop_pvs.h):
 ```
