@@ -1,9 +1,15 @@
 # SPEAR3 Legacy LLRF Codebase — Executive Summary & Upgrade Decision Matrix
 
-**Document**: 00 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**Date**: March 2026 (Rev 2 — corrected with upgrade system context from PDR)
+**Document**: 00 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**Date**: March 2026 (Rev 3 — corrected legacy state machine names; added missing document references)
 
 ---
+
+## CORRECTION NOTICE (Rev 3)
+
+Rev 2 contained the following error that has been corrected in Rev 3:
+
+4. **Legacy state machine names were incorrect.** Rev 2 described the legacy `rf_states.st` state sequence as "OFF→INITIALIZE→STANDBY→ON_CW→FAULT→FAULT_CLEAR". These are the **proposed upgrade states** from PDR Section 2.2, NOT the legacy states. The actual legacy states (from `rf_station_state.h` and `rf_states.st,v`) are: **OFF→PARK→TUNE→ON_FM→ON_CW** with 17 transition states. See [09-cross-reference-errata.md](09-cross-reference-errata.md) Item 1 for details.
 
 ## CORRECTION NOTICE (Rev 2)
 
@@ -167,6 +173,8 @@ From PDR Section 17:
 
 ## 7. Companion Documents
 
+### Code Review Technical Notes
+
 | Document | Content |
 |----------|---------|
 | [01-file-inventory.md](01-file-inventory.md) | Complete 253-file catalog with revised verdicts |
@@ -177,4 +185,12 @@ From PDR Section 17:
 | [06-plc-stepper-motors.md](06-plc-stepper-motors.md) | AB drivers (ELIMINATED) + stepper (ALREADY DONE) |
 | [07-epics-databases.md](07-epics-databases.md) | PV structure — critical for PV migration mapping |
 | [08-signal-processing.md](08-signal-processing.md) | subIQ.c + subSys.c — evaluate for coordinator reuse |
+| [09-cross-reference-errata.md](09-cross-reference-errata.md) | Cross-reference errata & PDR inconsistency register |
 
+### Authoritative Design References (not part of code review series but essential context)
+
+| Document | Content |
+|----------|---------|
+| [Designs/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md](../../Designs/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md) | **Authoritative legacy system reference** — correct state names, complete PV architecture, control loop analysis, state transition tables |
+| [Designs/10_SOFTWARE_DESIGN_DOCUMENT.md](../../Designs/10_SOFTWARE_DESIGN_DOCUMENT.md) | **Upgrade software architecture** — Python/PyEPICS/MATLAB coordinator design, legacy→upgrade code mapping (Section 22), PV contract reference |
+| [Designs/0_PHYSICAL_DESIGN_REPORT.md](../../Designs/0_PHYSICAL_DESIGN_REPORT.md) | **Master upgrade specification** — hardware architecture, signal list, channel allocation, protection chain |
