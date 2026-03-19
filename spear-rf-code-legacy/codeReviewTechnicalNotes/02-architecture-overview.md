@@ -1,6 +1,6 @@
 # Architecture Overview — PV Naming, Boot Sequence, Cross-Cutting Concerns
 
-**Document**: 02 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**Document**: 02 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
 **(Rev 4 — added CLKMACROS boot sequence clarification; see §2.1.1)**
 (Rev 3 — corrected HVPS PV naming error: VOLTS→VOLT)
 

@@ -1,6 +1,6 @@
 # VXI Driver & Device Support — Deep Dive
 
-**Document**: 03 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**Document**: 03 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
 **(Rev 3 — corrected LLRF9 signal mapping table §9.1 against PDR Section 4.4; previous mapping had wrong signal numbers, units, and board assignments)**
 **(Rev 2 — corrected for PEP-II modules and upgrade context)**
 

@@ -1,10 +1,29 @@
 # SPEAR3 Legacy LLRF Codebase — Executive Summary & Upgrade Decision Matrix
 
-**Document**: 00 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**Date**: March 2026 (Rev 6 — corrected rf_states.st state count, replaced fabricated calibration macro, clarified tuner loop state diagram)
+**Document**: 00 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**Date**: March 2026 (Rev 7 — PDR R1 cross-reference audit: added arc sensor count discrepancy, gap voltage arithmetic error, Interface Chassis response time reconciliation, PDR coverage gap analysis; see Rev 7 correction notice)
+(Rev 6 — corrected rf_states.st state count, replaced fabricated calibration macro, clarified tuner loop state diagram)
 (Rev 5 — extended TAXI terminology correction to SDD; added GVF software dependency cross-reference; added document hierarchy section)
 (Rev 4 — corrected cross-note consistency issues found during deep audit; see Rev 4 correction notice)
 (Rev 3 — corrected legacy state machine names; added missing document references; added open discrepancies)
+
+---
+
+## CORRECTION NOTICE (Rev 7)
+
+Rev 7 addresses findings from a comprehensive cross-reference audit of the Physical Design Report R1 against the legacy source code and existing technical notes 00–08. A dedicated audit document has been created as [09-pdr-cross-reference-audit.md](09-pdr-cross-reference-audit.md).
+
+19. **PDR §2.3 and §12.3 contain conflicting arc detection sensor counts (SAFETY-CRITICAL).** PDR §2.3 (line 201) states "total 12 Microstep-MIS optical sensors" and the architecture diagram (line 126) labels the arc detection block as "12sensor". However, PDR §12.3 (line 965) explicitly states "There are **6 sensors** total (updated from original design)". PDR §19.2 (line 1327) adds further ambiguity with "10 sensors and 5 process + 1 sensor & 1 process for spare". Legacy code evidence: `p2RfAimDef.h` defines `AIM_VERSION_12CH` and `AIM_K_CHANCNT = (AIM_IS7CH ? 7 : 12)` — the "12" number comes from the legacy AIM hardware which is being **replaced** by the Microstep-MIS system. Section 12.3 is authoritative ("6 sensors total, updated from original design"). §2.3 and the architecture diagram retain a stale legacy count. Added as §7.3 in the Open Discrepancies section.
+
+20. **PDR §4.3 contains a gap voltage arithmetic error.** Line 255 states "~712 kV for a total of ~2.5 MV" — but 712 kV × 4 cavities = 2,848 kV ≈ **2.85 MV**, not 2.5 MV. PDR §1 (lines 46, 55) correctly states ~2.85 MV. This is a typographical error in §4.3. Added as §7.4 in the Open Discrepancies section.
+
+21. **Interface Chassis response time: µs vs ms inconsistency (internal to Note 00 and PDR).** Note 00 §2 (line 142) described the Interface Chassis as "<1 µs hardware AND-gate" while the §5 protection chain table (line 209) listed "<1 ms". The PDR similarly mixes "microsecond scale" (§7.1, line 624) with "<1 ms" (§7.6 table, line 674; §14.4, line 1194). Reconciliation: the Interface Chassis AND-gate propagation delay is **µs-scale** (pure hardware logic); the "<1 ms" figure represents an upper bound including optocoupler and fiber-optic transceiver latency. The §5 table has been updated with a clarifying footnote.
+
+22. **GVF/TAXI dependency is not addressed in PDR upgrade design.** Note 07 correctly documents that GVF database records are loaded and actively used by the `rf_msgsTAXI` state set for LFB resync fault recovery. However, PDR §10 (Tuner Control System) makes no mention of GVF/TAXI dependency, failure modes if the GVF module is absent, or how LFB resync is handled in the upgrade. This is a design documentation gap — flagged as §7.5 in the Open Discrepancies section.
+
+23. **Note 08 §2.3: subIQamplCplg visibility anomaly.** `subIQamplCplg()` (line 218 of `subIQ.c`) is the only function in the file declared without the `static` keyword, making it externally visible. All other 22 functions use `static long`. Footnote added to Note 08 §2.1.
+
+24. **PDR coverage gap analysis added.** Seven PDR sections describing new or upgraded subsystems have no corresponding technical note coverage. A coverage map (§9) has been added to this document, and the complete audit is in [09-pdr-cross-reference-audit.md](09-pdr-cross-reference-audit.md).
 
 ---
 
@@ -206,9 +225,11 @@ From PDR Section 17:
 | Layer | Subsystem | Response | Legacy Equivalent |
 |-------|-----------|----------|-------------------|
 | 1 | LLRF9 FPGA | <1 µs | RFP analog feedback (no software equivalent) |
-| 2 | Interface Chassis | <1 ms | AIM fast interlock chain (devP2RfAim.c) |
+| 2 | Interface Chassis | µs-scale † | AIM fast interlock chain (devP2RfAim.c) |
 | 3 | RF MPS PLC (ControlLogix) | ~ms | PLC-5 via AB scanner (drvAb.c) |
 | 4 | EPICS coordinator | ~1 Hz | SNL programs (rf_states.st, rf_hvps_loop.st) |
+
+> **† Response time clarification (Rev 7):** The Interface Chassis uses hardware AND-gate logic with optocoupler-isolated and fiber-optic I/O. The AND-gate propagation delay is **µs-scale** (pure combinational logic). The PDR reports "<1 ms" in its protection layer table (§7.6 line 674, §14.4 line 1194), which represents a conservative upper bound including optocoupler switching time and fiber-optic transceiver latency. The PDR narrative text (§7.1 line 624) correctly describes the response as "microsecond scale". Both characterizations are technically correct at different measurement points, but µs-scale is the more precise figure for the AND-gate itself.
 
 ## 6. "First 2 Weeks" Priority (Revised)
 
@@ -242,7 +263,71 @@ When discrepancies exist between sources, the following priority order applies:
 2. **Legacy Technical Design Report** (`Designs/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md`) — authoritative for legacy system behavior interpretation
 3. **Physical Design Report** (`Designs/0_PHYSICAL_DESIGN_REPORT.md`) — authoritative for upgrade system specification
 4. **Software Design Document** (`Designs/10_SOFTWARE_DESIGN_DOCUMENT.md`) — authoritative for upgrade software architecture
-5. **Technical Notes 00–08** — analysis documents derived from sources above; defer to primary sources when conflicts exist
+5. **Technical Notes 00–09** — analysis documents derived from sources above; defer to primary sources when conflicts exist
+
+### 7.3 Arc Detection Sensor Count — Three Conflicting PDR Specifications (Rev 7, SAFETY-CRITICAL)
+
+**Status: UNRESOLVED — requires PDR clarification before procurement**
+
+The PDR contains three mutually inconsistent specifications for the arc detection sensor count:
+
+| PDR Section | Line | Claim | Context |
+|-------------|------|-------|---------|
+| §2.3 (Architecture narrative) | 201 | "total 12 Microstep-MIS optical sensors" | System description |
+| Architecture diagram | 126 | "12sensor" label on arc detection block | ASCII system diagram |
+| §12.3 (Arc Detection Installation) | 965 | "**6 sensors** total (updated from original design)" | Installation specification |
+| §19.2 (Procurement) | 1327 | "10 sensors and 5 process + 1 sensor & 1 process for spare" | Bill of materials |
+
+**Legacy code evidence resolving the "12" origin:**
+
+`spear-rf-code-legacy/rfApp/src/db/p2RfAimDef.h` defines:
+```c
+#define AIM_VERSION_7CH  0x1
+#define AIM_VERSION_12CH 0x2
+#define AIM_K_CHANCNT    (AIM_IS7CH ? 7 : 12)  /* total # of channels */
+```
+
+The legacy AIM (Arc Interlock Module) supported 7 or 12 hardware channels. The "12" in PDR §2.3 and the architecture diagram is a **stale reference to the legacy AIM channel count**, not the Microstep-MIS sensor specification. The AIM is being **completely replaced** by the new Microstep-MIS system (PDR §12.1).
+
+**Authoritative specification:** PDR §12.3 (line 965) — "6 sensors total (updated from original design)": 4 cavity windows + 1 klystron window + 1 circulator.
+
+**Interpretation of §19.2:** "10 sensors and 5 process" likely means: 6 active sensors + 4 spares = 10; 5 Microstep-MIS controller/process units + 1 spare = 6. This is consistent with 6 active sensors if the procurement includes spares.
+
+**Recommendation:** Update PDR §2.3 (line 201) from "12" to "6" and update the architecture diagram label from "12sensor" to "6sensor". Add a note that the legacy AIM used 12 channels.
+
+### 7.4 Gap Voltage Arithmetic Error in PDR §4.3 (Rev 7)
+
+**Status: UNRESOLVED — typographical error requiring PDR correction**
+
+| PDR Section | Line | Per-Cavity V_gap | Total (4 cavities) | Correct? |
+|-------------|------|-----------------|---------------------|----------|
+| §1 (Executive Summary) | 46, 55 | ~712 kV | ~2.85 MV | ✓ (712 × 4 = 2,848 ≈ 2.85 MV) |
+| §4.3 (RF Cavities) | 255 | ~712 kV | ~2.5 MV | ✗ (712 × 4 = 2,848 ≠ 2,500) |
+
+The per-cavity voltage (712 kV) is consistent across both sections. The error is in the total: §4.3 says "~2.5 MV" where it should say "~2.85 MV". This is a ~350 kV discrepancy (12%). Note 00 §7.1 already documents the distinction between the design target (~800 kV/cavity → ~3.2 MV) and the measured operating value (~712 kV/cavity → ~2.85 MV) — that clarification is correct and unchanged.
+
+**Recommendation:** Change §4.3 line 255 from "~2.5 MV" to "~2.85 MV".
+
+### 7.5 GVF/TAXI Dependency Gap in PDR §10 (Rev 7)
+
+**Status: UNRESOLVED — design documentation gap**
+
+The GVF module's hardware is not installed in SPEAR3 SRF1 (PDR §2.1: slot 3 is empty). However, Note 07 §1.1.1 (correction #11, Rev 5) confirms that GVF **database records ARE loaded** via `rf_vxi_modules_All.substitutions` and are actively used by the `rf_msgsTAXI` state set in `rf_msgs.st` (lines 196–352) for:
+
+- `{STN}:STN:GVF:MODU.GST1` — module status monitoring
+- `{STN}:STN:GVF:MODU.TMCK` — TAXI timing check
+- `{STN}:STN:GVF:STATE` — run state
+- `{STN}:STN:GVF:LFBLOOP` — LFB (Low Frequency feedback/woofer) loop status
+
+PDR §10 (Tuner Control System upgrade, ~120 lines) makes **zero mention** of:
+- GVF/TAXI dependency from the legacy code
+- Failure modes if GVF-dependent monitoring is absent in the upgrade
+- TAXI error handling strategy in the new system
+- LFB resync fault recovery implementation
+
+This matters because the commissioning team needs to know: "What happens to TAXI monitoring and LFB recovery if the GVF module is missing?" The legacy code gracefully handles this (error messages are logged but operation continues), but the upgrade design should explicitly document the strategy — either replicate the GVF monitoring through alternative PVs or explicitly document that this functionality is dropped.
+
+**Recommendation:** Add a subsection to PDR §10 addressing GVF/TAXI dependency handling in the upgrade design.
 
 ---
 
@@ -260,6 +345,7 @@ When discrepancies exist between sources, the following priority order applies:
 | [06-plc-stepper-motors.md](06-plc-stepper-motors.md) | AB drivers (ELIMINATED) + stepper (ALREADY DONE) |
 | [07-epics-databases.md](07-epics-databases.md) | PV structure — critical for PV migration mapping |
 | [08-signal-processing.md](08-signal-processing.md) | subIQ.c + subSys.c — evaluate for coordinator reuse |
+| [09-pdr-cross-reference-audit.md](09-pdr-cross-reference-audit.md) | PDR R1 cross-reference audit — errata, internal inconsistencies, coverage gaps |
 
 ### Authoritative Design References (not part of code review series but essential context)
 
@@ -283,3 +369,33 @@ The Software Design Document (SDD, Rev 1, March 18, 2026) postdates the technica
 | `rf_calib.st` | 3,345 | "2,800+" | ⚠️ Notes more precise (see correction #14) |
 
 This confirms the technical notes serve as the **primary authoritative technical reference** for legacy system source-level details. When discrepancies exist between documentation sources, apply the hierarchy defined in §7.2: **Source Code > Technical Notes > Design Documents**.
+
+---
+
+## 9. PDR Coverage Gap Analysis (Rev 7)
+
+The following table maps PDR R1 sections to technical note coverage. Sections marked "NONE" describe new or upgraded subsystems that have no corresponding legacy code analysis and no dedicated technical note. This serves as a roadmap for future documentation work.
+
+| PDR Section | Topic | Technical Note Coverage | Gap Status |
+|-------------|-------|------------------------|------------|
+| §1 | Executive Summary | Note 00 (cross-referenced) | ✓ Covered |
+| §2 | System Architecture | Note 00 §2, Note 02 | ✓ Covered (legacy mapping) |
+| §3 | VXI Legacy Description | Note 01, Note 03 | ✓ Covered |
+| §4 | RF Plant & Signal Allocation | Note 00 §3, Note 03 §9.1 | ✓ Covered (signal mapping) |
+| §5 | LLRF9 Controller | Note 00 §3, Note 04 (DSP comparison) | ✓ Partial — LLRF9 is vendor hardware, covered by reference |
+| §6 | HVPS System | Note 05 §5 (legacy HVPS loop) | ✓ Partial — legacy PLC code documented; CompactLogix upgrade not analyzed |
+| §6.3 | HVPS CompactLogix Upgrade | **NONE** | ⚠️ **GAP** — new PLC design, no legacy equivalent to analyze |
+| §7 | RF MPS PLC | Note 06 (legacy AB drivers) | ✓ Partial — legacy AB/PLC-5 interface documented |
+| §7.3 | RF MPS ControlLogix Upgrade | **NONE** | ⚠️ **GAP** — new ControlLogix design, informed by but distinct from legacy |
+| §8 | Interface Chassis | Note 00 §5 (protection chain) | ⚠️ **GAP** — entirely new hardware subsystem; only protection layer table exists |
+| §9 | PPS Interface | **NONE** | ⚠️ **GAP** — new personnel safety interface, no legacy equivalent |
+| §10 | Tuner Control System | Note 05 §4 (legacy tuner loop) | ✓ Partial — legacy SNL tuner documented; Galil upgrade referenced as "ALREADY DONE" |
+| §10.3 | Tuner Galil Upgrade | Note 06 §3 | ✓ Covered (commissioned August 2025) |
+| §11 | Waveform Buffer | **NONE** | ⚠️ **GAP** — entirely new monitoring system, no legacy equivalent |
+| §12 | Arc Detection | Note 01 (AIM file inventory), Note 03 §6 (devP2RfAim.c) | ✓ Partial — legacy AIM documented; Microstep-MIS upgrade specification in Note 09 |
+| §13 | Klystron Heater | **NONE** | ⚠️ **GAP** — programmable AC supply replaces motor-driven variac, no legacy code |
+| §14 | Software Architecture | Note 02 (legacy architecture), Note 05 (SNL programs) | ✓ Partial — legacy code documented; upgrade coordinator in SDD |
+| §15–18 | Schedule, Testing, Commissioning | N/A (project management) | N/A |
+| §19 | Procurement | Note 09 §2 (arc sensor cross-reference) | ✓ Partial |
+
+**Summary:** 7 PDR sections describing entirely new subsystems (Interface Chassis, Waveform Buffer, PPS Interface, HVPS CompactLogix, RF MPS ControlLogix, Klystron Heater, and detailed arc detection upgrade) have no legacy code equivalent and thus no dedicated technical note. These represent design documentation that should be reviewed and validated against vendor specifications and hardware design documents as they become available. See [09-pdr-cross-reference-audit.md](09-pdr-cross-reference-audit.md) for the complete PDR audit.

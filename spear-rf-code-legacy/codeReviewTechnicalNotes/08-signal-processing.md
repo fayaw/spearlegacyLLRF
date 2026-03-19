@@ -1,6 +1,7 @@
 # Signal Processing & Physics Algorithms
 
-**Document**: 08 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**Document**: 08 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 5 — added subIQamplCplg visibility anomaly note; updated document count to 09)**
 **(Rev 4 — corrected systematic +1 line number offset in all 11 subSys.c function references; lines now point to function signatures)**
 **(Rev 3 — formula-level audit: corrected 13 formula/description errors against source code)**
 
@@ -57,6 +58,8 @@ The signal processing layer consists of two C source files containing pure-math 
 | `subIQscaled` | 731 | A=raw_I(counts), B=raw_Q(counts), I=conv_loss_factor | scaled V | `J = A×IQ2VOLTS×I`, `K = B×IQ2VOLTS×I`. Returns ERROR if data not ready or overflowed. |
 | `subIQgetInit` | 769 | record fields | OK | One-time init for IQ data acquisition |
 | `subIQget` | 817 | record fields | OK | Read I/Q data from hardware |
+
+> **Visibility anomaly (Rev 5):** `subIQamplCplg` (line 218) is the **only function** in `subIQ.c` declared without the `static` keyword, making it externally visible to other compilation units. All other 22 functions use `static long`, restricting them to file scope. This is likely intentional — the coupling coefficient (VSWR) calculation may be called from external calibration or monitoring code — but it represents a deviation from the module's strict internal-linkage encapsulation pattern. Verified via `grep "^long \|^static long " subIQ.c,v`: 1 match for `long subIQamplCplg` vs 22 matches for `static long subIQ*`.
 
 ### 2.2 Key Physics Formulas
 

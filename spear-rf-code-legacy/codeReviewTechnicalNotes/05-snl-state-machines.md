@@ -1,6 +1,6 @@
 # SNL State Machine Programs — Control Logic Deep Dive
 
-**Document**: 05 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**Document**: 05 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
 **(Rev 6 — corrected rf_states.st state count from 22→23 (added missing s_init); replaced fabricated CALIB_MEAS macro code block with accurate utility macro description and 28-state enumeration; added tuner loop state diagram clarification distinguishing 5 SNL states from 3 algorithmic control modes)**
 **(Rev 5 — added rf_calib.st line count precision footnote; see §3 footnote ¹)**
 **(Rev 4 — corrected HVPS PV naming error VOLTS→VOLT; replaced fabricated HVPS status codes with the 16 actual codes from source; corrected proc state protection logic to reflect 3-condition check; corrected phantom PV references; added loop state/control mode enumerations)**

@@ -1,6 +1,6 @@
 # DSP Firmware Analysis — TMS320C16xx Assembly
 
-**Document**: 04 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**Document**: 04 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
 **(Rev 3 — corrected file/line counts against actual source; ALL DSP firmware ELIMINATED by LLRF9)**
 
 ---

@@ -1,6 +1,6 @@
 # Complete File Inventory — 253 Files with Upgrade Verdicts
 
-**Document**: 01 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**Document**: 01 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
 **(Rev 3 — corrected legacy state machine names in rf_states.st entry; added file count methodology)**
 
 **Verdict Key**: **ELIMINATED** = Replaced by LLRF9 or new hardware | **PEP-II ONLY** = Not used in SPEAR3 | **SPEC-EXTRACT** = Behavior spec for upgrade software | **REFERENCE** = Behavior spec for new code | **REUSE** = Directly reusable | **DONE** = Already replaced

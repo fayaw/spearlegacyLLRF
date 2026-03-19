@@ -1,6 +1,6 @@
 # EPICS Database & PV Architecture
 
-**Document**: 07 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**Document**: 07 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
 **(Rev 3 — corrected GVF software/hardware classification; added TAXI monitoring dependency)**
 
 ---

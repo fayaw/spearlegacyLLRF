@@ -1,6 +1,6 @@
 # PLC Integration & Stepper Motors
 
-**Document**: 06 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**Document**: 06 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
 **(Rev 2 — corrected with upgrade context)**
 
 ---
