@@ -16,7 +16,7 @@ This document provides a **comprehensive, AI-ingestible technical reference** fo
 
 1. **Legacy engineering drawings** — 15 image-based PDFs in `legacyArchitecture/` (cataloged and content-mapped herein)
 2. **Published technical literature** — SLAC technical reports and peer-reviewed papers (synthesized herein)
-3. **Legacy source code** — SNL/EPICS control programs in `legacyLLRF/` (analyzed in the companion document)
+3. **Legacy source code** — SNL/EPICS control programs in `spear-rf-code-legacy/rfApp/src/seq/` (analyzed in the companion document)
 
 ### Related Documents in This Package
 
