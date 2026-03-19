@@ -24,7 +24,7 @@ Legacy PV databases are a **critical reference for the upgrade**. The upgrade pr
 
 ## 1. Database Organization
 
-The EPICS database is split across 78+ files in `rfApp/Db/`, organized by function.
+The EPICS database is split across 76 files in `rfApp/Db/`, organized by function.
 
 ### 1.1 VXI Module Records (Custom Record Types)
 
