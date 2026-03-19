@@ -1,7 +1,7 @@
 # SNL State Machine Programs — Control Logic Deep Dive
 
-**Document**: 05 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**(Rev 2 — corrected with upgrade mapping from PDR)**
+**Document**: 05 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 3 — corrected legacy state machine names and state diagram from source code)**
 
 ---
 
@@ -47,75 +47,119 @@ program rf_states ("name=tRFSTATES,STN=barfonthis")
 
 Authors: Robert C. Sass (PEP-II, 1997), M. Laznovsky, S. Allison (SPEAR3 modifications)
 
-### 2.2 State Diagram
+### 2.2 State Diagram (Corrected from Source Code)
+
+> **Rev 3 correction**: Rev 2 showed the **proposed upgrade** state machine (OFF→INITIALIZE→STANDBY→ON_CW→FAULT→FAULT_CLEAR from PDR Section 2.2). The actual legacy state machine is shown below. See [09-cross-reference-errata.md](09-cross-reference-errata.md) Item 1.
+
+**Primary States** (from `rf_station_state.h`): OFF=0, PARK=1, TUNE=2, ON_FM=3, ON_CW=4
 
 ```
-                    ┌─────────┐
-         ┌─────────│   OFF   │◄────────────────────────────┐
-         │         └────┬────┘                              │
-         │              │ Operator command                   │
-         │              ▼                                    │
-         │         ┌──────────┐                              │
-         │         │INITIALIZE│                              │
-         │         └────┬─────┘                              │
-         │              │ All modules healthy                │
-         │              ▼                                    │
-         │         ┌─────────┐                              │
-         │    ┌────│ STANDBY │◄─────────────────────┐      │
-         │    │    └────┬────┘                       │      │
-         │    │         │ Operator "RF ON"            │      │
-         │    │         ▼                             │      │
-         │    │    ┌─────────┐                        │      │
-         │    │    │  ON_CW  │────── FAULT ──────►┌───┴────┐│
-         │    │    └─────────┘                     │ FAULT  ││
-         │    │                                    └───┬────┘│
-         │    │                                        │     │
-         │    │                                        ▼     │
-         │    │                                ┌────────────┐│
-         │    └────────────────────────────────│FAULT_CLEAR ││
-         │                                     └────────────┘│
-         └───────────────────────────────────────────────────┘
+                      ┌─────────┐
+           ┌──────────│   OFF   │◄──────── s_go_off (from any state)
+           │          └────┬────┘
+           │               │ Operator: STATE:CTRL = PARK
+           │               ▼
+           │          ┌──────────┐
+           │   ┌──────│   PARK   │◄──────── s_go_park (init VXI, load DSP/tables)
+           │   │      └────┬─────┘
+           │   │           │ Operator: STATE:CTRL = TUNE
+           │   │           ▼
+           │   │      ┌─────────┐
+           │   │ ┌────│  TUNE   │◄──────── s_go_tune (enable drive, direct loop)
+           │   │ │    └────┬────┘
+           │   │ │         │ Operator: STATE:CTRL = ON_FM or ON_CW
+           │   │ │         ├─────── s_go_on_fm ─────┐
+           │   │ │         │                         ▼
+           │   │ │         │                    ┌─────────┐
+           │   │ │         │         ┌──────────│  ON_FM  │ (comb+ripple loops)
+           │   │ │         │         │          └────┬────┘
+           │   │ │         │         │               │ s_go_on_cw (or direct)
+           │   │ │         │         │               ▼
+           │   │ │         └── s_go_tune_to_on_cw ──►┌─────────┐
+           │   │ │                                    │  ON_CW  │ (full power)
+           │   │ │          go_on_cw_to_tune ◄────────└─────────┘
+           │   │ │          go_on_fm_to_tune ◄────────┘
+           │   │ └────────────────────┘
+           │   └──────────────────────────────────────────────┘
+           └──────────────────────────────────────────────────────┘
+
+  Transition states within operating modes:
+  ┌────────────────────────────────────────────────┐
+  │ s_comb_ramp    — Comb loop ramp-up sequence    │
+  │ s_direct_ramp  — Direct loop ramp-up sequence  │
+  │ s_gv_up        — Gap voltage ramp up           │
+  │ s_gv_down      — Gap voltage ramp down         │
+  │ s_lp_check     — Loop parameter check          │
+  │ s_faultfiles   — Fault file dump               │
+  │ s_go_stn_reset — Station reset sequence        │
+  │ s_go_tickleoff — Tickle off sequence           │
+  │ s_go_tickleon  — Tickle on sequence            │
+  └────────────────────────────────────────────────┘
 ```
 
-### 2.3 State Details
+**State set architecture** (3 concurrent state sets in rf_states.st):
+1. **`ss rf_states`** — Main state machine (above). Contains all primary and transition states.
+2. **`ss rf_statesLP`** — Loop protection state set. Runs concurrently, monitors loop health.
+3. **`ss rf_statesFF`** — Fault file state set. Manages asynchronous fault file capture.
 
-**OFF**:
+### 2.3 State Details (Corrected from Source Code)
+
+**s_off (OFF = 0)**:
 - All RF outputs disabled
 - Monitoring only
 - Entry action: Disable all feedback loops, zero DACs
+- Transition: Operator sets `STATE:CTRL = PARK` → enters `s_go_park`
 
-**INITIALIZE**:
-- Loads DSP firmware into all modules
-- Configures VXI modules (registers, DACs, filters)
-- Configures AB PLC communication
-- Verifies all module health (checks firmware version, interrupt status)
-- Loads table/coefficient files
-- Timeout → FAULT if initialization doesn't complete
+**s_park (PARK = 1)**:
+- VXI modules initialized (DSP firmware loaded, table files loaded)
+- AB PLC communication configured
+- Module health verified (firmware version, interrupt status)
+- RF output disabled, HVPS may be energized
+- Transition: Operator sets `STATE:CTRL = TUNE` → enters `s_go_tune`
 
-**STANDBY**:
-- All modules initialized and healthy
-- RF feedback loops disabled
-- HVPS may or may not be energized
-- Ready for operator to enable RF
+**s_tune (TUNE = 2)**:
+- Drive power ramping via direct loop engagement
+- Direct loop active (s_direct_ramp transition state handles ramp-up)
+- Gap voltage being established (s_gv_up/s_gv_down handle ramps)
+- Transition to ON_FM: `s_go_on_fm` → enables comb and ripple loops
+- Transition to ON_CW (direct): `s_go_tune_to_on_cw` → skips ON_FM
 
-**ON_CW** (Continuous Wave):
-- RF feedback active
-- Sequence: Enable direct loop → ramp drive power → enable comb loop → enable ripple loop
+**s_on_fm (ON_FM = 3)**:
+- Frequency modulation mode — comb + ripple rejection loops active
+- `s_comb_ramp` transition state handles comb loop engagement
+- Drive power established, gap voltage controlled
+- Transition: Operator sets `STATE:CTRL = ON_CW` → enters `s_go_on_cw`
+- Fallback: `go_on_fm_to_tune` → returns to TUNE if problems
+
+**s_on_cw (ON_CW = 4)**:
+- Continuous wave — full RF power
+- All feedback loops active (direct, comb, ripple)
 - Monitors: AIM interlocks, HVPS status, IQA measurements
-- Any fault → immediate transition to FAULT
+- Any fault → `s_faultfiles` (captures signal RAM to `/dat/FAULTSigI_00..10`) → `s_go_off`
+- Fallback: `go_on_cw_to_tune` → returns to TUNE if operator requests or loop instability
 
-**FAULT**:
-- RF output disabled immediately
-- Fault file dump triggered (AIM DAS sequence)
-- Signal RAM contents captured to numbered fault files (/dat/FAULTSigI_00 through _10)
-- Circular buffer of 11 fault files (NUMFFILES)
-- Fault source recorded (AIM interlock, HVPS trip, IQA alarm, etc.)
-- Automatic transition to FAULT_CLEAR after dump complete
+**Transition States (17 total)**:
+| State | Purpose |
+|-------|---------|
+| `s_go_off` | Orderly shutdown from any state to s_off |
+| `s_go_park` | Initialize VXI modules, load DSP firmware/tables |
+| `s_go_tune` | Enable drive power, engage direct feedback loop |
+| `s_go_on_fm` | Enable comb and ripple rejection loops |
+| `s_go_on_cw` | Full power engagement from ON_FM |
+| `s_go_tune_to_on_cw` | Direct transition from TUNE to ON_CW (bypassing ON_FM) |
+| `go_on_cw_to_tune` | Controlled fallback from ON_CW to TUNE |
+| `go_on_fm_to_tune` | Controlled fallback from ON_FM to TUNE |
+| `s_comb_ramp` | Comb loop ramp-up sequence (gradual engagement) |
+| `s_direct_ramp` | Direct loop ramp-up sequence |
+| `s_gv_up` | Gap voltage ramp up (incremental step-up) |
+| `s_gv_down` | Gap voltage ramp down (incremental step-down) |
+| `s_lp_check` | Loop parameter validity check |
+| `s_faultfiles` | Fault file capture (signal RAM → `/dat/FAULTSig*`) |
+| `s_go_stn_reset` | Station reset sequence |
+| `s_go_tickleoff` | Tickle excitation off |
+| `s_go_tickleon` | Tickle excitation on |
 
-**FAULT_CLEAR**:
-- Resets interlocks
-- Clears fault flags
-- Transitions to STANDBY when all interlocks cleared
+> **Note on upgrade mapping**: The proposed upgrade state machine (PDR §2.2: OFF→INITIALIZE→STANDBY→ON_CW→FAULT→FAULT_CLEAR) simplifies the 22-state legacy machine into 6 states. The legacy PARK+VXI-init maps to the upgrade's INITIALIZE. The legacy TUNE+ON_FM are collapsed into the upgrade's ramp-to-ON_CW sequence. The legacy fault-file capture becomes a substep of the upgrade's FAULT state. See `Designs/10_SOFTWARE_DESIGN_DOCUMENT.md` Section 22 for the complete legacy→upgrade state mapping.
 
 ### 2.4 Key Variables (PVs)
 
