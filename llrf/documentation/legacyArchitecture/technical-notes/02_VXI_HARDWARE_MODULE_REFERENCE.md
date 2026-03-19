@@ -1,7 +1,7 @@
 # PEP-II / SPEAR3 LLRF VXI Hardware Module Reference
 
 **Document Number**: LLRF-REF-003
-**Version**: 2.0
+**Version**: 3.0
 **Date**: 2026-03-19
 **Reconstructed From**: Corredoura SLAC-PUB-8498, arXiv:physics/0007029, Legacy source code, Legacy PDF file metadata
 
@@ -27,7 +27,7 @@ The PEP-II LLRF system is housed in a standard VXI mainframe. For SPEAR3 (single
 | 9 | ARC/Interlock Detector | — | Arc detection, interlock management, beam abort | **Active (but not functional)** |
 | 10-12 | Spare | — | Available for expansion | — |
 
-> ⚠️ **IMPORTANT**: The Comb Filter Modules (CFM, slots 6-7) and Gap Voltage Feed-Forward module (GVF/GFF, slot 8) are **PEP-II design elements only**. These modules were **never used in the SPEAR3 RF plant** (1999–2022 legacy system) and are **not present in the LLRF9 upgrade** (2022–present). They were physically present in the VXI crate as inherited hardware but were not populated or connected in the SPEAR3 configuration. All references to comb filter loops, GVF/GFF feed-forward, and LFB woofer interfaces in this documentation describe PEP-II functionality for historical/reference purposes only.
+> ⚠️ **IMPORTANT**: The Comb Filter Modules (CFM, slots 6-7) and Gap Voltage Feed-Forward module (GVF, slot 8) are **PEP-II design elements only**. These modules were **never used in the SPEAR3 RF plant** (1999–2022 legacy system) and are **not present in the LLRF9 upgrade** (2022–present). They were physically present in the VXI crate as inherited hardware but were not populated or connected in the SPEAR3 configuration. All references to comb filter loops, GVF feed-forward, and LFB woofer interfaces in this documentation describe PEP-II functionality for historical/reference purposes only.
 
 **Source**: Corredoura SLAC-PUB-8498, Fig. 1 (VXI crate topology)
 **Cross-ref PDF**: `bd3403300000.pdf`, `bd3403300100.pdf`, `blockDiagrambd3403290100-1.pdf`

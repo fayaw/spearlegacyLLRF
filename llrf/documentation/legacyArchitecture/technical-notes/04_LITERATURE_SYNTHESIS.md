@@ -1,7 +1,7 @@
 # PEP-II / SPEAR3 LLRF — Literature Synthesis and Operational Insights
 
 **Document Number**: LLRF-REF-005
-**Version**: 2.0
+**Version**: 3.0
 **Date**: 2026-03-19
 
 ---

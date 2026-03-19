@@ -1,7 +1,7 @@
 # Cross-Reference Index — PEP-II / SPEAR3 LLRF Documentation
 
 **Document Number**: LLRF-REF-006
-**Version**: 2.0
+**Version**: 3.0
 **Date**: 2026-03-19
 **Purpose**: AI-ready topic-to-source mapping for the complete PEP-II/SPEAR3 LLRF knowledge base
 
@@ -123,7 +123,8 @@ Supporting files:
 | Direct loop | Wideband feedback loop that reduces effective cavity impedance |
 | DSP | Digital Signal Processor — used in ripple loop (PEP-II: also comb filter) |
 | EPICS | Experimental Physics and Industrial Control System — distributed control framework |
-| GVF/GFF | Gap Voltage Feed-Forward — ⚠️ **PEP-II ONLY, not used in SPEAR3**. Module providing voltage reference and LFB interface |
+| GFF | Gap Feed-Forward — ⚠️ **PEP-II ONLY, not used in SPEAR3**. The feed-forward function that generates IQ reference values via DACs on the RFP module. Implemented by the GVF module |
+| GVF | Gap Voltage Feed-Forward — ⚠️ **PEP-II ONLY, not used in SPEAR3**. VXI hardware module providing voltage reference and LFB woofer interface. Implements the GFF function |
 | HVPS | High Voltage Power Supply — provides klystron cathode voltage (up to 90 kV, nominal 74.7 kV at 500 mA) |
 | IQ | In-phase / Quadrature — two-component representation of RF signal amplitude and phase |
 | IQA | IQ/Amplitude detector — VXI digital demodulation module |

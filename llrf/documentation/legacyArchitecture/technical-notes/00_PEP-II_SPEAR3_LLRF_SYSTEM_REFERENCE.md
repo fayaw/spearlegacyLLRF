@@ -84,10 +84,10 @@ As of 2026, the SPEAR3 LLRF system is undergoing a comprehensive upgrade (docume
 
 **What is new**: Interface Chassis (central hardware interlock hub), Waveform Buffer System (8 RF + 4 HVPS monitoring channels), Arc Detection System (6 Microstep-MIS optical sensors), PPS Interface Box (dedicated, PLC-independent).
 
-**Eliminated PEP-II feedback loops**: The following legacy analog loops are no longer needed in the LLRF9 architecture:
-- **Comb filter loop** — Used for PEP-II multi-bunch stabilization; not applicable to SPEAR3 single-station configuration
-- **Gap voltage feedback (GVF)** — PEP-II cavity field stabilization; now handled by LLRF9 vector-sum feedback
-- **Ripple rejection loop** — LLRF9 digital feedback inherently rejects power-line ripple
+**Eliminated PEP-II feedback loops**: The following legacy loops are no longer needed in the LLRF9 architecture:
+- **Comb (Narrowband) RF Feedback Loop** — Used for PEP-II multi-bunch stabilization; not applicable to SPEAR3 single-station configuration
+- **Gap Voltage Feed-Forward (GVF)** — PEP-II cavity field stabilization; PEPII only.
+- **Ripple Feedback Loop** — LLRF9 digital feedback inherently rejects power-line ripple
 - **4-way DAC branching** — LLRF9 controls via single vector sum output
 
 > **Source**: `Designs/0_PHYSICAL_DESIGN_REPORT.md`, Section 15.7; `llrf/documentation/LLRFUpgradeTaskListRev3.docx`
@@ -455,15 +455,15 @@ f_BW(comb span) >> f_BW(direct) >> f_BW(ripple) >> f_BW(HVPS) ~ f_BW(tuner) >> f
 
 **Source Code**: `rf_tuner_loop.st` — per-cavity instances via `CAV` macro.
 
-### 3.5 HVPS / Klystron Voltage Loop
+### 3.5 HVPS Voltage Regulation Loop
 
 **Purpose**: Regulate klystron cathode voltage to maintain drive power or gap voltage at setpoint. During "processing" mode, carefully ramps voltage while monitoring cavity vacuum.
 
 **Source Code**: `rf_hvps_loop.st` — states: init, off, proc, on.
 
-### 3.6 Gap Voltage Feed-Forward (GFF/GVF) — ⚠️ PEP-II ONLY
+### 3.6 Gap Voltage Feed-Forward (GVF) — ⚠️ PEP-II ONLY
 
-> ⚠️ **The GVF/GFF module is PEP-II hardware only. In SPEAR3, gap voltage control was handled by the DAC control loop in VxWorks software. Not present in LLRF9 upgrade.**
+> ⚠️ **The GVF module is PEP-II hardware only. In SPEAR3, gap voltage control was handled by the DAC control loop in VxWorks software. Not present in LLRF9 upgrade.**
 
 **Purpose**: Provide a feed-forward path to stabilize gap voltage during beam transients, working in conjunction with the wideband feedback.
 

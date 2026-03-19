@@ -1,7 +1,7 @@
 # PEP-II / SPEAR3 LLRF Feedback Loop Architecture — Detailed Technical Reconstruction
 
 **Document Number**: LLRF-REF-002
-**Version**: 2.0
+**Version**: 3.0
 **Date**: 2026-03-19
 **Classification**: Engineering Technical Reference
 **Reconstructed From**: SLAC-PUB-8498 (Corredoura 1999), arXiv:physics/0007029 (Corredoura 2000), Phys. Rev. ST Accel. Beams 13:052802 (Fox 2010), Phys. Rev. ST Accel. Beams 10:022801 (Rivetta 2007), Legacy source code (`spear-rf-code-legacy/rfApp/src/seq/`)
@@ -71,6 +71,27 @@ Reconstructed from Corredoura SLAC-PUB-8498, Fig. 3 and arXiv:physics/0007029:
   │ adjust   │    │ voltage  │    │ motor    │
   └──────────┘    └──────────┘    └──────────┘
 ```
+
+### 1.2 Feedback and Control Loop Summary
+
+The following table lists all feedback and control loops in the PEP-II/SPEAR3 LLRF system, organized from **highest to lowest bandwidth**. Loops marked ❌ were part of the PEP-II design but are **not used in SPEAR3** (neither in the legacy system nor the LLRF9 upgrade).
+
+| # | Loop Name | Function | Approx. Bandwidth | Hardware / Components | SPEAR3 Status |
+|---|-----------|----------|-------------------|----------------------|---------------|
+| 1 | **Direct (Wideband) RF Feedback Loop** | Reduces effective cavity impedance by ~40 dB (factor of ~100), suppressing Robinson instability and coupled-bunch growth rates | ~800 kHz (with lead compensation; ~250 kHz without) | Analog: RFP module (error amplifier, lead/integral compensation, baseband modulator), IQ demodulators, IQ RF modulator | ✅ Active |
+| 2 | **Comb (Narrowband) RF Feedback Loop** | Provides additional gain at revolution frequency harmonics to further suppress coupled-bunch modes beyond what the Direct loop alone achieves | ~2 MHz overall span; ~10 kHz per comb tooth | Digital: VXI Comb Filter modules (I and Q, separate), FIFO one-turn delay | ❌ PEP-II only |
+| 3 | **Ripple Feedback Loop** | Cancels RF amplitude/phase modulation from HVPS switching ripple (~360 Hz fundamental, harmonics to ~50 kHz). In SPEAR3 practice, deployed primarily as a slow phase tracker compensating for klystron phase shift across cathode voltage changes | Up to ~50 kHz (design); lower effective BW in SPEAR3 slow-tracker mode | DSP: AT&T DSP1610 processor; analog integrator path | ✅ Active (as slow phase tracker) |
+| 4 | **HVPS Voltage Regulation Loop** | Regulates klystron cathode voltage to maintain RF drive power or gap voltage at setpoint; includes processing mode for cavity conditioning | ~0.5–1 Hz | Software: VxWorks SNL (`rf_hvps_loop.st`); HVPS SCR controller, Enerpro voltage regulator board | ✅ Active |
+| 5 | **DAC Control Loop** | Maintains gap voltage and RF drive power at software setpoints by adjusting baseband DAC values; compensates for slow drifts and klystron gain variation | ~0.1 Hz | Software: VxWorks SNL (`rf_dac_loop.st`); Octal DAC on RFP module | ✅ Active |
+| 6 | **Tuner Control Loop** | Adjusts cavity resonant frequency via mechanical tuner to maintain optimal detuning angle for beam loading compensation | ~0.01–1 Hz (stepper motor limited) | EPICS: VxWorks SNL (`rf_tuner_loop.st`); stepper motors, mechanical tuner plungers (per cavity) | ✅ Active |
+| 7 | **Gap Voltage Feed-Forward (GVF module / GFF function)** | Provides IQ reference values for gap voltage setpoint and interfaces with Longitudinal Feedback (LFB) system for low-order coupled-bunch damping. *Feed-forward path, not a feedback loop.* GVF is the hardware module; GFF is the feed-forward function on the RFP DACs. | N/A (feed-forward) | VXI GVF module; GFF IQ DACs on RFP; fiber optic TAXI link to LFB | ❌ PEP-II only (both GVF and GFF) |
+
+> **Notes on bandwidth values:**
+> - Bandwidth values are approximate and depend on operating conditions (beam current, loop gain settings, compensation parameters).
+> - The Direct loop bandwidth of ~800 kHz assumes lead compensation is active (see §6). Without lead compensation, the maximum stable bandwidth is limited to ~250 kHz by the total loop delay of ~1 μs (see §11.2).
+> - The Comb loop's "~2 MHz overall span" refers to the range of revolution harmonics covered; individual comb teeth have ~10 kHz bandwidth each (see §4, cross-ref PS-52 transcription).
+> - The Ripple loop was originally designed for HVPS ripple cancellation but in SPEAR3 was deployed primarily as a slow phase tracker (see §5).
+> - Loops 4–6 are software-based EPICS/SNL control loops running on the VxWorks IOC, not analog hardware loops.
 
 ---
 
@@ -766,9 +787,9 @@ From `rf_hvps_loop_defs.h`:
 
 ---
 
-## 10. Gap Voltage Feed-Forward (GVF/GFF) — ⚠️ PEP-II ONLY
+## 10. Gap Voltage Feed-Forward (GVF) — ⚠️ PEP-II ONLY
 
-> ⚠️ **The GVF/GFF module is PEP-II hardware only. It was NOT used in the SPEAR3 legacy system (1999–2022) and is NOT present in the LLRF9 upgrade (2022–present). In SPEAR3, gap voltage control was handled by the DAC control loop in VxWorks software, not by a dedicated GVF module. There is no LFB (Longitudinal Feedback) system at SPEAR3. This section is retained for historical/reference purposes.**
+> ⚠️ **The GVF module is PEP-II hardware only. It was NOT used in the SPEAR3 legacy system (1999–2022) and is NOT present in the LLRF9 upgrade (2022–present). In SPEAR3, gap voltage control was handled by the DAC control loop in VxWorks software, not by a dedicated GVF module. There is no LFB (Longitudinal Feedback) system at SPEAR3. This section is retained for historical/reference purposes.**
 
 ### 10.1 Purpose (PEP-II)
 
