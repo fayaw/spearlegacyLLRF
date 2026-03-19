@@ -1,9 +1,15 @@
 # SPEAR3 Legacy LLRF Codebase — Executive Summary & Upgrade Decision Matrix
 
 **Document**: 00 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**Date**: March 2026 (Rev 2 — corrected with upgrade system context from PDR)
+**Date**: March 2026 (Rev 3 — corrected legacy state machine names; added missing document references; added open discrepancies)
 
 ---
+
+## CORRECTION NOTICE (Rev 3)
+
+Rev 2 contained the following error that has been corrected in Rev 3:
+
+4. **Legacy state machine names were incorrect.** Rev 2 described the legacy `rf_states.st` state sequence as "OFF→INITIALIZE→STANDBY→ON_CW→FAULT→FAULT_CLEAR". These are the **proposed upgrade states** from PDR Section 2.2, NOT the legacy states. The actual legacy states (from `rf_station_state.h` and `rf_states.st,v`) are: **OFF→PARK→TUNE→ON_FM→ON_CW** with 17 transition states. See [05-snl-state-machines.md](05-snl-state-machines.md) Section 2.2 for the corrected state diagram.
 
 ## CORRECTION NOTICE (Rev 2)
 
@@ -165,7 +171,41 @@ From PDR Section 17:
 4. **Extract rf_tuner_loop.st** → verify LLRF9 built-in tuner matches legacy behavior
 5. **Evaluate subIQ.c/subSys.c** → which functions are needed in the EPICS coordinator?
 
-## 7. Companion Documents
+## 7. Open Discrepancies Requiring Design Review
+
+The following discrepancies were identified during cross-reference of the legacy source code, technical notes, and design documents. They are flagged here for resolution during design review.
+
+### 7.1 Gap Voltage — Clarification (RESOLVED)
+
+| Document | Section | V_gap per cavity | V_total (4 cavities) | Status |
+|----------|---------|-----------------|---------------------|--------|
+| Legacy Technical Design §1 | Key Parameters | **~800 kV** | **~3.2 MV** | **Design value** for SPEAR3 |
+| PDR Section 1 (line 55–56) | Executive Summary | ~712 kV | ~2.85 MV | **Current measured value** |
+| PDR Section 4.3 (line 255) | RF Cavities | ~712 kV | **~2.5 MV** | ✗ Typo (712×4 = 2848 ≠ 2500) |
+
+**Clarification** (per domain expert):
+- **~800 kV per cavity (~3.2 MV total)** is the original SPEAR3 design gap voltage.
+- **~712 kV per cavity (~2.85 MV total)** is the current measured operating gap voltage.
+- These are not contradictory — the system operates below design maximum. The PDR correctly uses the measured operating value for upgrade specification.
+- PDR Section 4.3's "~2.5 MV" remains a typo — it contradicts the 712 kV per-cavity voltage stated in the same section.
+
+**Remaining action**: Correct PDR §4.3 total from "~2.5 MV" to "~2.85 MV" to be consistent with 712 kV × 4 cavities.
+
+### 7.2 Authoritative Source Hierarchy
+
+When discrepancies exist between sources, the following priority order applies:
+
+1. **Legacy source code** (`spear-rf-code-legacy/`) — ground truth for what the legacy system actually does
+2. **Legacy Technical Design Report** (`Designs/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md`) — authoritative for legacy system behavior interpretation
+3. **Physical Design Report** (`Designs/0_PHYSICAL_DESIGN_REPORT.md`) — authoritative for upgrade system specification
+4. **Software Design Document** (`Designs/10_SOFTWARE_DESIGN_DOCUMENT.md`) — authoritative for upgrade software architecture
+5. **Technical Notes 00–08** — analysis documents derived from sources above; defer to primary sources when conflicts exist
+
+---
+
+## 8. Companion Documents
+
+### Code Review Technical Notes
 
 | Document | Content |
 |----------|---------|
@@ -178,3 +218,10 @@ From PDR Section 17:
 | [07-epics-databases.md](07-epics-databases.md) | PV structure — critical for PV migration mapping |
 | [08-signal-processing.md](08-signal-processing.md) | subIQ.c + subSys.c — evaluate for coordinator reuse |
 
+### Authoritative Design References (not part of code review series but essential context)
+
+| Document | Content |
+|----------|---------|
+| [Designs/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md](../../Designs/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md) | **Authoritative legacy system reference** — correct state names, complete PV architecture, control loop analysis, state transition tables |
+| [Designs/10_SOFTWARE_DESIGN_DOCUMENT.md](../../Designs/10_SOFTWARE_DESIGN_DOCUMENT.md) | **Upgrade software architecture** — Python/PyEPICS/MATLAB coordinator design, legacy→upgrade code mapping (Section 22), PV contract reference |
+| [Designs/0_PHYSICAL_DESIGN_REPORT.md](../../Designs/0_PHYSICAL_DESIGN_REPORT.md) | **Master upgrade specification** — hardware architecture, signal list, channel allocation, protection chain |

@@ -1,7 +1,7 @@
 # Complete File Inventory — 253 Files with Upgrade Verdicts
 
 **Document**: 01 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**(Rev 2 — corrected for PEP-II module identification and upgrade architecture)**
+**(Rev 3 — corrected legacy state machine names in rf_states.st entry; added file count methodology)**
 
 **Verdict Key**: **ELIMINATED** = Replaced by LLRF9 or new hardware | **PEP-II ONLY** = Not used in SPEAR3 | **SPEC-EXTRACT** = Behavior spec for upgrade software | **REFERENCE** = Behavior spec for new code | **REUSE** = Directly reusable | **DONE** = Already replaced
 
@@ -13,6 +13,21 @@
 - **DSP firmware is ELIMINATED** — the LLRF9 FPGA replaces all DSP functions. These files are reference for understanding what the LLRF9 does internally, but no migration is needed.
 - **rf_dac_loop.st is ELIMINATED** — LLRF9 handles DAC/vector modulator control internally.
 - **Stepper motor code is ALREADY DONE** — Galil DMC-4143 commissioned August 2025.
+
+## File Count Methodology
+
+> This inventory catalogs **253 functional source files** in `rfApp/src/` and associated directories — the files directly relevant to understanding the legacy LLRF control logic and planning the upgrade. The full repository contains significantly more files:
+>
+> | Category | Count | Location | Included in 253? |
+> |----------|-------|----------|-----------------|
+> | Functional code (`.c`, `.h`, `.st`, `.s`, `.db`, `.dbd`, `.substitutions`) | ~253 | `rfApp/src/`, `rfApp/Db/`, `rfApp/DbIoc/` | ✅ Yes |
+> | Operator display files (`.HIF`, `.ACF`, `.GDF`, `.CNF`, `.SYM`) | ~639 | `rfApp/src/display/`, `rfApp/HIF/` | ❌ No |
+> | Build/configuration files (`Makefile`, `configure/*`) | ~450+ | Various | ❌ No |
+> | VXI boot table/coefficient files | 57 | `iocBoot/tbl/` | ❌ No |
+> | IOC boot configuration (`st.cmd`, `*.substitutions`, `config.ab`) | ~3 | `iocBoot/b132-iocrf/` | ❌ No |
+> | Total RCS-managed files in repository | 2,285 | All directories | — |
+>
+> Display files, table files, and IOC boot configuration are discussed in [02-architecture-overview.md](02-architecture-overview.md) Sections 2 and 6.
 
 ## Summary by Verdict (Revised)
 
@@ -106,7 +121,7 @@
 
 | File | Lines | Verdict | Upgrade Target | Notes |
 |------|-------|---------|---------------|-------|
-| `rf_states.st` | 2,227 | **SPEC-EXTRACT** | Python/EPICS coordinator | Master state machine: OFF→INITIALIZE→STANDBY→ON_CW→FAULT→FAULT_CLEAR. **Primary specification for the upgrade coordinator.** |
+| `rf_states.st` | 2,227 | **SPEC-EXTRACT** | Python/EPICS coordinator | Master state machine with 5 primary states: **OFF→PARK→TUNE→ON_FM→ON_CW** (per `rf_station_state.h`: OFF=0, PARK=1, TUNE=2, ON_FM=3, ON_CW=4) and 17 transition states (s_go_off, s_go_park, s_go_tune, s_go_on_fm, s_go_on_cw, s_go_tune_to_on_cw, s_comb_ramp, s_direct_ramp, s_gv_up, s_gv_down, s_lp_check, s_faultfiles, s_go_stn_reset, s_go_tickleoff, s_go_tickleon, go_on_cw_to_tune, go_on_fm_to_tune). 3 state sets: rf_states (main), rf_statesLP (loop protection), rf_statesFF (fault files). **Primary specification for the upgrade coordinator.** |
 | `rf_hvps_loop.st` | 343 | **SPEC-EXTRACT** | CompactLogix PLC code | HVPS supervisory: voltage regulation, crowbar, contactor. **Specification for new PLC ladder logic.** |
 | `rf_tuner_loop.st` | 555 | **SPEC-EXTRACT** | LLRF9 tuner + Python load-angle | Tuner motor control. 4 instances. **LLRF9 has built-in tuner PVs; Python handles load-angle offset.** |
 | `rf_calib.st` | 3,345 | REFERENCE | LLRF9 built-in calibration | Largest SNL. DAC offset nulling, cavity modulator calibration. **LLRF9's Dmitry software handles calibration.** Verify equivalence. |
