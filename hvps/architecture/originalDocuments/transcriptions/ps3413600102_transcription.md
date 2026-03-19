@@ -275,49 +275,65 @@ PS-341-360-01-R2 — Page 9
 
 ---
 
-## Page 10 — Terminals, Cooling, Enclosures
+## Page 10 — Primary Excitation & Short Circuit (continued)
 
-9.4 The bushings shall be located on the top of the transformer or on the side at a height of at least 7 feet above the ground level.
+7.4 The other rectifier transformer secondary shall have an 85 kV DC voltage superimposed on the 10-21 kV AC voltage and therefore shall have a DC high pot of 150 kV DC and/or 120 kV with rectifier in place.
 
-9.5 Cable connector provisions shall be provided at each bushing for connection to the high voltage DC cables.
+#### 8.0 Primary excitation
 
-#### 10.0 Cooling
+8.1 The phase shifting transformer shall be designed for continuous operation with 12.5 kV ±5% RMS at 60 Hz.
 
-10.1 The transformer oil shall be cooled by external radiator panels using natural convection cooling (type OA).
+8.2 The SCR's in the open Wye will control the primary excitation voltage on the rectifier transformers so as not to exceed the equivalent of a 13 kV 60 Hz line to line excitation under all conditions. The vendor shall design the rectifier transformers for an excitation (Volt-seconds) equivalent to 13 kV RMS 60 Hz Line to line. (12.5 kV/21 kV for turns ratio) {NOTE DC in primary winding will be limited to 0.5 Amp}. The total core losses (eddy currents and hysteresis) under SCR primary control shall be assumed by the vendor to be not more 10% greater than the total core losses experienced under 13 kV RMS 60 Hz excitation (without the SCR primary control, non-grounded wye, no zero sequence current).
 
-10.2 The number and size of the radiators shall provide sufficient cooling to maintain the oil temperature within IEEE transformer standards.
+#### 9.0 Short Circuit Conditions
 
-10.3 The cooling system shall be designed for operation at full load with an ambient temperature of 45° C.
+9.1 The transformer shall be designed for continuous full load operation.
 
-#### 11.0 Enclosures
+9.2 The transformers shall withstand an external 3 phase secondary short circuits at the transformer terminals for 5 cycles without appreciable damage or parameter change.
 
-11.1 All live conductors shall be suitably insulated or enclosed to protect personnel from accidental contact.
-
-11.2 The power supply transformer tank, rectifier section, SCR and crowbar sections shall be outdoor type suitable for installation in the San Francisco Bay area environment.
-
-11.3 The minimum required internal dimensions of the transformer tank shall be adequate to house the transformers, filter inductors, and provide space for the SLAC supplied SCR controller, SCR crowbar, and rectifier/filter sections.
+9.3 The transformers shall be designed for frequent crowbars (secondary short circuits) with interruption time from the primary SCR's of less than one cycle. The number of crowbars will not exceed 10,000 with no more than (10) in any one day.
 
 PS-341-360-01-R2 — Page 10
 
 ---
 
-## Page 11 — Enclosures (continued)
+## Page 11 — Terminals, Cooling
 
-11.4 There shall be provisions for oil expansion.
+#### 10.0 Terminals
 
-11.5 The transformer enclosure shall be designed for a continuous internal pressure of 5 PSI without permanent deformation and a total vacuum without permanent deformation.
+10.1 The primary line terminal shall be made compatible with SLAC's existing disconnect and vacuum contactor enclosure utilizing a weatherproof throat connection. Final dimensions and placement to be determined before design review.
 
-11.6 There shall be a drain valve and filling connection at the bottom of the tank.
+10.2 The open Wye terminals, filter inductor terminals, and SCR crowbar terminals (supplied by SLAC) are to be connected by the vendor. The terminals shall be leak tight oil to oil feed through. The details will be made available before the vendors required design review.
 
-11.7 The paint system shall be suitable for outdoor installation and shall be compatible with transformer oil.
+10.3 The rectifier transformer secondary terminals, consisting of the 3 phases of each Wye and the three +5% taps on each Wye, shall be terminated to the rectifier diodes on insulators in such a way that tools or debris will not fall into the transformers if dropped when working on the rectifiers.
 
-#### 12.0 Enclosures — Layout Requirements
+10.4 The five DC Output terminals shall be sealed oil tight with cable termination for RG-220 Cable. The low voltage terminals shall be Isolation Design Inc. Model D-130-02 and the High voltage terminal Model D-117-BA or SLAC approved equal.
 
-12.1 The power supply shall be designed to mount on existing PEP concrete transformer pads. (See figures 4 and 9).
+#### 11.0 Cooling and oil
 
-12.2 A weather proof control and monitoring enclosure shall be provided. Containing interconnection terminal blocks and monitoring devices specified in section 13.
+11.1 The power supply shall be forced oil/convection air cooling (FO) using an oil pump to insure adequate cooling for the transformers and the rectifiers and SCR at the top of the tank.
 
-12.3 The rectifier section shall be located on the top (figure 4) of the transformer and shall be a minimum of 48" W × 82" L × 24" H. This will contain the rectifier diodes, filter capacitors, and filter resistors. The rectifier section shall be separated from the rectifier transformers so that it can be installed and maintained without draining the tank oil and designed in such a way that tools or debris will not lodge in the transformers if dropped from the diode or filter.
+11.2 The oil pump(s) shall be designed to allow for oil flow in the air cooled radiators without the pump(s) being on. Pump(s) shall be arranged to enable removal and maintenance on the pumps without draining the oil from the tank.
+
+11.3 The average winding temperature rise of all transformers and filter inductors shall be 65°C maximum with a hot spot temperature rise of 80°C maximum above 40°C ambient.
+
+11.4 The transformers and inductors shall comply with the loading guide for 65° oil transformers NEMA standards.
+
+PS-341-360-01-R2 — Page 11
+
+---
+
+## Page 12 — Oil & Enclosures
+
+11.5 The oil used in the transformer shall be Sontex® X-ray oil (Drakeol® 10 LT mineral Oil NF) or approved equal.
+
+#### 12.0 Enclosures
+
+12.1 The transformers enclosure shall be of the vendor's standard design. It shall however meet industrial standards for transformer tank design. It shall have sufficient space for all of the vendor supplied equipment as well as for the SCR phase controllers and crowbar enclosures supplied by SLAC.
+
+12.2 The transformer enclosure shall be capable of withstanding a full vacuum for oil filling and processing. The SCR enclosures will be vented into the main tank for oil overflow and vacuum oil filling.
+
+12.3 The diode rectifier section shall be located on the top (figure 4) of the transformer and shall be a minimum of 48" W × 82" L × 24" H. This will contain the rectifier diodes, filter capacitors, and filter resistors. The rectifier section shall be separated from the rectifier transformers so that it can be installed and maintained without draining the tank oil and designed in such a way that tools or debris will not lodge in the transformers if dropped from the diode or filter.
 
 12.4 The space shall be provided for the SLAC supplied SCR controller shall be a minimum of 54" W × 36" H × 19" D inside the tank with a flange of at least 2" wide at the top (see figure 6). The SLAC supplied SCR controller will come as a unit and shall be installed in such a way that it can be removed easily and quickly as a unit without draining the main tank oil.
 
