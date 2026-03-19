@@ -106,9 +106,9 @@ As of 2026, the SPEAR3 LLRF system is undergoing a comprehensive upgrade (docume
 | Cavity Shunt Impedance | R_s | 3.9 MΩ | Per cavity |
 | Cavity Unloaded Q | Q_0 | 33,500 | |
 | Cavity Loaded Q | Q_L | 6,700 | β = 4.0 |
-| Gap Voltage per Cavity | V_gap | 800 kV | Design operating point |
-| Total Accelerating Voltage | V_total | 3.2 MV | Sum of 4 cavities |
-| Klystron Power | P_kly | 1.2 MW max | 65 kV cathode voltage |
+| Gap Voltage per Cavity | V_gap | 800 kV | Design operating point, now operating at 712kV |
+| Total Accelerating Voltage | V_total | 3.2 MV | Sum of 4 cavities (2.5 MV for now) |
+| Klystron Power | P_kly | 1.2 MW max | operating at 74 kV cathode voltage |
 | Klystron Type | | SLAC design | 476 MHz CW |
 | IF Frequency (LLRF) | f_IF | 4.9 MHz | 476 - 471.1 MHz LO |
 | LO Frequency | f_LO | 471.1 MHz | |
