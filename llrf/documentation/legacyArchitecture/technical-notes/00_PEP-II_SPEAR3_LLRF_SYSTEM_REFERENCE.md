@@ -291,7 +291,7 @@ BANDWIDTH / RATE        LOOP                      FUNCTION
 ~0.1 Hz (EPICS)    ├─ DAC Loop ──────────────── Setpoint adjustment
                    │                            (drive power / gap voltage)
                    │
-~0.1 Hz (EPICS)    ├─ Tuner Loop ────────────── Cavity resonance frequency
+~0.01 Hz (EPICS)   ├─ Tuner Loop ────────────── Cavity resonance frequency
                    │                            (stepper motor)
                    │
 Gain tracking      └─ Klystron Sat Loop ─────── Baseband modulator gain
