@@ -1,8 +1,8 @@
 # SPEAR3 Legacy LLRF Control System — Technical Design Report
 
 **Document Number**: LLRF-DES-006  
-**Version**: 1.0  
-**Date**: 2026-03-13  
+**Version**: 1.1  
+**Date**: 2026-03-19  
 **Classification**: Engineering Technical Reference  
 **Derived From**: Deep code review of `spear-rf-code-legacy/rfApp/src/seq/` source files  
 **Original Facility**: PEP-II B-Factory → SPEAR3 Storage Ring (SSRL/SLAC)  
@@ -30,6 +30,7 @@
 16. [Appendix A — State Transition Tables](#appendix-a--state-transition-tables)
 17. [Appendix B — Complete PV Reference](#appendix-b--complete-pv-reference)
 18. [Appendix C — Source File Index](#appendix-c--source-file-index)
+19. [Appendix D — Document Change Log](#appendix-d--document-change-log)
 
 ---
 
@@ -62,7 +63,8 @@ The RF system operates at **476 MHz** with a single high-power klystron driving 
 | DAC Resolution | — | 12-bit (±2048 counts) | DAC Loop |
 | DAC Loop Period | T_DAC | ~0.5 s | DAC Loop (EPICS database) |
 | HVPS Loop Period | T_HVPS | ~0.5 s | HVPS Loop (EPICS database) |
-| Maximum Loop Idle | T_max | 10.0 s | All supervisory loops |
+| Maximum Loop Idle (DAC/HVPS) | T_max | 10.0 s | DAC and HVPS Loops |
+| Maximum Loop Idle (Tuner) | T_max,tuner | 60.0 s | Tuner Loop |
 | HVPS Voltage Tolerance Count | N_tol | 10 cycles | HVPS Loop |
 | Tuner Motor Deadband | RDBD | Configurable (mm) | Tuner Loop |
 | Minimum DAC Delta | Δ_min | 0.5 counts | DAC Loop |
@@ -82,7 +84,7 @@ rfSeq Library
 ├── rf_dac_loop.st    — DAC/drive power/gap voltage control loop
 ├── rf_hvps_loop.st   — High voltage power supply regulation loop
 ├── rf_tuner_loop.st  — Cavity tuner stepper motor control
-├── rf_calib.st       — Automated calibration sequences
+├── rf_calib.st       — Automated calibration sequences (program name: P2RF_Calib)
 └── rf_msgs.st        — Message logging and TAXI error recovery
 ```
 
@@ -90,6 +92,13 @@ Each program is parameterized via EPICS macros:
 - `STN` — Station identifier (e.g., `RFCA` for SPEAR3 Cavity A)
 - `CAV` — Cavity identifier (used by tuner loop for per-cavity instances)
 - `name` — Task name for logging
+- `RING` — Ring identifier (used by rf_loop_defs.h; referenced for LFB TAXI PV assignment)
+- `REG` — Region identifier (referenced in shared loop definitions)
+- `IOC` — IOC identifier (referenced in shared loop definitions)
+
+**Note on program registration**: The `rfSeq.dbd` file registers the following SNL programs with the EPICS IOC shell:
+`P2RF_CalibRegistrar`, `rf_dac_loopRegistrar`, `rf_hvps_loopRegistrar`, `rf_statesRegistrar`, `rf_tuner_loopRegistrar`, `rf_msgsRegistrar`.
+The calibration program is registered as `P2RF_Calib` (not `rf_calib`).
 
 ### 2.2 Hardware Module Hierarchy
 
@@ -406,6 +415,49 @@ When the direct loop control and fast turnon are both enabled, the system bypass
 10. Enable GFF and LFB woofer loops
 11. Reset beam abort
 
+#### 5.4.4 Any State → OFF Shutdown Sequence (s_go_off)
+
+The shutdown sequence performs an orderly powerdown, deliberately passing through the TUNE state first to allow time for HVPS fault logging by `rf_msgs.st`:
+
+1. Record HVPS voltage timestamp (marks fault time reference)
+2. Set readback state to OFF and force control state to OFF
+3. Pass through TUNE state: `TUNESUB()` — forces beam abort, sets run mode to TUNE
+4. If HVPS voltage > 0.1V: ramp HVPS voltage to zero and wait 5 seconds (300 ticks)
+5. Disable HVPS triggers
+6. Disable RF switch
+7. Turn off integral compensation (`intcomp = OFF`)
+8. Zero all I/Q references: tune, GFF, and operate
+9. Turn off direct loop
+10. Resynchronize clock module
+11. If fault file collection is enabled and fault was detected:
+    - Set `ffwrite_ef` event flag to trigger `rf_statesFF` state set
+    - Wait for fault file collection to complete
+
+**Note**: The integral compensation turn-off in step 7 was added in September 2004 (M. Laznovsky). Earlier versions left integral compensation running during OFF, which could cause integrator windup issues.
+
+#### 5.4.5 OFF → PARK Sequence (s_go_park)
+
+1. Resynchronize clock module
+2. Disable DACs
+3. Park cavity tuners: `pvPut(cavtunepark)`
+4. Wait TUNERWAIT (60 ticks ≈ 1 second) for tuners to park
+5. Reset beam abort (if no park faults present)
+6. Transition to PARK state
+
+#### 5.4.6 ON_CW → TUNE Sequence (go_on_cw_to_tune)
+
+1. Call `TUNESUB()`: force beam abort, set I/Q tune reference, set run mode to TUNE
+2. Turn off direct loop
+3. Zero GFF and operate I/Q references
+4. Transition to TUNE state
+
+#### 5.4.7 ON_FM → TUNE Sequence (go_on_fm_to_tune)
+
+1. Call `TUNESUB()`: force beam abort, set I/Q tune reference, set run mode to TUNE
+2. Transition to TUNE state
+
+**Note**: This is a minimal transition — the HVPS remains on and does not need re-sequencing since the station was already in an ON state.
+
 ### 5.5 Direct Loop Gain Ramping Algorithm
 
 When the direct loop is turned on, the gain is ramped up from a negative offset to avoid transients:
@@ -439,6 +491,45 @@ An identical algorithm is applied to the comb loop:
 $$G_{\text{comb,offset}}(n) = \min\left(0, \, G_{\text{comb,offset}}(0) + n \cdot \Delta G_{\text{comb}}\right)$$
 
 The sequencing order is: direct loop → lead compensation → integral compensation → comb loop → GFF → LFB woofer.
+
+### 5.7 rf_statesLP — Loop Transition State Set
+
+The `rf_statesLP` state set runs concurrently with `rf_states` and manages the engagement/disengagement of all feedback loops. It implements a multi-state sequence to ensure safe loop transitions:
+
+**States**: `s_lp_check` → `s_gv_down` → `s_direct_ramp` → `s_comb_ramp` → `s_gv_up`
+
+**s_lp_check** (idle/dispatch state):
+- Services direct loop, lead comp, integral comp, comb loop, GFF, and LFB woofer on/off requests
+- Enforces prerequisite: direct loop must be ON and station in ON_CW before enabling sub-loops
+- Prevents opening the direct loop while beam abort is reset (`fba != 0`) in ON_CW — user must take station out of ON_CW first
+- When `fba == 0` and station is ON_CW: transitions to `s_gv_up` to restore gap voltage and reset beam abort
+
+**s_gv_down** (gap voltage reduction):
+- Executes the direct loop transition sequence (`directlptransit`) which lowers gap voltage and drive power
+- Forces beam abort
+- Waits `volt_settle_time` seconds for gap voltage to settle
+- Then transitions to `s_direct_ramp`
+
+**s_direct_ramp** (direct loop gain ramp):
+- Turns on direct loop, sets I/Q reference to direct-loop-ON initial values (SETIQSUB mode 2)
+- Enables lead compensation (if configured) during ramp
+- Ramps direct loop gain from negative offset to 0 (Section 5.5 algorithm)
+- Enables integral compensation after ramp completes
+- Then triggers comb/GFF/LFB loop engagement back in `s_lp_check`
+
+**s_comb_ramp** (comb loop gain ramp):
+- Executes comb loop transition sequence (`comblptransit`) and enables comb loop
+- Ramps comb loop gain from negative offset to 0 (Section 5.6 algorithm)
+- Restores gap voltage and gains via `directlprestore`
+- If `fba != 0`: logs final state message
+
+**s_gv_up** (gap voltage restore and beam abort reset):
+- Restores drive power via `drivepwrrestore` sequence
+- Waits for gap voltage to come within tolerance (`volt_err_sevr == 0`) or `MAX_GV_UP_WAIT` (30 seconds)
+- Resets beam abort
+- Logs final operational state
+
+**Important constraint**: Any loop on/off button press during `s_gv_up` restarts the sequence from `s_lp_check` to ensure all loop states are consistent before resetting beam abort.
 
 ---
 
@@ -661,7 +752,10 @@ Read from: `{STN}:STNVOLT:HVPS:DELTA`
 - **TUNE mode**: Always uses `delta_tune_voltage` for gap voltage control
 - **ON_CW + direct loop OFF**: Uses `delta_tune_voltage` for gap voltage control  
 - **ON_CW + direct loop ON**: Uses `delta_on_voltage` (negated) for drive power control
+- **ON_FM mode**: Uses `delta_tune_voltage`, but sets `status = HVPS_LOOP_STATUS_ON_FM` to distinguish from TUNE
 - **All other states**: HVPS loop is OFF or in PROCESS mode
+
+**Note on ON_FM**: The code explicitly checks for `station_state == STATION_ON_FM` and sets a distinct status code (`HVPS_LOOP_STATUS_ON_FM`), enabling monitoring systems to distinguish ON_FM from TUNE even though the control law is identical. The delta voltage fetch and drive tolerance checking are skipped entirely in ON_FM mode.
 
 ### 7.4 Voltage Clamping and Safety
 
@@ -678,23 +772,48 @@ elif V_requested < V_min AND delta <= 0:
     V_requested = V_min
 ```
 
-### 7.5 Readback Tolerance Protection
+### 7.5 Readback Tolerance Protection (Patience Counter)
 
-To prevent the control loop from diverging when the HVPS actual voltage does not track the setpoint, a tolerance check is implemented:
+To prevent the control loop from diverging when the HVPS actual voltage does not track the setpoint, a "patience counter" algorithm is implemented:
 
 $$\text{if } |V_{\text{readback}} - V_{\text{requested,prev}}| > \Delta V_{\text{allowed}}:$$
 $$\quad V_{\text{requested}} \leftarrow V_{\text{requested,prev}} \quad \text{(hold previous value)}$$
-$$\quad N_{\text{tol}} \leftarrow N_{\text{tol}} + 1$$
+$$\quad N_{\text{volt\_tol}} \leftarrow N_{\text{volt\_tol}} + 1$$
 
-After N_tol exceeds 10 consecutive violations, the status changes to VOLT_TOL. The counter resets when the readback comes within tolerance.
+```
+// Patience counter algorithm (from SET_VOLTAGE macro)
+if |hvps_readback - prev_hvps_request| > allowed_diff:
+    hvps_request = prev_hvps_request      // Hold previous value
+    volt_tol_count += 1
+    if volt_tol_count > HVPS_LOOP_MAX_VOLT_TOL (10):
+        status = HVPS_LOOP_STATUS_VOLT_TOL
+else:
+    volt_tol_count = 0                    // Reset counter on success
+```
 
-### 7.6 Cavity Voltage Limiting in ON Mode
+The counter resets to zero as soon as the readback comes within tolerance. Only after **10 consecutive** out-of-tolerance cycles does the status transition to VOLT_TOL. This prevents transient readback glitches from triggering false alarms.
 
-When increasing HVPS voltage would cause any cavity voltage to exceed its maximum limit:
+### 7.6 Cavity Voltage Limiting in ON Mode (Patience Counter)
+
+When operating in the ON mode with gap voltage control (TUNE or direct loop OFF), the HVPS loop monitors whether increasing voltage would exceed cavity voltage limits. This uses a similar patience counter:
 
 $$\text{if MAJOR\\_SEVERITY}(V_{\text{gap,check}}) \text{ AND } \Delta V > 0:$$
 $$\quad \text{cavv\\_lim\\_count} \leftarrow \text{cavv\\_lim\\_count} + 1$$
-$$\quad \text{if cavv\\_lim\\_count} > 10: \text{status} \leftarrow \text{CAVV\\_LIM}$$
+$$\quad \text{if } (\text{cavv\\_lim\\_count} > 10) \text{ OR } (\text{status} \neq \text{GOOD}): \text{status} \leftarrow \text{CAVV\\_LIM}$$
+
+```
+// CAVV_LIM patience counter
+if MAJOR_SEVERITY(gap_voltage_check) AND delta > 0:
+    cavv_lim_count += 1
+    if cavv_lim_count > HVPS_LOOP_MAX_VOLT_TOL (10) OR status != GOOD:
+        status = HVPS_LOOP_STATUS_CAVV_LIM
+else:
+    cavv_lim_count = 0                    // Reset counter on success
+```
+
+**Note**: The `status != GOOD` check means that if the loop was already in a non-nominal status, the CAVV_LIM is reported immediately without waiting for the patience count. This provides faster fault escalation when multiple conditions are degraded simultaneously.
+
+An identical patience counter mechanism is used for drive power tolerance checking when in ON_CW with direct loop ON (`dp_error_stat` with MAJOR severity).
 
 ### 7.7 Transfer Function
 
@@ -711,6 +830,8 @@ where H_limit(z) represents the clamping and tolerance checking nonlinearities. 
 ### 8.1 Overview
 
 The tuner loop (`rf_tuner_loop.st`, authored by S. Allison, 1996) controls the mechanical cavity tuner via a stepper motor to keep the cavity resonant frequency aligned with the RF drive frequency. One instance runs per cavity (reentrant, `option +r`).
+
+**Timing**: The tuner loop waits for a `meas_ready` event or a maximum idle timeout of `LOOP_MAX_DELAY = 60.0` seconds. This is significantly longer than the DAC and HVPS loop timeouts (10.0 seconds each) because the mechanical tuner system operates on a much slower timescale and the load angle measurement is only meaningful after the motor has settled.
 
 ### 8.2 Control Law
 
@@ -757,6 +878,18 @@ The loop verifies that the stepper motor executes the commanded move by checking
 
 **Stuck detection**:
 - If the motor has not finished moving after LOOP_NOMOV_COUNT (5) consecutive cycles, status changes to LOOP_SM_MOVE_STATUS
+
+### 8.4a State-Dependent Activation
+
+The tuner loop activates for **any non-OFF station state** (PARK, TUNE, ON_FM, ON_CW):
+- `loop_off → loop_on`: transitions when `station_state != STATION_OFF`
+- `loop_on → loop_off`: transitions when `station_state == STATION_OFF`
+
+In PARK mode, the tuner behavior differs:
+- Uses `posn_park_home` instead of `posn_on_home` for homing position
+- Uses separate reset/home event flags (`loop_reset_park_ef`, `loop_home_park_ef`)
+- Load angle phase offset processing is **skipped** after tuner updates in PARK mode
+- Load angle severity checking (which would close the loop) is only performed when the station was previously NOT in PARK and the previous loop control was ON
 
 ### 8.5 Measurement Gating
 
@@ -905,7 +1038,9 @@ The rf_statesLP sequence enforces this through event flag checking.
 
 ### 11.1 Overview
 
-The calibration system (`rf_calib.st`, authored by R. Claus, 1997; rewritten by M. Laznovsky, 2004) performs automated offset nulling and IQ matrix calibration for the RFP module's digital signal processing hardware.
+The calibration system (`rf_calib.st`, program name `P2RF_Calib`, authored by R. Claus, 1997; rewritten by M. Laznovsky, 2004) performs automated offset nulling and IQ matrix calibration for the RFP module's digital signal processing hardware. The 2004 rewrite by M. Laznovsky replaced repeated code with macros, reduced from ~4630 lines to ~2800 (now ~3345 after additions), and reduced calibration run time from ~20 minutes to ~3 minutes.
+
+**Calibration state set**: The `P2RF_Calib` program implements a single state set with 29 states: Init → Startup → CombCheck → Startup2 → Setup → ZeroCavMults → ZeroDirMults → DirectInitial → ZeroCombMults → Combiner → Direct → SummingNodeI → SummingNodeQ → GainStageI → GainStageQ → TuneStage → ZeroKlysMults → DiffNodeOffsets → KlysStage → CompStage → Direct_Final → CombStage → KlysDemod → NullModulator → Finish → Done, with Abort and Abend error states. States `DiffNodeOffsets` and `KlysDemod` were added in September 2004.
 
 ### 11.2 Calibration Measurement Principle
 
@@ -1256,7 +1391,7 @@ The system decouples naturally because:
 
 The legacy design includes several robustness features:
 
-1. **Timeout fallbacks**: All loops process at least every 10 seconds regardless of event activity
+1. **Timeout fallbacks**: All loops process at least every T_max seconds regardless of event activity (10s for DAC/HVPS, 60s for tuner)
 2. **Severity gating**: Invalid measurements are rejected, preventing control action on bad data
 3. **Status tracking**: Each loop maintains detailed status for operator diagnostics
 4. **Anti-windup**: DAC and HVPS clamping prevents integrator windup at limits
@@ -1410,8 +1545,8 @@ The legacy design includes several robustness features:
 | `rf_tuner_loop_defs.h` | 80 | S. Allison | 1996 | Tuner loop constants |
 | `rf_tuner_loop_macs.h` | 90 | S. Allison | 1996 | Tuner loop macros |
 | `rf_tuner_loop_pvs.h` | 136 | S. Allison | 1996 | Tuner loop PV declarations |
-| `rf_calib.st` | 3345 | R. Claus, P. Corredoura, M. Laznovsky | 1997–2005 | Calibration sequences |
-| `rf_msgs.st` | 352 | S. Allison, R.C. Sass | 1997–2000 | Message logging & TAXI |
+| `rf_calib.st` | 3345 | R. Claus, P. Corredoura, M. Laznovsky | 1997–2005 | Calibration sequences (program: `P2RF_Calib`) |
+| `rf_msgs.st` | 352 | S. Allison, R.C. Sass | 1997–2000 | Message logging & TAXI (program: `rf_msgs`) |
 | `rf_loop_defs.h` | 14 | — | — | Shared loop definitions |
 | `rf_loop_macs.h` | 12 | — | — | Shared severity macros |
 
@@ -1419,6 +1554,31 @@ The legacy design includes several robustness features:
 
 ---
 
+## Appendix D — Document Change Log
+
+### Version 1.1 (2026-03-19) — Source Code Cross-Review
+
+Changes made after line-by-line cross-check of design document against all source code in `spear-rf-code-legacy/rfApp/src/seq/`:
+
+| Section | Change | Severity |
+|---------|--------|----------|
+| §1 Parameters | Added separate tuner max idle timeout (60s) — DAC/HVPS use 10s, tuner uses 60s | Medium |
+| §2.1 | Corrected calibration program name to `P2RF_Calib`; added `RING`, `REG`, `IOC` macros; added registrar names | High |
+| §5.4.4 | **NEW**: Shutdown sequence (s_go_off) — TUNE pass-through, HVPS ramp-down, intcomp disable | High |
+| §5.4.5 | **NEW**: PARK sequence (s_go_park) | Medium |
+| §5.4.6–5.4.7 | **NEW**: ON_CW→TUNE and ON_FM→TUNE transition sequences | Medium |
+| §5.7 | **NEW**: rf_statesLP state set — s_lp_check, s_gv_down, s_direct_ramp, s_comb_ramp, s_gv_up | High |
+| §7.3 | Added ON_FM status distinction (`HVPS_LOOP_STATUS_ON_FM`) | Medium |
+| §7.5 | Expanded readback tolerance with patience counter pseudocode | Medium |
+| §7.6 | Expanded CAVV_LIM with patience counter and fast-escalation logic | Medium |
+| §8.1 | Added tuner timing note (60s max delay) | Low |
+| §8.4a | **NEW**: Tuner state-dependent activation and PARK mode differences | Medium |
+| §11.1 | Corrected program name to `P2RF_Calib`; added 29-state listing | High |
+| §15.4 | Corrected timeout description to distinguish loop-specific timeouts | Low |
+| Appendix C | Added program names for rf_calib.st and rf_msgs.st | Low |
+
+---
+
 *End of Document*
 
-*This technical design report was generated from a comprehensive code review of the legacy LLRF control system source files located in `llrf/legacyLLRF/`. All mathematical models and control descriptions are derived directly from analysis of the SNL state machine implementations and their associated header files.*
+*This technical design report was generated from a comprehensive code review of the legacy LLRF control system source files located in `spear-rf-code-legacy/rfApp/src/seq/`. Version 1.1 corrections verified against source code cross-review (2026-03-19).*
