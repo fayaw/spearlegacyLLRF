@@ -1,7 +1,7 @@
 # Complete File Inventory — 253 Files with Upgrade Verdicts
 
-**Document**: 01 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
-**(Rev 2 — corrected for PEP-II module identification and upgrade architecture)**
+**Document**: 01 of 09 | **Series**: SPEAR3 LLRF Legacy Code Analysis
+**(Rev 3 — corrected legacy state machine names in rf_states.st entry)**
 
 **Verdict Key**: **ELIMINATED** = Replaced by LLRF9 or new hardware | **PEP-II ONLY** = Not used in SPEAR3 | **SPEC-EXTRACT** = Behavior spec for upgrade software | **REFERENCE** = Behavior spec for new code | **REUSE** = Directly reusable | **DONE** = Already replaced
 
@@ -106,7 +106,7 @@
 
 | File | Lines | Verdict | Upgrade Target | Notes |
 |------|-------|---------|---------------|-------|
-| `rf_states.st` | 2,227 | **SPEC-EXTRACT** | Python/EPICS coordinator | Master state machine: OFF→INITIALIZE→STANDBY→ON_CW→FAULT→FAULT_CLEAR. **Primary specification for the upgrade coordinator.** |
+| `rf_states.st` | 2,227 | **SPEC-EXTRACT** | Python/EPICS coordinator | Master state machine with 5 primary states: **OFF→PARK→TUNE→ON_FM→ON_CW** (per `rf_station_state.h`: OFF=0, PARK=1, TUNE=2, ON_FM=3, ON_CW=4) and 17 transition states (s_go_off, s_go_park, s_go_tune, s_go_on_fm, s_go_on_cw, s_go_tune_to_on_cw, s_comb_ramp, s_direct_ramp, s_gv_up, s_gv_down, s_lp_check, s_faultfiles, s_go_stn_reset, s_go_tickleoff, s_go_tickleon, go_on_cw_to_tune, go_on_fm_to_tune). 3 state sets: rf_states (main), rf_statesLP (loop protection), rf_statesFF (fault files). **Primary specification for the upgrade coordinator.** |
 | `rf_hvps_loop.st` | 343 | **SPEC-EXTRACT** | CompactLogix PLC code | HVPS supervisory: voltage regulation, crowbar, contactor. **Specification for new PLC ladder logic.** |
 | `rf_tuner_loop.st` | 555 | **SPEC-EXTRACT** | LLRF9 tuner + Python load-angle | Tuner motor control. 4 instances. **LLRF9 has built-in tuner PVs; Python handles load-angle offset.** |
 | `rf_calib.st` | 3,345 | REFERENCE | LLRF9 built-in calibration | Largest SNL. DAC offset nulling, cavity modulator calibration. **LLRF9's Dmitry software handles calibration.** Verify equivalence. |
