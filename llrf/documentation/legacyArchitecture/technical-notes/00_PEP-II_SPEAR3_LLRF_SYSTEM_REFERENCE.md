@@ -273,7 +273,7 @@ The LLRF system implements a **multi-rate hierarchical feedback architecture**:
 ```
 BANDWIDTH / RATE        LOOP                      FUNCTION
 ══════════════════════════════════════════════════════════════════
-~1 MHz (analog)    ┌─ Direct Loop ──────────── Cavity field stabilization
+~800 kHz (analog)   ┌─ Direct Loop ──────────── Cavity field stabilization
                    │                            (impedance reduction ~100×)
                    │
 ~10 kHz (analog/   ├─ Comb Loop [PEP-II ONLY] ─────────────── Revolution harmonic filtering
@@ -285,11 +285,11 @@ BANDWIDTH / RATE        LOOP                      FUNCTION
 ~10 kHz (analog)   ├─ Lead/Integral Comp ────── Phase margin improvement
                    │                            and steady-state accuracy
                    │
-~1 Hz (EPICS)      ├─ DAC Loop ──────────────── Setpoint adjustment
-                   │                            (drive power / gap voltage)
-                   │
-~0.5 Hz (EPICS)    ├─ HVPS Loop ─────────────── Klystron beam voltage
+~1 Hz (EPICS)      ├─ HVPS Loop ─────────────── Klystron beam voltage
                    │                            regulation
+                   │
+~0.1 Hz (EPICS)    ├─ DAC Loop ──────────────── Setpoint adjustment
+                   │                            (drive power / gap voltage)
                    │
 ~0.1 Hz (EPICS)    ├─ Tuner Loop ────────────── Cavity resonance frequency
                    │                            (stepper motor)
@@ -302,8 +302,8 @@ Gain tracking      └─ Klystron Sat Loop ─────── Baseband modul
 **Critical stability requirement**: Each loop bandwidth must be separated by at least one decade to prevent inter-loop coupling:
 
 ```
-f_BW(direct) >> f_BW(comb) >> f_BW(ripple) >> f_BW(DAC) >> f_BW(tuner)
-  ~1 MHz        ~10 kHz       ~50 kHz         ~1 Hz        ~0.1 Hz
+f_BW(direct) >> f_BW(comb) >> f_BW(ripple) >> f_BW(HVPS) >> f_BW(DAC) >> f_BW(tuner)
+  ~800 kHz      ~10 kHz       ~50 kHz         ~1 Hz         ~0.1 Hz      ~0.01 Hz
 ```
 
 **Source**: Corredoura SLAC-PUB-8498; Fox et al. Phys. Rev. ST Accel. Beams 13, 052802 (2010)
@@ -335,7 +335,7 @@ f_BW(direct) >> f_BW(comb) >> f_BW(ripple) >> f_BW(DAC) >> f_BW(tuner)
 ```
 
 **Key Parameters**:
-- Bandwidth: ~1 MHz (limited by group delay through klystron + cavity)
+- Bandwidth: ~800 kHz (limited by group delay through klystron + cavity)
 - Impedance reduction: ~40 dB (factor of 100)
 - Phase margin: Must be carefully set to avoid instability
 - Complication: Loss of cavity probe signal causes immediate saturation

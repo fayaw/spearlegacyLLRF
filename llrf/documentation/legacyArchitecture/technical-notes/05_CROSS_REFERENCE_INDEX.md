@@ -21,19 +21,21 @@
 
 ### 1.2 Feedback Loops
 
+> **Note**: All feedback loop design details are contained in a single source document: `feedbackLoopDescriptionps3403305200.pdf` (PS-340-330-52-R0). No standalone module-level specification documents for individual loops exist in the legacy PDF archive. Published papers provide additional theoretical context.
+
 | Topic | Legacy PDF | Published Paper | Source Code | This Package |
 |-------|-----------|----------------|-------------|--------------|
 | Complete loop architecture | `feedbackLoopDescriptionps3403305200.pdf` | Corredoura 1999, Fig. 3 | All `.st` | `01_...LOOPS.md` §1 |
-| Direct (wideband) loop | `ps3403305200.pdf` pp.1-3 (est.) | Corredoura 1999; Fox 2010 §II | `rf_states.st` | `01_...LOOPS.md` §3 |
-| Comb (narrowband) loop | `ps3403305600.pdf` | Corredoura 1999; Fox 2010 §III | `rf_calib.st` | `01_...LOOPS.md` §4 |
-| Ripple loop | `ps3403305800.pdf` | Corredoura 2000 §6 | `rf_dac_loop.st` | `01_...LOOPS.md` §5 |
-| Lead compensation | `ps3403305700.pdf` | — | `rf_states.st` | `01_...LOOPS.md` §6 |
-| Integral compensation | `ps3403305700.pdf` | — | `rf_states.st` | `01_...LOOPS.md` §6 |
-| Tuner loop | `ps3403306001.pdf` | Corredoura 1999 | `rf_tuner_loop.st` | `01_...LOOPS.md` §7 |
-| DAC loop (setpoint) | `ps3403305300.pdf` | — | `rf_dac_loop.st` | `01_...LOOPS.md` §8 |
-| HVPS loop (voltage) | `ps3403305400.pdf` | — | `rf_hvps_loop.st` | `01_...LOOPS.md` §9 |
-| GVF / feed-forward | `ps3403305900.pdf` | Corredoura 1999 (woofer) | `rf_msgs.st` (TAXI) | `01_...LOOPS.md` §10 |
-| Loop stability analysis | `ps3403305200.pdf` | Rivetta 2007; Fox 2010 | — | `01_...LOOPS.md` §11 |
+| Direct (wideband) loop | `feedbackLoopDescriptionps3403305200.pdf` pp. 3-4 | Corredoura 1999; Fox 2010 §II | `rf_states.st` | `01_...LOOPS.md` §3 |
+| Comb (narrowband) loop | `feedbackLoopDescriptionps3403305200.pdf` p. 5 | Corredoura 1999; Fox 2010 §III | `rf_calib.st` | `01_...LOOPS.md` §4 |
+| Ripple loop | `feedbackLoopDescriptionps3403305200.pdf` p. 6 | Corredoura 2000 §6 | `rf_dac_loop.st` | `01_...LOOPS.md` §5 |
+| Lead compensation | `feedbackLoopDescriptionps3403305200.pdf` p. 4 | — | `rf_states.st` | `01_...LOOPS.md` §6 |
+| Integral compensation | `feedbackLoopDescriptionps3403305200.pdf` p. 4 | — | `rf_states.st` | `01_...LOOPS.md` §6 |
+| Tuner loop | `feedbackLoopDescriptionps3403305200.pdf` p. 5 | Corredoura 1999 | `rf_tuner_loop.st` | `01_...LOOPS.md` §7 |
+| DAC loop (setpoint) | `feedbackLoopDescriptionps3403305200.pdf` p. 6 | — | `rf_dac_loop.st` | `01_...LOOPS.md` §8 |
+| HVPS loop (voltage) | `feedbackLoopDescriptionps3403305200.pdf` p. 6 | — | `rf_hvps_loop.st` | `01_...LOOPS.md` §9 |
+| GVF / feed-forward | `feedbackLoopDescriptionps3403305200.pdf` pp. 6-7 | Corredoura 1999 (woofer) | `rf_msgs.st` (TAXI) | `01_...LOOPS.md` §10 |
+| Loop stability analysis | `feedbackLoopDescriptionps3403305200.pdf` | Rivetta 2007; Fox 2010 | — | `01_...LOOPS.md` §11 |
 
 ### 1.3 Hardware Modules
 
@@ -41,19 +43,19 @@
 |-------|-----------|----------------|-------------|--------------|
 | RFP module | `ps3403305100.pdf` | Corredoura 1999 | `rf_calib.st` (p2RfRfpDef.h — PEP-II file, not in repo) | `02_...HARDWARE.md` §2.1 |
 | IQA modules | — | Ziomek & Corredoura 1995 | — | `02_...HARDWARE.md` §2.2 |
-| Comb filter modules | `ps3403305600.pdf` | — | `rf_calib.st` | `02_...HARDWARE.md` §2.3 |
-| GVF module | `ps3403305900.pdf` | — | `rf_dac_loop.st`, `rf_msgs.st` | `02_...HARDWARE.md` §2.4 |
+| Comb filter modules | `feedbackLoopDescriptionps3403305200.pdf` p. 5 | Corredoura 1999 | `rf_calib.st` | `02_...HARDWARE.md` §2.3 |
+| GVF module | `feedbackLoopDescriptionps3403305200.pdf` pp. 6-7 | Corredoura 1999 | `rf_dac_loop.st`, `rf_msgs.st` | `02_...HARDWARE.md` §2.4 |
 | CLK/RF distribution | — | — | — | `02_...HARDWARE.md` §2.5 |
 | ARC/Interlock (AIM) | — | — | `rf_states.st`, `rf_msgs.st` | `02_...HARDWARE.md` §2.6 |
-| Drive chain / modulator | `ps3403305503.pdf` | Corredoura 2000, Figs. 4-6 | — | `02_...HARDWARE.md` §4 |
+| Drive chain / modulator | — (no standalone spec; `ps3403305503.pdf` is a safety survey) | Corredoura 2000, Figs. 4-6 | — | `02_...HARDWARE.md` §4 |
 | Interface chassis | `legacyInterfaceModules/*.pdf` | — | — | `03_...CATALOG.md` §3.1 |
 
 ### 1.4 Operational Procedures
 
 | Topic | Legacy PDF | Published Paper | Source Code | This Package |
 |-------|-----------|----------------|-------------|--------------|
-| System commissioning | `ps3403306102.pdf` | — | `rf_calib.st`, `rf_states.st` | — |
-| Calibration sequences | `ps3403306102.pdf` | — | `rf_calib.st` | `A_LEGACY_...DESIGN.md` |
+| NIR safety procedure | `ps3403306102.pdf` (PS-340-330-61-R2) | — | — | — |
+| Calibration sequences | `ps3403305300.pdf` (PS-340-330-53), `ps3403305600.pdf` (PS-340-330-56) | — | `rf_calib.st` | `A_LEGACY_...DESIGN.md` |
 | State machine (startup) | — | Allison & Claus 1997 | `rf_states.st` | `A_LEGACY_...DESIGN.md` |
 | Fault recovery | — | Corredoura 2000 §2 | `rf_states.st`, `rf_msgs.st` | `04_...SYNTHESIS.md` §3 |
 | Fast turn-on | — | Corredoura 2000 §2 | `rf_states.st` | `04_...SYNTHESIS.md` §3 |

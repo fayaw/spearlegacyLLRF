@@ -797,6 +797,7 @@ See `Designs/0_PHYSICAL_DESIGN_REPORT.md`, Section 12 for the complete signal pa
 | Full Power Test & Survey | PS-340-330-57-R0 | Ionizing/non-ionizing survey |
 | Cavity Phasing | PS-340-330-58-R0 | Initial cavity distance adjustment |
 | Turn-on Procedure | PS-340-330-59-R0 | Standard turn-on |
+| Bellow Cavity Phasing | PS-340-330-60-R1 | Fine-tune cavity phase after initial phasing |
 | Non-Ionizing Radiation Safety | PS-340-330-61-R2 | SPEAR3 uses similar procedure |
 | Wiring to Local Panel | WD-340-330-02-R0 | External systems → cross-connects → Local Panel |
 | Cavity Junction Box | WD-340-330-03-R0 | Tuner drive, limit switches, IR sensor |

@@ -459,7 +459,7 @@ From Corredoura 2000, two limiting circuits were added:
 
 2. **Drive power limiter**: Uses existing IQA module linear detector to detect drive power. If power exceeds a programmable setpoint, both I and Q drive signals are reduced proportionally (maintaining phase) to prevent klystron saturation.
 
-**Cross-ref PDF**: `ps3403305503.pdf` (4 pages) — likely contains the drive chain schematic with limiting circuits.
+**Cross-ref PDF**: `ps3403305503.pdf` (4 pages) — RF Station Safety Survey (PS-340-330-55-R3). ⚠️ Note: This document is a safety survey form, not a drive chain specification. Drive chain design details come from Corredoura 2000, Figs. 4-6; no standalone drive chain spec was found in the legacy archive.
 
 ---
 
@@ -514,7 +514,7 @@ Frequency response peaks at: f = n × f_rev (n = 0, 1, 2, ...)
 - Iterative offset nulling to minimize DC offsets
 - Load/Run/Gain control via PVs
 
-**Cross-ref PDF**: `ps3403305600.pdf` (4 pages) — likely comb filter module specification.
+**Cross-ref PDF**: `ps3403305600.pdf` (4 pages) — RF Station Coupling & Cable Calibration Procedure (PS-340-330-56-R0). ⚠️ Note: This document is a cable loss measurement procedure, not a comb filter spec. Comb loop design details come from `feedbackLoopDescriptionps3403305200.pdf` (p. 5) and Corredoura SLAC-PUB-8498.
 
 ---
 
@@ -553,7 +553,7 @@ Analog Integrator Approach:
 - `ripple_loop_load` PV: Trigger to load ripple loop coefficients
 - `ripple_loop_ready_ef` event flag: Gain tracking at slower rate than main DAC loop
 
-**Cross-ref PDF**: `ps3403305800.pdf` (4 pages) — likely ripple loop specification.
+**Cross-ref PDF**: `ps3403305800.pdf` (4 pages) — RF Station Cavity Phasing Procedure (PS-340-330-58-R0). ⚠️ Note: This document is a cavity phasing procedure, not a ripple loop spec. Ripple loop design details come from `feedbackLoopDescriptionps3403305200.pdf` (p. 6) and Corredoura 2000 §6.
 
 ---
 
@@ -586,7 +586,7 @@ Integral Compensation: H_int(s) = 1 + 1/(s·τ_int)
 - `INTCOMP` (integral compensation) is turned OFF in the OFF state (per Laznovsky 2004 modification)
 - Lead comp enable/disable: Part of ON_CW state entry sequence
 
-**Cross-ref PDF**: `ps3403305700.pdf` (2 pages) — likely lead/integral compensation specification.
+**Cross-ref PDF**: `ps3403305700.pdf` (2 pages) — RF Station Full Power Test & Survey (PS-340-330-57-R0). ⚠️ Note: This document is a full power test procedure, not a compensation spec. Lead/integral compensation circuit details are described only in Corredoura SLAC-PUB-8498 and the source code (`rf_states.st`).
 
 ---
 
@@ -627,7 +627,7 @@ The SPEAR3 upgrade replaces the SLO-SYN stepper system with a **Galil DMC-4143**
 - EPICS motor record integration
 - Integration with LLRF9 phase feedback loop
 
-**Cross-ref PDF**: `ps3403306001.pdf` (5 pages) — likely tuner loop specification.
+**Cross-ref PDF**: `ps3403306001.pdf` (5 pages) — Bellow Cavity Phasing Procedure (PS-340-330-60-R1). ⚠️ Note: This document is a cavity phasing procedure, not a tuner loop spec. Tuner loop design details come from `feedbackLoopDescriptionps3403305200.pdf` (p. 5) and Corredoura SLAC-PUB-8498.
 **Cross-ref source**: `rf_tuner_loop.st`, `rf_tuner_loop_defs.h`, `rf_tuner_loop_macs.h`, `rf_tuner_loop_pvs.h`
 
 ---
@@ -668,7 +668,7 @@ From `rf_dac_loop_macs.h` — the `DAC_LOOP_SET` macro:
 - Maximum interval: 10 seconds (guaranteed update even without trigger)
 - Loop period: ~0.5 seconds (driven by EPICS database scan rate)
 
-**Cross-ref PDF**: `ps3403305300.pdf` (4 pages) — likely DAC loop specification.
+**Cross-ref PDF**: `ps3403305300.pdf` (4 pages) — RF Cavity Low Power Calibration Procedure (PS-340-330-53-R0). ⚠️ Note: This document is a cavity calibration procedure, not a DAC loop spec. DAC loop design details come from `feedbackLoopDescriptionps3403305200.pdf` (p. 6) and the source code (`rf_dac_loop.st`).
 
 ---
 
@@ -713,7 +713,7 @@ From `rf_hvps_loop_defs.h`:
 - HVPS states: OFF (0), PROC (1), ON (2)
 - Loop controls: OFF (0), PROC (1), ON (2)
 
-**Cross-ref PDF**: `ps3403305400.pdf` (2 pages) — likely HVPS loop specification.
+**Cross-ref PDF**: `ps3403305400.pdf` (2 pages) — RF Station Safety Certification Check-Off List (PS-340-330-54-R0). ⚠️ Note: This document is a safety certification checklist, not an HVPS loop spec. HVPS loop design details come from `feedbackLoopDescriptionps3403305200.pdf` (p. 6) and the source code (`rf_hvps_loop.st`).
 **Cross-ref source**: `rf_hvps_loop.st`, `rf_hvps_loop_defs.h`, `rf_hvps_loop_macs.h`, `rf_hvps_loop_pvs.h`
 
 ---
@@ -747,7 +747,7 @@ and resync the LFB if it's set
 
 **Note**: This code exists in the SPEAR3 legacy software (`rf_msgs.st`) but the TAXI link was never connected at SPEAR3.
 
-**Cross-ref PDF**: `ps3403305900.pdf` (7 pages) — GVF module specification (PEP-II design only).
+**Cross-ref PDF**: `ps3403305900.pdf` (7 pages) — RF Station Turn-On Procedure (PS-340-330-59-R0). ⚠️ Note: This document is a station turn-on procedure (including EPICS panel screenshots), not a GVF module spec. GVF design details come from `feedbackLoopDescriptionps3403305200.pdf` (pp. 6-7) and Corredoura SLAC-PUB-8498.
 
 ---
 
@@ -796,23 +796,25 @@ This model validated the LLRF design and explored stability limits at higher cur
 
 ## 12. Cross-Reference to Legacy PDFs
 
-| PDF File | Pages | Likely Content (Reconstructed) |
-|----------|-------|-------------------------------|
-| `feedbackLoopDescriptionps3403305200.pdf` | 8 | Complete feedback loop description — this document reconstructs its content |
-| `ps3403305200.pdf` | 8 | Same as above (duplicate or revision) |
-| `ps3403305100.pdf` | 11 | Main LLRF system specification (signal flow, module interconnection) |
-| `ps3403305300.pdf` | 4 | DAC loop specification |
-| `ps3403305400.pdf` | 2 | HVPS loop specification |
-| `ps3403305503.pdf` | 4 | Drive chain / baseband modulator specification |
-| `ps3403305600.pdf` | 4 | Comb filter module specification |
-| `ps3403305700.pdf` | 2 | Lead/integral compensation specification |
-| `ps3403305800.pdf` | 4 | Ripple loop specification |
-| `ps3403305900.pdf` | 7 | GVF module specification |
-| `ps3403306001.pdf` | 5 | Tuner loop specification |
-| `ps3403306102.pdf` | 13 | Complete system test/commissioning procedure |
-| `bd3403300000.pdf` | 1 | System block diagram (top level) |
-| `bd3403300100.pdf` | 1 | Subsystem block diagram |
-| `blockDiagrambd3403290100-1.pdf` | 1 | Additional block diagram (possibly VXI crate layout) |
+| PDF File | Pages | Verified Content (OCR-confirmed) |
+|----------|-------|----------------------------------|
+| `feedbackLoopDescriptionps3403305200.pdf` | 8 | **LLRF Feedback Loop Description (PS-340-330-52-R0)** — CRITICAL: describes all loops (Direct, Comb, Tuner, HVPS, DAC, Ripple, Gap FF, LFB Woofer). This document is the primary source reconstructed in this technical note |
+| `ps3403305200.pdf` | 8 | Same as above (duplicate copy) |
+| `ps3403305100.pdf` | 11 | **RF System Description (PS-340-330-51-R0)** — system overview, parameter tables, station layouts |
+| `ps3403305300.pdf` | 4 | **Cavity Low Power Calibration Procedure (PS-340-330-53-R0)** — cold cavity measurement |
+| `ps3403305400.pdf` | 2 | **Safety Certification Check-Off List (PS-340-330-54-R0)** — waveguide flange torque, interlock test |
+| `ps3403305503.pdf` | 4 | **Safety Survey (PS-340-330-55-R3)** — station safety survey form |
+| `ps3403305600.pdf` | 4 | **Coupling & Cable Calibration Procedure (PS-340-330-56-R0)** — cable loss data at 476 MHz |
+| `ps3403305700.pdf` | 2 | **Full Power Test & Survey (PS-340-330-57-R0)** — klystron full-power test with SHORT plate |
+| `ps3403305800.pdf` | 4 | **Cavity Phasing Procedure (PS-340-330-58-R0)** — cavity-to-beam phase optimization |
+| `ps3403305900.pdf` | 7 | **Turn-On Procedure (PS-340-330-59-R0)** — complete startup sequence, EPICS panel screenshots |
+| `ps3403306001.pdf` | 5 | **Bellow Cavity Phasing Procedure (PS-340-330-60-R1)** — fine-tune cavity phase |
+| `ps3403306102.pdf` | 13 | **Non-Ionizing Radiation Safety Procedure (PS-340-330-61-R2)** — NIR survey, waveguide pressurization |
+| `bd3403300000.pdf` | 1 | **PEP-II LER RF Station block diagram (BD-340-330-00)** — top-level station architecture |
+| `bd3403300100.pdf` | 1 | **PEP-II Low Level RF Configuration (BD-340-330-01)** — VXI module interconnection |
+| `blockDiagrambd3403290100-1.pdf` | 1 | **PEP-II Low Level RF block diagram** — RF modulator, amplifier chain, system I/Q |
+
+> **⚠️ Important**: No standalone module-level design specifications (DAC loop, HVPS loop, comb filter, ripple loop, drive chain, lead/integral compensation) were found in this legacy PDF archive. All loop design details in this document are sourced from `feedbackLoopDescriptionps3403305200.pdf` (PS-340-330-52-R0), published papers (Corredoura 1999, 2000; Fox 2010; Rivetta 2007), and the legacy source code.
 
 ---
 
