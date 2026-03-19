@@ -9,7 +9,7 @@
 
 This directory contains a comprehensive technical documentation package reconstructing the PEP-II LLRF system architecture and its ongoing upgrade for SPEAR3. The legacy design documents are image-based PDFs (scanned engineering drawings) that cannot be directly text-searched. This package provides AI-ingestible technical notes that reconstruct, synthesize, and cross-reference the legacy knowledge.
 
-**Version 2.0** extends the original package with:
+**Version 3.0** extends the original package with:
 - Integration of the Physical Design Report (`Designs/0_PHYSICAL_DESIGN_REPORT.md`)
 - Comprehensive mathematical models (beam loading, Robinson instability, feedback loop transfer functions)
 - Extraction and integration of all engineering design documents (12 docx files + 2 xlsx files)
@@ -80,6 +80,8 @@ See `05_CROSS_REFERENCE_INDEX.md` §5.5 and `04_LITERATURE_SYNTHESIS.md` §10 fo
 
 | 2.2 | 2026-03-19 | Transcription cross-reference: All 15 legacy PDFs now transcribed (in `legacy-pdf-transcriptions/`). +PEP-II nominal parameter table from PS-340-330-51 (shunt impedance, loaded Q, sync phase, detuning). +Station count disambiguation (5 nominal HER vs 7 max). +Equipment inventory and cooling system details. +Direct loop sub-functions (integral comp, lead comp, frequency offset tracking). +Alternate operating modes (Direct Loop OFF). +Optimized Station Phasing Routine parameters. +Cavity processing limits. +Signal level budget from BD-340-330-01. +PLC-5 I/O configuration (64 DI, 64 DO, 112 TC, 32 AI). +DH-485 peripheral details. +EPICS panel reference (4 panels). +Quantitative operational data from PS-53 through PS-61 (calibration constants, safety limits, turn-on parameters, phasing data). +Complete transcription cross-reference table in Doc 05. ~3,800+ lines total. |
 
+| 3.0 | 2026-03-19 | Cross-reference deep review against all transcriptions. **Factual corrections**: (1) Comb Loop bandwidth clarified — ~2 MHz overall span with ~10 kHz per-tooth bandwidth (previously listed as ~10 kHz, conflating per-tooth BW with overall span; cross-ref PS-52 transcription). (2) Ripple Loop actual vs. intended use distinguished — designed for HVPS ripple cancellation but deployed primarily as slow phase tracker compensating for klystron phase shift across cathode voltage changes (cross-ref PS-52 transcription). (3) AT&T DSP1610 processor identified in Ripple Loop architecture section (previously only in Doc 02 §12). **Missing details added**: (4) Cavity phasing pattern (A=0°, C=+90°, D=0°) with test setup details from PS-58/PS-60 transcriptions. (5) Bellow cross-coupling explanation expanded (Cav C adjustment affects Cav D). (6) MATLAB commissioning routines documented (Make Equal, Make Poly, Config Comb, Tune Cavs, ConfWoofer) from PS-52 transcription. (7) HER vs LER IQA module count distinguished (2 for LER, 3 for HER/SPEAR3). (8) HER block diagram (BD-340-329-01) signal levels cross-referenced against LER. **Version headers** updated across all 6 documents. |
+
 ---
 
-*Generated: 2026-03-19 | Version 2.2*
+*Generated: 2026-03-19 | Version 3.0*

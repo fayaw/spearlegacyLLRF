@@ -1,8 +1,8 @@
 # PEP-II / SPEAR3 LLRF — Literature Synthesis and Operational Insights
 
 **Document Number**: LLRF-REF-005
-**Version**: 1.0
-**Date**: 2026-03-18
+**Version**: 2.0
+**Date**: 2026-03-19
 
 ---
 
@@ -334,6 +334,21 @@ Nominal coupling and loss values for all RF signal paths at 476 MHz:
 
 ### 9a.5 Cavity Phasing Parameters (PS-340-330-58, PS-340-330-60)
 
+**Cavity Phase Relationships (HER 4-cavity station)**:
+
+In a 4-cavity station, the cavities are labeled D–C–B–A (upstream to downstream). The waveguide path lengths between cavities introduce fixed phase offsets. The RF phase at each cavity must be measured relative to cavity A (reference) and corrected by adjusting waveguide bellows:
+
+| Cavity | Position | Nominal Phase (rel. to A) | Notes |
+|--------|----------|:------------------------:|-------|
+| A | 0 (Ref.) | **0°** | Reference cavity |
+| B | — | — | OCR partially illegible; see source PDF |
+| C | — | **+90°** | Phase offset from waveguide path length |
+| D | — | **0°** | Returns to in-phase with A |
+
+> **Note**: The full cavity distance/wavelength table in PS-58 was partially illegible in the OCR transcription. Consult the original `ps3403305800.pdf` for exact waveguide path lengths. The nominal phase values for cavities A, C, and D were successfully extracted.
+
+**Bellow Adjustment Parameters**:
+
 | Parameter | Value |
 |-----------|-------|
 | PEP waveguide electrical spacing | **27.6 inches** (PEP standard) |
@@ -345,7 +360,9 @@ Nominal coupling and loss values for all RF signal paths at 476 MHz:
 | Typical fixed tuner temperature | 36–38°C (operating) |
 | Typical movable tuner temperature | 33–39°C (operating) |
 
-> **Note**: Bellow #1 adjustment for cavity C also shifts cavity D — counter-adjustment of bellow #3 is required.
+> **Bellow cross-coupling**: Bellow #1 adjustment for cavity C also shifts cavity D — counter-adjustment of bellow #3 is required. This mechanical coupling arises because bellows #1 and #3 share a common waveguide section through the first Magic-Tee. Any phasing procedure must account for this cross-coupling by iterating adjustments between cavity C and cavity D until both converge.
+
+> **Test setup**: Drive amplifier (120 W, 50 dB gain) connects via waveguide transition. HP 8753 network analyzer measures S11 phase at 476 MHz, 50 kHz span, 1602 points. Cavities set to resonance by manual tuner adjustment (move tuner down as last step). All tuner motor drive cables disconnected during phasing.
 
 > **Sources**: `legacy-pdf-transcriptions/operational-procedures/PS-340-330-58_RF_Station_Cavity_Phasing.md`, `PS-340-330-60_Bellow_Cavity_Phasing.md`
 

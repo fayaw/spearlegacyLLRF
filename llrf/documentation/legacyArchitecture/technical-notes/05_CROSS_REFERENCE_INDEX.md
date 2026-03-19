@@ -1,8 +1,8 @@
 # Cross-Reference Index — PEP-II / SPEAR3 LLRF Documentation
 
 **Document Number**: LLRF-REF-006
-**Version**: 1.0
-**Date**: 2026-03-18
+**Version**: 2.0
+**Date**: 2026-03-19
 **Purpose**: AI-ready topic-to-source mapping for the complete PEP-II/SPEAR3 LLRF knowledge base
 
 ---
@@ -29,6 +29,8 @@
 | Direct (wideband) loop | `feedbackLoopDescriptionps3403305200.pdf` pp. 3-4 | Corredoura 1999; Fox 2010 §II | `rf_states.st` | `01_...LOOPS.md` §3 |
 | Comb (narrowband) loop | `feedbackLoopDescriptionps3403305200.pdf` p. 5 | Corredoura 1999; Fox 2010 §III | `rf_calib.st` | `01_...LOOPS.md` §4 |
 | Ripple loop | `feedbackLoopDescriptionps3403305200.pdf` p. 6 | Corredoura 2000 §6 | `rf_dac_loop.st` | `01_...LOOPS.md` §5 |
+| Ripple loop actual use (phase tracking) | PS-52 transcription (p. 6) | Corredoura 2000 §6 | `rf_dac_loop.st` | `01_...LOOPS.md` §5.2 (v3.0) |
+| Ripple loop DSP (AT&T DSP1610) | BD-340-330-01 transcription | — | — | `01_...LOOPS.md` §5.2, `02_...HARDWARE.md` §12 |
 | Lead compensation | `feedbackLoopDescriptionps3403305200.pdf` p. 4 | — | `rf_states.st` | `01_...LOOPS.md` §6 |
 | Integral compensation | `feedbackLoopDescriptionps3403305200.pdf` p. 4 | — | `rf_states.st` | `01_...LOOPS.md` §6 |
 | Tuner loop | `feedbackLoopDescriptionps3403305200.pdf` p. 5 | Corredoura 1999 | `rf_tuner_loop.st` | `01_...LOOPS.md` §7 |
@@ -152,7 +154,7 @@ Supporting files:
 
 ---
 
-## 5. Document Source Matrix (Version 2.0)
+## 5. Document Source Matrix (Version 3.0)
 
 ### 5.1 Engineering Design Documents (docx)
 
@@ -229,7 +231,7 @@ See Doc 04, Section 10 for the complete bibliography with DOIs and OSTI identifi
 
 ---
 
-### 5.6 Legacy PDF Transcriptions (v2.2 — NEW)
+### 5.6 Legacy PDF Transcriptions (v2.2)
 
 All 15 legacy PDFs have been transcribed to searchable markdown. Located in `legacy-pdf-transcriptions/`:
 

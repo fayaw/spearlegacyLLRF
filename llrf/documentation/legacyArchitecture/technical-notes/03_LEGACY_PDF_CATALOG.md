@@ -1,8 +1,8 @@
 # Legacy PDF Archive Catalog — PEP-II LLRF Engineering Drawings
 
 **Document Number**: LLRF-REF-004
-**Version**: 1.0
-**Date**: 2026-03-18
+**Version**: 2.0
+**Date**: 2026-03-19
 
 ---
 

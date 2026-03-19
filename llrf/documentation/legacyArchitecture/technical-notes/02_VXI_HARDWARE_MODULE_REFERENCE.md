@@ -1,8 +1,8 @@
 # PEP-II / SPEAR3 LLRF VXI Hardware Module Reference
 
 **Document Number**: LLRF-REF-003
-**Version**: 1.0
-**Date**: 2026-03-18
+**Version**: 2.0
+**Date**: 2026-03-19
 **Reconstructed From**: Corredoura SLAC-PUB-8498, arXiv:physics/0007029, Legacy source code, Legacy PDF file metadata
 
 ---
@@ -91,7 +91,9 @@ The RFP module is the **heart of the LLRF system**. It contains:
 
 ### 2.2 IQA (IQ/Amplitude Detector) Modules
 
-Three IQA modules provide precision digital measurement of RF signals:
+Three IQA modules provide precision digital measurement of RF signals (SPEAR3/HER configuration). In the LER configuration, only **2 IQA modules** were used (2 cavities per LER station vs. 4 per HER/SPEAR3 station).
+
+> **Source**: BD-340-330-01 (LER: 2 IQA), BD-340-329-01 (HER: 3 IQA + 1 per additional cavity pair)
 
 **Function**: Digital IQ demodulation (down-conversion + filtering) producing:
 - I component (in-phase)
@@ -861,6 +863,8 @@ The following signal level budget is reconstructed from the LER LLRF Configurati
 - **Gap Feedforward**: VXI module with **lowpass filter** on output, I/Q modulator → gap module
 
 > **Source**: `legacy-pdf-transcriptions/block-diagrams/BD-340-330-01_PEP-II_Low_Level_RF_Configuration.md`
+> **HER cross-reference**: The HER counterpart (BD-340-329-01) confirms identical signal levels for the 4-cavity configuration. Additional HER details: explicit "REFL 4/7/6" reflection port labels on cavity I/Q detectors, per-cavity adjustment I/Q MOD modules (cav 1 adj through cav 4 adj), "LOWPASS" filter on Gap FF output path, and −3 dBm at circulator output.
+> **Source**: `legacy-pdf-transcriptions/block-diagrams/PEP-II_Low_Level_RF_Block_Diagram.md`
 
 ## 13. PLC-5 Control System Configuration (from BD-340-330-00 Transcription)
 
