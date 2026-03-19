@@ -123,8 +123,8 @@ The following parameters are from the original PEP-II design document PS-340-330
 | RF Voltage / Ring | V | MV | 14.00 | 3.40 |
 | Number of Cavities | n | — | 20 | 4 |
 | Cavities / Klystron | m | — | 4 | 2 |
-| Shunt Impedance | Z_0 | MΩ | 3.73 | 3.73 |
-| Shunt Impedance (accel. notation) | Rₐ=2*Z_0 | MΩ | 7.5 | 7.5 |
+| Shunt Impedance | R_s | MΩ | 3.73 | 3.73 |
+| Shunt Impedance (accel. notation) | Rₐ=2*R_s | MΩ | 7.5 | 7.5 |
 | Gap Voltage / Cavity | V_c | kV | 700.0 | 850.0 |
 | Cavity Wall Power | P_c=V_c^2/Rₐ | kW | 65.7 | 96.8 |
 | Beam Power / Cavity | P_b | kW | 186.3 | 408.3 |
