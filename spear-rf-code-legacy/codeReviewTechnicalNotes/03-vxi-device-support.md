@@ -325,18 +325,20 @@ Board versions affect channel count:
 - Version 0: Fewer channels (early boards)
 - Version 1+: Full 12 channels
 
-> ⚠️ **PDR Discrepancy — Arc Sensor Count**: The legacy AIM supports 12 channels, but the upgrade PDR gives three different sensor counts:
+> **Arc Sensor Count — Clarification (RESOLVED)**
 >
-> | PDR Section | Count | Context |
-> |-------------|-------|---------|
-> | Section 2 (line 126, 202) | **12** | Architecture diagram; "total 12 Microstep-MIS optical sensors" |
-> | Section 12.3 (line 965) | **6** | "There are **6 sensors** total (updated from original design)" — enumerated: 4 cavity + 1 klystron + 1 circulator |
-> | Section 12.4 (line 976) | **6** (implied) | "6-bit latch" and "6 status inputs" in signal path diagram |
-> | Section 19.2 (line 1327) | **10+1 spare** | Procurement: "10 sensors and 5 process + 1 sensor & 1 process for spare" |
+> The legacy AIM supports 12 channels, but the upgrade uses **6 sensor locations** with **11 total sensors** (including spares):
 >
-> **Analysis**: Section 12.3 is the most detailed and explicitly says "(updated from original design)" — suggesting 12 was an earlier count revised to 6. The procurement of 10 sensors may be 6 deployed + 4 spares. The Software Design Document (Section 12) also uses 6 sensors.
+> | PDR Section | Count | Interpretation |
+> |-------------|-------|----------------|
+> | Section 2 (line 126, 202) | **12** | Outdated — carried from earlier design revision |
+> | Section 12.3 (line 965) | **6** | ✅ **Correct**: 6 deployment locations (4 cavity windows + 1 klystron window + 1 circulator) |
+> | Section 12.4 (line 976) | **6** (implied) | ✅ Consistent: "6-bit latch" and "6 status inputs" in signal path diagram |
+> | Section 19.2 (line 1327) | **10+1 spare** | **11 total sensors**: 10 deployed/ready + 1 spare (6 locations × ~2 sensors per location for redundancy, minus 1) |
 >
-> **Recommended action**: Design review should confirm the correct count. If 6, update PDR Sections 2 and 2.3. Interface Chassis and Arc Detection Chassis designs depend on this number.
+> **Confirmed** (per domain expert): The upgrade deploys sensors at **6 locations**. Total procurement is **11 sensors** (10 + 1 spare). PDR Section 12.3 is the authoritative section — its "(updated from original design)" note confirms the reduction from the legacy 12-channel AIM.
+>
+> **Remaining action**: Update PDR Section 2 (line 126, 202) from "12" to "6 locations (11 sensors total)" for internal consistency.
 
 ### 5.2 Fast Interlock Chain
 
@@ -419,7 +421,7 @@ CF2 supports multiple filter bank configurations:
 | devP2RfRfp.c | 2,389 | Octal DAC loading sequence, DSP parameter list, signal RAM operations, mode transitions |
 | devP2RfGvf.c | 2,350 | Feed-forward algorithm interface, TAXI link handling, LFB woofer control |
 | devP2RfIqa.c | 2,260 | DDF filter structure, channel mux, history memory capture |
-| devP2RfAim.c | 1,982 | Arc detection (12 legacy channels → 6 in upgrade; see §5.1 discrepancy note), fault file system, DAS instruction format, BATS handling |
+| devP2RfAim.c | 1,982 | Arc detection (12 legacy channels → 6 locations / 11 sensors in upgrade; see §5.1), fault file system, DAS instruction format, BATS handling |
 | devP2RfCf2.c | 2,970 | Multi-bank coefficient management, IIR filter loading protocol |
 | devP2RfCfm.c | 1,487 | V1 comb filter coefficients (simpler than CF2) |
 | devP2RfClk.c | 957 | PLL configuration algorithm, ClkConsts(r,a,m,p) macro |

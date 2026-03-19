@@ -175,19 +175,21 @@ From PDR Section 17:
 
 The following discrepancies were identified during cross-reference of the legacy source code, technical notes, and design documents. They are flagged here for resolution during design review.
 
-### 7.1 Gap Voltage — Three Different Values Across Documents
+### 7.1 Gap Voltage — Clarification (RESOLVED)
 
-| Document | Section | V_gap per cavity | V_total (4 cavities) | Internally Consistent? |
-|----------|---------|-----------------|---------------------|----------------------|
-| PDR Section 1 (line 55–56) | Executive Summary | ~712 kV | ~2.85 MV | ✓ (712×4 = 2848 ≈ 2850) |
-| PDR Section 4.3 (line 255) | RF Cavities | ~712 kV | **~2.5 MV** | ✗ (712×4 = 2848 ≠ 2500) |
-| Legacy Technical Design §1 | Key Parameters | **~800 kV** | **~3.2 MV** | ✓ (800×4 = 3200) |
+| Document | Section | V_gap per cavity | V_total (4 cavities) | Status |
+|----------|---------|-----------------|---------------------|--------|
+| Legacy Technical Design §1 | Key Parameters | **~800 kV** | **~3.2 MV** | **Design value** for SPEAR3 |
+| PDR Section 1 (line 55–56) | Executive Summary | ~712 kV | ~2.85 MV | **Current measured value** |
+| PDR Section 4.3 (line 255) | RF Cavities | ~712 kV | **~2.5 MV** | ✗ Typo (712×4 = 2848 ≠ 2500) |
 
-**Analysis**: PDR Section 4.3's "~2.5 MV" appears to be a typo — it contradicts the 712 kV per-cavity voltage in the same document. The Legacy Technical Design's "~800 kV / ~3.2 MV" may reflect actual commissioning measurements (higher than design target) or a different operating point.
+**Clarification** (per domain expert):
+- **~800 kV per cavity (~3.2 MV total)** is the original SPEAR3 design gap voltage.
+- **~712 kV per cavity (~2.85 MV total)** is the current measured operating gap voltage.
+- These are not contradictory — the system operates below design maximum. The PDR correctly uses the measured operating value for upgrade specification.
+- PDR Section 4.3's "~2.5 MV" remains a typo — it contradicts the 712 kV per-cavity voltage stated in the same section.
 
-**Impact**: RF power budget, klystron drive requirements, and HVPS voltage setpoints depend on accurate gap voltage. Clarification is needed before LLRF9 setpoint configuration.
-
-**Recommended action**: (1) Correct PDR §4.3 to ~2.85 MV. (2) Document whether ~800 kV (legacy) vs ~712 kV (upgrade) is a deliberate design change or measurement vs. specification difference.
+**Remaining action**: Correct PDR §4.3 total from "~2.5 MV" to "~2.85 MV" to be consistent with 712 kV × 4 cavities.
 
 ### 7.2 Authoritative Source Hierarchy
 
