@@ -252,7 +252,7 @@ The klystron output feeds a waveguide network consisting of:
 
 ### 4.3 RF Cavities
 
-Four single-cell cavities at 476 MHz, each contributing ~712 kV gap voltage for a total of ~2.5 MV. Each cavity has:
+Four single-cell cavities at 476 MHz, each contributing ~712 kV gap voltage for a total of ~2.85 MV. Each cavity has:
 - A cavity probe (monitors internal field amplitude and phase)
 - A forward power coupler
 - A reflected power coupler
