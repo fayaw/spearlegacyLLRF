@@ -362,5 +362,7 @@ flowchart TB
 
 ---
 
-> **Transcription Note**: ASCII and Mermaid diagrams replicated from OCR (Tesseract 5.3.0 at 400 DPI, PSM 3+6+11) of `bd3403300000.pdf`. This is a complex single-page engineering block diagram showing the complete LER RF station. Component names and interconnections extracted from multiple OCR passes with different segmentation modes. **The original PDF should be consulted for precise signal routing, cable connections, and spatial layout details.**
+> **Transcription Note (v2)**: ASCII and Mermaid diagrams replicated from OCR of `bd3403300000.pdf`. This is a complex single-page engineering block diagram showing the complete LER RF station. Component names and interconnections extracted from multiple OCR passes with different segmentation modes. **The original PDF should be consulted for precise signal routing, cable connections, and spatial layout details.**
+>
+> **OCR v2 Verification (Tesseract 5.3.0 at 450 DPI, PSM 6+11, sparse mode best at 3424 chars):** Re-extraction at higher DPI confirms all major component labels. Additional details recovered: "EPICS processor - slot 0" label on control system, "Allen Bradley DH-485" network interface confirmed, "tuner control" and "beam phase" labels on cavity monitoring paths, "PLC-5 processor" designation confirmed, "crowbar" protection explicitly labeled on HVPS, "contactor status" and "open/close contactor" control signals confirmed, "from windows" label on operator interface path. These additional labels verify the ASCII art reconstruction and provide more granular signal path identification than the v1 extraction.
 

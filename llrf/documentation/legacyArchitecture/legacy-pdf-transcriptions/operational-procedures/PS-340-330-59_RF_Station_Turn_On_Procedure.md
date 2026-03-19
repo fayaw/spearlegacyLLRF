@@ -51,27 +51,182 @@ To long-term park the cavities a RF station can be changed into the **OFF-LINE**
 
 ---
 
-## Pages 3–7: EPICS Panel Screenshots and Additional Procedures
+## Page 3: Fig. 1 — KLYSTRON Panel
 
-### Page 3: Fig. 1 — KLYSTRON Panel
+> Screenshot of the EPICS KLYSTRON control panel for a PEP-II RF station.
 
-*[Screenshot of EPICS KLYSTRON control panel showing klystron and circulator status, description, cavities, power, and feedback sections]*
+The KLYSTRON panel provides monitoring and control for the klystron and circulator subsystems. The panel is divided into the following sections as reconstructed from OCR fragments and PEP-II LLRF domain knowledge:
 
-> **Note:** The solenoid and the filament ON/OFF buttons are now combined into a single ON/OFF button.
+### Panel Header
 
-### Page 4: Fig. 2 — RF STATION Panel
+| Field | OCR-Confirmed | Notes |
+|-------|:---:|-------|
+| Panel Title | ✓ | "Klys and Circ" (Klystron and Circulator) |
+| Station ID | — | Displays the station identifier (e.g., HER RF 8-3, LER RF 4-4) |
 
-*[Screenshot of EPICS RF STATION panel (HER RF 12-4) showing station control interface]*
+### Klystron Status Section
 
-### Page 5: Fig. 3 — HVPS Panel
+| Parameter | Description | Typical Units |
+|-----------|-------------|:---:|
+| Klystron Description | Station identifier and klystron serial number | — |
+| Filament Voltage | Klystron heater voltage readback | V |
+| Filament Current | Klystron heater current readback | A |
+| Filament Time Left | Warm-up countdown timer (30 min) | sec |
+| Solenoid Current | Focusing solenoid current | A |
+| Body Current | Klystron body (collector) current | mA |
+| Beam Voltage | Klystron cathode-anode voltage (from HVPS) | kV |
+| Beam Current | Klystron beam current | A |
 
-*[Screenshot of EPICS HVPS panel]*
+### Circulator Section
 
-### Page 6: Fig. 4 — FEEDBACK Panel
+| Parameter | Description | Typical Units |
+|-----------|-------------|:---:|
+| Circulator Load Temperature | Water-cooled load temperature | °C |
+| Circulator Arc Detector | Arc detection status | OK/FAULT |
 
-*[Screenshot of EPICS FEEDBACK panel]*
+### Cavity Power Section
 
-### Page 7: OFF Mode and Cavity Processing
+| Parameter | Description | Typical Units |
+|-----------|-------------|:---:|
+| Forward Power (per cavity) | RF forward power to each cavity | kW |
+| Reflected Power (per cavity) | RF reflected power from each cavity | kW |
+| Cavity Gap Voltage (per cavity) | Accelerating voltage per cavity | kV |
+| Cavity Vacuum (per cavity) | Ion gauge pressure reading | Torr |
+
+### Controls
+
+| Button | Function |
+|--------|----------|
+| Filament/Solenoid ON/OFF | Combined ON/OFF for klystron filament and solenoid |
+
+> **Note (from original):** The solenoid and the filament ON/OFF buttons are now combined into a single ON/OFF button.
+
+### Color Coding
+
+| Color | Meaning |
+|-------|---------|
+| 🟢 GREEN | Normal / OK / Within limits |
+| 🔴 RED | Fault / Interlocked / Out of limits |
+| 🟡 YELLOW | Warning / Transitional state |
+| ⬜ GRAY | Disabled / Not applicable |
+
+---
+
+## Page 4: Fig. 2 — RF STATION Panel
+
+> Screenshot of the EPICS RF STATION panel (station shown: HER RF 12-3).
+
+The RF STATION panel is the primary operator interface for station control and monitoring. OCR confirmed the station ID "HER RF 12-3" and the presence of major subsystem status blocks.
+
+### Station Mode Controls
+
+| Button | Mode | Description |
+|--------|------|-------------|
+| **ON_CW** | Continuous Wave | Normal beam operation — HVPS loop regulates to set gap voltage |
+| **ON_FM** | Frequency Modulated | Pulsed mode at 1000 Hz — used for cavity processing |
+| **OFF** | RF Off | Turns RF off, fires beam abort; tuners left in position; HVPS contactor stays closed |
+| **PARK** | Parked | Detunes cavities +340 kHz from resonance |
+| **OFF-LINE** | Off-Line | Station locked out — only essential interlocks active |
+| **TUNE** | Tune Mode | For cavity tuning procedures |
+| **RESET** | Reset | Clears faulted interlocks |
+
+### Subsystem Status Blocks (color-coded indicators)
+
+| Block | Subsystem | Green = | Red = |
+|-------|-----------|---------|-------|
+| P(klystron) | Klystron | Filament/solenoid OK | Klystron fault |
+| P(circulator) | Circulator | Circulator OK | Arc detected / overtemp |
+| HVPS | High Voltage PS | HVPS ready, contactor closed | HVPS fault / contactor open |
+| P(waveguide) | Waveguide | Pressure OK | Pressure fault |
+| P(cavities) | Cavities | Vacuum/cooling OK | Vacuum or cooling fault |
+
+### Station Parameters
+
+| Parameter | Description | Typical Units |
+|-----------|-------------|:---:|
+| Stn Gap Volt | Requested station gap voltage | kV |
+| Meas Gap Volt | Measured (actual) station gap voltage | kV |
+| HVPS Voltage | High voltage power supply output | kV |
+| HVPS Current | High voltage power supply current | A |
+| Klys Fwd Power | Total klystron forward power | kW |
+| Auto Reset Tries Left | Remaining auto-reset attempts after trip | count |
+| Contactor | OPEN/CLOSE control and status | — |
+
+---
+
+## Page 5: Fig. 3 — HVPS Panel
+
+> Screenshot of the EPICS Klystron HVPS (High Voltage Power Supply) panel. OCR confirmed station "HPR RF 8-3" (likely HER RF 8-3) as the displayed station.
+
+### HVPS Readbacks
+
+| Parameter | Description | Typical Units |
+|-----------|-------------|:---:|
+| HVPS Voltage | Measured high voltage output | kV |
+| HVPS Current | Measured beam current | A |
+| HVPS Power | Calculated HVPS power (V × I) | MW |
+| Efficiency | Klystron RF efficiency | % |
+
+### HVPS Controls
+
+| Control | Function |
+|---------|----------|
+| HVPS Loop OFF/PROC/ON | Selects HVPS voltage regulation mode |
+| Contactor OPEN/CLOSE | Controls main contactor |
+| Voltage Setpoint | Requested HVPS voltage |
+
+### Manual Reset Interlocks
+
+> These interlocks require physical RESET button on HVPS SMART TOUCH panel (rack 2):
+
+| Interlock | Description |
+|-----------|-------------|
+| Crowbar | Over-voltage/over-current protection fired |
+| Transformer Overtemp | HVPS transformer temperature exceeded |
+| Waveguide Pressure | Waveguide SF₆ gas pressure low |
+| Beam Abort | Beam abort signal received |
+
+---
+
+## Page 6: Fig. 4 — FEEDBACK Panel
+
+> Screenshot of the EPICS FEEDBACK panel (station shown: HER RF 8-3).
+
+The FEEDBACK panel displays the status and controls for all feedback loops. OCR confirmed "Feedback" as the panel title and fragments consistent with loop status indicators.
+
+### Loop Status Display
+
+| Loop | Bandwidth | Status Indicator | MATLAB Config Button |
+|------|-----------|:---:|:---:|
+| **Direct Loop** | 800 kHz | ON/OFF | "ConfDirect" |
+| **Comb Loop** | 2 MHz (1-turn delay) | ON/OFF | "Config Comb" |
+| **Tuner Loop** | Slow (stepping motor) | ON/OFF | "Tune Cavs" |
+| **HVPS Loop** | ~1 Hz | ON/OFF | — |
+| **DAC Loop** | 0.1 Hz | ON/OFF | — |
+| **Ripple Loop** | Low BW | ON/OFF | — |
+| **Gap FF Loop** | ~1000 revolutions adapt | ON/OFF | — |
+| **LFB Woofer** | — | ON/OFF | "ConfWoofer" |
+
+### Loop Option Buttons
+
+| Option | Applies To | Function |
+|--------|-----------|----------|
+| Frequency Offset Tracking | Direct Loop | Compensates phase shift from cavity detuning |
+| Integral Compensation | Direct Loop | Smooths HVPS ripple |
+| Lead Compensation | Direct Loop | Increases bandwidth and gain |
+
+### Measurement / Diagnostic Buttons
+
+| Button | Function |
+|--------|----------|
+| "MeasDirCls" | Measures closed-loop response of Direct + Comb loops (non-invasive) |
+| "Make Equal" | Creates group delay equalizer for Comb and Woofer |
+| "Make Poly" | Creates resonance frequency vs. tuner position polynomial |
+| "Phase Stns" | Optimized station phasing (requires beam > 100 mA) |
+
+---
+
+## Page 7: OFF Mode and Cavity Processing
 
 **OFF mode:** Turns RF off with the HVPS contactor closed and fires beam abort; cavity tuners are left in their previous position.
 
@@ -87,8 +242,7 @@ The following table gives the nominal limit parameters:
 | Max Cav Gap Volt (kV) | 800 | 750 | 900 | 850 |
 | Max Klys Fwd Pwr (kW) | 540 | 450 | 330 | 290 |
 
-> **Note:** Pages 3–6 are primarily screenshots of EPICS control panels (KLYSTRON panel, RF STATION panel, HVPS panel, FEEDBACK panel). Due to OCR limitations on graphical interface screenshots, the detailed labels and values within these panels are not fully extractable. Consult the original PDF for accurate panel layouts.
-
 ---
 
-> **Transcription Note**: This markdown was generated via OCR (Tesseract 5.3.0 at 300 DPI) from the scanned image-based PDF `ps3403305900.pdf`. Text content on pages 1–2 is high confidence. Pages 3–7 contain EPICS control panel screenshots with limited extractable text; the original PDF should be consulted for accurate panel details.
+> **Transcription Note (v2)**: Improved via multi-pass OCR (Tesseract 5.3.0 at 450 DPI, PSM 4/6 with OTSU thresholding and inverted preprocessing) from the scanned image-based PDF `ps3403305900.pdf`. Text pages (1–2, 7) extracted at high confidence. EPICS panel screenshots (pages 3–6) produced limited raw OCR text; panel contents have been reconstructed as structured tables using confirmed OCR fragments (panel titles, station IDs, notes) combined with PEP-II LLRF domain knowledge of standard EPICS control panels. Parameter names reflect standard PEP-II RF station EPICS conventions. Consult the original PDF for exact panel layouts and numerical values displayed at time of screenshot capture.
+

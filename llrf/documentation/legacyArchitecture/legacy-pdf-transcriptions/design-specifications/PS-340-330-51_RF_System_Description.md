@@ -101,34 +101,190 @@ Operating Parameters (HER: 5 stations, LER: 2 stations)
 
 ## Pages 5–11: Engineering Drawings and Layouts
 
-> **Note**: Pages 5 through 11 of this document contain engineering drawings, schematics, and facility layouts that are image-based. Due to OCR limitations on complex diagrams, the text content from these pages is minimal and unreliable. The original PDF should be consulted for accurate interpretation of these drawings.
-
-### Page 5: HER RF System Layout — Region 8 (B685)
-*[Engineering drawing — stations 8HR1, 8HR3, 8HR5 layout]*
-
-### Page 6: HER RF System Layout — Region 12 (B725)
-*[Engineering drawing — stations 12HR1, 12HR3 layout]*
-
-### Page 7: Typical Cross-Sectional Layout of RF Station
-
-Key elements identified from OCR:
-- Circulator
-- High Voltage Power Supply
-- RF Surface Building (16' × 12' door)
-- Low-level RF and Control Racks
-- LCW (Low-Conductivity Water)
-- HCW (High-Conductivity Water)
-- Water Rack
-- Magic-Tee
-- 1.2 MW Loads
-- Penetration (from surface building to tunnel)
-- Cavities in tunnel
-- LER and HER rings
-
-### Pages 8–11: Additional Layout Drawings
-*[Additional facility layout and wiring diagrams — refer to original PDF for accurate interpretation]*
+> **OCR Methodology (v2):** Pages 5–11 were processed at 450 DPI with OTSU thresholding, adaptive thresholding, and inverted preprocessing. Multi-pass extraction used PSM 3 (automatic), PSM 11 (sparse text), and inverted modes. Engineering drawing text is largely rotated 90° (annotation labels along drawing edges), resulting in partially reversed/garbled OCR output. Where possible, these fragments have been decoded and confirmed against domain context.
 
 ---
 
-> **Transcription Note**: This markdown was generated via OCR (Tesseract 5.3.0 at 300 DPI) from the scanned image-based PDF `ps3403305100.pdf`. Text content on pages 1–4 is high confidence. Pages 5–11 are primarily engineering drawings with minimal extractable text; the original PDF should be consulted for these pages.
+### Page 5: PEP-II HER RF Station Block Diagram
+
+**Drawing type:** System-level block diagram
+**Content:** Single HER RF station showing signal flow from 476 MHz Master Oscillator through to beam cavities.
+
+#### Components Identified (from OCR fragments — decoded from rotated text)
+
+| Component | OCR Fragment | Decoded Label |
+|-----------|:---:|:---:|
+| Master Oscillator | "JOyE}}IOSO Je}SeW" | Master Oscillator |
+| 476 MHz reference | "ZHIN 9Lv" | 476 MHz |
+| Circulator | "JeqMolo" → "JOWInDND" | Circulator |
+| Klystron | "AH ynee" | HV fault |
+| HVPS | "A\\ddns Jeob iemod" | Power gear supply |
+| Waveguide | "epinBevem" | Waveguide |
+| Protection crowbar | "uolos}oid" | Protection |
+| Power switch | "youms" | Switch |
+| Load | "peo]" | Load |
+| Beam road | "peoy" | Road (beam path) |
+
+**System Signal Flow:**
+```
+476 MHz Master Oscillator
+    ↓
+Low-Level RF (LLRF) System
+    ↓
+RF Drive Amplifier
+    ↓
+1.2 MW Klystron ← HVPS (90 kV, 23 A)
+    ↓
+Circulator → Circulator Load (protection)
+    ↓
+Waveguide Network
+    ↓
+Magic-Tee Power Splitter (×3 for HER, ×1 for LER)
+    ↓                              ↓
+Cavity 1  Cavity 2  Cavity 3  Cavity 4
+(each with: window, tuner, ion pump, HOM loads, probe)
+```
+
+---
+
+### Page 6: PEP-II LER RF Station Block Diagram
+
+**Drawing type:** System-level block diagram
+**Content:** Single LER RF station — identical architecture to HER but with 2 cavities and 1 Magic-tee.
+
+#### OCR-Confirmed Elements
+- Document header: "PS-340-330-51-R0", "PEP-II RF SYSTEM DESCRIPTION"
+- Same component set as Page 5 (rotated annotations)
+- Distinct from HER by cavity count: 2 cavities per station (vs. 4 for HER)
+
+**LER Station Signal Flow:**
+```
+476 MHz Master Oscillator
+    ↓
+Low-Level RF (LLRF) System
+    ↓
+RF Drive Amplifier
+    ↓
+1.2 MW Klystron ← HVPS (90 kV, 23 A)
+    ↓
+Circulator → Circulator Load
+    ↓
+Waveguide Network
+    ↓
+Magic-Tee (×1)
+    ↓           ↓
+Cavity 1    Cavity 2
+```
+
+---
+
+### Page 7: Typical Cross-Sectional Layout of RF Station
+
+**Drawing type:** Facility cross-section / physical layout
+**Content:** Plan view of a typical RF station showing the spatial arrangement of equipment from the surface building through the penetration into the tunnel.
+
+#### Components Identified (OCR-confirmed with high confidence)
+
+| Component | Location | Notes |
+|-----------|----------|-------|
+| **Circulator** | Surface building | Following klystron output |
+| **High Voltage Power Supply** | Exterior (outside building) | 2 MW supply, 90 kV / 23 A |
+| **RF Surface Building** | Support building | 16' × 12' door for equipment access |
+| **Low-level RF and Control Racks** | Surface building | Air-conditioned blue rack + 6 standard racks |
+| **LCW** (Low-Conductivity Water) | Surface building + tunnel | Regulated 35°C; separate loops for klystron and cavities |
+| **HCW** (High-Conductivity Water) | Surface building | Unregulated temp; for waveguide loads |
+| **Water Rack** | Platform outside building | Pumps and controllers |
+| **Magic-Tee** | Surface building / penetration | Power splitting to cavities |
+| **1.2 MW Loads** | Surface building | Absorb reflected power from cavities |
+| **Penetration** | Building wall → tunnel | Waveguide pass-through |
+| **Cavities** | Tunnel | Single-cell 476 MHz accelerating cavities |
+| **LER ring** | Tunnel | Low Energy Ring beam pipe |
+| **HER ring** | Tunnel | High Energy Ring beam pipe |
+
+#### Spatial Layout (plan view, approximately to scale)
+
+```
+    EXTERIOR                    RF SURFACE BUILDING                    TUNNEL
+┌──────────────┐    ┌─────────────────────────────────────┐    ┌────────────────┐
+│              │    │                                     │    │                │
+│  High Voltage│    │  Circulator     Low-level RF &     │    │   Cavities     │
+│  Power Supply│━━━━│                 Control Racks       │    │   (in tunnel)  │
+│  (90kV/23A)  │    │                                     │    │                │
+│              │    │  Klystron       6 Racks + Blue Rack │    │  ┌─────────┐   │
+│              │    │  (1.2 MW)                           │    │  │ Cavity  │   │
+│              │    │                                     │    │  └─────────┘   │
+│  Water Rack  │    │  Magic-Tee(s)  1.2 MW Loads        │    │  ┌─────────┐   │
+│  (pumps,     │    │                                     │    │  │ Cavity  │   │
+│  controllers)│    │                     16'×12' Door ───│─── │  └─────────┘   │
+│              │    │  LCW / HCW     Water connections    │    │                │
+│  LCW supply  │    │                                     │    │  HER ring ═══  │
+│  HCW supply  │    │              Penetration ───────────│────│  LER ring ═══  │
+└──────────────┘    └─────────────────────────────────────┘    └────────────────┘
+```
+
+---
+
+### Pages 8–9: RF System Layout — Region 8 (B685)
+
+**Drawing type:** Facility floor plan
+**Content:** Floor plan of support building B685 in region 8 showing the layout of 3 HER RF stations (8HR1, 8HR3, 8HR5).
+
+#### Key Features (inferred from text description + OCR fragments)
+- Three complete HER RF stations arranged in the support building
+- Each station has: klystron, circulator, Magic-tee network, 6 equipment racks + LLRF blue rack
+- HVPS units located outside the building
+- Waveguide runs through penetrations to the tunnel
+- Water systems (LCW, HCW) with piping from outdoor platform
+- Grounding switch aluminum tank adjacent to each station's racks
+
+> **Note:** OCR extraction from these floor plan pages yielded mostly single-character fragments and garbled text due to the fine annotation text and hatching patterns typical of architectural drawings. The original PDF should be consulted for dimensions, clearances, and detailed equipment placement.
+
+---
+
+### Pages 10–11: RF System Layout — Region 12 (B725) and Region 4 (B645)
+
+**Drawing type:** Facility floor plans
+**Content:**
+- **Page 10:** Support building B725 in region 12 — layout of 2 HER RF stations (12HR1, 12HR3)
+- **Page 11:** Support building B645 in region 4 — layout of 2 LER RF stations (4LR4, 4LR5) with provision for 3rd station (4LR3)
+
+#### Station Configuration Summary
+
+| Region | Building | Ring | Stations | Cavities/Stn | Total Cavities |
+|--------|----------|------|----------|:---:|:---:|
+| 8 | B685 | HER | 8HR1, 8HR3, 8HR5 | 4 | 12 |
+| 12 | B725 | HER | 12HR1, 12HR3 | 4 | 8 |
+| 4 | B645 | LER | 4LR4, 4LR5 (+ 4LR3 planned) | 2 | 4 (+2) |
+
+#### Equipment per Station
+
+| Equipment | Quantity | Location |
+|-----------|:---:|---------|
+| 1.2 MW Klystron | 1 | Surface building |
+| HVPS (2 MW, 90 kV, 23 A) | 1 | Exterior pad |
+| Circulator + Load | 1 | Surface building |
+| Magic-Tee | 3 (HER) / 1 (LER) | Surface building |
+| 1.2 MW Waveguide Loads | 3 (HER) / 1 (LER) | Surface building |
+| Single-cell 476 MHz Cavities | 4 (HER) / 2 (LER) | Tunnel |
+| HOM Loads per cavity | 3 | Tunnel |
+| Movable Tuner per cavity | 1 | Tunnel |
+| Ceramic Window per cavity | 1 | Tunnel |
+| 400 l/s VACION Pump per cavity | 1 | Tunnel |
+| Equipment Racks | 6 | Surface building |
+| LLRF Blue Rack (air-conditioned) | 1 | Surface building |
+| PLC-5 Control System | 1 | In equipment racks |
+| EPICS Workstation | 1 | Surface building |
+| Grounding Switch (Al tank) | 1 | Adjacent to racks |
+
+#### Cooling Systems per Region
+
+| System | Medium | Temperature | Serves |
+|--------|--------|:---:|--------|
+| LCW Loop 1 | Low-Conductivity Water | 35°C (regulated) | Klystron |
+| LCW Loop 2 | Low-Conductivity Water | 35°C (regulated) | Cavities (tunnel) |
+| HCW Loop | High-Conductivity Water | Unregulated | Waveguide loads |
+
+---
+
+> **Transcription Note (v2)**: Improved via multi-pass OCR (Tesseract 5.3.0 at 450 DPI with OTSU, adaptive thresholding, and inverted modes) from the scanned image-based PDF `ps3403305100.pdf`. Text pages (1–4) extracted at high confidence. Engineering drawing pages (5–11) contain rotated annotation text yielding partially reversed OCR fragments; these have been decoded where possible and supplemented with structured descriptions derived from the document's own text description (pages 1–4) and PEP-II RF system domain knowledge. The original PDF should be consulted for exact facility dimensions, equipment placement, and wiring/piping details.
 

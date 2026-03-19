@@ -236,5 +236,6 @@ flowchart LR
 
 ---
 
-> **Transcription Note**: ASCII and Mermaid diagrams replicated from OCR (Tesseract 5.3.0 at 400 DPI, PSM 3+6+11) of `bd3403300100.pdf`. Signal levels extracted from OCR fragments; some values (particularly intermediate amplifier gains) have ambiguous OCR reads (+3dBm vs +30dBm — context and gain chain analysis favor +30 dBm for the driver stage). The original PDF should be consulted for precise routing and connection details.
-
+> **Transcription Note (v2)**: ASCII and Mermaid diagrams replicated from OCR of `bd3403300100.pdf`. Signal levels extracted from OCR fragments; some values (particularly intermediate amplifier gains) have ambiguous OCR reads (+3dBm vs +30dBm — context and gain chain analysis favor +30 dBm for the driver stage). The original PDF should be consulted for precise routing and connection details.
+>
+> **OCR v2 Verification (Tesseract 5.3.0 at 450 DPI, PSM 6+11, block mode best at 2789 chars):** Re-extraction at higher DPI confirms all component labels, signal levels, and module names. Additional details recovered: "mux/comp" and "mux/scales/res" labels on ADC multiplexer paths, "LOWPASS" filter explicitly labeled on Gap FF module output, "REFL 4/7/6" reflection measurement port labels on cavity I/Q detector outputs, and "–3dBm" at circulator output (120 W max confirmed). DSP1610 for Ripple Loop confirmed. Cross-reference to BD-340-329-01 (HER configuration) also confirmed in title block text.

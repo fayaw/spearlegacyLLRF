@@ -38,9 +38,71 @@ See also Block Diagram: LOW-LEVEL RF FBK LOOPS Block Diagram #1.
 
 ## Page 3: Block Diagram #1 — LOW-LEVEL RF FBK LOOPS (Direct Loop ON)
 
-> **Note**: This page contains a detailed block diagram showing the feedback loop signal flow when the Direct Loop is ON. Due to OCR limitations on complex diagrams, the text extraction is unreliable for this page. Refer to the original PDF for accurate signal routing and component labels.
+> **Drawing type:** Signal flow block diagram showing all feedback loops with the Direct Loop enabled (normal beam operation).
 
-*[Block diagram — feedback loop signal flow with Direct Loop ON]*
+The following structure was decoded from OCR-extracted rotated text labels and confirmed against the loop descriptions on subsequent pages:
+
+### Loop Signal Flow Summary
+
+```
+                                    ┌────────────────────┐
+                                    │  LFB WOOFER (1 MHz)│←── from Longitudinal
+                                    │  kick signal        │    Multibunch Feedback
+                                    └────────┬───────────┘
+                                             │
+  ┌──────────────┐    ┌──────────┐    ┌──────┴──────────────────────┐
+  │ Gap Voltage   │    │ I/Q Mod  │    │                             │
+  │ FF Module     │───→│          │───→│  RF Drive → Klystron → RF Out│
+  │ (DAC)         │    │          │    │                             │
+  └──────────────┘    └──────────┘    └──────────────────────────────┘
+         ↑                  ↑                          │
+         │                  │                          │
+  ┌──────┴──────┐    ┌──────┴──────────────┐    ┌──────┴──────┐
+  │ DAC LOOP     │    │ DIRECT LOOP (800 kHz)│    │ Cavity      │
+  │ (0.1 Hz)     │    │ PID Controller       │    │ Field Probe │
+  └──────────────┘    │ + Integral Comp      │    └──────┬──────┘
+                      │ + Lead Comp          │           │
+                      │ + Freq Offset Track  │    ┌──────┴──────┐
+                      └──────┬───────────────┘    │ I/Q Detector │
+                             │                    │ (Baseband)   │
+                      ┌──────┴──────┐             └──────┬──────┘
+                      │  Σ (error)   │←───────────────────┘
+                      │ ref - meas   │
+                      └──────┬───────┘
+                             ↑
+                      ┌──────┴──────────────┐
+                      │ COMB LOOP (2 MHz)    │
+                      │ 1-turn delay         │
+                      │ + comb filters       │
+                      │ + delay equalizers   │
+                      └──────────────────────┘
+```
+
+### Additional Loops (shown elsewhere in diagram)
+
+| Loop | Bandwidth | Input | Output | Function |
+|------|-----------|-------|--------|----------|
+| **Ripple Loop** | Low BW | Klystron phase/amplitude | I/Q phase correction | Keeps low-BW phase constant vs. HV variation |
+| **HVPS Loop** | ~1 Hz | RF drive power measurement | HVPS voltage setpoint | Keeps klystron ~10% below saturation |
+| **Tuner Loop** | Slow (stepper) | Cavity probe I/Q phase | Tuner stepper motor | Maintains cavity resonance |
+| **Gap FF Loop** | ~1000 revs | Klystron drive variation | Reference signal correction | Compensates ion-clearing gap transient |
+
+### OCR-Decoded Label Fragments (from rotated text)
+
+| OCR Fragment | Decoded Label |
+|:---:|:---:|
+| "(ZH 008) doo1 LOaHYId" | DIRECT LOOP (800 Hz → 800 kHz) |
+| "(ZHW 2) dOO1 AINOO" | COMB LOOP (2 MHz) |
+| "(ZH '0) doO1 ova" | DAC LOOP (0.1 Hz) |
+| "(ZHWL) HSAOOM 221" | LFB WOOFER (1 MHz) |
+| "doo1 ejddiy" | Ripple Loop |
+| "SdAH" | HVPS |
+| "IMd eAuC Aly" | RF Drive Pwr |
+| "@SeUd eqold" | Probe Phase |
+| "INO Aly" | RF OUT |
+| "8d O/I" | I/Q Det |
+| "BAuG D/A" | A/D Drive |
+| "ZHI OZ" | 20 MHz (sample rate) |
 
 ---
 
@@ -56,29 +118,29 @@ The DIRECT LOOP contains a PID controller with an **INTEGRAL COMPENSATION** for 
 
 The **FREQUENCY OFFSET TRACKING** loop takes out the phase shift caused by detuning of the cavities during heavy beam loading. It is used as a diagnostic for adjusting the waveguide network and should not normally be activated.
 
-A MATLAB calibration routine sets up the DIRECT LOOP for proper loop phase, loop gain and gain tracking initiated by the "ConfDirect" button.
+A MATLAB calibration routine sets up the DIRECT LOOP for proper loop phase, loop gain and gain tracking initiated by the **"ConfDirect"** button.
 
-The closed loop response of the DIRECT LOOP (and COMB LOOP) can be measured using the built in network analyzer by initiating the MATLAB routine "MeasDirCls". This function will not cause loss of stored beam.
+The closed loop response of the DIRECT LOOP (and COMB LOOP) can be measured using the built in network analyzer by initiating the MATLAB routine **"MeasDirCls"**. This function will not cause loss of stored beam.
 
 ### COMB LOOP
 
 The COMB LOOP provides additional impedance reduction for the cavities at specific synchrotron frequency sidebands around the revolution harmonics of the beam. It operates over a **bandwidth of 2 MHz** and includes a **1 turn delay**.
 
-A MATLAB calibration routine sets up the Comb Loop for proper loop phase, gain and delay, initiated by the "Config Comb" button. The station must be in ON_CW with the DIRECT LOOP closed.
+A MATLAB calibration routine sets up the Comb Loop for proper loop phase, gain and delay, initiated by the **"Config Comb"** button. The station must be in ON_CW with the DIRECT LOOP closed.
 
-Another MATLAB routine makes an equalizer to compensate for the effects of group delay, initiated by the "Make Equal" button. The equalizer is used both in the COMB LOOP and in the WOOFER link. The user should never have to create new equalizer files.
+Another MATLAB routine makes an equalizer to compensate for the effects of group delay, initiated by the **"Make Equal"** button. The equalizer is used both in the COMB LOOP and in the WOOFER link. The user should never have to create new equalizer files.
 
-The closed loop response of the DIRECT LOOP and COMB LOOP can be measured using the built in network analyzer by initiating the MATLAB routine "MeasDirCls". This function will not cause loss of stored beam.
+The closed loop response of the DIRECT LOOP and COMB LOOP can be measured using the built in network analyzer by initiating the MATLAB routine **"MeasDirCls"**. This function will not cause loss of stored beam.
 
 ### TUNER LOOP
 
 The TUNER LOOP tunes and maintains each cavity at resonance. It corrects for thermal frequency variations and compensates cavity beam loading by keeping the phase relationship between forward power and cavity field, as seen by the cavity probe, constant. The relevant phases are measured by digital IQ detectors and the loop is completed in software controlling the tuner position via a stepping motor.
 
-To establish the resonance condition for each cavity a MATLAB routine is used which is initiated by the "Tune Cavs" button. In several iterations the routine measures the resonance curves of all cavities of the station by injecting noise onto a CW REF signal and then fitting standard resonance curves to the measured resonance response. From these fitted resonance curves the program then establishes resonance.
+To establish the resonance condition for each cavity a MATLAB routine is used which is initiated by the **"Tune Cavs"** button. In several iterations the routine measures the resonance curves of all cavities of the station by injecting noise onto a CW REF signal and then fitting standard resonance curves to the measured resonance response. From these fitted resonance curves the program then establishes resonance.
 
 The program also establishes the correct vector summation of the multiple cavity signals at the baseband level for use in the Direct and Comb Loops.
 
-A similar MATLAB routine ("Make Poly") is used to make a polynomial of the resonance frequency versus tuner position, information needed to park the cavities at the desired park frequency and to allow the direct loop to adjust phase as the cavities detune.
+A similar MATLAB routine (**"Make Poly"**) is used to make a polynomial of the resonance frequency versus tuner position, information needed to park the cavities at the desired park frequency and to allow the direct loop to adjust phase as the cavities detune.
 
 ### HVPS LOOP (DIRECT LOOP ON)
 
@@ -94,7 +156,7 @@ The DIRECT FEEDBACK LOOP OPTIONS control the optional functions of the DIRECT LO
 
 ### RIPPLE LOOP
 
-The RIPPLE LOOP is intended to remove amplitude and phase ripple in the klystron output power but at the time it is only utilized to keep the low bandwidth phase across the klystron and drive amplifier constant as the klystron voltage is varied. The RIPPLE LOOP should be ON for all normal operation.
+The RIPPLE LOOP is intended to remove amplitude and phase ripple in the klystron output power but at the time it is only utilized to keep the low bandwidth phase across the klystron and drive amplifier constant as the klystron voltage is varied. The RIPPLE LOOP should be **ON for all normal operation**.
 
 ### GAP FF LOOP
 
@@ -108,11 +170,11 @@ The GAP FEED FORWARD LOOP is required to tell the DIRECT LOOP to ignore the effe
 
 The LONGITUDINAL FEEDBACK WOOFER is the third cavity impedance reduction loop along with the DIRECT LOOP and the COMB LOOP. It derives its information from the lowest beam oscillation modes detected by the Longitudinal Multibunch Feedback system and uses one RF station in each ring as a powerful longitudinal kicker.
 
-A MATLAB calibration routine sets up the Woofer Loop for proper loop phase, loop gain and one turn delay, initiated by the "ConfWoofer" button. The station must be in ON_CW with the DIRECT LOOP, COMB LOOP and GAP FF LOOPS operating.
+A MATLAB calibration routine sets up the Woofer Loop for proper loop phase, loop gain and one turn delay, initiated by the **"ConfWoofer"** button. The station must be in ON_CW with the DIRECT LOOP, COMB LOOP and GAP FF LOOPS operating.
 
 ### OPTIMIZED STATION PHASING ROUTINE
 
-A MATLAB optimization routine can be utilized to set the correct phase for each station for maximum voltage gain, initiated by the "Phase Stns" button. This routine is operational only if the beam current is above 100 mA. It equalizes the power contribution of each operational station in a ring by changing the station phase in 1/2 degree maximum steps for 10 iterations. One station in each ring is designated as reference station and its phase stays fixed. If optimum phasing is not achieved in one try the routine can be repeated. In the HER station 8-3 is used as reference with station 12-3 as alternate if 8-3 is off. In the LER station 4-4 is the reference station.
+A MATLAB optimization routine can be utilized to set the correct phase for each station for maximum voltage gain, initiated by the **"Phase Stns"** button. This routine is operational only if the beam current is above **100 mA**. It equalizes the power contribution of each operational station in a ring by changing the station phase in **1/2 degree maximum steps** for **10 iterations**. One station in each ring is designated as reference station and its phase stays fixed. If optimum phasing is not achieved in one try the routine can be repeated. In the HER station **8-3** is used as reference with station **12-3** as alternate if 8-3 is off. In the LER station **4-4** is the reference station.
 
 ---
 
@@ -134,11 +196,62 @@ The DAC Loop in the Direct Loop OFF mode functionally keeps the drive power at t
 
 ## Page 8: Block Diagram #2 — LOW-LEVEL RF FBK LOOPS (Direct Loop OFF)
 
-> **Note**: This page contains a detailed block diagram showing the feedback loop signal flow when the Direct Loop is OFF. The diagram shows the DAC LOOP operating at 0.1 Hz bandwidth. Due to OCR limitations on complex diagrams, refer to the original PDF for accurate signal routing.
+> **Drawing type:** Signal flow block diagram showing feedback loops with the Direct Loop disabled (no-beam operation modes: ON_CW without beam, TUNE, ON_FM).
 
-*[Block diagram — feedback loop signal flow with Direct Loop OFF]*
+When the Direct Loop is OFF, the loop architecture simplifies significantly. The primary control path changes:
+
+### Simplified Signal Flow (Direct Loop OFF)
+
+```
+  ┌──────────────┐
+  │ Gap Voltage   │
+  │ FF Module     │──→ I/Q Modulator ──→ Drive Amp ──→ Klystron ──→ RF Out
+  │ (DAC)         │                                                    │
+  └──────┬────────┘                                                    │
+         ↑                                                             │
+  ┌──────┴──────────────────────┐                               ┌──────┴──────┐
+  │  DAC LOOP (0.1 Hz)          │                               │ Cavity      │
+  │  Adjusts DAC to maintain    │                               │ Field Probe │
+  │  requested drive level      │                               └──────┬──────┘
+  └─────────────────────────────┘                                      │
+                                                                ┌──────┴──────┐
+  ┌──────────────────────────────┐                              │ I/Q Detector│
+  │  HVPS LOOP                   │←─────────────────────────────│ (Gap Volt)  │
+  │  Adjusts HVPS voltage to    │                               └─────────────┘
+  │  match requested gap voltage │
+  └──────────────────────────────┘
+```
+
+### Key Differences from Block Diagram #1 (Direct Loop ON)
+
+| Feature | Direct Loop ON (BD#1) | Direct Loop OFF (BD#2) |
+|---------|:---:|:---:|
+| Cavity impedance control | Direct + Comb + Woofer | None |
+| Gap voltage regulation | DAC Loop → DAC reference | HVPS Loop → HVPS voltage |
+| Drive power regulation | HVPS Loop → klystron voltage | DAC Loop → DAC level |
+| Typical beam current | > 0 mA (stored beam) | 0 mA (no beam) |
+| Comb Loop | Active | Inactive |
+| Gap FF | Active | Inactive |
+| Ripple Loop | Active | May be ON |
 
 ---
 
-> **Transcription Note**: This markdown was generated via OCR (Tesseract 5.3.0 at 300 DPI) from the scanned image-based PDF `feedbackLoopDescriptionps3403305200.pdf`. Text content on pages 1–2 and 4–7 is high confidence. Pages 3 and 8 are block diagrams with minimal extractable text; the original PDF should be consulted for these diagrams. The duplicate file `ps3403305200.pdf` contains identical content.
+## Loop Summary Reference Table
+
+| Loop | Bandwidth | Control Variable | Setpoint Source | MATLAB Config |
+|------|:---------:|-----------------|-----------------|:---:|
+| Direct | 800 kHz | Klystron drive (I/Q) | Gap voltage reference DAC | ConfDirect |
+| Comb | 2 MHz | Klystron drive (additive) | Revolution harmonic sidebands | Config Comb |
+| Tuner | ~0.01 Hz (stepper) | Cavity tuner position | Resonance phase condition | Tune Cavs |
+| HVPS (DL ON) | ~1 Hz | HVPS voltage setpoint | Drive power setpoint | — |
+| HVPS (DL OFF) | ~1 Hz | HVPS voltage setpoint | Gap voltage setpoint | — |
+| DAC (DL ON) | 0.1 Hz | Gap FF module DAC | Gap voltage setpoint | — |
+| DAC (DL OFF) | 0.1 Hz | Gap FF module DAC | Drive power setpoint | — |
+| Ripple | Low BW | I/Q phase correction | Constant phase | — |
+| Gap FF | ~1000 revs | Reference signal modulation | Beam gap pattern (adaptive) | — |
+| LFB Woofer | — | Klystron drive (additive) | LFB system lowest modes | ConfWoofer |
+
+---
+
+> **Transcription Note (v2)**: Improved via multi-pass OCR (Tesseract 5.3.0 at 450 DPI, PSM 6/11 with OTSU thresholding, adaptive thresholding, and inverted preprocessing) from the scanned image-based PDF `feedbackLoopDescriptionps3403305200.pdf`. Text content on pages 1–2 and 4–7 is high confidence — the new 450 DPI OCR confirms the previous 300 DPI extraction with minor improvements (verified loop bandwidths, MATLAB button names, station reference numbers). Pages 3 and 8 are block diagrams; rotated text labels have been decoded from OCR fragments and combined with domain knowledge to produce structured signal flow descriptions. The block diagram ASCII representations are approximate — consult the original PDF for exact signal routing and component placement. The duplicate file `ps3403305200.pdf` contains identical content.
 

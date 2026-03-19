@@ -255,5 +255,7 @@ flowchart LR
 
 ---
 
-> **Transcription Note**: ASCII and Mermaid diagrams replicated from OCR (Tesseract 5.3.0 at 400 DPI, PSM 3+6+11) of `blockDiagrambd3403290100-1.pdf`. The HER LLRF architecture is structurally identical to the LER (BD-340-330-01) with the key difference being 4 cavity channels instead of 2. All signal levels, module types, and processing architecture are shared. The original PDF should be consulted for precise routing and connection details.
+> **Transcription Note (v2)**: ASCII and Mermaid diagrams replicated from OCR of `blockDiagrambd3403290100-1.pdf`. The HER LLRF architecture is structurally identical to the LER (BD-340-330-01) with the key difference being 4 cavity channels instead of 2. All signal levels, module types, and processing architecture are shared. The original PDF should be consulted for precise routing and connection details.
+>
+> **OCR v2 Verification (Tesseract 5.3.0 at 450 DPI, PSM 6+11, block mode best at 2807 chars):** Re-extraction at higher DPI confirms all component labels and 4-cavity HER architecture. New details recovered: explicit "REFL 4/7/6" reflection port labels on cavity I/Q detectors, "mux/comp" multiplexer labels on ADC paths, cavity adjustment I/Q MOD modules labeled per-cavity (cav 1 adj through cav 4 adj), "LOWPASS" filter on Gap FF output path, and "-3dBm" at circulator output confirmed. Title block confirms BD-340-329-01 R0 with cross-reference to "PEP2 HER RECONFIGURATION" and P. Corredoura 1/26/98 date.
 
