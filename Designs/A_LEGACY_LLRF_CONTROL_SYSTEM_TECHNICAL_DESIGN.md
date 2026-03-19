@@ -4,7 +4,7 @@
 **Version**: 1.0  
 **Date**: 2026-03-13  
 **Classification**: Engineering Technical Reference  
-**Derived From**: Deep code review of `llrf/legacyLLRF/` source files  
+**Derived From**: Deep code review of `spear-rf-code-legacy/rfApp/src/seq/` source files  
 **Original Facility**: PEP-II B-Factory → SPEAR3 Storage Ring (SSRL/SLAC)  
 **Original Authors**: S. Allison, R.C. Sass, M. Zelazny, P. Corredoura, R. Claus, M. Laznovsky (1996–2005)  
 
