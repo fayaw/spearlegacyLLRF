@@ -72,11 +72,11 @@ Operating Parameters (HER: 5 stations, LER: 2 stations)
 | Equivalent Window Power (H-field) | P_w | kW | 259.8 | 708.3 |
 | Energy Loss / Turn / Cavity | V_a | kV | 180.8 | 204.2 |
 | Optimum Coupling Factor β=1+P_b/P_c | β | — | 3.84 | 5.22 |
-| Actual Beta | β | — | — | — |
+| Actual Beta | β | — | 3.72 | 3.72 |
 | Synchronous Phase Angle | φ | degrees | 75.0 | 76.10 |
 | Detuning Angle | ψ | degrees | -66.0 | -74.52 |
 | Change in Resonant Frequency | Δf | kHz | -78.9 | -126.7 |
-| Unloaded Q | Q₀ | — | — | — |
+| Unloaded Q | Q₀ | — | 32,000 | 32,000 |
 | Loaded Q | Q_l | — | 6,780 | 6,780 |
 | Generator Power / Cavity | P_g | kW | 252.0 | 519.7 |
 | Generator Induced Voltage at Resonance / Cav. | V_ar | kV | 1,121 | 1,609 |
