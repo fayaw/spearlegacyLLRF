@@ -207,13 +207,13 @@ Cavity 1    Cavity 2
     EXTERIOR                    RF SURFACE BUILDING                    TUNNEL
 ┌──────────────┐    ┌─────────────────────────────────────┐    ┌────────────────┐
 │              │    │                                     │    │                │
-│  High Voltage│    │  Circulator     Low-level RF &     │    │   Cavities     │
+│  High Voltage│    │  Circulator     Low-level RF &      │    │   Cavities     │
 │  Power Supply│━━━━│                 Control Racks       │    │   (in tunnel)  │
 │  (90kV/23A)  │    │                                     │    │                │
 │              │    │  Klystron       6 Racks + Blue Rack │    │  ┌─────────┐   │
 │              │    │  (1.2 MW)                           │    │  │ Cavity  │   │
 │              │    │                                     │    │  └─────────┘   │
-│  Water Rack  │    │  Magic-Tee(s)  1.2 MW Loads        │    │  ┌─────────┐   │
+│  Water Rack  │    │  Magic-Tee(s)  1.2 MW Loads         │    │  ┌─────────┐   │
 │  (pumps,     │    │                                     │    │  │ Cavity  │   │
 │  controllers)│    │                     16'×12' Door ───│─── │  └─────────┘   │
 │              │    │  LCW / HCW     Water connections    │    │                │
