@@ -82,10 +82,10 @@ The following structure was decoded from OCR-extracted rotated text labels and c
 
 | Loop | Bandwidth | Input | Output | Function |
 |------|-----------|-------|--------|----------|
-| **Ripple Loop** | Low BW | Klystron phase/amplitude | I/Q phase correction | Keeps low-BW phase constant vs. HV variation |
+| **Ripple Loop** | 300 Hz| Klystron phase/amplitude | I/Q phase correction | Keeps low-BW phase constant vs. HV variation |
 | **HVPS Loop** | ~1 Hz | RF drive power measurement | HVPS voltage setpoint | Keeps klystron ~10% below saturation |
-| **Tuner Loop** | Slow (stepper) | Cavity probe I/Q phase | Tuner stepper motor | Maintains cavity resonance |
-| **Gap FF Loop** | ~1000 revs | Klystron drive variation | Reference signal correction | Compensates ion-clearing gap transient |
+| **Tuner Loop** | 1Hz Slow (stepper) | Cavity probe I/Q phase | Tuner stepper motor | Maintains cavity resonance |
+| **Gap FF Loop** | ~100 Hz | Klystron drive variation | Reference signal correction | Compensates ion-clearing gap transient |
 
 ### OCR-Decoded Label Fragments (from rotated text)
 
