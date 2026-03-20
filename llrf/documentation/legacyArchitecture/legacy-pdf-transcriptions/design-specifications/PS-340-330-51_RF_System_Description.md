@@ -53,12 +53,12 @@ Operating Parameters (HER: 5 stations, LER: 2 stations)
 |-----------|--------|------|-----|-----|
 | Frequency | f₀ | MHz | 476 | 476 |
 | RF Voltage / Ring | V | MV | 14.00 | 3.40 |
-| Energy Loss / Turn / Ring | V₁ | MV | — | — |
+| Energy Loss / Turn / Ring | V₁ | MV | 3.58 | 0.77 |
 | Number of Cavities | n | — | 20 | 4 |
 | Number of Cavities / Klystron | m | — | 4 | 2 |
 | Number of Idling Stations | x | — | 0 | 0 |
-| Beam Current | I₀ | A | — | — |
-| Shunt Impedance / Cavity | Z₀ | MΩ | — | — |
+| Beam Current | I₀ | A | 1.03 | 2.00 |
+| Shunt Impedance / Cavity | Z₀ | MΩ | 3.73 | 3.73 |
 | Shunt Impedance Accel Notation / Cavity | Rₐ | MΩ | 7.5 | 7.5 |
 | Gap Voltage / Cavity | V_c | kV | 700.0 | 850.0 |
 | Cavity Wall Power | P_c | kW | 65.7 | 96.8 |
