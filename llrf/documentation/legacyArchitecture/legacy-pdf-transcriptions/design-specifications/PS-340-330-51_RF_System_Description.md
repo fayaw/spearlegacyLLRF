@@ -133,7 +133,7 @@ Low-Level RF (LLRF) System
     ↓
 RF Drive Amplifier
     ↓
-1.2 MW Klystron ← HVPS (90 kV, 23 A)
+1.2 MW Klystron ← HVPS (90 kV, 23 A) ← AC switch gear ← 12 kV 3 phase AC power
     ↓
 Circulator → Circulator Load (protection)
     ↓
