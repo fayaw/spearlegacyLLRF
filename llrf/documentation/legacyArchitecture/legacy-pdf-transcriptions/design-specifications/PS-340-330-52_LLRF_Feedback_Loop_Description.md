@@ -11,6 +11,8 @@
 | **Pages** | 8 |
 | **Source PDF** | `feedbackLoopDescriptionps3403305200.pdf` (identical to `ps3403305200.pdf`) |
 
+> **See also:** [SPEAR3 LLRF FBK Loops Description](PEPII_LLRF_FBK_Loops_Description.md) — Comprehensive technical description of all eight feedback loops with full signal-path detail and SPEAR3 integration context (updated 3/20/2026).
+
 ---
 
 ## PEP-II LLRF Feedback Loop Description
@@ -40,7 +42,6 @@ See also Block Diagram: LOW-LEVEL RF FBK LOOPS Block Diagram #1.
 
 > **Drawing type:** Signal flow block diagram showing all feedback loops with the Direct Loop enabled (normal beam operation).
 
-The following structure was decoded from OCR-extracted rotated text labels and confirmed against the loop descriptions on subsequent pages:
 
 ### Loop Signal Flow Summary
 
@@ -51,27 +52,27 @@ The following structure was decoded from OCR-extracted rotated text labels and c
 |                                                                                                                                  |
 |                        +-----------------+                                                  +---------+                          |
 |                        | ON_CW Drive Pwr +---------->(S)--------------------------------->  |  HVPS   |                          |
-|                        +-----------------+             ^                                   +---------+                           |
-|                                               Kly Drive|         /  HVPS LOOP  \               |                                 |
-|                                               Pwr  +---+        |    (1 Hz)    |          HV supply                              |
+|                        +-----------------+             ^                                    +---------+                          |
+|                                               Kly Drive|          /  HVPS LOOP  \               |                                |
+|                                               Pwr  +---+         |    (1 Hz)    |          HV supply                             |
 |                                          +----------+            |              |               |                                |
 |                                          | I/Q Det. +------------>              |               |                                |
 |                                          +----------+             \            /                |                                |
 |                                                                    \----------/                 |                                |
-|                                                                                                                                  |
-|         +------------+          /\                   +----------+  |            /----------\                                     |
+|                                                            |------------------------------------+                                |
+|         +------------+          /\                   +----------+               /----------\                                     |
 |476 MHz=>| I/Q        |========>/  \ Drive ==========>| Klystron |<-+===========>( Cavity    )                                    |
 |         | Modulator  |        / D  \  Amp            +----------+   main RF     (          )                                     |
 |         +------+-----+       / r v  \                               path        (          )                                     |
-|                ^            /  i     \                                            \----------/                                   |
+|                ^            /  i     \                                          \----------/                                     |
 |                |           /  Amp     \                                                 |  |                                     |
 |                                                                                                                                  |
 |                |                                           +----------+ +---------+ +----------+ |                               |
 |                |                                           | I/Q Det. | |  Tuner  | | I/Q Det. | |                               |
 |                |                                           |(Kly Out  | +----+----+ |(Probe    | |                               |
-|                |                                           | Fwd Ph.) | TUNER ^     | Phase)   | |                               |
-|                |                                           +-----+----+ LOOP  |     +-----+----+ |                               |
-|                |                                                 |     (1 Hz) |           |      |                               |
+|                |                                           | Fwd Ph.) | TUNER  ^    | Phase)   | |                               |
+|                |                                           +-----+----+ LOOP   |    +-----+----+ |                               |
+|                |                                                 |     (1 Hz)  |          |      |                               |
 |                |    RIPPLE LOOP (300 Hz)                         |             |      (S)<-+ Probe Ph.|                          |
 |                |   <-------------------------------------------  |             |           |          |                          |
 |                |                             Kly Out Fwd Phase   +------------>+     +-----+---------+                           |
@@ -100,40 +101,26 @@ The following structure was decoded from OCR-extracted rotated text labels and c
 |  |  DAC  |<──────────────────────────── DAC LOOP (0.1 Hz) ─────────────────────────────────────<                                 |
 |  +---+---+                                                                                   |                                   |
 |      |                                                                        +──────────>+---------------+                      |
-|      +─────────────────────────────────────────────────> to I/Q Modulator    |           | Stn Gap Volt  |                       |
+|      +─────────────────────────────────────────────────> to I/Q Modulator     |           | Stn Gap Volt  |                      |
 |                                                                               |           +---------------+                      |
 |  LFB WOOFER (1 MHz)                                                           |                                                  |
-|  <──── From Longitudinal Multibunch Feedback System ──────────────> to DAC   |                                                   |
+|  <──── From Longitudinal Multibunch Feedback System ──────────────> to DAC    |                                                  |
 |                                                                                                                                  |
 +----------------------------------------------------------------------------------------------------------------------------------+
 ```
 
-### Additional Loops (shown elsewhere in diagram)
+| Loop Name | Bandwidth | Function |
+|---|---|---|
+| LFB Woofer | 1 MHz | Longitudinal multibunch feedback injection |
+| Comb Loop | 2 MHz | Multi-bunch instability suppression |
+| Direct Loop | 800 kHz | Primary cavity field (amplitude + phase) control |
+| Ripple Loop | 300 Hz | Power-supply ripple rejection |
+| Gap FF Loop | 100 Hz | Gap voltage feedforward correction |
+| HVPS Loop | 1 Hz | Klystron operating point (drive power) control |
+| Tuner Loop | 1 Hz | Cavity mechanical resonance frequency control |
+| DAC Loop | 0.1 Hz | Long-term DC drift correction (station gap voltage) |
 
-| Loop | Bandwidth | Input | Output | Function |
-|------|-----------|-------|--------|----------|
-| **Ripple Loop** | 300 Hz| Klystron phase/amplitude | I/Q phase correction | Keeps low-BW phase constant vs. HV variation |
-| **HVPS Loop** | ~1 Hz | RF drive power measurement | HVPS voltage setpoint | Keeps klystron ~10% below saturation |
-| **Tuner Loop** | 1Hz Slow (stepper) | Cavity probe I/Q phase | Tuner stepper motor | Maintains cavity resonance |
-| **Gap FF Loop** | ~100 Hz | Klystron drive variation | Reference signal correction | Compensates ion-clearing gap transient |
-
-### OCR-Decoded Label Fragments (from rotated text)
-
-| OCR Fragment | Decoded Label |
-|:---:|:---:|
-| "(ZH 008) doo1 LOaHYId" | DIRECT LOOP ( 800 kHz) |
-| "(ZHW 2) dOO1 AINOO" | COMB LOOP (2 MHz) |
-| "(ZH '0) doO1 ova" | DAC LOOP (0.1 Hz) |
-| "(ZHWL) HSAOOM 221" | LFB WOOFER (1 MHz) |
-| "doo1 ejddiy" | Ripple Loop |
-| "SdAH" | HVPS |
-| "IMd eAuC Aly" | RF Drive Pwr |
-| "@SeUd eqold" | Probe Phase |
-| "INO Aly" | RF OUT |
-| "8d O/I" | I/Q Det |
-
-
----
+Together these loops span more than **7 decades of frequency** (0.1 Hz to 2 MHz), each targeting a different disturbance source that would otherwise degrade the amplitude and phase stability of the accelerating voltage seen by the beam.
 
 ## 3) Normal Operation for Stored Beam (DIRECT LOOP ON)
 
@@ -160,6 +147,8 @@ A MATLAB calibration routine sets up the Comb Loop for proper loop phase, gain a
 Another MATLAB routine makes an equalizer to compensate for the effects of group delay, initiated by the **"Make Equal"** button. The equalizer is used both in the COMB LOOP and in the WOOFER link. The user should never have to create new equalizer files.
 
 The closed loop response of the DIRECT LOOP and COMB LOOP can be measured using the built in network analyzer by initiating the MATLAB routine **"MeasDirCls"**. This function will not cause loss of stored beam.
+
+> **SPEAR3 Note:** The Comb Loop (CFM module) was designed for PEP-II multi-bunch operation and is **not actively used in SPEAR3 operation**.
 
 ### TUNER LOOP
 
@@ -191,6 +180,8 @@ The RIPPLE LOOP is intended to remove amplitude and phase ripple in the klystron
 
 The GAP FEED FORWARD LOOP is required to tell the DIRECT LOOP to ignore the effects of the ion-clearing gap in the beam bunch train. Functionally the loop learns about the variation in the klystron drive caused by the beam gap and adds an equal variation in the reference signal so that the error signal driving the klystron stays unchanged. This loop adapts fully in about **1000 beam revolutions**.
 
+> **SPEAR3 Note:** The Gap Feedforward Loop (GVF hardware module; GFF function on the RFP DACs) as described above is a PEP-II-specific function. It is **not used in SPEAR3 operation**.
+
 ---
 
 ## Page 7: Additional Loop Descriptions (continued)
@@ -200,6 +191,8 @@ The GAP FEED FORWARD LOOP is required to tell the DIRECT LOOP to ignore the effe
 The LONGITUDINAL FEEDBACK WOOFER is the third cavity impedance reduction loop along with the DIRECT LOOP and the COMB LOOP. It derives its information from the lowest beam oscillation modes detected by the Longitudinal Multibunch Feedback system and uses one RF station in each ring as a powerful longitudinal kicker.
 
 A MATLAB calibration routine sets up the Woofer Loop for proper loop phase, loop gain and one turn delay, initiated by the **"ConfWoofer"** button. The station must be in ON_CW with the DIRECT LOOP, COMB LOOP and GAP FF LOOPS operating.
+
+> **SPEAR3 Note:** The LFB Woofer requires the Longitudinal Multibunch Feedback system and PEP-II multi-bunch beam conditions. It is **not used in SPEAR3 operation**.
 
 ### OPTIMIZED STATION PHASING ROUTINE
 
@@ -267,18 +260,18 @@ When the Direct Loop is OFF, the loop architecture simplifies significantly. The
 
 ## Loop Summary Reference Table
 
-| Loop | Bandwidth | Control Variable | Setpoint Source | MATLAB Config |
-|------|:---------:|-----------------|-----------------|:---:|
-| Direct | 800 kHz | Klystron drive (I/Q) | Gap voltage reference DAC | ConfDirect |
-| Comb | 2 MHz | Klystron drive (additive) | Revolution harmonic sidebands | Config Comb |
-| Tuner | ~1 Hz (stepper) | Cavity tuner position | Resonance phase condition | Tune Cavs |
-| HVPS (DL ON) | ~1 Hz | HVPS voltage setpoint | Drive power setpoint | — |
-| HVPS (DL OFF) | ~1 Hz | HVPS voltage setpoint | Gap voltage setpoint | — |
-| DAC (DL ON) | 0.1 Hz | Gap FF module DAC | Gap voltage setpoint | — |
-| DAC (DL OFF) | 0.1 Hz | Gap FF module DAC | Drive power setpoint | — |
-| Ripple | 300 Hz | I/Q phase correction | Constant phase | — |
-| Gap FF | 100 Hz | Reference signal modulation | Beam gap pattern (adaptive) | — |
-| LFB Woofer | 1 MHz | Klystron drive (additive) | LFB system lowest modes | ConfWoofer |
+| Loop | Bandwidth | Control Variable | Setpoint Source | MATLAB Config | SPEAR3 Legacy Status |
+|------|:---------:|-----------------|-----------------|:---:|:---:|
+| Direct | 800 kHz | Klystron drive (I/Q) | Gap voltage reference DAC | ConfDirect | Active |
+| Comb | 2 MHz | Klystron drive (additive) | Revolution harmonic sidebands | Config Comb | Not used |
+| Tuner | ~1 Hz (stepper) | Cavity tuner position | Resonance phase condition | Tune Cavs | Active |
+| HVPS (DL ON) | ~1 Hz | HVPS voltage setpoint | Drive power setpoint | — | Active |
+| HVPS (DL OFF) | ~1 Hz | HVPS voltage setpoint | Gap voltage setpoint | — | Active |
+| DAC (DL ON) | 0.1 Hz | Gap FF module DAC | Gap voltage setpoint | — | Active |
+| DAC (DL OFF) | 0.1 Hz | Gap FF module DAC | Drive power setpoint | — | Active |
+| Ripple | 300 Hz | I/Q phase correction | Constant phase | — | Active |
+| Gap FF | 100 Hz | Reference signal modulation | Beam gap pattern (adaptive) | — | Not used |
+| LFB Woofer | 1 MHz | Klystron drive (additive) | LFB system lowest modes | ConfWoofer | Not used |
 
 ---
 

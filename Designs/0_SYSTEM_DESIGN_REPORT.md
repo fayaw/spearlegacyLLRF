@@ -1,4 +1,4 @@
-# SPEAR3 LLRF Upgrade System — Physical Design Report
+# SPEAR3 LLRF Upgrade System — System Design Report
 
 **Document ID**: SPEAR3-LLRF-PDR-001 Rev 1
 **Revision**: R0 → R1

@@ -11,6 +11,8 @@
 | **Pages** | 11 |
 | **Source PDF** | `ps3403305100.pdf` |
 
+> **See also:** [PS-340-330-52 LLRF Feedback Loop Description](PS-340-330-52_LLRF_Feedback_Loop_Description.md) and [SPEAR3 LLRF FBK Loops Description](PEPII_LLRF_FBK_Loops_Description.md) for detailed LLRF control loop descriptions.
+
 ---
 
 ## PEP-II RF System Description
@@ -27,7 +29,7 @@ Following each klystron is the waveguide network, first a circulator for protect
 
 Each station has a set of 6 racks in the support building containing station breakers, emergency off button, local control and monitor panels for the HVPS and the overall station including safety key switches and a red warning beacon indication that the klystron high voltage is ON. The Process Logic Control system providing temperature readback and most interlock functions is located in these racks as well as klystron filament and focus supplies, cavity ion gauge readouts and ion pump supplies for klystron and cavities.
 
-A smaller air-conditioned blue rack at each station contains the low-level RF modules. The Low-level RF system provides control of amplitude, phase and tuning of the cavity including the fast feedback system to stabilize the interaction of the cavity with the beam to dampen multibunch oscillations and dealing with the ion clearing gap in the beam.
+A smaller air-conditioned blue rack at each station contains the low-level RF (LLRF) modules in a VXI chassis. The LLRF system provides amplitude, phase, and tuning control of the cavity using an **I/Q modulator** driven at 476 MHz as the primary actuator. Eight feedback and feedforward loops spanning seven decades of frequency (0.1 Hz to 2 MHz) stabilize the cavity accelerating voltage: the **Direct Loop** (800 kHz, primary cavity field control), **Comb Loop** (2 MHz, multi-bunch impedance reduction), **Ripple Loop** (300 Hz, HVPS ripple rejection), **Gap FF Loop** (100 Hz, gap voltage feedforward), **HVPS Loop** (1 Hz, klystron operating point), **Tuner Loop** (1 Hz, cavity resonance), **DAC Loop** (0.1 Hz, long-term drift correction), and **LFB Woofer** (1 MHz, longitudinal multibunch feedback injection). See *PS-340-330-52 LLRF Feedback Loop Description* for detailed descriptions of each loop.
 
 Close by the racks is an aluminum tank containing a grounding switch with lock-out provisions for the klystron high voltage power supply.
 
@@ -130,6 +132,9 @@ Operating Parameters (HER: 5 stations, LER: 2 stations)
 476 MHz Master Oscillator
     ↓
 Low-Level RF (LLRF) System
+  ├─ I/Q Modulator (476 MHz, amplitude/phase control actuator)
+  ├─ 8 Feedback Loops (Direct 800 kHz, Comb 2 MHz, Ripple 300 Hz, ...)
+  └─ Cavity Probe feedback ─────────────────────────────────────────────────────────────
     ↓
 RF Drive Amplifier
     ↓
@@ -162,6 +167,9 @@ Cavity 1  Cavity 2  Cavity 3  Cavity 4
 476 MHz Master Oscillator
     ↓
 Low-Level RF (LLRF) System
+  ├─ I/Q Modulator (476 MHz, amplitude/phase control actuator)
+  ├─ 8 Feedback Loops (Direct 800 kHz, Ripple 300 Hz, ...)
+  └─ Cavity Probe feedback ──────────────────────────────────
     ↓
 RF Drive Amplifier
     ↓
