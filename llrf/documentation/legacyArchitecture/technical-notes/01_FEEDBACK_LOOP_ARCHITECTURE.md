@@ -586,7 +586,7 @@ Frequency response peaks at: f = n × f_rev (n = 0, 1, 2, ...)
 ### 5.1 Purpose
 
 The HVPS uses SCR (thyristor) switching, producing ripple at:
-- **360 Hz** fundamental (6-pulse rectifier × 60 Hz)
+- **720 Hz** fundamental (2x6-pulse rectifier × 60 Hz)
 - Harmonics up to **~50 kHz**
 
 This ripple modulates klystron cathode voltage → gain/phase modulation of RF output → cavity field perturbation.

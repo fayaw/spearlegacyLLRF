@@ -118,26 +118,26 @@ The upgraded system replaces all control electronics while retaining the RF plan
   │  State Machine | HVPS Loop | Tuner Mgr | Fault Mgr | Diagnostics | Heartbeat Monitoring         │
   └─────────────────────────────────────────┬───────────────────────────────────────────────────────┘
                                             │ EPICS CA (~1 Hz supervisory)
-     ┌──────────┬──────────┬────────────────┼──────────┬──────────┬──────────┐
-     │          │          │                │          │          │          │
-  ┌──┴───────┐┌─┴────────┐┌┴───────────┐┌───┴───────┐┌─┴───────┐┌─┴──────┐┌──┴────────────┐
-  │ LLRF9 #1 ││ LLRF9 #2 ││ Motor Ctrl ││ HVPS PLC  ││Waveform ││  Arc   ││ RF MPS PLC    │
-  │Field Ctrl││Field Ctrl ││Galil       ││Compact-  ││ Buffer  ││ Detect ││CtrlLogix 1756 │
-  │+Tuner    ││+Tuner    ││ DMC-4143   ││ Logix     ││ System  ││12sensor││Collector pwr  │
-  │+Intlk    ││+Intlk    ││Ethernet HB ││V control  ││         ││        ││   calc        │
-  └┬───┬─────┘└──────────┘└─────┬──────┘└───┬──┬────┘└────┬────┘└────┬───┘└───┬──────────┬┘
-   │   └─int.─┘                 │           │  │          │          │        │          │
-   │  (No IC)                   │           │  │STATUS    │          │        │    ┌─────┴────────┐
-   │                            │           │  │fiber     │          │        │    │ Heater Ctrl  │
-   │                            │           │  │(direct   │          │        │    │Prog. AC Sup. │
-   │                            │           │  │ to HVPS  │          │        │    │Controlled by │
-   │                            │           │  │ Power)   │          │        │    │  RF MPS      │
-   │  to IC ───>                │           │  │          │  <─── to IC       │    └──────────────┘
-   ▼  from above                ▼           ▼  │          ▲  from below ▲     ▲    (NOT connected
-  ┌────────────────────────────────────────────┐│┌─────────────────────────────────────────────────┐ to IC)
+     ┌──────────┬──────────┬────────────────┼──────────┬──────────┬──────────┬──────────────────┐
+     │          │          │                │          │          │          │                  │
+  ┌──┴───────┐┌─┴────────┐┌┴───────────┐┌───┴───────┐┌─┴───────┐┌─┴──────┐┌──┴────────────┐     │
+  │ LLRF9 #1 ││ LLRF9 #2 ││ Motor Ctrl ││ HVPS PLC  ││Waveform ││  Arc   ││ RF MPS PLC    │     │
+  │Field Ctrl││Field Ctrl ││Galil       ││Compact-  ││ Buffer  ││ Detect ││CtrlLogix 1756 │     │
+  │+Tuner    ││+Tuner    ││ DMC-4143   ││ Logix     ││ System  ││12sensor││Collector pwr  │     │
+  │+Intlk    ││+Intlk    ││Ethernet HB ││V control  ││         ││        ││   calc        │     │
+  └┬───┬─────┘└──────────┘└─────┬──────┘└───┬───┬───┘└─────┬───┘└─────┬──┘└────┬────────┬─┘     │
+   │   └─int.─┘                 │           │   │          │          │        │        │       │
+   │  (No IC)                   │           │   │STATUS    │          │        │    ┌───┴───────┴──┐
+   │                            │           │   │fiber     │          │        │    │ Heater Ctrl  │
+   │                            │           │   │(direct   │          │        │    │Prog. AC Sup. │
+   │                            │           │   │ to HVPS  │          │        │    │Controlled by │
+   │                            │           │   │ Power)   │          │        │    │  RF MPS      │
+   │  to IC ───>                │           │   │          │  <─── to IC       │    └──────────────┘
+   ▼  from above                ▼           ▼   │          ▲  from below ▲     ▲   
+  ┌────────────────────────────────────────────┐│┌─────────────────────────────────────────────────┐ 
   │                        INTERFACE CHASSIS   │││(NEW)                                            │
   │  First-fault detection | Optocoupler/galv. │││isol. | Fiber I/O | AND-gate permit logic        │
-  └────────┬───────────────────────────────────┘│└──────────────────────────────────────┬──────────┘
+  └────────┬───────────────────────────────────┘│└─────────────────────────────────────┬───────────┘
            │                                    │                                      │
            │                                    │                            3x fiber optic
            │                                    │                          SCR ENABLE│CROWBAR│STATUS
@@ -199,11 +199,11 @@ The upgraded system replaces all control electronics while retaining the RF plan
 **New Subsystems** (did not exist in legacy):
 - Interface Chassis — central hardware interlock coordination hub
 - Waveform Buffer System — 8 RF + 4 HVPS channel extended monitoring
-- Arc Detection — total 12 Microstep-MIS optical sensors: 4 cavity windows, 1 klystron window, 1 circulator, process chassis
+- Arc Detection — 10 Microstep-MIS optical sensors across 6 receiver units (5 active, 1 spare): 4 cavity windows (2 sensors per window on 4 receivers), 1 klystron window + 1 circulator (sharing 1 receiver), 1 spare receiver
 - PPS Interface Box
 
 **Enhanced Subsystems** (upgraded from legacy):
-- Klystron Heater Controller — Motor-driven variac → Commercial programmable AC supply with EPICS integration via RF MPS.
+- Klystron Heater Controller — Motor-driven variac → Chroma programmable AC supply; MPS controls via analog ramp, EPICS monitors/enables via Ethernet (ASYN VISA ASCII module).
 - Collector Power Protection — Forward power proxy → Waveform Buffer System measures HVPS voltage and current and klystron forward power → Collector power calculation performed in RF MPS
 
 ---
@@ -956,18 +956,27 @@ The arc detection system is a new subsystem that provides optical monitoring of 
 
 **Microstep-MIS Waveguide Arc Detectors**: Optical sensors that detect the light flash produced by an electrical arc inside a waveguide or cavity viewport. These are commercial off-the-shelf devices providing:
 - Optical fiber sensors mounted at cavity window viewports, klystron window, and circulator
-- Controller unit with dry-contact relay outputs per channel
+- Receiver units, each accepting up to 2 sensor fiber inputs with one independent dry-contact relay output per input channel
 - Response time on the order of microseconds
 - Configurable sensitivity thresholds
 
 ### 12.3 Installation
 
-There are **6 sensors** total (updated from original design):
-- 4 sensors mounted on cavity window viewports (one per cavity: Cav A, B, C, D)
+There are **10 sensors** total (updated from original design):
+- 8 sensors mounted on cavity window viewports (two per cavity: Cav A, B, C, D)
 - 1 sensor mounted on the klystron window
 - 1 sensor monitoring the circulator
 
-Mechanical mounting requires custom adapters for the existing CF flange viewports (see `llrf/arcDetector/Mechanical/Reference/` for viewport specifications). Sensor fibers run to the Microstep-MIS controller unit located in B132.
+Mechanical mounting requires custom adapters for the existing CF flange viewports (see `llrf/arcDetector/Mechanical/Reference/` for viewport specifications). Sensor fibers run to 6 Microstep-MIS receiver units located in B132 (5 active, 1 spare). Receiver-to-sensor assignment:
+
+| Receiver | Ch 1 | Ch 2 |
+|----------|------|------|
+| Rcvr 1 | Cav A sensor 1 | Cav A sensor 2 |
+| Rcvr 2 | Cav B sensor 1 | Cav B sensor 2 |
+| Rcvr 3 | Cav C sensor 1 | Cav C sensor 2 |
+| Rcvr 4 | Cav D sensor 1 | Cav D sensor 2 |
+| Rcvr 5 | Klystron sensor | Circulator sensor |
+| Rcvr 6 | (spare) | (spare) |
 
 ### 12.4 Signal Path and Design
 
@@ -976,17 +985,21 @@ The Arc Detection Chassis routes both paths to the Interface Chassis — the fas
 > **Figure 4 — Arc Detection Signal Path** (see `Designs/docx/drawings/PRD_drawings.vsdx`)
 
 ```
-[Cav A sensor]  ───┐                                 ┌── OR gate ──────► PERMIT input        ──┐
-[Cav B sensor]  ───┤                                 │   (1 wire,          (fast trip)         │
-[Cav C sensor]  ───┼──► [Microstep-MIS Controller] ──┤    hardware)                            ├─► [Interface Chassis]
-[Cav D sensor]  ───┤   (6 relay outputs)             │                                         │
-[Kly sensor]    ───┤                                 └── 6-bit latch ──► 6 status inputs  ─────┘
-[Circulator]    ───┘                                    (latching)       (diagnostic)
-                                                Also: Test + Reset signals from Interface Chassis → Arc Detect
+[Cav A sensor 1] ──► [Rcvr 1, ch1] ──┐
+[Cav A sensor 2] ──► [Rcvr 1, ch2] ──┤
+[Cav B sensor 1] ──► [Rcvr 2, ch1] ──┤
+[Cav B sensor 2] ──► [Rcvr 2, ch2] ──┤    ┌──────────────────────────────────────────────────────────────┐
+[Cav C sensor 1] ──► [Rcvr 3, ch1] ──┼───►│  Arc Detection Chassis                                       │
+[Cav C sensor 2] ──► [Rcvr 3, ch2] ──┤    │   OR (all 10) ──────► PERMIT output (active-high) ───────────┼──► Interface Chassis
+[Cav D sensor 1] ──► [Rcvr 4, ch1] ──┤    │   10-bit latch ─────► 10 status outputs (one per sensor) ────┼──► Interface Chassis
+[Cav D sensor 2] ──► [Rcvr 4, ch2] ──┤    └──────────────────────────────────────────────────────────────┘
+[Kly sensor]     ──► [Rcvr 5, ch1] ──┤    Test + Reset ◄───────────────────────────────────────────────────── Interface Chassis
+[Circulator]     ──► [Rcvr 5, ch2] ──┘
+[Rcvr 6: spare]     (both channels unused)
 ```
 
-- **Fast trip path**: The 6 relay outputs are OR-ed in the Arc Detection Chassis into a single active-high permit signal. Any arc event immediately de-asserts it, entering the Interface Chassis AND-gate alongside all other permits. This path is purely hardware with no encoding latency.
-- **Diagnostic identification path**: The same 6 relay outputs simultaneously set individual bits in a 6-bit latching register inside the Arc Detection Chassis. All 6 bits are wired as separate status inputs to the Interface Chassis. The Interface Chassis includes these bits in its fault status word, which the RF MPS PLC reads to determine which sensor fired. The latch holds state until explicitly reset, preserving identity through the fault response sequence.
+- **Fast trip path**: The 10 relay outputs (one per sensor, from 5 active receivers) are OR-ed in the Arc Detection Chassis into a single active-high permit signal. Any arc event immediately de-asserts it, entering the Interface Chassis AND-gate alongside all other permits. This path is purely hardware with no encoding latency.
+- **Diagnostic identification path**: Each of the 10 relay outputs simultaneously sets an individual bit in a 10-bit latching register inside the Arc Detection Chassis. All 10 bits are wired as separate status inputs to the Interface Chassis. The Interface Chassis includes these bits in its fault status word, which the RF MPS PLC reads to identify exactly which sensor fired. The latch holds state until explicitly reset, preserving identity through the fault response sequence.
 
 Routing both paths to the Interface Chassis is cleaner than wiring the diagnostic path directly to the RF MPS: all arc-related signals are centralized in one place, no extra wiring runs to the MPS PLC are needed, and the Interface Chassis first-fault register can incorporate arc identification alongside all other fault sources.
 
@@ -994,14 +1007,14 @@ Routing both paths to the Interface Chassis is cleaner than wiring the diagnosti
 
 - The single arc permit output is **active-high** (permit present = no arc); any arc event drives it low — consistent with fail-safe convention throughout the Interface Chassis
 - The Interface Chassis removes the RF permit immediately upon any arc event
-- The 6 identification bits in the Interface Chassis fault status word indicate which sensor(s) fired; the latch holds until reset
+- The 10 identification bits in the Interface Chassis fault status word indicate which individual sensor fired; the latch holds until reset
 - If multiple sensors fire simultaneously, all corresponding bits are set
 - Reset of the latch requires an explicit EPICS command via the RF MPS after the fault is acknowledged
 
 ### 12.6 Interfaces
 
-- **Arc Detection Chassis → Interface Chassis**: 1 permit signal (OR of all 6 sensors, fail-safe active-high) + 6 latched status bits (one per sensor) + Test + Reset signals
-- **Interface Chassis → RF MPS PLC**: Arc permit state and 6-bit fired-detector ID included in the Interface Chassis fault status word
+- **Arc Detection Chassis → Interface Chassis**: 1 permit signal (OR of all 10 sensors, fail-safe active-high) + 10 latched status bits (one per sensor) + Test + Reset signals
+- **Interface Chassis → RF MPS PLC**: Arc permit state and 10-bit fired-detector ID included in the Interface Chassis fault status word
 - **RF MPS / EPICS**: Per-sensor trip status PVs, fired-detector identification, event count, latch reset command
 - **EPICS Coordinator**: Reads arc fault status for operator displays and state machine fault handling
 
@@ -1044,17 +1057,27 @@ Front-panel indicators (DS1, DS2 green LEDs) and local metering
 
 ### 13.2 Upgraded System
 
-> **Note**: Tony and Ben have advised buying a programmable AC supply from TDK/Lambda, Ametek, Chroma, etc. The parts cost is higher but there is no fabrication cost or effort — a fully COTS solution.
+The **Chroma programmable AC power supply** is the selected replacement. The unit is in hand, has been tested, and is ready to proceed. It is already in use elsewhere at the lab for the same heater application, providing a proven repair path and known operational characteristics.
 
-| Parameter | Legacy | Upgraded |
-|-----------|--------|----------|
-| Control method | Motor-driven variac | Commercial programmable AC supply |
+**Key advantages over the legacy variac**:
+- Analog voltage programming input — allows the RF MPS to directly ramp output voltage via a DAC signal, replacing the slow motor-driven variac
+- Ethernet interface with VISA-type ASCII command set — enables EPICS monitoring and enable/disable control via an ASYN driver module
+- Solid-state, no mechanical wear
+- Known, in-lab support and repair path
+
+| Parameter | Legacy | Upgraded (Chroma) |
+|-----------|--------|-------------------|
+| Control method | Motor-driven variac | Programmable AC supply, analog voltage ramp |
 | Response time | Seconds–minutes | <100 ms |
 | Voltage regulation | ±1%? | ±0.1% |
 | Reliability | Mechanical wear | Solid-state (>50,000 hr MTBF) |
-| EPICS integration | Limited | Full (automated sequences) |
+| EPICS integration | Limited | ASYN module over Ethernet (monitoring + enable/disable) |
 
-**Upgraded system architecture**:
+**Control architecture**:
+
+- **MPS controls the supply** via an analog ramp on the programming input. The RF MPS PLC DAC output drives the Chroma voltage programming pin, setting the output level. This keeps the safety-critical ramp control in hardware (MPS) with fast response.
+- **EPICS communicates via Ethernet** for monitoring and enable/disable. The Chroma Ethernet interface supports VISA-type ASCII commands. An ASYN EPICS module will be developed to provide readback PVs (output voltage, current, status) and to send enable/disable commands from the EPICS coordinator.
+- **Existing V/I metering retained**: The current analog voltage and current meters (feeding MPS analog inputs) are kept in place to provide hardware-level monitoring of the output within rating limits, independent of the Ethernet path.
 
 > **Figure 5 — Heater Controller Architecture** (see `Designs/docx/drawings/PRD_drawings.vsdx`)
 
@@ -1064,18 +1087,15 @@ Front-panel indicators (DS1, DS2 green LEDs) and local metering
                     │   (Soft IOC)        │
                     └─────────┬───────────┘
                               │ EPICS Channel Access
-                              ▼
-                    ┌─────────────────────┐
-                    │    RF MPS PLC       │
+                    ┌─────────┾───────────┐
+                    │    RF MPS PLC        │
                     │  (CtrlLogix 1756)   │
                     └─────────┬───────────┘
-                              │ Analog/Ethernet
-                              ▼
-                    ┌─────────────────────┐
-                    │ Programmable AC     │
-                    │ Supply (COTS)       │
+                              │ Analog ramp (voltage programming input)
+                    ┌─────────┾───────────┐  ◄───── Ethernet (ASYN / VISA ASCII)
+                    │  Chroma AC Supply   │  ◄───── V/I meters → MPS analog inputs
                     └─────────┬───────────┘
-                              │ Clean 60 Hz AC
+                              │ 60 Hz AC output
                               ▼
                     ┌─────────────────────┐
                     │  Klystron Cathode   │
@@ -1084,16 +1104,19 @@ Front-panel indicators (DS1, DS2 green LEDs) and local metering
 ```
 
 **Key design considerations**:
-- Commercial programmable AC supply produces clean sine waves; no custom fabrication required
-- True RMS voltage/current monitoring — independent RMS meters monitored by RF MPS, or values read over Ethernet by IOC and written to PLC (TBD)
-- Automated warm-up, standby, and cool-down sequences via EPICS
-- Heater controller is part of RF MPS — klystron does not receive a permit to operate unless the heater has reached power level and timed out. EPICS system provides an override to allow the system expert to bypass the timeout in the event of a short power dip.
+- MPS ramps the Chroma output voltage via analog programming input for controlled warm-up and cooldown; no mechanical components
+- ASYN EPICS module required to interface to Chroma Ethernet (VISA ASCII command set); module to be developed
+- Existing analog V/I metering feeds MPS hardware inputs directly — hardware protection path is independent of Ethernet/EPICS
+- Automated warm-up, standby, and cooldown sequences managed by the EPICS coordinator
+- Heater interlock: klystron does not receive an RF permit until the heater has reached operating power and the soak timer has elapsed; EPICS provides an expert override for short power dips
 
 ### 13.3 Interfaces
 
-- **RF MPS / EPICS Coordinator**: Setpoint control via analog amplitude control (PLC) and/or Ethernet (IOC sets 60 Hz output frequency). Supply is voltage-controlled, ramped to ~500 W output while keeping current below maximum. RMS monitoring: TBD — either independent RMS meters monitored by RF MPS hardware, or IOC reads values over Ethernet and writes to PLC.
-- **HVPS coordination**: Heater must be at operating temperature before HVPS enable; HVPS must be off before heater cooldown
-- **RF MPS**: Heater "ready" status required for RF permit. Hardware heater current and voltage monitored by MPS.
+- **RF MPS → Chroma (hardware control)**: MPS PLC DAC output drives the Chroma analog voltage programming input. Output is ramped up/down under MPS control for warm-up and cooldown sequences. MPS also provides the hardware enable/disable signal.
+- **EPICS → Chroma (monitoring + soft control)**: ASYN EPICS module communicates over Ethernet using VISA-type ASCII commands. Provides readback PVs for output voltage, current, and status; sends enable/disable commands from the EPICS coordinator.
+- **Existing V/I metering (retained)**: Legacy analog voltage and current meters feed MPS analog inputs directly, providing hardware-level protection independent of the Ethernet path. Output is monitored against rating limits.
+- **HVPS coordination**: Heater must be at operating temperature before HVPS enable; HVPS must be off before heater cooldown.
+- **RF MPS permit**: Heater "ready" status required for RF permit. Hardware heater current and voltage monitored by MPS analog inputs.
 
 ---
 
