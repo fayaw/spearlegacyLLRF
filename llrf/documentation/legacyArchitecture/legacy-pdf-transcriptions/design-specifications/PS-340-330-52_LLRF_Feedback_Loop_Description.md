@@ -91,7 +91,7 @@ The following structure was decoded from OCR-extracted rotated text labels and c
 
 | OCR Fragment | Decoded Label |
 |:---:|:---:|
-| "(ZH 008) doo1 LOaHYId" | DIRECT LOOP (800 Hz → 800 kHz) |
+| "(ZH 008) doo1 LOaHYId" | DIRECT LOOP ( 800 kHz) |
 | "(ZHW 2) dOO1 AINOO" | COMB LOOP (2 MHz) |
 | "(ZH '0) doO1 ova" | DAC LOOP (0.1 Hz) |
 | "(ZHWL) HSAOOM 221" | LFB WOOFER (1 MHz) |
@@ -101,8 +101,7 @@ The following structure was decoded from OCR-extracted rotated text labels and c
 | "@SeUd eqold" | Probe Phase |
 | "INO Aly" | RF OUT |
 | "8d O/I" | I/Q Det |
-| "BAuG D/A" | A/D Drive |
-| "ZHI OZ" | 20 MHz (sample rate) |
+
 
 ---
 
