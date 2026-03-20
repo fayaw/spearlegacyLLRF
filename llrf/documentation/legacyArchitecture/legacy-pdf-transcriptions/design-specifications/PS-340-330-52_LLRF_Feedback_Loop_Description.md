@@ -246,9 +246,9 @@ When the Direct Loop is OFF, the loop architecture simplifies significantly. The
 | HVPS (DL OFF) | ~1 Hz | HVPS voltage setpoint | Gap voltage setpoint | — |
 | DAC (DL ON) | 0.1 Hz | Gap FF module DAC | Gap voltage setpoint | — |
 | DAC (DL OFF) | 0.1 Hz | Gap FF module DAC | Drive power setpoint | — |
-| Ripple | Low BW | I/Q phase correction | Constant phase | — |
-| Gap FF | ~1000 revs | Reference signal modulation | Beam gap pattern (adaptive) | — |
-| LFB Woofer | — | Klystron drive (additive) | LFB system lowest modes | ConfWoofer |
+| Ripple | 300 Hz | I/Q phase correction | Constant phase | — |
+| Gap FF | 100 Hz | Reference signal modulation | Beam gap pattern (adaptive) | — |
+| LFB Woofer | 1 MHz | Klystron drive (additive) | LFB system lowest modes | ConfWoofer |
 
 ---
 
