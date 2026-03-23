@@ -98,27 +98,16 @@ In general, monitored data is displayed in black text with the current status sh
 
 > **Note:** The following table reconstructs the content of the EPICS operator display screenshot shown on page 3 of the original paper. The display is titled **"HER RF12-1 Station"** and represents the main operator control and monitoring panel for an HER RF station.
 
-#### Navigation Buttons (Top Row)
+#### Navigation Buttons (Top Rows)
 
-| Button | Description |
-|--------|-------------|
-| Klystron | Klystron subsystem display |
-| Vacuum | Vacuum subsystem display |
-| SysBcon | System beacon / status display |
-| Tuners | Cavity tuner control display |
-| Oscillator | Master oscillator display |
-| HVPS | High voltage power supply display |
-| Temps | Temperature monitoring display |
-| Phase/Pwr | Phase and power monitoring display |
-| VXI Modus | VXI module status display |
-| AB Modus | Allen-Bradley module status display |
-| Waveguide | Waveguide subsystem display |
-| Cavities | Cavity subsystem display |
-| Arc Intlks | Arc interlock status display |
-| Bm Diags | Beam diagnostics display |
-| Exit | Exit display |
-| Print | Print display |
-| Help | Help display |
+> **Note:** Values below are approximate, reconstructed from a low-resolution screenshot in the original PDF. Some labels may be partially illegible.
+
+| Row | Buttons |
+|-----|--------|
+| Row 1 | Klystron, Oscillator, HVPS, Waveguide, Cavities |
+| Row 2 | Vacuum, FLCW, Temps, Phase/Pwr, Arc Intlks |
+| Row 3 | SysBcon, Tuners, AB Modus, VXI Modus, Bm Diags |
+| Top-right | Print, Exit, Help |
 
 #### Station Status and Control (Left Panel)
 
@@ -171,14 +160,21 @@ In general, monitored data is displayed in black text with the current status sh
 
 #### Cavity Data (per cavity)
 
-| Cavity | Forward (kW) | Reflected (kW) |
-|--------|-------------|----------------|
-| Cavity A | 9.9e-09 / 6.8e-09 | — |
-| Cavity B | 89 / 74 | — |
-| Cavity C | 43 / 36 | — |
-| Cavity D | — / — | — |
+| Parameter | Cavity A | Cavity B | Cavity C | Cavity D |
+|-----------|----------|----------|----------|----------|
+| Fwd Power (kW) | 9.9e-09 | 89 | 85 | 86 |
+| Probe (kW) | 6.8e-09 | 74 | 47 | 43 |
 
-#### Additional Parameters
+#### Tune Data (Deg)
+
+| Cavity | Value |
+|--------|-------|
+| A | 1.21 |
+| B | 2.06 |
+| C | -2.75 |
+| D | 2.21 |
+
+#### Right-Side Panel
 
 | Parameter | Value |
 |-----------|-------|
@@ -192,7 +188,6 @@ In general, monitored data is displayed in black text with the current status sh
 | HVPS Current (Amp) | 15.44 |
 | HVPS Power (kW) | 1006 |
 | Collector Power (kW) | 708 |
-| Tune Data (Deg) | -30.00 / 20.00 |
 | 1000 RF | (indicator) |
 
 ### Strip Chart Tool

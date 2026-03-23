@@ -186,18 +186,20 @@ To provide adjustable gain and phase shifts of IQ vectors a baseband IQ modulato
 > Constructing a baseband analog IQ modulator requires four 4-quadrant multipliers and two summing amplifiers to perform the matrix mathematics.
 
 ```
-    I to I weight ──▶[X]──┐
-                          │  +
-    I input ──────────────┼──▶[Σ]──▶ I output
-                          │  -
-    I to Q weight ──▶[X]──┘
+    I to I weight ──▶[X]◀── I input ──┐
+                                       │  +
+                                       ├──▶[Σ]──▶ I output
+                                       │  -
+    Q to I weight ──▶[X]◀── Q input ──┘
 
-    Q to I weight ──▶[X]──┐
-                          │  +
-    Q input ──────────────┼──▶[Σ]──▶ Q output
-                          │  +
-    Q to Q weight ──▶[X]──┘
+    I to Q weight ──▶[X]◀── I input ──┐
+                                       │  +
+                                       ├──▶[Σ]──▶ Q output
+                                       │  +
+    Q to Q weight ──▶[X]◀── Q input ──┘
 ```
+
+> **Note:** Each output receives contributions from **both** I and Q inputs. The minus sign on the Q-to-I path into the I output corresponds to the −sin θ term in the rotation matrix (Equation 2).
 
 Digital to analog converters (DACs) are used to produce the multiplier weights. Note that if the sign for the -sin θ term is handled as part of the summing circuit, only two weight values are required. We choose to use an individual DAC channel for each modulator weight to allow the multiplier offsets to be corrected for as part of each DAC weight.
 
