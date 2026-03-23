@@ -41,7 +41,7 @@
 
 The SPEAR3 (Stanford Positron Electron Asymmetric Ring, 3rd generation) Low-Level RF (LLRF) system is a heritage PEP-II B-Factory design operating at 476.315 MHz, controlling a single RF station that drives four single-cell copper cavities from one 1.2 MW klystron. The system was originally designed at SLAC by Corredoura, Allison, Sass, Tighe, and Claus (1996–1997) for the PEP-II asymmetric electron-positron collider, and was adopted for SPEAR3 in 2003 when the storage ring was upgraded from 358.54 MHz to 476.315 MHz.
 
-The LLRF system implements a multi-rate hierarchical feedback architecture with seven distinct control loops spanning bandwidths from ~800 kHz (analog direct feedback) down to ~0.1 Hz (DAC loop). Of these seven loops, five are actively used in SPEAR3 (Direct, Ripple, HVPS, DAC, and Tuner), while two are PEP-II heritage elements that were never deployed at SPEAR3 (Comb, Gap Voltage Feed-Forward).
+The LLRF system implements a multi-rate hierarchical feedback architecture with eight distinct control loops spanning bandwidths from ~800 kHz (analog direct feedback) down to ~0.1 Hz (DAC loop). Of these eight loops, five are actively used in SPEAR3 (Direct, Ripple, HVPS, DAC, and Tuner), while three are PEP-II heritage elements that were never deployed at SPEAR3 (Comb, Gap Voltage Feed-Forward, and LFB Woofer).
 
 The legacy system is built on a VXI instrumentation bus platform with custom SLAC-designed modules, controlled by an EPICS IOC running VxWorks on a Motorola PPC604 processor. The control software comprises 253 functional source files totaling over 82,000 lines of code, including 6 SNL (State Notation Language) real-time sequencer programs, AT&T DSP1610/TI TMS320C16xx DSP firmware in assembly, 7 custom EPICS record types, and 78+ EPICS database files.
 
@@ -304,8 +304,6 @@ $$P_\text{collector,max} = 74.7 \text{ kV} \times 22 \text{ A} = 1.64 \text{ MW}
 
 This exceeds the collector's continuous thermal rating, requiring fast HVPS shutdown within ~100 ms.
 
-current operation, what klyston ouput power?
-
 ---
 
 ## 5. System Architecture
@@ -414,6 +412,7 @@ The LLRF system implements a multi-rate hierarchical feedback architecture. Band
 | 5 | DAC Control | ~0.1 Hz | Software: SNL (`rf_dac_loop.st`) | **Active** |
 | 6 | Tuner Control | ~1 Hz | Software: SNL (`rf_tuner_loop.st`) | **Active** |
 | 7 | Gap Voltage Feed-Forward | N/A (feed-forward) | VXI GVF module | **PEP-II only** |
+| 8 | LFB Woofer | ~1 MHz | External: LFB system injection via GVF/TAXI fiber link | **PEP-II only** |
 
 **Critical stability requirement**:
 
@@ -652,9 +651,9 @@ The output is:
 - Subject to a minimum delta threshold of 0.5 counts (prevents hunting)
 - Updated no less frequently than every 10 seconds (even without trigger events)
 
-### 10.4 Upgrade Fate (This is not true. we still need it  to regular driver power to klystron at close to staturation!)
+### 10.4 Upgrade Fate
 
-The DAC loop is **eliminated** in the LLRF9 architecture. The LLRF9 controls the modulator internally via a single vector sum output — there is no external DAC setpoint management.
+The DAC loop function is **retained** in the LLRF9 architecture. The implementation changes from writing to Octal DACs on the legacy RFP module to writing equivalent scalar setpoints to the LLRF9 via EPICS. The slow proportional control algorithm (§10.3) is re-implemented in the Python/EPICS coordinator. The LLRF9 provides I/Q setpoint inputs that the coordinator adjusts, maintaining the same gap voltage regulation (Direct Loop ON) and drive power regulation (Direct Loop OFF) roles described in §10.2. This is necessary because the klystron must be kept near saturation for efficient operation, and only the slow supervisory DAC loop tracks the long-term DC setpoint that the fast direct loop rides on top of.
 
 ---
 
@@ -726,6 +725,12 @@ where $N$ = samples per revolution period, $a$ = feed-forward gain, $b$ = feedba
 The GVF module provided IQ reference values for gap voltage setpoint and an interface to the PEP-II Longitudinal Feedback (LFB) system via fiber optic TAXI link. Since SPEAR3 has no LFB system, the GVF hardware was never installed (slot 3 was empty). Gap voltage control was handled entirely by the software DAC loop.
 
 **Software dependency**: Although the GVF hardware was absent, the GVF database records (`gvf.db`) were loaded and actively consumed by the TAXI monitoring state set in `rf_msgs.st` for error recovery. Removal of these database records would break the TAXI error monitoring code path.
+
+### 12.3 LFB Woofer (Longitudinal Feedback Woofer)
+
+The LFB Woofer provided an injection interface for the PEP-II Longitudinal Multibunch Feedback (LFB) system. The LFB system measured bunch-by-bunch longitudinal oscillations using a dedicated broadband beam pickup and computed kick corrections, injecting the low-frequency component (up to 1 MHz) back into the RF system via the GVF module to modulate the klystron drive voltage. This "woofer" path damped coupled-bunch instabilities that neither the Direct Loop nor the Comb Loop could sufficiently suppress at PEP-II's very high beam currents (up to 3 A).
+
+**Not used in SPEAR3**: SPEAR3 has no LFB system. The fiber optic TAXI link carrying the woofer signal was never installed. The `rf_msgs.st` TAXI monitoring state set communicated only error/status messages over the TAXI link, not woofer correction data. SPEAR3's moderate beam current (500 mA vs. PEP-II's 1.8–3.0 A) makes the LFB Woofer unnecessary — the Direct Loop alone provides sufficient coupled-bunch suppression.
 
 ---
 
@@ -909,7 +914,7 @@ Cavity × measurement iteration is handled by nested `for` loops within states, 
 | `rf_tuner_loop.st` | LLRF9 built-in + Python load-angle | **Configure + rewrite** |
 | `rf_calib.st` | LLRF9 built-in calibration | **Verify equivalence** |
 | `rf_msgs.st` | EPICS logging + LLRF9 diagnostics | **Reference** |
-| `rf_dac_loop.st` | **Eliminated** — LLRF9 internal | Per PDR §15.7 |
+| `rf_dac_loop.st` | Python/EPICS coordinator (retained) | Rewrite — slow proportional algorithm re-implemented in coordinator writing LLRF9 scalar setpoints |
 
 ---
 
@@ -1171,12 +1176,14 @@ MATLAB commissioning routines (from PS-340-330-52-R0):
 
 ### 22.2 Eliminated Loops
 
-The following legacy loops are eliminated because the LLRF9 digital feedback handles their functions internally:
+The following legacy loops are eliminated because the LLRF9 digital feedback handles their functions internally, or because they were PEP-II-only features never active at SPEAR3:
 
-- **Ripple rejection** — LLRF9 bandwidth inherently rejects 720 Hz ripple
-- **Comb filter** — PEP-II only; not needed for SPEAR3 beam current
-- **Gap voltage feed-forward** — PEP-II only; no LFB system at SPEAR3
-- **DAC loop (4-way branching)** — LLRF9 controls via single vector sum output
+- **Ripple rejection** — LLRF9 bandwidth inherently rejects 720 Hz ripple; dedicated ripple loop eliminated
+- **Comb filter** — PEP-II only; not needed for SPEAR3 beam current (500 mA vs. PEP-II's 1.8–3.0 A)
+- **Gap voltage feed-forward (GVF)** — PEP-II only; no LFB system at SPEAR3; hardware never installed
+- **LFB Woofer** — PEP-II only; requires Longitudinal Multibunch Feedback system not present at SPEAR3
+
+> **Note**: The **DAC loop** function is **retained**. It is re-implemented in the Python/EPICS coordinator (writing LLRF9 scalar setpoints instead of RFP Octal DAC registers), maintaining the long-term gap voltage setpoint and drive power regulation that the fast Direct Loop operates on top of. See §10.
 
 ### 22.3 Upgrade State Machine
 
@@ -1234,6 +1241,7 @@ Legacy PARK + VXI init maps to INITIALIZE. Legacy TUNE + ON_FM are collapsed int
 25. SPEAR3 LLRF Legacy Code Analysis Notes (8 documents), `spear-rf-code-legacy/codeReviewTechnicalNotes/`
 26. PEP-II/SPEAR3 LLRF Technical Notes (6 documents), `llrf/documentation/legacyArchitecture/technical-notes/`
 27. Legacy PDF Transcriptions (14 documents), `llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/`
+28. "SPEAR3 LLRF Feedback Loops — Comprehensive Technical Description," `llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/design-specifications/PEPII_LLRF_FBK_Loops_Description.md`, March 2026
 
 ---
 
