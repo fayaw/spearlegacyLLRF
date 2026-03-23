@@ -1,6 +1,6 @@
 # Legacy PDF Transcriptions — PEP-II RF System Archive
 
-This directory contains faithful markdown transcriptions of all **15 original legacy PDF documents** from the PEP-II RF system archive. These transcriptions were generated via OCR extraction and enhanced with domain knowledge to provide searchable, version-controlled access to the complete legacy documentation.
+This directory contains faithful markdown transcriptions of all **17 original legacy PDF documents** from the PEP-II RF system archive, including 2 IEEE conference papers. These transcriptions were generated via OCR extraction and enhanced with domain knowledge to provide searchable, version-controlled access to the complete legacy documentation.
 
 ---
 
@@ -35,11 +35,18 @@ This directory contains faithful markdown transcriptions of all **15 original le
 | 13 | [BD-340-330-01](block-diagrams/BD-340-330-01_PEP-II_Low_Level_RF_Configuration.md) | `bd3403300100.pdf` | 1 | PEP-II LER LLRF Configuration Block Diagram — detailed signal processing chain |
 | 14 | [BD-340-329-01](block-diagrams/PEP-II_Low_Level_RF_Block_Diagram.md) | `blockDiagrambd3403290100-1.pdf` | 1 | PEP-II HER LLRF Configuration Block Diagram — HER counterpart to BD-340-330-01 |
 
+### Conference Papers (2 documents)
+
+| # | Document | PDF | Pages | Description |
+|---|----------|-----|:-----:|-------------|
+| 15 | [Operator Interface](conference-papers/Operator_Interface_PEP-II_LLRF_Control_System.md) | `Operator_interface_for_the_PEP-II_low_level_RF_control_system.pdf` | 3 | Operator Interface for the PEP-II Low Level RF Control System — EPICS-based OPI design, IOC software architecture, EDD/DM displays, SLC integration, color-coding conventions (PAC 98, Allison & Claus) |
+| 16 | [Architecture & Performance](conference-papers/Architecture_and_Performance_PEP-II_LLRF.md) | `architecture-and-performance-of-the-pep-ii-low-level-rf.pdf` | 5 | Architecture and Performance of the PEP-II Low-Level RF System — SLAC-PUB-8124, complete LLRF system design: IQ baseband processing, direct/comb/ripple/gap feedback loops, VXI hardware topology, digital down conversion, coupler directivity correction, beam phase detection (PAC 99, Corredoura) |
+
 ### Duplicate
 
 | # | Document | PDF | Notes |
 |---|----------|-----|-------|
-| 15 | *(not transcribed separately)* | `ps3403305200.pdf` | Identical content to `feedbackLoopDescriptionps3403305200.pdf` (PS-340-330-52) |
+| 17 | *(not transcribed separately)* | `ps3403305200.pdf` | Identical content to `feedbackLoopDescriptionps3403305200.pdf` (PS-340-330-52) |
 
 ---
 
@@ -74,8 +81,9 @@ This directory contains faithful markdown transcriptions of all **15 original le
 ### v1 (initial extraction)
 - **PDF Library**: PyMuPDF (fitz) — native text extraction attempted first
 - **OCR Engine**: Tesseract 5.3.0 — fallback at 300 DPI for image-based pages
-- **All 15 PDFs** are image-based (scanned documents) — OCR was required for all pages
-- **Total pages processed**: 76 pages across 15 PDFs
+- **13 of 17 PDFs** are image-based (scanned documents) — OCR was required for those pages
+- **2 conference papers** (Operator Interface, Architecture & Performance) are image-based IEEE Xplore scans — transcribed from high-resolution visual review
+- **Total pages processed**: 84 pages across 17 PDFs
 
 ### v2 (improved extraction)
 - **OCR Engine**: Tesseract 5.3.0 at **450 DPI** (up from 300 DPI)
