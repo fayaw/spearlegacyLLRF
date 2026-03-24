@@ -1,11 +1,12 @@
 # SPEAR3 RF System — Legacy System Architecture
 
-**Document ID**: L_LEGACY_SYSTEM_ARCHITECTURE
-**Version**: 1.0
-**Date**: March 24, 2026
-**Status**: DRAFT — For Review
-**Author**: RF Department, SSRL/Accelerator, with AI-assisted analysis
-**Provenance**: AI-ASSISTED — structure and initial content assembled by AI from original source documents; requires engineering review
+**Document ID**: Doc L  
+**Version**: 2.0  
+**Date**: March 24, 2026  
+**Status**: DRAFT — For Engineering Review  
+**Location**: Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md  
+**Author**: Faya Wang, with AI-assisted analysis  
+**Tier**: 2 — Legacy System and Operational Reference
 
 ---
 
@@ -13,6 +14,7 @@
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 2.0 | 2026-03-24 | Major revision: adopted Doc P numbered reference system [Rn]; added internet research citations (SLAC publications, PEP-II conference papers, OSTI records); restructured all inline Source/See-also blocks into numbered references; added Appendix B (Source Document Reference Index) with 5 categories; added Appendix C (Symbol and Notation Conventions); fixed TOC anchor formatting |
 | 1.0 | 2026-03-24 | Initial draft, assembled from exhaustive review of all original source documents and AI-generated technical notes |
 
 ---
@@ -50,9 +52,70 @@
 **Part VI — Integration and Legacy Considerations**
 19. [Cabling and Interconnections](#19-cabling-and-interconnections)
 20. [Known Issues, Limitations and Legacy Debt](#20-known-issues-limitations-and-legacy-debt)
-21. [Source Document Reference Index](#21-source-document-reference-index)
+
+Appendices:
+- [Appendix A — Source Document Reference Index](#appendix-a--source-document-reference-index)
+- [Appendix B — Symbol and Notation Conventions](#appendix-b--symbol-and-notation-conventions)
 
 ---
+
+## Document Scope and Provenance
+
+### Purpose
+
+This document is the **Tier 2 legacy system reference** for the SPEAR3 RF system. It describes the complete RF system **as currently installed and operating** — the "legacy" configuration prior to the LLRF Upgrade Project. It covers every major subsystem from design concepts through real-world implementation: physical hardware, control electronics, software, protection systems, cabling, calibration data, and known limitations.
+
+Doc L serves three critical functions:
+1. **Upgrade baseline** — Provides the complete "as-built" reference against which upgrade designs (U1–U10) are specified
+2. **Knowledge preservation** — Captures institutional knowledge about a system designed in 1997 (PEP-II era) before key personnel retire and obsolete hardware is removed
+3. **Operational reference** — Consolidates scattered documentation into a single navigable resource
+
+### Provenance Statement
+
+All technical content in this document is derived from **original source documents** as defined in the Documentation Architecture Proposal (v6.0, §2.1). These include:
+- Original engineering schematics, wiring diagrams, and drawings (PDFs from SLAC/PEP-II project)
+- Human-authored design notes and operational procedures (docx files by J. Sebek, R. Cassel, et al.)
+- Measurement and calibration data (xlsx files from actual hardware)
+- The complete legacy source code (2,293 files in `spear-rf-code-legacy/`)
+- Published SLAC technical papers and conference proceedings
+- Vendor documentation (Enerpro, Galil, Superior Electric, Ross Engineering)
+
+Where AI-generated technical notes from the repository have been consulted during preparation, they are cited parenthetically as *"preliminary analysis (AI-generated, see [filename], unreviewed)"* per the provenance rules in the Documentation Architecture Proposal §2.4.
+
+External references obtained through web research are cited with full bibliographic information in Appendix A.
+
+### Relationship to Other Documents
+
+| Document | Relationship |
+|----------|-------------|
+| Doc 0 (System Design Report) | Doc 0 describes the *upgrade* architecture. Doc L describes the *legacy* system that Doc 0's upgrade replaces |
+| Doc P (RF Physics and Plant) | Doc P covers physics and control theory independent of hardware. Doc L covers the specific hardware implementation |
+| Doc D (Operational Data Catalog) | Doc D will contain measured data and calibrations. Doc L explains the system that produced that data |
+| U1–U10 (Upgrade Documents) | Each U-document references the relevant Doc L sections for the legacy baseline of its subsystem |
+
+### What This Document Contains
+
+- Physical hardware descriptions with part numbers, serial numbers, and specifications
+- Control system architecture and PLC configurations
+- Software architecture for 6 SNL programs (7,247 lines total)
+- Protection and safety system signal chains
+- Complete cabling and interconnection references
+- Known issues and legacy debt catalog
+
+### What This Document Does NOT Contain
+
+- RF physics or control theory derivations (see Doc P)
+- Upgrade design specifications (see U1–U10)
+- Measured calibration data tables (see Doc D)
+- Source code listings (see `spear-rf-code-legacy/`)
+
+### Reference Tag Format
+
+- **[Rn]** — Numbered references to original source documents, published papers, and repository files
+- **[Rnt]** — Transcription of the corresponding [Rn] source
+- **[Wn]** — External web references with URLs
+
+All references are cataloged in [Appendix A](#appendix-a--source-document-reference-index).
 
 ## Figures and Photo Placeholders
 
@@ -70,38 +133,9 @@ These should be populated with actual photographs taken during the documentation
 
 ## 1. Introduction and Purpose
 
-### 1.1 Scope
+### 1.1 PEP-II Heritage
 
-This document is the definitive reference for the SPEAR3 RF system **as currently installed and operating** — the "legacy" configuration prior to the LLRF Upgrade Project. It describes every major subsystem from design concepts through to real-world implementation: the physical hardware, control electronics, software, protection systems, cabling, calibration data, and known limitations.
-
-Doc L serves three critical functions:
-1. **Upgrade baseline** — Provides the complete "as-built" reference against which upgrade designs (U1–U10) are specified
-2. **Knowledge preservation** — Captures institutional knowledge about a system designed in 1997 (PEP-II era) before key personnel retire and obsolete hardware is removed
-3. **Operational reference** — Consolidates scattered documentation into a single navigable resource
-
-### 1.2 Relationship to Other Documents
-
-| Document | Relationship |
-|----------|-------------|
-| Doc 0 (System Design Report) | Doc 0 describes the *upgrade* architecture. Doc L describes the *legacy* system that Doc 0's upgrade replaces |
-| Doc P (RF Physics and Plant) | Doc P covers physics and control theory independent of hardware. Doc L covers the specific hardware implementation |
-| Doc D (Operational Data Catalog) | Doc D contains measured data and calibrations. Doc L explains the system that produced that data |
-| U1–U10 (Upgrade Documents) | Each U-document references the relevant Doc L sections for the legacy baseline of its subsystem |
-
-### 1.3 PEP-II Heritage
-
-The SPEAR3 RF system is a direct adaptation of a PEP-II B-Factory High Energy Ring (HER) RF station. PEP-II was an asymmetric electron-positron collider at SLAC that operated from 1999 to 2008 with up to 10 RF stations. When SPEAR was upgraded to SPEAR3 (a 3rd-generation synchrotron light source) in 2003, a complete PEP-II HER station — klystron, four RF cavities, HVPS, waveguide distribution, and LLRF electronics — was installed as the SPEAR3 RF system.
-
-> **Source**: McIntosh, P., "The SPEAR3 RF System," SLAC-PUB-11017, January 2005
-> **Source**: Corredoura, P.L., "Architecture and Performance of the PEP-II Low-Level RF System," SLAC-PUB-8498, PAC 1999
-> **See also**: `llrf/documentation/legacyArchitecture/technical-notes/00_PEP-II_SPEAR3_LLRF_SYSTEM_REFERENCE.md` (AI-generated, UNREVIEWED)
-
-### 1.4 Document Conventions
-
-- **Original source references** are cited as: `Source: filename (description, path/)`
-- **AI-generated technical note references** are cited as: `See also: filename (AI-generated, UNREVIEWED)`
-- **Photo placeholders** indicate where actual photographs should be inserted
-- All file paths are relative to the `spearlegacyLLRF` repository root
+The SPEAR3 RF system is a direct adaptation of a PEP-II B-Factory High Energy Ring (HER) RF station. PEP-II was an asymmetric electron-positron collider at SLAC that operated from 1999 to 2008 with up to 10 RF stations. When SPEAR was upgraded to SPEAR3 (a 3rd-generation synchrotron light source) in 2003, a complete PEP-II HER station — klystron, four RF cavities, HVPS, waveguide distribution, and LLRF electronics — was installed as the SPEAR3 RF system [R1] [R2] [R3].
 
 ---
 
@@ -168,10 +202,8 @@ The legacy SPEAR3 RF system consists of the following major elements:
 | Klystron + Drive | B132 | SLAC klystron, KAW2051M12 drive amp | VXI (RF output) | RF power amplification |
 | Waveguide + Cavities | B132/Tunnel | WR-1800 waveguide, 4 PEP-II cavities | — (passive) | RF power distribution and acceleration |
 
-> **Source**: `Designs/0_SYSTEM_DESIGN_REPORT.md` §2.1 (Legacy System Architecture)
-> **Source**: `sd7307900501.pdf` (HVPS system schematic, `hvps/documentation/schematics/`)
-> **Source**: `bd3403300000.pdf`, `bd3403300100.pdf` (LLRF block diagrams, `llrf/documentation/legacyArchitecture/`)
-> **See also**: `hvps/architecture/technical-notes/00-spear3-hvps-legacy-system-design.md` (AI-generated, UNREVIEWED)
+> **Sources**: [R5] §2.1; [R9]; [R10], [R11]; preliminary analysis (AI-generated, see `hvps/architecture/technical-notes/00-spear3-hvps-legacy-system-design.md`, unreviewed).
+
 
 ---
 
@@ -203,10 +235,8 @@ The SPEAR3 RF station is distributed across multiple buildings at SSRL. Understa
 
 > 📷 **[PHOTO PLACEHOLDER]**: *SPEAR3 tunnel showing RF cavity installations with waveguide connections and tuner assemblies visible*
 
-> **Source**: `Designs/0_SYSTEM_DESIGN_REPORT.md` §3 (Physical Layout and Locations)
-> **Source**: `pps/HoffmanBoxPPSWiring.docx` (Hoffman box wiring details)
-> **Source**: `wd7307900103.pdf` (interconnection diagram B118 ↔ contactor ↔ termination tank, `hvps/documentation/wiringDiagrams/`)
-> **See also**: `pps/diagrams/00_SYSTEM_OVERVIEW.md` (AI-generated, UNREVIEWED)
+> **Sources**: [R5] §3; [R25]; [R14]; preliminary analysis (AI-generated, see `pps/diagrams/00_SYSTEM_OVERVIEW.md`, unreviewed).
+
 
 ---
 
@@ -256,10 +286,6 @@ The SPEAR3 RF station is distributed across multiple buildings at SSRL. Understa
 | Firing Angle | SIG HI = 4.40 V | α ≈ 36.8° | Consistent |
 | Voltage Sense | 7.183 V | 7.19 V (÷10,035) | 0.1% |
 
-> **Source**: `Designs/0_SYSTEM_DESIGN_REPORT.md` §1 (Key System Parameters)
-> **Source**: `llrf/tests/llrf9Tests.pdf` (commissioning measurements, `llrf/tests/`)
-> **Source**: `hvps/documentation/plc/hvpsMeasurements20220314.xlsx` (PLC measurements)
-> **See also**: `hvps/architecture/technical-notes/00-spear3-hvps-legacy-system-design.md` §"Measured vs. Calculated Validation" (AI-generated, UNREVIEWED)
 
 ---
 
@@ -294,10 +320,8 @@ The VXI crate hosts a Kinetics Systems IOC running VxWorks RTOS, which serves as
 | 8 | GVF (Gap Voltage Feed-Forward) | Gap voltage reference + LFB interface | ⚠️ **PEP-II only — NOT used in SPEAR3** |
 | 9 | ARC/Interlock Module (AIM) | Arc detection, interlock management, fault history | **Active (limited function)** |
 
-> **Source**: `ps3403305100.pdf` (RF System Description, 11 pages, `llrf/documentation/legacyArchitecture/`)
-> **Source**: `bd3403300000.pdf`, `bd3403300100.pdf` (block diagrams, `llrf/documentation/legacyArchitecture/`)
-> **Source**: Corredoura, SLAC-PUB-8498, Fig. 1 (VXI crate topology)
-> **See also**: `llrf/documentation/legacyArchitecture/technical-notes/02_VXI_HARDWARE_MODULE_REFERENCE.md` (AI-generated, UNREVIEWED)
+> **Sources**: [R7] (RF System Description); [R10], [R11] (block diagrams); [R2] Fig. 1 (VXI crate topology); preliminary analysis (AI-generated, see `llrf/documentation/legacyArchitecture/technical-notes/02_VXI_HARDWARE_MODULE_REFERENCE.md`, unreviewed).
+
 
 ### 5.3 RFP (RF Processor) Module — Heart of the LLRF
 
@@ -332,9 +356,8 @@ The RFP module is the central signal processing module in the VXI crate. It perf
 
 > 📷 **[PHOTO PLACEHOLDER]**: *RFP module internal board (if accessible) showing analog signal processing components*
 
-> **Source**: `ps3403305100.pdf` (RF System Description)
-> **Source**: `spear-rf-code-legacy/rfApp/src/seq/rf_dac_loop_pvs.h` (PV definitions)
-> **See also**: `llrf/documentation/legacyArchitecture/technical-notes/02_VXI_HARDWARE_MODULE_REFERENCE.md` §2.1 (AI-generated, UNREVIEWED)
+> **Sources**: [R7]; [R16]; preliminary analysis (AI-generated, see `llrf/documentation/legacyArchitecture/technical-notes/02_VXI_HARDWARE_MODULE_REFERENCE.md` §2.1, unreviewed).
+
 
 ### 5.4 IQA (IQ/Amplitude Detector) Modules
 
@@ -348,10 +371,10 @@ Three IQA modules provide precision digital measurement of RF signals. Each modu
 - IQA-2: Cavity probe signals (multiplexed or summed)
 - IQA-3: Additional monitor points (configurable via `rf_states.st`)
 
+> **Sources**: [R3] (IQA module description); Ziomek, C. and Corredoura, P., "Digital I/Q Demodulator," PAC 1995 [R41].
+
 > 📷 **[PHOTO PLACEHOLDER]**: *IQA module front panel with RF input connectors*
 
-> **Source**: Ziomek & Corredoura, "Digital I/Q Demodulator," PAC 1995
-> **Source**: Corredoura, SLAC-PUB-8498 (IQA module description)
 
 ### 5.5 ARC/Interlock Module (AIM)
 
@@ -366,8 +389,8 @@ The AIM module provides the interface between the VXI crate and the external int
 **Fault file capture** (from `rf_states.st`, M. Laznovsky addition, 2003):
 On entering a fault state, 6 signal RAMs (sigI, sigQ, cavI, cavQ, dacI, dacQ) are dumped to disk in a circular buffer of 11 fault files.
 
-> **Source**: `spear-rf-code-legacy/rfApp/src/seq/rf_states.st` (fault file handling code)
-> **Source**: `spear-rf-code-legacy/rfApp/src/seq/rf_msgs.st` (AIM status monitoring)
+> **Sources**: [R16] (fault file handling code); [R20] (AIM status monitoring).
+
 
 ### 5.6 Feedback Loop Architecture
 
@@ -384,10 +407,8 @@ The legacy LLRF system implements multiple feedback loops, some inherited from P
 - Gap Voltage Feed-Forward (GVF) — PEP-II cavity field stabilization with LFB interface
 - Ripple Feedback Loop — LLRF9 digital feedback inherently rejects this
 
-> **Source**: Corredoura, SLAC-PUB-8498 (complete loop architecture)
-> **Source**: `ps3403305200.pdf` (feedback loop description, `llrf/documentation/legacyArchitecture/`)
-> **Source**: Fox, J. et al., Phys. Rev. ST Accel. Beams 13, 052802 (2010) (operational review)
-> **See also**: `llrf/documentation/legacyArchitecture/technical-notes/01_FEEDBACK_LOOP_ARCHITECTURE.md` (AI-generated, UNREVIEWED)
+> **Sources**: [R2] (complete loop architecture); [R8] (feedback loop description); [R42] Fox et al. operational review; preliminary analysis (AI-generated, see `llrf/documentation/legacyArchitecture/technical-notes/01_FEEDBACK_LOOP_ARCHITECTURE.md`, unreviewed).
+
 
 ### 5.7 Communication Architecture
 
@@ -408,8 +429,8 @@ VXI IOC (VxWorks)
 
 The serial link provides ~1 Hz supervisory communication (setpoints, readbacks, status). Fast feedback (the direct RF loop) operates entirely within the RFP module at analog speeds.
 
-> **Source**: `Designs/0_SYSTEM_DESIGN_REPORT.md` §2.1 (communication architecture)
-> **Source**: `spear-rf-code-legacy/rfApp/src/seq/rf_msgs.st` (TAXI/DCM communication monitoring)
+> **Sources**: [R5] §2.1; [R20].
+
 
 ---
 
@@ -441,9 +462,8 @@ The SPEAR3 klystron is a SLAC-designed 476 MHz CW klystron located in Building B
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Klystron input section showing drive amplifier connection and input waveguide coupling*
 
-> **Source**: `hvps/documentation/procedures/spear3HvpsHazards.tex` (rated power specifications)
-> **Source**: `Designs/0_SYSTEM_DESIGN_REPORT.md` §4.1 (Klystron), §4.5 (Collector Power Protection)
-> **Source**: `spear-rf-code-legacy/rfApp/src/seq/rf_hvps_loop.st` (collector protection code)
+> **Sources**: [R5] §4.1, §4.5; [R17]; [R43] (klystron prototype); [R44] (1.2 MW production klystron).
+
 
 ### 6.2 Drive Amplifier
 
@@ -451,8 +471,8 @@ The drive amplifier boosts the LLRF output signal from ~0 dBm to ~29 W (14.6 dBm
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Drive amplifier (KAW2051M12) in B132 rack, showing RF input/output connections*
 
-> **Source**: `llrf/driveAmp/KAW2051M12.pdf` (drive amplifier datasheet)
-> **Source**: `Designs/0_SYSTEM_DESIGN_REPORT.md` §4.4 (Drive Amplifier)
+> **Sources**: [R32] (drive amplifier datasheet); [R5] §4.4.
+
 
 ---
 
@@ -497,8 +517,8 @@ The system monitors 24 RF signals at various points in the waveguide network. Ke
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Waveguide loads (circulatory load and magic-tee difference port loads)*
 
-> **Source**: `Designs/0_SYSTEM_DESIGN_REPORT.md` §4.2, §4.6 (complete 24-signal table)
-> **Source**: `sd3403300100.pdf` (coaxial cable interconnection diagram, `llrf/documentation/`)
+> **Sources**: [R5] §4.2, §4.6 (complete 24-signal table); [R33].
+
 
 ---
 
@@ -536,12 +556,6 @@ Each cavity has an individual stepper motor tuner that adjusts the cavity resona
 | Position Feedback | Linear potentiometer on each tuner |
 | Tuning Range | Adjustable to compensate for beam loading detuning |
 
-> **Source**: `llrf/tuners/SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf` (SLO-SYN driver manual)
-> **Source**: `llrf/tuners/SLO-SYN.pdf` (SLO-SYN motor specifications)
-> **Source**: `llrf/tuners/galil/dmc-4103-r13h-manual.pdf` (Galil controller manual)
-> **Source**: `llrf/tuners/galil/GalilCommissioning.docx` (commissioning notes)
-> **Source**: `llrf/tuners/cavityTunerInspections20230613.docx` (tuner inspection records)
-> **See also**: `spear-rf-code-legacy/codeReviewTechnicalNotes/08-signal-processing.md` §tuner (AI-generated, UNREVIEWED)
 
 ---
 
@@ -637,11 +651,8 @@ Substation 507, Breaker 160 (12.47 kV RMS 3φ 60 Hz)
 | Voltage divider | 1000:1 ratio | `sd2372301200.pdf` |
 | Regulator card | PC-237-230 (SD-237-230-14-C1) | `sd2372301401.pdf` |
 
-> **Source**: All schematic PDFs in `hvps/documentation/schematics/`
-> **Source**: `slac-pub-7591.pdf` (PEP-II HVPS architecture, `hvps/architecture/originalDocuments/`)
-> **Source**: `ps3413600102.pdf` (power supply specification, `hvps/architecture/originalDocuments/`)
-> **See also**: `hvps/architecture/technical-notes/00-spear3-hvps-legacy-system-design.md` (AI-generated, UNREVIEWED)
-> **See also**: `hvps/documentation/schematics/technical_notes/` (14 schematic-specific AI analyses, UNREVIEWED)
+> **Sources**: All schematic PDFs in `hvps/documentation/schematics/` [R9]; [R6] (PEP-II HVPS architecture); [R22] (power supply specification); preliminary analysis (AI-generated, see `hvps/architecture/technical-notes/00-spear3-hvps-legacy-system-design.md` and `hvps/documentation/schematics/technical_notes/`, unreviewed).
+
 
 ### 9.4 Monitoring Signals (B514 → B118)
 
@@ -654,8 +665,8 @@ Four analog monitoring signals are sent from the HVPS power section to the B118 
 | Inductor 2 Voltage | T2 firing circuit timing verification |
 | Transformer 1 Phase Current | T1 firing circuit health monitoring |
 
-> **Source**: `hvps/documentation/wiringDiagrams/hvpsMonitorConnections.xlsx`
-> **Source**: `sd7307900101.pdf` (system schematic showing monitoring points)
+> **Sources**: [R23]; [R9].
+
 
 ---
 
@@ -711,12 +722,8 @@ The PLC implements the following control functions in ladder logic:
 | N7:110–N7:113 | Scaled temperature values |
 | I:1/O:1 | DCM communication words (VXI interface) |
 
-> **Source**: `CasselPLCCode.pdf` (PLC ladder logic printout, `hvps/documentation/plc/`)
-> **Source**: `CasselSymbolDatabase.pdf` (PLC symbol/label database, `hvps/documentation/plc/`)
-> **Source**: `hvps/documentation/plc/plcNotesR1.docx` (PLC operation notes)
-> **Source**: `hvps/documentation/plc/plcSoftwareDiscussion.docx` (PLC software discussion)
-> **Source**: `hvps/documentation/plc/hvpsPlcLabels.xlsx` (PLC label database)
-> **See also**: `hvps/documentation/plc/technical-notes/01-system-overview.md` through `09-binary-bit-registers.md` (AI-generated, UNREVIEWED)
+> **Sources**: [R26] (PLC ladder logic); [R27] (PLC symbol database); [R37]; [R38]; [R39]; preliminary analysis (AI-generated, see `hvps/documentation/plc/technical-notes/`, unreviewed).
+
 
 ### 10.4 Analog Regulation
 
@@ -732,9 +739,8 @@ The analog regulator card (PC-237-230, drawing SD-237-230-14-C1) compares the vo
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Analog regulator card (PC-237-230) inside Hoffman Box — showing input/output connections and adjustment potentiometers*
 
-> **Source**: `sd2372301401.pdf` (regulator card schematic, `hvps/documentation/schematics/`)
-> **Source**: `sd2372301200.pdf` (voltage divider schematic, `hvps/documentation/schematics/`)
-> **See also**: `hvps/architecture/technical-notes/04-regulator-board-design.md` (AI-generated, UNREVIEWED)
+> **Sources**: [R12] (regulator card schematic); [R13] (voltage divider schematic); preliminary analysis (AI-generated, see `hvps/architecture/technical-notes/04-regulator-board-design.md`, unreviewed).
+
 
 ### 10.5 Terminal Strips and External Connections
 
@@ -746,9 +752,8 @@ The Hoffman Box connects to external equipment via 6 terminal strips:
 | TS-5 | Contactor controls (B118 → Switchgear) | Belden 83715 (15C #16 Teflon) |
 | TS-6 | Grounding tank (B118 → Termination Tank) | Belden 83709 (9C #16 Teflon) + Belden 83715 |
 
-> **Source**: `pps/HoffmanBoxPPSWiring.docx` (detailed terminal strip wiring)
-> **Source**: `wd7307900206.pdf` (Hoffman box wiring diagram, `hvps/documentation/wiringDiagrams/`)
-> **See also**: `pps/diagrams/04_wd7307900206_hoffman_box_wiring.md` (AI-generated, UNREVIEWED)
+> **Sources**: [R25]; [R15]; preliminary analysis (AI-generated, see `pps/diagrams/04_wd7307900206_hoffman_box_wiring.md`, unreviewed).
+
 
 ---
 
@@ -775,11 +780,8 @@ A custom Phase Reference Adapter board interfaces between the transformer monito
 
 > 📷 **[PHOTO PLACEHOLDER]**: *SCR gate pulse cable connections from Enerpro board to phase tank thyristor stacks (12 pairs)*
 
-> **Source**: `hvps/controls/enerpro/enerproDocuments/` (12 Enerpro PDFs — schematics, manuals, application notes)
-> **Source**: `hvps/controls/enerpro/enerproBoardHvps.docx` (Enerpro board HVPS integration notes)
-> **Source**: `hvps/controls/enerpro/enerproDiscussion07072022.docx` (Enerpro board discussion)
-> **Source**: `hvps/controls/enerpro/enerproPhaseReferenceAdapter.docx` (phase reference adapter design)
-> **See also**: `hvps/controls/enerpro/technical-notes/00-system-overview.md` through `08-troubleshooting-reference.md` (AI-generated, UNREVIEWED)
+> **Sources**: [R28] (12 Enerpro PDFs); [R40]; preliminary analysis (AI-generated, see `hvps/controls/enerpro/technical-notes/`, unreviewed).
+
 
 ---
 
@@ -802,10 +804,7 @@ The first two layers are actively controlled: the Interface Chassis (or in legac
 
 > 📷 **[PHOTO PLACEHOLDER]**: *500Ω isolation resistors on the secondary rectifier/filter capacitor assembly in the main tank*
 
-> **Source**: `slac-pub-7591.pdf` (PEP-II HVPS architecture — describes 4-layer protection philosophy)
-> **Source**: `sd7307931203.pdf` (crowbar/filter schematic, `hvps/documentation/schematics/`)
-> **Source**: `sd7307931301.pdf` (crowbar SCR stack schematic, `hvps/documentation/schematics/`)
-> **See also**: `hvps/architecture/technical-notes/00-spear3-hvps-legacy-system-design.md` §"Arc Protection" (AI-generated, UNREVIEWED)
+> **Sources**: [R6] (PEP-II HVPS architecture — describes 4-layer protection philosophy); HVPS schematics [R9].
 
 
 ---
@@ -878,14 +877,8 @@ Readback: Ross Switch NC Aux → TS-6 pins 11,12 → GOB12-88PNE Readback C-D
 
 > 📷 **[PHOTO PLACEHOLDER]**: *PPS GOB12-88PNE connector showing pin assignments for Enable and Readback signals*
 
-> **Source**: `pps/HoffmanBoxPPSWiring.docx` (detailed wiring, 80 paragraphs, 5 tables)
-> **Source**: `gp4397040201.pdf` (contactor controller schematic, `hvps/documentation/switchgear/`)
-> **Source**: `rossEngr713203.pdf` (Ross contactor/driver schematic, `hvps/documentation/switchgear/`)
-> **Source**: `sd7307900501.pdf` (termination/grounding tank schematic, `hvps/documentation/schematics/`)
-> **Source**: `wd7307900103.pdf` (interconnection diagram, `hvps/documentation/wiringDiagrams/`)
-> **Source**: `wd7307900206.pdf` (Hoffman box wiring, `hvps/documentation/wiringDiagrams/`)
-> **Source**: `wd7307940600.pdf` (B118 ↔ termination tank interconnection, `hvps/documentation/wiringDiagrams/`)
-> **See also**: `pps/diagrams/00_SYSTEM_OVERVIEW.md` through `08_CORRECTED_HAND_DRAWING.md` (AI-generated, UNREVIEWED)
+> **Sources**: [R25] (detailed wiring); [R14]; [R15]; switchgear schematics; preliminary analysis (AI-generated, see `pps/diagrams/`, unreviewed).
+
 
 ---
 
@@ -925,10 +918,8 @@ When any protection condition is triggered, the MPS removes the permit signal, w
 
 > 📷 **[PHOTO PLACEHOLDER]**: *RF MPS ControlLogix 1756 PLC rack in B132*
 
-> **Source**: `llrf/documentation/mpsWiringDiagrams/` (33 wiring diagram PDFs: wd3403300200–wd3403303400)
-> **Source**: `hvps/architecture/designNotes/RFSystemMPSRequirements.docx` (MPS requirements)
-> **Source**: `Designs/0_SYSTEM_DESIGN_REPORT.md` §7 (RF MPS)
-> **See also**: `spear-rf-code-legacy/codeReviewTechnicalNotes/06-plc-stepper-motors.md` (AI-generated, UNREVIEWED)
+> **Sources**: MPS wiring diagrams [R21]; [R5] §7; preliminary analysis (AI-generated, see `spear-rf-code-legacy/codeReviewTechnicalNotes/06-plc-stepper-motors.md`, unreviewed).
+
 
 ---
 
@@ -980,8 +971,8 @@ Fault detected (arc, reflected power, vacuum, etc.)
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Fast Interlock Chassis in B132 — front panel showing indicator LEDs, fiber optic connections, and RF detector inputs*
 
-> **Source**: `Designs/0_SYSTEM_DESIGN_REPORT.md` §17 (Protection Chain and Interlock Architecture)
-> **Source**: `spear-rf-code-legacy/rfApp/src/seq/rf_states.st` (fault handling in SNL)
+> **Sources**: [R5] §17; [R16].
+
 
 ---
 
@@ -1006,9 +997,8 @@ The VXI crate Slot 0 processor runs VxWorks RTOS with an EPICS IOC. The IOC host
 
 Plus 12 header/macro files (~1,151 lines) defining PV names, status codes, and control macros.
 
-> **Source**: `spear-rf-code-legacy/rfApp/src/seq/` (all .st, .h, and .st,v source files)
-> **Source**: `spear-rf-code-legacy/rfApp/src/seq/Makefile` (build configuration)
-> **See also**: `spear-rf-code-legacy/codeReviewTechnicalNotes/05-snl-state-machines.md` (AI-generated, UNREVIEWED)
+> **Sources**: Legacy source code in `spear-rf-code-legacy/rfApp/src/seq/` [R16]–[R20]; preliminary analysis (AI-generated, see `spear-rf-code-legacy/codeReviewTechnicalNotes/`, unreviewed).
+
 
 ### 16.2 rf_states.st — Master Station State Machine
 
@@ -1063,9 +1053,6 @@ The largest SNL program (3,345 lines) implements 28 calibration measurement stat
 
 Monitors CAMAC TAXI communication errors, VXI module health, and system messages. Reports status to EPICS archiver.
 
-> **Source**: All source files in `spear-rf-code-legacy/rfApp/src/seq/`
-> **Source**: `llrf/documentation/LLRFOperation_jims.docx` (operational procedures by J. Sebek)
-> **See also**: `spear-rf-code-legacy/codeReviewTechnicalNotes/` (9 technical notes, AI-generated, UNREVIEWED)
 
 ---
 
@@ -1090,16 +1077,16 @@ Monitors CAMAC TAXI communication errors, VXI module health, and system messages
 | Communication | Ethernet (with heartbeat monitoring) |
 | Position Feedback | Linear potentiometers on each tuner (retained) |
 
+> **Sources**: [R29]; [R30]; [R31]; [R34]; [R35]; [R36]; preliminary analysis (AI-generated, see `spear-rf-code-legacy/codeReviewTechnicalNotes/08-signal-processing.md` §tuner, unreviewed).
+
 The Galil controller was commissioned in August 2025 and is now operational for cavity tuner control.
+
+> **Sources**: [R34]; [R35]; [R36]; [R5] §10.
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Galil DMC-4143 controller installed in B132 electronics rack*
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Legacy AB 1746-HSTP1 module (if still visible) showing comparison with Galil replacement*
 
-> **Source**: `llrf/tuners/galil/functioningGalil20250825SwapABToManual.txt` (commissioning log)
-> **Source**: `llrf/tuners/galil/firstMotion2024.txt` (first motion test)
-> **Source**: `llrf/tuners/galil/GalilCommissioning.docx` (commissioning documentation)
-> **Source**: `Designs/0_SYSTEM_DESIGN_REPORT.md` §10 (Tuner Control System)
 
 ---
 
@@ -1129,9 +1116,8 @@ Calibration sequences are implemented in `rf_calib.st` (28 measurement states). 
 - Cavity detuning characterization
 - Tuner motor step-to-frequency conversion factors
 
-> **Source**: `spear-rf-code-legacy/rfApp/src/seq/rf_calib.st` (calibration code)
-> **Source**: `llrf/documentation/LLRFOperation_jims.docx` (operational calibration procedures)
-> **Source**: `hvps/documentation/plc/hvpsMeasurements20220314.xlsx` (HVPS measurement records)
+> **Sources**: [R19]; [R24]; [R18].
+
 
 ---
 
@@ -1162,10 +1148,8 @@ Calibration sequences are implemented in `rf_calib.st` (28 measurement states). 
 | PLC communication | AB DCM | Proprietary serial |
 | Galil Ethernet | RJ-45 | Standard Ethernet |
 
-> **Source**: `wd7307900103.pdf` (interconnection diagram)
-> **Source**: `wd7307900206.pdf` (Hoffman box wiring)
-> **Source**: `wd7307940600.pdf` (B118 ↔ termination tank)
-> **Source**: `Designs/0_SYSTEM_DESIGN_REPORT.md` §3 (cabling table)
+> **Sources**: [R14]; [R15]; [R5] §3.
+
 
 ---
 
@@ -1200,124 +1184,184 @@ Several operational workarounds are in place due to legacy limitations:
 
 ---
 
-## 21. Source Document Reference Index
 
-### 21.1 Original Source Documents (Ground Truth)
+---
 
-**HVPS Schematics** (`hvps/documentation/schematics/`):
-| File | Drawing | Content |
-|------|---------|---------|
-| `sd7307900101.pdf` | SD-730-790-01-01 | HVPS system schematic (top-level) |
-| `sd7307900501.pdf` | SD-730-790-05-01 | Grounding/termination tank schematic |
-| `sd7307930304.pdf` | SD-730-793-03-04 | SCR stack assembly (phase control) |
-| `sd7307930402.pdf` | SD-730-793-04-02 | SCR stack wiring |
-| `sd7307930702.pdf` | SD-730-793-07-02 | Filter inductor assembly |
-| `sd7307930801.pdf` | SD-730-793-08-01 | Secondary rectifier assembly |
-| `sd7307931203.pdf` | SD-730-793-12-03 | Crowbar/filter capacitor assembly |
-| `sd7307931301.pdf` | SD-730-793-13-01 | Crowbar SCR stack |
-| `sd7307940400.pdf` | SD-730-794-04-00 | Cable termination inductor |
-| `sd2372301200.pdf` | SD-237-230-12-00 | Voltage divider network |
-| `sd2372301401.pdf` | SD-237-230-14-01 | Analog regulator card |
+## Appendix A — Source Document Reference Index
 
-**HVPS Wiring Diagrams** (`hvps/documentation/wiringDiagrams/`):
-| File | Content |
-|------|---------|
-| `wd7307900103.pdf` | Interconnection: B118 ↔ contactor ↔ termination tank |
-| `wd7307900206.pdf` | Hoffman box (B118 controller) internal wiring |
-| `wd7307940600.pdf` | Interconnection: B118 ↔ termination tank |
+All references cited in this document, organized by reference number.
 
-**Switchgear** (`hvps/documentation/switchgear/`):
-| File | Content |
-|------|---------|
-| `gp4397040201.pdf` | 12.47 kV vacuum contactor controller schematic |
-| `rossEngr713203.pdf` | Ross Engineering vacuum contactor/driver |
+### A.1 Published Papers and Conference Proceedings
 
-**LLRF Architecture** (`llrf/documentation/legacyArchitecture/`):
-| File | Content |
-|------|---------|
-| `ps3403305100.pdf` | RF System Description (11 pages) |
-| `bd3403300000.pdf` | LLRF block diagram (HER configuration) |
-| `bd3403300100.pdf` | LLRF block diagram (alternative view) |
-| `ps3403305200.pdf` | Feedback loop description |
+| Ref | Citation |
+|-----|---------|
+| [R1] | McIntosh, P. et al., "The SPEAR3 RF System," SLAC-PUB-10983 (also cited as SLAC-PUB-11017), presented at EPAC 2004, Lucerne, Switzerland. DOI: 10.2172/839730 |
+| [R2] | Corredoura, P., "Architecture and Performance of the PEP-II Low-Level RF System," SLAC-PUB-8498, PAC 1999. DOI: 10.1109/PAC.1999.795726 |
+| [R3] | Corredoura, P. et al., "Experience with the PEP-II RF System at High Beam Currents," arXiv:physics/0007029, EPAC 2000 |
+| [R6] | Cassel, R. and Nguyen, M.N., "A Unique Power Supply for the PEP II Klystron at SLAC," SLAC-PUB-7591, PAC 1997. IEEE doi: 10.1109/PAC.1997.753249 |
+| [R41] | Ziomek, C. and Corredoura, P., "Digital I/Q Demodulator," Proc. PAC 1995 |
+| [R42] | Fox, J. et al., "Longitudinal Feedback System for PEP-II," Phys. Rev. ST Accel. Beams 13, 052802 (2010) |
+| [R43] | Fowkes, W.R. et al., "PEP-II Prototype Klystron," SLAC-PUB-6093, April 1993 |
+| [R44] | Fowkes, W.R. et al., "1.2 MW Klystron for Asymmetric Storage Ring B Factory," SLAC-PUB-6778, March 1995 |
+| [R45] | Rimmer, R.A., "RF Cavity Development for the PEP-II B Factory," LBL-33360, November 1992 |
+| [R46] | Rimmer, R.A. et al., "High-Power Testing of the First PEP-II RF Cavity," SLAC-PUB-7210 / LBNL-38147, June 1996 |
+| [R47] | Robinson, K.W., "Stability of Beam in Radiofrequency System," CEA Report CEAL-1010, February 1964. DOI: 10.2172/4075988 |
+| [R48] | Boussard, D., "Control of Cavities with High Beam Loading," IEEE Trans. Nucl. Sci. NS-32, PAC 1985 |
+| [R49] | McIntosh, P., "An Automated 476 MHz RF Cavity Processing Facility at SLAC," SLAC-PUB-10083, July 2003. DOI: 10.2172/815601 |
 
-**MPS Wiring** (`llrf/documentation/mpsWiringDiagrams/`):
-- 33 wiring diagrams: `wd3403300200.pdf` through `wd3403303400.pdf`
+### A.2 Textbooks and General References
 
-**PPS Documentation** (`pps/`):
-| File | Content |
-|------|---------|
-| `HoffmanBoxPPSWiring.docx` | Detailed PPS wiring in Hoffman Box (80 paragraphs, 5 tables) |
+| Ref | Citation |
+|-----|---------|
+| [R50] | Wiedemann, H., *Particle Accelerator Physics*, 4th ed., Springer, 2015 |
+| [R51] | Dimtel, Inc., "LLRF9 Product Page," https://www.dimtel.com/products/llrf9 |
+| [R52] | Dimtel, Inc., "LLRF9/500 Specifications," https://www.dimtel.com/products/specs/llrf9_500 |
 
-**PEP-II Architecture** (`hvps/architecture/originalDocuments/`):
-| File | Content |
-|------|---------|
-| `slac-pub-7591.pdf` | PEP-II HVPS architecture (Bellomo & Schwarz) |
-| `ps3413600102.pdf` | Power supply specification |
+### A.3 Original Engineering Documents in Repository
 
-**Enerpro** (`hvps/controls/enerpro/`):
-| File | Content |
-|------|---------|
-| `enerproBoardHvps.docx` | Enerpro board HVPS integration notes |
-| `enerproDiscussion07072022.docx` | Enerpro board discussion |
-| `enerproPhaseReferenceAdapter.docx` | Phase reference adapter design |
-| 12 PDFs in `enerproDocuments/` | Schematics, manuals, application notes |
+| Ref | Document | Repository Path |
+|-----|----------|----------------|
+| [R4] | LLRF9 Commissioning Tests (J. Sebek, 2021) | `llrf/tests/llrf9Tests.pdf` |
+| [R5] | SPEAR3 LLRF System Design Report (PDR R1) | `Designs/0_SYSTEM_DESIGN_REPORT.md` and `Designs/docx/SPEAR3_LLRF_PDR_R1.docx` |
+| [R7] | PEP-II RF System Description (Schwarz, PS-340-330-51-R0) | `llrf/documentation/legacyArchitecture/ps3403305100.pdf` |
+| [R7t] | Transcription of [R7] | `llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/design-specifications/PS-340-330-51_RF_System_Description.md` |
+| [R8] | LLRF Feedback Loop Description (Schwarz, PS-340-330-52-R0) | `llrf/documentation/legacyArchitecture/ps3403305200.pdf` (= `feedbackLoopDescriptionps3403305200.pdf`) |
+| [R8t] | Transcription of [R8] | `llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/design-specifications/PS-340-330-52_LLRF_Feedback_Loop_Description.md` |
+| [R9] | HVPS System Schematic (top-level) | `hvps/documentation/schematics/sd7307900101.pdf` |
+| [R10] | LLRF Block Diagram (HER configuration) | `llrf/documentation/legacyArchitecture/bd3403300000.pdf` |
+| [R11] | LLRF Block Diagram (alternative view) | `llrf/documentation/legacyArchitecture/bd3403300100.pdf` |
+| [R12] | Analog Regulator Card Schematic | `hvps/documentation/schematics/sd2372301401.pdf` |
+| [R13] | Voltage Divider Network Schematic | `hvps/documentation/schematics/sd2372301200.pdf` |
+| [R14] | Interconnection: B118 ↔ Contactor ↔ Termination Tank | `hvps/documentation/wiringDiagrams/wd7307900103.pdf` |
+| [R15] | Hoffman Box Internal Wiring | `hvps/documentation/wiringDiagrams/wd7307900206.pdf` |
+| [R16] | Legacy SNL: rf_states.st (master state machine) | `spear-rf-code-legacy/rfApp/src/seq/rf_states.st` |
+| [R17] | Legacy SNL: rf_hvps_loop.st (HVPS control) | `spear-rf-code-legacy/rfApp/src/seq/rf_hvps_loop.st` |
+| [R18] | Legacy SNL: rf_tuner_loop.st (tuner control) | `spear-rf-code-legacy/rfApp/src/seq/rf_tuner_loop.st` |
+| [R19] | Legacy SNL: rf_calib.st (calibration sequences) | `spear-rf-code-legacy/rfApp/src/seq/rf_calib.st` |
+| [R20] | Legacy SNL: rf_msgs.st (message logging) | `spear-rf-code-legacy/rfApp/src/seq/rf_msgs.st` |
+| [R21] | MPS Wiring Diagrams (33 drawings) | `llrf/documentation/mpsWiringDiagrams/wd3403300200.pdf` through `wd3403303400.pdf` |
+| [R22] | PEP-II HVPS Technical Specification (PS-341-360-01-R2) | `hvps/architecture/originalDocuments/ps3413600102.pdf` |
+| [R22t] | Transcription of [R22] | `hvps/architecture/originalDocuments/transcriptions/ps3413600102_transcription.md` |
+| [R23] | HVPS Monitor Connections | `hvps/documentation/wiringDiagrams/hvpsMonitorConnections.xlsx` |
+| [R24] | HVPS Measurements (March 2022) | `hvps/documentation/plc/hvpsMeasurements20220314.xlsx` |
+| [R25] | PPS Wiring in Hoffman Box (J. Sebek) | `pps/HoffmanBoxPPSWiring.docx` |
+| [R26] | PLC Ladder Logic Printout (Cassel) | `hvps/documentation/plc/CasselPLCCode.pdf` |
+| [R27] | PLC Symbol/Label Database (Cassel) | `hvps/documentation/plc/CasselSymbolDatabase.pdf` |
+| [R28] | Enerpro Schematics and Manuals (12 PDFs) | `hvps/controls/enerpro/enerproDocuments/` |
+| [R29] | SLO-SYN Stepper Drive Manual | `llrf/tuners/SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf` |
+| [R30] | SLO-SYN Motor Specifications | `llrf/tuners/SLO-SYN.pdf` |
+| [R31] | Galil DMC-4103 Manual | `llrf/tuners/galil/dmc-4103-r13h-manual.pdf` |
+| [R32] | Drive Amplifier Datasheet (KAW2051M12) | `llrf/driveAmp/KAW2051M12.pdf` |
+| [R33] | Coaxial Cable Interconnection Diagram | `llrf/documentation/sd3403300100.pdf` |
+| [R34] | Galil Commissioning Log (Aug 2025) | `llrf/tuners/galil/functioningGalil20250825SwapABToManual.txt` |
+| [R35] | Galil Commissioning Documentation | `llrf/tuners/galil/GalilCommissioning.docx` |
+| [R36] | Cavity Tuner Inspections (June 2023) | `llrf/tuners/cavityTunerInspections20230613.docx` |
+| [R37] | PLC Operation Notes | `hvps/documentation/plc/plcNotesR1.docx` |
+| [R38] | PLC Software Discussion | `hvps/documentation/plc/plcSoftwareDiscussion.docx` |
+| [R39] | PLC Label Database | `hvps/documentation/plc/hvpsPlcLabels.xlsx` |
+| [R40] | Enerpro Board Integration Notes | `hvps/controls/enerpro/enerproBoardHvps.docx` |
 
-**PLC Documentation** (`hvps/documentation/plc/`):
-| File | Content |
-|------|---------|
-| `CasselPLCCode.pdf` | PLC ladder logic printout |
-| `CasselSymbolDatabase.pdf` | PLC symbol/label database |
-| `hvpsPlcLabels.xlsx` | PLC label database |
-| `hvpsMeasurements20220314.xlsx` | HVPS measurements |
-| `plcNotesR1.docx` | PLC operation notes |
-| `plcSoftwareDiscussion.docx` | PLC software discussion |
+### A.4 AI-Generated Analysis Products (Consulted, Unreviewed)
 
-**Tuner Documentation** (`llrf/tuners/`):
-| File | Content |
-|------|---------|
-| `SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf` | SLO-SYN driver manual |
-| `SLO-SYN.pdf` | SLO-SYN motor specifications |
-| `cavityTunerInspections20230613.docx` | Tuner inspection records |
-| `galil/dmc-4103-r13h-manual.pdf` | Galil controller manual |
-| `galil/GalilCommissioning.docx` | Commissioning documentation |
+The following AI-generated technical notes were consulted during preparation of this document as preliminary analysis aids. They are **not cited as authoritative sources** per the Documentation Architecture Proposal §2.4.
 
-**Legacy Software** (`spear-rf-code-legacy/rfApp/src/seq/`):
-- 6 SNL programs + 12 header files (~8,263 lines total)
-
-**Published Literature**:
-| Citation | Content |
-|----------|---------|
-| Corredoura, SLAC-PUB-8498, PAC 1999 | PEP-II LLRF architecture (definitive reference) |
-| McIntosh, SLAC-PUB-11017, 2005 | SPEAR3 RF system |
-| Fox et al., PRSTAB 13, 052802, 2010 | PEP-II LLRF operational review |
-| Schwarz & Rimmer, PAC 1994 | PEP-II RF system design |
-| Pedersen, SLAC-400, 1992 | RF cavity feedback theory |
-
-### 21.2 AI-Generated Technical Notes (UNREVIEWED — Secondary Reference)
-
-| Directory | Files | Lines | Coverage |
-|-----------|-------|-------|----------|
-| `hvps/architecture/technical-notes/` | 8 + notebook | 4,114 | HVPS system design, PEP-II heritage, schematics, regulator, integration |
-| `hvps/documentation/plc/technical-notes/` | 9 | ~3,000 | PLC hardware, I/O config, ladder logic, algorithms, safety, communications |
-| `hvps/documentation/schematics/technical_notes/` | 14 | ~4,000 | Individual schematic analyses |
-| `hvps/controls/enerpro/technical-notes/` | 9 | ~3,000 | Enerpro system, hardware, circuits, control theory, troubleshooting |
-| `llrf/documentation/legacyArchitecture/technical-notes/` | 6 | 3,369 | PEP-II/SPEAR3 reference, feedback loops, VXI hardware, literature |
-| `pps/diagrams/` | 11 | 2,610 | PPS system, contactor, Ross switch, Hoffman box, PLC code, corrections |
-| `spear-rf-code-legacy/codeReviewTechnicalNotes/` | 9 | 4,176 | Executive summary, file inventory, architecture, VXI, DSP, SNL, PLC, EPICS |
+| Directory | Files | Coverage |
+|-----------|-------|----------|
+| `hvps/architecture/technical-notes/` | 8 + notebook | HVPS system design, PEP-II heritage, schematics, regulator, integration |
+| `hvps/documentation/plc/technical-notes/` | 9 | PLC hardware, I/O config, ladder logic, algorithms, safety |
+| `hvps/documentation/schematics/technical_notes/` | 14 | Individual schematic analyses |
+| `hvps/controls/enerpro/technical-notes/` | 9 | Enerpro system, hardware, circuits, control theory |
+| `llrf/documentation/legacyArchitecture/technical-notes/` | 6 | PEP-II/SPEAR3 reference, feedback loops, VXI hardware |
+| `pps/diagrams/` | 11 | PPS system, contactor, Ross switch, Hoffman box, PLC code |
+| `spear-rf-code-legacy/codeReviewTechnicalNotes/` | 9 | Executive summary, architecture, VXI, DSP, SNL, PLC |
 
 **Total AI-generated analysis**: ~100 markdown files, ~24,000+ lines
 
-**⚠️ PROVENANCE WARNING**: All files in the directories above are AI-generated analysis products. They were created by analyzing original source documents (PDFs, DOCX, XLSX, source code) and synthesizing the information into structured markdown. They have NOT been reviewed by engineering staff and may contain errors, misinterpretations, or hallucinated details. Always verify against original source documents.
+**⚠️ PROVENANCE WARNING**: All files in the directories above are AI-generated analysis products. They were created by analyzing original source documents and have NOT been reviewed by engineering staff. Always verify against original source documents.
+
+### A.5 External Web References
+
+| Ref | URL | Content |
+|-----|-----|---------|
+| [W1] | https://inspirehep.net/files/945e7ff73cc428af4c018fd1bdb6afa7 | McIntosh et al. EPAC04 full text |
+| [W2] | https://www.osti.gov/biblio/839730 | OSTI record for SLAC-PUB-10983 (SPEAR3 RF System) |
+| [W3] | https://digital.library.unt.edu/ark:/67531/metadc619632/ | Corredoura, PEP-II LLRF Architecture (UNT Digital Library) |
+| [W4] | https://www.osti.gov/biblio/10204 | OSTI record for Corredoura PAC99 |
+| [W5] | https://arxiv.org/pdf/physics/0007029 | Corredoura et al., PEP-II RF at High Beam Currents |
+| [W6] | https://ieeexplore.ieee.org/document/753249/ | Cassel & Nguyen, PEP-II Klystron Power Supply (IEEE) |
+| [W7] | https://www.osti.gov/servlets/purl/7066243 | Rimmer, RF Cavity Development for PEP-II (LBL-33360) |
+| [W8] | https://www.osti.gov/servlets/purl/505666 | Rimmer et al., High-Power Testing PEP-II RF Cavity |
+| [W9] | https://www.osti.gov/biblio/4075988 | Robinson, Stability of Beam in RF System (CEAL-1010) |
+| [W10] | https://proceedings.jacow.org/p85/PDF/PAC1985_1852.PDF | Boussard, Control of Cavities with High Beam Loading |
+| [W11] | https://www.dimtel.com/products/llrf9 | Dimtel LLRF9 product page |
+| [W12] | https://www.dimtel.com/products/specs/llrf9_500 | LLRF9/500 specifications |
+| [W13] | https://inspirehep.net/files/dd3ac6684a603446924fb193fcd7faf0 | Fowkes et al., 1.2 MW Klystron (SLAC-PUB-6778) |
+| [W14] | https://s3.cern.ch/inspire-prod-files-e/ede001caff380d3448f21bc3b1d5e371 | Fowkes et al., PEP-II Prototype Klystron (SLAC-PUB-6093) |
+| [W15] | https://slac.stanford.edu/pubs/slacpubs/10000/slac-pub-10083.pdf | McIntosh, 476 MHz Cavity Processing (SLAC-PUB-10083) |
+| [W16] | https://www.osti.gov/biblio/815601 | OSTI record for SLAC-PUB-10083 |
+| [W17] | https://inspirehep.net/literature/1102529 | INSPIRE record for Robinson 1964 |
+| [W18] | https://www.desy.de/~branlard/papers/LINAC14/WEIOA06.pdf | Branlard, "Low Level RF for SRF Accelerators," LINAC14 |
+
+---
+
+## Appendix B — Symbol and Notation Conventions
+
+### B.1 Frequently Used Symbols
+
+| Symbol | Definition | Typical Unit |
+|--------|-----------|-------------|
+| f₀, ω₀ | Cavity resonant frequency | MHz, rad/s |
+| f_RF, ω_RF | RF operating frequency (476.315 MHz) | MHz, rad/s |
+| f_rev, ω_rev | Revolution frequency (1.2808 MHz) | MHz, rad/s |
+| f_s, ω_s | Synchrotron frequency (~9.4 kHz) | kHz, rad/s |
+| Q₀ | Unloaded quality factor (33,500) | dimensionless |
+| Q_L | Loaded quality factor (6,700) | dimensionless |
+| β | Coupling coefficient = Q₀/Q_ext (4.0) | dimensionless |
+| R_s | Shunt impedance (3.9 MΩ) | MΩ |
+| V_gap | Gap voltage per cavity (~712 kV operating) | kV |
+| I_b | DC beam current (500 mA design) | mA or A |
+| V_HV | HVPS output voltage (−74.7 kV operating) | kV |
+| I_HV | HVPS output current (19.4 A operating) | A |
+| α | SCR firing angle | degrees |
+| SIG HI | Enerpro control voltage (proportional to α) | V |
+
+### B.2 Abbreviations
+
+| Abbreviation | Definition |
+|-------------|-----------|
+| AIM | Arc/Interlock Module (VXI) |
+| CLK | Clock/RF Distribution module (VXI) |
+| DCM | Direct Communication Module (Allen-Bradley) |
+| GVF | Gap Voltage Feed-Forward (PEP-II only) |
+| HER | High Energy Ring (PEP-II) |
+| HOM | Higher-Order Mode |
+| HVPS | High-Voltage Power Supply |
+| IQA | IQ/Amplitude detector module (VXI) |
+| LLRF | Low-Level RF |
+| MPS | Machine Protection System |
+| PPS | Personnel Protection System |
+| RFP | RF Processor module (VXI) |
+| SCR | Silicon Controlled Rectifier (thyristor) |
+| SNL | State Notation Language (EPICS) |
+
+### B.3 Conventions
+
+1. **Shunt impedance convention**: This document uses the **linac convention** (R_s = V²/2P) unless explicitly stated otherwise. The accelerator convention (R_s = V²/P) gives values exactly 2× larger.
+
+2. **Phase convention**: Positive phase angles represent phase advance. The synchronous phase φ_s is measured from the zero-crossing of the RF voltage.
+
+3. **Frequency detuning**: Δf = f₀ − f_RF. Negative detuning (Δf < 0) means the cavity resonant frequency is below the RF frequency — the normal operating condition for beam loading compensation above transition.
+
+4. **Reference tag format**: [Rn] for numbered references, [Rnt] for transcription of the same source, [Wn] for web references.
+
+5. **Voltage polarity**: HVPS voltages are reported as positive magnitudes unless preceded by a minus sign. The actual cathode polarity is negative (−77 kV).
 
 ---
 
 *End of Document*
 
----
-
-**Document Status**: DRAFT v1.0 — Requires engineering review
-**Total Sections**: 21
-**Photo Placeholders**: 50+
-**Original Sources Referenced**: 150+ PDFs, 50+ DOCX, 18+ XLSX, 2,293 legacy code files
-**AI Technical Notes Referenced**: ~100 markdown files
-
+**Document Control**:
+- This document is the Tier 2 legacy system reference for the SPEAR3 RF system.
+- The definitive version is `Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md` in the `spearlegacyLLRF` repository.
+- **Provenance**: AI-ASSISTED — structure and content proposed by AI based on exhaustive review of original source documents, published papers, and web research. Subject to human review and approval by a named engineer.
+- **Review status**: UNREVIEWED — requires verification by a qualified RF engineer against original source documents and the physical system.

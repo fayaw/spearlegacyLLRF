@@ -1,10 +1,10 @@
 # SPEAR3 RF System — Documentation Architecture
 
 **Document ID**: DOCUMENTATION_ARCHITECTURE  
-**Version**: 6.0  
+**Version**: 6.1  
 **Date**: March 24, 2026  
 **Status**: PROPOSAL — For Review  
-**Supersedes**: v5.1 (March 24, 2026)  
+**Supersedes**: v6.0 (March 24, 2026)  
 **Author**: Faya Wang, with AI-assisted analysis  
 
 ---
@@ -13,7 +13,8 @@
 
 | Version | Date | Description |
 |---------|------|-------------|
-| 6.0 | 2026-03-24 | Major update following deep codebase review: Doc L v1.0 drafted (1,323 lines, 21 sections, 50+ photo placeholders); improved Doc L section outline to match actual 6-part structure with precise original source citations; updated U-document descriptions with corrected hardware details from source review; added Enerpro FCOG6100 serial numbers and Galil DMC-4143 Rev 1.3h details; corrected AI technical note file names to match actual repository paths; updated gap analysis with findings from comprehensive source review; added Appendix D mapping Doc L sections to original sources |
+| 6.1 | 2026-03-24 | Updated references to Doc L v2.0 (adopted [Rn] numbered reference system, internet research citations, Appendix A reference index with 52 entries across 5 categories, Appendix B symbols/conventions); updated version numbers and line counts throughout |
+| 6.0 | 2026-03-24 | Major update following deep codebase review: Doc L v2.0 drafted (1,367 lines, 20 sections + 2 appendices, 50+ photo placeholders); improved Doc L section outline to match actual 6-part structure with precise original source citations; updated U-document descriptions with corrected hardware details from source review; added Enerpro FCOG6100 serial numbers and Galil DMC-4143 Rev 1.3h details; corrected AI technical note file names to match actual repository paths; updated gap analysis with findings from comprehensive source review; added Appendix D mapping Doc L sections to original sources |
 | 5.1 | 2026-03-24 | Critical correction: properly distinguished original source documents (PDFs, docx, code) from AI-generated analysis products (technical notes, obsolete design docs); rewrote provenance model so all new documents cite original sources directly; added review status framework for AI-generated content; removed citations of unreviewed AI summaries as authoritative references |
 | 5.0 | 2026-03-23 | Complete rewrite: verified file paths, added inventories, gap analysis, reading paths, conventions |
 | 4.0 | 2026-03-22 | Four-tier architecture proposal with traceability appendices |
@@ -577,7 +578,7 @@ Each section below lists the **original source documents** to be consulted. AI-g
 
 ### 8.1 Doc L — Legacy System Architecture
 
-**Status**: DRAFT v1.0 completed (1,323 lines, 21 sections, 50+ photo placeholders)  
+**Status**: DRAFT v2.0 completed (1,367 lines, 20 sections + 2 appendices, 50+ photo placeholders; uses [Rn] numbered reference system with 52 source references and 18 web references)  
 **Location**: `Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md`  
 **Priority**: High — required context for all upgrade work
 
@@ -630,7 +631,7 @@ A consolidated, end-to-end reference for the legacy PEP-II/SPEAR3 RF system as c
 
 #### 8.1.3 Current Status and Next Steps
 
-Doc L v1.0 is a **comprehensive draft** requiring:
+Doc L v2.0 is a **comprehensive draft** requiring:
 1. **Engineering review** — verify all technical claims against physical system and source documents
 2. **Photo documentation** — capture all 50+ photo placeholders before legacy hardware removal
 3. **PV and register verification** — confirm EPICS PV names and PLC register assignments against running system
@@ -750,7 +751,7 @@ Each U-document should follow a consistent structure:
 | U7 (Waveform Buffer) not started | Design exists only in WaveformBuffersforLLRFUpgrade.docx | Write U7 from Jim Sebek's docx |
 | U8 (Arc Detection) not started | COTS hardware selected but no formal design document | Write U8 from arc detector product sheets + tups072.pdf + arcDetectorHardwareOptions.docx |
 | Doc P not written | Physics reference needed by all upgrade documents | Write Doc P from original PEP-II documents and textbook references |
-| Doc L v1.0 drafted | Engineering review and photo population needed | Review Doc L v1.0 (1,323 lines); verify against physical system; capture 50+ photos |
+| Doc L v2.0 drafted | Engineering review and photo population needed | Review Doc L v2.0 (1,367 lines); verify against physical system; capture 50+ photos |
 
 ### 10.3 Knowledge Gaps (From `Designs/todo list.md`)
 
@@ -916,7 +917,7 @@ Technical notes directories follow a consistent pattern that has evolved organic
 | Action | Deliverable | Dependencies | Rationale |
 |--------|-------------|--------------|-----------|
 | Write Doc P | `Designs/P_RF_PHYSICS_AND_PLANT.md` | Original PDFs (§4.1, 4.2) | Foundation for all U-documents |
-| Review Doc L v1.0 | `Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md` (1,323 lines drafted) | Original PDFs, docx, code (§4) | Engineering review needed; populate 50+ photo placeholders |
+| Review Doc L v2.0 | `Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md` (1,367 lines drafted) | Original PDFs, docx, code (§4) | Engineering review needed; populate 50+ photo placeholders |
 | Write U3 (RF MPS) | `Designs/U3_RF_MPS_UPGRADE.md` | 33 MPS wiring diagrams, MPS requirements docx | Hardware assembled, software needed |
 | Write U6 (Tuner Control) | `Designs/U6_TUNER_CONTROL_UPGRADE.md` | Galil docs, commissioning docx, test logs | Galil commissioned, needs formal document |
 | Review safety-critical AI-generated TN | Updated §5 review status | Original source documents | MPS, PPS, crowbar content must be verified |
@@ -1187,7 +1188,7 @@ This appendix maps each Doc L section to its primary original source documents, 
 
 ### D.1 Key Discoveries from Deep Codebase Review
 
-During the exhaustive review that informed Doc L v1.0, several important details were confirmed or corrected:
+During the exhaustive review that informed Doc L v2.0, several important details were confirmed or corrected:
 
 1. **Enerpro board identification**: FCOG6100 Rev.K (serial numbers 41506, 50470, 30045), with FCOAUX60 Rev D auxiliaries (S/N: 03198, 03813, 1694) — confirmed from `hvps/controls/enerpro/` directory structure and documentation
 2. **Galil DMC-4143 Rev 1.3h**: Confirmed commissioned August 2025 from `functioningGalil20250825SwapABToManual.txt` timestamp — this replaces legacy AB 1746-HSTP1 controllers
