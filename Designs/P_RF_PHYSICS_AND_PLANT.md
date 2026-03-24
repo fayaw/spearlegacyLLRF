@@ -1,7 +1,7 @@
 # SPEAR3 RF System — RF Physics, Control Theory and Physical Plant
 
 **Document ID**: Doc P
-**Version**: 2.6
+**Version**: 2.7
 **Date**: March 24, 2026
 **Status**: DRAFT — For Engineering Review
 **Location**: Designs/P_RF_PHYSICS_AND_PLANT.md
@@ -22,6 +22,7 @@
 | 2.4 | 2026-03-24 | Inline equation numbering via \\qquad \\text{} — labels now appear on the same line as equations without using \\tag{}. |
 | 2.5 | 2026-03-24 | Deep cross-reference review against original sources (McIntosh SLAC-PUB-10983, Schwarz PS-340-330-51, SSRL parameter page, simulation config, legacy code). Corrected synchrotron frequency formula to convention-independent form; added note on design vs operational VRF; corrected QL/β traceability to Schwarz; corrected DSP identification (AT&T DSP1610, not TMS320C16xx); corrected HVPS ripple harmonic description; added radiation damping time clarification; added new [R3] SSRL web reference; updated Appendix A parameters. |
 | 2.6 | 2026-03-24 | Major physics corrections per operational data review: updated U0 from 0.91 to 1.02 MeV with full recalculation cascade (φs, fs, detuning, generator power); corrected Eq. 2.7 generator power formula (~196 kW/cavity, matching measured ~200 kW); standardized RF frequency to 476.3 MHz; corrected I/Q modulator count from PEP-II (7) to SPEAR3 (5); added D1/D2 beam loading physics, D4 comb filter physics, expanded D6 klystron gain tracking detail; added thermal detuning estimation; added system block diagrams; comprehensive LaTeX formatting cleanup. |
+| 2.7 | 2026-03-24 | Physics verification: simplified Eq. 2.4b to use cos convention directly (removed convention-independent form); verified Eq. 2.5 optimum detuning via first-principles admittance derivation (confirmed self-consistent with Rs = 3.73 MΩ); clarified Rs convention in Appendix C (Rs = V²/(2P), circuit convention). |
 
 ---
 
@@ -222,15 +223,13 @@ V_\text{RF} \cos\phi_s = U_0 \qquad \text{(Eq. 2.4)}
 
 Note: $\sin\phi_s = \sin(69.0^\circ) = 0.934$, which appears in the beam loading compensation formulas below.
 
-**Synchrotron frequency** — The convention-independent form avoids confusion between phase conventions:
+**Synchrotron frequency** — Using our cos convention ($V_\text{RF}\cos\phi_s = U_0$, so $\sin\phi_s = \sqrt{1 - (U_0/V_\text{RF})^2}$):
 
 ```math
-\nu_s = \sqrt{\frac{h\,\alpha_c}{2\pi\,E_0}\sqrt{V_\text{RF}^2 - U_0^2}} \qquad \text{(Eq. 2.4b)}
+\nu_s = \sqrt{\frac{h\,\alpha_c\,V_\text{RF}\,\sin\phi_s}{2\pi\,E_0}} \qquad \text{(Eq. 2.4b)}
 ```
 
-> With $V_\text{RF} = 2.85$ MV (operational): $\sqrt{V_\text{RF}^2 - U_0^2} = \sqrt{2.85^2 - 1.02^2} = 2.66$ MV, giving $\nu_s \approx 0.0079$, $f_s \approx 10.1$ kHz. Published values: $Q_s = 0.008$ [R1], $\nu_s = 0.007$ [R3] — the range reflects differences in operational $V_\text{RF}$ and $\alpha_c$ across lattice configurations. For control design, the key constraint is that the direct loop bandwidth ($\sim 800$ kHz) $\gg f_s$, regardless of the exact $f_s$.
-
-> **Phase convention note**: Eq. 2.4b is equivalent to $\nu_s = \sqrt{h\,\alpha_c\,V_\text{RF}\,\sin\phi_s/(2\pi E_0)}$ when $\phi_s$ is in the **cos convention** (Eq. 2.4, where $V_\text{RF}\cos\phi_s = U_0$), or to $\nu_s = \sqrt{h\,\alpha_c\,V_\text{RF}\,\cos\phi_s/(2\pi E_0)}$ when $\phi_s$ is in the **sin convention** (where $V_\text{RF}\sin\phi_s = U_0$). The convention-independent form is used here to prevent errors.
+> With $V_\text{RF} = 2.85$ MV, $\sin\phi_s = 0.934$: $\nu_s = \sqrt{372 \times 0.00118 \times 2.85 \times 0.934 \,/\, (2\pi \times 3000)} \approx 0.0079$, giving $f_s = \nu_s \, f_\text{rev} \approx 10.1$ kHz. Published values: $Q_s = 0.008$ [R1], $\nu_s = 0.007$ [R3] — the range reflects differences in operational $V_\text{RF}$ and $\alpha_c$ across lattice configurations. For control design, the key constraint is that the direct loop bandwidth ($\sim 800$ kHz) $\gg f_s$.
 
 **Optimum detuning** — minimizes reflected power at the input coupler:
 
@@ -241,6 +240,8 @@ Note: $\sin\phi_s = \sin(69.0^\circ) = 0.934$, which appears in the beam loading
 ```math
 \psi_\text{opt} \approx -67.8^\circ \qquad \text{(Eq. 2.5a)}
 ```
+
+> **Derivation note**: Equation 2.5 follows from the condition that optimum detuning makes the reactive component of the required generator current zero, minimizing reflected power at the input coupler. The cavity admittance at the drive frequency is $Y = G(1 + j\tan\psi)$ with $G = 1/(2R_s)$. The reactive generator current is $\text{Im}(I_\text{gen}) = V_\text{gap} \cdot G \cdot \tan\psi + I_b \sin\phi_s$. Setting this to zero gives $\tan\psi_\text{opt} = -I_b \sin\phi_s / (V_\text{gap} \cdot G) = -I_b \cdot R_s \cdot \sin\phi_s / V_\text{gap}$, which is Eq. 2.5. The formula is self-consistent: both $V_{b,\text{res}} = I_b R_s$ (Eq. 2.2) and $P_\text{wall} = V^2/(2R_s)$ (Eq. 2.7a) use the same $R_s = 3.73$ MΩ, confirming that $\tan\psi_\text{opt} = -V_{b,\text{res}} \sin\phi_s / V_\text{gap}$ is the correct form.
 
 **Optimum frequency detuning** — using $\sin\phi_s$ explicitly in the formula:
 
@@ -1034,7 +1035,7 @@ Calibration files in `llrf/calibrations/` establish numerical relationships for 
 
 ### C.2 Conventions
 
-1. **Shunt impedance**: Linac convention ($R_s = V^2/2P$) unless stated. Accelerator convention $= 2\times$ larger.
+1. **Shunt impedance**: $R_s = V^2/(2P)$ throughout this document (i.e., $P_\text{wall} = V_\text{gap}^2/(2R_s)$). This is sometimes called "circuit convention." The accelerator convention $R_a = V^2/P = 2R_s$ is $2\times$ larger; Schwarz [R6] reports $R_a = 7.5$ MΩ $\approx 2 \times 3.73$.
 2. **Synchronous phase**: $\phi_s$ measured from voltage crest (SLAC convention): $V_\text{RF}\cos\phi_s = U_0$.
 3. **Detuning**: $\Delta f = f_0 - f_\text{RF}$. Negative = cavity below RF (normal above transition).
 4. **Reference tags**: [Rn] = numbered reference, [Rnt] = transcription, [Wn] = web, [Dn] = disturbance (§4).
