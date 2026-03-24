@@ -21,39 +21,39 @@
 
 ## Table of Contents
 
-**Part I — System Overview**
+#### Part I — System Overview
 1. [Introduction and Purpose](#1-introduction-and-purpose)
 2. [System Architecture Overview](#2-system-architecture-overview)
 3. [Physical Layout and Locations](#3-physical-layout-and-locations)
 4. [Key System Parameters](#4-key-system-parameters)
 
-**Part II — RF Signal Chain**
+#### Part II — RF Signal Chain
 5. [LLRF Controller (VXI System)](#5-llrf-controller-vxi-system)
 6. [Klystron and Drive System](#6-klystron-and-drive-system)
 7. [Waveguide Distribution Network](#7-waveguide-distribution-network)
 8. [RF Cavities and Tuner Assemblies](#8-rf-cavities-and-tuner-assemblies)
 
-**Part III — Power Systems**
+#### Part III — Power Systems
 9. [High-Voltage Power Supply — Power Section](#9-high-voltage-power-supply--power-section)
 10. [HVPS Control System — Hoffman Box (B118)](#10-hvps-control-system--hoffman-box-b118)
 11. [Enerpro SCR Firing System](#11-enerpro-scr-firing-system)
 12. [Arc Protection and Crowbar System](#12-arc-protection-and-crowbar-system)
 
-**Part IV — Protection and Safety Systems**
+#### Part IV — Protection and Safety Systems
 13. [Personnel Protection System (PPS) Interface](#13-personnel-protection-system-pps-interface)
 14. [RF Machine Protection System (MPS)](#14-rf-machine-protection-system-mps)
 15. [Interlock Architecture and Signal Chain](#15-interlock-architecture-and-signal-chain)
 
-**Part V — Control Software and Instrumentation**
+#### Part V — Control Software and Instrumentation
 16. [EPICS IOC and SNL Software Architecture](#16-epics-ioc-and-snl-software-architecture)
 17. [Tuner Control System](#17-tuner-control-system)
 18. [Diagnostics, Calibration and Monitoring](#18-diagnostics-calibration-and-monitoring)
 
-**Part VI — Integration and Legacy Considerations**
+#### Part VI — Integration and Legacy Considerations
 19. [Cabling and Interconnections](#19-cabling-and-interconnections)
 20. [Known Issues, Limitations and Legacy Debt](#20-known-issues-limitations-and-legacy-debt)
 
-Appendices:
+#### Appendices
 - [Appendix A — Source Document Reference Index](#appendix-a--source-document-reference-index)
 - [Appendix B — Symbol and Notation Conventions](#appendix-b--symbol-and-notation-conventions)
 
