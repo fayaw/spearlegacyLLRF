@@ -1,7 +1,7 @@
 # SPEAR3 RF System — RF Physics, Control Theory and Physical Plant
 
 **Document ID**: Doc P
-**Version**: 2.4
+**Version**: 2.5
 **Date**: March 24, 2026
 **Status**: DRAFT — For Engineering Review
 **Location**: Designs/P_RF_PHYSICS_AND_PLANT.md
@@ -19,6 +19,7 @@
 | 2.1 | 2026-03-24 | LaTeX formatting for all equations and symbols. Physics review: corrected synchronous phase convention (Eq. 2.4), verified all numerical calculations, fixed minor inconsistencies. |
 | 2.2 | 2026-03-24 | GitHub rendering fix: converted all display equations to fenced math code blocks for reliable MathJax rendering; moved equation labels to text below blocks; cleaned up negative thin spaces, thousand-separator braces, and degree symbols. |
 | 2.3 | 2026-03-24 | Attempted \\tag{} for inline equation numbering — caused rendering failures on GitHub. Reverted. |
+| 2.5 | 2026-03-24 | Deep cross-reference review against original sources (McIntosh SLAC-PUB-10983, Schwarz PS-340-330-51, SSRL parameter page, simulation config, legacy code). Corrected synchrotron frequency formula to convention-independent form; added note on design vs operational VRF; corrected QL/β traceability to Schwarz; corrected DSP identification (AT&T DSP1610, not TMS320C16xx); corrected HVPS ripple harmonic description; added radiation damping time clarification; added new [R3] SSRL web reference; updated Appendix A parameters. |
 | 2.4 | 2026-03-24 | Inline equation numbering via \\qquad \\text{} — labels now appear on the same line as equations without using \\tag{}. |
 
 ---
@@ -75,11 +76,18 @@ The SPEAR3 RF system must deliver a 476.3 MHz accelerating voltage of $\sim 2.85
 | RF frequency | $f_\text{RF}$ | 476.3051755 | MHz |
 | Momentum compaction | $\alpha_c$ | $1.18 \times 10^{-3}$ | — |
 | Energy loss per turn | $U_0$ | ~0.91 | MeV |
-| Total accelerating voltage | $V_\text{RF}$ | ~2.85 | MV |
-| Synchrotron frequency | $f_s$ | ~9.4 | kHz |
-| Radiation damping time | $\tau_\text{rad}$ | ~5 | ms |
+| Total accelerating voltage (design) | $V_\text{RF}$ | 3.2 | MV |
+| Total accelerating voltage (operational) | $V_\text{RF}$ | ~2.85 | MV |
+| Synchrotron frequency | $f_s$ | ~7.7–10.2 | kHz |
+| Synchrotron tune | $\nu_s$ | ~0.006–0.008 | — |
+| Longitudinal radiation damping time | $\tau_s$ | ~2.9 | ms |
+| Transverse radiation damping time | $\tau_{x,y}$ | ~4.2, 5.1 | ms |
 
-> **Sources**: [R1] McIntosh et al., SLAC-PUB-10983, EPAC 2004. [R2] Hettel et al., PAC 1999. [R5] `Designs/0_SYSTEM_DESIGN_REPORT.md`.
+> **Note on VRF**: The **design** value of 3.2 MV (800 kV/cavity) is from the original SPEAR3 RF system specification [R1]. The **operational** value of ~2.85 MV (712 kV/cavity) is from LLRF9 commissioning measurements [R4] and is used throughout the beam loading calculations in this document. The synchrotron frequency is current-dependent (through the optimal detuning and effective impedance) and varies with VRF: $f_s \approx 10.2$ kHz at 2.85 MV, $\sim 10.8$ kHz at 3.2 MV with $\alpha_c = 1.18 \times 10^{-3}$. Published references cite $\nu_s \approx 0.007$–$0.008$ depending on operating conditions [R1] [R3].
+
+> **Note on αc**: Published values range from 0.0011 (SSRL parameter page [R3]) to 0.00118 (used in this document) depending on the specific lattice optics. Differences of $\sim 7\%$ in $\alpha_c$ produce $\sim 3\%$ differences in $f_s$.
+
+> **Sources**: [R1] McIntosh et al., SLAC-PUB-10983, EPAC 2004 (Table 1: $Q_s = 0.008$, $\alpha = 0.00113$). [R2] Hettel et al., PAC 1999. [R3] SSRL SPEAR Storage Ring Parameters ($\nu_s = 0.007$, $\alpha_c = 0.0011$, $V_\text{RF} = 3.2$ MV). [R5] `Designs/0_SYSTEM_DESIGN_REPORT.md`.
 
 ### 1.3 RF System Configuration
 
@@ -118,7 +126,9 @@ Near its fundamental mode at $\omega_0 = 2\pi \times 476.3\;\text{MHz}$, each ca
 | Loaded Q | $Q_L$ | 6,700 | — |
 | Coupling coefficient | $\beta = Q_0/Q_\text{ext}$ | 3.78 | — |
 
-> **Sources**: [R6] Schwarz parameter table; [R7] Rimmer et al., LBL-33360.
+> **Traceability note**: $R_s = 3.73$ MΩ and $Q_0 = 32{,}000$ are directly from [R6] Schwarz. Schwarz reports $\beta_\text{actual} = 3.72$ and $\beta_\text{optimum} = 3.84$ for PEP-II HER, giving $Q_L = 6{,}780$. The value $\beta = 3.78$ used here is a derived operating point (intermediate between actual and optimum) consistent with $Q_L \approx 6{,}700$ via $Q_L = Q_0/(1+\beta) = 32{,}000/4.78 = 6{,}695$. McIntosh [R1] reports $R_s = 3.8$ MΩ in accelerator convention (approx. $2 \times R_s^\text{linac} = 7.5$ MΩ, consistent with Schwarz $R_a = 7.5$ MΩ [R6]).
+
+> **Sources**: [R6] Schwarz parameter table (PS-340-330-51-R0); [R7] Rimmer et al., LBL-33360.
 
 #### 2.1.2 Cavity Transfer Function
 
@@ -163,6 +173,16 @@ V_\text{RF} \cos\phi_s = U_0 \qquad \text{(Eq. 2.4)}
 ```
 
 Note: $\sin\phi_s = \sin(71.4^\circ) = 0.948$, which appears in the beam loading compensation formulas below.
+
+**Synchrotron frequency** — The convention-independent form avoids confusion between phase conventions:
+
+```math
+\nu_s = \sqrt{\frac{h\,\alpha_c}{2\pi\,E_0}\sqrt{V_\text{RF}^2 - U_0^2}} \qquad \text{(Eq. 2.4b)}
+```
+
+> With $V_\text{RF} = 2.85$ MV (operational): $\sqrt{V_\text{RF}^2 - U_0^2} = 2.70$ MV, giving $\nu_s \approx 0.0079$, $f_s \approx 10.2$ kHz. Published values: $Q_s = 0.008$ [R1], $\nu_s = 0.007$ [R3] — the range reflects differences in operational $V_\text{RF}$ and $\alpha_c$ across lattice configurations. For control design, the key constraint is that the direct loop bandwidth ($\sim 800$ kHz) $\gg f_s$, regardless of the exact $f_s$.
+
+> **Phase convention note**: Eq. 2.4b is equivalent to $\nu_s = \sqrt{h\,\alpha_c\,V_\text{RF}\,\sin\phi_s/(2\pi E_0)}$ when $\phi_s$ is in the **cos convention** (Eq. 2.4, where $V_\text{RF}\cos\phi_s = U_0$), or to $\nu_s = \sqrt{h\,\alpha_c\,V_\text{RF}\,\cos\phi_s/(2\pi E_0)}$ when $\phi_s$ is in the **sin convention** (where $V_\text{RF}\sin\phi_s = U_0$). The convention-independent form is used here to prevent errors.
 
 **Optimum detuning** — minimizes reflected power at the input coupler:
 
@@ -313,7 +333,7 @@ Each of the 4 cavity probe signals is demodulated to I/Q and combined through a 
 |---|-------------|-----------|-----------|--------|
 | D1 | Beam loading (steady-state) | DC | $V_b = 1.865$ MV/cavity | Dominates voltage budget |
 | D2 | Beam loading (transient) | DC–100 kHz | Growth rates $< T_\text{rev}$ | Longitudinal instability |
-| D3 | Robinson instability | $f_s \sim 9.4$ kHz | Exponential growth | Beam loss |
+| D3 | Robinson instability | $f_s \sim 10$ kHz (Eq. 2.4b) | Exponential growth | Beam loss |
 | D4 | Coupled-bunch modes | $n \cdot f_\text{rev}$ | $1/\tau_{cb}$ | Beam oscillation |
 | D5 | HVPS ripple | 360, 720, 1080… Hz | $< 1\%$ P-P voltage | Phase modulation |
 | D6 | Klystron gain drift | 0.01–1 Hz | up to 7 dB | Loop gain variation |
@@ -364,13 +384,21 @@ For SPEAR3 ($f_\text{rev} = 1.28$ MHz $\gg \Delta f_{1/2} = 35.5$ kHz), only 1�
 
 ### 4.5 D5: HVPS Ripple
 
-The 12-pulse SCR rectifier produces:
+The 12-pulse SCR rectifier produces two families of harmonics:
+
+**12-pulse fundamental harmonics** (ideal 12-pulse cancellation):
 
 ```math
-f_\text{ripple} = 12n \times f_\text{line} = 720,\;1440,\;2160,\;\ldots\;\text{Hz} \qquad \text{(Eq. 4.5)}
+f_\text{12p} = 12n \times f_\text{line} = 720,\;1440,\;2160,\;\ldots\;\text{Hz} \qquad \text{(Eq. 4.5a)}
 ```
 
-with residual harmonics at $60,\;120,\;\ldots,\;360$ Hz (reduced by $\sim 20$ dB due to imperfect 12-pulse balance). Coupling to RF field via AM-PM conversion:
+**Residual 6-pulse harmonics** (from imperfect phase balance between the two 6-pulse bridges):
+
+```math
+f_\text{6p} = 6n \times f_\text{line} = 360,\;720,\;1080,\;\ldots\;\text{Hz} \qquad \text{(Eq. 4.5b)}
+```
+
+The 360 Hz component (first 6-pulse harmonic absent in ideal 12-pulse operation) is the **dominant residual** and the primary target of the ripple loop. Additional low-order harmonics at 60, 120, 180, 240 Hz may appear at reduced levels ($\sim 20$–$40$ dB below 360 Hz) depending on SCR firing symmetry. Coupling to RF field via AM-PM conversion:
 
 ```math
 \Delta\phi_\text{RF} \sim \frac{\partial P_\text{kly}/\partial V_k}{P_\text{kly}} \cdot \Delta V_\text{ripple} \qquad \text{(Eq. 4.6)}
@@ -396,7 +424,7 @@ For normal-conducting copper cavities: microphonic excursions $< 10$ Hz (negligi
  1 – 10            Slow mechanical (D7)     Tuner loop
  60 – 2000         HVPS ripple (D5)         Ripple loop (300 Hz) + Direct loop
  10³ – 10⁵         Beam transients (D2)     Direct loop (~800 kHz)
- ~9.4 kHz          Robinson (D3)            Direct loop (impedance reduction)
+ ~10 kHz           Robinson (D3)            Direct loop (impedance reduction)
  ~1.28 MHz         Coupled-bunch (D4)       Direct loop (+ Comb in PEP-II)
  ═══════════════════════════════════════════════════════════════
 ```
@@ -522,7 +550,7 @@ Not used at SPEAR3. Addresses D2 (residual coupled-bunch motion).
 | Measurement | Klystron forward I/Q | Upstream of cavity |
 | Bandwidth | $\sim 300$ Hz | 120, 240, 360 Hz + harmonics |
 | Algorithm | DSP harmonic estimator at $\sim 23$ kHz | 6 fast + 8 slow harmonics |
-| Fixed-point | q13 (phase), q11 (accum), q15 (gains) | TMS320C16xx |
+| Fixed-point | q13 (phase), q11 (accum), q15 (gains) | AT&T DSP1610 |
 | SPEAR3 status | **Active** | |
 
 > **Sources**: `spear-rf-code-legacy/dsp1610/rfpDsp/ripple.s` [R36]; [R20t].
@@ -681,7 +709,7 @@ where $\psi_\text{target}$ is the target detuning angle (Eq. 2.6). Implemented i
 | Disturbance | Frequency | Open-Loop Impact | Rejection | Residual |
 |-------------|-----------|:-:|:-:|:-:|
 | Beam loading (D1–D2) | DC–100 kHz | Unstable | $\sim 40$ dB | Stable |
-| Robinson (D3) | $\sim 9.4$ kHz | Exponential growth | $\sim 40$ dB | $\ll 1/\tau_\text{rad}$ |
+| Robinson (D3) | $\sim 10$ kHz (Eq. 2.4b) | Exponential growth | $\sim 40$ dB | $\ll 1/\tau_s$ |
 | HVPS ripple (D5) | 360–2000 Hz | $\sim 1\%$ phase | $\sim 40$ dB | $< 0.01\%$ |
 | Thermal drift (D8) | $< 0.01$ Hz | $\sim 100$ Hz/hr | Tuner tracks | $< 1$ Hz |
 | Klystron gain (D6) | 0.01–1 Hz | $\sim 7$ dB var. | Gain tracking | $< 0.5$ dB |
@@ -722,8 +750,12 @@ Calibration files in `llrf/calibrations/` establish numerical relationships for 
 | RF frequency | $f_\text{RF}$ | 476.3051755 | MHz | [R4] |
 | Momentum compaction | $\alpha_c$ | $1.18 \times 10^{-3}$ | — | [R2] |
 | Energy loss per turn | $U_0$ | ~0.91 | MeV | [R1] |
-| Synchrotron tune | $\nu_s$ | ~0.0073 | — | Derived |
-| Synchrotron frequency | $f_s$ | ~9.4 | kHz | Derived |
+| Total RF voltage (design) | $V_\text{RF}$ | 3.2 | MV | [R1] [R3] |
+| Total RF voltage (operational) | $V_\text{RF}$ | ~2.85 | MV | [R4] [R5] |
+| Synchrotron tune | $\nu_s$ | ~0.008 | — | Eq. 2.4b; [R1] |
+| Synchrotron frequency | $f_s$ | ~10 | kHz | Eq. 2.4b |
+| Long. radiation damping time | $\tau_s$ | 2.87 | ms | [R1] |
+| Trans. radiation damping time | $\tau_{x,y}$ | 4.24, 5.14 | ms | [R1] |
 
 ### A.2 Cavity Parameters (Per Cavity)
 
@@ -733,8 +765,10 @@ Calibration files in `llrf/calibrations/` establish numerical relationships for 
 | Shunt impedance (linac) | $R_s$ | 3.73 | MΩ | [R6] |
 | $R/Q$ | $R/Q$ | ~116 | Ω | [R7] |
 | Unloaded Q | $Q_0$ | 32,000 | — | [R6] |
-| Loaded Q | $Q_L$ | 6,700 | — | [R6] |
-| Coupling coefficient | $\beta$ | 3.78 | — | Derived |
+| Loaded Q | $Q_L$ | 6,700 | — | Derived from $\beta = 3.78$ |
+| Coupling coefficient (this doc) | $\beta$ | 3.78 | — | Derived |
+| Coupling coefficient (Schwarz actual) | $\beta$ | 3.72 | — | [R6] |
+| Coupling coefficient (Schwarz optimum) | $\beta$ | 3.84 | — | [R6] |
 | Cavity half-bandwidth | $\Delta f_{1/2}$ | 35.5 | kHz | Derived |
 | Operational gap voltage | $V_\text{gap}$ | ~712 | kV | [R5] |
 
@@ -787,7 +821,7 @@ Calibration files in `llrf/calibrations/` establish numerical relationships for 
 
 | Ref | Citation |
 |-----|---------|
-| [R3] | SSRL SPEAR3 Accelerator Parameters |
+| [R3] | SSRL SPEAR Storage Ring Parameters, https://www-ssrl.slac.stanford.edu/accphy/spear_parameters.html (last updated 26 Apr 2002, H.-D. Nuhn) |
 | [R10] | Wiedemann, H., *Particle Accelerator Physics*, 4th ed., Springer, 2015 |
 | [R18] | Analog Devices AD834 datasheet |
 
@@ -822,6 +856,7 @@ Calibration files in `llrf/calibrations/` establish numerical relationships for 
 | [W4] | https://www.dimtel.com/products/llrf9 | Dimtel LLRF9 |
 | [W5] | https://proceedings.jacow.org/p85/PDF/PAC1985_1852.PDF | Boussard PAC85 |
 | [W7] | https://inspirehep.net/files/dbbd3f9a808792f9901894060a879b5f | Chang et al. NSRRC |
+| [W8] | https://www-ssrl.slac.stanford.edu/accphy/spear_parameters.html | SSRL SPEAR Storage Ring Parameters [R3] |
 
 ---
 
