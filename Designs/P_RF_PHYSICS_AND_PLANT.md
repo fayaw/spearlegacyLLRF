@@ -1,7 +1,7 @@
 # SPEAR3 RF System — RF Physics, Control Theory and Physical Plant
 
 **Document ID**: Doc P
-**Version**: 2.5
+**Version**: 2.6
 **Date**: March 24, 2026
 **Status**: DRAFT — For Engineering Review
 **Location**: Designs/P_RF_PHYSICS_AND_PLANT.md
@@ -19,8 +19,9 @@
 | 2.1 | 2026-03-24 | LaTeX formatting for all equations and symbols. Physics review: corrected synchronous phase convention (Eq. 2.4), verified all numerical calculations, fixed minor inconsistencies. |
 | 2.2 | 2026-03-24 | GitHub rendering fix: converted all display equations to fenced math code blocks for reliable MathJax rendering; moved equation labels to text below blocks; cleaned up negative thin spaces, thousand-separator braces, and degree symbols. |
 | 2.3 | 2026-03-24 | Attempted \\tag{} for inline equation numbering — caused rendering failures on GitHub. Reverted. |
-| 2.5 | 2026-03-24 | Deep cross-reference review against original sources (McIntosh SLAC-PUB-10983, Schwarz PS-340-330-51, SSRL parameter page, simulation config, legacy code). Corrected synchrotron frequency formula to convention-independent form; added note on design vs operational VRF; corrected QL/β traceability to Schwarz; corrected DSP identification (AT&T DSP1610, not TMS320C16xx); corrected HVPS ripple harmonic description; added radiation damping time clarification; added new [R3] SSRL web reference; updated Appendix A parameters. |
 | 2.4 | 2026-03-24 | Inline equation numbering via \\qquad \\text{} — labels now appear on the same line as equations without using \\tag{}. |
+| 2.5 | 2026-03-24 | Deep cross-reference review against original sources (McIntosh SLAC-PUB-10983, Schwarz PS-340-330-51, SSRL parameter page, simulation config, legacy code). Corrected synchrotron frequency formula to convention-independent form; added note on design vs operational VRF; corrected QL/β traceability to Schwarz; corrected DSP identification (AT&T DSP1610, not TMS320C16xx); corrected HVPS ripple harmonic description; added radiation damping time clarification; added new [R3] SSRL web reference; updated Appendix A parameters. |
+| 2.6 | 2026-03-24 | Major physics corrections per operational data review: updated U0 from 0.91 to 1.02 MeV with full recalculation cascade (φs, fs, detuning, generator power); corrected Eq. 2.7 generator power formula (~196 kW/cavity, matching measured ~200 kW); standardized RF frequency to 476.3 MHz; corrected I/Q modulator count from PEP-II (7) to SPEAR3 (5); added D1/D2 beam loading physics, D4 comb filter physics, expanded D6 klystron gain tracking detail; added thermal detuning estimation; added system block diagrams; comprehensive LaTeX formatting cleanup. |
 
 ---
 
@@ -73,19 +74,23 @@ The SPEAR3 RF system must deliver a 476.3 MHz accelerating voltage of $\sim 2.85
 | Revolution frequency | $f_\text{rev}$ | 1.2804 | MHz |
 | Revolution period | $T_\text{rev}$ | 0.781 | μs |
 | Harmonic number | $h$ | 372 | — |
-| RF frequency | $f_\text{RF}$ | 476.3051755 | MHz |
+| RF frequency | $f_\text{RF}$ | 476.3 | MHz |
 | Momentum compaction | $\alpha_c$ | $1.18 \times 10^{-3}$ | — |
-| Energy loss per turn | $U_0$ | ~0.91 | MeV |
+| Energy loss per turn | $U_0$ | 1.02 | MeV |
 | Total accelerating voltage (design) | $V_\text{RF}$ | 3.2 | MV |
 | Total accelerating voltage (operational) | $V_\text{RF}$ | ~2.85 | MV |
-| Synchrotron frequency | $f_s$ | ~7.7–10.2 | kHz |
-| Synchrotron tune | $\nu_s$ | ~0.006–0.008 | — |
+| Synchrotron frequency | $f_s$ | ~10.1 | kHz |
+| Synchrotron tune | $\nu_s$ | ~0.008 | — |
 | Longitudinal radiation damping time | $\tau_s$ | ~2.9 | ms |
 | Transverse radiation damping time | $\tau_{x,y}$ | ~4.2, 5.1 | ms |
 
-> **Note on VRF**: The **design** value of 3.2 MV (800 kV/cavity) is from the original SPEAR3 RF system specification [R1]. The **operational** value of ~2.85 MV (712 kV/cavity) is from LLRF9 commissioning measurements [R4] and is used throughout the beam loading calculations in this document. The synchrotron frequency is current-dependent (through the optimal detuning and effective impedance) and varies with VRF: $f_s \approx 10.2$ kHz at 2.85 MV, $\sim 10.8$ kHz at 3.2 MV with $\alpha_c = 1.18 \times 10^{-3}$. Published references cite $\nu_s \approx 0.007$–$0.008$ depending on operating conditions [R1] [R3].
+> **Note on $f_\text{RF}$**: The nominal RF frequency is 476.3 MHz. The precise frequency (e.g. 476.3051755 MHz as measured) varies slightly as the ring circumference changes with temperature. For consistency, 476.3 MHz is used throughout this document.
 
-> **Note on αc**: Published values range from 0.0011 (SSRL parameter page [R3]) to 0.00118 (used in this document) depending on the specific lattice optics. Differences of $\sim 7\%$ in $\alpha_c$ produce $\sim 3\%$ differences in $f_s$.
+> **Note on $U_0$**: The current operational energy loss per turn is $U_0 = 1.02$ MeV. This is validated by the measured generator power of $\sim 200$ kW/cavity (§2.1.3). The value 0.91 MeV appearing in some earlier references [R1] corresponds to a different set of insertion-device contributions; the current ID complement increases $U_0$.
+
+> **Note on $V_\text{RF}$**: The **design** value of 3.2 MV (800 kV/cavity) is from the original SPEAR3 RF system specification [R1]. The **operational** value of $\sim 2.85$ MV (712 kV/cavity) is from LLRF9 commissioning measurements [R4] and is used throughout the beam loading calculations in this document.
+
+> **Note on $\alpha_c$**: Published values range from 0.0011 (SSRL parameter page [R3]) to 0.00118 (used in this document) depending on the specific lattice optics. Differences of $\sim 7\%$ in $\alpha_c$ produce $\sim 3\%$ differences in $f_s$.
 
 > **Sources**: [R1] McIntosh et al., SLAC-PUB-10983, EPAC 2004 (Table 1: $Q_s = 0.008$, $\alpha = 0.00113$). [R2] Hettel et al., PAC 1999. [R3] SSRL SPEAR Storage Ring Parameters ($\nu_s = 0.007$, $\alpha_c = 0.0011$, $V_\text{RF} = 3.2$ MV). [R5] `Designs/0_SYSTEM_DESIGN_REPORT.md`.
 
@@ -111,6 +116,49 @@ The RF station consists of: a single 1.2 MW CW klystron (Marconi/CPI K3512S) →
 ## 2. Plant Physics Model
 
 This section derives the mathematical models of the three physical subsystems that the LLRF controller must regulate: the RF cavity, the klystron amplifier, and the HVPS.
+
+### 2.0 High-Level System Block Diagram
+
+The following diagram shows the full RF control architecture — four cavities driven by one klystron, with multiple feedback loops spanning seven decades of frequency:
+
+```
+  ┌─────────────────────────────────────────────────────────────────────────────────────┐
+  │                        SPEAR3 RF CONTROL SYSTEM — OVERVIEW                          │
+  ├─────────────────────────────────────────────────────────────────────────────────────┤
+  │                                                                                     │
+  │   IQ Ref ──▶(Σ)──▶ BASEBAND ──▶ IQ RF ──▶ DRIVE ──▶ KLYSTRON ──▶ 3× MAGIC ──┐   │
+  │     (DAC)    ↑      MODULATOR     MOD       AMP       1.2 MW      TEE         │   │
+  │              │      (gain/phase   (up to    (~29 W)   (43 dB,    SPLITTER     │   │
+  │              │       tracking)    476 MHz)             <150 ns)               │   │
+  │              │                                                                │   │
+  │              │                                            ┌───────────────────┤   │
+  │              │  DIRECT LOOP                               │                   │   │
+  │              │  (~800 kHz BW)                              ▼                   ▼   │
+  │              │  ┌────────────────┐                     ┌──────┐           ┌──────┐ │
+  │              ├──┤ Error Amp +    │◀── Vector ◀── IQ ◀──┤Cav 1 │   ...    │Cav 4 │ │
+  │              │  │ Lead/Integral  │    Sum       Demod  │      │           │      │ │
+  │              │  │ Compensation   │    (4 cav)          │ Probe│           │ Probe│ │
+  │              │  └────────────────┘                     └──┬───┘           └──┬───┘ │
+  │              │                                            │                  │     │
+  │   RIPPLE     │                                            ▼                  ▼     │
+  │   LOOP ──────┤  ◀── Kly Fwd IQ ◀── IQ Demod ◀── Klystron Forward Power          │
+  │   (~300 Hz)  │       (DSP: AT&T DSP1610, 23 kHz sample rate)                      │
+  │              │                                                                     │
+  │   DAC LOOP ──┘  (~0.1 Hz, maintains Vgap setpoint)                                │
+  │                                                                                     │
+  │   TUNER LOOP (0.01–1 Hz): ∠probe − ∠fwd → stepper motor → mechanical tuner       │
+  │   HVPS LOOP  (~1 Hz): Drive power monitor → PLC → SCR firing angle → Vk           │
+  │                                                                                     │
+  │   ╔════════════════════════════════════════════════════════════════════════╗         │
+  │   ║  NOT USED at SPEAR3: Comb Loop, Gap FF Loop, LFB Woofer             ║         │
+  │   ╚════════════════════════════════════════════════════════════════════════╝         │
+  └─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Key architectural features:**
+- **Single klystron, four cavities**: One I/Q modulator drives all four cavities simultaneously. Field regulation uses the vector sum of all four cavity probes.
+- **Bandwidth hierarchy**: Direct (800 kHz) ≫ Ripple (300 Hz) ≫ HVPS/Tuner (~1 Hz) ≫ DAC (0.1 Hz) — natural frequency-domain decoupling.
+- **Analog fast path**: The direct loop operates entirely in analog baseband for minimum delay ($\sim 270$–500 ns total loop delay).
 
 ### 2.1 RF Cavity as a Narrowband Resonator
 
@@ -169,10 +217,10 @@ V_\text{RF} \cos\phi_s = U_0 \qquad \text{(Eq. 2.4)}
 ```
 
 ```math
-\cos\phi_s = \frac{U_0}{V_\text{RF}} = \frac{0.91\;\text{MeV}}{2.85\;\text{MV}} = 0.319 \implies \phi_s \approx 71.4^\circ \qquad \text{(Eq. 2.4a)}
+\cos\phi_s = \frac{U_0}{V_\text{RF}} = \frac{1.02\;\text{MeV}}{2.85\;\text{MV}} = 0.358 \implies \phi_s \approx 69.0^\circ \qquad \text{(Eq. 2.4a)}
 ```
 
-Note: $\sin\phi_s = \sin(71.4^\circ) = 0.948$, which appears in the beam loading compensation formulas below.
+Note: $\sin\phi_s = \sin(69.0^\circ) = 0.934$, which appears in the beam loading compensation formulas below.
 
 **Synchrotron frequency** — The convention-independent form avoids confusion between phase conventions:
 
@@ -180,35 +228,51 @@ Note: $\sin\phi_s = \sin(71.4^\circ) = 0.948$, which appears in the beam loading
 \nu_s = \sqrt{\frac{h\,\alpha_c}{2\pi\,E_0}\sqrt{V_\text{RF}^2 - U_0^2}} \qquad \text{(Eq. 2.4b)}
 ```
 
-> With $V_\text{RF} = 2.85$ MV (operational): $\sqrt{V_\text{RF}^2 - U_0^2} = 2.70$ MV, giving $\nu_s \approx 0.0079$, $f_s \approx 10.2$ kHz. Published values: $Q_s = 0.008$ [R1], $\nu_s = 0.007$ [R3] — the range reflects differences in operational $V_\text{RF}$ and $\alpha_c$ across lattice configurations. For control design, the key constraint is that the direct loop bandwidth ($\sim 800$ kHz) $\gg f_s$, regardless of the exact $f_s$.
+> With $V_\text{RF} = 2.85$ MV (operational): $\sqrt{V_\text{RF}^2 - U_0^2} = \sqrt{2.85^2 - 1.02^2} = 2.66$ MV, giving $\nu_s \approx 0.0079$, $f_s \approx 10.1$ kHz. Published values: $Q_s = 0.008$ [R1], $\nu_s = 0.007$ [R3] — the range reflects differences in operational $V_\text{RF}$ and $\alpha_c$ across lattice configurations. For control design, the key constraint is that the direct loop bandwidth ($\sim 800$ kHz) $\gg f_s$, regardless of the exact $f_s$.
 
 > **Phase convention note**: Eq. 2.4b is equivalent to $\nu_s = \sqrt{h\,\alpha_c\,V_\text{RF}\,\sin\phi_s/(2\pi E_0)}$ when $\phi_s$ is in the **cos convention** (Eq. 2.4, where $V_\text{RF}\cos\phi_s = U_0$), or to $\nu_s = \sqrt{h\,\alpha_c\,V_\text{RF}\,\cos\phi_s/(2\pi E_0)}$ when $\phi_s$ is in the **sin convention** (where $V_\text{RF}\sin\phi_s = U_0$). The convention-independent form is used here to prevent errors.
 
 **Optimum detuning** — minimizes reflected power at the input coupler:
 
 ```math
-\tan\psi_\text{opt} = -\frac{I_b \, R_s \, \sin\phi_s}{V_\text{gap}} = -\frac{0.5 \times 3.73 \times 10^6 \times 0.948}{712 \times 10^3} = -2.48 \qquad \text{(Eq. 2.5)}
+\tan\psi_\text{opt} = -\frac{I_b \, R_s \, \sin\phi_s}{V_\text{gap}} = -\frac{0.5 \times 3.73 \times 10^6 \times 0.934}{712 \times 10^3} = -2.45 \qquad \text{(Eq. 2.5)}
 ```
 
 ```math
-\psi_\text{opt} \approx -68^\circ \qquad \text{(Eq. 2.5a)}
+\psi_\text{opt} \approx -67.8^\circ \qquad \text{(Eq. 2.5a)}
 ```
 
-**Optimum frequency detuning:**
+**Optimum frequency detuning** — using $\sin\phi_s$ explicitly in the formula:
 
 ```math
-\Delta f_\text{opt} = \frac{f_0 \tan\psi_\text{opt}}{2Q_L} = \frac{476.3\;\text{MHz} \times (-2.48)}{2 \times 6700} \approx -88\;\text{kHz} \qquad \text{(Eq. 2.6)}
+\Delta f_\text{opt} = \frac{f_0 \tan\psi_\text{opt}}{2Q_L} = -\frac{f_0 \, I_b \, R_s \, \sin\phi_s}{2Q_L \, V_\text{gap}} = -\frac{476.3\;\text{MHz} \times 0.5 \times 3.73 \times 10^6 \times 0.934}{2 \times 6700 \times 712 \times 10^3} \approx -87\;\text{kHz} \qquad \text{(Eq. 2.6)}
 ```
 
-The cavity must be tuned $\sim 88$ kHz **below** $f_\text{RF}$ at 500 mA.
+The cavity must be tuned $\sim 87$ kHz **below** $f_\text{RF}$ at 500 mA.
 
-**Required generator power per cavity:**
+**Required generator power per cavity** — At optimum coupling ($\beta_\text{opt}$) and optimum detuning ($\psi_\text{opt}$), the minimum generator power per cavity is the sum of cavity wall losses and beam power:
 
 ```math
-P_\text{gen} = \frac{V_\text{gap}^2}{4R_L}\left[1 + \left(\frac{I_b R_s \sin\phi_s}{V_\text{gap}}\right)^{2}\right]^{1/2} + \frac{I_b V_\text{gap}\cos\phi_s}{n_\text{cav}} \qquad \text{(Eq. 2.7)}
+P_\text{gen/cav} = P_\text{wall} + \frac{P_\text{beam}}{n_\text{cav}} = \frac{V_\text{gap}^2}{2R_s} + \frac{I_b \, U_0}{n_\text{cav}} \qquad \text{(Eq. 2.7)}
 ```
 
-where $R_L = R_s/(1+\beta) \approx 780\;\text{k}\Omega$, giving $\approx 135$ kW/cavity, $\approx 540$ kW total (within the 1.2 MW klystron capacity).
+**Evaluation:**
+
+```math
+P_\text{wall} = \frac{V_\text{gap}^2}{2R_s} = \frac{(712\;\text{kV})^2}{2 \times 3.73\;\text{M}\Omega} = 68\;\text{kW/cavity} \qquad \text{(Eq. 2.7a)}
+```
+
+```math
+\frac{P_\text{beam}}{n_\text{cav}} = \frac{I_b \, U_0}{n_\text{cav}} = \frac{0.5\;\text{A} \times 1.02\;\text{MeV}}{4} = 127.5\;\text{kW/cavity} \qquad \text{(Eq. 2.7b)}
+```
+
+```math
+P_\text{gen/cav} = 68 + 127.5 \approx 196\;\text{kW/cavity} \qquad \text{(Eq. 2.7c)}
+```
+
+**Total RF power**: $4 \times 196 = 782$ kW — within the 1.2 MW klystron capacity ($\sim 35\%$ margin). The measured forward power at 500 mA is $\sim 200$ kW/cavity, consistent with this calculation (the small excess accounts for reflected power at non-ideal coupling).
+
+> **Note**: Eq. 2.7 is the minimum-power condition at optimum coupling. In the general case with arbitrary coupling $\beta$ and detuning $\psi$, the generator power includes reflected power terms. The important identity is that beam power per cavity $= I_b V_\text{gap}\cos\phi_s = I_b \, U_0/n_\text{cav}$ (since $V_\text{RF}\cos\phi_s = U_0$ and $V_\text{gap} = V_\text{RF}/n_\text{cav}$). This is independent of the phase convention.
 
 > **Sources**: [R11] Gamp, CAS 2011; [R12] Wilson, SLAC-PUB-6062; [R13] Boussard, PAC 1985.
 
@@ -228,7 +292,7 @@ where $K_\text{kly}$ is the small-signal gain and $\tau_\text{kly} < 150$ ns.
 | Gain | 43 dB (min) | — |
 | Bandwidth | 5 MHz | −3 dB |
 | Group delay | $< 150$ ns | — |
-| Perveance | $\sim 2.0 \times 10^{-6}$ | A/V$^{3/2}$ |
+| Perveance | $\sim 2.0 \times 10^{-6}$ | $\text{A/V}^{3/2}$ |
 
 **Saturation model:**
 
@@ -297,9 +361,13 @@ The I/Q modulator performs a scaled rotation:
 \begin{pmatrix} I_\text{out} \\ Q_\text{out} \end{pmatrix} = G \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix} \begin{pmatrix} I_\text{in} \\ Q_\text{in} \end{pmatrix} \qquad \text{(Eq. 3.1)}
 ```
 
-**Implementation**: Four AD834 four-quadrant multipliers + two EL2073 summing amplifiers. Group delay $< 5$ ns, full-power BW $> 40$ MHz, dynamic range $> 50$ dB. Total system: 7 I/Q modulators, 56 DAC channels.
+**Implementation**: Each baseband I/Q modulator uses four AD834 four-quadrant multipliers + two EL2073 summing amplifiers to implement the 2×2 matrix. Group delay $< 5$ ns, full-power BW $> 40$ MHz, dynamic range $> 50$ dB.
 
-> **Sources**: [R15] Corredoura, Eq. 2; [R14] Schwarz, PS-340-330-52-R0.
+**SPEAR3 modulator count**: 4 cavity combining modulators (one per probe) + 1 drive modulator (direct loop gain/phase) = **5 baseband I/Q modulators**, with associated Octal DAC channels on the RFP module for the 2×2 matrix coefficients.
+
+> **PEP-II comparison**: The PEP-II HER system used 7 baseband I/Q modulators (4 cavity combining + 1 direct loop + 1 comb filter adjust + 1 ripple) with 56 DAC channels [R15]. SPEAR3 requires fewer because: (a) the comb loop is not used, (b) the ripple correction is applied via DSP rather than a dedicated modulator. The AD834 multipliers and EL2073 op-amps are the same components.
+
+> **Sources**: [R15] Corredoura, Eq. 2 (PEP-II configuration); [R14] Schwarz, PS-340-330-52-R0; Doc B §13.2 (SPEAR3 RFP module description).
 
 ### 3.3 I/Q Demodulation
 
@@ -307,7 +375,7 @@ RF signals are converted to baseband I/Q using $+13$ dBm demodulators. Outputs: 
 
 ### 3.4 Cavity Probe Vector Sum
 
-Each of the 4 cavity probe signals is demodulated to I/Q and combined through a programmable network (4 I/Q modulators + 2 summing amplifiers) to form the **total accelerating RF vector**.
+Each of the 4 cavity probe signals is demodulated to I/Q and combined through a programmable combining network (4 I/Q baseband modulators + 2 summing amplifiers on the RFP module) to form the **total accelerating RF vector**. The DAC weights for each modulator set the complex gain for each cavity's contribution to the vector sum.
 
 ### 3.5 Error Signal Generation
 
@@ -342,15 +410,47 @@ Each of the 4 cavity probe signals is demodulated to I/Q and combined through a 
 
 ### 4.2 D1/D2: Beam Loading — The Dominant Disturbance
 
-**Growth rate for coupled-bunch instability** from the fundamental mode [R15]:
+**D1 — Steady-state beam loading**: Each bunch extracts energy from the cavity field. The beam-induced voltage $V_{b,\text{res}} = I_b R_s = 1.865$ MV per cavity (Eq. 2.2) exceeds the gap voltage by a factor of 2.6. Without active compensation, the generator must supply this reactive power in addition to the real power delivered to the beam. Detuning the cavity (§2.1.3) brings the reactive component to zero at the operating current, but any current deviation creates a mismatch.
+
+**D2 — Transient beam loading**: Current transients (injection, ion-clearing gap, bunch-by-bunch variations) cause rapid changes in the beam-induced voltage. These transients drive cavity field oscillations at frequencies up to $\sim f_\text{rev}$.
+
+**How feedback suppresses D1/D2**: The direct feedback loop reduces the effective impedance seen by the beam:
+
+```math
+Z_\text{eff}(\omega) = \frac{Z_\text{cav}(\omega)}{1 + G_\text{OL}(\omega)} \qquad \text{(Eq. 4.1a, same as Eq. 5.3)}
+```
+
+At DC and low frequencies where $|G_\text{OL}| \gg 1$ (proportional gain $\sim 15$ dB + integrator), the impedance reduction is $\sim 40$ dB ($\times 100$). This has two physical effects:
+
+1. **Voltage regulation**: The beam-induced voltage perturbation $\Delta V_b = \Delta I_b \cdot Z_\text{eff}$ is reduced by the loop gain. A 1% current transient that would cause $\sim 19$ kV field perturbation without feedback produces only $\sim 190$ V with 40 dB impedance reduction.
+
+2. **Stability**: The beam-cavity interaction becomes stable because the reduced impedance eliminates the conditions for exponential growth. The **growth rate** for coupled-bunch instability from the fundamental mode [R15]:
 
 ```math
 \frac{1}{\tau} = \frac{I_b\,\alpha_c\,f_\text{RF}}{2\,\nu_s\,\beta^2\,(E/e)}\;R_{cb} \qquad \text{(Eq. 4.1)}
 ```
 
-where $R_{cb} = \sum_n \text{Re}\left[Z(\omega_\text{RF} + n\omega_\text{rev} + \omega_s) - Z(\omega_\text{RF} + n\omega_\text{rev} - \omega_s)\right]$.
+where $R_{cb} = \sum_n \text{Re}\left[Z_\text{eff}(\omega_\text{RF} + n\omega_\text{rev} + \omega_s) - Z_\text{eff}(\omega_\text{RF} + n\omega_\text{rev} - \omega_s)\right]$.
 
-**Without feedback**, the peak cavity impedance of $\sim 750\;\text{k}\Omega$ produces growth rates faster than $T_\text{rev} \approx 0.78\;\mu\text{s}$. This single fact drove the PEP-II system design to include multiple feedback loops [R15].
+With feedback, $Z_\text{eff}$ replaces $Z_\text{cav}$ in the sum, reducing growth rates by the same factor as the impedance reduction. **Without feedback**, the peak cavity impedance of $\sim 750\;\text{k}\Omega$ produces growth rates faster than $T_\text{rev} \approx 0.78\;\mu\text{s}$. This single fact drove the PEP-II system design to include multiple feedback loops [R15].
+
+```
+  Beam Loading Phasor Diagram (Steady State at 500 mA)
+  ────────────────────────────────────────────────────
+                    │ Imaginary
+                    │
+        Vb,res      │      Vgap (712 kV)
+    (1865 kV) ←─────┤─────────────────→ Real
+                    │╲  φs = 69°
+                    │ ╲
+                    │  ╲  Vgen (generator voltage)
+                    │   ╲
+                    │    ╲  ψopt = −68° (detuning angle)
+                    │
+  The generator voltage Vgen must compensate both the beam
+  loading Vb and the detuning. At optimum detuning, the
+  reflected power is minimized (Pgen ≈ 196 kW/cav).
+```
 
 > **Sources**: [R15] Corredoura, PAC 1999, Eq. 1; [R11] Gamp, CAS 2011.
 
@@ -374,13 +474,32 @@ Direct feedback reduces $Z_\text{eff} = Z_\text{cav}/(1 + G_\text{OL})$, reducin
 
 ### 4.4 D4: Coupled-Bunch Modes
 
-For $h = 372$ modes, each mode $m$ driven by:
+For $h = 372$ modes, each mode $m$ is driven by the impedance sampled at revolution harmonics:
 
 ```math
 \frac{1}{\tau_m} = \frac{\alpha_c\,\omega_\text{rev}\,I_b}{4\,\omega_s\,(E/e)}\sum_p\left[\text{Re}\{Z((ph+m)\omega_\text{rev}+\omega_s)\} - \text{Re}\{Z((ph+m)\omega_\text{rev}-\omega_s)\}\right] \qquad \text{(Eq. 4.4)}
 ```
 
-For SPEAR3 ($f_\text{rev} = 1.28$ MHz $\gg \Delta f_{1/2} = 35.5$ kHz), only 1–2 revolution harmonics interact with each cavity mode. **The comb filter (essential for PEP-II) is not needed at SPEAR3.**
+**Physics of the comb filter**: The comb filter is designed to provide additional impedance reduction at revolution frequency harmonics — precisely where beam-driven modes exist — without increasing gain (and noise) at frequencies between harmonics. Its transfer function (Eq. 5.4) has gain peaks at integer multiples of $f_\text{rev}$, creating a frequency response that looks like the teeth of a comb:
+
+```
+  Comb Filter Frequency Response
+  ──────────────────────────────────
+  Gain
+   │  ╷  ╷  ╷  ╷  ╷  ╷  ╷  ╷
+   │  │  │  │  │  │  │  │  │   ← peaks at n × frev
+   │  │  │  │  │  │  │  │  │
+   │──┘──┘──┘──┘──┘──┘──┘──┘──── frequency
+       frev 2frev 3frev  ...
+
+  Each peak targets one coupled-bunch mode.
+  Between peaks, gain returns to unity → no noise amplification.
+```
+
+**Why SPEAR3 does not need the comb filter**: The key ratio is $f_\text{rev}/\Delta f_{1/2}$:
+
+- **SPEAR3**: $f_\text{rev} = 1.28$ MHz $\gg \Delta f_{1/2} = 35.5$ kHz → ratio $\approx 36$. Only 1–2 revolution harmonics fall within each cavity mode's bandwidth. The direct loop alone provides sufficient impedance reduction at these few harmonics.
+- **PEP-II**: $f_\text{rev} \approx 136$ kHz, comparable to $\Delta f_{1/2}$ → ratio $\approx 4$. Many revolution harmonics interact with each cavity mode, requiring the comb filter to provide targeted suppression at each harmonic without the excessive noise amplification that a wideband loop would produce.
 
 ### 4.5 D5: HVPS Ripple
 
@@ -408,11 +527,33 @@ The 360 Hz component (first 6-pulse harmonic absent in ideal 12-pulse operation)
 
 ### 4.6 D6: Klystron Gain Variation
 
-Small-signal gain varies up to $\sim 7$ dB over the operating range. The gain tracking function (§6.9) compensates by adjusting I/Q modulator weights.
+**Source of gain variation**: As beam current changes from 0 to 500 mA, the HVPS loop adjusts cathode voltage $V_k$ to maintain the klystron $\sim 10\%$ below saturation. As $V_k$ changes, the small-signal gain (slope of the $P_\text{out}$ vs $P_\text{in}$ curve) varies by up to $\sim 7$ dB. This shifts the open-loop gain of the direct feedback loop, potentially affecting stability margins.
+
+**Gain tracking implementation** (§6.9): The baseband modulator on the RFP module (4 Gilbert-cell multipliers in a 2×2 matrix) has its matrix coefficients controlled by 12-bit Octal DACs. A slow EPICS loop ($\sim 2$ Hz) reads the klystron forward power and drive power monitors, computes the current gain, and adjusts the modulator matrix to maintain constant overall loop gain:
+
+```math
+G_\text{modulator} = \frac{G_\text{loop,target}}{G_\text{klystron}(V_k)} \qquad \text{(Eq. 4.6a)}
+```
+
+The MATLAB calibration routine `ConfDirect` (initiated from the EPICS feedback panel) performs the initial gain tracking setup by measuring klystron gain at the current operating point and writing the appropriate 2×2 matrix coefficients to the quad DAC.
+
+> **Note**: In PEP-II, the ripple loop also applied gain/phase correction via a dedicated I/Q modulator. At SPEAR3, the ripple loop phase correction is handled by the DSP (AT&T DSP1610), and the slow gain tracking is handled by the baseband modulator coefficients on the RFP module.
+
+> **Sources**: [R14] Schwarz, PS-340-330-52-R0; [R15] Corredoura; Doc B §7.6.
 
 ### 4.7 D7/D8: Microphonics and Thermal Detuning
 
-For normal-conducting copper cavities: microphonic excursions $< 10$ Hz (negligible vs. $\Delta f_{1/2} = 35.5$ kHz). Thermal drift: $\sim -1$ kHz/°C. The tuner loop (§8) tracks both.
+For normal-conducting copper cavities: microphonic excursions $< 10$ Hz (negligible vs. $\Delta f_{1/2} = 35.5$ kHz).
+
+**Thermal detuning estimation**: The resonant frequency of a copper cavity scales inversely with its linear dimensions: $\Delta f/f = -\alpha_\text{Cu} \cdot \Delta T$, where $\alpha_\text{Cu} \approx 16.5 \times 10^{-6}\;/\text{°C}$ is the linear thermal expansion coefficient of copper. For a simple cavity at 476.3 MHz, this gives:
+
+```math
+\frac{\partial f_0}{\partial T} \approx -f_0 \cdot \alpha_\text{Cu} = -476.3\;\text{MHz} \times 16.5 \times 10^{-6} \approx -7.9\;\text{kHz/°C} \qquad \text{(Eq. 4.7)}
+```
+
+> **Note**: This first-principles estimate ($-7.9$ kHz/°C) applies to the uncooled cavity body. In practice, the PEP-II-type cavities at SPEAR3 are water-cooled with a regulated cooling circuit that maintains body temperature to within $\sim \pm 0.1$°C. The effective observed drift rate during normal operations is significantly smaller — on the order of $\sim -1$ kHz/°C of *cooling water* temperature change, reflecting the thermal resistance between the cooling circuit and the cavity walls. SPEAR3-specific measurement data for the thermal detuning coefficient should be obtained from tuner loop commissioning records to confirm this estimate.
+
+The tuner loop (§8) tracks both microphonics and thermal drift, maintaining the cavity at the optimum detuning angle $\psi_\text{opt}$ (Eq. 2.5a).
 
 ### 4.8 Frequency-Domain Summary: The Disturbance Spectrum
 
@@ -722,7 +863,7 @@ From [R4]: LLRF9 achieves improved noise floor vs. legacy at 500 mA. Overall amp
 
 | Parameter | Capacity | Typical | Margin |
 |-----------|:-:|:-:|:-:|
-| Klystron power | 1.2 MW | $\sim 800$ kW | $\sim 50\%$ |
+| Klystron power | 1.2 MW | $\sim 782$ kW ($4 \times 196$) | $\sim 35\%$ |
 | HVPS voltage | 90 kV | $\sim 74$ kV | $\sim 22\%$ |
 | Gap voltage/cavity | 1 MV | $\sim 712$ kV | $\sim 40\%$ |
 | Direct loop BW | $\sim 930$ kHz | $\sim 800$ kHz | $\sim 16\%$ |
@@ -747,13 +888,14 @@ Calibration files in `llrf/calibrations/` establish numerical relationships for 
 | Circumference | $C$ | 234.14 | m | [R2] |
 | Revolution frequency | $f_\text{rev}$ | 1.2804 | MHz | Derived |
 | Harmonic number | $h$ | 372 | — | [R1] |
-| RF frequency | $f_\text{RF}$ | 476.3051755 | MHz | [R4] |
+| RF frequency | $f_\text{RF}$ | 476.3 | MHz | [R4] |
 | Momentum compaction | $\alpha_c$ | $1.18 \times 10^{-3}$ | — | [R2] |
-| Energy loss per turn | $U_0$ | ~0.91 | MeV | [R1] |
+| Energy loss per turn | $U_0$ | 1.02 | MeV | Operational (current IDs) |
 | Total RF voltage (design) | $V_\text{RF}$ | 3.2 | MV | [R1] [R3] |
 | Total RF voltage (operational) | $V_\text{RF}$ | ~2.85 | MV | [R4] [R5] |
+| Synchronous phase | $\phi_s$ | 69.0 | deg | Eq. 2.4a ($\cos$ convention) |
 | Synchrotron tune | $\nu_s$ | ~0.008 | — | Eq. 2.4b; [R1] |
-| Synchrotron frequency | $f_s$ | ~10 | kHz | Eq. 2.4b |
+| Synchrotron frequency | $f_s$ | ~10.1 | kHz | Eq. 2.4b |
 | Long. radiation damping time | $\tau_s$ | 2.87 | ms | [R1] |
 | Trans. radiation damping time | $\tau_{x,y}$ | 4.24, 5.14 | ms | [R1] |
 
@@ -771,6 +913,13 @@ Calibration files in `llrf/calibrations/` establish numerical relationships for 
 | Coupling coefficient (Schwarz optimum) | $\beta$ | 3.84 | — | [R6] |
 | Cavity half-bandwidth | $\Delta f_{1/2}$ | 35.5 | kHz | Derived |
 | Operational gap voltage | $V_\text{gap}$ | ~712 | kV | [R5] |
+| Beam-induced voltage | $V_{b,\text{res}}$ | 1.865 | MV/cav | Eq. 2.2: $I_b R_s$ |
+| Optimum detuning angle | $\psi_\text{opt}$ | $\approx -67.8$ | deg | Eq. 2.5a |
+| Optimum frequency detuning | $\Delta f_\text{opt}$ | $\approx -87$ | kHz | Eq. 2.6 |
+| Cavity wall losses | $P_\text{wall}$ | ~68.1 | kW/cav | Eq. 2.7a |
+| Beam power per cavity | $P_\text{beam}/n_\text{cav}$ | ~127.5 | kW/cav | Eq. 2.7b |
+| Generator power per cavity | $P_\text{gen/cav}$ | ~196 | kW | Eq. 2.7c |
+| Total RF power (4 cav) | $P_\text{gen,tot}$ | ~782 | kW | $4 \times P_\text{gen/cav}$ |
 
 ### A.3 Klystron Parameters
 
@@ -782,7 +931,7 @@ Calibration files in `llrf/calibrations/` establish numerical relationships for 
 | Bandwidth | 5 MHz ($-3$ dB) | — | [R1] |
 | Group delay | $< 150$ ns | — | [R1] |
 | Drive power | $\sim 29$ W | — | [R5] |
-| Perveance | $\sim 2.0 \times 10^{-6}$ | A/V$^{3/2}$ | [R23] |
+| Perveance | $\sim 2.0 \times 10^{-6}$ | $\text{A/V}^{3/2}$ | [R23] |
 
 ### A.4 Feedback Loop Parameters
 
