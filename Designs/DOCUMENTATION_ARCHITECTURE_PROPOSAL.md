@@ -1,10 +1,10 @@
 # SPEAR3 RF System — Documentation Architecture
 
 **Document ID**: DOCUMENTATION_ARCHITECTURE  
-**Version**: 5.1  
+**Version**: 6.0  
 **Date**: March 24, 2026  
 **Status**: PROPOSAL — For Review  
-**Supersedes**: v5.0 (March 23, 2026)  
+**Supersedes**: v5.1 (March 24, 2026)  
 **Author**: Faya Wang, with AI-assisted analysis  
 
 ---
@@ -13,6 +13,7 @@
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 6.0 | 2026-03-24 | Major update following deep codebase review: Doc L v1.0 drafted (1,323 lines, 21 sections, 50+ photo placeholders); improved Doc L section outline to match actual 6-part structure with precise original source citations; updated U-document descriptions with corrected hardware details from source review; added Enerpro FCOG6100 serial numbers and Galil DMC-4143 Rev 1.3h details; corrected AI technical note file names to match actual repository paths; updated gap analysis with findings from comprehensive source review; added Appendix D mapping Doc L sections to original sources |
 | 5.1 | 2026-03-24 | Critical correction: properly distinguished original source documents (PDFs, docx, code) from AI-generated analysis products (technical notes, obsolete design docs); rewrote provenance model so all new documents cite original sources directly; added review status framework for AI-generated content; removed citations of unreviewed AI summaries as authoritative references |
 | 5.0 | 2026-03-23 | Complete rewrite: verified file paths, added inventories, gap analysis, reading paths, conventions |
 | 4.0 | 2026-03-22 | Four-tier architecture proposal with traceability appendices |
@@ -38,6 +39,7 @@
 14. [Appendix A — Subsystem × Tier Cross-Reference Matrix](#appendix-a--subsystem--tier-cross-reference-matrix)
 15. [Appendix B — Source Document Catalog](#appendix-b--source-document-catalog)
 16. [Appendix C — AI-Generated Analysis Review Checklist](#appendix-c--ai-generated-analysis-review-checklist)
+17. [Appendix D — Doc L Section ↔ Original Source Cross-Reference](#appendix-d--doc-l-section--original-source-document-cross-reference)
 
 ---
 
@@ -575,39 +577,65 @@ Each section below lists the **original source documents** to be consulted. AI-g
 
 ### 8.1 Doc L — Legacy System Architecture
 
-**Status**: To be written  
-**Proposed location**: `Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md`  
+**Status**: DRAFT v1.0 completed (1,323 lines, 21 sections, 50+ photo placeholders)  
+**Location**: `Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md`  
 **Priority**: High — required context for all upgrade work
 
 #### 8.1.1 Purpose
 
-A consolidated reference to the legacy PEP-II/SPEAR3 RF system as currently installed. This document synthesizes information from original engineering records (PDFs, schematics, docx) and verified code analysis into a single navigable reference.
+A consolidated, end-to-end reference for the legacy PEP-II/SPEAR3 RF system as currently installed and operating. Doc L serves three critical functions:
+1. **Upgrade baseline** — provides the complete "as-built" reference against which upgrade designs (U1–U10) are specified
+2. **Knowledge preservation** — captures institutional knowledge about a system designed in 1997 before key personnel retire and hardware is removed
+3. **Operational reference** — consolidates scattered documentation (150+ PDFs, 50+ docx, 18+ xlsx, 2,293 code files) into a single navigable resource
 
-#### 8.1.2 Content Outline and Source References
+#### 8.1.2 Document Structure (6 Parts, 21 Sections)
 
-| Section | Topic | Original Sources |
-|---------|-------|-----------------|
-| §1 | System-level architecture overview | sd7307900501.pdf (system schematic), bd3403300000.pdf, bd3403300100.pdf (block diagrams) |
-| §2 | VXI module hardware reference | ps3403305100.pdf (RF System Description), SD-340-308-series (interface module schematics) |
-| §3 | DSP firmware architecture | dsp1610/ source code files |
-| §4 | EPICS/SNL software architecture | rfApp/ source code (rf_states.st, rf_tuner_loop.st, rf_hvps_loop.st, etc.) |
-| §5 | HVPS system architecture | sd7307900101.pdf (system schematic), 11 schematic PDFs, hvps/architecture/designNotes/ (10 docx) |
-| §6 | PLC control system | CasselPLCCode.pdf, CasselSymbolDatabase.pdf, allenBradley/ source code |
-| §7 | Enerpro SCR regulation boards | Enerpro enerproDocuments/ (12 PDFs), enerproBoardHvps.docx |
-| §8 | PPS interface architecture | PPS schematic PDFs (6), HoffmanBoxPPSWiring.docx, pps_Ben.md, Jim Sebek email |
-| §9 | Switchgear and power distribution | Switchgear PDFs (gp, id, ross series), hvps/documentation/wiringDiagrams/ |
-| §10 | Tuner / stepper motor system | SLO-SYN manuals, galil docs, stepper/ source code, cavityTunerInspections20230613.docx |
-| §11 | Arc detection system | Waveguide Arc Detector product sheets, tups072.pdf, arcDetectorHardwareOptions.docx |
-| §12 | Filament heater system | sd3403110002.pdf (filament heater schematic) |
-| §13 | Local panel / cable / interconnection | Local panel drawings (13 PDFs), sd3403300100.pdf, LocalPanelToXConnectMapping.xlsx |
-| §14 | MPS system | wd3403300200-3400 (33 wiring diagrams), RFSystemMPSRequirements.docx |
-| §15 | Signal chain and calibration | Calibration xlsx files (6), LLRFOperation_jims.docx |
+**Part I — System Overview** (§1–4):
+- §1 Introduction, scope, PEP-II heritage → McIntosh SLAC-PUB-11017, Corredoura SLAC-PUB-8498
+- §2 System architecture block diagram, subsystem summary → `sd7307900101.pdf`, `bd3403300000.pdf`, `bd3403300100.pdf`, Doc 0 §2.1
+- §3 Physical layout across B118, B132, B514, tunnel → Doc 0 §3, `pps/HoffmanBoxPPSWiring.docx`, `wd7307900103.pdf`
+- §4 Key system parameters (RF, HVPS, measured June 2020 data) → `llrf9Tests.pdf`, `hvpsMeasurements20220314.xlsx`
 
-*Preliminary AI analysis exists in*: All hvps/, llrf/, pps/ technical notes series; Code Review TN 00-08; Designs/obsolete/ Docs A and B *(all unreviewed)*
+**Part II — RF Signal Chain** (§5–8):
+- §5 LLRF Controller (VXI system) — 10-slot module inventory, RFP feedback, IQA measurement, AIM interlocks, feedback loops (4 active, 3 PEP-II-only), DCM serial communication → `ps3403305100.pdf` (11 pages), `bd3403300000.pdf`, Corredoura SLAC-PUB-8498, all `rf_*.st` and `rf_*_pvs.h` source files
+- §6 Klystron and drive system — SLAC 476 MHz CW klystron, KAW2051M12 drive amp, collector power protection → `spear3HvpsHazards.tex`, `KAW2051M12.pdf`, `rf_hvps_loop.st`
+- §7 Waveguide distribution — circulator → 3 magic-tees → 4 cavities, 24 monitored RF signals → Doc 0 §4.2/§4.6, `sd3403300100.pdf`
+- §8 RF cavities and tuner assemblies — 4 PEP-II single-cell HOM-damped copper cavities, SLO-SYN M093-FC11 motors, Galil DMC-4143 Rev 1.3h (commissioned Aug 2025) → `SLO-SYN*.pdf`, `galil/dmc-4103-r13h-manual.pdf`, `cavityTunerInspections20230613.docx`
 
-#### 8.1.3 Writing Approach
+**Part III — Power Systems** (§9–12):
+- §9 HVPS power section — 12-pulse thyristor bridge (12 × Powerex T8K7 SCR stacks), T0/T1/T2 transformers, L1/L2 filter inductors, secondary rectifiers, crowbar, cable inductors L3/L4 → all 11 schematic PDFs, `slac-pub-7591.pdf`, `ps3413600102.pdf`
+- §10 HVPS control system (Hoffman Box) — SLC-500 PLC (13 slots), analog regulator card (PC-237-230), terminal strips, voltage regulation loop → `CasselPLCCode.pdf`, `CasselSymbolDatabase.pdf`, `plcNotesR1.docx`, `sd2372301401.pdf`, `wd7307900206.pdf`
+- §11 Enerpro SCR firing system — **FCOG6100 Rev.K** (S/N: 41506, 50470, 30045), **FCOAUX60 Rev D** (S/N: 03198, 03813, 1694), custom phase reference adapter (3×2MΩ resistors) → `hvps/controls/enerpro/enerproDocuments/` (12 PDFs), `enerproBoardHvps.docx`, `enerproPhaseReferenceAdapter.docx`
+- §12 Arc protection — PEP-II 4-layer architecture: Layer 1 SCR inhibit (<1μs), Layer 2 crowbar (<1μs), Layer 3 500Ω isolation (passive), Layer 4 cable inductors (passive) → `slac-pub-7591.pdf`, `sd7307931203.pdf`, `sd7307931301.pdf`
 
-Doc L should be written by consulting **original source documents directly**. The existing AI-generated technical notes can be used as a starting checklist (what topics to cover, what source documents to consult) but their content must be verified against the originals. Where an AI-generated note is found to be accurate after review, its content can be incorporated with attribution.
+**Part IV — Protection and Safety Systems** (§13–15):
+- §13 PPS Interface — ⚠️ critical compliance issue (PLC in PPS chain), K4/MX/RR relay chain, Ross HQ3 vacuum contactor + HCA-1-A controller, Ross grounding switch → `pps/HoffmanBoxPPSWiring.docx` (80 paragraphs, 5 tables), `gp4397040201.pdf`, `rossEngr713203.pdf`, `sd7307900501.pdf`, `wd7307900103.pdf`/`wd7307900206.pdf`/`wd7307940600.pdf`
+- §14 RF MPS — PLC-5 (1771) → **ControlLogix 1756** (hardware assembled, software written, tested without RF power) → `llrf/documentation/mpsWiringDiagrams/` (33 wiring diagrams), `RFSystemMPSRequirements.docx`
+- §15 Interlock architecture — multi-layer trip chain: Fast Interlock Chassis (<1μs) → RF MPS (~10ms) → SLC-500 HVPS (~100ms) → VXI/SNL (~1s) → fault file capture → Doc 0 §17, `rf_states.st`
+
+**Part V — Control Software and Instrumentation** (§16–18):
+- §16 EPICS IOC and SNL software — 6 SNL programs: `rf_states.st` (2,227 lines, **23 states across 3 concurrent state sets**), `rf_calib.st` (3,345 lines, 28 calibration states), `rf_tuner_loop.st` (555 lines × 4 instances), `rf_hvps_loop.st` (343 lines), `rf_dac_loop.st` (290 lines, ⚠️ eliminated in upgrade), `rf_msgs.st` (352 lines) + 12 header files (~1,151 lines) → `spear-rf-code-legacy/rfApp/src/seq/` (all source files)
+- §17 Tuner control — Legacy: AB 1746-HSTP1 + SLO-SYN SS2000MD4-M (obsolete) → Current: **Galil DMC-4143 Rev 1.3h** (commissioned Aug 2025, Ethernet) → `galil/functioningGalil20250825SwapABToManual.txt`, `galil/firstMotion2024.txt`, `GalilCommissioning.docx`
+- §18 Diagnostics, calibration, fault recording — 24 RF signal monitoring, IQA-based measurement, PLC monitoring (thermocouples, oil levels), fault file circular buffer (11 files) → `rf_calib.st`, `llrf/calibrations/` (6 xlsx), `llrf9Tests.pdf`
+
+**Part VI — Integration and Legacy Considerations** (§19–21):
+- §19 Cabling and interconnections — B118↔Switchgear (Belden 83715), B118↔B514 (fiber optic + electrical), B132↔Tunnel (RF coax + motor) → `wd7307900103.pdf`, `wd7307900206.pdf`, `wd7307940600.pdf`
+- §20 Known issues and legacy debt — 6 critical/high issues (PPS compliance, VXI obsolescence, SLC-500 EOL, PLC-5 MPS, SLO-SYN obsolescence, VxWorks/SNL) + 4 documentation gaps → all sources cross-referenced
+- §21 Source document reference index — complete catalog organized by subsystem → cross-referenced against `RfSystemDocumentIndexR3.xlsx`
+
+**Cross-cutting features**:
+- 50+ photo placeholders with specific descriptions of exact shot needed
+- Every section cites original source documents directly
+- AI technical notes as secondary "See also" references with `(AI-generated, UNREVIEWED)` tag
+
+#### 8.1.3 Current Status and Next Steps
+
+Doc L v1.0 is a **comprehensive draft** requiring:
+1. **Engineering review** — verify all technical claims against physical system and source documents
+2. **Photo documentation** — capture all 50+ photo placeholders before legacy hardware removal
+3. **PV and register verification** — confirm EPICS PV names and PLC register assignments against running system
+4. **Operational setpoint capture** — record current alarm limits, tuning deadbands, and safe operating envelopes (feeds into Doc D)
+
 
 ### 8.2 Code Review Technical Notes
 
@@ -722,7 +750,7 @@ Each U-document should follow a consistent structure:
 | U7 (Waveform Buffer) not started | Design exists only in WaveformBuffersforLLRFUpgrade.docx | Write U7 from Jim Sebek's docx |
 | U8 (Arc Detection) not started | COTS hardware selected but no formal design document | Write U8 from arc detector product sheets + tups072.pdf + arcDetectorHardwareOptions.docx |
 | Doc P not written | Physics reference needed by all upgrade documents | Write Doc P from original PEP-II documents and textbook references |
-| Doc L not written | Consolidated legacy reference needed | Write Doc L from original PDFs, schematics, docx, and verified code review |
+| Doc L v1.0 drafted | Engineering review and photo population needed | Review Doc L v1.0 (1,323 lines); verify against physical system; capture 50+ photos |
 
 ### 10.3 Knowledge Gaps (From `Designs/todo list.md`)
 
@@ -888,7 +916,7 @@ Technical notes directories follow a consistent pattern that has evolved organic
 | Action | Deliverable | Dependencies | Rationale |
 |--------|-------------|--------------|-----------|
 | Write Doc P | `Designs/P_RF_PHYSICS_AND_PLANT.md` | Original PDFs (§4.1, 4.2) | Foundation for all U-documents |
-| Write Doc L | `Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md` | Original PDFs, docx, code (§4) | Required context for upgrade design |
+| Review Doc L v1.0 | `Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md` (1,323 lines drafted) | Original PDFs, docx, code (§4) | Engineering review needed; populate 50+ photo placeholders |
 | Write U3 (RF MPS) | `Designs/U3_RF_MPS_UPGRADE.md` | 33 MPS wiring diagrams, MPS requirements docx | Hardware assembled, software needed |
 | Write U6 (Tuner Control) | `Designs/U6_TUNER_CONTROL_UPGRADE.md` | Galil docs, commissioning docx, test logs | Galil commissioned, needs formal document |
 | Review safety-critical AI-generated TN | Updated §5 review status | Original source documents | MPS, PPS, crowbar content must be verified |
@@ -921,16 +949,16 @@ This matrix shows where each subsystem's content lives across the four tiers. Ce
 |-----------|---------------|------------------|-----------------|------------------|
 | Overall System | Master Index ★ | — | — | Doc 0 (exists) |
 | RF Physics & Plant | — | Doc P ★ | — | — |
-| LLRF Controller | — | Doc P §3–4 ★ | Doc L §2–4 ★ | U1 (in progress) |
-| HVPS | — | Doc P §5 ★ | Doc L §5–7,9 ★ | U2 (in progress) |
-| RF MPS | — | — | Doc L §14 ★ | U3 ★ |
-| Interface Chassis | — | — | Doc L §2 ★ | U4 (in progress) |
-| PPS Interface | — | — | Doc L §8 ★ | U5 (in progress) |
-| Tuner Control | — | Doc P §7 ★ | Doc L §10 ★ | U6 ★ |
+| LLRF Controller | — | Doc P §3–4 ★ | Doc L §5 (drafted) | U1 (in progress) |
+| HVPS | — | Doc P §5 ★ | Doc L §9–12 (drafted) | U2 (in progress) |
+| RF MPS | — | — | Doc L §14 (drafted) | U3 ★ |
+| Interface Chassis | — | — | Doc L §5,15 (drafted) | U4 (in progress) |
+| PPS Interface | — | — | Doc L §13 (drafted) | U5 (in progress) |
+| Tuner Control | — | Doc P §7 ★ | Doc L §8,17 (drafted) | U6 ★ |
 | Waveform Buffer | — | — | — | U7 ★ |
-| Arc Detection | — | — | Doc L §11 ★ | U8 ★ |
-| Klystron Heater | — | — | Doc L §12 ★ | U9 (in progress) |
-| Control Software | — | — | Doc L §3–4 ★ | U10 (in progress) |
+| Arc Detection | — | — | Doc L §12 (drafted) | U8 ★ |
+| Klystron Heater | — | — | Doc L §6 (drafted) | U9 (in progress) |
+| Control Software | — | — | Doc L §16–18 (drafted) | U10 (in progress) |
 | Operational Data | — | — | Doc D ★ | — |
 
 
@@ -1125,3 +1153,46 @@ This appendix provides a systematic review checklist for all AI-generated markdo
 - This document should be reviewed and updated whenever new documentation is created or existing documents are substantially revised.
 - The definitive version is `Designs/DOCUMENTATION_ARCHITECTURE_PROPOSAL.md` in the `spearlegacyLLRF` repository.
 - **Provenance**: AI-ASSISTED — structure and content proposed by AI, based on exhaustive repository review, subject to human review and approval.
+
+
+---
+
+## Appendix D — Doc L Section ↔ Original Source Document Cross-Reference
+
+This appendix maps each Doc L section to its primary original source documents, enabling efficient verification during engineering review.
+
+| Doc L Section | Part | Primary Original Sources | AI Technical Notes Consulted |
+|---------------|------|-------------------------|------------------------------|
+| §1 Introduction | I | McIntosh SLAC-PUB-11017; Corredoura SLAC-PUB-8498 | `llrf/documentation/legacyArchitecture/technical-notes/00_PEP-II_SPEAR3_LLRF_SYSTEM_REFERENCE.md` |
+| §2 Architecture | I | `sd7307900101.pdf`, `bd3403300000.pdf`, `bd3403300100.pdf`, Doc 0 §2.1 | `hvps/architecture/technical-notes/00-spear3-hvps-legacy-system-design.md` |
+| §3 Physical Layout | I | Doc 0 §3, `pps/HoffmanBoxPPSWiring.docx`, `wd7307900103.pdf` | `pps/diagrams/00_SYSTEM_OVERVIEW.md` |
+| §4 Parameters | I | `llrf9Tests.pdf`, `hvpsMeasurements20220314.xlsx`, Doc 0 §1 | `hvps/architecture/technical-notes/00-spear3-hvps-legacy-system-design.md` §Validation |
+| §5 LLRF VXI | II | `ps3403305100.pdf` (11 pages), `bd3403300000.pdf`, SLAC-PUB-8498, all `rf_*.st` + `rf_*_pvs.h` | `llrf/*/technical-notes/01_FEEDBACK_LOOP_ARCHITECTURE.md`, `02_VXI_HARDWARE_MODULE_REFERENCE.md` |
+| §6 Klystron | II | `spear3HvpsHazards.tex`, `KAW2051M12.pdf`, `rf_hvps_loop.st`, Doc 0 §4.1/§4.5 | — |
+| §7 Waveguide | II | Doc 0 §4.2/§4.6, `sd3403300100.pdf` | — |
+| §8 Cavities/Tuners | II | `SLO-SYN*.pdf` (3 manuals), `galil/dmc-4103-r13h-manual.pdf`, `galil/ds_41x3.pdf`, `cavityTunerInspections20230613.docx`, `GalilCommissioning.docx`, `functioningGalil20250825SwapABToManual.txt` | `spear-rf-code-legacy/codeReviewTechnicalNotes/08-signal-processing.md` |
+| §9 HVPS Power | III | 11 schematic PDFs (`sd7307900101–sd7307940400`), `slac-pub-7591.pdf`, `ps3413600102.pdf` | `hvps/architecture/technical-notes/00-spear3-hvps-legacy-system-design.md`, `hvps/documentation/schematics/technical_notes/` (14 files) |
+| §10 HVPS Control | III | `CasselPLCCode.pdf`, `CasselSymbolDatabase.pdf`, `plcNotesR1.docx`, `sd2372301401.pdf`, `wd7307900206.pdf`, `pps/HoffmanBoxPPSWiring.docx`, `hvpsPlcLabels.xlsx` | `hvps/documentation/plc/technical-notes/01-system-overview.md` through `09-binary-bit-registers.md` |
+| §11 Enerpro | III | `hvps/controls/enerpro/enerproDocuments/` (12 PDFs), `enerproBoardHvps.docx`, `enerproDiscussion07072022.docx`, `enerproPhaseReferenceAdapter.docx` | `hvps/controls/enerpro/technical-notes/00-system-overview.md` through `08-troubleshooting-reference.md` |
+| §12 Arc Protection | III | `slac-pub-7591.pdf`, `sd7307931203.pdf`, `sd7307931301.pdf` | `hvps/architecture/technical-notes/00-spear3-hvps-legacy-system-design.md` §Arc Protection |
+| §13 PPS | IV | `pps/HoffmanBoxPPSWiring.docx` (80¶, 5 tables), `gp4397040201.pdf`, `rossEngr713203.pdf`, `sd7307900501.pdf`, `wd7307900103.pdf`, `wd7307900206.pdf`, `wd7307940600.pdf` | `pps/diagrams/00_PPS_System_Overview.md` through `08_CORRECTED_HAND_DRAWING.md` |
+| §14 RF MPS | IV | `llrf/documentation/mpsWiringDiagrams/` (33 PDFs), `RFSystemMPSRequirements.docx`, Doc 0 §7 | `spear-rf-code-legacy/codeReviewTechnicalNotes/06-plc-stepper-motors.md` |
+| §15 Interlocks | IV | Doc 0 §17, `rf_states.st`, Fast Interlock Chassis schematics | — |
+| §16 EPICS/SNL | V | `spear-rf-code-legacy/rfApp/src/seq/` (6 .st + 12 .h files), `LLRFOperation_jims.docx` | `spear-rf-code-legacy/codeReviewTechnicalNotes/03_SNL_STATE_MACHINES.md`, `05-snl-state-machines.md` |
+| §17 Tuner Control | V | `galil/functioningGalil20250825SwapABToManual.txt`, `galil/firstMotion2024.txt`, `GalilCommissioning.docx`, Doc 0 §10 | `spear-rf-code-legacy/codeReviewTechnicalNotes/08-tuner-and-stepper.md` |
+| §18 Diagnostics | V | `rf_calib.st`, `llrf/calibrations/` (6 xlsx), `llrf9Tests.pdf` | — |
+| §19 Cabling | VI | `wd7307900103.pdf`, `wd7307900206.pdf`, `wd7307940600.pdf`, Doc 0 §3 | — |
+| §20 Known Issues | VI | All sources; `pps/MSG from Jim Sebek to Faya about PPS.md` | All technical notes series |
+| §21 Source Index | VI | Repository scan + `llrf/documentation/RfSystemDocumentIndexR3.xlsx` | — |
+
+### D.1 Key Discoveries from Deep Codebase Review
+
+During the exhaustive review that informed Doc L v1.0, several important details were confirmed or corrected:
+
+1. **Enerpro board identification**: FCOG6100 Rev.K (serial numbers 41506, 50470, 30045), with FCOAUX60 Rev D auxiliaries (S/N: 03198, 03813, 1694) — confirmed from `hvps/controls/enerpro/` directory structure and documentation
+2. **Galil DMC-4143 Rev 1.3h**: Confirmed commissioned August 2025 from `functioningGalil20250825SwapABToManual.txt` timestamp — this replaces legacy AB 1746-HSTP1 controllers
+3. **SNL program complexity**: `rf_states.st` has **23 states across 3 concurrent state sets** (not the 18–20 commonly cited) — confirmed from direct source code reading
+4. **SNL line counts**: rf_states.st=2,227; rf_calib.st=3,345 (largest!); rf_tuner_loop.st=555; rf_hvps_loop.st=343; rf_dac_loop.st=290; rf_msgs.st=352; 12 headers=~1,151 — all confirmed from source
+5. **VXI slots 6–8**: Contain PEP-II modules (Comb Filter I, Comb Filter Q, GVF) that are **present but NOT used in SPEAR3** — important for upgrade planning
+6. **PPS compliance**: Both PPS chains confirmed to route through SLC-500 PLC ladder logic (Rungs 0016 and 0017) — critical safety finding from `CasselPLCCode.pdf` + `HoffmanBoxPPSWiring.docx`
+7. **K4/RR relay label swap**: Original wiring diagrams have K4 and RR labels swapped — corrected in Doc L and PPS technical notes, but field verification recommended
