@@ -1,7 +1,7 @@
 # SPEAR3 RF System — RF Physics, Control Theory and Physical Plant
 
 **Document ID**: Doc P
-**Version**: 2.2
+**Version**: 2.3
 **Date**: March 24, 2026
 **Status**: DRAFT — For Engineering Review
 **Location**: Designs/P_RF_PHYSICS_AND_PLANT.md
@@ -18,6 +18,7 @@
 | 2.0 | 2026-03-24 | Major rewrite: disturbance-driven control design narrative. |
 | 2.1 | 2026-03-24 | LaTeX formatting for all equations and symbols. Physics review: corrected synchronous phase convention (Eq. 2.4), verified all numerical calculations, fixed minor inconsistencies. |
 | 2.2 | 2026-03-24 | GitHub rendering fix: converted all display equations to fenced math code blocks for reliable MathJax rendering; moved equation labels to text below blocks; cleaned up negative thin spaces, thousand-separator braces, and degree symbols. |
+| 2.3 | 2026-03-24 | Equation numbering alignment fix: moved all 38 equation labels from standalone text lines into \tag{} commands within math blocks for proper same-line, right-aligned display per MathJax convention. |
 
 ---
 
@@ -123,23 +124,20 @@ Near its fundamental mode at $\omega_0 = 2\pi \times 476.3\;\text{MHz}$, each ca
 The cavity voltage response to a driving current near resonance:
 
 ```math
-H_\text{cav}(s) = \frac{R_s \,\omega_{1/2}}{s + \omega_{1/2} + j\Delta\omega}
+H_\text{cav}(s) = \frac{R_s \,\omega_{1/2}}{s + \omega_{1/2} + j\Delta\omega} \tag{Eq. 2.1a}
 ```
-**(Eq. 2.1a)**
 
 where $\omega_{1/2} = \omega_0/(2Q_L)$ is the cavity half-bandwidth. The **impedance seen by the beam** at frequency offset $\Delta\omega$ from $\omega_\text{RF}$:
 
 ```math
-Z_\text{cav}(\Delta\omega) = \frac{R_s}{1 + j\,2Q_L\,\Delta\omega/\omega_0}
+Z_\text{cav}(\Delta\omega) = \frac{R_s}{1 + j\,2Q_L\,\Delta\omega/\omega_0} \tag{Eq. 2.1}
 ```
-**(Eq. 2.1)**
 
 **Cavity half-bandwidth:**
 
 ```math
-\Delta f_{1/2} = \frac{f_0}{2Q_L} = \frac{476.315\;\text{MHz}}{2 \times 6700} = 35.5\;\text{kHz}
+\Delta f_{1/2} = \frac{f_0}{2Q_L} = \frac{476.315\;\text{MHz}}{2 \times 6700} = 35.5\;\text{kHz} \tag{Eq. 2.1b}
 ```
-**(Eq. 2.1b)**
 
 This determines the cavity natural response time $\tau_\text{cav} = 1/(2\pi\Delta f_{1/2}) \approx 4.5\;\mu\text{s}$.
 
@@ -148,53 +146,46 @@ This determines the cavity natural response time $\tau_\text{cav} = 1/(2\pi\Delt
 The beam-induced voltage at resonance:
 
 ```math
-V_{b,\text{res}} = I_b \cdot R_s = 0.5\;\text{A} \times 3.73\;\text{M}\Omega = 1.865\;\text{MV}
+V_{b,\text{res}} = I_b \cdot R_s = 0.5\;\text{A} \times 3.73\;\text{M}\Omega = 1.865\;\text{MV} \tag{Eq. 2.2}
 ```
-**(Eq. 2.2)**
 
 This exceeds the desired gap voltage ($V_\text{gap} = 712$ kV) by a factor of 2.6, demonstrating that **beam loading is the dominant effect**.
 
 **Synchronous phase** — In the convention where $\phi_s$ is measured from the voltage crest (SLAC convention, used throughout this document):
 
 ```math
-V_\text{RF} \cos\phi_s = U_0
+V_\text{RF} \cos\phi_s = U_0 \tag{Eq. 2.4}
 ```
-**(Eq. 2.4)**
 
 ```math
-\cos\phi_s = \frac{U_0}{V_\text{RF}} = \frac{0.91\;\text{MeV}}{2.85\;\text{MV}} = 0.319 \implies \phi_s \approx 71.4^\circ
+\cos\phi_s = \frac{U_0}{V_\text{RF}} = \frac{0.91\;\text{MeV}}{2.85\;\text{MV}} = 0.319 \implies \phi_s \approx 71.4^\circ \tag{Eq. 2.4a}
 ```
-**(Eq. 2.4a)**
 
 Note: $\sin\phi_s = \sin(71.4^\circ) = 0.948$, which appears in the beam loading compensation formulas below.
 
 **Optimum detuning** — minimizes reflected power at the input coupler:
 
 ```math
-\tan\psi_\text{opt} = -\frac{I_b \, R_s \, \sin\phi_s}{V_\text{gap}} = -\frac{0.5 \times 3.73 \times 10^6 \times 0.948}{712 \times 10^3} = -2.48
+\tan\psi_\text{opt} = -\frac{I_b \, R_s \, \sin\phi_s}{V_\text{gap}} = -\frac{0.5 \times 3.73 \times 10^6 \times 0.948}{712 \times 10^3} = -2.48 \tag{Eq. 2.5}
 ```
-**(Eq. 2.5)**
 
 ```math
-\psi_\text{opt} \approx -68^\circ
+\psi_\text{opt} \approx -68^\circ \tag{Eq. 2.5a}
 ```
-**(Eq. 2.5a)**
 
 **Optimum frequency detuning:**
 
 ```math
-\Delta f_\text{opt} = \frac{f_0 \tan\psi_\text{opt}}{2Q_L} = \frac{476.3\;\text{MHz} \times (-2.48)}{2 \times 6700} \approx -88\;\text{kHz}
+\Delta f_\text{opt} = \frac{f_0 \tan\psi_\text{opt}}{2Q_L} = \frac{476.3\;\text{MHz} \times (-2.48)}{2 \times 6700} \approx -88\;\text{kHz} \tag{Eq. 2.6}
 ```
-**(Eq. 2.6)**
 
 The cavity must be tuned $\sim 88$ kHz **below** $f_\text{RF}$ at 500 mA.
 
 **Required generator power per cavity:**
 
 ```math
-P_\text{gen} = \frac{V_\text{gap}^2}{4R_L}\left[1 + \left(\frac{I_b R_s \sin\phi_s}{V_\text{gap}}\right)^{2}\right]^{1/2} + \frac{I_b V_\text{gap}\cos\phi_s}{n_\text{cav}}
+P_\text{gen} = \frac{V_\text{gap}^2}{4R_L}\left[1 + \left(\frac{I_b R_s \sin\phi_s}{V_\text{gap}}\right)^{2}\right]^{1/2} + \frac{I_b V_\text{gap}\cos\phi_s}{n_\text{cav}} \tag{Eq. 2.7}
 ```
-**(Eq. 2.7)**
 
 where $R_L = R_s/(1+\beta) \approx 780\;\text{k}\Omega$, giving $\approx 135$ kW/cavity, $\approx 540$ kW total (within the 1.2 MW klystron capacity).
 
@@ -205,9 +196,8 @@ where $R_L = R_s/(1+\beta) \approx 780\;\text{k}\Omega$, giving $\approx 135$ kW
 For control analysis, the klystron is modeled as:
 
 ```math
-G_\text{kly}(s) = K_\text{kly} \cdot e^{-s\tau_\text{kly}}
+G_\text{kly}(s) = K_\text{kly} \cdot e^{-s\tau_\text{kly}} \tag{Eq. 2.8}
 ```
-**(Eq. 2.8)**
 
 where $K_\text{kly}$ is the small-signal gain and $\tau_\text{kly} < 150$ ns.
 
@@ -222,16 +212,14 @@ where $K_\text{kly}$ is the small-signal gain and $\tau_\text{kly} < 150$ ns.
 **Saturation model:**
 
 ```math
-P_\text{out} = P_\text{sat} \cdot \frac{P_\text{in}/P_\text{in,sat}}{1 + P_\text{in}/P_\text{in,sat}}
+P_\text{out} = P_\text{sat} \cdot \frac{P_\text{in}/P_\text{in,sat}}{1 + P_\text{in}/P_\text{in,sat}} \tag{Eq. 2.9}
 ```
-**(Eq. 2.9)**
 
 **AM-PM conversion** — klystron output phase sensitivity to cathode voltage:
 
 ```math
-\Delta\phi_\text{kly} \propto \frac{\Delta V_k}{V_k}
+\Delta\phi_\text{kly} \propto \frac{\Delta V_k}{V_k} \tag{Eq. 2.10}
 ```
-**(Eq. 2.10)**
 
 > **Sources**: [R1]; [R15] Corredoura, PAC 1999; [R5].
 
@@ -240,9 +228,8 @@ P_\text{out} = P_\text{sat} \cdot \frac{P_\text{in}/P_\text{in,sat}}{1 + P_\text
 The maximum stable crossover frequency (with $\sim 45^\circ$ phase margin):
 
 ```math
-\boxed{f_{c,\text{max}} \approx \frac{1}{4\tau_d}}
+\boxed{f_{c,\text{max}} \approx \frac{1}{4\tau_d}} \tag{Eq. 2.11}
 ```
-**(Eq. 2.11)**
 
 This is the single most important constraint in the entire control design.
 
@@ -258,9 +245,8 @@ This is the single most important constraint in the entire control design.
 ### 2.4 Complete Open-Loop Plant Transfer Function
 
 ```math
-G_\text{plant}(s) = G_0 \cdot H_\text{cav}(s) \cdot e^{-s\tau_d} = \frac{G_0 \,\omega_{1/2}}{s + \omega_{1/2} + j\Delta\omega}\; e^{-s\tau_d}
+G_\text{plant}(s) = G_0 \cdot H_\text{cav}(s) \cdot e^{-s\tau_d} = \frac{G_0 \,\omega_{1/2}}{s + \omega_{1/2} + j\Delta\omega}\; e^{-s\tau_d} \tag{Eq. 2.12}
 ```
-**(Eq. 2.12)**
 
 The cavity bandwidth ($35.5$ kHz) and the loop delay ($270$–$500$ ns) together define the limits of what feedback can achieve.
 
@@ -273,25 +259,22 @@ The cavity bandwidth ($35.5$ kHz) and the loop delay ($270$–$500$ ns) together
 All RF feedback loops use baseband In-phase and Quadrature (I/Q) techniques:
 
 ```math
-V_\text{RF}(t) = I(t)\cos(\omega_\text{RF}t) - Q(t)\sin(\omega_\text{RF}t)
+V_\text{RF}(t) = I(t)\cos(\omega_\text{RF}t) - Q(t)\sin(\omega_\text{RF}t) \tag{Eq. 3.0}
 ```
-**(Eq. 3.0)**
 
 where $I(t) = A(t)\cos\phi(t)$ and $Q(t) = A(t)\sin\phi(t)$, with inverse relations:
 
 ```math
-A(t) = \sqrt{I^2 + Q^2}\,,\qquad \phi(t) = \text{atan2}(Q, I)
+A(t) = \sqrt{I^2 + Q^2}\,,\qquad \phi(t) = \text{atan2}(Q, I) \tag{Eq. 3.0a}
 ```
-**(Eq. 3.0a)**
 
 ### 3.2 Baseband I/Q Modulator
 
 The I/Q modulator performs a scaled rotation:
 
 ```math
-\begin{pmatrix} I_\text{out} \\ Q_\text{out} \end{pmatrix} = G \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix} \begin{pmatrix} I_\text{in} \\ Q_\text{in} \end{pmatrix}
+\begin{pmatrix} I_\text{out} \\ Q_\text{out} \end{pmatrix} = G \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix} \begin{pmatrix} I_\text{in} \\ Q_\text{in} \end{pmatrix} \tag{Eq. 3.1}
 ```
-**(Eq. 3.1)**
 
 **Implementation**: Four AD834 four-quadrant multipliers + two EL2073 summing amplifiers. Group delay $< 5$ ns, full-power BW $> 40$ MHz, dynamic range $> 50$ dB. Total system: 7 I/Q modulators, 56 DAC channels.
 
@@ -308,14 +291,12 @@ Each of the 4 cavity probe signals is demodulated to I/Q and combined through a 
 ### 3.5 Error Signal Generation
 
 ```math
-\vec{E} = \vec{V}_\text{ref} - \vec{V}_\text{probe}
+\vec{E} = \vec{V}_\text{ref} - \vec{V}_\text{probe} \tag{Eq. 3.2}
 ```
-**(Eq. 3.2)**
 
 ```math
-\vec{V}_\text{drive} = G_\text{loop} \cdot \vec{E} = G_\text{loop}\left(\vec{V}_\text{ref} - \vec{V}_\text{probe}\right)
+\vec{V}_\text{drive} = G_\text{loop} \cdot \vec{E} = G_\text{loop}\left(\vec{V}_\text{ref} - \vec{V}_\text{probe}\right) \tag{Eq. 3.3}
 ```
-**(Eq. 3.3)**
 
 > **Sources**: [R15]; [R14].
 
@@ -343,9 +324,8 @@ Each of the 4 cavity probe signals is demodulated to I/Q and combined through a 
 **Growth rate for coupled-bunch instability** from the fundamental mode [R15]:
 
 ```math
-\frac{1}{\tau} = \frac{I_b\,\alpha_c\,f_\text{RF}}{2\,\nu_s\,\beta^2\,(E/e)}\;R_{cb}
+\frac{1}{\tau} = \frac{I_b\,\alpha_c\,f_\text{RF}}{2\,\nu_s\,\beta^2\,(E/e)}\;R_{cb} \tag{Eq. 4.1}
 ```
-**(Eq. 4.1)**
 
 where $R_{cb} = \sum_n \text{Re}\left[Z(\omega_\text{RF} + n\omega_\text{rev} + \omega_s) - Z(\omega_\text{RF} + n\omega_\text{rev} - \omega_s)\right]$.
 
@@ -358,16 +338,14 @@ where $R_{cb} = \sum_n \text{Re}\left[Z(\omega_\text{RF} + n\omega_\text{rev} + 
 **Robinson stability criterion** (above transition):
 
 ```math
-\text{Re}\{Z_\text{eff}(\omega_\text{RF} + \omega_s)\} < \text{Re}\{Z_\text{eff}(\omega_\text{RF} - \omega_s)\}
+\text{Re}\{Z_\text{eff}(\omega_\text{RF} + \omega_s)\} < \text{Re}\{Z_\text{eff}(\omega_\text{RF} - \omega_s)\} \tag{Eq. 4.2}
 ```
-**(Eq. 4.2)**
 
 **Robinson growth rate:**
 
 ```math
-\frac{1}{\tau_\text{Rob}} = \frac{\alpha_c\,\omega_\text{rev}\,I_b}{4\,\omega_s\,(E/e)} \left[\text{Re}\{Z(\omega_\text{RF} + \omega_s)\} - \text{Re}\{Z(\omega_\text{RF} - \omega_s)\}\right]
+\frac{1}{\tau_\text{Rob}} = \frac{\alpha_c\,\omega_\text{rev}\,I_b}{4\,\omega_s\,(E/e)} \left[\text{Re}\{Z(\omega_\text{RF} + \omega_s)\} - \text{Re}\{Z(\omega_\text{RF} - \omega_s)\}\right] \tag{Eq. 4.3}
 ```
-**(Eq. 4.3)**
 
 Direct feedback reduces $Z_\text{eff} = Z_\text{cav}/(1 + G_\text{OL})$, reducing the growth rate by the same factor.
 
@@ -378,9 +356,8 @@ Direct feedback reduces $Z_\text{eff} = Z_\text{cav}/(1 + G_\text{OL})$, reducin
 For $h = 372$ modes, each mode $m$ driven by:
 
 ```math
-\frac{1}{\tau_m} = \frac{\alpha_c\,\omega_\text{rev}\,I_b}{4\,\omega_s\,(E/e)}\sum_p\left[\text{Re}\{Z((ph+m)\omega_\text{rev}+\omega_s)\} - \text{Re}\{Z((ph+m)\omega_\text{rev}-\omega_s)\}\right]
+\frac{1}{\tau_m} = \frac{\alpha_c\,\omega_\text{rev}\,I_b}{4\,\omega_s\,(E/e)}\sum_p\left[\text{Re}\{Z((ph+m)\omega_\text{rev}+\omega_s)\} - \text{Re}\{Z((ph+m)\omega_\text{rev}-\omega_s)\}\right] \tag{Eq. 4.4}
 ```
-**(Eq. 4.4)**
 
 For SPEAR3 ($f_\text{rev} = 1.28$ MHz $\gg \Delta f_{1/2} = 35.5$ kHz), only 1–2 revolution harmonics interact with each cavity mode. **The comb filter (essential for PEP-II) is not needed at SPEAR3.**
 
@@ -389,16 +366,14 @@ For SPEAR3 ($f_\text{rev} = 1.28$ MHz $\gg \Delta f_{1/2} = 35.5$ kHz), only 1�
 The 12-pulse SCR rectifier produces:
 
 ```math
-f_\text{ripple} = 12n \times f_\text{line} = 720,\;1440,\;2160,\;\ldots\;\text{Hz}
+f_\text{ripple} = 12n \times f_\text{line} = 720,\;1440,\;2160,\;\ldots\;\text{Hz} \tag{Eq. 4.5}
 ```
-**(Eq. 4.5)**
 
 with residual harmonics at $60,\;120,\;\ldots,\;360$ Hz (reduced by $\sim 20$ dB due to imperfect 12-pulse balance). Coupling to RF field via AM-PM conversion:
 
 ```math
-\Delta\phi_\text{RF} \sim \frac{\partial P_\text{kly}/\partial V_k}{P_\text{kly}} \cdot \Delta V_\text{ripple}
+\Delta\phi_\text{RF} \sim \frac{\partial P_\text{kly}/\partial V_k}{P_\text{kly}} \cdot \Delta V_\text{ripple} \tag{Eq. 4.6}
 ```
-**(Eq. 4.6)**
 
 > **Sources**: [R21]; [R22]; *AI-generated analysis, see `01_FEEDBACK_LOOP_ARCHITECTURE.md`, unreviewed*.
 
@@ -445,23 +420,20 @@ Bandwidth separations of $10\times$–$1000\times$ provide natural frequency-dom
 **Open-loop transfer function:**
 
 ```math
-G_\text{OL}(s) = G_\text{prop} \cdot G_\text{lead}(s) \cdot G_\text{int}(s) \cdot G_\text{kly}(s) \cdot H_\text{cav}(s) \cdot e^{-s\tau_d}
+G_\text{OL}(s) = G_\text{prop} \cdot G_\text{lead}(s) \cdot G_\text{int}(s) \cdot G_\text{kly}(s) \cdot H_\text{cav}(s) \cdot e^{-s\tau_d} \tag{Eq. 5.1}
 ```
-**(Eq. 5.1)**
 
 **Closed-loop transfer function:**
 
 ```math
-T(s) = \frac{G_\text{OL}(s)}{1 + G_\text{OL}(s)}
+T(s) = \frac{G_\text{OL}(s)}{1 + G_\text{OL}(s)} \tag{Eq. 5.2}
 ```
-**(Eq. 5.2)**
 
 **Effective cavity impedance seen by the beam:**
 
 ```math
-Z_\text{eff}(\omega) = \frac{Z_\text{cav}(\omega)}{1 + G_\text{OL}(\omega)}
+Z_\text{eff}(\omega) = \frac{Z_\text{cav}(\omega)}{1 + G_\text{OL}(\omega)} \tag{Eq. 5.3}
 ```
-**(Eq. 5.3)**
 
 This is the central result. The direct loop **transforms the cavity from a high-impedance resonator into a low-impedance broadband structure**:
 
@@ -483,9 +455,8 @@ The asymmetry is preserved but absolute values reduced by $\sim 40$ dB.
 **Z-domain transfer function** [R15]:
 
 ```math
-H_\text{comb}(z) = G\,\frac{z^{-1} - z^{-n}}{1 - 2K\cos(2\pi\nu_s)\,z^{-n} + K^2 z^{-2n}}
+H_\text{comb}(z) = G\,\frac{z^{-1} - z^{-n}}{1 - 2K\cos(2\pi\nu_s)\,z^{-n} + K^2 z^{-2n}} \tag{Eq. 5.4}
 ```
-**(Eq. 5.4)**
 
 **SPEAR3 status**: The comb filter is **not used**. SPEAR3's $f_\text{rev} = 1.28$ MHz $\gg \Delta f_{1/2}$ means only 1–2 harmonics interact with each cavity mode.
 
@@ -504,16 +475,14 @@ Measures **klystron forward phase** (not cavity probe), avoiding the $35.5$ kHz 
 **Formal argument**: For two loops with bandwidths $f_1 \gg f_2$:
 
 ```math
-L_\text{total}(s) = L_1(s) + L_2(s) + L_1(s)\,L_2(s)
+L_\text{total}(s) = L_1(s) + L_2(s) + L_1(s)\,L_2(s) \tag{Eq. 5.5}
 ```
-**(Eq. 5.5)**
 
 The condition for safe decoupling:
 
 ```math
-\frac{f_i}{f_{i+1}} \geq 10 \quad \text{for all adjacent loop pairs}
+\frac{f_i}{f_{i+1}} \geq 10 \quad \text{for all adjacent loop pairs} \tag{Eq. 5.6}
 ```
-**(Eq. 5.6)**
 
 SPEAR3 satisfies this with large margins: DAC$\to$HVPS ($10\times$), HVPS$\to$Ripple ($300\times$), Ripple$\to$Direct ($2700\times$).
 
@@ -589,9 +558,8 @@ Outermost amplitude regulation loop. Bandwidth $\sim 0.1$ Hz. Adjusts I/Q modula
 ### 6.9 Gain Tracking Function
 
 ```math
-G_\text{modulator} \cdot G_\text{klystron} = G_\text{loop} \;(\text{constant})
+G_\text{modulator} \cdot G_\text{klystron} = G_\text{loop} \;(\text{constant}) \tag{Eq. 6.1}
 ```
-**(Eq. 6.1)**
 
 ```math
 \therefore\; G_\text{modulator} = G_\text{loop} \,/\, G_\text{klystron}(V_\text{HVPS})
@@ -628,16 +596,14 @@ The SPEAR3 klystron HVPS is a PEP-II design: 12-pulse primary SCR-controlled rec
 ### 7.3 SCR Phase Control Dynamics
 
 ```math
-V_\text{dc} = V_\text{dc,max} \cos\alpha
+V_\text{dc} = V_\text{dc,max} \cos\alpha \tag{Eq. 7.1}
 ```
-**(Eq. 7.1)**
 
 The Enerpro FCOG1200 firing boards:
 
 ```math
-H_\text{Enerpro}(s) = \frac{1}{1 + s/\omega_\text{Enerpro}}
+H_\text{Enerpro}(s) = \frac{1}{1 + s/\omega_\text{Enerpro}} \tag{Eq. 7.2}
 ```
-**(Eq. 7.2)**
 
 where $\omega_\text{Enerpro} \approx 415$ rad/s (settling $\sim 50$ ms $\approx 3$ AC cycles).
 
@@ -648,9 +614,8 @@ where $\omega_\text{Enerpro} \approx 415$ rad/s (settling $\sim 50$ ms $\approx 
 The SLC-500 PLC implements a first-order IIR filter with scan period $T = 10$ ms:
 
 ```math
-y[n] = (1-\alpha)\,y[n-1] + \alpha\,x[n]
+y[n] = (1-\alpha)\,y[n-1] + \alpha\,x[n] \tag{Eq. 7.3}
 ```
-**(Eq. 7.3)**
 
 with $\alpha = 0.4$, giving time constant $\tau = -T/\ln(1-\alpha) \approx 20$ ms.
 
@@ -691,18 +656,16 @@ The Enerpro PLL ($\sim 50$ ms settling) dominates: HVPS loop bandwidth limited t
 ### 8.2 Tuning Physics
 
 ```math
-f_\text{res}(x) = \text{polynomial fit (3rd–4th order)}
+f_\text{res}(x) = \text{polynomial fit (3rd–4th order)} \tag{Eq. 8.1}
 ```
-**(Eq. 8.1)**
 
 Temperature dependence: $\sim -1$ kHz/°C.
 
 ### 8.3 Tuner Control Loop
 
 ```math
-\varepsilon = \left[\angle(\text{probe}) - \angle(\text{fwd})\right] - \psi_\text{target}
+\varepsilon = \left[\angle(\text{probe}) - \angle(\text{fwd})\right] - \psi_\text{target} \tag{Eq. 8.2}
 ```
-**(Eq. 8.2)**
 
 where $\psi_\text{target}$ is the target detuning angle (Eq. 2.6). Implemented in `rf_tuner_loop.st` (EPICS SNL). Bandwidth $\sim 0.01$–$1$ Hz.
 
