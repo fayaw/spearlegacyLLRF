@@ -1,8 +1,8 @@
 # SPEAR3 RF System — RF Physics, Control Theory and Physical Plant
 
 **Document ID**: Doc P
-**Version**: 2.4
-**Date**: March 24, 2026
+**Version**: 2.5
+**Date**: March 25, 2026
 **Status**: DRAFT — For Engineering Review
 **Location**: Designs/P_RF_PHYSICS_AND_PLANT.md
 **Author**: Faya Wang, with AI-assisted analysis
@@ -20,6 +20,7 @@
 | 2.2 | 2026-03-24 | GitHub rendering fix: converted all display equations to fenced math code blocks for reliable MathJax rendering; moved equation labels to text below blocks; cleaned up negative thin spaces, thousand-separator braces, and degree symbols. |
 | 2.3 | 2026-03-24 | Attempted \\tag{} for inline equation numbering — caused rendering failures on GitHub. Reverted. |
 | 2.4 | 2026-03-24 | Inline equation numbering via \\qquad \\text{} — labels now appear on the same line as equations without using \\tag{}. |
+| 2.5 | 2026-03-25 | Deep review of sections 6, 8, 9: expanded loop-by-loop documentation with code-verified parameters, transfer functions, state machines, and PV names; added bandwidth hierarchy table (§6.0); expanded PEP-II heritage features with physics rationale (§6.3); documented HVPS/DAC/tuner loop state machines and interlocks (§6.4–6.6); expanded tuner signal path and state machine documentation (§8.3); comprehensive calibration system taxonomy — rf_calib.st (28 states), HVPS PLC registers, hardware calibration files (§9.4); fixed math rendering (`DAC→HVPS`). |
 
 ---
 
@@ -485,7 +486,7 @@ The condition for safe decoupling:
 \frac{f_i}{f_{i+1}} \geq 10 \quad \text{for all adjacent loop pairs} \qquad \text{(Eq. 5.6)}
 ```
 
-SPEAR3 satisfies this with large margins: DAC$\to$HVPS ($10\times$), HVPS$\to$Ripple ($300\times$), Ripple$\to$Direct ($2700\times$).
+SPEAR3 satisfies this with large margins: DAC→HVPS ($10\times$), HVPS→Ripple ($300\times$), Ripple→Direct ($2700\times$).
 
 > **Sources**: [R14]; [R15]; Åström & Murray, *Feedback Systems*, Ch. 12.
 
@@ -493,81 +494,264 @@ SPEAR3 satisfies this with large margins: DAC$\to$HVPS ($10\times$), HVPS$\to$Ri
 
 ## 6. Loop-by-Loop Transfer Functions and Design
 
-### 6.1 Direct Loop Specifications
+This section documents each feedback loop in the SPEAR3 LLRF system, ordered from fastest to slowest. All five active loops and the inactive PEP-II heritage features are covered with code-verified parameters.
+
+### 6.0 Loop Bandwidth Hierarchy
+
+The following table summarizes the complete bandwidth hierarchy. Adjacent loops are separated by at minimum the required factor of 10 in bandwidth (Eq. 5.6), ensuring frequency-domain decoupling.
+
+| Loop | Bandwidth | Disturbance | Implementation | Source File(s) |
+|------|:-:|:-:|:-:|:-:|
+| Direct (feedback) | ~800 kHz | D1–D4 | Analog (RFP module) | Hardware |
+| Ripple (harmonic) | 60–1500 Hz | D5 | DSP assembly (AT&T DSP1610) | `sp3ripple.s` |
+| HVPS (voltage) | ~0.1 Hz | D6 | EPICS SNL | `rf_hvps_loop.st` |
+| DAC (amplitude) | ~0.1 Hz | D6 | EPICS SNL | `rf_dac_loop.st` |
+| Tuner (frequency) | ~0.01 Hz | D7, D8 | EPICS SNL | `rf_tuner_loop.st` |
+
+**Separation ratios** (code-verified from maximum cycle times):
+
+| Adjacent Pair | Ratio | Requirement |
+|:-:|:-:|:-:|
+| Direct / Ripple | ~500x | >= 10x |
+| Ripple / HVPS | ~600x | >= 10x |
+| Ripple / DAC | ~600x | >= 10x |
+| HVPS and DAC | ~1x | Co-equal, orthogonal actuators |
+| DAC / Tuner | ~10x | >= 10x |
+
+The HVPS and DAC loops operate at comparable bandwidths (~0.1 Hz, both with `MAX_INTERVAL = 10.0` s) but act on orthogonal actuators (cathode voltage vs. modulator DAC counts) and can be treated as parallel rather than cascaded.
+
+### 6.1 Direct Loop — Fast Cavity Impedance Control
+
+The direct feedback loop is the primary stability loop, operating entirely in analog hardware on the RFP (RF Processor) VXI module. It measures the cavity probe vector sum and drives the I/Q modulator to reduce effective cavity impedance at beam harmonics.
+
+**Open-loop transfer function** (from Eq. 5.1):
+
+```math
+G_\text{OL}(s) = G_\text{prop} \cdot G_\text{lead}(s) \cdot G_\text{int}(s) \cdot G_\text{kly}(s) \cdot H_\text{cav}(s) \cdot e^{-s\tau_d} \qquad \text{(Eq. 6.1)}
+```
+
+**Effective impedance with feedback** (from Eq. 5.3):
+
+```math
+Z_\text{eff}(s) = \frac{Z_\text{cav}(s)}{1 + G_\text{OL}(s)} \qquad \text{(Eq. 6.2)}
+```
+
+At DC (below the loop bandwidth), the open-loop gain is approximately 40 dB, yielding impedance reduction of ~100x. This is the critical mechanism for Robinson instability suppression (D3) and steady-state beam loading compensation (D1).
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
 | Addresses | D1–D4 | Primary stability loop |
 | Measurement | Cavity probe vector sum (I/Q) | After combining network |
 | Actuator | I/Q modulator on klystron drive | Direct analog path |
-| Bandwidth | $\sim 800$ kHz (legacy) / $\sim 930$ kHz (LLRF9) | Limited by $\tau_d$ (Eq. 2.11) |
-| Gain (proportional) | $\sim 15$ dB | Adjustable via EPICS PV |
-| Integrator BW | $\sim 30$ kHz | Rejects carrier-frequency ripple |
-| Impedance reduction | $\sim 40$ dB at DC | Measured [R15] |
+| Bandwidth | ~800 kHz (legacy) / ~930 kHz (LLRF9) | Limited by total loop delay (Eq. 2.11) |
+| Gain (proportional) | ~15 dB | Adjustable via EPICS PV `{STN}:STN:RFP:DIRECTLOOP` |
+| Integrator BW | ~30 kHz | Rejects carrier-frequency ripple |
+| Impedance reduction | ~40 dB at DC | Measured [R15] |
+| Phase rotation | 2x2 I/Q matrix | Compensates cable and klystron phase |
 | SPEAR3 status | **Active** | |
 
-### 6.2 Comb Loop
+The direct loop phase is computed by `subSysPhaseTot` in `subSys.c` (line 178), which implements rate-limited delta tracking with frequency-offset compensation from the tuner position polynomial model. It computes the delta phase from frequency offset: `K = -0.000360 * group_delay * freq_offset * conv_const` (when loop and tracking are on), then tracks total phase as `L = L + rate_limited(C + D + K - L)` with +/-180 deg wrap.
 
-Not used at SPEAR3 (§5.3). Transfer function: Eq. 5.4.
+> **Sources**: [R15]; [R14]; `subSys.c` line 178 (phase computation); RFP module hardware.
 
-### 6.3 LFB Woofer
+### 6.2 Ripple Loop — HVPS Harmonic Rejection
 
-Not used at SPEAR3. Addresses D2 (residual coupled-bunch motion).
+The ripple loop cancels power supply harmonics (D5) using a bank of narrowband resonant controllers implemented on the AT&T DSP1610 processor. Each harmonic channel estimates and subtracts one spectral component of the HVPS ripple from the klystron drive signal.
 
-### 6.4 Ripple Loop Specifications
+**Transfer function** — the ripple loop implements a parallel bank of resonant controllers:
+
+```math
+H_\text{ripple}(z) = \sum_{n \in \mathcal{F}} H_n(z) + \sum_{m \in \mathcal{S}} H_m(z) \qquad \text{(Eq. 6.3)}
+```
+
+where F denotes fast harmonic channels and S denotes slow harmonic channels. Each channel implements a second-order resonant section at the target harmonic frequency, using downloadable coefficients from EPICS via the `Coef_IOC` array in DSP shared memory.
+
+**SPEAR3-specific configuration** (from `sp3ripple.s`, W. Ross, July 2006):
+
+| Parameter | Fast Harmonics | Slow Harmonics |
+|-----------|:-:|:-:|
+| Count | 26 (SPEAR3, reduced from PEP-II's 34) | 4 |
+| Sample rate | ~23 kHz | ~23/4 = 5.75 kHz effective |
+| Processing | Every DSP cycle | One per cycle (interleaved) |
+| Frequency coverage | Higher harmonics (> 360 Hz) | Near 60 Hz fundamental |
+| Phase precision | q13 (double-precision multiply) | q13 (double-precision multiply) |
+| Gain precision | q15 | q15 |
+
+The SPEAR3 variant (`sp3ripple.s`) reduced the fast harmonic count from 34 (PEP-II) to 26 to accommodate the higher sampling frequency needed for SPEAR3's 476.3 MHz RF. The slow harmonics use interleaved processing — only one slow channel is updated each sample cycle — providing better coefficient resolution for low-frequency harmonics where the discrete-time resonant coefficients approach 2.0 and 16-bit word resolution becomes limiting.
+
+The code evolved significantly for SPEAR3: W. Ross (March 2006) modified the algorithm to use the klystron ADC available on the Rev 4 RFP module (replacing data from the IQA module), removed the software FIFO for the reference signal, and replaced amplitude estimation with phase-only estimation using double-precision multiplication. The result: 26 fast phase harmonics + 4 slow phase harmonics.
+
+**DC gain coefficient tracking**: The ripple loop gain is automatically adjusted to track klystron gain variations. The function `subSysDCcoeff` in `subSys.c` (line 277) implements this: it adjusts the DC coefficient based on the deviation between desired and actual klystron gain, using deadband limiting. The DAC loop (`rf_dac_loop.st`) loads updated ripple amplitude setpoints via the `ripple_loop_load` PV whenever `ripple_loop_ampl_ef` fires.
+
+> **Sources**: `sp3ripple.s` (W. Ross, 2006) [R36]; `ripple.s` (Claus & Corredoura, 1996) [R36]; `subSys.c` line 277.
+
+### 6.3 PEP-II Heritage Features — Not Commissioned at SPEAR3
+
+The LLRF9/legacy VXI crate contains three subsystems inherited from the PEP-II LLRF design that are **not used at SPEAR3**. They are documented here for completeness and to explain the unused VXI slot allocations.
+
+**Comb Filter Loop** (VXI slots 6–7: CFM1, CFM2):
+
+The comb filter provides narrowband gain enhancement at revolution-frequency harmonics to damp coupled-bunch instabilities (D4). Its transfer function (Eq. 5.4):
+
+```math
+H_\text{comb}(z) = \frac{G_c}{1 - G_c\,z^{-N}} \qquad N = f_\text{RF}/f_\text{rev}
+```
+
+At PEP-II, with high beam current (> 1 A) distributed across hundreds of bunches feeding multiple cavities, coupled-bunch modes driven by cavity higher-order modes (HOMs) and fundamental impedance required active damping. SPEAR3, with only 2 cavities and moderate beam loading at 500 mA, has sufficiently weak coupled-bunch driving terms that the direct loop's ~40 dB impedance reduction alone stabilizes all modes. The comb filter modules (`{STN}:STN:CFM1`, `{STN}:STN:CFM2`) are physically present but not programmed. In the calibration sequence `rf_calib.st`, comb-related code is conditionally compiled via `#define DOCOMB 0`.
+
+**Longitudinal Feedback (LFB) Woofer**:
+
+The LFB "woofer" channel provides a low-frequency correction path for residual coupled-bunch motion (D4 residual and D2 transients) that the comb filter cannot capture due to its narrowband nature. In the PEP-II architecture, the LFB system (a separate bunch-by-bunch feedback processor) communicated corrections to the LLRF via the GVF module. The term "woofer" refers to its role in the "tweeter-woofer" decomposition of longitudinal feedback: the tweeter (bunch-by-bunch kickers) handles high-frequency motion while the woofer (RF cavity voltage modulation) handles low-frequency components.
+
+At SPEAR3, the LFB system does not exist as a separate installation. The direct loop alone provides sufficient coupled-bunch damping, and the ion-clearing gap transient (D2) is manageable through gap voltage feedback without a dedicated woofer path.
+
+**Gap Voltage Feed-Forward (GVF)** (VXI slot 8):
+
+The GVF module implements adaptive feedforward for gap voltage stabilization, using previous cavity field measurements as a predictive reference. The DSP code (`gvff.s`, Sapozhnikov & Ross, 1996) implements a double-precision adaptive filter with fractional-displacement circular buffer loading. At SPEAR3, with a single klystron feeding only 2 cavities (vs. PEP-II's multi-klystron, multi-cavity topology), the feedforward path provides negligible benefit over the direct feedback loop. The DAC loop (`rf_dac_loop.st`) checks `gvf_module_sevr` for GVF module availability and falls back to RFP-based DAC adjustment when the GVF is unavailable, which is the normal SPEAR3 operating mode.
+
+> **Sources**: [R14]; [R15]; `rf_calib.st` (`DOCOMB` flag); `gvff.s` (DSP); `rf_dac_loop.st` (GVF fallback).
+
+### 6.4 HVPS Loop — Klystron Operating Point Regulation
+
+The HVPS loop adjusts klystron cathode voltage to maintain constant klystron drive power (TUNE mode) or station gap voltage (ON_CW mode). It is the primary mechanism for compensating klystron gain drift (D6).
+
+**Control law** — discrete-time integrator implemented in `rf_hvps_loop.st`:
+
+```math
+V_\text{HVPS}[n+1] = V_\text{HVPS}[n] + \Delta V \qquad \text{(Eq. 6.4)}
+```
+
+where delta-V is computed from the error between measured and desired klystron drive power or gap voltage. The loop cycles at most every `HVPS_LOOP_MAX_INTERVAL = 10.0` s, giving an effective bandwidth of ~0.1 Hz.
+
+**State machine** (from `rf_hvps_loop.st`, M. Zelazny, Feb 1997):
+
+| State | Condition | Function |
+|-------|-----------|----------|
+| `init` | IOC boot | Initialize `requested_hvps_voltage` to current readback |
+| `off` | Station OFF or PARK | Hold voltage; wait for station state change |
+| `proc` | `hvps_loop_ctrl == CONTROL_PROC` | Cavity processing: slowly raise/lower voltage based on vacuum, power, and gap voltage |
+| `on` | Normal operation (TUNE or ON_CW) | Maintain constant drive power or gap voltage |
+
+**PROC state** — cavity conditioning logic:
+
+```math
+\Delta V = \begin{cases} \Delta V_\text{down} & \text{if } P_\text{fwd} > P_\text{max} \text{ or } V_\text{gap} \text{ high or vacuum bad} \\ \Delta V_\text{up} & \text{otherwise (all OK)} \end{cases} \qquad \text{(Eq. 6.5)}
+```
+
+**ON state** — normal regulation. The error source depends on direct loop state:
+- Direct loop **OFF**: regulate klystron drive power (forward power setpoint)
+- Direct loop **ON**: regulate station gap voltage (cavity voltage setpoint)
+
+**Safety interlocks** (checked every cycle before voltage adjustment):
+- RFP module severity (`rf_processor_severity`) — is the RF processor plugged in?
+- Klystron forward power validity — is klystron power measurable?
+- Cavity gap voltage validity — is gap voltage measurable?
+- Cavity vacuum severity — are cavity vacuums acceptable?
+- HVPS voltage readback validity — is the HVPS voltage reading out?
+- Voltage tolerance: 10 consecutive out-of-tolerance readings before status change (`HVPS_LOOP_MAX_VOLT_TOL = 10`)
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| Addresses | D5 (HVPS ripple) | Harmonic rejection |
-| Measurement | Klystron forward I/Q | Upstream of cavity |
-| Bandwidth | $\sim 300$ Hz | 120, 240, 360 Hz + harmonics |
-| Algorithm | DSP harmonic estimator at $\sim 23$ kHz | 6 fast + 8 slow harmonics |
-| Fixed-point | q13 (phase), q11 (accum), q15 (gains) | TMS320C16xx |
+| Addresses | D6 | Klystron operating point regulation |
+| Actuator | HVPS cathode voltage (`requested_hvps_voltage`) | Via PLC register N7:30 |
+| Bandwidth | ~0.1 Hz | `HVPS_LOOP_MAX_INTERVAL = 10.0` s |
+| Operating point | ~10% below saturation | Headroom for fast loops |
+| Control law | Discrete integrator (Eq. 6.4) | |
+| Status codes | 16 distinct statuses | See `rf_hvps_loop_defs.h` |
 | SPEAR3 status | **Active** | |
 
-> **Sources**: `spear-rf-code-legacy/dsp1610/rfpDsp/ripple.s` [R36]; [R20t].
+> **Sources**: `rf_hvps_loop.st` [R16]; `rf_hvps_loop_defs.h`; Section 7 (HVPS plant model).
 
-### 6.5 Gap Feedforward Loop
+### 6.5 DAC Loop — Amplitude Regulation
 
-Not used at SPEAR3. Addresses D2 (ion clearing gap transient).
+The DAC loop adjusts the baseline I/Q modulator DAC values to maintain constant klystron drive power (TUNE mode) or gap voltage (ON_CW mode). It acts on a different actuator than the HVPS loop (modulator counts vs. cathode voltage) and together they form a complementary pair for operating-point regulation.
 
-### 6.6 HVPS Loop Specifications
+**Control law** — proportional correction with deadband (from `subIQcounts` in `subIQ.c`, line 653):
+
+```math
+\Delta\text{counts} = A \cdot (C - B) \cdot D \cdot (1 + H) \qquad \text{(Eq. 6.6)}
+```
+
+where A is gain (0–1), B is actual measurement (kV or W), C is desired setpoint, D is conversion factor (Counts/kV), and H is loop gain adjustment. Applied only when B > G_min (minimum threshold) and |C - B| > E (deadband). Clamped to +/-F (max delta counts).
+
+The SNL state machine (`rf_dac_loop.st`, S. Allison, May 1997) wraps this control law:
+
+| State | Condition | Function |
+|-------|-----------|----------|
+| `loop_init` | IOC boot | Initialize counters and flags |
+| `loop_off` | Station OFF, PARK, or ON_FM | Hold; forward RFP DAC phase changes; load ripple loop amplitude |
+| `loop_tune` | Station TUNE | Adjust `tune_counts` for drive power via RFP tune mode octal DACs |
+| `loop_on` | Station ON_CW | Adjust `on_counts` (RFP) or `gff_counts` (GVF) for gap voltage or drive power |
+
+**ON_CW mode routing** — the DAC loop selects the appropriate actuator and error source based on direct loop and GVF module status (from `rf_dac_loop.st`):
+- Direct loop **OFF** + GVF unavailable: adjust `on_counts` via RFP DACs using drive power error
+- Direct loop **OFF** + GVF available: adjust `gff_counts` via GVF module using drive power error
+- Direct loop **ON** + GVF unavailable: adjust `on_counts` via RFP DACs using gap voltage error
+- Direct loop **ON** + GVF available: adjust `gff_counts` via GVF module using gap voltage error
+
+At SPEAR3, the GVF module is unavailable (PEP-II only), so the DAC loop always uses RFP-based DAC adjustment.
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| Addresses | D6 | Operating point regulation |
-| Actuator | HVPS cathode voltage | |
-| Bandwidth | $\sim 1$ Hz | Slow integrator |
-| Operating point | $\sim 10\%$ below saturation | Headroom for fast loops |
+| Addresses | D6 (operating point) | Complementary to HVPS loop |
+| Actuator | I/Q modulator DAC counts | 12-bit, +/-2047 counts max (`DAC_LOOP_MAX_COUNTS`) |
+| Bandwidth | ~0.1 Hz | `DAC_LOOP_MAX_INTERVAL = 10.0` s |
+| Minimum delta | 0.5 counts | `DAC_LOOP_MIN_DELTA_COUNTS` — prevents DAC chattering |
+| Status codes | 15 distinct statuses | See `rf_dac_loop_defs.h` |
 | SPEAR3 status | **Active** | |
 
-### 6.7 Tuner Loop Specifications
+The DAC loop also handles loading ripple loop amplitude setpoints when they change. Every cycle, it checks `ripple_loop_ampl_ef` and writes `ripple_loop_load` to update the ripple loop gain.
+
+> **Sources**: `rf_dac_loop.st` [R17]; `rf_dac_loop_defs.h`; `subIQ.c` line 653 (`subIQcounts`).
+
+### 6.6 Tuner Loop — Resonant Frequency Tracking
+
+The tuner loop maintains cavity resonant frequency by driving stepper motors to adjust mechanical plunger insertion depth. It compensates thermal detuning (D8) and microphonics (D7). This is the slowest control loop in the system.
+
+**Control law** — discrete-time integrator (from `rf_tuner_loop.st`, S. Allison, Oct 1996):
+
+```math
+x_\text{ctrl}[n] = x_\text{SM}[n] + \Delta x[n] \qquad \text{(Eq. 6.7)}
+```
+
+where x_SM is the current stepper motor readback position (PV `{STN}:CAV{CAV}TUNR:STEP:MOTOR.RBV`) and delta-x is the position correction computed in the EPICS database from the load angle error (PV `{STN}:CAV{CAV}TUNR:POSN:DELTA`). The SNL program does not compute delta-x itself — it reads the pre-computed value from the database. See Section 8.3 for the full signal path.
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
 | Addresses | D7, D8 | Frequency tracking |
-| Measurement | $\angle(\text{probe}) - \angle(\text{fwd})$ | Detuning angle |
-| Actuator | Stepper motor (Galil) | |
-| Bandwidth | $\sim 0.01$–$1$ Hz | Mechanical limit |
-| Implementation | EPICS SNL: `rf_tuner_loop.st` | |
+| Measurement | Load angle error severity | `{STN}:CAV{CAV}LOAD:ANGLE:ERR.SEVR` |
+| Actuator | Stepper motor (legacy SLO-SYN / Galil upgrade) | `{STN}:CAV{CAV}TUNR:POSN:CTRL` |
+| Bandwidth | ~0.01 Hz | `LOOP_MAX_DELAY = 60.0` s maximum cycle time |
+| Position feedback | Linear potentiometer | `{STN}:CAV{CAV}TUNR:POSN` |
+| Reset tolerance | 2x MDEL | Position monitor deadband |
+| Reset attempts | 5 (`LOOP_RESET_COUNT`), 60-tick delay between attempts | |
+| Instances | 4 (one per cavity) | Reentrant (`option +r`) |
+| Forward power check | Klystron power must exceed minimum | `{STN}:KLYSOUTFRWD:POWER:MIN` |
 | SPEAR3 status | **Active** | |
 
-### 6.8 DAC Loop Specifications
+> **Sources**: `rf_tuner_loop.st` [R18]; `rf_tuner_loop_defs.h`; `rf_tuner_loop_pvs.h`; Section 8 (tuner mechanics).
 
-Outermost amplitude regulation loop. Bandwidth $\sim 0.1$ Hz. Adjusts I/Q modulator baseline DAC values to maintain $V_\text{gap}$ setpoint.
+### 6.7 Gain Tracking Function
 
-### 6.9 Gain Tracking Function
+The gain tracking function maintains constant forward-path gain as the klystron operating point shifts due to HVPS voltage changes or cathode aging:
 
 ```math
-G_\text{modulator} \cdot G_\text{klystron} = G_\text{loop} \;(\text{constant}) \qquad \text{(Eq. 6.1)}
+G_\text{modulator} \cdot G_\text{klystron} = G_\text{loop} \;(\text{constant}) \qquad \text{(Eq. 6.8)}
 ```
 
 ```math
 \therefore\; G_\text{modulator} = G_\text{loop} \,/\, G_\text{klystron}(V_\text{HVPS})
 ```
-A slow EPICS loop (2 Hz) adjusts I/Q modulator weights to maintain constant forward-path gain as the klystron operating point shifts.
 
-> **Sources**: [R15]; [R14].
+Implemented as a ~2 Hz EPICS subroutine record (`subSysDCcoeff` in `subSys.c`, line 277). The algorithm adjusts the I/Q modulator multiplier weights based on the deviation between desired and actual klystron gain:
+
+```math
+\Delta G = D \cdot 10^{(G_\text{desired} + G_\text{deviation})/20} - G_\text{current} \qquad \text{(Eq. 6.9)}
+```
+
+Applied with deadband limiting. The gain state is tracked across on/off transitions and reset on beam abort events.
+
+> **Sources**: [R15]; [R14]; `subSys.c` line 277 (`subSysDCcoeff`).
 
 ---
 
@@ -644,35 +828,71 @@ The Enerpro PLL ($\sim 50$ ms settling) dominates: HVPS loop bandwidth limited t
 
 ### 8.1 Cavity Tuner Physical Description
 
-| Parameter | Value |
-|-----------|-------|
-| Motor | Superior Electric Slo-Syn M093-FC11 (NEMA 34D) |
-| Drive mechanism | Worm gear (self-locking) |
-| Tuning range | $\sim \pm 200$ kHz |
-| Step resolution | $\sim 1$ Hz/step |
-| Distance per microstep | $3.175\;\mu\text{m}$ (legacy), $0.05\;\mu\text{m}$ (Galil) |
+Each of the four SPEAR3 cavities is equipped with a mechanical tuner consisting of a plunger driven by a stepper motor through a worm gear assembly.
+
+| Parameter | Value | Notes |
+|-----------|-------|-------|
+| Motor | Superior Electric Slo-Syn M093-FC11 (NEMA 34D) | NEMA 34D frame |
+| Drive mechanism | Worm gear (self-locking) | Prevents backdriving |
+| Tuning range | ~+/-200 kHz | Full plunger travel |
+| Step resolution | ~1 Hz/step (legacy) | ~0.05 um/microstep (Galil) |
+| Position sensor | Linear potentiometer | Readback via `{STN}:CAV{CAV}TUNR:POSN` |
+| Motor controller | Galil DMC-4040 (upgrade) | Replaced SLO-SYN controller |
 
 > **Sources**: [R29]–[R33] Tuner documentation in `llrf/tuners/`.
 
 ### 8.2 Tuning Physics
 
+The resonant frequency is a nonlinear function of plunger insertion depth. The relationship is modeled by a polynomial fit (from `subSysFreqOff` in `subSys.c`, line 115):
+
 ```math
-f_\text{res}(x) = \text{polynomial fit (3rd–4th order)} \qquad \text{(Eq. 8.1)}
+f_\text{res}(x) = f_0 + p_1 \Delta x + p_2 (\Delta x)^2 + p_3 (\Delta x)^3 + t_1 V_\text{gap}^2 \qquad \text{(Eq. 8.1)}
 ```
 
-Temperature dependence: $\sim -1$ kHz/°C.
+where delta-x = x_current - x_home is the displacement from home tuner position, p_0 through p_3 are polynomial coefficients (fitted from tuner measurements), and t_1 is the thermal detuning coefficient accounting for voltage-dependent cavity heating. The code applies exponential smoothing to the raw polynomial estimate.
 
-### 8.3 Tuner Control Loop
+**Temperature dependence**: approximately -1 kHz per degree C. A change in cavity wall temperature (from beam heating or coolant temperature drift) shifts the resonant frequency slowly (D8), requiring continuous tuner correction. The voltage-squared term in Eq. 8.1 captures the dominant thermal effect from RF-induced heating.
+
+### 8.3 Tuner Control Loop — Signal Path
+
+The tuner loop has a distributed architecture where the control computation is split between the EPICS database and the SNL state machine:
+
+**Signal flow**:
+1. **Hardware**: Cavity probe and forward power detectors measure load angle
+2. **EPICS database**: Computes `LOAD:ANGLE` from phase difference, computes `LOAD:ANGLE:ERR` from setpoint deviation, computes `TUNR:POSN:DELTA` as the position correction
+3. **SNL state machine** (`rf_tuner_loop.st`): Reads `POSN:DELTA`, adds to current motor position, writes motor command
+
+**Load angle error** (computed in EPICS database):
 
 ```math
 \varepsilon = \left[\angle(\text{probe}) - \angle(\text{fwd})\right] - \psi_\text{target} \qquad \text{(Eq. 8.2)}
 ```
 
-where $\psi_\text{target}$ is the target detuning angle (Eq. 2.6). Implemented in `rf_tuner_loop.st` (EPICS SNL). Bandwidth $\sim 0.01$–$1$ Hz.
+where the target detuning angle follows from the optimum detuning condition (Eq. 2.6).
 
-> **Sources**: [R14]; [R34] `rf_tuner_loop.st`; [R35] Galil commissioning notes.
+**State machine** (from `rf_tuner_loop.st`, 555 lines, S. Allison, Oct 1996):
+
+| State | Function | Transition |
+|-------|----------|------------|
+| `loop_init` | Assign PV names from macros; initialize flags | Always -> `loop_unknown` |
+| `loop_unknown` | Wait for `posn_delta` monitor to fire, establishing connection | Monitor fires -> `loop_reset` |
+| `loop_reset` | Move motor to current `posn_delta + sm_posn`; verify arrival within 2x MDEL | Success -> `loop_off`; Fail (5 attempts) -> `loop_off` with error status |
+| `loop_off` | Hold position; monitor station state and loop enable PVs | Enable ON + conditions met -> `loop_on` |
+| `loop_on` | Read `posn_delta`, compute `posn_new = sm_posn + posn_delta`, command motor move | Enable OFF -> `loop_off` |
+
+**Safety interlocks** (checked before motor move in `loop_on`):
+- Load angle alarm: `load_angle_alarm_sevr` must be below threshold
+- Forward power minimum: `kly_fwd_power` must exceed `kly_fwd_power_min`
+- Motor done: previous motor move must be complete (`done_moving_status`)
+- Loop enable: `loop_enabled` PV must be true
+- Station state: station must be in appropriate operating mode
+
+**Status codes** (`rf_tuner_loop_defs.h`): The state machine reports 13 distinct status values via PV `{STN}:CAV{CAV}TUNR:LOOP:STATUS`, including: OK, moving, target reached, loop disabled, alarm condition, power too low, motor fault, reset failed, and others.
+
+> **Sources**: [R14]; [R34] `rf_tuner_loop.st`; [R35] Galil commissioning notes; `subSys.c` line 115 (`subSysFreqOff`).
 
 ---
+
 
 ## 9. Performance Requirements and Verification
 
@@ -680,33 +900,106 @@ where $\psi_\text{target}$ is the target detuning angle (Eq. 2.6). Implemented i
 
 | Disturbance | Frequency | Open-Loop Impact | Rejection | Residual |
 |-------------|-----------|:-:|:-:|:-:|
-| Beam loading (D1–D2) | DC–100 kHz | Unstable | $\sim 40$ dB | Stable |
-| Robinson (D3) | $\sim 9.4$ kHz | Exponential growth | $\sim 40$ dB | $\ll 1/\tau_\text{rad}$ |
-| HVPS ripple (D5) | 360–2000 Hz | $\sim 1\%$ phase | $\sim 40$ dB | $< 0.01\%$ |
-| Thermal drift (D8) | $< 0.01$ Hz | $\sim 100$ Hz/hr | Tuner tracks | $< 1$ Hz |
-| Klystron gain (D6) | 0.01–1 Hz | $\sim 7$ dB var. | Gain tracking | $< 0.5$ dB |
+| Beam loading (D1–D2) | DC–100 kHz | Unstable | ~40 dB | Stable |
+| Robinson (D3) | ~9.4 kHz | Exponential growth | ~40 dB | << 1/tau_rad |
+| HVPS ripple (D5) | 360–2000 Hz | ~1% phase | ~40 dB | < 0.01% |
+| Thermal drift (D8) | < 0.01 Hz | ~100 Hz/hr | Tuner tracks | < 1 Hz |
+| Klystron gain (D6) | 0.01–1 Hz | ~7 dB var. | Gain tracking | < 0.5 dB |
 
 ### 9.2 LLRF9 Commissioning Results
 
-From [R4]: LLRF9 achieves improved noise floor vs. legacy at 500 mA. Overall amplitude stability $< 0.05\%$ RMS, phase stability $< 0.05^\circ$ RMS — both exceed requirements.
+From [R4]: LLRF9 achieves improved noise floor vs. legacy at 500 mA. Overall amplitude stability < 0.05% RMS, phase stability < 0.05 deg RMS — both exceed requirements.
 
 ### 9.3 Performance Margins
 
 | Parameter | Capacity | Typical | Margin |
 |-----------|:-:|:-:|:-:|
-| Klystron power | 1.2 MW | $\sim 800$ kW | $\sim 50\%$ |
-| HVPS voltage | 90 kV | $\sim 74$ kV | $\sim 22\%$ |
-| Gap voltage/cavity | 1 MV | $\sim 712$ kV | $\sim 40\%$ |
-| Direct loop BW | $\sim 930$ kHz | $\sim 800$ kHz | $\sim 16\%$ |
-| Impedance reduction | $\sim 40$ dB | Required $\sim 30$ dB | $> 10$ dB margin |
+| Klystron power | 1.2 MW | ~800 kW | ~50% |
+| HVPS voltage | 90 kV | ~74 kV | ~22% |
+| Gap voltage/cavity | 1 MV | ~712 kV | ~40% |
+| Direct loop BW | ~930 kHz | ~800 kHz | ~16% |
+| Impedance reduction | ~40 dB | Required ~30 dB | > 10 dB margin |
 
-### 9.4 Calibration Data
+### 9.4 Calibration System
 
-Calibration files in `llrf/calibrations/` establish numerical relationships for all feedback loops.
+The SPEAR3 LLRF calibration system consists of three distinct subsystems, each with its own storage format, execution environment, and operational procedures.
 
-> **Sources**: [R38]; [R39] Jim Sebek's master document index.
+#### 9.4.1 RF Signal Chain Calibration (`rf_calib.st`)
+
+The primary calibration program (`rf_calib.st`, ~2800 lines) implements a 28-state calibration sequence that nulls offsets and establishes scale factors for every node in the RF signal chain. Key numerical parameters from `rf_calib_defs.h`:
+
+| Parameter | Value | Description |
+|-----------|:-----:|-------------|
+| `COUNT` | 30,000 | Data averaging depth (words per measurement) |
+| `MAX_DAC` | 2047 | 12-bit DAC full range (unsigned maximum) |
+| `MAX_DAC_SMALL` | 511 | Reduced DAC range for fine nulling |
+| `MAX_COMB` | +/-512 | Comb filter multiplier range |
+| `MODMAX` | 1024 | RF modulator maximum |
+| `ZERO_ATTEMPTS` | 11 | Iterations for zeroing procedures |
+| `MAX_ATTEMPTS` | 50 | Maximum nulling attempts |
+| `MARGIN` | 1 | Standard convergence tolerance (counts) |
+| `BIG_MARGIN` | 2 | Relaxed tolerance |
+| `BIG_MARGIN2` | 4 | Coarse tolerance |
+
+The 28 calibration states are organized into 14 logical categories:
+
+| Category | Nodes Calibrated | Example PV Suffixes |
+|----------|-----------------|---------------------|
+| 1. Octal DACs | RFP module (cavity, direct loop, comb loop) | Various octal DAC channels |
+| 2. IQA modulator offset | I/Q modulator DC null on IQA module | `IQA:MOD:OFFSI`, `IQA:MOD:OFFSQ` |
+| 3. Multiplier weights | All 4 cavity weighting multipliers | `MUL{n}I`, `MUL{n}Q` |
+| 4. Klystron modulator matrix | 4 coefficients (II, IQ, QI, QQ) | `KLYS:MODII`, `KLYS:MODIQ`, etc. |
+| 5. Klystron demodulator offset | Klystron I/Q demodulator DC offset | `KLOI`, `KLOQ` |
+| 6. Direct loop control node | Direct loop offset nulling | `DLIO`, `DLQO` |
+| 7. Comb loop control node | Comb loop offset nulling | `CLIO`, `CLQO` |
+| 8. Sum node | Signal summing junction offset | `SNIO`, `SNQO` |
+| 9. Gain stages | Per-cavity gain offsets (4 cav x 2 ch) | Various |
+| 10. Compensation stage | Compensation filter offset | `CSIO`, `CSQO` |
+| 11. Diff node | Difference node offset | `DNIO`, `DNQO` |
+| 12. Klystron demod (fine) | Fine demodulator offset nulling | `KLOI`, `KLOQ` |
+| 13. Tune mode setpoints | Tune-mode DAC values with offset correction | Various |
+| 14. Comb output offsets | Comb filter output offset (when `DOCOMB=1`) | `CO1I`, `CO1Q`, etc. |
+
+Each state uses iterative binary-search or stepping algorithms with the margin-based convergence checking. The `DOCOMB` flag (`#define DOCOMB 0`) disables comb-related calibration states at SPEAR3 (Section 6.3).
+
+#### 9.4.2 HVPS PLC Calibration
+
+The HVPS high-voltage power supply has its own calibration subsystem in the Allen-Bradley SLC-500 PLC, separate from the RF signal chain. Key parameters from the N7 register map (`hvps/documentation/plc/technical-notes/08-analog-registers-calibration.md`):
+
+| Register | Multiplier | Description |
+|----------|:----------:|-------------|
+| N7:20 | 10000 | Output Reference Multiplier |
+| N7:22 | 10075 | Voltage Multiplier |
+| N7:24 | 4600 | AC Current Multiplier |
+| N7:27 | 5000 | DC Current Multiplier |
+| N7:29 | 6 | Power Multiplier |
+
+**Voltage scaling** (from measurement data in `hvpsMeasurements20220314.xlsx`):
+- Phase angle formula: `N7:11 = (N7:10 x 12000)/32767 + 6000`
+- Voltage conversion: V_HVPS (kV) is approximately N7:15 x 0.00305
+- Calibration range: 2000–3200 V input / 60–69 kV output
+
+Temperature monitoring uses 4 thermocouples with alarm thresholds, routed through the PLC analog input module.
+
+#### 9.4.3 Hardware Calibration Data Files
+
+Six Excel calibration files in `llrf/calibrations/` provide hardware-specific measurement data:
+
+| File | Contents |
+|------|----------|
+| `driveAmpCalibration.xlsx` | Drive amplifier amplitude response curves |
+| `klystronCouplerDriveAmpCalibrations.xlsx` | Klystron-to-coupler coupling measurements |
+| `tuneModeDacCalibration.xlsx` | Tune mode DAC output verification |
+| `reflectedPowerCalibrations.xlsx` | Reflected power detector calibration |
+| `pulsarCouplerCalibration2049.xlsx` | Pulsar-specific coupler cal data |
+| `b132R11PatchPanel.xlsx` | Patch panel wiring and termination data |
+
+These files document the physical measurement campaigns that establish the numerical constants used in the software calibration routines above.
+
+> **Sources**: [R38] `rf_calib.st`; [R39] Jim Sebek's master document index; `rf_calib_defs.h`; `08-analog-registers-calibration.md`; `hvpsMeasurements20220314.xlsx`.
 
 ---
+
 
 ## Appendix A — SPEAR3 RF System Parameter Table
 
