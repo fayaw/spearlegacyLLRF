@@ -97,7 +97,7 @@ External references obtained through web research are cited with full bibliograp
 
 - Physical hardware descriptions with part numbers, serial numbers, and specifications
 - Control system architecture and PLC configurations
-- Software architecture for 6 SNL programs (7,247 lines total)
+- Software architecture for 6 SNL programs (7,112 lines total)
 - Protection and safety system signal chains
 - Complete cabling and interconnection references
 - Known issues and legacy debt catalog
@@ -383,11 +383,11 @@ The AIM module provides the interface between the VXI crate and the external int
 - Beam abort force/reset interface
 - Filament control signals
 - HVPS permissive signals
-- Fault history buffers (13 channels written to `/dat/FAULTSig*` files on fault)
+- Fault history buffers (11 channels written to `/dat/FAULT*_` files on fault)
 - Station fault word monitoring
 
 **Fault file capture** (from `rf_states.st`, M. Laznovsky addition, 2003):
-On entering a fault state, 6 signal RAMs (sigI, sigQ, cavI, cavQ, dacI, dacQ) are dumped to disk in a circular buffer of 11 fault files.
+On entering a fault state, 11 signal channels (RfpSI, RfpSQ, RfpCI, RfpCQ, Cf2I, Cf2Q, Iqa1Amp, Iqa2Amp, Iqa3Amp, Gvf, Aim) are dumped to disk as `/dat/FAULT<channel>_<n>` in a circular buffer of fault files.
 
 > **Sources**: [R16] (fault file handling code); [R20] (AIM status monitoring).
 
@@ -964,7 +964,7 @@ Fault detected (arc, reflected power, vacuum, etc.)
     │
     └── VXI IOC / rf_states.st (software, ~1 s)
             │
-            ├── Fault file capture (/dat/FAULTSig*)
+            ├── Fault file capture (/dat/FAULT*_)
             ├── Station state → OFF
             └── Operator notification
 ```
@@ -995,7 +995,7 @@ The VXI crate Slot 0 processor runs VxWorks RTOS with an EPICS IOC. The IOC host
 | `rf_dac_loop.st` | 290 | 1 | S. Allison | Drive/gap voltage DAC control |
 | `rf_msgs.st` | 352 | 1 | — | Message logging, TAXI monitoring |
 
-Plus 12 header/macro files (~1,151 lines) defining PV names, status codes, and control macros.
+Plus 11 header/macro files (1,111 lines) defining PV names, status codes, and control macros.
 
 > **Sources**: Legacy source code in `spear-rf-code-legacy/rfApp/src/seq/` [R16]–[R20]; preliminary analysis (AI-generated, see `spear-rf-code-legacy/codeReviewTechnicalNotes/`, unreviewed).
 
@@ -1033,7 +1033,7 @@ Runs as 4 instances (one per cavity) via `CAV` macro substitution. Implements a 
 2. Comparing against setpoint (optimal detuning for current beam current)
 3. Commanding stepper motor moves via AB 1746-HSTP1 controller
 
-**5 SNL states**, 3 algorithmic control modes: phase control, position control, and manual.
+**5 SNL states**, 2 control algorithms (phase-feedback-based position tuning for resonance maintenance, and position homing for park/on transitions) plus a loop-off monitoring state.
 
 ### 16.5 rf_dac_loop.st — Drive/Gap Voltage DAC Control
 
@@ -1106,7 +1106,7 @@ The Galil controller was commissioned in August 2025 and is now operational for 
 
 ### 18.3 Fault Recording
 
-**Legacy fault file system**: On any fault triggering a station trip, the VXI IOC captures 13 channels of signal RAM data to `/dat/FAULTSig*` files in a circular buffer of 11 fault records. These files preserve pre-fault waveforms for post-mortem analysis.
+**Legacy fault file system**: On any fault triggering a station trip, the VXI IOC captures 11 signal channels to `/dat/FAULT<channel>_<n>` files in a circular buffer of fault records (channels: RfpSI, RfpSQ, RfpCI, RfpCQ, Cf2I, Cf2Q, Iqa1Amp, Iqa2Amp, Iqa3Amp, Gvf, Aim). These files preserve pre-fault waveforms for post-mortem analysis.
 
 ### 18.4 Calibration Data
 
@@ -1251,13 +1251,13 @@ All references cited in this document, organized by reference number.
 | [R29] | SLO-SYN Stepper Drive Manual | `llrf/tuners/SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf` |
 | [R30] | SLO-SYN Motor Specifications | `llrf/tuners/SLO-SYN.pdf` |
 | [R31] | Galil DMC-4103 Manual | `llrf/tuners/galil/dmc-4103-r13h-manual.pdf` |
-| [R32] | Drive Amplifier Datasheet (KAW2051M12) | `llrf/driveAmp/KAW2051M12.pdf` |
-| [R33] | Coaxial Cable Interconnection Diagram | `llrf/documentation/sd3403300100.pdf` |
+| [R32] | Drive Amplifier Datasheet (KAW2051M12) | `llrf/driveAmp/KAW2051M12 (7-98-907-012A).pdf` |
+| [R33] | Coaxial Cable Interconnection Diagram | `llrf/documentation/coaxCables/sd3403300100.pdf` |
 | [R34] | Galil Commissioning Log (Aug 2025) | `llrf/tuners/galil/functioningGalil20250825SwapABToManual.txt` |
 | [R35] | Galil Commissioning Documentation | `llrf/tuners/galil/GalilCommissioning.docx` |
 | [R36] | Cavity Tuner Inspections (June 2023) | `llrf/tuners/cavityTunerInspections20230613.docx` |
 | [R37] | PLC Operation Notes | `hvps/documentation/plc/plcNotesR1.docx` |
-| [R38] | PLC Software Discussion | `hvps/documentation/plc/plcSoftwareDiscussion.docx` |
+| [R38] | PLC Software Discussion | `hvps/documentation/plc/PLC software discusion 1.docx` |
 | [R39] | PLC Label Database | `hvps/documentation/plc/hvpsPlcLabels.xlsx` |
 | [R40] | Enerpro Board Integration Notes | `hvps/controls/enerpro/enerproBoardHvps.docx` |
 
