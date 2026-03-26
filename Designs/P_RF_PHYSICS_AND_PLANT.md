@@ -1,8 +1,8 @@
 # SPEAR3 RF System — RF Physics, Control Theory and Physical Plant
 
 **Document ID**: Doc P
-**Version**: 3.0
-**Date**: March 26, 2026
+**Version**: 3.1
+**Date**: March 25, 2026
 **Status**: DRAFT — For Engineering Review
 **Location**: Designs/P_RF_PHYSICS_AND_PLANT.md
 **Author**: Faya Wang, with AI-assisted analysis
@@ -23,7 +23,8 @@
 | 2.5 | 2026-03-24 | Deep cross-reference review against original sources (McIntosh SLAC-PUB-10983, Schwarz PS-340-330-51, SSRL parameter page, simulation config, legacy code). Corrected synchrotron frequency formula to convention-independent form; added note on design vs operational VRF; corrected QL/β traceability to Schwarz; corrected DSP identification (AT&T DSP1610, not TMS320C16xx); corrected HVPS ripple harmonic description; added radiation damping time clarification; added new [R3] SSRL web reference; updated Appendix A parameters. |
 | 2.6 | 2026-03-24 | Major physics corrections per operational data review: updated U0 from 0.91 to 1.02 MeV with full recalculation cascade (φs, fs, detuning, generator power); corrected Eq. 2.7 generator power formula (~196 kW/cavity, matching measured ~200 kW); standardized RF frequency to 476.3 MHz; corrected I/Q modulator count from PEP-II (7) to SPEAR3 (5); added D1/D2 beam loading physics, D4 comb filter physics, expanded D6 klystron gain tracking detail; added thermal detuning estimation; added system block diagrams; comprehensive LaTeX formatting cleanup. |
 | 2.7 | 2026-03-24 | Physics verification: simplified Eq. 2.4b to use cos convention directly (removed convention-independent form); verified Eq. 2.5 optimum detuning via first-principles admittance derivation (confirmed self-consistent with Rs = 3.73 MΩ); clarified Rs convention in Appendix C (Rs = V²/(2P), circuit convention). |
-| 3.0 | 2026-03-26 | **Major improvements** based on deep codebase review: (a) Added formal symbol definitions for all transfer function blocks in Eq. 5.1 (§5.2), comb filter Eq. 5.4 (§5.3), and multi-loop Eq. 5.5 (§5.6); (b) Strengthened mathematical rigor with gain/phase budget analysis, explicit compensator forms (Eq. 6.1a), and cross-term stability derivation; (c) Transformed §6 from parameter tables into full engineering sections with transfer functions, control laws, and design rationale — added Eqs. 6.4a–c (ripple harmonic estimator), 6.6a (HVPS control), 6.7a–c (tuner loop), 6.8a (DAC loop), 6.9a–c (gain tracking); (d) Expanded §9.4 from 2 lines to comprehensive calibration overview with 6 subsections including calibration sequence (27-state rf_calib.st), drive/power/frequency calibration equations (Eqs. 9.1–9.3); (e) Expanded Appendix C from 15 to 100+ symbol definitions organized by subsystem. |
+| 3.0 | 2026-03-25 | **Major improvements** based on deep codebase review: (a) Added formal symbol definitions for all transfer function blocks in Eq. 5.1 (§5.2), comb filter Eq. 5.4 (§5.3), and multi-loop Eq. 5.5 (§5.6); (b) Strengthened mathematical rigor with gain/phase budget analysis, explicit compensator forms (Eq. 6.1a), and cross-term stability derivation; (c) Transformed §6 from parameter tables into full engineering sections with transfer functions, control laws, and design rationale — added Eqs. 6.4a–c (ripple harmonic estimator), 6.6a (HVPS control), 6.7a–c (tuner loop), 6.8a (DAC loop), 6.9a–c (gain tracking); (d) Expanded §9.4 from 2 lines to comprehensive calibration overview with 6 subsections including calibration sequence (27-state rf_calib.st), drive/power/frequency calibration equations (Eqs. 9.1–9.3); (e) Expanded Appendix C from 15 to 100+ symbol definitions organized by subsystem. |
+| 3.1 | 2026-03-25 | **Structural improvements**: (a) Added §6.0 Loop Overview and Implementation Summary with 9-loop classification table and 4-tier implementation taxonomy (analog HW → digital HW → RT software → supervisory SW); (b) Expanded §6.2 (Comb) from 2 lines to full engineering section with closed-loop impedance (Eq. 6.2a), FIR equalizer (Eq. 6.2b), complete comb path TF (Eq. 6.2c), PEP-II parameter table, frev/Δf₁/₂ ratio argument; (c) Expanded §6.3 (LFB Woofer) from 2 lines to full section with woofer transfer function (Eq. 6.3a), woofer/tweeter complementarity table, direct loop interaction analysis; (d) §5→§6 boundary cleanup: trimmed §5.2 detailed symbol table and impedance analysis (moved to §6.1), trimmed §5.3 comb symbol table (moved to §6.2), added forward references; (e) Added §3 transitional sentence cementing I/Q framework role; (f) Updated Appendix C.4 with comb/FIR symbols, added C.4a LFB woofer symbols. |
 
 ---
 
@@ -124,37 +125,37 @@ This section derives the mathematical models of the three physical subsystems th
 The following diagram shows the full RF control architecture — four cavities driven by one klystron, with multiple feedback loops spanning seven decades of frequency:
 
 ```
-  ┌─────────────────────────────────────────────────────────────────────────────────────┐
-  │                        SPEAR3 RF CONTROL SYSTEM — OVERVIEW                          │
-  ├─────────────────────────────────────────────────────────────────────────────────────┤
-  │                                                                                     │
-  │   IQ Ref ──▶(Σ)──▶ BASEBAND ──▶ IQ RF ──▶ DRIVE ──▶ KLYSTRON ──▶ 3× MAGIC ──┐   │
-  │     (DAC)    ↑      MODULATOR     MOD       AMP       1.2 MW      TEE         │   │
-  │              │      (gain/phase   (up to    (~29 W)   (43 dB,    SPLITTER     │   │
-  │              │       tracking)    476 MHz)             <150 ns)               │   │
-  │              │                                                                │   │
-  │              │                                            ┌───────────────────┤   │
-  │              │  DIRECT LOOP                               │                   │   │
+  ┌────────────────────────────────────────────────────────────────────────────────────┐
+  │                        SPEAR3 RF CONTROL SYSTEM — OVERVIEW                         │
+  ├────────────────────────────────────────────────────────────────────────────────────┤
+  │                                                                                    │
+  │   IQ Ref ──▶(Σ)──▶ BASEBAND ──▶ IQ RF ──▶ DRIVE ──▶ KLYSTRON ──▶ 3× MAGIC  ──┐  │
+  │     (DAC)    ↑      MODULATOR     MOD       AMP       1.2 MW      TEE          │   │
+  │              │      (gain/phase   (up to    (~29 W)   (43 dB,    SPLITTER      │   │
+  │              │       tracking)    476 MHz)             <150 ns)                │   │
+  │              │                                                                 │   │
+  │              │                                             ┌───────────────────┤   │
+  │              │  DIRECT LOOP                                │                   │   │
   │              │  (~800 kHz BW)                              ▼                   ▼   │
-  │              │  ┌────────────────┐                     ┌──────┐           ┌──────┐ │
-  │              ├──┤ Error Amp +    │◀── Vector ◀── IQ ◀──┤Cav 1 │   ...    │Cav 4 │ │
-  │              │  │ Lead/Integral  │    Sum       Demod  │      │           │      │ │
-  │              │  │ Compensation   │    (4 cav)          │ Probe│           │ Probe│ │
-  │              │  └────────────────┘                     └──┬───┘           └──┬───┘ │
-  │              │                                            │                  │     │
-  │   RIPPLE     │                                            ▼                  ▼     │
-  │   LOOP ──────┤  ◀── Kly Fwd IQ ◀── IQ Demod ◀── Klystron Forward Power          │
-  │   (~300 Hz)  │       (DSP: AT&T DSP1610, 23 kHz sample rate)                      │
+  │              │  ┌────────────────┐                      ┌──────┐          ┌──────┐ │
+  │              ├──┤ Error Amp +    │◀── Vector ◀── IQ ◀──┤Cav 1 │   ...   │Cav 4 │ │
+  │              │  │ Lead/Integral  │    Sum       Demod   │      │          │      │ │
+  │              │  │ Compensation   │    (4 cav)           │ Probe│          │ Probe│ │
+  │              │  └────────────────┘                      └──┬───┘          └──┬───┘ │
+  │              │                                             │                 │     │
+  │   RIPPLE     │                                             ▼                 ▼     │
+  │   LOOP ──────┤  ◀── Kly Fwd IQ ◀── IQ Demod ◀── Klystron Forward Power           │
+  │   (~300 Hz)  │       (DSP: AT&T DSP1610, 23 kHz sample rate)                       │
   │              │                                                                     │
-  │   DAC LOOP ──┘  (~0.1 Hz, maintains Vgap setpoint)                                │
-  │                                                                                     │
-  │   TUNER LOOP (0.01–1 Hz): ∠probe − ∠fwd → stepper motor → mechanical tuner       │
-  │   HVPS LOOP  (~1 Hz): Drive power monitor → PLC → SCR firing angle → Vk           │
-  │                                                                                     │
-  │   ╔════════════════════════════════════════════════════════════════════════╗         │
-  │   ║  NOT USED at SPEAR3: Comb Loop, Gap FF Loop, LFB Woofer             ║         │
-  │   ╚════════════════════════════════════════════════════════════════════════╝         │
-  └─────────────────────────────────────────────────────────────────────────────────────┘
+  │   DAC LOOP ──┘  (~0.1 Hz, maintains Vgap setpoint)                                 │
+  │                                                                                    │
+  │   TUNER LOOP (0.01–1 Hz): ∠probe − ∠fwd → stepper motor → mechanical tuner         │
+  │   HVPS LOOP  (~1 Hz): Drive power monitor → PLC → SCR firing angle → Vk            │
+  │                                                                                    │
+  │   ╔════════════════════════════════════════════════════════════════════════╗       │
+  │   ║  NOT USED at SPEAR3: Comb Loop, Gap FF Loop, LFB Woofer                ║       │
+  │   ╚════════════════════════════════════════════════════════════════════════╝       │
+  └────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 **Key architectural features:**
@@ -224,7 +225,7 @@ V_\text{RF} \cos\phi_s = U_0 \qquad \text{(Eq. 2.4)}
 
 Note: $\sin\phi_s = \sin(69.0^\circ) = 0.934$, which appears in the beam loading compensation formulas below.
 
-**Synchrotron frequency** — Using our cos convention ($V_\text{RF}\cos\phi_s = U_0$, so $\sin\phi_s = \sqrt{1 - (U_0/V_\text{RF})^2}$):
+**Synchrotron frequency** :
 
 ```math
 \nu_s = \sqrt{\frac{h\,\alpha_c\,V_\text{RF}\,\sin\phi_s}{2\pi\,E_0}} \qquad \text{(Eq. 2.4b)}
@@ -269,7 +270,7 @@ P_\text{wall} = \frac{V_\text{gap}^2}{2R_s} = \frac{(712\;\text{kV})^2}{2 \times
 ```
 
 ```math
-P_\text{gen/cav} = 68 + 127.5 \approx 196\;\text{kW/cavity} \qquad \text{(Eq. 2.7c)}
+P_\text{gen/cav} = 68 + 127.5 \approx 196\;\text{kW/cavity} \qquad        \text{(Eq. 2.7c)}
 ```
 
 **Total RF power**: $4 \times 196 = 782$ kW — within the 1.2 MW klystron capacity ($\sim 35\%$ margin). The measured forward power at 500 mA is $\sim 200$ kW/cavity, consistent with this calculation (the small excess accounts for reflected power at non-ideal coupling).
@@ -390,6 +391,8 @@ Each of the 4 cavity probe signals is demodulated to I/Q and combined through a 
 ```
 
 > **Sources**: [R15]; [R14].
+
+The I/Q baseband representation developed in this section is used throughout §4–§9 to express all loop transfer functions in the complex baseband domain.
 
 ---
 
@@ -595,18 +598,7 @@ Bandwidth separations of $10\times$–$1000\times$ provide natural frequency-dom
 G_\text{OL}(s) = G_\text{prop} \cdot G_\text{lead}(s) \cdot G_\text{int}(s) \cdot G_\text{kly}(s) \cdot H_\text{cav}(s) \cdot e^{-s\tau_d} \qquad \text{(Eq. 5.1)}
 ```
 
-**Block-by-block symbol definitions for Eq. 5.1:**
-
-| Symbol | Definition | Transfer Function | Parameters |
-|--------|-----------|-------------------|------------|
-| $G_\text{prop}$ | **Proportional gain** — a scalar gain setting that determines the DC open-loop gain of the direct feedback loop. Set via EPICS PV. | $G_\text{prop} = K_p$ (dimensionless, typically $\sim 15$ dB $\approx 5.6$) | Adjustable; sets the basic impedance reduction factor at frequencies below the loop bandwidth |
-| $G_\text{lead}(s)$ | **Lead compensator** — provides phase advance near the crossover frequency to compensate for the phase lag from the transport delay $\tau_d$ and the cavity pole. Without lead compensation, the maximum stable bandwidth is limited to $\sim 1/(2\pi\tau_d)$; with it, the bandwidth extends to $\sim 1/(4\tau_d)$ (Eq. 2.11). | $G_\text{lead}(s) = \dfrac{1 + s/\omega_z}{1 + s/\omega_p}$ where $\omega_p > \omega_z$ | $\omega_z$: lead zero frequency (below crossover), $\omega_p$: lead pole frequency (above crossover). The ratio $\omega_p/\omega_z$ sets the maximum phase advance ($\phi_\text{max} = \arcsin\frac{\omega_p/\omega_z - 1}{\omega_p/\omega_z + 1}$). Typical lead advance: $30^\circ$–$50^\circ$. |
-| $G_\text{int}(s)$ | **Integral compensator** — provides high gain at low frequencies for DC error rejection (drives steady-state error to zero). The integrator bandwidth is set well below the crossover frequency to avoid destabilizing the fast loop. | $G_\text{int}(s) = 1 + \dfrac{\omega_i}{s}$ (PI form) | $\omega_i = 2\pi \times 30\;\text{kHz}$: integrator unity-gain frequency. Below $\omega_i$, the gain rises as $1/f$; above $\omega_i$, the gain approaches unity. This frequency is chosen to be well below the direct loop crossover ($\sim 800$ kHz) for stability. |
-| $G_\text{kly}(s)$ | **Klystron transfer function** — models the klystron as a broadband gain with transport delay (Eq. 2.8). | $G_\text{kly}(s) = K_\text{kly} \cdot e^{-s\tau_\text{kly}}$ | $K_\text{kly}$: small-signal voltage gain ($\sim 43$ dB min); $\tau_\text{kly} < 150$ ns group delay. At frequencies below the klystron bandwidth ($\sim 5$ MHz), $G_\text{kly} \approx K_\text{kly}$ is essentially flat. |
-| $H_\text{cav}(s)$ | **Cavity transfer function** — the narrowband resonator response from Eq. 2.1a. This is the dominant dynamic element in the loop: its single pole at $\omega_{1/2}$ rolls off gain at $-20$ dB/decade and contributes $-90^\circ$ phase. | $H_\text{cav}(s) = \dfrac{R_s\,\omega_{1/2}}{s + \omega_{1/2} + j\Delta\omega}$ | $\omega_{1/2} = 2\pi \times 35.5\;\text{kHz}$: cavity half-bandwidth; $R_s = 3.73\;\text{M}\Omega$: shunt impedance; $\Delta\omega$: detuning from RF. |
-| $e^{-s\tau_d}$ | **Transport delay** — the aggregate propagation delay through all elements in the loop (cables, electronics, klystron). This contributes $-\omega\tau_d$ radians of phase lag and is the fundamental limit on achievable loop bandwidth (Eq. 2.11). | Pure delay | $\tau_d \approx 270$ ns (LLRF9) or $\sim 500$ ns (legacy analog). See §2.3 for the delay budget breakdown. |
-
-> **Design insight**: The compensator blocks are arranged so that $G_\text{prop}$ sets the overall gain level, $G_\text{lead}(s)$ recovers phase margin near crossover, and $G_\text{int}(s)$ provides low-frequency gain boosting. The loop crossover frequency $f_c$ (where $|G_\text{OL}(j2\pi f_c)| = 1$) is determined primarily by $G_\text{prop}$ and $\tau_d$, while the gain margin and phase margin are shaped by the lead compensator parameters.
+→ See §6.1 for block-by-block symbol definitions, explicit compensator forms (Eq. 6.1a), gain/phase budget at crossover, and stability analysis.
 
 **Closed-loop transfer function:**
 
@@ -614,7 +606,7 @@ G_\text{OL}(s) = G_\text{prop} \cdot G_\text{lead}(s) \cdot G_\text{int}(s) \cdo
 T(s) = \frac{G_\text{OL}(s)}{1 + G_\text{OL}(s)} \qquad \text{(Eq. 5.2)}
 ```
 
-This gives the cavity voltage response to the reference setpoint. At frequencies well below the crossover frequency $f_c$, $|G_\text{OL}| \gg 1$ and $T \approx 1$ (the output tracks the reference). Near and above $f_c$, $|G_\text{OL}| \to 0$ and $T \to 0$ (the loop has no authority). The $-3$ dB bandwidth of $T(s)$ defines the closed-loop bandwidth, which is approximately equal to $f_c$.
+At frequencies well below $f_c$, $|G_\text{OL}| \gg 1$ and $T \approx 1$; above $f_c$, $T \to 0$.
 
 **Effective cavity impedance seen by the beam:**
 
@@ -622,19 +614,12 @@ This gives the cavity voltage response to the reference setpoint. At frequencies
 Z_\text{eff}(\omega) = \frac{Z_\text{cav}(\omega)}{1 + G_\text{OL}(\omega)} \qquad \text{(Eq. 5.3)}
 ```
 
-This is the central result. The direct loop **transforms the cavity from a high-impedance resonator into a low-impedance broadband structure**. The impedance reduction factor is $|1 + G_\text{OL}(\omega)|$, which varies with frequency:
+This is the central result. The direct loop **transforms the cavity from a high-impedance resonator into a low-impedance broadband structure**:
 
-- At DC: $|G_\text{OL}| = G_\text{prop} \times (1 + \omega_i/0^+)$ → integrator provides very high gain $\implies$ $Z$ reduction $\sim 40$ dB (factor $\sim 100$)
-- At $f_s \approx 10$ kHz: $|G_\text{OL}| \sim 30$ dB $\implies$ both Robinson sidebands see substantial impedance reduction
-- At $\Delta f_{1/2} = 35.5$ kHz (cavity $-3$ dB point): $|G_\text{OL}| \sim 15$ dB $\implies$ $Z$ reduction $\sim 15$ dB
-- At $f > f_c$ (crossover): $|G_\text{OL}| < 1$ $\implies$ $Z_\text{eff} \approx Z_\text{cav}$ (no reduction)
-
-**Robinson stability under feedback:** Since $\omega_s \ll$ loop bandwidth, both synchrotron sidebands see approximately equal impedance reduction:
-
-```math
-\text{Re}\{Z_\text{eff}(\omega_\text{RF} \pm \omega_s)\} \approx \frac{\text{Re}\{Z_\text{cav}(\omega_\text{RF} \pm \omega_s)\}}{|1 + G_\text{OL}(\omega_s)|}
-```
-The asymmetry is preserved but absolute values reduced by $\sim 40$ dB.
+- At DC: impedance reduction $\sim 40$ dB (integrator provides very high gain)
+- At $f_s \approx 10$ kHz: $\sim 30$ dB (Robinson sidebands well suppressed)
+- At $\Delta f_{1/2} = 35.5$ kHz: $\sim 15$ dB
+- At $f > f_c$: no reduction ($Z_\text{eff} \approx Z_\text{cav}$)
 
 > **Sources**: [R15] Corredoura, Fig. 3; [R14]; [R11].
 
@@ -646,19 +631,9 @@ The asymmetry is preserved but absolute values reduced by $\sim 40$ dB.
 H_\text{comb}(z) = G\,\frac{z^{-1} - z^{-n}}{1 - 2K\cos(2\pi\nu_s)\,z^{-n} + K^2 z^{-2n}} \qquad \text{(Eq. 5.4)}
 ```
 
-**Symbol definitions for Eq. 5.4:**
-
-| Symbol | Definition | Physical Meaning |
-|--------|-----------|-----------------|
-| $z$ | Z-transform variable ($z = e^{j\omega T_s}$, where $T_s$ is the sampling period) | Standard discrete-time frequency variable |
-| $n$ | Number of samples per revolution period: $n = f_s / f_\text{rev}$ | Sets the comb tooth spacing. For SPEAR3 ($f_\text{rev} = 1.28$ MHz), the comb teeth are spaced at $1.28$ MHz intervals |
-| $G$ | Feed-forward gain coefficient | Sets the peak gain at each comb tooth. Peak gain $= G/(1-K)$ |
-| $K$ | Feedback coefficient ($|K| < 1$ for stability) | Controls the Q (sharpness) of each comb tooth. Bandwidth per tooth $\approx (1-K) \cdot f_\text{rev}/\pi$. As $K \to 1$, teeth become narrower and taller. |
-| $\nu_s$ | Synchrotron tune ($= f_s / f_\text{rev} \approx 0.008$) | Offsets the comb teeth by $\pm f_s$ from exact revolution harmonics, targeting the synchrotron sidebands where coupled-bunch modes are driven |
-
 The comb filter produces gain peaks at frequencies $f = m \cdot f_\text{rev} \pm f_s$ for integer $m$, precisely targeting the revolution-harmonic sidebands that drive coupled-bunch instabilities (Eq. 4.4).
 
-**SPEAR3 status**: The comb filter is **not used**. SPEAR3's $f_\text{rev} = 1.28$ MHz $\gg \Delta f_{1/2} = 35.5$ kHz means only 1–2 revolution harmonics interact with each cavity mode. The direct loop alone provides sufficient impedance reduction at these few harmonics. In PEP-II ($f_\text{rev} = 136$ kHz $\approx 4 \times \Delta f_{1/2}$), many harmonics fall within each cavity bandwidth, necessitating the comb filter.
+→ See §6.2 for symbol definitions, closed-loop impedance analysis with Direct+Comb, group delay equalization (FIR), PEP-II parameters, and the full argument for why SPEAR3 does not require this loop.
 
 ### 5.4 Slow Loops — Maintaining Operating Point (D6, D7, D8)
 
@@ -703,6 +678,29 @@ SPEAR3 satisfies this with large margins: DAC$\to$HVPS ($10\times$), HVPS$\to$Ri
 
 This section provides the transfer function, control law, and design rationale for each feedback loop. The subsections follow a consistent structure: **purpose → signal flow → transfer function → key parameters → design constraints**.
 
+### 6.0 Loop Overview and Implementation Summary
+
+The bandwidth requirement of each disturbance dictates the implementation technology. Microsecond-scale beam loading demands analog hardware with continuous processing. Millisecond-scale HVPS ripple is handled by a dedicated DSP. Second-scale drift is corrected by IOC software running in EPICS. This principle — **disturbance timescale → implementation tier** — makes the entire multi-loop architecture a natural consequence of the physics.
+
+| Loop | §Ref | Implementation | Update Rate | Controller Type | Bandwidth | SPEAR3 Status |
+|------|:----:|----------------|:-----------:|-----------------|:---------:|:-------------:|
+| Direct | 6.1 | Analog hardware (VXI RFP module) | Continuous | Lead-lag + PI | ~800 kHz | Active |
+| Comb | 6.2 | Digital hardware (VXI CFM, IIR + FIR) | ~10 MHz | IIR comb + FIR equalizer | ~2 MHz span | Not used |
+| LFB Woofer | 6.3 | Digital hardware (GVF module, TAXI fiber) | ~10 MHz | External injection | ~1 MHz | Not used |
+| Ripple | 6.4 | Digital hardware (AT&T DSP1610) | 23 kHz | Adaptive harmonic estimator | ~300 Hz | Active |
+| Gap FF | 6.5 | Digital hardware (GVF module DSP) | ~10 MHz | Feed-forward | ~100 Hz | Not used |
+| HVPS | 6.6 | Real-time software (EPICS SNL) | ~1 Hz | Proportional + deadband | ~1 Hz | Active |
+| Tuner | 6.7 | Real-time software (EPICS SNL) | ~1 Hz | Bang-bang | ~0.01–1 Hz | Active |
+| DAC | 6.8 | Real-time software (EPICS SNL) | Event / 10 s | Proportional + deadband | ~0.1 Hz | Active |
+| Gain Tracking | 6.9 | Supervisory software (EPICS CA) | ~2 Hz | Ratio maintenance | ~0.5 Hz | Active |
+
+The loops naturally partition into four implementation tiers:
+
+1. **Analog hardware** (continuous): The direct loop — minimum latency path for the fastest disturbances (D1–D4).
+2. **Digital hardware** (MHz-rate): Comb, woofer, gap feedforward, and ripple loops — dedicated DSP/FPGA processing for structured disturbances (D4, D5).
+3. **Real-time software** (~1 Hz): HVPS, tuner, and DAC loops — EPICS State Notation Language programs managing slow plant dynamics (D6–D8).
+4. **Supervisory software** (~0.1–2 Hz): Gain tracking — EPICS Channel Access for calibration maintenance.
+
 ### 6.1 Direct Loop — Wideband RF Field Regulation
 
 **Purpose**: Reduces the effective cavity impedance seen by the beam by $\sim 40$ dB at low frequencies, suppressing Robinson instability (D3), coupled-bunch growth (D4), and regulating against beam loading transients (D1–D2). This is the primary stability loop.
@@ -746,11 +744,100 @@ where the terms are (left to right): proportional gain, lead compensator, PI int
 
 ### 6.2 Comb Loop — Narrowband Enhancement at Revolution Harmonics
 
-Not used at SPEAR3 (§5.3). Transfer function: Eq. 5.4. The comb filter hardware (two VXI Comb Filter Modules with one-turn FIFO delay line) is physically present but was never activated for SPEAR3 operations.
+**Purpose**: Provides an additional ~20 dB of impedance reduction at revolution frequency harmonics — precisely where coupled-bunch modes are driven (D4) — complementing the broadband reduction of the direct loop. Between revolution harmonics, the comb gain returns to unity, avoiding unnecessary noise amplification.
 
-### 6.3 LFB Woofer — Longitudinal Feedback
+**Signal flow**: Cavity probe I/Q → ADC → IIR comb filter → FIR group delay equalizer → one-turn delay + vernier → DAC → summing node (added to direct loop output).
 
-Not used at SPEAR3. Addresses D2 (residual coupled-bunch motion) via fiber-optic TAXI link to the LFB system. SPEAR3 has no LFB system installed.
+**IIR comb transfer function** (restating Eq. 5.4 with engineering context):
+
+```math
+H_\text{comb}(z) = G\,\frac{z^{-1} - z^{-n}}{1 - 2K\cos(2\pi\nu_s)\,z^{-n} + K^2 z^{-2n}} \qquad \text{(Eq. 5.4)}
+```
+
+The peak gain at each comb tooth is $G_\text{peak} = G/(1-K)$, and the $-3$ dB bandwidth per tooth is approximately $(1-K) \cdot f_\text{rev}/\pi$. For typical PEP-II parameters ($K \approx 0.95$, $G \approx 0.05$), peak gain $\approx 1$ (unity) and tooth bandwidth $\approx 2.2$ kHz — narrow enough to target individual synchrotron sidebands without amplifying inter-harmonic noise.
+
+**Closed-loop impedance with Direct + Comb**: The combined impedance reduction at a revolution harmonic $m \cdot f_\text{rev}$ is:
+
+```math
+Z_\text{eff,D+C}(\omega) = \frac{Z_\text{cav}(\omega)}{1 + G_\text{OL,direct}(\omega) + G_\text{OL,comb}(\omega)} \qquad \text{(Eq. 6.2a)}
+```
+
+At revolution harmonics where both loops have authority, the impedance reduction is the product of the individual factors: the direct loop provides ~20 dB broadband, and the comb adds ~20 dB at targeted harmonics, for a combined ~40 dB at revolution sidebands.
+
+**Group delay equalization**: A 32-tap FIR filter compensates for the frequency-dependent group delay of the cavity and transport path across the comb filter's operating range ($\sim 4$ MHz centered on $f_\text{RF}$). The FIR coefficients are designed for the worst-case detuned cavity condition, maintaining phase linearity to $< 10^\circ$ over the full bandwidth. The one-turn delay is implemented as a FIFO and fine-adjusted with shift registers at 25 ns steps to match the revolution period to sub-ns precision.
+
+```math
+H_\text{eq}(z) = \sum_{k=0}^{31} c_k\, z^{-k} \qquad \text{(Eq. 6.2b)}
+```
+
+The complete comb path transfer function including equalization:
+
+```math
+G_\text{OL,comb}(z) = H_\text{comb}(z) \cdot H_\text{eq}(z) \cdot z^{-n_\text{delay}} \qquad \text{(Eq. 6.2c)}
+```
+
+where $n_\text{delay}$ accounts for the hardware transport delay (ADC + DAC + cable propagation).
+
+| Parameter | PEP-II Value | SPEAR3 Notes |
+|-----------|:----:|----|
+| Addresses | D4 (coupled-bunch modes) | — |
+| $f_\text{rev}$ | 136 kHz | 1.28 MHz |
+| $f_\text{rev}/\Delta f_{1/2}$ | $\approx 4$ | $\approx 36$ |
+| Revolution harmonics in cavity BW | $\sim 10$–$15$ | $\sim 1$–$2$ |
+| Comb feedback $K$ | $\approx 0.95$ | — |
+| Comb feed-forward $G$ | $\approx 0.05$ | — |
+| FIR taps | 32 | — |
+| One-turn delay | $\approx 7.34\;\mu\text{s}$ | $\approx 0.781\;\mu\text{s}$ |
+| Hardware | 2× VXI Comb Filter Modules (present) | Never activated |
+| SPEAR3 status | — | **Not used** |
+
+**Why not needed at SPEAR3**: With $f_\text{rev}/\Delta f_{1/2} \approx 36$, only 1–2 revolution harmonics interact with each cavity mode's bandwidth. The direct loop's broadband ~20 dB impedance reduction is sufficient to stabilize these few modes. In PEP-II, where $f_\text{rev}/\Delta f_{1/2} \approx 4$ and ~10–15 revolution harmonics populate each cavity mode, the comb filter was essential to suppress multi-harmonic coupled-bunch instabilities without amplifying noise at inter-harmonic frequencies.
+
+> **Sources**: [R15] Corredoura, SLAC-PUB-8498, Figs. 4–6; [R14] Schwarz.
+
+### 6.3 LFB Woofer — Longitudinal Feedback via RF Modulation
+
+**Purpose**: Provides broadband damping of low-order coupled-bunch modes ($|n| < 10$) by using the RF station as a longitudinal "sub-woofer" kicker (D2). In the multi-band longitudinal feedback architecture, the woofer handles the low-frequency content of the bunch oscillation spectrum (up to ~1 MHz), while a dedicated stripline kicker (the "tweeter") handles high-frequency content. This is the standard PEP-II/ALS/APS longitudinal damping architecture.
+
+**Signal flow**: LFB BPM pickup → bunch-by-bunch DSP processing (external system) → 10-bit fiber-optic TAXI link at 10 MHz → GVF module DAC → FIR group delay equalizer → injection summing node → I/Q reference modulation.
+
+**Transfer function**: The woofer acts as an additive correction to the static I/Q reference:
+
+```math
+\vec{V}_\text{ref,total}(s) = \vec{V}_\text{ref,static} + K_\text{woofer} \cdot H_\text{FIR}(s) \cdot e^{-s\tau_\text{woofer}} \cdot \Delta\vec{V}_\text{LFB}(s) \qquad \text{(Eq. 6.3a)}
+```
+
+where:
+- $K_\text{woofer}$ is the woofer injection gain (adjustable), setting the strength of RF modulation per unit LFB correction signal
+- $H_\text{FIR}(s)$ is the same 32-tap group delay equalizer used for the comb filter (Eq. 6.2b), compensating cavity and transport delay across the woofer bandwidth
+- $\tau_\text{woofer}$ is the one-turn injection delay (matching the revolution period for proper bunch alignment)
+- $\Delta\vec{V}_\text{LFB}(s)$ is the LFB correction signal received over the TAXI fiber link
+
+**Woofer/Tweeter complementarity**: The longitudinal feedback system partitions the correction bandwidth between two actuators:
+
+| Actuator | Mechanism | Bandwidth | Modes Addressed |
+|----------|-----------|:---------:|:---------------:|
+| Woofer (RF station) | Modulates cavity voltage via I/Q reference injection | DC – ~1 MHz | Low-order ($|n| < 10$) |
+| Tweeter (stripline kicker) | Direct longitudinal kick via broadband kicker | ~1 – ~200 MHz | High-order ($|n| > 10$) |
+
+The RF station woofer is effective for low-order modes because these modes require large energy corrections at low frequency — naturally suited to the high-power RF cavity. Higher-order modes require fast, broadband corrections — suited to the stripline kicker's low latency.
+
+**Interaction with direct loop**: The woofer injection enters upstream of the direct loop error point (at the reference input), so the direct loop sees the modified reference as its setpoint and tracks it. This means the woofer operates *through* the direct loop rather than in parallel, and the direct loop's bandwidth ($\sim 800$ kHz) sets an upper limit on the effective woofer bandwidth.
+
+| Parameter | PEP-II Value | SPEAR3 Notes |
+|-----------|:----:|----|
+| Addresses | D2, D4 (low-order coupled-bunch) | — |
+| External system | LFB bunch-by-bunch DSP | Not installed |
+| Data link | TAXI fiber, 10-bit, 10 MHz | — |
+| Injection hardware | GVF VXI module | Present but unused |
+| FIR equalizer | 32-tap (shared design with comb) | — |
+| One-turn delay | $\approx 7.34\;\mu\text{s}$ (PEP-II) | — |
+| Effective bandwidth | DC – ~1 MHz | — |
+| SPEAR3 status | — | **Not used** |
+
+**Why not needed at SPEAR3**: SPEAR3 does not have a longitudinal feedback system installed. At 500 mA beam current with $h = 372$, the coupled-bunch instability growth rates are manageable with the direct loop alone. PEP-II required the woofer to damp strong coupled-bunch oscillations driven by the high beam current ($> 1$ A) and large harmonic number ($h = 3{,}492$) where many more revolution harmonics drive unstable modes.
+
+> **Sources**: [R15] Corredoura, SLAC-PUB-8498; [R16] Fox et al., LFB system design; [R14] Schwarz.
 
 ### 6.4 Ripple Loop — HVPS Harmonic Rejection
 
@@ -1320,7 +1407,7 @@ Data file: `b132R11PatchPanel.xlsx`. Documents physical signal routing in Buildi
 | $L_1(s), L_2(s)$ | Fast and slow loop transfer functions | — | Eq. 5.5 |
 | $G_0$ | DC plant gain | — | Eq. 2.12 |
 
-### C.4 Comb Filter Parameters
+### C.4 Comb Filter and Group Delay Equalization Parameters
 
 | Symbol | Definition | Unit | First Ref |
 |--------|-----------|------|-----------|
@@ -1328,6 +1415,23 @@ Data file: `b132R11PatchPanel.xlsx`. Documents physical signal routing in Buildi
 | $n$ | Samples per revolution ($= f_s/f_\text{rev}$) | — | Eq. 5.4 |
 | $G$ | Comb feed-forward gain | — | Eq. 5.4 |
 | $K$ | Comb feedback coefficient ($|K| < 1$) | — | Eq. 5.4 |
+| $\nu_s$ | Synchrotron tune ($= f_s/f_\text{rev}$) | — | Eq. 5.4 |
+| $G_\text{peak}$ | Comb tooth peak gain ($= G/(1-K)$) | — | §6.2 |
+| $H_\text{eq}(z)$ | Group delay equalizer (32-tap FIR) | — | Eq. 6.2b |
+| $c_k$ | FIR equalizer coefficients ($k = 0\ldots 31$) | — | Eq. 6.2b |
+| $G_\text{OL,comb}(z)$ | Comb path open-loop transfer function | — | Eq. 6.2c |
+| $n_\text{delay}$ | Hardware transport delay (samples) | — | Eq. 6.2c |
+| $Z_\text{eff,D+C}$ | Effective impedance with Direct + Comb | Ω | Eq. 6.2a |
+
+### C.4a LFB Woofer Parameters
+
+| Symbol | Definition | Unit | First Ref |
+|--------|-----------|------|-----------|
+| $K_\text{woofer}$ | Woofer injection gain | — | Eq. 6.3a |
+| $H_\text{FIR}(s)$ | Woofer group delay equalizer (shared with comb) | — | Eq. 6.3a |
+| $\tau_\text{woofer}$ | Woofer one-turn injection delay | μs | Eq. 6.3a |
+| $\Delta\vec{V}_\text{LFB}(s)$ | LFB correction signal (from TAXI fiber) | V | Eq. 6.3a |
+| $\vec{V}_\text{ref,total}$ | Total I/Q reference (static + woofer) | V | Eq. 6.3a |
 
 ### C.5 Ripple Loop Parameters
 
