@@ -1,8 +1,8 @@
 # SPEAR3 RF System — RF Physics, Control Theory and Physical Plant
 
 **Document ID**: Doc P
-**Version**: 3.1
-**Date**: March 25, 2026
+**Version**: 3.2
+**Date**: March 26, 2026
 **Status**: DRAFT — For Engineering Review
 **Location**: Designs/P_RF_PHYSICS_AND_PLANT.md
 **Author**: Faya Wang, with AI-assisted analysis
@@ -13,7 +13,7 @@
 ## Revision History
 
 | Version | Date | Description |
-|---------|------|-------------|
+|---------|:------------:|-------------|
 | 1.0 | 2026-03-24 | Initial draft: nine-section catalog structure. |
 | 2.0 | 2026-03-24 | Major rewrite: disturbance-driven control design narrative. |
 | 2.1 | 2026-03-24 | LaTeX formatting for all equations and symbols. Physics review: corrected synchronous phase convention (Eq. 2.4), verified all numerical calculations, fixed minor inconsistencies. |
@@ -25,6 +25,8 @@
 | 2.7 | 2026-03-24 | Physics verification: simplified Eq. 2.4b to use cos convention directly (removed convention-independent form); verified Eq. 2.5 optimum detuning via first-principles admittance derivation (confirmed self-consistent with Rs = 3.73 MΩ); clarified Rs convention in Appendix C (Rs = V²/(2P), circuit convention). |
 | 3.0 | 2026-03-25 | **Major improvements** based on deep codebase review: (a) Added formal symbol definitions for all transfer function blocks in Eq. 5.1 (§5.2), comb filter Eq. 5.4 (§5.3), and multi-loop Eq. 5.5 (§5.6); (b) Strengthened mathematical rigor with gain/phase budget analysis, explicit compensator forms (Eq. 6.1a), and cross-term stability derivation; (c) Transformed §6 from parameter tables into full engineering sections with transfer functions, control laws, and design rationale — added Eqs. 6.4a–c (ripple harmonic estimator), 6.6a (HVPS control), 6.7a–c (tuner loop), 6.8a (DAC loop), 6.9a–c (gain tracking); (d) Expanded §9.4 from 2 lines to comprehensive calibration overview with 6 subsections including calibration sequence (27-state rf_calib.st), drive/power/frequency calibration equations (Eqs. 9.1–9.3); (e) Expanded Appendix C from 15 to 100+ symbol definitions organized by subsystem. |
 | 3.1 | 2026-03-25 | **Structural improvements**: (a) Added §6.0 Loop Overview and Implementation Summary with 9-loop classification table and 4-tier implementation taxonomy (analog HW → digital HW → RT software → supervisory SW); (b) Expanded §6.2 (Comb) from 2 lines to full engineering section with closed-loop impedance (Eq. 6.2a), FIR equalizer (Eq. 6.2b), complete comb path TF (Eq. 6.2c), PEP-II parameter table, frev/Δf₁/₂ ratio argument; (c) Expanded §6.3 (LFB Woofer) from 2 lines to full section with woofer transfer function (Eq. 6.3a), woofer/tweeter complementarity table, direct loop interaction analysis; (d) §5→§6 boundary cleanup: trimmed §5.2 detailed symbol table and impedance analysis (moved to §6.1), trimmed §5.3 comb symbol table (moved to §6.2), added forward references; (e) Added §3 transitional sentence cementing I/Q framework role; (f) Updated Appendix C.4 with comb/FIR symbols, added C.4a LFB woofer symbols. |
+| 3.2 | 2026-03-26 | **Added D9 (Ring Circumference Thermal Drift)**: New disturbance class documenting the ~4 kHz/year secular drift in RF operating frequency caused by seasonal thermal expansion of the ring tunnel. Added §4.8 with physics derivation: harmonic condition (Eq. 4.8), circumference change calculation (Eqs. 4.8a–b), D8 vs. D9 comparison table, and operational impact on tuner range. Updated disturbance taxonomy table (§4.1, D8 label clarified, D9 added); renamed old §4.8 frequency-domain summary to §4.9 with D9 entry at annual timescale; updated §5.4 and §6.7 to reference D9. |
+| 3.3 | 2026-03-27 | **Added extra loop functions**: comb filter, LFB Woofer and Direct loop |
 
 ---
 
@@ -91,7 +93,7 @@ The SPEAR3 RF system must deliver a 476.3 MHz accelerating voltage of $\sim 2.85
 
 > **Note on $U_0$**: The current operational energy loss per turn is $U_0 = 1.02$ MeV. This is validated by the measured generator power of $\sim 200$ kW/cavity (§2.1.3). The value 0.91 MeV appearing in some earlier references [R1] corresponds to a different set of insertion-device contributions; the current ID complement increases $U_0$.
 
-> **Note on $V_\text{RF}$**: The **design** value of 3.2 MV (800 kV/cavity) is from the original SPEAR3 RF system specification [R1]. The **operational** value of $\sim 2.85$ MV (712 kV/cavity) is from LLRF9 commissioning measurements [R4] and is used throughout the beam loading calculations in this document.
+> **Note on $V_\text{RF}$**: The **design** value of 3.2 MV (800 kV/cavity) is from the original SPEAR3 RF system specification [R1]. The **operational** value of $\sim 2.85$ MV (712 kV/cavity) is from LLRF9 commissioning measurements [R4] (also the current operation norminal at 500 mA ) and is used throughout the beam loading calculations in this document.
 
 > **Note on $\alpha_c$**: Published values range from 0.0011 (SSRL parameter page [R3]) to 0.00118 (used in this document) depending on the specific lattice optics. Differences of $\sim 7\%$ in $\alpha_c$ produce $\sim 3\%$ differences in $f_s$.
 
@@ -129,7 +131,7 @@ The following diagram shows the full RF control architecture — four cavities d
   │                        SPEAR3 RF CONTROL SYSTEM — OVERVIEW                         │
   ├────────────────────────────────────────────────────────────────────────────────────┤
   │                                                                                    │
-  │   IQ Ref ──▶(Σ)──▶ BASEBAND ──▶ IQ RF ──▶ DRIVE ──▶ KLYSTRON ──▶ 3× MAGIC  ──┐  │
+  │   IQ Ref ──▶(Σ)──▶ BASEBAND ──▶ IQ RF ──▶ DRIVE ──▶ KLYSTRON ──▶ 3× MAGIC ──┐  │
   │     (DAC)    ↑      MODULATOR     MOD       AMP       1.2 MW      TEE          │   │
   │              │      (gain/phase   (up to    (~29 W)   (43 dB,    SPLITTER      │   │
   │              │       tracking)    476 MHz)             <150 ns)                │   │
@@ -177,7 +179,7 @@ Near its fundamental mode at $\omega_0 = 2\pi \times 476.3\;\text{MHz}$, each ca
 | Loaded Q | $Q_L$ | 6,700 | — |
 | Coupling coefficient | $\beta = Q_0/Q_\text{ext}$ | 3.78 | — |
 
-> **Traceability note**: $R_s = 3.73$ MΩ and $Q_0 = 32{,}000$ are directly from [R6] Schwarz. Schwarz reports $\beta_\text{actual} = 3.72$ and $\beta_\text{optimum} = 3.84$ for PEP-II HER, giving $Q_L = 6{,}780$. The value $\beta = 3.78$ used here is a derived operating point (intermediate between actual and optimum) consistent with $Q_L \approx 6{,}700$ via $Q_L = Q_0/(1+\beta) = 32{,}000/4.78 = 6{,}695$. McIntosh [R1] reports $R_s = 3.8$ MΩ in accelerator convention (approx. $2 \times R_s^\text{linac} = 7.5$ MΩ, consistent with Schwarz $R_a = 7.5$ MΩ [R6]).
+> **Traceability note**: $R_s = 3.73$ MΩ and $Q_0 = 32{,}000$ are directly from [R6] Schwarz. Schwarz reports $\beta_\text{actual} = 3.72$ and $\beta_\text{optimum} = 3.84$ for PEP-II HER, giving $Q_L = 6{,}780$. The value $\beta = 3.78$ used here is a derived operating point (intermediate between actual and optimum) consistent with $Q_L \approx 6{,}700$ via $Q_L = Q_0/(1+\beta) = 32{,}000/4.78 = 6{,}695$. McIntosh [R1] reports $R_s = 3.8$ MΩ in accelerator convention (= $2 \times R_s^\text{linac} = 7.6$ MΩ, consistent with Schwarz $R_a = 7.5$ MΩ [R6]).
 
 > **Sources**: [R6] Schwarz parameter table (PS-340-330-51-R0); [R7] Rimmer et al., LBL-33360.
 
@@ -275,7 +277,7 @@ P_\text{gen/cav} = 68 + 127.5 \approx 196\;\text{kW/cavity} \qquad        \text{
 
 **Total RF power**: $4 \times 196 = 782$ kW — within the 1.2 MW klystron capacity ($\sim 35\%$ margin). The measured forward power at 500 mA is $\sim 200$ kW/cavity, consistent with this calculation (the small excess accounts for reflected power at non-ideal coupling).
 
-> **Note**: Eq. 2.7 is the minimum-power condition at optimum coupling. In the general case with arbitrary coupling $\beta$ and detuning $\psi$, the generator power includes reflected power terms. The important identity is that beam power per cavity $= I_b V_\text{gap}\cos\phi_s = I_b \, U_0/n_\text{cav}$ (since $V_\text{RF}\cos\phi_s = U_0$ and $V_\text{gap} = V_\text{RF}/n_\text{cav}$). This is independent of the phase convention.
+> **Note**: Eq. 2.7 is the minimum-power condition at optimum coupling. In the general case with arbitrary coupling $\beta$ and detuning $\psi$, the generator power includes reflected power terms. The important identity is that beam power per cavity $= I_b V_\text{gap}\cos\phi_s = I_b \, U_0/n_\text{cav}$.
 
 > **Sources**: [R11] Gamp, CAS 2011; [R12] Wilson, SLAC-PUB-6062; [R13] Boussard, PAC 1985.
 
@@ -319,7 +321,7 @@ The maximum stable crossover frequency (with $\sim 45^\circ$ phase margin):
 \boxed{f_{c,\text{max}} \approx \frac{1}{4\tau_d}} \qquad \text{(Eq. 2.11)}
 ```
 
-This is the single most important constraint in the entire control design.
+This is the single most important constraint in the entire control design (a practical rule-of-thumb, $2\times$  phase margin of $\frac{\pi}{4}$).
 
 | Component | Legacy (analog) | LLRF9 (digital) |
 |-----------|:-:|:-:|
@@ -330,13 +332,15 @@ This is the single most important constraint in the entire control design.
 | **Total** $\tau_d$ | **$\sim 500$ ns** | **$\sim 270$ ns** |
 | $f_{c,\text{max}}$ | **$\sim 500$ kHz** | **$\sim 926$ kHz** |
 
+**Note**: Diret loop delay is 270 ns from LLRF9 manual, which is assumed the total delay of the loop as listed here [To be confirmed].
+
 ### 2.4 Complete Open-Loop Plant Transfer Function
 
 ```math
 G_\text{plant}(s) = G_0 \cdot H_\text{cav}(s) \cdot e^{-s\tau_d} = \frac{G_0 \,\omega_{1/2}}{s + \omega_{1/2} + j\Delta\omega}\; e^{-s\tau_d} \qquad \text{(Eq. 2.12)}
 ```
 
-The cavity bandwidth ($35.5$ kHz) and the loop delay ($270$–$500$ ns) together define the limits of what feedback can achieve.
+The cavity bandwidth ($35.5$ kHz) and the loop delay together define the limits of what feedback can achieve.
 
 ---
 
@@ -347,13 +351,13 @@ The cavity bandwidth ($35.5$ kHz) and the loop delay ($270$–$500$ ns) together
 All RF feedback loops use baseband In-phase and Quadrature (I/Q) techniques:
 
 ```math
-V_\text{RF}(t) = I(t)\cos(\omega_\text{RF}t) - Q(t)\sin(\omega_\text{RF}t) \qquad \text{(Eq. 3.0)}
+V_\text{RF}(t) =A(t)\cos[\omega_\text{RF}t + \phi(t)] = I(t)\cos(\omega_\text{RF}t) - Q(t)\sin(\omega_\text{RF}t) \qquad \text{(Eq. 3.0)}
 ```
 
 where $I(t) = A(t)\cos\phi(t)$ and $Q(t) = A(t)\sin\phi(t)$, with inverse relations:
 
 ```math
-A(t) = \sqrt{I^2 + Q^2}\,,\qquad \phi(t) = \text{atan2}(Q, I) \qquad \text{(Eq. 3.0a)}
+A(t) = \sqrt{I^2 + Q^2}\,,\qquad \phi(t) = \text{atan2}(Q, I) \qquad    \text{(Eq. 3.0a)}
 ```
 
 ### 3.2 Baseband I/Q Modulator
@@ -361,10 +365,10 @@ A(t) = \sqrt{I^2 + Q^2}\,,\qquad \phi(t) = \text{atan2}(Q, I) \qquad \text{(Eq. 
 The I/Q modulator performs a scaled rotation:
 
 ```math
-\begin{pmatrix} I_\text{out} \\ Q_\text{out} \end{pmatrix} = G \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix} \begin{pmatrix} I_\text{in} \\ Q_\text{in} \end{pmatrix} \qquad \text{(Eq. 3.1)}
+\begin{pmatrix} I_\text{out} \\ Q_\text{out} \end{pmatrix} = G \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix} \begin{pmatrix} I_\text{in} \\ Q_\text{in} \end{pmatrix} \qquad    \text{(Eq. 3.1)}
 ```
 
-**Implementation**: Each baseband I/Q modulator uses four AD834 four-quadrant multipliers + two EL2073 summing amplifiers to implement the 2×2 matrix. Group delay $< 5$ ns, full-power BW $> 40$ MHz, dynamic range $> 50$ dB.
+**Implementation**: Each baseband I/Q modulator uses four AD834 four-quadrant multipliers (DC to 500 MHz) + two EL2073 summing amplifiers to implement the 2×2 matrix. Group delay $< 5$ ns, full-power BW $> 40$ MHz, dynamic range $> 50$ dB.
 
 **SPEAR3 modulator count**: 4 cavity combining modulators (one per probe) + 1 drive modulator (direct loop gain/phase) = **5 baseband I/Q modulators**, with associated Octal DAC channels on the RFP module for the 2×2 matrix coefficients.
 
@@ -392,7 +396,7 @@ Each of the 4 cavity probe signals is demodulated to I/Q and combined through a 
 
 > **Sources**: [R15]; [R14].
 
-The I/Q baseband representation developed in this section is used throughout §4–§9 to express all loop transfer functions in the complex baseband domain.
+The error signals $\Delta I$, $\Delta Q$ are then used with the reference $I, Q$ to caculate the rotation angle or multipliers in Eq.(3.1) for cavity field requlation. The I/Q baseband representation developed in this section is used throughout §4–§9 to express all loop transfer functions in the complex baseband domain.
 
 ---
 
@@ -411,11 +415,12 @@ The I/Q baseband representation developed in this section is used throughout §4
 | D5 | HVPS ripple | 360, 720, 1080… Hz | $< 1\%$ P-P voltage | Phase modulation |
 | D6 | Klystron gain drift | 0.01–1 Hz | up to 7 dB | Loop gain variation |
 | D7 | Microphonics | 1–300 Hz | $\Delta f \sim 1$–$10$ Hz | Cavity detuning |
-| D8 | Thermal detuning | $< 0.01$ Hz | $\Delta f \sim 1$–$100$ Hz | Slow frequency drift |
+| D8 | Thermal detuning (cavity) | $< 0.01$ Hz | $\Delta f \sim 1$–$100$ Hz | Slow frequency drift |
+| D9 | Ring circumference thermal drift | Seasonal ($\ll 0.001$ Hz) | $\Delta f_{RF} \sim 4$ kHz/year | Secular tuner setpoint migration |
 
 ### 4.2 D1/D2: Beam Loading — The Dominant Disturbance
 
-**D1 — Steady-state beam loading**: Each bunch extracts energy from the cavity field. The beam-induced voltage $V_{b,\text{res}} = I_b R_s = 1.865$ MV per cavity (Eq. 2.2) exceeds the gap voltage by a factor of 2.6. Without active compensation, the generator must supply this reactive power in addition to the real power delivered to the beam. Detuning the cavity (§2.1.3) brings the reactive component to zero at the operating current, but any current deviation creates a mismatch.
+**D1 — Steady-state beam loading**: Each bunch extracts energy from the cavity field. The beam-induced voltage $V_{b,\text{res}} = I_b R_s = 1.865$ MV per cavity (Eq. 2.2) exceeds the gap voltage by a factor of $\sim$ 2.6. Without active compensation, the generator must supply this reactive power in addition to the real power delivered to the beam. Detuning the cavity (§2.1.3) brings the reactive component to zero at the operating current, but any current deviation creates a mismatch.
 
 **D2 — Transient beam loading**: Current transients (injection, ion-clearing gap, bunch-by-bunch variations) cause rapid changes in the beam-induced voltage. These transients drive cavity field oscillations at frequencies up to $\sim f_\text{rev}$.
 
@@ -503,8 +508,12 @@ For $h = 372$ modes, each mode $m$ is driven by the impedance sampled at revolut
 
 **Why SPEAR3 does not need the comb filter**: The key ratio is $f_\text{rev}/\Delta f_{1/2}$:
 
-- **SPEAR3**: $f_\text{rev} = 1.28$ MHz $\gg \Delta f_{1/2} = 35.5$ kHz → ratio $\approx 36$. Only 1–2 revolution harmonics fall within each cavity mode's bandwidth. The direct loop alone provides sufficient impedance reduction at these few harmonics.
-- **PEP-II**: $f_\text{rev} \approx 136$ kHz, comparable to $\Delta f_{1/2}$ → ratio $\approx 4$. Many revolution harmonics interact with each cavity mode, requiring the comb filter to provide targeted suppression at each harmonic without the excessive noise amplification that a wideband loop would produce.
+- **SPEAR3**: $f_\text{rev} = 1.28$ MHz $\gg \Delta f_{1/2} = 35.5$ kHz → ratio $\approx 36$. In this regime, only the central RF harmonic lies within the cavity bandwidth, while all revolution sidebands are many cavity linewidths away and therefore do not significantly couple through the cavity impedance. The cavity effectively behaves as a narrowband filter, responding primarily to the carrier component of the beam current.
+
+- As a result, beam-induced disturbances at revolution harmonics are not directly amplified by the cavity, and the interaction is dominated by the fundamental RF component. Meanwhile, the beam current is much lower than PEPII, comb filtering is not necesssary for fine control and disturbance rejection, as the overall system is less sensitive to revolution harmonic coupling compared to PEP-II, relaxing the requirements on harmonic-by-harmonic suppression.
+
+- **PEP-II**: $f_\text{rev} \approx 136$ kHz, comparable to $\Delta f_{1/2}$ → ratio $\approx 4$. Although only the central RF harmonic lies strictly within the cavity bandwidth, the nearby revolution harmonics are only a few cavity linewidths away and therefore couple significantly through the cavity impedance. 
+- As a result, multiple revolution sidebands contribute to beam–cavity interaction and must be actively controlled for PEPII. This operating regime necessitates the use of a comb filter, which provides selective suppression at revolution harmonics. This approach effectively mitigates beam-induced disturbances while avoiding the excessive noise amplification that would arise from a purely wideband feedback loop.
 
 ### 4.5 D5: HVPS Ripple
 
@@ -528,13 +537,13 @@ The 360 Hz component (first 6-pulse harmonic absent in ideal 12-pulse operation)
 \Delta\phi_\text{RF} \sim \frac{\partial P_\text{kly}/\partial V_k}{P_\text{kly}} \cdot \Delta V_\text{ripple} \qquad \text{(Eq. 4.6)}
 ```
 
-> **Sources**: [R21]; [R22]; *AI-generated analysis, see `01_FEEDBACK_LOOP_ARCHITECTURE.md`, unreviewed*.
+> **Sources**: [R21]; [R22]; *`01_FEEDBACK_LOOP_ARCHITECTURE.md`*.
 
 ### 4.6 D6: Klystron Gain Variation
 
 **Source of gain variation**: As beam current changes from 0 to 500 mA, the HVPS loop adjusts cathode voltage $V_k$ to maintain the klystron $\sim 10\%$ below saturation. As $V_k$ changes, the small-signal gain (slope of the $P_\text{out}$ vs $P_\text{in}$ curve) varies by up to $\sim 7$ dB. This shifts the open-loop gain of the direct feedback loop, potentially affecting stability margins.
 
-**Gain tracking implementation** (§6.9): The baseband modulator on the RFP module (4 Gilbert-cell multipliers in a 2×2 matrix) has its matrix coefficients controlled by 12-bit Octal DACs. A slow EPICS loop ($\sim 2$ Hz) reads the klystron forward power and drive power monitors, computes the current gain, and adjusts the modulator matrix to maintain constant overall loop gain:
+**Gain tracking implementation** (§6.9): The baseband modulator on the RFP module (4 Gilbert-cell multipliers in a 2×2 matrix) has its matrix coefficients controlled by 12-bit Octal DACs. A slow EPICS loop ($\sim 1$ Hz) reads the klystron forward power and drive power monitors, computes the current gain, and adjusts the modulator matrix to maintain constant overall loop gain:
 
 ```math
 G_\text{modulator} = \frac{G_\text{loop,target}}{G_\text{klystron}(V_k)} \qquad \text{(Eq. 4.6a)}
@@ -556,23 +565,60 @@ For normal-conducting copper cavities: microphonic excursions $< 10$ Hz (negligi
 \frac{\partial f_0}{\partial T} \approx -f_0 \cdot \alpha_\text{Cu} = -476.3\;\text{MHz} \times 16.5 \times 10^{-6} \approx -7.9\;\text{kHz/°C} \qquad \text{(Eq. 4.7)}
 ```
 
-> **Note**: This first-principles estimate ($-7.9$ kHz/°C) applies to the uncooled cavity body. In practice, the PEP-II-type cavities at SPEAR3 are water-cooled with a regulated cooling circuit that maintains body temperature to within $\sim \pm 0.1$°C. The effective observed drift rate during normal operations is significantly smaller — on the order of $\sim -1$ kHz/°C of *cooling water* temperature change, reflecting the thermal resistance between the cooling circuit and the cavity walls. SPEAR3-specific measurement data for the thermal detuning coefficient should be obtained from tuner loop commissioning records to confirm this estimate.
+> **Note**: This first-principles estimate ($-7.9$ kHz/°C) applies to the uncooled cavity body. In practice, the PEP-II-type cavities at SPEAR3 are water-cooled with a regulated cooling circuit that maintains body temperature to within $\sim \pm 0.1$°C. 
 
 The tuner loop (§8) tracks both microphonics and thermal drift, maintaining the cavity at the optimum detuning angle $\psi_\text{opt}$ (Eq. 2.5a).
 
-### 4.8 Frequency-Domain Summary: The Disturbance Spectrum
+### 4.8 D9: Ring Circumference Thermal Drift — Long-Term RF Frequency Migration
+
+**Physical origin**: The RF harmonic condition requires the RF operating frequency to equal an integer multiple of the revolution frequency:
+
+```math
+f_\text{RF} = h \cdot f_\text{rev} = \frac{h \cdot c}{C} \qquad \text{(Eq. 4.8)}
+```
+
+The ring circumference $C = 234.14$ m is set by the physical path of the beam through the tunnel. As the building structure thermally expands and contracts with seasonal temperature changes, $C$ varies slowly on a monthly-to-annual timescale. By the harmonic condition, the correct RF operating frequency must shift accordingly. A nominally fixed RF master oscillator becomes progressively detuned from the correct harmonic as the circumference drifts.
+
+**Measured magnitude at SPEAR3**: The RF operating frequency drifts by approximately $\Delta f_\text{RF} \approx 4$ kHz over one year. From the harmonic condition:
+
+```math
+\frac{\Delta C}{C} = -\frac{\Delta f_\text{RF}}{f_\text{RF}} = -\frac{4\;\text{kHz}}{476.3\;\text{MHz}} = 8.4 \times 10^{-6} \qquad \text{(Eq. 4.8a)}
+```
+
+```math
+\Delta C = 8.4 \times 10^{-6} \times 234.14\;\text{m} \approx 2.0\;\text{mm} \qquad \text{(Eq. 4.8b)}
+```
+
+A 2 mm annual change in the 234 m circumference is consistent with a tunnel temperature variation of $\sim$ 0.8°C (concrete/steel: $\alpha_\text{struct} \approx 10$–$12 \times 10^{-6}$/°C), physically plausible for a building with seasonal HVAC cycling.
+
+**Contrast with D8 (cavity body thermal detuning)**:
+
+| | D8: Cavity thermal detuning | D9: Ring circumference drift |
+|---|---|---|
+| **Physical origin** | Cavity copper temperature → $f_0$ shifts | Tunnel/building temperature → $C$ changes → required $f_\text{RF}$ shifts |
+| **Rate** | $-7.9$ kHz/°C (Eq. 4.7); | $\sim 4$ kHz/year (measured operational data) |
+| **Timescale** | Short-term (hourly) | Long-term (seasonal/annual) |
+| **Control variable** | Tuner re-tracks $f_0$ relative to $f_\text{RF}$ | Tuner re-converges to new equilibrium as $f_\text{RF}$ migrates; RF master oscillator updated periodically |
+
+**Impact on the control system**: The operating detuning $\Delta f = f_\text{RF} - f_0$ defines the tuner equilibrium. Both D8 and D9 shift $\Delta f$, but from opposite sides — D8 moves $f_0$ (cavity geometry changes), while D9 moves $f_\text{RF}$ (ring geometry changes). The tuner loop (§6.7) is closed around the detuning angle $\psi = \arctan(2Q_L \Delta f / f_0)$, so it automatically re-converges to $\psi_\text{opt}$ when $f_\text{RF}$ changes, provided:
+
+1. The tuner mechanical range and total step count are sufficient to reach the new equilibrium position.
+2. The RF master oscillator frequency is updated periodically by feedback system to track the ring operating point.
+
+### 4.9 Frequency-Domain Summary: The Disturbance Spectrum
 
 ```
- Frequency (Hz)    Disturbance              Required Loop
- ═══════════════════════════════════════════════════════════════
- 0.001 – 0.01      Thermal drift (D8)       Tuner loop (~0.01–1 Hz)
- 0.01 – 1          Klystron gain (D6)       HVPS loop (~1 Hz), DAC loop (0.1 Hz)
- 1 – 10            Slow mechanical (D7)     Tuner loop
- 60 – 2000         HVPS ripple (D5)         Ripple loop (300 Hz) + Direct loop
- 10³ – 10⁵         Beam transients (D2)     Direct loop (~800 kHz)
- ~10 kHz           Robinson (D3)            Direct loop (impedance reduction)
- ~1.28 MHz         Coupled-bunch (D4)       Direct loop (+ Comb in PEP-II)
- ═══════════════════════════════════════════════════════════════
+ Frequency (Hz)    Disturbance                  Required Loop
+ ══════════════════════════════════════════════════════════════════════
+ ~3×10⁻⁸ (annual) Ring circ. thermal drift (D9) Tuner (+ periodic RF MO update)
+ 0.001 – 0.01      Cavity thermal drift (D8)     Tuner loop (~0.01–1 Hz)
+ 0.01 – 1          Klystron gain (D6)            HVPS loop (~1 Hz), DAC loop (0.1 Hz)
+ 1 – 10            Slow mechanical (D7)          Tuner loop
+ 60 – 2000         HVPS ripple (D5)              Ripple loop (300 Hz) + Direct loop
+ 10³ – 10⁵         Beam transients (D2)          Direct loop (~800 kHz)
+ ~10 kHz           Robinson (D3)                 Direct loop (impedance reduction)
+ ~1.28 MHz         Coupled-bunch (D4)            Direct loop (+ Comb in PEP-II)
+ ══════════════════════════════════════════════════════════════════════
 ```
 
 **This table is the Rosetta Stone of the control design.** Each loop exists because one or more disturbances occupy a specific frequency band.
@@ -633,11 +679,9 @@ H_\text{comb}(z) = G\,\frac{z^{-1} - z^{-n}}{1 - 2K\cos(2\pi\nu_s)\,z^{-n} + K^2
 
 The comb filter produces gain peaks at frequencies $f = m \cdot f_\text{rev} \pm f_s$ for integer $m$, precisely targeting the revolution-harmonic sidebands that drive coupled-bunch instabilities (Eq. 4.4).
 
-→ See §6.2 for symbol definitions, closed-loop impedance analysis with Direct+Comb, group delay equalization (FIR), PEP-II parameters, and the full argument for why SPEAR3 does not require this loop.
+### 5.4 Slow Loops — Maintaining Operating Point (D6, D7, D8, D9)
 
-### 5.4 Slow Loops — Maintaining Operating Point (D6, D7, D8)
-
-- **Tuner Loop** ($\sim 0.01$–$1$ Hz): Adjusts cavity mechanical tuner to maintain $\psi_\text{opt}$ (Eq. 2.6).
+- **Tuner Loop** ($\sim 0.01$–$1$ Hz): Adjusts cavity mechanical tuner to maintain $\psi_\text{opt}$ (Eq. 2.6), compensating cavity thermal drift (D8) and microphonics (D7). Also re-converges to the new equilibrium after a ring-circumference-driven RF frequency update (D9).
 - **HVPS Loop** ($\sim 1$ Hz): Adjusts klystron cathode voltage to maintain $\sim 10\%$ below saturation.
 - **DAC Loop** ($\sim 0.1$ Hz): Adjusts I/Q modulator baseline to maintain $V_\text{gap}$ setpoint.
 
@@ -655,7 +699,7 @@ Measures **klystron forward phase** (not cavity probe), avoiding the $35.5$ kHz 
 The combined loop transfer function for the two nested loops is:
 
 ```math
-L_\text{total}(s) = L_1(s) + L_2(s) + L_1(s)\,L_2(s) \qquad \text{(Eq. 5.5)}
+L_\text{total}(s) = (1 + L_1(s))(1 + L_2(s)) - 1 = L_1(s) + L_2(s) + L_1(s)\,L_2(s) \qquad \text{(Eq. 5.5)}
 ```
 
 The cross-term $L_1(s) \cdot L_2(s)$ represents the interaction between the two loops. At frequencies near $f_1$, $|L_2(j\omega)| \ll 1$ (the slow loop has negligible gain), so $L_\text{total} \approx L_1$ — the fast loop sees the slow loop as transparent. Conversely, at frequencies near $f_2$, $|L_1(j\omega)| \gg 1$ (the fast loop has high gain), but the cross-term simply augments the slow loop's authority without introducing new phase crossings, provided the bandwidth separation is sufficient.
@@ -668,7 +712,7 @@ The condition for safe decoupling — ensuring the cross-term does not introduce
 
 This ensures that at each loop's crossover frequency, all other loops are either at very high gain (inner loops) or very low gain (outer loops), so the Nyquist criterion can be applied to each loop independently.
 
-SPEAR3 satisfies this with large margins: DAC$\to$HVPS ($10\times$), HVPS$\to$Ripple ($300\times$), Ripple$\to$Direct ($2700\times$). The smallest separation (DAC→HVPS, $10\times$) is adequate because both are slow integrating loops with well-separated crossover frequencies.
+SPEAR3 satisfies this with large margins: DAC $\to$ HVPS ($10\times$), HVPS $\to$ Ripple ($300\times$), Ripple $\to$ Direct ($2700\times$). The smallest separation (DAC→HVPS, $10\times$) is adequate because both are slow integrating loops with well-separated crossover frequencies.
 
 > **Sources**: [R14]; [R15]; Åström & Murray, *Feedback Systems*, Ch. 12.
 
@@ -698,7 +742,7 @@ The loops naturally partition into four implementation tiers:
 
 1. **Analog hardware** (continuous): The direct loop — minimum latency path for the fastest disturbances (D1–D4).
 2. **Digital hardware** (MHz-rate): Comb, woofer, gap feedforward, and ripple loops — dedicated DSP/FPGA processing for structured disturbances (D4, D5).
-3. **Real-time software** (~1 Hz): HVPS, tuner, and DAC loops — EPICS State Notation Language programs managing slow plant dynamics (D6–D8).
+3. **Real-time software** (~1 Hz): HVPS, tuner, and DAC loops — EPICS programs managing slow plant dynamics (D6–D8).
 4. **Supervisory software** (~0.1–2 Hz): Gain tracking — EPICS Channel Access for calibration maintenance.
 
 ### 6.1 Direct Loop — Wideband RF Field Regulation
@@ -737,8 +781,8 @@ where the terms are (left to right): proportional gain, lead compensator, PI int
 | Proportional gain $K_p$ | $\sim 15$ dB ($\approx 5.6$) | Adjustable via EPICS PV |
 | Integrator frequency $\omega_i$ | $\sim 2\pi \times 30$ kHz | Rejects DC errors |
 | Phase margin | $\geq 45^\circ$ | Maintained by lead compensation |
-| DC impedance reduction | $\sim 40$ dB | $\approx 100\times$ reduction in $|Z_\text{eff}|$ |
-| SPEAR3 status | **Active** | |
+| DC impedance reduction | $\sim 40$ dB | $\approx 100\times$ reduction in $\|Z_\text{eff}\|$ |
+| SPEAR3 status | **Active** | — |
 
 > **Sources**: [R15] Corredoura, Figs. 3, 5; [R14] Schwarz; [R11] Gamp.
 
@@ -778,21 +822,6 @@ G_\text{OL,comb}(z) = H_\text{comb}(z) \cdot H_\text{eq}(z) \cdot z^{-n_\text{de
 
 where $n_\text{delay}$ accounts for the hardware transport delay (ADC + DAC + cable propagation).
 
-| Parameter | PEP-II Value | SPEAR3 Notes |
-|-----------|:----:|----|
-| Addresses | D4 (coupled-bunch modes) | — |
-| $f_\text{rev}$ | 136 kHz | 1.28 MHz |
-| $f_\text{rev}/\Delta f_{1/2}$ | $\approx 4$ | $\approx 36$ |
-| Revolution harmonics in cavity BW | $\sim 10$–$15$ | $\sim 1$–$2$ |
-| Comb feedback $K$ | $\approx 0.95$ | — |
-| Comb feed-forward $G$ | $\approx 0.05$ | — |
-| FIR taps | 32 | — |
-| One-turn delay | $\approx 7.34\;\mu\text{s}$ | $\approx 0.781\;\mu\text{s}$ |
-| Hardware | 2× VXI Comb Filter Modules (present) | Never activated |
-| SPEAR3 status | — | **Not used** |
-
-**Why not needed at SPEAR3**: With $f_\text{rev}/\Delta f_{1/2} \approx 36$, only 1–2 revolution harmonics interact with each cavity mode's bandwidth. The direct loop's broadband ~20 dB impedance reduction is sufficient to stabilize these few modes. In PEP-II, where $f_\text{rev}/\Delta f_{1/2} \approx 4$ and ~10–15 revolution harmonics populate each cavity mode, the comb filter was essential to suppress multi-harmonic coupled-bunch instabilities without amplifying noise at inter-harmonic frequencies.
-
 > **Sources**: [R15] Corredoura, SLAC-PUB-8498, Figs. 4–6; [R14] Schwarz.
 
 ### 6.3 LFB Woofer — Longitudinal Feedback via RF Modulation
@@ -816,9 +845,9 @@ where:
 **Woofer/Tweeter complementarity**: The longitudinal feedback system partitions the correction bandwidth between two actuators:
 
 | Actuator | Mechanism | Bandwidth | Modes Addressed |
-|----------|-----------|:---------:|:---------------:|
-| Woofer (RF station) | Modulates cavity voltage via I/Q reference injection | DC – ~1 MHz | Low-order ($|n| < 10$) |
-| Tweeter (stripline kicker) | Direct longitudinal kick via broadband kicker | ~1 – ~200 MHz | High-order ($|n| > 10$) |
+|----------|-----------|---------|---------------|
+| Woofer (RF station) | Modulates cavity voltage via I/Q reference injection | DC – ~1 MHz | Low-order  |
+| Tweeter (stripline kicker) | Direct longitudinal kick via broadband kicker | ~1 – ~200 MHz | High-order  |
 
 The RF station woofer is effective for low-order modes because these modes require large energy corrections at low frequency — naturally suited to the high-power RF cavity. Higher-order modes require fast, broadband corrections — suited to the stripline kicker's low latency.
 
@@ -881,7 +910,7 @@ where $e[n] = \phi_\text{ref} - \phi_\text{kly}$ is the phase error at sample $n
 
 ### 6.5 Gap Feedforward Loop
 
-Not used at SPEAR3. Addresses D2 (ion clearing gap transient). In PEP-II, the GVF module provided pre-computed I/Q correction waveforms via DSP firmware (`gvff.s`, 1,199 lines). Not needed at SPEAR3 due to smaller harmonic number ($h = 372$ vs. PEP-II $h = 3{,}492$).
+Not used at SPEAR3. Addresses D2 (ion clearing gap transient). In PEP-II, the GVF module provided pre-computed I/Q correction waveforms via DSP firmware (`gvff.s`). Not needed at SPEAR3 due to smaller harmonic number ($h = 372$ vs. PEP-II $h = 3{,}492$).
 
 ### 6.6 HVPS Loop — Klystron Operating Point Regulation
 
@@ -916,7 +945,7 @@ where $K_\text{HVPS}$ is the proportional gain (voltage step per unit power erro
 
 ### 6.7 Tuner Loop — Cavity Resonant Frequency Tracking
 
-**Purpose**: Adjusts the mechanical cavity tuner to maintain the optimum detuning angle $\psi_\text{opt}$ (Eq. 2.5a), compensating for thermal drift (D8) and microphonics (D7).
+**Purpose**: Adjusts the mechanical cavity tuner to maintain the optimum detuning angle $\psi_\text{opt}$ (Eq. 2.5a), compensating for beam loadng (main factor), cavity thermal drift (D8) and microphonics (D7). Also re-converges to the new equilibrium following a ring-circumference-driven shift in the RF operating frequency (D9).
 
 **Signal flow**: Cavity probe phase and klystron forward phase → phase subtraction → comparison to $\psi_\text{target}$ → deadband logic → stepper motor command → mechanical tuner.
 
@@ -940,7 +969,7 @@ where $x$ is the tuner position (steps), $x_\text{home}$ is the home position, $
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| Addresses | D7, D8 | Frequency tracking (microphonics + thermal) |
+| Addresses | D7, D8, D9 | Frequency tracking (microphonics + cavity thermal + ring circ. drift) |
 | Measurement | $\angle(\text{probe}) - \angle(\text{fwd})$ | Detuning angle proxy |
 | Actuator | Stepper motor → mechanical tuner plunger | Per cavity (4 independent loops) |
 | Bandwidth | $\sim 0.01$–$1$ Hz | Limited by mechanical response |
