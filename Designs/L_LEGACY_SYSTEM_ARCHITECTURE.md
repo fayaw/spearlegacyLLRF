@@ -97,7 +97,7 @@ External references obtained through web research are cited with full bibliograp
 
 - Physical hardware descriptions with part numbers, serial numbers, and specifications
 - Control system architecture and PLC configurations
-- Software architecture for 6 SNL programs (7,247 lines total)
+- Software architecture for 6 SNL programs (7,112 lines total)
 - Protection and safety system signal chains
 - Complete cabling and interconnection references
 - Known issues and legacy debt catalog
@@ -247,19 +247,19 @@ The SPEAR3 RF station is distributed across multiple buildings at SSRL. Understa
 | Parameter | Value | Notes |
 |-----------|-------|-------|
 | RF Frequency | 476.315 MHz | Harmonic 372 of revolution frequency |
-| Revolution Frequency | 1.2808 MHz | Circumference = 234.137 m |
+| Revolution Frequency | 1.2804 MHz | f_rf/h = 476.315 MHz / 372; Circumference = 234.137 m |
 | Beam Energy | 3.0 GeV | |
 | Design Beam Current | 500 mA | Top-off mode |
 | Fill Pattern | 276 bunches in 4 groups + 1 camshaft | |
 | Number of Cavities | 4 | Single-cell, HOM-damped copper (PEP-II type) |
-| Cavity Shunt Impedance (R_s) | 3.9 MΩ | Per cavity |
+| Cavity Shunt Impedance (R_s) | 3.8 MΩ | Per cavity |
 | Cavity Unloaded Q (Q_0) | 33,500 | |
 | Cavity Loaded Q (Q_L) | 6,700 | β = 4.0 (coupling factor) |
 | Gap Voltage per Cavity | ~712 kV | Operating point (design: 800 kV) |
 | Total Accelerating Voltage | ~2.85 MV | Sum of 4 cavities |
 | Klystron Output Power | ~800 kW | Operating (rated: ~1.5 MW) |
 | Drive Power | ~29 W | At klystron input |
-| IF Frequency | 4.9 MHz | 476 − 471.1 MHz LO |
+| IF Frequency | 5.215 MHz | f_rf − f_LO = 476.315 − 471.1 MHz (Note: 4.9 MHz is the PEP-II value) |
 | LO Frequency | 471.1 MHz | Distributed from CLK module |
 
 ### 4.2 HVPS Parameters
@@ -309,16 +309,21 @@ The VXI crate hosts a Kinetics Systems IOC running VxWorks RTOS, which serves as
 
 | Slot | Module | Function | SPEAR3 Status |
 |------|--------|----------|---------------|
-| 0 | Slot 0 μProcessor | VXI bus controller, EPICS IOC host (VxWorks RTOS) | **Active** |
-| 1 | CLK/RF Distribution | Master clock, LO generation (471.1 MHz), RF reference distribution | **Active** |
-| 2 | RFP (RF Processor) | Central feedback processing — IQ demod, vector sum, direct loop, baseband modulator | **Active** |
-| 3 | IQA-1 | Digital IQ demodulator + amplitude detector | **Active** |
-| 4 | IQA-2 | Digital IQ demodulator + amplitude detector | **Active** |
-| 5 | IQA-3 | Digital IQ demodulator + amplitude detector | **Active** |
-| 6 | Comb Filter (I) | Digital comb filter for I-channel | ⚠️ **PEP-II only — NOT used in SPEAR3** |
-| 7 | Comb Filter (Q) | Digital comb filter for Q-channel | ⚠️ **PEP-II only — NOT used in SPEAR3** |
-| 8 | GVF (Gap Voltage Feed-Forward) | Gap voltage reference + LFB interface | ⚠️ **PEP-II only — NOT used in SPEAR3** |
-| 9 | ARC/Interlock Module (AIM) | Arc detection, interlock management, fault history | **Active (limited function)** |
+| 0 | B132-IOCRF (Slot 0 μProcessor) | VXI bus controller, EPICS IOC host (VxWorks RTOS, Kinetics Systems) | **Active** |
+| 1 | AB Scanner | Allen-Bradley DCM serial communication module (PLC interface) | **Active** |
+| 2 | CLK/RF Distribution | Master clock, LO generation (471.1 MHz), RF reference distribution | **Active** |
+| 3 | *(empty)* | GVF slot from PEP-II — not installed in SPEAR3 | ⚠️ **Not installed** |
+| 4 | RFP (RF Processor) | Central feedback processing — IQ demod, vector sum, direct loop, baseband modulator | **Active** |
+| 5 | MPS Shutoff | CF2 slot from PEP-II, repurposed for MPS Shutoff in SPEAR3 | **Active** |
+| 6 | Link Passthru | Link passthrough module | **Active** |
+| 7 | IQA-1 | Forward power — klystron output forward and reflected power | **Active** |
+| 8 | *(empty)* | — | — |
+| 9 | IQA-2 | Reflected power — cavity reflected power (cavities A & B) | **Active** |
+| 10 | *(empty)* | — | — |
+| 11 | IQA-3 | Cavity probe — cavity forward power and probe signals (cavities A & B) | **Active** |
+| 12 | ARC/Interlock Module (AIM) | Arc detection, interlock management, fault history | **Active** |
+
+> **Authoritative source**: `rfApp/DbIoc/srf1.substitutions,v` (lines 103–104), which instantiates the `crat_vxi_13slot.db` template for the SRF1 station VXI crate (Elma, B132-101-11-24).
 
 > **Sources**: [R7] (RF System Description); [R10], [R11] (block diagrams); [R2] Fig. 1 (VXI crate topology); preliminary analysis (AI-generated, see `llrf/documentation/legacyArchitecture/technical-notes/02_VXI_HARDWARE_MODULE_REFERENCE.md`, unreviewed).
 
@@ -328,7 +333,7 @@ The VXI crate hosts a Kinetics Systems IOC running VxWorks RTOS, which serves as
 The RFP module is the central signal processing module in the VXI crate. It performs:
 
 **Analog Signal Processing**:
-- IQ demodulation of 4 cavity probe signals (476 MHz → 4.9 MHz IF → baseband I/Q)
+- IQ demodulation of 4 cavity probe signals (476 MHz → 5.215 MHz IF → baseband I/Q)
 - Vector summing of 4 cavity I/Q signals
 - Direct loop error amplifier comparing vector sum against IQ reference
 - Lead and integral compensation networks for loop stability
@@ -341,15 +346,15 @@ The RFP module is the central signal processing module in the VXI crate. It perf
 - RF switch: enable/disable RF output to klystron
 - Built-in history buffer (circular buffer, freeze on fault for post-mortem analysis)
 
-**Key PVs** (from `rf_dac_loop_pvs.h`):
+**Key PVs** (from `rf_dac_loop_pvs.h`, `rf_states.st`, and `rfp.db`):
 ```
-{STN}:RFP:TUNESTPT:I     — Tune mode I setpoint
-{STN}:RFP:TUNESTPT:Q     — Tune mode Q setpoint
-{STN}:RFP:DIFFNODE:I     — Operate mode I offset
-{STN}:RFP:DIFFNODE:Q     — Operate mode Q offset
-{STN}:RFP:RFSWITCH        — RF output enable/disable
-{STN}:RFP:RUNMODE         — TUNE/OPERATE mode select
-{STN}:RFP:DIRECTLOOP      — Direct loop enable/disable
+{STN}:STN:TUNE:IQ.A           — Tune mode IQ setpoint magnitude (counts)
+{STN}:STN:TUNE:CTRL           — Tune loop control
+{STN}:STNDIRECT:LOOP:PHASE    — Direct loop phase setpoint
+{STN}:STNDIRECT:LOOP:COUNTS   — Direct loop amplitude setpoint (counts)
+{STN}:STN:RFP:RFENABLE        — RF output enable/disable (from rf_states.st)
+{STN}:STN:RFP:RUNMODE         — TUNE/OPERATE mode select (from rfp.db)
+{STN}:STN:RFP:MODU.DLE        — Direct loop enable (RFP module register)
 ```
 
 > 📷 **[PHOTO PLACEHOLDER]**: *RFP module front panel showing RF connectors, status LEDs, and labeling*
@@ -366,10 +371,10 @@ Three IQA modules provide precision digital measurement of RF signals. Each modu
 - Amplitude = √(I² + Q²)
 - Phase = arctan(Q/I)
 
-**Channel allocation** (typical SPEAR3/HER configuration):
-- IQA-1: Klystron drive power monitoring
-- IQA-2: Cavity probe signals (multiplexed or summed)
-- IQA-3: Additional monitor points (configurable via `rf_states.st`)
+**Channel allocation** (SPEAR3 configuration, from `srf1.substitutions` and `03-vxi-device-support.md`):
+- IQA-1 (Slot 7): Forward power — klystron output forward and reflected power measurement
+- IQA-2 (Slot 9): Reflected power — cavity reflected power measurement (cavities A & B)
+- IQA-3 (Slot 11): Cavity probe — cavity forward power and probe signals (cavities A & B)
 
 > **Sources**: [R3] (IQA module description); Ziomek, C. and Corredoura, P., "Digital I/Q Demodulator," PAC 1995 [R41].
 
@@ -383,11 +388,11 @@ The AIM module provides the interface between the VXI crate and the external int
 - Beam abort force/reset interface
 - Filament control signals
 - HVPS permissive signals
-- Fault history buffers (13 channels written to `/dat/FAULTSig*` files on fault)
+- Fault history buffers (11 channels written to `/dat/FAULT*_` files on fault)
 - Station fault word monitoring
 
 **Fault file capture** (from `rf_states.st`, M. Laznovsky addition, 2003):
-On entering a fault state, 6 signal RAMs (sigI, sigQ, cavI, cavQ, dacI, dacQ) are dumped to disk in a circular buffer of 11 fault files.
+On entering a fault state, 11 signal channels (RfpSI, RfpSQ, RfpCI, RfpCQ, Cf2I, Cf2Q, Iqa1Amp, Iqa2Amp, Iqa3Amp, Gvf, Aim) are dumped to disk as `/dat/FAULT<channel>_<n>` in a circular buffer of fault files.
 
 > **Sources**: [R16] (fault file handling code); [R20] (AIM status monitoring).
 
@@ -964,7 +969,7 @@ Fault detected (arc, reflected power, vacuum, etc.)
     │
     └── VXI IOC / rf_states.st (software, ~1 s)
             │
-            ├── Fault file capture (/dat/FAULTSig*)
+            ├── Fault file capture (/dat/FAULT*_)
             ├── Station state → OFF
             └── Operator notification
 ```
@@ -995,7 +1000,7 @@ The VXI crate Slot 0 processor runs VxWorks RTOS with an EPICS IOC. The IOC host
 | `rf_dac_loop.st` | 290 | 1 | S. Allison | Drive/gap voltage DAC control |
 | `rf_msgs.st` | 352 | 1 | — | Message logging, TAXI monitoring |
 
-Plus 12 header/macro files (~1,151 lines) defining PV names, status codes, and control macros.
+Plus 11 header/macro files (1,111 lines) defining PV names, status codes, and control macros.
 
 > **Sources**: Legacy source code in `spear-rf-code-legacy/rfApp/src/seq/` [R16]–[R20]; preliminary analysis (AI-generated, see `spear-rf-code-legacy/codeReviewTechnicalNotes/`, unreviewed).
 
@@ -1033,7 +1038,7 @@ Runs as 4 instances (one per cavity) via `CAV` macro substitution. Implements a 
 2. Comparing against setpoint (optimal detuning for current beam current)
 3. Commanding stepper motor moves via AB 1746-HSTP1 controller
 
-**5 SNL states**, 3 algorithmic control modes: phase control, position control, and manual.
+**5 SNL states**, 2 control algorithms (phase-feedback-based position tuning for resonance maintenance, and position homing for park/on transitions) plus a loop-off monitoring state.
 
 ### 16.5 rf_dac_loop.st — Drive/Gap Voltage DAC Control
 
@@ -1106,7 +1111,7 @@ The Galil controller was commissioned in August 2025 and is now operational for 
 
 ### 18.3 Fault Recording
 
-**Legacy fault file system**: On any fault triggering a station trip, the VXI IOC captures 13 channels of signal RAM data to `/dat/FAULTSig*` files in a circular buffer of 11 fault records. These files preserve pre-fault waveforms for post-mortem analysis.
+**Legacy fault file system**: On any fault triggering a station trip, the VXI IOC captures 11 signal channels to `/dat/FAULT<channel>_<n>` files in a circular buffer of fault records (channels: RfpSI, RfpSQ, RfpCI, RfpCQ, Cf2I, Cf2Q, Iqa1Amp, Iqa2Amp, Iqa3Amp, Gvf, Aim). These files preserve pre-fault waveforms for post-mortem analysis.
 
 ### 18.4 Calibration Data
 
@@ -1251,13 +1256,13 @@ All references cited in this document, organized by reference number.
 | [R29] | SLO-SYN Stepper Drive Manual | `llrf/tuners/SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf` |
 | [R30] | SLO-SYN Motor Specifications | `llrf/tuners/SLO-SYN.pdf` |
 | [R31] | Galil DMC-4103 Manual | `llrf/tuners/galil/dmc-4103-r13h-manual.pdf` |
-| [R32] | Drive Amplifier Datasheet (KAW2051M12) | `llrf/driveAmp/KAW2051M12.pdf` |
-| [R33] | Coaxial Cable Interconnection Diagram | `llrf/documentation/sd3403300100.pdf` |
+| [R32] | Drive Amplifier Datasheet (KAW2051M12) | `llrf/driveAmp/KAW2051M12 (7-98-907-012A).pdf` |
+| [R33] | Coaxial Cable Interconnection Diagram | `llrf/documentation/coaxCables/sd3403300100.pdf` |
 | [R34] | Galil Commissioning Log (Aug 2025) | `llrf/tuners/galil/functioningGalil20250825SwapABToManual.txt` |
 | [R35] | Galil Commissioning Documentation | `llrf/tuners/galil/GalilCommissioning.docx` |
 | [R36] | Cavity Tuner Inspections (June 2023) | `llrf/tuners/cavityTunerInspections20230613.docx` |
 | [R37] | PLC Operation Notes | `hvps/documentation/plc/plcNotesR1.docx` |
-| [R38] | PLC Software Discussion | `hvps/documentation/plc/plcSoftwareDiscussion.docx` |
+| [R38] | PLC Software Discussion | `hvps/documentation/plc/PLC software discusion 1.docx` |
 | [R39] | PLC Label Database | `hvps/documentation/plc/hvpsPlcLabels.xlsx` |
 | [R40] | Enerpro Board Integration Notes | `hvps/controls/enerpro/enerproBoardHvps.docx` |
 
@@ -1312,12 +1317,12 @@ The following AI-generated technical notes were consulted during preparation of 
 |--------|-----------|-------------|
 | f₀, ω₀ | Cavity resonant frequency | MHz, rad/s |
 | f_RF, ω_RF | RF operating frequency (476.315 MHz) | MHz, rad/s |
-| f_rev, ω_rev | Revolution frequency (1.2808 MHz) | MHz, rad/s |
+| f_rev, ω_rev | Revolution frequency (1.2804 MHz) | MHz, rad/s |
 | f_s, ω_s | Synchrotron frequency (~9.4 kHz) | kHz, rad/s |
 | Q₀ | Unloaded quality factor (33,500) | dimensionless |
 | Q_L | Loaded quality factor (6,700) | dimensionless |
 | β | Coupling coefficient = Q₀/Q_ext (4.0) | dimensionless |
-| R_s | Shunt impedance (3.9 MΩ) | MΩ |
+| R_s | Shunt impedance (3.8 MΩ) | MΩ |
 | V_gap | Gap voltage per cavity (~712 kV operating) | kV |
 | I_b | DC beam current (500 mA design) | mA or A |
 | V_HV | HVPS output voltage (−74.7 kV operating) | kV |
