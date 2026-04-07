@@ -119,7 +119,15 @@ All references are cataloged in [Appendix A](#appendix-a--source-document-refere
 
 ## Figures and Photo Placeholders
 
-This document includes placeholders for photographs and figures of the actual legacy system hardware. These placeholders describe the exact shot needed and are formatted as:
+This document includes figures from the 2003 SPEAR3 RF system overview photograph set (`spear3RF_overview_2003_images/`) and placeholders for additional photographs still needed.
+
+**Populated figures** (22 images from the 2003 overview set, inserted April 2026):
+Figures 2-1, 3-1, 3-2, 3-3, 5-1, 6-1, 6-2, 6-3, 7-1, 7-2, 7-3, 7-4, 7-5, 8-1 through 8-8, and 9-1.
+
+**Remaining placeholders** (still requiring photography):
+Site map/aerial view of SSRL; B132 exterior; B118 interior (Hoffman Box and PLC interior shots); switchgear/contactor panel; VXI rear panel and individual module panels (RFP, IQA, AIM); klystron collector and input close-ups; directional coupler; ceramic window/arc sensor; HVPS Main Tank, Phase Tank, Crowbar Tank, filter inductors; fiber optic runs; 500 Ω isolation resistors; PPS relays, Ross contactor, grounding switch; MPS ControlLogix PLC; Fast Interlock Chassis; Galil DMC-4143 controller; legacy AB 1746-HSTP1 module.
+
+Remaining placeholders are formatted as:
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Description of the photograph needed*
 
@@ -186,7 +194,9 @@ The legacy SPEAR3 RF system consists of the following major elements:
    └─────────────────────────────────────────────────────┘
 ```
 
-> 📷 **[PHOTO PLACEHOLDER]**: *Overall SPEAR3 RF system — composite image showing B132 control electronics, B514 HVPS power section, and tunnel cavity installations, with arrows indicating signal/power flow between locations*
+![LLRF control electronics in Room 101, Building B132](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/LLRF%20in%20room%20101%20building%20132.png)
+
+*Figure 2-1: LLRF control electronics in Room 101, Building B132 — the primary control location for the SPEAR3 RF station, housing the VXI crate, drive amplifier, and associated electronics racks*
 
 ### 2.2 Subsystem Summary
 
@@ -227,13 +237,16 @@ The SPEAR3 RF station is distributed across multiple buildings at SSRL. Understa
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Building B118 interior — HVPS controller Hoffman enclosure (front view, showing PLC, terminal strips, power supplies)*
 
-> 📷 **[PHOTO PLACEHOLDER]**: *Building B514 exterior and interior — HVPS main tank, phase tank, and crowbar tank in the high-voltage substation*
+![Building B514 — HVPS substation](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Building514.jpg)
+*Figure 3-1: Building B514 — the high-voltage power supply substation housing the main transformer/rectifier tank, phase tank, and crowbar tank*
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Switchgear/contactor disconnect panel showing vacuum contactor, Ross HCA-1-A controller, and relay panel*
 
-> 📷 **[PHOTO PLACEHOLDER]**: *Termination tank showing Ross grounding switch, Danfysik DC-CT, and Pearson CT-110 installation*
+![HVPS grounding/termination tank in Building B132](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HVPS_Grounding_Tank_in%20Building132-Termination%20Tank.png)
+*Figure 3-2: HVPS grounding and termination tank located near Building B132 — contains the Ross Engineering HV grounding switch, Danfysik DC-CT, and Pearson CT-110 current transformer for the klystron cathode cable*
 
-> 📷 **[PHOTO PLACEHOLDER]**: *SPEAR3 tunnel showing RF cavity installations with waveguide connections and tuner assemblies visible*
+![RF cavities in the SPEAR3 storage ring tunnel — inward view](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Cavities%20in%20tunnel_inward%20view.png)
+*Figure 3-3: RF cavities installed in the SPEAR3 storage ring tunnel (inward view) — showing the waveguide connections and cavity arrangement in the radiation enclosure*
 
 > **Sources**: [R5] §3; [R25]; [R14]; preliminary analysis (AI-generated, see `pps/diagrams/00_SYSTEM_OVERVIEW.md`, unreviewed).
 
@@ -301,7 +314,8 @@ The LLRF controller is a VXI-based system located in Building B132 that provides
 
 The VXI crate hosts a Kinetics Systems IOC running VxWorks RTOS, which serves as the primary intelligence for the entire RF system. All communication with external PLCs (HVPS, MPS, stepper motors) passes through the VXI crate via an Allen-Bradley DCM serial communication module.
 
-> 📷 **[PHOTO PLACEHOLDER]**: *VXI crate front panel in B132, showing all installed modules with labels identifying each slot*
+![VXI crate (VxWorks IOC) in Building B132](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/LLRF%20VX%20works%20crate.jpg)
+*Figure 5-1: VXI crate running VxWorks RTOS in Building B132 \u2014 the EPICS IOC host for the SPEAR3 LLRF system, containing the RFP, IQA×3, CLK, AIM, and AB Scanner modules*
 
 > 📷 **[PHOTO PLACEHOLDER]**: *VXI crate rear panel showing RF signal cabling, control cables, and fiber optic connections*
 
@@ -461,7 +475,11 @@ The SPEAR3 klystron is a SLAC-designed 476 MHz CW klystron located in Building B
 2. MPS hardware limit using an RF detector module in the Fast Interlock Chassis that couples klystron forward power
 3. The AB controller monitors HVPS V and I and computes collector power, removing the MPS permit if limits are exceeded
 
-> 📷 **[PHOTO PLACEHOLDER]**: *SPEAR3 klystron in B132 — full view showing input waveguide, output waveguide, collector cooling, and solenoid magnets*
+![Marconi klystron installed in Building B132](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Marconi_Klystron.png)
+*Figure 6-1: Marconi klystron installed in Building B132 — 476 MHz CW klystron rated ~1.5 MW, showing the input waveguide, output waveguide, collector cooling, and solenoid focusing magnets*
+
+![Klystron filament control chassis](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Klystron%20Filament%20Control%20Chassis.jpg)
+*Figure 6-2: Klystron filament control chassis — manages the klystron heater/filament power and sequencing during startup and shutdown*
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Klystron collector region showing cooling water connections and temperature monitoring*
 
@@ -474,7 +492,8 @@ The SPEAR3 klystron is a SLAC-designed 476 MHz CW klystron located in Building B
 
 The drive amplifier boosts the LLRF output signal from ~0 dBm to ~29 W (14.6 dBm → 44.6 dBm) to drive the klystron input. The amplifier is a KAW2051M12 unit.
 
-> 📷 **[PHOTO PLACEHOLDER]**: *Drive amplifier (KAW2051M12) in B132 rack, showing RF input/output connections*
+![RF drive amplifier (KAW2051M12) in B132 rack](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/RF%20Driver%20Amplifer.jpg)
+*Figure 6-3: RF drive amplifier (KAW2051M12) in the B132 electronics rack — boosts the LLRF output from ~0 dBm to ~29 W to drive the klystron input at 476.315 MHz*
 
 > **Sources**: [R32] (drive amplifier datasheet); [R5] §4.4.
 
@@ -508,6 +527,12 @@ Klystron Output
 
 Each magic-tee splits power equally between two outputs (P2 and P3 ports). The P4 port (difference port) receives the sum of equal reflected power from the two cavities and directs it to a waveguide load.
 
+![AFT circulator in the waveguide distribution system](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/AFT_Circulator.png)
+*Figure 7-1: AFT circulator — positioned between the klystron output and the magic-tee splitter network; routes reflected power from the load network away from the klystron to protect it from reflected energy*
+
+![Magic-tee and bellows network mounted on the tunnel roof](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/MagicT%20and%20Bellow%20Network%20on%20Tunnel%20Roof.png)
+*Figure 7-2: Magic-tee power splitter and bellows network on the SPEAR3 tunnel roof — the two-stage magic-tee arrangement divides RF power equally among all four cavities; flexible bellows sections accommodate thermal expansion in the waveguide runs*
+
 ### 7.2 Monitored RF Signals
 
 The system monitors 24 RF signals at various points in the waveguide network. Key signals include:
@@ -516,11 +541,16 @@ The system monitors 24 RF signals at various points in the waveguide network. Ke
 - Waveguide load powers (signals 7–8, 15–16, 23–24)
 - Station reference and klystron drive (signals 5, 6)
 
-> 📷 **[PHOTO PLACEHOLDER]**: *Waveguide network in B132 showing circulator, magic-tee splitters, and waveguide runs toward tunnel*
+![Waveguide distribution network from klystron to cavities](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Waveguide_network_from_klystron_to_cavity.png)
+*Figure 7-3: Waveguide distribution network routing RF power from the klystron output through the circulator, magic-tee splitters, and into the tunnel toward the four RF cavities*
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Directional coupler installation on waveguide showing RF signal tap points*
 
-> 📷 **[PHOTO PLACEHOLDER]**: *Waveguide loads (circulatory load and magic-tee difference port loads)*
+![Water-cooled waveguide load](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Water_load.png)
+*Figure 7-4: Water-cooled waveguide load — absorbs circulator dump power and magic-tee difference-port reflected power; water cooling carries away dissipated RF energy*
+
+![High-conductivity water cooling station behind the booster](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HCW_Station_behind_Booster_forLoad.png)
+*Figure 7-5: High-conductivity water (HCW) cooling station behind the booster — supplies cooling water to the waveguide loads, absorbing reflected and dump power from the RF distribution network*
 
 > **Sources**: [R5] §4.2, §4.6 (complete 24-signal table); [R33].
 
@@ -540,13 +570,31 @@ Four single-cell, HOM-damped copper cavities (PEP-II type) are installed in the 
 
 Each cavity has waveguide window viewports on either side of the ceramic window, providing mounting points for arc detection sensors.
 
-> 📷 **[PHOTO PLACEHOLDER]**: *Single RF cavity installation in SPEAR3 tunnel — side view showing waveguide connection, HOM dampers, tuner plunger, and vacuum gauges*
+![PEP-II bare RF cavity prior to assembly](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/PEP-II%20Bare%20RF%20Cavity.png)
+*Figure 8-1: PEP-II bare single-cell RF cavity — copper cavity body prior to installation of HOM dampers, tuner assembly, and waveguide couplers; the SPEAR3 cavities are of this same design*
 
-> 📷 **[PHOTO PLACEHOLDER]**: *Cavity tuner assembly close-up showing stepper motor, mechanical linkage, linear potentiometer (position readback), and plunger mechanism*
+![RF cavity assembly — assembled view](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/RF%20Cavity%20Assembly.png)
+*Figure 8-2: RF cavity assembly — cavity body with waveguide coupler, HOM damper waveguide stubs, and tuner plunger installed*
+
+![RF cavity assembly with component labels](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/RF%20Cavity%20Assembly%20with%20Names.png)
+*Figure 8-3: Labeled RF cavity assembly — identifying the accelerating cell, input coupler, HOM damper ports, movable tuner plunger, probe port, and ceramic RF window*
+
+![Movable tuner plunger assembly below an RF cavity](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Movable%20Tunner%20below%20the%20cavity.png)
+*Figure 8-4: Movable tuner plunger assembly mounted below an RF cavity — the SLO-SYN stepper motor drives the plunger in/out to shift cavity resonant frequency and maintain it at 476.315 MHz under varying beam loading*
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Ceramic window on cavity showing arc detection sensor mounting points*
 
-> 📷 **[PHOTO PLACEHOLDER]**: *All four cavities in the tunnel with waveguide distribution visible*
+![HOM load at E-plane mitre bend](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HOM%20load%20at%20E%20mitre.png)
+*Figure 8-5: HOM (Higher-Order Mode) load at an E-plane mitre bend in the waveguide stub — absorbs parasitic cavity modes that would otherwise cause beam instability*
+
+![HOM load at H-plane mitre bend](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HOM%20load%20at%20H%20mitre.png)
+*Figure 8-6: HOM load at an H-plane mitre bend — the three HOM loads per cavity (E-mitre, H-mitre, and plate) together damp all significant parasitic resonances above the fundamental accelerating mode*
+
+![Water-cooled HOM load plate](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HOM%20load%20plate%20-%20water%20cooled.png)
+*Figure 8-7: Water-cooled HOM load plate — dissipates HOM power as heat, carried away by the high-conductivity water cooling system; each cavity has one of these plates in addition to the E- and H-mitre loads*
+
+![Four RF cavities in the SPEAR3 tunnel — outward view](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Cavities%20in%20tunnel_outward%20view.png)
+*Figure 8-8: Four RF cavities installed in the SPEAR3 storage ring tunnel (outward view) — showing the complete cavity row with waveguide distribution network and interconnecting bellows runs visible*
 
 ### 8.2 Tuner Mechanical Assembly
 
@@ -639,7 +687,8 @@ Substation 507, Breaker 160 (12.47 kV RMS 3φ 60 Hz)
 
 > 📷 **[PHOTO PLACEHOLDER]**: *Filter inductors L1 and L2 — air-core inductors with temperature monitoring sensors visible*
 
-> 📷 **[PHOTO PLACEHOLDER]**: *Switch-over tank showing HV cable connections between SPEAR1 and SPEAR2 units*
+![HVPS cable switch tank at Building B514](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HVPS%20Cable%20Switch%20Tank%20at%20building514.jpg)
+*Figure 9-1: HVPS cable switch tank at Building B514 \u2014 allows rapid changeover between the SPEAR1 (active) and SPEAR2 (warm spare) HVPS units without disconnecting high-voltage cables to the klystron*
 
 ### 9.3 Key Component Specifications
 

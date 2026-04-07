@@ -3,7 +3,7 @@
 **Document:** T_TUNER_CONTROL_SYSTEM_ANALYSIS.md  
 **Scope:** Complete reverse-engineering of the legacy mechanical cavity tuner control loop  
 **Purpose:** Foundation for LLRF upgrade redesign — enable AI-optimized replacement  
-**Sources:** `spear-rf-code-legacy/rfApp/` source tree (RCS-archived, EPICS/VxWorks era)  
+**Sources:** `spear-rf-code-legacy/rfApp/` source tree (RCS-archived, EPICS/VxWorks era); SLAC SPEAR RF EPICS operator help pages: [rf_tuners.html](https://www.slac.stanford.edu/grp/ssrl/spear/epics/app/rf/help/rf_tuners.html) \[W_tuners\], [rf_tuner_input.html](https://www.slac.stanford.edu/grp/ssrl/spear/epics/app/rf/help/rf_tuner_input.html) \[W_tuner_input\]  
 **Status:** Reference analysis — legacy system (AB 1746-HSTP1 stepper replaced by Galil DMC-4143, Aug 2025)
 
 ---
@@ -57,7 +57,7 @@ The system was designed as **two nested feedback loops**:
 **Key numbers:**
 - 2 Hz loop rate, 4 cavities, station prefix `SRF1:`
 - Stepper motor: 3 mm/s, 0.003175 mm/step, range −29.5 to +18 mm
-- Phase deadband: 0.25° (design), conversion: 0.02 mm/°, max delta: 1 mm/cycle
+- Phase deadband: 0.25° (design), conversion: 0.020–0.030 mm/° (nominal operational range per \[W_tuner_input\]), max delta: 1 mm/cycle
 
 ---
 
@@ -110,6 +110,8 @@ The inner loop drives `LOAD:ANGLE:ERR → 0`. But the raw IQA measurements inclu
 2. At resonance (confirmed by minimum reflected power or maximum stored energy), the EPICS IQA phase offset parameters are set so that `PROBE:PHASE.L − FRWD:PHASE.L = 0`
 3. From that point forward, `LOAD:ANGLE:ERR = 0` means resonance; any nonzero value means detuning by $\Delta f \approx \frac{\epsilon}{90°} \cdot \frac{f_0}{4 Q_L}$
 
+**EPICS panel parameters for this calibration:** The per-signal offsets described in step 2 are set via the **"Probe Phase Offset"** and **"Frwd Phase Offset"** parameters on the Tuner Inputs & Constants panel \[W_tuner_input\]. These are the operator-accessible knobs that translate the raw IQA `.L` measurement to zero at resonance. Both offsets are determined during tuner configuration.
+
 **Why `.L` rather than `.VAL`?** Both `PROBE:PHASE` and `FRWD:PHASE` have a `.VAL` field with an individual per-signal phase offset subtracted (for beam physics applications). The `.L` field is the raw input before this offset. Using `.L` means the load angle calibration is set once at the system level (both `.L` traces zeroed at resonance) rather than needing to track per-signal offsets.
 
 **Practical implication:** If the IQA phase calibration is incorrect or has drifted (hardware swap, cable re-routing), the tuner drives the cavity to the wrong frequency — it minimizes the measured phase difference, but that measured zero no longer corresponds to the true resonance. The system has no independent check of resonance other than this phase measurement.
@@ -131,10 +133,10 @@ The system was designed with two nested feedback loops. The **inner loop** (phas
                     └──────────────────┬──────────────────────────┘
                                        │ θ_offset (= 0 in SPEAR3)
                     ┌──────────────────▼──────────────────────────┐
- IQA 400 Hz ──────►│           INNER LOOP (phase)                │
+ IQA 400 Hz ──────► │           INNER LOOP (phase)                │
  PROBE:PHASE.L      │  error = probe − fwd + θ_offset             │
  FRWD:PHASE.L       │  delta = error × mm/deg × gain              │
-                    │  new_posn = current_posn + delta             │
+                    │  new_posn = current_posn + delta            │
                     │           → stepper motor                   │
                     └──────────────────┬──────────────────────────┘
                                        │ motor moves tuner plunger
@@ -145,7 +147,7 @@ The system was designed with two nested feedback loops. The **inner loop** (phas
                     └─────────────────────────────────────────────┘
 ```
 
-**In SPEAR3 as deployed:** $\theta_{offset} = 0$ always. The outer loop exists in the code architecture but is structurally disabled (see §5.3). The tuner operates in pure resonance-seeking mode — zero phase error means resonance.
+**In SPEAR3 as deployed:** $\theta_{offset} = 0$ always. The outer loop exists in the code architecture but defaults to disabled on a fresh start without autosave (see §5.3). In normal operation with autosave restore the outer loop can be functional. The tuner operates in pure resonance-seeking mode — zero phase error means resonance.
 
 ### 3.2 Station Configuration
 
@@ -180,22 +182,22 @@ The tuner loop only acts in `ON_CW` state. The state codes (from `rf_station_sta
 │  │ FRWD:PHASE   │  │ subIQphaseOff │  │ subSysFreqErr    │  │
 │  │ (400 Hz acq) │  │ subIQphase2ps │  │ (only PARK mode) │  │
 │  └──────────────┘  └───────────────┘  └──────────────────┘  │
-│            │                │                                 │
-│            └────────────────┘                                 │
-│                    │ TUNR:POSN:DELTA (event → SNL)            │
-└────────────────────┼─────────────────────────────────────────┘
+│            │                │                               │
+│            └────────────────┘                               │
+│                    │ TUNR:POSN:DELTA (event → SNL)          │
+└────────────────────┼────────────────────────────────────────┘
                      │
 ┌────────────────────▼─────────────────────────────────────────┐
 │  rf_tuner_loop.st  (SNL State Machine, 4 instances)          │
 │  loop_init → loop_unknown → loop_on                          │
-│    sm_posn + posn_delta → TUNR:POSN:CTRL → motor record     │
+│    sm_posn + posn_delta → TUNR:POSN:CTRL → motor record      │
 └────────────────────┬─────────────────────────────────────────┘
                      │
 ┌────────────────────▼─────────────────────────────────────────┐
 │  Stepper Motor Record (TUNR:STEP:MOTOR)                      │
 │  Legacy: AB 1746-HSTP1 (steppermotor record type)            │
 │  Current: Galil DMC-4143 (commissioned Aug 2025)             │
-└─────────────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -227,6 +229,8 @@ $$\boxed{\text{LOAD:ANGLE:ERR} = \phi_{probe} - \phi_{fwd} + \theta_{offset} + 0
 | INPD | — | Spare, always 0 |
 
 Result wrapped to $[-180°, +180°]$. Alarm limits: `HIHI/LOLO = ±5°` (MAJOR).
+
+**Load angle error limit (Ld Angle Err Limit):** The operator panel exposes a separate parameter **"Ld Angle Err Limit"** (nominal **0.5°** per \[W_tuner_input\]) that is distinct from the ±5° EPICS HIHI/LOLO alarms. When `|LOAD:ANGLE:ERR|` exceeds this limit, the outer loading angle offset integrator (§5.2) is **frozen** — no further offset accumulation occurs until the error returns within bounds. This provides a guard against the outer loop winding up during large transient detuning events.
 
 **Note on `.L` field:** Uses unadjusted (pre-offset) phase from IQA records. The `.VAL` field has a per-signal phase offset subtracted for beam physics applications — that subtraction is separate from the load angle target. See §2.4 for the calibration requirement that makes `error = 0` correspond to resonance.
 
@@ -268,9 +272,9 @@ $$\boxed{\Delta x = \text{clamp}\!\left(\epsilon \cdot C_{mm/deg} \cdot G_{loop}
 |---|---|---|---|
 | A | `STN:STATE:RBCK` (station state) | — | ✅ wired |
 | B | deadband (degrees) | 0.25° | ❌ commented out |
-| C | mm per degree | 0.02 mm/° | ❌ commented out |
+| C | mm per degree | 0.020–0.030 mm/° (nominal range per \[W_tuner_input\]) | ❌ commented out |
 | D | max delta per cycle | 1 mm | ❌ commented out |
-| E | `CAVTUNR:LOOP:GAIN` | 0–1 | ✅ wired |
+| E | `CAVTUNR:LOOP:GAIN` | 0–1; nominal **1.00** (always run at unity per \[W_tuner_input\]) | ✅ wired |
 | F | `LOAD:ANGLE:ERR` | degrees | ✅ wired |
 | G | `FREQ:ERR` (PARK only) | degrees | ✅ wired (inactive) |
 
@@ -333,7 +337,7 @@ $$\text{STRENGTH} = \frac{\text{PROBE:AMPL}}{\text{STN:VOLT}} \times 100\%$$
 - Clamped to 0% when `STN:VOLT < 2 kV` (hardwired floor in `subIQpowerEff`)
 
 `STRENGTH:CTRL` (ao, %, DRVH=100) is the operator setpoint.  
-`STRENGTH:DIFF` (ao, %, DRVH=100) is the integrator deadband.
+`STRENGTH:DIFF` (ao, %, DRVH=100) is the integrator deadband (nominal operating value **0.05%** per \[W_tuner_input\]).
 
 **Trigger mechanism:** NOT driven by the 2 Hz scan record. Triggered by the SNL sequencer writing PROC to `LOAD:ANGLE:UNADOFFS.PROC` (via `phase_offset_proc` PV) — see §4.3. This means the outer loop only fires when the inner loop has confirmed motor idleness and completed a full update.
 
@@ -343,8 +347,8 @@ $$\theta_{unadj}[n] = \text{forget} \cdot \left( \theta_{unadj}[n-1] - K \cdot e
 
 where:
 - $e_s = \text{STRENGTH} - \text{STRENGTH:CTRL}$ (cavity voltage strength error, %)
-- $K$ = `CAVLOAD:ANGLE:K` (deg/%, DRVH=1)
-- $\text{forget}$ = `CAVLOAD:ANGLE:FORGET` (≤1, dimensionless)
+- $K$ = `CAVLOAD:ANGLE:K` (deg/%, DRVH=1; nominal operating value **0.5 deg/%** per \[W_tuner_input\])
+- $\text{forget}$ = `CAVLOAD:ANGLE:FORGET` (≤1, dimensionless; nominal operating value **0.9995** per \[W_tuner_input\])
 
 **Gate logic — two modes:**
 
@@ -354,6 +358,8 @@ where:
 3. Beam has MINOR or MAJOR alarm: `STN:BEAM:STAT.SEVR` ∈ {1, 2} (INPC):
    - `STN:BEAM:STAT` is a `bi` record with `ZSV=MAJOR` — when beam is OFF, SEVR=2
    - `STN:BEAM:STATINP` computes: `beam_curr ≥ RF_CUTOFF ? ON : OFF`
+
+> **Beam loss behavior \[W_tuner_input\]:** When beam current drops below the minimum threshold, the stored load angle offset is **cleared to zero** and must regenerate from scratch as beam is re-injected. This is by design — the optimal detuning depends on beam current; a stale offset from a previous fill is not applicable to a new injection.
 
 *UPDATE (all must be true) — integrator steps:*
 4. Reset conditions are all false (enabled, ON_CW, beam healthy)
@@ -393,21 +399,21 @@ $$\boxed{\theta_{offset} = \text{clamp}(D_{fixed} + \theta_{unadj},\; E_{min},\;
 |---|---|---|
 | INPA | `CAVLOAD:ANGLE:CTRL` (enable) | ✅ wired |
 | INPB | `LOAD:ANGLE:UNADOFFS` (integrator output) | ✅ wired |
-| INPC | Max bound | ❌ absent — `#field(INPC,"10")` commented out → C = 0 |
+| INPC | Max bound | ❌ absent in DB source — `#field(INPC,"10")` commented out → C = 0 on fresh start; **autosave restores 75° in normal operation** \[W_tuner_input\] |
 | INPD | Fixed offset | ❌ absent → D = 0 |
 | INPE | Min bound | ❌ absent → E = 0 |
 
 **Purpose of the fixed offset (INPD):** Allows a permanent operator-set phase bias independent of the integrator. In PEP-II, this encoded a known optimal detuning from design parameters or absorbed systematic calibration offsets. In SPEAR3, INPD is absent: no fixed offset is applied.
 
-> **⚠ The outer loop is structurally disabled in deployed SPEAR3.**
+> **⚠ The outer loop defaults to disabled on a fresh IOC start without autosave.**
 >
-> With C=0 and E=0, `clamp(val, 0, 0) = 0` forces the output to zero regardless of what the integrator computes.
+> The DB source has `#field(INPC,"10")` commented out. On a clean start without autosave, C = 0 (and E = 0), so `clamp(val, 0, 0) = 0` forces the output to zero regardless of what the integrator computes.
 >
-> **The effective equation in SPEAR3 is: $\theta_{offset} = 0$.**
+> **However, in normal SPEAR3/PEP-II operation with autosave restore, `INPC` is restored to the nominal operational value of 75° per \[W_tuner_input\].** The official SLAC operator documentation states: *"Max Offs nominal value = 75 degrees"* and that it *"should not need to be greater than 10 degrees but is presently set higher."* With autosave active and `LOAD:ANGLE:CTRL=1`, the outer loop IS functional. The `#field(INPC,"10")` comment suppresses only the DB-compiled hard-coded default value; the 10° figure was likely a conservative initial recommendation subsequently raised to 75° in the deployed system.
 >
-> The voltage integrator (`UNADOFFS`) runs and computes values, but they are discarded by the zero-valued clamp bounds. This is almost certainly intentional — SPEAR3 has modest beam loading and operates well in pure resonance-seeking mode.
+> **Consequence of fresh start without autosave:** $\theta_{offset} = 0$. The voltage integrator (`UNADOFFS`) computes values but they are discarded by the zero-valued clamp bounds.
 >
-> **To activate the outer loop**, an operator would need to configure: `CAVLOAD:ANGLE:CTRL=1`, `STRENGTH:CTRL`, `STRENGTH:DIFF`, `LOAD:ANGLE:K`, `LOAD:ANGLE:FORGET`, and restore `INPC` to `LOAD:ANGLE:OFFS` (max bound ≈ 10°) via autosave/CSET. Even then, a fundamental sign-ambiguity exists because cavity voltage is symmetric about resonance — see §10.8.
+> **To activate the outer loop** on a fresh start, configure: `CAVLOAD:ANGLE:CTRL=1`, `STRENGTH:CTRL`, `STRENGTH:DIFF` (~0.05%), `LOAD:ANGLE:K` (~0.5 deg/%), `LOAD:ANGLE:FORGET` (~0.9995), and set `INPC` on `LOAD:ANGLE:OFFS` (max bound) to ~75°. Note also the fundamental sign-ambiguity described in §10.8 — cavity voltage is symmetric about resonance.
 
 ---
 
@@ -509,7 +515,7 @@ Understanding which variables carry memory across cycles is critical for the upg
 
 ## 7. Disabled Path: Park Mode (PEP-II Only)
 
-These functions existed for PEP-II (a collider with two rings). In SPEAR3 they are present in the code but permanently disabled.
+These functions existed for PEP-II (a collider with two rings). In SPEAR3 they are present in the code but permanently disabled. For PEP-II, the nominal park frequency offset was **±340 kHz** per station: half the cavities were parked at +340 kHz relative to resonance and the other half at −340 kHz \[W_tuners\].
 
 ### 7.1 Frequency Offset Estimation
 
@@ -520,7 +526,23 @@ Estimates frequency offset from tuner position using a polynomial:
 
 $$f_{offset} = p_0 + p_1 \cdot \Delta x + p_2 \cdot \Delta x^2 + p_3 \cdot \Delta x^3 + t_1 \cdot V_{cav}^2$$
 
-where $\Delta x = x_{current} - x_{home}$ (mm). Parameters calibrated per cavity and thermal conditions. The $t_1 \cdot V_{cav}^2$ term accounts for RF-heating-induced detuning.
+where $\Delta x = \text{Tuner Posn} - \text{ON Home Posn}$ (mm) — position relative to the ON mode home (`TUNR:POSN:ONHOME`), **not** absolute position. Parameters are calibrated per cavity and thermal conditions. The $t_1 \cdot V_{cav}^2$ term accounts for RF-heating-induced detuning. The polynomial is typically accurate to **~10 kHz** per \[W_tuner_input\].
+
+**Nominal coefficient ranges** (from \[W_tuner_input\]):
+
+| Coefficient | Nominal Range | Units |
+|---|---|---|
+| $p_0$ | 10 to 20 | kHz |
+| $p_1$ | 20 to 30 | kHz/mm |
+| $p_2$ | 0.4 to 0.6 | kHz/mm² |
+| $p_3$ | −0.01 to +0.01 | kHz/mm³ |
+| $t_1$ | ≈ −0.00010 | kHz/kV² |
+
+**Output smoothing:** A first-order IIR smoother with $S = 0.5$ is applied to the frequency offset output before it reaches `FREQ:ERR` \[W_tuner_input\]:
+
+$$f_{smooth}[n] = (1 - S) \cdot f_{offset}[n] + S \cdot f_{smooth}[n-1]$$
+
+This halves the effective bandwidth of the polynomial estimate, attenuating noise that could cause excessive motor movement in PARK mode.
 
 ### 7.2 Park Frequency Error
 
@@ -570,7 +592,7 @@ Total loop delay: ≈ loop period (0.5 s) dominates
 
 The linearized loop gain from phase error to stepper position change per cycle:
 
-$$G_{OL} = C_{mm/deg} \cdot G_{loop} = 0.02 \; \frac{\text{mm}}{°} \cdot G_{loop}$$
+$$G_{OL} = C_{mm/deg} \cdot G_{loop} = 0.020\text{–0.030} \; \frac{\text{mm}}{\text{°}} \cdot G_{loop}$$
 
 A position change of $\Delta x$ mm changes cavity resonant frequency by:
 
@@ -582,7 +604,7 @@ $$\frac{df}{dx} \approx p_1 \quad [\text{kHz/mm}]$$
 
 $$G_{eff} = C_{mm/deg} \cdot p_1 \cdot \frac{90°}{4 f_0} \cdot Q_L$$
 
-For nominal values ($C = 0.02$ mm/°, $p_1 \approx 10$ kHz/mm, $Q_L \approx 7000$, $f_0 = 476$ MHz):
+For nominal values ($C = 0.020$ mm/° (lower end of range), $p_1 \approx 10$ kHz/mm, $Q_L \approx 7000$, $f_0 = 476$ MHz):
 
 $$G_{eff} \approx 0.02 \times 10 \times 0.00004726891 \times 10^3 \times 7000 \approx 66$$
 
@@ -681,11 +703,13 @@ The three key parameters for `subIQphase2posn` (deadband B, conversion C, max-de
 
 **Recommendation:** Encode these as `ao` records with `PINI=YES` and default values.
 
-### 10.2 Outer Loop Disabled by Default
+### 10.2 Outer Loop Disabled on Fresh Start (Functional with Autosave)
 
-The LOAD:ANGLE:OFFS bounds (INPC) are commented out: `clamp(val, 0, 0) = 0`. Additionally, K and FORGET have no hardcoded defaults (both = 0 on fresh start). An operator setting `LOAD:ANGLE:CTRL=1` may believe the outer loop is active when it is not.
+The LOAD:ANGLE:OFFS bounds (INPC) are commented out in the DB source (`#field(INPC,"10")`): `clamp(val, 0, 0) = 0` on a fresh IOC start without autosave. In normal operation with autosave restore, INPC is restored to 75° \[W_tuner_input\], making the outer loop potentially active when `LOAD:ANGLE:CTRL=1`. Additionally, K and FORGET have no hardcoded DB defaults (both = 0 on fresh start without autosave).
 
-**Recommendation:** Define explicit defaults for K, FORGET, and the OFFS bounds.
+**Risk:** On a fresh IOC start without autosave (disaster recovery, new deployment), the outer loop is silently non-functional. An operator setting `LOAD:ANGLE:CTRL=1` may believe the outer loop is active when it is not.
+
+**Recommendation:** Encode explicit defaults for K (0.5 deg/%), FORGET (0.9995), and OFFS bounds (±75°) as DB `PINI=YES` values in the upgrade design.
 
 ### 10.3 No Feedforward for Beam Loading
 
@@ -707,7 +731,7 @@ The legacy system uses an implicit integrator to find optimal detuning rather th
 
 ### 10.5 Motor Resolution vs. Phase Resolution
 
-With C = 0.02 mm/°:
+With C = 0.020 mm/° (minimum end of nominal range; worst-case resolution):
 - 1 step (0.003175 mm) ≡ 0.159° phase change
 - RDBD (5 steps = 0.015875 mm) ≡ 0.794° phase
 
@@ -751,7 +775,7 @@ Scenario: cavity detuned ABOVE resonance (Δf > 0)
 
 The integrator converges only from the **correct side** of resonance; from the wrong side it diverges. Which side is "correct" depends on the sign of K and the tuner geometry (sign of $df/dx$), but the fundamental issue is that voltage alone does not distinguish $+\Delta f$ from $-\Delta f$.
 
-**Why this doesn't cause problems in practice:** The outer loop is structurally disabled in SPEAR3 (§5.3). The inner loop uses phase error, which is **monotonic** with detuning (not symmetric), so it does not have this ambiguity. If the outer loop were ever activated:
+**Why this doesn't cause problems in practice:** In SPEAR3 as deployed, the outer loop is non-functional on fresh start (see §5.3, §10.2). The inner loop uses phase error, which is **monotonic** with detuning (not symmetric), so it does not have this ambiguity. If the outer loop were ever activated (e.g., via autosave with Max Offs = 75°):
 
 1. **Normal operation (beam loading dominant):** Beam loading consistently pulls the cavity to one side of resonance (determined by $\sin\phi_s$). If the initial sign convention is chosen for this side, convergence is reliable under steady-state conditions.
 2. **Transient risk:** After a beam loss/injection event, the cavity could briefly end up on the wrong side of resonance. The integrator would push in the wrong direction until either (a) the inner loop's phase control pulls it back, or (b) the offset hits the ±180° clamp.
@@ -770,7 +794,7 @@ The integrator converges only from the **correct side** of resonance; from the w
 
 1. **Inner loop (active):** 2 Hz proportional phase controller. Error = `PROBE:PHASE.L − FRWD:PHASE.L`. Motor drives to nullify this error → cavity stays at the calibrated resonant frequency.
 
-2. **Outer loop (structurally inactive):** The `LOAD:ANGLE:OFFS` output is clamped to 0 by missing INPC/INPE bounds. The integrator computes values but they are discarded.
+2. **Outer loop (inactive on fresh start; potentially active with autosave):** The `LOAD:ANGLE:OFFS` max bound (INPC) is commented out in the DB source — on a fresh start `clamp(val, 0, 0) = 0` discards the integrator output. In normal SPEAR3 operation, autosave restores INPC to 75°, allowing the outer loop to function when `LOAD:ANGLE:CTRL=1`. In practice at SPEAR3 with modest beam loading the outer loop has always run at $\theta_{offset} = 0$ (pure resonance-seeking mode). See §5.3, §10.2.
 
 3. **PARK mode (disabled):** Permanently disabled via commented-out `INPB` in `FREQ:ERR`.
 
@@ -870,9 +894,9 @@ These are `ao`/`bo` records in `rf_stn_cav.db,v`, shared across all cavities (pr
 | Sub Record | Input | Function | Design Value | Status |
 |---|---|---|---|---|
 | `TUNR:POSN:DELTA` | INPB | Phase deadband (°) | 0.25 | `#field(INPB,"0.25")` — commented |
-| `TUNR:POSN:DELTA` | INPC | mm per degree | 0.02 | `#field(INPC,"0.02")` — commented |
+| `TUNR:POSN:DELTA` | INPC | mm per degree | 0.020–0.030 range | `#field(INPC,"0.02")` — commented |
 | `TUNR:POSN:DELTA` | INPD | Max delta per cycle (mm) | 1.0 | `#field(INPD,"1")` — commented |
-| `LOAD:ANGLE:OFFS` | INPC | Max offset bound (°) | 10 | `#field(INPC,"10")` — commented |
+| `LOAD:ANGLE:OFFS` | INPC | Max offset bound (°) | 10 (DB); **75 operational** \[W_tuner_input\] | `#field(INPC,"10")` — commented; autosave restores 75° in normal operation |
 | `FREQ:ERR` | INPB | Loaded cavity Q | 7000 | `#field(INPB,"7000")` — commented |
 
 ### B.4 Physical Constants (Hardwired)
