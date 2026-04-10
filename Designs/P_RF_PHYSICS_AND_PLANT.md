@@ -3,7 +3,7 @@
 **Document ID**: Doc P
 **Version**: 3.2
 **Date**: March 26, 2026
-**Status**: DRAFT — For Engineering Review
+**Status**: DRAFT 
 **Location**: Designs/P_RF_PHYSICS_AND_PLANT.md
 **Author**: Faya Wang, with AI-assisted analysis
 **Tier**: 1 — Physics and Plant Reference (implementation-independent)
@@ -131,7 +131,7 @@ The following diagram shows the full RF control architecture — four cavities d
   │                        SPEAR3 RF CONTROL SYSTEM — OVERVIEW                         │
   ├────────────────────────────────────────────────────────────────────────────────────┤
   │                                                                                    │
-  │   IQ Ref ──▶(Σ)──▶ BASEBAND ──▶ IQ RF ──▶ DRIVE ──▶ KLYSTRON ──▶ 3× MAGIC ──┐  │
+  │   IQ Ref ──▶(Σ)──▶ BASEBAND ──▶ IQ RF ──▶ DRIVE ──▶ KLYSTRON ──▶ 3x MAGIC ──┐   │
   │     (DAC)    ↑      MODULATOR     MOD       AMP       1.2 MW      TEE          │   │
   │              │      (gain/phase   (up to    (~29 W)   (43 dB,    SPLITTER      │   │
   │              │       tracking)    476 MHz)             <150 ns)                │   │

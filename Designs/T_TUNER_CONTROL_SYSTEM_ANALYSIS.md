@@ -4,7 +4,7 @@
 **Scope:** Complete reverse-engineering of the legacy mechanical cavity tuner control loop  
 **Purpose:** Foundation for LLRF upgrade redesign — enable AI-optimized replacement  
 **Sources:** `spear-rf-code-legacy/rfApp/` source tree (RCS-archived, EPICS/VxWorks era); SLAC SPEAR RF EPICS operator help pages: [rf_tuners.html](https://www.slac.stanford.edu/grp/ssrl/spear/epics/app/rf/help/rf_tuners.html) \[W_tuners\], [rf_tuner_input.html](https://www.slac.stanford.edu/grp/ssrl/spear/epics/app/rf/help/rf_tuner_input.html) \[W_tuner_input\]  
-**Status:** Reference analysis — legacy system (AB 1746-HSTP1 stepper replaced by Galil DMC-4143, Aug 2025)
+**Status:** Reference analysis — legacy system (AB 1746-HSTP1 stepper)
 
 ---
 
