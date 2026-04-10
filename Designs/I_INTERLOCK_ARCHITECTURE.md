@@ -141,7 +141,7 @@ The SPEAR3 RF interlock system involves five distinct hardware/software actors. 
 |-------|-------|----------|--------------------------|
 | **Fast Interlock Chassis** (340-308) | < 1 μs | B132 | Arc breakdown, reflections exceeding cavity/klystron ratings |
 | **AIM Module** (VXI Slot 12) | < 1 μs (HW) / ~10 μs (ISR) | VXI Crate | Digitizes arc channel status from Fast IC; asserts RF_FAULT on VXI backplane; manages BATS; captures fault waveforms; drives control outputs (HVPS_On, Filament, Solenoid) |
-| **RF MPS PLC** (ControlLogix 1756) | ~10 ms | B132 | Collector overpower, vacuum excursion, secondary arc, cooling |
+| **RF MPS PLC** (AB PLC-5) | ~10 ms | B132 | Collector overpower, vacuum excursion, secondary arc, cooling |
 | **SLC-500 HVPS PLC** (DH+ Rack 2) | ~20 ms | B118 | HVPS internal faults: oil, transformer, crowbar, overvoltage, arc in HV tank |
 | **SNL State Machine** (`rf_states.st`) | ~1 s | VXI CPU (VxWorks) | Orderly shutdown sequencing, fault recording, recovery coordination |
 
