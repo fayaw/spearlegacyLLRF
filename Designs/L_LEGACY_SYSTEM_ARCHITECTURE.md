@@ -1,8 +1,8 @@
 # SPEAR3 RF System — Legacy System Architecture
 
 **Document ID**: Doc L  
-**Version**: 2.7  
-**Date**: April 9, 2026  
+**Version**: 2.8  
+**Date**: April 15, 2026  
 **Status**: DRAFT  
 **Location**: Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md  
 **Author**: Faya Wang, with AI-assisted analysis  
@@ -14,6 +14,7 @@
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 2.8 | 2026-04-15 | Faya Wang | Cross-document consistency pass against `I_INTERLOCK_ARCHITECTURE.md` v1.7. §14.3: Rewrote protection function description — the RF MPS PLC relay simultaneously drives three paths (Path A → Fast IC → SCR ENABLE + CROWBAR; Path B → DH+ permit bit; Path C → Slot 5 VXI backplane RF_FAULT); removed incorrect "Path B" label for the MPS PLC itself and corrected erroneous "Path C = SLC-500" — the SLC-500 HVPS PLC is a separate independent actor, not an output path of the MPS relay. §15.1 table: corrected SLC-500 speed from "~100 ms" to "~10–20 ms" (consistent with Part IV intro and Doc I §6.x). §15.2 signal routing note: added collector overpower cascade cross-reference (Doc I §4.6) — RF drive cutoff triggers cascade HVPS hardware kill in ~20–30 ms, not only the orderly ~6 s SNL shutdown. §15.3 trip chain: completely restructured ASCII diagram from Path A/B/C flat model to four-layer model (Layer 1: Fast IC hardware; Layer 2: RF MPS PLC with its three internal paths A/B/C; Layer 3: SLC-500 independent actor; Layer 4: EPICS supervisory). |
 | 2.7 | 2026-04-10 | Added Part IV introductory overview paragraph — summarizes the five-actor multi-layer protection architecture (Fast IC <1 μs, RF MPS PLC ~10 ms, SLC-500 HVPS PLC ~10–20 ms, SNL state machine ~1 s, PPS dual-chain) and adds cross-reference to `Designs/I_INTERLOCK_ARCHITECTURE.md` [Doc I] for full signal flow diagrams, per-actor input/output tables, fault timeline examples, compliance analysis, and fault data access procedures. |
 | 2.6 | 2026-04-10 | Added §13.6 — complete dual-PPS-chain interaction and roles: Chain 1 (HV vacuum contactor, fail-safe open) vs Chain 2 (Ross grounding switch, fail-safe closed/grounded), operational shutdown/restore sequences, fail-safe direction analysis, and compliance comparison table (Chain 1 has hardware PPS series fail-safe at OX8 relay input; Chain 2 does not). Added note on Ross switch spring-return as partial Chain 2 fail-safe. Added §18.5 — Fault Data Availability and Analysis: four data sources (EPICS Channel Archiver, SNL `/dat/FAULT*_N` files, AIM hardware history buffer, B118 four-channel oscilloscope), storage locations, access procedures, key PVs, brief fault categorization guide. Cross-reference added to `I_INTERLOCK_ARCHITECTURE.md` §10 for detailed step-by-step analysis procedure. |
 | 2.5 | 2026-04-09 | §2.1 top-level block diagram completely redrawn: replaced flat/incorrect node layout with accurate two-column architecture showing AB DH+ bus as a shared serial link (VXI slot-1 AB6008 master) connecting three nodes — SLC-500 (HVPS, B118), ControlLogix 1756 MPS (B132), and Stepper Chassis 340-315 (B132); added full tuner chain (1746-HSTP1 → SS2000MD4 translators → SLO-SYN motors → tuner plungers) with Aug 2025 Galil note; added Fast Interlock Chassis I/O detail (fiber-optic arc sensors, SCR ENABLE/CROWBAR outputs to B514); added SLC-500 PPS relay chain (K4/MX/RR → Ross HQ3 contactor; Ross grounding switch); added RF signal path (RFP → Drive Amp → Klystron → Circulator → Magic-Tees → 4 cavities) with IQA measurement taps and arc sensor fiber paths; added new §2.1.1 Major Block Descriptions table with description for each of 13 blocks |
@@ -248,8 +249,8 @@ The legacy SPEAR3 RF system consists of the following major elements:
         │           │  Inputs:                             │                      │
         │           │   · arc sensors (fiber in, tunnel)   │                      │
         │           │   · reflected power RF detectors     │                      │
-        │           │   · beam permit (SPEAR MPS)          │                      │
         │           │   · HVPS status (fiber in, B514)     │                      │
+        │           │   · MPS PLC permit (relay)           │                      │
         │           │  ──────────────────────────────────  │                      │
         │           │  Status ────────────────────────────────► VXI AIM (slot 12) │
         │           │  SCR ENABLE (fiber optic) ──────────────► B514  (<1 μs)     │
@@ -324,7 +325,7 @@ The legacy SPEAR3 RF system consists of the following major elements:
 | **RF MPS AB PLC-5** | B132 | RF Machine Protection System. Allen-Bradley PLC-5/1771-DCM; DH+ node. Monitors klystron collector power (cathode power minus RF output), cavity reflected power, waveguide arc conditions, cooling water flow, klystron vacuum, and HVPS fault conditions. On any trip: removes MPS permit → HVPS SCR ENABLE removed + RF drive inhibited. Hardwired to Fast Interlock Chassis for permit exchange. |
 | **Stepper Chassis 340-315** | B132 | SLAC chassis (SN08) with SLC bus adapter and 4× AB 1746-HSTP1 high-speed stepper controller modules. One 1746-HSTP1 per cavity. DH+ node, commanded by `rf_tuner_loop.st` SNL program. Outputs step-pulse and direction signals to the SS2000MD4 translators. *Replaced by Galil DMC-4143 in Aug 2025; chassis retained.* |
 | **SS2000MD4 PWM Motor Translators** | B132 | Superior Electric SLO-SYN SS2000MD4-M bipolar PWM step drive translators, one per motor. Convert the step/direction digital pulse train from the 1746-HSTP1 (or Galil) into bipolar phase current to drive the two-phase stepper motor windings. |
-| **Fast Interlock Chassis 340-308** | B132 | Hardware interlock hub at sub-microsecond speed. Inputs: arc sensor fiber optics from the 4 cavity waveguide windows, RF power detector signals for reflected-power limits, SPEAR beam permit, orbit interlock, and HVPS status (fiber optic from B514). Outputs: SCR ENABLE removal (fiber → B514, <1 μs) and CROWBAR firing (fiber → B514, <1 μs). Summarized status word is reported to the VXI AIM module (slot 12). The MPS ControlLogix exchanges hardwired I/O permits with this chassis. |
+| **Fast Interlock Chassis 340-308** | B132 | Hardware interlock hub at sub-microsecond speed. Inputs: arc sensor fiber optics from the 4 cavity waveguide windows, RF power detector signals for reflected-power limits, RF MPS PLC permit (relay), and HVPS status (fiber optic from B514, informational only). Outputs: SCR ENABLE removal (fiber → B514, <1 μs) and CROWBAR firing (fiber → B514, <1 μs). Note: the SPEAR MPS beam permit and orbit interlock connect to the back connector of **VXI Slot 5 (MPS Shutoff)**, not to this chassis. Summarized status word is reported to the VXI AIM module (slot 12). |
 | **HVPS Power Section** (SPEAR1 + SPEAR2) | B514 | Two complete, identical 12-pulse thyristor phase-controlled rectifier units. At any time one is active and one is in standby; units are swapped during scheduled downtime to equalize run-time. Input: 12.47 kV 3-phase AC from substation 507. Conversion chain: phase-shift transformer T0 (3.5 MVA, ±15°) → 12-pulse SCR bridges (168× Powerex T8K7) → LC filter (8 μF) → crowbar (4 SCR stacks, fiber-optic trigger, ≤1 μs) → cable term. inductors L3/L4 → −77 kV DC at ~22 A. |
 | **Drive Amplifier KAW2051M12** | B132 | Broadband RF power amplifier. Amplifies the VXI RFP module baseband-modulated RF output to ~29 W (44.6 dBm) at 476.3 MHz, which drives the klystron input waveguide. |
 | **Klystron** | B132 | SLAC 476 MHz CW klystron, rated ~1.5 MW. Cathode at −77 kV DC; solenoid focused; non-full-power collector (collector dissipation must be monitored by MPS). Operating point: ~800 kW RF output, ~19.4 A, ~72.1 kV. Filament controlled by VXI AIM module. |
@@ -1245,12 +1246,13 @@ The RF MPS monitors and protects against:
 - Klystron vacuum excursion
 - HVPS fault conditions
 
-When any protection condition is triggered, the MPS removes its permit signal (Path B of the three-path interlock architecture), which:
+When any protection condition is triggered, the RF MPS PLC relay simultaneously drives three protective outputs (the "three-path architecture"; see `Designs/I_INTERLOCK_ARCHITECTURE.md` §5.3–§5.4):
 
-1. Removes DH+ (cuts the modulated RF drive signal to the klystron)
-2. Opens the RF drive gate
+- **Path A**: MPS relay → hardwired to Fast Interlock Chassis → SCR ENABLE removed + CROWBAR fired → hardware HVPS kill (<1 μs after relay assertion)
+- **Path B**: DH+ permit bit removed → modulated RF drive cut to klystron (~10 ms)
+- **Path C**: Slot 5 VXI backplane `RF_FAULT` asserted → EPICS alarm chain → orderly shutdown
 
-> **Note**: SCR ENABLE removal and crowbar firing are performed by the **Fast Interlock Chassis** (Path A) independently — hardware-only, no software in the loop, faster than any PLC response. The RF MPS PLC (Path B) and SLC-500 HVPS PLC (Path C) are parallel, independent trip paths that complement the Fast IC protection. See `Designs/I_INTERLOCK_ARCHITECTURE.md` §1.1–§1.2 for the three-path architecture.
+> **Note**: The **SLC-500 HVPS PLC** (B118) is a **separate, independent actor** in the protection hierarchy — it is **not** one of the three paths above. It monitors HVPS-internal conditions (oil, crowbar, transformer arc, overvoltage) and independently drives a supervisory SCR enable relay on a ~10–20 ms cycle. See `Designs/I_INTERLOCK_ARCHITECTURE.md` §1.1–§1.2 for the complete five-actor architecture.
 
 ### 14.4 MPS Wiring
 
@@ -1270,7 +1272,7 @@ The interlock system spans multiple hardware layers, from fast analog hardware i
 |-------|-------|----------|----------|
 | Fast analog | <1 μs | Fast Interlock Chassis | Arc detection, reflected power limits |
 | PLC hardware | ~10 ms | RF MPS ControlLogix | Equipment protection calculations |
-| PLC software | ~100 ms | SLC-500 (HVPS) | HVPS sequencing and monitoring |
+| PLC software | ~10–20 ms | SLC-500 (HVPS) | HVPS sequencing and monitoring |
 | EPICS supervisory | ~1 s | VXI IOC / SNL | State machine, operator interface |
 
 ### 15.2 Interlock Chassis
@@ -1279,8 +1281,10 @@ The Fast Interlock Chassis (also called Local Control Chassis) in B132 receives 
 
 - Arc detection inputs from waveguide fiber optic sensors
 - Reflected power monitor inputs
-- External permits (SPEAR MPS beam permit, orbit interlock)
+- RF MPS PLC permit (hardwired relay input) — removal triggers SCR ENABLE + CROWBAR
 - HVPS status fiber optic signals — the B514 power section STATUS fiber goes directly to the Fast IC (populating `HVPSON` bit in `FISTAT` A16 register) and to B118 SLC-500 Slot 6 IB16. This signal is **informational only**: `HVPSON=0` gates arc voltage history buffer readback in `devP2RfAim.c` but does **NOT** cause a Fast IC hardware trip.
+
+> **Signal routing**: The SPEAR MPS beam permit and orbit interlock are **not** inputs to the Fast Interlock Chassis. They wire directly to the back connector of **VXI Slot 5 (MPS Shutoff module)**. Removal of either permit causes Slot 5 to assert `RF_FAULT` on the VXI P2 backplane (immediate RF drive cut; no immediate hardware HVPS shutdown). The `RF_FAULT` assertion propagates through the EPICS alarm chain (`STN:VXI:LTCH` → `STNPARK:SUMY:STAT` → `STNOFF:SUMY:STAT` → `fault_stnoff`), and the SNL state machine performs an orderly HVPS shutdown ~6 s later via `s_go_off`. However, the RF drive cutoff typically initiates a **collector overpower cascade** (see `Designs/I_INTERLOCK_ARCHITECTURE.md` §4.6): the klystron collector absorbs full cathode power → `KLYSCOLLPLC:POWER` exceeds trip limit → RF MPS PLC fires Path A → Fast IC removes SCR ENABLE + CROWBAR → hardware HVPS kill in ~20–30 ms in practice. See `Designs/I_INTERLOCK_ARCHITECTURE.md` §4.2, §4.5, §4.6 for details.
 
 It reports summarized interlock status to the VXI crate through the ARC/Interlock Module (AIM). See `Designs/I_INTERLOCK_ARCHITECTURE.md` §1.2 for the complete signal flow diagram.
 
@@ -1289,26 +1293,28 @@ It reports summarized interlock status to the VXI crate through the ARC/Interloc
 ```
 Fault detected (arc, reflected power, vacuum, etc.)
     │
-    ├── Path A — Fast Interlock Chassis (analog, <1 μs)
-    │       │     [hardware-only, no software in loop]
-    │       ├── SCR ENABLE removed (fiber optic → B514 HVPS)
-    │       ├── CROWBAR fired (fiber optic → B514)
-    │       └── AIM FISTAT fault word → VXI IOC
+    ├── LAYER 1: Fast Interlock Chassis (hardware, <1 μs)
+    │       340-308, B132 — no CPU in trip path
+    │       ├── Arc/power detectors → SCR ENABLE removed (fiber optic → B514)
+    │       ├── Arc/power detectors → CROWBAR fired (fiber optic → B514)
+    │       └── FISTAT fault word → AIM → VXI IOC
     │
-    ├── Path B — RF MPS ControlLogix PLC (digital, ~10 ms)
-    │       │     [equipment protection: power, arc, vacuum]
-    │       ├── DH+ removed (cuts RF drive to klystron)
-    │       └── MPS status → VXI IOC
+    ├── LAYER 2: RF MPS ControlLogix PLC (~10 ms)
+    │       Monitors: collector power, reflected power, vacuum, cooling
+    │       On trip, PLC relay drives THREE simultaneous paths:
+    │       ├── Path A → hardwired relay → Fast IC → SCR ENABLE removed + CROWBAR → HVPS kill
+    │       ├── Path B → DH+ permit bit removed → RF drive cut to klystron
+    │       └── Path C → Slot 5 VXI backplane RF_FAULT → EPICS alarm chain
     │
-    ├── Path C — SLC-500 HVPS PLC (parallel, ~100 ms)
-    │       │     [HVPS sequencing; independent of MPS]
-    │       ├── SCR firing angle → zero (ramp HVPS down)
-    │       └── HVPS status → VXI IOC
+    ├── LAYER 3: SLC-500 HVPS PLC (~10–20 ms)  [independent actor — not an MPS relay output]
+    │       Monitors: HVPS oil, crowbar, transformer arc, overvoltage
+    │       ├── Supervisory SCR enable relay de-energized → HVPS disabled
+    │       └── HVPS status → VXI IOC via DH+
     │
-    └── EPICS / rf_states.st (supervisory, ~1 s)
-            │     [monitoring only, no fast trip authority]
+    └── LAYER 4: EPICS / rf_states.st (supervisory, ~1 s)
+            Monitoring only — no fast trip authority
             ├── Fault file capture (/dat/FAULT*_N)
-            ├── Station state → OFF
+            ├── Station state → OFF (orderly HVPS shutdown via s_go_off, ~6 s)
             └── Operator alarm/notification
 ```
 

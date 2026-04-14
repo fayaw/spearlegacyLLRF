@@ -625,7 +625,7 @@ The RF MPS does **not** directly control the LLRF9 or HVPS hardware. Instead, it
 
 ### 7.2 Legacy System
 
-The legacy RF MPS uses an **Allen-Bradley PLC-5** processor with **1771-series I/O modules**. It aggregates interlock signals from the RF system (via distributed analog modules and direct wiring), the HVPS, and external sources (SPEAR MPS permit, orbit interlock), and manages the RF permit chain.
+The legacy RF MPS uses an **Allen-Bradley PLC-5** processor with **1771-series I/O modules**. It aggregates interlock signals from the RF system (via distributed analog modules and direct wiring) and the HVPS, and manages the RF permit chain. The SPEAR MPS beam permit and orbit interlock are **not** direct inputs to the legacy RF MPS PLC — they wire to the back connector of VXI Slot 5 (MPS Shutoff module) where they participate in the VXI-backplane RF permit logic. See `Designs/I_INTERLOCK_ARCHITECTURE.md` §4.2.
 
 In the legacy system, interlock coordination was distributed across analog modules, PLC I/O, and direct point-to-point wiring with no central coordination point. The PLC-5 communicated with the EPICS control system via a 1771-DCM scanner module.
 

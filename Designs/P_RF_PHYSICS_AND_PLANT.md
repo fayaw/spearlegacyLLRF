@@ -1,12 +1,12 @@
 # SPEAR3 RF System — RF Physics, Control Theory and Physical Plant
 
-**Document ID**: Doc P
-**Version**: 3.2
-**Date**: March 26, 2026
+**Document ID**: Doc P  
+**Version**: 3.2  
+**Date**: March 26, 2026  
 **Status**: DRAFT 
-**Location**: Designs/P_RF_PHYSICS_AND_PLANT.md
-**Author**: Faya Wang, with AI-assisted analysis
-**Tier**: 1 — Physics and Plant Reference (implementation-independent)
+**Location**: Designs/P_RF_PHYSICS_AND_PLANT.md 
+**Author**: Faya Wang, with AI-assisted analysis  
+**Tier**: 1 — Physics and Plant Reference (implementation-independent)  
 
 ---
 
@@ -1507,11 +1507,11 @@ Data file: `b132R11PatchPanel.xlsx`. Documents physical signal routing in Buildi
 | Symbol | Definition | Unit | First Ref |
 |--------|-----------|------|-----------|
 | $I(t), Q(t)$ | In-phase, quadrature baseband components | V | Eq. 3.0 |
-| $A(t)$ | Amplitude ($= \sqrt{I^2 + Q^2}$) | V | Eq. 3.0a |
-| $\phi(t)$ | Phase ($= \text{atan2}(Q, I)$) | rad | Eq. 3.0a |
+| $A(t)$ | Amplitude $[= \sqrt{I^2 + Q^2}]$ | V | Eq. 3.0a |
+| $\phi(t)$ | Phase $[= \text{atan2}(Q, I)]$ | rad | Eq. 3.0a |
 | $G$ (in Eq. 3.1) | Baseband modulator gain | — | Eq. 3.1 |
 | $\theta$ | Baseband modulator rotation angle | rad | Eq. 3.1 |
-| $\vec{E}$ | Error vector ($= \vec{V}_\text{ref} - \vec{V}_\text{probe}$) | V | Eq. 3.2 |
+| $\vec{E}$ | Error vector $[= \vec{V}_\text{ref} - \vec{V}_\text{probe}]$ | V | Eq. 3.2 |
 
 ### C.9 Conventions
 
