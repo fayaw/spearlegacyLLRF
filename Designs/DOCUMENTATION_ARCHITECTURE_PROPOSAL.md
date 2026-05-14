@@ -1,10 +1,10 @@
 # SPEAR3 RF System — Documentation Architecture
 
 **Document ID**: DOCUMENTATION_ARCHITECTURE  
-**Version**: 6.1  
+**Version**: 6.2  
 **Date**: March 24, 2026  
 **Status**: PROPOSAL — For Review  
-**Supersedes**: v6.0 (March 24, 2026)  
+**Supersedes**: v6.1 (March 24, 2026)  
 **Author**: Faya Wang, with AI-assisted analysis  
 
 ---
@@ -13,6 +13,7 @@
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 6.2 | 2026-03-24 | Updated Doc P status to reflect completed v2.4 draft (866 lines, 9 sections + 3 appendices); added Doc D v1.0 (Operational Data Catalog); added Appendix E cross-document consistency notes flagging cavity parameter and klystron identification discrepancies between Doc P and Doc L; updated gap analysis to reflect Doc P and Doc D completion |
 | 6.1 | 2026-03-24 | Updated references to Doc L v2.0 (adopted [Rn] numbered reference system, internet research citations, Appendix A reference index with 52 entries across 5 categories, Appendix B symbols/conventions); updated version numbers and line counts throughout |
 | 6.0 | 2026-03-24 | Major update following deep codebase review: Doc L v2.0 drafted (1,367 lines, 20 sections + 2 appendices, 50+ photo placeholders); improved Doc L section outline to match actual 6-part structure with precise original source citations; updated U-document descriptions with corrected hardware details from source review; added Enerpro FCOG6100 serial numbers and Galil DMC-4143 Rev 1.3h details; corrected AI technical note file names to match actual repository paths; updated gap analysis with findings from comprehensive source review; added Appendix D mapping Doc L sections to original sources |
 | 5.1 | 2026-03-24 | Critical correction: properly distinguished original source documents (PDFs, docx, code) from AI-generated analysis products (technical notes, obsolete design docs); rewrote provenance model so all new documents cite original sources directly; added review status framework for AI-generated content; removed citations of unreviewed AI summaries as authoritative references |
@@ -128,7 +129,7 @@ ORIGINAL SOURCE DOCUMENTS (ground truth, authoritative)
   ├── Doc 0  — System Design Report (exists, based on docx PDR)
   ├── Doc P  — RF Physics & Plant (to be written)
   ├── Doc L  — Legacy System Architecture (to be written)
-  ├── Doc D  — Operational Data Catalog (to be written)
+  ├── Doc D  — Operational Data Catalog (DRAFT v1.0)
   └── U1–U10 — Upgrade subsystem specifications (various states)
 ```
 
@@ -539,38 +540,44 @@ A single navigation page that catalogs every document in the repository, organiz
 
 ## 7. Tier 1 — RF Physics, Control Theory and Physical Plant (Doc P)
 
-**Status**: To be written  
-**Proposed location**: `Designs/P_RF_PHYSICS_AND_PLANT.md`  
+**Status**: DRAFT v2.4 completed (866 lines, 9 sections + 3 appendices; uses disturbance-driven control design narrative with full LaTeX equations; [Rn]/[Wn] numbered reference system)  
+**Location**: `Designs/P_RF_PHYSICS_AND_PLANT.md`  
 **Priority**: High — needed by all Tier 3 upgrade documents
 
 ### 7.1 Purpose
 
 A self-contained reference document covering the RF physics, control theory, and physical plant parameters that are **independent of the specific control hardware implementation**. This content does not change when VXI hardware is replaced with the LLRF9 controller.
 
-### 7.2 Content Outline and Source References
+### 7.2 Actual Document Structure (Doc P v2.4)
 
-Each section below lists the **original source documents** to be consulted. AI-generated technical notes are noted parenthetically as preliminary analysis aids.
+Doc P v2.4 adopts a **disturbance-driven control design narrative** — the control architecture is presented as the inevitable response to the disturbance landscape of the RF plant. Each section builds logically from physics to control requirements to loop design.
 
-| Section | Topic | Original Sources |
-|---------|-------|-----------------|
-| §1 | SPEAR3 RF accelerating system overview | slac-pub-7591.pdf, ps3413600102.pdf, pepII supply.pptx |
-| §2 | Cavity physics: impedance, detuning, beam loading | Textbook references (Wiedemann, Wangler), ps3403305200.pdf (feedback loop description) |
-| §3 | I/Q feedback control theory | architecture-and-performance-of-the-pep-ii-low-level-rf.pdf, TUPKF061.pdf |
-| §4 | Feedback loop transfer functions and stability | ps3403305200.pdf, feedbackLoopDescriptionps3403305200.pdf |
-| §5 | HVPS plant model: SCR bridge, power supply dynamics | slac-pub-7591.pdf, ps3413600102.pdf, Enerpro FCOG1200 manuals |
-| §6 | Klystron characteristics and operating points | Klystron vendor data, llrf9Tests.pdf |
-| §7 | Tuner mechanics and resonant frequency control | SLO-SYN motor manuals, galil/dmc-4103-r13h-manual.pdf, cavityTunerInspections20230613.docx |
-| §8 | Signal processing: baseband conversion, DSP algorithms | dsp1610/ source code, rfApp/src/seq/ source code |
-| §9 | Noise, stability, and performance requirements | llrf9Tests.pdf/tex, calibration xlsx data |
+| Section | Topic | Key Sources |
+|---------|-------|-------------|
+| §1 | System overview and field stability requirements — storage ring parameters, RF configuration, field stability specs | [R1] McIntosh SLAC-PUB-10983; [R2] Hettel PAC 1999; [R5] Doc 0 |
+| §2 | Plant physics model — cavity transfer function, beam loading phasor analysis, klystron model, loop delay budget, open-loop plant TF | [R6] Schwarz PS-340-330-51; [R7] Rimmer LBL-33360; [R15] Corredoura SLAC-PUB-8124 |
+| §3 | I/Q signal processing framework — baseband representation, I/Q modulator, demodulation, vector sum, error signal | [R15] Corredoura; [R14] Schwarz PS-340-330-52 |
+| §4 | Disturbance analysis — 8-disturbance taxonomy (D1–D8), beam loading, Robinson instability, coupled-bunch modes, HVPS ripple, klystron gain, microphonics, thermal detuning | [R15]; [R16] Robinson CEAL-1010; [R11] Gamp CAS 2011; [R13] Boussard PAC 1985 |
+| §5 | Control architecture — bandwidth matching principle, direct loop, comb loop (not used at SPEAR3), slow loops, ripple loop, multi-loop stability | [R14]; [R15] |
+| §6 | Loop-by-loop transfer functions — direct loop, comb, LFB woofer, ripple, gap FF, HVPS, tuner, DAC, gain tracking | [R14]; [R36] DSP ripple firmware |
+| §7 | HVPS plant model and dynamics — SCR phase control, PLC regulation loop, arc protection, dynamic response | [R21] Cassel SLAC-PUB-7591; [R22] PS-341-360-01-R2; [R27] CasselPLCCode.pdf |
+| §8 | Tuner mechanics and resonant frequency control — physical description, tuning physics, control loop | [R29]–[R35] Tuner docs; `rf_tuner_loop.st` |
+| §9 | Performance requirements and verification — disturbance rejection summary, LLRF9 results, performance margins, calibration data | [R4] llrf9Tests.pdf; [R38] calibration data |
+| App. A | SPEAR3 RF system parameter table (4 subsections: ring, cavity, klystron, feedback loops) | All sources cross-referenced |
+| App. B | Source document reference index (published papers, textbooks, repository docs, web references) | 39 references |
+| App. C | Symbol and notation conventions | Standard |
 
-*Preliminary AI analysis exists in*: LLRF_TN_00 through 05, HVPS_ARCHITECTURE_TN_00 through 06, Code Review TN 04 and 07 *(all unreviewed)*
+*Preliminary AI analysis consulted*: LLRF_TN_00 through 05, HVPS_ARCHITECTURE_TN_00 through 06, Code Review TN 04 and 07 *(all unreviewed)*
 
 ### 7.3 Key Characteristics
 
 - **Does NOT contain**: Hardware-specific implementation details, upgrade designs, or operational procedures
-- **Does contain**: Equations, transfer functions, plant parameters, physical constants, measurement definitions
-- **References**: Original PDFs and textbooks; may note AI-generated analyses as "preliminary, unreviewed"
-- **Estimated scope**: ~60–80 pages equivalent
+- **Does contain**: Equations (full LaTeX with display math), transfer functions, plant parameters, physical constants, measurement definitions
+- **References**: 39 numbered references across 4 categories (published papers, textbooks, repository documents, web references); AI-generated analyses cited as "preliminary, unreviewed" per §2.4
+- **Actual scope**: 866 lines, ~55 pages equivalent
+- **Notable features**: Disturbance taxonomy table (§4.8 "Rosetta Stone"), complete loop delay budget comparison (legacy vs LLRF9), performance margins analysis
+
+> ⚠️ **Cross-Document Consistency Note**: Some cavity parameters in Doc P differ from Doc L. See Appendix E for details and resolution recommendations.
 
 ---
 
@@ -648,9 +655,9 @@ These are AI-generated analyses of the 2,293 legacy source files. They are organ
 
 ### 8.3 Doc D — Operational Data & Baselines Catalog
 
-**Status**: To be written — **CRITICAL PRIORITY** (time-sensitive)  
-**Proposed location**: `Designs/D_OPERATIONAL_DATA_CATALOG.md`  
-**Priority**: CRITICAL — data can only be captured while legacy system is still running
+**Status**: DRAFT v1.0 completed (catalogs 18 xlsx files, 50 EPICS database files with 889 PV records, simulation configurations, reliability records spanning 2005–2025, calibration data, and maintenance test campaigns; includes canonical parameter table with cross-document discrepancy analysis)  
+**Location**: `Designs/D_OPERATIONAL_DATA_CATALOG.md`  
+**Priority**: CRITICAL — additional live data can only be captured while legacy system is still running
 
 #### 8.3.1 Purpose
 
@@ -739,7 +746,7 @@ Each U-document should follow a consistent structure:
 
 | Gap | Description | Action Required |
 |-----|-------------|-----------------|
-| Doc D not started | Operational baselines and live measurements not systematically captured | Begin Doc D immediately; capture EPICS archiver data, calibration baselines, operational setpoints |
+| ✅ Doc D v1.0 drafted | Catalogs all existing data assets in repository (18 xlsx, 50 EPICS .db files, simulation configs, reliability records). Live EPICS archiver data and current operational setpoints still needed | Capture live EPICS data at 500 mA; record current alarm limits and operational setpoints before hardware swap |
 | No reviewed legacy documentation | All AI-generated technical notes are unreviewed | Prioritize review of safety-critical content (MPS, PPS, crowbar) |
 
 ### 10.2 High-Priority Gaps (Required for Upgrade)
@@ -908,7 +915,7 @@ Technical notes directories follow a consistent pattern that has evolved organic
 
 | Action | Deliverable | Dependencies | Rationale |
 |--------|-------------|--------------|-----------|
-| Begin Doc D data collection | `Designs/D_OPERATIONAL_DATA_CATALOG.md` | Access to running system | Operational data lost forever when legacy hardware removed |
+| ✅ Doc D v1.0 drafted; capture live data | `Designs/D_OPERATIONAL_DATA_CATALOG.md` | Access to running system | Additional live operational data lost forever when legacy hardware removed |
 | Capture EPICS archiver baselines | Data files + Doc D entries | Running SPEAR3 beam time | Must capture at 500 mA operating point |
 | Record operational setpoints and alarm limits | Doc D appendix | Operator/engineer interviews | Institutional knowledge at risk |
 
@@ -1197,3 +1204,52 @@ During the exhaustive review that informed Doc L v2.0, several important details
 5. **VXI slots 6–8**: Contain PEP-II modules (Comb Filter I, Comb Filter Q, GVF) that are **present but NOT used in SPEAR3** — important for upgrade planning
 6. **PPS compliance**: Both PPS chains confirmed to route through SLC-500 PLC ladder logic (Rungs 0016 and 0017) — critical safety finding from `CasselPLCCode.pdf` + `HoffmanBoxPPSWiring.docx`
 7. **K4/RR relay label swap**: Original wiring diagrams have K4 and RR labels swapped — corrected in Doc L and PPS technical notes, but field verification recommended
+
+---
+
+## Appendix E — Cross-Document Consistency Notes
+
+This appendix records known discrepancies between Doc P, Doc L, and Doc 0, identified during the v6.2 consistency review. Each entry provides the conflicting values, their sources, an assessment, and a recommended resolution. This registry should be maintained as documents are updated.
+
+### E.1 Cavity RF Parameters
+
+| Parameter | Doc P Value | Doc P Source | Doc L Value | Doc L Source | Doc 0 Value | Assessment |
+|-----------|-------------|-------------|-------------|-------------|-------------|------------|
+| Shunt impedance R_s | 3.73 MΩ | §2.1, citing Schwarz [R6] PS-340-330-51, Rimmer [R7] LBL-33360 | 3.9 MΩ | §5 LLRF parameters | — | ⚠️ Doc P cites primary measurement references; Doc L does not cite source. **Recommend Doc P value (3.73 MΩ)** pending engineering review. |
+| Unloaded Q (Q₀) | 32,000 | §2.1, citing [R6], [R7] | 33,500 | §5 LLRF parameters | — | ⚠️ Same provenance issue. **Recommend Doc P value (32,000)** pending review. |
+| Loaded Q (Q_L) | 6,700 | §2.1 | 6,700 | §5 | — | ✅ Consistent |
+| Coupling coefficient β | 3.78 | §2.1, derived as β = Q₀/Q_ext | 4.0 | §5 | — | ⚠️ Follows from Q₀ discrepancy. β = Q₀/Q_L − 1 yields 3.78 with Q₀=32,000 and 4.0 with Q₀=33,500. **Resolution depends on Q₀.** |
+| Cavity half-bandwidth Δf₁/₂ | 35.5 kHz | §2.1 | — | Not explicitly stated | — | Consistent with Q_L = 6,700 at 476.3 MHz (35.5 kHz = f_RF / 2Q_L) |
+| Total gap voltage V_gap | 2.85 MV (4 cavities) | §1.3 | ~2.85 MV | §4.3 | ~2.85 MV | ✅ Consistent |
+| Individual cavity voltage | ~712 kV | §1.3 | ~712 kV | §4.3 | ~712 kV | ✅ Consistent |
+
+> **Root Cause**: Doc P performed a careful literature review citing Schwarz's parameter table (PS-340-330-51) and Rimmer's cavity measurements (LBL-33360). Doc L appears to use rounded values, possibly from a different source or from PEP-II cavity specifications rather than SPEAR3-specific measurements. The discrepancy should be resolved during engineering review by tracing to the most recent SPEAR3-specific cavity characterization.
+
+### E.2 Klystron Identification
+
+| Attribute | Doc P | Doc L | HVPS Reliability Data | Assessment |
+|-----------|-------|-------|-----------------------|------------|
+| Type designation | Marconi/CPI K3512S | "SLAC-designed 476 MHz CW klystron" | "Marconi failed; Phillips/SLAC klystron installed in building 132, Spear ring" (Sept 2020, Sheet 27 of Spear1Tests) | Both correct for different time periods |
+| Timeline | Describes original design-basis tube | Describes current installed tube | Records replacement event: Sept 2, 2020 | — |
+
+> **Root Cause**: The SPEAR3 klystron was replaced in September 2020 after the original Marconi unit failed. Doc P describes the design-basis/original klystron; Doc L describes the currently installed Phillips/SLAC tube. **Recommendation**: Both documents should include a note about the replacement timeline. Doc L §6 should add a note stating "Original Marconi/CPI K3512S klystron replaced September 2020 with Phillips/SLAC unit following tube failure". Doc P §1.3 should add "Note: original Marconi tube replaced 2020; current tube is Phillips/SLAC — see Doc L §6".
+
+### E.3 HVPS Operating Voltage
+
+| Source | Voltage | Context |
+|--------|---------|---------|
+| Doc P §7.1 | ~77 kV nominal | Design nominal operating point |
+| Doc L §4.3 | 72.08 kV (measured) | Measured June 2020 at specific beam current (before klystron replacement) |
+| Doc 0 §1 | ~74 kV at 500 mA beam | Current operating point cited during LLRF9 commissioning |
+| HVPS Measurements (March 2022) | 60.01–68.74 kV | Regulator test sweep from 2000–3200 V gap (not full operating voltage) |
+
+> **Assessment**: These values are all plausible for different beam currents and dates. HVPS voltage scales with beam current due to beam loading. **Recommendation**: Each document should state the beam current and date when citing an HVPS operating voltage. No single "correct" value exists — the HVPS voltage is an operational variable, not a fixed parameter.
+
+### E.4 Status of Discrepancy Resolution
+
+| ID | Discrepancy | Severity | Owner | Status |
+|----|-------------|----------|-------|--------|
+| E.1 | Cavity R_s, Q₀, β | Medium — affects transfer function calculations | RF Engineer | 🔴 Unresolved — awaiting engineering review |
+| E.2 | Klystron identification | Low — informational | Documentation | 🟡 Documented — needs annotation in both docs |
+| E.3 | HVPS voltage | Low — contextual | Documentation | 🟡 Documented — needs beam current annotation |
+
