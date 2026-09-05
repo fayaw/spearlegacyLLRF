@@ -1,0 +1,72 @@
+% !TeX root = ../L_legacy_system_architecture.tex
+% The complete trip chain: four layers, ordered by response time.
+\begin{tikzpicture}[font=\scriptsize,x=1mm,y=1mm,every node/.style={outer sep=0pt}]
+\tikzset{act/.style={text width=104mm,anchor=north west,inner sep=4pt,
+                     rounded corners=1.6pt,font=\scriptsize,align=left},
+         br/.style ={text width=96mm,anchor=north west,inner sep=3pt,
+                     font=\tiny,align=left,draw=black!25,fill=white,
+                     rounded corners=1.2pt}}
+
+\node[pwr,text width=104mm,anchor=north west] (fault) at (0,0)
+  {\textbf{Fault detected} --- arc, reflected power, vacuum, cooling, \dots};
+
+% ---- Layer 1 -------------------------------------------------------------
+\node[act,draw=cPwr!70,fill=cPwr!6,text=cPwr!85!black] (l1) at (10,-14)
+  {\textbf{LAYER 1 --- Fast Interlock Chassis 340-308} \hfill hardware, signal
+   ${<}\,\qty{1}{\micro\second}$\\ {\tiny B132 --- no CPU in the trip path}};
+\node[br] (l1a) at (18,-28)
+  {Arc / power detectors $\rightarrow$ \textbf{SCR ENABLE removed} (fiber $\rightarrow$ B514).
+   Primary current is actually interrupted in \qtyrange{4}{8}{\milli\second} at the
+   next zero crossing.};
+\node[br] (l1b) at (18,-38)
+  {Arc / power detectors $\rightarrow$ \textbf{CROWBAR fired} (fiber $\rightarrow$ B514).
+   The crowbar conducts $\approx\qty{10}{\micro\second}$ after the trigger.};
+\node[br] (l1c) at (18,-47)
+  {FISTAT fault word $\rightarrow$ AIM $\rightarrow$ VXI IOC.};
+
+% ---- Layer 2 -------------------------------------------------------------
+\node[act,draw=cPlc!70,fill=cPlc!7,text=cPlc!80!black] (l2) at (10,-58)
+  {\textbf{LAYER 2 --- RF MPS PLC-5} \hfill ${\sim}\qty{10}{\milli\second}$\\
+   {\tiny Monitors collector power, reflected power, vacuum, cooling.
+    On trip the PLC relay drives three simultaneous paths:}};
+\node[br] (l2a) at (18,-74)
+  {\textbf{Path A} $\rightarrow$ hardwired relay $\rightarrow$ Fast IC
+   $\rightarrow$ SCR ENABLE removed + CROWBAR $\rightarrow$ HVPS kill.};
+\node[br] (l2b) at (18,-83)
+  {\textbf{Path B} $\rightarrow$ Remote I/O permit bit removed $\rightarrow$
+   RF drive cut to the klystron.};
+\node[br] (l2c) at (18,-92)
+  {\textbf{Path C} $\rightarrow$ slot-5 VXI backplane RF\_FAULT $\rightarrow$
+   EPICS alarm chain.};
+
+% ---- Layer 3 -------------------------------------------------------------
+\node[act,draw=cPlc!70,fill=cPlc!7,text=cPlc!80!black] (l3) at (10,-103)
+  {\textbf{LAYER 3 --- SLC-500 HVPS PLC} \hfill \qtyrange{10}{20}{\milli\second}\\
+   {\tiny Independent actor, not an output of the MPS relay.
+    Monitors HVPS oil, crowbar, transformer arc, overvoltage.}};
+\node[br] (l3a) at (18,-119)
+  {Supervisory SCR enable relay de-energized $\rightarrow$ HVPS disabled.};
+\node[br] (l3b) at (18,-128)
+  {HVPS status $\rightarrow$ VXI IOC via Remote I/O.};
+
+% ---- Layer 4 -------------------------------------------------------------
+\node[act,draw=cCtrl!70,fill=cCtrl!6,text=cCtrl!85!black] (l4) at (10,-139)
+  {\textbf{LAYER 4 --- EPICS / \texttt{rf\_states.st}} \hfill supervisory,
+   ${\sim}\qty{1}{\second}$\\ {\tiny Monitoring only --- no fast trip authority.}};
+\node[br] (l4a) at (18,-153)
+  {Fault file capture (\texttt{/dat/FAULT*\_N}).};
+\node[br] (l4b) at (18,-162)
+  {Station state $\rightarrow$ OFF (orderly HVPS shutdown via
+   \texttt{s\_go\_off}, ${\sim}\qty{6}{\second}$).};
+\node[br] (l4c) at (18,-171)
+  {Operator alarm and notification.};
+
+% ---- spine ---------------------------------------------------------------
+% Stubs leave the rail at each layer box's own anchor height, so they are
+% exactly horizontal regardless of how tall the box turns out.
+\coordinate (rail) at (5,0);
+\draw[bus] (5,-6) -- (5,-176);
+\foreach \n in {l1,l2,l3,l4}{\draw[sig] (\n.west -| rail) -- (\n.west);}
+\foreach \n in {l1a,l1b,l1c,l2a,l2b,l2c,l3a,l3b,l4a,l4b,l4c}
+  {\draw[draw=black!35] (\n.west -| 14,0) ++(0,4) -- (\n.west -| 14,0) -- (\n.west);}
+\end{tikzpicture}

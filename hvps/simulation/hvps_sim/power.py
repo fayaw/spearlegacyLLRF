@@ -279,10 +279,10 @@ class LCFilter:
         # Total effective inductance (L1 and L2 in the two legs)
         # In the star-point topology, each bridge feeds through its inductor
         self.L = self.cfg.inductor_l1_h  # Per-bridge inductor
-        self.C = self.cfg.capacitor_uf * 1e-6  # Convert µF to F
+        self.C = self.cfg.capacitor_uf * 1e-6  # Net series capacitance, µF → F
         self.R_damp = self.cfg.isolation_resistance
-        # Cable termination inductors
-        self.L_cable = self.cfg.cable_inductor_l3_uh * 1e-6  # Convert µH to H
+        # Cable termination inductors (Grounding Tank SD-730-790-05-C1)
+        self.L_cable = self.cfg.cable_inductor_a_uh * 1e-6  # Convert µH to H
 
         # State variables
         self.i_L1 = 0.0  # Current through L1

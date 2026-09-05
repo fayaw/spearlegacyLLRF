@@ -55,7 +55,7 @@ Based on `hvps/architecture/technical-notes/00-spear3-hvps-legacy-system-design.
 ```
 12.47 kV 3φ AC Input (Substation 507)
         ↓
-Phase-Shift Transformer (T0) - 3.5 MVA
+Phase-Shift Transformer (T0) - 2750 kVA
 ├─ Primary: 12.47 kV delta
 └─ Secondary: Dual wye ±15° phase shift
         ↓
@@ -81,9 +81,9 @@ Secondary Rectifiers (D1-D24)
 └─ Total: 120 kV capability, 22A continuous
         ↓
 Filter Bank & Isolation
-├─ Capacitor Bank: 8 µF total
+├─ Capacitor Bank: 8 µF per stage × 4 series stages (2 µF net)
 ├─ Isolation Resistors: 500Ω (PEP-II innovation)
-└─ Voltage Divider: 1000:1 ratio
+└─ Voltage Divider: ≈10,000:1 ratio (10 kV/V at the monitor output)
         ↓
 Crowbar Protection (SCR13-16)
 ├─ 4 SCR Stacks in Series
@@ -91,8 +91,8 @@ Crowbar Protection (SCR13-16)
 └─ Fiber-optic trigger (~1µs delay)
         ↓
 Cable Termination Inductors
-├─ L3: 200µH (Layer 4 protection)
-└─ L4: 200µH (Layer 4 protection)
+├─ Cable termination inductor A: 350µH, 40A (Layer 4 protection)
+└─ Cable termination inductor B: 350µH, 40A (Layer 4 protection)
         ↓
 -77 kV DC @ 22A to SPEAR3 Klystron
 ```
@@ -149,7 +149,7 @@ Expected results:
 
 ### Filter Design Parameters
 - **Primary Inductors**: L1 = L2 = 0.3H (series = 0.6H total)
-- **Filter Capacitor**: 8 µF total capacitance
+- **Filter Capacitor**: 8 µF per stage, four series stages (2 µF net across the output)
 - **Isolation Resistors**: 500Ω (PEP-II arc protection)
 - **Cable Termination**: L3 + L4 = 400µH total
 - **Cutoff Frequency**: 72.6 Hz
@@ -160,7 +160,7 @@ Expected results:
 ### LC Filter Performance
 ```python
 L_total = 0.6  # H (L1 + L2 in series)
-C_total = 8e-6  # F (8 µF)
+C_total = 2e-6  # F — 8 µF per stage / 4 series stages
 R_isolation = 500  # Ω
 
 fc = 1/(2π√LC) = 72.6 Hz

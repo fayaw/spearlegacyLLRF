@@ -7,13 +7,13 @@ A physics-based simulation package for the SPEAR3 High Voltage Power Supply (HVP
 The SPEAR3 HVPS delivers **-77 kV DC @ 22 A (1.7 MW)** to power the SPEAR3 storage ring klystrons. Based on the PEP-II design (1997), it uses a **12-pulse thyristor phase-controlled rectifier** with star-point controller topology.
 
 ```
-12.47 kV 3φ AC  →  Phase-Shift Xfmr (T0, 3.5 MVA)
+12.47 kV 3φ AC  →  Phase-Shift Xfmr (T0, 2750 kVA)
                 →  Rectifier Xfmrs (T1/T2, 1.5 MVA each)
                 →  12-Pulse SCR Rectifier (2 × 6-pulse bridges)
                 →  Filter Network (L: 0.3H, C: 8µF)
                 →  Secondary Rectifiers (D1-D24)
                 →  Crowbar Protection (SCR13-16, ~1µs trigger)
-                →  Cable Termination (L3/L4, 200µH)
+                →  Cable Termination (350µH, 40A)
                 →  -77 kV DC Output → Klystron
 ```
 
@@ -87,7 +87,7 @@ results = run_all(plot=True)
   1. Current limiting via filter inductors
   2. Crowbar SCR activation (~1 µs fiber-optic trigger)
   3. Primary thyristor turn-off (4-8 ms)
-  4. Cable termination inductors (200 µH)
+  4. Cable termination inductors (350 µH, 40 A — per Grounding Tank drawing SD-730-790-05-C1)
 - Arc energy tracking (<5 J with crowbar, <20 J without)
 - Safety interlocks (temperature, pressure, vacuum, oil, OC, OV)
 - Fault latching with master reset (matches PLC B3:4 register)

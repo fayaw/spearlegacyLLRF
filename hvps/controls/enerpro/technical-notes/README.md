@@ -88,8 +88,8 @@ All source PDFs are located in: `hvps/controls/enerpro/enerproDocuments/`
 
 ## Related Documentation
 
-- [PLC Technical Notes](../../documentation/plc/technical-notes/README.md) — Allen-Bradley SLC 500 PLC control system
-- [HVPS System Overview](../../README.md) — Complete HVPS system documentation
+- [PLC Technical Notes](../../../documentation/plc/technical-notes/README.md) — Allen-Bradley SLC 500 PLC control system
+- [HVPS Schematic Technical Notes](../../../documentation/schematics/technical_notes/README.md) — per-drawing notes for the HVPS schematics
 
 ---
 

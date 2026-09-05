@@ -2,9 +2,57 @@ Technical Note: 12.47KV Vacuum Contactor Controller
 Electrical Connection Wiring Diagram
 
 
-Source Document: id3088010601.pdf
+Source Document: **`../id3088010601.pdf`** — the drawing itself. This is the only source; the same-named `.docx` in this directory is a conversion **of this Markdown file**, not an independent original.
 Document Type: Technical Note – Circuit Schematic Analysis
 Purpose: Detailed extraction of design information from circuit schematic for AI-assisted design reconstruction
+
+> **Verification status: VERIFIED (3 September 2026).** The scanned drawing was rendered to image and read directly.
+
+> ## ✅ This drawing closes the PPS contact readback trace
+>
+> It supplies the middle link in a four-drawing chain that identifies which auxiliary contact carries the PPS readback:
+>
+> | Link | Drawing | Establishes |
+> |---|---|---|
+> | 1 | Ross 713203 E-1 | HQ3 auxiliary contact set **S5** on **TB2-18 (NO) / 19 (COM) / 20 (NC)** |
+> | **2** | **ID-308-801-06-C1 (this drawing)** | **TB2-18, TB2-19, TB2-20 carry wires 20, 21, 22** |
+> | 3 | GP-439-704-02-C1 | Wires **20, 21, 22** = **"PPS (CONTACTOR)"** → **TB3-22, TB3-23, TB3-24** |
+> | 4 | WD-730-790-01-C3 | Contactor Disconnect labels one auxiliary set **"CONTACTS PPS"** |
+>
+> Full trace: `Designs/tex/L_legacy_system_architecture.pdf` §13.2.1.
+>
+> ### TB2 wire names (relevant extract, as drawn)
+>
+> | TB2 terminal | Wire name |
+> |---|---|
+> | 15 | HH |
+> | 16 | DD |
+> | **18** | **20** |
+> | **19** | **21** |
+> | **20** | **22** |
+
+> ### Rear compartment — as drawn
+>
+> | Item | Value |
+> |---|---|
+> | Incoming line | 12.47 kV, ØA / ØB / ØC |
+> | Cable | #4 – 15 kV |
+> | Switch | **600 A, 13.8 kV** |
+> | Fuses | **50E** |
+> | Current transformers | **50/5**, taps X1 / X2, buses C0–C3 |
+> | Surge protection | Surge arrestors |
+> | Heating | Space heater |
+> | Temperature | **"CABINET TEMP SENSOR (TO BE ADDED LATER)"** — confirm whether it was ever installed; if not, the S6 "TEMP" auxiliary contact is unused |
+>
+> ### RFPS interlock block (TB1, terminals A–I)
+>
+> | Interlock | Routing |
+> |---|---|
+> | PRESS RELIEF | → TBD-9 |
+> | OIL OVER TEMP | → TBD-7 |
+> | **LOW PRESS SW — "(SPEAR ONLY)"** | — |
+>
+> The low-pressure switch is annotated **"(SPEAR ONLY)"**, i.e. specific to the SPEAR installation rather than PEP-II. Confirm it is present, wired and tested.
 
 
 ────────────────────────────────────────────────────────────
@@ -40,13 +88,13 @@ This is the physical connection wiring diagram for the 12.47 kV vacuum contactor
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    SWITCHGEAR ENCLOSURE                        │
-│                    48" × 140" NEMAT Rated                      │
+│                     NEMA, weatherproof                         │
 │                                                                 │
 │  ┌─────────────────┐              ┌─────────────────┐          │
 │  │  REAR COMPART   │              │  FRONT COMPART  │          │
 │  │                 │              │                 │          │
 │  │ 12.47kV Incoming│              │ Control Panels  │          │
-│  │ OA, OB, OC      │              │ Protection      │          │
+│  │ ØA, ØB, ØC      │              │ Protection      │          │
 │  │ #4-15KV Cable   │              │ Relays          │          │
 │  │ 120VAC Source   │              │ Terminal Blocks │          │
 │  │                 │              │                 │          │

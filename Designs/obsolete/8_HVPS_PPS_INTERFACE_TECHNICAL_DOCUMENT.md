@@ -77,7 +77,7 @@ The SPEAR3 RF station consists of the following physical elements relevant to th
 | **Vacuum Contactor** | Ross Engineering HQ3, 12.47 kV | Contactor Disconnect Panel (switchgear) |
 | **Contactor Controller (Driver)** | Ross Engineering HCA-1-A (P/N 820360) | Adjacent to contactor |
 | **Grounding (Termination) Tank** | Contains Ross grounding switch, Danfysik DC-CT, Pearson CT-110 | Near klystron |
-| **PPS Interface Chassis** | GOB12-88PNE 8-pin connector, locked box on Hoffman Box | Building B118 |
+| **PPS Interface Chassis** | GOB1208PNE 8-pin connector, locked box on Hoffman Box | Building B118 |
 
 ### Power Flow Path
 
@@ -128,13 +128,13 @@ The legacy HVPS controller is housed in a Hoffman NEMA enclosure (34"x42") locat
 
 **Terminal Strips**:
 - **TS-5**: Contactor controls (15 terminals) — connection to switchgear via Belden 83715 (15C #16 Teflon)
-- **TS-6**: Grounding tank connections (21 terminals) — connection to termination tank via Belding 83709 (9C #16 Teflon) + Belden 83715
+- **TS-6**: Grounding tank connections (21 terminals) — connection to termination tank via Belden 83709 (9C #16 Teflon) + Belden 83715
 - TS-3: PPS status LEDs
 - TS-7: Power distribution
 - TS-1, TS-8: Miscellaneous
 
 **External Connectors**:
-- **GOB12-88PNE**: 8-pin circular PPS connector (Burndy/Souriau Trim Trio) — mounted in locked box on Hoffman Box
+- **GOB1208PNE**: 8-pin circular PPS connector (Burndy/Souriau Trim Trio) — mounted in locked box on Hoffman Box
 - AMP 8-Pin: PPS status LEDs
 - BNC-1 through BNC-12: Monitor/trigger signals
 
@@ -206,9 +206,9 @@ Also in the termination tank:
 
 ## 4. Current PPS Interface with HVPS
 
-### 4.1 PPS Connector — GOB12-88PNE
+### 4.1 PPS Connector — GOB1208PNE
 
-The PPS interface uses a single 8-pin circular connector (Burndy/Souriau Trim Trio, GOB12-88PNE) mounted in a locked enclosure on the exterior of the Hoffman Box.
+The PPS interface uses a single 8-pin circular connector (Burndy/Souriau Trim Trio, GOB1208PNE) mounted in a locked enclosure on the exterior of the Hoffman Box.
 
 | Pin | Signal | Direction | Routing | Destination |
 |-----|--------|-----------|---------|-------------|
@@ -224,7 +224,7 @@ The PPS interface uses a single 8-pin circular connector (Burndy/Souriau Trim Tr
 ### 4.2 PPS Signal Flow — Chain 1 (Vacuum Contactor)
 
 ```
-PPS Chassis GOB12-88PNE Pin E (+24VDC)
+PPS Chassis GOB1208PNE Pin E (+24VDC)
     │
     ├──→ PLC Slot-6 IN14 (PPS 1 monitoring input)
     │        │
@@ -261,7 +261,7 @@ READBACK:
 ### 4.3 PPS Signal Flow — Chain 2 (Ross Grounding Switch)
 
 ```
-PPS Chassis GOB12-88PNE Pin G (+24VDC)
+PPS Chassis GOB1208PNE Pin G (+24VDC)
     │
     └──→ PLC Slot-6 IN15 (PPS 2 monitoring input)
              │
@@ -353,7 +353,7 @@ The following issues were identified through engineering analysis and documented
 
 ### 6.1 PPS Wiring Exposure (Radiation Safety Concern)
 
-**Issue**: PPS wires from the GOB12-88PNE connector terminate on TS-5 and TS-6 *inside* the Hoffman Box, alongside non-PPS wiring. The readback wires (S5 aux, Ross aux) pass through terminal strips that also carry HVPS control signals.
+**Issue**: PPS wires from the GOB1208PNE connector terminate on TS-5 and TS-6 *inside* the Hoffman Box, alongside non-PPS wiring. The readback wires (S5 aux, Ross aux) pass through terminal strips that also carry HVPS control signals.
 
 **Impact**: To open the Hoffman Box for maintenance, a radiation safety work control form and system retest may be required because PPS wiring is exposed. This creates an unnecessary maintenance burden and potential for accidental PPS wire disturbance.
 
@@ -412,7 +412,7 @@ The HVPS controller upgrade replaces or modifies the following:
 |-----------|--------|----------|--------|
 | **PLC** | SLC-500 (AB-1747-L532) | **CompactLogix** | Hardware procured; software development needed |
 | **PLC I/O** | 1746-series modules | **CompactLogix I/O** | Procured for HVPS1, HVPS2, and B44 Test Stand |
-| **SCR Gate Driver** | Original Enerpro firing board | **New Enerpro boards** (5 needed, ~$4k) | To be procured |
+| **SCR Gate Driver** | Original Enerpro firing board | **New Enerpro boards** (5 needed, ~\$4k) | To be procured |
 | **Analog Regulator** | PC-237-230-14-C0 regulator card | **Redesigned analog regulator** | Design needed |
 | **Communication** | Data Highway (SLC-500 scanner) | **Ethernet/EPICS** (EtherNet/IP or OPC-UA) | Architecture decision needed |
 | **Supervisory Control** | SNL rf_hvps_loop.st on VxWorks | **Python/EPICS hvps_loop.py** | Software design documented |
@@ -473,7 +473,7 @@ The HVPS power stage (transformer, rectifier, oil system, SCR stack) is retained
     ┌────────────┼──────────────┐
     │            │              │
   HVPS SCR    HVPS Crowbar   PPS Interface
-  Enable      Signal         (GOB12-88PNE
+  Enable      Signal         (GOB1208PNE
   (fiber)     (fiber)         or replacement)
 ```
 
@@ -780,7 +780,7 @@ The HVPS-PPS interface spans multiple physical locations:
 - **Termination Tank** (near klystron): Ross switch, Danfysik, Pearson
 - **Interface Chassis** (new, location TBD): Central interlock hub
 
-Cabling between these locations uses multi-conductor Teflon-insulated cables (Belden 83715 15C, Belding 83709 9C) that have been in place for decades. The upgrade must work with existing cable infrastructure where possible.
+Cabling between these locations uses multi-conductor Teflon-insulated cables (Belden 83715 15C, Belden 83709 9C) that have been in place for decades. The upgrade must work with existing cable infrastructure where possible.
 
 ### 11.6 The LLRF9 STATUS / HVPS STATUS Feedback Loop
 
@@ -800,7 +800,7 @@ The HVPS system cannot be tested independently of the SPEAR3 machine in all conf
 ### 11.8 Backward Compatibility
 
 The upgrade must maintain backward compatibility with:
-- The PPS chassis (GOB12-88PNE connector and signal levels, unless PPS group approves change)
+- The PPS chassis (GOB1208PNE connector and signal levels, unless PPS group approves change)
 - The vacuum contactor closing/opening sequences (contactor controller HCA-1-A is retained)
 - The Ross grounding switch coil requirements
 - The S5 and Ross auxiliary contact wiring
@@ -832,7 +832,7 @@ The upgrade must maintain backward compatibility with:
 | Question | Options | Impact | Owner |
 |----------|---------|--------|-------|
 | Will PPS group approve removing PLC from safety chain? | Yes (Interface Chassis) / No (keep PLC in chain) | Fundamental architecture decision | PPS/Protection Group |
-| Is the GOB12-88PNE connector retained or replaced? | Keep existing / New PPS interface standard | Affects Interface Chassis design | PPS/Protection Group |
+| Is the GOB1208PNE connector retained or replaced? | Keep existing / New PPS interface standard | Affects Interface Chassis design | PPS/Protection Group |
 | Must PPS wiring be in dedicated conduit? | Yes / No (isolated within Interface Chassis acceptable) | Affects installation scope | PPS/Protection Group |
 | What PPS testing/certification is required? | Functional test only / Full retest / Radiation safety verification | Affects schedule | PPS/Protection Group |
 

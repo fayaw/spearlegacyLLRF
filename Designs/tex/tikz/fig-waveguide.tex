@@ -1,0 +1,38 @@
+% !TeX root = ../L_legacy_system_architecture.tex
+% Waveguide distribution: klystron to four cavities through a circulator and
+% three magic-tees.  Each tee splits equally between P2 and P3; the P4
+% difference port absorbs the summed reflection into a waveguide load.
+\begin{tikzpicture}[font=\scriptsize,x=1mm,y=1mm,every node/.style={outer sep=0pt}]
+\tikzset{load/.style={draw=black!45,fill=black!6,rounded corners=1pt,
+                      font=\tiny,align=center,inner sep=2.5pt}}
+
+\node[rf,text width=28mm] (kly) at (60,0) {\textbf{Klystron output}};
+
+\node[rf,text width=26mm,anchor=north] (circ) at (60,-14) {\textbf{Circulator}};
+\draw[sig] (kly.south) -- (circ.north);
+\node[load,anchor=west] (cl) at (92,-19) {Circulator load\\{\tiny absorbs reflected power}};
+\draw[sig] (circ.east) -- (cl.west);
+
+\node[rf,text width=26mm,anchor=north] (mt1) at (60,-32) {\textbf{Magic-tee 1}};
+\draw[sig] (circ.south) -- (mt1.north);
+\node[load,anchor=west] (l1) at (92,-37) {WG load 1\\{\tiny P4 port}};
+\draw[sig] (mt1.east) -- (l1.west);
+
+\node[rf,text width=26mm,anchor=north] (mt2) at (28,-52) {\textbf{Magic-tee 2}};
+\node[rf,text width=26mm,anchor=north] (mt3) at (92,-52) {\textbf{Magic-tee 3}};
+\draw[sig] (mt1.south) -- ++(0,-4) -| (mt2.north);
+\draw[sig] (mt1.south) -- ++(0,-4) -| (mt3.north);
+
+\node[load,anchor=north] (l2) at (60,-57) {WG load 2\\{\tiny P4}};
+\node[load,anchor=north] (l3) at (124,-57) {WG load 3\\{\tiny P4}};
+\draw[sig] (mt2.east) -- (l2.west);
+\draw[sig] (mt3.east) -- (l3.west);
+
+\foreach \x/\n/\lab in {14/ca/A, 42/cb/B, 78/cc/C, 106/cd/D}{
+  \node[rf,text width=17mm,anchor=north] (\n) at (\x,-72) {\textbf{Cavity \lab}};
+}
+\draw[sig] (mt2.south) -- ++(0,-4) -| (ca.north);
+\draw[sig] (mt2.south) -- ++(0,-4) -| (cb.north);
+\draw[sig] (mt3.south) -- ++(0,-4) -| (cc.north);
+\draw[sig] (mt3.south) -- ++(0,-4) -| (cd.north);
+\end{tikzpicture}

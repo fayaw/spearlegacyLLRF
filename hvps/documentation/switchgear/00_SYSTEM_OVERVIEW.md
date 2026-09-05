@@ -1,10 +1,23 @@
 # SPEAR3 HVPS Switchgear System Overview
 
 **Document ID:** HVPS-SG-OVERVIEW-001  
-**Revision:** R0  
-**Date:** March 2026  
+**Revision:** R1  
+**Date:** September 2026  
 **Author:** Engineering Team (SSRL/SLAC)  
 **Classification:** System Overview — Comprehensive Reference
+
+> ## Verification status — CORRECTED September 2026
+>
+> All four switchgear drawings in this directory were rendered to image and read directly. Corrections applied to this document:
+>
+> | R0 said | Correct | Source |
+> |---|---|---|
+> | Vacuum contactor "15 kV, 400 A, 3-pole" | **14.5 kV, 400 A, 3-pole** — the drawing reads "VACUUM CONTACTOR 14.5 KV 400A 3P" | GP-308-500-01-R3 |
+> | Enclosure "NEMAT rated, 48" × 140" MAX" | **NEMA**, weatherproof, door-in-door; plan view **140" max × 102" max**; rear elevation 48" W × 32" D × 124" H | GP-308-500-01-R3 |
+>
+> Confirmed correct as written: the **2000 A** blocking-relay threshold and the **170 ms** minimum hold-in on loss of AC control power. Both are verbatim from the drawings.
+>
+> The remainder of this document has not been line-by-line verified. Where it disagrees with a per-drawing note in `technical_notes/`, or with `Designs/tex/L_legacy_system_architecture.pdf`, **those win**.
 
 ---
 
@@ -12,12 +25,25 @@
 
 This document provides a comprehensive overview of the SPEAR3 High Voltage Power Supply (HVPS) switchgear system, integrating information from circuit schematics, technical documentation, and system design references. It serves as the primary reference for understanding the complete switchgear architecture, its role in the SPEAR3 RF system, and its integration with the LLRF upgrade project.
 
-**Key Documentation Sources:**
-- Circuit schematic technical notes (this directory)
-- HVPS Engineering Technical Note (`Designs/4_HVPS_Engineering_Technical_Note.md`)
-- HVPS-PPS Interface Document (`Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md`)
-- LLRF9 System Report (`Designs/3_LLRF9_SYSTEM_AND_SOFTWARE_REPORT.md`)
-- Legacy system documentation (`llrf/`, `pps/`)
+### Authoritative sources — the drawings
+
+| Drawing | Content | Verified note |
+|---|---|---|
+| [`gp3085000103.pdf`](gp3085000103.pdf) | **GP-308-500-01-R3** — Lawrence Berkeley Laboratory, A. Tseng / L. Johnson, 6-23-77. The **original PEP-era design drawing**. Authoritative for the **relay legend** (27, MX, IP, RR, TX, BR, 50-51, 01/LT, M), the contactor rating, and the blocking-relay design intent | [`technical_notes/TN_gp3085000103_SwitchgearSchematicAndArrangement.md`](technical_notes/TN_gp3085000103_SwitchgearSchematicAndArrangement.md) |
+| [`gp4397040201.pdf`](gp4397040201.pdf) | **GP-439-704-02-C1** — SLAC as-built schematic, redrawn to CAD 09/25/06. Contains the **sequence of operation** and the **PPS (CONTACTOR) = TB3-22/23/24** wire-name table | [`technical_notes/TN_gp4397040201_VacContSchematicDiagram.md`](technical_notes/TN_gp4397040201_VacContSchematicDiagram.md) |
+| [`id3088010601.pdf`](id3088010601.pdf) | **ID-308-801-06-C1** — as-built connection wiring, the companion to GP-439-704-02. Supplies the middle link in the PPS readback trace | [`technical_notes/TN_id3088010601_ConnectionWiringDiagram.md`](technical_notes/TN_id3088010601_ConnectionWiringDiagram.md) |
+| [`rossEngr713203.pdf`](rossEngr713203.pdf) | **Ross Engineering 713203 E-1** — HCA-1-A driver (P/N 820360) and HQ3 contactor (P/N 813203). **300–400 V DC stored energy**; 5 s door dump; 5 min manual wait | [`technical_notes/TN_DOC041421_RossEngr713203_SystemSchematic.md`](technical_notes/TN_DOC041421_RossEngr713203_SystemSchematic.md) |
+
+> `DOC041421-04142021114320.pdf` and `rossEngr713203.pdf` are the same size (69,376 bytes) and appear to be **the same document under two names**.
+>
+> The `.docx` files in `technical_notes/` are conversions **of** their same-named `.md` files, not independent originals. The only sources are the PDFs above.
+
+### Related system references
+
+- Per-drawing notes for the HVPS proper: [`../schematics/technical_notes/`](../schematics/technical_notes/)
+- PPS system view: [`../../../pps/diagrams/`](../../../pps/diagrams/)
+- Consolidated legacy architecture: [`../../../Designs/tex/L_legacy_system_architecture.pdf`](../../../Designs/tex/L_legacy_system_architecture.pdf)
+- J. Sebek's original PPS wiring trace: [`../../../pps/HoffmanBoxPPSWiring.docx`](../../../pps/HoffmanBoxPPSWiring.docx)
 
 ---
 
@@ -61,7 +87,7 @@ The SPEAR3 storage ring operates with a single RF station consisting of:
 │   SLAC 12.47kV  │    │   SWITCHGEAR     │    │      HVPS       │    │   KLYSTRON   │
 │   Distribution  │────│   Vacuum         │────│   Transformer   │────│   ~1 MW RF   │
 │   3-Phase AC    │    │   Contactor      │    │   Rectifier     │    │   476.3 MHz  │
-└─────────────────┘    │   15kV/400A      │    │   ~90 kV DC     │    └──────┬───────┘
+└─────────────────┘    │  14.5kV / 400A   │    │   ~90 kV DC     │    └──────┬───────┘
                        │   Protection     │    └─────────────────┘           │
                        └──────────────────┘                                  │
                               │                                              │
@@ -106,7 +132,7 @@ The switchgear system consists of three main subsystems:
     ↓
 Current Transformers (CT 50/5 or 200/5)
     ↓
-Vacuum Contactor (15 kV, 400A, 3-pole HQ3)
+Vacuum Contactor (14.5 kV, 400 A, 3-pole HQ3)
     ↓
 Surge Arrestors
     ↓
@@ -124,7 +150,7 @@ SLAC 12.47kV Distribution
          │
     ┌────▼────┐
     │   HQ3   │  Vacuum Contactor
-    │ 15kV/   │  (Ross Engineering)
+    │ 14.5kV/ │  (Ross Engineering)
     │ 400A    │  3-pole, stored energy
     │ 3-pole  │  closing mechanism
     └────┬────┘
@@ -168,12 +194,12 @@ SLAC 12.47kV Distribution
 
 | Component | Specification | Function |
 |-----------|---------------|----------|
-| **Vacuum Contactor** | 15 kV, 400A, 3-pole HQ3 (Ross Engineering) | Main switching device |
+| **Vacuum Contactor** | 14.5 kV, 400 A, 3-pole HQ3 (Ross Engineering) | Main switching device |
 | **Current Transformers** | 50/5 or 200/5 ratio | Protection relay measurement |
 | **Energy Storage Capacitors** | 3500mF @ ~350 VDC | Contactor closing energy |
 | **Protection Relays** | 50-51 (overcurrent), 27 (undervoltage), BR (blocking) | System protection |
 | **Control Power Supply** | 125 VDC, 115 VAC | Control circuit power |
-| **Metal Enclosure** | NEMAT rated, 48" × 140" MAX | Outdoor weatherproof housing |
+| **Metal Enclosure** | NEMA, weatherproof; plan view 140" max × 102" max | Outdoor weatherproof housing |
 
 ---
 
@@ -184,7 +210,7 @@ SLAC 12.47kV Distribution
 The system uses **vacuum interrupter technology** for 12.47 kV switching:
 
 - **Model**: HQ3 (Ross Engineering)
-- **Rating**: 15 kV, 400A, 3-pole
+- **Rating**: 14.5 kV, 400 A, 3-pole
 - **Interrupting capability**: Suitable for transformer inrush and fault currents
 - **Operating mechanism**: Stored energy closing with toggle mechanism
 - **Maintenance**: Vacuum bottles have long service life, minimal maintenance
@@ -501,7 +527,7 @@ TBD-6:  [Reserved]
 
 ### 8.1 Enclosure Specifications
 
-**NEMAT Rated Enclosure:**
+**NEMA Enclosure (weatherproof, door-in-door):**
 - **Dimensions**: 48" × 140" maximum
 - **Configuration**: Door-in-door arrangement
 - **Weather protection**: Outdoor rated (W/P = weatherproof)
@@ -558,7 +584,7 @@ The SPEAR3 LLRF Upgrade Project modernizes the entire RF control system, includi
 - **Vacuum contactor**: HQ3 contactor and driver system
 - **Protection relays**: 50-51, 27, BR relay systems
 - **Energy storage**: Capacitor-based closing system
-- **Enclosure**: NEMAT rated switchgear cabinet
+- **Enclosure**: NEMA weatherproof switchgear cabinet
 
 **Modified/Upgraded Components:**
 - **Control interface**: New fiber optic connections to upgraded HVPS controller
@@ -658,7 +684,7 @@ SPEAR MPS = FAULT ──▶ Interface Chassis ──┬──▶ LLRF9 Enable = 
 | Parameter | Specification | Notes |
 |-----------|---------------|-------|
 | **Incoming Voltage** | 12.47 kV, 3-phase | SLAC electrical distribution |
-| **Contactor Rating** | 15 kV, 400A, 3-pole | HQ3 vacuum contactor |
+| **Contactor Rating** | 14.5 kV, 400 A, 3-pole | HQ3 vacuum contactor |
 | **Current Transformers** | 50/5 or 200/5 ratio | Protection measurement |
 | **Control Power** | 125 VDC, 115 VAC | Internal power supplies |
 | **Energy Storage** | 3500mF @ 350 VDC | Closing capacitor |
@@ -678,7 +704,7 @@ SPEAR MPS = FAULT ──▶ Interface Chassis ──┬──▶ LLRF9 Enable = 
 
 | Parameter | Specification | Notes |
 |-----------|---------------|-------|
-| **Enclosure** | NEMAT 48" × 140" | Outdoor weatherproof |
+| **Enclosure** | NEMA, 140" max × 102" max | Outdoor weatherproof |
 | **Foundation** | 7' × 15' concrete pad | Structural support |
 | **Cable** | #4-15KV, 3-conductor | Underground installation |
 | **Access** | Door-in-door arrangement | Maintenance accessibility |

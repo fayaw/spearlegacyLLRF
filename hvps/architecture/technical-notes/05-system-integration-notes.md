@@ -19,7 +19,7 @@ The Personnel Protection System provides critical safety interlocks for the HVPS
                     │  ┌─────────────────────────────────┐    │
                     │  │   PPS Input Connections         │    │
                     │  │                                 │    │
-                    │  │   • GOB12-88PNE Connector       │    │
+                    │  │   • GOB1208PNE Connector       │    │
                     │  │   • Burndy 8-pin Circular       │    │
                     │  │   • Souriau Trim Trio (Alt.)    │    │
                     │  └─────────────────────────────────┘    │
@@ -44,7 +44,7 @@ The Personnel Protection System provides critical safety interlocks for the HVPS
 
 ### **PPS Connector Specifications**
 
-**GOB12-88PNE Connector:**
+**GOB1208PNE Connector:**
 - **Original**: Burndy circular 8-pin connector
 - **Current**: Possibly Souriau Trim Trio (part number verification needed)
 - **Source**: Locked PPS box on HVPS controller
@@ -264,7 +264,7 @@ The HVPS system must integrate with the Machine Protection System through:
 ### **MPS Response Requirements**
 
 **Response Time Categories:**
-- **Immediate (< 1 μs)**: Hardware crowbar activation
+- **Immediate (trigger < 1 µs)**: hardware crowbar **trigger**. The crowbar itself **conducts ≈ 10 µs** after the trigger, and the **primary current is interrupted in 4–8 ms** (SLAC-PUB-7591). Energy delivered to the klystron is **< 5 J** with the crowbar, versus < 40 J without
 - **Fast (< 10 μs)**: Primary control shutdown
 - **Medium (< 1 ms)**: Software interlock response
 - **Slow (< 1 s)**: Administrative and procedural responses

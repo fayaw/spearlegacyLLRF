@@ -455,4 +455,4 @@ The following table maps legacy VXI module signals to their LLRF9 equivalents as
 
 - Engineers need this mapping to verify signal continuity during commissioning
 - Cable labeling should cross-reference both legacy slot numbers and LLRF9 unit/board/channel
-- PDR Section 5.3 is the authoritative source for the complete mapping; the legacy VXI slot assignments in `srf1.substitutions` (see [02-architecture-overview.md](02-architecture-overview.md) §6.2) provide the legacy side
+- PDR Section 5.3 is the authoritative source for the complete mapping; the legacy VXI slot assignments in `srf1.substitutions,v` (see [02-architecture-overview.md](02-architecture-overview.md) §6.2) provide the legacy side

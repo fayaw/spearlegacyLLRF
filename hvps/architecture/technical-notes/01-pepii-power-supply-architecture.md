@@ -206,7 +206,7 @@ The main transformer tank contains:
 - **4 SCR stacks** with snubber networks
 - **Impedance matching** to output cable
 - **Two voltage dividers** for high voltage monitoring
-- **200 μH inductors** in termination tank for cable discharge current reduction
+- **200 μH inductors** in termination tank for cable discharge current reduction *(this is the PEP-II design figure from SLAC-PUB-7591; the as-built SPEAR3 Grounding Tank drawing SD-730-790-05-C1 labels them "350 UHY 40A")*
 
 ### **Primary Control Tank Components**
 
@@ -307,7 +307,7 @@ The principles documented in this 1997 publication form the foundation for:
 | **Crowbar Delay** | ~10 μs | Response time |
 | **Primary Voltage** | 12.5 kV | Thyristor rating |
 | **Pulse Count** | 12 | Harmonic reduction |
-| **Cost Target** | < $140/kVA | 1997 dollars |
+| **Cost Target** | < \$140/kVA | 1997 dollars |
 
 ---
 

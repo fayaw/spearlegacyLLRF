@@ -1,9 +1,58 @@
 # WD-730-790-02-C6 — HVPS Controller Wiring (Hoffman Box)
 
 > **Drawing**: `wd7307900206.pdf`
-> **Title**: PEP-II RF Systems — 2.5MW Klystron PWR SPLY — Trigger Enclosure Wiring
-> **Engineers**: R. Cassel (ENGR), W. Gorecki (DFTR)
-> **CAD File**: wd730790020601.dgn
+> **Title**: PEP II RF SYSTEMS — **2.5 MW KLYSTRON PWR SPLY** — TRIGGER ENCLOSURE WIRING
+> **Engineers**: R. Cassel (ENGR), W. Gorecki (DFTR), S. Lowe (CHKR)
+> **CAD File**: WD730790020601.DGN, sheet 1 of 1
+>
+> **Verification status: VERIFIED (3 September 2026)** — read directly from the scanned drawing rendered to image.
+
+### Revision block (as drawn)
+
+| Rev | Description | Drafter | Checker | Engr appv | Date |
+|---|---|---|---|---|---|
+| C1 | REV'D FOR CORRECTNESS | WSG | D.C. | D.C. | 06/03 |
+| C2 | REV'D FOR CORRECTNESS | WSG | J.O. | D.C. | 07/03 |
+| C3 | REV'D PER ECO # A0764 | WSG | J.O. | D.C. | 09/03 |
+| C4 | REV'D PER ECO # A0188 | WSG | J.O. | M.L. | 04/06 |
+| C5 | REV'D FOR CORRECTNESS | WSG | J.O. | M.L. | 01/07 |
+| C6 | REV'D FOR CORRECTNESS | A.M. | — | — | — |
+
+> This is the **master wiring diagram for the whole B118 trigger enclosure**. It is the single most useful sheet in the HVPS documentation set, and it independently confirms several facts that were previously carried only in derived notes.
+
+---
+
+## What this drawing confirms
+
+| Item | Confirmation on this sheet |
+|---|---|
+| **TS-3 is the Voltage Monitor strip** | TS-3 is drawn against a block titled "PEP2 RF SYSTEM KLY PS MONITOR BD **SD-730-793-12**" and is labelled **VOLTAGE MONITOR**. Its terminals read DC VOLTAGE *1, DC VOLTAGE *2, COM, VOLTS, AMPS, COM, −15 V, +15 V, **CURRENT 5A/V**. |
+| **PPS status LEDs are on the AMP 8-pin connector** | Four LEDs are drawn next to the AMP-8PIN J2 / AMP-8PINH F2 connectors: **PPS1 LED1 GRN, PPS2 LED2 GRN, PPS3 LED3 RED, PPS4 LED4 RED** — two green, two red. The **PPS GOB1208PNE** connector is drawn alongside. |
+| **Thermocouple channel assignment** | **TC-1 SCR TOP OIL, TC-2 SCR BOTTOM OIL, TC-3 CROWBAR, TC-4 AIR TEMP**, wired to SLOT-3. This matches ladder file LAD 4 "SCALE" in the PLC program exactly. |
+| **Terminal strip roles** | TS-2 (control power), **TS-3 Voltage Monitor**, **TS-4 TRANSFORMER INTERLOCKS**, **TS-5 CONTACTOR CONTROLS**, **TS-6 GND TANK**, **TS-7 TRANSFORMER MONITORS**, **TS-8 PERMITS**. |
+| **Regulator card identity** | Drawn as **PC-237-230-14-C0** with jumpers JP1–JP12 and signals CUR. LIMIT, MAN TRIP, VOLT TRIP, CURR TRIP, LOAD, STOP, RESET, EL1, SIG HI, VOLT REF, CUR REF. |
+| **Enerpro board set** | **EN-1A "ENERPRO-FIRING BOARD"** (with the PP1 jumper block visible) and **EN-1B "ENERPRO-12PHASE"** — the FCOG6100 and its FCOAUX60 auxiliary board. |
+| **Trigger interconnect boards** | **LEFT SIDE TRIG INTERCONNECT BD SD-730-793-08** and **RIGHT SIDE TRIG INTERCONNECT BD SD-730-793-07**, each feeding an interface board (IN1, IN2) and six gate-drive channels. |
+| **Supply rating** | Title block reads "2.5 MW KLYSTRON PWR SPLY". |
+
+---
+
+## PLC chassis — as drawn
+
+| Slot | Module | Notes |
+|---|---|---|
+| **SLOT-0** | **1747-L532** | **SLC-5/03 CPU**, RS232 and DH485 ports |
+| SLOT-1 | AB-1747-DCM | Remote I/O adapter module; LNK1 / LNK2 / SHIELD |
+| SLOT-2 | AB-1746-IO8 | OUT 0–3 drive AC BIAS P.S., AC 120 VDC P.S., AC 240 VAC P.S. and the **AC GND TANK RELAY COIL**; INPUT 0–3 take A PHASE TS7-1 and FILTER TS7-13 / TS7-14 |
+| SLOT-3 | AB-1746-THERMC | TC-1…TC-4 (see above) |
+| SLOT-5 | AB-1746-OX8 | Relay outputs |
+| SLOT-6 | AB-1746-IB16 | 16 DC inputs |
+| SLOT-7 | AB-1746-IV16 | 16 DC inputs |
+| SLOT-8 | AB-1746-NIO4V | 4 analog in / out |
+| SLOT-9 | AB-1746-NI4 | 4 analog in |
+| SLOT-PS | AB-1747-P1 | Chassis power supply, +24 V / AC / COM |
+
+> **Note**: the 1747-DCM in Slot-1 is a Remote I/O **adapter**, not a scanner — it presents this chassis to the VXI-resident 6008-SV scanner as adapter 1. The scanner is in the VXI crate in B132, not here.
 
 ---
 
@@ -14,7 +63,8 @@ flowchart TB
     subgraph HOFFMAN["Hoffman Box 34x42 (Building B118)"]
         
         subgraph PLC["Allen-Bradley SLC-500 PLC"]
-            SLOT1["Slot-1: AB-1747-DCM<br/>(Scanner)"]
+            SLOT0["Slot-0: AB-1747-L532<br/>(SLC-5/03 CPU)"]
+            SLOT1["Slot-1: AB-1747-DCM<br/>(Remote I/O adapter)"]
             SLOT2["Slot-2: AB-1746-IO8<br/>(8 I/O Combo)"]
             SLOT3["Slot-3: AB-1746-THERMC<br/>(Thermocouple)"]
             SLOT5["Slot-5: AB-1746-OX8<br/>(8 Relay Output)"]
@@ -52,7 +102,7 @@ flowchart TB
         end
 
         subgraph CONNECTORS["External Connectors"]
-            PPS_CONN["PPS GOB12-88PNE<br/>(8-pin circular)"]
+            PPS_CONN["PPS GOB1208PNE<br/>(8-pin circular)"]
             AMP_8PIN["AMP 8-Pin<br/>(PPS LEDs)"]
             BNC_RACK["BNC-1 thru BNC-12<br/>(Monitor/Trigger)"]
         end
@@ -115,7 +165,7 @@ Thermocouple inputs for temperature monitoring
 │          │        │ PLC Rung 0017: Touch Panel Enable          │
 │          │        │   AND Emergency Off Clear                  │
 │          │        │ INPUT SIDE: PPS 1 signal (24VDC from       │
-│          │        │   GOB12-88PNE) — HARDWARE FAIL-SAFE       │
+│          │        │   GOB1208PNE) — HARDWARE FAIL-SAFE       │
 │ OUT 1    │ Output │ Contactor On/Off (Rung 0002)              │
 │ (others) │ Output │ Various control outputs                    │
 └──────────┴────────┴────────────────────────────────────────────┘
@@ -123,7 +173,7 @@ Thermocouple inputs for temperature monitoring
 ⚠️  CRITICAL SAFETY NOTE:
     The OX8 module uses relay contacts.
     The INPUT side of OUT 2 relay contacts is wired to PPS 1 signal
-    (24VDC from GOB12-88PNE connector, not from PLC power).
+    (24VDC from GOB1208PNE connector, not from PLC power).
     If PPS removes 24VDC, K4 CANNOT be energized even if PLC fails.
 ```
 
@@ -149,10 +199,10 @@ Thermocouple inputs for temperature monitoring
 │ IN 11    │ (Available)                                         │
 │ IN 12    │ (Available)                                         │
 │ IN 13    │ (Available)                                         │
-│ IN 14    │ *** PPS 1 Input *** (from GOB12-88PNE)            │
+│ IN 14    │ *** PPS 1 Input *** (from GOB1208PNE)            │
 │          │   Rungs: 0014 (Emergency Off), 0015 (PPS ON),     │
 │          │          0016 (Ross Switch Enable)                  │
-│ IN 15    │ *** PPS 2 Input *** (from GOB12-88PNE)            │
+│ IN 15    │ *** PPS 2 Input *** (from GOB1208PNE)            │
 │          │   Rungs: 0015 (PPS ON), 0016 (Ross Switch),       │
 │          │          0068 (Bias Power Enable)                   │
 └──────────┴────────────────────────────────────────────────────┘
@@ -244,9 +294,9 @@ Connects to AMP 8-Pin connector
 │  9   │              │ P5/ManSW   │ Manual GRN SW (NO/NC*)        │
 │ 10   │              │ P5/ManSW   │ Manual GRN SW Common          │
 │ 11   │ GRN/BLK      │ P5/Ross   │ Ross GRN SW Aux COM           │
-│      │              │            │ → Pin D of GOB12-88PNE        │
+│      │              │            │ → Pin D of GOB1208PNE        │
 │ 12   │              │ P5/Ross   │ Ross GRN SW Aux NC             │
-│      │              │            │ → Pin C of GOB12-88PNE        │
+│      │              │            │ → Pin C of GOB1208PNE        │
 │ 13   │              │ P5/Ross   │ Ross GRN SW Coil (+)           │
 │      │              │            │ ← Slot-2 IO8 OUT3 (120VAC)   │
 │ 14   │              │ P5/Ross   │ Ross GRN SW Coil (-)           │
@@ -260,7 +310,7 @@ Connects to AMP 8-Pin connector
 │ 21   │              │ P5/Shunt  │ Return Current Shunt (-)       │
 │      │              │            │ (Earth of Grounding Tank)     │
 ├──────┼──────────────┼────────────┼───────────────────────────────┤
-│ Cable│ Belding 83709│            │ 9 conductor, #16 AWG, Teflon  │
+│ Cable│ Belden 83709│            │ 9 conductor, #16 AWG, Teflon  │
 │      │              │            │ + Belden 83715 15C #16        │
 └──────┴──────────────┴────────────┴───────────────────────────────┘
 ```
@@ -274,12 +324,12 @@ TS7-14: Filter
 
 ---
 
-## PPS Connector — GOB12-88PNE Wiring
+## PPS Connector — GOB1208PNE Wiring
 
 ```mermaid
 flowchart LR
     subgraph PPS_BOX["PPS Interface Chassis<br/>(Locked box on Hoffman Box)"]
-        GOB["GOB12-88PNE<br/>8-Pin Circular<br/>(Burndy/Souriau Trim Trio)"]
+        GOB["GOB1208PNE<br/>8-Pin Circular<br/>(Burndy/Souriau Trim Trio)"]
     end
 
     subgraph SIGNALS["Signal Routing"]

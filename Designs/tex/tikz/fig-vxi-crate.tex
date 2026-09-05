@@ -1,0 +1,40 @@
+% !TeX root = ../L_legacy_system_architecture.tex
+% VXI crate slot map.  Slot names in quotes are the literal strings in
+% rfApp/DbIoc/srf1.substitutions,v; empty slots are shaded.
+\begin{tikzpicture}[font=\tiny,x=1mm,y=1mm,every node/.style={outer sep=0pt}]
+\def\w{12}   % slot pitch
+\def\h{19}   % slot height
+
+% slot/label/function/empty-flag
+\foreach \i/\name/\fn/\e in {%
+  0/{B132-\\IOCRF}/{IOC\\VxWorks\\PowerPC}/0,
+  1/{AB\\Scanner}/{6008-SV1R\\RIO\\scanner}/0,
+  2/{Clock}/{CLK}/0,
+  3/{}/{}/1,
+  4/{RF Pro-\\cessing}/{RFP}/0,
+  5/{MPS\\Shutoff}/{SPEAR MPS\\in + orbit\\interlock}/0,
+  6/{Link\\Passthru}/{ripple-link\\passthrough}/0,
+  7/{IQA1}/{Klystron\\fwd/refl}/0,
+  8/{}/{}/1,
+  9/{IQA2}/{Cavity\\refl.}/0,
+  10/{}/{}/1,
+  11/{IQA3}/{Cavity\\probe}/0,
+  12/{Arc\\Interlock}/{AIM}/0}
+{
+  \ifnum\e=1
+    \node[draw=black!45,fill=black!8,minimum width=\w mm,minimum height=\h mm,
+          inner sep=1pt,align=center,font=\tiny\itshape,anchor=north west]
+      at ({\i*\w},0) {empty};
+  \else
+    \node[draw=cCtrl,fill=cCtrl!7,minimum width=\w mm,minimum height=\h mm,
+          inner sep=1pt,align=center,font=\tiny,text=cCtrl!85!black,
+          anchor=north west] at ({\i*\w},0) {\name};
+  \fi
+  % slot number above
+  \node[font=\tiny\bfseries,anchor=south] at ({\i*\w+\w/2},1) {\i};
+  % function below
+  \node[font=\tiny,align=center,anchor=north,text=black!65]
+    at ({\i*\w+\w/2},{-\h-1.5}) {\fn};
+}
+\node[font=\tiny\bfseries,anchor=east] at (-1,1.8) {slot:};
+\end{tikzpicture}

@@ -40,7 +40,7 @@ This is the detailed electrical schematic diagram for the 12.47 kV outdoor switc
 │   12.47 kV      │    │   SWITCHGEAR    │    │      HVPS       │
 │   Utility       │────│   Vacuum        │────│   Transformer  │
 │   Supply        │    │   Contactor     │    │   Primary       │
-│   3-Phase       │    │   HQ3 15kV/400A │    │   Input         │
+│   3-Phase       │    │  HQ3 14.5kV/400A│    │   Input         │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                               │
                        ┌──────▼──────┐

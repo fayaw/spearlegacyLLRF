@@ -1,6 +1,24 @@
 # 00 — HVPS Control System Overview with Enerpro Integration
 
-> **Sources**: `enerproBoardHvps.docx`, `enerproDiscussion07072022.docx`, `enerproPhaseReferenceAdapter.docx`
+> **Sources**: [`../enerproBoardHvps.docx`](../enerproBoardHvps.docx), [`../enerproDiscussion07072022.docx`](../enerproDiscussion07072022.docx), [`../enerproPhaseReferenceAdapter.docx`](../enerproPhaseReferenceAdapter.docx) — all original J. Sebek documents.
+>
+> **Drawings** (verified by direct reading, September 2026):
+> [`../../../documentation/schematics/sd2372301200.pdf`](../../../documentation/schematics/sd2372301200.pdf) — SD-237-230-12-R0 / Enerpro **E128**, the FCOG6100 schematic ·
+> [`../../../documentation/schematics/sd2372301401.pdf`](../../../documentation/schematics/sd2372301401.pdf) — SD-237-230-14-C1, the regulator board ·
+> [`../../../architecture/designNotes/EnerproVoltageandCurrentRegulatorBoardNotes.docx`](../../../architecture/designNotes/EnerproVoltageandCurrentRegulatorBoardNotes.docx) — J. Sebek's authoritative regulator analysis
+>
+> ## Verification status — CORRECTED September 2026
+>
+> | Earlier revisions said | Correct | Source |
+> |---|---|---|
+> | Phase-reference resistors **2 MΩ** | **200 kΩ** as installed at SLAC (R37/R38/R39). Enerpro's standard value in the E128 parts list is **1.9 MΩ ½ W 1% RN70** | `enerproBoardHvps.docx`; SD-237-230-12-R0 |
+> | Source impedance **2 MΩ** | **500 Ω** — the monitor windings are low-impedance sources | `enerproBoardHvps.docx` |
+> | Signal amplitude **~75 V p-p** | **≈ 190 V p-p** | `enerproBoardHvps.docx` |
+> | Adapter resistors **2 MΩ** | **3 × 576 kΩ** to J7 pins 1–3 and **3 × 200 kΩ** to J7 pins 4–6 | `enerproPhaseReferenceAdapter.docx` |
+>
+> **Two connector roles, settled from the schematic notes**: on the FCOG6100, **J5 is the off-board phase-reference input** (Note 10) and **J7 is for *test* references** (Note 11). J8 takes the cable to the FCOAUX60 auxiliary board (Note 12). The J7 usage described in the *upgrade* sections below refers to the **FCOG1200**, which is a different board.
+>
+> **Also note**: the analog regulator is a **diode minimum-select**, not a summing junction, and its **AC current loop is saturated by design and never takes control** — the HVPS is voltage-regulated only. See `EnerproVoltageandCurrentRegulatorBoardNotes.docx`.
 
 ## System Architecture Overview
 
@@ -31,7 +49,7 @@ The SPEAR RF Klystron High Voltage Power Supply (HVPS) control system integrates
                                 │               │ 12-Pulse        │◄───│ Phase Reference │
                                 │               │ Thyristor       │    │ Adapter Board   │
                                 │               │ Bridges         │    │                 │
-                                │               │                 │    │ • 3×2MΩ Resistors│
+                                │               │                 │    │ • 576kΩ + 200kΩ  │
                                 │               │ • Bridge X      │    │ • J7 Interface  │
                                 │               │ • Bridge Y      │    │ • Phase Shift   │
                                 │               │ • 30° Shift     │    │   Generation    │
@@ -94,16 +112,23 @@ EPICS Target → PLC Processing → Dual Control Outputs
 ```
 Phase-Shifting Transformer Monitor Windings
     │
-    ├─ Phase A ──► 2MΩ (R37) ──► J5-1 ──► FCOG6100
-    ├─ Phase B ──► 2MΩ (R38) ──► J5-3 ──► FCOG6100  
-    └─ Phase C ──► 2MΩ (R39) ──► J5-5 ──► FCOG6100
+    ├─ Phase A ──► 200 kΩ (R37) ──► J5-1 ──► FCOG6100
+    ├─ Phase B ──► 200 kΩ (R38) ──► J5-3 ──► FCOG6100
+    └─ Phase C ──► 200 kΩ (R39) ──► J5-5 ──► FCOG6100
 
 Measured Characteristics:
-• Source Impedance: 2MΩ at HVPS
-• Input Resistors: 2MΩ at FCOG6100
-• Signal Amplitude: ~75V peak-to-peak
-• Phase Sequence: C-B-A (as observed)
+• Source Impedance: 500 Ω (monitor windings on the phase-shifting transformer)
+• Input Resistors:  200 kΩ as installed at SLAC (Enerpro standard value is 1.9 MΩ)
+• Signal Amplitude: ≈190 V peak-to-peak
+• Phase offset:     ±15° from the rectifier transformer primaries
 ```
+
+> **On the resistor values**, from J. Sebek's `enerproBoardHvps.docx`, confirmed against the FCOG6100 schematic (SD-237-230-12-R0 / Enerpro E128):
+>
+> - **R37/R38/R39 = 200 kΩ** as installed at SLAC. The Enerpro **standard** value in the E128 parts list is **1.9 MΩ, ½ W, 1%, RN70** — SLAC reduced it to suit the much lower monitor-winding reference. Note 10 on the schematic reads: *"FOR OFF-BOARD PHASE REFERENCES: INSTALL R37-R39 AND J5, OMIT R31-R33 AND T1."*
+> - **Source impedance is 500 Ω**, not 2 MΩ — these are low-impedance monitor windings.
+> - **Amplitude ≈ 190 V p-p.**
+> - Inside the board the references are pulled to +5 V through 15 kΩ in RN1 and squared up by LM324 comparators.
 
 ---
 
@@ -135,7 +160,7 @@ Measured Characteristics:
 ├─────────────────┬─────────────────┬─────────────────┬─────────────────────────────┤
 │ 3-PHASE INPUT   │ RESISTOR ARRAY  │ PHASE SHIFTING  │    J7 INTERFACE             │
 │                 │                 │                 │                             │
-│ • Monitor       │ • 3×2MΩ or      │ • 45° Lead      │ • eAx, eBx, eCx (pins 1-3)  │
+│ • Monitor       │ • 3×576kΩ +     │ • 45° Lead      │ • eAx, eBx, eCx (pins 1-3)  │
 │   Windings      │   6 Resistors   │ • 75° Lag       │ • eAy, eBy, eCy (pins 4-6)  │
 │ • 75V p-p       │ • Current Limit │ • Amplitude     │ • 5V Bias                   │
 │ • C-B-A Seq     │ • Matching      │   Control       │ • 1-8V p-p Range           │
@@ -245,7 +270,7 @@ Measured Characteristics:
 ### Design Requirements (from Enerpro Discussion)
 
 #### Signal Specifications
-- **Input Voltage**: 75V peak-to-peak from monitor windings
+- **Input Voltage**: ≈190 V peak-to-peak from monitor windings
 - **Output Voltage**: 1-8V peak-to-peak (preferably 1-9V range)
 - **DC Bias**: +5V for all six outputs
 - **Phase Accuracy**: ±15-20% amplitude matching within each bridge group
@@ -271,7 +296,7 @@ Monitor Windings Input (75V p-p)
                          └─► Pin 6 (eCy) ──► FCOG1200 (75° Lag)
 
 Where:
-• R_A, R_B, R_C = 2MΩ current limiting resistors
+• R_A, R_B, R_C = 576 kΩ (pins 1-3, advanced) and 200 kΩ (pins 4-6, retarded)
 • Phase shifting accomplished by FCOG1200 internal RC networks
 • RN4A-C modified to 47kΩ for 45° lead (Bridge X)
 • RN4D-F modified to 180kΩ for 75° lag (Bridge Y)
@@ -283,14 +308,14 @@ Where:
 ```
 RN4A-C = 47kΩ, C17-C19 = 0.033μF
 Phase shift = arctan(ωRC) = arctan(2π×60×47k×0.033μ) = 45°
-Amplitude at comparator = 75V × (2M/(2M+3.3k)) × (47k/(47k+3.3k)) = 69.4V
+Amplitude at comparator ≈ 190 Vpp × (200k/(200k+0.5k)) × (47k/(47k+0.5k)) ≈ 187 Vpp before clamping
 ```
 
 #### Bridge Y (75° Lag)  
 ```
 RN4D-F = 180kΩ, C20-C22 = 0.033μF
 Phase shift = arctan(ωRC) = arctan(2π×60×180k×0.033μ) = 75°
-Amplitude at comparator = 75V × (2M/(2M+3.3k)) × (180k/(180k+3.3k)) = 69.1V
+Amplitude at comparator ≈ 190 Vpp × (200k/(200k+0.5k)) × (180k/(180k+0.5k)) ≈ 189 Vpp before clamping
 ```
 
 ---
@@ -365,7 +390,7 @@ Since independent monitoring of the two secondary bridges is not available, the 
 - **Harmonic Content**: Power line harmonics visible in error signal
 
 ### Protection and Safety
-- **Input Current Limiting**: 2MΩ resistors limit current to safe levels
+- **Input Current Limiting**: 200 kΩ resistors (R37–R39) limit the current into the phase detector
 - **Voltage Clamping**: Recommended clamping at regulator output
 - **Phase Loss Detection**: Instant gating inhibition on phase imbalance
 - **Soft-Start Recovery**: Gradual restart after fault clearance
@@ -388,7 +413,7 @@ Since independent monitoring of the two secondary bridges is not available, the 
 
 ### Current Limiting and Protection
 **Challenge**: High input voltages could damage FCOG1200
-**Solution**: 2MΩ current limiting resistors, maximum current ~37.5μA at 75V
+**Solution**: 200 kΩ current-limiting resistors; at ≈190 V p-p the peak current is ≈ 0.5 mA
 
 ---
 
@@ -403,7 +428,7 @@ Since independent monitoring of the two secondary bridges is not available, the 
 
 ### Phase 2: Adapter Board Design
 1. **Phase Reference Adapter**:
-   - 3×2MΩ input resistors (matched)
+   - 3×200 kΩ input resistors (matched)
    - J7 mating connector (TE P/N 3-640440-8)
    - Proper spacing for high voltage safety
    - Test points for verification

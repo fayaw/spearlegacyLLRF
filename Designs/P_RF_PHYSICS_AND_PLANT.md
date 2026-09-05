@@ -1,5 +1,8 @@
 # SPEAR3 RF System — RF Physics, Control Theory and Physical Plant
 
+
+> **⚠ Galil status — corrected September 2026.** The Galil DMC-4143 has **not** been installed and is **not** in operation; it was in development. Test moves were performed on the existing cavity motors and worked fine, but it goes online only **when the current LLRF upgrade project is finished**. The **AB 1746-HSTP1 remains the in-service tuner controller**. Any statement below that this work is "already done" or that the Galil "replaced" the AB hardware is incorrect and has been amended.
+
 **Document ID**: Doc P  
 **Version**: 3.2  
 **Date**: March 26, 2026  
@@ -97,7 +100,7 @@ The SPEAR3 RF system must deliver a 476.3 MHz accelerating voltage of $\sim 2.85
 
 > **Note on $\alpha_c$**: Published values range from 0.0011 (SSRL parameter page [R3]) to 0.00118 (used in this document) depending on the specific lattice optics. Differences of $\sim 7\%$ in $\alpha_c$ produce $\sim 3\%$ differences in $f_s$.
 
-> **Sources**: [R1] McIntosh et al., SLAC-PUB-10983, EPAC 2004 (Table 1: $Q_s = 0.008$, $\alpha = 0.00113$). [R2] Hettel et al., PAC 1999. [R3] SSRL SPEAR Storage Ring Parameters ($\nu_s = 0.007$, $\alpha_c = 0.0011$, $V_\text{RF} = 3.2$ MV). [R5] `Designs/0_SYSTEM_DESIGN_REPORT.md`.
+> **Sources**: [R1] McIntosh et al., SLAC-PUB-10983, EPAC 2004 (Table 1: $Q_s = 0.008$, $\alpha = 0.00113$). [R2] Hettel et al., PAC 1999. [R3] SSRL SPEAR Storage Ring Parameters ($\nu_s = 0.007$, $\alpha_c = 0.0011$, $V_\text{RF} = 3.2$ MV). [R5] `Designs/tex/0_system_design_report.pdf`.
 
 ### 1.3 RF System Configuration
 
@@ -173,7 +176,7 @@ Near its fundamental mode at $\omega_0 = 2\pi \times 476.3\;\text{MHz}$, each ca
 
 | Parameter | Symbol | Value | Unit |
 |-----------|--------|-------|------|
-| Resonant frequency | $f_0$ | 476.315 | MHz |
+| Resonant frequency | $f_0$ | ≈ 476.3 | MHz |
 | Shunt impedance | $R_s$ | 3.73 | MΩ |
 | Unloaded Q | $Q_0$ | 32,000 | — |
 | Loaded Q | $Q_L$ | 6,700 | — |
@@ -200,7 +203,7 @@ Z_\text{cav}(\Delta\omega) = \frac{R_s}{1 + j\,2Q_L\,\Delta\omega/\omega_0} \qqu
 **Cavity half-bandwidth:**
 
 ```math
-\Delta f_{1/2} = \frac{f_0}{2Q_L} = \frac{476.315\;\text{MHz}}{2 \times 6700} = 35.5\;\text{kHz} \qquad \text{(Eq. 2.1b)}
+\Delta f_{1/2} = \frac{f_0}{2Q_L} = \frac{476.3\;\text{MHz}}{2 \times 6700} = 35.5\;\text{kHz} \qquad \text{(Eq. 2.1b)}
 ```
 
 This determines the cavity natural response time $\tau_\text{cav} = 1/(2\pi\Delta f_{1/2}) \approx 4.5\;\mu\text{s}$.
@@ -781,7 +784,7 @@ where the terms are (left to right): proportional gain, lead compensator, PI int
 | Proportional gain $K_p$ | $\sim 15$ dB ($\approx 5.6$) | Adjustable via EPICS PV |
 | Integrator frequency $\omega_i$ | $\sim 2\pi \times 30$ kHz | Rejects DC errors |
 | Phase margin | $\geq 45^\circ$ | Maintained by lead compensation |
-| DC impedance reduction | $\sim 40$ dB | $\approx 100\times$ reduction in $\|Z_\text{eff}\|$ |
+| DC impedance reduction | $\sim 40$ dB | $\approx 100\times$ reduction in $\lvert Z_\text{eff} \rvert$ |
 | SPEAR3 status | **Active** | — |
 
 > **Sources**: [R15] Corredoura, Figs. 3, 5; [R14] Schwarz; [R11] Gamp.
@@ -876,7 +879,7 @@ The RF station woofer is effective for low-order modes because these modes requi
 
 **Key design choice**: Measures the **klystron forward signal** (not cavity probe), because the ripple frequencies ($< 2$ kHz) are well within the cavity bandwidth ($35.5$ kHz) and the correction must be applied upstream.
 
-**Harmonic estimator algorithm** (from `ripple.s` [R36]): The DSP implements an adaptive harmonic tracker — for each harmonic $k$:
+**Harmonic estimator algorithm** (from `ripple.s,v` [R36]): The DSP implements an adaptive harmonic tracker — for each harmonic $k$:
 
 ```math
 \hat{A}_k[n] = \hat{A}_k[n-1] + \mu_k \cdot e[n] \cdot \cos(2\pi k f_\text{line} n T_s) \qquad \text{(Eq. 6.4a)}
@@ -906,7 +909,7 @@ where $e[n] = \phi_\text{ref} - \phi_\text{kly}$ is the phase error at sample $n
 
 > **Note**: In SPEAR3 operations, the ripple loop is deployed primarily as a **slow phase tracker** compensating for klystron phase shifts across cathode voltage changes (D6). The LLRF9 inherently rejects HVPS ripple through its high-bandwidth direct loop, making the legacy DSP-based ripple loop unnecessary in the upgrade.
 
-> **Sources**: [R36] `ripple.s`; [R20t]; [R14] Schwarz §5.
+> **Sources**: [R36] `ripple.s,v`; [R20t]; [R14] Schwarz §5.
 
 ### 6.5 Gap Feedforward Loop
 
@@ -916,9 +919,9 @@ Not used at SPEAR3. Addresses D2 (ion clearing gap transient). In PEP-II, the GV
 
 **Purpose**: Adjusts the klystron cathode voltage $V_k$ to maintain the klystron operating point at $\sim 10\%$ below saturation (D6), ensuring the direct loop has sufficient headroom for fast corrections.
 
-**Signal flow**: Klystron forward power monitor (or station gap voltage) → EPICS SNL (`rf_hvps_loop.st`) → PLC HVPS voltage setpoint → Enerpro SCR firing angle → cathode voltage $V_k$.
+**Signal flow**: Klystron forward power monitor (or station gap voltage) → EPICS SNL (`rf_hvps_loop.st,v`) → PLC HVPS voltage setpoint → Enerpro SCR firing angle → cathode voltage $V_k$.
 
-**Control law** (from `rf_hvps_loop.st`): Operates in two modes:
+**Control law** (from `rf_hvps_loop.st,v`): Operates in two modes:
 
 1. **Processing mode** (`STATION_PROC`): Slowly ramps $V_k$ upward while monitoring cavity vacuum, conditioning the cavities by gradually increasing RF power.
 
@@ -938,10 +941,10 @@ where $K_\text{HVPS}$ is the proportional gain (voltage step per unit power erro
 | Bandwidth | $\sim 1$ Hz | Limited by PLC scan rate and Enerpro settling |
 | Update rate | $\sim 2$ Hz ($\sim 0.5$ s cycle) | Configurable via `hvps_loop_delay` |
 | Control law | Proportional with deadband | Rate-limited output |
-| Implementation | EPICS SNL: `rf_hvps_loop.st` (343 lines, 4 states) | States: init, off, proc, on |
+| Implementation | EPICS SNL: `rf_hvps_loop.st,v` (343 lines, 4 states) | States: init, off, proc, on |
 | SPEAR3 status | **Active** | |
 
-> **Sources**: [R14]; `spear-rf-code-legacy/rfApp/src/seq/rf_hvps_loop.st`.
+> **Sources**: [R14]; `spear-rf-code-legacy/rfApp/src/seq/rf_hvps_loop.st,v`.
 
 ### 6.7 Tuner Loop — Cavity Resonant Frequency Tracking
 
@@ -949,7 +952,7 @@ where $K_\text{HVPS}$ is the proportional gain (voltage step per unit power erro
 
 **Signal flow**: Cavity probe phase and klystron forward phase → phase subtraction → comparison to $\psi_\text{target}$ → deadband logic → stepper motor command → mechanical tuner.
 
-**Control law** (from `rf_tuner_loop.st` [R34]):
+**Control law** (from `rf_tuner_loop.st,v` [R34]):
 
 ```math
 \varepsilon = \left[\angle(V_\text{probe}) - \angle(V_\text{fwd})\right] - \psi_\text{target} \qquad \text{(Eq. 6.7a)}
@@ -975,11 +978,11 @@ where $x$ is the tuner position (steps), $x_\text{home}$ is the home position, $
 | Bandwidth | $\sim 0.01$–$1$ Hz | Limited by mechanical response |
 | Control law | Bang-bang with deadband | $N_\text{step}$ steps per correction cycle |
 | Tuning resolution | $\sim 1$ Hz/step | Worm gear mechanism, self-locking |
-| Implementation | EPICS SNL: `rf_tuner_loop.st` (555 lines) | States: init, unknown, reset, off, on |
-| Motor controller | Galil DMC-4143 (Rev 1.3h, commissioned Aug 2025) | Replaces legacy AB 1746-HSTP1 |
+| Implementation | EPICS SNL: `rf_tuner_loop.st,v` (555 lines) | States: init, unknown, reset, off, on |
+| Motor controller | **AB 1746-HSTP1** (in service). Galil DMC-4143 Rev 1.3h is **in development, not installed** — test moves were made Aug 2025; it goes online when the LLRF upgrade completes | — |
 | SPEAR3 status | **Active** | |
 
-> **Sources**: [R14]; [R34] `rf_tuner_loop.st`; [R35] Galil commissioning notes.
+> **Sources**: [R14]; [R34] `rf_tuner_loop.st,v`; [R35] Galil commissioning notes.
 
 ### 6.8 DAC Loop — Outermost Amplitude Regulation
 
@@ -987,7 +990,7 @@ where $x$ is the tuner position (steps), $x_\text{home}$ is the home position, $
 
 **Signal flow**: Gap voltage readback (cavity probe amplitude) or drive power readback → error calculation → proportional controller with deadband → DAC count adjustment → RFP Octal DAC → I/Q modulator baseline.
 
-**Control law** (from `rf_dac_loop.st` and `subIQcounts` in `subIQ.c`):
+**Control law** (from `rf_dac_loop.st,v` and `subIQcounts` in `subIQ.c`):
 
 ```math
 \Delta C_\text{DAC}[n] = K_\text{DAC} \cdot (V_\text{set} - V_\text{meas}) \cdot D_\text{conv} \cdot (1 + G_\text{loop}) \qquad \text{(Eq. 6.8a)}
@@ -1009,10 +1012,10 @@ where $\Delta C_\text{DAC}$ is the DAC count change, $K_\text{DAC}$ is proportio
 | Bandwidth | $\sim 0.1$ Hz | Limited by scan rate and smoothing |
 | Update rate | Event-driven or $\leq 10$ s timeout | `DAC_LOOP_MAX_INTERVAL = 10.0` |
 | DAC range | $\pm 2047$ counts (12-bit) | Minimum delta: 0.5 counts |
-| Implementation | EPICS SNL: `rf_dac_loop.st` (290 lines, 4 states) | init, off, tune, on |
+| Implementation | EPICS SNL: `rf_dac_loop.st,v` (290 lines, 4 states) | init, off, tune, on |
 | SPEAR3 status | **Active** | |
 
-> **Sources**: `rf_dac_loop.st`; `subIQ.c` (`subIQcounts`).
+> **Sources**: `rf_dac_loop.st,v`; `subIQ.c` (`subIQcounts`).
 
 ### 6.9 Gain Tracking Function
 
@@ -1136,9 +1139,9 @@ Temperature dependence: $\sim -1$ kHz/°C.
 \varepsilon = \left[\angle(\text{probe}) - \angle(\text{fwd})\right] - \psi_\text{target} \qquad \text{(Eq. 8.2)}
 ```
 
-where $\psi_\text{target}$ is the target detuning angle (Eq. 2.6). Implemented in `rf_tuner_loop.st` (EPICS SNL). Bandwidth $\sim 0.01$–$1$ Hz.
+where $\psi_\text{target}$ is the target detuning angle (Eq. 2.6). Implemented in `rf_tuner_loop.st,v` (EPICS SNL). Bandwidth $\sim 0.01$–$1$ Hz.
 
-> **Sources**: [R14]; [R34] `rf_tuner_loop.st`; [R35] Galil commissioning notes.
+> **Sources**: [R14]; [R34] `rf_tuner_loop.st,v`; [R35] Galil commissioning notes.
 
 ---
 
@@ -1174,7 +1177,7 @@ Calibration establishes the numerical relationships between raw hardware signals
 
 #### 9.4.1 Calibration Sequence Overview
 
-The master calibration is executed by `rf_calib.st` (3,345 lines, 27 states). It runs as an EPICS SNL program and requires the station to be OFF (no RF power). The sequence progresses through the following phases:
+The master calibration is executed by `rf_calib.st,v` (3,345 lines, 27 states). It runs as an EPICS SNL program and requires the station to be OFF (no RF power). The sequence progresses through the following phases:
 
 | Phase | States | What It Does |
 |-------|--------|-------------|
@@ -1232,7 +1235,7 @@ Data file: `b132R11PatchPanel.xlsx`. Documents physical signal routing in Buildi
 
 > **Upgrade note**: Many calibrations will need adaptation for the LLRF9 system (different ADC/DAC ranges, signal levels, processing gains). The polynomial frequency model (Eq. 6.7c) and combiner matrix calibration are expected to transfer; drive and power detector calibrations require new measurements.
 
-> **Sources**: [R38]; [R39]; `rf_calib.st`; `subIQ.c` (§2.2 of [R20u]).
+> **Sources**: [R38]; [R39]; `rf_calib.st,v`; `subIQ.c` (§2.2 of [R20u]).
 
 ---
 
@@ -1262,7 +1265,7 @@ Data file: `b132R11PatchPanel.xlsx`. Documents physical signal routing in Buildi
 
 | Parameter | Symbol | Value | Unit | Source |
 |-----------|--------|-------|------|--------|
-| Resonant frequency | $f_0$ | 476.315 | MHz | [R6] |
+| Resonant frequency | $f_0$ | ≈ 476.3 | MHz | [R6] |
 | Shunt impedance (linac) | $R_s$ | 3.73 | MΩ | [R6] |
 | $R/Q$ | $R/Q$ | ~116 | Ω | [R7] |
 | Unloaded Q | $Q_0$ | 32,000 | — | [R6] |
@@ -1338,19 +1341,25 @@ Data file: `b132R11PatchPanel.xlsx`. Documents physical signal routing in Buildi
 | Ref | Document | Path |
 |-----|----------|------|
 | [R4] | LLRF9 Commissioning Tests | `llrf/tests/llrf9Tests.pdf` |
-| [R5] | System Design Report | `Designs/0_SYSTEM_DESIGN_REPORT.md` |
+| [R5] | System Design Report | `Designs/tex/0_system_design_report.pdf` |
 | [R6] | RF System Description (Schwarz) | `llrf/documentation/legacyArchitecture/ps3403305100.pdf` |
 | [R14] | Feedback Loop Description (Schwarz) | `llrf/documentation/legacyArchitecture/feedbackLoopDescriptionps3403305200.pdf` |
-| [R19] | Comprehensive FBK Loops Description | `llrf/.../PEPII_LLRF_FBK_Loops_Description.md` |
+| [R19] | Comprehensive FBK Loops Description | `llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/design-specifications/PEPII_LLRF_FBK_Loops_Description.md` |
 | [R20t] | DSP Firmware Analysis | `spear-rf-code-legacy/codeReviewTechnicalNotes/04-dsp-firmware.md` |
 | [R21t] | SLAC-PUB-7591 Transcription | `hvps/architecture/originalDocuments/transcriptions/slac-pub-7591_transcription.md` |
 | [R22] | HVPS Technical Spec | `hvps/architecture/originalDocuments/ps3413600102.pdf` |
 | [R23] | HVPS Simulation Config | `hvps/simulation/hvps_sim/config.py` |
 | [R26] | Enerpro FCOG1200 Manual | `hvps/controls/enerpro/enerproDocuments/` |
 | [R27] | Cassel PLC Code | `hvps/documentation/plc/CasselPLCCode.pdf` |
-| [R34] | Tuner Loop Source Code | `spear-rf-code-legacy/rfApp/src/seq/rf_tuner_loop.st` |
+| [R28] | Cavity Tuner Inspection Report, 13 June 2023 | `llrf/tuners/cavityTunerInspections20230613.docx` |
+| [R29] | Tuner mechanical design paper, PAC 1997 | `llrf/tuners/tunerDesignPac97HDS8P030.PDF` |
+| [R30] | Superior Electric SLO-SYN stepper motor data | `llrf/tuners/SLO-SYN.pdf` |
+| [R31] | SLO-SYN MD808 Stepper Drive Manual | `llrf/tuners/SLO-SYN_MD808_Stepper_Drive_Manual.pdf` |
+| [R32] | SLO-SYN SS2000MD4M Step Drive / Translator Manual | `llrf/tuners/SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf` |
+| [R33] | Superior Electric stepper catalogue (legacy) | `llrf/tuners/Old Stepper Catalog_Superior Electric_0.pdf` |
+| [R34] | Tuner Loop Source Code | `spear-rf-code-legacy/rfApp/src/seq/rf_tuner_loop.st,v` |
 | [R35] | Galil Commissioning Notes | `llrf/tuners/galil/GalilCommissioning.docx` |
-| [R36] | DSP Ripple Firmware | `spear-rf-code-legacy/dsp1610/rfpDsp/ripple.s` |
+| [R36] | DSP Ripple Firmware | `spear-rf-code-legacy/rfApp/src/dsp/rfpDsp/ripple.s,v` |
 | [R38] | RF Calibration Data | `llrf/calibrations/*.xlsx` |
 | [R39] | RF Document Index | `llrf/documentation/RfSystemDocumentIndexR3.xlsx` |
 
@@ -1429,7 +1438,7 @@ Data file: `b132R11PatchPanel.xlsx`. Documents physical signal routing in Buildi
 | $\omega_i$ | Integrator unity-gain frequency ($\approx 2\pi \times 30$ kHz) | rad/s | §5.2 |
 | $H_\text{cav}(s)$ | Cavity transfer function | — | Eq. 2.1a |
 | $\tau_d$ | Total loop delay | ns | Eq. 2.11 |
-| $f_c$ | Crossover frequency (where $|G_\text{OL}| = 1$) | kHz | Eq. 2.11 |
+| $f_c$ | Crossover frequency (where $\lvert G_\text{OL} \rvert = 1$) | kHz | Eq. 2.11 |
 | $T(s)$ | Closed-loop transfer function | — | Eq. 5.2 |
 | $Z_\text{eff}$ | Effective impedance with feedback | Ω | Eq. 5.3 |
 | $Z_\text{cav}$ | Cavity impedance without feedback | Ω | Eq. 2.1 |
@@ -1443,7 +1452,7 @@ Data file: `b132R11PatchPanel.xlsx`. Documents physical signal routing in Buildi
 | $z$ | Z-transform variable ($e^{j\omega T_s}$) | — | Eq. 5.4 |
 | $n$ | Samples per revolution ($= f_s/f_\text{rev}$) | — | Eq. 5.4 |
 | $G$ | Comb feed-forward gain | — | Eq. 5.4 |
-| $K$ | Comb feedback coefficient ($|K| < 1$) | — | Eq. 5.4 |
+| $K$ | Comb feedback coefficient ($\lvert K \rvert < 1$) | — | Eq. 5.4 |
 | $\nu_s$ | Synchrotron tune ($= f_s/f_\text{rev}$) | — | Eq. 5.4 |
 | $G_\text{peak}$ | Comb tooth peak gain ($= G/(1-K)$) | — | §6.2 |
 | $H_\text{eq}(z)$ | Group delay equalizer (32-tap FIR) | — | Eq. 6.2b |

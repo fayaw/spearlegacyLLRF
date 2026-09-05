@@ -1,22 +1,67 @@
 # SPEAR3 High Voltage Power Supply (HVPS) System — Complete Design Overview
 
 **Document ID:** HVPS-OVERVIEW-001  
-**Revision:** R1  
-**Date:** March 2026  
+**Revision:** R2  
+**Date:** September 2026  
 **Author:** Engineering Team (SSRL/SLAC)  
 **Classification:** System Design Reference — Complete HVPS Architecture
+
+> ## ⚠ Verification status — PARTIALLY VERIFIED, use with care
+>
+> Every section has been read line-by-line against the verified per-drawing notes in this directory. Two limits remain:
+>
+> - The Mermaid diagrams in §7–§8 and the board interconnection matrix have **not** been traced net-by-net against the drawings.
+> - A few component values (arc-detection R26/R33, monitor-board R33/R36) could not be confirmed on any drawing and are flagged in place.
+>
+> **Where this document disagrees with a per-drawing note in this directory, or with `Designs/tex/L_legacy_system_architecture.pdf`, those win.**
+
+### Revision history
+
+| Rev | Date | Change |
+|---|---|---|
+| R1 | 2025 | Initial draft, written from directory listings without reading the source drawings |
+| R2 | Sept 2026 | Line-by-line verification against all 14 per-drawing notes. Separated the HVPS filter (main oil tank) from the Grounding Tank, whose component values R1 had swapped (§3.3); output rating, transformer input current, SCR stack count and phase shift corrected (§2, §3); regulator test-point map, device designators, diode minimum-select architecture and inert current loop added (§4.4, §11.1); monitor-board buffer count and drawing titles corrected (§6.1) |
 
 ---
 
 ## Purpose and Scope
 
-This document provides a comprehensive technical overview of the SPEAR3 High Voltage Power Supply (HVPS) system based on analysis of all circuit schematics, technical notes, and system documentation. It serves as the master reference for understanding the complete HVPS design, from system-level architecture down to individual circuit boards.
+This document provides a comprehensive technical overview of the SPEAR3 High Voltage Power Supply (HVPS) system. It serves as the orientation reference for understanding the complete HVPS design, from system-level architecture down to individual circuit boards.
 
-**Key Sources:**
-- 10 detailed DOCX technical notes (extracted from PDF schematics)
-- Existing markdown analyses (SD-7307900101, SD-237-230-14)
-- System engineering documents (Designs/4_HVPS_Engineering_Technical_Note.md)
-- PPS interface documentation (Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md)
+### Authoritative sources
+
+Every drawing below was rendered to image and read directly in September 2026. **Prefer these over this overview for any specific value.**
+
+| Drawing | Content | Verified note |
+|---|---|---|
+| `../../wiringDiagrams/ei7307900000.pdf` | **EI-730-790-00-C0 / NWL #39308** — the transformer manufacturer's own schematic. Authoritative for transformer ratings (**2750 kVA, 12.5 kV at 127 A**), monitor windings, and all oil/pressure/vacuum/flow protection setpoints | [ei7307900000.md](ei7307900000.md) |
+| `../sd7307900101.pdf` | SD-730-790-01-C1 — HVPS system schematic, full power chain and DC stage taps | [sd7307900101.md](sd7307900101.md) |
+| `../sd7307900501.pdf` | SD-730-790-05-C1 — Grounding Tank | [sd7307900501.md](sd7307900501.md) |
+| `../sd2372301200.pdf` | SD-237-230-12-R0 — Enerpro FCOG6100 firing circuit (Enerpro E128) | [sd2372301299.md](sd2372301299.md) |
+| `../sd2372301401.pdf` | SD-237-230-14-C1 — voltage and current regulator board | [sd2372301401.md](sd2372301401.md) |
+| `../sd7307930304.pdf` | SD-730-793-03-C4 — 12 kV SCR driver board | [sd7307930304.md](sd7307930304.md) |
+| `../sd7307930402.pdf` | SD-730-793-04-C2 — SCR crowbar trigger board | [sd7307930402.md](sd7307930402.md) |
+| `../sd7307930702.pdf` | SD-730-793-07-C2 — right side trigger interconnect | [sd7307930702.md](sd7307930702.md) |
+| `../sd7307930801.pdf` | SD-730-793-08-C1 — left side trigger interconnect | [sd7307930801.md](sd7307930801.md) |
+| `../sd7307931203.pdf` | SD-730-793-12-C3 — PS monitor board | [sd7307931203.md](sd7307931203.md) |
+| `../sd7307931301.pdf` | SD-730-793-13-C1 — optical SCR trigger board | [sd7307931301.md](sd7307931301.md) |
+| `../sd7307940400.pdf` | SD-730-794-04-C0 — crowbar trigger board, 1999 generation | [sd7307940400.md](sd7307940400.md) |
+| `../../wiringDiagrams/wd7307940400.pdf` | WD-730-794-04-C0 — **contains the HVPS output voltage dividers** in its "TRANSFORMER TANK WD-730-792-01" section | — |
+| `../../wiringDiagrams/wd7307900206.pdf` | WD-730-790-02-C6 — master trigger enclosure wiring diagram | `pps/diagrams/04_wd7307900206_hoffman_box_wiring.md` |
+| `../../wiringDiagrams/wd7307900103.pdf` | WD-730-790-01-C3 — system interconnection wiring | `pps/diagrams/05_wd7307900103_interconnection_full.md` |
+
+### Original engineering documents
+
+| Document | Content |
+|---|---|
+| `../../procedures/spear3HvpsHazards.tex` | J. Sebek — stored energy, discharge time constants, transformer secondary voltages, klystron perveance |
+| `../../../architecture/designNotes/EnerproVoltageandCurrentRegulatorBoardNotes.docx` | J. Sebek — authoritative circuit analysis of the regulator board |
+| `../../../controls/enerpro/enerproBoardHvps.docx` | J. Sebek — installed Enerpro board revisions, serials, phase-reference wiring |
+| `../../plc/plcNotesR1.docx` | J. Sebek — PLC timing, the N7:10 digital low-pass filter |
+| `../../plc/CasselPLCCode.pdf` | Full ladder logic listing, program SSRLV6-4-05-10 |
+| `../../../architecture/originalDocuments/ps3413600102.pdf` | PS-341-360-01 — the written HVPS specification |
+| `../../../architecture/originalDocuments/slac-pub-7591.pdf` | Cassel & Nguyen, PAC 1997 — crowbar timing, regulation and ripple figures |
+| `../../../../pps/HoffmanBoxPPSWiring.docx` | J. Sebek — terminal-by-terminal PPS wiring trace, switchgear theory of operation |
 
 ---
 
@@ -40,10 +85,10 @@ This document provides a comprehensive technical overview of the SPEAR3 High Vol
 ## 1. Executive Summary
 
 ### 1.1 System Function
-The SPEAR3 HVPS converts 12.5KV 3-phase AC mains power into regulated -77KV DC at 27 amps (~2MW) to power a klystron tube that provides 476 MHz RF power to the SPEAR3 storage ring cavities.
+The SPEAR3 HVPS converts 12.5KV 3-phase AC mains power into regulated −90 kV DC rated at 27 A (2.5 MW), typically operated at ≈ −72 to −75 kV to power a klystron tube that provides ≈476.3 MHz RF power to the SPEAR3 storage ring cavities.
 
 ### 1.2 Key System Characteristics
-- **Power Level**: ~2MW (77KV × 27A)
+- **Power Level**: 2.5 MW rated (−90 kV × 27 A); typical operation ≈ 1.5 MW
 - **Architecture**: 12-pulse thyristor-controlled rectifier
 - **Regulation**: Precision voltage/current control via SCR phase angle
 - **Protection**: Multi-layer protection including crowbar, arc detection, and interlocks
@@ -54,10 +99,10 @@ The SPEAR3 HVPS converts 12.5KV 3-phase AC mains power into regulated -77KV DC a
 
 ```mermaid
 graph TD
-    A[12.5KV 3φ AC<br/>Facility Power] --> B[Phase Shifting<br/>Transformer<br/>30° Shift]
-    B --> C[12-Pulse SCR<br/>Rectifier<br/>6× 40KV 80A]
-    C --> D[HV Filter Network<br/>350µHY + 30NFD]
-    D --> E[-77KV DC @ 27A<br/>Klystron Load<br/>~2MW]
+    A[12.5KV 3φ AC<br/>Facility Power] --> B[Phase Shifting Transformer<br/>±15° (30° between sets)]
+    B --> C[12-Pulse SCR Rectifier<br/>2 bridges × 6 stacks<br/>stack rated 40 kV 80 A]
+    C --> D[HV Filter Network<br/>L 0.3 H · C 8 µF/stage]
+    D --> E[−90 kV max / −72…−75 kV typ<br/>Klystron Load<br/>2.5 MW rated]
     
     F[Control System<br/>SD-237-230-14] --> C
     G[Protection System<br/>Crowbar + Arc Det.] --> C
@@ -87,12 +132,12 @@ graph TD
 ```mermaid
 graph TB
     subgraph "Power Conversion Subsystem"
-        A1[12.5KV 3φ AC Input<br/>~160A]
-        A2[Phase Shifting Transformer<br/>30° Phase Offset]
-        A3[SCR Rectifier Set A<br/>3× 40KV 80A SCRs]
-        A4[SCR Rectifier Set B<br/>3× 40KV 80A SCRs]
-        A5[HV Filter Network<br/>L: 350µHY, C: 30NFD]
-        A6[-77KV DC Output<br/>27A to Klystron]
+        A1[12.5 kV 3φ AC Input<br/>127 A (2750 kVA)]
+        A2[Phase Shifting Transformer<br/>±15° (30° between sets)]
+        A3[SCR Rectifier Bridge B+<br/>6 stacks, 40 kV 80 A each]
+        A4[SCR Rectifier Bridge B−<br/>6 stacks, 40 kV 80 A each]
+        A5[HV Filter Network<br/>L: 0.3 H, C: 8 µF/stage]
+        A6[−90 kV max DC Output<br/>27 A rated to Klystron]
         
         A1 --> A2
         A2 --> A3
@@ -118,7 +163,7 @@ graph TB
     subgraph "Protection Subsystem"
         C1[Arc Detection<br/>Klystron + Transformer]
         C2[Crowbar Driver A<br/>SD-730-793-04<br/>MIC-4427 Optical]
-        C3[Crowbar Driver B<br/>SD-730-794-04<br/>IRFDP120 MOSFETs]
+        C3[Crowbar Driver B<br/>SD-730-794-04<br/>IXYTH12N90 MOSFETs]
         C4[Crowbar SCR<br/>40KV 80A<br/>Fast Protection]
         C5[PPS Interface<br/>Personnel Safety]
         
@@ -158,9 +203,9 @@ The HVPS consists of four major subsystems:
 #### A. Power Conversion Subsystem
 - **Input**: 12.5KV 3-phase AC from facility power
 - **Phase Shifting Transformer**: Provides 30° phase shift for 12-pulse operation
-- **SCR Rectifier**: Six thyristors (40KV 80A) in 12-pulse configuration
-- **Output Filter**: LC filter network (350µHY inductors, 30NFD capacitors)
-- **Output**: -77KV DC at 27A to klystron
+- **SCR Rectifier**: two 6-pulse bridges, six stacks each (stack rated 40 kV 80 A), in 12-pulse configuration
+- **Output Filter**: LC network in the main oil tank — **0.3 H inductors, 8 µF/stage capacitors** (§3.3)
+- **Output**: −90 kV DC rated at 27 A to klystron (typical ≈ −72 to −75 kV)
 
 #### B. Control and Regulation Subsystem
 - **Voltage/Current Regulator Board** (SD-237-230-14): Master control with precision op-amps
@@ -206,17 +251,17 @@ graph TD
     subgraph "12-Pulse Rectifier Architecture"
         A[12.5KV 3φ AC<br/>Primary Input] --> B[Phase Shifting<br/>Transformer]
         
-        B --> C[Secondary Set A<br/>0° Phase]
-        B --> D[Secondary Set B<br/>30° Phase Shift]
+        B --> C[Secondary Set A<br/>+15°]
+        B --> D[Secondary Set B<br/>−15°]
         
-        C --> E[6-Pulse Rectifier A<br/>SCR1, SCR3, SCR5]
-        D --> F[6-Pulse Rectifier B<br/>SCR2, SCR4, SCR6]
+        C --> E[6-Pulse Bridge B+<br/>6 stacks]
+        D --> F[6-Pulse Bridge B−<br/>6 stacks]
         
         E --> G[DC Output Combiner]
         F --> G
         
-        G --> H[HV Filter Network<br/>350µHY + 30NFD]
-        H --> I[-77KV DC Output<br/>720Hz Ripple]
+        G --> H[HV Filter Network<br/>L 0.3 H · C 8 µF/stage]
+        H --> I[−90 kV max DC Output<br/>720 Hz Ripple]
         
         subgraph "SCR Gate Control"
             J[Trigger Interconnect<br/>SD-730-793-07/08]
@@ -249,8 +294,8 @@ graph TD
 
 ### 3.2 SCR Rectifier System
 **Thyristor Specifications:**
-- **Rating**: 40KV 80A per device
-- **Configuration**: Six thyristors in 12-pulse arrangement
+- **Rating**: 40 kV 80 A **per stack** (SD-730-790-01-C1 reads "THYRISTOR CONTROLLED RECTIFIER 40KV 80A"). Each stack contains ~14 series Powerex T8K7 thyristors; ~168 devices total
+- **Configuration**: **two 6-pulse bridges** (B+ and B−), six stacks each, fed from the ±15° phase-shifted secondaries
 - **Control**: Phase-angle control for voltage regulation
 - **Firing**: Synchronized gate pulses from trigger system
 
@@ -260,19 +305,36 @@ graph TD
 - IXFH12N90 MOSFET gate drivers (900V, 12A)
 - 50µS ±5% gate pulse width with adjustable sub-pulses
 
-### 3.3 Output Filter System (SD-730-790-05)
-**Grounding Tank Components:**
-- **Filter Inductors**: L1, L2 (350µHY 40A each, series connected)
-- **Filter Capacitors**: C3, C5 (30NFD 37KV), C4 (10NFD 56KV)
-- **Current Sensing**: Danfysik DC-CT (positive output) + 15A/50MV shunt
-- **Voltage Sensing**: 25KV 100A voltage transducer
-- **Termination**: HVT-G (50Ω 90KV) for impedance matching
+### 3.3 Output Filter System
 
-**Filter Performance:**
-- LC filter network provides ripple reduction
-- Oil-filled tank for HV insulation
-- Dual current sensing for redundancy
-- Precision voltage measurement for regulation feedback
+> **Two physically separate assemblies.** The **HVPS filter** is inside the main oil tank (SD-730-790-01-C1); the **Grounding Tank** (SD-730-790-05-C1) is a separate tank near the klystron that terminates the HV cable. Their component values are completely different — do not interchange them.
+
+**HVPS filter — main oil tank, SD-730-790-01-C1**
+
+| Item | Value |
+|---|---|
+| Primary filter inductors L1, L2 | **0.3 H**, 85 A, 0.38 Ω, ≈1084 J each at rated current |
+| Filter capacitors | **8 µF, 30 kV per stage × 4 series stages** (2 µF net across the output); 8,788 J stored |
+| Filter resistors | **500 Ω, 1 kW**, in oil |
+| Filter rectifiers | 30 kV, 3 A average |
+
+**Grounding Tank — SD-730-790-05-C1** (see [`sd7307900501.md`](sd7307900501.md))
+
+| Item | Value |
+|---|---|
+| Cable termination inductors L1, L2 | **"350 UHY 40A"** — *these are the 350 µH parts; they are not the HVPS filter inductors* |
+| Diode across each inductor | **25 kV, 100 A** — *this is a diode, not a "voltage transducer"* |
+| Capacitor across each inductor | C3, C4 — **30 nF, 37 kV** |
+| Series pair to ground | C1, C2 — **10 nF, 56 kV** |
+| Series damping resistor | R1 — **50 Ω, 90 kV** |
+| Current sensing | Danfysik DC-CT; Pearson 110 CT at 10 A/V; **15 A / 50 mV shunt** (3.333 mΩ) |
+| Bushings | HVT-1 (POWER SUPPLY), HVT-2 (LOAD), HVT-G (PWR GRN) — *HVT-G is a ground-return bushing, not a 50 Ω termination* |
+
+**Filter performance**
+
+- The main-tank LC network provides the ripple reduction; measured ripple is **< 1% peak-to-peak and < 0.2% RMS above 60 kV**
+- Both tanks are oil-filled for HV insulation
+- The termination-tank inductors limit the rate of rise of cable discharge current into the klystron and force a current zero during a fault
 
 ---
 
@@ -332,7 +394,7 @@ graph TD
         C2 --> D1[SCR Rectifier<br/>Set A]
         C4 --> D2[SCR Rectifier<br/>Set B]
         
-        D1 --> D3[HV Output<br/>-77KV @ 27A]
+        D1 --> D3[HV Output<br/>−90 kV max @ 27 A]
         D2 --> D3
         
         D3 --> E1[Voltage/Current<br/>Sensing]
@@ -354,17 +416,36 @@ graph TD
 - **Isolation**: 6× 4N32 optocouplers for galvanic isolation
 - **Protection Logic**: CD4044B RS latches for trip conditions
 
-**Functional Circuits:**
-1. **Voltage Limit Amplifier**: INA117 (U13) with 4.99K input, 500pF compensation
-2. **Voltage Difference Amplifier**: INA117 (U11A) with precision 10.00K feedback
-3. **Current Limit Amplifier**: 4.99K/5K input network, MC34074 processing
-4. **Current Difference Amplifier**: INA114/INA117 for precision measurement
-5. **Over-Voltage Trip**: MC34074 comparator with CD4044B latch
-6. **Over-Current Trip**: MC34074 comparator with 1N4747 (20V) clamping
-7. **Manual Trip**: R32 (1K) input with CD4044B latch
-8. **Under-Voltage Lockout**: R47 (100K) + C11 time constant
-9. **SCR Phase-Control Output**: OP77 precision output with 1N4740 (10V) clamp
-10. **Soft-Start Logic**: MC34074 with C32 (10µF) + R49 (10K) timing
+**Functional Circuits** *(designators read from the drawing and J. Sebek's `EnerproVoltageandCurrentRegulatorBoardNotes.docx`)*:
+
+| # | Function | Device | Notes |
+|---|---|---|---|
+| 1 | Voltage difference amplifier | **U16 INA117** | Input from J1A/J1B "NEG. VOLTAGE SENSE" |
+| 2 | Voltage limit / error amplifier | **U13 OP77** | R31 10.00 K, R33 9.53 K, R37 4.99 K, C11 2 µF, C17 0.001 µF |
+| 3 | Isolated current preamp | **U9 INA114** | With DC1 NMA1215 isolated DC-DC |
+| 4 | Current difference amplifier | **U12 INA117** | — |
+| 5 | Current limit / error amplifier | **U17 OP77** | R58 10.00 K, R59 9.53 K, R65 4.99 K, C31 2 µF |
+| 6 | Over-voltage comparator | **U11A MC34074** | Threshold set by R38 5 K trimmer |
+| 7 | Over-current comparator | **U14A MC34074** | Threshold set by R43 5 K trimmer |
+| 8 | Trip latches | **U10A–U10D CD4044B** | Quad R/S three-state latches |
+| 9 | SCR phase-control output | **U18 OP77** → R69 7.50 K → J4C | Clamped by a **10 V Zener** |
+| 10 | Trip and soft-start | **U11D MC34074** | R28 10 K CW, R52 250 K, R53 100 K, C18 10 µF |
+| 11 | Auto reset | **U14B MC34074** | R51 300 K, C32 10 µF, jumper JP7 |
+| 12 | SCR gate under-voltage lockout | **U14D MC34074** | R47 4.3 K, D8 1N4747 20 V |
+
+> **Designators are easy to confuse on this board.** U13 is an **OP77**, U16 is the **INA117** difference amplifier, and U11A is an **MC34074** comparator.
+
+#### Control architecture — three points that are easy to miss
+
+**1. The two loops are combined by a diode minimum-select, not a summing junction.** The voltage and current chains feed a **non-linear diode junction with both anodes tied together**; the *lower* cathode voltage wins and becomes SIG-HI. A 15 V supply through 10 kΩ biases the conducting diode and a **10 V Zener** clamps the anode.
+
+**2. The AC current loop is saturated by design and never takes control.** Its reference at **J4-2 (IL1)** comes from the Enerpro board's own +5 V reference; against a typical current sense of ≈ 2.2 V DC the OP77 saturates at ≈ +14 V, above the 10 V clamp. **The HVPS is voltage-regulated only.**
+
+**3. The board senses AC *input* current, not HVPS *output* current.** Input phases are sensed by **300:5 CTs** (EI-730-790-00-C0), rectified, paralleled and terminated in a **0.5 Ω burden**. HVPS output current is measured separately by the Danfysik transducer in the termination tank.
+
+**Reference input**: the voltage setpoint arrives from **AB Slot-8 Output 0** at **J4-1 / J4-7**. The drawing labels that pin "POS. VOLTAGE LIMIT COMMAND", which is a **misnomer** — it is the reference input, not a limit.
+
+**Loop dynamics**: input low-pass τ = 0.01 s (corner 15.9 Hz); error amplifier zero at 7.96 Hz, poles at 0 Hz (pure integrator) and 15.9 kHz; **Type 1**, no steady-state error; integrator gain ≈ −5 × 10⁻³.
 
 **Configuration Options:**
 - **PEP II Mode**: R20 not used (gain=1), standard component values
@@ -398,8 +479,8 @@ graph TD
 **Left Side Board (SD-730-793-08):**
 - **Mirror Architecture**: Same IC complement as right-side board
 - **24V Fault/Enable Bus**: Connection to right-side board
-- **Commands Interface**: IDC20 connector for external control
-- **Monitoring**: 6-phase SCR monitoring with bypass capability
+- **Commands Interface**: **P1 IDC14** carries the COMMANDS bus between the two boards (+12 V PWR, 24 V FAULT/ENABLE, FO SCR ENABLE, CB ENABLE, SLAVE CB TRIG, PLC FORCE CB, SLAVE CB OFF). **E1 IDC20** carries the SCR TRIGGERS — *the two connectors are easily transposed*
+- **Monitoring**: M1 IDC14 bus — SCR ENABLE MON, CB TRIG MON, CB MONITOR, KLYS ARC MON, SCR MONITOR, KLYS CB MON
 
 ---
 
@@ -427,7 +508,7 @@ graph TD
         
         subgraph "System Level Protection"
             S1[Primary Crowbar<br/>SD-730-793-04] --> S2[40KV 80A<br/>Crowbar SCR]
-            S3[Secondary Crowbar<br/>SD-730-794-04] --> S4[3× IRFDP120<br/>MOSFETs]
+            S3[Secondary Crowbar<br/>SD-730-794-04] --> S4[IXYTH12N90 switches<br/>IRFD9120/IRFD110 drivers]
             
             S5[Arc Detection<br/>Klystron] --> S6[CD4538<br/>20mS Timer]
             S7[Arc Detection<br/>Transformer] --> S6
@@ -464,7 +545,7 @@ graph TD
             T4 --> T5[Fiber Optic<br/>Isolation]
             T5 --> T6[Crowbar SCR<br/>Gate Drive]
             
-            T7[Alternative Path<br/>IRFDP120] --> T8[Faster Response<br/><10µS]
+            T7[1999-generation board<br/>IXYTH12N90] --> T8[Same 60T:60T:60T<br/>pulse transformer]
         end
         
         H1 --> C1
@@ -494,21 +575,22 @@ graph TD
 - **Power**: +12V supply with IXFH12N90 MOSFETs
 
 **Secondary Crowbar (SD-730-794-04):**
-- **MOSFETs**: 3× IRFDP120 for faster switching
+- **Switches**: **Q1, Q2 IXYTH12N90**, driven by discrete complementary pairs **Q3/Q4 IRFD9120** (P-channel) and **Q5/Q6 IRFD110** (N-channel) — in place of the MIC-4451 driver ICs used on the 2002 board
 - **Power**: +15V supply (different from 793-series)
 - **EMI Filtering**: Ferrite beads (300Ω/500Ω) for noise rejection
 - **Timing**: CM14528 monostables with 200pF timing capacitors
 
 ### 5.2 Arc Detection System
 **Klystron Arc Detection:**
-- BNC input connectors on trigger interconnect boards
-- P3KE7 TVS diodes for transient protection
-- R26 (33K) + R33 (35K) signal conditioning
+- BNC input connectors on trigger interconnect boards — **J1 on the left-side board is labelled "KLYSTRON ARC TRIGGER"**
+- Input network read from SD-730-793-08-C1: **R1 510 Ω, D2 1.5KE7.5CA, D1 1.5KE12A, R4 51 Ω ½ W, C4 0.001 µF**
 - Integration with fault/enable logic
 
+> **Unverified**: values of "R26 (33K) + R33 (35K)" and a "P3KE7 TVS" are quoted for this circuit elsewhere in the repository but **could not be confirmed** on either trigger interconnect drawing. The transient protection devices read directly are **1.5KE7.5CA and 1.5KE12A**.
+
 **Transformer Arc Detection:**
-- Similar architecture to klystron arc detection
-- Separate BNC inputs for transformer monitoring
+- **J1 on the right-side board is labelled "TRANSFORMER ARC TRIGGER"**
+- Input network read from SD-730-793-07-C2: **R37 510 Ω, D9 1.5KE7.5CA, C30 0.001 µF, D8 1.5KE12A, R33 51 Ω ½ W**
 - Combined fault logic for coordinated protection
 
 ### 5.3 Multi-Layer Protection Architecture
@@ -525,12 +607,12 @@ graph TD
 graph TD
     subgraph "Monitoring & Interface Architecture"
         subgraph "HV Sensing (Grounding Tank SD-730-790-05)"
-            G1[HV Output<br/>-77KV @ 27A] --> G2[Voltage Divider<br/>25KV 100A<br/>Transducer]
+            G1[HV Output<br/>−90 kV max @ 27 A] --> G2[Voltage Divider<br/>5×20 MΩ + 2×1 MΩ∥<br/>≈10,000:1]
             G1 --> G3[Current Sensing<br/>Danfysik DC-CT<br/>Positive Output]
             G1 --> G4[Current Shunt<br/>15A/50MV<br/>Backup Sensing]
             
-            G5[Filter Inductors<br/>L1, L2 350µHY] --> G6[Series Connection<br/>700µHY Total]
-            G7[Filter Capacitors<br/>C3,C5 30NFD<br/>C4 10NFD] --> G8[Ripple Filtering<br/>720Hz]
+            G5[Termination Inductors<br/>350 µH 40 A] --> G6[Grounding Tank<br/>SD-730-790-05-C1]
+            G7[Term. Tank Caps<br/>C3,C4 30 nF 37 kV<br/>C1,C2 10 nF 56 kV] --> G8[Ripple Filtering<br/>720Hz]
             
             G2 --> G9[Voltage Signal<br/>to Monitor Board]
             G3 --> G10[Current Signal<br/>to Monitor Board]
@@ -551,7 +633,7 @@ graph TD
             
             subgraph "Domain 2 (GND2)"
                 M9[NMH2415S<br/>DC-DC Conv #2] --> M10[±15V2 Isolated<br/>1500V Isolation]
-                M10 --> M11[Precision Divider<br/>R33/R36<br/>511Ω/536Ω 1%]
+                M10 --> M11[Precision Divider<br/>INA117 front end<br/>R25 2k 12-turn trim]
                 M10 --> M12[Current Network<br/>R2 1K + R32 10K]
                 
                 M11 --> M13[BUF634<br/>Voltage Buffer]
@@ -613,10 +695,13 @@ graph TD
 - **DC-DC Converters**: 2× NMH2415S for 1500V isolation
 
 **Precision Monitoring:**
-- **Voltage Monitor**: 10kV/V scale, R33/R36 (511Ω/536Ω 1% precision)
-- **Current Monitor**: 5A/V scale, R2 (1K) + R32 (10K)
-- **Buffer Amplifiers**: 5× BUF634 unity-gain buffers
+- **Voltage Monitor**: 10 kV/V scale — BNC1 is labelled "+ Voltage 10 kV/V" on the drawing
+- **Current Monitor**: 5 A/V scale — BNC2 is labelled "+ Current 5A/V"
+
+> **Unverified**: scaling resistor values "R33/R36 (511Ω/536Ω 1%)" are quoted for this board elsewhere in the repository but **could not be confirmed** on the drawing. The values read directly were R26 9.09 k, R24 150 Ω, R13/R14/R15 100 Ω ½ W, R7/R8 1 k and the R25 2 k 12-turn trim pot.
+- **Buffer Amplifiers**: **4× BUF634** unity-gain buffers (U7, U8, U9, U10)
 - **Reference Calibration**: R25 (2K 12-turn trimmer)
+- **Input amplifiers**: U1, U3, U4, U5, U6 INA117; U2 AD841
 
 **Output Connectors:**
 - **BNC1**: Voltage output (10kV/V)
@@ -652,8 +737,8 @@ graph TD
 | **SD-730-793-07-C2** | Right Side Trigger Interconnect | 6-phase SCR control hub | 3× MIC-4427, CD4538 monitoring, fiber-optic I/O |
 | **SD-730-793-08-C1** | Left Side Trigger Interconnect | Mirror of right-side control | Same as 793-07, 24V fault/enable bus |
 | **SD-730-793-12-C3** | Monitor Board | Precision measurement | NMH2415S, BUF634, dual isolated domains |
-| **SD-730-793-13-C1** | HV Power Circuit Modification | Modified SCR driver variant | 6N-139 optocoupler, modified timing |
-| **SD-730-794-04-C0** | SCR Crowbar Trigger | Alternative crowbar design | IRFDP120 MOSFETs, ferrite filtering |
+| **SD-730-793-13-C1** | **Optical SCR Trigger Board** (M. Nguyen, 16-APR-03) | Fibre-fed SCR gate drive | 6N-139 optocoupler, CD4047B/CD4538 timing, IXFH12N90, 60T:60T:60T pulse transformer, P1 rails +240 V/+120 V |
+| **SD-730-794-04-C0** | SCR Crowbar Trigger Board, **1999 generation** (R. Cassel 11/08/99) | Earlier design, superseded by SD-730-793-04-C2 | +15 V logic, 6N-138 opto, **IXYTH12N90** switches with discrete IRFD9120/IRFD110 drivers, ferrite beads |
 
 ### 7.2 Board Interconnection Matrix
 
@@ -682,13 +767,13 @@ SD-730-793-04/SD-730-794-04 (Crowbar) ←→ Arc detection inputs
 graph TD
     subgraph "Complete HVPS Signal Flow Architecture"
         subgraph "Power Flow Path"
-            P1[12.5KV 3φ AC<br/>Facility Power<br/>~160A] --> P2[Phase Shifting<br/>Transformer<br/>30° Offset]
-            P2 --> P3[SCR Rectifier A<br/>3× 40KV 80A<br/>0° Phase]
-            P2 --> P4[SCR Rectifier B<br/>3× 40KV 80A<br/>30° Phase]
+            P1[12.5 kV 3φ AC<br/>Facility Power<br/>127 A] --> P2[Phase Shifting Transformer<br/>±15° (30° between sets)]
+            P2 --> P3[SCR Bridge B+<br/>6 stacks 40 kV 80 A<br/>+15°]
+            P2 --> P4[SCR Bridge B−<br/>6 stacks 40 kV 80 A<br/>−15°]
             P3 --> P5[DC Combiner<br/>12-Pulse Output]
             P4 --> P5
-            P5 --> P6[HV Filter Network<br/>Grounding Tank<br/>350µHY + 30NFD]
-            P6 --> P7[-77KV DC @ 27A<br/>Klystron Load<br/>~2MW Output]
+            P5 --> P6[HV Filter (main tank)<br/>L 0.3 H · C 8 µF/stage<br/>then Grounding Tank]
+            P6 --> P7[−90 kV max / −72…−75 kV typ<br/>Klystron Load<br/>2.5 MW rated Output]
         end
         
         subgraph "Control Signal Flow"
@@ -710,10 +795,10 @@ graph TD
         end
         
         subgraph "Feedback Signal Flow"
-            F1[HV Voltage Sensing<br/>25KV 100A<br/>Transducer] --> F2[Monitor Board<br/>SD-730-793-12<br/>Domain 2]
+            F1[HV Voltage Sensing<br/>5×20 MΩ + 2×1 MΩ∥<br/>≈10,000:1 divider] --> F2[Monitor Board<br/>SD-730-793-12<br/>Domain 2]
             F3[HV Current Sensing<br/>Danfysik DC-CT<br/>+ 15A/50MV Shunt] --> F2
             
-            F2 --> F4[Precision Scaling<br/>511Ω/536Ω 1%<br/>Voltage Divider]
+            F2 --> F4[Precision Scaling<br/>on PS Monitor Board<br/>SD-730-793-12-C3]
             F2 --> F5[Current Network<br/>1K + 10K<br/>Resistors]
             
             F4 --> F6[BUF634 Buffer<br/>Voltage Output<br/>10kV/V Scale]
@@ -792,7 +877,7 @@ graph TD
 #### Power Flow:
 ```
 12.5KV 3φ AC → Phase Shift Transformer → SCR Rectifiers → 
-HV Filter (Grounding Tank) → -77KV DC → Klystron
+HV Filter (main tank) → Grounding Tank → −90 kV max DC → Klystron
 ```
 
 #### Control Flow:
@@ -877,7 +962,8 @@ SCR Inhibit → System Shutdown
 
 #### Power MOSFETs:
 - **IXFH12N90**: N-channel power MOSFETs (900V, 12A) - primary switching
-- **IRFDP120**: N-channel power MOSFETs (lower voltage, faster) - crowbar applications
+- **IXYTH12N90**: N-channel power MOSFETs — main switches on the 1999-generation crowbar trigger board
+- **IRFD9120 / IRFD110**: complementary P/N-channel pair forming discrete gate drivers on the same board
 - **IRFD110**: N-channel MOSFETs (trigger switching)
 
 #### Thyristors:
@@ -904,9 +990,9 @@ SCR Inhibit → System Shutdown
 - **24.9K**: 5µS timing resistors
 
 #### Filter Components:
-- **350µHY**: High-current filter inductors
-- **30NFD 37KV**: High-voltage filter capacitors
-- **10NFD 56KV**: High-voltage filter capacitors
+- **350 µH 40 A**: cable termination inductors in the Grounding Tank (*not* the HVPS filter inductors, which are 0.3 H / 85 A)
+- **30 nF 37 kV**: capacitors across the termination inductors (Grounding Tank)
+- **10 nF 56 kV**: series capacitor pair to ground (Grounding Tank)
 - **Ferrite Beads**: 300Ω/500Ω EMI filtering
 
 #### Timing Capacitors:
@@ -920,25 +1006,27 @@ SCR Inhibit → System Shutdown
 ## 10. System Performance Characteristics
 
 ### 10.1 Power Specifications
-- **Input**: 12.5KV 3-phase AC, ~160A
-- **Output**: -77KV DC at 27A (2.08MW)
-- **Efficiency**: ~85-90% (estimated, including transformer losses)
-- **Power Factor**: >0.95 (12-pulse configuration)
-- **Harmonic Distortion**: <5% THD (12-pulse eliminates 5th/7th harmonics)
+- **Input**: 12.5 kV 3-phase AC, **127 A** at the 2750 kVA nameplate rating (EI-730-790-00-C0)
+- **Output**: −90 kV DC rated at 27 A (2.5 MW); typical ≈ −72 to −75 kV at 19–22 A
+- **Efficiency**: ~85–90% — *estimate, not measured*
+- **Power Factor**: >0.95 — *estimate for a 12-pulse converter, not measured*
+- **Harmonic Distortion**: <5% THD — *estimate; the 12-pulse configuration cancels the 5th and 7th harmonics, not measured*
 
 ### 10.2 Regulation Performance
-- **Voltage Regulation**: ±0.5% (load regulation)
-- **Current Regulation**: ±1% (current limit accuracy)
-- **Transient Response**: <10ms (load step response)
-- **Ripple**: <1% (720Hz ripple frequency)
+- **Voltage Regulation**: **< 0.1%** (Cassel & Nguyen, SLAC-PUB-7591)
+- **Current Regulation**: the AC current loop is **saturated by design and never takes control** — see §4.1. There is no active current regulation
+- **Transient Response**: governed by the PLC setpoint ramp, a digital single-pole filter with **τ = 0.759 s** (α = 0.1, T = 80 ms), plus the analog loop above
+- **Stability**: Type 1 system — no steady-state error between setpoint and readback
+- **Ripple**: **< 1% peak-to-peak and < 0.2% RMS above 60 kV**, at 720 Hz (SLAC-PUB-7591)
 - **Stability**: Long-term drift <0.1%/hour
 
 ### 10.3 Protection Response Times
-- **Crowbar Activation**: <10µS (hardware-based)
-- **SCR Inhibit**: <1µS (gate blocking)
-- **Arc Detection**: <100µS (fault recognition)
-- **Over-voltage Trip**: <1ms (comparator response)
-- **Over-current Trip**: <1ms (comparator response)
+- **Crowbar activation**: **≈ 10 µs** before the crowbar conducts (SLAC-PUB-7591). Energy to the klystron is then **< 5 J** with the crowbar, versus < 40 J without
+- **SCR gate inhibit**: gate drive removed immediately, but conduction continues to the next current zero; primary current is interrupted in **4–8 ms**
+- **Arc Detection**: fast — *specific figure not documented in any source; the "<100 µs" previously quoted is unverified*
+- **Over-voltage Trip**: comparator response, *unverified*
+- **Over-current Trip**: comparator response, *unverified*
+- **Primary current interruption**: **4–8 ms** (SLAC-PUB-7591) — this, not the gate-inhibit time, is what bounds fault energy
 
 ### 10.4 Control System Performance
 - **Phase Control Range**: 0-150° (SCR firing angle)
@@ -953,13 +1041,22 @@ SCR Inhibit → System Shutdown
 ### 11.1 Critical Test Points
 
 #### Regulator Board (SD-237-230-14):
-- **TP3**: +15V supply monitoring
-- **TP4**: Negative voltage monitoring
-- **TP6**: -15V supply monitoring
-- **TP8**: Manual trip monitoring
-- **TP9**: Power-on status
-- **TP10**: Ground reference
-- **TP12**: Trip output monitoring
+
+> **Authoritative test-point map**, from J. Sebek's `EnerproVoltageandCurrentRegulatorBoardNotes.docx`. Test-point lists that give TP3 = +15 V, TP6 = −15 V or TP9 = power-on do **not** match this board:
+
+| TP | Measures |
+|---|---|
+| **TP1** | Output of the current difference amplifier |
+| **TP2** | Output of the over-current comparator |
+| **TP4** | Inverted voltage difference of the negative voltage sense |
+| **TP5** | Output of the inverting error amplifier |
+| **TP8** | Output of the over-voltage comparator |
+| **TP9** | Inverted input of the voltage reference |
+| **TP10** | Over-voltage threshold setting |
+| **TP11** | Over-current threshold setting |
+| **TP12** | Inverted reference value generated by the Enerpro board |
+
+**TP10 and TP11 are the two most important test points on the board** — they read the over-voltage and over-current trip thresholds, and **neither as-set value is recorded anywhere in this repository**. The over-voltage pot spans 2 V to 12 V, i.e. **20 kV to 120 kV** of HVPS output. Measure both, publish the intended values, and confirm the boards are set to them.
 
 #### SCR Driver Boards (SD-730-793-03/04):
 - **TP1**: Trigger input verification
@@ -1016,6 +1113,9 @@ SCR Inhibit → System Shutdown
 ### 12.1 Component Obsolescence Assessment
 
 #### High Risk (Obsolete/Difficult to Source):
+- **VTL5C** (VR1, VR2 on the regulator board): **opto-coupled variable resistor — the single component that most constrains the upgrade.** Obsolete with no drop-in equivalent; resistance swings MΩ→kΩ in milliseconds but takes ≈ 150 ms to return. Identified in the PDR as forcing a regulator redesign
+- **MAD4030-B**: obsolete 4.5 W isolated DC-DC converter (formerly Astec, now Artesyn)
+- **1N3064**: signal diode, obsolete — Digi-Key recommends Vishay **1N4150**; Vishay lists **BAW27** as the direct replacement
 - **OP77**: Precision op-amp, consider modern equivalents (OPA177, AD797)
 - **INA117**: High-voltage instrumentation amp, consider INA149 or discrete design
 - **CD4047B**: CMOS multivibrator, still available but consider modern timing ICs
@@ -1077,32 +1177,40 @@ SCR Inhibit → System Shutdown
 
 ## Document Cross-Reference Index
 
-### Primary Technical Documents
-- **sd7307900101.docx**: HVPS System Overview Schematic
-- **sd7307900501.docx**: Grounding Tank Assembly
-- **sd2372301401.docx**: Enerpro Voltage/Current Regulator Board
-- **sd7307930304.docx**: SCR Driver Board
-- **sd7307930402.docx**: SCR Crowbar Driver Board
-- **sd7307930702.docx**: Right Side Trigger Interconnect Board
-- **sd7307930801.docx**: Left Side Trigger Interconnect Board
-- **sd7307931203.docx**: Monitor Board
-- **sd7307931301.docx**: HV Power Circuit Modification
-- **sd7307940400.docx**: SCR Crowbar Trigger Board
+### Per-drawing technical notes (all VERIFIED by direct reading)
 
-### Supporting Analysis Documents
-- **SD-7307900101_HVPS_System_Schematic_Analysis.md**: System-level analysis
-- **SD-237-230-14_Regulator_Board_Analysis.md**: Regulator board analysis
+| Note | Drawing | Content |
+|---|---|---|
+| [ei7307900000.md](ei7307900000.md) | EI-730-790-00-C0 / NWL #39308 | Transformer manufacturer's schematic — ratings, monitor windings, protection setpoints |
+| [sd7307900101.md](sd7307900101.md) | SD-730-790-01-C1 | HVPS system schematic |
+| [sd7307900501.md](sd7307900501.md) | SD-730-790-05-C1 | Grounding Tank |
+| [sd2372301299.md](sd2372301299.md) | SD-237-230-12-R0 | Enerpro FCOG6100 firing circuit (E128) |
+| [sd2372301401.md](sd2372301401.md) | SD-237-230-14-C1 | Voltage / current regulator board |
+| [sd7307930304.md](sd7307930304.md) | SD-730-793-03-C4 | 12 kV SCR driver board |
+| [sd7307930402.md](sd7307930402.md) | SD-730-793-04-C2 | SCR crowbar trigger board |
+| [sd7307930702.md](sd7307930702.md) | SD-730-793-07-C2 | Right side trigger interconnect |
+| [sd7307930801.md](sd7307930801.md) | SD-730-793-08-C1 | Left side trigger interconnect |
+| [sd7307931203.md](sd7307931203.md) | SD-730-793-12-C3 | PS monitor board |
+| [sd7307931301.md](sd7307931301.md) | SD-730-793-13-C1 | Optical SCR trigger board |
+| [sd7307940400.md](sd7307940400.md) | SD-730-794-04-C0 | Crowbar trigger board, 1999 generation |
 
-### System Engineering Documents
-- **Designs/4_HVPS_Engineering_Technical_Note.md**: Complete system engineering reference
-- **Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md**: PPS interface documentation
+### Removed documents
 
-### Original Schematic PDFs
-- **sd7307900101.pdf** through **sd7307940400.pdf**: Original scanned schematics
+- `SD-7307900101_HVPS_System_Schematic_Analysis.md` — **deleted**; duplicated `sd7307900101.md` and disagreed with it
+- `SD-237-230-14_Regulator_Board_Analysis.md` — **deleted**; duplicated `sd2372301401.md`
+
+### System engineering documents
+
+| Document | Content |
+|---|---|
+| [`../../../../Designs/tex/L_legacy_system_architecture.pdf`](../../../../Designs/tex/L_legacy_system_architecture.pdf) | **The consolidated legacy system reference.** Supersedes the older `Designs/4_HVPS_Engineering_Technical_Note.md` and `Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md`, both now in `Designs/obsolete/` |
+| [`../../switchgear/00_SYSTEM_OVERVIEW.md`](../../switchgear/00_SYSTEM_OVERVIEW.md) | Switchgear system overview |
+| [`../../plc/technical-notes/README.md`](../../plc/technical-notes/README.md) | PLC control system notes (verified clean) |
+| [`../../../../pps/diagrams/README.md`](../../../../pps/diagrams/README.md) | PPS system view and interconnection notes |
 
 ---
 
-**Document Status**: Complete system overview based on comprehensive schematic analysis  
-**Analysis Date**: March 2026  
-**Confidence Level**: High (based on detailed circuit analysis and cross-referencing)  
-**Next Review**: Recommended annual review for component availability and system performance
+**Document Status**: System overview; core power-chain and control content corrected against the source drawings, September 2026  
+**Last correction pass**: September 2026 (line-by-line)  
+**Confidence**: High for §1–§6 and §9–§12 where cross-referenced to a verified per-drawing note; **medium** for the Mermaid diagrams and the interconnection matrix in §7–§8, which have not been individually traced against the drawings  
+**Next Review**: after the field-verification items in `../../../../Designs/tex/L_legacy_system_architecture.pdf` §20.2 are closed

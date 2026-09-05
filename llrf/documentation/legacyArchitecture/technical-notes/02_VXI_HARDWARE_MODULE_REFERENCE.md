@@ -73,7 +73,7 @@ The RFP module is the **heart of the LLRF system**. It contains:
 - DSP interface for ripple loop
 - Built-in history buffer (circular buffer, freeze on fault)
 
-**Source Code Interface PVs** (from `rf_dac_loop_pvs.h`, `rf_calib.st`):
+**Source Code Interface PVs** (from `rf_dac_loop_pvs.h,v`, `rf_calib.st,v`):
 ```
 {STN}:RFP:TUNESTPT:I     — Tune mode I setpoint (Octal DAC)
 {STN}:RFP:TUNESTPT:Q     — Tune mode Q setpoint (Octal DAC)
@@ -145,7 +145,7 @@ Two identical comb filter modules, one for each IQ component:
 
 **Why not used in SPEAR3**: SPEAR3 is a single RF station without LFB integration. Gap voltage control is handled by the DAC control loop in the VxWorks IOC software.
 
-**Source Code Interface**: Referenced in `rf_dac_loop_pvs.h` as `gvf_module_sevr` for module health monitoring (code present but module not connected in SPEAR3).
+**Source Code Interface**: Referenced in `rf_dac_loop_pvs.h,v` as `gvf_module_sevr` for module health monitoring (code present but module not connected in SPEAR3).
 
 ### 2.5 CLK/RF Distribution Module
 
@@ -157,7 +157,7 @@ Two identical comb filter modules, one for each IQ component:
 
 ### 2.6 ARC/Interlock Detector Module (AIM)
 
-From `rf_states.st` and `rf_msgs.st`:
+From `rf_states.st,v` and `rf_msgs.st,v`:
 
 **Functions**:
 - Beam abort force/reset interface
@@ -169,7 +169,7 @@ From `rf_states.st` and `rf_msgs.st`:
 **Fault file capability** (from Corredoura):
 > "In the event of a fault, fast history buffers throughout the system write selected rf signals to disk files which can be viewed later to help diagnose problems."
 
-Fault file types (13 channels, from `rf_states.st`):
+Fault file types (13 channels, from `rf_states.st,v`):
 ```
 /dat/FAULTRfpSI_    — RFP station I-channel history
 /dat/FAULTRfpSQ_    — RFP station Q-channel history
@@ -446,7 +446,7 @@ When SCR triggers are disabled, stored energy in the filter inductors (L ≈ spe
 | Parameter | Value | Source |
 |-----------|-------|--------|
 | Input voltage | 12.47 kV RMS, 3-phase | SLAC-PUB-7591 |
-| Phase-shifting transformer | 3.5 MVA, extended delta, ±15° | SLAC-PUB-7591 |
+| Phase-shifting transformer | **2750 kVA**, 12.5 kV at 127 A RMS, extended delta, ±15° | **NWL schematic EI-730-790-00-C0 (NWL #39308)** — the manufacturer's nameplate, resolved September 2026. Supersedes PS-341-360-01 §1.5 "350 kVA", SD-730-790-01-C1 "3000 kVA" and Sebek's 3.5 MVA estimate |
 | Rectifier transformers | 2 × 1.5 MVA, open-wye primary | HVPS ETN §2.2 |
 | Maximum output voltage | −90 kVDC | HVPS ETN §1.2 |
 | Maximum output current | 27 A | HVPS ETN §1.2 |
@@ -458,7 +458,7 @@ When SCR triggers are disabled, stored energy in the filter inductors (L ≈ spe
 | Crowbar stacks | 4 × 6 thyristors, fiber-optic triggered | HVPS ETN §2.7 |
 | Output voltage dividers | 2 × 100 MΩ (5 × 20MΩ + 2×10kΩ parallel) | HVPS ETN §2.8 |
 | Divider scale factor | 9.1 V at −91 kV | HVPS ETN §2.8 |
-| Number of HVPSs | 2 (SPEAR1 active, SPEAR2 warm spare) | HVPS ETN §1.2 |
+| Number of HVPSs | 2 (SPEAR1 and SPEAR2; one energized, the other fully off; swapped at the April and August downs) | HVPS ETN §1.2 |
 
 ### 7A.2 Legacy Controller — SLC-500 PLC Slot Configuration
 
@@ -563,7 +563,7 @@ From the Enerpro discussion call (July 7, 2022, with Saul Rivera and David Princ
 
 From `pps/HoffmanBoxPPSWiring.docx` (detailed analysis by J. Sebek):
 
-**PPS connector**: Burndy GOB12-88PNE (now Souriau Trim Trio) — 8-pin circular
+**PPS connector**: Burndy GOB1208PNE (now Souriau Trim Trio) — 8-pin circular
 
 | Pin Pair | Function | Type |
 |----------|----------|------|

@@ -1,0 +1,233 @@
+% ============================================================================
+%  SPEAR3 RF System documentation -- shared preamble
+%  Engine: LuaLaTeX.  Build with build.ps1 (latexmk -lualatex).
+% ============================================================================
+
+\usepackage[letterpaper,top=1in,bottom=1in,left=1.05in,right=1.05in]{geometry}
+
+% --- fonts -----------------------------------------------------------------
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}
+\setsansfont{TeX Gyre Heros}
+\setmonofont{Consolas}[Scale=0.86]
+
+% --- Unicode safety --------------------------------------------------------
+% LuaLaTeX DROPS unmapped glyphs SILENTLY -- an unmapped U+03BC turns "8 uF"
+% into "8 F".  Every non-ASCII character used in these documents is mapped
+% here.  The build script fails if the log reports "Missing character".
+\usepackage{newunicodechar}
+\newunicodechar{μ}{\ensuremath{\mu}}      \newunicodechar{µ}{\ensuremath{\mu}}
+\newunicodechar{Ω}{\ensuremath{\Omega}}   \newunicodechar{≈}{\ensuremath{\approx}}
+\newunicodechar{≥}{\ensuremath{\geq}}     \newunicodechar{≤}{\ensuremath{\leq}}
+\newunicodechar{≠}{\ensuremath{\neq}}     \newunicodechar{×}{\ensuremath{\times}}
+\newunicodechar{÷}{\ensuremath{\div}}     \newunicodechar{±}{\ensuremath{\pm}}
+\newunicodechar{−}{\ensuremath{-}}        \newunicodechar{√}{\ensuremath{\sqrt{}}}
+\newunicodechar{α}{\ensuremath{\alpha}}   \newunicodechar{β}{\ensuremath{\beta}}
+\newunicodechar{φ}{\ensuremath{\varphi}}  \newunicodechar{ω}{\ensuremath{\omega}}
+\newunicodechar{Δ}{\ensuremath{\Delta}}   \newunicodechar{τ}{\ensuremath{\tau}}
+\newunicodechar{θ}{\ensuremath{\theta}}   \newunicodechar{λ}{\ensuremath{\lambda}}
+\newunicodechar{π}{\ensuremath{\pi}}      \newunicodechar{σ}{\ensuremath{\sigma}}
+\newunicodechar{₀}{\ensuremath{_0}}       \newunicodechar{₁}{\ensuremath{_1}}
+\newunicodechar{₂}{\ensuremath{_2}}       \newunicodechar{²}{\ensuremath{^2}}
+\newunicodechar{³}{\ensuremath{^3}}       \newunicodechar{⁴}{\ensuremath{^4}}
+\newunicodechar{⁻}{\ensuremath{^-}}       \newunicodechar{⁺}{\ensuremath{^+}}
+\newunicodechar{→}{\ensuremath{\rightarrow}}
+\newunicodechar{←}{\ensuremath{\leftarrow}}
+\newunicodechar{↔}{\ensuremath{\leftrightarrow}}
+\newunicodechar{⇒}{\ensuremath{\Rightarrow}}
+\newunicodechar{⊕}{\ensuremath{\oplus}}   \newunicodechar{∥}{\ensuremath{\parallel}}
+\newunicodechar{°}{\ensuremath{^\circ}}   \newunicodechar{·}{\ensuremath{\cdot}}
+\newunicodechar{≪}{\ensuremath{\ll}}      \newunicodechar{≫}{\ensuremath{\gg}}
+\newunicodechar{✓}{\checkmark}            \newunicodechar{⚠}{\textbf{!}}
+\newunicodechar{–}{--}                    \newunicodechar{—}{---}
+
+% --- maths and units -------------------------------------------------------
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\DeclareSIUnit\voltampere{VA}
+\DeclareSIUnit\VAR{var}
+\sisetup{per-mode=symbol,range-phrase={ to },range-units=single,
+         group-minimum-digits=4,detect-weight=true}
+
+% --- tables ----------------------------------------------------------------
+\usepackage{longtable,booktabs,array,tabularx,multirow}
+\usepackage{ragged2e}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\renewcommand{\arraystretch}{1.18}
+% left-aligned, hyphenating paragraph column used by every wide table
+\newcolumntype{P}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+
+% --- graphics and figures --------------------------------------------------
+\usepackage{graphicx}
+\graphicspath{{figures/}{figures/photos/}{figures/generated/}}
+\usepackage{float}
+\usepackage[font=small,labelfont=bf,width=0.92\linewidth]{caption}
+\usepackage{comment}
+
+% A figure must not drift out of the section it belongs to.  With 47 floats
+% LaTeX will otherwise push them pages away from the text that discusses them.
+\usepackage[section]{placeins}
+
+% Default float parameters are tuned for papers with two or three figures.
+% This document is figure-dense, so allow more of a page to be float and more
+% floats per page; without this, figures queue up and drift several pages.
+\renewcommand{\topfraction}{0.88}
+\renewcommand{\bottomfraction}{0.70}
+\renewcommand{\textfraction}{0.10}
+\renewcommand{\floatpagefraction}{0.72}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{5}
+
+% Image size policy.  Photographs are capped in BOTH width and height so that
+% no figure can ever exceed roughly half a page, whatever its aspect ratio.
+\newlength{\photomaxh}\setlength{\photomaxh}{0.34\textheight} % ~1/3 page
+\newlength{\widemaxh} \setlength{\widemaxh}{0.46\textheight}  % ~1/2 page
+
+% \photofig{file}{caption}{label}      -- default, about 1/3 page
+\newcommand{\photofig}[3]{%
+  \begin{figure}[htbp]\centering
+    \includegraphics[width=0.62\linewidth,height=\photomaxh,keepaspectratio]{#1}%
+    \caption{#2}\label{#3}
+  \end{figure}}
+% \widefig{file}{caption}{label}       -- for detailed schematics, about 1/2 page
+\newcommand{\widefig}[3]{%
+  \begin{figure}[htbp]\centering
+    \includegraphics[width=0.94\linewidth,height=\widemaxh,keepaspectratio]{#1}%
+    \caption{#2}\label{#3}
+  \end{figure}}
+% \smallfig{file}{caption}{label}      -- for low-resolution sources
+\newcommand{\smallfig}[3]{%
+  \begin{figure}[htbp]\centering
+    \includegraphics[width=0.44\linewidth,height=0.26\textheight,keepaspectratio]{#1}%
+    \caption{#2}\label{#3}
+  \end{figure}}
+% \tallfig{file}{caption}{label}       -- portrait-orientation photographs.
+% A tall photo capped at \photomaxh comes out only ~45 mm wide, so these are
+% capped by height instead and allowed a narrower column.
+\newcommand{\tallfig}[3]{%
+  \begin{figure}[tbp]\centering
+    \includegraphics[width=0.46\linewidth,height=0.50\textheight,keepaspectratio]{#1}%
+    \caption{#2}\label{#3}
+  \end{figure}}
+% two portrait photographs side by side under one caption:
+% \tallpairfig{fileA}{subA}{labA}{fileB}{subB}{labB}{caption}{label}
+\newcommand{\tallpairfig}[8]{%
+  \begin{figure}[tbp]\centering
+    \begin{minipage}[b]{0.46\linewidth}\centering
+      \includegraphics[width=\linewidth,height=0.40\textheight,keepaspectratio]{#1}%
+      \subcaption{#2}\label{#3}
+    \end{minipage}\hfill
+    \begin{minipage}[b]{0.46\linewidth}\centering
+      \includegraphics[width=\linewidth,height=0.40\textheight,keepaspectratio]{#4}%
+      \subcaption{#5}\label{#6}
+    \end{minipage}
+    \caption{#7}\label{#8}
+  \end{figure}}
+% two photographs side by side, each about 1/4 page
+\newcommand{\pairfig}[6]{%
+  \begin{figure}[htbp]\centering
+    \begin{minipage}[t]{0.48\linewidth}\centering
+      \includegraphics[width=\linewidth,height=0.26\textheight,keepaspectratio]{#1}%
+      \subcaption{#2}\label{#3}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.48\linewidth}\centering
+      \includegraphics[width=\linewidth,height=0.26\textheight,keepaspectratio]{#4}%
+      \subcaption{#5}\label{#6}
+    \end{minipage}
+  \end{figure}}
+\usepackage{subcaption}
+
+% --- diagrams --------------------------------------------------------------
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc,shapes.geometric,
+                shapes.misc,chains,decorations.pathreplacing,patterns,matrix}
+\usepackage{pgfplots}\pgfplotsset{compat=1.18}
+\usepackage{rotating}                  % sidewaysfigure, if a portrait page is wanted
+\usepackage{pdflscape}                 % landscape: rotates the PAGE in the PDF
+\usepackage[export]{adjustbox}         % max width= / max height= on a box
+
+% Shrink a diagram to the text width only if it would otherwise overflow, so
+% figures drawn at their natural scale are never enlarged or needlessly shrunk.
+\newsavebox{\fitbox}
+\newenvironment{fitpicture}
+  {\begin{lrbox}{\fitbox}}
+  {\end{lrbox}%
+   \ifdim\wd\fitbox>\linewidth
+     \resizebox{\linewidth}{!}{\usebox{\fitbox}}%
+   \else
+     \usebox{\fitbox}%
+   \fi}
+
+% House diagram style.  Keep every block diagram in these styles so the
+% document reads as one drawing set rather than a scrapbook.
+\definecolor{cCtrl}{HTML}{1F4E79}   % control / EPICS
+\definecolor{cPlc} {HTML}{7F6000}   % PLC / interlock
+\definecolor{cPwr} {HTML}{843C0C}   % high power
+\definecolor{cRf}  {HTML}{2E6B34}   % RF signal path
+\definecolor{cNeut}{HTML}{3B3B3B}
+\tikzset{
+  blk/.style   ={draw=cNeut,fill=white,rounded corners=1.6pt,align=center,
+                 inner sep=4pt,font=\scriptsize,minimum height=8mm},
+  ctrl/.style  ={blk,draw=cCtrl,fill=cCtrl!7,text=cCtrl!85!black},
+  plc/.style   ={blk,draw=cPlc, fill=cPlc!8, text=cPlc!80!black},
+  pwr/.style   ={blk,draw=cPwr, fill=cPwr!7, text=cPwr!85!black},
+  rf/.style    ={blk,draw=cRf,  fill=cRf!7,  text=cRf!80!black},
+  grp/.style   ={draw=black!35,dashed,rounded corners=3pt,inner sep=7pt},
+  lbl/.style   ={font=\scriptsize\itshape,text=black!62},
+  sig/.style   ={-{Stealth[length=2.2mm]},draw=cNeut,thick},
+  fib/.style   ={sig,densely dashed},
+  bus/.style   ={draw=cNeut,line width=1.1pt},
+  tag/.style   ={font=\tiny,inner sep=1.4pt,fill=white,text=black!70},
+}
+% consistent caption for a TikZ figure
+\newcommand{\diagcap}[2]{\caption{#1}\label{#2}}
+
+% --- lists, misc -----------------------------------------------------------
+\usepackage{enumitem}
+\setlist{nosep,leftmargin=1.35em}
+\providecommand{\tightlist}{%   emitted by pandoc for compact lists
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage[table]{xcolor}
+\usepackage{soul}
+\usepackage{microtype}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{needspace}
+
+% --- callout box for warnings / key findings -------------------------------
+\usepackage[most]{tcolorbox}
+\newtcolorbox{keynote}[1][]{colback=black!3,colframe=black!45,boxrule=0.4pt,
+  arc=1.5pt,left=5pt,right=5pt,top=4pt,bottom=4pt,fontupper=\small,#1}
+\newtcolorbox{warnbox}[1][]{colback=cPwr!5,colframe=cPwr!70,boxrule=0.7pt,
+  arc=1.5pt,left=5pt,right=5pt,top=4pt,bottom=4pt,fontupper=\small,#1}
+
+% --- cross references and links --------------------------------------------
+\usepackage[hyphens]{url}
+\usepackage[hidelinks,pdfusetitle,bookmarksnumbered]{hyperref}
+\usepackage[capitalise,nameinlink]{cleveref}
+\crefname{section}{\S}{\S\S}
+\Crefname{section}{Section}{Sections}
+
+% Repository paths are long and unhyphenatable; allow breaks after / and .
+% Long file paths and CamelCase document names have no natural break points, so
+% url's default break set is not enough: allow a break before any capital and
+% after the usual separators.
+\newcommand{\fpath}[1]{{\ttfamily\small\Urlmuskip=0mu plus 1mu\relax
+  \def\UrlBreaks{\do\/\do\.\do\-\do\_\do\:\do\A\do\B\do\C\do\D\do\E\do\F\do\G
+    \do\H\do\I\do\J\do\K\do\L\do\M\do\N\do\O\do\P\do\Q\do\R\do\S\do\T\do\U
+    \do\V\do\W\do\X\do\Y\do\Z}%
+  \urlstyle{tt}\nolinkurl{#1}}}
+\setlength{\emergencystretch}{2em}
+
+% --- headers ---------------------------------------------------------------
+\pagestyle{fancy}\fancyhf{}
+\renewcommand{\headrulewidth}{0.3pt}
+\fancyhead[L]{\footnotesize\nouppercase{\rightmark}}
+\fancyhead[R]{\footnotesize\thepage\ / \pageref{LastPage}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\quad #1}}
+\fancypagestyle{plain}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}%
+  \fancyfoot[C]{\footnotesize\thepage}}
+
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{3}

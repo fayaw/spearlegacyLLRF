@@ -1,0 +1,39 @@
+% !TeX root = ../L_legacy_system_architecture.tex
+% HVPS voltage regulation: the PLC supplies BOTH a feedforward estimate of
+% SIG HI and the reference for the analog error amplifier; the Enerpro SIG HI
+% input is the sum of the two.  It is a summing arrangement, not a cascade.
+% Every connection is orthogonal; the feedforward runs along the top, the
+% error path comes up from the regulator, and the feedback returns underneath.
+\begin{tikzpicture}[font=\scriptsize,x=1mm,y=1mm,every node/.style={outer sep=0pt}]
+\tikzset{sum/.style={draw=cNeut,circle,inner sep=0pt,minimum size=5.5mm,font=\small}}
+
+\node[ctrl,text width=26mm,anchor=west] (eps) at (8,0)   {\textbf{EPICS setpoint}};
+\node[plc,text width=26mm,anchor=west]  (plc) at (8,-20)  {\textbf{SLC-500 PLC}};
+\draw[sig] (eps.south) -- node[right,tag]{Remote I/O} (plc.north);
+
+\node[sum]                              (sum) at (112,-20) {$+$};
+\node[pwr,text width=34mm,anchor=west]  (ener) at (128,-20)
+  {\textbf{Enerpro SIG HI}\\ $\rightarrow$ SCR firing angle};
+
+% feedforward straight along the top
+\draw[sig] (plc.east) -- (sum.west);
+\draw[sig] (sum.east) -- (ener.west);
+\node[tag,anchor=south] at (72,-18.2) {PLC feedforward (N7:11, approximate SIG HI)};
+
+% reference down and across into the regulator
+\node[blk,text width=34mm,anchor=north] (reg) at (72,-44)
+  {\textbf{Analog regulator}\\ PC-237-230\\ (SD-237-230-14-C1)};
+\draw[sig] (plc.south) |- (reg.west);
+\node[tag,anchor=south west] at (22,-42.5) {N7:10 reference};
+
+% error up from the regulator into the summing junction
+\draw[sig] (reg.north) -- ++(0,6) -| (sum.south);
+\node[tag,anchor=south east] at (110,-32.5) {error};
+
+% feedback: HVPS output through the divider back into the regulator
+\node[blk,text width=42mm,anchor=north] (div) at (72,-76)
+  {HVPS output voltage\\ via the $\approx 10\,000{:}1$ divider};
+\draw[sig] (div.north) -- (reg.south);
+\draw[sig] (ener.south) |- (div.east);
+\node[tag,rotate=90,anchor=south] at (143.5,-58) {HVPS output};
+\end{tikzpicture}

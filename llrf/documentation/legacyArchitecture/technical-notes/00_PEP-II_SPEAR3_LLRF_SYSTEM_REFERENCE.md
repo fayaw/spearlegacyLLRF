@@ -54,7 +54,7 @@ In 2003, SPEAR (Stanford Positron Electron Asymmetric Ring) was upgraded to **SP
 
 | Parameter | SPEAR2 (original) | SPEAR3 (PEP-II heritage) |
 |-----------|-------------------|--------------------------|
-| RF Frequency | 358.54 MHz | 476.315 MHz |
+| RF Frequency | 358.54 MHz | ~476.3 MHz |
 | Harmonic Number | 280 | 372 |
 | Cavities | 1 × 5-cell aluminum | 4 × single-cell copper (PEP-II type) |
 | Klystron | PEP-I type, ~200 kW | 1.2 MW (PEP-II type) |
@@ -94,21 +94,24 @@ As of 2026, the SPEAR3 LLRF system is undergoing a comprehensive upgrade (docume
 
 ### 1.4 System Operating Parameters (SPEAR3)
 
+> **The RF frequency is not a fixed constant** — it is retuned by tens of kHz as the ring circumference drifts with tunnel temperature. Use ~476.3 MHz as the nominal. Recorded values: **476.3051755 MHz** measured (`PEPII_LLRF_FBK_Loops_Description.md`), and **476.309 MHz** as the value the VXI clock module was designed to (Dusatko, *SPEAR3 LLRF System Description* v1.2, Table 1). Beware the widely quoted pairing of f_RF = 476.315 MHz with f_rev = 1.2808 MHz: 1.2808 MHz × 372 = 476.46 MHz, which is not self-consistent. The correct fiducial rate is **1.28040 MHz**.
+
 | Parameter | Symbol | Value | Notes |
 |-----------|--------|-------|-------|
-| RF Frequency | f_RF | 476.315 MHz | Harmonic 372 of revolution frequency |
-| Revolution Frequency | f_rev | 1.2808 MHz | C = 234.137 m |
+| RF Frequency | f_RF | ~476.3 MHz | Harmonic 372 of revolution frequency; drifts with ring circumference |
+| Revolution Frequency | f_rev | ~1.2804 MHz | = f_RF / 372 |
+| Ring Circumference | C | ~234.14 m | Dusatko Table 1 gives 234.126 m as the clock design value |
 | Beam Energy | E | 3.0 GeV | |
 | Design Beam Current | I_b | 500 mA | Top-off mode |
 | Bunch Spacing | | 2.1 ns | 476 MHz RF period |
 | Fill Pattern | | 276 bunches in 4 groups + 1 camshaft | |
 | Number of Cavities | | 4 | Single-cell, HOM-damped copper |
-| Cavity Shunt Impedance | R_s | 3.9 MΩ | Per cavity |
-| Cavity Unloaded Q | Q_0 | 33,500 | |
+| Cavity Shunt Impedance | R_s | 3.73 MΩ (linac convention) | Per cavity, Schwarz PS-340-330-51. McIntosh quotes 3.8 MΩ in the **accelerator** convention (= 7.5 MΩ linac). |
+| Cavity Unloaded Q | Q_0 | 32,000 | Schwarz PS-340-330-51. |
 | Cavity Loaded Q | Q_L | 6,700 | β = 4.0 |
 | Gap Voltage per Cavity | V_gap | 800 kV | Design operating point, now operating at 712kV |
 | Total Accelerating Voltage | V_total | 3.2 MV | Sum of 4 cavities (2.5 MV for now) |
-| Klystron Power | P_kly | 1.2 MW max | operating at 74 kV cathode voltage |
+| Klystron Power | P_kly | 1.2 MW max | PEP-II design figure. **The klystron installed at SPEAR3 is a Marconi unit rated 1.5 MW**, which is what the HVPS and RF system were sized for. PEP-II klystrons came from several sources (some SLAC-built, some Marconi); 1.2 MW is the figure quoted throughout the PEP-II literature |
 | Klystron Type | | SLAC design | 476 MHz CW |
 | IF Frequency (LLRF) | f_IF | 4.9 MHz | 476 - 471.1 MHz LO |
 | LO Frequency | f_LO | 471.1 MHz | |
@@ -409,7 +412,7 @@ f_BW(comb span) >> f_BW(direct) >> f_BW(ripple) >> f_BW(HVPS) ~ f_BW(tuner) >> f
 - Phase margin: Must be carefully set to avoid instability
 - Complication: Loss of cavity probe signal causes immediate saturation
 
-**Source Code**: Direct loop ON/OFF is controlled by `rf_states.st` variable `direct_loop`; the `rf_dac_loop.st` adjusts DAC setpoints differently depending on direct loop state.
+**Source Code**: Direct loop ON/OFF is controlled by `rf_states.st,v` variable `direct_loop`; the `rf_dac_loop.st,v` adjusts DAC setpoints differently depending on direct loop state.
 
 ### 3.2 Comb (Narrowband) RF Feedback Loop — ⚠️ PEP-II ONLY
 
@@ -432,10 +435,10 @@ f_BW(comb span) >> f_BW(direct) >> f_BW(ripple) >> f_BW(HVPS) ~ f_BW(tuner) >> f
 
 **Key Parameters**:
 - Comb filter bandwidth per tooth: Configurable
-- Revolution harmonic spacing: 1.2808 MHz (SPEAR3) / 136.3 kHz (PEP-II)
+- Revolution harmonic spacing: ~1.2804 MHz (SPEAR3) / 136.3 kHz (PEP-II)
 - Implementation: Dedicated VXI Comb Filter modules (I and Q separate)
 
-**Source Code**: Comb loop amplitude/phase are PV-controlled; `rf_calib.st` handles comb filter calibration.
+**Source Code**: Comb loop amplitude/phase are PV-controlled; `rf_calib.st,v` handles comb filter calibration.
 
 ### 3.3 Ripple Loop
 
@@ -445,7 +448,7 @@ f_BW(comb span) >> f_BW(direct) >> f_BW(ripple) >> f_BW(HVPS) ~ f_BW(tuner) >> f
 
 **Key Challenge** (from Corredoura 2000): "An analog integrator in the direct RF feedback loop cancels the ripple but simulations show it will cause instability as beam currents reach 2A."
 
-**Source Code**: `rf_dac_loop.st` contains `ripple_loop_ampl` PV and `ripple_loop_load` processing.
+**Source Code**: `rf_dac_loop.st,v` contains `ripple_loop_ampl` PV and `ripple_loop_load` processing.
 
 ### 3.4 Tuner Loop
 
@@ -453,13 +456,13 @@ f_BW(comb span) >> f_BW(direct) >> f_BW(ripple) >> f_BW(HVPS) ~ f_BW(tuner) >> f
 
 **Implementation**: EPICS-based slow loop controlling stepper motors on each cavity's mechanical tuner. The tuner position is adjusted based on the phase angle between the forward power and cavity voltage.
 
-**Source Code**: `rf_tuner_loop.st` — per-cavity instances via `CAV` macro.
+**Source Code**: `rf_tuner_loop.st,v` — per-cavity instances via `CAV` macro.
 
 ### 3.5 HVPS Voltage Regulation Loop
 
 **Purpose**: Regulate klystron cathode voltage to maintain drive power or gap voltage at setpoint. During "processing" mode, carefully ramps voltage while monitoring cavity vacuum.
 
-**Source Code**: `rf_hvps_loop.st` — states: init, off, proc, on.
+**Source Code**: `rf_hvps_loop.st,v` — states: init, off, proc, on.
 
 ### 3.6 Gap Voltage Feed-Forward (GVF) — ⚠️ PEP-II ONLY
 

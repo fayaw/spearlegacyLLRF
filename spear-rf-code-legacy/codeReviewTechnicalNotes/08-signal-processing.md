@@ -52,7 +52,7 @@ The signal processing layer consists of two C source files containing pure-math 
 | `subIQphaseErr` | 566 | A=measured, B=setpoint | error | `measured − setpoint` (with ±180° wrap) |
 | `subIQphase2posn` | 586 | A=phase, B=gain, C=offs | position | `phase × gain + offset` |
 | `subIQdac` | 620 | A=ampl, B=phase, C=mode | DAC counts | I/Q matrix DAC calculation |
-| ✦ `subIQcounts` | 653 | A=gain(0–1), B=actual(kV/W), C=desired(kV/W), D=conv_factor, E=deadband, F=max_delta, G=min_threshold, H=loop_gain | delta counts | Proportional controller: `VAL = A × (C−B) × D×(1+H)`. Only applied when B>G and |error|>E. Clamped to ±F. Outputs K=error, L=adjusted conversion factor. |
+| ✦ `subIQcounts` | 653 | A=gain(0–1), B=actual(kV/W), C=desired(kV/W), D=conv_factor, E=deadband, F=max_delta, G=min_threshold, H=loop_gain | delta counts | Proportional controller: `VAL = A × (C−B) × D×(1+H)`. Only applied when B>G and \|error\|>E. Clamped to ±F. Outputs K=error, L=adjusted conversion factor. |
 | `subIQcorrected` | 698 | A=raw_I, B=raw_Q, corrections | corrected I,Q | Directivity correction matrix application |
 | `subIQscaled` | 731 | A=raw_I(counts), B=raw_Q(counts), I=conv_loss_factor | scaled V | `J = A×IQ2VOLTS×I`, `K = B×IQ2VOLTS×I`. Returns ERROR if data not ready or overflowed. |
 | `subIQgetInit` | 769 | record fields | OK | One-time init for IQ data acquisition |

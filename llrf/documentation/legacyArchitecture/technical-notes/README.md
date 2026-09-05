@@ -48,7 +48,7 @@ Located in: `llrf/documentation/`, `llrf/architecture/`, `hvps/architecture/desi
 Content: Interface Chassis specification, fiber optic analysis, waveform buffer design, HVPS trigger architecture, arc detection, operational procedures, tuner mechanics, component selection, document index
 
 ### Legacy Source Code (6 SNL programs + 11 header files)
-Located in: `llrf/legacyLLRF/`
+Located in: `spear-rf-code-legacy/rfApp/src/seq/`
 Total: 7,112 lines of SNL code (.st files) + 1,111 lines in supporting headers (.h files) = 8,223 lines
 
 ### Physical Design Report

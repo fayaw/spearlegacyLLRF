@@ -23,7 +23,7 @@ The SPEAR3 HVPS Personnel Protection System (PPS) is undergoing a comprehensive 
 ```mermaid
 graph TB
     subgraph EXT_LEGACY["External Systems (Current)"]
-        PPS_CHASSIS["PPS Interface Chassis<br/>(Personnel Protection System)<br/>GOB12-88PNE Connector"]
+        PPS_CHASSIS["PPS Interface Chassis<br/>(Personnel Protection System)<br/>GOB1208PNE Connector"]
         GRID["12.47 kV Utility Power"]
         KLYSTRON["Klystron Load"]
     end
@@ -65,7 +65,7 @@ graph TB
 
     %% Legacy PPS Chain 2: Ross Ground Switch
     PLC_LEGACY -->|"Slot-2 IO8 OUT3<br/>120 VAC<br/>(Rung 0016)<br/>⚠️ PLC DEPENDENCY"| TS6_LEGACY
-    TS6_LEGACY -->|"Belding 83709<br/>9C #16 Teflon"| ROSS_SW_LEGACY
+    TS6_LEGACY -->|"Belden 83709<br/>9C #16 Teflon"| ROSS_SW_LEGACY
     ROSS_SW_LEGACY -->|"NC Aux Contact<br/>PPS Readback C-D"| TS6_LEGACY
     TS6_LEGACY -->|"Readback"| PPS_CHASSIS
 
@@ -198,24 +198,24 @@ graph TB
 flowchart LR
     subgraph LEGACY_CHAIN1["Legacy Chain 1: HV Contactor"]
         direction TB
-        PPS1_LEG["PPS 1 Enable<br/>GOB12-88PNE Pin E→F"] --> PLC_LEG["⚠️ SLC-500 PLC<br/>Slot-6 IB16 Input 14"]
+        PPS1_LEG["PPS 1 Enable<br/>GOB1208PNE Pin E→F"] --> PLC_LEG["⚠️ SLC-500 PLC<br/>Slot-6 IB16 Input 14"]
         PLC_LEG --> RUNG_LEG["PLC Rung 0017<br/>⚠️ Through PLC Logic"]
         RUNG_LEG --> K4_LEG["K4 Relay Coil<br/>(PPS Control)"]
         K4_LEG --> MX_LEG["MX Relay"]
         MX_LEG --> L1_LEG["L1 Holding Coil"]
 
         S5_LEG["S5 NC Aux Contact"] --> TS5_LEG["TS-5 Pins 15,14<br/>⚠️ EXPOSED WIRING"]
-        TS5_LEG --> PPS_AB_LEG["GOB12-88PNE<br/>Readback Pins A-B"]
+        TS5_LEG --> PPS_AB_LEG["GOB1208PNE<br/>Readback Pins A-B"]
     end
 
     subgraph LEGACY_CHAIN2["Legacy Chain 2: Ross Grounding Switch"]
         direction TB
-        PPS2_LEG["PPS 2 Enable<br/>GOB12-88PNE Pin G→H"] --> PLC2_LEG["⚠️ SLC-500 PLC<br/>Slot-6 IB16 Input 15"]
+        PPS2_LEG["PPS 2 Enable<br/>GOB1208PNE Pin G→H"] --> PLC2_LEG["⚠️ SLC-500 PLC<br/>Slot-6 IB16 Input 15"]
         PLC2_LEG --> RUNG2_LEG["PLC Rung 0016<br/>⚠️ PLC DEPENDENCY"]
         RUNG2_LEG --> ROSS_LEG["Ross Grounding<br/>Switch Coil<br/>⚠️ 120VAC via PLC"]
 
         ROSS_AUX_LEG["Ross Switch NC Aux"] --> TS6_LEG["TS-6 Pins 11,12<br/>⚠️ EXPOSED WIRING"]
-        TS6_LEG --> PPS_CD_LEG["GOB12-88PNE<br/>Readback Pins C-D"]
+        TS6_LEG --> PPS_CD_LEG["GOB1208PNE<br/>Readback Pins C-D"]
     end
 ```
 

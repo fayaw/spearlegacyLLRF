@@ -1,0 +1,12 @@
+% Report the natural size of a TikZ figure, so the adjustbox caps in body.tex
+% can be set from measurement rather than estimate.
+%   lualatex -interaction=nonstopmode "\def\FIG{fig-system-overview}\input{figsize}"
+\documentclass[letterpaper,11pt]{article}
+\input{preamble}
+\newsavebox{\measbox}
+\begin{document}
+\savebox{\measbox}{\input{tikz/\FIG}}
+\typeout{==== \FIG: width=\the\wd\measbox, height=\the\ht\measbox, depth=\the\dp\measbox}
+\typeout{==== textwidth=\the\textwidth, textheight=\the\textheight}
+\thispagestyle{empty}\null
+\end{document}

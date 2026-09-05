@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-This comprehensive technical summary synthesizes the complete HVPS documentation ecosystem, integrating design notes with detailed technical analyses from across the system. The SPEAR3 HVPS is a sophisticated 2MW power conversion system that converts 12.47 kVAC three-phase mains power into regulated -77 kVDC at 27A to power klystron RF amplifiers for the SPEAR3 storage ring.
+This comprehensive technical summary synthesizes the complete HVPS documentation ecosystem, integrating design notes with detailed technical analyses from across the system. The SPEAR3 HVPS is a 2.5 MW-rated power conversion system that converts 12.47 kV AC three-phase mains power into regulated negative HV DC — **rated −90 kV at 27 A, typically operated at ≈ −72 to −75 kV** — to power the klystron RF amplifier for the SPEAR3 storage ring. (−77 kV is an intermediate DC stage tap on SD-730-790-01-C1, not the output.)
 
 ### Key System Characteristics
 - **Power Level**: ~2MW (77 kV × 27A)
@@ -34,10 +34,9 @@ This comprehensive technical summary synthesizes the complete HVPS documentation
 12. [LLRF Upgrade Scope](#12-llrf-upgrade-scope)
 13. [Testing & Commissioning Notes](#13-testing--commissioning-notes)
 14. [EPICS PVs and Diagnostic Panels](#14-epics-pvs-and-diagnostic-panels)
-15. [System Integration and Signal Flow](#15-system-integration-and-signal-flow)
-16. [Known Documentation Errors](#16-known-documentation-errors)
-17. [Component Obsolescence Notes](#17-component-obsolescence-notes)
-18. [Source Document Cross-Reference](#18-source-document-cross-reference)
+15. [Known Documentation Errors](#15-known-documentation-errors)
+16. [Component Obsolescence Notes](#16-component-obsolescence-notes)
+17. [Source Document Cross-Reference](#17-source-document-cross-reference)
 
 ---
 
@@ -71,7 +70,7 @@ This comprehensive technical summary synthesizes the complete HVPS documentation
                     │  │ Fiber Optic     │    │ 12-Pulse        │◄───│ Phase Reference │             │
                     │  │ Interface       │    │ Thyristor       │    │ Adapter Board   │             │
                     │  │                 │    │ Bridges         │    │                 │             │
-                    │  │ • SCR Enable    │    │                 │    │ • 3×2MΩ Resistors│             │
+                    │  │ • SCR Enable    │    │                 │    │ • 200kΩ R37-R39  │             │
                     │  │ • Crowbar       │    │ • Bridge X      │    │ • J7 Interface  │             │
                     │  │ • Status        │    │ • Bridge Y      │    │ • Phase Shift   │             │
                     │  └─────────────────┘    │ • 30° Shift     │    │   Generation    │             │
@@ -143,7 +142,7 @@ Mains Power    │ Vacuum Contactor│     │ Transformers    │     │ Thyri
                │ PPS Interlocks  │     │ Phase Reference │     │ Filter Network  │
                │                 │     │ Monitoring      │     │                 │
                │ • K4/RR/MX      │     │                 │     │ • L-C Filter    │
-               │ • Permits       │     │ • 3×2MΩ Load    │     │ • Ripple <0.5%  │
+               │ • Permits       │     │ • 500Ω source       │     │ • Ripple <0.5%  │
                │ • Lockout       │     │ • Voltage Sense │     │ • Energy Storage│
                └─────────────────┘     └─────────────────┘     └─────────────────┘
 ```
@@ -281,14 +280,14 @@ The board processes two analog feedback signals through parallel chains:
 
 Both chains feed into an OP77 inverting error amplifier with integrator compensation. The two error amplifier outputs are combined through a **non-linear diode summing junction** — the lower of the two voltages (whichever limit is more constraining) determines the control voltage sent to the Enerpro board.
 
-### 2.4 Voltage Reference Input
+### 4.4 Voltage Reference Input
 
 - Source: AB Slot-8, Output 0 (EL1), connected to J4-1/J4-7.
 - The reference voltage enters the INA117 negative input, producing a negative output.
 - After trim and fixed resistor, this becomes one input to the OP77 error amplifier summing junction.
 - **Test point:** TP9 monitors the inverted voltage reference.
 
-### 2.5 High Voltage Readback
+### 4.5 High Voltage Readback
 
 - Inputs from voltage dividers (drawing WD-730-792-01 section of WD-730-794-04): five series resistors followed by two parallel resistors per divider.
 - The input circuit forms a low-pass filter with the on-board load resistor and capacitor.
@@ -296,7 +295,7 @@ Both chains feed into an OP77 inverting error amplifier with integrator compensa
 - **Test point:** TP4 monitors the inverted voltage difference.
 - The DC transfer function from HVPS output to difference amplifier output produces the scale factor used for readback.
 
-### 2.6 Error Amplifier
+### 4.6 Error Amplifier
 
 The error amplifier (OP77) operates as an inverting integrator:
 - Inputs: voltage reference current and HV readback current via matched resistors to the summing junction.
@@ -305,7 +304,7 @@ The error amplifier (OP77) operates as an inverting integrator:
 - Two VTL5C variable resistors controlled by the interlock system can reduce the feedback impedance (effectively reducing integrator gain) during fault conditions.
 - **Test point:** TP5 monitors the error amplifier output.
 
-### 2.7 Current Sensing Path
+### 4.7 Current Sensing Path
 
 - AC line current sensed by current transformers on phases A and C, with a burden resistor generating a proportional voltage.
 - Input low-pass filter, then INA114 (negative unity gain), then INA117 (inversion).
@@ -313,7 +312,7 @@ The error amplifier (OP77) operates as an inverting integrator:
 - Under normal conditions, the current error amplifier saturates because the current is well below the limit — the voltage loop controls the Enerpro.
 - **Test points:** TP1 (current readback), TP12 (current reference), TP11 (overcurrent threshold), TP2 (comparator output).
 
-### 2.8 Enerpro SIG HI Control
+### 4.8 Enerpro SIG HI Control
 
 The final control voltage to the Enerpro is a resistive combination of:
 - **Regulator board output** (through 7.5 kΩ) — the voltage error amplifier output after buffer.
@@ -323,7 +322,7 @@ The Thevenin equivalent determines the SIG HI input to the Enerpro, which operat
 
 - **Test point:** TP7 monitors the buffered regulator contribution to SIG HI.
 
-### 2.9 Interlocks on the Regulator Board
+### 4.9 Interlocks on the Regulator Board
 
 The board implements five interlock inputs:
 
@@ -342,7 +341,7 @@ When any interlock trips, three actions occur:
 
 - **Test point:** TP6 monitors the comparator output that disables the error amplifiers.
 
-### 2.10 Enerpro Board Revisions
+### 4.10 Enerpro Board Revisions
 
 | Location | FCOG6100 Rev | FCOG6100 S/N | FCOAUX60 Rev | FCOAUX60 S/N |
 |---|---|---|---|---|
@@ -425,11 +424,11 @@ Three fiber optic links connect the LLRF control system to the HVPS controller:
 
 All three signals are **active-high** (presence of light = permit/OK), so a fiber break fails safely.
 
-### 3.2 Enerpro Trigger Distribution
+### 6.2 Enerpro Trigger Distribution
 
 The Enerpro FCOG6100 generates a picket fence of thyristor trigger pulses via a voltage-controlled oscillator (nominal frequency with average inter-pulse time). These pulses are routed through two interconnect boards to 12 SCR driver boards (one per thyristor phase).
 
-### 3.3 Right Side Trigger Interconnect Board (SD-730-793-07-C2)
+### 6.3 Right Side Trigger Interconnect Board (SD-730-793-07-C2)
 
 Controls thyristor triggers for one extended-delta transformer primary. Phase B+/B− triggers are **always enabled** (OFF tied to common) to allow filter inductor discharge. The remaining four phases are controlled by logic gates U9A and U9B.
 
@@ -446,7 +445,7 @@ The board also generates two signals on the **Commands bus**:
 - FO SCR Enable (active low) — pass-through of the fiber optic signal
 - Slave Crowbar Trigger — goes high on transformer arc or PLC force crowbar
 
-### 3.4 Left Side Trigger Interconnect Board (SD-730-793-08-C1)
+### 6.4 Left Side Trigger Interconnect Board (SD-730-793-08-C1)
 
 Complementary to the right side board. Same B-phase always-enabled design. Additional unique functions:
 
@@ -463,11 +462,11 @@ Complementary to the right side board. Same B-phase always-enabled design. Addit
 | Fiber optic Klystron Crowbar | LLRF system | Active = fire crowbar + disable |
 | Klystron Arc signal | BNC input | Active = fire crowbar + disable |
 
-### 3.5 SCR Driver Board (SD-730-793-03-C4)
+### 6.5 SCR Driver Board (SD-730-793-03-C4)
 
 Each driver board receives the Enerpro trigger pulse (TRIG, pin 5 of ribbon cable) and the OFF control (pin 7). The trigger pulse drives monostable U1B, which generates a timed pulse train for the thyristor gate. If OFF is high or open, CLR on U1B is held low, disabling all trigger generation.
 
-### 3.6 Status Fiber Optic Output
+### 6.6 Status Fiber Optic Output
 
 The left side trigger interconnect board generates the fiber optic status signal. The status light is **ON** (healthy) only when:
 1. Control supply voltage is present, AND
@@ -475,7 +474,7 @@ The left side trigger interconnect board generates the fiber optic status signal
 
 Loss of either condition extinguishes the status signal, informing the LLRF that the HVPS has faulted.
 
-### 3.7 Commands Bus Signals
+### 6.7 Commands Bus Signals
 
 | Pin | Signal | Source |
 |---|---|---|
@@ -493,22 +492,22 @@ Loss of either condition extinguishes the status signal, informing the LLRF that
 
 *Source: `HoffmanBoxPPSWiring.docx`*
 
-### 4.1 PPS Input Connector
+### 7.1 PPS Input Connector
 
-The PPS system enters the Hoffman box through a **Burndy GOB12-88PNE** 8-pin circular connector, likely from a locked PPS box mounted on the HVPS controller. Signals are distributed to terminal strips, LED indicators, and PLC inputs.
+The PPS system enters the Hoffman box through a **Burndy GOB1208PNE** 8-pin circular connector, likely from a locked PPS box mounted on the HVPS controller. Signals are distributed to terminal strips, LED indicators, and PLC inputs.
 
 Key terminal strips in the Hoffman box:
 - **TS-5**: Contactor Controls — interfaces to the Ross Engineering vacuum contactor via a trunk cable to TB2 in the HVPS.
 - **TS-6**: Ground Tank connections — DC current sense, ground relay, oil level, and auxiliary status.
 - **TS-8**: Permit signals and local panel connections.
 
-### 4.2 Vacuum Contactor Control
+### 7.2 Vacuum Contactor Control
 
 The Ross Engineering vacuum contactor uses a two-coil architecture:
 - **L2 (Close coil)**: High-power coil to initially close the contactor. Requires K1 relay energized, which requires MX relay energized.
 - **L1 (Hold coil)**: Low-power coil to maintain the closed position. Requires MX energized and TX (auxiliary trip) de-energized.
 
-### 4.3 PPS Relay Control — Corrected Understanding
+### 7.3 PPS Relay Control — Corrected Understanding
 
 **Critical finding:** The labels on drawing WD-730-794-02-C0 are **swapped**.
 
@@ -525,14 +524,14 @@ The Ross Engineering vacuum contactor uses a two-coil architecture:
   - 24 VDC "ON" control from BB to BB1 (to MX relay via 86L lockout relay)
 - De-energizing K4 removes all permits and disables the controller, requiring a startup delay to rebuild stored energy in the controller capacitors.
 
-### 4.4 MX Relay Operation
+### 7.4 MX Relay Operation
 
 The MX relay energizes the vacuum contactor when K4 is energized, the 86L lockout relay is clear, and the "ON" command is given. MX controls:
 - Contactor open indication (via S4 auxiliary contact)
 - Hold coil L1 path (through TX NC contacts)
 - Controller coil switching (removes close circuit power, enabling hold circuit)
 
-### 4.5 Grounding Tank PPS
+### 7.5 Grounding Tank PPS
 
 Documented via TS-6 in the Hoffman Box and WD-730-794-06-C0. Connections include:
 - **Danfysik DC current transducer**: ±15 VDC supply, current output, and status signals
@@ -547,7 +546,7 @@ Documented via TS-6 in the Hoffman Box and WD-730-794-06-C0. Connections include
 
 *Source: `HoffmanBoxPowerDistribution.docx`*
 
-### 5.1 Power Supply Inventory
+### 8.1 Power Supply Inventory
 
 | Supply | Voltage | Rating | Application | Status |
 |---|---|---|---|---|
@@ -559,7 +558,7 @@ Documented via TS-6 in the Hoffman Box and WD-730-794-06-C0. Connections include
 | AB-1747-P1 | 24 VDC | C5 | Slot 7 1746-IV16 VDC input | Active |
 | Enerpro/MAD4030 | ±15 VDC | Regulator card | On-board DC-DC from 30 VDC | **Obsolete** |
 
-### 5.2 Lambda LND-X-152 Configuration Issue
+### 8.2 Lambda LND-X-152 Configuration Issue
 
 This obsolete supply is configured unconventionally:
 - Two independent floating outputs with commons tied together.
@@ -568,7 +567,7 @@ This obsolete supply is configured unconventionally:
 - This means the current limit applies to the **sum** of both supply currents.
 - **Recommendation:** Replace with separate +12 VDC and +24 VDC supplies.
 
-### 5.3 Monitor Board Power
+### 8.3 Monitor Board Power
 
 - Uses regulated ±15 VDC from the SOLA supply.
 - The 30 VDC is dropped by two 3.3 V Zener diodes (1N4728) to ~23.4 VDC.
@@ -578,14 +577,14 @@ This obsolete supply is configured unconventionally:
 - Output ripple: 70 mV p-p typical (150 mV p-p max). Better alternative: Traco TIM 2-2423 (50 mV p-p).
 - DIP package NMH2415DC is being discontinued; SIP package NMH2415SC still available.
 
-### 5.4 Regulator Card Power Budget
+### 8.4 Regulator Card Power Budget
 
 - On-board MAD4030 DC-DC converter creates ±15 VDC from the 30 VDC Enerpro control voltage.
 - Rated at 4.5 W (150 mA per rail).
 - Major current consumers: two BUF634 buffers (up to 250 mA each if driving low impedance).
 - Estimated budget: ~200 mA for buffer outputs + ~50 mA for signal opamps.
 
-### 5.5 Open Questions from Power Distribution Analysis
+### 8.5 Open Questions from Power Distribution Analysis
 
 - Are TS-1 (E5) fuses oversized at 10 A?
 - TS-2 pin 1 shows 26 V — should this be 24 V?
@@ -675,7 +674,7 @@ This obsolete supply is configured unconventionally:
 
 *Source: `interfacesBetweenRFSystemControllers.docx`*
 
-### 6.1 Interface Architecture
+### 10.1 Interface Architecture
 
 SPEAR3 is upgrading three key RF subsystem controllers:
 1. **LLRF controller** — Dimtel LLRF9 commercial system (amplitude/phase control of cavity RF fields)
@@ -684,7 +683,7 @@ SPEAR3 is upgrading three key RF subsystem controllers:
 
 The high-power elements (klystron, HVPS hardware, cavities) remain unchanged. An **interface chassis** is being designed to interconnect all subsystems.
 
-### 6.2 Interface Chassis Design
+### 10.2 Interface Chassis Design
 
 **Input Permits** (all active-high for fail-safe):
 
@@ -708,7 +707,7 @@ The high-power elements (klystron, HVPS hardware, cavities) remain unchanged. An
 **Output Status:**
 - Status signals to RF MPS showing all input inhibit states and three output permit states (24 VDC logic).
 
-### 6.3 General Design Principles
+### 10.3 General Design Principles
 
 - All permits are **active high** — a cable break fails safely.
 - All inputs are **optically isolated** using Broadcom/Avago HCPL-2400-000E optocouplers (response time in microseconds).
@@ -719,18 +718,18 @@ The high-power elements (klystron, HVPS hardware, cavities) remain unchanged. An
 
 ---
 
-## 7. RF System Machine Protection Requirements
+## 11. RF System Machine Protection Requirements
 
 *Source: `RFSystemMPSRequirements.docx`*
 
-### 7.1 Protection Philosophy
+### 11.1 Protection Philosophy
 
 Each RF subsystem must be protected from high-power faults (DC or RF). The general approach:
 1. Eliminate stored energy in the faulting component.
 2. Disable upstream power sources.
 3. Notify downstream elements to shut down gracefully.
 
-### 7.2 HVPS Protection
+### 11.2 HVPS Protection
 
 **Primary threat:** Internal faults (transformer arcs, overcurrent).
 
@@ -750,7 +749,7 @@ Each RF subsystem must be protected from high-power faults (DC or RF). The gener
 
 **Upstream disable:** Opening the 12.47 kV vacuum contactor (controlled by PPS and PLC).
 
-### 7.3 Klystron Protection
+### 11.3 Klystron Protection
 
 **Fast faults:**
 - Klystron arcs and waveguide arcs: HVPS crowbar fired immediately via fiber optic and electronic paths.
@@ -761,14 +760,14 @@ Each RF subsystem must be protected from high-power faults (DC or RF). The gener
 - Focus coil L/R time constant should be measured to determine response time budget.
 - PLC extinguishes both fiber optic signals (SCR enable and crowbar).
 
-### 7.4 Cavity Protection
+### 11.4 Cavity Protection
 
 - Main danger: arcing at cavity windows.
 - LLRF senses over-voltage and excessive reflected power.
 - LLRF redundantly removes drive power.
 - LLRF removes permit from PLC; PLC extinguishes HVPS fiber optic signals.
 
-### 7.5 Filter Inductor Discharge Detail
+### 11.5 Filter Inductor Discharge Detail
 
 When triggers for phases A and C are inhibited on the driver boards:
 - Pin P2-7 is driven high.
@@ -778,21 +777,21 @@ When triggers for phases A and C are inhibited on the driver boards:
 
 ---
 
-## 8. LLRF Upgrade Scope
+## 12. LLRF Upgrade Scope
 
 *Source: `LLRFUpgradeTaskListRev0.docx`*
 
-### 8.1 LLRF Controls
+### 12.1 LLRF Controls
 
 - Purchased: **Dimtel LLRF9** system — 4 units (2 operational + 2 spares).
 - Interface with rest of system: one input permit (from MPS/PPS chain) and one output permit (LLRF fault status).
 
-### 8.2 MPS System Upgrade
+### 12.2 MPS System Upgrade
 
 - Legacy PLC-5 (1771 hardware) → **ControlLogix 1756** using Rockwell Automation conversion kit.
 - Hardware assembled, software written — needs testing with actual hardware.
 
-### 8.3 Interface Chassis
+### 12.3 Interface Chassis
 
 A new chassis to connect MPS to the rest of the RF system and SPEAR3:
 
@@ -809,7 +808,7 @@ A new chassis to connect MPS to the rest of the RF system and SPEAR3:
 - HVPS crowbar inhibit (fiber optic)
 - Status to RF MPS
 
-### 8.4 HVPS Controller Upgrade Scope
+### 12.4 HVPS Controller Upgrade Scope
 
 The HVPS controller upgrade includes:
 - PLC migration (SLC-500 → ControlLogix)
@@ -819,11 +818,11 @@ The HVPS controller upgrade includes:
 
 ---
 
-## 9. Testing & Commissioning Notes
+## 13. Testing & Commissioning Notes
 
 *Sources: `hoffmanTestingNotes.docx`, `regulatorEnerproTestingNotes.docx`*
 
-### 9.1 Enerpro Testing Procedures
+### 13.1 Enerpro Testing Procedures
 
 Key test points and verification items for the Enerpro board:
 - **TP1**: Response of input phase references
@@ -836,7 +835,7 @@ Phase references enter on J5 pins 1, 3, 5, sourced from 120 VAC instrument trans
 
 **Open question:** Can the FCOG1200 (12-pulse) board work with only the three phases already available, or are all six phases from the open-star transformers needed?
 
-### 9.2 Regulator Board Testing Procedures
+### 13.2 Regulator Board Testing Procedures
 
 | Test Point | Signal | Purpose |
 |---|---|---|
@@ -856,14 +855,14 @@ Phase references enter on J5 pins 1, 3, 5, sourced from 120 VAC instrument trans
 3. Capture startup transient when HVPS is turned on from EPICS.
 4. Verify current limit (IL1) on TP12 and TP3 is far from active control.
 
-### 9.3 Monitor Board Testing
+### 13.3 Monitor Board Testing
 
 The Monitor Board (SD-730-793-12-C3) is **not included** in the Trigger Enclosure Wiring Diagram WD-730-790-02. Connections need to be traced and the wiring diagram updated.
 - **BNC1**: Isolated output of second voltage monitor
 - **BNC2**: Isolated current output (from Danfysik)
 - **J2H, J2G**: Reference voltage outputs
 
-### 9.4 Regulator-Enerpro Integration Testing (April 2022)
+### 13.4 Regulator-Enerpro Integration Testing (April 2022)
 
 **Problem:** Regulator board output (TP7) stayed constant regardless of HVPS output.
 
@@ -875,17 +874,17 @@ The Monitor Board (SD-730-793-12-C3) is **not included** in the Trigger Enclosur
 
 ---
 
-## 10. EPICS PVs and Diagnostic Panels
+## 14. EPICS PVs and Diagnostic Panels
 
 *Source: `rfedmHvpsLabelsPvs.docx`*
 
-### 10.1 EDM Panel Hierarchy
+### 14.1 EDM Panel Hierarchy
 
 1. **RF Station** (operator panel) → RF Detail button →
 2. **SPEAR RF Station** (expert panel) → HVPS button →
 3. **SPEAR RF Klystron HVPS** (expert HVPS panel)
 
-### 10.2 HVPS EPICS Process Variables
+### 14.2 HVPS EPICS Process Variables
 
 | Panel Label | PV Name | Description |
 |---|---|---|
@@ -916,7 +915,7 @@ The Monitor Board (SD-730-793-12-C3) is **not included** in the Trigger Enclosur
 | SCR 1 | `SRF1:HVPSSCR1:ON:STAT` | Left side board thyristor firing |
 | SCR 2 | `SRF1:HVPSSCR2:ON:STAT` | Right side board thyristor firing |
 
-### 10.3 Trip Diagnosis Procedure
+### 14.3 Trip Diagnosis Procedure
 
 When an RF trip occurs:
 1. Take a screenshot of the **SPEAR RF Klystron HVPS** panel.
@@ -925,7 +924,7 @@ When an RF trip occurs:
 
 ---
 
-## 11. Known Documentation Errors
+## 15. Known Documentation Errors
 
 Errors identified across the design notes that should be corrected in future drawing revisions:
 
@@ -941,7 +940,7 @@ Errors identified across the design notes that should be corrected in future dra
 
 ---
 
-## 17. Component Obsolescence Notes
+## 16. Component Obsolescence Notes
 
 | Component | Function | Status | Recommended Replacement |
 |---|---|---|---|
@@ -952,11 +951,11 @@ Errors identified across the design notes that should be corrected in future dra
 | **1N3064** | Small signal switching diode | Obsolete | Vishay 1N4150 (Digikey rec.) or BAW27 (Vishay direct) |
 | **BUF634** (DIP) | High-current buffer (regulator/monitor boards) | DIP discontinued | BUF634A (no DIP available; higher performance) |
 | **Murata NMH2415DC** (DIP) | DC-DC converter (monitor board) | Being discontinued | NMH2415SC (SIP package, still available) |
-| **Burndy GOB12-88PNE** | PPS 8-pin connector | Possibly Souriau Trim Trio | Verify current part number |
+| **Burndy GOB1208PNE** | PPS 8-pin connector | Possibly Souriau Trim Trio | Verify current part number |
 
 ---
 
-## 18. Source Document Cross-Reference
+## 17. Source Document Cross-Reference
 
 | Document | Primary Topics | Key Drawings Referenced |
 |---|---|---|

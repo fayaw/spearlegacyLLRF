@@ -162,19 +162,19 @@ These document the Machine Protection System wiring for the RF station.
 | System block diagram | `bd3403300000.pdf` | Corredoura SLAC-PUB-8498, Fig. 1 | — |
 | Feedback loop architecture | `feedbackLoopDescriptionps3403305200.pdf` | Corredoura SLAC-PUB-8498, Fig. 3 | All `.st` files |
 | RF system description | `ps3403305100.pdf` | Corredoura SLAC-PUB-8498 | — |
-| Direct loop (design) | `feedbackLoopDescriptionps3403305200.pdf` (pp. 3-4) | Corredoura 1999; Fox 2010 §II | `rf_states.st` |
-| Comb loop (design) | `feedbackLoopDescriptionps3403305200.pdf` (p. 5) | Corredoura 1999; Fox 2010 §III | `rf_calib.st` |
-| Tuner loop (design) | `feedbackLoopDescriptionps3403305200.pdf` (p. 5) | Corredoura 1999 | `rf_tuner_loop.st` |
-| HVPS loop (design) | `feedbackLoopDescriptionps3403305200.pdf` (p. 6) | — | `rf_hvps_loop.st` |
-| DAC loop (design) | `feedbackLoopDescriptionps3403305200.pdf` (p. 6) | — | `rf_dac_loop.st` |
-| Ripple loop (design) | `feedbackLoopDescriptionps3403305200.pdf` (p. 6) | Corredoura 2000 §6 | `rf_dac_loop.st` |
-| Gap FF / LFB Woofer (design) | `feedbackLoopDescriptionps3403305200.pdf` (pp. 6-7) | Corredoura SLAC-PUB-8498 | `rf_msgs.st` (TAXI recovery) |
+| Direct loop (design) | `feedbackLoopDescriptionps3403305200.pdf` (pp. 3-4) | Corredoura 1999; Fox 2010 §II | `rf_states.st,v` |
+| Comb loop (design) | `feedbackLoopDescriptionps3403305200.pdf` (p. 5) | Corredoura 1999; Fox 2010 §III | `rf_calib.st,v` |
+| Tuner loop (design) | `feedbackLoopDescriptionps3403305200.pdf` (p. 5) | Corredoura 1999 | `rf_tuner_loop.st,v` |
+| HVPS loop (design) | `feedbackLoopDescriptionps3403305200.pdf` (p. 6) | — | `rf_hvps_loop.st,v` |
+| DAC loop (design) | `feedbackLoopDescriptionps3403305200.pdf` (p. 6) | — | `rf_dac_loop.st,v` |
+| Ripple loop (design) | `feedbackLoopDescriptionps3403305200.pdf` (p. 6) | Corredoura 2000 §6 | `rf_dac_loop.st,v` |
+| Gap FF / LFB Woofer (design) | `feedbackLoopDescriptionps3403305200.pdf` (pp. 6-7) | Corredoura SLAC-PUB-8498 | `rf_msgs.st,v` (TAXI recovery) |
 | Drive chain / modulator | — (no standalone spec in archive) | Corredoura 2000, Figs. 4-6 | — |
-| Lead/integral comp | — (no standalone spec in archive) | — | `rf_states.st` (INTCOMP, LEADCOMP) |
-| Cavity low power calibration | `ps3403305300.pdf` | — | `rf_calib.st` |
+| Lead/integral comp | — (no standalone spec in archive) | — | `rf_states.st,v` (INTCOMP, LEADCOMP) |
+| Cavity low power calibration | `ps3403305300.pdf` | — | `rf_calib.st,v` |
 | Cable/coupling calibration | `ps3403305600.pdf` | — | — |
 | Cavity phasing | `ps3403305800.pdf` | — | — |
-| Station turn-on | `ps3403305900.pdf` | — | `rf_states.st` |
+| Station turn-on | `ps3403305900.pdf` | — | `rf_states.st,v` |
 | Bellow cavity phasing | `ps3403306001.pdf` | — | — |
 | NIR safety | `ps3403306102.pdf` | — | — |
 

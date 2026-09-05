@@ -238,9 +238,12 @@ class PySpiceCircuitModel:
     def __init__(self):
         # Real system parameters (no scaling!)
         self.L_total = 0.6  # 0.3H + 0.3H in series
-        self.C_filter = 8e-6  # 8 µF (real system value)
+        # SD-730-790-01-C1 labels the filter caps "CAPACITORS 8uFD 30KV" and
+        # there are four series stages, so 8 µF is PER STAGE. The net series
+        # capacitance across the output is 8/4 = 2 µF.
+        self.C_filter = 2e-6  # F (8 µF per stage / 4 series stages)
         self.R_isolation = 500.0  # 500Ω (PEP-II innovation)
-        self.R_load = 3500.0  # 77kV / 22A = 3.5kΩ
+        self.R_load = 3300.0  # ≈72 kV / 22 A ≈ 3.3 kΩ typical operating point
         
         # Circuit state for continuous simulation
         self.v_capacitor = 0.0

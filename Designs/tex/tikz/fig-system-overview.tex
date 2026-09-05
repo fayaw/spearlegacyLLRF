@@ -1,0 +1,147 @@
+% !TeX root = ../L_legacy_system_architecture.tex
+% Top-level SPEAR3 RF station architecture (replaces the 105x144 ASCII drawing).
+% Laid out PORTRAIT: narrow (~156 mm) and tall (~210 mm) so it fills a normal
+% page without rotation.  The RF chain therefore runs over two rows rather than
+% one.  Rows run top (control) to bottom (RF plant).
+\begin{tikzpicture}[
+  font=\scriptsize,
+  every node/.style={outer sep=0pt},
+  x=1mm,y=1mm,
+]
+\def\colL{28}\def\colM{78}\def\colR{128}
+
+% ===== Row A -- EPICS control ==============================================
+\node[ctrl,text width=72mm,anchor=north] (epics) at (\colM,0)
+  {\textbf{EPICS CONTROL LAYER}\quad[B132]\\
+   VxWorks RTOS $\cdot$ EPICS IOC $\cdot$ 6 SNL programs\\
+   EDM operator panels $\cdot$ Channel Access $\cdot$ Archiver};
+
+% ===== Row B -- VXI crate ==================================================
+\node[ctrl,text width=142mm,anchor=north] (vxi) at (\colM,-18)
+  {\textbf{VXI CRATE}\, (Elma 13-slot)\quad[B132, room 101]\\[2pt]
+   {\ttfamily\tiny [0]\,IOC\quad[1]\,AB6008\quad[2]\,CLK\quad[4]\,RFP\quad
+    [5]\,MPSShtf\quad[6]\,LinkPassthru\quad[7]\,IQA-1\quad[9]\,IQA-2\quad
+    [11]\,IQA-3\quad[12]\,AIM}};
+\draw[sig] (epics.south) -- node[tag,right]{VXIbus P2 backplane} (vxi.north);
+
+% ===== Row C -- Remote I/O bus =============================================
+\coordinate (busY) at (0,-42);
+\draw[bus,double,double distance=1.2pt] (4,-42) -- (152,-42);
+\node[tag,anchor=south,align=center] at (\colM,-41.2)
+  {AB REMOTE I/O (RIO) serial link\ \ $\cdot$\ \ VXI slot 1: AB 6008-SV1R
+   scanner (link master)\ $\cdot$\ ${\sim}1$\,Hz};
+\draw[sig] (vxi.south) -- (\colM,-42);
+
+% ===== Row D -- the three RIO adapters =====================================
+\node[plc,text width=42mm,anchor=north] (slc) at (\colL,-48)
+  {\textbf{SLC-500 PLC}\quad[B118]\\ \textit{RIO rack 1 (Full)}\\[2pt]
+   HVPS sequencing $\cdot$ voltage regulation\\
+   Temperature monitoring\\
+   PPS relay chain $\cdot$ Enerpro SCR control\\
+   {\tiny 1747-L532 CPU\ +\ 1747-DCM adapter}};
+
+\node[plc,text width=42mm,anchor=north] (mps) at (\colM,-48)
+  {\textbf{RF MPS: AB PLC-5}\\\textbf{+ 1771-DCM}\quad[B132]\\
+   \textit{RIO rack 3 (1/4)}\\[2pt]
+   Equipment protection: klystron collector power $\cdot$ waveguide arc
+   detection $\cdot$ cavity reflected power $\cdot$ cooling water / vacuum
+   $\cdot$ HVPS fault status};
+
+\node[plc,text width=42mm,anchor=north] (step) at (\colR,-48)
+  {\textbf{STEPPER CHASSIS}\\\textbf{340-315}\quad[B132]\\
+   \textit{RIO rack 2 (3/4)}\\[2pt]
+   SLC adapter\ +\ $4\times$ AB 1746-HSTP1\\
+   (step/direction pulse output)};
+
+\foreach \n in {slc,mps,step}{\draw[sig] (\n.north|-busY) -- (\n.north);}
+
+% ===== Row E -- fast interlock chassis and stepper translators =============
+\node[plc,text width=42mm,anchor=north] (fic) at (\colM,-88)
+  {\textbf{FAST INTERLOCK CHASSIS}\\\textbf{340-308}\quad[B132]\\[2pt]
+   In: arc sensors (fiber) $\cdot$ reflected-power detectors $\cdot$
+   HVPS status (fiber) $\cdot$ MPS permit relay\\[2pt]
+   Out: FISTAT $\rightarrow$ AIM $\cdot$ \mbox{SCR ENABLE}
+   (${<}\,\qty{1}{\micro\second}$) $\cdot$ CROWBAR
+   (${\approx}\,\qty{10}{\micro\second}$)};
+\draw[sig] (mps.south) -- node[tag,right,align=left]{hardwired I/O\\(permits)} (fic.north);
+
+\node[blk,text width=42mm,anchor=north] (xlat) at (\colR,-88)
+  {\textbf{SS2000MD4 PWM}\\\textbf{TRANSLATORS $\times$ 4}\quad[B132]\\
+   step/dir $\rightarrow$ bipolar motor current};
+\draw[sig] (step.south) -- node[tag,right]{step/dir} (xlat.north);
+
+% ===== Row F -- HVPS power section ========================================
+\node[pwr,text width=142mm,anchor=north] (hvps) at (\colM,-124)
+  {\textbf{HVPS POWER SECTION}\quad[B514]\\
+   {\tiny\textnormal{SPEAR1 + SPEAR2: two identical units; one energized, the
+   other fully off; roles exchanged at the April and August scheduled downs}}\\[3pt]
+   \qty{12.47}{\kilo\volt} $3\varphi$ \qty{60}{\hertz}
+   $\rightarrow$ Switchgear
+   $\rightarrow$ Phase-shift transformer T0 (\qty{2750}{\kilo\voltampere},
+   $\pm15^\circ$)
+   $\rightarrow$ 12-pulse SCR bridges ($168\times$ Powerex T8K7)\\
+   $\rightarrow$ Filter inductors L1/L2 (\qty{0.3}{\henry})
+   $\rightarrow$ 4 series rectifier/filter stages (\qty{8}{\micro\farad} each)
+   $\rightarrow$ Crowbar SCRs (4 stacks)
+   $\rightarrow$ Termination-tank inductors (\qty{350}{\micro\henry})
+   $\rightarrow$ HV DC out};
+
+\draw[sig] (slc.south) -- (slc.south|-hvps.north)
+  node[pos=0.62,left,tag,align=right]{PPS relay chain\\(PLC ladder)};
+\draw[fib] (fic.south) -- (fic.south|-hvps.north)
+  node[pos=0.55,right,tag,align=left]{SCR ENABLE / CROWBAR / STATUS\\fiber optic
+  $\leftrightarrow$ B514\ \ ($\sim$10--20\,ms)};
+
+% ===== Row G1 -- RF signal path, first leg ================================
+% Row members are anchored WEST at a common y so the connectors between them
+% are exactly horizontal whatever height each box turns out to be.
+\def\rowGa{-158}
+\node[rf,text width=38mm,anchor=west] (amp)  at (6,\rowGa)
+  {\textbf{DRIVE AMP}\\ KAW2051M12 [B132]\\ ${\sim}\qty{29}{\watt}$};
+\node[rf,text width=38mm,anchor=west] (kly)  at (58,\rowGa)
+  {\textbf{KLYSTRON} [B132]\\ Marconi \qty{1.5}{\mega\watt}\\
+   \qty{476.3}{\mega\hertz} $\cdot$ ${\sim}\qty{800}{\kilo\watt}$};
+\node[rf,text width=34mm,anchor=west] (circ) at (110,\rowGa)
+  {\textbf{CIRCULATOR}\\ $\rightarrow$ WG dump load};
+\draw[sig] (amp.east) -- (kly.west);
+\draw[sig] (kly.east) -- (circ.west);
+
+% ===== Row G2 -- RF signal path, second leg ===============================
+\def\rowGb{-186}
+\node[rf,text width=40mm,anchor=west] (mt)  at (14,\rowGb)
+  {\textbf{MAGIC-TEE NETWORK}\\ MT-1 $\rightarrow$ MT-2, MT-3\\
+   (P4 ports to WG loads)};
+\node[rf,text width=44mm,anchor=west] (cav) at (78,\rowGb)
+  {\textbf{4 PEP-II CAVITIES}\\ Cav A--D, HOM-damped copper\\
+   \qty{476.3}{\mega\hertz} $\cdot$ ${\sim}\qty{712}{\kilo\volt}$ gap};
+\draw[sig] (mt.east) -- (cav.west);
+% circulator drops to the second leg
+\draw[sig] (circ.south) -- ++(0,-6) -| (mt.north);
+
+% RF drive from the VXI RFP module, down the left margin
+\coordinate (railL) at (0,0);
+\draw[sig] (vxi.west) -- (vxi.west -| railL) -- (amp.west -| railL) -- (amp.west);
+\node[tag,rotate=90,anchor=south] at (-1.4,-108) {VXI RFP drive, \qty{476.3}{\mega\hertz}};
+
+% cathode HV from the HVPS
+\draw[sig] (kly.north|-hvps.south) -- (kly.north)
+  node[midway,right,tag,align=left]{${\approx}-72$ to $-\qty{75}{\kilo\volt}$,
+   \qtyrange{19}{22}{\ampere}\\{\tiny HV cable via Termination Tank}};
+
+% ===== Row H -- tuners and IQA measurement ================================
+\node[blk,text width=44mm,anchor=north] (tun) at (\colR,-206)
+  {SLO-SYN M093-FC11 stepper $\rightarrow$ tuner plunger\\
+   {\tiny one per cavity, linear-pot feedback}};
+\draw[sig] (cav.south) -- (tun.north);
+\coordinate (railR) at (156,0);
+\draw[sig] (xlat.east) -- (xlat.east -| railR) -- (tun.east -| railR) -- (tun.east);
+\node[tag,rotate=90,anchor=south] at (157.4,-150) {motor cables to tunnel};
+
+\node[ctrl,text width=52mm,anchor=north] (iqa) at (36,-206)
+  {IQA-1 klystron fwd/refl $\cdot$ IQA-2 cavity refl. $\cdot$ IQA-3 cavity probe
+   $\cdot$ arc sensors (fiber $\rightarrow$ Fast IC)};
+\draw[sig] (cav.south west) -- ++(0,-6) -| (iqa.north);
+\coordinate (railI) at (7,0);
+\draw[sig] (iqa.west) -- (iqa.west -| railI) -- (vxi.west -| railI) -- (vxi.west);
+\node[tag,rotate=90,anchor=south] at (5.6,-120) {IQA measurements to VXI};
+\end{tikzpicture}

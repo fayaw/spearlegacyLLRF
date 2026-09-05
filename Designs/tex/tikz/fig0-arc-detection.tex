@@ -1,0 +1,65 @@
+% !TeX root = ../0_system_design_report.tex
+% Figure 4 -- arc detection signal path.  Ten sensors, five active receivers,
+% and two parallel outputs: a hardware OR (fast trip) and a 10-bit latch that
+% preserves which sensor fired.  The Interface Chassis sits below the Arc
+% Detection Chassis so the three interconnecting signals have room to be
+% labelled.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  sens/.style={blk,text width=27mm,minimum height=5mm,inner sep=1.6pt,
+               font=\scriptsize,anchor=west},
+  rcv/.style ={rf,text width=22mm,minimum height=5mm,inner sep=1.6pt,
+               font=\scriptsize,anchor=west},
+]
+
+% ===== sensors and receivers ============================================
+\def\dy{7.4}
+\foreach [count=\i from 0] \s/\r in {%
+  {Cav A sensor 1}/{Rcvr 1, ch 1},
+  {Cav A sensor 2}/{Rcvr 1, ch 2},
+  {Cav B sensor 1}/{Rcvr 2, ch 1},
+  {Cav B sensor 2}/{Rcvr 2, ch 2},
+  {Cav C sensor 1}/{Rcvr 3, ch 1},
+  {Cav C sensor 2}/{Rcvr 3, ch 2},
+  {Cav D sensor 1}/{Rcvr 4, ch 1},
+  {Cav D sensor 2}/{Rcvr 4, ch 2},
+  {Klystron sensor}/{Rcvr 5, ch 1},
+  {Circulator sensor}/{Rcvr 5, ch 2}}{%
+    \pgfmathsetmacro\y{-\i*\dy}
+    \node[sens] (s\i) at (0,\y) {\s};
+    \node[rcv]  (r\i) at (36,\y) {\r};
+    \draw[sig] (s\i.east) -- (r\i.west);
+    \draw[draw=cNeut,thick] (r\i.east) -- (66,\y);
+  }
+\node[blk,text width=22mm,minimum height=5mm,inner sep=1.6pt,anchor=west,
+      draw=black!35,text=black!50,dashed] at (36,-10*\dy)
+  {Rcvr 6 --- spare\\{\tiny both channels unused}};
+\node[lbl,anchor=north west,text width=30mm] at (0,-10*\dy+2)
+  {10 sensors, fiber-fed\\ Microstep-MIS detectors};
+
+% collect the ten relay outputs onto a vertical bus
+\draw[bus] (66,2) -- (66,-9*\dy);
+\draw[sig] (66,-4.5*\dy) -- (76,-4.5*\dy);
+\node[tag,anchor=south east] at (65.5,1.6) {10 relay outputs};
+
+% ===== arc detection chassis ============================================
+\node[plc,text width=70mm,anchor=west,align=left,inner sep=4pt] (adc) at (76,-4.5*\dy)
+  {\textbf{ARC DETECTION CHASSIS}\\[3pt]
+   \textbf{OR} of all 10 $\rightarrow$ PERMIT output\\
+   {\tiny active-high; pure hardware, no encoding latency}\\[3pt]
+   \textbf{10-bit latch} $\rightarrow$ 10 status outputs\\
+   {\tiny one bit per sensor; holds until explicitly reset}};
+
+% ===== interface chassis ================================================
+\node[plc,text width=70mm,anchor=north west,align=left,inner sep=4pt]
+  (ic) at (76,-9.4*\dy)
+  {\textbf{INTERFACE CHASSIS}\\[2pt]
+   {\tiny AND-gate permit logic $\cdot$ first-fault register}};
+
+\draw[sig] (86,-6.6*\dy) -- (86,-9.4*\dy);
+\node[tag,anchor=west,align=left] at (87,-8*\dy) {PERMIT\\{\tiny fast trip path}};
+\draw[sig] (112,-6.6*\dy) -- (112,-9.4*\dy);
+\node[tag,anchor=west,align=left] at (113,-8*\dy)
+  {10 status bits\\{\tiny which sensor fired}};
+\draw[sig] (142,-9.4*\dy) -- (142,-6.6*\dy);
+\node[tag,anchor=east,align=right] at (141,-8*\dy) {Test\\ Reset};
+\end{tikzpicture}

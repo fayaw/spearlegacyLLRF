@@ -1,0 +1,32 @@
+% !TeX root = ../L_legacy_system_architecture.tex
+% Communication architecture: what hangs off the VXI IOC.
+\begin{tikzpicture}[font=\scriptsize,x=1mm,y=1mm,every node/.style={outer sep=0pt}]
+\node[ctrl,text width=42mm,anchor=north west] (ioc) at (0,0)
+  {\textbf{VXI IOC} (VxWorks)\\ B132, room 101};
+
+\node[plc,text width=46mm,anchor=north west] (scan) at (18,-16)
+  {\textbf{AB 6008-SV1R} Remote I/O scanner\\ (VXI slot 1, link master)};
+
+\node[plc,text width=62mm,anchor=north west] (r1) at (40,-32)
+  {\textbf{rack 1} (Full) $\rightarrow$ SLC-500 PLC via 1747-DCM\\ HVPS, B118};
+\node[plc,text width=62mm,anchor=north west] (r2) at (40,-45)
+  {\textbf{rack 2} (3/4) $\rightarrow$ Stepper chassis 340-315\\ $4\times$ 1746-HSTP1, B132};
+\node[plc,text width=62mm,anchor=north west] (r3) at (40,-58)
+  {\textbf{rack 3} (1/4) $\rightarrow$ RF MPS PLC-5 via 1771-DCM\\ B132};
+
+\node[rf,text width=62mm,anchor=north west] (rfout) at (18,-74)
+  {\textbf{RF signals} $\rightarrow$ RFP module drive output
+   (\qty{476}{\mega\hertz})};
+\node[rf,text width=62mm,anchor=north west] (rfin) at (18,-86)
+  {\textbf{Cavity probes} $\times$ 4 (\qty{476}{\mega\hertz})
+   $\rightarrow$ IQA modules};
+
+% Orthogonal tree spines.  Stubs are drawn from (node.west -| rail) rather
+% than a hardcoded y, so they stay horizontal whatever height a box turns out.
+\coordinate (railA) at (6,0);
+\coordinate (railB) at (24,0);
+\draw[bus] (6,-6) -- (6,-92);
+\foreach \n in {scan,rfout,rfin}{\draw[sig] (\n.west -| railA) -- (\n.west);}
+\draw[bus] (24,-26) -- (24,-64);
+\foreach \n in {r1,r2,r3}{\draw[sig] (\n.west -| railB) -- (\n.west);}
+\end{tikzpicture}

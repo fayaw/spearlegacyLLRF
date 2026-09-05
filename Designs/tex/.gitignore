@@ -1,0 +1,23 @@
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+preview_*.pdf
+preview_*.aux
+preview_*.log
+preview_*.out
+tikztest.pdf
+
+# generated figures are rebuilt by scripts/make-figures.ps1
+figures/generated/
+
+# the built document is kept: it is what gets shared
+!L_legacy_system_architecture.pdf

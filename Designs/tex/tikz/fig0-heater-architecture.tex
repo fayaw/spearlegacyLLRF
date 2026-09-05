@@ -1,0 +1,36 @@
+% !TeX root = ../0_system_design_report.tex
+% Figure 5 -- klystron heater controller architecture.  The control chain runs
+% down the left; the two monitoring paths branch to the right.  All row members
+% use anchor=west at a common y so the horizontal links are exactly horizontal.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+
+\node[ctrl,text width=48mm,anchor=west] (ep)  at (10,0)
+  {\textbf{EPICS COORDINATOR}\\ (soft IOC)};
+\node[plc,text width=48mm,anchor=west]  (mps) at (10,-26)
+  {\textbf{RF MPS PLC}\\ ControlLogix 1756};
+\node[pwr,text width=48mm,anchor=west]  (ch)  at (10,-54)
+  {\textbf{CHROMA AC SUPPLY}\\ programmable};
+\node[rf,text width=48mm,anchor=west]   (kc)  at (10,-82)
+  {\textbf{KLYSTRON CATHODE HEATER}};
+
+\draw[sig] (ep.south)  -- node[right,tag]{EPICS Channel Access} (mps.north);
+\draw[sig] (mps.south) -- node[right,tag,align=left]
+  {analog ramp\\{\tiny voltage programming input}} (ch.north);
+\draw[sig] (ch.south)  -- node[right,tag]{\qty{60}{\hertz} AC output} (kc.north);
+
+% --- Ethernet: setpoints and readback, same row as the supply -------------
+\node[blk,text width=46mm,anchor=west] (eth) at (76,-54)
+  {Ethernet --- ASYN / VISA ASCII\\{\tiny setpoints, readback, status}};
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick] (ch.east) -- (eth.west);
+
+% --- retained analog V/I metering, tapped off the supply output -----------
+\node[blk,text width=46mm,anchor=west] (vi) at (76,-70)
+  {V / I meters (retained analog)\\{\tiny hardware monitoring of the output}};
+\fill[cNeut] (34,-70) circle (0.7);
+\draw[sig] (34,-70) -- (vi.west);
+% return to the MPS analog inputs, routed clear of everything on the far right
+\draw[draw=cNeut,thick] (vi.east) -- (132,-70);
+\draw[sig] (132,-70) |- (mps.east);
+\node[tag,anchor=south] at (100,-25.4) {MPS analog inputs};
+
+\end{tikzpicture}

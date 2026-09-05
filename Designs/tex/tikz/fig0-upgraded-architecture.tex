@@ -1,0 +1,111 @@
+% !TeX root = ../0_system_design_report.tex
+% Figure 1 -- upgraded system architecture.  Portrait, sized to fill a page.
+% The point the drawing must make: machine protection (Interface Chassis) and
+% personnel safety (PPS Interface Box) are architecturally separate paths.
+%
+% Layout note: the two subsystem rows are horizontally offset so that the
+% upper row's drop lines to the Interface Chassis pass through clear lanes
+% between the lower row's boxes.  Row members use anchor=west at a common y so
+% that every connector between them is exactly horizontal.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+
+% ===== operator and expert layers =========================================
+\node[ctrl,text width=54mm,anchor=north] (op) at (32,0)
+  {\textbf{OPERATOR LAYER}\\
+   EDM panels $\cdot$ web dashboard\\ EPICS archiver $\cdot$ logging};
+\node[ctrl,text width=76mm,anchor=north] (ex) at (114,0)
+  {\textbf{EXPERT LAYER}\\
+   MATLAB tools (Dimtel LLRF9 + in-house)\\
+   expert EPICS panels $\cdot$ system diagnostics};
+
+% ===== EPICS coordinator ==================================================
+\node[ctrl,text width=146mm,anchor=north] (epics) at (78,-24)
+  {\textbf{EPICS (soft IOC) COORDINATOR}\\
+   state machine $\cdot$ HVPS loop $\cdot$ tuner manager $\cdot$ fault manager
+   $\cdot$ diagnostics $\cdot$ heartbeat monitoring};
+\draw[sig] (op.south) -- (op.south|-epics.north);
+\draw[sig] (ex.south) -- (ex.south|-epics.north);
+
+\def\yCA{-44}
+\coordinate (caY) at (0,\yCA);
+\draw[bus] (10,\yCA) -- (146,\yCA);
+\node[tag,fill=white,inner sep=1.5pt] at (78,\yCA)
+  {EPICS Channel Access\quad($\sim$\qty{1}{\hertz} supervisory)};
+\draw[sig] (epics.south) -- (78,\yCA);
+
+% ===== upper subsystem row ================================================
+% centres 16 / 50 / 84 / 118, width 26  ->  spans 3-29, 37-63, 71-97, 105-131
+\def\yU{-58}
+\node[rf,text width=26mm,anchor=west]  (l1)  at (3,\yU)
+  {\textbf{LLRF9 \#1}\\ field control\\ tuner control\\ interlocks};
+\node[rf,text width=26mm,anchor=west]  (l2)  at (37,\yU)
+  {\textbf{LLRF9 \#2}\\ field control\\ tuner control\\ interlocks};
+\node[blk,text width=26mm,anchor=west] (mot) at (71,\yU)
+  {\textbf{MOTOR CTRL}\\ Galil DMC-4143\\ Ethernet,\\ heartbeat};
+\node[plc,text width=26mm,anchor=west] (hp)  at (105,\yU)
+  {\textbf{HVPS PLC}\\ CompactLogix\\ voltage control};
+\foreach \n in {l1,l2,mot,hp}{\draw[sig] (\n.north|-caY) -- (\n.north);}
+% the two LLRF9 interlock chains are wired directly to each other, not via the
+% Interface Chassis
+\draw[{Stealth[length=2mm]}-{Stealth[length=2mm]},thick]
+  (l1.east) -- node[tag,rotate=90]{interlock} (l2.west);
+
+% ===== lower subsystem row ================================================
+% centres 27 / 61 / 95 / 129, width 26  ->  spans 14-40, 48-74, 82-108, 116-142
+\def\yL{-84}
+\node[blk,text width=26mm,anchor=west] (wb)   at (14,\yL)
+  {\textbf{WAVEFORM}\\\textbf{BUFFER SYSTEM}};
+\node[blk,text width=26mm,anchor=west] (arc)  at (48,\yL)
+  {\textbf{ARC DETECT}\\ 10 sensors};
+\node[plc,text width=26mm,anchor=west] (mp)   at (82,\yL)
+  {\textbf{RF MPS PLC}\\ ControlLogix 1756\\ collector-power calc};
+\node[blk,text width=26mm,anchor=west] (heat) at (116,\yL)
+  {\textbf{HEATER CTRL}\\ programmable AC supply};
+\foreach \n in {wb,arc,mp}{\draw[sig] (\n.north|-caY) -- (\n.north);}
+\draw[sig] (mp.east) -- (heat.west);
+
+% ===== interface chassis ==================================================
+\node[plc,text width=146mm,anchor=north] (ic) at (78,-104)
+  {\textbf{INTERFACE CHASSIS}\quad(new)\\
+   first-fault detection $\cdot$ optocoupler / galvanic isolation $\cdot$
+   fiber I/O $\cdot$ AND-gate permit logic};
+
+% lower row drops straight down
+\foreach \n in {wb,arc,mp}{\draw[sig] (\n.south) -- (\n.south|-ic.north);}
+% upper row jogs sideways into the clear lanes at x = 8, 44, 78, 112
+\def\yJog{-76}
+\foreach \n/\lane in {l1/8, l2/44, mot/78, hp/112}{%
+  \draw[draw=cNeut,thick] (\n.south) |- (\lane,\yJog);
+  \draw[sig] (\lane,\yJog) -- (\lane,-104);}
+
+% ===== external permits ===================================================
+\node[blk,text width=60mm,anchor=north] (ext) at (38,-130)
+  {\textbf{MACHINE PROTECTION SAFETY SYSTEMS}\\
+   SPEAR MPS $\cdot$ orbit interlock $\cdot$ external permits\\
+   {\tiny feed into the Interface Chassis}};
+\draw[sig] (ext.north) -- (ext.north|-ic.south);
+
+% ===== HVPS power section =================================================
+\node[pwr,text width=60mm,anchor=north] (hvps) at (116,-132)
+  {\textbf{HVPS (power section)}\\
+   transformer, rectifier, crowbar, thyristor stacks,\\
+   grounding tank, Ross switch, filter inductors};
+\draw[fib] (116,-104) -- (hvps.north);
+\node[tag,anchor=west,align=left] at (119,-119)
+  {3$\times$ fiber optic\\ SCR ENABLE $\cdot$ CROWBAR $\cdot$ STATUS\\
+   {\tiny bypasses the PLC}};
+
+% ===== PPS chain (separate path) ==========================================
+\node[blk,text width=60mm,anchor=north,draw=cPwr!70,fill=cPwr!5] (ppsbox) at (116,-158)
+  {\textbf{PPS INTERFACE BOX}\\
+   Bud enclosure $\cdot$ 4 relays $\cdot$ status LEDs\\
+   lockable connector\\
+   HVPS contactor and Ross switch control};
+\draw[sig] (hvps.south) -- (hvps.south|-ppsbox.north);
+\node[tag,anchor=west,align=left] at (119,-151)
+  {PPS interlock signals\\ {\tiny HVPS contactor, Ross switch}};
+
+\node[blk,text width=60mm,anchor=north,draw=cPwr!70,fill=cPwr!5] (pps) at (116,-184)
+  {\textbf{SPEAR PPS}\\ Personnel Protection System};
+\draw[sig] (ppsbox.south) -- node[right,tag]{PPS chain signals} (pps.north);
+\end{tikzpicture}

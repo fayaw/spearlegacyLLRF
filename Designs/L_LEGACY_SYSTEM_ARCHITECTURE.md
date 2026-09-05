@@ -1,0 +1,2180 @@
+# SPEAR3 RF System — Legacy System Architecture
+
+**Document ID**: Doc L  
+**Version**: 3.2  
+**Date**: September 4, 2026  
+**Status**: RELEASE CANDIDATE — all technical content re-verified against original source documents and against every legible engineering drawing in the repository; pending named-engineer sign-off  
+**Location**: Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md  
+**Author**: Faya Wang, with AI-assisted analysis  
+**Tier**: 2 — Legacy System and Operational Reference
+
+---
+
+## Revision History
+
+| Version | Date | Description |
+|---------|------|-------------|
+| 3.2 | 2026-09-04 | **Editorial pass — no technical content changed.** Removed Appendix A.4 ("AI-Generated Analysis Products"), which listed repository analysis notes that this document no longer cites; former A.5 renumbered to A.4. Removed the two residual *"preliminary analysis (AI-generated … unreviewed)"* source citations in §6.4 and §16, replacing the latter with an explicit statement of where the SNL line and state counts come from. Removed change-history commentary from the body text throughout (§4.3, §9.2, §9.3, §9.3.1, §10.5, §13.2.1, §15.2, §20.2 G16, App. A.1 [R2], App. A.3 [R13], §21 grade legend) — statements of the form "earlier revisions said X" or "corrected September 2026" now live only in this table, while the underlying technical distinctions they protected (design vs as-built inductor values, the two L1/L2 designator collisions, SLAC-PUB-8124 vs -8498) are retained as forward-looking warnings. Dropped a stale cross-reference asking for a rack-assignment correction in Doc I that has since been made. |
+| 3.1 | 2026-09-03 | **Drawing-verification pass.** Every legible engineering drawing in the repository was rendered to image and read directly, rather than relying on derived notes. **Resolved**: the phase-shifting transformer rating is **2750 kVA, 12.5 kV at 127 A RMS** per NWL's own schematic EI-730-790-00-C0 / NWL #39308 [R70] — superseding the 350 kVA, 3000 kVA and 3.5 MVA figures previously in circulation, and with them Sebek's derived 162 A/phase (§9.2, §9.3, §4.2); the **PPS contact readback trace** is now established end-to-end across four drawings and documented in new **§13.2.1** (closes gap G18). **Corrections**: cable termination inductors are **350 µH / 40 A** as built per SD-730-790-05-C1 [R62], not the 200 µH design figure in SLAC-PUB-7591, and are designated L1/L2 not L3/L4 (§9.3, §12); `sd2372301200.pdf` is the **Enerpro FCOG6100 firing-circuit schematic** (Enerpro E128), not a voltage-divider drawing — reference [R13] corrected, and no divider drawing exists in the repository (§9.3, App. A.3, G14); `sd7307940400.pdf` is an **earlier-generation crowbar trigger board** (SD-730-794-04-C0, 1999), not termination inductors (§9.3.1); relay designations corrected against the authoritative legend on the original 1977 LBL drawing [R69] — MX = Remote Control Relay, RR = **Remote Reset** Relay, plus the previously undocumented **IP interposing relay** (§13.2). **Additions**: §13.2.1 PPS readback trace; Chain-1 opening timing (**≥170 ms hold-in, ≈200 ms worst case** to interrupt 12.47 kV) and the HCA-1-A **300–400 V DC stored-energy hazard** (§13.2); blocking-relay design intent — *"prevent vac contactor trip when fault current exceeds 2000 amps"* [R69]; SD-730-793-03/-04 gate-drive timing and the **crowbar optical-SCR conversion** note (§9.3.1); confirmation of TS-3 as the Voltage Monitor strip and of the PPS LED assignment from the master wiring diagram [R63] (§10.5). **New references** [R62]–[R70]. **New gaps** G14–G22; G18 resolved. |
+| 3.0 | 2026-09-03 | **Release-candidate verification pass.** Every technical claim re-checked against original source documents (J. Sebek `spear3HvpsHazards.tex`, `enerproBoardHvps.docx`, `enerproPhaseReferenceAdapter.docx`, `HoffmanBoxPPSWiring.docx`; Dusatko *SPEAR3 LLRF System Description* v1.2; Cassel & Nguyen SLAC-PUB-7591; HVPS specification PS-341-360-01; legacy EPICS/SNL source code) rather than against AI-generated technical notes. **Corrections**: serial communication link is Allen-Bradley **Remote I/O**, not Data Highway+ (§2.1, §2.1.1, §5.7, §19.2, new §5.7.1 adapter map); crowbar conduction delay ≈10 μs and primary current interruption 4–8 ms, replacing "<1 μs" (§12.1); filter capacitor bank is 8 μF **per stage × 4 series stages** storing 8.8 kJ, not "8 μF total, ~24 kJ" (§9.2, §9.3, new §9.5); HV divider ratio ≈10,000:1, not 1000:1 (§9.3, §9.4, §10.4); crowbar 80 **kA** peak (bushing rating), not "80 A each" (§9.3); legacy Enerpro board is **FCOG6100 Rev K + FCOAUX60 Rev D** with 3 × 200 kΩ off-board phase-reference resistors on **J5** — the FCOG1200 and its 576 kΩ/200 kΩ J7 adapter are **upgrade** items (§11); RF MPS is **PLC-5 / 1771** throughout, ControlLogix 1756 marked as not-yet-in-service (§2.1, §2.1.1, §2.2, §14, §15); Fast Interlock Chassis and Local Control Chassis are **separate** units (§15.2); fault-slot PV is `{STN}:STN:FAULT:NUM`, not `NFAULT` (§18.5); AIM control-signal table reconciled with Dusatko §2.8 (six control signals to the ARC chassis, seven FICTRL register bits) (§5.5); §5.8.2 PEP-II column multipliers corrected (LO = RF × 96/97, CLK40 = 288 × fiducial, PLL40 ref = RF/97); TS-3 is the Voltage Monitor strip — PPS status LEDs are on connector AMP-8Pin J2 (§10.5). **Additions**: §5.7.1 Remote I/O adapter map; §5.8.1 VXI crate ASCII layout (was missing); §9.5 HVPS stored energy and discharge times; §9.6 secondary rectifier/filter stage structure; §11.4 legacy-vs-upgrade Enerpro comparison; §10.5 full terminal-strip inventory; §17 [truncated] **Corrections**: serial communication link is Allen-Bradley **Remote I/O**, not Data Highway+ (§2.1, §2.1.1, §5.7, §19.2, new §5.7.1 adapter map); crowbar conduction delay ≈10 μs and primary current interruption 4–8 ms, replacing "<1 μs" (§12.1); filter capacitor bank is 8 μF **per stage × 4 series stages** storing 8.8 kJ, not "8 μF total, ~24 kJ" (§9.2, §9.3, new §9.5); HV divider ratio ≈10,000:1, not 1000:1 (§9.3, §9.4, §10.4); crowbar 80 **kA** peak (bushing rating), not "80 A each" (§9.3); legacy Enerpro board is **FCOG6100 Rev K + FCOAUX60 Rev D** with 3 × 200 kΩ off-board phase-reference resistors on **J5** — the FCOG1200 and its 576 kΩ/200 kΩ J7 adapter are **upgrade** items (§11); RF MPS is **PLC-5 / 1771** throughout, ControlLogix 1756 marked as not-yet-in-service (§2.1, §2.1.1, §2.2, §14, §15); Fast Interlock Chassis and Local Control Chassis are **separate** units (§15.2); fault-slot PV is `{STN}:STN:FAULT:NUM`, not `NFAULT` (§18.5); AIM control-signal table reconciled with Dusatko §2.8 (six control signals to the ARC chassis, seven FICTRL register bits) (§5.5); §5.8.2 PEP-II column multipliers corrected (LO = RF × 96/97, CLK40 = 288 × fiducial, PLL40 ref = RF/97); TS-3 is the Voltage Monitor strip — PPS status LEDs are on connector AMP-8Pin J2 (§10.5). **Additions**: §5.7.1 Remote I/O adapter map; §5.8.1 VXI crate ASCII layout (was missing); §9.5 HVPS stored energy and discharge times; §9.6 secondary rectifier/filter stage structure; §11.4 legacy-vs-upgrade Enerpro comparison; §10.5 full terminal-strip inventory; §17.3 tuner motion parameters; §12.2 klystron arc energy budget; §21 Verification Status matrix. **Editorial**: klystron identified as Marconi, 1.5 MW (§6.1); RF frequency and HVPS operating point presented as drifting/typical values with explicit provenance (§4.1, §4.2, §4.3); figures renumbered into reading order in §3 and §9; figure count corrected to 36; citation collisions resolved — new [R53] (Dusatko) and [R54] (W. Ross clock module) replace mis-tagged [R7]/[R3] uses; [R2] report number corrected to SLAC-PUB-8124; [R5] repointed to PDR R2; all [W*n*] web references verified and linked from their parent entries. |
+| 2.8 | 2026-04-15 | Cross-document consistency pass against `I_INTERLOCK_ARCHITECTURE.md` v1.7. §14.3: Rewrote protection function description — the RF MPS PLC relay simultaneously drives three paths (Path A → Fast IC → SCR ENABLE + CROWBAR; Path B → DH+ permit bit; Path C → Slot 5 VXI backplane RF_FAULT); removed incorrect "Path B" label for the MPS PLC itself and corrected erroneous "Path C = SLC-500" — the SLC-500 HVPS PLC is a separate independent actor, not an output path of the MPS relay. §15.1 table: corrected SLC-500 speed from "~100 ms" to "~10–20 ms" (consistent with Part IV intro and Doc I §6.x). §15.2 signal routing note: added collector overpower cascade cross-reference (Doc I §4.6) — RF drive cutoff triggers cascade HVPS hardware kill in ~20–30 ms, not only the orderly ~6 s SNL shutdown. §15.3 trip chain: completely restructured ASCII diagram from Path A/B/C flat model to four-layer model (Layer 1: Fast IC hardware; Layer 2: RF MPS PLC with its three internal paths A/B/C; Layer 3: SLC-500 independent actor; Layer 4: EPICS supervisory). |
+| 2.7 | 2026-04-10 | Added Part IV introductory overview paragraph — summarizes the five-actor multi-layer protection architecture (Fast IC <1 μs, RF MPS PLC ~10 ms, SLC-500 HVPS PLC ~10–20 ms, SNL state machine ~1 s, PPS dual-chain) and adds cross-reference to `Designs/I_INTERLOCK_ARCHITECTURE.md` [Doc I] for full signal flow diagrams, per-actor input/output tables, fault timeline examples, compliance analysis, and fault data access procedures. |
+| 2.6 | 2026-04-10 | Added §13.6 — complete dual-PPS-chain interaction and roles: Chain 1 (HV vacuum contactor, fail-safe open) vs Chain 2 (Ross grounding switch, fail-safe closed/grounded), operational shutdown/restore sequences, fail-safe direction analysis, and compliance comparison table (Chain 1 has hardware PPS series fail-safe at OX8 relay input; Chain 2 does not). Added note on Ross switch spring-return as partial Chain 2 fail-safe. Added §18.5 — Fault Data Availability and Analysis: four data sources (EPICS Channel Archiver, SNL `/dat/FAULT*_N` files, AIM hardware history buffer, B118 four-channel oscilloscope), storage locations, access procedures, key PVs, brief fault categorization guide. Cross-reference added to `I_INTERLOCK_ARCHITECTURE.md` §10 for detailed step-by-step analysis procedure. |
+| 2.5 | 2026-04-09 | §2.1 top-level block diagram completely redrawn: replaced flat/incorrect node layout with accurate two-column architecture showing AB DH+ bus as a shared serial link (VXI slot-1 AB6008 master) connecting three nodes — SLC-500 (HVPS, B118), ControlLogix 1756 MPS (B132), and Stepper Chassis 340-315 (B132); added full tuner chain (1746-HSTP1 → SS2000MD4 translators → SLO-SYN motors → tuner plungers) with Aug 2025 Galil note; added Fast Interlock Chassis I/O detail (fiber-optic arc sensors, SCR ENABLE/CROWBAR outputs to B514); added SLC-500 PPS relay chain (K4/MX/RR → Ross HQ3 contactor; Ross grounding switch); added RF signal path (RFP → Drive Amp → Klystron → Circulator → Magic-Tees → 4 cavities) with IQA measurement taps and arc sensor fiber paths; added new §2.1.1 Major Block Descriptions table with description for each of 13 blocks |
+| 2.4 | 2026-04-07 | Cross-checked against Dusatko SP3_writeup_V1d2 (SPEAR 3 LLRF System Description v1.2): corrected LO frequency (471.1 MHz -> 471.187 MHz = RF x 92/93); corrected IF frequency (5.215 MHz -> 5.122 MHz = RF/93); corrected Figure 5-1 caption LO value; corrected RFP section IF value; corrected §5.5 AIM fault-file channel names (Cf2I/Cf2Q -> CmbI/CmbQ, correct order); added 6 AIM control signal names and RF_FAULT backplane description; added IQA ripple-link description; corrected ripple loop status (active in SPEAR3 for amplitude/phase regulation; HVPS ripple removal feature not implemented); added new §5.8 CLK module section with VXI crate ASCII layout, system timing parameters table (SPEAR3 vs PEP-II), CLK I/O block diagram, architecture block diagram, PLL details, and SPEAR3 adaptation table |
+| 2.3 | 2026-04-07 | Deep cross-check against source documents: corrected fault file channel names (Cf2I/Cf2Q -> CmbI/CmbQ — SPEAR3 uses #else branch of #ifdef CF2; Iqa3Amp is last channel, not 9th); corrected IQA-2/3 slot descriptions (all 4 cavities via channel-select mux, not "cavities A & B"); corrected drive amplifier text (removed inconsistent input power figures, both §6.2 and Figure 6-3); confirmed VXI slots, HVPS parameters, SNL program line counts, state machine states, and Enerpro board model/serial numbers against source code and technical notes |
+| 2.2 | 2026-04-07 | Removed all photo placeholders; corrected “warm spare” language (SPEAR1/SPEAR2 swap roles during scheduled downtime — both fully operational); fixed blank-line formatting between all image tags and captions; final accuracy review of all 35 figure captions |
+| 2.1 | 2026-04-07 | Added 5 new photographs: HVPS annotated circuit schematic (Figure 9-A), HVPS2 main oil tank exterior (Figure 9-3), HVPS2 B514 outdoor view (Figure 9-4), HVPS2 oil tank top-view documentation (Figure 9-5), Cavity Tuner Motor Driver front panel (Figure 17-2); fixed Figure 9-2 filename (HVPS1→HVPS2, off-duty unit photographed 2026); fixed Figure 3-2 file extension (.png→.jpg); updated Populated Figures list |
+| 2.0 | 2026-03-24 | Major revision: adopted Doc P numbered reference system [Rn]; added internet research citations (SLAC publications, PEP-II conference papers, OSTI records); restructured all inline Source/See-also blocks into numbered references; added Appendix B (Source Document Reference Index) with 5 categories; added Appendix C (Symbol and Notation Conventions); fixed TOC anchor formatting |
+| 1.0 | 2026-03-24 | Initial draft, assembled from exhaustive review of all original source documents and AI-generated technical notes |
+
+---
+
+## Table of Contents
+
+### Part I — System Overview
+
+- [1. Introduction and Purpose](#1-introduction-and-purpose)
+- [2. System Architecture Overview](#2-system-architecture-overview)
+- [3. Physical Layout and Locations](#3-physical-layout-and-locations)
+- [4. Key System Parameters](#4-key-system-parameters)
+
+### Part II — RF Signal Chain
+
+- [5. LLRF Controller (VXI System)](#5-llrf-controller-vxi-system)
+- [6. Klystron and Drive System](#6-klystron-and-drive-system)
+- [7. Waveguide Distribution Network](#7-waveguide-distribution-network)
+- [8. RF Cavities and Tuner Assemblies](#8-rf-cavities-and-tuner-assemblies)
+
+### Part III — Power Systems
+
+- [9. High-Voltage Power Supply — Power Section](#9-high-voltage-power-supply--power-section)
+- [10. HVPS Control System — Hoffman Box (B118)](#10-hvps-control-system--hoffman-box-b118)
+- [11. Enerpro SCR Firing System](#11-enerpro-scr-firing-system)
+- [12. Arc Protection and Crowbar System](#12-arc-protection-and-crowbar-system)
+
+### Part IV — Protection and Safety Systems
+
+- [13. Personnel Protection System (PPS) Interface](#13-personnel-protection-system-pps-interface)
+- [14. RF Machine Protection System (MPS)](#14-rf-machine-protection-system-mps)
+- [15. Interlock Architecture and Signal Chain](#15-interlock-architecture-and-signal-chain)
+
+### Part V — Control Software and Instrumentation
+
+- [16. EPICS IOC and SNL Software Architecture](#16-epics-ioc-and-snl-software-architecture)
+- [17. Tuner Control System](#17-tuner-control-system)
+- [18. Diagnostics, Calibration and Monitoring](#18-diagnostics-calibration-and-monitoring)
+
+### Part VI — Integration and Legacy Considerations
+
+- [19. Cabling and Interconnections](#19-cabling-and-interconnections)
+- [20. Known Issues, Limitations and Legacy Debt](#20-known-issues-limitations-and-legacy-debt)
+- [21. Verification Status](#21-verification-status)
+
+### Appendices
+
+- [Appendix A — Source Document Reference Index](#appendix-a--source-document-reference-index)
+- [Appendix B — Symbol and Notation Conventions](#appendix-b--symbol-and-notation-conventions)
+
+---
+
+## Document Scope and Provenance
+
+### Purpose
+
+This document is the **Tier 2 legacy system reference** for the SPEAR3 RF system. It describes the complete RF system **as currently installed and operating** — the "legacy" configuration prior to the LLRF Upgrade Project. It covers every major subsystem from design concepts through real-world implementation: physical hardware, control electronics, software, protection systems, cabling, calibration data, and known limitations.
+
+Doc L serves three critical functions:
+
+1. **Upgrade baseline** — Provides the complete "as-built" reference against which upgrade designs (U1–U10) are specified
+2. **Knowledge preservation** — Captures institutional knowledge about a system designed in 1997 (PEP-II era) before key personnel retire and obsolete hardware is removed
+3. **Operational reference** — Consolidates scattered documentation into a single navigable resource
+
+### Provenance Statement
+
+All technical content in this document is derived from **original source documents** as defined in the Documentation Architecture Proposal (v6.0, §2.1). These include:
+
+- Original engineering schematics, wiring diagrams, and drawings (PDFs from SLAC/PEP-II project)
+- Human-authored design notes and operational procedures (docx files by J. Sebek, R. Cassel, et al.)
+- Measurement and calibration data (xlsx files from actual hardware)
+- The complete legacy source code (2,293 files in `spear-rf-code-legacy/`)
+- Published SLAC technical papers and conference proceedings
+- Vendor documentation (Enerpro, Galil, Superior Electric, Ross Engineering)
+
+Every technical statement in this document is referenced to an original source in [Appendix A](#appendix-a--source-document-reference-index). AI-generated technical notes elsewhere in the repository are **not** cited as authority anywhere in this document.
+
+External references obtained through web research are cited with full bibliographic information in Appendix A.
+
+### Relationship to Other Documents
+
+| Document | Relationship |
+|----------|-------------|
+| Doc 0 (System Design Report) | Doc 0 describes the *upgrade* architecture. Doc L describes the *legacy* system that Doc 0's upgrade replaces |
+| Doc I (Legacy Interlock Architecture) | Doc I is the Tier 2 interlock deep-dive companion to Doc L. Where Doc L (§13–§15) summarizes the protection subsystems, Doc I provides the complete signal flow diagrams, per-actor input/output tables, PPS compliance analysis, fault timeline examples, and step-by-step fault data access procedures. |
+| Doc P (RF Physics and Plant) | Doc P covers physics and control theory independent of hardware. Doc L covers the specific hardware implementation |
+| Doc D (Operational Data Catalog) | Doc D will contain measured data and calibrations. Doc L explains the system that produced that data |
+| U1–U10 (Upgrade Documents) | Each U-document references the relevant Doc L sections for the legacy baseline of its subsystem |
+
+### What This Document Contains
+
+- Physical hardware descriptions with part numbers, serial numbers, and specifications
+- Control system architecture and PLC configurations
+- Software architecture for 6 SNL programs (7,112 lines total)
+- Protection and safety system signal chains
+- Complete cabling and interconnection references
+- Known issues and legacy debt catalog
+
+### What This Document Does NOT Contain
+
+- RF physics or control theory derivations (see Doc P)
+- Upgrade design specifications (see U1–U10)
+- Measured calibration data tables (see Doc D)
+- Source code listings (see `spear-rf-code-legacy/`)
+- Detailed interlock signal analysis, fault timeline examples, and fault data access procedures (see Doc I)
+
+### Reference Tag Format
+
+- **[Rn]** — Numbered references to original source documents, published papers, and repository files
+- **[Rnt]** — Transcription of the corresponding [Rn] source
+- **[Wn]** — External web references with URLs
+
+All references are cataloged in [Appendix A](#appendix-a--source-document-reference-index).
+
+## Figures
+
+All figures are from the SPEAR3 RF system photograph set (`spear3RF_overview_2003_images/`) assembled during the 2003 commissioning period and the 2025-2026 documentation campaign.
+
+**Complete figure inventory (36 figures, v3.0). Figure numbers follow reading order within each section.**
+
+| Figure | Subject | Section |
+|--------|---------|--------|
+| 1-1 | Legacy System Architecture | §1 |
+| 2-1 | LLRF control electronics, Room 101, B132 | §2 |
+| 3-1 | Building B132 (klystron + LLRF control) exterior | §3 |
+| 3-2 | Building B514 — HVPS substation exterior | §3 |
+| 3-3 | HVPS grounding/termination tank near B132 | §3 |
+| 3-4 | RF cavities in tunnel — inward view | §3 |
+| 5-1 | VXI crate (VxWorks IOC), B132 | §5 |
+| 5-2 | Rear of LLRF VXI crate — fiber optic and coax cabling | §5 |
+| 6-1 | Marconi klystron, B132 | §6 |
+| 6-2 | Klystron filament control chassis | §6 |
+| 6-3 | RF drive amplifier (KAW2051M12), B132 rack | §6 |
+| 7-1 | AFT circulator in waveguide distribution | §7 |
+| 7-2 | Magic-tee and bellows network on tunnel roof | §7 |
+| 7-3 | Waveguide network from klystron to cavities | §7 |
+| 7-4 | Water-cooled waveguide load | §7 |
+| 7-5 | HCW cooling station behind booster | §7 |
+| 8-1 | PEP-II bare RF cavity prior to assembly | §8 |
+| 8-2 | RF cavity assembly — assembled view | §8 |
+| 8-3 | RF cavity assembly with component labels | §8 |
+| 8-4 | Movable tuner plunger assembly below cavity | §8 |
+| 8-5 | HOM load at E-plane mitre bend | §8 |
+| 8-6 | HOM load at H-plane mitre bend | §8 |
+| 8-7 | Water-cooled HOM load plate | §8 |
+| 8-8 | Four RF cavities in tunnel — outward view (tuner side) | §8 |
+| 9-1 | PEP-II Klystron HVPS — annotated circuit schematic | §9 |
+| 9-2 | HVPS2 main oil tank exterior, B514 | §9 |
+| 9-3 | SCR thyristor stacks inside HVPS2 phase tank | §9 |
+| 9-4 | HVPS cable switch tank at B514 | §9 |
+| 9-5 | HVPS2 installation — B514 outdoor view | §9 |
+| 9-6 | HVPS2 oil tank top view — stack assembly tank maintenance, April 2026 down | §9 |
+| 10-1 | HVPS Hoffman Box SPEAR1 — closed front view | §10 |
+| 10-2 | HVPS Hoffman Box SPEAR1 — interior view | §10 |
+| 10-3 | HVPS Hoffman Box SPEAR2 — closed front view | §10 |
+| 15-1 | Fast Interlock Chassis 340-308, B132 | §15 |
+| 17-1 | Cavity Tuner Motor Driver — chassis interior (AB modules) | §17 |
+| 17-2 | Cavity Tuner Motor Driver — front panel | §17 |
+
+---
+
+# PART I — SYSTEM OVERVIEW
+
+---
+
+## 1. Introduction and Purpose
+
+### 1.1 PEP-II Heritage
+
+The SPEAR3 RF system is a direct adaptation of a PEP-II B-Factory High Energy Ring (HER) RF station. PEP-II was an asymmetric electron-positron collider at SLAC that operated from 1999 to 2008 with up to 10 RF stations. When SPEAR was upgraded to SPEAR3 (a 3rd-generation synchrotron light source) in 2003, a complete PEP-II HER station — klystron, four RF cavities, HVPS, waveguide distribution, and LLRF electronics — was installed as the SPEAR3 RF system [R1] [R2] [R3].
+
+![Legacy System Architecture](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Legacy_Architecture.png)
+
+*Figure 1-1: Legacy LLRF control architecture*
+
+---
+
+## 2. System Architecture Overview
+
+### 2.1 Top-Level System Block Diagram
+
+The legacy SPEAR3 RF system consists of the following major elements:
+
+```
+ SPEAR3 RF STATION — LEGACY SYSTEM ARCHITECTURE
+ (pre-LLRF upgrade  ·  Buildings: B132=klystron/ctrl · B118=HVPS ctrl · B514=HVPS power)
+
+                  ┌────────────────────────────────────────────────────────┐
+                  │              EPICS CONTROL LAYER  [B132]               │
+                  │  VxWorks RTOS · EPICS IOC · 6 SNL programs             │
+                  │  EDM operator panels  ·  Channel Access  ·  Archiver   │
+                  └──────────────────────────┬─────────────────────────────┘
+                                             │ VXIbus P2 backplane
+  ┌──────────────────────────────────────────┴────────────────────────────────────────┐
+  │                      VXI CRATE  (Elma 13-slot)  [B132, rm 101]                    │
+  │  [0]IOC  [1]AB6008  [2]CLK  [4]RFP  [5]MPSShtf  [6]LinkPassthru                   │
+  │  [7]IQA-1  ···  [9]IQA-2  ···  [11]IQA-3  ···  [12]AIM                            │
+  └───┬───────────────────────────────────────────────────────────────────────────────┘
+      │
+  ════╪════════════ AB REMOTE I/O (RIO) serial link ═════════════════════════════════
+      │     VXI slot 1: AB 6008-SV1R Remote I/O scanner (link master) · ~1 Hz
+      │     One link, three RIO adapters ("racks"): 1 = HVPS · 2 = tuners · 3 = RF MPS
+      ├──────────────────────────────┬────────────────────────────────────────────┐
+      │                              │                                            │
+ ┌────┴──────────────┐  ┌────────────┴──────────────────────┐  ┌──────────────────┴──────────────┐
+ │  SLC-500 PLC      │  │  AB PLC-5 + 1771-DCM              │  │  STEPPER CHASSIS 340-315        │
+ │  [B118] RIO rack 1│  │  RF MPS  [B132]     RIO rack 3    │  │  [B132]        RIO rack 2       │
+ │                   │  │                                   │  │  SLC adapter +                  │
+ │  HVPS sequencing  │  │                                   │  │  4× AB 1746-HSTP1               │
+ │  Voltage reg.     │  │  Equipment protection:            │  │  (step/direction pulse output)  │
+ │  Temp monitoring  │  │  · klystron collector power       │  └──────────────────┬──────────────┘
+ │  PPS relay chain  │  │  · waveguide arc detection        │                     │ step/dir pulses
+ │  Enerpro SCR ctrl │  │  · cavity reflected power         │                     ▼
+ │  (1747-L532 CPU   │  │  · cooling water / vacuum         │  ┌─────────────────────────────────┐
+ │   1747-DCM RIO    │  │  · HVPS fault status              │  │  SS2000MD4 PWM TRANSLATORS × 4  │
+ │   adapter)        │  │  Removes MPS permit →             │  │  [B132]                         │
+ └──────┬────────────┘  │   SCR ENABLE off + RF drive off   │  │  step/dir → bipolar motor I     │
+        │               └──────────────┬────────────────────┘  └──────────────────┬──────────────┘
+        │                              │ hardwired I/O                            │ motor cables
+        │                              │ (permits/interlocks)                     │ (to tunnel)
+        │                              ▼                                          │
+        │           ┌──────────────────────────────────────┐                      │
+        │           │  FAST INTERLOCK CHASSIS 340-308      │                      │
+        │           │  [B132]                              │                      │
+        │           │  Inputs:                             │                      │
+        │           │   · arc sensors (fiber in, tunnel)   │                      │
+        │           │   · reflected power RF detectors     │                      │
+        │           │   · HVPS status (fiber in, B514)     │                      │
+        │           │   · MPS PLC permit (relay)           │                      │
+        │           │  ──────────────────────────────────  │                      │
+        │           │  Status ────────────────────────────────► VXI AIM (slot 12) │
+        │           │  SCR ENABLE (fiber optic) ──────────────► B514  (sig <1 μs) │
+        │           │  CROWBAR fire (fiber optic) ─────────────► B514  (≈10 μs)   │
+        │           └──────────────────────────────────────┘                      │
+        │                                                                         │
+        │  PPS relay chain (via PLC ladder):                                      ▼  (tunnel)
+        │   Slot5-OX8 OUT2 → K4 → MX → L1 hold coil → Ross HQ3 Vacuum Contactor (switchgear)
+        │   Slot2-IO8 OUT3 (120 VAC) → Ross Grounding Switch (Termination Tank, B132)
+        │
+        │  SCR ENABLE / CROWBAR / STATUS  (fiber optic ↔ B514; PLC supervisory path, ~10–20 ms)
+        ▼
+ ┌───────────────────────────────────────────────────────────────────────────────────┐
+ │                            HVPS POWER SECTION  [B514]                             │
+ │  SPEAR1 + SPEAR2  (two complete identical units; one energized, the other fully   │
+ │  off; roles exchanged at the April and August scheduled downs)                    │
+ │                                                                                   │
+ │  12.47 kV 3φ 60 Hz  →  Switchgear  →  Phase-shift xfmr T0 (2750 kVA, ±15°)         │
+ │                      →  12-pulse SCR bridges (168 × Powerex T8K7 thyristors)      │
+ │                      →  Filter inductors L1/L2 (0.3 H each)                       │
+ │                      →  4 series rect./filter stages, 8 μF each (26/26/26/13 kV)  │
+ │                      →  Crowbar SCRs (4 stacks, ≈10 μs, fiber-optic trigger)      │
+ │                      →  Termination tank inductors (350 μH)  →  HV DC out        │
+ └──────────────────────────────┬────────────────────────────────────────────────────┘
+                                │ ≈ −72 to −75 kV DC · 19–22 A (HV cable via Termination Tank, B132)
+ ───────────────────────────────│──────────── RF SIGNAL PATH  [B132] ──────────────────────
+                                │
+             VXI RFP module     ▼              ~29 W
+              (476.3 MHz) ──► DRIVE AMP ──────────────────────► KLYSTRON ◄─── HV cathode (HVPS)
+                               KAW2051M12                        [B132]  ◄─── Solenoid PSU
+                               [B132]                          476.3 MHz ◄─── Filament (AIM)
+                                                               ~800 kW
+                                                                   │
+ ───────────────────────────────────────────────────────── TUNNEL ─│───────────────────────
+                                                                   ▼
+                                                           ┌───────────────┐
+                                                           │  CIRCULATOR   │──► WG Load (dump)
+                                                           └───────┬───────┘
+                                                                   │
+                                                           ┌───────┴───────┐
+                                                           │  MAGIC-TEE 1  │──► WG Load
+                                                           └──────┬────────┘
+                                                                  │
+                                                        ┌─────────┴─────────┐
+                                                        │                   │
+                                                 ┌──────┴──┐         ┌──────┴──┐
+                                                 │ MT-2    │         │ MT-3    │
+                                                 └──┬───┬──┘         └──┬───┬──┘
+                                                    │   │               │   │
+                                                  Cav-A Cav-B         Cav-C Cav-D
+                                            (4 PEP-II HOM-damped copper cavities)
+                                            (476.3 MHz · ~712 kV gap voltage each)
+                                                  │                       │
+                                   Refl. ────────► IQA-2 (cavity refl.) Arc sensors (fiber optic)
+                                   Probe ────────► IQA-3 (cavity probe) ──────────────────────────►
+                                   Fwd/Refl ─────► IQA-1 (klystron)      Fast Interlock Chassis
+                                                  │
+                                          Tuner plunger ◄── SLO-SYN M093-FC11 stepper motor ◄── SS2000MD4 translator ◄── STEPPER CHASSIS (above)
+                                                             (one per cavity, lin. pot. feedback)
+                                                             
+```
+
+> **Note on interlock timings shown above**: `<1 μs` is the *signal* latency of the Fast Interlock Chassis comparator and its fiber-optic link. The physical response is slower and is what actually bounds the protection: the crowbar thyristors begin conducting ≈ 10 μs after the trigger, and complete interruption of primary current takes 4–8 ms because the phase-control thyristors can only stop conducting at an AC zero crossing [R6]. See §12.1.
+>
+> **Note on the tuner chain**: The legacy path — `rf_tuner_loop.st,v` (SNL) → Remote I/O → Stepper Chassis 340-315 (1746-HSTP1) → SS2000MD4 translators → SLO-SYN motors — **is the configuration currently in service**. A Galil DMC-4143 4-axis Ethernet controller in a new SLAC chassis has been procured and bench-tested (it successfully drove the installed cavity motors in August 2025 [R34]) but is **not yet installed or operational**; it will go online when the LLRF upgrade project completes. The SLO-SYN motors and linear potentiometers are retained in both configurations.
+
+### 2.1.1 Major Block Descriptions
+
+| Block | Location | Description |
+|-------|----------|-------------|
+| **EPICS Control Layer** | B132 | VxWorks RTOS on VXI slot-0 PowerPC (350 MHz). Hosts 6 SNL state-machine programs (`rf_states`, `rf_hvps_loop`, `rf_tuner_loop`×4, `rf_dac_loop`, `rf_calib`, `rf_msgs`) plus ~78 EPICS process-variable database files. Provides ~1 Hz supervisory control; all fast feedback is in hardware below this layer. |
+| **VXI Crate** (Elma 13-slot) | B132, rm 101 | The master intelligence of the RF station. Slot 1 (AB 6008-SV1R) is the Remote I/O scanner linking to all PLCs. Slot 2 (CLK) generates the 471.187 MHz LO and all system clocks. Slot 4 (RFP) implements the analog RF feedback loop. Slots 7/9/11 (IQA×3) measure forward power, reflected power, and cavity probes. Slot 12 (AIM) manages arc detection, fault capture, and direct hardware interlock I/O. |
+| **AB Remote I/O (RIO) serial link** | B132 backbone | Allen-Bradley proprietary Remote I/O ("blue hose") serial bus — **not** Data Highway+. The VXI slot-1 **AB 6008-SV1R** is the RIO *scanner* (link master); the PLCs appear on the link as RIO *adapters* (racks) through their DCM modules. Three adapters share the one link: rack 1 = HVPS SLC-500 via 1747-DCM (B118, Full rack), rack 2 = cavity tuner stepper chassis (B132, 3/4 rack), rack 3 = RF MPS PLC-5 via 1771-DCM (B132, 1/4 rack). ~1 Hz update rate. All supervisory setpoints, enables, and readbacks between the VXI IOC and the external PLCs/stepper chassis travel on this link. See §5.7.1 for the adapter/card map. |
+| **SLC-500 PLC** (AB-1747-L532) | B118, Hoffman Box | HVPS controller. Appears on the Remote I/O link as adapter (rack) 1 through its 1747-DCM. Functions: HVPS power-up/down sequencing, analog voltage regulation (PLC reference + analog regulator error → Enerpro SIG HI → SCR firing angle), 8-channel thermocouple monitoring, PPS relay chain (Slot-5 OX8 → K4 → MX → L1 hold coil → Ross HQ3 contactor; Slot-2 IO8 → Ross Grounding Switch), supervisory fiber-optic SCR ENABLE/CROWBAR outputs to B514. **Note**: legacy PPS compliance issue — both PPS chains pass through PLC ladder logic. |
+| **RF MPS — AB PLC-5 + 1771-DCM** | B132 | RF Machine Protection System. Allen-Bradley PLC-5 with 1771-series I/O; appears on the Remote I/O link as adapter (rack) 3 through its 1771-DCM. Monitors klystron collector power (cathode power minus RF output), cavity reflected power, waveguide arc conditions, cooling water flow, klystron vacuum, and HVPS fault conditions. On any trip: removes MPS permit → HVPS SCR ENABLE removed + RF drive inhibited. Hardwired to Fast Interlock Chassis for permit exchange. *A ControlLogix 1756 replacement has been assembled and tested without RF power but is **not yet in service** — see §14.2.* |
+| **Stepper Chassis 340-315** | B132 | SLAC chassis (SN08) with SLC bus adapter and 4× AB 1746-HSTP1 high-speed stepper controller modules. One 1746-HSTP1 per cavity. Remote I/O adapter (rack) 2, commanded by the `rf_tuner_loop.st,v` SNL program. Outputs step-pulse and direction signals to the SS2000MD4 translators. *Currently in service; to be replaced by the Galil DMC-4143 at the end of the LLRF upgrade project.* |
+| **SS2000MD4 PWM Motor Translators** | B132 | Superior Electric SLO-SYN SS2000MD4-M bipolar PWM step drive translators, one per motor. Convert the step/direction digital pulse train from the 1746-HSTP1 (or Galil) into bipolar phase current to drive the two-phase stepper motor windings. |
+| **Fast Interlock Chassis 340-308** | B132 | Hardware interlock hub. Inputs: arc sensor fiber optics from the 4 cavity waveguide windows, klystron window and circulator; RF power detector signals for reflected-power limits; RF MPS PLC permit (relay); HVPS status (fiber optic from B514, informational only). Outputs: SCR ENABLE removal and CROWBAR firing (fiber → B514). Comparator-to-fiber signal latency is <1 μs; the resulting crowbar conduction begins ≈ 10 μs later and primary current interruption takes 4–8 ms (§12.1). Note: the SPEAR MPS beam permit and orbit interlock connect to the back connector of **VXI Slot 5 (MPS Shutoff)**, not to this chassis. Summarized status word is reported to the VXI AIM module (slot 12). |
+| **Local Control Chassis** | B132 | Separate SLAC chassis that gathers and distributes a portion of the station's hardwired interlock and control wiring and connects it to the Fast Interlock Chassis [R5] §2.1. It is a wiring/permit aggregation point, not a trip-decision element. *Detailed I/O list not yet captured — see §20.2.* |
+| **HVPS Power Section** (SPEAR1 + SPEAR2) | B514 | Two complete, identical 12-pulse thyristor phase-controlled rectifier units. One unit is energized and the other is completely switched off (not a warm standby); the roles are exchanged at the two scheduled downs each year (April and August). Input: 12.47 kV 3-phase AC from substation 507. Conversion chain: phase-shift transformer T0 (2750 kVA, ±15°) → 12-pulse SCR bridges (168× Powerex T8K7) → filter inductors L1/L2 (0.3 H) → 4 series rectifier/filter stages (8 μF each) → crowbar (4 SCR stacks, fiber-optic trigger, ≈10 μs) → termination-tank inductors L1/L2 (350 μH) → HV DC to the klystron cathode (§4.2). |
+| **Drive Amplifier KAW2051M12** | B132 | Broadband RF power amplifier. Amplifies the VXI RFP module baseband-modulated RF output to ~29 W (44.6 dBm) at 476.3 MHz, which drives the klystron input waveguide. |
+| **Klystron** | B132 | Marconi 476 MHz CW klystron, rated ~1.5 MW — the rating the HVPS and RF system were sized for. Negative HV cathode; solenoid focused; non-full-power collector (collector dissipation must be monitored by MPS). Typical operating point: ~800 kW RF output at ≈ −72 kV / ≈ 19 A (§4.3). Filament controlled by VXI AIM module. |
+| **Circulator + Waveguide Network** | B132/Tunnel | AFT ferrite circulator routes klystron reflected power to a water-cooled load, protecting the klystron. WR-1800 rectangular waveguide then divides power through a 2-stage magic-tee network: Magic-Tee 1 → Magic-Tees 2 and 3 → each feeds a pair of RF cavities. Three water-cooled waveguide loads absorb difference-port (reflected) power. |
+| **RF Cavities × 4** | Tunnel | Four single-cell HOM-damped copper cavities (PEP-II HER design). Each at 476.3 MHz, ~712 kV gap voltage (operating), 3 HOM dampers, ceramic RF window, internal probe, and movable tuner plunger. Arc detection sensors at cavity waveguide windows send fiber-optic fault signals to the Fast Interlock Chassis. |
+| **SLO-SYN M093-FC11 Stepper Motors × 4** | Tunnel | Superior Electric NEMA 34D stepper motors. Each drives a movable plunger in its RF cavity; plunger depth shifts the cavity resonant frequency. Linear potentiometer on each assembly provides position feedback. The SNL `rf_tuner_loop.st,v` program closes a phase-based slow loop: IQA cavity phase reading → compute resonance error → command motor steps. |
+
+![LLRF control electronics in Room 101, Building B132](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/LLRF%20in%20room%20101%20building%20132.png)
+
+*Figure 2-1: LLRF control electronics in Room 101, Building B132 — the primary control location for the SPEAR3 RF station, housing the VXI crate, drive amplifier, and associated electronics racks*
+
+### 2.2 Subsystem Summary
+
+| Subsystem | Location | Primary Hardware | Legacy Control | Function |
+|-----------|----------|-----------------|----------------|----------|
+| LLRF Controller | B132 | VXI crate (RFP, IQA×3, CLK, AIM) | SNL/EPICS on VxWorks | RF feedback and station control |
+| HVPS Power Section | B514 | Transformer, thyristor bridges, crowbar | — (power electronics) | Negative HV DC to klystron cathode |
+| HVPS Controller | B118 | SLC-500 PLC, analog regulator, Enerpro FCOG6100 + FCOAUX60 | PLC ladder logic + SNL | Voltage regulation and sequencing |
+| RF MPS | B132 | AB PLC-5 + 1771 I/O | PLC ladder logic | Equipment protection |
+| PPS Interface | B118/Switchgear | Hoffman box, relay chain, Ross switch | Hardwired + PLC | Personnel safety |
+| Tuner Motors | Tunnel | SLO-SYN M093-FC11 × 4 | AB 1746-HSTP1 via SNL | Cavity frequency tuning |
+| Interlock System | B132 | Fast Interlock Chassis 340-308 + Local Control Chassis (separate units) | Analog + PLC | Fault detection and trip chains |
+| Klystron + Drive | B132 | Marconi klystron, KAW2051M12 drive amp | VXI (RF output) | RF power amplification |
+| Waveguide + Cavities | B132/Tunnel | WR-1800 waveguide, 4 PEP-II cavities | — (passive) | RF power distribution and acceleration |
+
+> **Sources**: [R5] §2.1; [R9]; [R10], [R11]; [R53] §2.2.
+
+---
+
+## 3. Physical Layout and Locations
+
+The SPEAR3 RF station is distributed across multiple buildings at SSRL. Understanding the physical geography is essential for understanding cable runs, signal latency, and maintenance access.
+
+| Location | Equipment | Distance from B132 |
+|----------|-----------|-------------------|
+| **Building B132** (room 101) | Klystron, drive amplifier, VXI crate (LLRF controller), RF MPS PLC, Fast Interlock Chassis, Local Control Chassis, stepper motor controllers | — (primary location) |
+| **Building B118** (Power Supply Room) | HVPS Controller (Hoffman NEMA enclosure), SLC-500 PLC, Enerpro firing boards, analog regulator card, monitoring oscilloscope | ~100 m cable run to B514 |
+| **Building B514** (HVPS Substation) | HVPS Main Tank (transformer, rectifier, inductor, filter caps), Phase Tank (12 thyristor stacks), Crowbar Tank (4 thyristor stacks, output voltage divider) | - |
+| **Contactor Disconnect Panel** (Switchgear) | Vacuum contactor (Ross HQ3), contactor controller/driver (Ross HCA-1-A), K4/MX/RR/TX/BR relays, L1 holding and L2 closing coils, S2–S5 auxiliary contacts | B514 |
+| **Termination Tank** (B132, rm101) | HV cable termination, Ross Engineering HV grounding switch, Danfysik DC-CT, Pearson CT-110 current transformer | Near klystron |
+| **Switch-over Tank** | HV cable connections between SPEAR1/SPEAR2 HVPS and klystron | Adjacent to B514 |
+| **SPEAR3 Storage Ring Tunnel** | 4 RF cavities, waveguide distribution network (circulator, magic-tees, waveguide loads), tuner motor assemblies, arc detection sensor mounting points | Radiation area, restricted access |
+
+![Building B132 — klystron gallery exterior](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/bldg132.jpg)
+
+*Figure 3-1: Building B132 — the klystron building housing the LLRF control electronics, drive amplifier, and RF MPS; the "132" building number is visible on the metal-clad corrugated exterior, with utility pipe runs, electrical panels, and the RF area access road in the foreground*
+
+![Building B514 — HVPS substation](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Building514.jpg)
+
+*Figure 3-2: Building B514 — the high-voltage power supply substation housing the main transformer/rectifier tank, phase tank, and crowbar tank*
+
+![HVPS grounding/termination tank in Building B132](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HVPS_Grounding_Tank_in%20Building132-Termination%20Tank.jpg)
+
+*Figure 3-3: HVPS grounding and termination tank located near Building B132 — cylindrical stainless/aluminum vessel with two high-voltage cable entries through flexible metallic conduit at the top; contains the Ross Engineering HV grounding switch, the Danfysik UltraStab DC-CT that measures klystron cathode current, a 3.333 mΩ (15 A = 50 mV) return-cable shunt, and the Pearson CT-110 wide-bandwidth current transformer used for klystron arc detection [R25]*
+
+![RF cavities in the SPEAR3 storage ring tunnel — inward view](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Cavities%20in%20tunnel_inward%20view.png)
+
+*Figure 3-4: RF cavities installed in the SPEAR3 storage ring tunnel (inward view) — showing the waveguide connections and cavity arrangement in the radiation enclosure*
+
+> **Sources**: [R5] §3; [R25]; [R14].
+
+---
+
+## 4. Key System Parameters
+
+> **How to read the numbers in this section.** Two of the station's headline quantities are not fixed constants:
+>
+> - **RF frequency.** The ring circumference changes slowly with tunnel temperature, and the RF frequency is retuned to keep the harmonic condition satisfied. The operating frequency therefore wanders over a range of a few tens of kHz about 476.3 MHz. This document uses **476.3 MHz** as the nominal value and quotes precise figures only where the source of a specific reading matters (see the RF frequency row below).
+> - **Klystron cathode voltage and current.** These are adjusted continuously by the HVPS supervisory loop to hold drive power in range as beam current, klystron gain, and cavity conditions vary. Values quoted in this document are typical readbacks with their date/source identified, not setpoints.
+>
+> Where two source documents give slightly different values for the same quantity, both are given with their provenance rather than being averaged or silently reconciled.
+
+### 4.1 RF System Parameters
+
+| Parameter | Value | Notes |
+|-----------|-------|-------|
+| RF Frequency (nominal) | ~476.3 MHz | Harmonic 372 of the revolution frequency. Not fixed: retuned by a few tens of kHz as the ring circumference drifts with tunnel temperature. Representative values on record: **476.3051755 MHz** measured [R8t]; **476.309 MHz** is the value the CLK module was designed to (§5.8.2) [R53]. Both lie well inside the ±200 PPM CLK tuning range. |
+| Revolution Frequency | ~1.2804 MHz | = f_RF / 372 |
+| Ring Circumference | ~234.14 m | Doc P value [R55]. The CLK design table quotes 234.126 m (§5.8.2); the difference is within the thermal drift described above. |
+| Beam Energy | 3.0 GeV | |
+| Design Beam Current | 500 mA | Top-off mode |
+| Fill Pattern | 276 bunches in 4 groups + 1 camshaft | |
+| Number of Cavities | 4 | Single-cell, HOM-damped copper (PEP-II HER type) |
+| Cavity Shunt Impedance (R_s) | 3.73 MΩ (linac convention) | Schwarz [R7]. Equivalent to 7.5 MΩ in the accelerator convention; McIntosh [R1] quotes 3.8 MΩ accelerator-convention. See Appendix B.3. |
+| Cavity Unloaded Q (Q_0) | 32,000 | Schwarz [R7] |
+| Cavity Loaded Q (Q_L) | ~6,700 | β ≈ 3.78 (coupling factor); Q_L = Q_0/(1+β) |
+| Gap Voltage per Cavity | ~712 kV | Operating point (design: 800 kV) [R4] |
+| Total Accelerating Voltage | ~2.85 MV | Sum of 4 cavities (design 3.2 MV) |
+| Klystron Output Power | ~800 kW | Typical operating (tube rated ~1.5 MW) |
+| Drive Power | ~29 W | At klystron input |
+| IF Frequency | 5.1216 MHz | = RF/93 = RF − LO. (The PEP-II IF is 4.9072 MHz = RF/97 — a *different* divisor; see §5.8.2.) |
+| LO Frequency | 471.187 MHz | Generated by CLK module PLL471 (= RF × 92/93); distributed to the IQAs at +14.0 dBm on PKZ front-panel connectors [R53] §3.0.5 |
+
+> **Cross-reference**: `Designs/P_RF_PHYSICS_AND_PLANT.md` [R55] is the authoritative source for beam and cavity physics parameters and their derivations. Where this document and Doc P differ, Doc P governs for physics quantities and Doc L governs for as-installed hardware.
+
+### 4.2 HVPS Parameters
+
+| Parameter | Value | Notes |
+|-----------|-------|-------|
+| Input Power | 12.47 kV RMS, 3-phase, 60 Hz | Substation 507, Breaker 160. Rated **127 A/phase** at 12.5 kV, 2750 kVA, per the NWL nameplate schematic [R70]; typical input current ≈ 113 A [R56] |
+| Phase-shifted secondary (to T1/T2 primaries) | 12.91 kV RMS phase-to-phase | The ±15° extended-delta output is 4% larger than the incoming line. The specification [R22] carries 12.47 kV in its text but 12.91 kV in its figures; 12.91 kV is correct [R56] |
+| Output Voltage (rated max) | −90 kV DC | Negative polarity for klystron cathode |
+| Output Current (rated max) | 27 A | |
+| Output Power (rated max) | 2.5 MW | |
+| Output Voltage (typical operating) | ≈ −72 to −75 kV | Varies with beam current and klystron gain. −74.7 kV is quoted for full 500 mA operation [R56]; −72.08 kV was the June 2020 reading (§4.3) |
+| Output Current (typical operating) | ≈ 19 to 22 A | 22.0 A at full 500 mA operation [R56]; 19.4 A in June 2020 (§4.3) |
+| Output Voltage with HVPS off (klystron load) | ≈ 1.3 kV | **Not zero.** Transformer primary-to-secondary leakage is rectified by the output diodes even with the phase-control thyristors not firing. Goes to zero only when the input contactor opens [R56] |
+| Topology | 12-pulse thyristor phase-controlled rectifier | "Star point controller" configuration, primary-side filter inductor [R6] |
+| Voltage Regulation | < 0.1% | Design specification, Cassel & Nguyen [R6]. *A ±0.5% figure appears in a later PEP-II slide set; the published paper value is used here.* |
+| Ripple | < 1% peak-to-peak, < 0.2% RMS | Above 60 kV [R6] |
+| Configuration | 2 units — SPEAR1 and SPEAR2 | One unit is energized; the other is completely switched off (not a warm standby). Roles are exchanged at the two scheduled downs each year (April and August). Either unit may be the active one. |
+
+### 4.3 Representative Operating Point (June 2020)
+
+A single consistent set of readbacks, used throughout this document to check the HVPS control-chain arithmetic. It is a snapshot, not a setpoint.
+
+| Parameter | Measured | Calculated | Difference |
+|-----------|----------|-----------|-------|
+| Output Voltage | 72.08 kV | 72.08 kV (input) | — |
+| Output Current | 19.4 A | 19.2 A (Child–Langmuir, perveance ≈ 1 μperv) | 1.0% |
+| Power | 1.398 MW | 1.384 MW | 1.0% |
+| Firing Angle | SIG HI = 4.40 V | α ≈ 36.8° | Consistent |
+| Voltage Sense | 7.183 V | 7.19 V (divider ÷ 10,035) | 0.1% |
+
+> **Divider check**: each HVPS output divider is **five 20 MΩ resistors in series (100 MΩ) into two 1 MΩ in parallel (500 kΩ)** — R1–R7 and R11–R17 on WD-730-794-04-C0 [R71]. The 500 kΩ bottom leg is loaded by the regulator board’s ≈ 10.5 kΩ input, which dominates it, so the end-to-end scale factor is $R_\text{load}/R_\text{div} = 10^4/10^8 = 10^{-4}$, i.e. **≈ 10,000:1** — 9.1 V at the full 91 kV output, consistent with the ÷10,035 above [R72].
+
+---
+
+# PART II — RF SIGNAL CHAIN
+
+---
+
+## 5. LLRF Controller (VXI System)
+
+### 5.1 Overview
+
+The LLRF controller is a VXI-based system located in Building B132 that provides the fast RF feedback, station state management, and measurement functions for the RF station. It was designed for PEP-II by P. Corredoura, S. Allison, R. Sass, R. Tighe, and R. Claus at SLAC (1996–1997).
+
+The VXI crate hosts a Kinetics Systems IOC running VxWorks RTOS, which serves as the primary intelligence for the entire RF system. All communication with external PLCs (HVPS, MPS, stepper motors) passes through the VXI crate via an Allen-Bradley DCM serial communication module.
+
+![VXI crate (VxWorks IOC) in Building B132](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/LLRF%20VX%20works%20crate.jpg)
+*Figure 5-1: VXI crate running VxWorks RTOS in Building B132 — slot 0: EPICS IOC host (350 MHz MPC 750 PowerPC, VxWorks); slot 1: AB6008 scanner (DCM serial link); slot 2: CLK/RF distribution (clock and 471.187 MHz LO, requires ≥9 dBm RF input); slot 3: empty (GVF not installed); slot 4: RFP (RF Processor, direct feedback loop); slot 5: MPS Shutoff; slot 6: Link Passthru (also routes ripple-link backplane signal between IQA-1 and RFP); slot 7: IQA-1 (forward/reflected power, ripple-link source); slot 8: empty; slot 9: IQA-2 (cavity reflected); slot 10: empty; slot 11: IQA-3 (cavity probe); slot 12: AIM (arc/interlock)*
+
+![VXI crate rear — B132 LLRF rack cabling](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/back_of_llrf_rack.jpg)
+*Figure 5-2: Rear of the LLRF VXI crate (Elma chassis, SLAC EEIP accepted 2019) in Building B132 — showing the dense cable plant of orange fiber optic cables (SCR ENABLE/CROWBAR/STATUS runs to B514), blue coaxial signal cables (IQA measurement inputs), and multi-conductor control wiring interconnecting the VXI modules*
+
+### 5.2 VXI Module Inventory
+
+| Slot | Module | Function | SPEAR3 Status |
+|------|--------|----------|---------------|
+| 0 | B132-IOCRF (Slot 0 μProcessor) | VXI bus controller, EPICS IOC host (VxWorks RTOS, Kinetics Systems) | **Active** |
+| 1 | AB Scanner | Allen-Bradley DCM serial communication module (PLC interface) | **Active** |
+| 2 | CLK/RF Distribution | Master clock, LO generation (471.187 MHz = RF × 92/93), RF reference fanout (+14.0 dBm); CLK40/20/10 timing signals; TSYNC synchronization pulse | **Active** |
+| 3 | *(empty)* | GVF slot from PEP-II — not installed in SPEAR3 | ⚠️ **Not installed** |
+| 4 | RFP (RF Processor) | Central feedback processing — IQ demod, vector sum, direct loop, baseband modulator | **Active** |
+| 5 | MPS Shutoff | CF2 slot from PEP-II, repurposed for MPS Shutoff in SPEAR3 | **Active** |
+| 6 | Link Passthru | RF amplifier Link passthrough module | **Active** |
+| 7 | IQA-1 | Forward power — klystron output forward and reflected power | **Active** |
+| 8 | *(empty)* | — | — |
+| 9 | IQA-2 | Reflected power — all-cavity reflected power measurement (4 cavities via channel mux) | **Active** |
+| 10 | *(empty)* | — | — |
+| 11 | IQA-3 | Cavity probe — all-cavity probe signal measurement (4 cavities via channel mux) | **Active** |
+| 12 | ARC/Interlock Module (AIM) | Arc detection, interlock management, fault history | **Active** |
+
+> **Authoritative source**: `rfApp/DbIoc/srf1.substitutions,v` (lines 103–104), which instantiates the `crat_vxi_13slot.db` template for the SRF1 station VXI crate (Elma, B132-101-11-24).
+
+> **Sources**: [R53] §2.0 and Fig. 2 (crate layout); [R7], [R7t] (RF System Description); [R10], [R11] (block diagrams); [R2] Fig. 1 (VXI crate topology).
+
+### 5.3 RFP (RF Processor) Module — Heart of the LLRF
+
+The RFP module is the central signal processing module in the VXI crate. It performs:
+
+**Analog Signal Processing**:
+
+- IQ demodulation of 4 cavity probe signals (476 MHz → 5.122 MHz IF → baseband I/Q)
+- Vector summing of 4 cavity I/Q signals
+- Direct loop error amplifier comparing vector sum against IQ reference
+- Lead and integral compensation networks for loop stability
+- Baseband modulator (4 × Gilbert-cell multipliers in 2×2 matrix for I→I, I→Q, Q→I, Q→Q correction)
+- IQ RF modulator (baseband → 476 MHz upconversion for klystron drive)
+
+**Digital Control Interface**:
+
+- Octal DACs (12-bit, ±2048 counts) for: tune mode IQ setpoints, operate mode IQ offsets, klystron modulator matrix coefficients, ripple loop coefficients
+- Mode control: TUNE / OPERATE switching
+- RF switch: enable/disable RF output to klystron
+- Built-in history buffer (circular buffer, freeze on fault for post-mortem analysis)
+
+**Key PVs** (from `rf_dac_loop_pvs.h,v`, `rf_states.st,v`, and `rfp.db`):
+
+```
+{STN}:STN:TUNE:IQ.A           — Tune mode IQ setpoint magnitude (counts)
+{STN}:STN:TUNE:CTRL           — Tune loop control
+{STN}:STNDIRECT:LOOP:PHASE    — Direct loop phase setpoint
+{STN}:STNDIRECT:LOOP:COUNTS   — Direct loop amplitude setpoint (counts)
+{STN}:STN:RFP:RFENABLE        — RF output enable/disable (from rf_states.st)
+{STN}:STN:RFP:RUNMODE         — TUNE/OPERATE mode select (from rfp.db)
+{STN}:STN:RFP:MODU.DLE        — Direct loop enable (RFP module register)
+```
+
+> **Sources**: [R53] §2.4; [R16]; PV names verified against `rfApp/Db/rf_fbck.db`, `rfApp/Db/rfp.db`, `rfApp/Db/historyList`.
+
+### 5.4 IQA (IQ/Amplitude Detector) Modules
+
+Three IQA modules provide precision digital measurement of RF signals. Each module performs digital IQ demodulation using a custom SLAC ASIC, producing:
+
+- I component (in-phase), Q component (quadrature)
+- Amplitude = √(I² + Q²)
+- Phase = arctan(Q/I)
+
+**Channel allocation** (SPEAR3 four-cavity configuration):
+
+- IQA-1 (Slot 7): Forward power — klystron output forward and reflected power measurement; also sources the **ripple link** — one downconverted/sampled channel sent to the RFP via the VXIbus backplane for use in the ripple loop [R53] §2.7
+- IQA-2 (Slot 9): Reflected power — all-cavity reflected power measurement (all 4 cavities, channel select mux)
+- IQA-3 (Slot 11): Cavity probe — all-cavity probe signal measurement (all 4 cavities, channel select mux)
+
+> **Verification status**: the IQA-1/2/3 functional split above is consistent with the station database and with [R53] §2.7, but the **per-connector mapping of the 8 RF inputs on each module has not been recovered from an original source**. It should be taken from the coaxial interconnection drawing [R33] and confirmed in the field before this table is used for cabling work. See §20.2.
+
+Each IQA muxes 8 RF input channels through a single ADC in round-robin fashion, downconverting from 476.3 MHz to the 5.1216 MHz IF (using the 471.187 MHz LO from the CLK module) and bandpass-filtering at the IF before quadrature sampling with the 20.486 MHz CLK20. The PEP-II variant of the module uses a different IF (4.9072 MHz) and therefore a different bandpass filter — this filter change was one of the modifications required to adapt the IQA to SPEAR3 [R53] §2.7. The 8 channels also have amplitude threshold comparators that assert `RF_FAULT` on the VXIbus backplane if any channel exceeds its programmed limit. Each IQA contains circular history buffers that record I/Q data per channel and can be read out over VXI after a fault.
+
+> **Sources**: [R53] §2.7; Ziomek, C. and Corredoura, P., "Digital I/Q Demodulator," PAC 1995 [R41]; [R2].
+
+### 5.5 ARC/Interlock Module (AIM)
+
+The AIM module provides the interface between the VXI crate and the external interlock system:
+
+- Beam abort force/reset interface
+- Filament control signals
+- HVPS permissive signals
+- Fault history buffers — two independent systems:
+  - **System A** (12-ch AIM only): 512 KB on-module hardware ring buffer (`HISBUF` register at A24 offset `0x0038`); Fast IC fast ADC continuously samples arc-channel voltages + HVPS voltage; freezes on fault. Controlled by `ADCMUX` and `ADCCTL` bits in FICTRL. Read back via `ARCVOL` sequential register.
+  - **System B** (both AIM versions): SNL `ss rf_statesFF` in `rf_states.st,v` captures 11 RF/IQA signal channels to `/dat/FAULT*_N` files at ≈1 s after fault. These are RF/IQA signals — distinct from the arc voltage data in System A.
+- Station fault word monitoring (AIM reads `FISTAT` A16 register from Fast IC)
+- Arc voltage comparator threshold configuration: AIM EPICS writes **TRIPLVL** registers (A24 offset `0x0020`) which are applied directly to the Fast IC analog comparators (range 10–255). This is the primary mechanism for setting arc detection sensitivity.
+
+**AIM `FICTRL` control register.** The AIM drives the external interlock system through bits of its Fast Interlock Control register (`FICTRL`, A16 offset `0x20`). Dusatko [R53] §2.8 identifies **six control signals** that the AIM sends to the Interlock/PLC system, and states that they travel **from the AIM to the ARC chassis and from there onward through optical fibers**, which provide the galvanic isolation — they are not individually run from the VXI module to each end device. The register also carries a seventh bit used only as a test stimulus. Bit assignments are from `rfApp/src/db/p2RfAimDef.h,v`:
+
+| Signal | FICTRL bit | Symbol | One of Dusatko's six? | Ultimate destination |
+|--------|-----------|--------|----------------------|----------------------|
+| `Solenoid_On` | 0 | `AIM_V_SOLENOID` | Yes | Klystron solenoid power supply |
+| `HVPS_On` | 1 | `AIM_V_HVPS` | Yes | B514 HVPS SCR enable hardware |
+| `Klys_Filament_On` | 2 | `AIM_V_FILAMENT` | Yes | Klystron filament heater supply |
+| `Filament_Timeout` | 3 | `AIM_V_FILTMOOVRD` | Yes | Fast IC filament-watchdog override |
+| `Forced_Fault` | 4 | `AIM_V_FRCDFLT` | **No — test input** | Fast IC forced-fault test stimulus |
+| `Fault_Reset` | 5 | `AIM_V_FLTRESET` | Yes | Fast IC arc latch reset |
+| `Beam_Abort` | 6 | `AIM_V_FRCBMABT` | Yes | SPEAR3 Machine MPS (injection kicker) |
+
+> A further bit, `AIM_V_RSTBMABT` (bit 7), resets the beam-abort latch. `Designs/I_INTERLOCK_ARCHITECTURE.md` §3.6 tabulates a different set of six (it includes `Forced_Fault` and relegates `Filament_Timeout` to a note); the grouping above follows the original Dusatko text.
+
+**`RF_FAULT` backplane line**: Open-collector line shared by CLK, RFP, and AIM. Any module asserting `RF_FAULT` is monitored by AIM (which takes interlock action) and by RFP (which immediately cuts the RF drive to the klystron). AIM can also independently assert `RF_FAULT` based on arc detection or threshold violations.
+
+**Fault file capture (System B)** (from `rf_states.st,v`, M. Laznovsky addition, 2003):
+On entering a fault state, 11 RF/IQA signal channels are captured to `/dat/FAULT<channel>_<n>` files by SNL `ss rf_statesFF`. Channel order (per `rf_states.st,v` `faultroot[]` array, `#else` branch of `#ifdef CF2` since SPEAR3 has no CF2 module): RfpSI, RfpSQ, RfpCI, RfpCQ, **CmbI, CmbQ**, Iqa1Amp, Iqa2Amp, Gvf, Aim, Iqa3Amp. `NUMFFILES=11` is the channel count (not a buffer depth). These are RF/IQA signals — distinct from the arc voltage data captured in System A (12-ch AIM hardware HISBUF).
+
+> **Sources**: [R53] §2.8; [R16] (fault file handling code); `rfApp/src/db/p2RfAimDef.h,v` (register map, drawing 340-307); [R20] (AIM status monitoring). For complete AIM/Fast IC architecture and signal details, see `Designs/I_INTERLOCK_ARCHITECTURE.md` §2–§3.
+
+### 5.6 Feedback Loop Architecture
+
+The legacy LLRF system implements multiple feedback loops, some inherited from PEP-II and some SPEAR3-specific:
+
+**Active in SPEAR3**:
+
+1. **Direct (Wideband) RF Feedback Loop** — Reduces the effective cavity impedance seen by the beam, suppressing the Robinson instability [R47] that would otherwise limit the storable current under heavy beam loading [R48]. Analog feedback at baseband, ~800 kHz bandwidth (≈ 1.25 μs response) [R8t]. Critical for beam stability. The general theory of this class of controller is treated in [R50] and, for modern digital implementations, in [R59].
+2. **Tuner Loop** — EPICS/SNL slow loop controlling the stepper motors to maintain cavity resonance. Implemented in `rf_tuner_loop.st,v` (§17.3).
+3. **HVPS Voltage Regulation Loop** — Regulates klystron cathode voltage via the PLC/analog-regulator SIG HI chain to the Enerpro SCR firing angle. Implemented across `rf_hvps_loop.st,v` (SNL) and PLC ladder logic (§10.4).
+4. **DAC Control Loop** — Manages drive power and gap voltage setpoints through the RFP octal DACs. Implemented in `rf_dac_loop.st,v`.
+5. **Ripple Loop** — Implemented in the RFP using an AGERE DSP1610 DSP IC [R53] §2.4, and *is* used in SPEAR3 to regulate constant phase and amplitude. **However**, the HVPS power-supply ripple-cancellation feature — the loop's original PEP-II purpose — is not implemented: per Dusatko, "This ripple remove feature is not implemented." The DSP1610 hardware is present and the loop runs, but only for general amplitude/phase regulation. SPEAR3-specific ripple DSP firmware is present in the source tree (`rfApp/src/dsp/`, `sp3ripple.s,v`).
+
+**NOT active in SPEAR3** (PEP-II only, module not installed):
+
+- Comb (Narrowband) RF Feedback Loop — PEP-II multi-bunch stabilization at revolution harmonics; the two CFM modules that implement it are absent from the SPEAR3 crate
+- Gap Voltage Feed-Forward (GVF/GAP) — PEP-II ion-clearing-gap transient compensation with LFB interface; module absent. SPEAR3 has no ion clearing gap, so the station reference amplitude and phase are instead supplied by a pair of RFP-resident DACs driven by a slow EPICS loop [R53] §2.4
+
+> **Sources**: [R2] (complete loop architecture); [R8], [R8t] (feedback loop description); [R53] §2.4; [R42] Fox et al. operational review.
+
+### 5.7 Communication Architecture
+
+The VXI crate communicates with all external controllers over a **single Allen-Bradley Remote I/O (RIO) serial link**. The VXI slot-1 module is an **Allen-Bradley 6008-SV1R VMEbus Remote I/O scanner** (a VME card adapted to VXI through an HP E1407A VME-to-VXI adapter) and acts as the link master. The PLCs and the stepper chassis do **not** appear as peers on a Data Highway+ network; they appear as RIO *adapters* ("racks") through their DCM modules.
+
+```
+VXI IOC (VxWorks)
+    │
+    ├── AB 6008-SV1R Remote I/O scanner (VXI slot 1)
+    │     ├── rack 1 (Full)  ──► SLC-500 PLC via 1747-DCM   (HVPS, B118)
+    │     ├── rack 2 (3/4)   ──► Stepper chassis 340-315     (4 × 1746-HSTP1, B132)
+    │     └── rack 3 (1/4)   ──► RF MPS PLC-5 via 1771-DCM   (B132)
+    │
+    ├── RF Signals ──► RFP module (476 MHz drive output)
+    │             ◄── Cavity probes × 4 (476 MHz)
+    │
+    └── Interlocks ──► AIM module ◄── Fast Interlock Chassis
+```
+
+The link provides ~1 Hz supervisory communication (setpoints, readbacks, status). Fast feedback (the direct RF loop) operates entirely within the RFP module at analog speeds. Fast interlock signals bypass the link completely and travel on hardwired/fiber paths to the Fast Interlock Chassis and AIM.
+
+#### 5.7.1 Remote I/O Adapter and Card Map
+
+Rack sizes are declared in the IOC boot file `iocBoot/b132-iocrf/config.ab,v`; the adapter and card assignments come from `rfApp/Db/rf_ab_4CV.substitutions,v` (the 4-cavity SPEAR3 configuration instantiated by `srf1.substitutions,v`).
+
+| Adapter (rack) | Size | Device | EPICS component | Cards |
+|---|---|---|---|---|
+| 1 | Full | SLC-500 HVPS PLC (1747-DCM) | `HVPSDCM` | 0, 2, 4, 6, 8, 10, 12, 14 (+ summary) |
+| 2 | 3/4 | Stepper chassis 340-315 (4 × 1746-HSTP1) | `CAV1TUNR`…`CAV4TUNR` | 0, 2, 4, 6 (one per cavity, + summary) |
+| 3 | 1/4 | RF MPS PLC-5 (1771-DCM) | `STNDCM` | 0 |
+
+The RF MPS 1771-DCM exposes eight data tables `STNDCM:T0` … `STNDCM:T7`; EPICS records read them with device types `AB-1771DCM BI`, `AB-1771DCM AI I to F`, and `AB-1771DCM AI-13 bit raw`. Communication health for each adapter is summarised into `$(S):STNDCM:SUMY:MODU`, `$(S):HVPSDCM:SUMY`, and `$(S):CAVTUNR:SUMY`, all of which feed the station alarm tree.
+
+> **Note**: `Designs/I_INTERLOCK_ARCHITECTURE.md` §5.7 and §6.4 carry the same assignment.
+
+> **Sources**: `spear-rf-code-legacy/iocBoot/b132-iocrf/config.ab,v`; `spear-rf-code-legacy/rfApp/Db/rf_ab_4CV.substitutions,v`; `spear-rf-code-legacy/allenBradley/documentation/allenBradley.html,v` — all collected as [R60]; [R53] §2.2; [R5] §2.1; [R20].
+
+### 5.8 CLK (Clock and RF Reference Distribution) Module
+
+The Clock module in VXI slot 2 is the master timing and RF reference source for the entire LLRF system. It was originally designed for PEP-II and modified for SPEAR3 frequencies. [R53] §§2.3, 3.0
+
+#### 5.8.1 VXI Crate Physical Layout
+
+The 13-slot VXI crate (Elma chassis, SLAC EEIP accepted 2019, label B132-101-11-24) is laid out as follows, per the head revision of `rfApp/DbIoc/srf1.substitutions,v` (slot-name strings shown in quotes are the literal values in that file):
+
+```
+ slot:    0        1        2       3       4        5        6       7      8      9     10     11     12
+       ┌────────┬────────┬───────┬───────┬────────┬────────┬────────┬──────┬──────┬──────┬──────┬──────┬──────┐
+       │ B132-  │  AB    │ Clock │ (empty│  RF    │  MPS   │  Link  │ IQA1 │(empty│ IQA2 │(empty│ IQA3 │ Arc  │
+       │ IOCRF  │Scanner │       │  GVF) │Process-│Shutoff │Passthru│      │  )   │      │  )   │      │Inter-│
+       │        │        │       │       │  ing   │        │        │      │      │      │      │      │lock  │
+       └────────┴────────┴───────┴───────┴────────┴────────┴────────┴──────┴──────┴──────┴──────┴──────┴──────┘
+          IOC     6008-     CLK             RFP     SPEAR    ripple-  Kly           Cavity        Cavity   AIM
+        VxWorks   SV1R                              MPS in   link      fwd/          refl.         probe
+        PowerPC   RIO                               + orbit  pass-     refl.
+                  scanner                           interlock through
+```
+
+Slots 3, 8 and 10 are empty. The gap voltage feed-forward (GVF) module and the two comb-filter modules that PEP-II carries in slots 3, 5 and 6 are not required by SPEAR3 [R53] §2.0. Slot names in the box are the literal strings from the substitution file (`"B132-IOCRF"`, `"AB Scanner"`, `"Clock"`, `"RF Processing"`, `"MPS Shutoff"`, `"Link Passthru"`, `"IQA1"`, `"IQA2"`, `"IQA3"`, `"Arc Interlock"`).
+
+**Evolution since 2004.** The Dusatko reference [R53] describes the crate as originally commissioned, when the SPEAR3 station drove **two** cavities and carried **two** IQA modules, with **slot 5 = RF AMP** (a Mini-Circuits ZFL-500HLN amplifier module added because cable losses put the incoming 476.3 MHz below the clock's +9.0 dBm minimum) and **slot 6 = MPS INTLK**. In the present four-cavity configuration those two functions have exchanged slots — slot 5 is the MPS Shutoff module and slot 6 is the "Link Passthru" module — and a third IQA has been added in slot 11. Both slot-5 and slot-6 modules pass the backplane ripple-link signal through from IQA-1 (slot 7) to the RFP (slot 4) [R53] §§2.5–2.6.
+
+> **Open item**: whether the RF-amplifier function described in [R53] §2.5 is still present (folded into the slot-6 Link Passthru module) or has been removed because the input level is now adequate has not been established from documentation. Field verification required — see §20.2.
+
+#### 5.8.2 System Timing Parameters
+
+From [R53] §3.0, Tables 1 and 2 (Dusatko v1.2). **The SPEAR3 and PEP-II clocks use different division ratios**, so each column carries its own multiplier — they are not two evaluations of one formula.
+
+| Parameter | SPEAR3 | PEP-II |
+|-----------|--------|--------|
+| Storage Ring RF | 476.309 MHz | 476.000 MHz |
+| RF Tuning Range | ±200 PPM | ±100 PPM |
+| Ring Circumference | 234.126 m | 2199.33 m |
+| Number of RF Buckets (h) | 372 | 3492 |
+| Fiducial Rate (f_RF / h) | 1.28040 MHz | 136.312 kHz |
+| LO Frequency | 471.1874 MHz (RF × 92/93) | 471.0928 MHz (RF × 96/97) |
+| CLK40 | 40.9728 MHz (32 × fiducial) | 39.2579 MHz (288 × fiducial) |
+| CLK20 | 20.4864 MHz (16 × fiducial) | 19.6289 MHz (144 × fiducial) |
+| CLK10 | 10.2432 MHz (8 × fiducial) | 9.8145 MHz (72 × fiducial) |
+| PLL40 Ref Clock | 5.1216 MHz (RF/93) | 4.9072 MHz (RF/97) |
+| **IF (= RF − LO)** | **5.1216 MHz** (RF/93) | **4.9072 MHz** (RF/97) |
+
+> **Note on the RF frequency in this table**: 476.309 MHz is the value the clock module was *designed* to (= 1.28040 MHz × 372), not a present-day readback. The station's actual operating frequency drifts by tens of kHz with ring circumference (§4.1); the clock's ±200 PPM (≈ ±95 kHz) pull range accommodates this.
+
+#### 5.8.3 Clock Module Signals (Top-Level I/O)
+
+```
+                              ┌─────────────────────────────────────┐
+                              │          VXI Clock Module           │
+From SPEAR3  476.3 MHz RF ────┼──► 476.3 MHz RF FANOUT ──────────────►  To RFP (3 copies)
+Timing       Bunch0           │  ► 471.187 MHz LO OUT ───────────────►  To IQAs (4 copies)
+System       FIDUCIAL ────────┼──► CLK40 (40.972 MHz) ───────────────►  To RFP / IQAs / AIM
+                              │  ► CLK20 (20.486 MHz) ───────────────►  To IQAs
+                              │  ► CLK10 (10.243 MHz) ───────────────►  To RFP & IQAs
+                              │  ► TCLK (1.280 MHz turn clock) ──────►  Not used (retained)
+                              │  ► TSYNC (programmable sync pulse) ──►  To IQAs (TTLTRG3)
+                              │  ► RF_FAULT ─────────────────────────►  To AIM / RFP
+VXIbus backplane ─────────────┤                                     │
+                              └─────────────────────────────────────┘
+```
+
+**Signal descriptions** [R53] §§2.3, 3.0:
+
+- **476.3 MHz RF FANOUT** — Input from SPEAR3 timing system (minimum +9.0 dBm required); amplified to +14.0 dBm and fanned out to RFP and other modules; PKZ impedance-controlled connectors
+- **471.187 MHz LO** — Phase-locked local oscillator (= RF × 92/93); 4 copies at +14.0 dBm on front-panel PKZ connectors distributed to all three IQA modules for downconversion to 5.122 MHz IF
+- **CLK40** — 40.972 MHz system clock; output on VXIbus backplane ECLTRG0 (bussed to all modules via P2); runs RFP and IQA digital logic; a delay vernier adjusts backplane timing skew
+- **CLK20** — 20.486 MHz; output on ECLTRG1; drives IQA ADC quadrature sampling
+- **CLK10** — 10.243 MHz; output on TTLTRG0; runs AIM fault/control logic and is also the reference for PLL471
+- **TCLK** — 1.280 MHz turn clock (50% duty cycle); generated by ÷372 ECL counter locked to fiducial; output on TTLTRG1; not used by any SPEAR3 module (GAP module absent) but retained for diagnostics
+- **TSYNC** — Programmable synchronization pulse derived from fiducial; width and delay are software-controlled via VXI registers; used by IQA and other modules to synchronize internal state machines; output on TTLTRG3
+- **RF_FAULT** — Open-collector backplane fault line; asserted by clock when RF input is lost or PLL loses lock; monitored by AIM and RFP
+
+#### 5.8.4 Clock Module Architecture
+
+```
+476.3 MHz ──► RF Splitter ──────────────────────────────────────►  476.3 MHz RF Fanout
+Storage Ring    and Amps
+RF input                 │
+                         ├──► PLL40 Ref Pre-Scaler (÷93) ──► 5.1215 MHz
+                         │                                         │
+                         │                                    PLL40 (×8)          CLK40 (40.972 MHz) ──►
+                         │                               Q3236 PLL IC + VCXO ────► ÷2 ─────────────────► CLK20 (20.486 MHz)
+                         │                               HV51-400P VCXO             └── ÷4 ──────────────► CLK10 (10.243 MHz)
+                         │                               Loop BW: 10 kHz
+                         │
+1.28 MHz ─────────────►  Sync Generator ──► ASYNC ──────────────────►  (resets PLL40 prescaler & dividers)
+Bunch0 Fiducial          (ESYNC, ASYNC)
+                         │
+                         ├──► Turn Counter (÷372 ECL) ──► 1.2804 MHz ──► Fiducial Error Detector ──► TCLK
+                         │                                                (compares vs. fiducial edge)
+                         │
+                         └──► (not connected)            PLL471 (×46 = ÷2 ext. + ÷23 Q3236)
+                                                          VCO: Z-COMM V418MEM1, 30 MHz range
+                                                          Reference: CLK10, Loop BW: 5 kHz
+                                                                    │
+                                                         RF Splitter and Amps
+                                                                    │
+                                                         471.187 MHz LO Fanout (4 copies) ──►
+```
+
+Both PLLs and the RF input/fanout circuitry are housed in an **ovenized thermal enclosure** on the PCB to minimize phase noise, jitter, and frequency drift.
+
+#### 5.8.5 Changes Made to Adapt Clock for SPEAR3
+
+From [R53] §3.1 and [R54] (W. Ross, "PEP-II/SPEAR3 LLRF System Clock Module Revision 2", 1 September 2001):
+
+| Item | Change for SPEAR3 |
+|------|-------------------|
+| PLL40 Ref prescaler | Division ratio changed to ÷93 |
+| PLL40 VCXO | Changed to Connor-Winfield HV51-400P (40.972 MHz center, ±200 PPM, TTL output — level-shift circuitry added to produce pseudo-ECL) |
+| PLL471 feedback divider | Changed to ÷23 (external ÷2 + Q3236 internal ÷23; effective ratio 92/93 from 476.3 MHz) |
+| Turn Counter | Division ratio changed to ÷372 |
+| Configuration ID | DIP switch changed to indicate SPEAR3 model; IOC software verifies Config ID at boot |
+
+> **Sources**: [R53] (Dusatko, "The SPEAR3 Low Level RF System Description," v1.2, 4 May 2004; updated 29 January 2016); [R54] (W. Ross, "PEP-II/SPEAR3 LLRF System Clock Module Revision 2," 1 September 2001).
+
+---
+
+## 6. Klystron and Drive System
+
+### 6.1 Klystron
+
+The SPEAR3 klystron is a **Marconi** 476 MHz CW klystron located in Building B132. It is a single-beam tube with a non-full-power collector, meaning collector power must be actively managed to avoid thermal damage.
+
+> **Note on tube provenance and rating.** PEP-II klystrons were procured from more than one source — some were built at SLAC, others by Marconi. **The tube currently installed at SPEAR3 is a Marconi unit rated 1.5 MW**, and the HVPS (−90 kV / 27 A / 2.5 MW) and the rest of the RF system were sized for that rating. The 2004 SPEAR3 RF system paper [R1] describes the station as originally installed with a 1.2 MW klystron, and the PEP-II development papers [R43], [R44] describe the SLAC-built 1.2 MW tube; those figures refer to the original PEP-II production tube, not to the unit now in service.
+
+| Parameter | Value |
+|-----------|-------|
+| Frequency | ~476.3 MHz (follows the ring; §4.1) |
+| Manufacturer | Marconi |
+| Rated Output Power | ~1.5 MW |
+| Operating Output Power | ~800 kW typical |
+| Cathode Voltage | ≈ −72 to −75 kV typical; −90 kV maximum (HVPS rating) |
+| Cathode Current | ≈ 19 to 22 A typical; 27 A maximum (HVPS rating) |
+| Perveance | ≈ 1 µperv (Child–Langmuir *I* = *P*·*V*<sup>3/2</sup>, *P* ≈ 10<sup>−6</sup>) [R56] |
+| Drive Power | ~29 W |
+| Gain | ~44.4 dB (800 kW / 29 W) |
+| Collector type | Non-full-power (requires collector power protection) |
+
+**Collector Power Protection**: Because the klystron has a non-full-power collector, the collector dissipation (cathode power minus RF output power) must be monitored. In the legacy system, this is implemented through:
+
+1. Software monitoring in `rf_hvps_loop.st,v` comparing `klystron_forward_power` vs `max_klystron_forward_power`; on excess, the HVPS voltage is reduced
+2. An MPS hardware limit using the RF detector module in the Fast Interlock Chassis, fed from a coupled sample of klystron forward power (front-panel J16, "DETECTED KLYSTRON POWER")
+3. The RF MPS PLC monitors HVPS V and I, computes collector power (`{STN}:KLYSCOLLPLC:POWER`), and removes the MPS permit if the limit is exceeded — turning off both the HVPS and the drive power
+
+![Marconi klystron installed in Building B132](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Marconi_Klystron.png)
+*Figure 6-1: Marconi klystron installed in Building B132 — 476 MHz CW klystron rated ~1.5 MW, showing the input waveguide, output waveguide, collector cooling, and solenoid focusing magnets*
+
+![Klystron filament control chassis](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Klystron%20Filament%20Control%20Chassis.jpg)
+*Figure 6-2: Klystron filament control chassis — manages the klystron heater/filament power and sequencing during startup and shutdown. The legacy chassis uses a motor-driven variac feeding a 10:1 step-down toroidal isolation transformer and a solid-state relay; it is enabled by the AIM `Klys_Filament_On` signal (§5.5) and its variac position is commanded through Allen-Bradley I/O [R5] §13.1*
+
+> **Sources**: [R5] §4.1, §4.5, §13.1; [R17]; [R43] (PEP-II prototype klystron); [R44] (PEP-II 1.2 MW production klystron); [R56] (perveance).
+
+### 6.2 Drive Amplifier
+
+The drive amplifier (KAW2051M12) boosts the LLRF drive signal to ~29 W (44.6 dBm) at the station RF frequency (~476.3 MHz) to drive the klystron input.
+
+![RF drive amplifier (KAW2051M12) in B132 rack](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/RF%20Driver%20Amplifer.jpg)
+*Figure 6-3: RF drive amplifier (KAW2051M12) in the B132 electronics rack — amplifies the LLRF drive signal to ~29 W (44.6 dBm) at ~476.3 MHz to drive the klystron input*
+
+> **Sources**: [R32] (drive amplifier datasheet); [R5] §4.4.
+
+---
+
+## 7. Waveguide Distribution Network
+
+### 7.1 Network Topology
+
+The klystron output feeds a waveguide network that distributes RF power equally to 4 cavities:
+
+```
+Klystron Output
+    │
+    ▼
+[CIRCULATOR] ──► Circulator Load (absorbs reflected power)
+    │
+    ▼
+[MAGIC-TEE 1] ──► (P4) WG Load 1
+    │         │
+    ▼         ▼
+[MAGIC-TEE 2]  [MAGIC-TEE 3]
+    │    │         │    │
+    ▼    ▼         ▼    ▼
+ Cav A  Cav B   Cav C  Cav D
+    │    │         │    │
+   (P4)  (P4)     (P4)  (P4)
+  WG Load 2      WG Load 3
+```
+
+Each magic-tee splits power equally between two outputs (P2 and P3 ports). The P4 port (difference port) receives the sum of equal reflected power from the two cavities and directs it to a waveguide load.
+
+![AFT circulator in the waveguide distribution system](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/AFT_Circulator.png)
+
+*Figure 7-1: AFT circulator — positioned between the klystron output and the magic-tee splitter network; routes reflected power from the load network away from the klystron to protect it from reflected energy*
+
+![Magic-tee and bellows network mounted on the tunnel roof](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/MagicT%20and%20Bellow%20Network%20on%20Tunnel%20Roof.png)
+
+*Figure 7-2: Magic-tee power splitter and bellows network on the SPEAR3 tunnel roof — the two-stage magic-tee arrangement divides RF power equally among all four cavities; flexible bellows sections accommodate thermal expansion in the waveguide runs*
+
+### 7.2 Monitored RF Signals
+
+The system monitors 24 RF signals at various points in the waveguide network. Key signals include:
+
+- Klystron forward and reflected power (signals 1, 2)
+- Each cavity's forward power, reflected power, and probe signal (signals 9–14, 17–22)
+- Waveguide load powers (signals 7–8, 15–16, 23–24)
+- Station reference and klystron drive (signals 5, 6 — 5 = klystron drive power, 6 = station reference power)
+- Circulator load forward and reflected power (signals 3, 4)
+
+![Waveguide distribution network from klystron to cavities](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Waveguide_network_from_klystron_to_cavity.png)
+
+*Figure 7-3: Waveguide distribution network routing RF power from the klystron output through the circulator, magic-tee splitters, and into the tunnel toward the four RF cavities*
+
+![Water-cooled waveguide load](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Water_load.png)
+
+*Figure 7-4: Water-cooled waveguide load — absorbs circulator dump power and magic-tee difference-port reflected power; water cooling carries away dissipated RF energy*
+
+![High-conductivity water cooling station behind the booster](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HCW_Station_behind_Booster_forLoad.png)
+
+*Figure 7-5: High-conductivity water (HCW) cooling station behind the booster — supplies cooling water to the waveguide loads, absorbing reflected and dump power from the RF distribution network*
+
+> **Sources**: [R5] §4.2, §4.6 (complete 24-signal table); [R33].
+
+---
+
+## 8. RF Cavities and Tuner Assemblies
+
+### 8.1 Cavity Specifications
+
+Four single-cell, HOM-damped copper cavities (PEP-II HER type) are installed in the SPEAR3 storage ring tunnel. The design is Rimmer's PEP-II cavity [R45], rated for continuous operation at 476 MHz with up to 150 kW wall dissipation under heavy beam loading, with three rectangular waveguide stubs and broadband loads damping the higher-order modes [R46]. Each cavity provides:
+
+- Accelerating gap voltage: ~712 kV (operating)
+- Resonant frequency: tuned to the station RF frequency (~476.3 MHz), tuner-adjustable
+- 3 HOM (Higher-Order Mode) loads per cavity for beam stability
+- Ceramic window for RF power transmission
+- Internal probe for field amplitude and phase monitoring
+
+Each cavity has waveguide window viewports on either side of the ceramic window, providing mounting points for arc detection sensors.
+
+![PEP-II bare RF cavity prior to assembly](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/PEP-II%20Bare%20RF%20Cavity.png)
+*Figure 8-1: PEP-II bare single-cell RF cavity — copper cavity body prior to installation of HOM dampers, tuner assembly, and waveguide couplers; the SPEAR3 cavities are of this same design*
+
+![RF cavity assembly — assembled view](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/RF%20Cavity%20Assembly.png)
+
+*Figure 8-2: RF cavity assembly — cavity body with waveguide coupler, HOM damper waveguide stubs, and tuner plunger installed*
+
+![RF cavity assembly with component labels](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/RF%20Cavity%20Assembly%20with%20Names.png)
+
+*Figure 8-3: Labeled RF cavity assembly — identifying the accelerating cell, input coupler, HOM damper ports, movable tuner plunger, probe port, and ceramic RF window*
+
+![Movable tuner plunger assembly below an RF cavity](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Movable%20Tunner%20below%20the%20cavity.png)
+
+*Figure 8-4: Movable tuner plunger assembly mounted below an RF cavity — the SLO-SYN stepper motor drives the plunger in/out to shift the cavity resonant frequency and hold it at the station RF frequency under varying beam loading*
+
+![HOM load at E-plane mitre bend](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HOM%20load%20at%20E%20mitre.png)
+
+*Figure 8-5: HOM (Higher-Order Mode) load at an E-plane mitre bend in the waveguide stub — absorbs parasitic cavity modes that would otherwise cause beam instability*
+
+![HOM load at H-plane mitre bend](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HOM%20load%20at%20H%20mitre.png)
+
+*Figure 8-6: HOM load at an H-plane mitre bend — the three HOM loads per cavity (E-mitre, H-mitre, and plate) together damp all significant parasitic resonances above the fundamental accelerating mode*
+
+![Water-cooled HOM load plate](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HOM%20load%20plate%20-%20water%20cooled.png)
+
+*Figure 8-7: Water-cooled HOM load plate — dissipates HOM power as heat, carried away by the high-conductivity water cooling system; each cavity has one of these plates in addition to the E- and H-mitre loads*
+
+![Four RF cavities in the SPEAR3 tunnel — outward view](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Cavities%20in%20tunnel_outward%20view.png)
+
+*Figure 8-8: Four RF cavities installed in the SPEAR3 storage ring tunnel (outward view, tuner side) — showing the complete cavity row with waveguide distribution network and interconnecting bellows runs visible*
+
+### 8.2 Tuner Mechanical Assembly
+
+Each cavity has an individual stepper motor tuner that adjusts the cavity resonant frequency by varying the insertion depth of a mechanical plunger:
+
+| Component / parameter | Specification | Source |
+|-----------|--------------|--------|
+| Motor | Superior Electric SLO-SYN M093-FC11 (NEMA 34D) | [R30] |
+| Motor driver (in service) | Superior Electric SLO-SYN SS2000MD4-M PWM translator, one per motor (obsolete part) | [R29] |
+| Motor controller (in service) | Allen-Bradley 1746-HSTP1 stepper module, one per cavity, in chassis 340-315 | `devSmAB1746HSTP1.c` |
+| Motor controller (procured, not yet installed) | Galil DMC-4143 Rev 1.3h, 4-axis | [R34], [R35] |
+| Position feedback | Linear potentiometer on each tuner assembly (indication only — not used to close the loop) | [R36] |
+| Step resolution | 0.003175 mm/step (1.27 mm/rev ÷ 400 steps/rev) | `rf_cav.db,v` `DIST` |
+| Slew velocity | 3 mm/s (`VELO`), acceleration 0.5 mm/s² (`ACCL`) | `rf_cav.db,v` |
+| Software travel limits | −29.5 mm (`DRVL`) to +18 mm (`DRVH`) | `rf_cav.db,v` |
+| Retry deadband | 0.015875 mm (exactly 5 steps) | `rf_cav.db,v` |
+| Loop rate | 2 Hz, 4 independent instances of `rf_tuner_loop.st,v` | [R18] |
+
+> Full analysis of the tuner control loop \u2014 inner phase loop, outer (disabled) load-angle loop, calibration polynomial, and failure modes \u2014 is in `Designs/T_TUNER_CONTROL_SYSTEM_ANALYSIS.md` [R57]. See also §17.
+
+---
+
+# PART III — POWER SYSTEMS
+
+---
+
+## 9. High-Voltage Power Supply — Power Section
+
+### 9.1 Architecture Overview
+
+The HVPS is a 12-pulse thyristor phase-controlled rectifier based on the PEP-II design (SLAC, 1997) [R6]. It delivers negative-polarity DC high voltage to the klystron cathode. The power section is located in Building B514; the control system is in Building B118.
+
+Two complete HVPS units exist: **SPEAR1** and **SPEAR2**. Both are maintained in operating condition and connect to the klystron through a switch-over tank. At any time **one unit is energized and the other is completely switched off** — this is not a warm-standby arrangement. The roles are exchanged at the two scheduled accelerator downs each year (April and August), which equalizes run-time and gives maintenance access to the off-duty unit. Either SPEAR1 or SPEAR2 may be the active unit.
+
+### 9.2 Power Conversion Chain
+
+```
+Substation 507, Breaker 160 (12.47 kV RMS 3φ 60 Hz)
+    │
+    ▼
+┌─────────────────────┐
+│ SWITCHGEAR          │  Disconnect switch, 3×50A fuses, vacuum contactor
+│ (Contactor Panel)   │  Ross HQ3 contactor + HCA-1-A controller
+└─────────┬───────────┘
+          │
+┌─────────▼───────────┐
+│ PHASE-SHIFT XFMR T0 │  2750 kVA, oil-immersed (see note below)
+│ Extended Delta       │  Primary: 12.47 kV delta
+│                      │  Secondary: dual wye ±15°, 12.91 kV RMS φ–φ
+└─────┬─────────┬──────┘
+      │         │
+┌─────▼────┐ ┌──▼────────┐
+│ T1 (+15°)│ │ T2 (−15°) │  Rectifier transformers, 1.5 MVA each
+│ Open wye │ │ Open wye  │  T1-S1 = T1-S2 = T2-S1 = 21.0 kV RMS; T2-S2 = 10.5 kV RMS
+└─────┬────┘ └──┬────────┘
+      │         │
+┌─────▼─────────▼────────┐
+│ 12-PULSE SCR BRIDGES   │  2 × six-pulse bridge, star-point connected to the
+│ Star point controller  │  open-wye primary centres; 12 stacks × 14 Powerex T8K7
+│ Enerpro FCOG6100       │  = 168 thyristors. Phase angle control 0°–180°.
+│  + FCOAUX60            │  Snubbers: 0.047 μF/thyristor, 0.015 μF/stack
+└─────────┬──────────────┘
+          │
+┌─────────▼──────────────┐
+│ FILTER INDUCTORS       │  L1, L2: 0.3 H, 85 A full load, 0.38 Ω DC
+│ (Primary side)         │  1,084 J stored energy each
+└─────────┬──────────────┘
+          │
+┌─────────▼──────────────┐
+│ SECONDARY RECTIFIERS   │  4 stages in series, one per transformer secondary
+│ + FILTER  (4 stages)   │  Stage DC: −26, −26, −26, −13 kV → −91 kV total
+│                        │  Main rect. 30 kV/30 A; filter rect. 30 kV/>3 A
+│                        │  Filter cap 8 μF PER STAGE (≈2 μF net) via 105% tap
+│                        │  + 2 × 500 Ω series isolation resistors per stage
+│                        │  Output divider: ≈ 10,000:1 (two in parallel)
+└─────────┬──────────────┘
+          │
+┌─────────▼──────────────┐
+│ CROWBAR PROTECTION     │  4 SCR stacks in series (SCR13–16), 6 thyristors/stack
+│                        │  Bushings 100 kV DC, 80 kA peak fault current
+│                        │  Fiber-optic trigger; conducts ≈ 10 μs after trigger
+└─────────┬──────────────┘
+          │
+┌─────────▼──────────────┐
+│ CABLE TERM. INDUCTORS  │  L1, L2 in Grounding Tank: "350 UHY 40A"
+│ (Layer 4 protection)   │  Limits cable discharge current to klystron
+└─────────┬──────────────┘
+          │
+          ▼
+   HV DC to klystron cathode  (≈ −72 to −75 kV, 19–22 A typical; −90 kV / 27 A rated)
+```
+
+> **Note on the T0 rating.** Four different figures for the phase-shifting transformer are in circulation. The authority is **NWL's own electrical schematic** for the unit, EI-730-790-00-C0 / NWL # 39308 [R70], whose input block reads verbatim **"INPUT 2750 KVA 3 PHASE / 12.5 KV AT 127 AMPS RMS"**. The two figures are internally consistent: 2750 kVA ÷ (√3 × 12.5 kV) = 127.0 A.
+>
+> | Source | Figure | Assessment |
+> |---|---|---|
+> | **EI-730-790-00-C0 [R70]** | **2750 kVA, 127 A at 12.5 kV** | **Manufacturer's nameplate — use this** |
+> | PS-341-360-01 §1.5 [R22] | "350 kVA" | Decimal error; far too small to pass 2.5 MW |
+> | SD-730-790-01-C1 [R9] | "3000 KVA" | Rounded label on the SLAC system sheet |
+> | J. Sebek [R56] | 3.5 MVA, ⇒ 162 A/phase | Reasoned estimate made without access to [R70] |
+>
+> Sebek's 162 A/phase follows arithmetically from his 3.5 MVA assumption and does not survive it. His **≈113 A typical** operating current is independent of that assumption and remains valid, sitting comfortably below the 127 A rating at a ~2.5 MW operating point.
+
+![PEP-II Klystron Power Supply — annotated circuit schematic](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HVPS_shematic.jpg)
+
+*Figure 9-1: PEP-II Klystron Power Supply — annotated circuit schematic showing the complete power conversion chain from the 12.5 kV 3-phase input through the disconnect/breaker, phase-shifting transformer (T0), thyristor-controlled rectifier bridges (40 kV, 80 A), filter inductors, secondary rectifier stages, 8 µF/30 kV filter capacitors, 500 Ω/1 kW filter resistors, 30 kV/30 A rectifiers, Crowbar, and Termination Tank to the Klystron (90 kV, 27 A). The intermediate DC levels labelled on the power stage outputs (−26 kV, −52 kV, −77 kV, −90 kV) are **cumulative stage tap voltages**, not the klystron operating point — see §4.2. The SPEAR3 HVPS is directly derived from this PEP-II design*
+
+![HVPS2 main oil tank exterior at Building B514](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HVPS2_mainoiltank.png)
+
+*Figure 9-2: HVPS2 main oil tank at Building B514 — this large oil-immersed enclosure houses the phase-shift transformer (T0), the two rectifier transformers (T1, T2), the two filter inductors, four filter capacitors with their eight resistors, and the main and filter diode rectifier stacks. The SCR phase controller and the SCR crowbar are mounted inside it in their own isolated oil tanks with oil-to-oil bushings, so either can be serviced without contaminating the main tank oil [R6]. SPEAR1 is an identical installation*
+
+![SCR thyristor stack assemblies inside HVPS Phase Tank — SPEAR2](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/SCR_assembly_inTank_HVPS2.jpg)
+
+*Figure 9-3: Thyristor stack assemblies inside the HVPS2 phase tank, viewed into the side access opening with the cover removed — showing columns of Powerex T8K7 SCR thyristor discs (flat black cylinders) paired on copper bus bar assemblies with gate driver signal wiring; this photo was taken with SPEAR2 drained and accessed during the April 2026 scheduled downtime; SPEAR1 contains identical hardware*
+
+![HVPS cable switch tank at Building B514](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HVPS%20Cable%20Switch%20Tank%20at%20building514.jpg)
+
+*Figure 9-4: HVPS cable switch tank at Building B514 — provides the switchover connection between the SPEAR1 and SPEAR2 HVPS units and the klystron HV cable; allows the active unit to be changed without disconnecting the klystron high-voltage cable*
+
+![HVPS2 installation at Building B514 — switchgear area and oil tank enclosures](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HVPS2_switchgear_oilTank.jpg)
+
+*Figure 9-5: HVPS2 installation at Building B514 — outdoor view from the switchgear area showing the large beige oil-filled power supply enclosures, "SPEAR 2" identification label, and "DANGER HIGH VOLTAGE" placard on the panel door; the cable trays, conduit runs, and grounding conductors are visible overhead; a "DO NOT ENERGIZE" lock-and-tag notice is visible at left (SPEAR2 is the off-duty unit during this April 2026 downtime); SPEAR1 forms an identical installation beside this*
+
+![HVPS2 oil tank — top view during 2026 documentation campaign](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/HVPS2_oilTank_top_View.jpg)
+
+*Figure 9-6: HVPS2 main oil tank being accessed from the top during the 2026 HVPS inspection — a rectangular access hatch in the ribbed/bolted steel tank top plate is open, revealing the internal copper bus bar assembly and SCR bridge structures below; three personnel are visible (two engineers working at the access opening, one documenting with a notebook); the orange fiber optic conduit visible at upper left routes the SCR ENABLE, CROWBAR, and STATUS fiber signals to the B118 Hoffman Box*
+
+### 9.3 Key Component Specifications
+
+| Component | Specification | Source |
+|-----------|--------------|-------------------|
+| Phase-shift transformer T0 | **2750 kVA**, 12.5 kV at 127 A RMS — the manufacturer's nameplate rating from NWL's own schematic [R70]. Extended delta; 12.47 kV delta primary / dual wye ±15° secondary at 12.91 kV RMS φ–φ. The SLAC top-level schematic labels the source "12.5KV 3PH 3000 KVA" (a rounded figure) | EI-730-790-00-C0 [R70]; `sd7307900101.pdf` [R9] — see note in §9.2 |
+| Rectifier transformers T1, T2 | 1.5 MVA each, open wye primary / dual wye secondary | SD-730-790-01-C1 [R9]; [R22] §1.9 |
+| Transformer secondaries | T1-S1 = T1-S2 = T2-S1 = 21.0 kV RMS φ–φ; T2-S2 = 10.5 kV RMS | [R56] |
+| Series DC stage taps | −26 kV, −52 kV, −77 kV, −90 kV (cumulative, as labelled on the schematic) | SD-730-790-01-C1 [R9] |
+| SCR stacks (phase control) | 12 stacks × 14 Powerex T8K7 (8 kV, 700 A) = 168 thyristors. The schematic labels the thyristor-controlled rectifier assembly "40KV 80A" | [R56]; SD-730-790-01-C1 [R9] |
+| Thyristor snubbers / sharing | 0.047 μF across each thyristor; 0.015 μF R-C snubber per stack; MOVs plus ≈ 20 MΩ sharing resistor per thyristor (≈ 280 MΩ per stack) | [R56] |
+| Filter inductors L1, L2 | 0.3 H, 85 A full load, 0.38 Ω DC resistance | [R56]; labelled "FILTER INDUCTOR" on SD-730-790-01-C1 [R9] |
+| Secondary rectifiers | 4 six-pulse main bridges in series, "RECTIFIERS 30KV 30A"; 4 filter bridges, "FILTER RECTIFERS 30KV 3A AVG" | SD-730-790-01-C1 [R9]; [R22] §§3.4–3.5 |
+| Filter capacitors | "CAPACITORS 8uFD 30KV" — **8 μF per stage × 4 series stages** (≈ 2 μF net), fed from a 105% secondary tap | SD-730-790-01-C1 [R9]; [R56] |
+| Filter series resistors | "FILTER RESISTORS 500 OHMS 1KW" — 8 total, two per stage, in oil | SD-730-790-01-C1 [R9]; [R22] §3.8 |
+| Additional output capacitor | 0.22 μF across the HVPS output (not shown on the top-level schematic) | [R56] |
+| Crowbar SCRs (SCR13–16) | 4 stacks in series, 6 thyristors per stack with 5 MΩ sharing resistors. The schematic labels the crowbar assembly "CROWBAR 40KV 80A" (per-stack device rating); the oil-to-oil feed-through bushings are separately rated 100 kV DC with 80 kA peak fault current | SD-730-790-01-C1 [R9]; [R22] §§5.3, 8.1; [R6]; [R56] |
+| Cable termination inductors | **350 µH, 40 A** as built — labelled "350 UHY 40A" on the Grounding Tank drawing, where they are designated **L1 and L2**. Each is shunted by a 25 kV / 100 A diode and a 30 nF / 37 kV capacitor. *SLAC-PUB-7591 [R6] describes "small 200 μhy inductors in the termination tank" — that is the 1997 design figure; the as-built value is 350 μH.* | SD-730-790-05-C1 [R62]; [R6] |
+| Output voltage divider | **Two identical dividers**, each **five 20 MΩ resistors in series (100 MΩ) into two 1 MΩ resistors in parallel (500 kΩ)** — R1–R7 and R11–R17 on WD-730-794-04-C0 [R71], in its "TRANSFORMER TANK WD-730-792-01" section. Each feeds a coaxial run (VOLTAGE 1 via J7, VOLTAGE 2 via J8) to TS-3 "VOLTAGE MONITORS" as DC-VOLTAGE #1 and #2. **The 500 kΩ bottom leg is loaded by the regulator board's ≈ 10.5 kΩ input**, which dominates it; the resulting end-to-end scale factor is $R_\text{load}/R_\text{div} = 10^4/10^8 =$ **1 × 10⁻⁴, i.e. ≈ 10,000:1** (9.1 V at 91 kV) [R72]. Independently confirmed by the PS Monitor Board output labelled "+ Voltage 10 kV/V" | WD-730-794-04-C0 [R71]; [R72]; SD-730-793-12-C3 [R61] |
+| Output HV cable | Mil-C-17/81-0001 (formerly RG-220), ≈ 101–103 pF/m; ≈ 10 m HVPS → transfer tank, < 50 m transfer tank → termination tank | [R56] |
+| Regulator card | PC-237-230 (SD-237-230-14-C1), "PEP II RF System — Enerpro Voltage and Current Regulator Board" | `sd2372301401.pdf` |
+
+#### 9.3.1 SCR Trigger and Monitor Electronics (SD-730-793 series)
+
+The `SD-730-793-xx` drawings are **printed-circuit-board schematics for the trigger, interlock and monitoring electronics**, not power-assembly drawings. Verified identities:
+
+| Drawing | Title | Role |
+|---|---|---|
+| **SD-730-793-03-C4** | 2MW Klystron PS 12 kV SCR Driver Board (M. Nguyen, 23 MAY 02) | Gate drive to the phase-control thyristor stacks. Opto-isolated 6N-139 input; CD4047B astable plus CD4528 monostables; MIC-4451 drivers into IXFH12N90 MOSFETs and a 60T/60T/60T pulse transformer. On-drawing timing diagram: **TP1 = 50 μs ± 5%, TP2 = 16 μs ± 1 μs (adj. by R2), TP4–TP5 = 5 μs / 5 μs / 18 μs ± 5%** |
+| **SD-730-793-04-C2** | 2MW Klystron Power Supply SCR Crowbar Trigger Board (M. Nguyen, 10-JUN-02) | Crowbar gate drive. Same 6N-139 / CD4047B / CD4538 / MIC-4451 / IXFH12N90 / 60T pulse-transformer topology, but on a **millisecond** envelope: **TP1 = 50 ms (adj. by R1), TP2 = 5 ms, TP3 = 44 μs (adj. by R2), TP4–TP5 = 3 × 5 μs optical SCR trigger**. A second output, **J1 (SIP4) "Output Plug to Old Slave Trigger Bd"**, driven by MIC-4427s, fires the slave boards so all four crowbar stacks trigger together |
+| **SD-730-793-07-C2** | SCR Control Driver — **Right Side** Trigger Interconnect Bd | Carries **J1 BNC "TRANSFORMER ARC TRIGGER"** and **J2 HFBR-2412 "F.O SCR ENABLE"** receiver; drives ±A/±B/±C SCR trigger outputs; exchanges the COMMANDS bus (+12V PWR, 24V FAULT/ENABLE, FO SCR ENABLE, CB ENABLE, SLAVE CB TRIG, PLC FORCE CB, SLAVE CB OFF) with the left-side board |
+| **SD-730-793-08-C1** | SCR Control Driver — **Left Side** Trigger Interconnect Bd | Carries **J1 BNC "KLYSTRON ARC TRIGGER"**, **J2 HFBR-2412 "F.O KLYSTRON CROWBAR"** receiver and **J3 HFBR-1412 "F.O STATUS"** transmitter; MONITORING bus M1 (SCR ENABLE MON, CB TRIG MON, CB MONITOR, KLYS ARC MON, SCR MONITOR, KLYS CB MON) |
+| **SD-730-793-12-C3** | 2MW Klystron PS Monitor Board | Conditions the HVPS voltage and current monitors; outputs **BNC1 "+ Voltage 10 kV/V"**, **BNC2 "+ Current 5A/V"**, and a **BNC3 "CROWBAR"** input; isolated ±15 V rails via two NMH2415S DC-DC converters |
+| **SD-730-793-13-C1** | 2MW Klystron Power Supply Optical SCR Trigger Board | Generates the gate pulse train through a 60T/60T/60T pulse transformer; power connector P1 carries **+240 V, +120 V, GND, +5 V, AC OUT** — matching the 240 V first pulse / 120 V subsequent pulses described in §9.6 |
+
+These three fiber-optic ports — SCR ENABLE (right board), KLYSTRON CROWBAR (left board) and STATUS (left board) — are the B118 ↔ B514 fiber set referred to throughout §2.1, §15 and §19.1.
+
+> **The crowbar SCRs were converted to optically triggered devices.** SD-730-793-04-C2 carries two notes verbatim: *"1. This board is used to drive the new optical SCR."* and *"2. For the old conventional SCR, replace resistors R3 and R37 with 78.70K, 1% Tol."* R3 and R37 are the timing resistors of the two 5 µs monostables (24.9 kΩ as built for optical SCRs). Anyone working on a crowbar trigger board must first establish which SCR type is installed in that stack. See also §20.2 G17.
+
+> Boards **-03**, **-04** and **-13** share the same **4DB-P107-06** power connector with the same pinout (+240 V, +120 V, GND, +5 V, AC OUT ×2), confirming that the two-level 240 V / 120 V gate-drive scheme of §9.6 is used on all three.
+
+> **Two generations of crowbar trigger board exist.** `sd7307940400.pdf` is **SD-730-794-04-C0**, "SCR Crowbar Trigger Board", R. Cassel 11/08/99 — an earlier design using +15 V logic, a 6N-138 optocoupler, discrete IRFD9120/IRFD110 gate drivers and IXYTH12N90 switches, with R3/R4 = 147 kΩ. It was superseded by SD-730-793-04-C2 (2002), which uses +12 V logic, a 6N-139, MIC-4451 drivers and IXFH12N90 switches with R3 = 24.9 kΩ. The "Old Slave Trigger Bd" referred to on the 2002 sheet is most likely a board of this 1999 vintage. **Component values are not interchangeable between the two generations.**
+
+> **Sources**: All schematic PDFs in `hvps/documentation/schematics/` [R9]; [R6] (PEP-II HVPS architecture); [R22], [R22t] (power supply specification); [R56] (J. Sebek, HVPS hazards note).
+
+### 9.4 Monitoring Signals (B514 → B118)
+
+Four analog monitoring signals are sent from the HVPS power section to the B118 control room and are wired to a four-channel oscilloscope in the Hoffman Box area (see §18.5):
+
+| Signal | Purpose | Sensor |
+|--------|---------|--------|
+| HVPS Output Voltage | DC voltage monitoring and regulation feedback | ≈10,000:1 resistive divider (§9.3) |
+| HVPS Output Current | DC current monitoring | Danfysik UltraStab DC-CT in the Termination Tank; output goes to both Slot-9 `1746-NI4` Input 3 and the PS Monitor Board [R25] |
+| Inductor 2 Voltage | T2 firing circuit timing verification (sawtooth) | Inductor tap |
+| Transformer 1 Phase Current | T1 firing circuit health monitoring | Transformer CT |
+
+Two further sensors in the Termination Tank feed protection rather than monitoring: a **3.333 mΩ (15 A = 50 mV) shunt** in the HV return cable, wired via TS-6 20/21 to BNC-12 as the klystron arc trigger; and a **Pearson CT-110** (10 A/V) wide-bandwidth current transformer whose coaxial output feeds J1 of the Left Side Trigger Interconnect Board (SD-730-793-08-C1) and initiates a crowbar trigger on a large enough transient [R25].
+
+> **Sources**: [R23]; [R9]; [R25].
+
+### 9.5 Stored Energy and Discharge Times
+
+These are the numbers that govern safe access to the HVPS. They are taken directly from the J. Sebek hazards note [R56], which is the authoritative reference for HVPS lock-and-tag planning; the summary below does not replace it.
+
+| Component | Value | Stored energy | Time constant | Time to safe (≤ 50 V) |
+|---|---|---|---|---|
+| Filter inductor (each of 2) | 0.3 H at 85 A | 1,084 J | < 0.1 s | < 0.1 s |
+| Phase stack snubber capacitor | 0.015 μF at 18.26 kV | 2.5 J | 4.2 s | 24.8 s |
+| Per-thyristor snubber capacitor | 0.047 μF | 40 mJ | 0.94 s | 3.1 s |
+| Filter capacitors (normal shutdown) | ≈ 2 μF net | 8,788 J | < 1 s | < 1 s |
+| Additional output capacitor | 0.22 μF | 911 J | < 1 s | < 1 s |
+| Output cables | ≈ 0.006 μF | 25 J | < 1 s | < 1 s |
+| **Total output capacitance (normal shutdown)** | **≈ 2.23 μF** | **9,824 J** | **< 1 s** | **< 1 s** |
+| Total output capacitance (klystron load removed) | ≈ 2.23 μF | 9,824 J | 20.9 s | 160 s |
+| Filter capacitors (internal HVPS failure isolating them from the main rectifiers) | ≈ 2 μF | 8,788 J | 640 s | **4,890 s ≈ 81.5 min** |
+
+**Normal turn-off.** When the HVPS controller is commanded off it removes the firing triggers from all thyristor stacks **except the B⁺ and B⁻ stacks**. This simultaneously disables rectification and latches on a short-circuit path through which the filter-inductor current freewheels and decays; the measured inductor voltage reaches zero in about 10 ms. The output capacitors discharge through the klystron itself in well under a second (measured decay below 50 V within ~250 ms), because the Child–Langmuir load is highly conductive at high voltage [R56].
+
+**The one dangerous case.** If an internal failure disconnects the large filter capacitors from the main rectifiers, their only remaining discharge path is the filter-rectifier shunt resistance, and the time to a safe voltage becomes ≈ 81.5 minutes. Any work that opens the main tank must confirm that the capacitors are still connected to the filter rectifiers before contact is made with the output section.
+
+> **Sources**: [R56] (all values, Table 1 and §3); [R6].
+
+### 9.6 Control Power and Trigger Pulses
+
+| Item | Specification |
+|---|---|
+| DC control power | 125 V DC from Substation 507, used by the local contactor controller in the switchgear; also feeds its local MPS for transformer tank overpressure, main tank oil temperature, and LCW flow through the oil cooling radiators |
+| AC control power | Three phases of 208 V AC — one for the contactor controller, one for the main-tank oil pump, one for the switchgear compartment light |
+| Thyristor gate trigger pulses | Trains of 16 μs pulses in 15° bursts; first pulse 240 V, subsequent pulses 120 V. Similar amplitudes fire the crowbar thyristors |
+
+> **Sources**: [R56] §2.3–2.4.
+
+---
+
+## 10. HVPS Control System — Hoffman Box (B118)
+
+### 10.1 Overview
+
+The HVPS control system is housed in a Hoffman NEMA enclosure (the "Hoffman Box") located in Building B118. It contains the PLC, analog regulation electronics, Enerpro SCR firing boards, power supplies, terminal strips, and fiber optic interfaces.
+
+![HVPS Controller Hoffman Box — SPEAR1 (closed)](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/hoffman_box_spear1.jpg)
+*Figure 10-1: HVPS controller Hoffman enclosure (SPEAR1, active unit) in Building B118 — closed front view showing the "SPEAR 1" identification label, DANGER HIGH VOLTAGE warning placard, lock-and-tag procedure form, and SLAC HV Switching Order mounted on the door*
+
+![HVPS Controller Hoffman Box — SPEAR1 (opened interior)](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/hoffman_box_spear1_opened.jpg)
+*Figure 10-2: HVPS controller Hoffman Box interior (SPEAR1) — showing the SLC-500 PLC rack (center, with CPU and I/O modules in slots 0 through 9+, labeled "SPEAR 1 RFHVPS"), four blue switching power supplies PS-1 through PS-4 (providing 120V×2, 240V, and 5V rails), Enerpro FCOG6100 SCR firing board (dark blue PCB, lower center), analog regulation board (green PCB), and terminal strips (TS-1 through TS-6) in the lower section; the BNC monitoring output panel is visible at lower right*
+
+![HVPS Controller Hoffman Box — SPEAR2 (closed)](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/hoffman_box_spear2.jpg)
+*Figure 10-3: HVPS controller Hoffman Box for SPEAR2 in Building B118 — closed front view showing the "SPEAR 2" identification label, lock-and-tag documentation, and an oscilloscope waveform printout (showing 12-pulse thyristor firing waveforms from HER B-2, circa 2007) posted on the door for reference; SPEAR2 contains identical hardware to SPEAR1 and is fully operational; one unit is active while the other is switched off, with roles exchanged during scheduled downtime*
+
+### 10.2 SLC-500 PLC Hardware Configuration
+
+| Slot | Module | Function |
+|------|--------|----------|
+| 0 | SLC-500 CPU (AB-1747-L532) | Main processor |
+| 1 | 1747-DCM (DCM-FULL) | Remote I/O adapter — presents the SLC-500 to the VXI 6008-SV1R scanner as RIO rack 1 |
+| 2 | 1746-IO8 | 8-point digital I/O. OUT3 (terminal 5) drives the Ross Grounding Switch coil (120 VAC); also 12 kV and 240 V control |
+| 3 | Thermocouple Module | 8-channel temperature sensing (4 channels actively scaled) |
+| 4 | (empty) | Unused slot |
+| 5 | 1746-OX8 | 8-point relay output. OUT1 = Contactor On/Off (TS-5 2); OUT2 = Contactor Enable → K4 coil (TS-5 4); also SCR enable, crowbar, fast inhibit |
+| 6 | 1746-IB16 | 16-point 24 V DC digital input. IN8 = Grounding Tank oil level; IN9 = manual grounding switch aux; IN10 = crowbar tank oil; IN11 = SCR phase tank oil; IN14 = PPS 1; IN15 = PPS 2 |
+| 7 | 1746-IV16 | 16-point 24 V DC digital input. IN0 = Blocking relay; IN1 = Overcurrent; IN2 = Contactor Closed/OK; IN3 = Contactor Ready; IN13 = Ross Ground Relay NO |
+| 8 | AB-1746-NIO4V | 4-channel analog I/O (voltage reference output, phase angle readback) |
+| 9 | AB-1746-NI4 | 4-channel analog input. IN3 = Danfysik DC-CT output (HVPS current); also AC current and voltage monitors |
+| 10 | Input module | Additional inputs (12 channels) |
+| 11 | Input module | Additional inputs |
+| 12 | — | Not documented in any available source; assumed empty |
+| 13 | Output module | Additional outputs (4 channels) |
+
+> **Verification note**: slots 0–11 and 13 are documented; **slot 12 is not mentioned in any source examined**. Since an SLC-500 system can span more than one chassis, the physical arrangement of slots 10–13 (single extended chassis vs. a second chassis) should be confirmed in the field. See §20.2. I/O point assignments above are taken from the original PPS wiring note [R25], which traces each signal to its terminal and PLC point.
+
+### 10.3 Control Functions
+
+The PLC implements the following control functions in ladder logic:
+
+1. **Power-up/power-down sequencing** — Orderly startup of contactors, SCR drives, and HVPS output
+2. **Voltage reference generation** — Converts the EPICS setpoint (via VXI → Remote I/O) into the analog reference for the regulator board
+3. **SIG HI feedforward** — Computes an approximate SIG HI value for the Enerpro board from the target voltage
+4. **Safety interlock monitoring** — Monitors oil levels, temperatures, PPS status, fiber optic signals
+5. **Crowbar management** — Arms/disarms crowbar protection, handles crowbar events
+6. **Communication** — Exchanges input and output data tables with the VXI IOC over the Remote I/O link (rack 1)
+
+**Key PLC Registers**:
+
+| Register | Purpose |
+|----------|---------|
+| N7:10 | Voltage reference output (to analog regulator) |
+| N7:11 | Phase angle / SIG HI feedforward |
+| N7:100–N7:107 | Thermocouple raw readings |
+| N7:110–N7:113 | Scaled temperature values |
+| I:1 / O:1 | Remote I/O data words (VXI interface) |
+
+**PPS-related ladder rungs** (from the original code review in [R25]):
+
+| Rung | Function |
+|------|----------|
+| 0002 | In series with master-ready → Close Contactor (`O:5/1`) |
+| 0014 | PPS 1 → sets the emergency-off bits |
+| 0015 | PPS 1 **in parallel with** PPS 2 → sets `B3:1` "PPS ON" |
+| 0016 | PPS 1 **in series with** PPS 2 (and other conditions) → energizes the Ross Grounding Switch relay coil |
+| 0017 | In series with Touch Panel Enable and Emergency Off Clear → OX8 OUT2. *The rung is labelled "Crowbar On" in the PLC listing, but [R25] concludes the label is wrong and that this rung actually drives Contactor Enable / the K4 coil.* |
+| 0068 | PPS 2 in series with the touch-panel key enable → Bias Power (120 VAC to the Kepco supplies) |
+
+> **Sources**: [R26] (PLC ladder logic); [R27] (PLC symbol database); [R25] (rung and I/O point analysis — original, J. Sebek); [R37]; [R38]; [R39].
+
+### 10.4 Analog Regulation
+
+The voltage regulation loop is a **summing** arrangement, not a simple cascade: the PLC supplies both a feedforward estimate of SIG HI *and* the reference for an analog error amplifier, and the Enerpro SIG HI input is the sum of the two [R40].
+
+```
+                         PLC feedforward  (N7:11, approximate SIG HI)
+                                 │
+ EPICS setpoint                  │
+   │  Remote I/O                 │
+   ▼                             ▼
+  PLC ── N7:10 reference ──► ┌───────────────┐        ⊕ ────► Enerpro SIG HI ──► SCR firing angle
+                            │ Analog        │ error   ▲
+                            │ regulator     │─────────┘
+                            │ PC-237-230    │
+                            └───────▲───────┘
+                                    │
+                    HVPS output voltage via the ≈ 10,000:1 divider
+```
+
+The analog regulator card (PC-237-230, drawing SD-237-230-14-C1) compares the PLC reference with the HVPS output voltage feedback and generates a bipolar error signal; that error is weighted and added to the PLC's unipolar feedforward output to form SIG HI. Power-line harmonics are clearly visible on the error signal in normal operation [R40].
+
+> **Sources**: [R40] (Enerpro board integration note — original, J. Sebek); [R12] (regulator card schematic); [R13] (voltage divider schematic).
+
+### 10.5 Terminal Strips and External Connections
+
+Internal wiring in the Hoffman Box is organised on numbered terminal strips (reference drawing WD-730-790-02-C6 [R15]). The strips identified in the original PPS wiring trace [R25] are:
+
+| Terminal strip | Function | External cable |
+|---------------|-----------|-----------|
+| TS-2 | Control power supply distribution — system common, ± rails, status | Internal |
+| TS-3 | **Voltage Monitor.** Drawn on WD-730-790-02-C6 [R63] directly against a block titled "PEP2 RF SYSTEM KLY PS MONITOR BD SD-730-793-12" and labelled VOLTAGE MONITOR. Terminals: DC VOLTAGE *1, DC VOLTAGE *2, COM, VOLTS, AMPS, COM, −15 V, +15 V, CURRENT 5A/V | Internal |
+| TS-4 | Transformer interlocks | To HVPS tanks |
+| TS-5 | Contactor controls, 15 terminals (B118 → Switchgear) | Belden 83715 (15C #16 Teflon) |
+| TS-6 | Grounding tank / Termination Tank, 21 terminals (B118 → B132) | Belden 83709 (9C #16 Teflon) + Belden 83715 |
+| TS-7 | Power distribution | Internal |
+| TS-8 | PPS permits — PPS 1 on terminal 1, PPS 2 on terminal 3, common on terminal 6 | From PPS GOB1208PNE connector |
+
+**PPS status indication** is *not* on a terminal strip: the four external status LEDs (two green, two red) on the outside of the Hoffman Box are wired to an **AMP 8-pin connector, J2** [R25].
+
+> **Confirmed by direct drawing reading (September 2026).** WD-730-790-02-C6 [R63] draws the four LEDs adjacent to the AMP-8PIN J2 / AMP-8PINH F2 connectors and labels them individually: **PPS1 LED1 GRN, PPS2 LED2 GRN, PPS3 LED3 RED, PPS4 LED4 RED**. The **PPS GOB1208PNE** connector appears alongside them on the same sheet.
+
+> **Verification note**: TS-1 has not been identified in any source examined, and the terminal-by-terminal content of TS-2, TS-3, TS-4 and TS-7 has not been transcribed. TS-5, TS-6 and TS-8 are fully traced in [R25]. Completing the inventory requires reading WD-730-790-02-C6 directly — see §20.2.
+
+> **Sources**: [R25] (original PPS wiring trace, J. Sebek); [R15] (WD-730-790-02-C6).
+
+---
+
+## 11. Enerpro SCR Firing System
+
+### 11.1 Overview
+
+The installed firing system is an **Enerpro FCOG6100 Rev K three-phase firing circuit paired with an FCOAUX60 Rev D auxiliary firing board**. The FCOG6100 is a *six-pulse* board; the FCOAUX60 provides the 30°-delayed second set of triggers that turns the pair into a 12-pulse firing system for the two six-pulse bridges. The board set receives a control voltage (SIG HI) from the summing junction described in §10.4 and converts it into a firing angle, phase-locked to the AC line through phase reference signals.
+
+> **Do not confuse with the upgrade.** The **Enerpro FCOG1200** is a genuine 12-pulse board and is the *replacement* selected for the HVPS controller upgrade; it is not installed. Everything in this section describes the FCOG6100 + FCOAUX60 set that is in service today. §11.4 tabulates the differences.
+
+### 11.2 Current Hardware
+
+| Board | Model | Revision | Serial Numbers | Schematic |
+|-------|-------|----------|----------------|-----------|
+| Main firing boards | Enerpro FCOG6100 | Rev. K | 41506, 50470, 30045 | Enerpro E128; SLAC SD-237-230-12-R0 [R13] |
+| Auxiliary firing boards | Enerpro FCOAUX60 | Rev D | 03198, 03813, 1694 | — |
+
+Three sets are held (SPEAR1, SPEAR2, and the test stand). Serial numbers are from the original Enerpro integration note [R40].
+
+### 11.2.1 The regulator board and how SIG HI is actually formed
+
+The SIG HI control voltage handed to the Enerpro board is produced by the SLAC-designed regulator card **SD-237-230-14-C1** (board designation PC-237-230). Its internal architecture is documented in detail by J. Sebek [R72], and three features of it are operationally important.
+
+**(a) It is a minimum-select, not a sum.** The board has two analog control chains — one for the negative output *voltage*, one for the positive input *current* — processed through identical signal-conditioning and error-amplifier stages. They are combined through a **non-linear diode "summing junction"** in which the **anodes of two diodes are tied together**. The *lower* of the two cathode voltages wins and sets the common anode voltage, which becomes the control voltage sent to the Enerpro board. A 15 V DC supply through a 10 kΩ resistor keeps the conducting diode biased, and a **10 V Zener** clamps the anode. In other words the two loops compete and **whichever demands less output takes control** — the classic voltage-or-current-limit arrangement.
+
+**(b) The AC current loop is saturated by design and never takes control.** The current-loop reference at **J4-2 (IL1)** is supplied from the Enerpro board's own regulated +5 V reference. Against a typical measured AC current sense of ≈ 2.2 V DC, the resulting summing-junction current drives the OP77 error amplifier hard against its ≈ +14 V rail — above the 10 V Zener clamp — so the current chain can never win the diode select. Sebek's assessment: *"it probably is better to just eliminate this circuit which is designed to never be used in the feedback control of the Enerpro."* **Treat the HVPS as voltage-regulated only.**
+
+**(c) The board measures AC input current, not HVPS output current.** The regulator senses the **average input AC phase current** via the **300:5 current transformers** on the NWL transformer input [R70], full-wave rectified, paralleled and terminated in a **0.5 Ω burden resistor** [R67]. The **HVPS output current is measured separately** by the Danfysik DC current transducer in the termination tank (§9.4). These are two different quantities and are frequently conflated.
+
+#### Signal path summary
+
+| Signal | Path |
+|---|---|
+| Voltage reference (setpoint) | AB **Slot-8 Output 0** → **J4-1 / J4-7**. *On the board schematic this input is confusingly labelled "POS. VOLTAGE LIMIT COMMAND"; it is the reference voltage input, not a limit* [R72] |
+| HV readback | Voltage dividers (§9.3) → **J1A / J1B** "NEG. VOLTAGE SENSE" → INA117 → error amplifier |
+| Voltage monitor out | BUF634 → 1 kΩ → **J3-1** → AB **Slot-8 Input 0** |
+| Current monitor out | BUF634 → **J3-2** → AB **Slot-9 In-1** |
+| Current reference | Enerpro +5 V reference → **J4-2 (IL1)** |
+| Control voltage out | Diode minimum-select → **J4-3 SIG-HI** → Enerpro SIG HI input |
+
+#### Loop dynamics
+
+The voltage input network is a single-pole low-pass with $\tau = 0.01$ s, i.e. a corner at **15.9 Hz**. The error amplifier ($R_{FB1} = 10.0$ kΩ, $C_{FB1} = 2.0$ µF, $C_{FB2} = 1.0$ nF) contributes a **pure integrator**, a zero at **7.96 Hz** and a second pole at **15.9 kHz**. The system is therefore **Type 1** — no steady-state error between setpoint and readback — with an integrator gain of about $-5 \times 10^{-3}$ [R72].
+
+#### Protection thresholds
+
+The over-voltage comparator's trip level is set by a potentiometer over **2 V to 12 V**, corresponding to HVPS output voltages of **20 kV to 120 kV**. Trip states latch in a **CD4044B**. The as-set values for both the over-voltage and over-current thresholds are **not recorded anywhere in this repository** — see §20.2 G23.
+
+#### Test points
+
+| TP | Measures |
+|---|---|
+| TP1 | Output of the current difference amplifier |
+| TP2 | Output of the over-current comparator |
+| TP4 | Inverted voltage difference of the negative voltage sense |
+| TP5 | Output of the inverting error amplifier |
+| TP8 | Output of the over-voltage comparator |
+| TP9 | Inverted input of the voltage reference |
+| TP10 | Over-voltage threshold setting |
+| TP11 | Over-current threshold setting |
+| TP12 | Inverted reference value generated by the Enerpro board |
+
+### 11.3 Phase References
+
+Enerpro firing boards normally take their phase references from the *rectifier transformer secondaries*. The SPEAR3 HVPS cannot do this: there are no accessible secondary references, so the timing is instead derived from **monitor windings on the legs of the phase-shifting transformer T0**. Those windings lead one rectifier transformer primary by 15° and lag the other by 15° — they are not in phase with either bridge.
+
+Measured characteristics of these references, on both SPEAR1 and SPEAR2 [R40]:
+
+| Property | Value |
+|---|---|
+| Waveform | Sinusoidal, ≈ **190 V peak-to-peak** |
+| Source impedance at the HVPS | 500 Ω |
+| Voltage ratio of the monitor windings | ≈ 100:1 (125 V φ–φ for 12.5 kV φ–φ), 5 A RMS rating [R22] §2.2 |
+
+On the installed FCOG6100 these three references enter through **connector J5** as off-board phase references and are scaled by the on-board resistors **R37, R38 and R39** (J5-1 = R37 = phase A, J5-3 = R38 = phase B, J5-5 = R39 = phase C). Inside the board the references are pulled to +5 V DC through 15 kΩ resistors in RN1, divided by RC networks, and squared up by LM324 comparators in the phase-detection circuitry [R40].
+
+**Resistor value — standard vs. SLAC.** The Enerpro schematic [R13] gives R31–R39 as **1.9 MΩ, ½ W, 1%, RN70** in its parts list, and Note 10 states *"FOR OFF-BOARD PHASE REFERENCES: INSTALL R37-R39 AND J5. OMIT R31-R33 AND T1."* SLAC's boards have **R37–R39 changed to 200 kΩ** to suit the ≈190 V<sub>pk-pk</sub> monitor-winding reference, which is much lower than the line voltages the standard 1.9 MΩ value assumes; Sebek works the Thevenin equivalent using 200.5 kΩ (200 kΩ plus the 500 Ω source impedance) [R40]. Both values are correct for their respective contexts and must not be interchanged.
+
+**Connector roles on the FCOG6100** (from the schematic notes [R13]):
+
+| Connector | Role |
+|---|---|
+| J5 | Off-board phase references (Note 10) — the path used at SPEAR3 |
+| J7 | Provided for **test** reference inputs (Note 11) |
+| J8 | Cable to the **FCOAUX60** auxiliary board, for gating paralleled SCRs (Note 12) |
+| J10 | 50/60 Hz jack (added at revision J) |
+| J1/P1, J2/P2 | Gate drive: +A/+B/+C for line-to-load SCRs; −A/−B/−C for load-to-line SCRs |
+
+Two on-board jumper blocks configure the board: **PP1 phase reference selection** (positions 1,2,3 open + 4,5,6 closed = 0°; the reverse = −30°) and **PP1 gate pulse profile selection** (120° burst / 2×30° bursts / 2×60° spaced pulses). The SIG HI input path is buffered by U6 with span (R42) and bias (R43) trim; Note 18 records that R52 = 150 kΩ suits 0 V < SIG HI < 5.0 V while R52 = 249 kΩ suits 0.9 V < SIG HI < 5.9 V.
+
+> **The "Phase Reference Adapter" is an upgrade item, not legacy hardware.** The FCOG1200 has no place for input resistors between its J7 connector and the phase-detection circuitry, so a small adapter board is being designed for the upgrade: three inputs, **six** resistors, six outputs — 3 × 576 kΩ to J7 pins 1–3 and 3 × 200 kΩ to J7 pins 4–6, with Enerpro replacing RN4A–C with 66.5 kΩ and RN4D–F with 287 kΩ so that one triplet is advanced and the other retarded by 15°. The mating connector is TE 3-640440-8 (Enerpro C2MTAPLG08). None of this exists in the installed system [R58].
+
+### 11.4 Legacy vs. Upgrade Firing Board
+
+| | **Installed (legacy)** | **Selected for upgrade** |
+|---|---|---|
+| Board(s) | FCOG6100 Rev K (6-pulse) + FCOAUX60 Rev D (30° delay) | FCOG1200 Rev L (native 12-pulse) |
+| Phase reference entry | J5, with on-board R37–R39 = 200 kΩ | J7, via a custom external adapter (§11.3) |
+| Phase shift to match ±15° references | Provided by the FCOAUX60 | Provided by modified RN4 resistors + matched 0.033 μF caps |
+| Auto-balance | Not used | On-board trimpot adjustment only (no independent bridge monitoring available) |
+| SIG HI input | Terminated into an inverting op-amp input held at +5 V DC (R49/U6) | High-impedance buffer input, nominal 0.8–5.8 V range |
+| Status | In service; obsolete, limited vendor support | Not yet procured/installed |
+
+> **Sources**: [R40] (Enerpro modifications note — original, J. Sebek); [R58] (phase reference adapter note — original, J. Sebek); [R28] (Enerpro manuals and schematics); [R22] §2.2 (monitor winding specification).
+
+---
+
+## 12. Arc Protection and Crowbar System
+
+### 12.1 Four-Layer Protection Architecture
+
+The HVPS implements a 4-layer arc protection system to protect the klystron from destructive energy discharge during arcs. **The response times below distinguish signal latency from physical response** — the two differ by orders of magnitude, and it is the physical response that bounds the protection:
+
+| Layer | Protection | Signal latency | Physical response | Mechanism |
+|-------|-----------|---------------|-------------------|-----------|
+| 1 | SCR firing inhibit | < 1 μs | **4–8 ms** | Fiber-optic SCR ENABLE signal removed. The phase-control thyristors can only stop conducting at an AC zero crossing, so complete interruption of primary current takes 4–8 ms depending on when in the cycle the arc occurs. Meanwhile the primary filter inductor limits the rate of rise of fault current, and bypassing the inductor (latching on one phase leg) dissipates its stored energy safely [R6] |
+| 2 | Crowbar firing | < 1 μs | **≈ 10 μs** | Fiber-optic CROWBAR signal fires 4 series-connected crowbar SCR stacks, shorting the HVPS output. The crowbar has a delay of approximately 10 μs before it conducts current [R6] |
+| 3 | Filter capacitor isolation | — | Passive (instantaneous) | 500 Ω series isolation resistors, in the PEP-II secondary rectifier / filter capacitor arrangement, limit how much of the 8.8 kJ stored in the filter capacitors can reach an arc |
+| 4 | Cable termination inductors | — | Passive (instantaneous) | The termination-tank inductors limit the rate of rise of cable discharge current into the klystron and force a current zero. SLAC-PUB-7591 gives 200 μH for the PEP-II design; the as-built SPEAR3 Grounding Tank drawing labels them "350 UHY 40A" (§9.3) |
+
+Layers 1 and 2 are actively commanded — in the legacy system by the **Fast Interlock Chassis 340-308** and, on a slower supervisory path, by the **SLC-500 HVPS PLC**. Layers 3 and 4 are passive properties of the circuit topology. (The *Interface Chassis* that will command layers 1 and 2 after the upgrade does not exist in the legacy system.)
+
+### 12.2 Klystron Arc Energy Budget
+
+The design objective is set by what a klystron gun can survive: the energy delivered into an arc should not exceed **60 J**, equivalently an I²t of **40 A²s** [R6]. The four-layer architecture achieves:
+
+| Condition | Energy reaching the klystron |
+|---|---|
+| Crowbar operating normally | **< 5 J** |
+| Crowbar disabled or failed | **< 20–40 J** (still inside the 60 J limit) |
+
+This is the essential point of the PEP-II design: because the stored energy is isolated by the rectifier/resistor/capacitor arrangement rather than by a series dropping resistor, **no single-point failure — including total failure of the crowbar — destroys the klystron**. Conventional supplies of this class rely on a fast crowbar plus a 10–50 Ω series resistor, which both wastes power and leaves the tube unprotected if the crowbar fails [R6].
+
+> **Sources**: [R6] (Cassel & Nguyen, SLAC-PUB-7591 — protection philosophy, crowbar delay, primary interruption time, energy limits); HVPS schematics [R9]; [R56] (stored energy inventory, §9.5).
+
+---
+
+# PART IV — PROTECTION AND SAFETY SYSTEMS
+
+The SPEAR3 RF station employs a multi-layer protection architecture in which five distinct actors operate in parallel, each addressing a different threat class at a different speed. At the fastest level, the **Fast Interlock Chassis 340-308** (B132) provides hardware protection against arc breakdown and RF reflected power excursions with no CPU or firmware in the trip path — its comparator-to-fiber latency is under a microsecond, though the physical response it commands takes ≈ 10 μs (crowbar) to 4–8 ms (SCR turn-off); see §12.1. The **RF MPS PLC** (Allen-Bradley PLC-5 with 1771 I/O, B132) provides equipment protection on a ~10 ms timescale, monitoring klystron collector power, cavity reflected power, vacuum, and cooling. The **SLC-500 HVPS PLC** (B118) monitors the HVPS internals (oil, crowbar, transformer arc, overvoltage) and drives the supervisory SCR enable relay on a ~10–20 ms cycle. Sitting above all hardware protection, the **SNL state machine** (`rf_states.st,v`) provides orderly shutdown sequencing, fault recording, and operator state management at the ~1 s timescale. Personnel safety is enforced by two complementary PPS chains — both interfaced through the SLC-500 PLC — that control the HV vacuum contactor and the Ross grounding switch respectively.
+
+This part of Doc L summarizes the three protection subsystems (PPS, RF MPS, and Fast IC / interlock chain). For the complete interlock architecture — including full signal flow diagrams, per-actor input/output tables, fault timeline examples, compliance analysis, and detailed fault data access procedures — see Doc I (`Designs/I_INTERLOCK_ARCHITECTURE.md`).
+
+---
+
+## 13. Personnel Protection System (PPS) Interface
+
+### 13.1 Overview
+
+The PPS interface controls two critical safety functions: the HV vacuum contactor (which connects 12.47 kV AC power to the HVPS) and the Ross grounding switch (which grounds the HVPS output for safe access).
+
+**⚠️ KEY COMPLIANCE ISSUE**: In the legacy system, both PPS chains pass through the SLC-500 PLC inside the Hoffman Box. This places a programmable logic controller in the personnel safety chain — a design that does not meet modern PPS standards.
+
+### 13.2 Legacy PPS Chain 1: HV Contactor
+
+```
+PPS 1 Enable (GOB1208PNE Pin E→F)
+    → SLC-500 PLC Slot-6 IB16 Input 14
+    → PLC Rung 0017 (Contactor Enable logic)
+    → Slot-5 OX8 OUT2
+    → TS-5 → Belden 83715 cable → Switchgear
+    → K4 Relay (PPS Control) → MX Relay → L1 Holding Coil → Contactor energized
+
+Readback: S5 auxiliary contact (NC) → TS-5 pins 14,15 → GOB1208PNE Readback A-B
+```
+
+### 13.3 Legacy PPS Chain 2: Ross Grounding Switch
+
+```
+PPS 2 Enable (GOB1208PNE Pin G→H)
+    → SLC-500 PLC Slot-6 IB16 Input 15
+    → PLC Rung 0016 (Ross switch enable — requires PPS 1 AND PPS 2 in series)
+    → Slot-2 IO8 OUT3, terminal 5 (120 VAC)
+    → TS-6 terminals 13, 14 → Belden 83709 cable → Termination Tank (P5-F / P5-E)
+    → Ross Grounding Switch coil
+
+Readback: Ross Switch aux common/NC → TS-6 terminals 11, 12 → GOB1208PNE Readback C-D
+```
+
+> **Note**: rung 0016 puts PPS 1 and PPS 2 **in series** (together with other conditions) to energize the Ross switch coil, so removing *either* PPS signal grounds the HV bus. Rung 0015 puts them in parallel to set the "PPS ON" status bit `B3:1` [R25].
+
+> **Caveat from the original source**: [R25] states that the assignment of the PPS 1 and PPS 2 enables to pin pairs E–F and G–H, and of the readbacks to A–B and C–D, is an assumption that had not yet been confirmed with the PPS group. Treat the pin lettering as provisional until verified — see §20.2.
+
+### 13.4 Identified Issues
+
+| Issue | Severity | Details |
+|-------|----------|---------|
+| PLC in PPS chain | Critical | Both PPS chains route through SLC-500 PLC ladder logic |
+| PPS wiring exposed | High | PPS wires terminate on TS-5, TS-6 and TS-8 inside the HVPS controller enclosure, co-located with non-PPS wiring |
+| Ross switch PLC dependency | High | Ross switch coil is driven by a PLC 120 VAC output (Slot-2 IO8 OUT3), with no hardware PPS element in series |
+| K4/RR relay label swap | Medium | Drawing WD-730-794-02-C0 labels RR as the PPS relay and K4 as the reset relay. [R25] shows the two labels are swapped: **K4** is the relay that opens the contactor and disables the controller on a PPS fault, while RR acts as a reset for the TX latch. The drawing also omits the K4 NO and 86 NC contacts that belong between wire BB and the MX coil. *Original engineering finding by J. Sebek.* |
+| Contactor re-close delay | Low | Because K4 removes all control power from the contactor controller, capacitor C6 must recharge before K3 can re-energize — this is why the contactor takes several seconds to re-close after a PPS enable is restored [R25] |
+| Hardware obsolescence | High | SLC-500 and 1746 modules are end-of-life |
+
+### 13.5 Relay Chain Details (Contactor Disconnect Panel)
+
+| Component | Function | Type |
+|-----------|----------|------|
+| K4 | PPS Control Relay — energized from OX8 OUT2 with the PPS common as its return; two NO contacts, one interrupting controller control power and one in series with the MX coil | Relay |
+| MX | **Remote Control Relay, 24 V DC** [R69] — must be energized for K1 (and hence the L2 closing coil) and stays energized to hold L1 | Relay |
+| RR | **Remote Reset Relay, 24 V DC** [R69] — its NC contact is in the TX latch chain; energizing RR clears a latched TX overcurrent trip | Relay |
+| IP | **Interposing Relay, 24 V DC** [R69] — added at revision 2 of the original LBL drawing alongside 27, MX and RR. Not described in any derived note; presence at SPEAR3 unconfirmed | Relay |
+| 27 | **Under Voltage Relay** [R69] | Relay |
+| 01 / LT | **Local Control Switch — Trip** [R69] | Switch |
+| M | **Main operating and holding coils** [R69] | Coil |
+| TX | Auxiliary tripping relay — summarizes the eight overcurrent protection relays (instantaneous 50A/B/C/N and time 51A/B/C/N) and latches; must be de-energized for L1 to hold | Relay |
+| L2 | Closing coil — high-power coil that initially closes the vacuum contactor, fired from the stored-energy capacitor bank | Coil |
+| L1 | Holding Coil — maintains the vacuum contactor closed once L2 has closed it | Coil |
+| S4, S5 | Two spare auxiliary contact sets on the HQ3, brought out to TB2 terminals **15–17** and **18–20** in **NO / COM / NC** order [R66], [R69]. **S5 is the PPS contact readback** — see §13.2.1 for the four-drawing trace. On the Contactor Disconnect panel [R67] the six auxiliary sets are labelled by function: S1 BLOCKING RELAY, S2 OVERCURRENT, S3 CONTACTOR, S4 CLOSE READY, **S5 "CONTACTS PPS"**, S6 TEMP | Contact |
+| Vacuum Contactor | Ross Eng. Model **HQ3**, P/N 813203 — connects 12.47 kV AC to HVPS. Switchgear rating on the original LBL drawing: **14.5 kV, 400 A, 3-pole**, behind **50E fuses in 400 A holders** with **50/5** CTs [R69] | HV contactor |
+| Controller | Ross Eng. **HCA-1-A**, P/N 820360 — contactor controller / energy-storage driver ([R65] system view; [R66] internal schematic) | Controller |
+
+#### Opening timing — from the drawing's own sequence of operation [R65]
+
+| Stage | Time |
+|---|---|
+| Hold-in after loss of AC control voltage | **≥ 170 ms** |
+| L1 holding solenoid dropout | within **1 cycle** (≈ 17 ms) |
+| HV contacts clear | a further **½–1 cycle**, nominally at the first current zero |
+| **Worst case, loss of control power → 12.47 kV interrupted** | **≈ 200 ms** |
+| Recharge before reclose is possible | **a few seconds** (K2 ready relay waits on the MT1 voltage sensor) |
+
+> **This is not a fast interlock.** Chain 1 removes primary AC power on a ~200 ms timescale. It is a personnel-safety isolation, not a machine-protection trip; the fast paths (crowbar ≈ 10 µs, SCR gate removal) are what protect the klystron.
+
+> **The blocking relay defeats opening on a large fault \u2014 by design.** The original LBL drawing annotates BR verbatim: *"BLOCKING RELAY \u2014 PREVENT VAC CONTACTOR TRIP WHEN FAULT CURRENT EXCEEDS 2000 AMPS"* [R69]. The vacuum contactor is not rated to interrupt full fault current, so above 2000 A the BR holds it closed and the upstream **50E fuses** clear the fault instead. Opening the contactor into a large fault would destroy it. This is why GP-439-704-02-C1 states that when BR is closed, "MX and TX local off are bypassed and contactor cannot open immediately even if AC is lost".
+
+#### Stored-energy hazard in the HCA-1-A driver [R66]
+The driver holds its closing energy at **300–400 V DC** (C1–C7, 4800 µF, 450 V). Opening the driver door dumps both capacitors **within 5 seconds**. If that automatic dump does not operate, the drawing's Note 1 applies: decay to 80 V takes about **5 minutes** and to 40 V about **10 minutes**, so **wait at least 5 minutes after removing power and then short both capacitors** before touching live parts.
+
+> **Sources**: [R25] (detailed wiring and switchgear theory of operation — original, J. Sebek); [R14]; [R15]; switchgear schematics GP 439-704-02-C1, WD-730-794-02-C0, rossEngr713203.
+
+#### 13.2.1 The PPS contact readback — complete trace
+
+This path is established by cross-reading four drawings. Each supplies one link, and together they form an unbroken chain:
+
+| Link | Drawing | What it establishes |
+|---|---|---|
+| 1 | Ross 713203 E-1 [R66] | The HQ3 contactor brings out a spare auxiliary contact set **S5** on **TB2-18 (NO) / TB2-19 (COM) / TB2-20 (NC)** |
+| 2 | ID-308-801-06-C1 [R68] | TB2-18, TB2-19 and TB2-20 carry **wires 20, 21 and 22** |
+| 3 | GP-439-704-02-C1 [R65] | Wires **20, 21, 22** are the ones labelled **"PPS (CONTACTOR)"**, landing on **TB3-22, TB3-23, TB3-24** |
+| 4 | WD-730-790-01-C3 [R67] | The Contactor Disconnect panel labels one auxiliary contact set **"CONTACTS PPS"** |
+
+```
+HQ3 contactor aux contact S5
+   TB2-18 (NO) / TB2-19 (COM) / TB2-20 (NC)          [R66]
+        │
+        ├── wires 20 / 21 / 22                        [R68]
+        │
+        └── TB3-22 / TB3-23 / TB3-24  "PPS (CONTACTOR)"   [R65]
+                 │
+                 └── PPS chassis (GOB1208PNE)          [R67]
+```
+
+**Caveats.** Link 4 is corroborative rather than load-bearing: on [R67] the contact-set labels sit beside their symbols and the row alignment is not certain at the available scan resolution, so the specific pairing of "CONTACTS PPS" to a numbered terminal group on that sheet should not be relied on. Links 1–3 are unambiguous and mutually consistent. Separately, J. Sebek records the **GOB1208PNE pin pairing itself** (E–F / G–H for permits, A–B / C–D for readbacks) as an **unconfirmed assumption** [R25] — that last hop remains a field-verification item.
+
+
+### 13.6 PPS Dual-Chain Interaction and Roles
+
+The two PPS chains are **not redundant** — they perform complementary safety functions that must operate in the correct sequence:
+
+| | **Chain 1 — HV Vacuum Contactor** | **Chain 2 — Ross Grounding Switch** |
+|---|---|---|
+| **Safety function** | Disconnect 12.47 kV AC primary power from HVPS | Ground the HVPS HV output bus for safe personnel access |
+| **Operating state** | Coil energized → contactor **CLOSED** (12.47 kV connected) | Coil energized → switch held **OPEN** (HV bus not grounded) |
+| **Safe-access state** | PPS 1 removed → K4 drops → L1 drops → contactor **spring-opens** → 12.47 kV disconnected | PPS 2 removed → 120 VAC removed → switch **spring-closes** → HV bus grounded |
+| **Readback** | S5 NC auxiliary contact closed = contactor OPEN = 12.47 kV removed | Ross switch NC auxiliary contact closed = switch GROUNDED = HV bus grounded |
+| **Fail-safe direction** | Lose power → contactor opens → safe | Lose power → switch closes to ground → safe |
+
+**Operational Sequence for Safe Access**:
+
+Personnel access to the HVPS area requires **both** chains to be in their safe state, in the correct order:
+
+1. PPS 1 removed → Rung 0017 drops → contactor opens → 12.47 kV disconnected
+2. HVPS residual energy dissipates (capacitor bank discharges through load circuits)
+3. PPS 2 removed → Rung 0016 drops → Ross switch closes → HV bus grounded
+4. PPS readbacks A-B and C-D loop complete → machine PPS confirms both chains safe
+5. Personnel entry permitted
+
+Restore sequence reverses the above (grounding switch opens before contactor closes).
+
+> **Critical**: Closing the grounding switch (Chain 2) onto a live HV bus (Chain 1 still closed) would produce a catastrophic high-energy arc fault. The machine PPS system enforces the correct sequencing through its permitting logic.
+
+**Compliance Comparison**:
+
+| | **Chain 1** | **Chain 2** |
+|---|---|---|
+| PLC dependency | PPS 1 routes through SLC-500 Rung 0017 | PPS 2 routes through SLC-500 Rung 0016 |
+| Hardware fail-safe | **Present** — OX8 relay input side wired to PPS 1 (24VDC). K4 cannot energize without PPS 1 even if PLC closes relay contact. | **Absent** — IO8 OUT3 drives 120 VAC to Ross coil. PLC failure energized could hold switch open without PPS 2. |
+| Primary compliance risk | Low (hardware series PPS voltage provides physical enforcement) | **Higher** — PLC failure-energized scenario leaves HV bus ungrounded |
+
+Chain 2's spring-return (fail-safe toward grounded) mitigates total PPS loss, but a PLC output staying energized despite PPS removal is not protected against by any hardware means. This is the primary driver for the planned upgrade to direct PPS control through the Interface Chassis. See `pps/diagrams/00_SYSTEM_OVERVIEW.md` for the upgrade architecture.
+
+For the complete signal-chain details, compliance assessment, and all relay/wiring details, see `Designs/I_INTERLOCK_ARCHITECTURE.md` §6.8.
+
+> **Sources**: [R25]; `pps/diagrams/00_SYSTEM_OVERVIEW.md`; `pps/diagrams/07_PLC_CODE_AND_LOGIC.md`; `pps/diagrams/08_CORRECTED_HAND_DRAWING.md`.
+
+---
+
+## 14. RF Machine Protection System (MPS)
+
+### 14.1 Overview
+
+The RF MPS provides equipment/machine protection — distinct from the personnel-safety PPS. It monitors klystron operating parameters and RF station conditions, removing permits to protect equipment from damage.
+
+### 14.2 Hardware Evolution
+
+| Era | Platform | Status |
+|-----|----------|--------|
+| **In service** | Allen-Bradley PLC-5 with 1771-series I/O; 1771-DCM Remote I/O adapter (rack 3) | Obsolete, no vendor support, but **this is the platform currently protecting the station** |
+| Prepared replacement | Allen-Bradley ControlLogix 1756 (Rockwell conversion kit) | Hardware assembled, software written, tested on SPEAR3 **without RF power**. **Not yet in service**; will be commissioned as part of the LLRF upgrade [R5] §7.3 |
+
+> Throughout this document the RF MPS is described as the PLC-5. Where a statement applies to the future ControlLogix platform it is marked explicitly.
+
+### 14.3 Protection Functions
+
+The RF MPS monitors and protects against:
+
+- Excessive klystron collector power (cathode power minus RF output)
+- Excessive reflected power at any cavity
+- Waveguide arc conditions (via interlock chassis inputs)
+- Loss of cooling water
+- Klystron vacuum excursion
+- HVPS fault conditions
+
+When any protection condition is triggered, the RF MPS PLC relay simultaneously drives three protective outputs (the "three-path architecture"; see `Designs/I_INTERLOCK_ARCHITECTURE.md` §5.3–§5.4):
+
+- **Path A**: MPS relay → hardwired to Fast Interlock Chassis → SCR ENABLE removed + CROWBAR fired → hardware HVPS kill (fiber signal < 1 μs after relay assertion; crowbar conducts ≈ 10 μs later, primary current interrupted within 4–8 ms — §12.1)
+- **Path B**: Remote I/O permit bit removed → modulated RF drive cut to klystron (~10 ms)
+- **Path C**: Slot 5 VXI backplane `RF_FAULT` asserted → EPICS alarm chain → orderly shutdown
+
+> **Note**: The **SLC-500 HVPS PLC** (B118) is a **separate, independent actor** in the protection hierarchy — it is **not** one of the three paths above. It monitors HVPS-internal conditions (oil, crowbar, transformer arc, overvoltage) and independently drives a supervisory SCR enable relay on a ~10–20 ms cycle. See `Designs/I_INTERLOCK_ARCHITECTURE.md` §1.1–§1.2 for the complete five-actor architecture.
+
+### 14.4 MPS Wiring
+
+33 MPS wiring diagrams (wd3403300200 through wd3403303400) describe the complete MPS signal chain from multiple trip sources to HVPS and crowbar outputs.
+
+> **Sources**: MPS wiring diagrams [R21]; [R5] §7; `Designs/I_INTERLOCK_ARCHITECTURE.md` §5.
+
+---
+
+## 15. Interlock Architecture and Signal Chain
+
+### 15.1 Overview
+
+The interlock system spans multiple hardware layers, from fast analog hardware interlocks to slow PLC-monitored conditions:
+
+| Layer | Speed | Hardware | Function |
+|-------|-------|----------|----------|
+| Fast analog | < 1 μs (signal); ≈ 10 μs crowbar, 4–8 ms SCR (§12.1) | Fast Interlock Chassis 340-308 | Arc detection, reflected power limits |
+| PLC hardware | ~10 ms | RF MPS **PLC-5** | Equipment protection calculations |
+| PLC software | ~10–20 ms | SLC-500 (HVPS) | HVPS sequencing and monitoring |
+| EPICS supervisory | ~1 s | VXI IOC / SNL | State machine, operator interface |
+
+### 15.2 Interlock Chassis
+
+> **These are two different units.** The **Fast Interlock Chassis 340-308** is the trip-decision element described below. The **Local Control Chassis** is a separate chassis that gathers a portion of the station's hardwired interlock and control wiring and connects it to the Fast Interlock Chassis [R5] §2.1. The two names are not synonyms.
+
+The Fast Interlock Chassis in B132 receives and summarizes hardware interlock signals:
+
+- Arc detection inputs from waveguide fiber optic sensors
+- Reflected power monitor inputs
+- RF MPS PLC permit (hardwired relay input) — removal triggers SCR ENABLE + CROWBAR
+- HVPS status fiber optic signals — the B514 power section STATUS fiber goes directly to the Fast IC (populating `HVPSON` bit in `FISTAT` A16 register) and to B118 SLC-500 Slot 6 IB16. This signal is **informational only**: `HVPSON=0` gates arc voltage history buffer readback in `devP2RfAim.c` but does **NOT** cause a Fast IC hardware trip.
+
+> **Signal routing**: The SPEAR MPS beam permit and orbit interlock are **not** inputs to the Fast Interlock Chassis. They wire directly to the back connector of **VXI Slot 5 (MPS Shutoff module)**. Removal of either permit causes Slot 5 to assert `RF_FAULT` on the VXI P2 backplane (immediate RF drive cut; no immediate hardware HVPS shutdown). The `RF_FAULT` assertion propagates through the EPICS alarm chain (`STN:VXI:LTCH` → `STNPARK:SUMY:STAT` → `STNOFF:SUMY:STAT` → `fault_stnoff`), and the SNL state machine performs an orderly HVPS shutdown ~6 s later via `s_go_off`. However, the RF drive cutoff typically initiates a **collector overpower cascade** (see `Designs/I_INTERLOCK_ARCHITECTURE.md` §4.6): the klystron collector absorbs full cathode power → `KLYSCOLLPLC:POWER` exceeds trip limit → RF MPS PLC fires Path A → Fast IC removes SCR ENABLE + CROWBAR → hardware HVPS kill in ~20–30 ms in practice. See `Designs/I_INTERLOCK_ARCHITECTURE.md` §4.2, §4.5, §4.6 for details.
+
+It reports summarized interlock status to the VXI crate through the ARC/Interlock Module (AIM). See `Designs/I_INTERLOCK_ARCHITECTURE.md` §1.2 for the complete signal flow diagram.
+
+### 15.3 Complete Trip Chain
+
+```
+Fault detected (arc, reflected power, vacuum, etc.)
+    │
+    ├── LAYER 1: Fast Interlock Chassis (hardware, signal <1 μs)
+    │       340-308, B132 — no CPU in trip path
+    │       ├── Arc/power detectors → SCR ENABLE removed (fiber → B514)
+    │       │      primary current actually interrupted in 4–8 ms (zero crossing)
+    │       ├── Arc/power detectors → CROWBAR fired (fiber → B514)
+    │       │      crowbar conducts ≈ 10 μs after trigger
+    │       └── FISTAT fault word → AIM → VXI IOC
+    │
+    ├── LAYER 2: RF MPS PLC-5 (~10 ms)
+    │       Monitors: collector power, reflected power, vacuum, cooling
+    │       On trip, PLC relay drives THREE simultaneous paths:
+    │       ├── Path A → hardwired relay → Fast IC → SCR ENABLE removed + CROWBAR → HVPS kill
+    │       ├── Path B → Remote I/O permit bit removed → RF drive cut to klystron
+    │       └── Path C → Slot 5 VXI backplane RF_FAULT → EPICS alarm chain
+    │
+    ├── LAYER 3: SLC-500 HVPS PLC (~10–20 ms)  [independent actor — not an MPS relay output]
+    │       Monitors: HVPS oil, crowbar, transformer arc, overvoltage
+    │       ├── Supervisory SCR enable relay de-energized → HVPS disabled
+    │       └── HVPS status → VXI IOC via Remote I/O
+    │
+    └── LAYER 4: EPICS / rf_states.st (supervisory, ~1 s)
+            Monitoring only — no fast trip authority
+            ├── Fault file capture (/dat/FAULT*_N)
+            ├── Station state → OFF (orderly HVPS shutdown via s_go_off, ~6 s)
+            └── Operator alarm/notification
+```
+
+For complete fault timeline examples and three-path architecture details, see `Designs/I_INTERLOCK_ARCHITECTURE.md` §8.
+
+![SLAC PEP-II Fast Interlock Chassis 340-308 in B132](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/Interlocak_chassis_front.jpg)
+*Figure 15-1: SLAC PEP-II Fast Interlock Chassis 340-308 in the B132 electronics rack — front panel showing FAULT RESET, LAMENT TIMEOUT, and BEAM ABORT controls (left cluster); 12-channel test port (TEST CH.); CH.1–CH.12 INPUT MONITOR test points (center); HVPS ON, SOLENOID ON, and FILAMENT ON status indicators; and J16 DETECTED KLYSTRON POWER coaxial input; the chassis provides sub-microsecond hardware protection by monitoring RF detector inputs and asserting SCR ENABLE removal and CROWBAR firing via fiber optic to the B514 HVPS on fault conditions*
+
+> **Sources**: [R5] §17; [R16].
+
+---
+
+# PART V — CONTROL SOFTWARE AND INSTRUMENTATION
+
+---
+
+## 16. EPICS IOC and SNL Software Architecture
+
+### 16.1 IOC Platform
+
+The VXI crate Slot 0 processor runs VxWorks RTOS with an EPICS IOC. The IOC hosts 6 SNL (State Notation Language) programs compiled into a single `rfSeq` library:
+
+| Program | Lines | Instances | Authors | Function |
+|---------|-------|-----------|---------|----------|
+| `rf_states.st,v` | 2,227 | 1 | R.C. Sass, M. Laznovsky, S. Allison | Master station state machine |
+| `rf_calib.st,v` | 3,345 | 1 | R. Claus | Calibration sequences |
+| `rf_tuner_loop.st,v` | 555 | 4 (per cavity) | — | Cavity tuner motor control |
+| `rf_hvps_loop.st,v` | 343 | 1 | — | HVPS supervisory control |
+| `rf_dac_loop.st,v` | 290 | 1 | S. Allison | Drive/gap voltage DAC control |
+| `rf_msgs.st,v` | 352 | 1 | — | Message logging, TAXI monitoring |
+
+Plus 11 header/macro files (1,111 lines) defining PV names, status codes, and control macros.
+
+> **Sources**: Legacy source code in `spear-rf-code-legacy/rfApp/src/seq/` [R16]–[R20]. The line and state counts in the table above are taken from `spear-rf-code-legacy/codeReviewTechnicalNotes/05-snl-state-machines.md`; only RCS `,v` archives are present in the repository, so they could not be recounted from working files (§21).
+
+### 16.2 rf_states.st — Master Station State Machine
+
+**Primary States**: OFF (0) → PARK (1) → TUNE (2) → ON_FM (3) → ON_CW (4)
+
+**State architecture**: 3 concurrent state sets:
+
+1. **`ss rf_states`** — Main state machine with 5 primary states + 17 transition states
+2. **`ss rf_statesLP`** — Loop protection (concurrent monitoring)
+3. **`ss rf_statesFF`** — Fault file capture (asynchronous)
+
+**Total**: 23 states across 3 concurrent state sets.
+
+**State transitions**:
+
+- OFF → PARK: Operator command; initializes VXI modules, loads DSP firmware
+- PARK → TUNE: Operator command; enables drive power, engages direct feedback loop
+- TUNE → ON_FM: Enables comb and ripple loops (PEP-II modes)
+- TUNE → ON_CW (direct): Bypasses ON_FM, goes straight to full power
+- Any → OFF: Fault or operator shutdown; orderly disengagement of all loops
+
+### 16.3 rf_hvps_loop.st — HVPS Supervisory Control
+
+States: `init` → `off` → `proc` (processing/conditioning) → `on`
+
+**Processing mode** carefully ramps HVPS voltage while monitoring cavity vacuum. If vacuum exceeds limits, voltage is reduced. This is used during cavity conditioning and post-trip recovery.
+
+**16 status codes** (from source): The HVPS reports status via integer codes that the SNL program interprets for operator display and automated responses.
+
+### 16.4 rf_tuner_loop.st — Cavity Tuner Control
+
+Runs as 4 instances (one per cavity) via `CAV` macro substitution. Implements a slow feedback loop that maintains cavity resonant frequency by:
+
+1. Reading cavity phase angle (from IQA module)
+2. Comparing against setpoint (optimal detuning for current beam current)
+3. Commanding stepper motor moves via AB 1746-HSTP1 controller
+
+**5 SNL states**, 2 control algorithms (phase-feedback-based position tuning for resonance maintenance, and position homing for park/on transitions) plus a loop-off monitoring state.
+
+### 16.5 rf_dac_loop.st — Drive/Gap Voltage DAC Control
+
+Manages the RFP module's octal DACs that control drive power and gap voltage setpoints. The loop operates differently depending on whether the direct feedback loop is on or off, and transitions between TUNE and OPERATE modes.
+
+**⚠️ ELIMINATED IN UPGRADE**: This program is entirely replaced by the LLRF9 internal vector modulator control.
+
+### 16.6 rf_calib.st — Calibration Sequences
+
+The largest SNL program (3,345 lines) implements 28 calibration measurement states including:
+
+- IQA module amplitude/phase calibration
+- Klystron gain measurement
+- Cavity tuner characterization
+- Feedback loop gain optimization
+
+### 16.7 rf_msgs.st — Message Logging
+
+Monitors CAMAC TAXI communication errors, VXI module health, and system messages. Reports status to EPICS archiver.
+
+---
+
+## 17. Tuner Control System
+
+### 17.1 Configuration Currently in Service
+
+| Component | Detail |
+|-----------|--------|
+| Controllers | Allen-Bradley 1746-HSTP1 stepper modules (4 units) in chassis 340-315, SN08 |
+| Drivers | Superior Electric SLO-SYN SS2000MD4-M PWM step drive translators (one per motor) |
+| Motors | Superior Electric SLO-SYN M093-FC11 (NEMA 34D, 4 units) |
+| Communication | Allen-Bradley Remote I/O, adapter (rack) 2, from the VXI 6008-SV1R scanner |
+| Software | `rf_tuner_loop.st,v` (SNL, 4 instances, 2 Hz) |
+| Position feedback | Linear potentiometer per tuner — indication only |
+
+### 17.2 Planned Upgrade Configuration (not yet installed)
+
+| Component | Detail |
+|-----------|--------|
+| Controller | Galil DMC-4143 Rev 1.3h 4-axis motion controller in a new SLAC-built chassis |
+| Motors | Same SLO-SYN M093-FC11 (retained) |
+| Communication | Ethernet (with heartbeat monitoring) |
+| Position Feedback | Linear potentiometers on each tuner (retained) |
+
+**Status.** The Galil controller has been procured and developed on the bench. In August 2025 it was connected to the installed cavity tuner motors and successfully drove them [R34]; the session log records firmware `DMC4143 Rev 1.3h`, amplifier `AMP1 43547 Rev 4`, and a series of manual jog and speed tests. **It has not been installed as the operating controller and is not in the control loop.** It is expected to go online when the LLRF upgrade project completes. Until then the 1746-HSTP1 / SS2000MD4 chain in §17.1 is the system of record.
+
+### 17.3 Tuner Motion Parameters
+
+Values below are from the deployed EPICS `steppermotor` record (`rf_cav.db,v`, device type `AB-1746HSTP1`) and are the numbers the loop actually runs with. See §8.2 for the mechanical assembly and [R57] for the full control-loop analysis.
+
+| Parameter | Value | Record field |
+|---|---|---|
+| Step resolution | 0.003175 mm/step (1.27 mm/rev ÷ 400 steps/rev) | `DIST` |
+| Slew velocity | 3 mm/s | `VELO` |
+| Acceleration | 0.5 mm/s² | `ACCL` |
+| Upper travel limit | +18 mm | `DRVH` |
+| Lower travel limit | −29.5 mm | `DRVL` |
+| Retry deadband | 0.015875 mm (5 steps) | `RDBD` |
+| Engineering units | mm | `EGU` |
+| Loop rate | 2 Hz | `rf_tuner_loop.st,v` |
+| Phase deadband (design) | 0.25° | `rf_cav.db,v` `INPB` (commented out in the DB source) |
+| Phase-to-position conversion | 0.020–0.030 mm/° | `rf_cav.db,v` `INPC` (commented out; restored by autosave) |
+| Maximum move per cycle | 1 mm | `rf_cav.db,v` `INPD` (commented out; restored by autosave) |
+
+> **Important operational caveat**: the deadband, conversion factor and per-cycle clamp are **commented out in the database source** and default to zero on a cold start without autosave — in which case the computed move is always zero and the tuner does not respond. In normal operation these values are restored by autosave. The outer load-angle (cavity voltage) loop is likewise structurally clamped to zero and is not active in SPEAR3. Both behaviours are analysed in [R57] §§4.2, 5.3, 10.2.
+
+> **Sources**: [R29]; [R30]; [R31]; [R34]; [R35]; [R36]; [R5] §10; [R57] (tuner control system analysis); `spear-rf-code-legacy/rfApp/Db/rf_cav.db,v`.
+
+![Legacy Allen-Bradley Cavity Tuner Motor Driver 340-315 — SLC adapter and 1746-HSTP1 stepper modules](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/RF_MPS_PLC_Modules_AllenBradley.jpg)
+*Figure 17-1: Allen-Bradley Cavity Tuner Motor Driver chassis (SLAC 340-315, SN08) in the B132 electronics rack — showing the SLC adapter module (leftmost, with COMM FAULT indicator and STATUS showing RUN/fault) followed by four AB 1746-HSTP1 STEPPER modules (each with RUN, CCW, CW, ERR, FLT indicators; green RUN lights confirm active communication), plus one additional STEPPER module at far right. This chassis is the motion controller currently driving all four cavity tuners; it is to be replaced by the Galil DMC-4143 when the LLRF upgrade project completes*
+
+![Legacy Allen-Bradley Cavity Tuner Motor Driver 340-315 — front panel view](../llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/spear3RF_overview_2003_images/CavityTunerMotorDriver.jpg)
+*Figure 17-2: Allen-Bradley Cavity Tuner Motor Driver chassis (SLAC 340-315, SN08) — closed front panel view showing the rack-mounted chassis faceplate with designation label, SLAC EEIP Accepted sticker, and two green power-health LEDs (+24V and +5V both illuminated); the chassis occupies approximately four rack units; slot position labels 08–13 from the adjacent rack frame are visible; the interior modules (SLC adapter and four 1746-HSTP1 stepper controllers) are shown in Figure 17-1*
+
+---
+
+## 18. Diagnostics, Calibration and Monitoring
+
+### 18.1 RF Signal Monitoring
+
+24 RF signals are monitored across the waveguide network (see §7.2 for complete table). In the legacy system, these are measured by the VXI IQA modules. In the upgrade, they will be distributed across LLRF9 units and the Waveform Buffer System.
+
+### 18.2 HVPS Monitoring
+
+4 analog monitoring signals from B514 to B118 (see §9.4). Additionally, the PLC monitors:
+
+- 8 thermocouple channels (4 actively scaled to engineering units)
+- Oil level switches (main tank, phase tank, crowbar tank)
+- Contactor and grounding switch status
+- All fiber optic signal states
+
+### 18.3 Fault Recording
+
+**Legacy fault file system**: On any fault triggering a station trip, the VXI IOC captures 11 signal channels to `/dat/FAULT<channel>_<N>` files (channels in capture order: RfpSI, RfpSQ, RfpCI, RfpCQ, CmbI, CmbQ, Iqa1Amp, Iqa2Amp, Gvf, Aim, Iqa3Amp). `NUMFFILES = 11` in `rf_states.st,v` is the channel count; for SPEAR3 the CF2 module is not installed, so the `#else` branch of `#ifdef CF2` applies, giving CmbI/CmbQ (comb filter channels) in place of Cf2I/Cf2Q. The eleventh channel (IQA-3) is only captured when the IOC startup script sets the `IQA3MACROS` environment variable; `iocBoot/b132-iocrf/st.cmd,v` does set it (`IQA3MACROS=R=SRF1`), so all 11 channels are written on SPEAR3. Otherwise only 10 are.
+
+The suffix `N` is the fault slot number, which cycles **1 to 15** (`NUMFAULTS = 15`) and is published as `{STN}:STN:FAULT:NUM`; the corresponding event timestamps are in `{STN}:STN:FAULT:TIME1` through `TIME15`. Capture works by temporarily redirecting each module's history-buffer filename and size records (`MODU.AHFS`, `MODU.AHSZ`), triggering the dump (`MODU.GAHS`), waiting on the status field (`MODU.ASTT`), then restoring the previous filenames and sizes. These files preserve pre-fault waveforms for post-mortem analysis.
+
+### 18.4 Calibration Data
+
+Calibration sequences are implemented in `rf_calib.st,v` (28 measurement states). Key calibrations include:
+
+- RF signal amplitude and phase calibration against known references
+- Klystron gain curve measurement
+- Cavity detuning characterization
+- Tuner motor step-to-frequency conversion factors
+
+> **Sources**: [R19]; [R24]; [R18].
+
+### 18.5 Fault Data Availability and Analysis
+
+Four data sources capture fault event information at different time scales. Full access procedures and a step-by-step analysis guide are provided in `Designs/I_INTERLOCK_ARCHITECTURE.md` Part X (§10.1–10.6). Summary:
+
+| Source | What It Captures | Storage Location | Access |
+|--------|-----------------|------------------|--------|
+| **AIM Hardware History Buffer** | 12 arc channel voltage waveforms + HVPS voltage; continuous ADC ring buffer, freezes on fault | VXI AIM on-board memory; exported to IOC `/dat/aimHist.dat` | Read `{STN}:STN:AIM:ARCLTDSTT` PV for latched arc channel bits; see Doc I §10.2 |
+| **SNL Fault Files** (`/dat/FAULT*_N`) | 11 RF/IQA channels: RFP I/Q, comb I/Q, IQA amplitude waveforms, GVF and AIM snapshots | VxWorks `/dat/` directory on B132 VXI IOC; slot number `N` cycles 1–15 (`NUMFAULTS = 15`) | Read `{STN}:STN:FAULT:NUM` for the current slot and `{STN}:STN:FAULT:TIME1`…`TIME15` for the event timestamps; transfer via NFS/FTP; see Doc I §10.3 |
+| **B118 Oscilloscope (4 channels)** | CH1: HVPS DC voltage; CH2: HVPS DC current; CH3: Inductor T2 sawtooth voltage; CH4: Transformer T1 AC phase current | Standalone oscilloscope in B118 Hoffman Box area — not connected to EPICS | Direct field observation; single-shot trigger or freeze at fault; export via USB or photograph screen; EPICS scalar readback at 1 Hz via `{STN}:HVPS:VOLT` and `{STN}:HVPS:CURR` (Remote I/O AI records); see Doc I §10.4 |
+| **EPICS Channel Archiver** | All EPICS PVs at ~1 Hz, multi-year rolling history | EPICS archiver server (SLAC controls group) | Strip Chart GUI, web interface, or Python Archiver Appliance REST API |
+
+**Key PVs to check after any fault event** (see Doc I Appendix A for full list):
+
+| PV | Significance |
+|----|-------------|
+| `{STN}:STN:AIM:ARCLTDSTT` | Which arc channels fired? (bits 0–3 = cavities, bit 4 = klystron, bit 5 = circulator; all zeros = non-arc fault) |
+| `{STN}:HVPSXFORM:ARC:LTCH` | HV transformer internal arc |
+| `{STN}:HVPS:CROWBAR:LTCH` | Crowbar fired |
+| `{STN}:STN:MPS:LTCH` | RF MPS PLC trip |
+| `{STN}:HVPSSTN:SUMY:LTCH` | Aggregated HVPS fault summary |
+| `{STN}:STN:FAULT:NUM` | Fault file slot number (1–15) — use to locate `/dat/FAULT*_N` |
+| `{STN}:STN:FAULT:TIME1` … `TIME15` | Timestamp of each stored fault event |
+
+> **Sources**: `Designs/I_INTERLOCK_ARCHITECTURE.md` Part X (§10.1–10.6); §18.2; `rfApp/Db/rf_hvps.db` (HVPS scalar PV definitions).
+
+---
+
+# PART VI — INTEGRATION AND LEGACY CONSIDERATIONS
+
+---
+
+## 19. Cabling and Interconnections
+
+### 19.1 Major Cable Runs
+
+| Cable Run | Cable Type | Conductors | Route |
+|-----------|-----------|------------|-------|
+| B118 → Switchgear (Contactor) | Belden 83715 | 15C #16 Teflon | TS-5 to contactor controller |
+| B118 → Termination Tank (Grounding) | Belden 83709 + Belden 83715 | 9C + 15C #16 Teflon | TS-6 to grounding tank |
+| B118 → B514 (SCR triggers) | Electrical cable pairs | 12 pairs | Controller to Phase Tank thyristor stacks |
+| B118 → B514 (Fiber optic) | Fiber optic | SCR ENABLE, CROWBAR, STATUS | Controller to HVPS power section |
+| B132 → Tunnel (RF signals) | Coax cables | Forward, reflected, probe per cavity | LLRF inputs from cavities |
+| B132 → Tunnel (Motor) | Multi-conductor | Stepper motor phase leads + linear potentiometer feedback per cavity | To tuner assemblies |
+
+### 19.2 Connector Types
+
+| Interface | Connector | Notes |
+|-----------|-----------|-------|
+| PPS | GOB1208PNE | Lockable, military-grade |
+| RF signals | SMA/N-type | 50Ω coaxial |
+| Fiber optic | HFBR series | Avago/Broadcom |
+| PLC communication | Allen-Bradley Remote I/O (twinaxial "blue hose") | 6008-SV1R scanner to 1747-DCM / 1771-DCM adapters |
+| Galil Ethernet | RJ-45 | Standard Ethernet |
+
+> **Sources**: [R14]; [R15]; [R5] §3.
+
+---
+
+## 20. Known Issues, Limitations and Legacy Debt
+
+### 20.1 Critical Issues
+
+| Issue | Category | Impact | Details |
+|-------|----------|--------|---------|
+| PPS compliance | Safety | **Critical** | PLC in PPS chain; PPS wires exposed in HVPS controller enclosure |
+| VXI crate obsolescence | Hardware | **Critical** | Custom SLAC modules (RFP, IQA, CLK, AIM) — no replacements available. The whole crate is superseded by two Dimtel LLRF9/476 units in the upgrade [R51], [R52] |
+| SLC-500 PLC end-of-life | Hardware | **High** | Allen-Bradley discontinued; no vendor support |
+| PLC-5 MPS platform | Hardware | **High** | Allen-Bradley discontinued; no vendor support |
+| SLO-SYN driver obsolescence | Hardware | **Medium** | SS2000MD4-M discontinued |
+| VxWorks/SNL software | Software | **High** | PEP-II era code (1997); unsupported OS; no modern development tools |
+
+### 20.2 Documentation Gaps and Items Requiring Field Verification
+
+| # | Gap | Impact | Notes |
+|---|-----|--------|-------|
+| G1 | K4/RR relay label error | Medium | Drawing WD-730-794-02-C0 has the RR and K4 labels swapped, and omits the K4 NO / 86 NC contacts between wire BB and the MX coil. Analysed and corrected in [R25]; as-built drawings still show the incorrect labels (§13.4) |
+| G2 | Manual grounding switch contact type | Low | Inconsistency between WD-730-794-06-C0 (NO) and SD-730-790-05-C1 (NC) for the "mushroom" switch auxiliary contact monitored on Slot-6 IN9. Field verification required [R25] |
+| G3 | MPS trip logic completeness | Medium | 33 MPS wiring diagrams exist ([R21]) but a consolidated trip logic truth table has not been assembled |
+| G4 | Operational setpoints and limits | High | Alarm limits, tuner deadbands, safe operating envelopes not systematically captured. Some of the tuner values are known to be autosave-dependent (§17.3) |
+| G5 | Terminal strip inventory incomplete | Medium | TS-5, TS-6 and TS-8 are fully traced in [R25]. TS-1 has not been identified at all, and TS-2/TS-3/TS-4/TS-7 are named but not transcribed terminal-by-terminal. Requires reading WD-730-790-02-C6 directly (§10.5) |
+| G6 | SLC-500 slot 12 | Low | No source documents slot 12, and the 0–13 span implies more than one chassis. Physical arrangement of slots 10–13 needs field confirmation (§10.2) |
+| G7 | IQA per-connector channel map | Medium | The IQA-1/2/3 functional split is established, but which of the 8 RF inputs on each module carries which signal has not been recovered. Take from [R33] and confirm in the field (§5.4) |
+| G8 | Fate of the VXI slot-5 RF amplifier | Low | [R53] documents an RF amplifier module in slot 5 (added because the incoming 476.3 MHz was below the clock's +9.0 dBm minimum). The present crate has MPS Shutoff in slot 5 and Link Passthru in slot 6. Whether the amplifier function survives, and where, is undocumented (§5.8.1) |
+| G9 | PPS connector pin lettering | Medium | [R25] states that the assignment of PPS 1 / PPS 2 enables to pin pairs E–F and G–H, and readbacks to A–B and C–D, is an unconfirmed assumption. Needs confirmation with the PPS group (§13.3) |
+| G10 | PPS connector part number | Low | Originally a Burndy circular 8-pin; possibly now a Souriau Trim Trio equivalent (GOB1208PNE). Exact current part number requires field verification [R25] |
+| G11 | Local Control Chassis | Medium | Named in [R5] §2.1 and present in B132, but its I/O list, drawing number and exact relationship to the Fast Interlock Chassis are not documented anywhere (§2.1.1, §15.2) |
+| G12 | HVPS regulation specification | Low | SLAC-PUB-7591 [R6] specifies < 0.1% regulation; a later PEP-II slide set states ±0.5%. This document follows the published paper (§4.2). The as-measured regulation of the SPEAR3 units has not been recorded |
+| G13 | Klystron nameplate data | Low | The installed tube is a Marconi unit rated 1.5 MW (§6.1). Its exact type number, serial number and installation date are not recorded in this repository |
+| ~~G14~~ | ~~HVPS output voltage divider drawing~~ | **RESOLVED** | Closed September 2026. The dividers are on **WD-730-794-04-C0** [R71], in its "TRANSFORMER TANK WD-730-792-01" section: R1–R5 and R11–R15 are 20 MΩ each (100 MΩ per chain), R6/R7 and R16/R17 are 1 MΩ each in parallel (500 kΩ bottom leg). Confirmed independently by [R72]. `sd2372301200.pdf`, previously catalogued as the divider drawing, is in fact the Enerpro FCOG6100 firing circuit (§11.2) |
+| G15 | `sd2372301299.md` filename | Low | The note file is named `sd2372301299` but the drawing it describes is `sd2372301200.pdf` (SD-237-230-12-R0). No `sd2372301299.pdf` exists in the repository |
+| G16 | Inductor designator collision | Low | The HVPS primary filter inductors and the termination-tank inductors are **both** designated L1/L2 on their respective drawings. The designation "L3/L4" for the termination-tank pair does not appear on SD-730-790-05-C1. Use "primary filter inductors" and "termination-tank inductors" to disambiguate |
+| G17 | Crowbar SCR type per stack | **High** | SD-730-793-04-C2 supports both optically triggered and conventional crowbar SCRs, distinguished only by the values of R3 and R37 (24.9 kΩ optical / 78.70 kΩ conventional). Confirm which type is installed in each of the four crowbar stacks and record it, before any board is swapped or re-stuffed |
+| ~~G18~~ | ~~PPS readback auxiliary contact~~ | **RESOLVED** | Closed September 2026 by cross-reading four drawings — see §13.2.1 below. The PPS contact readback is the HQ3 auxiliary set on **TB2-18/19/20**, carried on **wires 20/21/22**, landing on **TB3-22/23/24** |
+| G19 | Manual grounding switch contact sense | Medium | WD-730-794-06-C0 wires the **NO** contact ("NO MANUAL GRN SW"), while SD-730-790-05-C1 shows SW1 with **both** NC and NO available. WD-730-794-06-C0 is additionally a **test stand** drawing with no revision entries. Confirm which contact is landed at SPEAR3 |
+| G20 | TS-5 terminal assignment | Medium | The signal *names* on TS-5 are unambiguous on [R67] (COMMON, ON, PPS COM, PPS, RESET, AUX TRIP, CONTACTOR CLOSED, ENABLE, CONTACTOR READY, PPS), but the drawing's labels sit between terminal rows and disagree in places with J. Sebek's field trace [R25] (which has terminal 7 = Blocking, 9 = Overcurrent where the drawing reads AUX TRIP and CONTACTOR CLOSED). Confirm terminal-by-terminal before rewiring |
+| G21 | Cabinet temperature sensor | Low | ID-308-801-06-C1 [R68] annotates the switchgear cabinet temperature sensor **"TO BE ADDED LATER"**. Confirm whether it was ever installed; if not, the S6 "TEMP" auxiliary contact may be unused |
+| G22 | "LOW PRESS SW (SPEAR ONLY)" | Low | The RFPS interlock block on [R68] carries a low-pressure switch annotated **"(SPEAR ONLY)"**, i.e. an interlock specific to the SPEAR installation rather than PEP-II. Confirm it is present, wired and tested |
+| G23 | Regulator board trip thresholds | **High** | The over-voltage comparator on SD-237-230-14-C1 is potentiometer-set anywhere from **2 V to 12 V**, i.e. **20 kV to 120 kV** of HVPS output. The over-current threshold is likewise adjustable. **Neither as-set value is recorded anywhere in this repository.** Measure both (TP10 and TP11), publish the intended values, and confirm the boards are set to them [R72] |
+| G24 | Regulator input burden resistor | Low | The AC current-sense burden resistor is given as **0.5 Ω** [R67]. Sebek flags this as needing confirmation and suggests measuring between terminals 1 and 2 on TS-4 [R72] |
+
+### 20.3 Operational Workarounds
+
+Several operational workarounds are in place due to legacy limitations:
+
+- Manual operator intervention required for some fault recovery sequences that could be automated
+- Cavity processing (conditioning) requires careful manual voltage ramping due to limited automation in legacy SNL code. The cavities were originally conditioned off-line on the automated SLAC 476 MHz processing facility [R49], which is not available for in-situ re-conditioning
+- PEP-II functions (comb filter, GVF/GAP) are absent from the SPEAR3 crate; the station reference is instead supplied by RFP-resident DACs driven by a slow EPICS loop (§5.6)
+- Several tuner loop parameters are commented out in the database source and depend on autosave restore to be non-zero (§17.3)
+
+---
+
+## 21. Verification Status
+
+This matrix records how each part of the document was substantiated during the v3.0 verification pass. It is intended to tell a reader how much weight to place on each section, and to direct the remaining review effort.
+
+| Legend | Meaning |
+|---|---|
+| **A** | Verified against an original engineering source (drawing, specification, human-authored note, published paper) or against the legacy source code itself |
+| **B** | Derived from an original source but with an interpretation step that a reviewer should check |
+| **C** | Line/state counts taken from a repository analysis file rather than recounted from the source itself |
+| **F** | Requires field verification (listed in §20.2) |
+
+| Section | Status | Basis |
+|---|---|---|
+| §2.1, §2.1.1 Block diagram and blocks | A/B | `srf1.substitutions,v`, `config.ab,v`, `rf_ab_4CV.substitutions,v`, [R53], [R5] |
+| §3 Physical layout | A | [R5] §3, [R25], [R14] |
+| §4.1 RF parameters | A | [R53] Table 1, [R8t], [R55], [R7] |
+| §4.2, §4.3 HVPS parameters | A | [R56], [R6], [R22] |
+| §5.1–§5.2 VXI inventory | A | `srf1.substitutions,v` lines 103–104, `crat_vxi_13slot.template` |
+| §5.3 RFP | A/B | [R53] §2.4; PV names verified in `rf_fbck.db`, `rfp.db` |
+| §5.4 IQA | A/F | [R53] §2.7; per-connector map outstanding (G7) |
+| §5.5 AIM | A | [R53] §2.8, `p2RfAimDef.h,v`, `rf_states.st,v` |
+| §5.6 Feedback loops | A | [R53] §2.4, [R8t] |
+| §5.7, §5.7.1 Communication | A | `config.ab,v`, `rf_ab_4CV.substitutions,v`, `allenBradley.html,v` |
+| §5.8 CLK module | A | [R53] §§2.3, 3.0–3.1; [R54] |
+| §6 Klystron and drive | A/F | [R5], [R56]; nameplate outstanding (G13) |
+| §7 Waveguide network | B | [R5] §4.2, §4.6; [R33] |
+| §8 Cavities and tuners | A | [R7], [R57], `rf_cav.db,v` |
+| §9.1–§9.4 HVPS power section | A | [R6], [R22], [R56], `hvps/documentation/schematics/` |
+| §9.5 Stored energy | A | [R56] Table 1 |
+| §9.6 Control power and triggers | A | [R56] §2.3–2.4 |
+| §10.1–§10.4 HVPS controller | A/B | [R25], [R40], [R26], [R27] |
+| §10.5 Terminal strips | A/F | [R25]; inventory incomplete (G5) |
+| §11 Enerpro | A | [R40], [R58] — both original J. Sebek notes |
+| §12 Arc protection | A | [R6] |
+| §13 PPS | A/F | [R25]; pin lettering unconfirmed (G9) |
+| §14 RF MPS | B/F | [R5] §7, [R21], Doc I §5; trip truth table outstanding (G3) |
+| §15 Interlock chain | B | Doc I §§1–5; [R5] §2.1 |
+| §16 SNL software | C | Line counts and state counts from `codeReviewTechnicalNotes/05-snl-state-machines.md`; only RCS `,v` archives are present in the repository, so working-file line counts could not be recounted directly |
+| §17 Tuner control | A | `rf_cav.db,v`, [R34], [R57] |
+| §18 Diagnostics | A | `rf_states.st,v`, `st.cmd,v`, Doc I Part X |
+| §19 Cabling | B | [R14], [R15], [R25] |
+| §20 Known issues | A/B | Consolidated from the above |
+
+---
+
+---
+
+## Appendix A — Source Document Reference Index
+
+All references cited in this document, organized by reference number. Web-accessible copies are tagged **[W*n*]** in the right-hand column and listed with their URLs in [§A.4](#a4-external-web-references).
+
+### A.1 Published Papers and Conference Proceedings
+
+| Ref | Citation | Web |
+|-----|---------|-----|
+| [R1] | McIntosh, P. et al., "The SPEAR3 RF System," **SLAC-PUB-10983**, EPAC 2004, Lucerne. OSTI 839730, DOI: 10.2172/839730. *Describes the station as installed in 2003 with a 1.2 MW klystron and four 476.3 MHz HOM-damped copper cavities at a design 3.2 MV (800 kV/cavity).* | [W1], [W2] |
+| [R2] | Corredoura, P., "Architecture and Performance of the PEP-II Low-Level RF System," **SLAC-PUB-8124**, PAC 1999. OSTI 10204, DOI: 10.2172/10204. *Not to be confused with SLAC-PUB-8498, which is [R3].* | [W3], [W4] |
+| [R3] | Corredoura, P., Allison, S., Ross, W., Sass, R., Tighe, R., "Experience with the PEP-II RF System at High Beam Currents," **SLAC-PUB-8498**, EPAC 2000, arXiv:physics/0007029 | [W5] |
+| [R6] | Cassel, R. and Nguyen, M.N., "A Unique Power Supply for the PEP II Klystron at SLAC," **SLAC-PUB-7591**, PAC 1997. DOI: 10.1109/PAC.1997.753249. *Authoritative for HVPS topology, crowbar delay (≈10 μs), primary interruption time (4–8 ms), regulation (<0.1%), ripple (<1% p-p, <0.2% RMS above 60 kV), and klystron arc energy limits.* | [W6] |
+| [R41] | Ziomek, C. and Corredoura, P., "Digital I/Q Demodulator," Proc. PAC 1995 | — |
+| [R42] | Fox, J. et al., "Longitudinal Feedback System for PEP-II," Phys. Rev. ST Accel. Beams 13, 052802 (2010) | — |
+| [R43] | Fowkes, W.R. et al., "PEP-II Prototype Klystron," SLAC-PUB-6093, April 1993 | [W14] |
+| [R44] | Fowkes, W.R. et al., "1.2 MW Klystron for Asymmetric Storage Ring B Factory," SLAC-PUB-6778, March 1995 | [W13] |
+| [R45] | Rimmer, R.A., "RF Cavity Development for the PEP-II B Factory," LBL-33360, November 1992. OSTI 7066243. *Cavity design basis for the four SPEAR3 cavities (§8.1).* | [W7] |
+| [R46] | Rimmer, R.A. et al., "High-Power Testing of the First PEP-II RF Cavity," SLAC-PUB-7210 / LBNL-38147 / UCRL-JC-126198, EPAC'96, June 1996. OSTI 505666. *150 kW wall dissipation, three rectangular HOM waveguides and broadband loads — the arrangement described in §8.1.* | [W8] |
+| [R47] | Robinson, K.W., "Stability of Beam in Radiofrequency System," CEA Report CEAL-1010, February 1964. OSTI 4075988, DOI: 10.2172/4075988. *Origin of the Robinson stability criterion that motivates the direct loop (§5.6).* | [W9], [W17] |
+| [R48] | Boussard, D., "Control of Cavities with High Beam Loading," IEEE Trans. Nucl. Sci. NS-32, PAC 1985. *Classical treatment of RF feedback under heavy beam loading (§5.6).* | [W10] |
+| [R49] | McIntosh, P., "An Automated 476 MHz RF Cavity Processing Facility at SLAC," SLAC-PUB-10083, July 2003. OSTI 815601, DOI: 10.2172/815601. *The facility used to condition the SPEAR3 cavities before installation — relevant to the manual conditioning workaround in §20.3.* | [W15], [W16] |
+
+### A.2 Textbooks and General References
+
+| Ref | Citation | Web |
+|-----|---------|-----|
+| [R50] | Wiedemann, H., *Particle Accelerator Physics*, 4th ed., Springer, 2015. *General reference for the beam dynamics summarised in §4.1.* | — |
+| [R51] | Dimtel, Inc., "LLRF9 Product Page." *The replacement LLRF controller; cited here only to identify what supersedes the VXI system described in §5.* | [W11] |
+| [R52] | Dimtel, Inc., "LLRF9/500 Specifications." | [W12] |
+| [R59] | Branlard, J., "Low Level RF for SRF Accelerators," LINAC 2014. *Background tutorial on LLRF architectures.* | [W18] |
+
+### A.3 Original Engineering Documents in Repository
+
+| Ref | Document | Repository Path |
+|-----|----------|----------------|
+| [R4] | LLRF9 Commissioning Tests (J. Sebek, 2021) — source of the ~712 kV/cavity operating gap voltage | `llrf/tests/llrf9Tests.pdf`, `llrf/tests/llrf9Tests.tex` |
+| [R5] | SPEAR3 LLRF Upgrade System Physical Design Report, **R2** (28 April 2026) — the authoritative upgrade reference | `Designs/docx/SPEAR3_LLRF_PDR_R2.docx`; markdown rendering of R1 at `Designs/0_SYSTEM_DESIGN_REPORT.md` |
+| [R7] | PEP-II RF System Description (Schwarz, PS-340-330-51-R0) — cavity R_s, Q_0, β | `llrf/documentation/legacyArchitecture/ps3403305100.pdf` |
+| [R7t] | Transcription of [R7] | `llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/design-specifications/PS-340-330-51_RF_System_Description.md` |
+| [R8] | LLRF Feedback Loop Description (Schwarz, PS-340-330-52-R0) | `llrf/documentation/legacyArchitecture/ps3403305200.pdf` (= `feedbackLoopDescriptionps3403305200.pdf`) |
+| [R8t] | Transcription of [R8] | `llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/design-specifications/PS-340-330-52_LLRF_Feedback_Loop_Description.md` |
+| [R9] | HVPS System Schematic (top-level) | `hvps/documentation/schematics/sd7307900101.pdf` |
+| [R10] | LLRF Block Diagram (HER configuration) | `llrf/documentation/legacyArchitecture/bd3403300000.pdf` |
+| [R11] | LLRF Block Diagram (alternative view) | `llrf/documentation/legacyArchitecture/bd3403300100.pdf` |
+| [R12] | Analog Regulator Card Schematic | `hvps/documentation/schematics/sd2372301401.pdf` |
+| [R13] | **Enerpro General Purpose 3-Phase Firing Circuit, PCB PN FCOG6100** — SLAC SD-237-230-12-R0 / Enerpro drawing E128, drawn W.C. Mitchell 9/29/87. *This file is **not** a voltage-divider drawing, despite having been catalogued as one; the dividers are on [R71].* | `hvps/documentation/schematics/sd2372301200.pdf` |
+| [R14] | Interconnection: B118 ↔ Contactor ↔ Termination Tank | `hvps/documentation/wiringDiagrams/wd7307900103.pdf` |
+| [R15] | Hoffman Box Internal Wiring | `hvps/documentation/wiringDiagrams/wd7307900206.pdf` |
+| [R16] | Legacy SNL: rf_states.st (master state machine) | `spear-rf-code-legacy/rfApp/src/seq/rf_states.st,v` |
+| [R17] | Legacy SNL: rf_hvps_loop.st (HVPS control) | `spear-rf-code-legacy/rfApp/src/seq/rf_hvps_loop.st,v` |
+| [R18] | Legacy SNL: rf_tuner_loop.st (tuner control) | `spear-rf-code-legacy/rfApp/src/seq/rf_tuner_loop.st,v` |
+| [R19] | Legacy SNL: rf_calib.st (calibration sequences) | `spear-rf-code-legacy/rfApp/src/seq/rf_calib.st,v` |
+| [R20] | Legacy SNL: rf_msgs.st (message logging) | `spear-rf-code-legacy/rfApp/src/seq/rf_msgs.st,v` |
+| [R21] | MPS Wiring Diagrams (33 drawings) | `llrf/documentation/mpsWiringDiagrams/wd3403300200.pdf` through `wd3403303400.pdf` |
+| [R22] | PEP-II HVPS Technical Specification (PS-341-360-01-R2) | `hvps/architecture/originalDocuments/ps3413600102.pdf` |
+| [R22t] | Transcription of [R22] | `hvps/architecture/originalDocuments/transcriptions/ps3413600102_transcription.md` |
+| [R23] | HVPS Monitor Connections | `hvps/documentation/wiringDiagrams/hvpsMonitorConnections.xlsx` |
+| [R24] | HVPS Measurements (March 2022) | `hvps/documentation/plc/hvpsMeasurements20220314.xlsx` |
+| [R25] | PPS Wiring in Hoffman Box (J. Sebek) — terminal-by-terminal PPS trace, PLC rung analysis, switchgear theory of operation, K4/RR label finding | `pps/HoffmanBoxPPSWiring.docx` |
+| [R26] | PLC Ladder Logic Printout (Cassel) | `hvps/documentation/plc/CasselPLCCode.pdf` |
+| [R27] | PLC Symbol/Label Database (Cassel) | `hvps/documentation/plc/CasselSymbolDatabase.pdf` |
+| [R28] | Enerpro Schematics and Manuals (12 PDFs) | `hvps/controls/enerpro/enerproDocuments/` |
+| [R29] | SLO-SYN Stepper Drive Manual | `llrf/tuners/SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf` |
+| [R30] | SLO-SYN Motor Specifications | `llrf/tuners/SLO-SYN.pdf` |
+| [R31] | Galil DMC-41x3 series user manual (covers the DMC-4143) | `llrf/tuners/galil/dmc-4103-r13h-manual.pdf`; datasheet `llrf/tuners/galil/ds_41x3.pdf` |
+| [R32] | Drive Amplifier Datasheet (KAW2051M12) | `llrf/driveAmp/KAW2051M12 (7-98-907-012A).pdf` |
+| [R33] | Coaxial Cable Interconnection Diagram | `llrf/documentation/coaxCables/sd3403300100.pdf` |
+| [R34] | Galil bench session log with the installed cavity motors (25 Aug 2025) — records firmware `DMC4143 Rev 1.3h`, `AMP1 43547 Rev 4` | `llrf/tuners/galil/functioningGalil20250825SwapABToManual.txt`; earlier session `firstMotion2024.txt` |
+| [R35] | Galil Commissioning Documentation | `llrf/tuners/galil/GalilCommissioning.docx` |
+| [R36] | Cavity Tuner Inspections (June 2023) | `llrf/tuners/cavityTunerInspections20230613.docx` |
+| [R37] | PLC Operation Notes | `hvps/documentation/plc/plcNotesR1.docx` |
+| [R38] | PLC Software Discussion | `hvps/documentation/plc/PLC software discusion 1.docx` |
+| [R39] | PLC Label Database | `hvps/documentation/plc/hvpsPlcLabels.xlsx` |
+| [R40] | Enerpro Modifications for SLAC HVPS (J. Sebek) — installed FCOG6100/FCOAUX60 identity and serial numbers, phase-reference measurements, SIG HI summing chain | `hvps/controls/enerpro/enerproBoardHvps.docx` |
+| [R53] | Dusatko, J., *The SPEAR3 Low Level RF System Description*, v1.2, SLAC ESD, 4 May 2004 (updated 29 January 2016) — authoritative for the VXI crate, CLK, IQA, RFP, AIM and their SPEAR3 modifications | `llrf/documentation/legacyArchitecture/SP3_writeup_V1d2.pdf` |
+| [R54] | Ross, W., *PEP-II/SPEAR3 LLRF System Clock Module Revision 2*, SLAC ESD Engineering Document, 1 September 2001 | Cited as reference 3 of [R53]; document not held in this repository |
+| [R55] | SPEAR3 RF Physics and Plant (Doc P) — authoritative for beam and cavity physics parameters | `Designs/P_RF_PHYSICS_AND_PLANT.md` |
+| [R56] | Sebek, J., *SPEAR3 High Voltage Power Supply Hazards* — authoritative for HVPS stored energy, discharge times, operating point, transformer ratings, and the T0 rating correction | `hvps/documentation/procedures/spear3HvpsHazards.tex` |
+| [R57] | SPEAR3 Legacy LLRF Tuner Control System Technical Analysis (Doc T) | `Designs/T_TUNER_CONTROL_SYSTEM_ANALYSIS.md` |
+| [R58] | Sebek, J., *Enerpro Phase Reference Adapter* — the upgrade adapter design (576 kΩ / 200 kΩ into FCOG1200 J7) | `hvps/controls/enerpro/enerproPhaseReferenceAdapter.docx` |
+| [R60] | Legacy IOC boot and Remote I/O configuration | `spear-rf-code-legacy/iocBoot/b132-iocrf/st.cmd,v`, `config.ab,v`; `spear-rf-code-legacy/rfApp/DbIoc/srf1.substitutions,v`; `spear-rf-code-legacy/rfApp/Db/rf_ab_4CV.substitutions,v`; `spear-rf-code-legacy/rfApp/src/db/p2RfAimDef.h,v`; `spear-rf-code-legacy/allenBradley/documentation/allenBradley.html,v` |
+| [R61] | SCR trigger, interlock and monitor board schematics (SD-730-793 series) — verified by direct reading of the scanned drawings, September 2026 | `hvps/documentation/schematics/sd7307930304.pdf`, `sd7307930402.pdf`, `sd7307930702.pdf`, `sd7307930801.pdf`, `sd7307931203.pdf`, `sd7307931301.pdf` |
+| [R62] | Grounding Tank schematic, SD-730-790-05-C1 (R. Cassel, 2/13/03) — verified by direct reading, September 2026 | `hvps/documentation/schematics/sd7307900501.pdf` |
+| [R63] | **Trigger Enclosure Wiring, WD-730-790-02-C6** (R. Cassel / W. Gorecki / S. Lowe; revisions C1–C6, 06/03 to 01/07) — master wiring diagram for the B118 trigger enclosure; verified by direct reading, September 2026 | `hvps/documentation/wiringDiagrams/wd7307900206.pdf` |
+| [R64] | Grounding Tank Wiring, WD-730-794-06-C0 (R. Cassel / W. Gorecki 03/03/2000 / S. Lowe 4/3/00) — **test stand** configuration, no revisions recorded; verified by direct reading, September 2026 | `hvps/documentation/wiringDiagrams/wd7307940600.pdf` |
+| [R65] | Vacuum Contactor Controller Electrical Schematic, GP-439-704-02-C1 (redrawn to CAD per as-built, 09/25/06) — verified by direct reading, September 2026 | `hvps/documentation/switchgear/gp4397040201.pdf` |
+| [R66] | Ross Engineering 713203 E-1, High Speed Vacuum Contactor Energy Storage Closing & Holding System Schematic (driver HCA-1-A P/N 820360; contactor HQ3 P/N 813203; last revision E, 2-2-83) — verified by direct reading, September 2026 | `hvps/documentation/switchgear/rossEngr713203.pdf` |
+| [R67] | **Interconnection Wiring, WD-730-790-01-C3** (R. Cassel / W. Gorecki 03/02/2000 / S. Lowe; revisions C1–C3, 08/03 to 10/03) — system-level interconnection between the B118 Hoffman Box, Contactor Disconnect and Termination Tank; verified by direct reading, September 2026 | `hvps/documentation/wiringDiagrams/wd7307900103.pdf` |
+| [R68] | **12.47 kV Vacuum Contactor Controller, Electrical Connection Wiring Diagram, ID-308-801-06-C1** (redrawn to CAD and resized D→E, revised per as-built, 09/25/06; supersedes ID-308-801-06 R0) — the connection-wiring companion to [R65]; verified by direct reading, September 2026 | `hvps/documentation/switchgear/id3088010601.pdf` |
+| [R69] | **12.47 kV Outdoor Metal-Enclosed Combination Vacuum Contactor Controller — Schematic Diagram & General Arrangement, GP-308-500-01-R3** (Lawrence Berkeley Laboratory; A. Tseng / L. Johnson, 6-23-77, revisions 1–3) — the original PEP-era design drawing; authoritative source for the relay device legend; verified by direct reading, September 2026 | `hvps/documentation/switchgear/gp3085000103.pdf` |
+| [R70] | **Klystron Power Supply Electrical Schematic, EI-730-790-00-C0 / NWL # 39308** (NWL Transformers, Bordentown NJ; SLAC issue R. Cassel / W. Gorecki 12/17/02 / J. Olszewski 1/21/03; NWL revisions A–F, 1996–2001) — the **transformer manufacturer's own schematic**; authoritative for transformer ratings, monitor windings and oil/pressure protection setpoints; verified by direct reading, September 2026 | `hvps/documentation/wiringDiagrams/ei7307900000.pdf` |
+| [R71] | **SCR Control Driver — Crowbar Interconnecting Cables, WD-730-794-04-C0** (R. Cassel 5/30/00 / W. Gorecki 03/03/2000 / S. Lowe 4/3/00) — contains the **"TRANSFORMER TANK WD-730-792-01"** section with both HVPS output voltage dividers, the crowbar trigger transformer T1 feeding SCR1–SCR4 over RG-220, and the CR1–CR4 driver board pinouts; verified by direct reading, September 2026 | `hvps/documentation/wiringDiagrams/wd7307940400.pdf` |
+| [R72] | **Enerpro Voltage and Current Regulator Board Notes** — J. Sebek. Detailed circuit analysis of SD-237-230-14-C1: divider loading and transfer functions, error-amplifier pole/zero analysis, the diode minimum-select summing junction, and the finding that the AC current loop is saturated by design | `hvps/architecture/designNotes/EnerproVoltageandCurrentRegulatorBoardNotes.docx` |
+
+### A.4 External Web References
+
+All URLs were checked on 3 September 2026. "Verified" means the page was retrieved and its bibliographic content confirmed to match the citation it supports; "link only" means the URL resolves but the content could not be machine-read (PDF, paywall, or bot challenge) and the citation rests on the corresponding repository copy or OSTI/arXiv record instead.
+
+| Ref | URL | Content | Supports | Status |
+|-----|-----|---------|----------|--------|
+| [W1] | <https://inspirehep.net/files/945e7ff73cc428af4c018fd1bdb6afa7> | McIntosh et al. EPAC04 full text | [R1] | Link only (opaque INSPIRE file hash — prefer [W2]) |
+| [W2] | <https://www.osti.gov/biblio/839730> | OSTI record for SLAC-PUB-10983 (SPEAR3 RF System) | [R1] | **Verified** |
+| [W3] | <https://digital.library.unt.edu/ark:/67531/metadc619632/> | Corredoura, PEP-II LLRF Architecture (UNT Digital Library) | [R2] | Link only (bot challenge) |
+| [W4] | <https://www.osti.gov/biblio/10204> | OSTI record for Corredoura PAC99 — confirms report number **SLAC-PUB-8124** | [R2] | **Verified** |
+| [W5] | <https://arxiv.org/abs/physics/0007029> | Corredoura et al., PEP-II RF at High Beam Currents — confirms report number SLAC-PUB-8498 and the full author list | [R3] | **Verified** |
+| [W6] | <https://ieeexplore.ieee.org/document/753249/> | Cassel & Nguyen, PEP-II Klystron Power Supply (IEEE) | [R6] | Link only (paywall); full transcription held at `hvps/architecture/originalDocuments/transcriptions/slac-pub-7591_transcription.md` |
+| [W7] | <https://www.osti.gov/biblio/7066243> | Rimmer, RF Cavity Development for PEP-II (LBL-33360) | [R45] | **Verified** |
+| [W8] | <https://www.osti.gov/biblio/505666> | Rimmer et al., High-Power Testing of the First PEP-II RF Cavity | [R46] | **Verified** |
+| [W9] | <https://www.osti.gov/biblio/4075988> | Robinson, Stability of Beam in RF System (CEAL-1010) | [R47] | **Verified** |
+| [W10] | <https://proceedings.jacow.org/p85/PDF/PAC1985_1852.PDF> | Boussard, Control of Cavities with High Beam Loading | [R48] | Link only (PDF) |
+| [W11] | <https://www.dimtel.com/products/llrf9> | Dimtel LLRF9 product page | [R51] | **Verified** |
+| [W12] | <https://www.dimtel.com/products/specs/llrf9_500> | LLRF9/500 specifications | [R52] | **Verified** |
+| [W13] | <https://inspirehep.net/files/dd3ac6684a603446924fb193fcd7faf0> | Fowkes et al., 1.2 MW Klystron (SLAC-PUB-6778) | [R44] | Link only (opaque INSPIRE file hash) |
+| [W14] | <https://s3.cern.ch/inspire-prod-files-e/ede001caff380d3448f21bc3b1d5e371> | Fowkes et al., PEP-II Prototype Klystron (SLAC-PUB-6093) | [R43] | Link only (opaque INSPIRE file hash) |
+| [W15] | <https://slac.stanford.edu/pubs/slacpubs/10000/slac-pub-10083.pdf> | McIntosh, 476 MHz Cavity Processing (SLAC-PUB-10083) | [R49] | Link only (PDF) |
+| [W16] | <https://www.osti.gov/biblio/815601> | OSTI record for SLAC-PUB-10083 | [R49] | **Verified** |
+| [W17] | <https://inspirehep.net/literature/1102529> | INSPIRE record for Robinson 1964 | [R47] | **Verified** |
+| [W18] | <https://www.desy.de/~branlard/papers/LINAC14/WEIOA06.pdf> | Branlard, "Low Level RF for SRF Accelerators," LINAC14 | [R59] | Link only (PDF) |
+
+> **Maintenance note**: [W1], [W13] and [W14] are content-addressed INSPIRE/CERN file hashes. They are fragile and should be replaced with stable landing-page URLs or repository copies at the next revision.
+
+---
+
+## Appendix B — Symbol and Notation Conventions
+
+### B.1 Frequently Used Symbols
+
+| Symbol | Definition | Typical Unit |
+|--------|-----------|-------------|
+| f₀, ω₀ | Cavity resonant frequency | MHz, rad/s |
+| f_RF, ω_RF | RF operating frequency (~476.3 MHz, drifting — §4.1) | MHz, rad/s |
+| f_rev, ω_rev | Revolution frequency (~1.2804 MHz) | MHz, rad/s |
+| f_s, ω_s | Synchrotron frequency (~10.1 kHz — see [R55]) | kHz, rad/s |
+| Q₀ | Unloaded quality factor (32,000) | dimensionless |
+| Q_L | Loaded quality factor (~6,700) | dimensionless |
+| β | Coupling coefficient = Q₀/Q_ext (~3.78) | dimensionless |
+| R_s | Shunt impedance (3.73 MΩ, linac convention) | MΩ |
+| V_gap | Gap voltage per cavity (~712 kV operating) | kV |
+| I_b | DC beam current (500 mA design) | mA or A |
+| V_HV | HVPS output voltage (≈ −72 to −75 kV typical) | kV |
+| I_HV | HVPS output current (≈ 19 to 22 A typical) | A |
+| α | SCR firing angle | degrees |
+| SIG HI | Enerpro control voltage (proportional to α) | V |
+
+### B.2 Abbreviations
+
+| Abbreviation | Definition |
+|-------------|-----------|
+| AIM | Arc/Interlock Module (VXI slot 12, SLAC drawing 340-307) |
+| CLK | Clock/RF Distribution module (VXI slot 2) |
+| DCM | Direct Communication Module — an Allen-Bradley **Remote I/O adapter** (1747-DCM for SLC-500, 1771-DCM for PLC-5) |
+| Fast IC | Fast Interlock Chassis (SLAC drawing 340-308) |
+| GVF / GAP | Gap Voltage Feed-Forward (PEP-II only; module not installed in SPEAR3) |
+| HER | High Energy Ring (PEP-II) |
+| HOM | Higher-Order Mode |
+| HVPS | High-Voltage Power Supply |
+| IQA | IQ/Amplitude detector module (VXI slots 7, 9, 11) |
+| LLRF | Low-Level RF |
+| MPS | Machine Protection System (RF MPS = the station-level equipment protection PLC; SPEAR MPS = the facility system) |
+| PPS | Personnel Protection System |
+| RFP | RF Processor module (VXI slot 4) |
+| RIO | Allen-Bradley Remote I/O — the serial link between the VXI 6008-SV1R scanner and the PLC adapters |
+| SCR | Silicon Controlled Rectifier (thyristor) |
+| SNL | State Notation Language (EPICS) |
+
+### B.3 Conventions
+
+1. **Shunt impedance convention**: This document uses the **linac convention** (R_s = V²/2P) unless explicitly stated otherwise, giving R_s = 3.73 MΩ per cavity. The accelerator convention (R_s = V²/P) gives values exactly 2× larger (7.5 MΩ); the figure of 3.8 MΩ that appears in McIntosh [R1] is an accelerator-convention value and must not be mixed with linac-convention formulae.
+
+2. **Phase convention**: Positive phase angles represent phase advance. The synchronous phase φ_s is measured from the zero-crossing of the RF voltage.
+
+3. **Frequency detuning**: Δf = f₀ − f_RF. Negative detuning (Δf < 0) means the cavity resonant frequency is below the RF frequency — the normal operating condition for beam loading compensation above transition.
+
+4. **Reference tag format**: [Rn] for numbered references, [Rnt] for a transcription of the same source, [Wn] for web references.
+
+5. **Voltage polarity**: HVPS voltages are reported as positive magnitudes unless preceded by a minus sign. The klystron cathode polarity is negative.
+
+6. **Timing statements**: Where an interlock or protection time is quoted, this document distinguishes **signal latency** (comparator to fiber, typically < 1 μs) from **physical response** (crowbar conduction ≈ 10 μs; SCR primary interruption 4–8 ms). Unqualified "response time" figures in older revisions conflated the two.
+
+7. **Drifting quantities**: The RF frequency and the klystron cathode voltage/current are not fixed (§4). Values quoted for them are typical readbacks with their source identified, not setpoints, and small differences between sources are expected.
+
+---
+
+*End of Document*
+
+**Document Control**:
+
+- This document is the Tier 2 legacy system reference for the SPEAR3 RF system.
+- The definitive version is `Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md` in the `spearlegacyLLRF` repository.
+- **Provenance**: AI-ASSISTED. Structure and drafting by AI; every technical claim is referenced to an original source document, an engineering drawing read directly, or the legacy source code. Subject to human review and approval by a named engineer.
+- **Review status**: Release candidate. §21 records the verification basis for each section; §20.2 lists the items (G1–G24) that still require field verification or transcription of an original drawing before this document can be considered complete.

@@ -1,0 +1,99 @@
+% !TeX root = ../0_system_design_report.tex
+% Figure 2 -- RF plant signal flow.  Circled numbers are the directional-coupler
+% channel indices (1)-(24) used in the "Monitored RF Signals" table.
+% Row members use anchor=west at a common y so every in-row connector is exactly
+% horizontal; every branch uses -| so no run is ever diagonal.
+\begin{tikzpicture}[
+  font=\scriptsize, x=1mm, y=1mm,
+  sn/.style={circle,draw=cRf!70,fill=white,inner sep=0.3pt,font=\tiny,
+             text=cRf!70!black,minimum size=3.6mm},
+  wg/.style={draw=cPwr,line width=1.3pt,-{Stealth[length=2.4mm]}},
+  wgp/.style={draw=cPwr,line width=1.3pt},
+]
+
+% ===== station reference rail ============================================
+\draw[bus,draw=cCtrl] (0,12) -- (156,12);
+\node[tag,anchor=south west,text=cCtrl!85!black] at (2,12.8)
+  {\tikz[baseline=-0.6ex]\node[sn,draw=cCtrl!70,text=cCtrl]{6};\ %
+   Station Ref, \qty{476.3}{\mega\hertz} --- master reference to the LLRF9 and
+   to every downconverter};
+\draw[sig,draw=cCtrl] (10,12) -- (10,4);
+
+% ===== drive chain =======================================================
+\node[ctrl,text width=20mm,anchor=west] (llrf) at (0,0)  {\textbf{LLRF9}\\ drive output};
+\node[rf,text width=22mm,anchor=west]   (amp)  at (28,0) {\textbf{DRIVE AMP}\\ $\sim$\qty{29}{\watt}};
+\node[rf,text width=26mm,anchor=west]   (kly)  at (58,0) {\textbf{KLYSTRON}\\ Marconi \qty{1.5}{\mega\watt}};
+\node[rf,text width=26mm,anchor=west]   (circ) at (94,0)
+  {\textbf{CIRCULATOR}\\ {\tiny P1 kly in $\cdot$ P2 to WG}};
+\node[pwr,text width=20mm,anchor=west]  (cl)   at (136,0)
+  {\textbf{CIRC LOAD}\\ {\tiny circulator P3}};
+
+\draw[sig] (llrf.east) -- node[sn]{5} (amp.west);
+\draw[wg]  (amp.east)  -- (kly.west);
+\draw[wg]  (kly.east)  -- node[sn]{1} (circ.west);
+\draw[wg]  (circ.east) -- node[sn,pos=0.28]{3} node[sn,pos=0.72]{4} (cl.west);
+
+% klystron reflected power, routed clear of everything else
+\coordinate (r2) at (91,-14);
+\draw[wgp] (91,0) -- (r2);
+\draw[wg]  (r2) -| node[sn,pos=0.22]{2} (kly.south);
+
+% ===== magic tee 1 =======================================================
+\node[pwr,text width=44mm,anchor=west] (mt1) at (56,-32)
+  {\textbf{MAGIC TEE 1}\\ {\tiny first split --- half the power to each side}};
+\node[pwr,text width=22mm,anchor=west] (wl1) at (114,-32)
+  {\textbf{WG LOAD 1}\\ {\tiny MT-1 P4}};
+\draw[wg] (mt1.east) -- node[sn,pos=0.28]{7} node[sn,pos=0.72]{8} (wl1.west);
+% circulator P2 down into MT1
+\coordinate (p2) at (107,-22);
+\draw[wgp] (circ.south) -- (circ.south|-p2);
+\draw[wg]  (circ.south|-p2) -| (mt1.north);
+
+% ===== magic tee 2 / 3 ===================================================
+\node[pwr,text width=20mm,anchor=west] (wl2) at (0,-62)
+  {\textbf{WG LOAD 2}\\ {\tiny MT-2 P4}};
+\node[pwr,text width=30mm,anchor=west] (mt2) at (34,-62)
+  {\textbf{MAGIC TEE 2}\\ {\tiny second split}};
+\node[pwr,text width=30mm,anchor=west] (mt3) at (92,-62)
+  {\textbf{MAGIC TEE 3}\\ {\tiny second split}};
+\node[pwr,text width=20mm,anchor=west] (wl3) at (136,-62)
+  {\textbf{WG LOAD 3}\\ {\tiny MT-3 P4}};
+\draw[wg] (mt2.west) -- node[sn,pos=0.28]{15} node[sn,pos=0.72]{16} (wl2.east);
+\draw[wg] (mt3.east) -- node[sn,pos=0.28]{23} node[sn,pos=0.72]{24} (wl3.west);
+
+\coordinate (s1) at ($(mt1.south)+(0,-10)$);
+\draw[wgp] (mt1.south) -- (s1);
+\draw[wg]  (s1) -| (mt2.north);
+\draw[wg]  (s1) -| (mt3.north);
+
+% ===== cavities ==========================================================
+\def\yC{-92}
+\node[rf,text width=30mm,anchor=west] (ca) at (4,\yC)   {\textbf{CAVITY A}};
+\node[rf,text width=30mm,anchor=west] (cb) at (44,\yC)  {\textbf{CAVITY B}};
+\node[rf,text width=30mm,anchor=west] (cc) at (82,\yC)  {\textbf{CAVITY C}};
+\node[rf,text width=30mm,anchor=west] (cd) at (122,\yC) {\textbf{CAVITY D}};
+
+\coordinate (s2) at ($(mt2.south)+(0,-10)$);
+\draw[wgp] (mt2.south) -- (s2);
+\draw[wg]  (s2) -| (ca.north);
+\draw[wg]  (s2) -| (cb.north);
+\coordinate (s3) at ($(mt3.south)+(0,-10)$);
+\draw[wgp] (mt3.south) -- (s3);
+\draw[wg]  (s3) -| (cc.north);
+\draw[wg]  (s3) -| (cd.north);
+
+% Per-cavity directional-coupler channels.  Each cavity drops a thin spine and
+% the three numbered taps hang off it, so all four groups align exactly.
+\newcommand{\cavsig}[4]{%
+  \draw[draw=black!35] (#1.south) -- ($(#1.south)+(0,-15)$);
+  \node[sn] (#1a) at ($(#1.south)+(0,-5)$)  {#2};
+  \node[sn] (#1b) at ($(#1.south)+(0,-10)$) {#3};
+  \node[sn] (#1c) at ($(#1.south)+(0,-15)$) {#4};
+  \node[anchor=west,font=\tiny,text=black!65,inner sep=1.5pt] at (#1a.east) {Fwd};
+  \node[anchor=west,font=\tiny,text=black!65,inner sep=1.5pt] at (#1b.east) {Refl};
+  \node[anchor=west,font=\tiny,text=black!65,inner sep=1.5pt] at (#1c.east) {Probe};}
+\cavsig{ca}{9}{10}{13}
+\cavsig{cb}{11}{12}{14}
+\cavsig{cc}{17}{18}{21}
+\cavsig{cd}{19}{20}{22}
+\end{tikzpicture}

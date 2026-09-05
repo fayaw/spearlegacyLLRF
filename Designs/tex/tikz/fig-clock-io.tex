@@ -1,0 +1,30 @@
+% !TeX root = ../L_legacy_system_architecture.tex
+% VXI clock module: top-level inputs and outputs.
+\begin{tikzpicture}[font=\scriptsize,x=1mm,y=1mm,every node/.style={outer sep=0pt}]
+\node[ctrl,minimum width=46mm,minimum height=62mm,anchor=north west] (clk) at (52,0) {};
+\node[font=\small\bfseries,text=cCtrl!85!black,anchor=north] at (75,-2) {VXI Clock Module};
+
+% ---- inputs -------------------------------------------------------------
+\node[anchor=east,align=right,font=\scriptsize] (in1) at (48,-12)
+  {\qty{476.3}{\mega\hertz} RF\\{\tiny from SPEAR3 timing system}};
+\node[anchor=east,align=right,font=\scriptsize] (in2) at (48,-30)
+  {Bunch\,0 FIDUCIAL\\{\tiny \qty{1.280}{\mega\hertz}}};
+\node[anchor=east,align=right,font=\scriptsize] (in3) at (48,-48)
+  {VXIbus backplane};
+\foreach \n/\y in {in1/-12,in2/-30,in3/-48}{\draw[sig] (\n.east) -- (52,\y);}
+
+% ---- outputs ------------------------------------------------------------
+\foreach \y/\txt in {%
+  -8/{\qty{476.3}{\mega\hertz} RF FANOUT \ $\rightarrow$ RFP (3 copies)},
+  -15/{\qty{471.187}{\mega\hertz} LO OUT \ $\rightarrow$ IQAs (4 copies)},
+  -22/{CLK40 (\qty{40.972}{\mega\hertz}) \ $\rightarrow$ RFP / IQAs / AIM},
+  -29/{CLK20 (\qty{20.486}{\mega\hertz}) \ $\rightarrow$ IQAs},
+  -36/{CLK10 (\qty{10.243}{\mega\hertz}) \ $\rightarrow$ RFP and IQAs},
+  -43/{TCLK (\qty{1.280}{\mega\hertz} turn clock) \ $\rightarrow$ not used, retained},
+  -50/{TSYNC (programmable sync pulse) \ $\rightarrow$ IQAs (TTLTRG3)},
+  -57/{RF\_FAULT \ $\rightarrow$ AIM / RFP}}
+{
+  \draw[sig] (98,\y) -- (104,\y);
+  \node[anchor=west,font=\scriptsize] at (105,\y) {\txt};
+}
+\end{tikzpicture}

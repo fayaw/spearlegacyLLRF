@@ -1,0 +1,13 @@
+% Harness for previewing one TikZ figure at a time on an oversized page.
+% Used by preview-figs.ps1; not part of the document build.
+%   lualatex "\def\FIG{fig-vxi-crate}\input{tikztest}"
+\PassOptionsToPackage{paperwidth=17in,paperheight=13in,margin=0.4in}{geometry}
+\documentclass[letterpaper,11pt]{article}
+\input{preamble}
+\geometry{paperwidth=17in,paperheight=13in,margin=0.4in}
+\pagestyle{empty}
+\begin{document}
+\begin{figure}[H]\centering
+\input{tikz/\FIG}
+\end{figure}
+\end{document}

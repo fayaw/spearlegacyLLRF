@@ -195,10 +195,16 @@ The tuner loop only acts in `ON_CW` state. The state codes (from `rf_station_sta
                      │
 ┌────────────────────▼─────────────────────────────────────────┐
 │  Stepper Motor Record (TUNR:STEP:MOTOR)                      │
-│  Legacy: AB 1746-HSTP1 (steppermotor record type)            │
-│  Current: Galil DMC-4143 (commissioned Aug 2025)             │
+│  IN SERVICE: AB 1746-HSTP1 (steppermotor record type)        │
+│  IN DEVELOPMENT: Galil DMC-4143 — not installed, not running │
 └──────────────────────────────────────────────────────────────┘
 ```
+
+> ### ⚠ Galil controller status
+>
+> Per the system owner: the Galil DMC-4143 control **has not been installed and is not in operation — it is in development**. Test moves were performed on the existing cavity motors and worked fine, but the controller is expected to go online only **when the current LLRF upgrade project is finished**. It has *not* replaced the Allen-Bradley hardware.
+>
+> **The AB 1746-HSTP1 stepper controller remains the in-service hardware.** Everything in this document describing present-day tuner behaviour refers to the AB path; Galil material is forward-looking.
 
 ---
 
@@ -651,7 +657,7 @@ $$\theta[n] = \text{forget} \cdot \left( \theta[n-1] - K \cdot e_s[n-1] \right)$
 
 **EPICS record type:** `steppermotor` (custom AB 1746-HSTP1 driver record)  
 **Physical device (legacy):** Allen-Bradley 1746-HSTP1 stepper module  
-**Physical device (current, Aug 2025 upgrade):** Galil DMC-4143 motion controller
+**Physical device (in development, not installed):** Galil DMC-4143 motion controller
 
 ```epics
 grecord(steppermotor,"$(S):$(C)TUNR:STEP:MOTOR") {
@@ -735,7 +741,7 @@ With C = 0.020 mm/° (minimum end of nominal range; worst-case resolution):
 - 1 step (0.003175 mm) ≡ 0.159° phase change
 - RDBD (5 steps = 0.015875 mm) ≡ 0.794° phase
 
-For $Q_L \approx 7000$: 0.159° corresponds to $\Delta f \approx 95$ Hz minimum resolvable correction. The Galil upgrade achieves sub-step positioning.
+For $Q_L \approx 7000$: 0.159° corresponds to $\Delta f \approx 95$ Hz minimum resolvable correction. The Galil controller would achieve sub-step positioning once commissioned.
 
 ### 10.6 No State Estimation or Predictive Control
 
@@ -1002,4 +1008,4 @@ These are `ao`/`bo` records in `rf_stn_cav.db,v`, shared across all cavities (pr
 | 2 Hz loop rate | `rf_stn_cav.db,v` (SCAN="2 second") | `rf_tuner_loop.st,v` |
 | RF frequency (476 MHz) | `rf_cav.db,v` (INPA=0.00004726891) | Derived: 90/(476000×4) |
 | Station state codes | `rfApp/src/db/rf_station_state.h,v` | `codeReviewTechnicalNotes/05-snl-state-machines.md` |
-| Hardware replaced by Galil | `codeReviewTechnicalNotes/06-plc-stepper-motors.md` | PDR §10.3 (Aug 2025) |
+| Galil planned as AB replacement (**not yet installed**) | `codeReviewTechnicalNotes/06-plc-stepper-motors.md` | PDR §10.3; test moves performed Aug 2025, `llrf/tuners/galil/functioningGalil20250825SwapABToManual.txt` |

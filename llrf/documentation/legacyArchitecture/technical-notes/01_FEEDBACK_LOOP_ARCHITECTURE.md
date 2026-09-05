@@ -81,9 +81,9 @@ The following table lists all feedback and control loops in the PEP-II/SPEAR3 LL
 | 1 | **Direct (Wideband) RF Feedback Loop** | Reduces effective cavity impedance by ~40 dB (factor of ~100), suppressing Robinson instability and coupled-bunch growth rates | ~800 kHz (with lead compensation; ~250 kHz without) | Analog: RFP module (error amplifier, lead/integral compensation, baseband modulator), IQ demodulators, IQ RF modulator | ✅ Active |
 | 2 | **Comb (Narrowband) RF Feedback Loop** | Provides additional gain at revolution frequency harmonics to further suppress coupled-bunch modes beyond what the Direct loop alone achieves | ~2 MHz overall span; ~10 kHz per comb tooth | Digital: VXI Comb Filter modules (I and Q, separate), FIFO one-turn delay | ❌ PEP-II only |
 | 3 | **Ripple Feedback Loop** | Cancels RF amplitude/phase modulation from HVPS switching ripple (~360 Hz fundamental, harmonics to ~50 kHz). In SPEAR3 practice, deployed primarily as a slow phase tracker compensating for klystron phase shift across cathode voltage changes | Up to ~50 kHz (design); lower effective BW in SPEAR3 slow-tracker mode | DSP: AT&T DSP1610 processor; analog integrator path | ✅ Active (as slow phase tracker) |
-| 4 | **HVPS Voltage Regulation Loop** | Regulates klystron cathode voltage to maintain RF drive power or gap voltage at setpoint; includes processing mode for cavity conditioning | ~0.5–1 Hz | Software: VxWorks SNL (`rf_hvps_loop.st`); HVPS SCR controller, Enerpro voltage regulator board | ✅ Active |
-| 5 | **DAC Control Loop** | Maintains gap voltage and RF drive power at software setpoints by adjusting baseband DAC values; compensates for slow drifts and klystron gain variation | ~0.1 Hz | Software: VxWorks SNL (`rf_dac_loop.st`); Octal DAC on RFP module | ✅ Active |
-| 6 | **Tuner Control Loop** | Adjusts cavity resonant frequency via mechanical tuner to maintain optimal detuning angle for beam loading compensation | ~0.01–1 Hz (stepper motor limited) | EPICS: VxWorks SNL (`rf_tuner_loop.st`); stepper motors, mechanical tuner plungers (per cavity) | ✅ Active |
+| 4 | **HVPS Voltage Regulation Loop** | Regulates klystron cathode voltage to maintain RF drive power or gap voltage at setpoint; includes processing mode for cavity conditioning | ~0.5–1 Hz | Software: VxWorks SNL (`rf_hvps_loop.st,v`); HVPS SCR controller, Enerpro voltage regulator board | ✅ Active |
+| 5 | **DAC Control Loop** | Maintains gap voltage and RF drive power at software setpoints by adjusting baseband DAC values; compensates for slow drifts and klystron gain variation | ~0.1 Hz | Software: VxWorks SNL (`rf_dac_loop.st,v`); Octal DAC on RFP module | ✅ Active |
+| 6 | **Tuner Control Loop** | Adjusts cavity resonant frequency via mechanical tuner to maintain optimal detuning angle for beam loading compensation | ~0.01–1 Hz (stepper motor limited) | EPICS: VxWorks SNL (`rf_tuner_loop.st,v`); stepper motors, mechanical tuner plungers (per cavity) | ✅ Active |
 | 7 | **Gap Voltage Feed-Forward (GVF module / GFF function)** | Provides IQ reference values for gap voltage setpoint and interfaces with Longitudinal Feedback (LFB) system for low-order coupled-bunch damping. *Feed-forward path, not a feedback loop.* GVF is the hardware module; GFF is the feed-forward function on the RFP DACs. | N/A (feed-forward) | VXI GVF module; GFF IQ DACs on RFP; fiber optic TAXI link to LFB | ❌ PEP-II only (both GVF and GFF) |
 
 > **Notes on bandwidth values:**
@@ -102,12 +102,12 @@ The following table lists all feedback and control loops in the PEP-II/SPEAR3 LL
 The RF cavity near its fundamental resonance is characterized by:
 
 ```
-R_s    = shunt impedance (circuit convention) = 3.9 MΩ per SPEAR3 cavity
-Q_0    = unloaded quality factor = 33,500
+R_s    = shunt impedance (linac convention, R_s = V²/2P) = 3.73 MΩ per SPEAR3 cavity
+Q_0    = unloaded quality factor = 32,000
 Q_ext  = external (coupling) quality factor
 Q_L    = loaded quality factor = 1/(1/Q_0 + 1/Q_ext) = 6,700 (SPEAR3)
 β      = coupling coefficient = Q_0/Q_ext = 4.0 (SPEAR3)
-ω_0    = 2π × 476.315 MHz (resonant angular frequency)
+ω_0    = 2π × ~476.3 MHz (resonant angular frequency)
 Δω     = ω - ω_0 (detuning from resonance)
 ```
 
@@ -126,7 +126,7 @@ Z_cav(Δω) = R_s / (1 + j·2·Q_L·Δω/ω_0)
 The cavity half-bandwidth is:
 
 ```
-f_1/2 = f_0 / (2·Q_L) = 476.315 MHz / (2 × 6700) ≈ 35.5 kHz
+f_1/2 = f_0 / (2·Q_L) = 476.3 MHz / (2 × 6700) ≈ 35.5 kHz
 ```
 
 This bandwidth determines the maximum rate at which cavity fields can change naturally (without feedback).
@@ -179,7 +179,7 @@ tan(ψ_opt) = -I_b · R_s · sin(φ_s) / V_gap
 Δf_opt = f_0 · tan(ψ_opt) / (2·Q_L)
 ```
 
-For SPEAR3 at 500 mA: I_b = 0.5 A, R_s = 3.9 MΩ, V_gap = 712 kV/cavity, φ_s ≈ 75°:
+For SPEAR3 at 500 mA: I_b = 0.5 A, R_s = 3.73 MΩ, V_gap = 712 kV/cavity, φ_s ≈ 75°:
 ```
 tan(ψ_opt) ≈ -(0.5 × 3.9e6 × sin(75°)) / 712e3 ≈ -2.64
 ψ_opt ≈ -69°
@@ -200,7 +200,7 @@ The Robinson instability arises from the asymmetry of the effective cavity imped
 
 where:
   α_c = momentum compaction factor
-  ω_rev = revolution angular frequency = 2π × 1.2808 MHz (SPEAR3)
+  ω_rev = revolution angular frequency = 2π × ~1.2804 MHz (SPEAR3)
   ω_s = synchrotron angular frequency ≈ 2π × 8.8 kHz (SPEAR3)
   E_0 = beam energy = 3.0 GeV
 ```
@@ -296,7 +296,7 @@ Peak gain = a / (1 - b)
 Bandwidth per tooth ≈ (1 - b) · f_rev / π
 ```
 
-For SPEAR3: f_rev = 1.2808 MHz, so revolution harmonic spacing is 1.2808 MHz. For PEP-II: f_rev = 136.3 kHz, much denser spacing requiring more precise filtering.
+For SPEAR3: f_rev ≈ 1.2804 MHz, so revolution harmonic spacing is ≈ 1.2804 MHz. For PEP-II: f_rev = 136.3 kHz, much denser spacing requiring more precise filtering.
 
 **Note**: The comb filter was essential for PEP-II (multi-ampere beam with dense revolution harmonics) but is **not used in the current SPEAR3 legacy system** and is **eliminated in the LLRF9 upgrade** — the LLRF9's wideband digital direct loop provides sufficient coupled-bunch mode suppression for SPEAR3's moderate beam loading.
 
@@ -365,7 +365,7 @@ P_collector,max = V_HVPS × I_HVPS = 74 kV × 22 A = 1.63 MW
 ```
 This exceeds the collector's continuous rating, requiring fast HVPS shutdown.
 
-**Legacy implementation**: Software limit in `rf_hvps_loop.st` monitoring `klystron_forward_power` vs. `max_klystron_forward_power`, plus MPS hardware comparator.
+**Legacy implementation**: Software limit in `rf_hvps_loop.st,v` monitoring `klystron_forward_power` vs. `max_klystron_forward_power`, plus MPS hardware comparator.
 
 **Upgraded implementation**: Waveform Buffer System computes P_collector = V×I - P_fwd directly, with hardware trip to Interface Chassis.
 
@@ -420,7 +420,7 @@ The direct loop is the **primary impedance reduction loop** (mathematical basis 
 ```
 Z_eff = R_s / (1 + j·2·Q_L·Δω/ω₀)
 
-where R_s = 3.9 MΩ (shunt impedance per cavity)
+where R_s = 3.73 MΩ (shunt impedance per cavity, linac convention)
 ```
 
 With direct feedback at gain G, the effective impedance is reduced:
@@ -429,7 +429,7 @@ With direct feedback at gain G, the effective impedance is reduced:
 Z_eff(closed loop) ≈ Z_eff(open loop) / (1 + G)
 ```
 
-For G ≈ 100 (40 dB), the impedance is reduced from 3.9 MΩ to ~39 kΩ per cavity. This reduction is critical for:
+For G ≈ 100 (40 dB), the impedance is reduced from 3.73 MΩ to ≈ 37 kΩ per cavity. This reduction is critical for:
 - Suppressing Robinson instability (growth rate ∝ Z_eff)
 - Reducing coupled-bunch mode growth rates
 - Improving cavity field stability against beam current fluctuations
@@ -503,7 +503,7 @@ Modulator Gain × Klystron Gain = Constant (loop gain)
 
 This is implemented by the **quad DAC** in the RFP module, which sets the 2×2 matrix coefficients (I-I, I-Q, Q-I, Q-Q).
 
-**Source Code Reference**: `rf_dac_loop.st` — the DAC loop adjusts these coefficients; `rf_calib.st` performs the initial calibration.
+**Source Code Reference**: `rf_dac_loop.st,v` — the DAC loop adjusts these coefficients; `rf_calib.st,v` performs the initial calibration.
 
 ### 3.4 Limiting Circuits (Post-Commissioning Addition)
 
@@ -556,14 +556,14 @@ Frequency response peaks at: f = n × f_rev (n = 0, 1, 2, ...)
 
 | Parameter | PEP-II HER | PEP-II LER | SPEAR3 |
 |-----------|-----------|-----------|---------|
-| Revolution frequency | 136.3 kHz | 136.3 kHz | 1.2808 MHz |
+| Revolution frequency | 136.3 kHz | 136.3 kHz | ~1.2804 MHz |
 | Revolution period | 7.34 μs | 7.34 μs | 0.781 μs |
-| Comb teeth spacing | 136.3 kHz | 136.3 kHz | 1.2808 MHz |
+| Comb teeth spacing | 136.3 kHz | 136.3 kHz | ~1.2804 MHz |
 | Maximum harmonics in bandwidth | ~3700 | ~3700 | ~390 |
 
 ### 4.4 Comb Loop Calibration
 
-`rf_calib.st` contains the calibration sequence for the comb filter:
+`rf_calib.st,v` contains the calibration sequence for the comb filter:
 - `ZeroCombMults` state: Zeros the comb filter multiplier weights
 - Iterative offset nulling to minimize DC offsets
 - Load/Run/Gain control via PVs
@@ -617,7 +617,7 @@ Analog Integrator Approach:
 
 ### 5.3 Source Code Reference
 
-`rf_dac_loop.st`:
+`rf_dac_loop.st,v`:
 - `ripple_loop_ampl` PV: Ripple loop amplitude setpoint
 - `ripple_loop_load` PV: Trigger to load ripple loop coefficients
 - `ripple_loop_ready_ef` event flag: Gain tracking at slower rate than main DAC loop
@@ -650,12 +650,12 @@ Integral Compensation: H_int(s) = 1 + 1/(s·τ_int)
 
 ### 6.3 Source Code Reference
 
-`rf_states.st`:
+`rf_states.st,v`:
 - Lead compensation is enabled/disabled during state transitions
 - `INTCOMP` (integral compensation) is turned OFF in the OFF state (per Laznovsky 2004 modification)
 - Lead comp enable/disable: Part of ON_CW state entry sequence
 
-**Cross-ref PDF**: `ps3403305700.pdf` (2 pages) — RF Station Full Power Test & Survey (PS-340-330-57-R0). ⚠️ Note: This document is a full power test procedure, not a compensation spec. Lead/integral compensation circuit details are described only in Corredoura SLAC-PUB-8498 and the source code (`rf_states.st`).
+**Cross-ref PDF**: `ps3403305700.pdf` (2 pages) — RF Station Full Power Test & Survey (PS-340-330-57-R0). ⚠️ Note: This document is a full power test procedure, not a compensation spec. Lead/integral compensation circuit details are described only in Corredoura SLAC-PUB-8498 and the source code (`rf_states.st,v`).
 
 ---
 
@@ -678,7 +678,7 @@ At zero beam current, the cavity should be tuned to resonance (Δf = 0). As beam
 
 **Hardware**: SLO-SYN stepper motors (Superior Electric) driving cavity tuning plungers. Each cavity has an independent tuner.
 
-**Control**: EPICS sequence `rf_tuner_loop.st` running per-cavity instances (via `CAV` macro).
+**Control**: EPICS sequence `rf_tuner_loop.st,v` running per-cavity instances (via `CAV` macro).
 
 **States**: `loop_init` → `loop_unknown` → `loop_off` / `loop_on` / `loop_reset`
 
@@ -697,7 +697,7 @@ The SPEAR3 upgrade replaces the SLO-SYN stepper system with a **Galil DMC-4143**
 - Integration with LLRF9 phase feedback loop
 
 **Cross-ref PDF**: `ps3403306001.pdf` (5 pages) — Bellow Cavity Phasing Procedure (PS-340-330-60-R1). ⚠️ Note: This document is a cavity phasing procedure, not a tuner loop spec. Tuner loop design details come from `feedbackLoopDescriptionps3403305200.pdf` (p. 5) and Corredoura SLAC-PUB-8498.
-**Cross-ref source**: `rf_tuner_loop.st`, `rf_tuner_loop_defs.h`, `rf_tuner_loop_macs.h`, `rf_tuner_loop_pvs.h`
+**Cross-ref source**: `rf_tuner_loop.st,v`, `rf_tuner_loop_defs.h`, `rf_tuner_loop_macs.h`, `rf_tuner_loop_pvs.h`
 
 ---
 
@@ -709,7 +709,7 @@ The DAC loop is the **outer supervisory loop** that adjusts the IQ reference set
 
 ### 8.2 Operating Modes
 
-From `rf_dac_loop.st`:
+From `rf_dac_loop.st,v`:
 
 | Station State | DAC Loop Mode | Adjusts | Target |
 |--------------|---------------|---------|--------|
@@ -737,7 +737,7 @@ From `rf_dac_loop_macs.h` — the `DAC_LOOP_SET` macro:
 - Maximum interval: 10 seconds (guaranteed update even without trigger)
 - Loop period: ~0.5 seconds (driven by EPICS database scan rate)
 
-**Cross-ref PDF**: `ps3403305300.pdf` (4 pages) — RF Cavity Low Power Calibration Procedure (PS-340-330-53-R0). ⚠️ Note: This document is a cavity calibration procedure, not a DAC loop spec. DAC loop design details come from `feedbackLoopDescriptionps3403305200.pdf` (p. 6) and the source code (`rf_dac_loop.st`).
+**Cross-ref PDF**: `ps3403305300.pdf` (4 pages) — RF Cavity Low Power Calibration Procedure (PS-340-330-53-R0). ⚠️ Note: This document is a cavity calibration procedure, not a DAC loop spec. DAC loop design details come from `feedbackLoopDescriptionps3403305200.pdf` (p. 6) and the source code (`rf_dac_loop.st,v`).
 
 ---
 
@@ -751,7 +751,7 @@ Controls the klystron cathode voltage to regulate either:
 
 ### 9.2 Implementation
 
-From `rf_hvps_loop.st`:
+From `rf_hvps_loop.st,v`:
 
 **Processing Mode** (`proc` state):
 ```
@@ -782,8 +782,8 @@ From `rf_hvps_loop_defs.h`:
 - HVPS states: OFF (0), PROC (1), ON (2)
 - Loop controls: OFF (0), PROC (1), ON (2)
 
-**Cross-ref PDF**: `ps3403305400.pdf` (2 pages) — RF Station Safety Certification Check-Off List (PS-340-330-54-R0). ⚠️ Note: This document is a safety certification checklist, not an HVPS loop spec. HVPS loop design details come from `feedbackLoopDescriptionps3403305200.pdf` (p. 6) and the source code (`rf_hvps_loop.st`).
-**Cross-ref source**: `rf_hvps_loop.st`, `rf_hvps_loop_defs.h`, `rf_hvps_loop_macs.h`, `rf_hvps_loop_pvs.h`
+**Cross-ref PDF**: `ps3403305400.pdf` (2 pages) — RF Station Safety Certification Check-Off List (PS-340-330-54-R0). ⚠️ Note: This document is a safety certification checklist, not an HVPS loop spec. HVPS loop design details come from `feedbackLoopDescriptionps3403305200.pdf` (p. 6) and the source code (`rf_hvps_loop.st,v`).
+**Cross-ref source**: `rf_hvps_loop.st,v`, `rf_hvps_loop_defs.h`, `rf_hvps_loop_macs.h`, `rf_hvps_loop_pvs.h`
 
 ---
 
@@ -807,14 +807,14 @@ The longitudinal feedback system (designed by Fox, Teytelman et al.) operates bu
 
 ### 10.3 TAXI Error Recovery — PEP-II
 
-The GVF module includes TAXI (serial data link) error monitoring. A TAXI error indicates loss of synchronization with the fiber optic link. From `rf_msgs.st`:
+The GVF module includes TAXI (serial data link) error monitoring. A TAXI error indicates loss of synchronization with the fiber optic link. From `rf_msgs.st,v`:
 
 ```
 kludge sequence to monitor the state of the taxi error bit
 and resync the LFB if it's set
 ```
 
-**Note**: This code exists in the SPEAR3 legacy software (`rf_msgs.st`) but the TAXI link was never connected at SPEAR3.
+**Note**: This code exists in the SPEAR3 legacy software (`rf_msgs.st,v`) but the TAXI link was never connected at SPEAR3.
 
 **Cross-ref PDF**: `ps3403305900.pdf` (7 pages) — RF Station Turn-On Procedure (PS-340-330-59-R0). ⚠️ Note: This document is a station turn-on procedure (including EPICS panel screenshots), not a GVF module spec. GVF design details come from `feedbackLoopDescriptionps3403305200.pdf` (pp. 6-7) and Corredoura SLAC-PUB-8498.
 

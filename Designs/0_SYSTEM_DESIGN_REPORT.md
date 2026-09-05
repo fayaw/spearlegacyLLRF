@@ -81,13 +81,13 @@ The legacy SPEAR3 LLRF system was originally designed for the PEP-II B-Factory (
 
 - **LLRF Controller**: Custom PEP-II analog RF Processor (RFP) module in a VXI chassis. The VXI crate contains a CPU, an Allen-Bradley controller, a Clock Module, the RFP module (heart of the fast feedback system), three IQA modules (amplitude/phase monitors), and an Arc Interface Module.
 - **Control Software**: Six SNL (State Notation Language) programs on VxWorks RTOS, compiled into a single `rfSeq` IOC library:
-  - `rf_tuner_loop.st` — Cavity tuner stepper motor control
-  - `rf_hvps_loop.st` — HVPS supervisory control and regulation
-  - `rf_states.st` — RF station state machine control (PEP-II heritage, R. Sass, 1997)
-  - `rf_dac_loop.st` — Drive Power and Gap Voltage RFP/GFF DAC loop (S. Allison, 1997)
-  - `rf_calib.st` — Calibration sequences (R. Claus, SLAC/PEP-II LLRF Group)
-  - `rf_msgs.st` — Message logging and CAMAC TAXI error monitoring
-  - See: `llrf/legacyLLRF/Makefile`, `llrf/legacyLLRF/rf_dac_loop_pvs.h`
+  - `rf_tuner_loop.st,v` — Cavity tuner stepper motor control
+  - `rf_hvps_loop.st,v` — HVPS supervisory control and regulation
+  - `rf_states.st,v` — RF station state machine control (PEP-II heritage, R. Sass, 1997)
+  - `rf_dac_loop.st,v` — Drive Power and Gap Voltage RFP/GFF DAC loop (S. Allison, 1997)
+  - `rf_calib.st,v` — Calibration sequences (R. Claus, SLAC/PEP-II LLRF Group)
+  - `rf_msgs.st,v` — Message logging and CAMAC TAXI error monitoring
+  - See: `spear-rf-code-legacy/rfApp/src/seq/Makefile,v`, `spear-rf-code-legacy/rfApp/src/seq/rf_dac_loop_pvs.h,v`
 - **HVPS Controller**: Allen-Bradley SLC-500 PLC (processor: AB-1747-L532, scanner: AB-1747-DCM) with Enerpro SCR gate driver boards, housed in a Hoffman NEMA enclosure in Building B118. It communicates with the VXI crate via an Allen-Bradley serial interface to receive commands and to send readbacks and statuses. It communicates with an interface chassis via fiber optic signals to receive hardware permits and send a hardware status.
   - See: `pps/HoffmanBoxPPSWiring.docx`
 - **RF Machine Protection System (RF MPS)**: Allen-Bradley PLC-5 (1771 series), (since converted to ControlLogix 1756 with the hardware assembled, software written, tested without RF power). Scope: klystron/RF station equipment protection only — distinct from the facility-wide SPEAR MPS which provides an external permit input.
@@ -96,7 +96,7 @@ The legacy SPEAR3 LLRF system was originally designed for the PEP-II B-Factory (
   - See: `llrf/tuners/SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf`, `llrf/tuners/SLO-SYN.pdf`
 - **Interlock System**: Distributed across analog modules, PLC I/O, and direct wiring. Some of the wiring is connected in a Local Control Chassis, which connects to the Fast Interlock Chassis. The interlock chassis also has fiber optic inputs to detect potential arcs in the waveguide system. The interlock chassis summarizes the status of these interlocks and reports them back to the VXI system through an Arc Interlock Module, located in the VXI crate.
 - **Communication**: The main intelligence for the existing system is a Kinetics Systems VXI IOC in the system VXI crate. The crate has a VME Allen-Bradley communication module through which it communicates, via a serial link, with the two Allen-Bradley RF MPS crates, the four cavity tuner stepper motor controllers, and the HVPS controller.
-  - See: `llrf/legacyLLRF/rf_msgs.st`
+  - See: `spear-rf-code-legacy/rfApp/src/seq/rf_msgs.st,v`
 
 ### 2.2 Upgraded System Architecture
 
@@ -191,7 +191,7 @@ The upgraded system replaces all control electronics while retaining the RF plan
 - LLRF Controller: Analog RFP → Dimtel LLRF9/476 (×2 units)
 - RF MPS: PLC-5 1771 → ControlLogix 1756
 - HVPS Controller: SLC-500 → CompactLogix PLC + new Enerpro board + redesigned analog regulator
-- Tuner Motor Controllers: AB 1746-HSTP1 + Slo-Syn → Galil DMC-4143 Rev 1.3h 4-axis motion controller (commissioned August 2025, operational)
+- Tuner Motor Controllers: AB 1746-HSTP1 + Slo-Syn (**in service**) → Galil DMC-4143 Rev 1.3h 4-axis motion controller (**in development — not installed, not operating; goes online when the LLRF upgrade completes**) (commissioned August 2025, operational)
   - See: `llrf/tuners/galil/functioningGalil20250825SwapABToManual.txt`, `llrf/tuners/galil/firstMotion2024.txt`
 - Control Software: SNL/VxWorks → EPICS + LLRF9 internal EPICS IOC + MATLAB applications
 - Operator Interface: Legacy EDM panels → modernized panels
@@ -269,7 +269,7 @@ The current SPEAR3 system includes collector power protection implemented throug
 
 **Current Implementation**:
 - **Monitoring**: `LLRF:HVPS:PCOLL_MAX` PV sets maximum collector power limit
-- **Protection Logic**: HVPS loop (`rf_hvps_loop.st`) monitors `klystron_forward_power` vs. `max_klystron_forward_power`
+- **Protection Logic**: HVPS loop (`rf_hvps_loop.st,v`) monitors `klystron_forward_power` vs. `max_klystron_forward_power`
 - **Action**: When klystron forward power exceeds limits, HVPS voltage is reduced (`delta_proc_voltage_down`)
 - **Integration**: Collector limit displayed in HVPS EDL panel ("COLLECTOR LIMIT")
 
@@ -444,7 +444,7 @@ Two Dimtel LLRF9/476 units replace the entire VXI-based LLRF system (four units 
 
 ### 6.1 Power Section (Retained)
 
-Based on the proven PEP-II design architecture from 1997, this legacy system has been adapted for SPEAR3 operational requirements while maintaining the innovative star point controller topology and multi-layer arc protection system. The HVPS converts 12.47 kV RMS 3-phase AC to regulated DC high voltage for the klystron cathode. The system delivers −74 kV DC at 22 A (1.5 MW nominal) to power the SPEAR3 storage ring klystron. The power section, including transformers, thyristor stacks, filter inductors, secondary rectifiers, crowbar, oil system, and all power cabling, is retained unchanged.
+Based on the proven PEP-II design architecture from 1997, this legacy system has been adapted for SPEAR3 operational requirements while maintaining the innovative star point controller topology and multi-layer arc protection system. The HVPS converts 12.47 kV RMS 3-phase AC to regulated DC high voltage for the klystron cathode. It is **rated −90 kV at 27 A (2.5 MW)** and typically operates at **≈ −72 to −75 kV at 19–22 A (≈ 1.4–1.6 MW DC)**, which supports the klystron's ≈ 800 kW typical RF output. The power section, including transformers, thyristor stacks, filter inductors, secondary rectifiers, crowbar, oil system, and all power cabling, is retained unchanged.
 
 > **Figure 3 — HVPS Power Chain** (see `Designs/docx/drawings/PRD_drawings.vsdx`)
 
@@ -460,7 +460,7 @@ Based on the proven PEP-II design architecture from 1997, this legacy system has
                               ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                    PHASE-SHIFT TRANSFORMER (T0)                             │
-│                    Extended Delta │ 350 kVA                                 │
+│                    Extended Delta │ 2750 kVA                                 │
 │     Primary: 12.47 kV delta │ Secondary: Dual wye ±15° phase shift          │
 └─────────────┬───────────────────────────────────────────────┬───────────────┘
               │ +15°                                          │ -15°
@@ -476,18 +476,19 @@ Based on the proven PEP-II design architecture from 1997, this legacy system has
               └─────────────────┬─────────────────────────────┘
                                 │
                                 ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        6-PULSE BRIDGE (SCR 1-6)                             │
-│                   Phase Control Thyristor Bridge                            │
-│                   6 stacks × 14 Powerex T8K7 SCRs                           │
-└─────────────────────────────┬───────────────────────────────────────────────┘
-                              │
-                              ▼
+┌───────────────────────────────┐         ┌───────────────────────────────┐
+│   6-PULSE BRIDGE  B+          │         │   6-PULSE BRIDGE  B−          │
+│   Phase-control thyristors    │         │   Phase-control thyristors    │
+└───────────────┬───────────────┘         └───────────────┬───────────────┘
+                │      the two bridges together give      │
+                └──────────── 12-pulse operation ─────────┘
+                                │
+                                ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           CROWBAR PROTECTION                                │
 │                        4 thyristor stacks                                   │
 └─────────────────────────────┬───────────────────────────────────────────────┘
-                              │ -90 kV DC (max) / -74.4 kV DC (nominal)
+                              │ -90 kV DC (max) / ≈ -72 to -75 kV DC (typical)
                               ▼
                         [KLYSTRON CATHODE]
 ```
@@ -501,8 +502,12 @@ Based on the proven PEP-II design architecture from 1997, this legacy system has
 | Nominal operating voltage | −74.4 kV |
 | Nominal operating current | 22.0 A |
 | Nominal operating beam current | 500 mA |
-| Rectifier topology | 12-pulse, thyristor phase-controlled |
-| Number of HVPSs | 2 (SPEAR1 active, SPEAR2 warm spare) |
+| Rectifier topology | 12-pulse, thyristor phase-controlled (two 6-pulse bridges, B+ and B−) |
+| Number of HVPSs | 2 (SPEAR1 and SPEAR2) — see note below |
+
+> **Spare-supply posture.** The two supplies are **not** in a warm-standby arrangement. One supply is energised and the other is **off**. Roles are exchanged during scheduled downtimes (typically one in April and one in August); either supply may be the active one. Both are fully operational.
+
+> **T0 rating — resolved September 2026.** The phase-shifting transformer nameplate is **2750 kVA, 12.5 kV at 127 A RMS**, per NWL's own electrical schematic EI-730-790-00-C0 (NWL # 39308), whose two figures are internally consistent (2750 kVA ÷ (√3 × 12.5 kV) = 127 A). This supersedes the three figures previously in circulation: PS-341-360-01 §1.5 "350 kVA" (a decimal error — far too small to pass 2.5 MW), SD-730-790-01-C1 "3000 KVA" (a rounded label), and Sebek's adopted 3.5 MVA estimate (made without access to the NWL drawing).
 
 ### 6.2 Legacy Controller
 
@@ -529,7 +534,7 @@ The legacy controller is housed in a Hoffman NEMA enclosure (34”×42”) in Bu
 - **Power Supplies**: SOLA ±15V/+5V/24V, Kepko 120V (×2), Kepko 5V/20A, Kepko 240V
 - **PS Monitor Board** (SD-730-793-12): Monitors power supply health
 - **Terminal Strips**: TS-5 (contactor, 15 terminals), TS-6 (grounding tank, 21 terminals), TS-3 (PPS LEDs), TS-7 (power distribution)
-- **PPS Connector**: Originally Burndy circular 8-pin; possibly replaced with Souriau Trim Trio equivalent (GOB12-88PNE) — exact current part number requires field verification
+- **PPS Connector**: Originally Burndy circular 8-pin; possibly replaced with Souriau Trim Trio equivalent (GOB1208PNE) — exact current part number requires field verification
 
 The SLC-500 PLC executes ladder logic for voltage regulation, contactor management, temperature monitoring, and — critically — PPS safety chain control:
 - **PPS 1**: Controls K4 enable path for 12kV contactor; also has hardware fail-safe wired directly to OX8 relay input (bypasses PLC)
@@ -770,7 +775,7 @@ The PPS is the radiation and electrical safety interlock system managed by SLAC'
 - **Chain 1**: Vacuum contactor (removes 12.47 kV input power to HVPS)
 - **Chain 2**: Ross grounding switch (shorts the HVPS output to ground)
 
-The PPS interface uses a GOB12-88PNE (Burndy/Souriau Trim Trio) 8-pin circular connector mounted in a locked box on the Hoffman enclosure.
+The PPS interface uses a GOB1208PNE (Burndy/Souriau Trim Trio) 8-pin circular connector mounted in a locked box on the Hoffman enclosure.
 
 ### 9.2 Legacy PPS Design (Problems)
 
@@ -840,7 +845,7 @@ Each of the 4 RF cavities has a mechanical tuner that adjusts the cavity resonan
 
 - **Motor controller**: Allen-Bradley 1746-HSTP1 (high-speed stepper module, OBSOLETE)
 - **Motor driver**: Superior Electric SS2000MD4-M Slo-Syn PWM driver (OBSOLETE)
-- **Control software**: SNL `rf_tuner_loop.st` — phase-based feedback with home reset, motion monitoring, and load angle offset computation
+- **Control software**: SNL `rf_tuner_loop.st,v` — phase-based feedback with home reset, motion monitoring, and load angle offset computation
 - **Phase source**: Legacy analog RFP module
 
 ### 10.3 Upgraded Controller
@@ -862,7 +867,7 @@ The tuner motor controller is being replaced with a modern motion controller. Th
 
 ### 10.4 Load Angle Offset Loop
 
-The load angle offset loop is a supervisory function that balances gap voltage across all 4 cavities by adjusting the individual tuner phase setpoints. In the legacy system this was embedded in `rf_tuner_loop.st`; in the upgrade it becomes a separate Python module (e.g., `load_angle_controller.py`) that:
+The load angle offset loop is a supervisory function that balances gap voltage across all 4 cavities by adjusting the individual tuner phase setpoints. In the legacy system this was embedded in `rf_tuner_loop.st,v`; in the upgrade it becomes a separate Python module (e.g., `load_angle_controller.py`) that:
 - Reads all 4 cavity probe amplitudes from LLRF9
 - Computes amplitude imbalance
 - Adjusts individual tuner phase offset PVs to redistribute power
@@ -1022,7 +1027,7 @@ Routing both paths to the Interface Chassis is cleaner than wiring the diagnosti
 
 ## 13. Subsystem 9: Klystron Cathode Heater
 
-> **Detailed reference**: `llrf/filamentHeater/sd3403110002.pdf`
+> **Detailed reference**: `llrf/documentation/filamentHeater/sd3403110002.pdf`
 
 ### 13.1 Legacy System
 
@@ -1122,7 +1127,7 @@ The **Chroma programmable AC power supply** is the selected replacement. The uni
 
 ## 14. Subsystem 10: Control Software
 
-> **Detailed reference**: `llrf/epicsSequences/legacyLLRF`, `Docs_JS/LLRFOperation_jims.docx`
+> **Detailed reference**: `spear-rf-code-legacy/rfApp/src/seq/`, `Docs_JS/LLRFOperation_jims.docx`
 
 ### 14.1 Legacy Software
 
@@ -1130,12 +1135,12 @@ The legacy control software consists of SNL (State Notation Language) programs r
 
 | Program | Lines | Function |
 |---------|-------|----------|
-| `rf_states.st` | 2,227 | Master state machine (OFF/PARK/TUNE/ON_CW), turn-on, fault handling |
-| `rf_dac_loop.st` | 290 | DAC control loop (gap voltage regulation) |
-| `rf_hvps_loop.st` | 343 | HVPS control loop (drive power regulation) |
-| `rf_tuner_loop.st` | 555 | Tuner control (×4 cavities, phase-based, load angle) |
-| `rf_calib.st` | 2,800+ | Calibration (analog offset nulling, coefficient calibration, ~20 min) |
-| `rf_msgs.st` | 352 | Message logging, HVPS faults, TAXI error detection |
+| `rf_states.st,v` | 2,227 | Master state machine (OFF/PARK/TUNE/ON_CW), turn-on, fault handling |
+| `rf_dac_loop.st,v` | 290 | DAC control loop (gap voltage regulation) |
+| `rf_hvps_loop.st,v` | 343 | HVPS control loop (drive power regulation) |
+| `rf_tuner_loop.st,v` | 555 | Tuner control (×4 cavities, phase-based, load angle) |
+| `rf_calib.st,v` | 2,800+ | Calibration (analog offset nulling, coefficient calibration, ~20 min) |
+| `rf_msgs.st,v` | 352 | Message logging, HVPS faults, TAXI error detection |
 
 ### 14.2 Upgraded Software — EPICS/MATLAB Coordinator
 
@@ -1287,7 +1292,7 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 |------|------|---------|
 | Interface Chassis ↔ all hardware | Hardwired digital/fiber | Safety interlocks (no network dependency) |
 | LLRF9 Unit 1 ↔ Unit 2 | LEMO interlock daisy-chain | Fast interlock propagation |
-| PPS ↔ PPS Interface Box | Hardwired (GOB12-88PNE) | Personnel safety (no network dependency) |
+| PPS ↔ PPS Interface Box | Hardwired (GOB1208PNE) | Personnel safety (no network dependency) |
 | Arc Detection → Interface Chassis | Dry contact relay and/or semiconductor switches | Arc interlock (no network dependency) |
 
 **Critical design principle**: All safety-critical communication paths are hardwired. No safety function depends on the Ethernet network or EPICS Channel Access. Network loss pauses supervisory control but does not compromise protection.
@@ -1383,46 +1388,77 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 
 ## 20. Appendix: Source Document Index
 
+> Every path below has been checked to exist. Note that the legacy SNL source is RCS-archived under `spear-rf-code-legacy/rfApp/src/seq/` with `,v` suffixes — there is no `llrf/legacyLLRF/` directory.
+
+### Governing project document
+
+| Path | Content |
+|------|---------|
+| [`docx/SPEAR3_LLRF_PDR_R2.docx`](docx/SPEAR3_LLRF_PDR_R2.docx) | **SPEAR3 LLRF Upgrade Preliminary Design Review, R2 (28 April 2026)** — the authoritative upgrade specification. Sections 1–19 of this report track it directly |
+| [`docx/SPEAR3_LLRF_Upgrade_Project_Schedule.xlsx`](docx/SPEAR3_LLRF_Upgrade_Project_Schedule.xlsx) | Project schedule |
+
 ### LLRF Source Material
 
 | Path | Content |
 |------|---------|
-| `llrf/legacyLLRF/rf_states.st` | Legacy master state machine (2,227 lines) |
-| `llrf/legacyLLRF/rf_dac_loop.st` | Legacy DAC control loop (290 lines) |
-| `llrf/legacyLLRF/rf_hvps_loop.st` | Legacy HVPS control loop (343 lines) |
-| `llrf/legacyLLRF/rf_tuner_loop.st` | Legacy tuner control loop (555 lines) |
-| `llrf/legacyLLRF/rf_calib.st` | Legacy calibration system (2,800+ lines) |
-| `llrf/legacyLLRF/rf_msgs.st` | Legacy message logging (352 lines) |
-| `llrf/architecture/llrfInterfaceChassis.docx` | Interface Chassis specification |
-| `llrf/architecture/WaveformBuffersforLLRFUpgrade.docx` | Waveform Buffer System design |
-| `llrf/architecture/arcDetectorHardwareOptions.docx` | Arc detection hardware selection |
-| `llrf/documentation/LLRFOperation_jims.docx` | SPEAR3 RF Station Operation Guide (J. Sebek) |
-| `llrf/documentation/LLRFUpgradeTaskListRev3.docx` | Full project scope, procurement, costs |
-| `llrf/tuners/galil/` | Galil DMC-4143 firmware and test notes |
-| `llrf/driveAmp/KAW2051M12*.pdf` | Drive amplifier datasheet |
-| `llrf/arcDetector/` | Arc detector product sheets and mechanical references |
+| `../spear-rf-code-legacy/rfApp/src/seq/rf_states.st,v` | Legacy master state machine (23 states) |
+| `../spear-rf-code-legacy/rfApp/src/seq/rf_dac_loop.st,v` | Legacy DAC control loop |
+| `../spear-rf-code-legacy/rfApp/src/seq/rf_hvps_loop.st,v` | Legacy HVPS control loop |
+| `../spear-rf-code-legacy/rfApp/src/seq/rf_tuner_loop.st,v` | Legacy tuner control loop |
+| `../spear-rf-code-legacy/rfApp/src/seq/rf_calib.st,v` | Legacy calibration system |
+| `../spear-rf-code-legacy/rfApp/src/seq/rf_msgs.st,v` | Legacy message logging |
+| `../spear-rf-code-legacy/codeReviewTechnicalNotes/` | Nine-part code review of the legacy application |
+| [`../llrf/architecture/llrfInterfaceChassis.docx`](../llrf/architecture/llrfInterfaceChassis.docx) | Interface Chassis specification |
+| [`../llrf/architecture/WaveformBuffersforLLRFUpgrade.docx`](../llrf/architecture/WaveformBuffersforLLRFUpgrade.docx) | Waveform Buffer System design |
+| [`../llrf/architecture/arcDetectorHardwareOptions.docx`](../llrf/architecture/arcDetectorHardwareOptions.docx) | Arc detection hardware selection |
+| [`../llrf/architecture/rfPowerDetector.docx`](../llrf/architecture/rfPowerDetector.docx) | RF power detector selection |
+| [`../llrf/architecture/analogDesignComponents.docx`](../llrf/architecture/analogDesignComponents.docx) | Analog component selection |
+| [`../llrf/documentation/LLRFOperation_jims.docx`](../llrf/documentation/LLRFOperation_jims.docx) | SPEAR3 RF Station Operation Guide (J. Sebek) |
+| [`../llrf/documentation/LLRFUpgradeTaskListRev3.docx`](../llrf/documentation/LLRFUpgradeTaskListRev3.docx) | Full project scope, procurement, costs |
+| [`../llrf/documentation/fiberOpticCableSignalControlRev3.docx`](../llrf/documentation/fiberOpticCableSignalControlRev3.docx) | Fibre-optic signal and control routing |
+| `../llrf/tuners/galil/` | Galil DMC-4143 firmware and **test-move logs** (the controller is *not* installed — see §10) |
+| `../llrf/driveAmp/` | Drive amplifier datasheet (KAW2051M12) |
+| `../llrf/arcDetector/` | Arc detector product sheets and mechanical references |
+| `../llrf/tests/llrf9Tests.tex` | LLRF9 commissioning measurements (J. Sebek, 2021) |
 
 ### HVPS Source Material
 
 | Path | Content |
 |------|---------|
-| `hvps/architecture/originalDocuments/slac-pub-7591.pdf` | Original HVPS design publication |
-| `hvps/architecture/originalDocuments/ps3413600102.pdf` | HVPS power section specifications |
-| `hvps/controls/enerpro/` | Enerpro SCR gate driver documentation and schematics |
-| `hvps/documentation/plc/` | SLC-500 PLC code, labels, and analysis |
-| `hvps/documentation/schematics/` | HVPS electrical schematics |
-| `hvps/documentation/wiringDiagrams/` | Wiring diagrams (Hoffman Box, HVPS) |
-| `hvps/documentation/procedures/` | Maintenance and safety procedures |
-| `hvps/maintenance/` | Stack installation checklists, phase tank maintenance |
+| [`../hvps/documentation/wiringDiagrams/ei7307900000.pdf`](../hvps/documentation/wiringDiagrams/ei7307900000.pdf) | **EI-730-790-00-C0 / NWL #39308** — the transformer manufacturer's own schematic. Authoritative for the **2750 kVA / 127 A** nameplate and all oil, pressure, vacuum and flow protection setpoints |
+| [`../hvps/documentation/schematics/sd7307900101.pdf`](../hvps/documentation/schematics/sd7307900101.pdf) | SD-730-790-01-C1 — HVPS system schematic |
+| [`../hvps/documentation/wiringDiagrams/wd7307940400.pdf`](../hvps/documentation/wiringDiagrams/wd7307940400.pdf) | WD-730-794-04-C0 — contains the **HVPS output voltage dividers** |
+| [`../hvps/documentation/wiringDiagrams/wd7307900206.pdf`](../hvps/documentation/wiringDiagrams/wd7307900206.pdf) | WD-730-790-02-C6 — master trigger enclosure wiring diagram |
+| [`../hvps/documentation/procedures/spear3HvpsHazards.tex`](../hvps/documentation/procedures/spear3HvpsHazards.tex) | J. Sebek — stored energy, discharge time constants, klystron perveance |
+| [`../hvps/architecture/designNotes/EnerproVoltageandCurrentRegulatorBoardNotes.docx`](../hvps/architecture/designNotes/EnerproVoltageandCurrentRegulatorBoardNotes.docx) | J. Sebek — authoritative regulator board circuit analysis |
+| [`../hvps/architecture/designNotes/RFSystemMPSRequirements.docx`](../hvps/architecture/designNotes/RFSystemMPSRequirements.docx) | RF system MPS requirements |
+| [`../hvps/architecture/originalDocuments/slac-pub-7591.pdf`](../hvps/architecture/originalDocuments/slac-pub-7591.pdf) | Cassel & Nguyen, PAC 1997 — crowbar timing, regulation, ripple |
+| [`../hvps/architecture/originalDocuments/ps3413600102.pdf`](../hvps/architecture/originalDocuments/ps3413600102.pdf) | PS-341-360-01 — HVPS power section specification |
+| [`../hvps/controls/enerpro/enerproBoardHvps.docx`](../hvps/controls/enerpro/enerproBoardHvps.docx) | J. Sebek — installed Enerpro board revisions, serials, phase references |
+| [`../hvps/documentation/plc/CasselPLCCode.pdf`](../hvps/documentation/plc/CasselPLCCode.pdf) | Full SLC-500 ladder logic listing, program SSRLV6-4-05-10 |
+| [`../hvps/documentation/plc/plcNotesR1.docx`](../hvps/documentation/plc/plcNotesR1.docx) | J. Sebek — PLC timing and the N7:10 setpoint filter |
+| `../hvps/documentation/procedures/` | Maintenance and safety procedures, EWPs, lockout permits |
+| `../hvps/maintenance/` | Stack installation checklists, phase tank maintenance |
 
-### PPS Source Material
+### Switchgear and PPS Source Material
 
 | Path | Content |
 |------|---------|
-| `pps/diagrams/00_SYSTEM_OVERVIEW.md` | PPS current vs. upgrade architecture overview |
-| `pps/diagrams/01-08_*.md` | Detailed analysis of each PPS-related schematic |
-| `pps/MSG from Jim Sebek to Faya about PPS.md` | 2022 PPS concerns and upgrade drivers |
-| `pps/HoffmanBoxPPSWiring.docx` | Detailed PPS wiring analysis |
-| `pps/*.pdf` | Original PPS schematics and wiring diagrams |
+| [`../hvps/documentation/switchgear/gp3085000103.pdf`](../hvps/documentation/switchgear/gp3085000103.pdf) | **GP-308-500-01-R3** (LBL, 1977) — original design drawing; authoritative **relay legend**; blocking relay blocks trip above 2000 A |
+| [`../hvps/documentation/switchgear/gp4397040201.pdf`](../hvps/documentation/switchgear/gp4397040201.pdf) | GP-439-704-02-C1 — as-built schematic and sequence of operation |
+| [`../hvps/documentation/switchgear/id3088010601.pdf`](../hvps/documentation/switchgear/id3088010601.pdf) | ID-308-801-06-C1 — as-built connection wiring |
+| [`../hvps/documentation/switchgear/rossEngr713203.pdf`](../hvps/documentation/switchgear/rossEngr713203.pdf) | Ross 713203 E-1 — HCA-1-A driver and HQ3 contactor |
+| [`../pps/HoffmanBoxPPSWiring.docx`](../pps/HoffmanBoxPPSWiring.docx) | J. Sebek — terminal-by-terminal PPS wiring trace |
+| [`../pps/MSG from Jim Sebek to Faya about PPS.md`](../pps/MSG%20from%20Jim%20Sebek%20to%20Faya%20about%20PPS.md) | 2022 PPS concerns and upgrade drivers |
+| [`../pps/diagrams/README.md`](../pps/diagrams/README.md) | PPS diagram note set and the PPS readback trace |
+
+### Companion design documents
+
+| Document | Content |
+|---|---|
+| [`tex/L_legacy_system_architecture.pdf`](tex/L_legacy_system_architecture.pdf) | **The legacy system reference.** All legacy values in this report should agree with it |
+| [`I_INTERLOCK_ARCHITECTURE.md`](I_INTERLOCK_ARCHITECTURE.md) | Legacy interlock and protection architecture |
+| [`P_RF_PHYSICS_AND_PLANT.md`](P_RF_PHYSICS_AND_PLANT.md) | RF physics, cavity parameters, beam loading |
+| [`T_TUNER_CONTROL_SYSTEM_ANALYSIS.md`](T_TUNER_CONTROL_SYSTEM_ANALYSIS.md) | Tuner control system analysis |
 
 ---

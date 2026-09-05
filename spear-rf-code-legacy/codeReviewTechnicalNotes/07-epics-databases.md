@@ -42,9 +42,9 @@ The EPICS database is split across 76 files in `rfApp/Db/`, organized by functio
 
 While no GVF hardware module is physically installed in SRF1 (slot 3 is empty), the GVF **software layer is active and functionally required**:
 
-1. **Database records ARE loaded**: `gvf.db` is instantiated via `rf_vxi_modules_All.substitutions` (line: `file gvf.db`), which is included by `srf1.substitutions` → `rf_vxi_modules_All.db`.
+1. **Database records ARE loaded**: `gvf.db` is instantiated via `rf_vxi_modules_All.substitutions` (line: `file gvf.db`), which is included by `srf1.substitutions,v` → `rf_vxi_modules_All.db`.
 
-2. **GVF process variables are actively consumed** by the TAXI monitoring state set `rf_msgsTAXI` in `rf_msgs.st` (lines 196–352):
+2. **GVF process variables are actively consumed** by the TAXI monitoring state set `rf_msgsTAXI` in `rf_msgs.st,v` (lines 196–352):
 
 | PV Name | SNL Variable | Function |
 |---------|-------------|----------|
@@ -101,7 +101,7 @@ While no GVF hardware module is physically installed in SRF1 (slot 3 is empty), 
 
 | File | Description |
 |------|-------------|
-| `rf_cav.db` | Directivity calculations, cavity power/coupling/strength/frequency offset, tuner loop status, phase/frequency histories, load angle offset, stepper motor control/disable/init/stop logic |
+| `rf_cav.db,v` | Directivity calculations, cavity power/coupling/strength/frequency offset, tuner loop status, phase/frequency histories, load angle offset, stepper motor control/disable/init/stop logic |
 
 ### 1.8 DAC Configuration
 
@@ -178,7 +178,7 @@ file crat_vxi_13slot.db     { ... slot assignments ... }
 
 ### 2.2 VXI Module Slot Assignments
 
-From `crat_vxi_13slot.template` in `srf1.substitutions`:
+From `crat_vxi_13slot.template` in `srf1.substitutions,v`:
 
 | Slot | Assignment |
 |------|-----------|

@@ -1,0 +1,68 @@
+% !TeX root = ../L_legacy_system_architecture.tex
+% HVPS power conversion chain, substation to klystron cathode.
+% Stage boxes on the left, parameters on the right.
+% Written out node by node rather than with \foreach: the parameter text
+% contains commas, which \foreach would treat as list separators.
+\begin{tikzpicture}[font=\scriptsize,x=1mm,y=1mm,every node/.style={outer sep=0pt}]
+\def\bx{46}
+\newcommand{\stage}[4]{%   #1 name  #2 y  #3 title  #4 parameters
+  \node[pwr,text width=54mm,anchor=north] (#1) at (\bx,#2) {\textbf{#3}};
+  \node[anchor=north west,text width=76mm,font=\tiny,text=black!68] at (78,#2-1) {#4};}
+
+\node[anchor=north,align=center,font=\scriptsize\bfseries,text=cPwr!85!black]
+  (src) at (\bx,0)
+  {Substation 507, Breaker 160\\
+   {\normalfont\qty{12.47}{\kilo\volt} RMS $3\varphi$ \qty{60}{\hertz}}};
+
+\stage{s1}{-14}{SWITCHGEAR (contactor panel)}
+  {Disconnect switch, $3\times\qty{50}{\ampere}$ fuses, vacuum contactor.
+   Ross HQ3 contactor + HCA-1-A controller}
+
+\stage{s2}{-32}{PHASE-SHIFT TRANSFORMER T0}
+  {\qty{2750}{\kilo\voltampere}, oil-immersed, extended delta.
+   Primary \qty{12.47}{\kilo\volt} delta; secondary dual wye $\pm15^\circ$,
+   \qty{12.91}{\kilo\volt} RMS $\varphi$--$\varphi$}
+
+\stage{s3}{-50}{RECTIFIER TRANSFORMERS T1 ($+15^\circ$), T2 ($-15^\circ$)}
+  {Open wye, \qty{1.5}{\mega\voltampere} each.
+   T1-S1 = T1-S2 = T2-S1 = \qty{21.0}{\kilo\volt} RMS;
+   T2-S2 = \qty{10.5}{\kilo\volt} RMS}
+
+\stage{s4}{-68}{12-PULSE SCR BRIDGES}
+  {Two six-pulse bridges, star-point connected to the open-wye primary centres.
+   12 stacks $\times$ 14 Powerex T8K7 = 168 thyristors.
+   Phase-angle control $0^\circ$--$180^\circ$.  Enerpro FCOG6100 + FCOAUX60.
+   Snubbers \qty{0.047}{\micro\farad} per thyristor,
+   \qty{0.015}{\micro\farad} per stack}
+
+\stage{s5}{-92}{PRIMARY FILTER INDUCTORS L1, L2}
+  {\qty{0.3}{\henry}, \qty{85}{\ampere} full load, \qty{0.38}{\ohm} DC.
+   \qty{1084}{\joule} stored energy each}
+
+\stage{s6}{-108}{SECONDARY RECTIFIERS + FILTER, 4 SERIES STAGES}
+  {One stage per transformer secondary.
+   Stage DC $-26$, $-26$, $-26$, $-\qty{13}{\kilo\volt}$
+   $\rightarrow -\qty{91}{\kilo\volt}$ total.
+   Filter capacitance \qty{8}{\micro\farad} \emph{per stage}
+   ($\approx\qty{2}{\micro\farad}$ net) via a \qty{105}{\percent} tap.
+   Output divider $\approx 10\,000{:}1$}
+
+\stage{s7}{-132}{CROWBAR PROTECTION}
+  {4 SCR stacks in series (SCR13--16), 6 thyristors per stack.
+   Bushings \qty{100}{\kilo\volt} DC, \qty{80}{\kilo\ampere} peak fault current.
+   Fiber-optic trigger; conducts $\approx\qty{10}{\micro\second}$ after trigger}
+
+\stage{s8}{-152}{CABLE TERMINATION INDUCTORS L1, L2 (Grounding Tank)}
+  {``350 UHY 40A''.  Limits cable discharge current into the klystron}
+
+\draw[sig] (src.south) -- (s1.north);
+\foreach \a/\b in {1/2,2/3,3/4,4/5,5/6,6/7,7/8}{\draw[sig] (s\a.south) -- (s\b.north);}
+
+\node[anchor=north,align=center,font=\scriptsize\bfseries,text=cPwr!85!black]
+  (out) at (\bx,-168)
+  {HV DC to klystron cathode\\
+   {\normalfont$\approx -72$ to $-\qty{75}{\kilo\volt}$,
+    \qtyrange{19}{22}{\ampere} typical;
+    $-\qty{90}{\kilo\volt}$ / \qty{27}{\ampere} rated}};
+\draw[sig] (s8.south) -- (out.north);
+\end{tikzpicture}

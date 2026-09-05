@@ -1059,7 +1059,7 @@ The HVPS implements defense-in-depth with five independent shutdown paths:
 
 ### 19.4 Legacy PPS Interface
 
-PPS connector: Burndy GOB12-88PNE (8-pin). Two enable pairs (PPS 1, PPS 2) sourced by PPS; two status contacts (NO + NC) monitored by PPS. PPS logic is routed through the HVPS controller PLC — this is the primary compliance issue motivating the upgrade to a dedicated, PLC-independent PPS Interface Box.
+PPS connector: Burndy GOB1208PNE (8-pin). Two enable pairs (PPS 1, PPS 2) sourced by PPS; two status contacts (NO + NC) monitored by PPS. PPS logic is routed through the HVPS controller PLC — this is the primary compliance issue motivating the upgrade to a dedicated, PLC-independent PPS Interface Box.
 
 ### 19.5 Upgrade: Interface Chassis
 

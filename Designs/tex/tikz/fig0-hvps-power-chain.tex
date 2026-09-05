@@ -1,0 +1,52 @@
+% !TeX root = ../0_system_design_report.tex
+% Figure 3 -- HVPS power chain, B514.  12-pulse phase-controlled rectifier.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+
+\node[lbl,anchor=north] at (65,4) {BUILDING B514};
+
+\node[pwr,text width=124mm,anchor=north] (sw) at (65,-2)
+  {\textbf{SWITCHGEAR \& SAFETY}\\
+   disconnect switch $\cdot$ fuses (3\,$\times$\,\qty{50}{\ampere}) $\cdot$
+   vacuum contactor $\cdot$ ground switch $\cdot$ interlocks};
+
+\node[pwr,text width=124mm,anchor=north] (t0) at (65,-24)
+  {\textbf{PHASE-SHIFT TRANSFORMER T0}\\
+   extended delta $\cdot$ \qty{2750}{\kilo\voltampere}\\
+   primary \qty{12.47}{\kilo\volt} delta \quad$\vert$\quad
+   secondary dual wye, $\pm 15^\circ$ phase shift};
+\draw[sig] (sw.south) -- node[right,tag]{\qty{12.47}{\kilo\volt} delta} (t0.north);
+
+\node[pwr,text width=54mm,anchor=north] (t1) at (32,-52)
+  {\textbf{RECTIFIER XFMR T1}\\
+   \qty{1.5}{\mega\voltampere} $\cdot$ $+15^\circ$\\
+   primary open wye $\cdot$ secondary dual wye\\ \qty{12.5}{\kilo\volt}};
+\node[pwr,text width=54mm,anchor=north] (t2) at (98,-52)
+  {\textbf{RECTIFIER XFMR T2}\\
+   \qty{1.5}{\mega\voltampere} $\cdot$ $-15^\circ$\\
+   primary open wye $\cdot$ secondary dual wye\\ \qty{12.5}{\kilo\volt}};
+\draw[sig] (t1.north|-t0.south) -- node[right,tag]{$+15^\circ$} (t1.north);
+\draw[sig] (t2.north|-t0.south) -- node[right,tag]{$-15^\circ$} (t2.north);
+
+\node[pwr,text width=54mm,anchor=north] (b1) at (32,-82)
+  {\textbf{6-PULSE BRIDGE B+}\\ phase-control thyristors};
+\node[pwr,text width=54mm,anchor=north] (b2) at (98,-82)
+  {\textbf{6-PULSE BRIDGE B$-$}\\ phase-control thyristors};
+\draw[sig] (t1.south) -- (b1.north);
+\draw[sig] (t2.south) -- (b2.north);
+
+% the two bridges combine: series output into the crowbar
+\draw[draw=cNeut,thick] (b1.south) -- ++(0,-8) -- (98,-98) -- (b2.south);
+\node[tag,fill=white,inner sep=1.5pt] at (65,-98)
+  {the two bridges together give \textbf{12-pulse} operation};
+
+\node[pwr,text width=124mm,anchor=north] (cb) at (65,-104)
+  {\textbf{CROWBAR PROTECTION}\\ 4 thyristor stacks};
+\draw[sig] (65,-98) -- (cb.north);
+
+\node[pwr,text width=54mm,anchor=north] (kc) at (65,-132)
+  {\textbf{KLYSTRON CATHODE}};
+\draw[sig] (cb.south) -- (kc.north);
+\node[tag,anchor=west,align=left] at (67,-123)
+  {\qty{-90}{\kilo\volt} DC (max)\\
+   $\approx$ \qtyrange{-72}{-75}{\kilo\volt} DC (typical)};
+\end{tikzpicture}

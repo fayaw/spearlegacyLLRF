@@ -6,6 +6,20 @@ These technical notes document the PLC control system for the **SPEAR RF Klystro
 
 The PLC manages all aspects of the HVPS including power sequencing, voltage/current regulation, crowbar protection, transformer interlocks, emergency shutdown, and communication with the EPICS control system via a VXI crate.
 
+> ## ✅ Verification status — VERIFIED (September 2026)
+>
+> This note set was audited against its original sources during the September 2026 documentation-accuracy campaign and **no errors were found**. It is one of only two note sets in this repository to pass without correction.
+>
+> **How it was checked.** `CasselPLCCode.pdf` is machine-readable, so an independent rung index was built directly from the listing (program **SSRLV6-4-05-10**, printed Wednesday 23 June 2021; LAD 2 = 120 rungs / 5557 bytes, LAD 3 "COPY" = 6 rungs / 108 bytes, LAD 4 "SCALE" = 5 rungs / 159 bytes) and every checkable claim in these notes was compared against it. The slot map, rung numbers, register assignments, thermocouple channel mapping and interlock logic all matched.
+>
+> Independently, the derived control-loop analysis in [05](05-control-algorithms.md) was cross-checked against J. Sebek's original `plcNotesR1.docx`. The two agree exactly, including the derived filter time constant:
+>
+> $$\tau = \frac{-T}{\ln(1-\alpha)} = \frac{-0.08}{\ln 0.9} = 0.759\ \text{s}$$
+>
+> with α = 0.1 and T = 80 ms. Sebek's document also confirms that **N7:10 is the "Reference Out" register loaded into output 0 of the AB-1746-NIO4V in slot 8, and is connected to EL1, the reference input to the regulator card** — which in turn is confirmed from the regulator side by `EnerproVoltageandCurrentRegulatorBoardNotes.docx` (the reference enters at J4-1/J4-7, and the schematic's "POS. VOLTAGE LIMIT COMMAND" label for that pin is a misnomer).
+>
+> **Why this set is reliable.** Accuracy across this repository correlates almost exactly with whether the source was machine-readable. These notes were written from a text-extractable PDF and two original author documents; note sets written from image-only scans were, without exception, found to contain fabricated detail.
+
 ---
 
 ## Technical Notes Index

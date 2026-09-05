@@ -1,0 +1,99 @@
+% !TeX root = ../L_legacy_system_architecture.tex
+% Control-layer hierarchy and the three interlock paths.
+% Redrawn from the 2003 overview slide, whose embedded values were stale:
+% the transformer is 2750 kVA (not 3.5 MVA), the SLC-500 parts are 1747-L532
+% and 1747-DCM (not 1474-), the filter is 8 uF PER STAGE, and the second HVPS
+% is fully off rather than on warm standby.
+\begin{tikzpicture}[font=\scriptsize,x=1mm,y=1mm,every node/.style={outer sep=0pt}]
+
+% ===== operator and expert layers =========================================
+\node[ctrl,text width=64mm,anchor=north] (op) at (46,0)
+  {\textbf{OPERATOR LAYER --- EPICS CONTROL}\\[1pt]
+   {\tiny VxWorks RTOS $\cdot$ EPICS IOC $\cdot$ 6 SNL programs\\
+    EDM panels $\cdot$ Channel Access $\cdot$ EPICS Archiver}};
+\node[ctrl,text width=52mm,anchor=north] (ex) at (140,0)
+  {\textbf{EXPERT LAYER}\\[1pt]
+   {\tiny MATLAB tools $\cdot$ expert EPICS panels $\cdot$ system diagnostics}};
+
+% ===== VXI crate ==========================================================
+\node[ctrl,text width=170mm,anchor=north] (vxi) at (92,-20)
+  {\textbf{VXI CRATE} (Elma 13-slot) --- B132, room 101\\[1pt]
+   {\ttfamily\tiny [0]\,IOC\ \ [1]\,AB6008 Scanner\ \ [2]\,CLK\ \ [3]\,empty\ \
+    [4]\,RFP\ \ [5]\,MPS Shutoff\ \ [6]\,Link Passthru\\{}
+    [7]\,IQA-1\ \ [8]\,empty\ \ [9]\,IQA-2\ \ [10]\,empty\ \ [11]\,IQA-3\ \ [12]\,AIM}};
+\draw[sig] (op.south) -- (op.south|-vxi.north);
+\draw[sig] (ex.south) -- (ex.south|-vxi.north);
+
+% ===== fast interlock chassis =============================================
+\node[plc,text width=76mm,anchor=north] (fic) at (134,-40)
+  {\textbf{FAST INTERLOCK CHASSIS 340-308}\\[1pt]
+   {\tiny \emph{In:} arc sensors $\cdot$ reflected RF power $\cdot$ beam permit
+    (SPEAR MPS) $\cdot$ HVPS status\\
+    \emph{Out:} status $\cdot$ SCR ENABLE (fiber) $\cdot$ CROWBAR fire (fiber)}};
+\draw[sig] (150,-30.5) -- (150,-40);
+
+% ===== the three controllers ==============================================
+\node[plc,text width=44mm,anchor=north] (hplc) at (24,-60)
+  {\textbf{HVPS PLC}\ \ SLC-500\\[1pt]
+   {\tiny HVPS sequencing $\cdot$ voltage regulation $\cdot$ temperature
+    monitoring $\cdot$ PPS relay chain $\cdot$ Enerpro SCR control\\
+    (1747-L532 CPU, 1747-DCM adapter)}};
+
+\node[plc,text width=50mm,anchor=north] (mplc) at (86,-60)
+  {\textbf{RF MPS PLC}\ \ PLC-5 / 1771-DCM\\[1pt]
+   {\tiny \emph{Equipment protection:} klystron collector power $\cdot$
+    waveguide arc $\cdot$ cavity reflected power $\cdot$ cooling water and
+    vacuum $\cdot$ HVPS fault status\\[1pt]
+    \emph{Removes MPS permit:} SCR ENABLE off, RF drive off}};
+
+\node[plc,text width=44mm,anchor=north] (mot) at (156,-60)
+  {\textbf{MOTOR CONTROL}\\[1pt]
+   {\tiny Cavity motor driver, Stepper Chassis 340-315\\
+    SLC adapter + $4\times$ AB 1746-HSTP1\\ (step/direction pulse output)}};
+
+\foreach \n in {hplc,mplc,mot}{\draw[sig] (\n.north|-vxi.south) -- (\n.north);}
+
+\node[blk,text width=40mm,anchor=north] (xlat) at (156,-86)
+  {SS2000MD4 PWM translator\\ $\rightarrow$ SLO-SYN stepper motor};
+\draw[sig] (mot.south) -- (xlat.north);
+
+% ===== HVPS ===============================================================
+\node[pwr,text width=104mm,anchor=north] (hvps) at (76,-96)
+  {\textbf{HVPS} --- SPEAR1 + SPEAR2\\[1pt]
+   {\tiny two complete identical units; one energized, the other fully off ---
+    \emph{not} a warm standby\\[2pt]
+    \qty{12.47}{\kilo\volt} $3\varphi$ \qty{60}{\hertz} $\rightarrow$
+    switchgear $\rightarrow$ phase-shift transformer
+    (\qty{2750}{\kilo\voltampere}, $\pm15^\circ$)\\
+    $\rightarrow$ 12-pulse SCR bridges ($168\times$ Powerex T8K7)
+    $\rightarrow$ filter inductors L1/L2 $\rightarrow$
+    \qty{8}{\micro\farad} per stage, 4 stages\\
+    $\rightarrow$ crowbar SCRs (4 stacks, fiber trigger)
+    $\rightarrow$ cable switch tank $\rightarrow$ grounding and termination tank}};
+\draw[sig] (hplc.south) -- (hplc.south|-hvps.north);
+% drop the fiber in the clear gap between the RF MPS PLC and motor-control
+% columns; from the chassis centre it would run through one or the other
+\draw[fib] (122,-51) -- (122,-96);
+\draw[fib] (fic.south) ++(0,0) -- (134,-51) -- (122,-51);
+
+% ===== RF chain ===========================================================
+\node[rf,text width=26mm,anchor=north] (amp) at (34,-124) {Drive amp};
+\node[rf,text width=26mm,anchor=north] (kly) at (72,-124) {\textbf{Klystron}};
+\node[rf,text width=32mm,anchor=north] (wg)  at (114,-124) {Waveguide network};
+\node[rf,text width=24mm,anchor=north] (cav) at (154,-124) {4 cavities};
+\draw[sig] (amp.east) -- (kly.west);
+\draw[sig] (kly.east) -- (wg.west);
+\draw[sig] (wg.east)  -- (cav.west);
+\draw[sig] (kly.north|-hvps.south) -- (kly.north);
+
+% ===== interlock path legend ==============================================
+\node[draw=cCtrl!45,fill=cCtrl!5,rounded corners=2pt,inner sep=4pt,
+      text width=168mm,anchor=north west,align=left] (leg) at (12,-140)
+  {\textbf{Interlock paths}\qquad
+   {\tiny
+   \textbf{1}\ \ Fast IC $\rightarrow$ HVPS; Fast IC $\rightarrow$ AIM
+   $\rightarrow$ RFP \qquad
+   \textbf{2}\ \ RF MPS $\rightarrow$ Fast IC $\rightarrow$ HVPS;
+   MPS Shutoff $\rightarrow$ RFP \qquad
+   \textbf{3}\ \ HVPS PLC $\rightarrow$ HVPS; software $\rightarrow$ RFP}};
+\end{tikzpicture}

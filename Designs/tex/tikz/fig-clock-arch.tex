@@ -1,0 +1,90 @@
+% !TeX root = ../L_legacy_system_architecture.tex
+% Clock module internal architecture: two PLLs, the divider chain and the
+% turn counter.  Both PLLs sit in an ovenized thermal enclosure.
+% Every box in a row is anchored WEST at a common y, so the .east/.west
+% anchors line up exactly and all connectors are truly horizontal.
+\begin{tikzpicture}[font=\scriptsize,x=1mm,y=1mm,every node/.style={outer sep=0pt}]
+\def\rA{-10}   % RF input row
+\def\rB{-32}   % PLL40 row
+\def\rC{-70}   % sync row
+\def\rD{-90}   % turn counter row
+\def\rE{-114}  % PLL471 row
+
+% ===== RF input and fanout ================================================
+\node[anchor=east,align=right] (rfin) at (-2,\rA)
+  {\qty{476.3}{\mega\hertz}\\{\tiny storage-ring RF}};
+\node[blk,text width=26mm,anchor=west] (split) at (2,\rA)
+  {RF splitter\\and amplifiers};
+\draw[sig] (rfin.east) -- (split.west);
+
+\node[blk,text width=28mm,anchor=west] (fanout) at (150,\rA)
+  {\qty{476.3}{\mega\hertz}\\RF fanout};
+\draw[sig] (split.east) -- (fanout.west);
+
+% ===== PLL40 chain ========================================================
+\node[blk,text width=30mm,anchor=west] (pre) at (36,\rB)
+  {PLL40 reference\\pre-scaler ($\div93$)};
+\draw[sig] (split.south) |- (pre.west);
+\node[tag,anchor=south] at (76,{\rB+1.6}) {\qty{5.1215}{\mega\hertz}};
+
+\node[blk,text width=34mm,anchor=west] (pll40) at (86,\rB)
+  {\textbf{PLL40} ($\times8$)\\ Q3236 PLL IC + HV51-400P VCXO\\
+   loop BW \qty{10}{\kilo\hertz}};
+\draw[sig] (pre.east) -- (pll40.west);
+
+\node[blk,text width=32mm,anchor=west] (clk40) at (140,\rB)
+  {CLK40\ \ \qty{40.972}{\mega\hertz}};
+\node[blk,text width=32mm,anchor=west] (clk20) at (140,{\rB-12})
+  {$\div2 \rightarrow$ CLK20\ \ \qty{20.486}{\mega\hertz}};
+\node[blk,text width=32mm,anchor=west] (clk10) at (140,{\rB-24})
+  {$\div4 \rightarrow$ CLK10\ \ \qty{10.243}{\mega\hertz}};
+\draw[sig] (pll40.east) -- (clk40.west);
+\draw[sig] (pll40.east) -- ++(3,0) |- (clk20.west);
+\draw[sig] (pll40.east) -- ++(3,0) |- (clk10.west);
+
+% ===== fiducial input and sync ============================================
+\node[anchor=east,align=right] (fid) at (-2,\rC)
+  {\qty{1.28}{\mega\hertz}\\{\tiny Bunch\,0 fiducial}};
+\node[blk,text width=28mm,anchor=west] (sync) at (2,\rC)
+  {Sync generator\\(ESYNC, ASYNC)};
+\draw[sig] (fid.east) -- (sync.west);
+
+% ASYNC reset: up the clear lane between the pre-scaler and PLL40
+\draw[sig] (sync.east) -- (78,\rC) -- (78,{\rB-14}) -| (pll40.south);
+\node[tag,anchor=west,align=left] at (79.5,{\rC+8})
+  {ASYNC resets the\\pre-scaler and dividers};
+
+% ===== turn counter chain =================================================
+\node[blk,text width=30mm,anchor=west] (turn) at (36,\rD)
+  {Turn counter\\($\div372$, ECL)};
+\draw[sig] (sync.south) |- (turn.west);
+\node[blk,text width=32mm,anchor=west] (fed) at (86,\rD)
+  {Fiducial error detector\\{\tiny compares against the fiducial edge}};
+\draw[sig] (turn.east) -- (fed.west);
+\node[tag,anchor=south] at (79,{\rD+1.6}) {\qty{1.2804}{\mega\hertz}};
+\node[blk,text width=20mm,anchor=west] (tclk) at (140,\rD) {TCLK};
+\draw[sig] (fed.east) -- (tclk.west);
+
+% ===== PLL471 chain =======================================================
+\node[blk,text width=50mm,anchor=west] (pll471) at (30,\rE)
+  {\textbf{PLL471} ($\times46$: $\div2$ \mbox{external} $+\ \div23$ Q3236)\\
+   VCO Z-COMM V418MEM1, \qty{30}{\mega\hertz} range\\
+   reference CLK10, loop BW \qty{5}{\kilo\hertz}};
+% CLK10 reference: out to the right-hand lane, down past every box, then a
+% full-height vertical rise into the underside of PLL471
+\draw[sig] (clk10.east) -- (186,{\rB-24}) -- (186,{\rE-30}) -| (pll471.south);
+\node[tag,anchor=south west] at (57,{\rE-29}) {CLK10 reference};
+
+\node[blk,text width=26mm,anchor=west] (spl2) at (94,\rE)
+  {RF splitter\\and amplifiers};
+\draw[sig] (pll471.east) -- (spl2.west);
+\node[blk,text width=32mm,anchor=west] (lo) at (128,\rE)
+  {\qty{471.187}{\mega\hertz}\\LO fanout (4 copies)};
+\draw[sig] (spl2.east) -- (lo.west);
+
+% ===== ovenized enclosure =================================================
+\begin{scope}[on background layer]
+  \node[grp,fit=(split)(pre)(pll40)(clk40)(clk10)(pll471)(spl2)(lo)(fanout),
+        label={[lbl,anchor=north east]below right:ovenized thermal enclosure}] {};
+\end{scope}
+\end{tikzpicture}

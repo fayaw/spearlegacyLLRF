@@ -14,12 +14,12 @@ The 6 SNL programs are the **primary spec extraction targets** for the upgrade. 
 
 | Legacy SNL | Upgrade Target | Status |
 |-----------|---------------|--------|
-| `rf_states.st` | Python/EPICS coordinator state machine | **SPEC-EXTRACT → rewrite** |
-| `rf_hvps_loop.st` | CompactLogix PLC ladder logic (B118) | **SPEC-EXTRACT → PLC code** |
-| `rf_tuner_loop.st` | LLRF9 built-in tuner (10 Hz phase) + Python load-angle | **SPEC-EXTRACT → configure + rewrite** |
-| `rf_calib.st` | LLRF9 built-in calibration (Dmitry's software) | Verify equivalence |
-| `rf_msgs.st` | EPICS logging + LLRF9 diagnostics | Reference |
-| `rf_dac_loop.st` | **ELIMINATED** — LLRF9 vector modulator | Per PDR §15.7: eliminated |
+| `rf_states.st,v` | Python/EPICS coordinator state machine | **SPEC-EXTRACT → rewrite** |
+| `rf_hvps_loop.st,v` | CompactLogix PLC ladder logic (B118) | **SPEC-EXTRACT → PLC code** |
+| `rf_tuner_loop.st,v` | LLRF9 built-in tuner (10 Hz phase) + Python load-angle | **SPEC-EXTRACT → configure + rewrite** |
+| `rf_calib.st,v` | LLRF9 built-in calibration (Dmitry's software) | Verify equivalence |
+| `rf_msgs.st,v` | EPICS logging + LLRF9 diagnostics | Reference |
+| `rf_dac_loop.st,v` | **ELIMINATED** — LLRF9 vector modulator | Per PDR §15.7: eliminated |
 
 ---
 
@@ -29,12 +29,12 @@ Six SNL (State Notation Language) programs control the RF station:
 
 | Program | Lines | Instances | Function |
 |---------|-------|-----------|----------|
-| `rf_states.st` | 2,227 | 1 | Master station state machine |
-| `rf_calib.st` | 3,345 | 1 | Calibration sequences |
-| `rf_tuner_loop.st` | 555 | 4 (one per cavity) | Cavity tuner motor control |
-| `rf_hvps_loop.st` | 343 | 1 | HVPS supervisory control |
-| `rf_dac_loop.st` | 290 | 1 | Drive/gap voltage DAC control |
-| `rf_msgs.st` | 352 | 1 | Message logging and TAXI monitoring |
+| `rf_states.st,v` | 2,227 | 1 | Master station state machine |
+| `rf_calib.st,v` | 3,345 | 1 | Calibration sequences |
+| `rf_tuner_loop.st,v` | 555 | 4 (one per cavity) | Cavity tuner motor control |
+| `rf_hvps_loop.st,v` | 343 | 1 | HVPS supervisory control |
+| `rf_dac_loop.st,v` | 290 | 1 | Drive/gap voltage DAC control |
+| `rf_msgs.st,v` | 352 | 1 | Message logging and TAXI monitoring |
 
 **Support files**: 12 header/macro files (~1,151 lines) define PV names, status codes, and control macros.
 
@@ -229,7 +229,7 @@ Automated calibration of the RF signal chain. Uses C preprocessor utility macros
 
 ### 3.3 Code Structure and Utility Macros
 
-The `rf_calib.st` program contains **28 hand-written SNL states** — not macro-generated states. All state declarations are explicit:
+The `rf_calib.st,v` program contains **28 hand-written SNL states** — not macro-generated states. All state declarations are explicit:
 
 `Init` → `Startup` → `CombCheck` → `Startup2` → `Setup` → `ZeroCavMults` → `ZeroDirMults` → `DirectInitial` → `ZeroCombMults` → `Combiner` → `Direct` → `SummingNodeI` → `SummingNodeQ` → `GainStageI` → `GainStageQ` → `TuneStage` → `ZeroKlysMults` → `DiffNodeOffsets` → `KlysStage` → `CompStage` → `Direct_Final` → `CombStage` → `KlysDemod` → `NullModulator` → `Finish` / `Abort` / `Abend` → `Done`
 
@@ -356,7 +356,7 @@ Monitors and controls the High Voltage Power Supply via Allen-Bradley SLC-500 PL
 
 ### 5.2 Key PV Connections (from `rf_hvps_loop_pvs.h`)
 
-> **Rev 4 correction**: Rev 3 listed PVs as `{STN}:HVPS:VOLTS:CTRL` and `{STN}:HVPS:VOLTS:RBCK` (with 'S'). The actual PV namespace uses `{STN}:HVPS:VOLT:CTRL` and `{STN}:HVPS:VOLT` (no 'S'), verified against `rf_hvps_loop_pvs.h,v`. Rev 3 also listed phantom PVs (`PCOLL_MAX`, `CROWBAR:ARM`, `CONT:CLOSE/OPEN`, `HVPS:FAULT:*`, `HVPS:STATUS`) that do **not** appear in the SNL program's PV declarations. These may exist in the EPICS database layer (`.db` files) but are not part of the `rf_hvps_loop.st` SNL state machine. The table below lists only PVs actually declared in `rf_hvps_loop_pvs.h`.
+> **Rev 4 correction**: Rev 3 listed PVs as `{STN}:HVPS:VOLTS:CTRL` and `{STN}:HVPS:VOLTS:RBCK` (with 'S'). The actual PV namespace uses `{STN}:HVPS:VOLT:CTRL` and `{STN}:HVPS:VOLT` (no 'S'), verified against `rf_hvps_loop_pvs.h,v`. Rev 3 also listed phantom PVs (`PCOLL_MAX`, `CROWBAR:ARM`, `CONT:CLOSE/OPEN`, `HVPS:FAULT:*`, `HVPS:STATUS`) that do **not** appear in the SNL program's PV declarations. These may exist in the EPICS database layer (`.db` files) but are not part of the `rf_hvps_loop.st,v` SNL state machine. The table below lists only PVs actually declared in `rf_hvps_loop_pvs.h`.
 
 | PV | Type | Mon | Description |
 |----|------|-----|-------------|
@@ -435,7 +435,7 @@ Monitors and controls the High Voltage Power Supply via Allen-Bradley SLC-500 PL
 - `HVPS_LOOP_MAX_INTERVAL` = 10.0 s — maximum time between cycles regardless of events
 - `HVPS_LOOP_MAX_VOLT_TOL` = 10 — tolerance violation count before status change
 
-### 5.4 HVPS State Machine Architecture (from `rf_hvps_loop.st`)
+### 5.4 HVPS State Machine Architecture (from `rf_hvps_loop.st,v`)
 
 The HVPS loop implements 4 states: `init`, `off`, `proc`, and `on`.
 
@@ -584,7 +584,7 @@ The `DAC_LOOP_SET` macro (~50 lines) implements the core feedback:
 
 ### 7.2 TAXI Error Monitoring
 
-The TAXI serial link connects GVF modules and provides timing signals. The `rf_msgsTAXI` state set within `rf_msgs.st` monitors the GVF TAXI link status via `{STN}:STN:GVF:MODU.TMCK` and, upon detecting a TAXI overflow error (`GVF_M_TAXIOFLW`), sends a resync command to the LFB (Low-Frequency Feedback) system. The implementation dynamically assigns the LFB PV based on the ring being serviced.
+The TAXI serial link connects GVF modules and provides timing signals. The `rf_msgsTAXI` state set within `rf_msgs.st,v` monitors the GVF TAXI link status via `{STN}:STN:GVF:MODU.TMCK` and, upon detecting a TAXI overflow error (`GVF_M_TAXIOFLW`), sends a resync command to the LFB (Low-Frequency Feedback) system. The implementation dynamically assigns the LFB PV based on the ring being serviced.
 
 > **PDR terminology note**: PDR §2.1 (line 89) describes this as "CAMAC TAXI error monitoring". This is incorrect — TAXI is a VXI serial link protocol used by the GVF module, not a CAMAC feature. The source code (`rf_msgs.st,v`) explicitly references GVF module status bits and prints "Gvf Taxi error detected" on fault. CAMAC is a completely different bus standard not used in this system.
 

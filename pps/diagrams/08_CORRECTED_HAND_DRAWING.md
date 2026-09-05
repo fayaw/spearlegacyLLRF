@@ -11,7 +11,7 @@
 ```
                     PPS INTERFACE CHASSIS
                     ┌─────────────────────┐
-                    │  GOB12-88PNE        │
+                    │  GOB1208PNE        │
                     │  8-Pin Circular     │
                     │  (Burndy/Souriau)   │
                     │                     │
@@ -85,7 +85,7 @@
 ```mermaid
 flowchart TB
     subgraph PPS_CHASSIS["PPS Interface Chassis"]
-        GOB["GOB12-88PNE<br/>8-Pin Circular"]
+        GOB["GOB1208PNE<br/>8-Pin Circular"]
         PIN_E["Pin E: PPS 1 (+)"]
         PIN_F["Pin F: PPS 1 (-)"]
         PIN_G["Pin G: PPS 2 (+)"]

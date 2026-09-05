@@ -169,7 +169,7 @@ The simulation generates the **exact same 4 monitoring signals** that are curren
 - Signal: `hvps_voltage_monitor_kv` 
 - Range: 0 to -90 kV DC
 - Purpose: Voltage regulation monitoring
-- Real system: Voltage divider 1000:1 measurement
+- Real system: Voltage divider ≈10,000:1 measurement (10 kV/V at the monitor output)
 
 **Channel 2: HVPS DC Current Monitor**  
 - Signal: `hvps_current_monitor_a`

@@ -1,8 +1,19 @@
-# WD-730-794-06-C0 — Interconnection: B118 Controller ↔ Termination Tank
+# WD-730-794-06-C0 — Interconnection: B118 Controller ↔ Grounding Tank
 
 > **Drawing**: `wd7307940600.pdf`
-> **Title**: PEP-II 2MW Klystron — Test Stand Power Supply — Grounding Tank Wiring
-> **Scope**: Detailed wiring between Hoffman Box TS-6 and Grounding Tank J1/P5
+> **Title**: PEPII 2MW KLYSTRON **TEST STAND** POWER SUPPLY — GROUNDING TANK WIRING
+> **CAD file**: 73079406.WD0, sheet 1 of 1
+> **Engineer**: R. Cassel · **Drafter**: W. Gorecki, 03/03/2000 · **Checker**: S. Lowe, 4/3/00
+> **Revision block**: empty — original issue, no revisions recorded
+> **Scope**: Wiring between the Hoffman Box (PWR SUPP REGULATOR, 34×42) terminal strip TS-6 and the Grounding Tank
+>
+> **Verification status: VERIFIED (3 September 2026)** — read directly from the scanned drawing rendered to image.
+
+> ### ⚠ Provenance caveat
+>
+> The title block reads "**TEST STAND** POWER SUPPLY". This drawing documents the klystron **test stand** configuration, not necessarily the installed SPEAR3 system, and it carries **no revision entries** — so it has never been formally updated. Where it disagrees with J. Sebek's field trace in `pps/HoffmanBoxPPSWiring.docx`, prefer the field trace, and confirm before rewiring.
+>
+> One known consequence: this drawing wires the **NO** contact of the manual grounding switch (TS-6 label "NO MANUAL GRN SW"), whereas the Grounding Tank schematic SD-730-790-05-C1 shows SW1 with **both NC and NO** contacts available. Which one is actually landed at SPEAR3 is an open field-verification item.
 
 ---
 
@@ -17,7 +28,7 @@ flowchart LR
     end
 
     subgraph CABLES["Cable Runs"]
-        CABLE1["Belding 83709<br/>9C #16 Teflon"]
+        CABLE1["Belden 83709<br/>9C #16 Teflon"]
         CABLE2["Belden 83715<br/>15C #16 Teflon"]  
         COAX_70["BNC Coax<br/>70 ft"]
     end
@@ -127,37 +138,74 @@ flowchart LR
 
 ---
 
-## Grounding Tank Internal Routing
+## Grounding Tank Connectors — transcribed from the drawing
 
-```mermaid
-flowchart TB
-    P5["P5 Connector<br/>MS3102R18-1P<br/>(Panel Mount)"]
-    
-    P5 -->|"Pins A-F"| J2["J2 (Danfysik<br/>Internal DB9)"]
-    P5 -->|"Pins G-H"| OIL["Oil Level<br/>Sensor LEV-3"]
-    P5 -->|"Pins J-K"| MANUAL["Manual GRN SW<br/>(Mushroom)"]
-    P5 -->|"Pins L-M-R"| ROSS_AUX["Ross Switch<br/>Aux Contacts<br/>COM/NC/NO"]
-    P5 -->|"Pins N-P"| ROSS_COIL["Ross Switch<br/>Coil"]
-    P5 -->|"Pins S-T"| SHUNT["15A/50mV<br/>Current Shunt"]
-    
-    BNC1["BNC-1<br/>(Coax)"] --> PEARSON["Pearson CT-110"]
-```
+> **Verified 3 September 2026** by reading the scanned drawing directly.
+>
+> **Note**: the drawing shows **three physically separate cable runs**. P5 carries **only** the shunt and ground-switch circuits; the oil-level sensor and the Danfysik are on their own cables.
+
+### Three cable runs, all 70 ft
+
+| Cable | Type as drawn | From (Hoffman Box) | To (Grounding Tank) |
+|---|---|---|---|
+| 1 | TWISTED SHIELDED 8761 | TS-6 (upper) | **LEV-3 "OIL-LEVEL"**, pins 1 and 2 |
+| 2 | BELDEN 83709 9C #16 TEF | TS-6 (middle) | **P5** — MS3102R18-1P |
+| 3 | BELDEN 83709 9C #16 TEF | TS-6 (lower) | **J2 / CON9** |
+| 4 | COAX RG-58 | BNC-1 "FAULT" | BNC1 "ARC FAULT" |
+
+### P5 — MS3102R18-1P (shunt and ground switch only)
+
+| Pin | Signal | Wire |
+|---|---|---|
+| A | SHUNT− | RED |
+| B | SHUNT COM | WT |
+| C | NO MANUAL GRN SW | BK |
+| D | COM MANUAL GRN SW | WT-BLK |
+| E | GRN RELAY COIL | GRN |
+| F | GRN RELAY COIL | BLU |
+| G | NC GRN RELAY | — |
+| H | NC GRN RELAY | RED-BLK |
+| I | NO GRN RELAY | GRN-BLK |
+| J | COM GRN RELAY | ORG |
+
+> This connector matches **J1 (MS3102R18-1P)** shown on the Grounding Tank schematic SD-730-790-05-C1.
+
+### J2 / CON9 — Danfysik DC-CT
+
+| Pin | Signal | Wire |
+|---|---|---|
+| 1 | NOT USED | RED-BLK |
+| 2 | TEST | ORG |
+| 3 | STATUS− | GRN-BLK |
+| 4 | GRD | GRN |
+| 5 | −15 V | BLU |
+| 6 | OUTPUT | BK |
+| 7 | NOT USED | WT-BLK |
+| 8 | STATUS+ | WT |
+| 9 | +15 V | RED |
+
+### BNC coax run
+
+**BNC1 "ARC FAULT"** at the tank is annotated **"10A/V PERSON CT TYPE 110"** — i.e. a Pearson model 110 current transformer at 10 A/V. It runs 70 ft of RG-58 to **BNC-1 "FAULT"** in the Hoffman Box.
 
 ---
 
 ## Signal Summary Table
 
-| Signal | Source | TS-6 | Cable | Tank | Destination | PLC I/O |
+| Signal | Source | TS-6 | Cable | Tank connector | Destination | PLC I/O |
 |--------|--------|------|-------|------|-------------|---------|
-| Danfysik Analog | Danfysik DC-CT | 1-2 | Belding 83709 | J2 A-B | Slot-9 NI4 IN3 + Monitor BD | Analog In |
-| Danfysik Power | SOLA PS | 3-6 | Belding 83709 | J2 C-F | Danfysik supply | — |
-| Oil Level | 12VDC / LEV-3 | 7-8 | Belding 83709 | P5 G-H | Slot-6 IB16 IN8 | Digital In |
-| Manual SW Status | 12VDC / Man SW | 9-10 | Cable | P5 J-K | Slot-6 IB16 IN9 | Digital In |
-| Ross PPS Readback | Ross Aux NC/COM | 11-12 | Cable | P5 L-M | GOB12-88PNE C-D | To PPS Chassis |
-| Ross Coil Drive | Slot-2 IO8 OUT3 | 13-14 | Cable | P5 N-P | Ross coil | Digital Out |
-| SCR Phase Oil | NC contact | 15-16 | Cable | SCR Tank | Slot-6 IB16 | Digital In |
-| Crowbar Oil | NC contact | 17-18 | Cable | Crow Tank | Slot-6 IB16 | Digital In |
-| Ross Aux NO | Ross Aux NO | 19 | Cable | P5 R | (monitoring) | — |
-| Return Current | Shunt | 20-21 | Cable | P5 S-T | (monitoring) | Analog |
-| Arc Fault | Pearson CT-110 | BNC-1 | Coax 70ft | BNC-1 | Left Trig Interconnect | — |
+| Danfysik output | Danfysik DC-CT | 1-2 | Belden 83709 | J2-6 / J2-4 | Slot-9 NI4 IN3 + Monitor Bd | Analog In |
+| Danfysik supply ±15 V | SOLA PS | 3-4 | Belden 83709 | J2-9 / J2-5 | Danfysik supply | — |
+| Danfysik status | Danfysik DC-CT | 5-6 | Belden 83709 | J2-8 / J2-3 | Status readback | — |
+| Grounding tank oil level | LEV-3 | 7-8 | **Twisted shielded 8761** | **LEV-3 pins 1, 2** | Slot-6 IB16 IN8 | Digital In |
+| Manual GRN SW | Manual (mushroom) switch | 9-10 | Belden 83709 | **P5-D (COM), P5-C (NO)** | Slot-6 IB16 IN9 | Digital In |
+| Ground relay NC | Ross aux | 11-12 | Belden 83709 | **P5-G / P5-H** | GOB1208PNE C-D | To PPS chassis |
+| Ross coil drive | Slot-2 IO8 OUT3 | 13-14 | Belden 83709 | **P5-E / P5-F** | Ross coil | Digital Out |
+| Crowbar tank oil | NC contact | 15-16 | Cable | Crowbar tank | Slot-6 IB16 IN10 | Digital In |
+| SCR tank oil | NC contact | 17-18 | Cable | SCR tank | Slot-6 IB16 IN11 | Digital In |
+| Ground relay NO | Ross aux | 19 | Belden 83709 | **P5-I** | Slot-7 IV16 IN13 | Digital In |
+| Return current shunt | 15 A / 50 mV shunt | 20-21 | Belden 83709 | **P5-A / P5-B** | BNC-12 | Analog |
+| Arc fault | **Pearson CT type 110, 10 A/V** | BNC-1 | Coax RG-58, 70 ft | BNC1 | Left Trigger Interconnect Bd | — |
+
+> TS-6 terminal numbers above follow J. Sebek's field trace in `pps/HoffmanBoxPPSWiring.docx`; the tank-side connector pins follow this drawing. The two agree on grouping but the drawing's TS-6 labels sit between terminal numbers in places, so individual odd/even assignments within a pair should be confirmed before rewiring.
 

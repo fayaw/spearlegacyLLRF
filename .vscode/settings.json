@@ -1,0 +1,90 @@
+{
+  // Double-click in the rendered preview jumps to that line in the source.
+  "markdown.preview.doubleClickToSwitchToEditor": true,
+
+  // Keep preview and editor scroll positions locked together in both directions.
+  "markdown.preview.scrollPreviewWithEditor": true,
+  "markdown.preview.scrollEditorWithPreview": true,
+
+  // Highlight the line in the preview corresponding to the editor cursor.
+  "markdown.preview.markEditorSelection": true,
+
+  // Open preview beside the source rather than replacing it, so the sync is usable.
+  "markdown.preview.openMarkdownLinks": "inEditor",
+
+  // This repo's notes are reference documents: keep long lines intact and wrap visually.
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": {
+      "comments": "off",
+      "strings": "off",
+      "other": "off"
+    },
+    "editor.unicodeHighlight.ambiguousCharacters": false,
+    "files.trimTrailingWhitespace": false
+  },
+
+  // Drawing transcriptions contain box-drawing and Greek characters; do not flag them.
+  "editor.unicodeHighlight.allowedCharacters": {
+    "Ω": true,
+    "µ": true,
+    "μ": true,
+    "±": true,
+    "×": true,
+    "≈": true,
+    "−": true,
+    "∥": true,
+    "√": true,
+    "φ": true,
+    "τ": true,
+    "α": true,
+    "Δ": true,
+    "°": true
+  },
+
+  // ---------------------------------------------------------------------
+  //  LaTeX (Designs/tex) -- SyncTeX between the PDF and the source.
+  //  Ctrl+click in the PDF jumps to that line in the .tex; Ctrl+Alt+J from
+  //  the editor jumps to that spot in the PDF.
+  // ---------------------------------------------------------------------
+  "latex-workshop.view.pdf.viewer": "tab",
+  "latex-workshop.synctex.afterBuild.enabled": true,
+  "latex-workshop.latex.autoBuild.run": "onSave",
+
+  // Build with the repo's own recipe: LuaLaTeX is required (see Designs/tex/README.md)
+  // and --synctex=1 is what makes the two-way jump work.
+  "latex-workshop.latex.tools": [
+    {
+      "name": "lualatex",
+      "command": "lualatex",
+      "args": [
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "--synctex=1",
+        "%DOC%"
+      ]
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "lualatex x3",
+      "tools": ["lualatex", "lualatex", "lualatex"]
+    }
+  ],
+
+  // body.tex and the tikz/*.tex fragments are \input, not standalone documents
+  "latex-workshop.latex.rootFile.useSubFile": false,
+  "latex-workshop.latex.search.rootFiles.include": [
+    "Designs/tex/L_legacy_system_architecture.tex"
+  ],
+  "latex-workshop.latex.autoClean.run": "never",
+  "latex-workshop.message.badbox.show": false,
+
+  "search.exclude": {
+    "**/Archived_NOTUSE": true
+  },
+
+  "files.associations": {
+    "*.tex": "latex"
+  }
+}

@@ -1,0 +1,57 @@
+% ============================================================================
+%  Doc 0 -- SPEAR3 LLRF Upgrade System: System Design Report
+%  Build:  powershell -ExecutionPolicy Bypass -File build.ps1 -Doc 0_system_design_report
+%  Engine: LuaLaTeX (required -- see the Unicode note in preamble.tex)
+% ============================================================================
+\documentclass[letterpaper,11pt]{article}
+\input{preamble}
+
+% Marks a heading that exists in the outline but whose content has never been
+% written.  Printing the gap is better than printing a bare heading, because a
+% bare heading reads as "nothing to say here" rather than "still owed".
+\newcommand{\notwritten}{\par\noindent
+  \textcolor{cPwr}{\rule{2mm}{2mm}}\hspace{2mm}%
+  \textcolor{cPwr!85!black}{\itshape Not yet written.}\par\medskip}
+
+\title{\vspace{-1.4cm}\bfseries SPEAR3 LLRF Upgrade System\\[2mm]
+       \Large System Design Report}
+\author{RF Department\\[1mm]\normalsize SSRL / Accelerator Directorate,
+        SLAC National Accelerator Laboratory}
+\date{Rev 1 \quad\textbullet\quad \today}
+
+\begin{document}
+\maketitle
+\thispagestyle{plain}
+
+\begin{center}
+\begin{minipage}{0.86\linewidth}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{Document ID}    & SPEAR3-LLRF-PDR-001 Rev 1 \\
+\textbf{Tier}           & 1 --- Top-Level System Design Reference \\
+\textbf{Status}         & Release candidate; pending named-engineer sign-off \\
+\textbf{Source}         & \fpath{Designs/tex/0_system_design_report.tex} \\
+\end{tabular}
+\end{minipage}
+\end{center}
+
+\vspace{4mm}
+\begin{keynote}
+This report is the top-level design reference for the SPEAR3 LLRF Upgrade
+Project.  It describes the system architecture, the scope and high-level design
+of every subsystem in both the legacy and upgraded configurations, and the
+interfaces between them.  It is the entry point for the detailed engineering
+design of each subsystem, not a substitute for it:
+\Cref{appendix-source-document-index} indexes the detailed design documents that
+carry the underlying evidence.  The legacy plant is described in full in
+\fpath{Designs/tex/L_legacy_system_architecture.pdf} (Doc L).
+\end{keynote}
+
+\clearpage
+\tableofcontents
+\clearpage
+\listoffigures
+\clearpage
+
+\input{body-doc0}
+
+\end{document}

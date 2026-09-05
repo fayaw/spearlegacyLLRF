@@ -1,5 +1,8 @@
 # Architecture Overview — PV Naming, Boot Sequence, Cross-Cutting Concerns
 
+
+> **⚠ Galil status — corrected September 2026.** The Galil DMC-4143 has **not** been installed and is **not** in operation; it was in development. Test moves were performed on the existing cavity motors and worked fine, but it goes online only **when the current LLRF upgrade project is finished**. The **AB 1746-HSTP1 remains the in-service tuner controller**. Any statement below that this work is "already done" or that the Galil "replaced" the AB hardware is incorrect and has been amended.
+
 **Document**: 02 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
 **(Rev 4 — added CLKMACROS boot sequence clarification; see §2.1.1)**
 (Rev 3 — corrected HVPS PV naming error: VOLTS→VOLT)
@@ -16,7 +19,7 @@ The legacy architecture (VxWorks + VXI + AB serial) is being replaced by a heter
 | Signal monitoring | IQA modules | LLRF9 ADC (18 channels) + Waveform Buffer (12 channels) |
 | HVPS control | SLC-500 PLC via AB serial | CompactLogix PLC via Ethernet/IP |
 | RF MPS | PLC-5 via AB serial | ControlLogix 1756 via Ethernet/IP |
-| Tuner control | AB 1746-HSTP1 via AB serial | Galil DMC-4143 via Ethernet (commissioned Aug 2025) |
+| Tuner control | AB 1746-HSTP1 via Remote I/O (**in service**) | Galil DMC-4143 via Ethernet (**planned, not installed**) |
 | Interlock coordination | Distributed (analog + PLC + wiring) | **New** Interface Chassis (hardware AND-gate) |
 | Supervisory software | SNL on VxWorks | Python/EPICS coordinator (soft IOC, ~1 Hz) |
 | Arc detection | VXI AIM module (partially functional) | **New** Microstep-MIS optical (12 sensors) |
@@ -193,7 +196,7 @@ VxWorks kernel boot (PPC604)
 
 #### 2.1.1 ⚠️ CLKMACROS Boot Sequence Note (Rev 4 Clarification)
 
-The boot diagram above shows `CLKMACROS=S=2` in step 3 (putenv block). However, **this macro does not appear in the production `st.cmd`** as archived in RCS (`iocBoot/b132-iocrf/st.cmd,v`). The 11 putenv() calls actually present in `st.cmd` are: `IQA3MACROS`, `DATABASE_MACROS`, `C1TUNRLOOP_MACROS` through `C4TUNRLOOP_MACROS`, `AB_CONFIG_FILE`, `RESTORE_AB`, `RESTORE_VXI`, `RESTORE_INP`, and `RESTORE_FILENAME`.
+The boot diagram above shows `CLKMACROS=S=2` in step 3 (putenv block). However, **this macro does not appear in the production `st.cmd,v`** as archived in RCS (`iocBoot/b132-iocrf/st.cmd,v`). The 11 putenv() calls actually present in `st.cmd,v` are: `IQA3MACROS`, `DATABASE_MACROS`, `C1TUNRLOOP_MACROS` through `C4TUNRLOOP_MACROS`, `AB_CONFIG_FILE`, `RESTORE_AB`, `RESTORE_VXI`, `RESTORE_INP`, and `RESTORE_FILENAME`.
 
 `CLKMACROS` is consumed by `p2RfInitHooks.c` (at `initHookAtBeginning`) via `getenv("CLKMACROS")`. If `getenv()` returns NULL, clock initialization is gracefully skipped (the function breaks out of the init hook). This means either:
 - **CLKMACROS is set through VxWorks boot parameters** (boot loader environment, not in the application st.cmd)
@@ -380,7 +383,7 @@ Key elements extracted from the latest revision:
 11. dbpf("SRF1:STN:ID"," ")                   ← Override station ID
 ```
 
-**Upgrade relevance**: The Linux-based upgrade IOC will use a similar startup script pattern (standard EPICS `st.cmd`) but without VxWorks `ld`/`putenv` syntax. The macro definitions (STN=SRF1, cavity numbering) must be preserved. The AB scanner configuration will be replaced by CompactLogix/ControlLogix Ethernet I/O.
+**Upgrade relevance**: The Linux-based upgrade IOC will use a similar startup script pattern (standard EPICS `st.cmd,v`) but without VxWorks `ld`/`putenv` syntax. The macro definitions (STN=SRF1, cavity numbering) must be preserved. The AB scanner configuration will be replaced by CompactLogix/ControlLogix Ethernet I/O.
 
 ### 6.2 srf1.substitutions — Database Macro Expansion
 

@@ -1,5 +1,8 @@
 # PLC Integration & Stepper Motors
 
+
+> **⚠ Galil status — corrected September 2026.** The Galil DMC-4143 has **not** been installed and is **not** in operation; it was in development. Test moves were performed on the existing cavity motors and worked fine, but it goes online only **when the current LLRF upgrade project is finished**. The **AB 1746-HSTP1 remains the in-service tuner controller**. Any statement below that this work is "already done" or that the Galil "replaced" the AB hardware is incorrect and has been amended.
+
 **Document**: 06 of 08 | **Series**: SPEAR3 LLRF Legacy Code Analysis
 **(Rev 2 — corrected with upgrade context)**
 
@@ -12,28 +15,44 @@
 | AB drvAb.c serial driver | 2,039 | **ELIMINATED** | All new PLCs use Ethernet/IP |
 | AB SLC-500 (HVPS) | — | CompactLogix PLC (Ethernet) | PDR §6.3 |
 | AB PLC-5 (RF MPS) | — | ControlLogix 1756 (Ethernet) | PDR §7.3 |
-| AB 1746-HSTP1 stepper | 1,673 | **DONE** — Galil DMC-4143 (commissioned Aug 2025) | PDR §10.3 |
+| AB 1746-HSTP1 stepper | 1,673 | **IN SERVICE** — Galil DMC-4143 planned but not installed | PDR §10.3 |
 | Compumotor / OMS drivers | — | **ELIMINATED** — never used in SPEAR3 | Historical |
 
 ---
 
-## 1. Allen-Bradley PLC Architecture — ELIMINATED
+## 1. Allen-Bradley Remote I/O Architecture — ELIMINATED
 
 ### 1.1 Physical Configuration
 
-From `config.ab`:
+The link is Allen-Bradley **Remote I/O (RIO)**, not Data Highway+. `iocBoot/b132-iocrf/config.ab,v` is headed "Allen-Bradley **Remote I/O** Scanner Configuration" and the VXI slot-1 card is an **AB 6008-SV1R VMEbus Remote I/O scanner** (see `allenBradley/documentation/allenBradley.html,v`, which lists models 6008-SV / 6008-SV1R / 6008-SV2R as "VMEbus Scanner Remote I/O Scanner"). The PLCs are RIO *adapters* ("racks"), reached through their DCM modules — they are not network peers.
+
+Rack sizes, from `config.ab,v`:
+
 ```
-Rack 1, Group 0: Full rack    — RF MPS PLC (PLC-5 or ControlLogix)
-Rack 2, Group 0: 3/4 rack     — HVPS SLC-500
-Rack 3, Group 0: 1/4 rack     — Stepper motor modules
+1 0 Full
+2 0 3/4
+3 0 1/4
 ```
 
-The AB scanner (VME adapter card in VXI slot 1) connects via serial link to all three racks.
+Adapter identity, from `rfApp/Db/rf_ab_4CV.substitutions,v` (the 4-cavity SPEAR3 configuration instantiated by `srf1.substitutions,v`):
+
+```
+Adapter 1 (Full) : HVPSDCM   — HVPS SLC-500 via 1747-DCM  (B118)
+                   cards 0,2,4,6,8,10,12,14 + HVPSDCM:SUMY
+Adapter 2 (3/4)  : CAVTUNR   — cavity tuner stepper chassis 340-315 (B132)
+                   cards 0,2,4,6 = CAV1TUNR..CAV4TUNR + CAVTUNR:SUMY
+Adapter 3 (1/4)  : STNDCM    — RF MPS PLC-5 via 1771-DCM  (B132)
+                   card 0 = STN:DCM, data tables T0..T7
+```
+
+> **Note**: it is easy to mis-assign rack 1 to the RF MPS, rack 2 to the HVPS, and rack 3 to the steppers. That is wrong on all three counts. The assignment above is read directly from `rf_ab_4CV.substitutions,v`, where the `ab_adapter.db` pattern gives `{HVPSDCM, 1}`, `{CAVTUNR, 2}`, `{STNDCM, 3}`. The number of cards per adapter independently corroborates the rack sizes.
+
+The AB scanner (VME adapter card in VXI slot 1, reached through an HP E1407A VME-to-VXI adapter) polls all three adapters at roughly 1 Hz.
 
 ### 1.2 Communication Flow
 
 ```
-EPICS Records ──DSET──► AB Device Support ──► drvAb.c ──serial──► AB Scanner
+EPICS Records ──DSET──► AB Device Support ──► drvAb.c ──RIO──► AB 6008-SV1R Scanner
                                                                       │
                                       ┌───────────────────────────────┘
                                       │
@@ -41,8 +60,8 @@ EPICS Records ──DSET──► AB Device Support ──► drvAb.c ──seri
                         │             │              │
                    ┌────▼────┐  ┌─────▼────┐  ┌─────▼────┐
                    │ Rack 1  │  │ Rack 2   │  │ Rack 3   │
-                   │ MPS PLC │  │ HVPS PLC │  │ Stepper  │
-                   │ (PLC-5) │  │ (SLC-500)│  │ (HSTP1)  │
+                   │ HVPS PLC│  │ Tuners   │  │ RF MPS   │
+                   │(SLC-500)│  │ (4×HSTP1)│  │ (PLC-5)  │
                    └─────────┘  └──────────┘  └──────────┘
 ```
 

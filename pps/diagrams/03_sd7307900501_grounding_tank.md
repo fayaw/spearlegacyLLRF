@@ -187,7 +187,7 @@ stateDiagram-v2
 ### PPS Readback Logic for Ross Switch
 
 ```
-Ross Switch State     │ Aux NC Contact │ TS-6 Pins 11-12 │ GOB12-88PNE C-D
+Ross Switch State     │ Aux NC Contact │ TS-6 Pins 11-12 │ GOB1208PNE C-D
 ─────────────────────┼────────────────┼──────────────────┼─────────────────
 CLOSED (grounded)    │ CLOSED         │ Closed circuit   │ Closed = SAFE
 OPEN (operating)     │ OPEN           │ Open circuit     │ Open = OPERATING

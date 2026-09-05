@@ -1,0 +1,55 @@
+% !TeX root = ../L_legacy_system_architecture.tex
+% The two legacy PPS chains, side by side.  Both pass through the SLC-500 PLC
+% -- the compliance issue called out in the text.
+\begin{tikzpicture}[font=\scriptsize,x=1mm,y=1mm,every node/.style={outer sep=0pt}]
+\tikzset{ppsbox/.style={draw=cPlc,fill=cPlc!7,rounded corners=1.4pt,
+                      text=cPlc!80!black,align=center,inner sep=3pt,
+                      font=\scriptsize,text width=62mm}}
+
+% ---------------- Chain 1 -------------------------------------------------
+\node[font=\small\bfseries,anchor=north west,text=cPlc!80!black] at (0,4)
+  {Chain 1 --- HV vacuum contactor};
+\foreach \i/\y/\t in {%
+  1/-2/{PPS 1 Enable (GOB1208PNE pin E$\rightarrow$F)},
+  2/-14/{SLC-500 PLC slot-6 IB16 input 14},
+  3/-26/{PLC rung 0017 (contactor enable logic)},
+  4/-38/{slot-5 OX8 OUT2},
+  5/-50/{TS-5 $\rightarrow$ Belden 83715 cable $\rightarrow$ switchgear},
+  6/-62/{K4 relay (PPS control) $\rightarrow$ MX relay $\rightarrow$ L1 holding coil}}
+  {\node[ppsbox,anchor=north west] (a\i) at (0,\y) {\t};}
+\foreach \a/\b in {1/2,2/3,3/4,4/5,5/6}{\draw[sig] (a\a.south) -- (a\b.north);}
+\node[pwr,text width=62mm,anchor=north west] (a7) at (0,-74) {\textbf{Contactor energized}};
+\draw[sig] (a6.south) -- (a7.north);
+\node[blk,text width=62mm,anchor=north west,font=\tiny] (a8) at (0,-88)
+  {\textbf{Readback}: S5 auxiliary contact (NC) $\rightarrow$ TS-5 pins 14, 15
+   $\rightarrow$ GOB1208PNE readback A--B};
+\draw[fib] (a7.south) -- (a8.north);
+
+% ---------------- Chain 2 -------------------------------------------------
+\node[font=\small\bfseries,anchor=north west,text=cPlc!80!black] at (76,4)
+  {Chain 2 --- Ross grounding switch};
+\foreach \i/\y/\t in {%
+  1/-2/{PPS 2 Enable (GOB1208PNE pin G$\rightarrow$H)},
+  2/-14/{SLC-500 PLC slot-6 IB16 input 15},
+  3/-26/{PLC rung 0016 (Ross switch enable --- requires PPS\,1 \textbf{and} PPS\,2 in series)},
+  4/-38/{slot-2 IO8 OUT3, terminal 5 (\qty{120}{\volt} AC)},
+  5/-50/{TS-6 terminals 13, 14 $\rightarrow$ Belden 83709 cable $\rightarrow$ Termination Tank (P5-F / P5-E)},
+  6/-62/{Ross grounding switch coil}}
+  {\node[ppsbox,anchor=north west] (b\i) at (76,\y) {\t};}
+\foreach \a/\b in {1/2,2/3,3/4,4/5,5/6}{\draw[sig] (b\a.south) -- (b\b.north);}
+\node[pwr,text width=62mm,anchor=north west] (b7) at (76,-74) {\textbf{HV bus ungrounded}};
+\draw[sig] (b6.south) -- (b7.north);
+\node[blk,text width=62mm,anchor=north west,font=\tiny] (b8) at (76,-88)
+  {\textbf{Readback}: Ross switch aux common/NC $\rightarrow$ TS-6 terminals 11, 12
+   $\rightarrow$ GOB1208PNE readback C--D};
+\draw[fib] (b7.south) -- (b8.north);
+
+% ---------------- compliance note ----------------------------------------
+\node[anchor=north west,text width=138mm,font=\scriptsize,align=left,
+      draw=cPwr!70,fill=cPwr!5,rounded corners=1.5pt,inner sep=4pt] at (0,-100)
+  {\textbf{Compliance issue.}  Both chains pass through the SLC-500 PLC, placing a
+   programmable logic controller in the personnel safety chain --- a design that
+   does not meet modern PPS standards.  Rung 0016 puts PPS\,1 and PPS\,2 in
+   \emph{series}, so removing either signal grounds the HV bus; rung 0015 puts
+   them in \emph{parallel} to set the ``PPS ON'' status bit \texttt{B3:1}.};
+\end{tikzpicture}

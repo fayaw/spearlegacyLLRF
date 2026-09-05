@@ -446,6 +446,8 @@ Two oscilloscope captures side by side comparing normal vs. light-triggered SCR 
 > - #6 TWISTED SHIELDED
 >
 > **Terminal Blocks:** TB1, TB2, TB3, TB4, TB5, TEB4
+
+> **Transcriber's note (added 3 September 2026).** "BELDING" above is preserved as transcribed, but it is a **misreading**. The drawing WD-730-790-01-C3, read directly from the scan, clearly reads **BELDEN** — the wire manufacturer Belden, whose 83715 (15-conductor #16 Teflon) and 83709 (9-conductor #16 Teflon) are real catalogue parts. "Belding" is not a wire manufacturer. Derived notes elsewhere in this repository have been corrected to BELDEN; this transcription retains the original reading for provenance.
 >
 > **Bottom Labels:**
 > - TERMINAL STRIP LAYOUT

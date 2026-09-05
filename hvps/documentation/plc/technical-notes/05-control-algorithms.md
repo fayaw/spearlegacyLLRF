@@ -91,6 +91,12 @@ where the equivalent time constant is:
 
 **For the HVPS:** With α = 0.1 and T = 80 ms → **τ ≈ 0.76 s**.
 
+> **Verified against the original.** J. Sebek's [`plcNotesR1.docx`](../plcNotesR1.docx) derives this independently and gives **τ = −(0.08/log 0.9) = 0.759 s**. The two agree.
+>
+> That document also confirms the destination of this register: *"N7:10 is the Reference Out register that is loaded into output 0 of module AB-1746-NIO4V (slot 8). It is connected to **EL1, the reference input to the regulator card**."* From the regulator side, [`EnerproVoltageandCurrentRegulatorBoardNotes.docx`](../../../architecture/designNotes/EnerproVoltageandCurrentRegulatorBoardNotes.docx) confirms the same connection at **J4-1 / J4-7**, and warns that the board schematic labels this input **"POS. VOLTAGE LIMIT COMMAND"**, which is a misnomer — it is the reference input, not a limit.
+>
+> Sebek also notes the PLC scan estimate: Rockwell allows ≈ 0.9 ms per kB of code, and this program is ≈ 5.5 kB, so a full cycle takes **≈ 5 ms**. Rung 104's 80 ms timer therefore gates the filter at roughly every 16th scan.
+
 The reference voltage reaches:
 - 63% of target in ~0.76 s
 - 95% of target in ~2.3 s

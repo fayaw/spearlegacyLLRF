@@ -26,29 +26,29 @@
 | Topic | Legacy PDF | Published Paper | Source Code | This Package |
 |-------|-----------|----------------|-------------|--------------|
 | Complete loop architecture | `feedbackLoopDescriptionps3403305200.pdf` | Corredoura 1999, Fig. 3 | All `.st` | `01_...LOOPS.md` §1 |
-| Direct (wideband) loop | `feedbackLoopDescriptionps3403305200.pdf` pp. 3-4 | Corredoura 1999; Fox 2010 §II | `rf_states.st` | `01_...LOOPS.md` §3 |
-| Comb (narrowband) loop | `feedbackLoopDescriptionps3403305200.pdf` p. 5 | Corredoura 1999; Fox 2010 §III | `rf_calib.st` | `01_...LOOPS.md` §4 |
-| Ripple loop | `feedbackLoopDescriptionps3403305200.pdf` p. 6 | Corredoura 2000 §6 | `rf_dac_loop.st` | `01_...LOOPS.md` §5 |
-| Ripple loop actual use (phase tracking) | PS-52 transcription (p. 6) | Corredoura 2000 §6 | `rf_dac_loop.st` | `01_...LOOPS.md` §5.2 (v3.0) |
+| Direct (wideband) loop | `feedbackLoopDescriptionps3403305200.pdf` pp. 3-4 | Corredoura 1999; Fox 2010 §II | `rf_states.st,v` | `01_...LOOPS.md` §3 |
+| Comb (narrowband) loop | `feedbackLoopDescriptionps3403305200.pdf` p. 5 | Corredoura 1999; Fox 2010 §III | `rf_calib.st,v` | `01_...LOOPS.md` §4 |
+| Ripple loop | `feedbackLoopDescriptionps3403305200.pdf` p. 6 | Corredoura 2000 §6 | `rf_dac_loop.st,v` | `01_...LOOPS.md` §5 |
+| Ripple loop actual use (phase tracking) | PS-52 transcription (p. 6) | Corredoura 2000 §6 | `rf_dac_loop.st,v` | `01_...LOOPS.md` §5.2 (v3.0) |
 | Ripple loop DSP (AT&T DSP1610) | BD-340-330-01 transcription | — | — | `01_...LOOPS.md` §5.2, `02_...HARDWARE.md` §12 |
-| Lead compensation | `feedbackLoopDescriptionps3403305200.pdf` p. 4 | — | `rf_states.st` | `01_...LOOPS.md` §6 |
-| Integral compensation | `feedbackLoopDescriptionps3403305200.pdf` p. 4 | — | `rf_states.st` | `01_...LOOPS.md` §6 |
-| Tuner loop | `feedbackLoopDescriptionps3403305200.pdf` p. 5 | Corredoura 1999 | `rf_tuner_loop.st` | `01_...LOOPS.md` §7 |
-| DAC loop (setpoint) | `feedbackLoopDescriptionps3403305200.pdf` p. 6 | — | `rf_dac_loop.st` | `01_...LOOPS.md` §8 |
-| HVPS loop (voltage) | `feedbackLoopDescriptionps3403305200.pdf` p. 6 | — | `rf_hvps_loop.st` | `01_...LOOPS.md` §9 |
-| GVF / feed-forward | `feedbackLoopDescriptionps3403305200.pdf` pp. 6-7 | Corredoura 1999 (woofer) | `rf_msgs.st` (TAXI) | `01_...LOOPS.md` §10 |
+| Lead compensation | `feedbackLoopDescriptionps3403305200.pdf` p. 4 | — | `rf_states.st,v` | `01_...LOOPS.md` §6 |
+| Integral compensation | `feedbackLoopDescriptionps3403305200.pdf` p. 4 | — | `rf_states.st,v` | `01_...LOOPS.md` §6 |
+| Tuner loop | `feedbackLoopDescriptionps3403305200.pdf` p. 5 | Corredoura 1999 | `rf_tuner_loop.st,v` | `01_...LOOPS.md` §7 |
+| DAC loop (setpoint) | `feedbackLoopDescriptionps3403305200.pdf` p. 6 | — | `rf_dac_loop.st,v` | `01_...LOOPS.md` §8 |
+| HVPS loop (voltage) | `feedbackLoopDescriptionps3403305200.pdf` p. 6 | — | `rf_hvps_loop.st,v` | `01_...LOOPS.md` §9 |
+| GVF / feed-forward | `feedbackLoopDescriptionps3403305200.pdf` pp. 6-7 | Corredoura 1999 (woofer) | `rf_msgs.st,v` (TAXI) | `01_...LOOPS.md` §10 |
 | Loop stability analysis | `feedbackLoopDescriptionps3403305200.pdf` | Rivetta 2007; Fox 2010 | — | `01_...LOOPS.md` §11 |
 
 ### 1.3 Hardware Modules
 
 | Topic | Legacy PDF | Published Paper | Source Code | This Package |
 |-------|-----------|----------------|-------------|--------------|
-| RFP module | `ps3403305100.pdf` | Corredoura 1999 | `rf_calib.st` (p2RfRfpDef.h — PEP-II file, not in repo) | `02_...HARDWARE.md` §2.1 |
+| RFP module | `ps3403305100.pdf` | Corredoura 1999 | `rf_calib.st,v` (p2RfRfpDef.h — PEP-II file, not in repo) | `02_...HARDWARE.md` §2.1 |
 | IQA modules | — | Ziomek & Corredoura 1995 | — | `02_...HARDWARE.md` §2.2 |
-| Comb filter modules | `feedbackLoopDescriptionps3403305200.pdf` p. 5 | Corredoura 1999 | `rf_calib.st` | `02_...HARDWARE.md` §2.3 |
-| GVF module | `feedbackLoopDescriptionps3403305200.pdf` pp. 6-7 | Corredoura 1999 | `rf_dac_loop.st`, `rf_msgs.st` | `02_...HARDWARE.md` §2.4 |
+| Comb filter modules | `feedbackLoopDescriptionps3403305200.pdf` p. 5 | Corredoura 1999 | `rf_calib.st,v` | `02_...HARDWARE.md` §2.3 |
+| GVF module | `feedbackLoopDescriptionps3403305200.pdf` pp. 6-7 | Corredoura 1999 | `rf_dac_loop.st,v`, `rf_msgs.st,v` | `02_...HARDWARE.md` §2.4 |
 | CLK/RF distribution | — | — | — | `02_...HARDWARE.md` §2.5 |
-| ARC/Interlock (AIM) | — | — | `rf_states.st`, `rf_msgs.st` | `02_...HARDWARE.md` §2.6 |
+| ARC/Interlock (AIM) | — | — | `rf_states.st,v`, `rf_msgs.st,v` | `02_...HARDWARE.md` §2.6 |
 | Drive chain / modulator | — (no standalone spec; `ps3403305503.pdf` is a safety survey) | Corredoura 2000, Figs. 4-6 | — | `02_...HARDWARE.md` §4 |
 | Interface chassis | `legacyInterfaceModules/*.pdf` | — | — | `03_...CATALOG.md` §3.1 |
 
@@ -57,10 +57,10 @@
 | Topic | Legacy PDF | Published Paper | Source Code | This Package |
 |-------|-----------|----------------|-------------|--------------|
 | NIR safety procedure | `ps3403306102.pdf` (PS-340-330-61-R2) | — | — | — |
-| Calibration sequences | `ps3403305300.pdf` (PS-340-330-53), `ps3403305600.pdf` (PS-340-330-56) | — | `rf_calib.st` | `A_LEGACY_...DESIGN.md` |
-| State machine (startup) | — | Allison & Claus 1997 | `rf_states.st` | `A_LEGACY_...DESIGN.md` |
-| Fault recovery | — | Corredoura 2000 §2 | `rf_states.st`, `rf_msgs.st` | `04_...SYNTHESIS.md` §3 |
-| Fast turn-on | — | Corredoura 2000 §2 | `rf_states.st` | `04_...SYNTHESIS.md` §3 |
+| Calibration sequences | `ps3403305300.pdf` (PS-340-330-53), `ps3403305600.pdf` (PS-340-330-56) | — | `rf_calib.st,v` | `A_LEGACY_...DESIGN.md` |
+| State machine (startup) | — | Allison & Claus 1997 | `rf_states.st,v` | `A_LEGACY_...DESIGN.md` |
+| Fault recovery | — | Corredoura 2000 §2 | `rf_states.st,v`, `rf_msgs.st,v` | `04_...SYNTHESIS.md` §3 |
+| Fast turn-on | — | Corredoura 2000 §2 | `rf_states.st,v` | `04_...SYNTHESIS.md` §3 |
 
 ### 1.5 SPEAR3 Specifics
 
@@ -78,12 +78,12 @@
 
 | File | Lines | Primary Function | Related Loops |
 |------|-------|-----------------|---------------|
-| `rf_states.st` | 2227 | Master state machine (OFF→PARK→TUNE→ON_FM→ON_CW) | All loops |
-| `rf_dac_loop.st` | 290 (+426 in headers) | DAC setpoint control, gap voltage / drive power | DAC, ripple |
-| `rf_hvps_loop.st` | 343 (+351 in headers) | Klystron voltage regulation | HVPS |
-| `rf_tuner_loop.st` | 555 (+306 in headers) | Cavity tuner motor control (per-cavity) | Tuner |
-| `rf_calib.st` | 3345 | Automated calibration sequences | All (Octal DAC, comb, offsets) |
-| `rf_msgs.st` | 352 | Message logging, TAXI recovery, filament | GVF (TAXI) |
+| `rf_states.st,v` | 2227 | Master state machine (OFF→PARK→TUNE→ON_FM→ON_CW) | All loops |
+| `rf_dac_loop.st,v` | 290 (+426 in headers) | DAC setpoint control, gap voltage / drive power | DAC, ripple |
+| `rf_hvps_loop.st,v` | 343 (+351 in headers) | Klystron voltage regulation | HVPS |
+| `rf_tuner_loop.st,v` | 555 (+306 in headers) | Cavity tuner motor control (per-cavity) | Tuner |
+| `rf_calib.st,v` | 3345 | Automated calibration sequences | All (Octal DAC, comb, offsets) |
+| `rf_msgs.st,v` | 352 | Message logging, TAXI recovery, filament | GVF (TAXI) |
 
 Supporting files:
 - `rf_loop_defs.h` — Common definitions

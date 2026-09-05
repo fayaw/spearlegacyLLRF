@@ -76,21 +76,36 @@ class ThyristorBridgeConfig:
 @dataclass
 class FilterConfig:
     """Primary filter inductors and secondary filter network."""
-    # Primary filter inductors L1, L2
-    inductor_l1_h: float = 0.3          # H (350 µH per doc variant)
+    # Primary filter inductors L1, L2 (SD-730-790-01-C1)
+    inductor_l1_h: float = 0.3          # H
     inductor_l2_h: float = 0.3          # H
     inductor_current_rating: float = 85.0  # A
     inductor_stored_energy_j: float = 1084.0  # J each at rated current
-    # Secondary filter capacitor bank
-    capacitor_uf: float = 8.0           # µF total (30 nF per doc variant)
+    # Secondary filter capacitor bank.
+    # SD-730-790-01-C1 labels these "CAPACITORS 8uFD 30KV" and there are FOUR
+    # series stages, so 8 µF is the value PER STAGE, not the bank total.
+    # Net series capacitance across the output is therefore 8/4 = 2 µF.
+    capacitor_uf_per_stage: float = 8.0  # µF per stage
+    capacitor_stages: int = 4            # series stages
     capacitor_voltage_rating: float = 100_000.0  # V
-    # Isolation resistors (PEP-II design)
+    # Isolation resistors (SD-730-790-01-C1: "FILTER RESISTORS 500 OHMS 1KW")
     isolation_resistance: float = 500.0  # Ω
-    # Voltage divider
-    voltage_divider_ratio: float = 1000.0  # 1000:1
-    # Cable termination inductors L3, L4
-    cable_inductor_l3_uh: float = 200.0  # µH
-    cable_inductor_l4_uh: float = 200.0  # µH
+    # Output voltage divider.
+    # Two ~100 MΩ chains; the controller reads the bottom 10 kΩ, giving 9.1 V at
+    # the full 91 kV output. Independently confirmed by the PS Monitor Board
+    # (SD-730-793-12-C3), whose output BNC is labelled "+ Voltage 10 kV/V".
+    voltage_divider_ratio: float = 10_000.0  # ≈10,000:1
+    # Cable termination inductors, designated L1/L2 on the Grounding Tank
+    # drawing SD-730-790-05-C1, which labels them "350 UHY 40A".
+    # (SLAC-PUB-7591 quotes 200 µH; that is the PEP-II design figure.)
+    cable_inductor_a_uh: float = 350.0  # µH
+    cable_inductor_b_uh: float = 350.0  # µH
+    cable_inductor_current_rating: float = 40.0  # A
+
+    @property
+    def capacitor_uf(self) -> float:
+        """Net series capacitance of the filter bank across the output, in µF."""
+        return self.capacitor_uf_per_stage / self.capacitor_stages
 
 
 @dataclass

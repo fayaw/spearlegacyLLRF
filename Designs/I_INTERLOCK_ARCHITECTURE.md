@@ -1,8 +1,8 @@
 # SPEAR3 RF Station Legacy System Interlock Architecture
 
 **Document ID**: Doc I
-**Version**: 1.7  
-**Date**: April 15, 2026  
+**Version**: 1.8  
+**Date**: September 3, 2026  
 **Status**: To be released  
 **Location**: Designs/I_INTERLOCK_ARCHITECTURE.md  
 **Author**: Faya Wang, with AI-assisted analysis  
@@ -14,7 +14,8 @@
 
 | Rev | Date | Author | Changes |
 |-----|------|--------|---------|
-| 1.7 | 2026-04-15 | Faya Wang | R16: Internal consistency pass. Corrected platform name throughout Part V: §1.1 actor table, Part V body heading, §5.1 hardware row, and §5.6 EPICS PV path were all referencing old "PLC-5 / 1771-DCM" hardware. Hardware was replaced with Allen-Bradley ControlLogix 1756 (§5.1 Status row confirms "Hardware replaced"). Updated four locations to "ControlLogix 1756 (upgraded from PLC-5 / 1771-DCM)". Fixed typo "CAllen-Bradley" → "Allen-Bradley" in §5.6. No functional content changed. |
+| 1.8 | 2026-09-03 | Faya Wang | R17: Source-verification pass against the original EPICS/IOC configuration files, aligning this document with `Designs/tex/L_legacy_system_architecture.pdf` v3.0. **(a) The Allen-Bradley link is Remote I/O, not Data Highway+.** `rfApp/src/ab/allenBradley.html,v` identifies the VXI Slot 1 card as a 6008-SV "VMEbus Scanner **Remote I/O** Scanner", and `iocBoot/.../config.ab,v` is headed "Allen-Bradley **Remote I/O** Scanner Configuration". All 61 occurrences of "DH+" / "Data Highway+" replaced. **(b) The adapter assignments were reversed.** `rfApp/Db/rf_ab_4CV.substitutions,v` gives adapter 1 = `HVPSDCM` (the SLC-500 HVPS PLC, full rack — consistent with `config.ab,v` "1 0 Full" and with the 1747-DCM-FULL in chassis slot 1 of the Cassel PLC listing), adapter 2 = `CAVTUNR` (cavity tuners), adapter 3 = `STNDCM` (the RF MPS PLC). This document previously placed the RF MPS PLC on "Rack 1" and the SLC-500 on "Rack 2", which is backwards. **(c)** Fault-slot PV corrected from `{STN}:STN:NFAULT` to **`{STN}:STN:FAULT:NUM`** per `rf_states.st,v` line 544 (4 locations). **(d)** §10.4 CH1: HVPS divider ratio corrected from 1000:1 to **≈10,000:1**, and the nominal from −77 kV (an intermediate DC stage tap) to the typical **≈−72 to −75 kV** operating range. |
+| 1.7 | 2026-04-15 | Faya Wang | R16: Internal consistency pass. Corrected platform name throughout Part V: §1.1 actor table, Part V body heading, §5.1 hardware row, and §5.6 EPICS PV path were all referencing old "PLC-5 / 1771-DCM" hardware. Hardware was replaced with Allen-Bradley PLC-5 with 1771 I/O (§5.1 Status row confirms "Hardware replaced"). Updated four locations to "PLC-5/1771 (upgraded from PLC-5 / 1771-DCM)". Fixed typo "CAllen-Bradley" → "Allen-Bradley" in §5.6. No functional content changed. |
 | 1.6 | 2026-04-14 | Faya Wang | R15: Added cascade physics analysis (§4.6). When RF drive is cut by SPEAR MPS permit withdrawal or orbit interlock (Slot 5), the klystron collector absorbs full cathode input power with no RF output — collector overpower fires the RF MPS PLC relay (Path A) within ~10–20 ms → Fast IC hardware HVPS kill within ~20–30 ms. The previous claim "no hardware-speed HVPS kill for these inputs under any circumstances" (§9.5) was incorrect. Corrected §9.5 table and paragraph; updated §4.4 key conclusion, §4.5 HVPS timing table and assessment text, §1.2 speed table (SPEAR MPS/orbit row) and SNL diagram note. Added §4.6 (cascade physics), §8.5 (example cascade fault event), §9.7 (cross-layer cascade interaction note). Updated TOC. |
 | 1.5 | 2026-04-14 | Faya Wang | R14: Corrected HVPS shutdown behavior for SPEAR MPS and orbit interlock paths. Codebase analysis shows that Slot 5 RF_FAULT assertion propagates through the EPICS alarm chain (AIM ISR → `STN:VXI:LTCH` MAJOR → `STNPARK:SUMY:STAT` MAJOR → `STNOFF:SUMY:STAT` MAJOR → `fault_stnoff`) into the SNL state machine, which then executes `s_go_off` — performing an orderly HVPS shutdown (~6 s: ramp to 0 + `hvpstrig=OFF`). The previous claim "no HVPS shutdown" for SPEAR MPS and orbit interlock was incorrect; the correct statement is "no immediate **hardware** HVPS shutdown (no SCR ENABLE removal or crowbar firing via Fast IC), but HVPS IS turned off ~6 s later via SNL orderly sequence." Updated §1.2 speed summary table (added SPEAR MPS/orbit row), §4.4 key conclusion, §4.5 analysis table and assessment text, §5.5 Path C note, §9.5 table. Also strengthened §4.5 assessment: Slot 5 is **essential** (not merely retained) because it is the sole integration point for SPEAR MPS and orbit interlock into the RF protection architecture — without it these signals have no effect on either RF or HVPS. |
 | 1.4 | 2026-04-14 | Faya Wang | R13: Corrected signal routing of SPEAR MPS beam permit and orbit interlock — these signals connect to the **back connector of VXI Slot 5 (MPS Shutoff module)**, not to the inputs of the Fast Interlock Chassis as previously documented. Updated §2.2 (removed incorrect Fast IC input rows; added routing note), §1.2 signal flow diagram (Slot 5 box now shows all three back-connector inputs), §4.2 (full three-input description for Slot 5 back connector), §4.4 key conclusion, §4.5 analysis table and assessment (added direct-permit row; clarified HVPS-shutdown absence for SPEAR MPS and orbit paths), §5.3 Path C output note, §5.5 Path C description (new note on SPEAR MPS and orbit permit direct wiring). |
@@ -63,7 +64,7 @@
 - [4.5 Analysis: Is the MPS Shutoff Module Necessary?](#45-analysis-is-the-mps-shutoff-module-necessary)
 - [4.6 Cascade Physics: Secondary Trips Following RF Drive Cutoff](#46-cascade-physics-secondary-trips-following-rf-drive-cutoff)
 
-#### Part V — RF MPS PLC (ControlLogix 1756)
+#### Part V — RF MPS PLC (PLC-5/1771)
 - [5.1 Platform](#51-platform)
 - [5.2 Inputs](#52-inputs)
 - [5.3 Outputs](#53-outputs)
@@ -82,7 +83,7 @@
 - [6.7 HVPS Alarm Aggregation Tree](#67-hvps-alarm-aggregation-tree)
 - [6.8 PPS Dual-Chain Architecture (Contactor and Grounding Switch)](#68-pps-dual-chain-architecture-contactor-and-grounding-switch)
 
-#### Part VII — SNL State Machine (`rf_states.st`)
+#### Part VII — SNL State Machine (`rf_states.st,v`)
 - [7.1 Inputs](#71-inputs)
 - [7.2 Outputs](#72-outputs)
 - [7.3 Architecture](#73-architecture)
@@ -98,7 +99,7 @@
 - [8.2 Example: RF MPS PLC Trip — Cooling Water Overtemperature](#82-example-rf-mps-plc-trip--cooling-water-overtemperature)
 - [8.3 Example: HVPS PLC Trip — High-Voltage Transformer Arc](#83-example-hvps-plc-trip--high-voltage-transformer-arc)
 - [8.4 Recovery Sequence](#84-recovery-sequence)
-- [8.5 Example: SPEAR MPS Trip — Cascade to Collector Overpower](#85-example-spear-mps-trip--cascade-to-collector-overpower)
+- [8.5 Example: SPEAR MPS Permit Withdrawal — Cascade to Collector Overpower](#85-example-spear-mps-permit-withdrawal--cascade-to-collector-overpower)
 
 #### Part IX — Key Cross-Layer Interactions
 - [9.1 AIM `aimon` ↔ SLC-500 Hardware Gate](#91-aim-aimon--slc-500-hardware-gate)
@@ -148,9 +149,9 @@ The SPEAR3 RF interlock system involves five distinct hardware/software actors. 
 |-------|-------|----------|--------------------------|
 | **Fast Interlock Chassis** (340-308) | < 1 μs | B132 | Arc breakdown, reflections exceeding cavity/klystron ratings |
 | **AIM Module** (VXI Slot 12) | < 1 μs (HW) / ~10 μs (ISR) | VXI Crate | Digitizes arc channel status from Fast IC; asserts RF_FAULT on VXI backplane; manages BATS; captures fault waveforms; drives control outputs (HVPS_On, Filament, Solenoid) |
-| **RF MPS PLC** (ControlLogix 1756) | ~10 ms | B132 | Collector overpower, vacuum excursion, secondary arc, cooling |
-| **SLC-500 HVPS PLC** (DH+ Rack 2) | ~20 ms | B118 | HVPS internal faults: oil, transformer, crowbar, overvoltage, arc in HV tank |
-| **SNL State Machine** (`rf_states.st`) | ~1 s | VXI CPU (VxWorks) | Orderly shutdown sequencing, fault recording, recovery coordination |
+| **RF MPS PLC** (PLC-5/1771) | ~10 ms | B132 | Collector overpower, vacuum excursion, secondary arc, cooling |
+| **SLC-500 HVPS PLC** (RIO adapter 1) | ~20 ms | B118 | HVPS internal faults: oil, transformer, crowbar, overvoltage, arc in HV tank |
+| **SNL State Machine** (`rf_states.st,v`) | ~1 s | VXI CPU (VxWorks) | Orderly shutdown sequencing, fault recording, recovery coordination |
 
 ### 1.2 Signal Flow Diagram
 
@@ -173,13 +174,13 @@ Three fault sources feed five actors. Hardware paths (top) are independent of so
 │  Analog comparators  │    │  Path A: relay → Fast IC ───┼──────►│  overvolt, oil, transformer│
 │  No CPU, no firmware │◄───┼──(removes hw permit)        │       │                            │
 │                      │    │                             │       │  SCR supervisory relay:    │
-│  ┌──────────────────┐│    │  Path B: DH+ permit bit OFF ├──┐    │  Slot 5 OX8 → fiber → B514 │
+│  ┌──────────────────┐│    │  Path B: Remote I/O permit bit OFF ├──┐    │  Slot 5 OX8 → fiber → B514 │
 │  │ SCR ENABLE  OUT  ││    │  → STN:MPS:LTCH = MAJOR     │  │    │  (turns off SCR gate drive)│
 │  │ (fiber → B514)   ││    │                             │  │    │                            │
 │  └────────┬─────────┘│    │  Path C: relay → VXI Slot 5 ├──┼──┐ │  Updates HVPS:*:LTCH PVs   │
 │           │          │    │  MPS SHUTOFF MODULE         │  │  │ └────────────┬───────────────┘
 │  ┌────────┴─────────┐│    │  → RF_FAULT on VXI backplane│  │  │              │
-│  │ CROWBAR FIRE OUT ││    │ (redundant RF cut;          │  │  │              │ DH+ ~1 Hz
+│  │ CROWBAR FIRE OUT ││    │ (redundant RF cut;          │  │  │              │ RIO ~1 Hz
 │  │ (fiber → B514)   ││    └─────────────────────────────┘  │  │              ▼
 │  └────────┬─────────┘│                                     │  │       {STN}:HVPS*:*:LTCH
 │           │          │                                     │  │       → HVPSSTN:SUMY:LTCH
@@ -244,7 +245,7 @@ Three fault sources feed five actors. Hardware paths (top) are independent of so
             │   1. fba=1  → BATS (beam abort)        │
             │   2. HVPS voltage setpoint → 0         │
             │   3. taskDelay(300) — 5 s ramp time    │
-            │   4. hvpstrig=OFF → SCR gate off (DH+) │
+            │   4. hvpstrig=OFF → SCR gate off (Remote I/O) │
             │   5. rfswitch=OFF → RF drive off       │
             │   6. Fault file capture (11 channels)  │
             │                                        │
@@ -261,10 +262,10 @@ Three fault sources feed five actors. Hardware paths (top) are independent of so
 | Path | Actor | Hardware action | EPICS notification | SNL response |
 |------|-------|----------------|-------------------|--------------|
 | Arc / RF overpow. → Fast IC | Fast IC 340-308 | < 1 μs (SCR + CROWBAR + RF cut) | ~50–500 μs (AIM ISR → VXI:LTCH) | ~1 s (orderly HVPS shutdown) |
-| MPS PLC Path A → Fast IC | RF MPS PLC + Fast IC | ~10–15 ms (immediate HVPS kill: SCR ENABLE + CROWBAR; + RF cut) | ~1 s (DH+ Path B) | ~1 s (orderly HVPS shutdown, HVPS already dead) |
+| MPS PLC Path A → Fast IC | RF MPS PLC + Fast IC | ~10–15 ms (immediate HVPS kill: SCR ENABLE + CROWBAR; + RF cut) | ~1 s (Remote I/O Path B) | ~1 s (orderly HVPS shutdown, HVPS already dead) |
 | MPS PLC Path C → Slot 5 | RF MPS PLC + Slot 5 | ~10–15 ms (RF cut only; no immediate hardware HVPS kill) | ~50–500 μs (AIM ISR → VXI:LTCH → STNOFF) | ~6 s (orderly HVPS shutdown via s_go_off) |
 | SPEAR MPS permit / orbit interlock → Slot 5 | VXI Slot 5 | ~5–15 ms (RF cut only; no *direct* hardware HVPS kill from Slot 5; but see cascade note) | ~50–500 μs (AIM ISR → VXI:LTCH → STNOFF) | ~6 s (SNL orderly shutdown) — **but in practice ~20–30 ms** via collector overpower cascade → MPS PLC Path A → Fast IC (see §4.6) |
-| HVPS internal fault → SLC-500 | SLC-500 HVPS PLC | ~10–20 ms (SCR supervisory relay removes HVPS enable) | ~100 ms–1 s (DH+ → EPICS) | ~1 s (orderly RF shutdown, HVPS already off) |
+| HVPS internal fault → SLC-500 | SLC-500 HVPS PLC | ~10–20 ms (SCR supervisory relay removes HVPS enable) | ~100 ms–1 s (Remote I/O → EPICS) | ~1 s (orderly RF shutdown, HVPS already off) |
 
 ---
 
@@ -297,6 +298,17 @@ The Fast Interlock Chassis is a pure analog hardware circuit — no software, no
 | SCR ENABLE remove | B514 HVPS SCR gate drivers | < 1 μs | Fiber optic — eliminates ground loop |
 | CROWBAR fire | B514 crowbar thyristor | < 1 μs | Fiber optic |
 | Status word | AIM Module (VXI Slot 12) | ~1 μs | Direct chassis-to-module connection |
+
+> **These latencies are signal-propagation times, not fault-clearing times.** The distinction matters when reasoning about fault energy:
+>
+> | Stage | Time |
+> |---|---|
+> | Fast IC asserts the fiber command | **< 1 μs** (the figures above) |
+> | Crowbar thyristor begins conducting | **≈ 10 μs** after the trigger |
+> | Primary AC current interrupted | **4–8 ms** |
+> | Vacuum contactor opens (PPS Chain 1) | **≈ 200 ms** worst case |
+>
+> Removing SCR gate drive does **not** stop conduction immediately — the thyristors continue to the next current zero. The crowbar is what bounds energy into the klystron: **< 5 J with it, < 40 J without** (SLAC-PUB-7591).
 
 ### 2.4 Front Panel
 
@@ -514,7 +526,7 @@ The 11 fault file channels:
 | Fast IC interlock chain state (`FSTINTSTT`, `MODU.FSTT`) | Fast Interlock Chassis 340-308 | Direct chassis-to-module cable | Daisy-chain fast interlock state |
 | Fast IC fast fault status (`FSTFLT`, `MODU.FFLT`) | Fast Interlock Chassis 340-308 | Direct chassis-to-module cable | Aggregated fast fault indication |
 | AIM interrupt | AIM on-board IRQ logic | VXI interrupt line | `AIM_M_ARCDETD` (arc detected), `AIM_M_VXIBPFLT` (VXI backplane fault), `AIM_M_FRCDFLTINT` (forced fault), etc. |
-| AB (DH+) heartbeat/summary | AB-6008 scanner (VXI Slot 1) | VXI backplane | Watchdog for DH+ communication health; contributes to `AIMARC:LTCH` via first-fault register |
+| AB Remote I/O heartbeat/summary | AB-6008 scanner (VXI Slot 1) | VXI backplane | Watchdog for Remote I/O communication health; contributes to `AIMARC:LTCH` via first-fault register |
 | AIM_M_SOFTWARE interrupt | EPICS IOC write | VXI register write | Software-triggered interrupt (for test/forced-fault operations) |
 
 ### 3.10 Outputs
@@ -567,7 +579,7 @@ The "MPS Shutoff" module in slot 5 provides the **VXI-backplane permit interface
 
 ### 4.3 Software Visibility
 
-The MPS permit status is tracked in EPICS via `{STN}:STN:MPS:LTCH` — a binary input record reading from the AB DH+ communication registers (`rf_interlock.db`, `DTYP="AB-1771DCM BI"`, word `T6[WL,B]`). This is the software-visible representation of the MPS permit held by the RF MPS PLC.
+The MPS permit status is tracked in EPICS via `{STN}:STN:MPS:LTCH` — a binary input record reading from the AB Remote I/O communication registers (`rf_interlock.db`, `DTYP="AB-1771DCM BI"`, word `T6[WL,B]`). This is the software-visible representation of the MPS permit held by the RF MPS PLC.
 
 The `{STN}:STN:VXI:LTCH` record (from `rf_interlock_vxi.db`) reads from the AIM latch register bits (`{STN}:STN:AIM:LTCH.BN`) — not from the CF2 slot 5 module. The CF2 OVFL and status records (`{STN}:STN:CF2OVFL:STAT`) are loaded in the DB but are not connected to any active hardware in SPEAR3 (their `DTYP="Soft Channel"` reads from the inactive `{STN}:STN:CF2:MODU` record).
 
@@ -614,7 +626,7 @@ Critically, Slot 5 does **not** independently produce an immediate HVPS shutdown
 
 Slot 5 is **architecturally necessary** for SPEAR3 RF protection:
 
-1. **Sole integration point for SPEAR MPS and orbit interlock**: These two signals are wired only to the Slot 5 back connector. Without Slot 5, their removal would have zero effect on either RF drive or HVPS — the klystron would continue transmitting into the cavity regardless of the machine beam-permit status or orbit feedback state. There is no alternative wiring path, no DH+ register, and no EPICS record that would carry these signals to any other protective device.
+1. **Sole integration point for SPEAR MPS and orbit interlock**: These two signals are wired only to the Slot 5 back connector. Without Slot 5, their removal would have zero effect on either RF drive or HVPS — the klystron would continue transmitting into the cavity regardless of the machine beam-permit status or orbit feedback state. There is no alternative wiring path, no RIO register, and no EPICS record that would carry these signals to any other protective device.
 
 2. **Provides the only VXI-backplane RF kill for machine-level permits**: The Fast IC and SLC-500 HVPS PLC have no knowledge of SPEAR MPS beam permit or orbit interlock state. Only Slot 5 bridges these machine-level signals into the RF station protection architecture.
 
@@ -642,12 +654,12 @@ The RF MPS PLC monitors collector power continuously via a dedicated AB analog i
 
 | EPICS PV | Record | Source | Description |
 |----------|--------|--------|-------------|
-| `{STN}:KLYSCOLLPLC:POWER` | `ai` | AB DH+ T4[41], EGUF=1200 kW | Real-time PLC collector power reading (HIHI=1175 kW MAJOR, HIGH=1150 kW MINOR) |
-| `{STN}:KLYSCOLL:POWER:ULIM` | `ai` | AB DH+ T4[42], EGUF=1200 kW | Configurable PLC trip limit register (operator-set; hardware relay trips when measured power exceeds this value) |
+| `{STN}:KLYSCOLLPLC:POWER` | `ai` | AB Remote I/O T4[41], EGUF=1200 kW | Real-time PLC collector power reading (HIHI=1175 kW MAJOR, HIGH=1150 kW MINOR) |
+| `{STN}:KLYSCOLL:POWER:ULIM` | `ai` | AB Remote I/O T4[42], EGUF=1200 kW | Configurable PLC trip limit register (operator-set; hardware relay trips when measured power exceeds this value) |
 | `{STN}:KLYSCOLL:POWER` | `sub` (subIQpowerNet) | INPA=`HVPS:POWER`, INPB=`KLYSOUTFRWD:POWER` | EPICS-computed collector power = cathode power − klystron RF output |
-| `{STN}:KLYSCOLL:POWER:LTCH` | `bi` | AB DH+ WL=16, WF=31, B=2 | Hardware latch bit set by PLC when its output relay fires (collector overpower trip) |
+| `{STN}:KLYSCOLL:POWER:LTCH` | `bi` | AB Remote I/O WL=16, WF=31, B=2 | Hardware latch bit set by PLC when its output relay fires (collector overpower trip) |
 
-> **Important distinction**: `KLYSCOLLPLC:POWER.HIHI = 1175 kW` is an **EPICS software alarm** that propagates through Channel Access; it does not directly fire the PLC relay. The PLC's own internal comparator — comparing the measured analog value against the limit stored in T4[42] — fires the hardware relay independently of EPICS. The relay fires first (~10 ms); the EPICS alarm propagates ~100 ms later via DH+ polling.
+> **Important distinction**: `KLYSCOLLPLC:POWER.HIHI = 1175 kW` is an **EPICS software alarm** that propagates through Channel Access; it does not directly fire the PLC relay. The PLC's own internal comparator — comparing the measured analog value against the limit stored in T4[42] — fires the hardware relay independently of EPICS. The relay fires first (~10 ms); the EPICS alarm propagates ~100 ms later via Remote I/O polling.
 
 **Cascade signal chain:**
 
@@ -670,7 +682,7 @@ RF MPS PLC fires output relay  →  Path A activated:
     │
     ├─→ Fast IC: RF_FAULT asserted via AIM → VXI backplane (redundant RF cut)
     │
-    └─→ DH+: KLYSCOLL:POWER:LTCH (WL=16/WF=31/B=2) propagates to EPICS (~100 ms)
+    └─→ Remote I/O: KLYSCOLL:POWER:LTCH (WL=16/WF=31/B=2) propagates to EPICS (~100 ms)
               → KLYS:SUMY:LTCH → STNOFF:SUMY:STAT → fault_stnoff → s_go_off
 
 Total time from RF cut to HVPS hardware kill: ~20–30 ms
@@ -702,15 +714,15 @@ However, this mechanism is conditional and less certain than Mechanism 1:
 
 ---
 
-## Part V — RF MPS PLC (ControlLogix 1756)
+## Part V — RF MPS PLC (PLC-5/1771)
 
 ### 5.1 Platform
 
 | Attribute | Detail |
 |-----------|--------|
-| Hardware | Allen-Bradley ControlLogix 1756 (upgraded from PLC-5 / 1771-DCM) |
+| Hardware | Allen-Bradley PLC-5 with 1771 I/O (upgraded from PLC-5 / 1771-DCM) |
 | Location | B132 (same rack as VXI crate) |
-| DH+ node | Rack 1 |
+| Remote I/O adapter | **Adapter 3** (`STNDCM`) |
 | Status | Hardware replaced; software written and tested without RF power |
 
 ### 5.2 Inputs
@@ -723,7 +735,7 @@ However, this mechanism is conditional and less certain than Mechanism 1:
 | Cooling water flow | Flow meters on klystron and dummy load circuits | Digital/analog I/O | Below minimum flow trips MPS |
 | Cooling water temperature | Temperature sensors on water circuits | Analog I/O | Exceeding maximum trips MPS |
 | Klystron vacuum | Ion pump current or Penning gauge | Analog I/O | Vacuum excursion protection |
-| HVPS fault status | SLC-500 HVPS PLC | DH+ (ControlLogix reads SLC-500 via DH+ scanner) | HVPS faults forwarded to MPS summary |
+| HVPS fault status | SLC-500 HVPS PLC | Remote I/O (the VXI scanner polls both adapters independently) | HVPS faults forwarded to MPS summary |
 | 476 MHz reference power | `{STN}:STNREF:POWER:LTCH` | EPICS gateway | Reference RF monitor |
 | Local panel / remote switch | B132 local panel | Digital I/O | Local/remote mode selector |
 
@@ -733,7 +745,7 @@ However, this mechanism is conditional and less certain than Mechanism 1:
 |--------|-------------|------------|-------|
 | **MPS permit relay** (Path A) | Fast Interlock Chassis 340-308 | Hardwired relay contact | De-energizing removes Fast IC permit → SCR ENABLE + CROWBAR from Fast IC |
 | **MPS permit relay** (Path C) | VXI Slot 5 MPS Shutoff module (back connector) | Hardwired relay contact (separate contact of same relay) | De-energizing removes one of Slot 5's three permits → RFP drive cut via VXI backplane |
-| DH+ permit status bit | EPICS IOC (via AB-6008 scanner) | DH+ word T6[WL,B] | Software path (Path B) — updates `{STN}:STN:MPS:LTCH` |
+| Remote I/O permit status bit | EPICS IOC (via AB-6008 scanner) | RIO word T6[WL,B] | Software path (Path B) — updates `{STN}:STN:MPS:LTCH` |
 
 ### 5.4 Protection Functions
 
@@ -747,7 +759,7 @@ The MPS PLC monitors **equipment protection** parameters on a ~10 ms scan cycle:
 | **Cooling water flow** | Below minimum flow rate | Klystron and waveguide loads |
 | **Cooling water temperature** | Exceeds maximum | Thermal runaway detection |
 | **Klystron vacuum** | Ion pump current or Penning gauge exceeds limit | Vacuum excursion protection |
-| **HVPS fault conditions** | Status from SLC-500 via DH+ | Forwarded to MPS summary |
+| **HVPS fault conditions** | Status from SLC-500 via Remote I/O | Forwarded to MPS summary |
 | **Reference power level** | `{STN}:STNREF:POWER:LTCH` | 476 MHz reference monitor |
 
 ### 5.5 Trip Actions — Three Paths
@@ -765,8 +777,8 @@ This path: ~10 ms (PLC scan) + relay opening time + Fast IC response (< 1 μs) �
 
 **Path B — Software/EPICS notification (slow, ~1 s):**
 
-1. PLC writes "no permit" status to its DH+ output data table
-2. VXI AB6008 scanner reads DH+ registers at ~1 Hz
+1. PLC writes "no permit" status to its Remote I/O output data table
+2. VXI AB6008 scanner reads Remote I/O registers at ~1 Hz
 3. Updates `{STN}:STN:MPS:LTCH` EPICS record
 4. Alarm propagates via `rf_sumy_stn_spr.db` → `{STN}:STNMPS:SUMY:LTCH.INPI` → `{STN}:STNOFF:SUMY:STAT.SEVR`
 5. SNL `fault_stnoff != NO_ALARM` triggers `s_go_off`
@@ -788,8 +800,8 @@ Path C: ~10 ms (PLC scan) + relay opening time ≈ **~10 ms total**.
 ### 5.6 EPICS PV Path
 
 ```
-RF MPS PLC (Allen-Bradley ControlLogix 1756, Rack 1 DH+ node)
-    │  DH+ word T6[WL,B]
+RF MPS PLC (Allen-Bradley PLC-5 with 1771 I/O, Remote I/O adapter 3)
+    │  RIO word T6[WL,B]
     ▼
 {STN}:STN:MPS:LTCH  (bi, DTYP="AB-1771DCM BI", MAJOR alarm)
     │  .SEVR  NPP MS
@@ -813,9 +825,9 @@ RF MPS PLC (Allen-Bradley ControlLogix 1756, Rack 1 DH+ node)
 | Attribute | Detail |
 |-----------|--------|
 | CPU | Allen-Bradley 1747-L532 |
-| DH+ Scanner | Allen-Bradley 1747-DCM |
+| Remote I/O adapter module | Allen-Bradley 1747-DCM, chassis Slot 1, full rack |
 | Location | B118 (HVPS building), Hoffman Box enclosure |
-| DH+ Node | Rack 2 |
+| Remote I/O adapter | **Adapter 1** (`HVPSDCM`, full rack) |
 | Rack | 14-slot SLC chassis |
 
 ### 6.2 Inputs
@@ -826,7 +838,7 @@ RF MPS PLC (Allen-Bradley ControlLogix 1756, Rack 1 DH+ node)
 | HVPS DC output current | HVPS power supply analog | Slot 8–9 Analog I/O (AI word 31) | Used for current readback and overcurrent detection |
 | Primary AC current | AC current transformer | Slot 8–9 Analog I/O | Overcurrent detection (`HVPSAC:CURR:LTCH`) |
 | Oil temperature (thermocouple) | Oil tank thermocouple | Slot 3 thermocouple input | `HVPSOIL:TEMP:LTCH` overtemperature latch |
-| PPS enable | PPS system (GOB12-88PNE, Pin E→F) | Slot 6 IB16 digital input 14 | Used for HV vacuum contactor control |
+| PPS enable | PPS system (GOB1208PNE, Pin E→F) | Slot 6 IB16 digital input 14 | Used for HV vacuum contactor control |
 | **B514 HVPS STATUS fiber** | **B514 HVPS power section self-status** | **Slot 6 IB16 fiber-optic receiver** | **B514 reports its operational status back to B118. The same STATUS fiber from B514 also goes directly to the Fast IC in B132 (see §2.2 — `HVPSON` in FISTAT). The SLC-500 reads B514 STATUS here; it does NOT re-transmit it onward.** |
 | Fast IC interlock status | Fast Interlock Chassis 340-308 | Slot 6 IB16 (fiber-optic receiver) | Arc/interlock status from Fast IC — separate from B514 STATUS above |
 | Crowbar fired / arc status | Internal HVPS self-monitoring | Slot 6 IB16 digital inputs | `HVPS:CROWBAR:LTCH`, `HVPSKLYS:ARC:LTCH`, etc. |
@@ -834,7 +846,7 @@ RF MPS PLC (Allen-Bradley ControlLogix 1756, Rack 1 DH+ node)
 | Transformer arc | Arc detector inside HV transformer | Slot 6 IB16 digital input | `HVPSXFORM:ARC:LTCH` |
 | SCR bank status | SCR gate driver feedback | Slot 6 IB16 digital inputs | `HVPSSCR1:ON:STAT`, `HVPSSCR2:ON:STAT` |
 | Contactor status | HV vacuum contactor auxiliary contact | Slot 6 IB16 digital inputs | `HVPSCONTACT:*:STAT` group |
-| `hvpstrig` (SCR enable command) | EPICS IOC via DH+ (SNL `HVPSONSUB`) | DH+ incoming data table → Slot 5 OX8 relay | Supervisory SCR enable gate; must be ON for HVPS to produce HV |
+| `hvpstrig` (SCR enable command) | EPICS IOC via Remote I/O (SNL `HVPSONSUB`) | Remote I/O incoming data table → Slot 5 OX8 relay | Supervisory SCR enable gate; must be ON for HVPS to produce HV |
 
 ### 6.3 Outputs
 
@@ -843,15 +855,15 @@ RF MPS PLC (Allen-Bradley ControlLogix 1756, Rack 1 DH+ node)
 | **SCR ENABLE relay** (`HVPSSCR:ON:CTRL`) | B514 SCR gate drivers | Slot 5 OX8 relay OUT → fiber optic cable → B514 | Supervisory HVPS enable path; ~20 ms speed; must be ON simultaneously with Fast IC SCR enable path |
 | Ross grounding switch command | Ross Engineering HQ3 grounding switch | Slot 2 IO8 (120 VAC) | **PPS Chain 2**: grounds HV tank before personnel entry |
 | HV vacuum contactor command | Ross Engineering HQ3 vacuum contactor | Slot 5 OX8 OUT2 → relay chain (K4 → MX → RR → L1) | **PPS Chain 1**: connects/disconnects 12.47 kV AC to HVPS primary (fail-safe open) |
-| **HVPS DH+ status registers** | EPICS IOC (via AB-6008 scanner, Rack 2) | DH+ | All `HVPS*:*:LTCH` and `HVPS*:*:STAT` PVs populated from these registers |
-| Voltage setpoint output | HVPS voltage control SCR firing angle | Slot 8–9 Analog I/O (AO) | SNL `rf_hvps_loop.st` writes ramp-controlled setpoint |
+| **HVPS Remote I/O status registers** | EPICS IOC (via AB-6008 scanner, adapter 1) | Remote I/O | All `HVPS*:*:LTCH` and `HVPS*:*:STAT` PVs populated from these registers |
+| Voltage setpoint output | HVPS voltage control SCR firing angle | Slot 8–9 Analog I/O (AO) | SNL `rf_hvps_loop.st,v` writes ramp-controlled setpoint |
 
 ### 6.4 Rack Slot Configuration
 
 | Slot | Module | Function |
 |------|--------|---------|
 | 0 | 1747-L532 CPU | Program execution |
-| 1 | 1747-DCM | DH+ communication master for Rack 2 |
+| 1 | 1747-DCM | Remote I/O adapter module — presents the SLC-500 chassis to the VXI scanner as adapter 1 (full rack) |
 | 2 | IO8 (8-pt, 120 VAC) | Ross grounding switch output (PPS Chain 2) |
 | 3 | Thermocouple input | HVPS temperature measurements |
 | 5 | OX8 relay output | SCR ENABLE / HVPS control relay (see §6.6) |
@@ -860,11 +872,11 @@ RF MPS PLC (Allen-Bradley ControlLogix 1756, Rack 1 DH+ node)
 
 ### 6.5 What the SLC-500 Interlocks On
 
-The SLC-500 monitors every significant HVPS internal condition and exposes them as EPICS records via DH+. The full set of HVPS interlock sources, with their DH+ word/bit assignments from `rf_digital_All.substitutions,v`:
+The SLC-500 monitors every significant HVPS internal condition and exposes them as EPICS records via Remote I/O. The full set of HVPS interlock sources, with their Remote I/O word/bit assignments from `rf_digital_All.substitutions,v`:
 
 #### Category 1 — Electrical Faults
 
-| PV | DH+ Card/Bit | Alarm | Description |
+| PV | RIO Card/Bit | Alarm | Description |
 |----|-------------|-------|-------------|
 | `{STN}:HVPS:CROWBAR:LTCH` | C12.9 | MAJOR | **Crowbar fired** — HVPS crowbar thyristor discharged; stored energy dumped |
 | `{STN}:HVPS:VOLT:LTCH` | C14.1 | MAJOR | **Overvoltage** — DC output exceeded rated voltage |
@@ -875,7 +887,7 @@ The SLC-500 monitors every significant HVPS internal condition and exposes them 
 
 #### Category 2 — Oil System
 
-| PV | DH+ Card/Bit | Alarm | Description |
+| PV | RIO Card/Bit | Alarm | Description |
 |----|-------------|-------|-------------|
 | `{STN}:HVPSOIL:LEVEL:LTCH` | C12.14 | MAJOR | **Oil level low** — insulating oil in HV tank below minimum |
 | `{STN}:HVPSOIL:TEMP:LTCH` | C12.15 | MAJOR | **Oil temperature high** — insulating oil overtemperature |
@@ -885,7 +897,7 @@ The SLC-500 monitors every significant HVPS internal condition and exposes them 
 
 #### Category 3 — Transformer / HV Tank
 
-| PV | DH+ Card/Bit | Alarm | Description |
+| PV | RIO Card/Bit | Alarm | Description |
 |----|-------------|-------|-------------|
 | `{STN}:HVPSXFORM:ARC:LTCH` | C14.10 | MAJOR | **Transformer arc** — arc detector inside the HV transformer tank |
 | `{STN}:HVPSXFORM:PRESS:LTCH` | C14.6 | MAJOR | **Transformer overpressure** — SF₆ or oil pressure in transformer enclosure exceeded limit |
@@ -895,7 +907,7 @@ The SLC-500 monitors every significant HVPS internal condition and exposes them 
 
 #### Category 4 — Supply and Contactor Status
 
-| PV | DH+ Card/Bit | Alarm | Description |
+| PV | RIO Card/Bit | Alarm | Description |
 |----|-------------|-------|-------------|
 | `{STN}:HVPS:PPS:STAT` | C14.8 | MAJOR on 0=NOPERMIT | **PPS Status** — PPS permit present (PERMIT=0, NOPERMIT=1 → alarm inverted) |
 | `{STN}:HVPS12KV:VOLT:STAT` | C12.1 | MAJOR on 0=NOTAVAIL | **12 kV AC available** — primary 12.47 kV supply status |
@@ -912,7 +924,7 @@ The SLC-500 monitors every significant HVPS internal condition and exposes them 
 | `{STN}:HVPSSCR1:ON:STAT` | C14.2 | MAJOR on 0=OFF | SCR bank 1 on status |
 | `{STN}:HVPSSCR2:ON:STAT` | C14.3 | MAJOR on 0=OFF | SCR bank 2 on status |
 
-> **Note on DH+ addressing**: "C12.9" means Card (output word) 12, bit 9. Word 12 = physical I/O module card 12÷2 = slot 6. The SLC-500 uses 8-bit word addressing where adjacent card pairs share a 16-bit word.
+> **Note on Remote I/O addressing**: "C12.9" means Card (output word) 12, bit 9. Word 12 = physical I/O module card 12÷2 = slot 6. The SLC-500 uses 8-bit word addressing where adjacent card pairs share a 16-bit word.
 
 #### Category 5 — Analog Monitoring
 
@@ -927,13 +939,13 @@ The SLC-500 monitors every significant HVPS internal condition and exposes them 
 
 ### 6.6 SCR Enable Relay — The HVPS Supervisory Enable Path
 
-The SLC-500 controls the HVPS SCR bank through a relay in Rack 2 Slot 5 (OX8 relay output, OUT port). This is the **supervisory SCR ENABLE path** — it must be held closed for the HVPS to maintain output voltage.
+The SLC-500 controls the HVPS SCR bank through a relay in SLC-500 chassis Slot 5 (OX8 relay output, OUT port). This is the **supervisory SCR ENABLE path** — it must be held closed for the HVPS to maintain output voltage.
 
 ```
 SNL rf_states.st HVPSONSUB() macro
     └── pvPut(hvpstrig, ON)
         └── {STN}:HVPSSCR:ON:CTRL = 1
-            └── DH+ → SLC-500 Rack2
+            └── Remote I/O → SLC-500 (RIO adapter 1)
                 └── OX8 relay OUT closed
                     └── Fiber optic cable → B514
                         └── SCR gate driver enable
@@ -990,18 +1002,18 @@ Both paths use fiber optic to B514. **Both** must be asserted for the HVPS SCR t
 | **Safety function** | Disconnect 12.47 kV AC primary power from HVPS | Ground the HVPS HV bus (−77 kV) for safe personnel access |
 | **SLC-500 output** | Slot-5 OX8 OUT2 relay contact → K4 → MX → L1 relay chain | Slot-2 IO8 OUT3 (120 VAC) → Ross switch coil |
 | **PLC rung** | Rung 0017 (mislabeled "Crowbar On" on original drawing — corrected to "Contactor Enable") | Rung 0016 (Ross switch enable) |
-| **PPS input** | PPS 1 (GOB12-88PNE Pin E→F) | PPS 2 (GOB12-88PNE Pin G→H) |
+| **PPS input** | PPS 1 (GOB1208PNE Pin E→F) | PPS 2 (GOB1208PNE Pin G→H) |
 | **Operating state** | Coil held energized (contactor **CLOSED** — 12.47 kV connected) | Coil held energized (switch held **OPEN** — HV bus not grounded) |
 | **Fail-safe state** | PPS removed → K4 drops → L1 drops → contactor **spring-opens** → 12.47 kV disconnected | PPS removed → 120 VAC removed → switch **spring-closes** → HV bus grounded |
-| **Readback signal** | S5 NC auxiliary contact → GOB12-88PNE Pins A-B | Ross switch NC auxiliary contact → GOB12-88PNE Pins C-D |
+| **Readback signal** | S5 NC auxiliary contact → GOB1208PNE Pins A-B | Ross switch NC auxiliary contact → GOB1208PNE Pins C-D |
 | **Readback meaning** | Pins A-B shorted = contactor OPEN (12.47 kV removed, safe) | Pins C-D shorted = switch CLOSED (HV bus grounded, safe) |
 
 #### Chain 1 — HV Vacuum Contactor Relay Path
 
-The full relay chain from PPS to contactor, as routed through the SLC-500. This is the personnel-safety path described in `L_LEGACY_SYSTEM_ARCHITECTURE.md` §13.
+The full relay chain from PPS to contactor, as routed through the SLC-500. This is the personnel-safety path described in `tex/L_legacy_system_architecture.pdf` §13.
 
 ```
-PPS Enable (GOB12-88PNE, Pin E→F)
+PPS Enable (GOB1208PNE, Pin E→F)
     → SLC-500 Slot-6 IB16 Input 14
     → PLC Rung 0017 (ladder logic)
     → Slot-5 OX8 OUT2
@@ -1017,17 +1029,17 @@ PPS Enable (GOB12-88PNE, Pin E→F)
 #### Chain 2 — Ross Grounding Switch
 
 ```
-PPS 2 Enable (GOB12-88PNE Pin G→H)
+PPS 2 Enable (GOB1208PNE Pin G→H)
     → SLC-500 PLC Slot-6 IB16 Input 15
     → PLC Rung 0016 (Ross switch enable)
     → Slot-2 IO8 OUT3 (120 VAC)
     → TS-6 → Belden 83709 cable → Termination Tank
     → Ross Grounding Switch coil
 
-Readback: Ross Switch NC Aux → TS-6 pins 11,12 → GOB12-88PNE Readback C-D
+Readback: Ross Switch NC Aux → TS-6 pins 11,12 → GOB1208PNE Readback C-D
 ```
 
-> **Critical design issue**: The PPS chain routes through SLC-500 ladder logic — a programmable device is in the personnel safety chain. This does not meet modern PPS standards (SLAC ES&H). Flagged in `L_LEGACY_SYSTEM_ARCHITECTURE.md` §13.4.
+> **Critical design issue**: The PPS chain routes through SLC-500 ladder logic — a programmable device is in the personnel safety chain. This does not meet modern PPS standards (SLAC ES&H). Flagged in `tex/L_legacy_system_architecture.pdf` §13.4.
 
 #### Fail-Safe Directions
 
@@ -1064,7 +1076,7 @@ RESTORE after personnel exit:
 | | **Chain 1** | **Chain 2** |
 |---|---|---|
 | **Compliance issue** | PPS 1 routes through SLC-500 Rung 0017 | PPS 2 routes through SLC-500 Rung 0016 |
-| **Hardware fail-safe** | **Present** — OX8 relay input side is wired directly to PPS 1 signal (24VDC from GOB12-88PNE Pin E). Even if the PLC closes the output contact, K4 coil cannot energize without PPS 1 voltage physically present. | **Absent** — PLC drives 120 VAC directly to Ross switch coil via IO8 OUT3. If PLC fails energized (maintains 120 VAC output despite PPS 2 removal), the Ross switch remains held open (un-grounded) without a PPS 2 command. |
+| **Hardware fail-safe** | **Present** — OX8 relay input side is wired directly to PPS 1 signal (24VDC from GOB1208PNE Pin E). Even if the PLC closes the output contact, K4 coil cannot energize without PPS 1 voltage physically present. | **Absent** — PLC drives 120 VAC directly to Ross switch coil via IO8 OUT3. If PLC fails energized (maintains 120 VAC output despite PPS 2 removal), the Ross switch remains held open (un-grounded) without a PPS 2 command. |
 | **Failure mode concern** | PLC closes OX8 spuriously → K4 cannot energize (no PPS 1 voltage) → **no hazard** | PLC maintains 120 VAC spuriously → Ross switch stays open → **HV bus not grounded when PPS removed** |
 
 > **Chain 2 is the higher-priority compliance concern.** The spring-return mechanism provides a fail-safe against total power loss, but does not protect against a PLC output failure that maintains the coil energized. The upgrade architecture (see `pps/diagrams/00_SYSTEM_OVERVIEW.md`) eliminates this by providing direct PPS control of both chains through the Interface Chassis, bypassing the PLC for safety-critical permitting.
@@ -1073,22 +1085,22 @@ RESTORE after personnel exit:
 
 ---
 
-## Part VII — SNL State Machine (`rf_states.st`)
+## Part VII — SNL State Machine (`rf_states.st,v`)
 
 ### 7.1 Inputs
 
 | Input PV | Source | Connection | Role |
 |----------|--------|------------|------|
 | `{STN}:STNOFF:SUMY:STAT.SEVR` (`fault_stnoff`) | EPICS alarm aggregation tree (`rf_sumy_stn.db`) | EPICS CA `pvMonitor` | **Master trip wire** — any MAJOR alarm propagated here triggers `s_go_off` |
-| `{STN}:HVPS:VOLT` (`hvpsvoltrd`) | SLC-500 AI (DH+ word 30) | EPICS CA `pvGet` | HVPS voltage readback for ramp control |
-| `{STN}:HVPS:CURR` | SLC-500 AI (DH+ word 31) | EPICS CA `pvGet` | HVPS current readback |
+| `{STN}:HVPS:VOLT` (`hvpsvoltrd`) | SLC-500 AI (RIO word 30) | EPICS CA `pvGet` | HVPS voltage readback for ramp control |
+| `{STN}:HVPS:CURR` | SLC-500 AI (RIO word 31) | EPICS CA `pvGet` | HVPS current readback |
 | `{STN}:STN:AIM:ARCLTDSTT` | AIM ARCLTDSTT register | EPICS CA `pvMonitor` | Arc latched status — used to distinguish arc fault from other faults |
 | `{STN}:STN:FORCED:LTCH` (`forced_fault`) | AIM first-fault register bit | EPICS CA `pvMonitor` | Hard arc latch — blocks auto-reset |
 | `{STN}:HVPSOFF:SUMY:STAT` | EPICS HVPS alarm tree | EPICS CA `pvMonitor` | HVPS off/fault status, feeds `fault_stnoff` |
 | `{STN}:STN:LOCAL:ON` | Local panel switch | EPICS CA | Local/remote mode; local mode forces OFF |
 | `{STN}:STN:STATE` (`stnstate`) | EPICS state PV | EPICS CA | Station state (restored at boot in `s_init`) |
-| `{STN}:HVPSSCR:ON:CTRL` readback | DH+ readback from SLC-500 | EPICS CA | SCR enable relay state confirmation |
-| TAXI/GVF status (via `rf_msgs.st`) | GVF module software PVs | EPICS inter-IOC | TAXI error monitoring; triggers resync if TAXI errors detected |
+| `{STN}:HVPSSCR:ON:CTRL` readback | Remote I/O readback from SLC-500 | EPICS CA | SCR enable relay state confirmation |
+| TAXI/GVF status (via `rf_msgs.st,v`) | GVF module software PVs | EPICS inter-IOC | TAXI error monitoring; triggers resync if TAXI errors detected |
 
 ### 7.2 Outputs
 
@@ -1098,8 +1110,8 @@ RESTORE after personnel exit:
 | `{STN}:STN:AIM:MODU.RBA` (`rba`) | AIM `MODU.RBA` → SPEAR3 machine MPS | Reset Beam Abort — de-asserts beam abort during recovery |
 | `{STN}:STN:AIM:MODU.RSTF` (`rstf`) | AIM hardware latches | Resets all AIM arc latches and fast interlock latches |
 | `{STN}:STN:AIM:MODU.HVPS` (`aimon`) | AIM fiber optic HVPS_On output | Hardware gate for HVPS energization; set in `HVPSONSUB` |
-| `{STN}:HVPSSCR:ON:CTRL` (`hvpstrig`) | SLC-500 DH+ → Slot 5 OX8 relay → B514 SCR | Supervisory SCR ENABLE gate; ON in `HVPSONSUB`, OFF in `s_go_off` Step 5 |
-| `{STN}:HVPS:VOLT:SP` (`hvpswdefault`) | SLC-500 DH+ → Analog output → SCR firing angle | HVPS voltage setpoint; set to 0 in `s_go_off` Step 3 |
+| `{STN}:HVPSSCR:ON:CTRL` (`hvpstrig`) | SLC-500 Remote I/O → Slot 5 OX8 relay → B514 SCR | Supervisory SCR ENABLE gate; ON in `HVPSONSUB`, OFF in `s_go_off` Step 5 |
+| `{STN}:HVPS:VOLT:SP` (`hvpswdefault`) | SLC-500 Remote I/O → Analog output → SCR firing angle | HVPS voltage setpoint; set to 0 in `s_go_off` Step 3 |
 | `{STN}:STN:RFP:RFENABLE` (`rfswitch`) | RFP module RF drive enable | RF drive gate; ON in `HVPSONSUB`, OFF in `s_go_off` Step 6 |
 | `{STN}:STN:STATE` (`stnstate`) | EPICS state display PV | Operator state display: OFF/PARK/TUNE/ON_FM/ON_CW |
 | `{STN}:STN:INTCOMP` (`intcomp`) | RFP/IQA integrator compensation | Direct feedback integrator; disabled in `s_go_off` Step 7 |
@@ -1107,7 +1119,7 @@ RESTORE after personnel exit:
 
 ### 7.3 Architecture
 
-The SNL state machine (`rf_states.st`, 2,227 lines, 3 concurrent state sets) is the **software coordination layer**. It does not provide fast protection — by the time `fault_stnoff` changes, all hardware trips have already fired. Its roles are:
+The SNL state machine (`rf_states.st,v`, 2,227 lines, 3 concurrent state sets) is the **software coordination layer**. It does not provide fast protection — by the time `fault_stnoff` changes, all hardware trips have already fired. Its roles are:
 
 1. **Orderly shutdown** — ramp HVPS to zero before removing SCR enable (protects the HV capacitors/diodes from abrupt current interruption)
 2. **Fault recording** — capture of 11 signal channel waveforms to circular buffer
@@ -1125,7 +1137,7 @@ Inputs (from rf_sumy_stn.db record):
                └── {STN}:STN:VXI:LTCH (AIM fast interlock bits)
     INPB: {STN}:HVPSOFF:SUMY:STAT     ← HVPS fault/status
     INPC: {STN}:STN:LOCAL:ON           ← Local/remote panel state
-    INPD: {STN}:STN:ABSUMY:LTCH       ← DH+ AB communication summary latch
+    INPD: {STN}:STN:ABSUMY:LTCH       ← Remote I/O AB communication summary latch
     INPE: {STN}:STN:SUMY:PLC           ← PLC module status summary
 ```
 
@@ -1171,7 +1183,7 @@ Step 3: pvPut(hvpswdefault, 0)  → write 0 to HVPS voltage setpoint
 Step 4: taskDelay(300)           → ~5 second wait for HVPS to discharge
 
 Step 5: hvpstrig = OFF   pvPut(hvpstrig)
-    → {STN}:HVPSSCR:ON:CTRL = 0  → DH+ → SLC-500 Rack2
+    → {STN}:HVPSSCR:ON:CTRL = 0  → Remote I/O → SLC-500 (RIO adapter 1)
     → SCR gate drive disabled from supervisory path
 
 Step 6: rfswitch = OFF   pvPut(rfswitch)
@@ -1193,7 +1205,7 @@ HVPSONSUB():
     rfswitch = ON          pvPut(rfswitch)   → RF drive enabled
     pvGet(hvpswdefault)                       → read default voltage setpoint
     /* call TUNESUB to home tuners */
-    hvpstrig = ON          pvPut(hvpstrig)   → SCR gate drive enabled via DH+
+    hvpstrig = ON          pvPut(hvpstrig)   → SCR gate drive enabled via Remote I/O
     aimon = ON             pvPut(aimon)       → write {STN}:STN:AIM:MODU.HVPS = 1
                                                 → AIM fiber "HVPS_On" asserted
     /* wait up to 10 s checking fault_stnoff */
@@ -1261,13 +1273,13 @@ t ≈ 50–500 μs   EPICS IOC processes AIM:MODU record:
                 → {STN}:STNMPS:SUMY:LTCH propagates (MS) → STNOFF:SUMY:STAT MAJOR
 
 t ≈ 10–15 ms    MPS PLC (ControlLogix) next scan cycle:
-                → Detects fault via DH+ status or hardwired arc monitor
+                → Detects fault via Remote I/O status or hardwired arc monitor
                 → De-energizes relay → removes hardwired permit to Fast IC
                   (Fast IC already fired at t<1μs; this is PLC-level confirmation)
-                → Writes STN:MPS:LTCH bit OFF in DH+ output table
+                → Writes STN:MPS:LTCH bit OFF in Remote I/O output data table
 
 t ≈ 20 ms        SLC-500 detects HVPS crowbar event:
-                → Updates HVPS:CROWBAR:LTCH = FAULT in DH+ registers
+                → Updates HVPS:CROWBAR:LTCH = FAULT in Remote I/O registers
                 → HVPSSTN:SUMY:LTCH → HVPSOFF:SUMY:STAT → STNOFF:SUMY:STAT
 
 t ≈ 1 s          SNL rf_states.st detects fault_stnoff != NO_ALARM:
@@ -1283,7 +1295,7 @@ t ≈ 1.1–6 s     s_go_off Steps 2–4: HVPS voltage setpoint → 0
                 → ~5 s wait for capacitor bank to discharge
 
 t ≈ 6 s         s_go_off Steps 5–7:
-                → hvpstrig = OFF (SCR supervisory enable removed via DH+)
+                → hvpstrig = OFF (SCR supervisory enable removed via Remote I/O)
                 → rfswitch = OFF (RFP drive enable removed)
                 → intcomp = OFF
 
@@ -1331,7 +1343,7 @@ t ≈ 5–50 μs     AIM ISR fires:
                 → Reads FISTAT latch register (Sass 2004 fix)
                 → scanOnce({STN}:STN:AIM:MODU) scheduled
 
-t ≈ 10–30 ms    PLC writes permit bit OFF to DH+ output table (Path B):
+t ≈ 10–30 ms    PLC writes permit bit OFF to Remote I/O output data table (Path B):
                 → AB-6008 scanner reads at ~1 Hz
                 → {STN}:STN:MPS:LTCH → MAJOR alarm set
 
@@ -1379,7 +1391,7 @@ t ≈ 10–20 ms    SLC-500 HVPS PLC scan cycle (B118):
                 → PLC ladder logic sets HVPS fault state
                 → Slot 5 OX8 relay: SCR ENABLE relay OPENED
                   (supervisory SCR enable path removed from B514 SCR gate driver)
-                → DH+ output table updated with fault status
+                → Remote I/O output data table updated with fault status
 
 t ≈ 10–20 ms    SCR ENABLE removed via SLC-500 supervisory path:
                 → Fiber optic to B514 SCR gate driver enable
@@ -1394,7 +1406,7 @@ t ≈ 10–20 ms    SCR ENABLE removed via SLC-500 supervisory path:
                 arc voltage history buffer readout (skipped when HVPS is off).
 
 t ≈ 100 ms–1 s  EPICS alarm propagation:
-                → AB-6008 scanner reads DH+ at ~1 Hz
+                → AB-6008 scanner reads Remote I/O at ~1 Hz
                 → {STN}:HVPSXFORM:ARC:LTCH = MAJOR
                 → {STN}:HVPSSTN:SUMY:LTCH.INPG = MAJOR (transformer arc links in)
                 → {STN}:HVPSOFF:SUMY:STAT = MAJOR
@@ -1458,7 +1470,7 @@ SNL response:
     → s_off → s_go_park → s_go_tune → s_go_on_cw
     → HVPSONSUB():
         rfswitch = ON
-        hvpstrig = ON  → SLC-500 Rack2 relay closes → SCR gate drive enabled
+        hvpstrig = ON  → SLC-500 (RIO adapter 1) relay closes → SCR gate drive enabled
         aimon = ON     → AIM "HVPS_On" fiber output asserted
     → RESET_BMABTSUB():
         fba = 0 → rba → rstf  (BATS reset, arc hardware latches cleared)
@@ -1491,7 +1503,7 @@ t ≈ 10 μs       AIM Module (Slot 12) ISR fires:
                 ─────────────────────────────────────────────────────────────────
 
 t ≈ 10–20 ms    RF MPS PLC (next scan cycle completes):
-                → Reads KLYSCOLLPLC:POWER (DH+ T4[41]): elevated above normal
+                → Reads KLYSCOLLPLC:POWER (RIO T4[41]): elevated above normal
                   (collector power ≈ full cathode input; well above operating value)
                 → Internal comparator: measured power > KLYSCOLL:POWER:ULIM
                 → PLC fires output relay → Path A activated simultaneously:
@@ -1504,13 +1516,13 @@ t ≈ 15–25 ms    Path A — Fast IC responds to relay contact (< 1 μs from c
                 │     → Residual capacitor bank energy discharged safely
                 └─→ RF_FAULT via AIM → VXI backplane (redundant RF cut confirmation)
 
-                DH+ latch: KLYSCOLL:POWER:LTCH (WL=16/WF=31/B=2) = MAJOR latched
+                Remote I/O latch: KLYSCOLL:POWER:LTCH (WL=16/WF=31/B=2) = MAJOR latched
                   (hardware latch confirming relay fired; propagates to EPICS)
 
 t ≈ 30–50 ms    B514 HVPS STATUS fiber drops → Fast IC records HVPSON=0 in FISTAT
                   [informational only; not a new Fast IC trip — see §9.6]
 
-t ≈ 100–300 ms  EPICS DH+ data arrives at IOC:
+t ≈ 100–300 ms  EPICS Remote I/O data arrives at IOC:
                 → {STN}:KLYSCOLL:POWER:LTCH propagates → KLYS:SUMY:LTCH = MAJOR
                 → {STN}:STN:MPS:LTCH = MAJOR (Path B permit bit from PLC)
                 → STN:ABSUMY:LTCH → STNOFF:SUMY:STAT = MAJOR
@@ -1531,7 +1543,7 @@ t ≈ 1 s         SNL s_go_off sequence begins:
 | PV | Value | Interpretation |
 |----|-------|---------------|
 | `{STN}:STN:VXI:LTCH` | MAJOR | Slot 5 RF_FAULT seen by AIM ISR (root cause — timestamps ~10 μs after t=0) |
-| `{STN}:STN:MPS:LTCH` | MAJOR | SPEAR MPS permit removed (root cause visible via DH+ Path B) |
+| `{STN}:STN:MPS:LTCH` | MAJOR | SPEAR MPS permit removed (root cause visible via Remote I/O Path B) |
 | `{STN}:KLYSCOLL:POWER:LTCH` | MAJOR | Collector overpower relay fired (cascade precipitating HVPS kill — timestamps ~15–25 ms after t=0) |
 | `{STN}:STN:AIM:ARCLTDSTT` | 0x000 | No waveguide arc detected (all zeros — confirms not a cavity arc event) |
 | `{STN}:STN:AIM:FSTFLT` | non-zero | Fast IC fired (Path A relay from RF MPS PLC collector overpower) |
@@ -1580,7 +1592,7 @@ The RF MPS PLC is unique among the five actors in that a single relay activation
 | Path | Layer | Immediate HVPS Effect | Delayed HVPS Effect (SNL) | RF Effect | Speed | Notes |
 |------|-------|----------------------|--------------------------|-----------|-------|-------|
 | **A** — MPS relay → Fast IC | Hardware interlock | **SCR ENABLE removed + CROWBAR fired** (fiber → B514) | Orderly `hvpstrig=OFF` (~1 s, HVPS already dead) | RF_FAULT via AIM | < 15 ms total | Primary HVPS shutdown path — only path with immediate hardware HVPS kill |
-| **B** — DH+ permit bit | Software / EPICS | None | SNL orderly `s_go_off`: HVPS ramp + `hvpstrig=OFF` | SNL orderly shutdown | ~1 s | Fault record, fault file, state machine bookkeeping; hardware already acted |
+| **B** — Remote I/O permit bit | Software / EPICS | None | SNL orderly `s_go_off`: HVPS ramp + `hvpstrig=OFF` | SNL orderly shutdown | ~1 s | Fault record, fault file, state machine bookkeeping; hardware already acted |
 | **C** — MPS relay → VXI Slot 5 | Hardware backplane | **None** — Slot 5 has no connection to B514 SCR or crowbar | Orderly HVPS shutdown via SNL `s_go_off` (~6 s, via `VXI:LTCH` alarm chain) | RF_FAULT via Slot 5 | < 15 ms (RF cut) | Redundant RF cut; HVPS shutdown via SNL only |
 
 **For SPEAR MPS permit and orbit interlock (Slot 5 direct inputs):**
@@ -1627,7 +1639,7 @@ t = 0 ms        RF DRIVE SIGNAL PATH (VXI → klystron):
                 → RF_FAULT NOT asserted (no AIM arc latch, no Fast IC trip)
                 → rfswitch PV still = ON
 
-t ≈ 100 ms–1 s  EPICS alarm propagation (DH+ → AB-6008 scanner → EPICS):
+t ≈ 100 ms–1 s  EPICS alarm propagation (Remote I/O → AB-6008 scanner → EPICS):
                 → {STN}:HVPSXFORM:ARC:LTCH (or other HVPS fault latch) = MAJOR
                 → {STN}:HVPSSTN:SUMY:LTCH propagates to HVPSOFF:SUMY:STAT
                 → {STN}:STNOFF:SUMY:STAT.SEVR = MAJOR
@@ -1655,7 +1667,7 @@ t ≈ 1 s         SNL rf_states.st detects fault → enters s_go_off:
 |------|-------|----------------|
 | t = 0 | HVPS PLC trips; SCR ENABLE removed | Drive ON; klystron de-powered |
 | t ≈ 0 | HVPS HV collapses; klystron cathode at ~0 V | Drive ON (software unaware); RF output = 0 |
-| t ≈ 100 ms–1 s | EPICS alarms propagate via DH+ | Drive ON (SNL not yet triggered) |
+| t ≈ 100 ms–1 s | EPICS alarms propagate via Remote I/O | Drive ON (SNL not yet triggered) |
 | t ≈ 1 s | SNL s_go_off sequence begins | Drive ON (Steps 1–5 in progress) |
 | **t ≈ 6 s** | **s_go_off Step 6: rfswitch = OFF** | **Drive OFF — RF drive cut** |
 
@@ -1748,7 +1760,7 @@ When a fault event occurs, multiple data sources capture pre- and post-event wav
 
 **What they contain**: 11 pre-fault RF and IQA signal channels captured from hardware signal memory buffers in the RFP and IQA VXI modules. These represent the RF state at the moment of fault.
 
-**Where stored**: VxWorks virtual disk `/dat/` on the VXI IOC in B132. Files use the naming convention `FAULT<channel>_<slot>` where `<slot>` is 1–15 (circular buffer, `NUMFAULTS=15`). The current slot number is tracked as EPICS PV `{STN}:STN:NFAULT`.
+**Where stored**: VxWorks virtual disk `/dat/` on the VXI IOC in B132. Files use the naming convention `FAULT<channel>_<slot>` where `<slot>` is 1–15 (circular buffer, `NUMFAULTS=15`). The current slot number is tracked as EPICS PV `{STN}:STN:FAULT:NUM`.
 
 **File channel list** (in capture order for SPEAR3 `#else` branch of `#ifdef CF2`):
 
@@ -1767,7 +1779,7 @@ When a fault event occurs, multiple data sources capture pre- and post-event wav
 | 10 | `FAULTCmbQ_N` | Combiner Q (PEP-II; inactive in SPEAR3) |
 
 **Access procedure**:
-1. Check `{STN}:STN:NFAULT` EPICS PV to find the most recent fault slot number N
+1. Check `{STN}:STN:FAULT:NUM` EPICS PV to find the most recent fault slot number N
 2. Log in to the VxWorks IOC shell (telnet to B132 VXI CPU) or access via NFS/FTP
 3. List `/dat/FAULT*_N` (substitute the slot number)
 4. Transfer files to a workstation for analysis (binary format; see §10.6 for reading)
@@ -1782,7 +1794,7 @@ When a fault event occurs, multiple data sources capture pre- and post-event wav
 
 | Channel | Signal | Source Hardware | Expected Waveform Pattern | Diagnostic Value |
 |---------|--------|-----------------|--------------------------|------------------|
-| **CH1** | HVPS DC Output Voltage | Resistive voltage divider (1000:1) from HVPS DC bus | Smooth DC at −77 kV nominal; slight 12-pulse ripple (~6.9% P-P) | Crowbar: instant collapse to ~0 V; SCR disable: decay over ~100 ms; setpoint changes visible as slow ramp |
+| **CH1** | HVPS DC Output Voltage | Resistive voltage divider (≈10,000:1) from HVPS DC bus | Smooth DC at ≈ −72 to −75 kV typical; slight 12-pulse ripple (~6.9% P-P) | Crowbar: instant collapse to ~0 V; SCR disable: decay over ~100 ms; setpoint changes visible as slow ramp |
 | **CH2** | HVPS DC Output Current | Danfysik DC-CT (Hall-effect current transducer) | DC at ~22 A nominal | Arc event: current spike; crowbar: current spike then zero; HVPS trip: current decay |
 | **CH3** | Inductor 2 (T2) Sawtooth Voltage | SCR firing circuit monitor winding on T2 | **Bipolar asymmetric sawtooth** (inverted direction vs. theoretical model — this is normal for real SPEAR3) | Waveform disappears when SCR firing stops; asymmetry changes indicate firing angle / regulation shifts; absence indicates HVPS off |
 | **CH4** | Transformer 1 (T1) AC Phase Current | Current transducer on T1 primary winding | **Bipolar asymmetric square pulses** with commutation spikes (not sinusoidal — characteristic of 12-pulse discrete switching) | Dropout indicates HVPS de-energized; asymmetric pulses indicate phase balance issue; commutation spike amplitude indicates SCR health |
@@ -1824,7 +1836,7 @@ When a fault event occurs, multiple data sources capture pre- and post-event wav
 | Overvoltage | `{STN}:HVPS:VOLT:LTCH` | DC output overvoltage? |
 | HVPS voltage | `{STN}:HVPS:VOLT` | Pre-fault and collapse waveform (1 Hz; limited time resolution) |
 | Station state | `{STN}:STN:STATE` | State machine transitions: ON_CW → s_go_off → OFF |
-| Fault slot | `{STN}:STN:NFAULT` | Fault file slot number — use to locate `/dat/FAULT*_N` files |
+| Fault slot | `{STN}:STN:FAULT:NUM` | Fault file slot number — use to locate `/dat/FAULT*_N` files |
 | Forced fault | `{STN}:STN:FORCED:LTCH` | Hard arc latch — requires manual FAULT RESET to clear |
 
 ---
@@ -1840,7 +1852,7 @@ When a fault event occurs, multiple data sources capture pre- and post-event wav
    - `HVPS:CROWBAR:LTCH` set → Crowbar fired
    - `STN:MPS:LTCH` set → MPS PLC trip (cooling, vacuum, or power)
    - `STN:FORCED:LTCH` set → Hard arc; manual FAULT RESET required before recovery
-3. **Note fault slot number** from `{STN}:STN:NFAULT` — needed to retrieve fault files
+3. **Note fault slot number** from `{STN}:STN:FAULT:NUM` — needed to retrieve fault files
 4. **Go to B118** and check the oscilloscope display for the fault waveforms: 
    - Was CH1 a sudden drop (crowbar) or a slow decay (SCR disable)? 
    - Did CH4 drop at the same instant as CH1, or before?
@@ -1856,7 +1868,7 @@ When a fault event occurs, multiple data sources capture pre- and post-event wav
    data = np.fromfile('/dat/FAULTRfpSI_1', dtype=np.int16)  # example
    ```
 4. **Review the B118 oscilloscope capture** (see §10.4): note whether CH1 (DC voltage) shows an abrupt collapse (crowbar, < 1 μs) or a gradual decay (~100 ms for SCR disable), and whether CH4 (T1 AC current) dropped simultaneously with or prior to CH1
-5. **Determine the initiating event** — use EPICS timestamp ordering (1 Hz resolution for DH+ PVs) to sequence events among HVPS faults; use the arc channel bit pattern for hardware-speed (< 1 μs) faults
+5. **Determine the initiating event** — use EPICS timestamp ordering (1 Hz resolution for Remote I/O PVs) to sequence events among HVPS faults; use the arc channel bit pattern for hardware-speed (< 1 μs) faults
 
 #### Fault Categorization Guide
 
@@ -1872,7 +1884,7 @@ When a fault event occurs, multiple data sources capture pre- and post-event wav
 | `ARCLTDSTT = 0`, `HVPS:VOLT:LTCH` set | HVPS DC output overvoltage | SLC-500 HVPS PLC (~10–20 ms) |
 | CH3 waveform entirely absent (oscilloscope) | SCR firing stopped — contactor open, or full SCR fault | Hardware, timing depends on cause |
 | CH4 waveform asymmetric or one phase missing | Phase imbalance in primary; possible SCR failure or phase loss | SLC-500 or AC protection |
-| CH1 voltage collapse: instant step to ~0 V | Crowbar fired | Crowbar circuit (analog, < 1 μs) |
+| CH1 voltage collapse: instant step to ~0 V | Crowbar fired | Crowbar circuit (trigger signal < 1 µs; the crowbar then **conducts ≈ 10 µs** later, and the primary current is interrupted in **4–8 ms** — SLAC-PUB-7591) |
 | CH1 voltage collapse: exponential decay over ~100 ms | SCR gate drive disabled (supervisory path) | SLC-500 relay (~10–20 ms) |
 
 > **Sources**: §3.8 (AIM history buffer and SNL fault files); §6.5 (HVPS PV list); §9.6 (RF shutdown path); `rfApp/Db/rf_hvps.db` (HVPS scalar PV definitions); `llrf/llrf9/iGp/matlab/llrf/read_waveforms.m` (LabCA MATLAB access pattern); `iocBoot/b132-iocrf/Tables/device.tbl` (KSC2961 GPIB controller registration).
@@ -1918,7 +1930,7 @@ The following details were inferred from code analysis and require physical hard
 | Fast IC ↔ MPS PLC wiring | Hardwired relay I/O between ControlLogix and Fast IC; exact connector/terminal IDs | Verify against MPS wiring drawings wd3403300200–wd3403303400 |
 | Fast IC ↔ AIM connection | AIM receives status word from Fast IC | Verify physical cable/connector; check if via VXI backplane or external cable |
 | SLC-500 SCR fiber path | OX8 relay OUT → fiber → B514 | Verify fiber cable routing and connection in B118/B514 |
-| DH+ word/bit assignments | Derived from `rf_digital_All.substitutions,v` | Cross-check against SLC-500 ladder logic program (if available) |
+| Remote I/O word/bit assignments | Derived from `rf_digital_All.substitutions,v` | Cross-check against SLC-500 ladder logic program (if available) |
 | `aimon` interlock gate | AIM fiber output physically gates SLC-500 HVPS enable | Verify signal path in B118 circuitry |
 | Arc sensor count | PDR §12.3 says 6 locations, 11 total sensors | Confirm physical installation count |
 
@@ -1932,7 +1944,7 @@ All findings in this document were derived from direct analysis of the following
 
 | Ref | File | Description |
 |-----|------|-------------|
-| **[R1]** | `Designs/L_LEGACY_SYSTEM_ARCHITECTURE.md` | SPEAR3 RF System Legacy Architecture (v2.5+) — primary system reference |
+| **[R1]** | `Designs/tex/L_legacy_system_architecture.pdf` | SPEAR3 RF System Legacy Architecture (v2.5+) — primary system reference |
 
 ### Primary Source Code
 
@@ -1940,7 +1952,7 @@ All findings in this document were derived from direct analysis of the following
 |-----|------|----------|-------|------|
 | **[R2]** | `rf_states.st,v` | `rfApp/src/seq/` | 2,227 | Master SNL state machine — all fault detection and response logic |
 | **[R3]** | `devP2RfAim.c,v` | `rfApp/src/vxi/` | 1,982 | AIM module device support — arc channels, ISR, BATS, fault files |
-| **[R4]** | `devABSLCDCM.c` | `rfApp/src/ab/` | 563 | SLC-500 DH+ device support — HVPS supervisory communication |
+| **[R4]** | `devABSLCDCM.c` | `rfApp/src/ab/` | 563 | SLC-500 Remote I/O device support — HVPS supervisory communication |
 | **[R5]** | `p2RfCf2Def.h,v` | `rfApp/src/vxi/` | 403 | CF2 register definitions (PEP-II heritage, slot 5 reference) |
 | **[R6]** | `p2RfAimDef.h,v` | `rfApp/src/vxi/` | — | AIM register definitions (`TRIPLVL`, `HISBUF`, `ARCVOL`, `FISTAT`, `HVPSON`) |
 
@@ -1950,7 +1962,7 @@ All findings in this document were derived from direct analysis of the following
 |-----|------|----------|------|
 | **[R7]** | `aim.db,v` | `rfApp/Db/` | AIM module PV definitions — arc status, interlock state, control outputs |
 | **[R8]** | `rf_digital_hvps.db,v` | `rfApp/Db/` | HVPS digital I/O template — all HVPS status/latch bits from SLC-500 |
-| **[R9]** | `rf_digital_All.substitutions,v` | `rfApp/Db/` | Instantiates HVPS digital I/O with DH+ word/bit assignments |
+| **[R9]** | `rf_digital_All.substitutions,v` | `rfApp/Db/` | Instantiates HVPS digital I/O with Remote I/O word/bit assignments |
 | **[R10]** | `rf_sumy_hvps.db,v` | `rfApp/Db/` | HVPS alarm aggregation tree |
 | **[R11]** | `rf_sumy_stn.db,v` | `rfApp/Db/` | Station-level alarm aggregation — STNOFF/STNON/STNMPS trees |
 | **[R12]** | `rf_sumy_stn_spr.db,v` | `rfApp/Db/` | SPEAR3-specific additions to station summary (STNMPS, external MPS) |
@@ -1969,4 +1981,6 @@ All findings in this document were derived from direct analysis of the following
 | **[R20]** | `01-file-inventory.md` | `codeReviewTechnicalNotes/` | File classification — CF2 marked PEP-II only |
 | **[R21]** | `03-vxi-device-support.md` | `codeReviewTechnicalNotes/` | AIM §5: arc channels, fast interlock chain, BATS, fault files |
 | **[R22]** | `05-snl-state-machines.md` | `codeReviewTechnicalNotes/` | Complete 23-state SNL architecture documentation |
-| **[R23]** | `06-plc-stepper-motors.md` | `codeReviewTechnicalNotes/` | PLC topology: 3 DH+ nodes, SLC-500 HVPS functions |
+| **[R23]** | `06-plc-stepper-motors.md` | `codeReviewTechnicalNotes/` | PLC topology: 3 Remote I/O adapters, SLC-500 HVPS functions |
+| **[R24]** | Switchgear and contactor drawings | `hvps/documentation/switchgear/` | GP-439-704-02-C1 (schematic), ID-308-801-06-C1 (connection wiring), GP-308-500-01-R3 (original LBL design, relay legend), Ross 713203 E-1 (HQ3 contactor and HCA-1-A driver). All verified by direct reading, September 2026 |
+| **[R25]** | `HoffmanBoxPPSWiring.docx` | `pps/` | J. Sebek — original terminal-by-terminal trace of the B118 Hoffman Box PPS wiring, switchgear theory of operation, and the K4/RR label-swap correction |

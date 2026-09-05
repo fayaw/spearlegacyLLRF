@@ -2,15 +2,17 @@
 
 > **Legacy System Documentation**: Comprehensive technical design report for the current SPEAR3 High Voltage Power Supply system (pre-upgrade)
 
+> **Verification status (September 2026)**: this note has been checked against the original sources — J. Sebek, *SPEAR3 High Voltage Power Supply Hazards* (`hvps/documentation/procedures/spear3HvpsHazards.tex`); Cassel & Nguyen, SLAC-PUB-7591; the HVPS specification PS-341-360-01 (`ps3413600102.pdf`); and drawing **SD-730-790-01-C1** read directly from the scan. Corrections applied in that pass are marked inline. Statements not so marked have **not** been re-verified.
+
 ## Executive Summary
 
-This document provides a comprehensive design report for the current SPEAR3 High Voltage Power Supply (HVPS) legacy system operating at SLAC National Accelerator Laboratory. The system delivers −77 kV DC at 22 A (1.7 MW nominal) to power the SPEAR3 storage ring klystrons. Based on the proven PEP-II design architecture from 1997, this legacy system has been adapted for SPEAR3 operational requirements while maintaining the innovative star point controller topology and multi-layer arc protection system. This documentation serves as the baseline reference for the current system prior to planned LLRF upgrade integration.
+This document provides a comprehensive design report for the current SPEAR3 High Voltage Power Supply (HVPS) legacy system operating at SLAC National Accelerator Laboratory. The supply is rated −**90 kV, 27 A, 2.5 MW** and typically delivers on the order of −**72 to −75 kV at 19–22 A** to the klystron cathode. Based on the proven PEP-II design architecture from 1997, this legacy system has been adapted for SPEAR3 operational requirements while maintaining the innovative star point controller topology and multi-layer arc protection system. This documentation serves as the baseline reference for the current system prior to planned LLRF upgrade integration.
 
 **Key System Characteristics:**
-- **Power Rating**: 1.7 MW nominal, 2.5 MW maximum capability
-  - *Typical Operation*: ~1.4 MW (72.08 kVDC @ 19.4 A measured June 2020)
-- **Output**: −77 kV DC @ 22 A (negative polarity for klystron cathode)
-- **Configuration**: 2-unit system (SPEAR1 active, SPEAR2 warm spare)
+- **Rating**: −90 kV, 27 A, 2.5 MW maximum (Sebek §2)
+- **Typical operation**: ≈ −72 to −75 kV at 19–22 A. Two recorded points: −74.7 kV / 22.0 A at full 500 mA SPEAR operation (Sebek §3.2), and 72.08 kV / 19.4 A / 1.398 MW measured June 2020. The operating point is not a fixed setpoint — it is trimmed continuously by the HVPS supervisory loop.
+- **Output with HVPS off (klystron load still connected)**: ≈ 1.3 kV, **not zero** — transformer leakage is still rectified by the output diodes. Goes to zero only when the input contactor opens.
+- **Configuration**: 2 units, SPEAR1 and SPEAR2. **One unit is energized and the other is completely switched off** — this is not a warm-standby arrangement. Roles are exchanged at the two scheduled downs each year (April and August); either unit may be the active one.
 - **Topology**: 12-pulse thyristor phase-controlled rectifier with star point controller
 - **Protection**: 4-layer arc protection system with single-fault tolerance
 - **Location**: Building 514 (power equipment), Building 118 (control systems)
@@ -23,12 +25,13 @@ This document provides a comprehensive design report for the current SPEAR3 High
 
 The SPEAR3 HVPS evolution from the original PEP-II design to current operational configuration:
 
-| **Parameter** | **Original PEP-II** | **SPEAR1 (Active)** | **SPEAR2 (Spare)** | **System Notes** |
+| **Parameter** | **Original PEP-II** | **SPEAR1** | **SPEAR2** | **System Notes** |
 |---------------|---------------------|---------------------|---------------------|------------------|
 | **Design Era** | 1997 (8 units) | Current SPEAR3 | Current SPEAR3 | Based on PEP-II architecture |
-| **Status** | Historical reference | Primary operational unit | Warm spare/backup | Operational redundancy |
-| **Output** | 83 kV @ 23-27 A | −77 kV @ 22 A | −77 kV @ 22 A | Negative polarity for klystron |
-| **Power** | 2.5 MW maximum | 1.7 MW nominal | 1.7 MW nominal | Lower operating point |
+| **Status** | Historical reference | Energized *or* fully off | Energized *or* fully off | Exactly one unit energized at a time; swapped at the April and August downs |
+| **Rating** | 83 kV @ 23 A (2.5 MVA) | −90 kV @ 27 A | −90 kV @ 27 A | Negative polarity for klystron cathode |
+| **Typical output** | — | ≈ −72 to −75 kV, 19–22 A | ≈ −72 to −75 kV, 19–22 A | Varies with beam current and klystron gain |
+| **Power** | 2.5 MW maximum | 2.5 MW maximum | 2.5 MW maximum | ≈ 1.4–1.6 MW typical |
 | **Input** | 12.5 kV 3-phase | 12.47 kV 3-phase | 12.47 kV 3-phase | Substation 507, breaker 160 |
 | **Location** | PEP-II facility | Building 514 | Building 514 | Distributed control architecture |
 | **Control** | Local control | Building 118 | Building 118 | EPICS/PLC based |
@@ -46,7 +49,7 @@ Substation 507, Breaker 160
    └────┬────┘
         │
   ┌─────┴───────┐
-  │ Phase-Shift │  Extended Delta Transformer (3.5 MVA)
+  │ Phase-Shift │  Extended Delta Transformer (2750 kVA)
   │ Transformer │  Primary: 12.47 kV delta
   │   (T0)      │  Secondary: Dual wye ±15° phase shift
   └──┬────────┬─┘
@@ -77,9 +80,9 @@ Substation 507, Breaker 160
   └──────┬──────┘                                         │
          │                                                │
   ┌──────┴──────┐                                         │
-  │ Filter Bank │  Capacitor Bank: 8 μF total             │
+  │ Filter Bank │  Capacitors: 8 μF PER STAGE × 4 stages  │
   │ & Isolation │  500Ω Isolation Resistors (PEP-II)      │
-  │ Resistors   │  Voltage Divider Network (1000:1)       │
+  │ Resistors   │  Voltage Divider Network (≈10,000:1)    │
   └──────┬──────┘                                         │
          │                                                │
   ┌──────┴──────┐                                         │
@@ -90,12 +93,12 @@ Substation 507, Breaker 160
   └──────┬──────┘                                         │
          │                                                │
   ┌──────┴──────┐                                         │
-  │ Cable Term. │  200μH Inductors (Layer 4 Protection)   │
+  │ Cable Term. │  350µH 40A Inductors (Layer 4 Protection) │
   │ Inductors   │  Reduce cable discharge current         │
   │ (L3, L4)    │  Klystron interface protection          │
   └──────┬──────┘                                         │
          │                                                │
-    −77 kV DC @ 22 A                                      │
+    ≈ −72 to −75 kV DC @ 19–22 A typical                  │
     (to SPEAR3 Klystron)                                  │
                                                           │
                                                           │
@@ -132,7 +135,7 @@ Substation 507, Breaker 160
 - **Protection**: 3×50A fuses, vacuum contactor, disconnect switch
 
 **Phase-Shifting Transformer (T0):**
-- **Rating**: 3.5 MVA, oil-immersed
+- **Rating**: **2750 kVA**, 12.5 kV at 127 A RMS, oil-immersed. *Resolved September 2026 from NWL's own schematic EI-730-790-00-C0 (NWL #39308), which states "INPUT 2750 KVA 3 PHASE / 12.5 KV AT 127 AMPS RMS" — internally consistent, since 2750 kVA ÷ (√3 × 12.5 kV) = 127 A. This supersedes three earlier figures in circulation: PS-341-360-01 §1.5 "350 kVA" (too small to pass 2.5 MW; a decimal error), SD-730-790-01-C1 "3000 KVA" (a rounded label), and Sebek's adopted 3.5 MVA estimate (made without access to the NWL drawing).*
 - **Primary**: 12.47 kV delta connection
 - **Secondary**: Dual wye configuration with ±15° phase shift
 - **Purpose**: Creates 12-pulse rectification (reduces harmonics)
@@ -158,23 +161,23 @@ Substation 507, Breaker 160
 - **Voltage Range**: 0 to −90 kV DC output
 - **Control Resolution**: 16-bit DAC (0.1% resolution)
 - **Response Time**: <10 ms for voltage changes
-- **Regulation**: ±0.5% at voltages >65 kV
-- **Ripple**: <1% peak-to-peak, <0.2% RMS
+- **Regulation**: < 0.1% per SLAC-PUB-7591. *(A ±0.5% figure appears in a later PEP-II slide set; the published paper value is preferred.)*
+- **Ripple**: <1% peak-to-peak, <0.2% RMS, above 60 kV
 
 ### **Secondary Rectification and Filtering**
 
 **Diode Rectifier Bridges:**
-- **Configuration**: 4 bridges in series (24 diodes total)
-- **Main Bridge**: 30 kV, 30 A rating (primary power conversion)
-- **Filter Bridge**: 30 kV, 3 A rating (5% extension for filtering)
-- **Total Capability**: 120 kV, 22 A continuous
-- **Cooling**: Forced air with temperature monitoring
+- **Configuration**: 4 six-pulse bridges in series, one per transformer secondary
+- **Main Bridge**: "RECTIFIERS 30KV 30A" (primary power conversion)
+- **Filter Bridge**: "FILTER RECTIFERS 30KV 3A AVG" (fed from a 105% secondary tap)
+- **Stage DC taps**: −26 kV, −52 kV, −77 kV, −90 kV cumulative, as labelled on SD-730-790-01-C1
+- **Cooling**: oil-immersed in the main tank
 
 **Filter System:**
-- **Capacitor Bank**: 8 μF total capacitance
-- **Isolation Resistors**: 500Ω (PEP-II innovation for arc protection)
-- **Voltage Divider**: 1000:1 ratio for voltage monitoring
-- **Energy Storage**: ~24 kJ at full voltage
+- **Capacitors**: "CAPACITORS 8uFD 30KV" — **8 μF per stage, four stages in series** (≈ 2 μF net across the output).
+- **Isolation Resistors**: "FILTER RESISTORS 500 OHMS 1KW" — 8 of them, two per stage, in oil (PEP-II innovation for arc protection)
+- **Voltage Divider**: two identical dividers, each **five 20 MΩ resistors in series (100 MΩ) into two 1 MΩ in parallel (500 kΩ)** per WD-730-794-04-C0. The 500 kΩ bottom leg is loaded by the regulator board’s ≈ 10.5 kΩ input, which dominates it, giving 9.1 V at the full 91 kV output — i.e. **≈ 10,000:1**, not 1000:1. Independently confirmed by the PS Monitor Board (SD-730-793-12-C3), whose output BNC is labelled "+ Voltage 10 kV/V".
+- **Energy Storage**: **8,788 J** in the filter capacitors at full voltage (Sebek Eqn. 8: ½ · 8 μF · (3·26² + 13²) · 10⁶). With the additional 0.22 μF output capacitor (911 J) and the output cables (25 J), total stored energy on the output is ≈ **9,824 J**.
 
 ## Control System Architecture
 
@@ -305,7 +308,7 @@ The SPEAR3 HVPS implements a sophisticated **four-layer protection system** desi
 │                                    ↓ (backup protection)                   │
 │  Layer 4: CABLE TERMINATION (Inductors)                                    │
 │  ┌─────────────────────────────────────────────────────────────────────┐   │
-│  │ • 200μH inductors at cable termination                              │   │
+│  │ • 350 µH 40 A inductors at cable termination                        │   │
 │  │ • Reduces cable discharge current                                   │   │
 │  │ • Final impedance matching to klystron                              │   │
 │  │ • Prevents reflection and standing waves                            │   │
@@ -380,7 +383,7 @@ These methods provide **redundant protection layers** with fail-safe design prin
 ### **Voltage Monitoring System**
 
 **High Voltage Measurement:**
-- **Primary Divider**: 1000:1 precision voltage divider
+- **Primary Divider**: ≈10,000:1 precision voltage divider (two in parallel, ~100 MΩ each; 9.1 V at 91 kV)
 - **Channels**: 9 independent voltage monitoring points
 - **Accuracy**: ±0.1% full scale
 - **Isolation**: High voltage isolation to ground
@@ -436,7 +439,7 @@ The Building 118 control room currently houses an oscilloscope for manual monito
 
 | **Available Signals** | **Signal Type** | **Purpose** | **Specifications** |
 |-------------|-----------------|-------------|-------------------|
-| **HVPS Output (DC Voltage)** | DC Voltage | Primary power monitoring | 0 to −90 kV DC, voltage divider (1000:1 ratio) |
+| **HVPS Output (DC Voltage)** | DC Voltage | Primary power monitoring | 0 to −90 kV DC, voltage divider (≈10,000:1; PS Monitor Board output scaled 10 kV/V) |
 | **HVPS Output (DC Current)** | DC Current | Load current monitoring | 0 to 30 A DC nominal (22 A typical), Danfysik DC-CT sensor with ±10V output |
 | **Inductor 2 (T2)** | Sawtooth voltage | T2 firing circuit timing diagnosis | Sawtooth pattern indicates thyristor firing |
 | **Transformer 1** | AC Phase Current | T1 firing circuit health | AC waveform with thyristor commutation spikes |
@@ -517,13 +520,13 @@ The Building 118 control room currently houses an oscilloscope for manual monito
 ### **Electrical Performance**
 
 **Output Specifications:**
-- **Voltage**: −77 kV DC nominal (−90 kV maximum)
+- **Voltage**: ≈ −72 to −75 kV DC typical (−90 kV maximum rating)
 - **Current**: 22 A nominal (30 A maximum)
 - **Power**: 1.7 MW nominal (2.5 MW maximum)
 - **Polarity**: Negative (klystron cathode connection)
 
 **Regulation and Stability:**
-- **Voltage Regulation**: ±0.5% at voltages >65 kV
+- **Voltage Regulation**: **< 0.1%** (Cassel & Nguyen, SLAC-PUB-7591). Ripple is **< 1% peak-to-peak and < 0.2% RMS above 60 kV**
 - **Current Regulation**: ±1% at currents >10 A
 - **Ripple**: <1% peak-to-peak, <0.2% RMS
 - **Stability**: <0.1%/hour drift after warm-up
@@ -821,7 +824,7 @@ $$\frac{\Delta V_{pp}}{V_{dc}} = \frac{2\sqrt{2}V_{LL}\cos(15°)\left[1-\cos(15�
 
 The 15° angle here is exactly the half-width of the 30° output arc, which equals half the ±15° T0 phase shift — a direct geometric connection between the transformer design and the ripple performance.
 
-At the nominal 77 kV output:
+At a 77 kV DC stage level (the −77 kV tap on SD-730-790-01-C1):
 
 $$\Delta V_{pp,unfiltered} \approx 0.0344 \times 77{,}000 \approx 2{,}650 \text{ V (peak-to-peak)}$$
 
@@ -940,7 +943,7 @@ This provides an order-of-magnitude check on crowbar thermal stress. The actual 
 
 #### Layer 4: Cable Termination Inductors
 
-The 200 µH cable termination inductors (L3, L4) limit the rate of current change during cable discharge events:
+The cable termination inductors limit the rate of current change during cable discharge events. The Grounding Tank drawing SD-730-790-05-C1 labels them **"350 UHY 40A"** and designates them **L1 and L2** (not L3/L4). SLAC-PUB-7591 quotes 200 µH; that is the PEP-II design figure, not the as-built value.
 
 $$\frac{dI}{dt}\bigg|_{max} = \frac{V_{dc}}{L_{cable}} = \frac{77{,}000}{200 \times 10^{-6}} = 3.85 \times 10^{8} \text{ A/s} = 385 \text{ A/µs}$$
 
@@ -950,7 +953,7 @@ This limits the instantaneous current surge from cable capacitance discharge, pr
 
 #### Voltage Feedback Scaling
 
-The high-voltage divider provides a 1000:1 ratio:
+The high-voltage divider provides a ratio of ≈10,000:1:
 
 $$V_{feedback} = \frac{V_{dc}}{1000} = \frac{77{,}000}{1000} = 77 \text{ V}$$
 
@@ -1043,7 +1046,7 @@ $$\text{THD}_{12p} = \sqrt{\sum_{h=11,13,23,...} \left(\frac{1}{h}\right)^2} \ap
 
 | **Parameter** | **Equation** | **Calculated Value** | **Specification** | **Margin** |
 |---------------|-------------|---------------------|-------------------|------------|
-| DC Output Voltage | $V_{dc} = 2.70 \, V_{sec,LL} \cos\alpha$ | 77 kV at α=31° | −77 kV nominal | On target |
+| DC Output Voltage | $V_{dc} = 2.70 \, V_{sec,LL} \cos\alpha$ | 77 kV at α=31° | −77 kV is an intermediate DC stage tap; typical output ≈ −72 to −75 kV | Consistent |
 | Maximum Voltage | $V_{dc,max}$ at $\alpha=0°$ | 90 kV | −90 kV max | On target |
 | Transformer Ratio | $n = V_{sec}/V_{pri}$ | 2.67:1 step-up | — | — |
 | SCR Derating | $V_{PIV}/V_{stack}$ | 15.8% | — | 84% margin |

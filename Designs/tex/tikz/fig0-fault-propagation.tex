@@ -1,0 +1,49 @@
+% !TeX root = ../0_system_design_report.tex
+% Figure 6 -- fault propagation for an RF arc event.  The left column is the
+% timescale; each step is roughly three orders of magnitude slower than the one
+% above it, which is the whole point of the layered protection scheme.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  stp/.style={blk,text width=104mm,anchor=north west,align=left,inner sep=3.4pt},
+  tim/.style={anchor=east,font=\scriptsize\bfseries,text=cPwr!85!black},
+]
+
+\def\S{-26}   % step pitch
+
+\node[stp,draw=cRf]   (s1) at (22,0)
+  {\textbf{Step 1 --- Arc occurs}\\
+   in a cavity window or the circulator window};
+\node[tim] at (20,-4) {instant};
+
+\node[stp,draw=cRf]   (s2) at (22,\S)
+  {\textbf{Step 2 --- Microstep-MIS detector closes its relay contact}\\
+   {\tiny optical detection, hardware relay output}};
+\node[tim] at (20,\S-4) {$<\qty{1}{\micro\second}$};
+
+\node[stp,draw=cPlc,fill=cPlc!8] (s3) at (22,2*\S)
+  {\textbf{Step 3 --- Interface Chassis latches the fault, removes all permits}\\
+   LLRF9 Enable removed $\cdot$ HVPS SCR ENABLE removed\\
+   first-fault register captures ``Arc Detection''};
+\node[tim] at (20,2*\S-4) {$<\qty{1}{\micro\second}$};
+
+\node[stp,draw=cCtrl] (s4) at (22,3*\S)
+  {\textbf{Step 4 --- Diagnostic capture}\\
+   LLRF9 captures \num{16}k-sample waveforms\\
+   Waveform Buffer freezes its circular buffers (pre-fault data preserved)};
+\node[tim] at (20,3*\S-4) {$\sim\unit{\micro\second}$};
+
+\node[stp,draw=cPlc,fill=cPlc!8] (s5) at (22,4*\S)
+  {\textbf{Step 5 --- RF MPS PLC receives fault status from the Interface
+   Chassis}\\ logs the event};
+\node[tim] at (20,4*\S-4) {$\sim\unit{\milli\second}$};
+
+\node[stp,draw=cCtrl] (s6) at (22,5*\S)
+  {\textbf{Step 6 --- EPICS coordinator detects the fault}\\
+   logs the event, enters the FAULT state};
+\node[tim] at (20,5*\S-4) {$\sim\unit{\second}$};
+
+\foreach \a/\b in {s1/s2,s2/s3,s3/s4,s4/s5,s5/s6}{%
+  \draw[sig] (\a.south west) ++(52,0) -- ($(\b.north west)+(52,0)$);}
+
+% timescale rail
+\draw[bus,draw=black!35] (20,2) -- (20,5*\S-10);
+\end{tikzpicture}
