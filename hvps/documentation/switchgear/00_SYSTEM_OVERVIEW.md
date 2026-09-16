@@ -17,7 +17,7 @@
 >
 > Confirmed correct as written: the **2000 A** blocking-relay threshold and the **170 ms** minimum hold-in on loss of AC control power. Both are verbatim from the drawings.
 >
-> The remainder of this document has not been line-by-line verified. Where it disagrees with a per-drawing note in `technical_notes/`, or with `Designs/tex/L_legacy_system_architecture.pdf`, **those win**.
+> The remainder of this document has not been line-by-line verified. Where it disagrees with a per-drawing note in `technical_notes/`, or with `Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf`, **those win**.
 
 ---
 
@@ -42,7 +42,7 @@ This document provides a comprehensive overview of the SPEAR3 High Voltage Power
 
 - Per-drawing notes for the HVPS proper: [`../schematics/technical_notes/`](../schematics/technical_notes/)
 - PPS system view: [`../../../pps/diagrams/`](../../../pps/diagrams/)
-- Consolidated legacy architecture: [`../../../Designs/tex/L_legacy_system_architecture.pdf`](../../../Designs/tex/L_legacy_system_architecture.pdf)
+- Consolidated legacy architecture: [`../../../Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf`](../../../Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf)
 - J. Sebek's original PPS wiring trace: [`../../../pps/HoffmanBoxPPSWiring.docx`](../../../pps/HoffmanBoxPPSWiring.docx)
 
 ---

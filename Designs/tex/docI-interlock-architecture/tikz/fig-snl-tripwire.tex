@@ -1,0 +1,33 @@
+% !TeX root = ../I_interlock_architecture.tex
+% The single SNL trip wire and its five alarm-tree inputs.
+% Each input carries its own annotation inside the box, so the connectors to
+% the collecting bus stay clear of any text.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+\def\dy{-15}
+
+\foreach \i/\pv/\note in {%
+  0/{\{STN\}:STNPARK:SUMY:STAT}/{VXI latch summary},
+  1/{\{STN\}:HVPSOFF:SUMY:STAT}/{HVPS fault and status},
+  2/{\{STN\}:STN:LOCAL:ON}/{local\slash remote panel state},
+  3/{\{STN\}:STN:ABSUMY:LTCH}/{Remote I/O comms summary latch},
+  4/{\{STN\}:STN:SUMY:PLC}/{PLC module status summary}}{%
+    \node[blk,text width=66mm,anchor=west] (i\i) at (0,\i*\dy)
+      {\texttt{\pv}\\ {\tiny\itshape \note}};
+  }
+
+% the AIM fast-interlock bits arrive through the VXI latch summary
+\node[tag,anchor=south west,align=left] at (2,10)
+  {\texttt{\{STN\}:STN:VXI:LTCH} --- AIM fast interlock bits};
+\draw[sig] (10,9.4) -- ($(i0.north west)+(10,0)$);
+
+\def\xB{80}
+\draw[bus] (\xB,3) -- (\xB,4*\dy-3);
+\foreach \i/\lab in {0/INPA, 1/INPB, 2/INPC, 3/INPD, 4/INPE}{%
+  \draw[draw=cNeut,thick] (i\i.east) -- node[above,tag]{\lab} (\xB,\i*\dy);
+}
+
+\node[ctrl,text width=62mm,anchor=west] (out) at (90,2*\dy)
+  {\textbf{\texttt{\{STN\}:STNOFF:SUMY:STAT.SEVR}}\\[2pt]
+   the single trip wire read by the SNL state machine};
+\draw[sig] (\xB,2*\dy) -- (out.west);
+\end{tikzpicture}

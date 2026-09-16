@@ -75,7 +75,13 @@
   // body.tex and the tikz/*.tex fragments are \input, not standalone documents
   "latex-workshop.latex.rootFile.useSubFile": false,
   "latex-workshop.latex.search.rootFiles.include": [
-    "Designs/tex/L_legacy_system_architecture.tex"
+    "Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.tex",
+    "Designs/tex/doc0-system-design/0_system_design_report.tex",
+    "Designs/tex/docI-interlock-architecture/I_interlock_architecture.tex"
+  ],
+  "latex-workshop.latex.search.rootFiles.exclude": [
+    "Designs/tex/common/tikztest.tex",
+    "Designs/tex/common/figsize.tex"
   ],
   "latex-workshop.latex.autoClean.run": "never",
   "latex-workshop.message.badbox.show": false,

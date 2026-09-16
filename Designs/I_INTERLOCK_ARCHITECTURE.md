@@ -14,7 +14,7 @@
 
 | Rev | Date | Author | Changes |
 |-----|------|--------|---------|
-| 1.8 | 2026-09-03 | Faya Wang | R17: Source-verification pass against the original EPICS/IOC configuration files, aligning this document with `Designs/tex/L_legacy_system_architecture.pdf` v3.0. **(a) The Allen-Bradley link is Remote I/O, not Data Highway+.** `rfApp/src/ab/allenBradley.html,v` identifies the VXI Slot 1 card as a 6008-SV "VMEbus Scanner **Remote I/O** Scanner", and `iocBoot/.../config.ab,v` is headed "Allen-Bradley **Remote I/O** Scanner Configuration". All 61 occurrences of "DH+" / "Data Highway+" replaced. **(b) The adapter assignments were reversed.** `rfApp/Db/rf_ab_4CV.substitutions,v` gives adapter 1 = `HVPSDCM` (the SLC-500 HVPS PLC, full rack — consistent with `config.ab,v` "1 0 Full" and with the 1747-DCM-FULL in chassis slot 1 of the Cassel PLC listing), adapter 2 = `CAVTUNR` (cavity tuners), adapter 3 = `STNDCM` (the RF MPS PLC). This document previously placed the RF MPS PLC on "Rack 1" and the SLC-500 on "Rack 2", which is backwards. **(c)** Fault-slot PV corrected from `{STN}:STN:NFAULT` to **`{STN}:STN:FAULT:NUM`** per `rf_states.st,v` line 544 (4 locations). **(d)** §10.4 CH1: HVPS divider ratio corrected from 1000:1 to **≈10,000:1**, and the nominal from −77 kV (an intermediate DC stage tap) to the typical **≈−72 to −75 kV** operating range. |
+| 1.8 | 2026-09-03 | Faya Wang | R17: Source-verification pass against the original EPICS/IOC configuration files, aligning this document with `Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf` v3.0. **(a) The Allen-Bradley link is Remote I/O, not Data Highway+.** `rfApp/src/ab/allenBradley.html,v` identifies the VXI Slot 1 card as a 6008-SV "VMEbus Scanner **Remote I/O** Scanner", and `iocBoot/.../config.ab,v` is headed "Allen-Bradley **Remote I/O** Scanner Configuration". All 61 occurrences of "DH+" / "Data Highway+" replaced. **(b) The adapter assignments were reversed.** `rfApp/Db/rf_ab_4CV.substitutions,v` gives adapter 1 = `HVPSDCM` (the SLC-500 HVPS PLC, full rack — consistent with `config.ab,v` "1 0 Full" and with the 1747-DCM-FULL in chassis slot 1 of the Cassel PLC listing), adapter 2 = `CAVTUNR` (cavity tuners), adapter 3 = `STNDCM` (the RF MPS PLC). This document previously placed the RF MPS PLC on "Rack 1" and the SLC-500 on "Rack 2", which is backwards. **(c)** Fault-slot PV corrected from `{STN}:STN:NFAULT` to **`{STN}:STN:FAULT:NUM`** per `rf_states.st,v` line 544 (4 locations). **(d)** §10.4 CH1: HVPS divider ratio corrected from 1000:1 to **≈10,000:1**, and the nominal from −77 kV (an intermediate DC stage tap) to the typical **≈−72 to −75 kV** operating range. |
 | 1.7 | 2026-04-15 | Faya Wang | R16: Internal consistency pass. Corrected platform name throughout Part V: §1.1 actor table, Part V body heading, §5.1 hardware row, and §5.6 EPICS PV path were all referencing old "PLC-5 / 1771-DCM" hardware. Hardware was replaced with Allen-Bradley PLC-5 with 1771 I/O (§5.1 Status row confirms "Hardware replaced"). Updated four locations to "PLC-5/1771 (upgraded from PLC-5 / 1771-DCM)". Fixed typo "CAllen-Bradley" → "Allen-Bradley" in §5.6. No functional content changed. |
 | 1.6 | 2026-04-14 | Faya Wang | R15: Added cascade physics analysis (§4.6). When RF drive is cut by SPEAR MPS permit withdrawal or orbit interlock (Slot 5), the klystron collector absorbs full cathode input power with no RF output — collector overpower fires the RF MPS PLC relay (Path A) within ~10–20 ms → Fast IC hardware HVPS kill within ~20–30 ms. The previous claim "no hardware-speed HVPS kill for these inputs under any circumstances" (§9.5) was incorrect. Corrected §9.5 table and paragraph; updated §4.4 key conclusion, §4.5 HVPS timing table and assessment text, §1.2 speed table (SPEAR MPS/orbit row) and SNL diagram note. Added §4.6 (cascade physics), §8.5 (example cascade fault event), §9.7 (cross-layer cascade interaction note). Updated TOC. |
 | 1.5 | 2026-04-14 | Faya Wang | R14: Corrected HVPS shutdown behavior for SPEAR MPS and orbit interlock paths. Codebase analysis shows that Slot 5 RF_FAULT assertion propagates through the EPICS alarm chain (AIM ISR → `STN:VXI:LTCH` MAJOR → `STNPARK:SUMY:STAT` MAJOR → `STNOFF:SUMY:STAT` MAJOR → `fault_stnoff`) into the SNL state machine, which then executes `s_go_off` — performing an orderly HVPS shutdown (~6 s: ramp to 0 + `hvpstrig=OFF`). The previous claim "no HVPS shutdown" for SPEAR MPS and orbit interlock was incorrect; the correct statement is "no immediate **hardware** HVPS shutdown (no SCR ENABLE removal or crowbar firing via Fast IC), but HVPS IS turned off ~6 s later via SNL orderly sequence." Updated §1.2 speed summary table (added SPEAR MPS/orbit row), §4.4 key conclusion, §4.5 analysis table and assessment text, §5.5 Path C note, §9.5 table. Also strengthened §4.5 assessment: Slot 5 is **essential** (not merely retained) because it is the sole integration point for SPEAR MPS and orbit interlock into the RF protection architecture — without it these signals have no effect on either RF or HVPS. |
@@ -1010,7 +1010,7 @@ Both paths use fiber optic to B514. **Both** must be asserted for the HVPS SCR t
 
 #### Chain 1 — HV Vacuum Contactor Relay Path
 
-The full relay chain from PPS to contactor, as routed through the SLC-500. This is the personnel-safety path described in `tex/L_legacy_system_architecture.pdf` §13.
+The full relay chain from PPS to contactor, as routed through the SLC-500. This is the personnel-safety path described in `tex/docL-legacy-architecture/L_legacy_system_architecture.pdf` §13.
 
 ```
 PPS Enable (GOB1208PNE, Pin E→F)
@@ -1039,7 +1039,7 @@ PPS 2 Enable (GOB1208PNE Pin G→H)
 Readback: Ross Switch NC Aux → TS-6 pins 11,12 → GOB1208PNE Readback C-D
 ```
 
-> **Critical design issue**: The PPS chain routes through SLC-500 ladder logic — a programmable device is in the personnel safety chain. This does not meet modern PPS standards (SLAC ES&H). Flagged in `tex/L_legacy_system_architecture.pdf` §13.4.
+> **Critical design issue**: The PPS chain routes through SLC-500 ladder logic — a programmable device is in the personnel safety chain. This does not meet modern PPS standards (SLAC ES&H). Flagged in `tex/docL-legacy-architecture/L_legacy_system_architecture.pdf` §13.4.
 
 #### Fail-Safe Directions
 
@@ -1944,7 +1944,7 @@ All findings in this document were derived from direct analysis of the following
 
 | Ref | File | Description |
 |-----|------|-------------|
-| **[R1]** | `Designs/tex/L_legacy_system_architecture.pdf` | SPEAR3 RF System Legacy Architecture (v2.5+) — primary system reference |
+| **[R1]** | `Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf` | SPEAR3 RF System Legacy Architecture (v2.5+) — primary system reference |
 
 ### Primary Source Code
 

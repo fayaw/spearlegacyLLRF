@@ -4,7 +4,7 @@
 %  Engine: LuaLaTeX (required -- see the Unicode note in preamble.tex)
 % ============================================================================
 \documentclass[letterpaper,11pt]{article}
-\input{preamble}
+\input{../common/preamble}
 
 % Marks a heading that exists in the outline but whose content has never been
 % written.  Printing the gap is better than printing a bare heading, because a
@@ -29,7 +29,7 @@
 \textbf{Document ID}    & SPEAR3-LLRF-PDR-001 Rev 1 \\
 \textbf{Tier}           & 1 --- Top-Level System Design Reference \\
 \textbf{Status}         & Release candidate; pending named-engineer sign-off \\
-\textbf{Source}         & \fpath{Designs/tex/0_system_design_report.tex} \\
+\textbf{Source}         & \fpath{Designs/tex/doc0-system-design/0_system_design_report.tex} \\
 \end{tabular}
 \end{minipage}
 \end{center}
@@ -43,7 +43,7 @@ interfaces between them.  It is the entry point for the detailed engineering
 design of each subsystem, not a substitute for it:
 \Cref{appendix-source-document-index} indexes the detailed design documents that
 carry the underlying evidence.  The legacy plant is described in full in
-\fpath{Designs/tex/L_legacy_system_architecture.pdf} (Doc L).
+\fpath{Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf} (Doc L).
 \end{keynote}
 
 \clearpage
@@ -52,6 +52,6 @@ carry the underlying evidence.  The legacy plant is described in full in
 \listoffigures
 \clearpage
 
-\input{body-doc0}
+\input{body}
 
 \end{document}

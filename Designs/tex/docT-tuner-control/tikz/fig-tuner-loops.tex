@@ -1,0 +1,38 @@
+% !TeX root = ../T_tuner_control_analysis.tex
+% The dual-loop tuner architecture.  The outer loop is drawn dashed and greyed
+% because on SPEAR3 its output is fixed at zero -- it is PEP-II inheritance.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+
+\node[blk,text width=92mm,anchor=north,draw=black!40,text=black!55,densely dashed]
+  (outer) at (60,0)
+  {\textbf{OUTER LOOP (voltage)}\\[2pt]
+   \texttt{STRENGTH} error $\rightarrow$ leaky integrator
+   $\rightarrow$ \texttt{LOAD:ANGLE:OFFS} ($\theta_\text{offset}$)\\[2pt]
+   {\bfseries disabled on SPEAR3: output $=0$}};
+
+\node[ctrl,text width=92mm,anchor=north] (inner) at (60,-30)
+  {\textbf{INNER LOOP (phase)}\\[2pt]
+   $\text{error} = \angle\text{probe} - \angle\text{fwd} + \theta_\text{offset}$\\
+   $\text{delta} = \text{error}\times(\text{mm}/\text{deg})\times\text{gain}$\\
+   $\text{new\_posn} = \text{current\_posn} + \text{delta}$
+   \;$\rightarrow$\; stepper motor};
+\draw[sig,draw=black!45] (outer.south) --
+  node[right,tag,xshift=1mm]{$\theta_\text{offset}$ ($=0$ on SPEAR3)} (inner.north);
+
+\node[rf,text width=92mm,anchor=north] (phys) at (60,-64)
+  {\textbf{CAVITY PHYSICS}\\[2pt]
+   tuner position $\rightarrow$ resonant frequency\\
+   resonant frequency $\rightarrow$ probe\slash forward phase difference};
+\draw[sig] (inner.south) -- node[right,tag,xshift=1mm]{motor moves the plunger} (phys.north);
+
+% the measurement that closes the inner loop.  Placed relative to inner.west so
+% the connector between them is exactly horizontal whatever the box heights.
+\node[blk,text width=32mm,anchor=east] (iqa) at ($(inner.west)-(12,0)$)
+  {\textbf{IQA} \qty{400}{\hertz}\\[1pt]
+   {\tiny\texttt{PROBE:PHASE.L}\\ \texttt{FRWD:PHASE.L}}};
+\draw[sig] (iqa.east) -- (inner.west);
+% plant back to the measurement, entering the IQA from below so that the line
+% never crosses the box it is feeding
+\draw[draw=cNeut,thick] (phys.west) -- (phys.west -| iqa.south);
+\draw[sig] (phys.west -| iqa.south) -- (iqa.south);
+\end{tikzpicture}

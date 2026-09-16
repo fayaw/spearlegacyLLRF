@@ -10,7 +10,7 @@ This directory contains technical notes for the SPEAR3 High Voltage Power Supply
 >
 > **Three systematic errors were found and corrected:**
 >
-> 1. The `SD-730-793-xx` family are **printed-circuit-board schematics for trigger, interlock and monitor electronics**, not HVPS power assemblies. Several notes (and, until September 2026, `Designs/tex/L_legacy_system_architecture.pdf`) described them as filter inductors, secondary rectifiers, filter capacitors and crowbar thyristors.
+> 1. The `SD-730-793-xx` family are **printed-circuit-board schematics for trigger, interlock and monitor electronics**, not HVPS power assemblies. Several notes (and, until September 2026, `Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf`) described them as filter inductors, secondary rectifiers, filter capacitors and crowbar thyristors.
 > 2. **`sd2372301200.pdf` is the Enerpro FCOG6100 firing-circuit schematic**, not the "Voltage Divider Network Schematic" it had been catalogued as everywhere in this repository. **No HVPS voltage-divider drawing appears to exist here.**
 > 3. **`sd7307940400.pdf` is an earlier-generation SCR Crowbar Trigger Board**, not the cable termination inductors. Those are on `sd7307900501.pdf` (Grounding Tank) and are **350 µH**, not the 200 µH design figure quoted in SLAC-PUB-7591.
 >

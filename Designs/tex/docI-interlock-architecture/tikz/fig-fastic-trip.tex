@@ -1,0 +1,35 @@
+% !TeX root = ../I_interlock_architecture.tex
+% Fast IC / AIM trip mechanism.  Pure hardware: the branch to the RFP and CLK
+% modules happens on the VXI backplane with no processor in the path.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+
+\node[rf,text width=78mm,anchor=north] (arc) at (45,0)
+  {\textbf{Arc detected on any channel} ($<\qty{1}{\micro\second}$)\\
+   \emph{or} Fast Interlock Chassis status asserted};
+
+% hardware outputs fired at the same instant, off to the side
+\node[pwr,text width=54mm,anchor=west] (out) at (92,-15)
+  {SCR ENABLE removed $\cdot$ CROWBAR fired\\
+   status word $\rightarrow$ AIM};
+\draw[draw=cNeut,thick] (arc.south) -- (45,-24);
+\draw[sig] (45,-15) -- (out.west);
+
+\node[plc,text width=78mm,anchor=north] (aim) at (45,-24)
+  {\textbf{AIM module asserts RF\_FAULT LOW}\\
+   VXI P2 backplane, open-collector line};
+
+% two independent modules watch the same backplane line
+\def\yB{-44}
+\draw[draw=cNeut,thick] (aim.south) -- (45,\yB);
+\draw[draw=cNeut,thick] (18,\yB) -- (72,\yB);
+
+\node[blk,text width=48mm,anchor=north] (rfp) at (18,\yB-4)
+  {\textbf{RFP module} (Slot 4)\\
+   zeros the RF drive DAC outputs\\
+   RF power collapses in-crate};
+\node[blk,text width=48mm,anchor=north] (clk) at (72,\yB-4)
+  {\textbf{CLK module} (Slot 2)\\
+   reference clock protection action};
+\draw[sig] (18,\yB) -- (rfp.north);
+\draw[sig] (72,\yB) -- (clk.north);
+\end{tikzpicture}

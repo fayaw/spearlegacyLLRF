@@ -46,7 +46,10 @@
 \usepackage{siunitx}
 \DeclareSIUnit\voltampere{VA}
 \DeclareSIUnit\VAR{var}
-\sisetup{per-mode=symbol,range-phrase={ to },range-units=single,
+% range-phrase must not rely on literal spaces (LaTeX strips them from a key
+% value, so "{ to }" renders as "10to20") and must force text mode (siunitx
+% sets numbers in math, where a bare "--" becomes two minus signs).
+\sisetup{per-mode=symbol,range-phrase={\text{--}},range-units=single,
          group-minimum-digits=4,detect-weight=true}
 
 % --- tables ----------------------------------------------------------------
@@ -56,10 +59,14 @@
 \renewcommand{\arraystretch}{1.18}
 % left-aligned, hyphenating paragraph column used by every wide table
 \newcolumntype{P}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+% Same, but \small: for dense tables.  The size must live in the column type --
+% wrapping a longtable in {\small ...} breaks its page-breaking \write.
+\newcolumntype{Q}[1]{>{\small\RaggedRight\arraybackslash}p{#1}}
 
 % --- graphics and figures --------------------------------------------------
 \usepackage{graphicx}
-\graphicspath{{figures/}{figures/photos/}{figures/generated/}}
+% Resolved from the document's own folder, which is the working directory.
+\graphicspath{{../common/}{../common/photos/}{../common/generated/}}
 \usepackage{float}
 \usepackage[font=small,labelfont=bf,width=0.92\linewidth]{caption}
 \usepackage{comment}

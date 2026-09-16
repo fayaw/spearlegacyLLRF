@@ -1,0 +1,23 @@
+% !TeX root = ../I_interlock_architecture.tex
+% HVPS enable chain: one software call descending through six layers to a
+% gate driver in another building.  Drawn as a staircase to keep the nesting.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+\def\dx{9}
+\def\dy{-11}
+
+\foreach \i/\sty/\txt in {%
+  0/ctrl/{SNL \texttt{rf\_states.st} \textbf{HVPSONSUB()} macro},
+  1/ctrl/{\texttt{pvPut(hvpstrig, ON)}},
+  2/blk/{\texttt{\{STN\}:HVPSSCR:ON:CTRL = 1}},
+  3/blk/{Remote I/O $\rightarrow$ SLC-500 (RIO adapter 1)},
+  4/plc/{OX8 relay output closed},
+  5/pwr/{fiber optic cable $\rightarrow$ B514},
+  6/pwr/{SCR gate driver enable}}{%
+    \node[\sty,anchor=north west,inner sep=3pt] (n\i) at (\i*\dx, \i*\dy) {\txt};
+  }
+
+% elbows land on the next box's west anchor, not on its corner
+\foreach \i [evaluate=\i as \j using int(\i+1)] in {0,...,5}{%
+  \draw[sig] ($(n\i.south west)+(4,0)$) |- (n\j.west);
+}
+\end{tikzpicture}

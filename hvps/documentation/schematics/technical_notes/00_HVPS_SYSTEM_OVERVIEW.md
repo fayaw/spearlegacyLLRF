@@ -13,7 +13,7 @@
 > - The Mermaid diagrams in §7–§8 and the board interconnection matrix have **not** been traced net-by-net against the drawings.
 > - A few component values (arc-detection R26/R33, monitor-board R33/R36) could not be confirmed on any drawing and are flagged in place.
 >
-> **Where this document disagrees with a per-drawing note in this directory, or with `Designs/tex/L_legacy_system_architecture.pdf`, those win.**
+> **Where this document disagrees with a per-drawing note in this directory, or with `Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf`, those win.**
 
 ### Revision history
 
@@ -1203,7 +1203,7 @@ SCR Inhibit → System Shutdown
 
 | Document | Content |
 |---|---|
-| [`../../../../Designs/tex/L_legacy_system_architecture.pdf`](../../../../Designs/tex/L_legacy_system_architecture.pdf) | **The consolidated legacy system reference.** Supersedes the older `Designs/4_HVPS_Engineering_Technical_Note.md` and `Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md`, both now in `Designs/obsolete/` |
+| [`../../../../Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf`](../../../../Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf) | **The consolidated legacy system reference.** Supersedes the older `Designs/4_HVPS_Engineering_Technical_Note.md` and `Designs/8_HVPS_PPS_INTERFACE_TECHNICAL_DOCUMENT.md`, both now in `Designs/obsolete/` |
 | [`../../switchgear/00_SYSTEM_OVERVIEW.md`](../../switchgear/00_SYSTEM_OVERVIEW.md) | Switchgear system overview |
 | [`../../plc/technical-notes/README.md`](../../plc/technical-notes/README.md) | PLC control system notes (verified clean) |
 | [`../../../../pps/diagrams/README.md`](../../../../pps/diagrams/README.md) | PPS system view and interconnection notes |
@@ -1213,4 +1213,4 @@ SCR Inhibit → System Shutdown
 **Document Status**: System overview; core power-chain and control content corrected against the source drawings, September 2026  
 **Last correction pass**: September 2026 (line-by-line)  
 **Confidence**: High for §1–§6 and §9–§12 where cross-referenced to a verified per-drawing note; **medium** for the Mermaid diagrams and the interconnection matrix in §7–§8, which have not been individually traced against the drawings  
-**Next Review**: after the field-verification items in `../../../../Designs/tex/L_legacy_system_architecture.pdf` §20.2 are closed
+**Next Review**: after the field-verification items in `../../../../Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf` §20.2 are closed

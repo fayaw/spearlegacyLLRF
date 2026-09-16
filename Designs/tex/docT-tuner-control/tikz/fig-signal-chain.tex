@@ -1,0 +1,32 @@
+% !TeX root = ../T_tuner_control_analysis.tex
+% Tuner signal chain across the three software layers: EPICS database, the SNL
+% state machine, and the motor record that finally moves hardware.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+
+% ===== EPICS database layer ================================================
+\node[blk,text width=34mm,anchor=west] (rec) at (8,0)
+  {\textbf{IQA records}\\{\tiny\texttt{PROBE:PHASE}\\ \texttt{FRWD:PHASE}\\ (\qty{400}{\hertz} acquisition)}};
+\node[blk,text width=34mm,anchor=west] (iq) at (50,0)
+  {\textbf{\texttt{subIQ.c}}\\{\tiny\texttt{subIQphaseErr}\\ \texttt{subIQphaseOff}\\ \texttt{subIQphase2posn}}};
+\node[blk,text width=34mm,anchor=west,draw=black!40,text=black!55] (sys) at (92,0)
+  {\textbf{\texttt{subSys.c}}\\{\tiny\texttt{subSysFreqOff}\\ \texttt{subSysFreqErr}\\ (PARK mode only)}};
+\draw[sig] (rec.east) -- (iq.west);
+\node[grp,fit=(rec)(iq)(sys),inner sep=6pt] (dbbox) {};
+\node[lbl,anchor=south west] at ($(dbbox.north west)+(1,1.5)$)
+  {EPICS DATABASE \quad\texttt{rf\_cav.db}, \texttt{rf\_stn\_cav.db}};
+
+% ===== SNL layer ===========================================================
+\node[ctrl,text width=110mm,anchor=north] (snl) at (67,-28)
+  {\textbf{\texttt{rf\_tuner\_loop.st}} --- SNL state machine, four instances\\[2pt]
+   \texttt{loop\_init} $\rightarrow$ \texttt{loop\_unknown} $\rightarrow$ \texttt{loop\_on}\\[2pt]
+   \texttt{sm\_posn} $+$ \texttt{posn\_delta} $\rightarrow$ \texttt{TUNR:POSN:CTRL}};
+\draw[sig] (dbbox.south) -- node[right,tag,xshift=1mm]
+  {\texttt{TUNR:POSN:DELTA} (event $\rightarrow$ SNL)} (snl.north);
+
+% ===== motor record ========================================================
+\node[pwr,text width=110mm,anchor=north] (mot) at (67,-58)
+  {\textbf{Stepper motor record} \quad\texttt{TUNR:STEP:MOTOR}\\[2pt]
+   \textbf{in service:} AB 1746-HSTP1 (\texttt{steppermotor} record type)\\
+   \textbf{in development:} Galil DMC-4143 --- not installed, not running};
+\draw[sig] (snl.south) -- (mot.north);
+\end{tikzpicture}

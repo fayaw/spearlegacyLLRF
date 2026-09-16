@@ -1,0 +1,56 @@
+% !TeX root = T_tuner_control_analysis.tex
+%  SPEAR3 Legacy LLRF -- Tuner Control System Technical Analysis (Doc T).
+%  Build:  powershell -ExecutionPolicy Bypass -File ..\build.ps1 -Doc T
+\documentclass[letterpaper,11pt]{article}
+\input{../common/preamble}
+
+% Verbatim-ish blocks.  \sigblock keeps the column alignment of signal and PV
+% traces; \codeblock is for C, EPICS database and SNL excerpts.
+\usepackage{fancyvrb}
+\DefineVerbatimEnvironment{sigblock}{Verbatim}%
+  {fontsize=\footnotesize,frame=leftline,framerule=0.6pt,rulecolor=\color{cNeut!35},
+   framesep=6pt,xleftmargin=8pt}
+\DefineVerbatimEnvironment{codeblock}{Verbatim}%
+  {fontsize=\footnotesize,frame=leftline,framerule=0.6pt,rulecolor=\color{cCtrl!45},
+   framesep=6pt,xleftmargin=8pt}
+
+\title{\vspace{-1.4cm}\bfseries SPEAR3 Legacy LLRF\\[2mm]
+       \Large Tuner Control System Technical Analysis}
+\author{Faya Wang\\[1mm]\normalsize RF Department, SSRL / Accelerator Directorate\\
+        \normalsize SLAC National Accelerator Laboratory}
+\date{September 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Document}  & Doc T --- Tuner Control System Technical Analysis \\
+\textbf{Scope}     & Reverse engineering of the legacy mechanical cavity tuner loop \\
+\textbf{Status}    & Reference analysis --- legacy system (AB 1746-HSTP1 stepper) \\
+\textbf{Source}    & \fpath{Designs/tex/docT-tuner-control/T_tuner_control_analysis.tex} \\
+\textbf{Companion} & Doc P (physics), Doc L (legacy architecture), Doc 0 (upgrade) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{4mm}
+\begin{keynote}
+This document reverse-engineers the tuner control loop \emph{as deployed on
+SPEAR3}, from the legacy \fpath{spear-rf-code-legacy/rfApp/} source tree. Two
+things are easy to get wrong when reading it. First, the architecture is a
+dual loop, but only the inner phase-regulation loop is active on SPEAR3: the
+outer voltage loop is PEP-II inheritance and its phase offset is fixed at zero.
+Second, the \textbf{AB 1746-HSTP1 is still the in-service controller}; the Galil
+DMC-4143 is in development and goes online only when the LLRF upgrade completes.
+\end{keynote}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+\input{body}
+
+\end{document}

@@ -1,0 +1,111 @@
+% !TeX root = I_interlock_architecture.tex
+%  SPEAR3 RF Station Legacy System Interlock Architecture (Doc I).
+%  Build:  powershell -ExecutionPolicy Bypass -File ..\build.ps1 -Doc I
+\documentclass[letterpaper,11pt]{article}
+\input{../common/preamble}
+
+% --- document-specific environments ----------------------------------------
+% Fault event timelines.  A description-style two-column layout rather than a
+% figure: the entries are long, and this keeps them searchable and in the flow.
+\newlength{\tltime}\setlength{\tltime}{0.20\linewidth}
+\newenvironment{timeline}
+  {\par\medskip\small\begin{list}{}{%
+     \setlength{\leftmargin}{\dimexpr\tltime+1.2em\relax}
+     \setlength{\labelwidth}{\tltime}
+     \setlength{\labelsep}{1.2em}
+     \setlength{\itemsep}{0.45\baselineskip}
+     \setlength{\parsep}{0pt}
+     \renewcommand{\makelabel}[1]{\hfill\textbf{\ttfamily\footnotesize ##1}}}}
+  {\end{list}\par\medskip}
+\newcommand{\tlrow}[2]{\item[#1] #2}
+
+% Verbatim-ish blocks.  \sigblock is for signal/PV traces that are laid out in
+% columns and must keep their alignment; \codeblock is for source excerpts.
+\usepackage{fancyvrb}
+\DefineVerbatimEnvironment{sigblock}{Verbatim}%
+  {fontsize=\footnotesize,frame=leftline,framerule=0.6pt,rulecolor=\color{cNeut!35},
+   framesep=6pt,xleftmargin=8pt,commandchars=\\\{\}}
+\DefineVerbatimEnvironment{codeblock}{Verbatim}%
+  {fontsize=\footnotesize,frame=leftline,framerule=0.6pt,rulecolor=\color{cCtrl!45},
+   framesep=6pt,xleftmargin=8pt}
+
+\title{\vspace{-1.4cm}\bfseries SPEAR3 RF Station\\[2mm]
+       \Large Legacy System Interlock Architecture}
+\author{Faya Wang\\[1mm]\normalsize RF Department, SSRL / Accelerator Directorate\\
+        \normalsize SLAC National Accelerator Laboratory}
+\date{September 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Document}       & Doc I --- Legacy System Interlock Architecture \\
+\textbf{Version}        & 1.8 \\
+\textbf{Status}         & To be released \\
+\textbf{Tier}           & 2 --- Legacy System Interlock Architecture \\
+\textbf{Source}         & \fpath{Designs/tex/docI-interlock-architecture/I_interlock_architecture.tex} \\
+\textbf{Companion}      & Doc L (legacy architecture), Doc 0 (upgrade design) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{4mm}
+\begin{keynote}
+This document traces every interlock path in the \emph{legacy} SPEAR3 RF station:
+what trips, how fast, through which hardware, and what the software can and
+cannot see. It is the reference against which the upgraded protection chain in
+Doc~0 is justified. Where the two disagree, the upgrade document states the
+intended future behaviour and this document states the present one.
+\end{keynote}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+\input{body}
+
+\end{document}
+
+% ---------------------------------------------------------------------------
+% REVISION HISTORY -- deliberately not rendered.  It belongs with the source,
+% not in a document sent to a reviewer.  Add a row for a substantive change;
+% leave historical rows frozen, since they record what was true at the time.
+%
+% 1.8  2026-09-03  Faya Wang
+%   R17: Source-verification pass against the original EPICS/IOC configuration
+%   files, aligning with Doc L v3.0.
+%   (a) The Allen-Bradley link is Remote I/O, not Data Highway+.  The VXI Slot 1
+%       card is a 6008-SV "VMEbus Remote I/O Scanner" per allenBradley.html,v,
+%       and config.ab,v is headed "Allen-Bradley Remote I/O Scanner
+%       Configuration".  All 61 occurrences of "DH+"/"Data Highway+" replaced.
+%   (b) The adapter assignments were reversed.  rf_ab_4CV.substitutions,v gives
+%       adapter 1 = HVPSDCM (SLC-500 HVPS PLC, full rack), adapter 2 = CAVTUNR
+%       (cavity tuners), adapter 3 = STNDCM (RF MPS PLC).  The document
+%       previously had the RF MPS PLC and the SLC-500 the other way round.
+%   (c) Fault-slot PV corrected from {STN}:STN:NFAULT to {STN}:STN:FAULT:NUM
+%       per rf_states.st,v line 544 (4 locations).
+%   (d) Sec 10.4 CH1: HVPS divider ratio corrected from 1000:1 to ~10,000:1,
+%       and the nominal from -77 kV to the typical -72 to -75 kV range.
+%
+% 1.7  2026-04-15  R16: Internal consistency pass on Part V platform naming.
+% 1.6  2026-04-14  R15: Added cascade physics analysis (Sec 4.6).  Collector
+%                  overpower fires MPS PLC Path A in ~10-20 ms after an RF
+%                  drive cut, giving a hardware HVPS kill in ~20-30 ms; the
+%                  earlier "no hardware-speed HVPS kill" claim was wrong.
+% 1.5  2026-04-14  R14: Corrected HVPS shutdown behaviour for the SPEAR MPS and
+%                  orbit interlock paths -- no immediate hardware HVPS kill,
+%                  but HVPS does go off ~6 s later via the SNL s_go_off
+%                  sequence.  Slot 5 is essential, not merely retained.
+% 1.4  2026-04-14  R13: SPEAR MPS beam permit and orbit interlock connect to the
+%                  back connector of VXI Slot 5, not to the Fast IC inputs.
+% 1.3  2026-04-10  R10-R12: Dual PPS chain interaction (Sec 6.9); RF shutdown
+%                  path for the HVPS PLC trip (Sec 9.6); Part X added.
+% 1.2  2026-04-09  R6-R9: TRIPLVL download path; AIM history buffer vs SNL fault
+%                  files; fiber output destinations; HVPS STATUS fiber.
+% 1.1  2026-04-09  R1-R5: AIM vs Fast IC roles; Slot 5 clarification; RF MPS PLC
+%                  as a three-path actor; I/O tables; two trip examples.
+% 1.0  2026-04-09  Initial document, synthesized from codebase review.
+% ---------------------------------------------------------------------------

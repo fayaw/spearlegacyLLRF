@@ -1456,7 +1456,7 @@ All supervisory communication in the upgraded system uses EPICS Channel Access o
 
 | Document | Content |
 |---|---|
-| [`tex/L_legacy_system_architecture.pdf`](tex/L_legacy_system_architecture.pdf) | **The legacy system reference.** All legacy values in this report should agree with it |
+| [`tex/docL-legacy-architecture/L_legacy_system_architecture.pdf`](tex/docL-legacy-architecture/L_legacy_system_architecture.pdf) | **The legacy system reference.** All legacy values in this report should agree with it |
 | [`I_INTERLOCK_ARCHITECTURE.md`](I_INTERLOCK_ARCHITECTURE.md) | Legacy interlock and protection architecture |
 | [`P_RF_PHYSICS_AND_PLANT.md`](P_RF_PHYSICS_AND_PLANT.md) | RF physics, cavity parameters, beam loading |
 | [`T_TUNER_CONTROL_SYSTEM_ANALYSIS.md`](T_TUNER_CONTROL_SYSTEM_ANALYSIS.md) | Tuner control system analysis |

@@ -1758,19 +1758,84 @@ This is the fastest loop in the system and is entirely closed inside the LLRF9 F
 
 \subsection{HVPS Supervisory Loop (\textasciitilde1 Hz)}\label{hvps-supervisory-loop-1-hz}
 
-\notwritten
+This loop trims the HVPS voltage setpoint to hold the requested operating point while respecting vacuum, gap-voltage and klystron-power limits. \textbf{The supervisory function is unchanged by the upgrade}; only the endpoints it reads and writes change.
+
+The legacy implementation is \fpath{rf_hvps_loop.st,v} (343 lines), which runs a 0.5\,s cycle with a 10\,s hard deadline and operates in one of three states --- \texttt{off}, \texttt{proc} and \texttt{on}:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{PROC (cavity processing)}: each cycle the loop compares klystron forward power against its limit and checks the cavity vacuum and gap-voltage alarm severities. If any is bad it applies a fixed negative step to the voltage setpoint; if all are good it applies a fixed positive step. This is what walks the cavities up in voltage during conditioning.
+\item
+  \textbf{ON (normal operation)}: the correction step is taken from the drive-power error when the direct loop is closed, or from the station gap-voltage error when it is not. The result is clamped to the configured voltage minimum and maximum.
+\item
+  \textbf{Tolerance supervision}: if the voltage readback disagrees with the requested value by more than the allowed difference for 10 consecutive cycles, the loop holds the setpoint and raises a status code rather than continuing to drive. A separate 10-cycle counter guards the case where the cavities are already at their voltage limit.
+\end{itemize}
+
+The loop reports one of 16 status codes (for example \texttt{GOOD}, \texttt{CAVV\_LIM}, \texttt{VOLT\_TOL}, \texttt{VOLT\_LIM}, \texttt{VACM\_BAD}) together with a human-readable string, so the operator sees \emph{why} the loop is holding rather than only that it is.
+
+\textbf{In the upgrade} the same algorithm runs in the EPICS coordinator at \textasciitilde1 Hz. The differences are all at the interfaces: the voltage setpoint and readback move over Ethernet to the CompactLogix HVPS PLC instead of through the Allen-Bradley serial link to the SLC-500, and the gap-voltage and drive-power inputs come from the LLRF9 units rather than from the RFP and IQA modules. Because the Waveform Buffer System now measures HVPS voltage and current directly, the loop also has a true power reading available where the legacy loop had only a forward-power proxy.
+
 \subsection{Tuner Control Loops (×4, \textasciitilde1 Hz)}\label{tuner-control-loops-4-1-hz}
 
-\notwritten
+One loop per cavity nulls the cavity detuning by driving the tuner stepper motor until the probe-to-forward phase difference reaches its setpoint. \textbf{The control law is unchanged by the upgrade.}
+
+The legacy implementation is \fpath{rf_tuner_loop.st,v} (555 lines), instantiated four times --- once per cavity --- with five states (\texttt{loop\_init}, \texttt{loop\_unknown}, \texttt{loop\_off}, \texttt{loop\_reset}, \texttt{loop\_on}). Each cycle it:
+
+\begin{enumerate}
+\tightlist
+\item
+  reads the cavity phase error (probe phase minus forward phase);
+\item
+  converts it to a tuner position delta through the per-cavity gain;
+\item
+  clamps the resulting position to the motor drive limits and skips the move entirely if the change falls inside the deadband, so the tuner does not chatter;
+\item
+  commands the move and then waits for the motor's done-moving flag before trusting the new position.
+\end{enumerate}
+
+Guards are on the motion rather than the arithmetic: five consecutive failed moves raise a motor-stall status, a missing or bad-severity phase measurement stops motion rather than moving on stale data, and forward power below the configured minimum disables the loop. There is a separate homing sequence with distinct home positions for the ON and PARK states, retried up to five times. The loop reports 14 status codes distinguishing the warning cases (at a drive limit, not at requested position, taking too long to move) from the non-functional cases (bad tuner readback, missing measurements, RF power too low).
+
+\textbf{In the upgrade} the phase measurement comes from the LLRF9 units, which deliver all four cavity probe phases at 10 Hz with sub-degree resolution --- an order of magnitude better than the legacy IQA chain --- and the motor command goes to the Galil DMC-4143 through EPICS motor records instead of to the Allen-Bradley 1746-HSTP1. The LLRF9 also provides its own built-in tuner control PVs (\texttt{GAIN\_P}, \texttt{GAIN\_I}, \texttt{OFFSET}, \texttt{CLOSE}, \texttt{MINFWD} per cavity), so the loop can either be closed inside the LLRF9 or run in the coordinator using LLRF9 phase data. Which of the two is used is a commissioning decision; the deadband, drive-limit and stall guards above are required either way.
+
 \subsection{Load Angle Offset Loop (\textasciitilde1 Hz)}\label{load-angle-offset-loop-1-hz}
 
-\notwritten
+This outer loop balances gap voltage across the four cavities by biasing the individual tuner phase setpoints, as described in Section~\ref{load-angle-offset-loop}. It reads the four cavity probe amplitudes, computes the imbalance, and adjusts each cavity's phase offset to redistribute power.
+
+\textbf{Legacy status}: the framework exists inside \fpath{rf_tuner_loop.st,v} and the offset is computed in the EPICS database, but it is \emph{not used} on SPEAR3 --- the phase offset fed to the tuner servo is fixed at zero, so the legacy tuners run in pure resonance-seeking mode. The mechanism is inherited from PEP-II, where it regulated cavity voltage in park mode.
+
+\textbf{In the upgrade} the loop becomes a distinct supervisory module in the EPICS coordinator rather than logic buried in the tuner sequencer, writing to the per-cavity tuner phase offset. Whether it is enabled is an operational decision; if it is, it needs an integrator limit and a hold condition tied to tuner loop health, because an outer loop writing into a servo that is itself faulted is a known way to walk a tuner into a limit.
+
 \subsection{Station State Machine}\label{station-state-machine}
 
-\notwritten
+The station sequencer owns turn-on, turn-off, mode changes and the response to a fault. \textbf{The sequencing responsibility is unchanged by the upgrade}; the state set is simplified because much of the legacy complexity existed to manage PEP-II loops that SPEAR3 does not use.
+
+The legacy implementation is \fpath{rf_states.st,v} (2,227 lines) --- by a wide margin the largest piece of legacy control software. It comprises 23 states across three concurrent state sets:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{5 operating states}: \texttt{OFF}, \texttt{PARK}, \texttt{TUNE}, \texttt{ON\_FM}, \texttt{ON\_CW}.
+\item
+  \textbf{12 transition substates} that carry the station between them, including the orderly shutdown, the station-reset retry, and the fault-file capture.
+\item
+  \textbf{5 loop-protection substates} that ramp gap voltage up and down and ramp the direct and comb loop gains, plus a concurrent fault-file writer.
+\end{itemize}
+
+Not every transition is legal. \texttt{PARK} cannot go directly to either ON state --- it must pass through \texttt{TUNE} --- and returning from \texttt{ON\_CW} to a lower state is routed through a controlled fallback rather than a direct jump. On a fault the sequencer captures the fault waveform files, performs an orderly shutdown, and then attempts an automatic restart up to a retry limit; a forced-fault latch blocks that automatic restart until an operator clears it.
+
+\textbf{In the upgrade} the sequencer moves to the EPICS coordinator and the state set collapses, because \texttt{ON\_FM} and the comb and gap-voltage-feedback ramps it existed to manage are PEP-II features that SPEAR3 does not use (Section~\ref{eliminated-loops}). Ramping drive power and closing the field loop become LLRF9 operations; the HVPS turn-on and turn-off sequences become CompactLogix operations; tuner homing becomes a Galil operation. What the coordinator retains is exactly the part that was always supervisory: deciding which transitions are legal, ordering the subsystem operations, arming and clearing the fault response, and enforcing the retry limit and the forced-fault latch.
+
+The one behaviour that must be preserved carefully is the interaction with the protection chain. The legacy sequencer could afford to be in the trip path because it ran on a real-time kernel; the upgraded coordinator is explicitly \emph{not} in the fast safety path (Section~\ref{protection-philosophy}), so the state machine must react to a trip that the Interface Chassis has already executed, rather than being the thing that executes it.
+
 \subsection{Calibration}\label{calibration}
 
-\notwritten
+Calibration nulls the offsets through the RF signal chain and measures the modulator response so that commanded I/Q corresponds to actual field. \textbf{The need is unchanged by the upgrade; the implementation is entirely replaced.}
+
+The legacy implementation is \fpath{rf_calib.st,v}, roughly 2,800 lines running a 28-state sequence that takes about 20 minutes. Each stage performs a binary search on a DAC channel, settling after each step, averaging a long I/Q record, and halving the step until the residual is within one LSB. It works through the cavity modulator terms, the direct loop, the comb loop, the summing and gain stages, the klystron stage and demodulator, and the final modulator null --- on the order of sixty DAC channels. It aborts cleanly on operator interrupt, on a missing comb module, and when RF is not enabled, restoring the saved DAC values on the way out.
+
+\textbf{In the upgrade} almost all of this disappears with the hardware it calibrated. The offsets being nulled were those of the analog RFP signal chain; the LLRF9 performs its own internal calibration of its ADC and DAC chains and provides it as a built-in function. What remains at the system level is the \emph{station} calibration that no single unit can do for itself: establishing the phase and amplitude relationship between the two LLRF9 units, the cable-length and coupler-calibration constants that convert LLRF9 readings into cavity gap voltage and waveguide power, and the tuner phase reference per cavity. These are coordinator-level procedures operating on LLRF9 measurements rather than DAC-level nulling, and they should be expected to take minutes rather than the legacy twenty.
+
 \subsection{Eliminated Loops}\label{eliminated-loops}
 
 The following legacy loops are eliminated in the upgrade because the LLRF9's digital feedback inherently provides their function (note: comb filter and GVF were used for PEP-II, not SPEAR3):
@@ -1837,10 +1902,45 @@ EPICS Coord
 
 \subsection{Interface Signal Types Summary}\label{interface-signal-types-summary}
 
-\notwritten
+The matrix above uses six physically distinct interface types. The division matters because it is what makes the "no safety function depends on the network" claim in Section~\ref{non-epics-communication-paths} true by construction.
+
+\begin{longtable}[]{@{}P{\dimexpr 0.20\linewidth-1.6\tabcolsep\relax}P{\dimexpr 0.30\linewidth-1.6\tabcolsep\relax}P{\dimexpr 0.24\linewidth-1.6\tabcolsep\relax}P{\dimexpr 0.26\linewidth-1.6\tabcolsep\relax}@{}}
+\toprule\noalign{}
+\textbf{Type} & \textbf{Used for} & \textbf{Between} & \textbf{Why this medium} \\
+\midrule\noalign{}
+\endhead
+Fiber optic & SCR ENABLE, CROWBAR, STATUS & Interface Chassis $\leftrightarrow$ HVPS & Full galvanic isolation across a building boundary at high voltage; immune to the ground transients a crowbar event produces \\
+Digital, opto-isolated & Permits, heartbeat, reset, fault status & Interface Chassis $\leftrightarrow$ MPS, Waveform Buffer, Arc Detect & Deterministic, no protocol stack; response set by propagation not by scan rate \\
+LEMO interlock & Interlock daisy-chain & LLRF9 \#1 $\leftrightarrow$ LLRF9 \#2 & Vendor-native interface; propagates a reflected-power trip between units without going through the Interface Chassis \\
+Dry contact / solid-state relay & Arc detector outputs & Arc receivers $\rightarrow$ Arc Detection Chassis & Native output of the Microstep-MIS receivers; contact closure needs no supply on the sensor side \\
+Analog & Heater voltage programming; HVPS voltage and current; V/I metering & MPS $\rightarrow$ Chroma; HVPS $\rightarrow$ Waveform Buffer and MPS & Continuous quantity with a hardware path that stays valid if the network is down \\
+EPICS Channel Access & Setpoints, readbacks, waveforms, status, commands & EPICS coordinator $\leftrightarrow$ all intelligent devices & Supervisory only; every device on it holds its last safe state if the link drops \\
+\bottomrule\noalign{}
+\end{longtable}
+
+Two conventions apply across all of them. Every permit is \textbf{active-high}, so a broken cable, a lost supply or a dark fiber removes the permit rather than granting it. And every interlock signal that crosses a chassis boundary is isolated --- by optocoupler, by fiber, or by relay contact --- so that no fault current or ground offset propagates between subsystems.
+
 \subsection{Open Interface Questions}\label{open-interface-questions}
 
-\notwritten
+The following interface details are not yet settled and are tracked here rather than being buried in the sections above. Each must be closed before the corresponding subsystem can be integrated.
+
+\begin{longtable}[]{@{}P{\dimexpr 0.26\linewidth-1.5\tabcolsep\relax}P{\dimexpr 0.51\linewidth-1.5\tabcolsep\relax}P{\dimexpr 0.23\linewidth-1.5\tabcolsep\relax}@{}}
+\toprule\noalign{}
+\textbf{Interface} & \textbf{Open question} & \textbf{Needed before} \\
+\midrule\noalign{}
+\endhead
+LLRF9 $\leftrightarrow$ Interface Chassis & Exact voltage logic levels for the interlock input and output. The input is selectable (3.3/5/24\,V) and the output is specified as \qty{4.75}{\volt} high through \qty{220}{\ohm}; the Interface Chassis input and output stages must be designed to match. & Interface Chassis PCB design \\
+EPICS version & The LLRF9 internal IOC runs EPICS Base 3.14, older than the SSRL site standard. Whether the units are migrated or bridged by a gateway is undecided. & Coordinator software design \\
+LLRF9 FPGA & Board generation (Spartan-6 vs.\ Artix-7) to be confirmed with the vendor; affects available firmware features. & Firmware feature commitments \\
+Network addressing & IP addresses and subnet allocation for both LLRF9 units, both PLCs, the motion controller and the Waveform Buffer are all TBD. & Any integration testing \\
+Soft IOC location & Whether the coordinator IOC is hosted in B132 or B137 is not yet confirmed with the controls group. & Rack and network planning \\
+Heater control & The ASYN/VISA EPICS module for the Chroma supply does not exist yet; the ASCII command subset to be supported is not defined. & Heater subsystem commissioning \\
+Tuner control split & Whether the tuner loop is closed inside the LLRF9 or in the coordinator using LLRF9 phase data (Section~\ref{tuner-control-loops-4-1-hz}). & Motion controller acceptance \\
+PPS connector & The installed connector part number requires field verification; the original Burndy circular 8-pin may already have been replaced by the Souriau Trim Trio equivalent. & PPS Interface Box fabrication \\
+Waveform Buffer spares & Two RF channels are unassigned. One is a candidate for a coupled klystron forward power signal feeding the collector power calculation. & Waveform Buffer PCB layout \\
+\bottomrule\noalign{}
+\end{longtable}
+
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \section{Protection Chain and Interlock Architecture}\label{protection-chain-and-interlock-architecture}

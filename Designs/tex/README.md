@@ -4,21 +4,44 @@ LaTeX is the **single source of truth** for these documents. The Markdown
 originals were removed once conversion was verified; their history remains in
 git.
 
-| Doc | Main file | Body | Figure prefix |
-|---|---|---|---|
-| **Doc 0** — System Design Report (upgrade) | `0_system_design_report.tex` | `body-doc0.tex` | `tikz/fig0-*` |
-| **Doc L** — Legacy System Architecture | `L_legacy_system_architecture.tex` | `body.tex` | `tikz/fig-*` |
+| Doc | Folder | Main file |
+|---|---|---|
+| **Doc 0** — System Design Report (upgrade) | `doc0-system-design/` | `0_system_design_report.tex` |
+| **Doc I** — Legacy Interlock Architecture | `docI-interlock-architecture/` | `I_interlock_architecture.tex` |
+| **Doc L** — Legacy System Architecture | `docL-legacy-architecture/` | `L_legacy_system_architecture.tex` |
+| **Doc P** — RF Physics, Control Theory and Plant | `docP-rf-physics/` | `P_rf_physics_and_plant.tex` |
+| **Doc T** — Tuner Control System Analysis | `docT-tuner-control/` | `T_tuner_control_analysis.tex` |
 
-Both share `preamble.tex`, so a change there affects both — rebuild both
-before committing preamble edits.
+Each document folder holds its own `body.tex` and its own `tikz/`, so figure
+names need no document prefix. Everything shared lives in `common/`. A change
+to `common/preamble.tex` affects every document — rebuild them all before
+committing one.
 
 ## Build
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File build.ps1          # Doc L (default)
-powershell -ExecutionPolicy Bypass -File build.ps1 -Clean   # from scratch
-powershell -ExecutionPolicy Bypass -File build.ps1 -Doc 0_system_design_report
+powershell -ExecutionPolicy Bypass -File build.ps1 -Doc L          # Doc L
+powershell -ExecutionPolicy Bypass -File build.ps1 -Doc 0 -Clean   # Doc 0, from scratch
+powershell -ExecutionPolicy Bypass -File build.ps1 -Doc I          # Doc I
+powershell -ExecutionPolicy Bypass -File build.ps1 -Doc P          # Doc P
+powershell -ExecutionPolicy Bypass -File build.ps1 -Doc T          # Doc T
 ```
+
+## Converting a Markdown document
+
+`scripts/md2tex.js` runs preprocess → pandoc → postprocess in one pass, and
+`scripts/verify.js` checks the result against the source (headings, key facts,
+equation count, equation tags, table and figure counts):
+
+```powershell
+node scripts/md2tex.js P
+node scripts/verify.js P
+```
+
+Add a document by extending the `DOCS` table at the top of each script. The
+converter writes a visible “figure not yet drawn” placeholder for any figure it
+has a name for but no `tikz/` file, so a half-finished conversion still builds
+and the gaps are obvious.
 
 `build.ps1` runs LuaLaTeX three times and then **fails the build** on any
 LaTeX error or any silently dropped character. Read the summary it prints; a
@@ -27,18 +50,20 @@ clean build reports zero for both.
 Preview a single diagram while working on it:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File preview-figs.ps1                     # all
-powershell -ExecutionPolicy Bypass -File preview-figs.ps1 -Only fig-vxi-crate # one
+powershell -ExecutionPolicy Bypass -File preview-figs.ps1                       # all, both docs
+powershell -ExecutionPolicy Bypass -File preview-figs.ps1 -Only fig-vxi-crate   # one
+powershell -ExecutionPolicy Bypass -File preview-figs.ps1 -Doc 0*              # one document
 ```
 
-`tikztest.tex` is the harness that script uses. It is a tool, not a build
-artifact — do not delete it when clearing `.aux`/`.log` files.
+`common/tikztest.tex` is the harness that script uses. It is a tool, not a
+build artifact — do not delete it when clearing `.aux`/`.log` files.
 
 Measure a diagram's natural size, so the `\adjustbox` caps on the rotated page
-are set from measurement rather than guesswork:
+are set from measurement rather than guesswork — run this from the document's
+own folder:
 
 ```powershell
-lualatex -interaction=nonstopmode "\def\FIG{fig-system-overview}\input{figsize}"
+lualatex -interaction=nonstopmode "\def\FIG{fig-system-overview}\input{../common/figsize}"
 ```
 
 It prints `width=`, `height=`, `\textwidth` and `\textheight` to the log.
@@ -51,9 +76,9 @@ Workshop to match. In the VS Code PDF tab:
 - **Ctrl+click in the PDF** jumps to the line in the `.tex` that produced it.
 - **Ctrl+Alt+J in the editor** jumps to that spot in the PDF.
 
-`body.tex`, `body-doc0.tex` and every `tikz/*.tex` carry a `% !TeX root =`
-comment so the extension knows which document they belong to. Keep that line at
-the top when adding a new figure file.
+`body.tex` and every `tikz/*.tex` carry a `% !TeX root =` comment so the
+extension knows which document they belong to. Keep that line at the top when
+adding a new figure file.
 
 If the build fails with `I can't write on file ...pdf`, the PDF is open in
 something that locks it. Close it, or use a viewer that does not lock.
@@ -70,26 +95,35 @@ true at the time.
 
 | Path | Contents |
 |---|---|
-| `0_system_design_report.tex` | Doc 0: title block, front matter, `\input{body-doc0}` |
-| `body-doc0.tex` | Doc 0 text. **Edit this** for content changes. |
-| `L_legacy_system_architecture.tex` | Doc L: title block, front matter, `\input{body}` |
-| `body.tex` | Doc L text. **Edit this** for content changes. |
-| `preamble.tex` | Shared preamble for all documents in this set |
-| `tikz/` | Hand-authored block diagrams, one file per figure |
-| `figures/photos/` | Photographs, copied here with LaTeX-safe names |
-| `figures/generated/` | Data plots built by `scripts/` (git-ignored) |
+| `common/preamble.tex` | Shared preamble for every document in this set |
+| `common/tikztest.tex` | Single-figure preview harness (a tool, not an artifact) |
+| `common/figsize.tex` | Reports a figure's natural size (a tool, not an artifact) |
+| `common/photos/` | Photographs, copied here with LaTeX-safe names, shared across documents |
+| `common/generated/` | Data plots built by `scripts/` (git-ignored) |
+| `<doc>/` — main `.tex` | Title block and front matter; `\input{../common/preamble}` and `\input{body}` |
+| `<doc>/body.tex` | The document text. **Edit this** for content changes. |
+| `<doc>/tikz/` | That document's hand-authored block diagrams, one file per figure |
 | `scripts/` | Generation of data-derived plots — see its README |
+
+## Adding a document
+
+1. Create `docX-short-name/` with `X_full_name.tex`, `body.tex` and `tikz/`.
+2. In the main file, `\input{../common/preamble}` then `\input{body}`.
+3. Add an entry to the `$docs` table at the top of `build.ps1`.
+4. Add the main file to `latex-workshop.latex.search.rootFiles.include` in
+   `.vscode/settings.json`, and put `% !TeX root =` at the top of `body.tex`
+   and every `tikz/*.tex`.
 
 ## LuaLaTeX is required
 
-Not a preference. `preamble.tex` maps every non-ASCII character used in these
-documents to a LaTeX construct via `newunicodechar`. Without those mappings
-LuaLaTeX **drops unmapped glyphs silently** — an unmapped `µ` turns
+Not a preference. `common/preamble.tex` maps every non-ASCII character used in
+these documents to a LaTeX construct via `newunicodechar`. Without those
+mappings LuaLaTeX **drops unmapped glyphs silently** — an unmapped `µ` turns
 "\qty{8}{\micro\farad}" written as literal `8 μF` into "8 F", with no error.
 That is why `build.ps1` treats a single dropped character as a build failure.
 
 When adding text containing a new symbol, build and check the "dropped
-characters" count. If it is non-zero, add the mapping to `preamble.tex`.
+characters" count. If it is non-zero, add the mapping to `common/preamble.tex`.
 
 ## Conventions
 
@@ -135,8 +169,13 @@ documents are **not** cited: the originals are in the repository, so cite
 those directly. Doc 0 has no reference appendix; it cites sources inline.
 
 **Tables.** Use the `P{width}` column type (left-aligned, hyphenating
-paragraph). Long file paths must be wrapped in `\fpath{...}` so they can break;
-a bare `\texttt{}` path will overflow the page.
+paragraph), or `Q{width}` for the same thing at `\small` in dense tables. Do
+**not** wrap a `longtable` in `{\small ...}` — the group breaks longtable's
+page-breaking `\write` and produces a baffling "Undefined control sequence"
+during `\shipout`. Long file paths must be wrapped in `\fpath{...}` so they can
+break; a bare `\texttt{}` path will overflow the page. `\fpath` must never
+appear in a `\caption{}`: captions are written to the `.lof`, and the
+`\nolinkurl` inside `\fpath` is not robust in a moving argument.
 
 **Cross-references.** Sections are auto-numbered; the `§n.m` references in the
 prose match because the numbering was preserved through the conversion. New

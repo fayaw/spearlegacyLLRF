@@ -1,0 +1,51 @@
+% !TeX root = ../I_interlock_architecture.tex
+% Cascade physics: cutting RF drive does not make the station safe by itself.
+% The klystron collector then absorbs the full cathode power, and it is that
+% secondary overpower trip -- not the original fault -- that kills the HVPS.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+
+\node[ctrl,text width=104mm,anchor=north] (cut) at (52,0)
+  {\textbf{RF drive cut}\quad Slot 5 RF\_FAULT $\rightarrow$ RFP module drive DAC $=0$};
+\node[tag,anchor=west,align=left] at (110,-6)
+  {RF output $\rightarrow 0$: the klystron cannot\\ amplify without drive
+   ($\sim\si{\micro\second}$ settling)};
+
+\node[rf,text width=104mm,anchor=north] (coll) at (52,-22)
+  {$P_\text{collector}\approx P_\text{cathode}$ --- exceeds the
+   \texttt{KLYSCOLL:POWER:ULIM} trip limit};
+\draw[sig] (cut.south) -- node[right,tag,xshift=1mm]
+  {$\approx\qty{10}{\milli\second}$, one PLC scan cycle} (coll.north);
+
+\node[plc,text width=104mm,anchor=north] (relay) at (52,-40)
+  {\textbf{RF MPS PLC fires its output relay} --- Path A activated};
+\draw[sig] (coll.south) -- (relay.north);
+
+% four consequences of Path A: three hardware, one software
+\def\yS{-52}
+% the drop out of the relay box and the turn onto the spine must be one path,
+% otherwise the corner is left open
+\draw[draw=cNeut,thick] (relay.south) -- (52,\yS) -- (14,\yS);
+\draw[bus] (14,\yS) -- (14,\yS-44);
+
+\foreach \i/\sty/\txt in {%
+  0/pwr/{\textbf{Fast IC:} SCR ENABLE fiber to B514 deasserted
+         ($<\qty{1}{\micro\second}$ after relay contact) $\rightarrow$ HVPS SCR gate
+         drivers disabled $\rightarrow$ HV output begins to collapse},
+  1/pwr/{\textbf{Fast IC:} CROWBAR FIRE $\rightarrow$ B514 crowbar triggered,
+         discharging residual capacitor energy},
+  2/rf/{\textbf{Fast IC:} RF\_FAULT asserted via AIM on the VXI backplane
+        (redundant RF cut)},
+  3/blk/{\textbf{Remote I/O:} \texttt{KLYSCOLL:POWER:LTCH} propagates to EPICS
+         ($\approx\qty{100}{\milli\second}$) $\rightarrow$ \texttt{KLYS:SUMY:LTCH}
+         $\rightarrow$ \texttt{STNOFF:SUMY:STAT} $\rightarrow$ \texttt{s\_go\_off}}}{%
+    \pgfmathsetmacro\y{\yS-6-\i*12}
+    \node[\sty,text width=104mm,anchor=west] (b\i) at (22,\y) {\txt};
+    \draw[sig] (14,\y) -- (b\i.west);
+  }
+
+\node[draw=cCtrl!45,fill=cCtrl!5,rounded corners=2pt,inner sep=4pt,
+      text width=104mm,anchor=north west,align=left] at (22,-108)
+  {Total time from RF cut to \textbf{hardware} HVPS kill:
+   $\approx\qtyrange{20}{30}{\milli\second}$ --- far faster than the
+   $\approx\qty{6}{\second}$ orderly SNL shutdown.};
+\end{tikzpicture}

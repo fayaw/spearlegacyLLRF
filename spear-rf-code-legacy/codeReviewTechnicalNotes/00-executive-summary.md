@@ -243,7 +243,7 @@ When discrepancies exist between sources, the following priority order applies:
 
 1. **Legacy source code** (`spear-rf-code-legacy/`) — ground truth for what the legacy system actually does
 2. **Legacy Technical Design Report** (`Designs/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md`) — authoritative for legacy system behavior interpretation
-3. **System Design Report** (`Designs/tex/0_system_design_report.pdf`) — authoritative for upgrade system specification
+3. **System Design Report** (`Designs/tex/doc0-system-design/0_system_design_report.pdf`) — authoritative for upgrade system specification
 4. **Software Design Document** (`Designs/10_SOFTWARE_DESIGN_DOCUMENT.md`) — authoritative for upgrade software architecture
 5. **Technical Notes 00–08** — analysis documents derived from sources above; defer to primary sources when conflicts exist
 
@@ -270,7 +270,7 @@ When discrepancies exist between sources, the following priority order applies:
 |----------|---------|
 | [Designs/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md](../../Designs/obsolete/A_LEGACY_LLRF_CONTROL_SYSTEM_TECHNICAL_DESIGN.md) | **Authoritative legacy system reference** — correct state names, complete PV architecture, control loop analysis, state transition tables |
 | [Designs/10_SOFTWARE_DESIGN_DOCUMENT.md](../../Designs/obsolete/10_SOFTWARE_DESIGN_DOCUMENT.md) | **Upgrade software architecture** — Python/PyEPICS/MATLAB coordinator design, legacy→upgrade code mapping (Section 22), PV contract reference |
-| [Designs/tex/0_system_design_report.pdf](../../Designs/tex/0_system_design_report.pdf) | **Master upgrade specification** — hardware architecture, signal list, channel allocation, protection chain |
+| [Designs/tex/doc0-system-design/0_system_design_report.pdf](../../Designs/tex/doc0-system-design/0_system_design_report.pdf) | **Master upgrade specification** — hardware architecture, signal list, channel allocation, protection chain |
 
 ### Document Relationships & Cross-References (Rev 5)
 

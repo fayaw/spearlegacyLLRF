@@ -1,0 +1,1284 @@
+% !TeX root = T_tuner_control_analysis.tex
+% Generated from T_TUNER_CONTROL_SYSTEM_ANALYSIS.md by scripts/md2tex.js, then hand-corrected.
+% Edit THIS file, not the markdown.
+
+\part{What and Why}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \protect\hyperlink{1-executive-summary}{Executive Summary}
+\item
+  \protect\hyperlink{2-physics-cavity-detuning-and-beam-loading}{Physics: Cavity Detuning and Beam Loading}
+\item
+  \protect\hyperlink{3-dual-loop-architecture-overview}{Dual-Loop Architecture Overview}
+\end{enumerate}
+
+\subsection{Part II --- How It Works}\label{part-ii--how-it-works}
+
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  \protect\hyperlink{4-inner-loop-phase-regulation}{Inner Loop: Phase Regulation}
+\item
+  \protect\hyperlink{5-outer-loop-voltage-regulation}{Outer Loop: Voltage Regulation}
+\item
+  \protect\hyperlink{6-sequencer-housekeeping-and-error-handling}{Sequencer: Housekeeping and Error Handling}
+\item
+  \protect\hyperlink{7-disabled-path-park-mode-pep-ii-only}{Disabled Path: Park Mode (PEP-II Only)}
+\end{enumerate}
+
+\subsection{Part III --- Analysis}\label{part-iii--analysis}
+
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{7}
+\tightlist
+\item
+  \protect\hyperlink{8-control-loop-analysis}{Control Loop Analysis}
+\item
+  \protect\hyperlink{9-hardware-interface}{Hardware Interface}
+\item
+  \protect\hyperlink{10-design-gaps-and-upgrade-opportunities}{Design Gaps and Upgrade Opportunities}
+\item
+  \protect\hyperlink{11-operational-summary-spear3-as-deployed}{Operational Summary: SPEAR3 As Deployed}
+\end{enumerate}
+
+\subsection{Appendices}\label{appendices}
+
+
+\begin{itemize}
+\tightlist
+\item
+  \protect\hyperlink{appendix-a-complete-epics-signal-chain}{A. Complete EPICS Signal Chain}
+\item
+  \protect\hyperlink{appendix-b-parameter-reference}{B. Parameter Reference}
+\item
+  \protect\hyperlink{appendix-c-snl-variables-constants-and-status-codes}{C. SNL Variables, Constants, and Status Codes}
+\item
+  \protect\hyperlink{appendix-d-source-traceability-index}{D. Source Traceability Index}
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\part{What and Why}
+
+\section{Executive Summary}\label{executive-summary}
+
+
+The SPEAR3 tuner control system keeps each cavity at its resonant frequency by mechanically adjusting a tuner plunger in response to measured phase error. The primary disturbance it compensates is \textbf{beam-loading-induced detuning} --- the reactive component of beam current shifts the cavity\textquotesingle s apparent resonant frequency in proportion to beam current. A secondary, slower disturbance is thermal drift from RF heating.
+
+The system was designed as \textbf{two nested feedback loops}:
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.0568\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.3295\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.3523\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.0455\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.2159\linewidth-1.60\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Loop & What it regulates & Controller type & Rate & Status in SPEAR3 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{Inner} & Phase error (probe − forward) & Proportional → stepper motor & 2 Hz & \textbf{Active} \\
+\textbf{Outer} & Cavity voltage (strength) & Leaky integrator → phase offset & 2 Hz & \textbf{Disabled by default} \\
+\end{longtable}
+
+\textbf{In SPEAR3 as deployed, only the inner loop is active.} It drives the cavity to the resonant frequency calibrated during a no-beam reference procedure. The outer voltage loop exists in the code but its output is structurally clamped to zero (see §5.3). The PARK mode frequency-domain path is PEP-II functionality, permanently disabled.
+
+\textbf{Key numbers:}
+
+\begin{itemize}
+\tightlist
+\item
+  2 Hz loop rate, 4 cavities, station prefix \texttt{SRF1:}
+\item
+  Stepper motor: 3 mm/s, 0.003175 mm/step, range −29.5 to +18 mm
+\item
+  Phase deadband: 0.25° (design), conversion: 0.020--0.030 mm/° (nominal operational range per {[}W\_tuner\_input{]}), max delta: 1 mm/cycle
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Physics: Cavity Detuning and Beam Loading}\label{physics-cavity-detuning-and-beam-loading}
+
+
+\subsection{Why the Tuner Exists}\label{why-the-tuner-exists}
+
+
+An RF cavity has a resonant frequency \(f_0\) determined by its geometry. When driven off-resonance, the generator must supply extra reactive power. The mechanical tuner adjusts cavity geometry to keep \(f_0\) aligned with the drive frequency (476 MHz at SPEAR3), minimizing reflected power and maximizing efficiency.
+
+Two phenomena shift the effective resonant frequency during operation:
+
+\textbf{Beam loading (primary, fast):} When stored beam traverses the cavity, the reactive component of the beam-induced current shifts the apparent resonant frequency by:
+
+\[\Delta f_{beam} = -\frac{f_0}{4 Q_L} \cdot \frac{I_b \sin\phi_s}{\pi V_{gap}}\]
+
+where \(I_b\) is beam current, \(\phi_s\) is synchronous phase, \(Q_L\) is loaded cavity Q (\textasciitilde7000), and \(V_{gap}\) is gap voltage. This detuning is proportional to beam current and changes dynamically as beam is injected, decays, or is lost. At SPEAR3 operating conditions (\(I_b \sim 100\text{–}500\) mA), beam loading can detune the cavity by tens of kHz.
+
+\textbf{Thermal drift (secondary, slow):} RF heating causes slow mechanical deformation of the cavity body, shifting the resonant frequency on timescales of minutes to hours. At SPEAR3\textquotesingle s operating gradient this is much smaller than beam loading.
+
+\subsection{The Load Angle}\label{the-load-angle}
+
+
+For a driven cavity with beam loading, define:
+
+\begin{itemize}
+\tightlist
+\item
+  \(\phi_L\) = load angle = phase of cavity field relative to generator
+\item
+  \(\psi\) = forward coupler phase relative to cavity probe
+\end{itemize}
+
+The optimal detuning \(\Delta\omega_{opt}\) for minimum generator power is:
+
+\[\Delta\omega_{opt} = -\frac{\omega_0}{2Q_L} \cdot \frac{I_b \sin\phi_s}{V_{gap}}\]
+
+This corresponds to a target load angle \(\psi_{target}\) where the generator operates most efficiently.
+
+\subsection{How the Error Signal Maps to Detuning}\label{how-the-error-signal-maps-to-detuning}
+
+
+The inner loop measures:
+
+\[\text{error} = \phi_{probe} - \phi_{fwd} + \theta_{offset}\]
+
+With \(\theta_{offset} = 0\) (as in SPEAR3), \texttt{error\ =\ 0} means \(\phi_{probe} = \phi_{fwd}\), which corresponds to \textbf{resonance} (zero detuning). The tuner drives toward this condition.
+
+With a nonzero \(\theta_{offset}\), the tuner drives to \(\phi_{probe} - \phi_{fwd} = -\theta_{offset}\), applying a deliberate detuning of approximately:
+
+\[\Delta f \approx \frac{\theta}{90°} \cdot \frac{f_0}{4 Q_L}\]
+
+\subsection{The IQA Calibration Requirement --- Why the Target Is Zero}\label{the-iqa-calibration-requirement--why-the-target-is-zero}
+
+
+The inner loop drives \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}ERR\ →\ 0}. But the raw IQA measurements include arbitrary phase offsets from cable lengths, directional coupler geometry, and signal conditioning hardware. The measured phase difference at true resonance is generally \emph{not} zero.
+
+\textbf{A calibration step establishes the zero reference:}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  With \textbf{no beam} (so beam loading does not shift the resonant frequency), operators sweep the tuner through resonance
+\item
+  At resonance (confirmed by minimum reflected power or maximum stored energy), the EPICS IQA phase offset parameters are set so that \texttt{PROBE:\allowbreak{}PHASE.\allowbreak{}L\ −\ FRWD:\allowbreak{}PHASE.\allowbreak{}L\ =\allowbreak{}\ 0}
+\item
+  From that point forward, \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}ERR\ =\allowbreak{}\ 0} means resonance; any nonzero value means detuning by \(\Delta f \approx \frac{\epsilon}{90°} \cdot \frac{f_0}{4 Q_L}\)
+\end{enumerate}
+
+\textbf{EPICS panel parameters for this calibration:} The per-signal offsets described in step 2 are set via the \textbf{"Probe Phase Offset"} and \textbf{"Frwd Phase Offset"} parameters on the Tuner Inputs \& Constants panel {[}W\_tuner\_input{]}. These are the operator-accessible knobs that translate the raw IQA \texttt{.L} measurement to zero at resonance. Both offsets are determined during tuner configuration.
+
+\textbf{Why \texttt{.L} rather than \texttt{.VAL}?} Both \texttt{PROBE:PHASE} and \texttt{FRWD:PHASE} have a \texttt{.VAL} field with an individual per-signal phase offset subtracted (for beam physics applications). The \texttt{.L} field is the raw input before this offset. Using \texttt{.L} means the load angle calibration is set once at the system level (both \texttt{.L} traces zeroed at resonance) rather than needing to track per-signal offsets.
+
+\textbf{Practical implication:} If the IQA phase calibration is incorrect or has drifted (hardware swap, cable re-routing), the tuner drives the cavity to the wrong frequency --- it minimizes the measured phase difference, but that measured zero no longer corresponds to the true resonance. The system has no independent check of resonance other than this phase measurement.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Dual-Loop Architecture Overview}\label{dual-loop-architecture-overview}
+
+
+\subsection{The Two Loops}\label{the-two-loops}
+
+
+The system was designed with two nested feedback loops. The \textbf{inner loop} (phase regulation) runs at 2 Hz and drives a stepper motor to null the measured phase error. The \textbf{outer loop} (voltage regulation) is a slow integrator that adjusts the inner loop\textquotesingle s phase setpoint to maintain cavity voltage.
+
+\begin{figure}[tbp]
+\centering
+\begin{fitpicture}\input{tikz/fig-tuner-loops}\end{fitpicture}
+\caption{The dual-loop tuner architecture: an inner phase-regulation loop closed on the load angle error, and an outer voltage-regulation loop that biases its setpoint. On SPEAR3 only the inner loop is active.}\label{fig:tuner-loops}
+\end{figure}
+
+\textbf{In SPEAR3 as deployed:} \(\theta_{offset} = 0\) always. The outer loop exists in the code architecture but defaults to disabled on a fresh start without autosave (see §5.3). In normal operation with autosave restore the outer loop can be functional. The tuner operates in pure resonance-seeking mode --- zero phase error means resonance.
+
+\subsection{Station Configuration}\label{station-configuration}
+
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.2368\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.4211\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.3421\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Item & Value & Source \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Station prefix & \texttt{SRF1:} & \texttt{rf\_\allowbreak{}stn\_\allowbreak{}4CV.\allowbreak{}substitutions,\allowbreak{}v} \\
+Cavity prefix & \texttt{\{STN\}:CAV\{N\}} (N=1..4) & \texttt{rf\_cav.db,v} \\
+Number of cavities & 4 (independent tuner per cavity) & \texttt{rf\_\allowbreak{}tuner\_\allowbreak{}loop.\allowbreak{}st,\allowbreak{}v} \\
+RF frequency & 476 MHz & \texttt{rf\_cav.db,v} \\
+Loop rate & 2 Hz (SCAN="2 second") & \texttt{rf\_\allowbreak{}stn\_\allowbreak{}cav.\allowbreak{}db,\allowbreak{}v} \\
+\end{longtable}
+
+\subsection{Station State Machine Context}\label{station-state-machine-context}
+
+
+The tuner loop only acts in \texttt{ON\_CW} state. The state codes (from \texttt{rf\_\allowbreak{}station\_\allowbreak{}state.\allowbreak{}h,\allowbreak{}v}) are:
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.1111\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.0889\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.8000\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+State & Code & Tuner Behavior \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+OFF & 0 & Loop idle, no motor movement \\
+PARK & 1 & PEP-II only --- disabled in SPEAR3 \\
+TUNE & 2 & Ramp/transition state \\
+ON\_FM & 3 & Transition state \\
+\textbf{ON\_CW} & \textbf{4} & \textbf{Active control --- phase-domain path} \\
+\end{longtable}
+
+\subsection{Software Components}\label{software-components}
+
+
+\begin{figure}[tbp]
+\centering
+\begin{fitpicture}\input{tikz/fig-signal-chain}\end{fitpicture}
+\caption{Tuner signal chain from the cavity probe and forward coupler through the IQA modules to the stepper motor record.}\label{fig:signal-chain}
+\end{figure}
+
+\subsubsection{Galil controller status}\label{-galil-controller-status}
+
+\begin{warnbox}
+Per the system owner: the Galil DMC-4143 control \textbf{has not been installed and is not in operation --- it is in development}. Test moves were performed on the existing cavity motors and worked fine, but the controller is expected to go online only \textbf{when the current LLRF upgrade project is finished}. It has \emph{not} replaced the Allen-Bradley hardware.
+
+\textbf{The AB 1746-HSTP1 stepper controller remains the in-service hardware.} Everything in this document describing present-day tuner behaviour refers to the AB path; Galil material is forward-looking.
+\end{warnbox}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\part{How It Works}
+
+\section{Inner Loop: Phase Regulation}\label{inner-loop-phase-regulation}
+
+
+This section traces the signal from IQA measurement through to motor command --- the active control path in SPEAR3.
+
+\subsection{Step 1 --- Phase Error Measurement}\label{step-1--phase-error-measurement}
+
+
+\textbf{C function:} \texttt{subIQphaseErr} --- \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}subIQ.\allowbreak{}c,\allowbreak{}v} (line 650)\\
+\textbf{EPICS record:} \texttt{\$(S):\allowbreak{}\$(C)LOAD:\allowbreak{}ANGLE:\allowbreak{}ERR}
+
+\begin{codeblock}
+psub->val = psub->l = psub->a - psub->b + psub->c + psub->d;
+if      (psub->val < -180.0) psub->val += 360.0;
+else if (psub->val >  180.0) psub->val -= 360.0;
+\end{codeblock}
+
+\[\boxed{\text{LOAD:ANGLE:ERR} = \phi_{probe} - \phi_{fwd} + \theta_{offset} + 0}\]
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.2958\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.2113\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.4930\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Input & PV & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+INPA (\(\phi_{probe}\)) & \texttt{PROBE:PHASE.L} & Unadjusted probe phase (degrees) \\
+INPB (\(\phi_{fwd}\)) & \texttt{FRWD:PHASE.L} & Unadjusted forward phase (degrees) \\
+INPC (\(\theta_{offset}\)) & \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}OFFS} & Target phase offset (= 0 in SPEAR3) \\
+INPD & --- & Spare, always 0 \\
+\end{longtable}
+
+Result wrapped to \([-180°, +180°]\). Alarm limits: \texttt{HIHI/\allowbreak{}LOLO\ =\allowbreak{}\ ±5°} (MAJOR).
+
+\textbf{Load angle error limit (Ld Angle Err Limit):} The operator panel exposes a separate parameter \textbf{"Ld Angle Err Limit"} (nominal \textbf{0.5°} per {[}W\_tuner\_input{]}) that is distinct from the ±5° EPICS HIHI/LOLO alarms. When \texttt{\textbar{}LOAD:\allowbreak{}ANGLE:\allowbreak{}ERR\textbar{}} exceeds this limit, the outer loading angle offset integrator (§5.2) is \textbf{frozen} --- no further offset accumulation occurs until the error returns within bounds. This provides a guard against the outer loop winding up during large transient detuning events.
+
+\textbf{Note on \texttt{.L} field:} Uses unadjusted (pre-offset) phase from IQA records. The \texttt{.VAL} field has a per-signal phase offset subtracted for beam physics applications --- that subtraction is separate from the load angle target. See §2.4 for the calibration requirement that makes \texttt{error\ =\ 0} correspond to resonance.
+
+\begin{codeblock}
+grecord(sub,"$(S):$(C)LOAD:ANGLE:ERR") {
+    field(INAM,"subIQinit")
+    field(SNAM,"subIQphaseErr")
+    field(INPA,"$(S):$(C)PROBE:PHASE.L  NPP MS")
+    field(INPB,"$(S):$(C)FRWD:PHASE.L   NPP MS")
+    field(INPC,"$(S):$(C)LOAD:ANGLE:OFFS.VAL NPP NMS")
+    field(EGU,"deg")
+    field(HOPR,"10")    field(LOPR,"-10")
+    field(HIHI,"5")     field(LOLO,"-5")
+    field(HHSV,"MAJOR") field(LLSV,"MAJOR")
+}
+\end{codeblock}
+
+\subsection{Step 2 --- Phase Error to Position Delta}\label{step-2--phase-error-to-position-delta}
+
+
+\textbf{C function:} \texttt{subIQphase2posn} --- \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}subIQ.\allowbreak{}c,\allowbreak{}v} (line 670)\\
+\textbf{EPICS record:} \texttt{\$(S):\allowbreak{}\$(C)TUNR:\allowbreak{}POSN:\allowbreak{}DELTA}
+
+\begin{codeblock}
+// Select error source based on station state
+if (state == STATION_PARK) error = G;  // park freq error (PEP-II)
+else                        error = F;  // load angle error (SPEAR3 ON_CW)
+
+gain = clamp(gain, 0, 1);  // CAVTUNR:LOOP:GAIN
+
+if (|error| > deadband_B):
+    delta = clamp(error * C_mm_per_deg * gain, -D_mm, +D_mm)
+else:
+    delta = 0
+\end{codeblock}
+
+\[\boxed{\Delta x = \text{clamp}\!\left(\epsilon \cdot C_{mm/deg} \cdot G_{loop},\; {-D},\; {+D}\right) \quad \text{if } |\epsilon| > B}\]
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.0499\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.2639\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.5278\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.1583\linewidth-1.50\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Input & PV / Value & Design Value & DB Status \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+A & \texttt{STN:\allowbreak{}STATE:\allowbreak{}RBCK} (station state) & --- & ✅ wired \\
+B & deadband (degrees) & 0.25° & ❌ commented out \\
+C & mm per degree & 0.020--0.030 mm/° (nominal range per {[}W\_tuner\_input{]}) & ❌ commented out \\
+D & max delta per cycle & 1 mm & ❌ commented out \\
+E & \texttt{CAVTUNR:\allowbreak{}LOOP:\allowbreak{}GAIN} & 0--1; nominal \textbf{1.00} (always run at unity per {[}W\_tuner\_input{]}) & ✅ wired \\
+F & \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}ERR} & degrees & ✅ wired \\
+G & \texttt{FREQ:ERR} (PARK only) & degrees & ✅ wired (inactive) \\
+\end{longtable}
+
+\begin{quote}
+\textbf{⚠ Configuration Gap:} INPB, INPC, INPD are all commented out in \texttt{rf\_cav.db,v}. At startup these default to 0, making C=0 (delta always 0) and D=0 (output clamped to 0). The tuner is non-functional without autosave restore or operator initialization.
+\end{quote}
+
+\subsection{Step 3 --- SNL Motor Command Integration}\label{step-3--snl-motor-command-integration}
+
+
+\textbf{Source:} \texttt{rfApp/\allowbreak{}src/\allowbreak{}rf\_\allowbreak{}tuner\_\allowbreak{}loop.\allowbreak{}st,\allowbreak{}v} --- the \texttt{loop\_on} state, 2 Hz LOOP:READY event handler
+
+After the IQA chain computes \texttt{POSN:DELTA}, the SNL sequencer integrates it into an absolute motor position:
+
+\begin{sigblock}
+pvGet(sm_posn)                              // current motor position (from .RBV)
+pvGet(posn_delta)                           // phase→position result
+
+// MOTOR SANITY CHECK: Did the motor reach last commanded position?
+if (|posn_ctrl − sm_posn| > sm_rdbd) AND (prev_loop_ctrl == ON):
+    loop_status = LOOP_SM_CTRL_STATUS       // missed previous target
+    prev_loop_ctrl = OFF                    // suppress until re-enabled
+
+// Compute new absolute target
+posn_new = sm_posn + posn_delta             // integrate onto current position
+posn_new = clamp(posn_new, sm_drvl, sm_drvh) // enforce travel limits
+
+// Write only if position changed or loop just re-enabled
+if (posn_ctrl != posn_new) OR (prev_loop_ctrl != ON):
+    posn_ctrl = posn_new
+    pvPut(posn_ctrl)                        // → FLNK → motor record
+prev_loop_ctrl = loop_ctrl
+\end{sigblock}
+
+\textbf{Key design choice:} The SNL uses \texttt{sm\_posn} (motor \texttt{.RBV} --- actual position) as the base for each cycle, not the last commanded \texttt{posn\_ctrl}. This means the inner loop is truly proportional --- each cycle\textquotesingle s motor command is: \(x_{new} = x_{actual} + \Delta x\). The position integration is \emph{implicit} through new commands building on the actual position.
+
+\textbf{Outer loop trigger} (coupling to §5): After the motor update, the SNL also fires the outer voltage integrator:
+
+\begin{sigblock}
+if (station_state != STATION_PARK) AND (dmov_meas_count >= 1):
+    pvPut(phase_offset_proc)     // writes PROC to LOAD:ANGLE:UNADOFFS
+\end{sigblock}
+
+This \texttt{phase\_\allowbreak{}offset\_\allowbreak{}proc} write is the only mechanism that triggers the outer loop. It only fires when the motor was idle (\texttt{DMOV=1}) and the inner loop completed a full update. See §5 for the outer loop details.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Outer Loop: Voltage Regulation}\label{outer-loop-voltage-regulation}
+
+
+\subsection{Purpose and Design Intent}\label{purpose-and-design-intent}
+
+
+The outer loop\textquotesingle s job is to find the \textbf{optimal detuning} for the prevailing beam loading conditions. Rather than computing this from beam current (which would require accurate knowledge of \(I_b\), \(\phi_s\), and \(Q_L\)), it uses an implicit approach: adjust the load angle offset until the cavity voltage (expressed as "strength") matches a setpoint. The physics ensures that this condition is satisfied only at the optimal operating point.
+
+\subsection{\texorpdfstring{The Integrator --- \texttt{subIQphaseOffsU}}{The Integrator --- subIQphaseOffsU}}\label{the-integrator--subiqphaseoffsu}
+
+
+\textbf{C function:} \texttt{subIQphaseOffsU} --- \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}subIQ.\allowbreak{}c,\allowbreak{}v} (line 551)\\
+\textbf{EPICS record:} \texttt{\$(S):\allowbreak{}\$(C)LOAD:\allowbreak{}ANGLE:\allowbreak{}UNADOFFS}
+
+\textbf{Regulated quantity --- cavity strength:}
+
+\[\text{STRENGTH} = \frac{\text{PROBE:AMPL}}{\text{STN:VOLT}} \times 100\%\]
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{PROBE:AMPL} = cavity probe signal amplitude (kV)
+\item
+  \texttt{STN:VOLT} = total station gap voltage sum across all cavities (kV)
+\item
+  Clamped to 0\% when \texttt{STN:\allowbreak{}VOLT\ \textless{}\ 2\ kV} (hardwired floor in \texttt{subIQpowerEff})
+\end{itemize}
+
+\texttt{STRENGTH:CTRL} (ao, \%, DRVH=100) is the operator setpoint.\\
+\texttt{STRENGTH:DIFF} (ao, \%, DRVH=100) is the integrator deadband (nominal operating value \textbf{0.05\%} per {[}W\_tuner\_input{]}).
+
+\textbf{Trigger mechanism:} NOT driven by the 2 Hz scan record. Triggered by the SNL sequencer writing PROC to \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}UNADOFFS.\allowbreak{}PROC} (via \texttt{phase\_\allowbreak{}offset\_\allowbreak{}proc} PV) --- see §4.3. This means the outer loop only fires when the inner loop has confirmed motor idleness and completed a full update.
+
+\textbf{Integrator update equation:}
+
+\[\theta_{unadj}[n] = \text{forget} \cdot \left( \theta_{unadj}[n-1] - K \cdot e_s[n-1] \right)\]
+
+where:
+
+\begin{itemize}
+\tightlist
+\item
+  \(e_s = \text{STRENGTH} - \text{STRENGTH:CTRL}\) (cavity voltage strength error, \%)
+\item
+  \(K\) = \texttt{CAVLOAD:\allowbreak{}ANGLE:\allowbreak{}K} (deg/\%, DRVH=1; nominal operating value \textbf{0.5 deg/\%} per {[}W\_tuner\_input{]})
+\item
+  \(\text{forget}\) = \texttt{CAVLOAD:\allowbreak{}ANGLE:\allowbreak{}FORGET} (≤1, dimensionless; nominal operating value \textbf{0.9995} per {[}W\_tuner\_input{]})
+\end{itemize}
+
+\textbf{Gate logic --- two modes:}
+
+\emph{RESET (state cleared to zero) --- ANY of:}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \texttt{CAVLOAD:\allowbreak{}ANGLE:\allowbreak{}CTRL} ≤ 0.5 --- disabled by operator (INPA)
+\item
+  Station state ≠ ON\_CW --- INPD ≠ 4
+\item
+  Beam has MINOR or MAJOR alarm: \texttt{STN:\allowbreak{}BEAM:\allowbreak{}STAT.\allowbreak{}SEVR} ∈ \{1, 2\} (INPC):
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{STN:BEAM:STAT} is a \texttt{bi} record with \texttt{ZSV=MAJOR} --- when beam is OFF, SEVR=2
+  \item
+    \texttt{STN:\allowbreak{}BEAM:\allowbreak{}STATINP} computes: \texttt{beam\_\allowbreak{}curr\ ≥\ RF\_\allowbreak{}CUTOFF\ ?\ ON\ :\allowbreak{}\ OFF}
+  \end{itemize}
+\end{enumerate}
+
+\begin{quote}
+\textbf{Beam loss behavior {[}W\_tuner\_input{]}:} When beam current drops below the minimum threshold, the stored load angle offset is \textbf{cleared to zero} and must regenerate from scratch as beam is re-injected. This is by design --- the optimal detuning depends on beam current; a stale offset from a previous fill is not applicable to a new injection.
+\end{quote}
+
+\emph{UPDATE (all must be true) --- integrator steps:}
+4. Reset conditions are all false (enabled, ON\_CW, beam healthy)
+5. \texttt{CAVLDANGERR:\allowbreak{}SUMY:\allowbreak{}SEVR.\allowbreak{}SEVR} = 0 --- all 4 cavities\textquotesingle{} load angle errors valid (INPB):
+
+\begin{itemize}
+\tightlist
+\item
+  This is a calc record in \texttt{rf\_\allowbreak{}sumy\_\allowbreak{}stn.\allowbreak{}db,\allowbreak{}v} with \texttt{CALC="0"} and four \texttt{NPP\ MS} inputs from \texttt{CAV1–CAV4\ LOAD:\allowbreak{}ANGLE:\allowbreak{}ERR.\allowbreak{}SEVR}. Its \texttt{.SEVR} reflects the worst alarm across all 4 cavities via EPICS severity maximization.
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{5}
+\tightlist
+\item
+  Previous-cycle beam was healthy (INPE \textless{} 0.5) --- one-cycle recovery hysteresis
+\item
+  \texttt{STRENGTH.SEVR} \textless{} 2.5 --- strength measurement valid (INPH)
+\item
+  \texttt{\textbar{}strength\_\allowbreak{}error\textbar{}\ \textgreater{}\ STRENGTH:\allowbreak{}DIFF} --- error exceeds deadband (INPI)
+\end{enumerate}
+
+\textbf{Pseudo-code:}
+
+\begin{codeblock}
+strength_error = STRENGTH - STRENGTH_CTRL;   // actual − desired (%)
+
+if (NOT active):
+    offset = 0.0;                             // RESET
+else if (all_valid AND |strength_error| > deadband):
+    offset -= strength_error * K;             // integrator step
+offset *= forget;                             // leaky decay
+offset = clamp(offset, -180, +180);           // hard limits
+\end{codeblock}
+
+\subsection{\texorpdfstring{Total Offset --- \texttt{subIQphaseOffs}}{Total Offset --- subIQphaseOffs}}\label{total-offset--subiqphaseoffs}
+
+
+\textbf{C function:} \texttt{subIQphaseOffs} --- \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}subIQ.\allowbreak{}c,\allowbreak{}v} (line 626)\\
+\textbf{EPICS record:} \texttt{\$(S):\allowbreak{}\$(C)LOAD:\allowbreak{}ANGLE:\allowbreak{}OFFS}
+
+\begin{codeblock}
+psub->val = psub->d;                      // fixed offset (INPD)
+if (psub->a > 0.5) psub->val += psub->b;  // + unadj_offset if enabled
+psub->val = clamp(psub->val, psub->e, psub->c); // clip to [min, max]
+\end{codeblock}
+
+\[\boxed{\theta_{offset} = \text{clamp}(D_{fixed} + \theta_{unadj},\; E_{min},\; C_{max})}\]
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.0496\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.2873\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.6631\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Input & Function & In deployed SPEAR3 db \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+INPA & \texttt{CAVLOAD:\allowbreak{}ANGLE:\allowbreak{}CTRL} (enable) & ✅ wired \\
+INPB & \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}UNADOFFS} (integrator output) & ✅ wired \\
+INPC & Max bound & ❌ absent in DB source --- \texttt{\#field(INPC,\allowbreak{}"10")} commented out → C = 0 on fresh start; \textbf{autosave restores 75° in normal operation} {[}W\_tuner\_input{]} \\
+INPD & Fixed offset & ❌ absent → D = 0 \\
+INPE & Min bound & ❌ absent → E = 0 \\
+\end{longtable}
+
+\textbf{Purpose of the fixed offset (INPD):} Allows a permanent operator-set phase bias independent of the integrator. In PEP-II, this encoded a known optimal detuning from design parameters or absorbed systematic calibration offsets. In SPEAR3, INPD is absent: no fixed offset is applied.
+
+\begin{quote}
+\textbf{⚠ The outer loop defaults to disabled on a fresh IOC start without autosave.}
+
+The DB source has \texttt{\#field(INPC,\allowbreak{}"10")} commented out. On a clean start without autosave, C = 0 (and E = 0), so \texttt{clamp(val,\allowbreak{}\ 0,\allowbreak{}\ 0)\ =\allowbreak{}\ 0} forces the output to zero regardless of what the integrator computes.
+
+\textbf{However, in normal SPEAR3/PEP-II operation with autosave restore, \texttt{INPC} is restored to the nominal operational value of 75° per {[}W\_tuner\_input{]}.} The official SLAC operator documentation states: \emph{"Max Offs nominal value = 75 degrees"} and that it \emph{"should not need to be greater than 10 degrees but is presently set higher."} With autosave active and \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}CTRL=\allowbreak{}1}, the outer loop IS functional. The \texttt{\#field(INPC,\allowbreak{}"10")} comment suppresses only the DB-compiled hard-coded default value; the 10° figure was likely a conservative initial recommendation subsequently raised to 75° in the deployed system.
+
+\textbf{Consequence of fresh start without autosave:} \(\theta_{offset} = 0\). The voltage integrator (\texttt{UNADOFFS}) computes values but they are discarded by the zero-valued clamp bounds.
+
+\textbf{To activate the outer loop} on a fresh start, configure: \texttt{CAVLOAD:\allowbreak{}ANGLE:\allowbreak{}CTRL=\allowbreak{}1}, \texttt{STRENGTH:CTRL}, \texttt{STRENGTH:DIFF} (\textasciitilde0.05\%), \texttt{LOAD:ANGLE:K} (\textasciitilde0.5 deg/\%), \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}FORGET} (\textasciitilde0.9995), and set \texttt{INPC} on \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}OFFS} (max bound) to \textasciitilde75°. Note also the fundamental sign-ambiguity described in §10.8 --- cavity voltage is symmetric about resonance.
+\end{quote}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Sequencer: Housekeeping and Error Handling}\label{sequencer-housekeeping-and-error-handling}
+
+
+\textbf{Source:} \texttt{rfApp/\allowbreak{}src/\allowbreak{}rf\_\allowbreak{}tuner\_\allowbreak{}loop.\allowbreak{}st,\allowbreak{}v} (555 lines, 4 instances --- \texttt{program\ rf\_\allowbreak{}tuner\_\allowbreak{}loop("STN=\allowbreak{}RRRS,\allowbreak{}CAV=\allowbreak{}X,\allowbreak{}name=\allowbreak{}CXTUNRLOOP")})
+
+The SNL sequencer manages the complete lifecycle of the tuner loop. §4.3 covered the normal control path within \texttt{loop\_on}. This section covers startup, error handling, and state classification.
+
+\subsection{State Diagram}\label{state-diagram}
+
+
+\begin{figure}[tbp]
+\centering
+\begin{fitpicture}\input{tikz/fig-loop-states}\end{fitpicture}
+\caption{SNL tuner loop state machine. Five states; motion is commanded only from \texttt{loop\_on}.}\label{fig:loop-states}
+\end{figure}
+
+\subsection{Guard Checks in loop\_on}\label{guard-checks-in-loop_on}
+
+
+Before the normal control path (§4.3) executes, the 2 Hz event handler evaluates guard conditions in priority order:
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.1053\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.2895\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.3158\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.2895\linewidth-1.50\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Priority & Condition & Status Code & Action \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1 & \texttt{loop\_\allowbreak{}ctrl\ =\allowbreak{}=\allowbreak{}\ OFF} & \texttt{LOOP\_\allowbreak{}OFF\_\allowbreak{}STATUS} (1) & No motor action \\
+2 & \texttt{meas\_\allowbreak{}count\ =\allowbreak{}=\allowbreak{}\ 0} & \texttt{LOOP\_\allowbreak{}PHASMISS\_\allowbreak{}STATUS} (5) & IQA not producing data \\
+3 & Motor stuck \textgreater{} 5 cycles & \texttt{LOOP\_\allowbreak{}SM\_\allowbreak{}MOVE\_\allowbreak{}STATUS} (6) & Motor alarm \\
+4 & \texttt{station\_\allowbreak{}state\ =\allowbreak{}=\allowbreak{}\ ON\_\allowbreak{}FM} & \texttt{LOOP\_\allowbreak{}ON\_\allowbreak{}FM\_\allowbreak{}STATUS} (8) & Wait for CW \\
+5 & Klystron power low & \texttt{LOOP\_\allowbreak{}LOW\_\allowbreak{}STATUS} (9) & Skip cycle \\
+6 & \texttt{dmov\_\allowbreak{}meas\_\allowbreak{}count\ \textless{}\ 1} & --- & Wait for motor idle \\
+7 & Motor missed target & \texttt{LOOP\_\allowbreak{}SM\_\allowbreak{}CTRL\_\allowbreak{}STATUS} (7) & Sanity alarm \\
+\end{longtable}
+
+Only if all guards pass does the normal path fire (§4.3 Step 3).
+
+\subsection{Measurement Accumulator}\label{measurement-accumulator}
+
+
+A separate \texttt{when(efTest(meas\_\allowbreak{}ready\_\allowbreak{}ef))} block counts measurement events between 2 Hz ticks:
+
+\begin{sigblock}
+meas_count++
+if (sm_dmov == SM_DONE_MOVING):    dmov_meas_count++
+else:                               dmov_meas_count = 0
+\end{sigblock}
+
+The main control path requires \texttt{dmov\_\allowbreak{}meas\_\allowbreak{}count\ ≥\ LOOP\_\allowbreak{}DMOV\_\allowbreak{}MEAS\ (=\allowbreak{}1)} --- at least one measurement where the motor was idle --- before acting.
+
+\subsection{State Variables and Persistent State}\label{state-variables-and-persistent-state}
+
+
+Understanding which variables carry memory across cycles is critical for the upgrade design:
+
+\textbf{Control state (persistent memory --- the loop\textquotesingle s "remembrance"):}
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.1769\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.2141\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.6090\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Variable & PV & Memory type \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{posn\_ctrl} & \texttt{TUNR:\allowbreak{}POSN:\allowbreak{}CTRL} & \textbf{Inner loop state.} The absolute motor position command. Updated each cycle as \(x_{actual} + \Delta x\). \\
+\texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}UNADOFFS\ .\allowbreak{}VAL} & \texttt{CAV\{N\}LOAD:\allowbreak{}ANGLE:\allowbreak{}UNADOFFS} & \textbf{Outer loop state.} Accumulated strength-error-based corrections with leaky forgetting. Stored in EPICS record \texttt{.VAL}. \\
+\end{longtable}
+
+\textbf{Sequencer bookkeeping (SNL-internal):}
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.1739\linewidth-1.00\tabcolsep\relax}Q{\dimexpr 0.8261\linewidth-1.00\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Variable & Role \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{loop\_state} & Current SNL state (init/off/reset/on) \\
+\texttt{loop\_status} & Last computed status code \\
+\texttt{prev\_\allowbreak{}loop\_\allowbreak{}ctrl} & Previous cycle\textquotesingle s enable value (edge detection + sanity check) \\
+\texttt{prev\_\allowbreak{}loop\_\allowbreak{}status} & Last status written to PV (change-detect) \\
+\texttt{meas\_count} & Measurement events since last 2 Hz tick \\
+\texttt{dmov\_\allowbreak{}meas\_\allowbreak{}count} & Motor-idle measurements (gating condition) \\
+\texttt{nomov\_count} & Consecutive stuck-motor cycles \\
+\end{longtable}
+
+\textbf{Measured values (stateless --- recomputed each cycle):}
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.4054\linewidth-1.00\tabcolsep\relax}Q{\dimexpr 0.5946\linewidth-1.00\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Variable & Source \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{posn\_delta} & \texttt{subIQphase2posn} output \\
+\texttt{sm\_posn} & Motor record \texttt{.RBV} \\
+\texttt{sm\_dmov} & Motor record \texttt{.DMOV} \\
+\texttt{station\_state} & \texttt{STN:\allowbreak{}STATE:\allowbreak{}RBCK} \\
+\texttt{load\_\allowbreak{}angle\_\allowbreak{}sevr} & \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}ERR.\allowbreak{}SEVR} \\
+\texttt{klys\_frwd\_pwr} & \texttt{KLYSOUTFRWD:\allowbreak{}POWER} \\
+\end{longtable}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Disabled Path: Park Mode (PEP-II Only)}\label{disabled-path-park-mode-pep-ii-only}
+
+
+These functions existed for PEP-II (a collider with two rings). In SPEAR3 they are present in the code but permanently disabled. For PEP-II, the nominal park frequency offset was \textbf{±340 kHz} per station: half the cavities were parked at +340 kHz relative to resonance and the other half at −340 kHz {[}W\_tuners{]}.
+
+\subsection{Frequency Offset Estimation}\label{frequency-offset-estimation}
+
+
+\textbf{C function:} \texttt{subSysFreqOff} --- \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}subSys.\allowbreak{}c,\allowbreak{}v} (line 116)\\
+\textbf{EPICS record:} \texttt{\$(S):\allowbreak{}\$(C):\allowbreak{}FREQ:\allowbreak{}OFFS}
+
+Estimates frequency offset from tuner position using a polynomial:
+
+\[f_{offset} = p_0 + p_1 \cdot \Delta x + p_2 \cdot \Delta x^2 + p_3 \cdot \Delta x^3 + t_1 \cdot V_{cav}^2\]
+
+where \(\Delta x = \text{Tuner Posn} - \text{ON Home Posn}\) (mm) --- position relative to the ON mode home (\texttt{TUNR:\allowbreak{}POSN:\allowbreak{}ONHOME}), \textbf{not} absolute position. Parameters are calibrated per cavity and thermal conditions. The \(t_1 \cdot V_{cav}^2\) term accounts for RF-heating-induced detuning. The polynomial is typically accurate to \textbf{\textasciitilde10 kHz} per {[}W\_tuner\_input{]}.
+
+\textbf{Nominal coefficient ranges} (from {[}W\_tuner\_input{]}):
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.3438\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.4375\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.2188\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Coefficient & Nominal Range & Units \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(p_0\) & 10 to 20 & kHz \\
+\(p_1\) & 20 to 30 & kHz/mm \\
+\(p_2\) & 0.4 to 0.6 & kHz/mm² \\
+\(p_3\) & −0.01 to +0.01 & kHz/mm³ \\
+\(t_1\) & ≈ −0.00010 & kHz/kV² \\
+\end{longtable}
+
+\textbf{Output smoothing:} A first-order IIR smoother with \(S = 0.5\) is applied to the frequency offset output before it reaches \texttt{FREQ:ERR} {[}W\_tuner\_input{]}:
+
+\[f_{smooth}[n] = (1 - S) \cdot f_{offset}[n] + S \cdot f_{smooth}[n-1]\]
+
+This halves the effective bandwidth of the polynomial estimate, attenuating noise that could cause excessive motor movement in PARK mode.
+
+\subsection{Park Frequency Error}\label{park-frequency-error}
+
+
+\textbf{C function:} \texttt{subSysFreqErr} --- \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}subSys.\allowbreak{}c,\allowbreak{}v} (line 147)\\
+\textbf{EPICS record:} \texttt{\$(S):\allowbreak{}\$(C):\allowbreak{}FREQ:\allowbreak{}ERR}
+
+\[\text{FREQ:ERR} = 0.00004726891 \cdot Q_L \cdot (f_{desired} - f_{offset}) \quad [\text{degrees}]\]
+
+This converts a frequency error to phase error in degrees so \texttt{subIQphase2posn} can handle both ON\_CW (phase) and PARK (frequency) paths.
+
+\textbf{Disabled in SPEAR3:} \texttt{INPB} (\(Q_L\) ≈ 7000) is commented out → B=0 → output always 0.
+
+\begin{codeblock}
+grecord(sub,"$(S):$(C):FREQ:ERR") {
+    field(SNAM,"subSysFreqErr")
+    field(INPA,"0.00004726891")   # 90/(476e3 × 4) deg/kHz
+  # field(INPB,"7000")            # Q_L — COMMENTED OUT
+    field(INPD,"$(S):$(C):FREQ:OFFS.VAL  NPP MS")
+}
+\end{codeblock}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\part{Analysis}
+
+\section{Control Loop Analysis}\label{control-loop-analysis}
+
+
+\subsection{Loop Timing Budget}\label{loop-timing-budget}
+
+
+\begin{figure}[tbp]
+\centering
+\begin{fitpicture}\input{tikz/fig-loop-timing}\end{fitpicture}
+\caption{Timing of one tuner loop cycle at \qty{2}{\hertz}, from measurement through move command to the position check.}\label{fig:loop-timing}
+\end{figure}
+
+\subsection{Open-Loop Gain (Proportional Path)}\label{open-loop-gain-proportional-path}
+
+
+The linearized loop gain from phase error to stepper position change per cycle:
+
+\[G_{OL} = C_{mm/deg} \cdot G_{loop} = 0.020\text{–0.030} \; \frac{\text{mm}}{\text{°}} \cdot G_{loop}\]
+
+A position change of \(\Delta x\) mm changes cavity resonant frequency by:
+
+\[\frac{df}{dx} \approx p_1 \quad [\text{kHz/mm}]\]
+
+(the linear coefficient of the tuner polynomial, calibrated per cavity)
+
+\textbf{Effective loop gain} (phase domain, per cycle with \(G_{loop}=1\)):
+
+\[G_{eff} = C_{mm/deg} \cdot p_1 \cdot \frac{90°}{4 f_0} \cdot Q_L\]
+
+For nominal values (\(C = 0.020\) mm/° (lower end of range), \(p_1 \approx 10\) kHz/mm, \(Q_L \approx 7000\), \(f_0 = 476\) MHz):
+
+\[G_{eff} \approx 0.02 \times 10 \times 0.00004726891 \times 10^3 \times 7000 \approx 66\]
+
+\begin{quote}
+\textbf{Note:} This is the single-cycle proportional gain. The 2 Hz rate and motor velocity limit prevent instability by severely band-limiting the loop. \texttt{CAVTUNR:\allowbreak{}LOOP:\allowbreak{}GAIN} (0--1) is critical for stability.
+\end{quote}
+
+\subsection{Integrator Dynamics (Outer Loop)}\label{integrator-dynamics-outer-loop}
+
+
+The load angle offset integrator is a \textbf{leaky first-order IIR integrator}:
+
+\[\theta[n] = \text{forget} \cdot \left( \theta[n-1] - K \cdot e_s[n-1] \right)\]
+
+\textbf{K gain} (\texttt{CAVLOAD:\allowbreak{}ANGLE:\allowbreak{}K}, deg/\%): Per-sample step size. \texttt{DRVH=1} limits K ≤ 1 deg/\%.
+
+\textbf{Forgetting factor} (\texttt{CAVLOAD:\allowbreak{}ANGLE:\allowbreak{}FORGET}, 0 \textless{} forget ≤ 1): Makes the integrator leaky:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{DC gain:} \(G_{DC} = -K/(1 - \text{forget})\) deg/\%
+\item
+  \textbf{Decay time constant:} \(\tau = -T / \ln(\text{forget})\) where \(T = 0.5\,\text{s}\)
+\item
+  If the strength error disappears, the accumulated offset decays to zero with time constant \(\tau\)
+\end{itemize}
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.0857\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.2714\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.2714\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.3714\linewidth-1.50\tabcolsep\relax}@{}}
+\toprule\noalign{}
+\texttt{forget} & \(\tau\) (seconds) & DC gain (K=1 deg/\%) & Notes \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+1.000 & ∞ (pure integrator) & ∞ & Winds up indefinitely \\
+0.999 & ≈ 500 s (8.3 min) & −1000 deg/\% & Very slow, high-gain \\
+0.990 & ≈ 50 s & −100 deg/\% & Moderate --- typical range \\
+0.900 & ≈ 4.7 s & −10 deg/\% & Aggressive \\
+\end{longtable}
+
+\begin{quote}
+\textbf{Configuration note:} Both K and FORGET are \texttt{ao} records with \texttt{PINI=YES} but no hardcoded defaults. On a fresh start without autosave, both = 0, silently disabling the integrator.
+\end{quote}
+
+\subsection{Bandwidth Hierarchy and Disturbance Rejection}\label{bandwidth-hierarchy-and-disturbance-rejection}
+
+
+\begin{itemize}
+\tightlist
+\item
+  Inner proportional loop bandwidth: ≈ 0.1--0.5 Hz (operator-tunable via \texttt{LOOP:GAIN})
+\item
+  Outer integrator loop bandwidth: ≈ 0.002--0.02 Hz (set by K and forget)
+\end{itemize}
+
+\textbf{Primary disturbance --- beam loading:} The dominant source of cavity detuning. As beam is injected, decays, or is lost, \(\Delta f \propto I_b \sin\phi_s / V_{gap}\) shifts the cavity resonance. Under normal SPEAR3 operation (slow current decay, hours lifetime), the average detuning rate is slow enough for the 2 Hz loop. However, discrete events --- injection bursts, fast beam loss --- can shift detuning faster than the 0.5 s loop period.
+
+\textbf{Secondary disturbance --- thermal drift:} RF heating shifts resonant frequency on minutes-to-hours timescale. Much smaller than beam loading at SPEAR3 gradients. Easily handled by the inner loop.
+
+\textbf{Uncorrected disturbances:} Fast detuning transients (injection events, beam loss) and components \textgreater{} \textasciitilde0.25 Hz are not corrected by the 2 Hz loop. These manifest as transient phase errors that ring down over several loop cycles.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Hardware Interface}\label{hardware-interface}
+
+
+\subsection{Stepper Motor Record}\label{stepper-motor-record}
+
+
+\textbf{EPICS record type:} \texttt{steppermotor} (custom AB 1746-HSTP1 driver record)\\
+\textbf{Physical device (legacy):} Allen-Bradley 1746-HSTP1 stepper module\\
+\textbf{Physical device (in development, not installed):} Galil DMC-4143 motion controller
+
+\begin{codeblock}
+grecord(steppermotor,"$(S):$(C)TUNR:STEP:MOTOR") {
+    field(DTYP,"AB-1746HSTP1")
+    field(OUT,"#L0 A2 C$(M) S0 @@0x8413 0x0010 500")
+    field(DOL,"$(S):$(C)TUNR:POSN:CTRL.VAL  NPP NMS")
+    field(OMSL,"closed_loop")
+    field(ACCL,".5")          # acceleration: 0.5 mm/s²
+    field(VELO,"3")           # velocity: 3 mm/s
+    field(DIST,"0.003175")    # mm per step
+    field(MODE,"Position")
+    field(CMOD,"Position")
+    field(MRES,"400")         # steps per revolution
+    field(PREC,"3")
+    field(EGU,"mm")
+    field(DRVH,"18")          # upper drive limit: +18 mm
+    field(DRVL,"-29.5")       # lower drive limit: -29.5 mm
+    field(RDBD,"0.015875")    # retry deadband: 5 steps
+}
+\end{codeblock}
+
+\subsection{Mechanism Specifications}\label{mechanism-specifications}
+
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.3944\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.2254\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.3803\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Parameter & Value & Calculation \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Step resolution & 0.003175 mm/step & 1.27 mm/rev ÷ 400 steps/rev \\
+Retry deadband & 0.015875 mm & 5 steps exactly \\
+Maximum velocity & 3 mm/s & \\
+Acceleration & 0.5 mm/s² & \\
+Travel range & 47.5 mm total & −29.5 to +18 mm \\
+Time to traverse full range & \textasciitilde15.8 s & at 3 mm/s \\
+Time to stop from full speed & 6 s & at 0.5 mm/s² \\
+Min detectable move & 0.015875 mm & 1 RDBD = 5 steps \\
+\end{longtable}
+
+\subsection{Position Control and Initialization}\label{position-control-and-initialization}
+
+
+The motor uses \textbf{absolute position mode}. On IOC startup:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \texttt{TUNR:\allowbreak{}STEP:\allowbreak{}CHCKINIT} verifies motor is initialized
+\item
+  \texttt{TUNR:\allowbreak{}STEP:\allowbreak{}INIT} sequence captures current hardware position → \texttt{TUNR:\allowbreak{}POSN:\allowbreak{}CTRL}
+\item
+  Subsequent commands write to \texttt{TUNR:\allowbreak{}POSN:\allowbreak{}CTRL}, which FLNKs directly to the motor record
+\end{enumerate}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Design Gaps and Upgrade Opportunities}\label{design-gaps-and-upgrade-opportunities}
+
+
+\subsection{Commented-Out Parameters Make Tuner Non-Functional on Fresh Start}\label{commented-out-parameters-make-tuner-non-functional-on-fresh-start}
+
+
+The three key parameters for \texttt{subIQphase2posn} (deadband B, conversion C, max-delta D) are commented out in the database. On a clean start without autosave restore, C=0 → no motor movement, D=0 → output clamped to 0.
+
+\textbf{Recommendation:} Encode these as \texttt{ao} records with \texttt{PINI=YES} and default values.
+
+\subsection{Outer Loop Disabled on Fresh Start (Functional with Autosave)}\label{outer-loop-disabled-on-fresh-start-functional-with-autosave}
+
+
+The LOAD:ANGLE:OFFS bounds (INPC) are commented out in the DB source (\texttt{\#field(INPC,\allowbreak{}"10")}): \texttt{clamp(val,\allowbreak{}\ 0,\allowbreak{}\ 0)\ =\allowbreak{}\ 0} on a fresh IOC start without autosave. In normal operation with autosave restore, INPC is restored to 75° {[}W\_tuner\_input{]}, making the outer loop potentially active when \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}CTRL=\allowbreak{}1}. Additionally, K and FORGET have no hardcoded DB defaults (both = 0 on fresh start without autosave).
+
+\textbf{Risk:} On a fresh IOC start without autosave (disaster recovery, new deployment), the outer loop is silently non-functional. An operator setting \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}CTRL=\allowbreak{}1} may believe the outer loop is active when it is not.
+
+\textbf{Recommendation:} Encode explicit defaults for K (0.5 deg/\%), FORGET (0.9995), and OFFS bounds (±75°) as DB \texttt{PINI=YES} values in the upgrade design.
+
+\subsection{No Feedforward for Beam Loading}\label{no-feedforward-for-beam-loading}
+
+
+Beam loading is the primary disturbance (§2.1, §8.4). The only compensation path is the 2 Hz reactive inner loop. The outer integrator was designed to find optimal detuning implicitly, but is inactive. Even if active, its \textasciitilde50 s time constant cannot respond to injection transients.
+
+\textbf{There is no feedforward from beam current to detuning setpoint.} This leaves the cavity transiently detuned during injection and loss events.
+
+\textbf{Upgrade opportunity:} Real-time detuning feedforward from DCCT beam current:
+
+\[\Delta f_{ff} = -\frac{f_0}{4 Q_L} \cdot \frac{I_b \sin\phi_s}{\pi V_{gap}}\]
+
+Computable in the LLRF9 with sub-millisecond latency.
+
+\subsection{Implicit vs. Explicit Physics}\label{implicit-vs-explicit-physics}
+
+
+The legacy system uses an implicit integrator to find optimal detuning rather than first-principles computation (\(\psi_{opt} = \arctan(2Q_L \Delta\omega / \omega_0)\)). This is robust but slow.
+
+\textbf{Upgrade opportunity:} Explicit model-based \(\Delta f_{opt}\) from measured \(I_b\), \(V_{gap}\), and \(\phi_s\) --- directly enabled by LLRF9 DSP.
+
+\subsection{Motor Resolution vs. Phase Resolution}\label{motor-resolution-vs-phase-resolution}
+
+
+With C = 0.020 mm/° (minimum end of nominal range; worst-case resolution):
+
+\begin{itemize}
+\tightlist
+\item
+  1 step (0.003175 mm) ≡ 0.159° phase change
+\item
+  RDBD (5 steps = 0.015875 mm) ≡ 0.794° phase
+\end{itemize}
+
+For \(Q_L \approx 7000\): 0.159° corresponds to \(\Delta f \approx 95\) Hz minimum resolvable correction. The Galil controller would achieve sub-step positioning once commissioned.
+
+\subsection{No State Estimation or Predictive Control}\label{no-state-estimation-or-predictive-control}
+
+
+Purely reactive --- responds to measured error with no prediction. The 2 Hz rate cannot correct disturbances \textgreater{} 1 Hz (AC ripple, beam chopping).
+
+\subsection{Outer Loop Trigger Is SNL-Mediated}\label{outer-loop-trigger-is-snl-mediated}
+
+
+The outer integrator is triggered by the SNL writing PROC, not by the scan record. If the sequencer is not running (IOC restart, task crash) or the motor is persistently stuck (\texttt{DMOV=0}), the outer loop freezes silently.
+
+\textbf{Recommendation:} Consider independent scan-based outer loop in upgrade.
+
+\subsection{Voltage Loop Sign Ambiguity --- Lorentzian Symmetry Problem}\label{voltage-loop-sign-ambiguity--lorentzian-symmetry-problem}
+
+
+\textbf{This is a fundamental control-design vulnerability in the outer (voltage) loop.}
+
+The cavity voltage response vs. detuning is a Lorentzian:
+
+\[V(\Delta f) = \frac{V_{max}}{\sqrt{1 + \left(\frac{2 Q_L \,\Delta f}{f_0}\right)^2}}\]
+
+This curve is \textbf{symmetric around resonance} --- the same reduced voltage appears at \(+\Delta f\) and \(-\Delta f\). The integrator uses voltage error alone (\texttt{STRENGTH\ −\ STRENGTH:\allowbreak{}CTRL}) to decide which direction to push the phase offset:
+
+\begin{codeblock}
+psub->val -= psub->l * psub->j;   // offset -= (actual − desired) × K
+\end{codeblock}
+
+When voltage is too low (actual \textless{} desired), the integrator always \textbf{increases} the offset. This is correct only if the cavity is detuned on one side of resonance. If it happens to be on the other side:
+
+\begin{sigblock}
+Scenario: cavity detuned ABOVE resonance (Δf > 0)
+  → voltage < target  (down the Lorentzian slope)
+  → error = actual − desired < 0
+  → offset -= (negative × K) → offset INCREASES
+  → inner loop drives tuner further above resonance
+  → voltage drops MORE → error grows → offset increases faster
+  → POSITIVE FEEDBACK → runaway to ±180° clamp
+\end{sigblock}
+
+The integrator converges only from the \textbf{correct side} of resonance; from the wrong side it diverges. Which side is "correct" depends on the sign of K and the tuner geometry (sign of \(df/dx\)), but the fundamental issue is that voltage alone does not distinguish \(+\Delta f\) from \(-\Delta f\).
+
+\textbf{Why this doesn\textquotesingle t cause problems in practice:} In SPEAR3 as deployed, the outer loop is non-functional on fresh start (see §5.3, §10.2). The inner loop uses phase error, which is \textbf{monotonic} with detuning (not symmetric), so it does not have this ambiguity. If the outer loop were ever activated (e.g., via autosave with Max Offs = 75°):
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Normal operation (beam loading dominant):} Beam loading consistently pulls the cavity to one side of resonance (determined by \(\sin\phi_s\)). If the initial sign convention is chosen for this side, convergence is reliable under steady-state conditions.
+\item
+  \textbf{Transient risk:} After a beam loss/injection event, the cavity could briefly end up on the wrong side of resonance. The integrator would push in the wrong direction until either (a) the inner loop\textquotesingle s phase control pulls it back, or (b) the offset hits the ±180° clamp.
+\item
+  \textbf{Startup ambiguity:} On first activation, the cavity\textquotesingle s initial detuning direction is unknown. The integrator has a 50/50 chance of guessing wrong.
+\end{enumerate}
+
+\textbf{Upgrade recommendation:} Any replacement for the voltage loop should use \textbf{signed detuning information} (available from the phase measurement) rather than unsigned voltage error. Options include:
+
+\begin{itemize}
+\tightlist
+\item
+  Feedforward from beam current (§10.3) --- eliminates the need for voltage feedback entirely
+\item
+  Model-based optimal detuning (§10.4) --- computes \(\Delta f_{opt}\) directly from \(I_b\), \(V_{gap}\), \(\phi_s\)
+\item
+  If a voltage feedback loop is retained, include sign discrimination by checking the inner loop\textquotesingle s phase error sign to determine which side of resonance the cavity is on, and flip the integrator sign accordingly
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Operational Summary: SPEAR3 As Deployed}\label{operational-summary-spear3-as-deployed}
+
+
+\textbf{In SPEAR3 as deployed, the tuner operates exclusively in pure resonance-seeking mode:}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Inner loop (active):} 2 Hz proportional phase controller. Error = \texttt{PROBE:\allowbreak{}PHASE.\allowbreak{}L\ −\ FRWD:\allowbreak{}PHASE.\allowbreak{}L}. Motor drives to nullify this error → cavity stays at the calibrated resonant frequency.
+\item
+  \textbf{Outer loop (inactive on fresh start; potentially active with autosave):} The \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}OFFS} max bound (INPC) is commented out in the DB source --- on a fresh start \texttt{clamp(val,\allowbreak{}\ 0,\allowbreak{}\ 0)\ =\allowbreak{}\ 0} discards the integrator output. In normal SPEAR3 operation, autosave restores INPC to 75°, allowing the outer loop to function when \texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}CTRL=\allowbreak{}1}. In practice at SPEAR3 with modest beam loading the outer loop has always run at \(\theta_{offset} = 0\) (pure resonance-seeking mode). See §5.3, §10.2.
+\item
+  \textbf{PARK mode (disabled):} Permanently disabled via commented-out \texttt{INPB} in \texttt{FREQ:ERR}.
+\end{enumerate}
+
+\textbf{What "resonance" means here:} The calibrated zero reference from the no-beam IQA calibration procedure (§2.4). The system keeps \texttt{probe\_\allowbreak{}phase\ −\ fwd\_\allowbreak{}phase\ =\allowbreak{}\ 0}, which equals resonance only if the calibration is valid.
+
+\textbf{What is NOT compensated:} With \(\theta_{offset} = 0\), the tuner always drives toward zero detuning (resonance). It does not apply the optimal detuning angle that would minimize generator power under beam loading. For SPEAR3\textquotesingle s modest beam loading this is acceptable. For higher beam loading conditions, the outer voltage loop exists in the architecture but requires explicit configuration to activate.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\appendix
+
+\section{Complete EPICS Signal Chain}\label{complete-epics-signal-chain}
+
+
+\subsection{A.1 Data Flow (SPEAR3 ON\_CW Mode)}\label{a1-data-flow-spear3-on_cw-mode}
+
+
+\begin{sigblock}
+Step 1: IQA hardware acquires I,Q at 400 Hz
+  SRF1:CAV1PROBE:IQ → subIQphase → SRF1:CAV1PROBE:PHASE  (degrees, unadjusted in .L)
+  SRF1:CAV1FRWD:IQ  → subIQphase → SRF1:CAV1FRWD:PHASE   (degrees, unadjusted in .L)
+
+Step 2: Load angle target (slow integrator, if enabled)
+  SRF1:CAV1:STRENGTH (= probe_amplitude / station_voltage × 100%)
+  SRF1:CAV1:STRENGTH:CTRL (operator setpoint, %)
+  → SRF1:CAV1LOAD:ANGLE:UNADOFFS (subIQphaseOffsU, triggered by SNL)
+  → SRF1:CAV1LOAD:ANGLE:OFFS     (subIQphaseOffs, = fixed_offs + unadj_offs, bounded)
+
+Step 3: Load angle error
+  SRF1:CAV1LOAD:ANGLE:ERR (subIQphaseErr):
+    error = PROBE:PHASE.L − FRWD:PHASE.L + LOAD:ANGLE:OFFS
+    wrapped to [−180°, +180°]
+
+Step 4: Phase error to position delta
+  SRF1:CAV1TUNR:POSN:DELTA (subIQphase2posn):
+    if |error| > deadband_B:
+        delta = error × C_mm_per_deg × gain_E
+        delta = clamp(delta, −D_mm, +D_mm)
+    else:
+        delta = 0
+  → fires event SRF1:CAVTUNR:LOOP:READY
+
+Step 5: SNL sequencer (one instance per cavity)
+  Wakes on READY event
+  new_posn = sm_posn + posn_delta
+  new_posn = clamp(new_posn, sm_drvl, sm_drvh)
+  writes new_posn → SRF1:CAV1TUNR:POSN:CTRL
+
+Step 6: Motor response
+  SRF1:CAV1TUNR:POSN:CTRL FLNK → SRF1:CAV1TUNR:STEP:MOTOR
+  Motor moves to absolute position new_posn
+  Readback: SRF1:CAV1TUNR:POSN (motor .RBV → EPICS ao)
+\end{sigblock}
+
+\subsection{A.2 Record Trigger Chain}\label{a2-record-trigger-chain}
+
+
+\begin{sigblock}
+SRF1:CAVTUNR:LOOP:SEQ  [SCAN="2 second"]
+    → fires FLNK → SRF1:CAVTUNR:LOOP:READY (event)
+    → SRF1:CAV{1,2,3,4}TUNR:POSN:DELTA processes (event-triggered)
+        → each POSN:DELTA FLNK → SRF1:CAV{N}TUNR:LOOPMEAS:READY event
+            → wakes SNL sequencer instance (per cavity)
+                → SNL reads posn_delta, updates motor: pvPut(TUNR:POSN:CTRL)
+                → SNL writes PROC to LOAD:ANGLE:UNADOFFS (via phase_offset_proc)
+                    → subIQphaseOffsU fires → updates voltage integrator
+                    → FLNK → LOAD:ANGLE:OFFS recomputed
+                        → feeds next cycle's LOAD:ANGLE:ERR
+\end{sigblock}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Parameter Reference}\label{parameter-reference}
+
+
+\subsection{B.1 Operator-Settable Parameters (Station-Level)}\label{b1-operator-settable-parameters-station-level}
+
+
+These are \texttt{ao}/\texttt{bo} records in \texttt{rf\_\allowbreak{}stn\_\allowbreak{}cav.\allowbreak{}db,\allowbreak{}v}, shared across all cavities (prefix \texttt{\$(S):CAV}):
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.3049\linewidth-1.67\tabcolsep\relax}Q{\dimexpr 0.0488\linewidth-1.67\tabcolsep\relax}Q{\dimexpr 0.0610\linewidth-1.67\tabcolsep\relax}Q{\dimexpr 0.0488\linewidth-1.67\tabcolsep\relax}Q{\dimexpr 0.0976\linewidth-1.67\tabcolsep\relax}Q{\dimexpr 0.4390\linewidth-1.67\tabcolsep\relax}@{}}
+\toprule\noalign{}
+PV (with prefix \texttt{SRF1:CAV}) & Type & EGU & DRVH & Default & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{TUNR:\allowbreak{}LOOP:\allowbreak{}CTRL} & bo & --- & --- & --- & Master loop enable (0=off, 1=on) \\
+\texttt{TUNR:\allowbreak{}LOOP:\allowbreak{}GAIN} & ao & --- & 1 & autosave & Phase-to-position gain scalar (0--1) \\
+\texttt{LOAD:ANGLE:K} & ao & deg/\% & 1 & autosave & Integrator K constant \\
+\texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}FORGET} & ao & --- & 1 & autosave & Forgetting factor (≤1) \\
+\texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}ERRMAX} & ao & deg & 180 & autosave & Max allowed load angle error \\
+\texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}CTRL} & bo & --- & --- & autosave & Enable load angle offset integrator \\
+\texttt{STRENGTH:CTRL} & ao & \% & 100 & autosave & Desired cavity strength setpoint (\%) \\
+\texttt{STRENGTH:DIFF} & ao & \% & 100 & autosave & Voltage integrator deadband \\
+\end{longtable}
+
+\subsection{B.2 Per-Cavity Parameters (rf\_cav.db,v)}\label{b2-per-cavity-parameters-rf_cavdbv}
+
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.2247\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.3820\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.0899\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.3034\linewidth-1.50\tabcolsep\relax}@{}}
+\toprule\noalign{}
+PV (e.g., \texttt{SRF1:CAV1}) & Function & Default & Notes \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{TUNR:\allowbreak{}POSN:\allowbreak{}ONHOME} & Home position for freq polynomial & autosave & Reference for \texttt{subSysFreqOff} \\
+\texttt{TUNR:\allowbreak{}POSN:\allowbreak{}PARKHOME} & Park home position & autosave & PEP-II only \\
+\texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}OFFS} & Total load angle offset (computed) & 0 & output of \texttt{subIQphaseOffs} \\
+\end{longtable}
+
+\subsection{B.3 Commented-Out Parameters (Require Autosave)}\label{b3-commented-out-parameters-require-autosave}
+
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.1403\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.0468\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.1424\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.2314\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.4391\linewidth-1.60\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Sub Record & Input & Function & Design Value & Status \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{TUNR:\allowbreak{}POSN:\allowbreak{}DELTA} & INPB & Phase deadband (°) & 0.25 & \texttt{\#field(INPB,\allowbreak{}"0.\allowbreak{}25")} --- commented \\
+\texttt{TUNR:\allowbreak{}POSN:\allowbreak{}DELTA} & INPC & mm per degree & 0.020--0.030 range & \texttt{\#field(INPC,\allowbreak{}"0.\allowbreak{}02")} --- commented \\
+\texttt{TUNR:\allowbreak{}POSN:\allowbreak{}DELTA} & INPD & Max delta per cycle (mm) & 1.0 & \texttt{\#field(INPD,\allowbreak{}"1")} --- commented \\
+\texttt{LOAD:\allowbreak{}ANGLE:\allowbreak{}OFFS} & INPC & Max offset bound (°) & 10 (DB); \textbf{75 operational} {[}W\_tuner\_input{]} & \texttt{\#field(INPC,\allowbreak{}"10")} --- commented; autosave restores 75° in normal operation \\
+\texttt{FREQ:ERR} & INPB & Loaded cavity Q & 7000 & \texttt{\#field(INPB,\allowbreak{}"7000")} --- commented \\
+\end{longtable}
+
+\subsection{B.4 Physical Constants (Hardwired)}\label{b4-physical-constants-hardwired}
+
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.1648\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.2308\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.2857\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.3187\linewidth-1.50\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Constant & Value & Location & Meaning \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{90/\allowbreak{}(476e3\ ×\ 4)} & 0.00004726891 deg/kHz & \texttt{rf\_cav.db,v}, FREQ:ERR INPA & Phase per unit frequency \\
+RF frequency & 476 MHz & Implicit & SPEAR3 accelerating frequency \\
+Stepper DIST & 0.003175 mm/step & Motor record & Linear resolution \\
+Stepper MRES & 400 steps/rev & Motor record & Angular resolution \\
+Stepper RDBD & 0.015875 mm & Motor record & 5-step retry deadband \\
+Motor DRVH/DRVL & +18 / −29.5 mm & Motor record & Travel limits \\
+Motor VELO & 3 mm/s & Motor record & Maximum velocity \\
+Motor ACCL & 0.5 mm/s² & Motor record & Acceleration \\
+\end{longtable}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{SNL Variables, Constants, and Status Codes}\label{snl-variables-constants-and-status-codes}
+
+
+\subsection{C.1 Complete PV Binding Table}\label{c1-complete-pv-binding-table}
+
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.2128\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.0638\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.3617\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.3617\linewidth-1.50\tabcolsep\relax}@{}}
+\toprule\noalign{}
+SNL Variable & Type & EPICS PV & Role \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{loop\_ctrl} & int & \texttt{\{STN\}:\allowbreak{}CAVTUNR:\allowbreak{}LOOP:\allowbreak{}CTRL} & Master enable, monitored (bo) \\
+\texttt{loop\_state} & int & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}LOOP:\allowbreak{}STATE} & Output: current SNL state code \\
+\texttt{loop\_status} & int & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}LOOP:\allowbreak{}STATUS} & Output: status code \\
+\texttt{loop\_\allowbreak{}status\_\allowbreak{}string\_\allowbreak{}c} & string & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}LOOP:\allowbreak{}STRING} & Output: human-readable status text \\
+\texttt{station\_state} & int & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}STATE:\allowbreak{}RBCK} & Monitored, drives state branching \\
+\texttt{posn\_ctrl} & float & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}POSN:\allowbreak{}CTRL} & Motor position command (mm) \\
+\texttt{posn\_delta} & float & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}POSN:\allowbreak{}DELTA} & Per-cycle position increment \\
+\texttt{posn\_new} & float & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}POSN:\allowbreak{}LOOP} & Logged: newly computed target \\
+\texttt{posn} & float & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}POSN} & Potentiometer position readback \\
+\texttt{posn\_on\_home} & float & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}POSN:\allowbreak{}ONHOME} & Home for ON mode \\
+\texttt{posn\_\allowbreak{}park\_\allowbreak{}home} & float & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}POSN:\allowbreak{}PARKHOME} & Home for PARK (PEP-II) \\
+\texttt{posn\_mdel} & float & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}POSN.\allowbreak{}MDEL} & Monitor delta \\
+\texttt{sm\_posn} & float & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}STEP:\allowbreak{}MOTOR.\allowbreak{}RBV} & Motor readback (authoritative) \\
+\texttt{sm\_dmov} & int & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}STEP:\allowbreak{}MOTOR.\allowbreak{}DMOV} & Done-moving flag, monitored \\
+\texttt{sm\_drvh} & float & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}STEP:\allowbreak{}MOTOR.\allowbreak{}DRVH} & Upper travel limit \\
+\texttt{sm\_drvl} & float & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}STEP:\allowbreak{}MOTOR.\allowbreak{}DRVL} & Lower travel limit \\
+\texttt{sm\_rdbd} & float & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}STEP:\allowbreak{}MOTOR.\allowbreak{}RDBD} & Retry deadband \\
+\texttt{phase\_\allowbreak{}offset\_\allowbreak{}proc} & int & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}LOAD:\allowbreak{}ANGLE:\allowbreak{}UNADOFFS.\allowbreak{}PROC} & Outer loop trigger \\
+\texttt{load\_\allowbreak{}angle\_\allowbreak{}sevr} & int & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}LOAD:\allowbreak{}ANGLE:\allowbreak{}ERR.\allowbreak{}SEVR} & Load angle alarm severity \\
+\texttt{klys\_frwd\_pwr} & float & \texttt{\{STN\}:\allowbreak{}KLYSOUTFRWD:\allowbreak{}POWER} & Klystron forward power \\
+\texttt{klys\_\allowbreak{}frwd\_\allowbreak{}pwr\_\allowbreak{}min} & float & \texttt{\{STN\}:\allowbreak{}KLYSOUTFRWD:\allowbreak{}POWER:\allowbreak{}MIN} & Minimum power threshold \\
+\texttt{loop\_ready} & int & \texttt{\{STN\}:\allowbreak{}CAVTUNR:\allowbreak{}LOOP:\allowbreak{}READY} & Station-wide 2 Hz event \\
+\texttt{meas\_ready} & int & \texttt{\{STN\}:\allowbreak{}CAV\{CAV\}TUNR:\allowbreak{}LOOPMEAS:\allowbreak{}READY} & Per-cavity measurement event \\
+\end{longtable}
+
+\subsection{C.2 Internal Counters (No PV Binding)}\label{c2-internal-counters-no-pv-binding}
+
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.2319\linewidth-1.00\tabcolsep\relax}Q{\dimexpr 0.7681\linewidth-1.00\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Variable & Purpose \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{meas\_count} & LOOPMEAS:READY events since last LOOP:READY \\
+\texttt{dmov\_\allowbreak{}meas\_\allowbreak{}count} & Motor-idle measurements (gating condition) \\
+\texttt{nomov\_count} & Consecutive stuck-motor cycles \\
+\texttt{nonfunc\_count} & Consecutive bad cycles (rate-limits alarms) \\
+\texttt{reset\_count} & Reset attempt counter \\
+\texttt{prev\_\allowbreak{}loop\_\allowbreak{}ctrl} & Previous enable value (edge detection + sanity check) \\
+\texttt{prev\_\allowbreak{}loop\_\allowbreak{}status} & Previous status code (change-detect) \\
+\end{longtable}
+
+\subsection{\texorpdfstring{C.3 Constants (from \texttt{rf\_\allowbreak{}tuner\_\allowbreak{}loop\_\allowbreak{}defs.\allowbreak{}h,\allowbreak{}v})}{C.3 Constants (from rf\_tuner\_loop\_defs.h,v)}}\label{c3-constants-from-rf_tuner_loop_defshv}
+
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.3088\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.0735\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.6176\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Constant & Value & Description \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\texttt{LOOP\_\allowbreak{}DMOV\_\allowbreak{}MEAS} & 1 & Min done-moving measurements before acting \\
+\texttt{LOOP\_\allowbreak{}NOMOV\_\allowbreak{}COUNT} & 5 & Stuck-motor cycles before alarm \\
+\texttt{LOOP\_\allowbreak{}NONFUNC\_\allowbreak{}INTERVAL} & 1 & Bad cycles before NONFUNC alarm \\
+\texttt{LOOP\_\allowbreak{}RESET\_\allowbreak{}COUNT} & 5 & Max reset attempts \\
+\texttt{LOOP\_\allowbreak{}MAX\_\allowbreak{}DELAY} & 60 & Max startup wait (seconds) \\
+\texttt{SM\_\allowbreak{}DONE\_\allowbreak{}MOVING} & 1 & DMOV value = done \\
+\end{longtable}
+
+\subsection{C.4 Status Codes}\label{c4-status-codes}
+
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.0909\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.4545\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.4545\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Code & Name & Meaning \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & \texttt{LOOP\_\allowbreak{}UNKNOWN\_\allowbreak{}STATUS} & Initial / unresolved \\
+1 & \texttt{LOOP\_\allowbreak{}OFF\_\allowbreak{}STATUS} & Disabled by operator \\
+2 & \texttt{LOOP\_\allowbreak{}GOOD\_\allowbreak{}STATUS} & Normal operation \\
+3 & \texttt{LOOP\_\allowbreak{}RESET\_\allowbreak{}STATUS} & Performing reset \\
+4 & \texttt{LOOP\_\allowbreak{}HOME\_\allowbreak{}STATUS} & Moving to home \\
+5 & \texttt{LOOP\_\allowbreak{}PHASMISS\_\allowbreak{}STATUS} & No IQA data \\
+6 & \texttt{LOOP\_\allowbreak{}SM\_\allowbreak{}MOVE\_\allowbreak{}STATUS} & Motor stuck \\
+7 & \texttt{LOOP\_\allowbreak{}SM\_\allowbreak{}CTRL\_\allowbreak{}STATUS} & Motor missed target \\
+8 & \texttt{LOOP\_\allowbreak{}ON\_\allowbreak{}FM\_\allowbreak{}STATUS} & Station in FM \\
+9 & \texttt{LOOP\_\allowbreak{}LOW\_\allowbreak{}STATUS} & Klystron power low \\
+13 & \texttt{LOOP\_\allowbreak{}LDANGLIM\_\allowbreak{}STATUS} & Load angle at limit \\
+\end{longtable}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\section{Source Traceability Index}\label{source-traceability-index}
+
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.2684\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.2579\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.4737\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+System Element & Primary Source & Secondary Source \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Loop topology, 5-state machine & \texttt{rfApp/\allowbreak{}src/\allowbreak{}rf\_\allowbreak{}tuner\_\allowbreak{}loop.\allowbreak{}st,\allowbreak{}v} & \texttt{codeReviewTechnicalNotes/\allowbreak{}05-\allowbreak{}snl-\allowbreak{}state-\allowbreak{}machines.\allowbreak{}md} \\
+\texttt{subIQphaseErr} (error calc) & \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}subIQ.\allowbreak{}c,\allowbreak{}v} line 650 & \texttt{rf\_cav.db,v} line \textasciitilde544 \\
+\texttt{subIQphaseOffsU} (integrator) & \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}subIQ.\allowbreak{}c,\allowbreak{}v} line 551 & \texttt{rf\_cav.db,v} line \textasciitilde591 \\
+\texttt{subIQphaseOffs} (total offset) & \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}subIQ.\allowbreak{}c,\allowbreak{}v} line 626 & \texttt{rf\_cav.db,v} line \textasciitilde567 \\
+\texttt{subIQphase2posn} (phase→posn) & \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}subIQ.\allowbreak{}c,\allowbreak{}v} line 670 & \texttt{rf\_cav.db,v} line \textasciitilde637 \\
+\texttt{subSysFreqOff} (polynomial freq) & \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}subSys.\allowbreak{}c,\allowbreak{}v} line 116 & \texttt{codeReviewTechnicalNotes/\allowbreak{}08-\allowbreak{}signal-\allowbreak{}processing.\allowbreak{}md} \\
+\texttt{subSysFreqErr} (freq error) & \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}subSys.\allowbreak{}c,\allowbreak{}v} line 147 & \texttt{rf\_cav.db,v} line \textasciitilde466 \\
+Motor parameters & \texttt{rfApp/\allowbreak{}Db/\allowbreak{}rf\_\allowbreak{}cav.\allowbreak{}db,\allowbreak{}v} lines 655--690 & \texttt{codeReviewTechnicalNotes/\allowbreak{}06-\allowbreak{}plc-\allowbreak{}stepper-\allowbreak{}motors.\allowbreak{}md} \\
+Station-level parameters & \texttt{rfApp/\allowbreak{}Db/\allowbreak{}rf\_\allowbreak{}stn\_\allowbreak{}cav.\allowbreak{}db,\allowbreak{}v} & \texttt{codeReviewTechnicalNotes/\allowbreak{}07-\allowbreak{}epics-\allowbreak{}databases.\allowbreak{}md} \\
+PARK mode disabled & \texttt{rf\_cav.db,v} (\texttt{\#field(INPB,\allowbreak{}"7000")}) & \texttt{codeReviewTechnicalNotes/\allowbreak{}05-\allowbreak{}snl-\allowbreak{}state-\allowbreak{}machines.\allowbreak{}md} \\
+2 Hz loop rate & \texttt{rf\_\allowbreak{}stn\_\allowbreak{}cav.\allowbreak{}db,\allowbreak{}v} (SCAN="2 second") & \texttt{rf\_\allowbreak{}tuner\_\allowbreak{}loop.\allowbreak{}st,\allowbreak{}v} \\
+RF frequency (476 MHz) & \texttt{rf\_cav.db,v} (INPA=0.00004726891) & Derived: 90/(476000×4) \\
+Station state codes & \texttt{rfApp/\allowbreak{}src/\allowbreak{}db/\allowbreak{}rf\_\allowbreak{}station\_\allowbreak{}state.\allowbreak{}h,\allowbreak{}v} & \texttt{codeReviewTechnicalNotes/\allowbreak{}05-\allowbreak{}snl-\allowbreak{}state-\allowbreak{}machines.\allowbreak{}md} \\
+Galil planned as AB replacement (\textbf{not yet installed}) & \texttt{codeReviewTechnicalNotes/\allowbreak{}06-\allowbreak{}plc-\allowbreak{}stepper-\allowbreak{}motors.\allowbreak{}md} & PDR §10.3; test moves performed Aug 2025, \texttt{llrf/\allowbreak{}tuners/\allowbreak{}galil/\allowbreak{}functioningGalil20250825SwapABToManual.\allowbreak{}txt} \\
+\end{longtable}

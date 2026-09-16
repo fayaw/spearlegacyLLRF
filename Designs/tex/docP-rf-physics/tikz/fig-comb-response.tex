@@ -1,0 +1,24 @@
+% !TeX root = ../P_rf_physics_and_plant.tex
+% Comb filter response.  Drawn from the digital comb magnitude
+%   M(f) = (1-K) / sqrt(1 - 2K cos(2 pi f/f_rev) + K^2),
+% plotted as the resulting loop gain 1 + G*M(f).  K and G are stated in the
+% caption: this figure shows the SHAPE, not fitted SPEAR3 parameters.
+\begin{tikzpicture}
+\begin{axis}[
+  width=125mm, height=52mm,
+  xlabel={frequency $f/f_\text{rev}$},
+  ylabel={loop gain (dB)},
+  domain=0:4.5, samples=1600,
+  xmin=0, xmax=4.5, ymin=-3, ymax=34,
+  xtick={0,1,2,3,4},
+  xticklabels={$0$,$f_\text{rev}$,$2f_\text{rev}$,$3f_\text{rev}$,$4f_\text{rev}$},
+  ytick={0,10,20,30},
+  grid=major, grid style={draw=black!12},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+  axis line style={draw=black!55},
+]
+\addplot[draw=cRf,line width=1pt,smooth]
+  {20*log10(1 + 30*(1-0.98)/sqrt(1 - 2*0.98*cos(360*x) + 0.98^2))};
+\addplot[draw=cNeut,densely dashed,line width=0.7pt,samples=2]{0};
+\end{axis}
+\end{tikzpicture}

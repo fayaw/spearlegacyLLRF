@@ -100,7 +100,7 @@ The SPEAR3 RF system must deliver a 476.3 MHz accelerating voltage of $\sim 2.85
 
 > **Note on $\alpha_c$**: Published values range from 0.0011 (SSRL parameter page [R3]) to 0.00118 (used in this document) depending on the specific lattice optics. Differences of $\sim 7\%$ in $\alpha_c$ produce $\sim 3\%$ differences in $f_s$.
 
-> **Sources**: [R1] McIntosh et al., SLAC-PUB-10983, EPAC 2004 (Table 1: $Q_s = 0.008$, $\alpha = 0.00113$). [R2] Hettel et al., PAC 1999. [R3] SSRL SPEAR Storage Ring Parameters ($\nu_s = 0.007$, $\alpha_c = 0.0011$, $V_\text{RF} = 3.2$ MV). [R5] `Designs/tex/0_system_design_report.pdf`.
+> **Sources**: [R1] McIntosh et al., SLAC-PUB-10983, EPAC 2004 (Table 1: $Q_s = 0.008$, $\alpha = 0.00113$). [R2] Hettel et al., PAC 1999. [R3] SSRL SPEAR Storage Ring Parameters ($\nu_s = 0.007$, $\alpha_c = 0.0011$, $V_\text{RF} = 3.2$ MV). [R5] `Designs/tex/doc0-system-design/0_system_design_report.pdf`.
 
 ### 1.3 RF System Configuration
 
@@ -1341,7 +1341,7 @@ Data file: `b132R11PatchPanel.xlsx`. Documents physical signal routing in Buildi
 | Ref | Document | Path |
 |-----|----------|------|
 | [R4] | LLRF9 Commissioning Tests | `llrf/tests/llrf9Tests.pdf` |
-| [R5] | System Design Report | `Designs/tex/0_system_design_report.pdf` |
+| [R5] | System Design Report | `Designs/tex/doc0-system-design/0_system_design_report.pdf` |
 | [R6] | RF System Description (Schwarz) | `llrf/documentation/legacyArchitecture/ps3403305100.pdf` |
 | [R14] | Feedback Loop Description (Schwarz) | `llrf/documentation/legacyArchitecture/feedbackLoopDescriptionps3403305200.pdf` |
 | [R19] | Comprehensive FBK Loops Description | `llrf/documentation/legacyArchitecture/legacy-pdf-transcriptions/design-specifications/PEPII_LLRF_FBK_Loops_Description.md` |

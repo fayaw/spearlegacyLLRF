@@ -17,7 +17,8 @@ preview_*.out
 tikztest.pdf
 
 # generated figures are rebuilt by scripts/make-figures.ps1
-figures/generated/
+common/generated/
 
-# the built document is kept: it is what gets shared
-!L_legacy_system_architecture.pdf
+# the built documents are kept: they are what gets shared
+!docL-legacy-architecture/L_legacy_system_architecture.pdf
+!doc0-system-design/0_system_design_report.pdf

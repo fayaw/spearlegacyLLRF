@@ -1,0 +1,40 @@
+% !TeX root = ../T_tuner_control_analysis.tex
+% SNL tuner loop state machine.  loop_off and loop_reset sit side by side
+% because loop_unknown branches to one or the other; both rejoin at loop_on.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+\def\xC{56}     % centre column
+
+\node[lbl,anchor=south] at (\xC,6) {startup};
+\node[blk,text width=54mm,anchor=north] (init) at (\xC,0)
+  {\textbf{\texttt{loop\_init}}\\{\tiny initialise PV monitors, wait for valid readbacks}};
+\draw[sig] (\xC,5) -- (init.north);
+
+\node[blk,text width=54mm,anchor=north] (unk) at (\xC,-22)
+  {\textbf{\texttt{loop\_unknown}}\\{\tiny wait for the loop control to be set}};
+\draw[sig] (init.south) -- node[right,tag,xshift=1mm]
+  {\texttt{sm\_dmov} and \texttt{sm\_posn} valid} (unk.north);
+
+% the branch: idle or reset
+\def\yB{-48}
+\draw[draw=cNeut,thick] (unk.south) -- (\xC,\yB);
+\draw[draw=cNeut,thick] (22,\yB) -- (90,\yB);
+\node[blk,text width=40mm,anchor=north] (off) at (22,\yB-4)
+  {\textbf{\texttt{loop\_off}}};
+\node[blk,text width=40mm,anchor=north] (rst) at (90,\yB-4)
+  {\textbf{\texttt{loop\_reset}}\\{\tiny return the motor to home}};
+\draw[sig] (22,\yB) -- (off.north);
+\draw[sig] (90,\yB) -- (rst.north);
+\node[tag,anchor=south east] at (20,\yB+1) {ctrl $=$ IDLE};
+\node[tag,anchor=south west] at (92,\yB+1) {ctrl $=$ RESET};
+
+% both rejoin at loop_on; start the drops at the box edges, not a guessed y
+\def\yJ{-74}
+\draw[draw=cNeut,thick] (off.south) -- (22,\yJ) -- (90,\yJ);
+\draw[draw=cNeut,thick] (rst.south) -- (90,\yJ);
+\node[tag,anchor=west] at (92,-70) {reset complete};
+
+\node[ctrl,text width=76mm,anchor=north] (on) at (\xC,\yJ-4)
+  {\textbf{\texttt{loop\_on}}\\{\tiny main control state: measure, compute delta,
+   command the move, verify the position}};
+\draw[sig] (\xC,\yJ) -- (on.north);
+\end{tikzpicture}

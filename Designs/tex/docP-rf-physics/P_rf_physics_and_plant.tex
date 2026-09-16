@@ -1,0 +1,96 @@
+% !TeX root = P_rf_physics_and_plant.tex
+%  SPEAR3 RF System -- RF Physics, Control Theory and Physical Plant (Doc P).
+%  Build:  powershell -ExecutionPolicy Bypass -File ..\build.ps1 -Doc P
+\documentclass[letterpaper,11pt]{article}
+\input{../common/preamble}
+
+% Equations carry their own "(Eq. N.M)" tags inside the display, exactly as in
+% the source document, because the prose cites those numbers ~195 times.
+% Do not switch to \label/\eqref without sweeping every citation.
+
+\title{\vspace{-1.4cm}\bfseries SPEAR3 RF System\\[2mm]
+       \Large RF Physics, Control Theory and Physical Plant}
+\author{Faya Wang\\[1mm]\normalsize RF Department, SSRL / Accelerator Directorate\\
+        \normalsize SLAC National Accelerator Laboratory}
+\date{March 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Document}  & Doc P --- RF Physics, Control Theory and Physical Plant \\
+\textbf{Version}   & 3.3 \\
+\textbf{Status}    & Draft \\
+\textbf{Tier}      & 1 --- Physics and Plant Reference (implementation-independent) \\
+\textbf{Source}    & \fpath{Designs/tex/docP-rf-physics/P_rf_physics_and_plant.tex} \\
+\textbf{Companion} & Doc L (legacy architecture), Doc I (interlocks), Doc T (tuner control) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{4mm}
+\begin{warnbox}
+\textbf{Galil status --- corrected September 2026.} The Galil DMC-4143 has
+\textbf{not} been installed and is \textbf{not} in operation; it was in
+development. Test moves were performed on the existing cavity motors and worked
+fine, but it goes online only \emph{when the current LLRF upgrade project is
+finished}. The \textbf{AB 1746-HSTP1 remains the in-service tuner controller}.
+Any statement below that this work is ``already done'', or that the Galil
+``replaced'' the AB hardware, is incorrect and has been amended.
+\end{warnbox}
+
+\begin{keynote}
+This document is implementation-independent. It states the physics of the
+SPEAR3 RF plant and the control problem that follows from it: what disturbs the
+cavity field, over what frequency range, and which loop is responsible for each
+band. Hardware-specific detail belongs in Doc~L (legacy) and Doc~0 (upgrade).
+\end{keynote}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+\input{body}
+
+\end{document}
+
+% ---------------------------------------------------------------------------
+% REVISION HISTORY -- deliberately not rendered.  It belongs with the source,
+% not in a document sent to a reviewer.  Historical rows stay frozen: they
+% record what was true at the time, including equation numbers as then issued.
+%
+% 3.3  2026-03-27  Added extra loop functions: comb filter, LFB woofer, direct loop.
+% 3.2  2026-03-26  Added D9 (ring circumference thermal drift): ~4 kHz/year secular
+%                  drift from seasonal thermal expansion of the tunnel.  New Sec 4.8
+%                  with harmonic condition (Eq 4.8) and circumference change
+%                  (Eqs 4.8a-b); old Sec 4.8 renamed 4.9.
+% 3.1  2026-03-25  Structural: added Sec 6.0 loop overview (9-loop classification,
+%                  4-tier implementation taxonomy); expanded Sec 6.2 comb
+%                  (Eqs 6.2a-c) and Sec 6.3 LFB woofer (Eq 6.3a); Sec 5/6 boundary
+%                  cleanup; Appendix C.4 comb/FIR and C.4a woofer symbols.
+% 3.0  2026-03-25  Formal symbol definitions for all transfer function blocks
+%                  (Eqs 5.1, 5.4, 5.5); gain/phase budget and explicit compensator
+%                  forms (Eq 6.1a); Sec 6 rewritten from tables into engineering
+%                  sections (Eqs 6.4a-c, 6.6a, 6.7a-c, 6.8a, 6.9a-c); Sec 9.4
+%                  calibration expanded (Eqs 9.1-9.3); Appendix C 15 -> 100+ symbols.
+% 2.7  2026-03-24  Simplified Eq 2.4b to the cos convention; verified Eq 2.5 optimum
+%                  detuning from first-principles admittance (self-consistent with
+%                  Rs = 3.73 MOhm); clarified Rs = V^2/(2P) circuit convention.
+% 2.6  2026-03-24  U0 corrected 0.91 -> 1.02 MeV with the full recalculation cascade
+%                  (phi_s, f_s, detuning, generator power); Eq 2.7 generator power
+%                  ~196 kW/cavity against ~200 kW measured; RF frequency standardised
+%                  to 476.3 MHz; I/Q modulator count corrected PEP-II 7 -> SPEAR3 5.
+% 2.5  2026-03-24  Cross-reference review against McIntosh SLAC-PUB-10983, Schwarz
+%                  PS-340-330-51, the SSRL parameter page and the legacy code.
+%                  DSP corrected to AT&T DSP1610; HVPS ripple harmonics corrected.
+% 2.4  2026-03-24  Inline equation numbering via \qquad \text{}.
+% 2.3  2026-03-24  Attempted \tag{} numbering; broke GitHub rendering; reverted.
+% 2.2  2026-03-24  Display equations moved into fenced math blocks for MathJax.
+% 2.1  2026-03-24  LaTeX formatting for equations; synchronous phase convention
+%                  corrected (Eq 2.4).
+% 2.0  2026-03-24  Major rewrite into a disturbance-driven control narrative.
+% 1.0  2026-03-24  Initial draft, nine-section catalogue structure.
+% ---------------------------------------------------------------------------

@@ -1,0 +1,77 @@
+% !TeX root = ../I_interlock_architecture.tex
+% HVPS alarm aggregation.  Three summary records, each collecting its inputs on
+% a spine; the first two chain upward into the single station trip wire.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+\def\dy{-6.6}
+\def\xT{73}      % right edge of the label column
+\def\xS{100}     % collecting spine, clear of the longest annotation
+\def\xB{106}     % summary record box
+
+% ---- group 1: the latched fault summary -----------------------------------
+\foreach \i/\inp/\pv/\note in {%
+  0/INPA/{HVPSAC:CURR:LTCH}/{AC overcurrent},
+  1/INPB/{HVPSKLYS:ARC:LTCH}/{klystron arc, HVPS side},
+  2/INPC/{HVPS:CROWBAR:LTCH}/{crowbar fired},
+  3/INPD/{HVPS:PANIC:LTCH}/{emergency off},
+  4/INPE/{HVPSTEMP:SUMY:LTCH}/{oil and general overtemperature},
+  5/INPF/{HVPSOIL:LEVEL:LTCH}/{oil level low},
+  6/INPG/{HVPSXFORM:ARC:LTCH}/{transformer arc},
+  7/INPH/{HVPSXFORM:PRESS:LTCH}/{transformer overpressure},
+  8/INPI/{HVPSXFORM:VACM:LTCH}/{transformer vacuum},
+  9/INPJ/{HVPS:VOLT:LTCH}/{DC overvoltage},
+  10/INPK/{HVPS:OPENLOAD:LTCH}/{open load}}{%
+    \pgfmathsetmacro\y{\i*\dy}
+    \node[anchor=east,font=\tiny] at (30,\y) {\textbf{\inp}};
+    \node[anchor=west,font=\scriptsize] at (32,\y) {\texttt{\pv}};
+    \node[lbl,anchor=west,font=\tiny\itshape] at (32,\y-2.6) {\note};
+    \draw[draw=cNeut] (\xT,\y) -- (\xS,\y);
+  }
+\draw[bus] (\xS,0) -- (\xS,10*\dy);
+
+\node[plc,text width=48mm,anchor=west] (g1) at (\xB,5*\dy)
+  {\textbf{\texttt{\{STN\}:}}\\ \textbf{\texttt{HVPSSTN:SUMY:LTCH}}\\[1pt]
+   {\tiny latched HVPS fault summary}};
+\draw[sig] (\xS,5*\dy) -- (g1.west);
+
+% ---- group 2: the operational status summary, feeding the trip wire -------
+\def\yB{-86}
+\foreach \i/\inp/\pv in {%
+  0/INPE/{HVPSCONTACT:SUMY:STAT},
+  1/INPH/{HVPSSTN:SUMY:STAT},
+  2/INPI/{HVPSSTN:SUMY:LTCH}}{%
+    \pgfmathsetmacro\y{\yB+\i*\dy}
+    \node[anchor=east,font=\tiny] at (30,\y) {\textbf{\inp}};
+    \node[anchor=west,font=\scriptsize] at (32,\y) {\texttt{\pv}};
+    \draw[draw=cNeut] (\xT,\y) -- (\xS,\y);
+  }
+\draw[bus] (\xS,\yB) -- (\xS,\yB+2*\dy);
+\node[plc,text width=48mm,anchor=west] (g2) at (\xB,\yB+1*\dy)
+  {\textbf{\texttt{\{STN\}:}}\\ \textbf{\texttt{HVPSOFF:SUMY:STAT}}};
+\draw[sig] (\xS,\yB+1*\dy) -- (g2.west);
+
+\node[ctrl,text width=48mm,anchor=west] (trip) at (\xB,\yB+5*\dy)
+  {\textbf{\texttt{STNOFF:SUMY:STAT.INPB}}\\[1pt]
+   {\tiny the single SNL trip wire}};
+\draw[sig] (g2.south) -- (trip.north);
+
+% ---- group 3: the overall supply summary ----------------------------------
+\def\yC{-124}
+\foreach \i/\inp/\pv in {%
+  0/INPB/{HVPSCONTACT:SUMY:STAT},
+  1/INPD/{HVPSSTN:SUMY:LTCH},
+  2/INPE/{HVPSAC:POWER:STAT},
+  3/INPF/{HVPSDC:POWER:STAT},
+  4/INPG/{HVPS:PPS:STAT},
+  5/INPH/{HVPS12KV:VOLT:STAT},
+  6/INPI/{HVPSSUPPLY:READY:STAT}}{%
+    \pgfmathsetmacro\y{\yC+\i*\dy}
+    \node[anchor=east,font=\tiny] at (30,\y) {\textbf{\inp}};
+    \node[anchor=west,font=\scriptsize] at (32,\y) {\texttt{\pv}};
+    \draw[draw=cNeut] (\xT,\y) -- (\xS,\y);
+  }
+\draw[bus] (\xS,\yC) -- (\xS,\yC+6*\dy);
+\node[blk,text width=48mm,anchor=west] (g3) at (\xB,\yC+3*\dy)
+  {\textbf{\texttt{\{STN\}:HVPS:SUMY:LTCH}}\\[1pt]
+   {\tiny supply readiness, not a trip path}};
+\draw[sig] (\xS,\yC+3*\dy) -- (g3.west);
+\end{tikzpicture}

@@ -1,0 +1,23 @@
+% !TeX root = ../I_interlock_architecture.tex
+% RF MPS PLC trip propagating up the EPICS alarm tree to the single trip wire.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+
+\node[plc,text width=96mm,anchor=north] (plc) at (0,0)
+  {\textbf{RF MPS PLC}\\
+   Allen-Bradley PLC-5 with 1771 I/O, Remote I/O adapter 3};
+
+\node[blk,text width=96mm,anchor=north] (ltch) at (0,-22)
+  {\texttt{\{STN\}:STN:MPS:LTCH}\\
+   \texttt{bi} record, \texttt{DTYP="AB-1771DCM BI"}, MAJOR alarm};
+
+\node[blk,text width=96mm,anchor=north] (sumy) at (0,-44)
+  {\texttt{\{STN\}:STNMPS:SUMY:LTCH.INPI}};
+
+\node[ctrl,text width=96mm,anchor=north] (stnoff) at (0,-62)
+  {\texttt{\{STN\}:STNOFF:SUMY:STAT.SEVR}\\
+   read as \texttt{fault\_stnoff} in \texttt{rf\_states.st}};
+
+\draw[sig] (plc.south)  -- node[right,tag,xshift=1mm]{RIO word \texttt{T6[WL,B]}} (ltch.north);
+\draw[sig] (ltch.south) -- node[right,tag,xshift=1mm]{\texttt{.SEVR} \quad NPP MS} (sumy.north);
+\draw[sig] (sumy.south) -- node[right,tag,xshift=1mm]{\texttt{.SEVR} \quad NPP MS} (stnoff.north);
+\end{tikzpicture}

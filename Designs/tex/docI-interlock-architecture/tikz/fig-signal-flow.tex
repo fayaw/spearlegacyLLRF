@@ -1,0 +1,119 @@
+% !TeX root = ../I_interlock_architecture.tex
+% Doc I master diagram.  Three fault sources, three actors, three MPS paths.
+% Read top to bottom: the hardware layer (upper two thirds) acts in under a
+% microsecond and is independent of software; the EPICS alarm tree and the SNL
+% state machine (lower third) only observe and then tidy up.
+%
+% Layout rules used here:
+%   * every box in a column shares that column's centre x, so the vertical
+%     connectors between them are exactly vertical;
+%   * the three MPS paths run in lanes that touch no box -- A across the gap at
+%     the actor row, B straight down the centre, C down the lane at x = 134;
+%   * the HVPS Remote I/O path runs down the far right at x = 203 so that it
+%     does not pass through the VXI Slot 5 box.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+\def\xA{30}\def\xB{100}\def\xC{168}
+\def\yE{-150}
+
+% ===== fault sources =======================================================
+\node[blk,text width=54mm,anchor=north] (s1) at (\xA,-2)
+  {Arc \slash\ RF overpower\\ {\tiny fiber, coax}};
+\node[blk,text width=58mm,anchor=north] (s2) at (\xB,-2)
+  {Collector, vacuum, cooling,\\ reflected power {\tiny (protection)}};
+\node[blk,text width=54mm,anchor=north] (s3) at (\xC,-2)
+  {HVPS internal faults\\ {\tiny oil, arc, voltage, crowbar}};
+\draw[grp] ($(s1.north west)+(-5,7)$) rectangle ($(s3.south east)+(5,-3)$);
+\node[lbl,anchor=north west] at ($(s1.north west)+(-3,6)$) {FAULT SOURCES};
+
+% ===== the three actors ====================================================
+\def\yA{-28}
+\node[rf,text width=54mm,anchor=north] (fic) at (\xA,\yA)
+  {\textbf{FAST INTERLOCK}\\\textbf{CHASSIS 340-308}\\
+   B132, $<\qty{1}{\micro\second}$\\[2pt]
+   {\tiny analog comparators\\ no CPU, no firmware}};
+\node[plc,text width=58mm,anchor=north] (mps) at (\xB,\yA)
+  {\textbf{RF MPS PLC}\\ AB PLC-5 with 1771 I/O, B132\\
+   $\approx\qty{10}{\milli\second}$ scan cycle};
+\node[plc,text width=54mm,anchor=north] (slc) at (\xC,\yA)
+  {\textbf{SLC-500 HVPS PLC}\\ B118, $\approx\qtyrange{10}{20}{\milli\second}$ scan\\[2pt]
+   {\tiny detects arc, crowbar, overvoltage,\\ oil, transformer}};
+\foreach \s/\d in {s1/fic, s2/mps, s3/slc}{\draw[sig] (\s.south) -- (\d.north);}
+
+% ===== hardware outputs at each end ========================================
+\node[pwr,text width=50mm,anchor=north] (fout) at (\xA,-60)
+  {SCR ENABLE {\tiny(fiber $\rightarrow$ B514)}\\
+   CROWBAR FIRE {\tiny(fiber $\rightarrow$ B514)}\\
+   STATUS WORD {\tiny($\rightarrow$ AIM Slot 12)}};
+\draw[sig] (fic.south) -- (fout.north);
+
+\node[pwr,text width=54mm,anchor=north] (sout) at (\xC,-60)
+  {SCR supervisory relay\\ Slot 5 OX8 $\rightarrow$ fiber $\rightarrow$ B514\\
+   {\tiny turns off the SCR gate drive}};
+\draw[sig] (slc.south) -- (sout.north);
+
+% ===== Paths A and B =======================================================
+% The actor boxes differ in height, so their .east/.west anchors sit at
+% different y.  Route from one anchor and project onto the other's x.
+\draw[sig] (mps.west) -- node[above,tag]{\textbf{Path A}} (mps.west -| fic.east);
+\draw[draw=cNeut,thick] (mps.south) -- (\xB,-50);
+\node[tag,anchor=west] at (\xB+3,-53) {\textbf{Path B}};
+
+% ===== AIM and Slot 5 ======================================================
+\def\yM{-84}
+\node[ctrl,text width=76mm,anchor=north] (aim) at (\xA,\yM)
+  {\textbf{AIM MODULE} --- VXI Slot 12 \texttt{devP2RfAim.c}\\[2pt]
+   {\tiny arc channel registers \mbox{\texttt{ARCCURSTT}}, \mbox{\texttt{ARCLTDSTT}},
+    populated from the Fast IC status word}\\[2pt]
+   asserts RF\_FAULT on the VXI P2 backplane};
+\draw[sig] (fout.south) -- node[right,tag,xshift=1mm]{direct chassis-to-module cable} (aim.north);
+
+\node[ctrl,text width=60mm,anchor=north] (slot5) at (\xC,\yM)
+  {\textbf{VXI SLOT 5} --- MPS SHUTOFF MODULE\\[2pt]
+   {\tiny receives on its back connector:\\
+    RF MPS PLC permit (relay) $\cdot$ SPEAR MPS beam permit $\cdot$ orbit interlock}\\[2pt]
+   asserts RF\_FAULT on P2};
+
+% Path C: down the clear lane at x = 134, between the MPS and HVPS columns
+\draw[sig] (mps.east) -- (134,-35) -- (134,-93) -- (slot5.west);
+\node[tag,anchor=east] at (132,-62) {\textbf{Path C}};
+
+% ===== the RFP module, cut by either asserter ==============================
+\node[rf,text width=54mm,anchor=north] (rfp) at (\xA,-118)
+  {\textbf{RFP MODULE} --- Slot 4\\ RF drive DAC $\rightarrow$ zero\\
+   {\tiny hardware, $<\qty{1}{\micro\second}$}};
+\draw[sig] (aim.south) -- (rfp.north);
+% dropped from the left of Slot 5 so it never shares the far-right RIO lane
+\draw[sig] ($(slot5.south west)+(16,0)$) |- node[pos=0.62,above,tag]
+  {RF\_FAULT line (open-collector)} (rfp.east);
+
+% ===== EPICS alarm tree ====================================================
+\node[blk,text width=212mm,anchor=north] (epics) at (98,\yE)
+  {\textbf{EPICS ALARM AGGREGATION TREE}\quad
+   \texttt{rf\_sumy\_stn.db} / \texttt{rf\_sumy\_stn\_spr.db}\quad
+   {\tiny($\approx\qty{100}{\milli\second}$ CA propagation)}\\[3pt]
+   {\footnotesize\texttt{STN:VXI:LTCH} $\rightarrow$ \texttt{STNPARK:SUMY:STAT}
+    \qquad \texttt{STNMPS:SUMY:LTCH} $\rightarrow$ \texttt{STN:MPS:LTCH},
+    \texttt{STN:FORCED:LTCH}, \texttt{STN:VXI:LTCH}
+    \qquad \texttt{HVPSOFF:SUMY:STAT} $\rightarrow$ \texttt{HVPSSTN:SUMY:LTCH},
+    \texttt{HVPSCONTACT:SUMY:STAT}}\\[3pt]
+   \textbf{\texttt{\{STN\}:STNOFF:SUMY:STAT.SEVR} --- the single SNL trip wire}};
+
+% AIM ISR: the software notification path, dropped clear of the RFP module
+\draw[sig] ($(aim.south west)+(8,0)$) -- (0,\yE);
+\node[tag,anchor=west,align=left] at (3,\yE+15)
+  {AIM ISR ($\approx\qty{10}{\micro\second}$)\\ $\rightarrow$ \texttt{STN:VXI:LTCH} $=$ MAJOR};
+\draw[sig] (\xB,-50) -- (\xB,\yE);
+% the HVPS Remote I/O path keeps to the far right of the Slot 5 box
+\draw[sig] (sout.east) -| (203,\yE);
+\node[tag,anchor=east] at (201,-114) {RIO $\approx\qty{1}{\hertz}$};
+
+% ===== SNL state machine ===================================================
+\node[ctrl,text width=150mm,anchor=north] (snl) at (98,\yE-30)
+  {\textbf{SNL STATE MACHINE} \texttt{rf\_states.st} --- VxWorks IOC,
+   $\approx\qty{1}{\second}$ response\\[3pt]
+   {\footnotesize \texttt{s\_go\_off}: force beam abort $\rightarrow$ HVPS setpoint to zero
+    $\rightarrow$ \qty{5}{\second} ramp $\rightarrow$ SCR gate off $\rightarrow$ RF drive off
+    $\rightarrow$ fault file capture (11 channels)}};
+\draw[sig] (epics.south) -- node[right,tag,xshift=1mm]
+  {\texttt{fault\_stnoff} $\neq$ NO\_ALARM} (snl.north);
+\end{tikzpicture}

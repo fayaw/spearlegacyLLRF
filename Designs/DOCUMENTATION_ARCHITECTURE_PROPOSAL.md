@@ -26,7 +26,7 @@
 > | `Archived/` | The directory is **`Archived_NOTUSE/`** |
 > | — | `SSA_upgrade/` was missing from the repository scope table |
 
-> **Reading note — proposed vs. existing documents.** This is a **proposal**. Document names of the form `00_MASTER_INDEX.md`, `D_OPERATIONAL_DATA_CATALOG.md` and `U{N}_{SUBSYSTEM}_UPGRADE.md` describe documents that **do not yet exist**; they are the deliverables this proposal argues for. Documents that do exist are `tex/0_system_design_report.pdf`, `tex/L_legacy_system_architecture.pdf`, `I_INTERLOCK_ARCHITECTURE.md`, `P_RF_PHYSICS_AND_PLANT.md` and `T_TUNER_CONTROL_SYSTEM_ANALYSIS.md`.
+> **Reading note — proposed vs. existing documents.** This is a **proposal**. Document names of the form `00_MASTER_INDEX.md`, `D_OPERATIONAL_DATA_CATALOG.md` and `U{N}_{SUBSYSTEM}_UPGRADE.md` describe documents that **do not yet exist**; they are the deliverables this proposal argues for. Documents that do exist are `tex/doc0-system-design/0_system_design_report.pdf`, `tex/docL-legacy-architecture/L_legacy_system_architecture.pdf`, `I_INTERLOCK_ARCHITECTURE.md`, `P_RF_PHYSICS_AND_PLANT.md` and `T_TUNER_CONTROL_SYSTEM_ANALYSIS.md`.
 
 ---
 
@@ -163,7 +163,7 @@ All new design documents (Doc P, Doc L, Doc D, U1–U10) must reference **origin
 
 | Document | Status | Notes |
 |----------|--------|-------|
-| `Designs/tex/0_system_design_report.tex` (Doc 0) | **Under PDR review** | LaTeX source; builds to `Designs/tex/0_system_design_report.pdf`. Converted from the markdown rendering of `Designs/docx/SPEAR3_LLRF_PDR_R2.docx`; the LaTeX is now the maintained version. |
+| `Designs/tex/doc0-system-design/0_system_design_report.tex` (Doc 0) | **Under PDR review** | LaTeX source; builds to `Designs/tex/doc0-system-design/0_system_design_report.pdf`. Converted from the markdown rendering of `Designs/docx/SPEAR3_LLRF_PDR_R2.docx`; the LaTeX is now the maintained version. |
 | `pps/pps_Ben.md` | **Transcription of meeting** | Ben Morris PPS Interface Upgrade Proposal transcribed from March 5, 2026 meeting. Quasi-original — content comes directly from human presentation. |
 | `pps/MSG from Jim Sebek to Faya about PPS.md` | **Transcribed email** | Jim Sebek's 2022 email thread, transcribed. Original human content. |
 | `hvps/documentation/switchgear/technical_notes/*.docx` | **RESOLVED — derived, not original** | Each `.docx` is a conversion **of** its same-named `.md` file. The rule established September 2026: a `.docx` in the repository **is** a true source **unless** a `.md` of the same name sits in the same folder, in which case the `.docx` was exported from the `.md`. These four are the only derived `.docx` files in the repository; the other 84 are genuine sources. |
@@ -661,7 +661,7 @@ Each section below lists the **original source documents** to be consulted. AI-g
 ### 8.1 Doc L — Legacy System Architecture
 
 **Status**: **RELEASE CANDIDATE v3.1** (2,201 lines, 21 sections + appendices; 72-entry reference index; §21 verification matrix)  
-**Location**: `Designs/tex/L_legacy_system_architecture.pdf`  
+**Location**: `Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf`  
 **Priority**: High — required context for all upgrade work
 
 #### 8.1.1 Purpose
@@ -803,7 +803,7 @@ These are AI analyses of the 2,293 legacy source files, organised as a self-cont
 ### 9.1 Doc 0 — System Design Report (Exists)
 
 **Status**: Under PDR review  
-**Location**: `Designs/tex/0_system_design_report.tex` (LaTeX source), `Designs/tex/0_system_design_report.pdf` (built output), `Designs/docx/SPEAR3_LLRF_PDR_R2.docx` (original docx)  
+**Location**: `Designs/tex/doc0-system-design/0_system_design_report.tex` (LaTeX source), `Designs/tex/doc0-system-design/0_system_design_report.pdf` (built output), `Designs/docx/SPEAR3_LLRF_PDR_R2.docx` (original docx)  
 **Constraint**: This document is preserved as-is during the current review cycle
 
 Doc 0 defines 10 subsystems and serves as the top-level system design reference. All upgrade documents (U1–U10) must be consistent with Doc 0.
@@ -1235,7 +1235,7 @@ This appendix provides a systematic review checklist. **AI verification against 
 | `hvps/architecture/technical-notes/00`–`06` (7) | HVPS | PEP-II docs, design notes | 5 of 7 | — | — |
 | `llrf/.../technical-notes/00`–`05` (6) | LLRF | Legacy architecture PDFs | 3 of 6 | — | — |
 | `spear-rf-code-legacy/codeReviewTechnicalNotes/00`–`08` (9) | Code | 2,293 source files | 5 of 9 | — | — |
-| `Designs/tex/L_legacy_system_architecture.pdf` | System | All original sources | ✅ twice | — | — |
+| `Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf` | System | All original sources | ✅ twice | — | — |
 | `Designs/P_RF_PHYSICS_AND_PLANT.md` | Physics | PEP-II papers, code | Partial | — | — |
 | `Designs/T_TUNER_CONTROL_SYSTEM_ANALYSIS.md` | Tuner | `rf_cav.db,v`, motor records | Partial | — | — |
 

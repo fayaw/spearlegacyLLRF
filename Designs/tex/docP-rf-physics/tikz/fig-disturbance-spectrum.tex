@@ -1,0 +1,37 @@
+% !TeX root = ../P_rf_physics_and_plant.tex
+% Disturbance spectrum on a log frequency axis, with the loop responsible for
+% each band.  Drawn on a log axis so the decade separation between adjacent
+% loop bandwidths is visible rather than merely asserted.
+%
+% The responsible loop is on the SAME line as its disturbance: a second line
+% below each bar reads as belonging to the row underneath it.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+\pgfmathsetmacro\sc{180/15}                    % 15 decades over 180 mm
+
+% ---- axis ----------------------------------------------------------------
+\draw[draw=black!55,line width=0.8pt] (0,0) -- (180,0);
+\foreach \e in {-8,-6,-4,-2,0,2,4,6}{%
+  \pgfmathsetmacro\x{(\e+8)*\sc}
+  \draw[draw=black!55] (\x,0) -- (\x,-2.2);
+  \node[font=\tiny,anchor=north] at (\x,-2.6) {$10^{\e}$};
+}
+\node[lbl,anchor=north] at (90,-8) {frequency (Hz)};
+
+% ---- bands: {disturbance}/{loop}/{log f low}/{log f high}/{row}/{style} ----
+\foreach \lab/\loop/\a/\b/\r/\sty in {%
+  {D9 ring circumference thermal drift}/{tuner, plus a periodic RF master oscillator update}/-7.6/-7.2/0/pwr,
+  {D8 cavity thermal drift}/{tuner loop}/-3/-2/1/pwr,
+  {D6 klystron gain}/{HVPS loop $\approx\qty{1}{\hertz}$, DAC loop $\approx\qty{0.1}{\hertz}$}/-2/0/2/plc,
+  {D7 slow mechanical}/{tuner loop}/0/1/3/plc,
+  {D5 HVPS ripple}/{ripple loop $\approx\qty{300}{\hertz}$, plus the direct loop}/1.78/3.3/4/rf,
+  {D2 beam transients}/{direct loop $\approx\qty{800}{\kilo\hertz}$}/3/5/5/rf,
+  {D3 Robinson}/{direct loop, by impedance reduction}/3.9/4.1/6/ctrl,
+  {D4 coupled-bunch}/{direct loop, plus the comb filter on PEP-II}/6.0/6.2/7/ctrl}{%
+    \pgfmathsetmacro\xa{(\a+8)*\sc}
+    \pgfmathsetmacro\xb{(\b+8)*\sc}
+    \pgfmathsetmacro\y{7+\r*10}
+    \draw[\sty,fill,draw,line width=0.6pt] (\xa,\y) rectangle (\xb+0.8,\y+5.4);
+    \node[font=\tiny,anchor=west] at (\xb+3,\y+2.7)
+      {\textbf{\lab} \;\textcolor{black!55}{\itshape\loop}};
+}
+\end{tikzpicture}

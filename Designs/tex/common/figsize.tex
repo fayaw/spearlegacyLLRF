@@ -1,8 +1,8 @@
 % Report the natural size of a TikZ figure, so the adjustbox caps in body.tex
-% can be set from measurement rather than estimate.
-%   lualatex -interaction=nonstopmode "\def\FIG{fig-system-overview}\input{figsize}"
+% can be set from measurement rather than estimate.  Run from a document folder.
+%   lualatex -interaction=nonstopmode "\def\FIG{fig-system-overview}\input{../common/figsize}"
 \documentclass[letterpaper,11pt]{article}
-\input{preamble}
+\input{../common/preamble}
 \newsavebox{\measbox}
 \begin{document}
 \savebox{\measbox}{\input{tikz/\FIG}}

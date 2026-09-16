@@ -43,7 +43,7 @@ Also drawn in this panel: **MX** (ON/OFF), **RR** (PPS) and **K-4** (RESET) rela
 > | 2 | ID-308-801-06-C1 | TB2-18/19/20 carry **wires 20 / 21 / 22** |
 > | 3 | GP-439-704-02-C1 | Wires 20/21/22 = **"PPS (CONTACTOR)"** → **TB3-22/23/24** |
 >
-> See `Designs/tex/L_legacy_system_architecture.pdf` §13.2.1 for the full trace.
+> See `Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf` §13.2.1 for the full trace.
 
 ### Contactor Disconnect terminal strip layout (as drawn)
 

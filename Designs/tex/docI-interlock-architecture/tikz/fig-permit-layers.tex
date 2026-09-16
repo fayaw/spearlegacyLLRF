@@ -1,0 +1,35 @@
+% !TeX root = ../I_interlock_architecture.tex
+% The same cascade seen as a stack of layers.  The point is that the chain
+% crosses from a permit decision, through RF physics, into a hardware kill --
+% no single layer does the whole job.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+\def\xL{0}     % layer-name column
+\def\xB{44}    % content column
+\def\wB{112}   % content width
+
+\foreach \i/\layer/\sty/\txt in {%
+  0/{Machine permit}/ctrl/{SPEAR MPS permit $\rightarrow$ VXI Slot 5
+       $\rightarrow$ RF\_FAULT asserted on the backplane},
+  1/{Hardware \slash\ RF}/rf/{RFP module: drive DAC $=0$
+       $\rightarrow$ klystron output $=0$ \quad\emph{(HVPS still on)}},
+  2/{RF physics}/rf/{$P_\text{collector}=P_\text{cathode}$ ---
+       all cathode power now lands on the collector},
+  3/{RF protection}/plc/{RF MPS PLC: \texttt{KLYSCOLLPLC:POWER} exceeds the trip
+       limit $\rightarrow$ output relay fires $\rightarrow$ \textbf{Path A}},
+  4/{Hardware interlock}/pwr/{Fast IC $\rightarrow$ SCR ENABLE removed
+       $+$ CROWBAR fired $\rightarrow$ \textbf{HVPS killed}}}{%
+    \pgfmathsetmacro\y{-\i*20}
+    \node[\sty,text width=\wB mm,anchor=west] (L\i) at (\xB,\y) {\txt};
+    \node[lbl,anchor=east,align=right,text width=38mm] at (\xB-3,\y) {\layer\ layer};
+  }
+
+\foreach \i/\dt in {0/{}, 1/{}, 2/{$\approx\qty{10}{\milli\second}$}, 3/{}}{%
+  \pgfmathsetmacro\ya{-\i*20}
+  \draw[sig] (\xB+\wB/2,\ya-7) -- node[right,tag,xshift=1mm]{\dt} (\xB+\wB/2,\ya-13);
+}
+
+\node[draw=cPwr!50,fill=cPwr!5,rounded corners=2pt,inner sep=4pt,
+      anchor=north west,text width=\wB mm] at (\xB,-90)
+  {Elapsed from the original permit withdrawal to the hardware HVPS kill:
+   $\approx\qty{30}{\milli\second}$.};
+\end{tikzpicture}

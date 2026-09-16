@@ -19,7 +19,7 @@ Purpose: Detailed extraction of design information from circuit schematic for AI
 > | 3 | GP-439-704-02-C1 | Wires **20, 21, 22** = **"PPS (CONTACTOR)"** → **TB3-22, TB3-23, TB3-24** |
 > | 4 | WD-730-790-01-C3 | Contactor Disconnect labels one auxiliary set **"CONTACTS PPS"** |
 >
-> Full trace: `Designs/tex/L_legacy_system_architecture.pdf` §13.2.1.
+> Full trace: `Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.pdf` §13.2.1.
 >
 > ### TB2 wire names (relevant extract, as drawn)
 >
