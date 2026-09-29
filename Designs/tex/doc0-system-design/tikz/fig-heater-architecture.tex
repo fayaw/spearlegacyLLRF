@@ -9,7 +9,7 @@
 \node[plc,text width=48mm,anchor=west]  (mps) at (10,-26)
   {\textbf{RF MPS PLC}\\ ControlLogix 1756};
 \node[pwr,text width=48mm,anchor=west]  (ch)  at (10,-54)
-  {\textbf{CHROMA AC SUPPLY}\\ programmable};
+  {\textbf{TDK LAMBDA AC SUPPLY}\\ programmable};
 \node[rf,text width=48mm,anchor=west]   (kc)  at (10,-82)
   {\textbf{KLYSTRON CATHODE HEATER}};
 
@@ -18,9 +18,14 @@
   {analog ramp\\{\tiny voltage programming input}} (ch.north);
 \draw[sig] (ch.south)  -- node[right,tag]{\qty{60}{\hertz} AC output} (kc.north);
 
+% --- external line-frequency sync, new in-house design item --------------
+\node[blk,text width=44mm,anchor=west,draw=cPwr,text=cPwr!85!black] (sy) at (-46,-54)
+  {\qty{60}{\hertz} SYNC CIRCUIT\\{\tiny external, in-house design (B.~Morris)}};
+\draw[sig] (sy.east) -- node[above,tag]{line sync} (ch.west);
+
 % --- Ethernet: setpoints and readback, same row as the supply -------------
 \node[blk,text width=46mm,anchor=west] (eth) at (76,-54)
-  {Ethernet --- ASYN / VISA ASCII\\{\tiny setpoints, readback, status}};
+  {Ethernet --- ASYN / ASCII\\{\tiny setpoints, readback, status}};
 \draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick] (ch.east) -- (eth.west);
 
 % --- retained analog V/I metering, tapped off the supply output -----------

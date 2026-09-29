@@ -6,6 +6,9 @@
 \begin{tikzpicture}[
   font=\scriptsize,
   every node/.style={outer sep=0pt},
+  % path labels, held clear of the connector they annotate
+  tagr/.style={tag,right,xshift=1.3mm},
+  tagl/.style={tag,left,xshift=-1.3mm},
   x=1mm,y=1mm,
 ]
 \def\colL{28}\def\colM{78}\def\colR{128}
@@ -22,14 +25,15 @@
    {\ttfamily\tiny [0]\,IOC\quad[1]\,AB6008\quad[2]\,CLK\quad[4]\,RFP\quad
     [5]\,MPSShtf\quad[6]\,LinkPassthru\quad[7]\,IQA-1\quad[9]\,IQA-2\quad
     [11]\,IQA-3\quad[12]\,AIM}};
-\draw[sig] (epics.south) -- node[tag,right]{VXIbus P2 backplane} (vxi.north);
+\draw[sig] (epics.south) -- node[tagr]{VXIbus P2 backplane} (vxi.north);
 
 % ===== Row C -- Remote I/O bus =============================================
 \coordinate (busY) at (0,-42);
 \draw[bus,double,double distance=1.2pt] (4,-42) -- (152,-42);
-\node[tag,anchor=south,align=center] at (\colM,-41.2)
-  {AB REMOTE I/O (RIO) serial link\ \ $\cdot$\ \ VXI slot 1: AB 6008-SV1R
-   scanner (link master)\ $\cdot$\ ${\sim}1$\,Hz};
+% split either side of the crate feed so the arrow does not cross the caption
+\node[tag,anchor=south east] at (71,-41.2) {AB REMOTE I/O (RIO) serial link};
+\node[tag,anchor=south west] at (85,-41.2)
+  {VXI slot 1: AB 6008-SV1R scanner (link master)\ $\cdot$\ ${\sim}1$\,Hz};
 \draw[sig] (vxi.south) -- (\colM,-42);
 
 % ===== Row D -- the three RIO adapters =====================================
@@ -63,12 +67,12 @@
    Out: FISTAT $\rightarrow$ AIM $\cdot$ \mbox{SCR ENABLE}
    (${<}\,\qty{1}{\micro\second}$) $\cdot$ CROWBAR
    (${\approx}\,\qty{10}{\micro\second}$)};
-\draw[sig] (mps.south) -- node[tag,right,align=left]{hardwired I/O\\(permits)} (fic.north);
+\draw[sig] (mps.south) -- node[tagr,align=left]{hardwired I/O\\(permits)} (fic.north);
 
 \node[blk,text width=42mm,anchor=north] (xlat) at (\colR,-88)
   {\textbf{SS2000MD4 PWM}\\\textbf{TRANSLATORS $\times$ 4}\quad[B132]\\
    step/dir $\rightarrow$ bipolar motor current};
-\draw[sig] (step.south) -- node[tag,right]{step/dir} (xlat.north);
+\draw[sig] (step.south) -- node[tagr]{step/dir} (xlat.north);
 
 % ===== Row F -- HVPS power section ========================================
 \node[pwr,text width=142mm,anchor=north] (hvps) at (\colM,-124)
@@ -87,9 +91,9 @@
    $\rightarrow$ HV DC out};
 
 \draw[sig] (slc.south) -- (slc.south|-hvps.north)
-  node[pos=0.62,left,tag,align=right]{PPS relay chain\\(PLC ladder)};
+  node[pos=0.62,tagl,align=right]{PPS relay chain\\(PLC ladder)};
 \draw[fib] (fic.south) -- (fic.south|-hvps.north)
-  node[pos=0.55,right,tag,align=left]{SCR ENABLE / CROWBAR / STATUS\\fiber optic
+  node[pos=0.55,tagr,align=left]{SCR ENABLE / CROWBAR / STATUS\\fiber optic
   $\leftrightarrow$ B514\ \ ($\sim$10--20\,ms)};
 
 % ===== Row G1 -- RF signal path, first leg ================================
@@ -118,30 +122,35 @@
 % circulator drops to the second leg
 \draw[sig] (circ.south) -- ++(0,-6) -| (mt.north);
 
-% RF drive from the VXI RFP module, down the left margin
-\coordinate (railL) at (0,0);
-\draw[sig] (vxi.west) -- (vxi.west -| railL) -- (amp.west -| railL) -- (amp.west);
-\node[tag,rotate=90,anchor=south] at (-1.4,-108) {VXI RFP drive, \qty{476.3}{\mega\hertz}};
+% RF drive from the VXI RFP module, down the left margin.  It leaves the crate
+% below the IQA return so the two margin rails never cross.
+\coordinate (railL) at (2,0);
+\coordinate (rfpOut) at ($(vxi.west)!0.75!(vxi.south west)$);
+\draw[sig] (rfpOut) -- (rfpOut -| railL) -- (amp.west -| railL) -- (amp.west);
+\node[tag,rotate=90,anchor=south] at (0.6,-108) {VXI RFP drive, \qty{476.3}{\mega\hertz}};
 
 % cathode HV from the HVPS
 \draw[sig] (kly.north|-hvps.south) -- (kly.north)
-  node[midway,right,tag,align=left]{${\approx}-72$ to $-\qty{75}{\kilo\volt}$,
+  node[midway,tagr,align=left]{${\approx}-72$ to $-\qty{75}{\kilo\volt}$,
    \qtyrange{19}{22}{\ampere}\\{\tiny HV cable via Termination Tank}};
 
 % ===== Row H -- tuners and IQA measurement ================================
 \node[blk,text width=44mm,anchor=north] (tun) at (\colR,-206)
   {SLO-SYN M093-FC11 stepper $\rightarrow$ tuner plunger\\
    {\tiny one per cavity, linear-pot feedback}};
-\draw[sig] (cav.south) -- (tun.north);
 \coordinate (railR) at (156,0);
 \draw[sig] (xlat.east) -- (xlat.east -| railR) -- (tun.east -| railR) -- (tun.east);
-\node[tag,rotate=90,anchor=south] at (157.4,-150) {motor cables to tunnel};
+\node[tag,rotate=90,anchor=north] at (157.4,-150) {motor cables to tunnel};
 
 \node[ctrl,text width=52mm,anchor=north] (iqa) at (36,-206)
   {IQA-1 klystron fwd/refl $\cdot$ IQA-2 cavity refl. $\cdot$ IQA-3 cavity probe
    $\cdot$ arc sensors (fiber $\rightarrow$ Fast IC)};
-\draw[sig] (cav.south west) -- ++(0,-6) -| (iqa.north);
-\coordinate (railI) at (7,0);
+% both taps leave the bottom edge of the cavity box in the same orthogonal style
+\draw[sig] ($(cav.south west)!0.5!(cav.south)$) -- ++(0,-6) -| (iqa.north);
+\draw[sig] ($(cav.south)!0.5!(cav.south east)$) -- ++(0,-6) -| (tun.north);
+% IQA measurements back to the crate, outboard of the RF-drive rail so the
+% return clears the SLC-500 and HVPS boxes
+\coordinate (railI) at (-4,0);
 \draw[sig] (iqa.west) -- (iqa.west -| railI) -- (vxi.west -| railI) -- (vxi.west);
-\node[tag,rotate=90,anchor=south] at (5.6,-120) {IQA measurements to VXI};
+\node[tag,rotate=90,anchor=south] at (-5.4,-120) {IQA measurements to VXI};
 \end{tikzpicture}

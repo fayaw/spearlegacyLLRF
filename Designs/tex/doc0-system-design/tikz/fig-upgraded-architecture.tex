@@ -3,10 +3,13 @@
 % The point the drawing must make: machine protection (Interface Chassis) and
 % personnel safety (PPS Interface Box) are architecturally separate paths.
 %
-% Layout note: the two subsystem rows are horizontally offset so that the
-% upper row's drop lines to the Interface Chassis pass through clear lanes
-% between the lower row's boxes.  Row members use anchor=west at a common y so
-% that every connector between them is exactly horizontal.
+% Layout rule that keeps every line clear: the lower row is offset by half a
+% pitch from the upper row, so each lower-row box sits under a GAP in the upper
+% row and each upper-row box sits over a GAP in the lower row.  Every drop is
+% therefore straight -- the Channel Access feeds reach the lower row without
+% crossing an upper-row box, and the upper row reaches the Interface Chassis
+% without crossing a lower-row box.  Only the HVPS PLC is routed sideways,
+% down the clear lane to the right of the heater controller.
 \begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
 
 % ===== operator and expert layers =========================================
@@ -19,7 +22,7 @@
    expert EPICS panels $\cdot$ system diagnostics};
 
 % ===== EPICS coordinator ==================================================
-\node[ctrl,text width=146mm,anchor=north] (epics) at (78,-24)
+\node[ctrl,text width=154mm,anchor=north] (epics) at (80,-24)
   {\textbf{EPICS (soft IOC) COORDINATOR}\\
    state machine $\cdot$ HVPS loop $\cdot$ tuner manager $\cdot$ fault manager
    $\cdot$ diagnostics $\cdot$ heartbeat monitoring};
@@ -28,10 +31,11 @@
 
 \def\yCA{-44}
 \coordinate (caY) at (0,\yCA);
-\draw[bus] (10,\yCA) -- (146,\yCA);
-\node[tag,fill=white,inner sep=1.5pt] at (78,\yCA)
+\draw[bus] (10,\yCA) -- (126,\yCA);
+% the rail label sits ABOVE the rail, clear of the coordinator drop at x = 80
+\node[tag,anchor=south west,fill=none] at (12,-42.6)
   {EPICS Channel Access\quad($\sim$\qty{1}{\hertz} supervisory)};
-\draw[sig] (epics.south) -- (78,\yCA);
+\draw[sig] (epics.south) -- (80,\yCA);
 
 % ===== upper subsystem row ================================================
 % centres 16 / 50 / 84 / 118, width 26  ->  spans 3-29, 37-63, 71-97, 105-131
@@ -45,38 +49,38 @@
 \node[plc,text width=26mm,anchor=west] (hp)  at (105,\yU)
   {\textbf{HVPS PLC}\\ CompactLogix\\ voltage control};
 \foreach \n in {l1,l2,mot,hp}{\draw[sig] (\n.north|-caY) -- (\n.north);}
-% the two LLRF9 interlock chains are wired directly to each other, not via the
-% Interface Chassis
-\draw[{Stealth[length=2mm]}-{Stealth[length=2mm]},thick]
-  (l1.east) -- node[tag,rotate=90]{interlock} (l2.west);
+% The two LLRF9 interlock chains are wired directly to each other, not via the
+% Interface Chassis.  Unlabelled on purpose: the only clear space for a label
+% is the lane the Waveform Buffer feed uses.  Explained in the caption.
+\draw[{Stealth[length=2mm]}-{Stealth[length=2mm]},thick] (l1.east) -- (l2.west);
 
 % ===== lower subsystem row ================================================
-% centres 27 / 61 / 95 / 129, width 26  ->  spans 14-40, 48-74, 82-108, 116-142
+% centres 33 / 67 / 101 / 135, width 26  ->  spans 20-46, 54-80, 88-114, 122-148
 \def\yL{-84}
-\node[blk,text width=26mm,anchor=west] (wb)   at (14,\yL)
+\node[blk,text width=26mm,anchor=west] (wb)   at (20,\yL)
   {\textbf{WAVEFORM}\\\textbf{BUFFER SYSTEM}};
-\node[blk,text width=26mm,anchor=west] (arc)  at (48,\yL)
-  {\textbf{ARC DETECT}\\ 10 sensors};
-\node[plc,text width=26mm,anchor=west] (mp)   at (82,\yL)
+\node[blk,text width=26mm,anchor=west] (arc)  at (54,\yL)
+  {\textbf{ARC DETECT}\\ AFT ARC4};
+\node[plc,text width=26mm,anchor=west] (mp)   at (88,\yL)
   {\textbf{RF MPS PLC}\\ ControlLogix 1756\\ collector-power calc};
-\node[blk,text width=26mm,anchor=west] (heat) at (116,\yL)
+\node[blk,text width=26mm,anchor=west] (heat) at (122,\yL)
   {\textbf{HEATER CTRL}\\ programmable AC supply};
+% straight drops: 33, 67 and 101 all fall in gaps of the upper row
 \foreach \n in {wb,arc,mp}{\draw[sig] (\n.north|-caY) -- (\n.north);}
 \draw[sig] (mp.east) -- (heat.west);
 
 % ===== interface chassis ==================================================
-\node[plc,text width=146mm,anchor=north] (ic) at (78,-104)
+\node[plc,text width=154mm,anchor=north] (ic) at (80,-104)
   {\textbf{INTERFACE CHASSIS}\quad(new)\\
    first-fault detection $\cdot$ optocoupler / galvanic isolation $\cdot$
    fiber I/O $\cdot$ AND-gate permit logic};
 
-% lower row drops straight down
+% straight drops: 16, 50, 84 all fall in gaps of the lower row
+\foreach \n in {l1,l2,mot}{\draw[sig] (\n.south) -- (\n.south|-ic.north);}
 \foreach \n in {wb,arc,mp}{\draw[sig] (\n.south) -- (\n.south|-ic.north);}
-% upper row jogs sideways into the clear lanes at x = 8, 44, 78, 112
-\def\yJog{-76}
-\foreach \n/\lane in {l1/8, l2/44, mot/78, hp/112}{%
-  \draw[draw=cNeut,thick] (\n.south) |- (\lane,\yJog);
-  \draw[sig] (\lane,\yJog) -- (\lane,-104);}
+% HVPS PLC takes the clear lane to the RIGHT of the heater controller
+\draw[draw=cNeut,thick] (hp.south) |- (152,-72);
+\draw[sig] (152,-72) -- (152,-104);
 
 % ===== external permits ===================================================
 \node[blk,text width=60mm,anchor=north] (ext) at (38,-130)
@@ -90,8 +94,9 @@
   {\textbf{HVPS (power section)}\\
    transformer, rectifier, crowbar, thyristor stacks,\\
    grounding tank, Ross switch, filter inductors};
-\draw[fib] (116,-104) -- (hvps.north);
-\node[tag,anchor=west,align=left] at (119,-119)
+% leaves the BOTTOM edge of the Interface Chassis, not its top
+\draw[fib] (ic.south -| hvps.north) -- (hvps.north);
+\node[tag,anchor=west,align=left] at (119,-123)
   {3$\times$ fiber optic\\ SCR ENABLE $\cdot$ CROWBAR $\cdot$ STATUS\\
    {\tiny bypasses the PLC}};
 

@@ -9,7 +9,7 @@
 
 \node[ctrl,text width=26mm,anchor=west] (eps) at (8,0)   {\textbf{EPICS setpoint}};
 \node[plc,text width=26mm,anchor=west]  (plc) at (8,-20)  {\textbf{SLC-500 PLC}};
-\draw[sig] (eps.south) -- node[right,tag]{Remote I/O} (plc.north);
+\draw[sig] (eps.south) -- node[right,tag] {Remote I/O} (plc.north);
 
 \node[sum]                              (sum) at (112,-20) {$+$};
 \node[pwr,text width=34mm,anchor=west]  (ener) at (128,-20)
@@ -24,7 +24,7 @@
 \node[blk,text width=34mm,anchor=north] (reg) at (72,-44)
   {\textbf{Analog regulator}\\ PC-237-230\\ (SD-237-230-14-C1)};
 \draw[sig] (plc.south) |- (reg.west);
-\node[tag,anchor=south west] at (22,-42.5) {N7:10 reference};
+\node[tag,anchor=south west] at (24,-42.5) {N7:10 reference};
 
 % error up from the regulator into the summing junction
 \draw[sig] (reg.north) -- ++(0,6) -| (sum.south);

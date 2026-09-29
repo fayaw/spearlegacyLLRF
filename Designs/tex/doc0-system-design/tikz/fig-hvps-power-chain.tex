@@ -1,52 +1,151 @@
 % !TeX root = ../0_system_design_report.tex
 % Figure 3 -- HVPS power chain, B514.  12-pulse phase-controlled rectifier.
-\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+%
+% Full conversion chain from the incoming substation feeder to the klystron
+% cathode.  Component values are the VERIFIED as-built ones from Doc L §9.3 --
+% they deliberately differ from the 1997 PEP-II design figures that circulated
+% earlier (T0 2750 kVA not 350 kVA; capacitors 8 uF per stage x 4 stages not
+% 8 uF total; divider ~10,000:1 not 1000:1; termination inductors 350 uH not
+% 200 uH; crowbar conduction ~10 us not ~1 us).
+%
+% Layout: power chain in a 150 mm column on the right; the Waveform Buffer on
+% the left with four dashed monitoring taps.  Tap lanes are ordered so that the
+% tap entering the buffer highest uses the leftmost lane -- each horizontal turn
+% then passes only over lanes that have already turned, so no tap crosses
+% another.  The single deliberate crossing is the Inductor 2 tap over the L1
+% power drop; no route avoids it, and dashed blue over solid dark reads clearly.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  full/.style={pwr,text width=150mm,anchor=north},
+  half/.style={pwr,text width=54mm,anchor=north},
+  tap/.style ={draw=cCtrl!75,densely dashed,line width=0.6pt,
+               -{Stealth[length=1.8mm]}},
+  cn/.style  ={circle,draw=cCtrl!70,fill=white,inner sep=0.3pt,font=\tiny,
+               text=cCtrl!80!black,minimum size=3.6mm},
+]
 
-\node[lbl,anchor=north] at (65,4) {BUILDING B514};
+\node[lbl,anchor=north] at (133,9) {BUILDING B514 --- high-voltage power section};
 
-\node[pwr,text width=124mm,anchor=north] (sw) at (65,-2)
+% ===== incoming feeder ===================================================
+\node[full,fill=black!8,draw=black!55,text=black!75] (sub) at (133,0)
+  {\textbf{SUBSTATION 507, BREAKER 160}\\
+   \qty{12.47}{\kilo\volt} RMS 3-phase AC};
+
+\node[full] (sw) at (133,-16)
   {\textbf{SWITCHGEAR \& SAFETY}\\
    disconnect switch $\cdot$ fuses (3\,$\times$\,\qty{50}{\ampere}) $\cdot$
-   vacuum contactor $\cdot$ ground switch $\cdot$ interlocks};
+   vacuum contactor (Ross HQ3)\\
+   ground switch $\cdot$ interlocks};
+\draw[sig] (sub.south) -- (sw.north);
 
-\node[pwr,text width=124mm,anchor=north] (t0) at (65,-24)
+\node[full] (t0) at (133,-38)
   {\textbf{PHASE-SHIFT TRANSFORMER T0}\\
-   extended delta $\cdot$ \qty{2750}{\kilo\voltampere}\\
+   extended delta $\cdot$ \qty{2750}{\kilo\voltampere},
+   \qty{12.5}{\kilo\volt} at \qty{127}{\ampere} RMS\\
    primary \qty{12.47}{\kilo\volt} delta \quad$\vert$\quad
    secondary dual wye, $\pm 15^\circ$ phase shift};
 \draw[sig] (sw.south) -- node[right,tag]{\qty{12.47}{\kilo\volt} delta} (t0.north);
 
-\node[pwr,text width=54mm,anchor=north] (t1) at (32,-52)
+% ===== two rectifier transformers ========================================
+\node[half] (t1) at (85,-62)
   {\textbf{RECTIFIER XFMR T1}\\
    \qty{1.5}{\mega\voltampere} $\cdot$ $+15^\circ$\\
-   primary open wye $\cdot$ secondary dual wye\\ \qty{12.5}{\kilo\volt}};
-\node[pwr,text width=54mm,anchor=north] (t2) at (98,-52)
+   open wye primary $\cdot$ dual wye \qty{12.5}{\kilo\volt}};
+\node[half] (t2) at (181,-62)
   {\textbf{RECTIFIER XFMR T2}\\
    \qty{1.5}{\mega\voltampere} $\cdot$ $-15^\circ$\\
-   primary open wye $\cdot$ secondary dual wye\\ \qty{12.5}{\kilo\volt}};
+   open wye primary $\cdot$ dual wye \qty{12.5}{\kilo\volt}};
 \draw[sig] (t1.north|-t0.south) -- node[right,tag]{$+15^\circ$} (t1.north);
 \draw[sig] (t2.north|-t0.south) -- node[right,tag]{$-15^\circ$} (t2.north);
 
-\node[pwr,text width=54mm,anchor=north] (b1) at (32,-82)
-  {\textbf{6-PULSE BRIDGE B+}\\ phase-control thyristors};
-\node[pwr,text width=54mm,anchor=north] (b2) at (98,-82)
-  {\textbf{6-PULSE BRIDGE B$-$}\\ phase-control thyristors};
+% ===== the two 6-pulse bridges, gated from the Interface Chassis =========
+\node[half] (b1) at (85,-88)
+  {\textbf{6-PULSE BRIDGE B+} (SCR 1--6)\\
+   6 stacks $\times$ 14 Powerex T8K7\\ star-point controller};
+\node[half] (b2) at (181,-88)
+  {\textbf{6-PULSE BRIDGE B$-$} (SCR 7--12)\\
+   6 stacks $\times$ 14 Powerex T8K7\\ star-point controller};
 \draw[sig] (t1.south) -- (b1.north);
 \draw[sig] (t2.south) -- (b2.north);
 
-% the two bridges combine: series output into the crowbar
-\draw[draw=cNeut,thick] (b1.south) -- ++(0,-8) -- (98,-98) -- (b2.south);
-\node[tag,fill=white,inner sep=1.5pt] at (65,-98)
-  {the two bridges together give \textbf{12-pulse} operation};
+\node[plc,text width=26mm,anchor=north,draw=cPlc,dashed,align=center] (icx) at (133,-88)
+  {\textbf{INTERFACE}\\\textbf{CHASSIS}\\[1pt]
+   {\tiny SCR ENABLE\\ CROWBAR}};
+\draw[{Stealth[length=2mm]}-,draw=cPlc,thick] (icx.west -| b1.east) -- (icx.west);
+\draw[{Stealth[length=2mm]}-,draw=cPlc,thick] (icx.east -| b2.west) -- (icx.east);
 
-\node[pwr,text width=124mm,anchor=north] (cb) at (65,-104)
-  {\textbf{CROWBAR PROTECTION}\\ 4 thyristor stacks};
-\draw[sig] (65,-98) -- (cb.north);
+% ===== filter inductors ==================================================
+\node[half] (l1) at (85,-116)
+  {\textbf{FILTER INDUCTOR L1}\\
+   \qty{0.3}{\henry} $\cdot$ \qty{85}{\ampere} $\cdot$ \qty{0.38}{\ohm} DC\\
+   \qty{1084}{\joule} stored $\cdot$ temp.\ monitored};
+\node[half] (l2) at (181,-116)
+  {\textbf{FILTER INDUCTOR L2}\\
+   \qty{0.3}{\henry} $\cdot$ \qty{85}{\ampere} $\cdot$ \qty{0.38}{\ohm} DC\\
+   \qty{1084}{\joule} stored $\cdot$ temp.\ monitored};
+\draw[sig] (b1.south) -- (l1.north);
+\draw[sig] (b2.south) -- (l2.north);
 
-\node[pwr,text width=54mm,anchor=north] (kc) at (65,-132)
-  {\textbf{KLYSTRON CATHODE}};
-\draw[sig] (cb.south) -- (kc.north);
-\node[tag,anchor=west,align=left] at (67,-123)
-  {\qty{-90}{\kilo\volt} DC (max)\\
-   $\approx$ \qtyrange{-72}{-75}{\kilo\volt} DC (typical)};
+% the two legs recombine into the series rectifier stack
+\draw[draw=cNeut,thick] (l1.south) -- (85,-138) -- (181,-138);
+\draw[draw=cNeut,thick] (l2.south) -- (181,-138);
+
+\node[full] (sr) at (133,-144)
+  {\textbf{SECONDARY RECTIFIERS D1--D24}\\
+   4 six-pulse main bridges in series --- \qty{30}{\kilo\volt},
+   \qty{30}{\ampere} each\\
+   plus 4 filter bridges --- \qty{30}{\kilo\volt}, \qty{3}{\ampere} average};
+\draw[sig] (133,-138) -- (sr.north);
+
+\node[full] (fb) at (133,-166)
+  {\textbf{FILTER BANK \& ISOLATION RESISTORS}\\
+   capacitors \qty{8}{\micro\farad} per stage $\times$ 4 series stages
+   ($\approx$\,\qty{2}{\micro\farad} net, \qty{8.8}{\kilo\joule})\\
+   \qty{500}{\ohm} / \qty{1}{\kilo\watt} isolation resistors (PEP-II)
+   $\cdot$ output divider $\approx$ 10\,000:1};
+\draw[sig] (sr.south) -- (fb.north);
+
+\node[full] (cb) at (133,-188)
+  {\textbf{CROWBAR PROTECTION} (SCR 13--16)\\
+   4 thyristor stacks in series, \qty{100}{\kilo\volt}\\
+   fiber-optic trigger, $\approx$\,\qty{10}{\micro\second} conduction delay
+   $\cdot$ dV/dt snubbers\\
+   crowbar tank, FR3 oil-filled};
+\draw[sig] (fb.south) -- (cb.north);
+
+\node[full] (ti) at (133,-214)
+  {\textbf{CABLE TERMINATION INDUCTORS}\\
+   \qty{350}{\micro\henry}, \qty{40}{\ampere} each (as built)\\
+   limit cable discharge current into the klystron};
+\draw[sig] (cb.south) -- (ti.north);
+
+\node[full,fill=cPwr!16,draw=cPwr] (out) at (133,-236)
+  {\textbf{KLYSTRON CATHODE} --- \qty{-74}{\kilo\volt} DC at
+   \qty{22}{\ampere} typical\\
+   {\tiny rated \qty{-90}{\kilo\volt} / \qty{27}{\ampere};
+    cable run to Building B132}};
+\draw[sig] (ti.south) -- (out.north);
+
+% ===== waveform buffer and its four monitoring taps ======================
+% wb spans x = 1..35; entries on its east edge at -163 / -168 / -172 / -178.
+\node[ctrl,text width=34mm,anchor=north,align=center] (wb) at (18,-160)
+  {\textbf{WAVEFORM}\\\textbf{BUFFER SYSTEM}\\[1pt]
+   {\tiny 4 HVPS channels, circular\\ buffers, pre-fault capture}\\[2pt]
+   {\tiny \textbf{1} HVPS voltage\\ \textbf{2} HVPS current\\
+          \textbf{3} Inductor 1 voltage\\ \textbf{4} Inductor 2 voltage}};
+
+% ch 3 -- Inductor 1 voltage: lane 40, turns first (highest entry)
+\draw[tap] (l1.west) -| (40,-163) -- (35,-163);
+\node[cn] at (52,-122) {3};
+
+% ch 4 -- Inductor 2 voltage: lane 45.  Crosses the L1 power drop at x = 85.
+\draw[tap] (l2.west) -| (150,-133) -- (45,-133) -- (45,-168) -- (35,-168);
+\node[cn] at (148,-122) {4};
+
+% ch 1 -- HVPS voltage from the output divider: straight in, no lane needed
+\draw[tap] (fb.west) -- (35,-172);
+\node[cn] at (52,-172) {1};
+
+% ch 2 -- HVPS current from the output run: lane 50, turns last (lowest entry)
+\draw[tap] (out.west) -| (50,-178) -- (35,-178);
+\node[cn] at (54,-240.5) {2};
 \end{tikzpicture}

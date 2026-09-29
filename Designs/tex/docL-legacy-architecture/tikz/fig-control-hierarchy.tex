@@ -25,12 +25,12 @@
 \draw[sig] (ex.south) -- (ex.south|-vxi.north);
 
 % ===== fast interlock chassis =============================================
-\node[plc,text width=76mm,anchor=north] (fic) at (134,-40)
+\node[plc,text width=76mm,anchor=north] (fic) at (130,-40)
   {\textbf{FAST INTERLOCK CHASSIS 340-308}\\[1pt]
    {\tiny \emph{In:} arc sensors $\cdot$ reflected RF power $\cdot$ beam permit
     (SPEAR MPS) $\cdot$ HVPS status\\
     \emph{Out:} status $\cdot$ SCR ENABLE (fiber) $\cdot$ CROWBAR fire (fiber)}};
-\draw[sig] (150,-30.5) -- (150,-40);
+\draw[sig] (fic.north|-vxi.south) -- (fic.north);
 
 % ===== the three controllers ==============================================
 \node[plc,text width=44mm,anchor=north] (hplc) at (24,-60)
@@ -51,7 +51,10 @@
    {\tiny Cavity motor driver, Stepper Chassis 340-315\\
     SLC adapter + $4\times$ AB 1746-HSTP1\\ (step/direction pulse output)}};
 
-\foreach \n in {hplc,mplc,mot}{\draw[sig] (\n.north|-vxi.south) -- (\n.north);}
+\foreach \n in {hplc,mplc}{\draw[sig] (\n.north|-vxi.south) -- (\n.north);}
+% motor control is fed down the right margin: a straight drop from the crate
+% would cross the fast interlock chassis
+\draw[sig] (176,0|-vxi.south) -- (176,-55.5) -| (mot.north);
 
 \node[blk,text width=40mm,anchor=north] (xlat) at (156,-86)
   {SS2000MD4 PWM translator\\ $\rightarrow$ SLO-SYN stepper motor};
@@ -60,8 +63,7 @@
 % ===== HVPS ===============================================================
 \node[pwr,text width=104mm,anchor=north] (hvps) at (76,-96)
   {\textbf{HVPS} --- SPEAR1 + SPEAR2\\[1pt]
-   {\tiny two complete identical units; one energized, the other fully off ---
-    \emph{not} a warm standby\\[2pt]
+   {\tiny two complete identical units; one energized, the other fully off\\[2pt]
     \qty{12.47}{\kilo\volt} $3\varphi$ \qty{60}{\hertz} $\rightarrow$
     switchgear $\rightarrow$ phase-shift transformer
     (\qty{2750}{\kilo\voltampere}, $\pm15^\circ$)\\
@@ -73,8 +75,7 @@
 \draw[sig] (hplc.south) -- (hplc.south|-hvps.north);
 % drop the fiber in the clear gap between the RF MPS PLC and motor-control
 % columns; from the chassis centre it would run through one or the other
-\draw[fib] (122,-51) -- (122,-96);
-\draw[fib] (fic.south) ++(0,0) -- (134,-51) -- (122,-51);
+\draw[fib] (fic.south) |- (122,-54) -- (122,-96);
 
 % ===== RF chain ===========================================================
 \node[rf,text width=26mm,anchor=north] (amp) at (34,-124) {Drive amp};
@@ -88,12 +89,12 @@
 
 % ===== interlock path legend ==============================================
 \node[draw=cCtrl!45,fill=cCtrl!5,rounded corners=2pt,inner sep=4pt,
-      text width=168mm,anchor=north west,align=left] (leg) at (12,-140)
-  {\textbf{Interlock paths}\qquad
+      text width=176mm,anchor=north west,align=left] (leg) at (1,-140)
+  {\textbf{Interlock paths}\quad
    {\tiny
    \textbf{1}\ \ Fast IC $\rightarrow$ HVPS; Fast IC $\rightarrow$ AIM
-   $\rightarrow$ RFP \qquad
+   $\rightarrow$ RFP\quad
    \textbf{2}\ \ RF MPS $\rightarrow$ Fast IC $\rightarrow$ HVPS;
-   MPS Shutoff $\rightarrow$ RFP \qquad
+   MPS Shutoff $\rightarrow$ RFP\quad
    \textbf{3}\ \ HVPS PLC $\rightarrow$ HVPS; software $\rightarrow$ RFP}};
 \end{tikzpicture}

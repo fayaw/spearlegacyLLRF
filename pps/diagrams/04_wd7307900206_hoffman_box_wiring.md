@@ -5,7 +5,7 @@
 > **Engineers**: R. Cassel (ENGR), W. Gorecki (DFTR), S. Lowe (CHKR)
 > **CAD File**: WD730790020601.DGN, sheet 1 of 1
 >
-> **Verification status: VERIFIED (3 September 2026)** — read directly from the scanned drawing rendered to image.
+> **Verification status: VERIFIED (3 September 2026; LED connector block re-read 28 September 2026)** — read directly from the scanned drawing rendered to image.
 
 ### Revision block (as drawn)
 
@@ -27,7 +27,7 @@
 | Item | Confirmation on this sheet |
 |---|---|
 | **TS-3 is the Voltage Monitor strip** | TS-3 is drawn against a block titled "PEP2 RF SYSTEM KLY PS MONITOR BD **SD-730-793-12**" and is labelled **VOLTAGE MONITOR**. Its terminals read DC VOLTAGE *1, DC VOLTAGE *2, COM, VOLTS, AMPS, COM, −15 V, +15 V, **CURRENT 5A/V**. |
-| **PPS status LEDs are on the AMP 8-pin connector** | Four LEDs are drawn next to the AMP-8PIN J2 / AMP-8PINH F2 connectors: **PPS1 LED1 GRN, PPS2 LED2 GRN, PPS3 LED3 RED, PPS4 LED4 RED** — two green, two red. The **PPS GOB1208PNE** connector is drawn alongside. |
+| **PPS status LEDs are on the AMP 8-pin connector** | Four LEDs are drawn between the mating pair **AMP-8PINM P2** (LED pigtails) and **AMP-8PIN J2** (cable): **PPS1 LED1 GRN, PPS2 LED2 GRN, PPS3 LED3 RED, PPS4 LED4 RED** — two green, two red. J2 takes them as anode/cathode pairs 1/2, 3/4, 5/6, 7/8 on RED, RED/BLK, BLU, BLK, WHT, WHT/BLK, GRN, GRN/BLK — matching `pps/HoffmanBoxPPSWiring.docx` Table 1 wire for wire. The **PPS GOB1208PNE** connector is drawn alongside. |
 | **Thermocouple channel assignment** | **TC-1 SCR TOP OIL, TC-2 SCR BOTTOM OIL, TC-3 CROWBAR, TC-4 AIR TEMP**, wired to SLOT-3. This matches ladder file LAD 4 "SCALE" in the PLC program exactly. |
 | **Terminal strip roles** | TS-2 (control power), **TS-3 Voltage Monitor**, **TS-4 TRANSFORMER INTERLOCKS**, **TS-5 CONTACTOR CONTROLS**, **TS-6 GND TANK**, **TS-7 TRANSFORMER MONITORS**, **TS-8 PERMITS**. |
 | **Regulator card identity** | Drawn as **PC-237-230-14-C0** with jumpers JP1–JP12 and signals CUR. LIMIT, MAN TRIP, VOLT TRIP, CURR TRIP, LOAD, STOP, RESET, EL1, SIG HI, VOLT REF, CUR REF. |

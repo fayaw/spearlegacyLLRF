@@ -15,6 +15,7 @@
 > 3. **`01`** carried a fabricated provenance string and mislabelled the ANSI 50/51 protective relays as "MCO" relays.
 > 4. **`04`** omitted **Slot-0, the 1747-L532 SLC-5/03 processor**, and described the 1747-DCM as a "scanner". It is a Remote I/O **adapter**; the scanner is the 6008-SV in the VXI crate in B132.
 > 5. "Belding" is a misreading throughout — the cable manufacturer is **Belden** (83709, 83715, 88761).
+> 6. **`04`** read the LED connector pair as "AMP-8PIN J2 / AMP-8PINH **F2**". There is no F2: the pair is **AMP-8PINM P2** (plug, LED pigtails) mating with **AMP-8PIN J2** (jack, cable). Re-read 28 September 2026.
 
 ## Purpose
 

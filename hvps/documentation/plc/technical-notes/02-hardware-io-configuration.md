@@ -1,73 +1,130 @@
 # 02 — Hardware & I/O Configuration
 
+> **Verification status: VERIFIED (28 September 2026)** — every discrete I/O table below was
+> checked point-by-point against three primary sources:
+>
+> | Tag | Source | What it gives |
+> |---|---|---|
+> | **[D]** | `wd7307900206.pdf` — WD-730-790-02-C6, master wiring diagram | the label printed beside each module terminal, plus wire colour |
+> | **[L]** | `CasselPLCCode.pdf` — ladder printout (`SSRLV6-4-05-10`, LAD 2/3/4) | the description the program itself attaches to each bit |
+> | **[S]** | `CasselSymbolDatabase.pdf` — address/symbol database | formal symbol names, where one was ever entered |
+>
+> **Corrections applied in this pass** (the previous revision was never reviewed):
+>
+> 1. `I:2/1` was "A Phase Reference Voltage". [L] calls it **12KV VOLTS / 12KV OFF** — it is the
+>    12 kV present sense, used in rungs 38 and 39.
+> 2. `I:2/2` and `I:2/3` were "Filter Inductor 1 / 2". **Neither bit is referenced anywhere in the
+>    ladder** and neither carries a symbol in [S]; the names were unsupported and have been removed.
+> 3. `I:6/1` was "Crowbar Enable Fiber Drive". [D] labels the terminal **CROWBAR TRIGGER MON** and
+>    [L] calls the bit **CROWBAR TRIGGER** — it is a monitor input, not an enable output.
+> 4. `I:7/13` was "Ground Tank Relay". [D] labels it **GRN RELAY OPEN** and [L] **GROUND SW OPEN** —
+>    the sense (open) is the whole point of the signal and was lost.
+> 5. `I:7/10` was "Water Flow Switch (Spare)". [D] labels the terminal **SPARE**; only [S] carries
+>    `WATER_FLOW_SWITCH`. The point is provisioned in software but shows as spare in the field wiring.
+> 6. `I:6/12` was "Key/Emergency Off Switch", conflating it with `I:6/13`. It is the **PERMIT key
+>    switch** on the local control panel; Emergency Off is a separate bit.
+> 7. Slot numbers were not stated for slots 0, 3 and 4. The chassis is a **10-slot rack, slots 0--9,
+>    with slot 4 empty** — see the chassis table below.
+>
+> **Not verified**: the `O:1` DCM status-bit table. Three entries were spot-checked against [L]
+> (`O:1/97` 12KV ON, `O:1/98` AC AUX PWR ON, `O:1/99` AC CURRENT TRIP) and all three matched, but the
+> remaining rows have not been walked.
+
+## Chassis
+
+| Slot | Module | Role |
+|---|---|---|
+| PS | AB-1747-P1 | Chassis power supply |
+| 0 | 1747-L532 | SLC-5/03 processor |
+| 1 | 1747-DCM | Remote I/O **adapter** (presents this chassis to the 6008-SV scanner in the B132 VXI crate) |
+| 2 | 1746-IO8 | 4 in / 4 out combo |
+| 3 | 1746-THERMC | Thermocouple input |
+| 4 | *(empty)* | — |
+| 5 | 1746-OX8 | 8-point relay output |
+| 6 | 1746-IB16 | 16-point 24 V DC input |
+| 7 | 1746-IV16 | 16-point 24 V DC input |
+| 8 | 1746-NIO4V | 4-channel analog in/out |
+| 9 | 1746-NI4 | 4-channel analog in |
+
 ## Binary Inputs
 
 ### Slot 2 — 1746-IO8 (Combo I/O)
 
-| PLC Address | B3 Copy Dest | Function | Normal State |
-|------------|--------------|----------|--------------| 
-| I:2/0 | B3:12/0 | 120 VAC Control Power | On |
-| I:2/1 | B3:12/1 | A Phase Reference Voltage | On |
-| I:2/2 | B3:12/2 | Filter Inductor 1 | Off |
-| I:2/3 | B3:12/3 | Filter Inductor 2 | Off |
+| PLC Address | B3 Copy Dest | Function | Source |
+|------------|--------------|----------|--------|
+| I:2/0 | B3:12/0 | 120 V AC control power present | [L] "120V AC CTRL PWR" (rungs 62, 63, 65, 66) |
+| I:2/1 | B3:12/1 | 12 kV present / 12 kV off sense | [L] "12KV VOLTS" (rung 38), "12KV OFF" (rung 39) |
+| I:2/2 | B3:12/2 | *not used* | no ladder reference, no symbol |
+| I:2/3 | B3:12/3 | *not used* | no ladder reference, no symbol |
 
-> **Note:** I:2 is copied to B3:12 by the COPY subroutine (LAD 3, Rung 0000) for QuickPanel display access.
+> **Note:** I:2 is copied to B3:12 by the COPY subroutine (LAD 3, Rung 0000), `COP #I:2.0 → #B3:12`, length 1 — read directly from [L].
 
 ### Slot 6 — 1746-IB16 (16-point 24V DC Digital Input)
 
-| PLC Address | B3 Copy Dest | Function | Normal State |
-|------------|--------------|----------|--------------| 
-| I:6/0 | B3:13/0 | SCR Disable Fiber Drive | Off |
-| I:6/1 | B3:13/1 | Crowbar Enable Fiber Drive | Off |
-| I:6/2 | B3:13/2 | Crowbar Monitor | On |
-| I:6/3 | B3:13/3 | Klystron Arc Monitor | On |
-| I:6/4 | B3:13/4 | SCR Trigger 1 | Off |
-| I:6/5 | B3:13/5 | Transformer Arc Monitor | On |
-| I:6/6 | B3:13/6 | SCR Trigger 2 | Off |
-| I:6/7 | B3:13/7 | RF Crowbar (Klystron Crowbar) | On |
-| I:6/8 | B3:13/8 | Ground Tank Oil Level | On |
-| I:6/9 | B3:13/9 | Ground Tank Switch (Grounding Switch Closed) | On |
-| I:6/10 | B3:13/10 | Crowbar Oil Level | On |
-| I:6/11 | B3:13/11 | SCR Oil Level | On |
-| I:6/12 | B3:13/12 | Key/Emergency Off Switch (Touch Panel Key Enable) | On |
-| I:6/13 | B3:13/13 | Emergency Off | On |
-| I:6/14 | B3:13/14 | PPS 1 | On |
-| I:6/15 | B3:13/15 | PPS 2 | On |
+| PLC Address | B3 Copy Dest | Terminal label [D] | Wire | Ladder description [L] |
+|------------|--------------|--------------------|------|------------------------|
+| I:6/0 | B3:13/0 | SCR DISABLE | YEL | SCR DISABLE FIBER DRIVER |
+| I:6/1 | B3:13/1 | CROWBAR TRIGGER MON | BLU | CROWBAR TRIGGER |
+| I:6/2 | B3:13/2 | CROWBAR MONITOR | GRAY | CROWBAR ON / CROWBAR ENABLE |
+| I:6/3 | B3:13/3 | KLYSTRON ARC MONITOR | BLK | ARC TRIP KLYSTRON |
+| I:6/4 | B3:13/4 | SCR MONITOR # 1 | RED | SCR TRIG#1 / SCR DRIVE BIT LOWER |
+| I:6/5 | B3:13/5 | XFORMER ARC MONITOR | BLK | XFORMER ARC |
+| I:6/6 | B3:13/6 | SCR MONITOR # 2 | RED | SCR TRIG#2 / SCR DRIVER UPPER |
+| I:6/7 | B3:13/7 | KLYSTRON CB MON | BRN | `KLYSTRON_CROWBAR` [S] — "CB" is **crowbar**, not circuit breaker |
+| I:6/8 | B3:13/8 | GRN TANK OIL OK | RED | GRN TANK OIL LEVEL |
+| I:6/9 | B3:13/9 | GRN SWITCH CLOSED | GRAY | Grounding Switch closed [S]; MANUAL GRN SWITCH OK |
+| I:6/10 | B3:13/10 | CROWBAR OIL LVL OK | VIOL | CROWBAR OIL LEVEL |
+| I:6/11 | B3:13/11 | SCR OIL LEVEL OK | YEL | SCR OIL LEVEL |
+| I:6/12 | B3:13/12 | KEY ENABLE | ORG | TOUCH PANEL (KEY) ENABLE — the PERMIT key switch on the local control panel |
+| I:6/13 | B3:13/13 | EMERGENCY OFF | BLK | EMERGENCY OFF |
+| I:6/14 | B3:13/14 | PPS # 1 | GRN | PPS-1 OK / PPS-1 ON |
+| I:6/15 | B3:13/15 | PPS # 2 | BLU | PPS-2 OK / PPS-2 ON |
 
+> Terminals 16 and 17 are DC COM [D].
+>
 > **Note:** I:6 is copied to B3:13 by the COPY subroutine (LAD 3, Rung 0001).
+>
+> Where [D] and [L] disagree on wording (I:6/2, I:6/4, I:6/6) both are given. The drawing names the
+> signal at the terminal block; the ladder names the condition the program tests.
 
 ### Slot 7 — 1746-IV16 (16-point 24V DC Digital Input)
 
-| PLC Address | B3 Copy Dest | Function | Normal State |
-|------------|--------------|----------|--------------| 
-| I:7/0 | B3:14/0 | Contactor Blocking Relay (Lockout) | Off |
-| I:7/1 | B3:14/1 | Contactor Overcurrent Relay | Off |
-| I:7/2 | B3:14/2 | Contactor Closed | On |
-| I:7/3 | B3:14/3 | Contactor Ready | Off |
-| I:7/4 | B3:14/4 | Transformer Pressure | On |
-| I:7/5 | B3:14/5 | Transformer Vacuum | On |
-| I:7/6 | B3:14/6 | Transformer Over Temperature | On |
-| I:7/7 | B3:14/7 | Transformer Oil Level (Low Oil Level) | On |
-| I:7/8 | B3:14/8 | Transformer Sudden Pressure | On |
-| I:7/9 | B3:14/9 | Oil Pump On (Flow) | Off |
-| I:7/10 | B3:14/10 | Water Flow Switch (Spare) | On |
-| I:7/11 | B3:14/11 | Enerpro Phase Loss | On |
-| I:7/12 | B3:14/12 | Regulator Current Limit | Off |
-| I:7/13 | B3:14/13 | Ground Tank Relay | On |
-| I:7/14 | B3:14/14 | Regulator Voltage Trip (Over Voltage Trip) | Off |
-| I:7/15 | B3:14/15 | Regulator Current Trip | Off |
+| PLC Address | B3 Copy Dest | Terminal label [D] | Wire | Ladder description [L] |
+|------------|--------------|--------------------|------|------------------------|
+| I:7/0 | B3:14/0 | BLOCKING RELAY | BRN | CONTACTOR LOCKOUT [S] |
+| I:7/1 | B3:14/1 | OVERCURRENT RELAY | RED | CONTACTOR OVER CURRENT [S] |
+| I:7/2 | B3:14/2 | CONTACTOR CLOSED | ORG | CONTACTOR CLOSED / CONTACTOR OPEN |
+| I:7/3 | B3:14/3 | CONTACTOR READY | BLU | CONTACTOR READY [S] |
+| I:7/4 | B3:14/4 | XFORMER PRESSURE NC | BRN | NO XFORMER PRESSURE ALARM |
+| I:7/5 | B3:14/5 | XFORMER VACUUM NC | ORG | XFORMER VACUUM |
+| I:7/6 | B3:14/6 | XFORMER OVER TEMP NC | YEL | XFORMER OVER TEMP |
+| I:7/7 | B3:14/7 | OIL LEVEL LOW NC | BLU | LOW OIL LEVEL |
+| I:7/8 | B3:14/8 | SUDDEN PRESSURE | RED | XFRMER SUDDEN PRESSURE |
+| I:7/9 | B3:14/9 | OIL PUMP FLOW NC | VIOL | OIL PUMP FLOW |
+| I:7/10 | B3:14/10 | **SPARE** | BLK | `WATER_FLOW_SWITCH` [S] — named in software, wired as spare |
+| I:7/11 | B3:14/11 | PHASE LOSS | YEL | PHASE LOSS [S] (Enerpro) |
+| I:7/12 | B3:14/12 | CURRENT LIMIT | WHT | CURRENT LIMIT (regulator) |
+| I:7/13 | B3:14/13 | **GRN RELAY OPEN** | GRAY | GROUND SW OPEN |
+| I:7/14 | B3:14/14 | VOLTAGE TRIP | ORG | OVER VOLTAGE TRIP (regulator) |
+| I:7/15 | B3:14/15 | CURRENT TRIP | BRN | REGULATOR CURRENT TRIP |
 
+> Terminal 16 is the 24 V DC feed (RED) and 17 is VDC+ [D].
+>
 > **Note:** I:7 is copied to B3:14 by the COPY subroutine (LAD 3, Rung 0002).
+>
+> These four contactor points (IN0--IN3) are on the **slot-7 IV16**, not on the slot-6 IB16.
 
-### Slot 1 — 1747-DCM-FULL (Inputs from VXI/EPICS)
+### Slot 1 — 1747-DCM (Inputs from VXI/EPICS)
 
-| PLC Address | Function | Rungs Used |
-|------------|----------|------------|
-| I:1/48 | Remote On/Off | 2, 6 |
-| I:1/64 | Control Enable | 4, 9 |
-| I:1/80 | Control Reset | 115 |
-| I:1 Register 1 | External Reference (16-bit setpoint from IOC) | 104 |
-| I:1 Register 2 | Maximum External Reference from VXI DCM | 92 |
+The ladder annotates these addresses `1747-DCM-FULL`. The module is a Remote I/O **adapter**, not a scanner — the scanner is the 6008-SV in the B132 VXI crate.
+
+| PLC Address | Function | Rungs Used | Source |
+|------------|----------|------------|--------|
+| I:1/48 | Remote On/Off | 2, 6 | [L] "REMOTE ON/OFF" |
+| I:1/64 | Control Enable | 4, 9 | [L] "CONTROL ENABLE" |
+| I:1/80 | Control Reset | 115 | [L] "CONTROL RESET" |
+| I:1 Register 1 | External Reference (16-bit setpoint from IOC) | 104 | [L] `I:1.1` |
+| I:1 Register 2 | Maximum External Reference from VXI DCM | 92 | [L] `I:1.2` |
 
 ---
 
@@ -75,27 +132,33 @@
 
 ### Slot 2 — 1746-IO8 (Combo I/O Outputs)
 
-| PLC Address | B3 Copy Dest | Function | Normal State |
-|------------|--------------|----------|--------------| 
-| O:2/0 | B3:15/0 | AC Bias Power Supply | On |
-| O:2/1 | B3:15/1 | 120 VDC Power Supply | On |
-| O:2/2 | B3:15/2 | 240 VDC Power Supply | On |
-| O:2/3 | B3:15/3 | Ground Tank Relay Coil (GRD Switch Relay) | On |
+| PLC Address | B3 Copy Dest | Terminal label [D] | Ladder description [L] |
+|------------|--------------|--------------------|------------------------|
+| O:2/0 | B3:15/0 | AC BIAS P.S. | BIAS PWR |
+| O:2/1 | B3:15/1 | AC 120 VDC P.S. | 120V PWR / 120VDC AC |
+| O:2/2 | B3:15/2 | AC 240 VAC P.S. | 240V PWR / 240VDC AC |
+| O:2/3 | B3:15/3 | AC GND TANK RELAY COIL | GRD SWITCH RELAY [S] |
 
 > **Note:** O:2 is copied to B3:15 by the COPY subroutine (LAD 3, Rung 0003).
+>
+> **Trap:** [S] also carries entries `O:2.0 VOLTAGE REFERANCE`, `O:2.1 PHASE ANGL BIAS` and
+> `O:2/32`–`O:2/35`, `O:2/128`–`O:2/135`. A 1746-IO8 is a **single-word** module (the COP in LAD 3
+> copies length 1), so those addresses cannot belong to it — they are stale symbol-database entries
+> from an earlier configuration. The analog reference and phase-angle outputs are on **slot 8**
+> (`O:8.0`, `O:8.1`), which is what the ladder actually writes. Prefer [L] over [S] here.
 
 ### Slot 5 — 1746-OX8 (8-point Relay Output)
 
-| PLC Address | B3 Copy Dest | Function | Normal State |
-|------------|--------------|----------|--------------| 
-| O:5/0 | B3:16/0 | SCR Enable (Control System Enable) | On |
-| O:5/1 | B3:16/1 | Contactor On (Close Contactor) | On |
-| O:5/2 | B3:16/2 | Contactor Enable (Crowbar On) | On |
-| O:5/3 | B3:16/3 | Force Crowbar (Crowbar Forced On) | Off |
-| O:5/4 | B3:16/4 | Crowbar Off (Crowbar Enable) | On |
-| O:5/5 | B3:16/5 | Enerpro Slow Start | Off |
-| O:5/6 | B3:16/6 | Enerpro Fast Inhibit | On |
-| O:5/7 | B3:16/7 | Regulator Reset | Off |
+| PLC Address | B3 Copy Dest | Terminal label [D] | Ladder description [L] |
+|------------|--------------|--------------------|------------------------|
+| O:5/0 | B3:16/0 | 12V FAULT / ENABLE | SCR ENABLE; `CONTROL SYSTEM ENABLE` [S] |
+| O:5/1 | B3:16/1 | CONT. ON/OFF | CLOSE CONTACTOR |
+| O:5/2 | B3:16/2 | CONT. ENABLE | "CROWBAR ON" — **the rung label is wrong**; the terminal drives Contactor Enable / the K4 coil (see `pps/HoffmanBoxPPSWiring.docx`) |
+| O:5/3 | B3:16/3 | PLC FORCE CROWBAR | `CROWBAR FORCED ON` [S] |
+| O:5/4 | B3:16/4 | CROWBAR OFF | `CROWBAR ENABLE` [S] |
+| O:5/5 | B3:16/5 | ENERPRO SLOW START | SLOW START |
+| O:5/6 | B3:16/6 | ENERPRO FAST INHIBIT | `FAST INHIBIT` [S] |
+| O:5/7 | B3:16/7 | REGULATOR RESET | REG RESET |
 
 > **Note:** O:5 is copied to B3:16 by the COPY subroutine (LAD 3, Rung 0004).
 
@@ -105,19 +168,19 @@
 
 ### Slot 8 — AB-1746-NIO4V (4-channel Analog I/O)
 
-| Channel | Function | PLC Destination | Rung |
-|---------|----------|-----------------|------|
-| IN 0 | Output voltage monitor from regulator card (J3-1) | N7:12 (via N7:19 offset addition) | 76, 77 |
-| IN 1 | Readback of phase control voltage to Enerpro (SIG HI) | N7:13 | 88 |
+| Channel | Terminal label [D] | Function | PLC Destination | Rung |
+|---------|--------------------|----------|-----------------|------|
+| IN 0 | "V" INPUT +VOLTAGE SENSE FROM REG. CARD | Output voltage monitor from regulator card (J3-1) | N7:12 (via N7:19 offset addition) — [L] "OFFSET FEEDBACK" | 76, 77 |
+| IN 1 | PHASE CONTROL DRIVER TO ENERPRO BD | Readback of phase control voltage to Enerpro (SIG HI) | N7:13 — [L] "PHASE MONITOR" | 88 |
 
 ### Slot 9 — AB-1746-NI4 (4-channel Analog Input)
 
-| Channel | Function | PLC Destination | Rung |
-|---------|----------|-----------------|------|
-| IN 0 | Input AC current monitor from regulator card (J3-2) | N7:14 (via N7:9 offset addition) | 78 |
-| IN 1 | Output voltage monitor 1 from HVPS (parallel path to J1-1 of regulator card) | N7:15 | 80 |
-| IN 2 | Output voltage monitor 2 from HVPS (redundant monitor) | N7:16 | 81 |
-| IN 3 | Output DC current monitor (Danfysik) from grounding tank | N7:17 | 82, 83 |
+| Channel | Terminal label [D] | Function | PLC Destination | Rung |
+|---------|--------------------|----------|-----------------|------|
+| IN 0 | "I" INPUT +CURRENT SENSE FROM REG. CARD | Input AC current monitor from regulator card (J3-2) | N7:14 (via N7:9 offset addition) — [L] "AC CURRENT MONITOR" | 78 |
+| IN 1 | *(truncated on the scan)* | Output voltage monitor 1 from HVPS (parallel path to J1-1 of regulator card) | N7:15 — [L] "VOLTAGE MONITOR #1" | 80 |
+| IN 2 | *(truncated on the scan)* | Output voltage monitor 2 from HVPS (redundant monitor) | N7:16 — [L] "VOLTAGE MONITOR #2" | 81 |
+| IN 3 | DC CURRENT MONITOR | Output DC current monitor (Danfysik) from grounding tank | N7:17 — [L] "DC CURRENT MONITOR" | 82, 83 |
 
 ---
 
@@ -125,10 +188,14 @@
 
 ### Slot 8 — AB-1746-NIO4V (4-channel Analog I/O)
 
-| Channel | Function | PLC Source | Rung |
-|---------|----------|------------|------|
-| OUT 0 | Reference voltage setpoint to regulator card input (EL1) | N7:10 → O:8.0 | 112 |
-| OUT 1 | Phase control contribution to Enerpro SIG HI input (via 1 kΩ resistor, summed with regulator output over 7.5 kΩ) | N7:11 → O:8.1 | 113 |
+| Channel | Terminal label [D] | Function | PLC Source | Rung |
+|---------|--------------------|----------|------------|------|
+| OUT 0 | REFERENCE FROM MCC | Reference voltage setpoint to regulator card input (EL1) | N7:10 → O:8.0 | 112 |
+| OUT 1 | 2ND PHASE CONTROL DRIVER TO ENERPRO BD | Phase control contribution to Enerpro SIG HI input (via 1 kΩ resistor, summed with regulator output over 7.5 kΩ) | N7:11 → O:8.1 | 113 |
+
+> The drawing labels the two analog output terminals **OUT 0** and **OUT 2**, while the ladder writes
+> channel words **O:8.0** and **O:8.1**. Treat the drawing text as a terminal designation and the
+> ladder as the channel number.
 
 ---
 
@@ -154,6 +221,10 @@
 > **Note:** In Rung 92, if N7:32 > N7:33, then N7:33 is sent to O:1 Register 5 instead of N7:32. Also in Rung 92, I:1.2 (Register 2) is moved into N7:33 (Maximum External Reference from the IOC).
 
 ### DCM Status Bit Outputs (O:1 bank — individual bits)
+
+> **Not verified.** Only three rows were checked against [L] — `O:1/97` 12KV ON, `O:1/98` AC AUX PWR ON
+> and `O:1/99` AC CURRENT TRIP — and all three matched. The rest of the table has not been walked
+> rung by rung.
 
 These individual bits are set in ladder logic and sent to the VXI/EPICS IOC:
 

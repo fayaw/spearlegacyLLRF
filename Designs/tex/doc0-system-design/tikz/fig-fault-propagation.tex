@@ -12,24 +12,24 @@
 \node[stp,draw=cRf]   (s1) at (22,0)
   {\textbf{Step 1 --- Arc occurs}\\
    in a cavity window or the circulator window};
-\node[tim] at (20,-4) {instant};
+\node[tim] at (20,-4) {$t=0$};
 
 \node[stp,draw=cRf]   (s2) at (22,\S)
-  {\textbf{Step 2 --- Microstep-MIS detector closes its relay contact}\\
-   {\tiny optical detection, hardware relay output}};
-\node[tim] at (20,\S-4) {$<\qty{1}{\micro\second}$};
+  {\textbf{Step 2 --- AFT ARC4 detector module asserts on the chassis backplane}\\
+   {\tiny optical detection; the system modules drop the arc permit to the Interface Chassis}};
+\node[tim] at (20,\S-4) {few \unit{\micro\second}};
 
 \node[stp,draw=cPlc,fill=cPlc!8] (s3) at (22,2*\S)
   {\textbf{Step 3 --- Interface Chassis latches the fault, removes all permits}\\
    LLRF9 Enable removed $\cdot$ HVPS SCR ENABLE removed\\
    first-fault register captures ``Arc Detection''};
-\node[tim] at (20,2*\S-4) {$<\qty{1}{\micro\second}$};
+\node[tim] at (20,2*\S-4) {few \unit{\micro\second}};
 
 \node[stp,draw=cCtrl] (s4) at (22,3*\S)
   {\textbf{Step 4 --- Diagnostic capture}\\
    LLRF9 captures \num{16}k-sample waveforms\\
    Waveform Buffer freezes its circular buffers (pre-fault data preserved)};
-\node[tim] at (20,3*\S-4) {$\sim\unit{\micro\second}$};
+\node[tim] at (20,3*\S-4) {tens of \unit{\micro\second}};
 
 \node[stp,draw=cPlc,fill=cPlc!8] (s5) at (22,4*\S)
   {\textbf{Step 5 --- RF MPS PLC receives fault status from the Interface

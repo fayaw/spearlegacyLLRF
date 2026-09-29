@@ -1,5 +1,12 @@
 # 06 — Safety & Interlock Systems
 
+> **Per-bit names swept 28 September 2026** against the master wiring diagram `wd7307900206.pdf`
+> (WD-730-790-02-C6). Corrected here: `I:6/1` is the **Crowbar Trigger Monitor** (an input), not a
+> "Crowbar Enable Fiber Drive" from the LLRF; `I:6/7` is the **klystron crowbar** monitor, not a
+> generic "RF Crowbar"; `I:7/10` is wired as **SPARE**. The rung numbers, latch bits and DCM bits
+> were checked against `CasselPLCCode.pdf` and are unchanged. See
+> [02](02-hardware-io-configuration.md) for the full verified I/O map.
+
 ## Overview
 
 The HVPS PLC implements multiple layers of safety protection:
@@ -29,12 +36,12 @@ The crowbar circuit rapidly short-circuits the HVPS output to protect the klystr
 
 | Signal | Address | Type | Description |
 |--------|---------|------|-------------|
-| Crowbar Enable Fiber Drive | I:6/1 | Input | Fiber optic enable from LLRF |
-| Crowbar Monitor | I:6/2 | Input | Crowbar circuit status |
+| Crowbar Trigger Monitor | I:6/1 | Input | Crowbar trigger sense (terminal "CROWBAR TRIGGER MON") — a **monitor**, not an enable |
+| Crowbar Monitor | I:6/2 | Input | Crowbar circuit status (ladder tests it as "Crowbar On") |
 | Klystron Arc Monitor | I:6/3 | Input | Arc detection from klystron |
-| RF Crowbar | I:6/7 | Input | Crowbar signal from RF system |
-| Crowbar Enable | O:5/4 | Output | Enable crowbar circuit |
-| Force Crowbar | O:5/3 | Output | Force crowbar on |
+| Klystron Crowbar Monitor | I:6/7 | Input | `KLYSTRON_CROWBAR` — terminal "KLYSTRON CB MON"; CB is **crowbar**, not circuit breaker |
+| Crowbar Enable | O:5/4 | Output | Enable crowbar circuit (terminal "CROWBAR OFF") |
+| Force Crowbar | O:5/3 | Output | Force crowbar on (terminal "PLC FORCE CROWBAR") |
 | Crowbar Latch | B3:4/10 | Bit | Crowbar fault latch |
 | Crowbar Lockout | B3:0/12 | Bit | Crowbar lockout state |
 
@@ -43,7 +50,7 @@ The crowbar circuit rapidly short-circuits the HVPS output to protect the klystr
 **Rung 0013 — Crowbar Latching:**
 - Crowbar latch (B3:4/10) sets when crowbar fires
 - Cleared by B3:0/10 (Reset)
-- Conditions: Crowbar enable fibers active AND fast inhibit active AND turn-off delay done
+- Conditions: crowbar monitor inputs active AND fast inhibit active AND turn-off delay done
 
 **Rung 0027 — Forced Crowbar:**
 - Forces O:5/3 (Crowbar Forced On) during contactor close delay (T4:16/TT) if either SCR driver latch (B3:3/14 or B3:3/15) is set
@@ -63,7 +70,7 @@ The crowbar circuit rapidly short-circuits the HVPS output to protect the klystr
 ### Klystron Crowbar
 
 **Rung 0056:**
-- Monitors I:6/7 (RF Crowbar signal)
+- Monitors I:6/7 (klystron crowbar monitor)
 - Sets B3:2/4 (_KLYSTRON_CROWBAR)
 - Reports O:1/123 (DCM_BIT) to EPICS
 
@@ -121,7 +128,7 @@ B3:0/9 (No Transformer Fault) is TRUE when ALL of these are OK:
 | Oil Pump Flow | I:7/9 | B3:4/7 | Only checked when SCR On (B3:0/4) | 47 |
 | Klystron Crowbar | I:6/3 | B3:2/6 | With I:6/0, I:6/1; also disables O:5/0 | 48 |
 | Klystron SCR Bit | I:6/0 | B3:2/5 | — | 49 |
-| Water Flow | I:7/10 | B3:2/7 | — | 50 |
+| Water Flow | I:7/10 | B3:2/7 | Terminal is labelled **SPARE** on the wiring diagram; `WATER_FLOW_SWITCH` exists only in the symbol database | 50 |
 | Phase Loss | I:7/11 | B3:2/3 | Only checked when SCR On | 51 |
 | Ground Tank Oil | I:6/8 | B3:4/14 | — | 52 |
 | DC Power | B3:1/8 | B3:4/6 | Aux power off while system not off | 59 |
@@ -154,8 +161,10 @@ B3:0/9 (No Transformer Fault) is TRUE when ALL of these are OK:
 | H1 SCR Driver (Lower) | I:6/4 | B3:3/14 | O:1/124 | 25 |
 | H2 SCR Driver (Upper) | I:6/6 | B3:3/15 | O:1/125 | 26 |
 
+> I:6/4 and I:6/6 are labelled **SCR MONITOR # 1** and **SCR MONITOR # 2** at the terminal block; the ladder calls them SCR TRIG#1 / SCR drive bit lower and SCR TRIG#2 / SCR driver upper. Both describe the same two inputs.
+
 Conditions for SCR driver fault detection:
-1. SCR Disable Fiber (I:6/0) must be clear
+1. SCR Disable (I:6/0) must be clear
 2. Regulator On (B3:0/2) must be true
 3. SCR Drive Bit (B3:2/13) must be set
 4. SCR Off Delay (T4:18/DN) must be done

@@ -1,65 +1,86 @@
 % !TeX root = ../0_system_design_report.tex
-% Figure 4 -- arc detection signal path.  Ten sensors, five active receivers,
-% and two parallel outputs: a hardware OR (fast trip) and a 10-bit latch that
-% preserves which sensor fired.  The Interface Chassis sits below the Arc
-% Detection Chassis so the three interconnecting signals have room to be
-% labelled.
+% Figure 4 -- arc detection signal path, AFT ARC4.  The dashed outline is the
+% vendor boundary: fibers land on detector modules, the detector modules drive
+% the chassis backplane, and only the two system modules and the test module
+% face the Interface Chassis.  Drawn this way on purpose -- the whole point of
+% the September 2026 change is that no SSRL wire lands on a detector module.
 \begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
-  sens/.style={blk,text width=27mm,minimum height=5mm,inner sep=1.6pt,
-               font=\scriptsize,anchor=west},
-  rcv/.style ={rf,text width=22mm,minimum height=5mm,inner sep=1.6pt,
-               font=\scriptsize,anchor=west},
+  src/.style={blk,text width=32mm,minimum height=4.6mm,inner sep=1.4pt,
+              font=\scriptsize,anchor=west},
+  det/.style={rf,text width=26mm,minimum height=4.6mm,inner sep=1.4pt,
+              font=\scriptsize,anchor=west},
+  mod/.style={plc,text width=30mm,minimum height=9mm,inner sep=2.6pt,
+              align=center,anchor=north west},
+  gry/.style={draw=black!35,text=black!50,dashed,fill=white},
 ]
 
-% ===== sensors and receivers ============================================
-\def\dy{7.4}
-\foreach [count=\i from 0] \s/\r in {%
-  {Cav A sensor 1}/{Rcvr 1, ch 1},
-  {Cav A sensor 2}/{Rcvr 1, ch 2},
-  {Cav B sensor 1}/{Rcvr 2, ch 1},
-  {Cav B sensor 2}/{Rcvr 2, ch 2},
-  {Cav C sensor 1}/{Rcvr 3, ch 1},
-  {Cav C sensor 2}/{Rcvr 3, ch 2},
-  {Cav D sensor 1}/{Rcvr 4, ch 1},
-  {Cav D sensor 2}/{Rcvr 4, ch 2},
-  {Klystron sensor}/{Rcvr 5, ch 1},
-  {Circulator sensor}/{Rcvr 5, ch 2}}{%
+\def\dy{6.6}
+\def\xbus{80}     % vertical backplane collection bus
+\def\yrail{-83}   % horizontal backplane rail
+
+% ===== fibers in, one detector module each ==============================
+\foreach [count=\i from 0] \s in {%
+  {Cavity A window, fiber 1},
+  {Cavity A window, fiber 2},
+  {Cavity B window, fiber 1},
+  {Cavity B window, fiber 2},
+  {Cavity C window, fiber 1},
+  {Cavity C window, fiber 2},
+  {Cavity D window, fiber 1},
+  {Cavity D window, fiber 2},
+  {Klystron output window},
+  {Circulator}}{%
     \pgfmathsetmacro\y{-\i*\dy}
-    \node[sens] (s\i) at (0,\y) {\s};
-    \node[rcv]  (r\i) at (36,\y) {\r};
-    \draw[sig] (s\i.east) -- (r\i.west);
-    \draw[draw=cNeut,thick] (r\i.east) -- (66,\y);
+    \pgfmathtruncatemacro\n{\i+1}
+    \node[src] (s\i) at (0,\y) {\s};
+    \node[det] (d\i) at (46,\y) {ARC detector \n};
+    \draw[fib] (s\i.east) -- (d\i.west);
+    \draw[draw=cNeut,thick] (d\i.east) -- (\xbus,\y);
   }
-\node[blk,text width=22mm,minimum height=5mm,inner sep=1.6pt,anchor=west,
-      draw=black!35,text=black!50,dashed] at (36,-10*\dy)
-  {Rcvr 6 --- spare\\{\tiny both channels unused}};
-\node[lbl,anchor=north west,text width=30mm] at (0,-10*\dy+2)
-  {10 sensors, fiber-fed\\ Microstep-MIS detectors};
+% Slots 11 and 12 carry no detector module: the chassis is 12-slot, 10 are
+% populated, and the two remaining modules are held as shelf spares.
+\foreach [count=\j from 10] \n in {11,12}{%
+  \pgfmathsetmacro\y{-\j*\dy}
+  \node[det,gry] (d\j) at (46,\y) {slot \n{} --- empty};
+}
+\node[lbl,anchor=north west,text width=34mm] at (0,-12*\dy-1)
+  {existing tunnel fibers ---\\ no adapters, no viewport work};
 
-% collect the ten relay outputs onto a vertical bus
-\draw[bus] (66,2) -- (66,-9*\dy);
-\draw[sig] (66,-4.5*\dy) -- (76,-4.5*\dy);
-\node[tag,anchor=south east] at (65.5,1.6) {10 relay outputs};
+% ===== chassis backplane ================================================
+\draw[bus] (\xbus,2.5) -- (\xbus,\yrail);
+\draw[bus] (46,\yrail) -- (152,\yrail);
+\node[tag,anchor=south west] at (\xbus+1.5,-76) {chassis backplane};
 
-% ===== arc detection chassis ============================================
-\node[plc,text width=70mm,anchor=west,align=left,inner sep=4pt] (adc) at (76,-4.5*\dy)
-  {\textbf{ARC DETECTION CHASSIS}\\[3pt]
-   \textbf{OR} of all 10 $\rightarrow$ PERMIT output\\
-   {\tiny active-high; pure hardware, no encoding latency}\\[3pt]
-   \textbf{10-bit latch} $\rightarrow$ 10 status outputs\\
-   {\tiny one bit per sensor; holds until explicitly reset}};
+% ===== internal power supply (no external connection) ===================
+\node[blk,text width=28mm,minimum height=7mm,inner sep=2.4pt,anchor=west,
+      draw=black!35,text=black!50] at (94,-8)
+  {internal power supply};
 
-% ===== interface chassis ================================================
-\node[plc,text width=70mm,anchor=north west,align=left,inner sep=4pt]
-  (ic) at (76,-9.4*\dy)
-  {\textbf{INTERFACE CHASSIS}\\[2pt]
-   {\tiny AND-gate permit logic $\cdot$ first-fault register}};
+% ===== system and test modules ==========================================
+\node[mod] (sm1) at (46,-87)  {\textbf{SYSTEM}\\\textbf{MODULE 1}};
+\node[mod] (sm2) at (84,-87)  {\textbf{SYSTEM}\\\textbf{MODULE 2}};
+\node[mod] (tst) at (122,-87) {\textbf{TEST}\\\textbf{MODULE}};
+\foreach \m in {sm1,sm2,tst}{\draw[sig] ($(\m.north)+(0,4)$) -- (\m.north);}
 
-\draw[sig] (86,-6.6*\dy) -- (86,-9.4*\dy);
-\node[tag,anchor=west,align=left] at (87,-8*\dy) {PERMIT\\{\tiny fast trip path}};
-\draw[sig] (112,-6.6*\dy) -- (112,-9.4*\dy);
-\node[tag,anchor=west,align=left] at (113,-8*\dy)
-  {10 status bits\\{\tiny which sensor fired}};
-\draw[sig] (142,-9.4*\dy) -- (142,-6.6*\dy);
-\node[tag,anchor=east,align=right] at (141,-8*\dy) {Test\\ Reset};
+% ===== vendor boundary ==================================================
+\node[grp,fit=(d0)(d11)(sm1)(tst)] {};
+\node[lbl,anchor=west] at (46,10) {AFT ARC4 chassis --- vendor boundary (dashed)};
+
+% ===== SSRL interface chassis ===========================================
+\node[plc,text width=140mm,anchor=north west,align=left,inner sep=4pt]
+  (ic) at (46,-117)
+  {\textbf{SSRL INTERFACE CHASSIS}\\[2pt]
+   {\tiny AND-gate permit logic $\cdot$ first-fault register $\cdot$
+    shares one physical chassis with the Waveform Buffer board}};
+
+\draw[sig] (sm1.south) -- (sm1.south|-ic.north);
+\node[tag,anchor=west,align=left] at ($(sm1.south)+(1.5,-9)$)
+  {ARC PERMIT\\ + detector ID};
+\draw[sig] (sm2.south) -- (sm2.south|-ic.north);
+\node[tag,anchor=west,align=left] at ($(sm2.south)+(1.5,-9)$)
+  {ARC PERMIT\\ + detector ID};
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},draw=cNeut,thick]
+  (tst.south) -- (tst.south|-ic.north);
+\node[tag,anchor=west,align=left] at ($(tst.south)+(1.5,-9)$) {Test\\ Reset};
 \end{tikzpicture}
+

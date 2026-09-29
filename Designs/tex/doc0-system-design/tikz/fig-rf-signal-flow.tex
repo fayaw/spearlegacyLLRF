@@ -30,12 +30,14 @@
 
 \draw[sig] (llrf.east) -- node[sn]{5} (amp.west);
 \draw[wg]  (amp.east)  -- (kly.west);
-\draw[wg]  (kly.east)  -- node[sn]{1} (circ.west);
+\draw[wg]  (kly.east)  -- node[sn] (n1) {1} (circ.west);
 \draw[wg]  (circ.east) -- node[sn,pos=0.28]{3} node[sn,pos=0.72]{4} (cl.west);
 
-% klystron reflected power, routed clear of everything else
-\coordinate (r2) at (91,-14);
-\draw[wgp] (91,0) -- (r2);
+% Klystron reflected power.  Same directional coupler as (1), so the branch
+% drops out of the BOTTOM of the (1) marker rather than from a bare point on
+% the waveguide run.
+\coordinate (r2) at ($(n1.south)+(0,-14)$);
+\draw[wgp] (n1.south) -- (r2);
 \draw[wg]  (r2) -| node[sn,pos=0.22]{2} (kly.south);
 
 % ===== magic tee 1 =======================================================

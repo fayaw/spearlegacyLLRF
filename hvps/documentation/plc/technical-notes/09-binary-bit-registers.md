@@ -1,6 +1,14 @@
 # 09 — Binary Bit Register Reference
 
 > Complete B3:0–B3:5 bit maps with labels, rung cross-references, and normal operating values.
+>
+> **The B3:12–B3:14 input-mirror labels were swept 28 September 2026** against the master wiring
+> diagram `wd7307900206.pdf` (WD-730-790-02-C6). Corrected: `I:2/1` is the **12 kV present** sense,
+> not "A Phase Reference Voltage"; `I:2/2` and `I:2/3` are **not used** (they were listed as "Filter
+> Inductor 1 / 2", which appears in no source); `I:6/1` is the **Crowbar Trigger Monitor**; `I:6/12`
+> is the **PERMIT key** only; `I:7/13` is **Ground Switch OPEN**; `I:7/10` is wired as **SPARE**.
+> The COPY-subroutine sources and destinations are unchanged. See
+> [02](02-hardware-io-configuration.md) for the full verified I/O map.
 
 ## Register Summary (Normal Operation Values)
 
@@ -164,10 +172,10 @@ Populated by COPY subroutine (LAD 3, Rung 0000): `COP #I:2.0 → #B3:12`
 
 | Bit | Label | Source | Normal State |
 |-----|-------|--------|-------------|
-| 0 | 120 VAC Control Power | I:2/0 | On |
-| 1 | A Phase Reference Voltage | I:2/1 | On |
-| 2 | Filter Inductor 1 | I:2/2 | Off |
-| 3 | Filter Inductor 2 | I:2/3 | Off |
+| 0 | 120 V AC control power present | I:2/0 | On |
+| 1 | 12 kV present ("12KV VOLTS" / "12KV OFF") | I:2/1 | On |
+| 2 | *not used* — no ladder reference, no symbol | I:2/2 | — |
+| 3 | *not used* — no ladder reference, no symbol | I:2/3 | — |
 | 8 | (OSR for Rung 115) | — | Used as OSR bit for control reset |
 
 ---
@@ -178,19 +186,19 @@ Populated by COPY subroutine (LAD 3, Rung 0001): `COP #I:6.0 → #B3:13`
 
 | Bit | Label | Source | Normal State |
 |-----|-------|--------|-------------|
-| 0 | SCR Disable Fiber Drive | I:6/0 | Off |
-| 1 | Crowbar Enable Fiber Drive | I:6/1 | Off |
+| 0 | SCR Disable (fiber driver) | I:6/0 | Off |
+| 1 | Crowbar Trigger Monitor | I:6/1 | Off |
 | 2 | Crowbar Monitor | I:6/2 | On |
 | 3 | Klystron Arc Monitor | I:6/3 | On |
-| 4 | SCR Trigger 1 | I:6/4 | Off |
+| 4 | SCR Monitor #1 (ladder: SCR TRIG#1 / SCR drive bit lower) | I:6/4 | Off |
 | 5 | Transformer Arc Monitor | I:6/5 | On |
-| 6 | SCR Trigger 2 | I:6/6 | Off |
-| 7 | RF Crowbar | I:6/7 | On |
+| 6 | SCR Monitor #2 (ladder: SCR TRIG#2 / SCR driver upper) | I:6/6 | Off |
+| 7 | Klystron Crowbar Monitor (`KLYSTRON_CROWBAR`) | I:6/7 | On |
 | 8 | Ground Tank Oil Level | I:6/8 | On |
-| 9 | Ground Tank Switch | I:6/9 | On |
+| 9 | Grounding Switch Closed | I:6/9 | On |
 | 10 | Crowbar Oil Level | I:6/10 | On |
 | 11 | SCR Oil Level | I:6/11 | On |
-| 12 | Key/Emergency Off Switch | I:6/12 | On |
+| 12 | Key Enable — the PERMIT key switch on the local control panel | I:6/12 | On |
 | 13 | Emergency Off | I:6/13 | On |
 | 14 | PPS 1 | I:6/14 | On |
 | 15 | PPS 2 | I:6/15 | On |
@@ -215,10 +223,10 @@ Populated by COPY subroutine (LAD 3, Rung 0002): `COP #I:7.0 → #B3:14`
 | 7 | Transformer Oil Level | I:7/7 | On |
 | 8 | Transformer Sudden Pressure | I:7/8 | On |
 | 9 | Oil Pump On (Flow) | I:7/9 | Off |
-| 10 | Water Flow Switch (Spare) | I:7/10 | On |
+| 10 | **SPARE** on the drawing; `WATER_FLOW_SWITCH` in the symbol database | I:7/10 | On |
 | 11 | Enerpro Phase Loss | I:7/11 | On |
 | 12 | Regulator Current Limit | I:7/12 | Off |
-| 13 | Ground Tank Relay | I:7/13 | On |
+| 13 | Ground Switch **OPEN** ("GRN RELAY OPEN") | I:7/13 | On |
 | 14 | Regulator Voltage Trip | I:7/14 | Off |
 | 15 | Regulator Current Trip | I:7/15 | Off |
 

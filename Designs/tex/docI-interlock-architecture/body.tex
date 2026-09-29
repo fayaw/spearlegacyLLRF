@@ -904,7 +904,7 @@ CPU & Allen-Bradley 1747-L532 \\
 Remote I/O adapter module & Allen-Bradley 1747-DCM, chassis Slot 1, full rack \\
 Location & B118 (HVPS building), Hoffman Box enclosure \\
 Remote I/O adapter & \textbf{Adapter 1} (\texttt{HVPSDCM}, full rack) \\
-Rack & 14-slot SLC chassis \\
+Rack & 10-slot SLC chassis (slots 0--9; slot 4 empty) \\
 \end{longtable}
 
 \subsection{Inputs}\label{inputs-3}
@@ -928,7 +928,7 @@ Crowbar fired / arc status & Internal HVPS self-monitoring & Slot 6 IB16 digital
 Oil level & Float switch in HV tank & Slot 6 IB16 digital input & \texttt{HVPSOIL:\allowbreak{}LEVEL:\allowbreak{}LTCH} \\
 Transformer arc & Arc detector inside HV transformer & Slot 6 IB16 digital input & \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} \\
 SCR bank status & SCR gate driver feedback & Slot 6 IB16 digital inputs & \texttt{HVPSSCR1:\allowbreak{}ON:\allowbreak{}STAT}, \texttt{HVPSSCR2:\allowbreak{}ON:\allowbreak{}STAT} \\
-Contactor status & HV vacuum contactor auxiliary contact & Slot 6 IB16 digital inputs & \texttt{HVPSCONTACT:\allowbreak{}*:\allowbreak{}STAT} group \\
+Contactor status & HV vacuum contactor auxiliary contacts & \textbf{Slot 7 IV16} digital inputs 0--3 & Blocking relay (IN0), overcurrent relay (IN1), contactor closed (IN2), contactor ready (IN3) --- \texttt{HVPSCONTACT:\allowbreak{}*:\allowbreak{}STAT} group. These sit on the \textbf{IV16 in slot 7}, not on the slot-6 IB16 \\
 \texttt{hvpstrig} (SCR enable command) & EPICS IOC via Remote I/O (SNL \texttt{HVPSONSUB}) & Remote I/O incoming data table → Slot 5 OX8 relay & Supervisory SCR enable gate; must be ON for HVPS to produce HV \\
 \end{longtable}
 

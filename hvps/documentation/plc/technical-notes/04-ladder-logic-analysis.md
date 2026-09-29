@@ -1,6 +1,16 @@
 # 04 — Ladder Logic Analysis
 
 > Complete rung-by-rung analysis of LAD 2 (120 rungs, 5557 bytes) from `CasselPLCCode.pdf`.
+>
+> **Per-bit names swept 28 September 2026** against the master wiring diagram `wd7307900206.pdf`
+> (WD-730-790-02-C6). Corrected here: `I:6/1` is the **Crowbar Trigger Monitor**, not a "Crowbar
+> Enable Fiber Drive" output; `I:6/12` is the **PERMIT key** switch only; `O:5/2` drives
+> **Contactor Enable / the K4 coil** even though its rung is labelled "Crowbar On". Rungs **0071 and
+> 0072** were rewritten from the listing — their input conditions were wrong (they are driven by the
+> SCR driver bits and SCR TRIG#1/#2, not by the regulator trip inputs) and their `B3:5` status bits
+> were swapped; notes 02, 07 and 09 had these right. The remaining rung numbering, conditions and
+> register assignments were checked against the listing and are unchanged.
+> See [02](02-hardware-io-configuration.md) for the full verified I/O map.
 
 ## RSLogix 500 Instruction Reference
 
@@ -70,7 +80,7 @@ Before reviewing the rungs, here are the key instructions used:
   - T4:16/DN — Contactor closed delay done
   - T4:13/DN — Time off delay done
   - O:5/4 — Crowbar Enable active
-  - I:6/1 — Crowbar Enable Fiber Drive
+  - I:6/1 — Crowbar Trigger Monitor
 - **Outputs:**
   - B3:1/13 — System Ready
   - O:1/117 — System Ready to DCM
@@ -85,7 +95,7 @@ Before reviewing the rungs, here are the key instructions used:
   - O:2/3 — Ground Switch Relay energized
   - B3:1/13 — System Ready
   - T4:16/DN — Contactor closed delay complete
-  - I:6/0 — SCR Disable Fiber (NOT disabled)
+  - I:6/0 — SCR Disable (NOT disabled)
   - I:1/64 — Control Enable from DCM
   - T4:10/TT or B3:0/3 — Remote SCR on momentary or panel on bit
 - **Blocking conditions:**
@@ -154,7 +164,7 @@ Detects open load condition when voltage is high but current is low:
 
 ### Rung 0013 — Crowbar Latching with Reset
 - **Logic:** Crowbar Latch (B3:4/10) is set when:
-  - Crowbar Enable Fiber Drive (I:6/1) or Crowbar Enable (I:6/2) active
+  - Crowbar Trigger Monitor (I:6/1) or Crowbar Monitor (I:6/2) active
   - Fast Inhibit (O:5/6) active
   - T4:13/DN (turn-off delay done)
 - **Reset:** B3:0/10 (Reset) clears the latch
@@ -178,16 +188,16 @@ Detects open load condition when voltage is high but current is low:
   - O:1/120 — PPS Status to DCM
 
 ### Rung 0016 — Off Display / Grounding Switch
-- **Conditions:** I:6/12 (Key Enable), I:6/14 (PPS-1), I:6/15 (PPS-2), I:6/9 (Ground Switch)
+- **Conditions:** I:6/12 (PERMIT key enable), I:6/14 (PPS-1), I:6/15 (PPS-2), I:6/9 (Grounding Switch closed)
 - **Outputs:**
   - B3:0/0 — Off Display
   - When I:7/2 (Contactor Closed): O:2/3 — Ground Switch Relay
 
 ### Rung 0017 — Enable Chain
-- **Conditions:** I:6/12 (Key Enable), B3:1/0 (Emergency Off clear), B3:0/0 (Not off)
+- **Conditions:** I:6/12 (PERMIT key enable), B3:1/0 (Emergency Off clear), B3:0/0 (Not off)
 - **Outputs:**
   - B3:0/6 — Enable
-  - O:5/2 — Crowbar On (1746-OX8)
+  - O:5/2 — terminal **CONT. ENABLE** (Contactor Enable → K4 coil). The ladder labels this rung "Crowbar On", but that label is wrong — see `pps/HoffmanBoxPPSWiring.docx`
   - B3:1/9 — Enable Display
 
 ### Rung 0018 — System Ready Time Delay
@@ -315,7 +325,7 @@ All follow the pattern: Reset clears latch; interlock condition sets latch.
 | 0047 | Oil Pump Flow | I:7/9 | B3:4/7 | Only when SCR On (B3:0/4) |
 | 0048 | Klystron Crowbar | I:6/3 (Arc), I:6/0, I:6/1 | B3:2/6 | Also disables O:5/0 |
 | 0049 | Klystron SCR Bit | I:6/0 | B3:2/5 | — |
-| 0050 | Water Flow | I:7/10 | B3:2/7 | — |
+| 0050 | Water Flow | I:7/10 | B3:2/7 | Terminal labelled **SPARE** on WD-730-790-02-C6; `WATER_FLOW_SWITCH` exists only in the symbol database |
 | 0051 | Phase Loss | I:7/11 | B3:2/3 | Only when SCR On |
 | 0052 | Ground Tank Oil | I:6/8 | B3:4/14 | — |
 
@@ -364,19 +374,24 @@ These rungs implement a sequenced power-up using timers that fire in cascade aft
 | 0069 | T10:3 | TON timer | Sequenced startup step |
 | 0070 | T10:4 | TON timer with DN check | Final startup step |
 
-### Rung 0071 — SCR 1 Status (H2 Half)
-- **Condition:** I:7/15 (Regulator Current Trip inverted — no trip)
+### Rung 0071 — "#1 SCR LATCHING WITH RESET AND OVERRIDE"
+- **Conditions:** B3:3/15 (SCR driver **upper** bit), I:6/6 (SCR TRIG#2)
 - **Outputs:**
-  - B3:4/8 (SCR 1 Latch)
-  - B3:5/10 (SCR 1 Status)
-  - O:1/115 (SCR 2 Status to DCM)
+  - B3:4/8 — **SCR1 LATCH**
+  - B3:5/11 — SCR **2** Status
+  - O:1/115 — SCR **2** Status to DCM
 
-### Rung 0072 — SCR 2 Status (H1 Half)
-- **Condition:** I:7/14 (Regulator Voltage Trip inverted — no trip)
+### Rung 0072 — "#2 SCR LATCHING WITH RESET AND OVERRIDE"
+- **Conditions:** B3:3/14 (SCR driver **lower** bit), I:6/4 (SCR TRIG#1)
 - **Outputs:**
-  - B3:4/9 (SCR 2 Latch)
-  - B3:5/11 (SCR 2 Status)
-  - O:1/114 (SCR 1 Status to DCM)
+  - B3:4/9 — **SCR2 LATCH**
+  - B3:5/10 — SCR **1** Status
+  - O:1/114 — SCR **1** Status to DCM
+
+> **Trap — the latch and the status carry opposite numbers.** Rung 0071 is commented "#1 SCR
+> LATCHING" and sets `SCR1 LATCH`, but it is driven by SCR TRIG#**2** and reports SCR **2** Status;
+> rung 0072 is the mirror image. This is how the original program is written — it is not a
+> transcription error here. Read the bit name, not the rung number, when tracing an SCR fault.
 
 ### Rung 0073 — Ground Switch Open
 - **Condition:** I:6/13 (Emergency Off clear)
