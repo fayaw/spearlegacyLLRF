@@ -15,12 +15,12 @@
    {\normalfont\qty{12.47}{\kilo\volt} RMS $3\varphi$ \qty{60}{\hertz}}};
 
 \stage{s1}{-14}{SWITCHGEAR (contactor panel)}
-  {Disconnect switch, $3\times\qty{50}{\ampere}$ fuses, vacuum contactor.
+  {Disconnect switch, primary fuses and vacuum contactor.
    Ross HQ3 contactor + HCA-1-A controller}
 
 \stage{s2}{-32}{PHASE-SHIFT TRANSFORMER T0}
-  {\qty{2750}{\kilo\voltampere}, oil-immersed, extended delta.
-   Primary \qty{12.47}{\kilo\volt} delta; secondary dual wye $\pm15^\circ$,
+  {\qty{350}{\kilo\voltampere} nominal component specification; extended delta.
+   Input \qty{12.47}{\kilo\volt}; two phase-shifted sets at $\pm15^\circ$,
    \qty{12.91}{\kilo\volt} RMS $\varphi$--$\varphi$}
 
 \stage{s3}{-50}{RECTIFIER TRANSFORMERS T1 ($+15^\circ$), T2 ($-15^\circ$)}
@@ -53,7 +53,7 @@
    Fiber-optic trigger; conducts $\approx\qty{10}{\micro\second}$ after trigger}
 
 \stage{s8}{-152}{CABLE TERMINATION INDUCTORS L1, L2 (Grounding Tank)}
-  {``350 UHY 40A''.  Limits cable discharge current into the klystron}
+  {``350 µH 40A''.  Limits cable discharge current into the klystron}
 
 \draw[sig] (src.south) -- (s1.north);
 \foreach \a/\b in {1/2,2/3,3/4,4/5,5/6,6/7,7/8}{\draw[sig] (s\a.south) -- (s\b.north);}

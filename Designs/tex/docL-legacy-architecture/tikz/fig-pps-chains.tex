@@ -12,8 +12,8 @@
 \foreach \i/\y/\t in {%
   1/-2/{PPS 1 Enable (GOB1208PNE pin E$\rightarrow$F)},
   2/-14/{SLC-500 PLC slot-6 IB16 input 14},
-  3/-26/{PLC rung 0017 (contactor enable logic)},
-  4/-38/{slot-5 OX8 OUT2},
+  3/-26/{PLC logic via emergency-off / enable; interpreted rung 0017},
+  4/-38/{slot-5 OX8 OUT2; hardware PPS supply dependency},
   5/-50/{TS-5 $\rightarrow$ Belden 83715 cable $\rightarrow$ switchgear},
   6/-62/{K4 relay (PPS control) $\rightarrow$ MX relay $\rightarrow$ L1 holding coil}}
   {\node[ppsbox,anchor=north west] (a\i) at (0,\y) {\t};}
@@ -23,7 +23,7 @@
 \node[blk,text width=62mm,anchor=north west,font=\tiny] (a8) at (0,-88)
   {\textbf{Readback}: S5 auxiliary contact (NC) $\rightarrow$ TS-5 pins 14, 15
    $\rightarrow$ GOB1208PNE readback A--B};
-\draw[fib] (a7.south) -- (a8.north);
+\draw[sig] (a7.south) -- (a8.north);
 
 % ---------------- Chain 2 -------------------------------------------------
 \node[font=\small\bfseries,anchor=north west,text=cPlc!80!black] at (76,4)
@@ -42,14 +42,14 @@
 \node[blk,text width=62mm,anchor=north west,font=\tiny] (b8) at (76,-88)
   {\textbf{Readback}: Ross switch aux common/NC $\rightarrow$ TS-6 terminals 11, 12
    $\rightarrow$ GOB1208PNE readback C--D};
-\draw[fib] (b7.south) -- (b8.north);
+\draw[sig] (b7.south) -- (b8.north);
 
 % ---------------- compliance note ----------------------------------------
 \node[anchor=north west,text width=138mm,font=\scriptsize,align=left,
       draw=cPwr!70,fill=cPwr!5,rounded corners=1.5pt,inner sep=4pt] at (0,-100)
-  {\textbf{Compliance issue.}  Both chains pass through the SLC-500 PLC, placing a
-   programmable logic controller in the personnel safety chain --- a design that
-   does not meet modern PPS standards.  Rung 0016 puts PPS\,1 and PPS\,2 in
-   \emph{series}, so removing either signal grounds the HV bus; rung 0015 puts
-   them in \emph{parallel} to set the ``PPS ON'' status bit \texttt{B3:1}.};
+  {\textbf{Documented dependencies, not an approved PPS sequence.}
+   Rung 0016 requires both permits to energize the Ross-switch coil; either
+   permit loss commands grounding. Rung 0015 ORs the permits for status.
+   Pin pairing, K4 wiring, actual contact motion and timing require field
+   verification and PPS-authority review.};
 \end{tikzpicture}

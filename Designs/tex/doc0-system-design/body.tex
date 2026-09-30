@@ -31,11 +31,8 @@ Revision & Date & Scope of Change & Summary \\
 \raisebox{0pt}[0pt][0pt]{\hypertarget{openitems}{}}%
 
 Everything in this report that is \textbf{provisional, unverified or explicitly
-TBD} is collected here, so that the reader does not have to find it buried in a
-subsection. Each item is tagged \openitemlegend{} at the point in the body where
-it matters; the page column links back to that point. This table is the single
-master list --- \Cref{inter-subsystem-interface-matrix} no longer keeps a
-separate one.
+TBD} is collected here. Each item is tagged \openitemlegend{} at the point in the body where
+it matters; the page column links back to that point.
 
 \begin{longtable}[]{@{}Q{\dimexpr 0.050\linewidth-1.6\tabcolsep\relax}Q{\dimexpr 0.215\linewidth-1.6\tabcolsep\relax}Q{\dimexpr 0.395\linewidth-1.6\tabcolsep\relax}Q{\dimexpr 0.250\linewidth-1.6\tabcolsep\relax}Q{\dimexpr 0.090\linewidth-1.6\tabcolsep\relax}@{}}
 \toprule\noalign{}
@@ -682,7 +679,7 @@ Based on the proven PEP-II design architecture from 1997, this legacy system has
 \begin{figure}[p]
 \centering
 \begin{fitpicture}\input{tikz/fig-hvps-power-chain}\end{fitpicture}
-\caption{HVPS power chain in Building B514, from the incoming substation feeder to the klystron cathode.  The \ang{15} phase offset between the two rectifier transformers is what turns two 6-pulse bridges into a single 12-pulse supply.  Dashed blue lines are the four Waveform Buffer monitoring taps, numbered as in \Cref{channel-configuration}; they are the only non-power signals shown.  Component values are the as-built ones verified against the original drawings --- T0 is \qty{2750}{\kilo\voltampere} not \qty{350}{\kilo\voltampere}, the filter capacitors are \qty{8}{\micro\farad} \emph{per stage} across four series stages rather than \qty{8}{\micro\farad} in total, the output divider is $\approx$\,10\,000:1 not 1000:1, and the cable termination inductors are \qty{350}{\micro\henry} not \qty{200}{\micro\henry}.}\label{fig:hvps-power-chain}
+\caption{HVPS power chain in Building B514, from the incoming substation feeder to the klystron cathode.  The \ang{15} phase offset between the two rectifier transformers is what turns two 6-pulse bridges into a single 12-pulse supply.  Dashed blue lines are the four Waveform Buffer monitoring taps, numbered as in \Cref{channel-configuration}; they are the only non-power signals shown.  Component values are the as-built ones verified against the original drawings --- T0 is \qty{2750}{\kilo\voltampere}, the filter capacitors are \qty{8}{\micro\farad} \emph{per stage} across four series stages, the output divider is $\approx$\,10\,000:1, and the cable termination inductors are \qty{350}{\micro\henry}.}\label{fig:hvps-power-chain}
 \end{figure}
 \begin{longtable}[]{@{}P{\dimexpr 0.4346\linewidth-1.00\tabcolsep\relax}P{\dimexpr 0.5654\linewidth-1.00\tabcolsep\relax}@{}}
 \toprule\noalign{}
@@ -2452,6 +2449,10 @@ Content
 \fpath{pps/diagrams/README.md} & PPS diagram note set and the PPS readback trace \\
 \end{longtable}
 
+\begin{comment}
+  
+
+
 \subsection{Companion design documents}\label{companion-design-documents}
 
 \begin{longtable}[]{@{}P{\dimexpr 0.5211\linewidth-1.00\tabcolsep\relax}P{\dimexpr 0.4789\linewidth-1.00\tabcolsep\relax}@{}}
@@ -2470,6 +2471,8 @@ Content
 \fpath{Designs/tex/docP-rf-physics/P\_rf\_physics\_and\_plant.pdf} & RF physics, cavity parameters, beam loading \\
 \fpath{Designs/tex/docT-tuner-control/T\_tuner\_control\_analysis.pdf} & Tuner control system analysis \\
 \end{longtable}
+
+\end{comment}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 

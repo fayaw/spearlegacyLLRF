@@ -215,6 +215,14 @@
 \usepackage[capitalise,nameinlink]{cleveref}
 \crefname{section}{\S}{\S\S}
 \Crefname{section}{Section}{Sections}
+% Spell out "Figure" for \cref too; cleveref's default abbreviates it to "Fig.",
+% which reads inconsistently beside \Cref in the same sentence.
+\crefname{figure}{Figure}{Figures}
+% Lowercase \cref on a section prints "§5.7" / "§§10.2--10.5" -- no space after
+% the sign and an en-dash range, matching the hand-written style it replaced.
+\crefformat{section}{\S#2#1#3}
+\crefrangeformat{section}{\S\S#3#1#4--#5#2#6}
+\crefmultiformat{section}{\S#2#1#3}{ and~\S#2#1#3}{, \S#2#1#3}{ and~\S#2#1#3}
 
 % Repository paths are long and unhyphenatable; allow breaks after / and .
 % Long file paths and CamelCase document names have no natural break points, so

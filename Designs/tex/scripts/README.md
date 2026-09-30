@@ -1,5 +1,20 @@
 # Figure generation scripts
 
+## Doc L Release Check
+
+From the repository root:
+
+```powershell
+& ./Designs/tex/build.ps1 -Doc L -Clean
+node Designs/tex/scripts/verify-docL.js
+```
+
+[verify-docL.js](verify-docL.js) checks original-source paths, citation and
+label integrity, Open Items backlinks, referenced images, the six SNL RCS
+head inventories, and all horizontal/vertical overflow diagnostics. Use
+`--source-only` while editing, before rebuilding. The checker does not replace
+engineering review or the field-verification records listed in Doc L.
+
 Most diagrams in these documents are hand-authored TikZ and live in
 `../tikz/`. They are plain text, diff cleanly, and need no build step beyond
 LaTeX itself — that is the right home for block diagrams, signal flows and
@@ -11,7 +26,7 @@ The convention is set up so that when one is needed, it is reproducible.
 
 ## Convention
 
-```
+```text
 scripts/
   data/            measured or exported data, committed as CSV
   make-figures.ps1 regenerates everything into ../figures/generated/

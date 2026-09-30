@@ -1,7 +1,7 @@
 % !TeX root = ../L_legacy_system_architecture.tex
 % Control-layer hierarchy and the three interlock paths.
 % Redrawn from the 2003 overview slide, whose embedded values were stale:
-% the transformer is 2750 kVA (not 3.5 MVA), the SLC-500 parts are 1747-L532
+% the phase-shifter specification is 350 kVA, the SLC-500 parts are 1747-L532
 % and 1747-DCM (not 1474-), the filter is 8 uF PER STAGE, and the second HVPS
 % is fully off rather than on warm standby.
 \begin{tikzpicture}[font=\scriptsize,x=1mm,y=1mm,every node/.style={outer sep=0pt}]
@@ -27,8 +27,8 @@
 % ===== fast interlock chassis =============================================
 \node[plc,text width=76mm,anchor=north] (fic) at (130,-40)
   {\textbf{FAST INTERLOCK CHASSIS 340-308}\\[1pt]
-   {\tiny \emph{In:} arc sensors $\cdot$ reflected RF power $\cdot$ beam permit
-    (SPEAR MPS) $\cdot$ HVPS status\\
+  {\tiny \emph{In:} arc sensors $\cdot$ RF power signals $\cdot$ RF MPS
+   interface $\cdot$ HVPS status\\
     \emph{Out:} status $\cdot$ SCR ENABLE (fiber) $\cdot$ CROWBAR fire (fiber)}};
 \draw[sig] (fic.north|-vxi.south) -- (fic.north);
 
@@ -66,7 +66,7 @@
    {\tiny two complete identical units; one energized, the other fully off\\[2pt]
     \qty{12.47}{\kilo\volt} $3\varphi$ \qty{60}{\hertz} $\rightarrow$
     switchgear $\rightarrow$ phase-shift transformer
-    (\qty{2750}{\kilo\voltampere}, $\pm15^\circ$)\\
+    (\qty{350}{\kilo\voltampere} nominal, $\pm15^\circ$)\\
     $\rightarrow$ 12-pulse SCR bridges ($168\times$ Powerex T8K7)
     $\rightarrow$ filter inductors L1/L2 $\rightarrow$
     \qty{8}{\micro\farad} per stage, 4 stages\\

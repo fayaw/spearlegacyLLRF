@@ -20,10 +20,17 @@
 \DeclareRobustCommand{\WDEF}[1]{%
   \raisebox{0pt}[0pt][0pt]{\hypertarget{ref:W#1}{}}\textbf{[W#1]}}
 
+\DeclareRobustCommand{\openitem}[1]{\,%
+  \raisebox{0pt}[0pt][0pt]{\hypertarget{open:#1}{}}\label{openp:#1}%
+  \hyperlink{openitems}{\textcolor{cPlc}{\bfseries\scriptsize[#1]}}}
+\newcommand{\openpage}[1]{\hyperlink{open:#1}{p.~\pageref*{openp:#1}}}
+\hypersetup{pdftitle={SPEAR3 RF System: Legacy System Architecture},
+  pdfauthor={Faya Wang},pdfsubject={Doc L R0 - Draft}}
+
 \title{\vspace{-1.4cm}\bfseries SPEAR3 RF System\\[2mm]
        \Large Legacy System Architecture}
-%\author{Faya Wang\\[1mm]\normalsize SLAC National Accelerator Laboratory}
-%\date{Version 4.0 \quad\textbullet\quad \today}
+\author{}
+\date{}
 
 \begin{document}
 \maketitle
@@ -33,26 +40,23 @@
 \begin{minipage}{0.86\linewidth}\small
 \begin{tabular}{@{}ll@{}}
 \textbf{Document ID} & Doc L \\
-\textbf{Version}    & R0 \\
+\textbf{Revision}    & R0 \\
 \textbf{Status}        & Draft \\
 \textbf{Author}        & Faya Wang \\
-\textbf{Reviewer}        & Jim Sebek ... \\
-\textbf{Classification}        & 2 --- Legacy System and Operational Reference \\
+\textbf{Reviewer}        & Jim Sebek and others \\
+\textbf{Classification}        & Tier 2 --- Legacy System and Operational Reference \\
 \textbf{Affiliation}        & SSRL, SLAC National Accelerator Laboratory \\
-\textbf{Date}        & \today \\
+\textbf{Date}        & 29 September 2026 \\
 \end{tabular}
 \end{minipage}
 \end{center}
 
 \vspace{4mm}
 \begin{keynote}
-This document describes the SPEAR3 RF station \emph{as built and as operated
-before the LLRF upgrade}.  It is a reference for the existing plant, not a
-design proposal.  Every technical statement is referenced to an original source
-document, an engineering drawing read directly, or the legacy source code;
-\Cref{sec:verification-status} records the verification basis section by
-section, and \Cref{sec:known-issues} lists the items that still require field
-verification.
+This document records the pre-upgrade configuration of the
+SPEAR3 RF station from the original drawings, publications, engineering records and
+legacy code. The \hyperref[sec:open-items]{Open Items} register lists the points that still
+require investigation. The document is ready for review.
 \end{keynote}
 
 \clearpage
