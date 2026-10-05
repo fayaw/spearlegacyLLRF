@@ -1,0 +1,42 @@
+% !TeX root = ../P_rf_physics_and_plant.tex
+% Reflected power at the input coupler versus cavity tuning, with and without
+% beam.  Plots |Gamma|^2 = [(b-1-a)^2 + (t+b)^2] / [(b+1+a)^2 + (t+b)^2]
+% with t = Df/7.44219 kHz  (t = 2 Q0 Df / f0, f0/2Q0 = 7.4422 kHz),
+%      beta = 3.78.
+%   500 mA:  a = 1.8755, b = 4.8930  ->  beta-1-a = 0.9045, beta+1+a = 6.6555
+%   no beam: a = 0,      b = 0       ->  beta-1   = 2.78,   beta+1   = 4.78
+% Keep these four constants in step with the cavity table if beta or the
+% operating point ever changes.
+\begin{tikzpicture}[font=\small]
+\begin{axis}[
+  width=100mm, height=56mm, scale only axis,
+  xmin=-90, xmax=42, ymin=0, ymax=100,
+  xtick={-90,-75,-60,-45,-30,-15,0,15,30},
+  xlabel={cavity tuning $\Delta f = f_0 - f_\text{RF}$ (kHz)},
+  ylabel={reflected power $|\Gamma|^2$ (\%)},
+  ytick={0,20,40,60,80,100},
+  grid=both, grid style={draw=black!12},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+  legend style={at={(0.5,1.03)},anchor=south,legend columns=2,
+                draw=black!30,fill=white,font=\scriptsize},
+]
+\addplot[cRf!75!black,very thick,domain=-90:42,samples=300]
+  {100*(0.9045^2 + (x/7.44219 + 4.8930)^2)/(6.6555^2 + (x/7.44219 + 4.8930)^2)};
+\addlegendentry{$I_b=\qty{500}{\milli\ampere}$}
+\addplot[cPwr!85!black,very thick,dashed,domain=-90:42,samples=300]
+  {100*(2.78^2 + (x/7.44219)^2)/(4.78^2 + (x/7.44219)^2)};
+\addlegendentry{$I_b=0$ (no beam)}
+
+% Annotations live in the region under both curves (lower right) or above the
+% dashed curve (upper middle); nothing is placed on a curve.
+\addplot[only marks,mark=*,mark size=1.9pt,black]
+  coordinates {(-36.42,1.85) (0,36.28) (-36.42,67.69)};
+
+\node[anchor=south,font=\scriptsize,align=center] at (axis cs:-36.42,13)
+  {operating point, \qty{1.8}{\percent}};
+\node[anchor=west,font=\scriptsize,align=left] at (axis cs:2.5,15)
+  {tuner parked, beam\\ at \qty{500}{\milli\ampere}: \qty{36}{\percent}};
+\node[anchor=west,font=\scriptsize,align=left] at (axis cs:-30,79)
+  {beam lost, cavity still\\ detuned: \qty{68}{\percent}};
+\end{axis}
+\end{tikzpicture}

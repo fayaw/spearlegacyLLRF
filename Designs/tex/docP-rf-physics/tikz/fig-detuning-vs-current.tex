@@ -1,0 +1,40 @@
+% !TeX root = ../P_rf_physics_and_plant.tex
+% Required cavity detuning versus beam current.
+%
+% Top panel:    Df_opt = -(R/Q) I_b1 sin(phi_s) f_0 / (2 V_gap), linear in I_b
+%               because I_b1 = 2 I_b and phi_s does not depend on current.
+%               Slope -0.07283 kHz/mA gives -36.4 kHz at 500 mA.
+% Bottom panel: the LOADED angle the tuner loop actually servos on,
+%               psi_L = atan(tan psi_0 / (1+beta)) = atan(-1.0236 I_b/500 mA).
+% Drawn as two stacked panels rather than a twin y axis: on a twin axis the
+% linear and arctangent curves very nearly coincide at 500 mA, which reads as
+% though they were the same quantity.
+\begin{tikzpicture}[font=\small]
+\begin{axis}[
+  name=top, width=96mm, height=36mm, scale only axis,
+  xmin=0, xmax=520, xticklabels={},
+  ymin=-42, ymax=3, ylabel={$\Delta f_\text{opt}$ (kHz)},
+  ytick={0,-10,-20,-30,-40},
+  grid=both, grid style={draw=black!12},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+]
+\addplot[cPwr!85!black,very thick,domain=0:500,samples=2] {-0.07283*x};
+\addplot[only marks,mark=*,mark size=1.7pt,cPwr!85!black] coordinates {(500,-36.42)};
+\node[anchor=south west,font=\scriptsize,text=cPwr!85!black] at (axis cs:25,-40)
+  {$-36.4$ kHz at \qty{500}{\milli\ampere}};
+\end{axis}
+\begin{axis}[
+  at={(top.below south west)}, anchor=north west, yshift=-5mm,
+  width=96mm, height=36mm, scale only axis,
+  xmin=0, xmax=520, xlabel={beam current $I_b$ (mA)},
+  ymin=-52, ymax=4, ylabel={$\psi_{L,\text{opt}}$ (deg)},
+  ytick={0,-15,-30,-45},
+  grid=both, grid style={draw=black!12},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+]
+\addplot[cRf!75!black,very thick,domain=0:500,samples=80] {atan(-1.0236*x/500)};
+\addplot[only marks,mark=*,mark size=1.7pt,cRf!75!black] coordinates {(500,-45.67)};
+\node[anchor=south west,font=\scriptsize,text=cRf!75!black] at (axis cs:25,-50)
+  {$-45.7^\circ$ at \qty{500}{\milli\ampere}};
+\end{axis}
+\end{tikzpicture}

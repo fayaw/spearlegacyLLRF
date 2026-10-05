@@ -1,8 +1,13 @@
-% !TeX root = T_tuner_control_analysis.tex
-%  SPEAR3 Legacy LLRF -- Tuner Control System Technical Analysis (Doc T).
-%  Build:  powershell -ExecutionPolicy Bypass -File ..\build.ps1 -Doc T
+% ============================================================================
+%  Doc T -- SPEAR3 Legacy LLRF: Tuner Control System Technical Analysis
+%  Build:  powershell -ExecutionPolicy Bypass -File build.ps1 -Doc T
+%  Engine: LuaLaTeX (required -- see the Unicode note in preamble.tex)
+% ============================================================================
 \documentclass[letterpaper,11pt]{article}
 \input{../common/preamble}
+
+% Equations are numbered within sections, as in Doc P.
+\numberwithin{equation}{section}
 
 % Verbatim-ish blocks.  \sigblock keeps the column alignment of signal and PV
 % traces; \codeblock is for C, EPICS database and SNL excerpts.
@@ -14,41 +19,68 @@
   {fontsize=\footnotesize,frame=leftline,framerule=0.6pt,rulecolor=\color{cCtrl!45},
    framesep=6pt,xleftmargin=8pt}
 
+% --- [Rn] citation scheme --------------------------------------------------
+% Doc T uses the same numbered [Rn] reference list as Doc L and Doc I, so that a
+% source cited in one document carries the same style of tag in all of them.
+% \R{n} links to the defining row in the source index; \RDEF{n} is that row.
+% The anchor is wrapped in a zero-size raisebox: a bare \hypertarget occupies a
+% line box and pushes the visible tag down a line inside a p{} cell.
+\DeclareRobustCommand{\R}[1]{\hyperlink{ref:R#1}{[R#1]}}
+\DeclareRobustCommand{\RDEF}[1]{%
+  \raisebox{0pt}[0pt][0pt]{\hypertarget{ref:R#1}{}}\textbf{[R#1]}}
+
+% --- open items ------------------------------------------------------------
+% \openitem{On} tags the statement in the body that is still unverified and
+% links forward to the Open Items table; \openpage{On} is the table's back-link.
+\DeclareRobustCommand{\openitem}[1]{\,%
+  \raisebox{0pt}[0pt][0pt]{\hypertarget{open:#1}{}}\label{openp:#1}%
+  \hyperlink{openitems}{\textcolor{cPlc}{\bfseries\scriptsize[#1]}}}
+\newcommand{\openpage}[1]{\hyperlink{open:#1}{p.~\pageref*{openp:#1}}}
+
+\hypersetup{pdftitle={SPEAR3 Legacy LLRF: Tuner Control System Technical Analysis},
+  pdfauthor={Faya Wang},pdfsubject={Doc T R0 - Draft}}
+
 \title{\vspace{-1.4cm}\bfseries SPEAR3 Legacy LLRF\\[2mm]
        \Large Tuner Control System Technical Analysis}
-\author{Faya Wang\\[1mm]\normalsize RF Department, SSRL / Accelerator Directorate\\
-        \normalsize SLAC National Accelerator Laboratory}
-\date{September 2026}
+\author{}
+\date{}
 
 \begin{document}
 \maketitle
-\thispagestyle{empty}
+\thispagestyle{plain}
 
 \begin{center}
+\begin{minipage}{0.86\linewidth}\small
 \begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{Document}  & Doc T --- Tuner Control System Technical Analysis \\
-\textbf{Scope}     & Reverse engineering of the legacy mechanical cavity tuner loop \\
-\textbf{Status}    & Reference analysis --- legacy system (AB 1746-HSTP1 stepper) \\
-\textbf{Source}    & \fpath{Designs/tex/docT-tuner-control/T_tuner_control_analysis.tex} \\
-\textbf{Companion} & Doc P (physics), Doc L (legacy architecture), Doc 0 (upgrade) \\
-\bottomrule
+\textbf{Document ID} & Doc T \\
+\textbf{Revision}    & R0 \\
+\textbf{Status}      & Draft \\
+\textbf{Author}      & Faya Wang \\
+\textbf{Reviewer}    & Jim Sebek and others \\
+\textbf{Classification} & Tier 2 --- Legacy Tuner Control Reference \\
+\textbf{Affiliation} & SSRL, SLAC National Accelerator Laboratory \\
+\textbf{Date}        & 30 September 2026 \\
 \end{tabular}
+\end{minipage}
 \end{center}
 
 \vspace{4mm}
 \begin{keynote}
-This document reverse-engineers the tuner control loop \emph{as deployed on
-SPEAR3}, from the legacy \fpath{spear-rf-code-legacy/rfApp/} source tree. Two
-things are easy to get wrong when reading it. First, the architecture is a
-dual loop, but only the inner phase-regulation loop is active on SPEAR3: the
-outer voltage loop is PEP-II inheritance and its phase offset is fixed at zero.
-Second, the \textbf{AB 1746-HSTP1 is still the in-service controller}; the Galil
-DMC-4143 is in development and goes online only when the LLRF upgrade completes.
+This document reverse-engineers the mechanical cavity tuner loop \emph{as
+deployed on SPEAR3}, from the legacy \fpath{spear-rf-code-legacy/rfApp/} source
+tree. Two things are easy to get wrong when reading it. First, the architecture
+is a dual loop, but only the inner phase-regulation loop is active on SPEAR3:
+the outer voltage loop is PEP-II inheritance and its phase offset is fixed at
+zero. Second, the \textbf{AB 1746-HSTP1 is still the in-service controller};
+the Galil DMC-4143 is in development and goes online only when the LLRF upgrade
+completes. The \hyperref[sec:open-items]{Open Items} register lists the points
+that still require field verification.
 \end{keynote}
 
 \clearpage
 \tableofcontents
+\clearpage
+\listoffigures
 \clearpage
 
 \input{body}

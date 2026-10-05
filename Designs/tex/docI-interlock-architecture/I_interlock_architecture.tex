@@ -1,6 +1,8 @@
-% !TeX root = I_interlock_architecture.tex
-%  SPEAR3 RF Station Legacy System Interlock Architecture (Doc I).
-%  Build:  powershell -ExecutionPolicy Bypass -File ..\build.ps1 -Doc I
+% ============================================================================
+%  Doc I -- SPEAR3 RF Station: Legacy System Interlock Architecture
+%  Build:  powershell -ExecutionPolicy Bypass -File build.ps1 -Doc I
+%  Engine: LuaLaTeX (required -- see the Unicode note in preamble.tex)
+% ============================================================================
 \documentclass[letterpaper,11pt]{article}
 \input{../common/preamble}
 
@@ -29,27 +31,49 @@
   {fontsize=\footnotesize,frame=leftline,framerule=0.6pt,rulecolor=\color{cCtrl!45},
    framesep=6pt,xleftmargin=8pt}
 
+% --- [Rn] citation scheme --------------------------------------------------
+% Doc I uses a numbered [Rn] reference list rather than BibTeX, because the
+% numbering is already established across the whole document set.  \R{n} is a
+% hyperlink to the defining row in the source index; \RDEF{n} is that row.
+% The anchor is wrapped in a zero-size raisebox: a bare \hypertarget occupies a
+% line box and pushes the visible tag down a line inside a p{} cell.
+\DeclareRobustCommand{\R}[1]{\hyperlink{ref:R#1}{[R#1]}}
+\DeclareRobustCommand{\RDEF}[1]{%
+  \raisebox{0pt}[0pt][0pt]{\hypertarget{ref:R#1}{}}\textbf{[R#1]}}
+
+% --- open items ------------------------------------------------------------
+% \openitem{On} tags the statement in the body that is still unverified and
+% links forward to the Open Items table; \openpage{On} is the table's back-link.
+\DeclareRobustCommand{\openitem}[1]{\,%
+  \raisebox{0pt}[0pt][0pt]{\hypertarget{open:#1}{}}\label{openp:#1}%
+  \hyperlink{openitems}{\textcolor{cPlc}{\bfseries\scriptsize[#1]}}}
+\newcommand{\openpage}[1]{\hyperlink{open:#1}{p.~\pageref*{openp:#1}}}
+
+\hypersetup{pdftitle={SPEAR3 RF Station: Legacy System Interlock Architecture},
+  pdfauthor={Faya Wang},pdfsubject={Doc I R0 - Draft}}
+
 \title{\vspace{-1.4cm}\bfseries SPEAR3 RF Station\\[2mm]
        \Large Legacy System Interlock Architecture}
-\author{Faya Wang\\[1mm]\normalsize RF Department, SSRL / Accelerator Directorate\\
-        \normalsize SLAC National Accelerator Laboratory}
-\date{September 2026}
+\author{}
+\date{}
 
 \begin{document}
 \maketitle
-\thispagestyle{empty}
+\thispagestyle{plain}
 
 \begin{center}
+\begin{minipage}{0.86\linewidth}\small
 \begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{Document}       & Doc I --- Legacy System Interlock Architecture \\
-\textbf{Version}        & 1.8 \\
-\textbf{Status}         & To be released \\
-\textbf{Tier}           & 2 --- Legacy System Interlock Architecture \\
-\textbf{Source}         & \fpath{Designs/tex/docI-interlock-architecture/I_interlock_architecture.tex} \\
-\textbf{Companion}      & Doc L (legacy architecture), Doc 0 (upgrade design) \\
-\bottomrule
+\textbf{Document ID} & Doc I \\
+\textbf{Revision}    & R0 \\
+\textbf{Status}      & Draft \\
+\textbf{Author}      & Faya Wang \\
+\textbf{Reviewer}    & Jim Sebek and others \\
+\textbf{Classification} & Tier 2 --- Legacy Interlock and Protection Reference \\
+\textbf{Affiliation} & SSRL, SLAC National Accelerator Laboratory \\
+\textbf{Date}        & 30 September 2026 \\
 \end{tabular}
+\end{minipage}
 \end{center}
 
 \vspace{4mm}
@@ -58,11 +82,15 @@ This document traces every interlock path in the \emph{legacy} SPEAR3 RF station
 what trips, how fast, through which hardware, and what the software can and
 cannot see. It is the reference against which the upgraded protection chain in
 Doc~0 is justified. Where the two disagree, the upgrade document states the
-intended future behaviour and this document states the present one.
+intended future behavior and this document states the present one. The
+\hyperref[sec:open-items]{Open Items} register lists the points that still
+require field verification.
 \end{keynote}
 
 \clearpage
 \tableofcontents
+\clearpage
+\listoffigures
 \clearpage
 
 \input{body}

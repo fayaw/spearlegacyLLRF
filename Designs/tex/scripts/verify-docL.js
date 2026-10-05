@@ -87,12 +87,13 @@ const anchors = new Set(values(`${main}\n${content}`, /\\hypertarget\{([^}]+)\}/
 for (const target of values(content, /\\hyperlink\{([^}]+)\}/g)) {
   if (!target.includes('#')) check(anchors.has(target), `Missing hyperlink destination: ${target}`);
 }
-for (const prefix of ['R', 'W']) {
+for (const prefix of ['R']) {
   const definitions = unique(values(content, new RegExp(`\\\\${prefix}DEF\\{(\\d+)\\}`, 'g')), `${prefix} reference`);
   const citations = values(content, new RegExp(`\\\\${prefix}\\{(\\d+)\\}`, 'g'));
   for (const citation of citations) check(definitions.has(citation), `Undefined citation: ${prefix}${citation}`);
   console.log(`${prefix} references: ${definitions.size}`);
 }
+check(!/\\W(DEF)?\{\d+\}/.test(content), 'Obsolete [Wn] web reference remains');
 
 const items = unique(values(body, /^(O\d+)\s*&/gm), 'open item');
 const tags = unique(values(body, /\\openitem\{(O\d+)\}/g), 'open-item tag');

@@ -2,13 +2,18 @@
 % The RF plant seen as a control system.  Forward path along the top, direct
 % loop returning below it.
 %
-% Lane discipline.  Lower boxes are placed with anchor=north at explicit centre
-% x so that every connector between them is exactly vertical or horizontal:
-%   cavities      centres 130 / 154 / 178 / 202, each 21 mm wide -> 119.5 .. 212.5
-%   IQ demod      centre 166, 56 mm wide         -> 138 .. 194
-%   error amp     centre  60, 56 mm wide         ->  32 ..  88
-% The klystron forward-power tap therefore drops at x = 112, which is clear of
-% all three.  Re-check this list before moving any box.
+% JOIN DISCIPLINE.  Every connector starts and ends on a node ANCHOR, never on a
+% hardcoded y that has to be kept in step with a box height.  An earlier version
+% drew the splitter drop from a fixed y = -8 and made the cavity stubs a fixed
+% 8 mm long, so both joins opened into visible gaps once the boxes were their
+% real height.  Do not reintroduce hardcoded endpoints.
+%
+% LANE DISCIPLINE.  The klystron forward-power tap runs over the top and down
+% the right-hand margin at x = 218.  Any route through the middle of the drawing
+% crosses the direct-loop return between the IQ demodulator and the error
+% amplifier -- which is exactly what the old middle lane at x = 112 did.
+% Clearances: cavity 4 ends at x = 212.4, the probe rail at 202, the
+% demodulator at 194.
 \begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
 
 % ===== forward path ========================================================
@@ -17,24 +22,25 @@
 \node[blk,text width=26mm,anchor=west] (bb)  at (32,0)   {\textbf{BASEBAND}\\\textbf{MODULATOR}\\{\tiny gain/phase tracking}};
 \node[blk,text width=22mm,anchor=west] (mod) at (64,0)   {\textbf{IQ RF MOD}\\{\tiny up to \qty{476}{\mega\hertz}}};
 \node[blk,text width=20mm,anchor=west] (drv) at (92,0)   {\textbf{DRIVE AMP}\\{\tiny $\approx\qty{29}{\watt}$}};
-\node[pwr,text width=26mm,anchor=west] (kly) at (118,0)  {\textbf{KLYSTRON}\\{\tiny \qty{1.2}{\mega\watt}, \qty{43}{\decibel}, ${<}\qty{150}{\nano\second}$}};
+\node[pwr,text width=26mm,anchor=west] (kly) at (118,0)  {\textbf{KLYSTRON}\\{\tiny \qty{1.5}{\mega\watt}, \qty{43}{\decibel}, ${<}\qty{150}{\nano\second}$}};
 \node[pwr,text width=24mm,anchor=west] (tee) at (150,0)  {\textbf{3$\times$ MAGIC}\\\textbf{TEE SPLITTER}};
 \draw[sig] (ref.east) -- (sum.west);
 \draw[sig] (sum.east) -- (bb.west);
 \foreach \a/\b in {bb/mod, mod/drv, drv/kly, kly/tee}{\draw[sig] (\a.east) -- (\b.west);}
 
-% ===== cavities ============================================================
-\draw[draw=cNeut,thick] (162,-8) -- (162,-22);
+% ===== splitter -> cavities ================================================
+\coordinate (fan) at (tee.south |- 0,-22);
+\draw[draw=cNeut,thick] (tee.south) -- (fan);
 \foreach \i/\n in {0/1, 1/2, 2/3, 3/4}{%
   \pgfmathsetmacro\x{130+\i*24}
   \node[rf,text width=18mm,anchor=north] (c\n) at (\x,-30) {\textbf{Cav \n}\\{\tiny probe}};
-  \draw[draw=cNeut,thick] (162,-22) -- (\x,-22);
-  \draw[sig] (\x,-22) -- (\x,-30);
+  \draw[draw=cNeut,thick] (fan) -- (\x,-22);
+  \draw[sig] (\x,-22) -- (c\n.north);
 }
 
-% ===== direct loop return ==================================================
-\foreach \n in {1,2,3,4}{\draw[draw=cNeut,thick] (c\n.south) -- ($(c\n.south)+(0,-8)$);}
-\draw[draw=cNeut,thick] (130,-50) -- (202,-50);
+% ===== cavity probes -> vector sum =========================================
+\foreach \n in {1,2,3,4}{\draw[draw=cNeut,thick] (c\n.south) -- (c\n.south |- 0,-50);}
+\draw[draw=cNeut,thick] (c1.south |- 0,-50) -- (c4.south |- 0,-50);
 
 \node[blk,text width=56mm,anchor=north] (dem) at (166,-58)
   {\textbf{IQ DEMOD $\rightarrow$ VECTOR SUM}\\{\tiny all four cavity probes}};
@@ -46,14 +52,15 @@
   {\textbf{DIRECT LOOP} $\approx\qty{800}{\kilo\hertz}$} (err.east);
 \draw[sig] (err.west) -| (sum.south);
 
-% ===== klystron forward power, down its own clear lane at x = 112 ==========
-\node[plc,text width=60mm,anchor=north] (rip) at (130,-84)
+% ===== ripple loop, fed down the reserved right-hand lane ==================
+\node[plc,text width=60mm,anchor=north] (rip) at (160,-84)
   {\textbf{RIPPLE LOOP} $\approx\qty{300}{\hertz}$\\
    {\tiny klystron forward power $\rightarrow$ IQ demod\\
     DSP: AT\&T DSP1610, \qty{23}{\kilo\hertz} sample rate}};
-\draw[draw=cNeut,thick] (124,-8) -- (124,-14) -- (112,-14);
-\draw[sig] (112,-14) -- (112,-84);
-\node[tag,anchor=east] at (110,-40) {klystron forward power};
+\coordinate (tapA) at ($(kly.north)+(0,6)$);
+\draw[draw=cNeut,thick] (kly.north) -- (tapA) -- (tapA -| 218,0);
+\draw[sig] (tapA -| 218,0) -- (rip.east -| 218,0) -- (rip.east);
+\node[tag,rotate=90,anchor=south] at (216.4,-74) {klystron forward power};
 
 % ===== supervisory loops ===================================================
 % Grouped rather than wired in: each acts on a different part of the plant, and

@@ -1,7 +1,8 @@
 % !TeX root = ../L_legacy_system_architecture.tex
 % HVPS voltage regulation: the PLC supplies BOTH a feedforward estimate of
-% SIG HI and the reference for the analog error amplifier; the Enerpro SIG HI
-% input is the sum of the two.  It is a summing arrangement, not a cascade.
+% SIG HI and the reference for the analog error amplifier; SIG HI is the
+% resistive sum of the two (1.00 k ohm PLC leg, 7.50 k ohm regulator leg).
+% It is a summing arrangement, not a cascade.
 % Every connection is orthogonal; the feedforward runs along the top, the
 % error path comes up from the regulator, and the feedback returns underneath.
 \begin{tikzpicture}[font=\scriptsize,x=1mm,y=1mm,every node/.style={outer sep=0pt}]
@@ -18,7 +19,9 @@
 % feedforward straight along the top
 \draw[sig] (plc.east) -- (sum.west);
 \draw[sig] (sum.east) -- (ener.west);
-\node[tag,anchor=south] at (72,-18.2) {PLC feedforward (N7:11, approximate SIG HI)};
+\node[tag,anchor=south] at (72,-18.2)
+  {PLC feedforward (N7:11, approximate SIG HI) $\rightarrow$ 1.00 k$\Omega$};
+\node[tag,anchor=south] at (121,-18.2) {J3-10};
 
 % reference down and across into the regulator
 \node[blk,text width=34mm,anchor=north] (reg) at (72,-44)
@@ -28,7 +31,8 @@
 
 % error up from the regulator into the summing junction
 \draw[sig] (reg.north) -- ++(0,6) -| (sum.south);
-\node[tag,anchor=south east] at (110,-32.5) {error};
+\node[tag,anchor=south east] at (110,-32.5)
+  {error $V_\text{REG}$ (J4-3) $\rightarrow$ 7.50 k$\Omega$};
 
 % feedback: HVPS output through the divider back into the regulator
 \node[blk,text width=42mm,anchor=north] (div) at (72,-76)

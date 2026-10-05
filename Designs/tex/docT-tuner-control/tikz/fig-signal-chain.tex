@@ -7,7 +7,7 @@
 \node[blk,text width=34mm,anchor=west] (rec) at (8,0)
   {\textbf{IQA records}\\{\tiny\texttt{PROBE:PHASE}\\ \texttt{FRWD:PHASE}\\ (\qty{400}{\hertz} acquisition)}};
 \node[blk,text width=34mm,anchor=west] (iq) at (50,0)
-  {\textbf{\texttt{subIQ.c}}\\{\tiny\texttt{subIQphaseErr}\\ \texttt{subIQphaseOff}\\ \texttt{subIQphase2posn}}};
+  {\textbf{\texttt{subIQ.c}}\\{\tiny\texttt{subIQphaseErr}\\ \texttt{subIQphaseOffs}\\ \texttt{subIQphase2posn}}};
 \node[blk,text width=34mm,anchor=west,draw=black!40,text=black!55] (sys) at (92,0)
   {\textbf{\texttt{subSys.c}}\\{\tiny\texttt{subSysFreqOff}\\ \texttt{subSysFreqErr}\\ (PARK mode only)}};
 \draw[sig] (rec.east) -- (iq.west);
@@ -20,7 +20,9 @@
   {\textbf{\texttt{rf\_tuner\_loop.st}} --- SNL state machine, four instances\\[2pt]
    \texttt{loop\_init} $\rightarrow$ \texttt{loop\_unknown} $\rightarrow$ \texttt{loop\_on}\\[2pt]
    \texttt{sm\_posn} $+$ \texttt{posn\_delta} $\rightarrow$ \texttt{TUNR:POSN:CTRL}};
-\draw[sig] (dbbox.south) -- node[right,tag,xshift=1mm]
+% dbbox is a fit node, so its centre is not snl's centre; drop from the point on
+% its bottom edge that is directly above snl, or the connector leans.
+\draw[sig] (snl.north |- dbbox.south) -- node[right,tag,xshift=1mm]
   {\texttt{TUNR:POSN:DELTA} (event $\rightarrow$ SNL)} (snl.north);
 
 % ===== motor record ========================================================

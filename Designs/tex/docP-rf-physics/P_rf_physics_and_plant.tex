@@ -1,56 +1,74 @@
-% !TeX root = P_rf_physics_and_plant.tex
-%  SPEAR3 RF System -- RF Physics, Control Theory and Physical Plant (Doc P).
-%  Build:  powershell -ExecutionPolicy Bypass -File ..\build.ps1 -Doc P
+% ============================================================================
+%  Doc P -- SPEAR3 RF System: RF Physics, Control Theory and Physical Plant
+%  Build:  powershell -ExecutionPolicy Bypass -File build.ps1 -Doc P
+%  Engine: LuaLaTeX (required -- see the Unicode note in preamble.tex)
+% ============================================================================
 \documentclass[letterpaper,11pt]{article}
 \input{../common/preamble}
 
-% Equations carry their own "(Eq. N.M)" tags inside the display, exactly as in
-% the source document, because the prose cites those numbers ~195 times.
-% Do not switch to \label/\eqref without sweeping every citation.
+% Equations are numbered per section by LaTeX itself and set flush right by the
+% article class.  Cite with \cref{eq:...} ("Eq. (2.5)") or \eqref{eq:...}
+% ("(2.5)") -- never with a hand-written number.
+\numberwithin{equation}{section}
+
+% --- [Rn] citation scheme --------------------------------------------------
+% Doc P uses a numbered [Rn] reference list rather than BibTeX, because the
+% numbering is already established across the whole document set.  \R{n} is a
+% hyperlink to the defining row in Appendix B; \RDEF{n} is that row.  The anchor
+% is wrapped in a zero-size raisebox: a bare \hypertarget occupies a line box and
+% pushes the visible tag down a line inside a p{} cell.  Robust because these
+% appear in figure captions.
+\DeclareRobustCommand{\R}[1]{\hyperlink{ref:R#1}{[R#1]}}
+\DeclareRobustCommand{\RDEF}[1]{%
+  \raisebox{0pt}[0pt][0pt]{\hypertarget{ref:R#1}{}}\textbf{[R#1]}}
+\DeclareRobustCommand{\W}[1]{\hyperlink{ref:W#1}{[W#1]}}
+\DeclareRobustCommand{\WDEF}[1]{%
+  \raisebox{0pt}[0pt][0pt]{\hypertarget{ref:W#1}{}}\textbf{[W#1]}}
+
+% Disturbance tags D1..D9 link back to the taxonomy table that defines them.
+\DeclareRobustCommand{\D}[1]{\hyperlink{dist:table}{\textbf{D#1}}}
+
+\hypersetup{pdftitle={SPEAR3 RF System: RF Physics, Control Theory and Physical Plant},
+  pdfauthor={Faya Wang},pdfsubject={Doc P R0 - Draft}}
 
 \title{\vspace{-1.4cm}\bfseries SPEAR3 RF System\\[2mm]
        \Large RF Physics, Control Theory and Physical Plant}
-\author{Faya Wang\\[1mm]\normalsize RF Department, SSRL / Accelerator Directorate\\
-        \normalsize SLAC National Accelerator Laboratory}
-\date{March 2026}
+\author{}
+\date{}
 
 \begin{document}
 \maketitle
-\thispagestyle{empty}
+\thispagestyle{plain}
 
 \begin{center}
+\begin{minipage}{0.86\linewidth}\small
 \begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{Document}  & Doc P --- RF Physics, Control Theory and Physical Plant \\
-\textbf{Version}   & 3.3 \\
-\textbf{Status}    & Draft \\
-\textbf{Tier}      & 1 --- Physics and Plant Reference (implementation-independent) \\
-\textbf{Source}    & \fpath{Designs/tex/docP-rf-physics/P_rf_physics_and_plant.tex} \\
-\textbf{Companion} & Doc L (legacy architecture), Doc I (interlocks), Doc T (tuner control) \\
-\bottomrule
+\textbf{Document ID} & Doc P \\
+\textbf{Revision}    & R0 \\
+\textbf{Status}      & Draft \\
+\textbf{Author}      & Faya Wang \\
+\textbf{Reviewer}    & Jim Sebek and others \\
+\textbf{Classification} & Tier 1 --- Physics and Plant Reference (implementation-independent) \\
+\textbf{Affiliation} & SSRL, SLAC National Accelerator Laboratory \\
+\textbf{Date}        & 29 September 2026 \\
 \end{tabular}
+\end{minipage}
 \end{center}
 
 \vspace{4mm}
-\begin{warnbox}
-\textbf{Galil status --- corrected September 2026.} The Galil DMC-4143 has
-\textbf{not} been installed and is \textbf{not} in operation; it was in
-development. Test moves were performed on the existing cavity motors and worked
-fine, but it goes online only \emph{when the current LLRF upgrade project is
-finished}. The \textbf{AB 1746-HSTP1 remains the in-service tuner controller}.
-Any statement below that this work is ``already done'', or that the Galil
-``replaced'' the AB hardware, is incorrect and has been amended.
-\end{warnbox}
-
 \begin{keynote}
-This document is implementation-independent. It states the physics of the
-SPEAR3 RF plant and the control problem that follows from it: what disturbs the
-cavity field, over what frequency range, and which loop is responsible for each
-band. Hardware-specific detail belongs in Doc~L (legacy) and Doc~0 (upgrade).
+This document states the physics of the SPEAR3 RF plant and the control problem
+that follows from it: what disturbs the cavity field, over what frequency range,
+and which loop is responsible for each band. It is
+\emph{implementation-independent} --- the content does not change when the VXI
+hardware is replaced by the LLRF9 controller. Hardware-specific detail belongs
+in Doc~L (legacy plant) and Doc~0 (upgrade design).
 \end{keynote}
 
 \clearpage
 \tableofcontents
+\clearpage
+\listoffigures
 \clearpage
 
 \input{body}
@@ -62,6 +80,69 @@ band. Hardware-specific detail belongs in Doc~L (legacy) and Doc~0 (upgrade).
 % not in a document sent to a reviewer.  Historical rows stay frozen: they
 % record what was true at the time, including equation numbers as then issued.
 %
+% R0   2026-09-29  Reissued in the Doc L house style.  Front matter rebuilt
+%                  (title block, metadata table, list of figures).  All
+%                  hand-written "(Eq. N.M)" tags replaced by real LaTeX
+%                  equations with automatic per-section numbers; every citation
+%                  goes through \cref/\eqref.  All internal "section N.M" prose
+%                  references replaced by \cref to a label -- the old literals
+%                  were stale (the loop-summary table's section column was off
+%                  by one throughout, and "Eq 5.1 table in 5.2" pointed at a
+%                  table that lives in Appendix C.3).  The 20 "Sources:" quote
+%                  blocks were removed and their citations moved inline as [Rn]
+%                  tags; [Rn] is now a hyperlink into Appendix B.  Section 5
+%                  de-duplicated against Section 6 (comb/slow/ripple thumbnails
+%                  removed) and 8.3 removed as a duplicate of the tuner loop.
+%                  Corrections: klystron perveance 2.0e-6 -> ~1.0e-6 A/V^3/2
+%                  (2.0e-6 came from a simulation config and contradicts this
+%                  document's own -77 kV / 22 A operating point); rf_calib state
+%                  count 27 -> 28; Enerpro board FCOG1200 -> FCOG6100+FCOAUX60
+%                  (FCOG1200 is the upgrade part); termination inductors 200 uH
+%                  -> 350 uH as built; crowbar conduction delay <1 us -> ~10 us;
+%                  [R16] collision (Robinson vs Fox) resolved; sign error in the
+%                  circumference-drift equation fixed.
+%                  Klystron maximum power set to 1.5 MW throughout (power budget,
+%                  klystron table, margin table, App. A.3); headroom 35% -> 48%.
+%                  Sec 7.3/7.6 reworked: the Enerpro 415 rad/s (-3 dB, 66 Hz)
+%                  small-signal pole and the 2-3 line-cycle step settling are now
+%                  presented as the two distinct quantities they are in [R25],
+%                  instead of one being wrongly derived from the other.  The
+%                  dynamic response table's "tau_LC = 86 us / 1.8 kHz" row was
+%                  unsourced and wrong: from the as-built 0.3 H per leg and the
+%                  2 uF net series bank, sqrt(LC) = 775 us and f0 = 205 Hz.  Added
+%                  the 12-pulse firing interval (1.39 ms, ~0.69 ms mean transport
+%                  lag) which is the real sampling limit of phase control, and
+%                  replaced the "<10 ms overall voltage step" row (which
+%                  contradicted the 33-50 ms Enerpro settling) with ~50-70 ms.
+%                  The ~1 Hz HVPS loop bandwidth is now attributed to the EPICS
+%                  supervisory update rate, not to the Enerpro.
+%                  FIGURES: fig-plant-overview redrawn -- every connector now
+%                  starts/ends on a node ANCHOR (the splitter drop and the cavity
+%                  stubs used hardcoded y values and had opened into visible
+%                  gaps), and the klystron forward-power tap moved to a reserved
+%                  right-hand lane at x=218 because its old middle lane at x=112
+%                  crossed the direct-loop return.  fig-disturbance-spectrum
+%                  axis narrowed 180 -> 110 mm and labels set on two lines at
+%                  \scriptsize, so fitpicture no longer shrinks the picture and
+%                  the text is legible.
+%                  NEW Sec 7 "Transient Operation" with two pgfplots figures
+%                  (detuning vs beam current; reflected power vs tuning with and
+%                  without beam), the reflection-coefficient derivation, a
+%                  transient scenario table and the direct-loop/tuner division
+%                  of labour.
+%                  PHYSICS CORRECTION forced by that section: the optimum
+%                  detuning was wrong by (1+beta)/2 = 2.39.  Eq 2.5/2.6 used the
+%                  DC current I_b with the UNLOADED R_s but then converted with
+%                  Q_L, and the derivation note carried G = 1/(2R_s) instead of
+%                  1/R_s.  Correct values, verified three independent ways
+%                  (reactive balance, loaded-R form, and the R/Q form using this
+%                  document's own R/Q = 116.6 ohm): psi_L,opt = -45.7 deg and
+%                  Df_opt = -36.4 kHz, not -67.8 deg and -87 kHz.  Eq 2.2
+%                  likewise restated as the loaded beam-induced voltage
+%                  I_b1 R_s/(1+beta) = 0.78 MV (was I_b R_s = 1.865 MV, which is
+%                  neither the loaded nor the unloaded value).
+% ---------------------------------------------------------------------------
+% Pre-LaTeX-reissue history (markdown lineage, internal versions 1.0-3.3):
 % 3.3  2026-03-27  Added extra loop functions: comb filter, LFB woofer, direct loop.
 % 3.2  2026-03-26  Added D9 (ring circumference thermal drift): ~4 kHz/year secular
 %                  drift from seasonal thermal expansion of the tunnel.  New Sec 4.8

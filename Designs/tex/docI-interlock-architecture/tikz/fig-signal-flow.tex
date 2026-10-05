@@ -73,8 +73,11 @@
     RF MPS PLC permit (relay) $\cdot$ SPEAR MPS beam permit $\cdot$ orbit interlock}\\[2pt]
    asserts RF\_FAULT on P2};
 
-% Path C: down the clear lane at x = 134, between the MPS and HVPS columns
-\draw[sig] (mps.east) -- (134,-35) -- (134,-93) -- (slot5.west);
+% Path C: down the clear lane at x = 134, between the MPS and HVPS columns.
+% Both turns are projected from node anchors: the MPS box and the Slot 5 box
+% differ in height, so a hardcoded y here tilts the first and last segments.
+\coordinate (pcTurn) at (mps.east -| 134,0);
+\draw[sig] (mps.east) -- (pcTurn) -- (pcTurn |- slot5.west) -- (slot5.west);
 \node[tag,anchor=east] at (132,-62) {\textbf{Path C}};
 
 % ===== the RFP module, cut by either asserter ==============================
@@ -98,9 +101,11 @@
     \texttt{HVPSCONTACT:SUMY:STAT}}\\[3pt]
    \textbf{\texttt{\{STN\}:STNOFF:SUMY:STAT.SEVR} --- the single SNL trip wire}};
 
-% AIM ISR: the software notification path, dropped clear of the RFP module
-\draw[sig] ($(aim.south west)+(8,0)$) -- (0,\yE);
-\node[tag,anchor=west,align=left] at (3,\yE+15)
+% AIM ISR: the software notification path.  Dropped straight down from a point
+% on the AIM box's own bottom edge -- targeting a fixed x instead tilts it.
+\coordinate (aimdrop) at ($(aim.south west)+(8,0)$);
+\draw[sig] (aimdrop) -- (aimdrop |- 0,\yE);
+\node[tag,anchor=west,align=left] at ($(aimdrop |- 0,\yE)+(4,15)$)
   {AIM ISR ($\approx\qty{10}{\micro\second}$)\\ $\rightarrow$ \texttt{STN:VXI:LTCH} $=$ MAJOR};
 \draw[sig] (\xB,-50) -- (\xB,\yE);
 % the HVPS Remote I/O path keeps to the far right of the Slot 5 box
