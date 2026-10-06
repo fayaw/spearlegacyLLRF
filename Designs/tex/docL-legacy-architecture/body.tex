@@ -40,7 +40,7 @@ Revision & Date & Scope of Change & Summary \\
 \bottomrule\noalign{}
 \endlastfoot
 %\textbf{R1} & 2026-09-29 & Original-source audit; reviewer issue & Corrected RF mapping, tuner units, HVPS ratings/energy and protection/software claims. Added front Open Items; reconciled references and layout. Issued for review; approvals pending. \\
-\textbf{R0} & 2026-09-29 & Draft & Initial draft of the Tier 2 legacy system reference for the SPEAR3 RF system, documenting the complete "as-built" and operational configuration prior to the LLRF Upgrade Project. \\
+\textbf{R0} & 2026-10-5 & Draft & Initial draft of the Tier 2 legacy system reference for the SPEAR3 RF system, documenting the complete "as-built" and operational configuration prior to the LLRF Upgrade Project. \\
 \end{longtable}
 
 
@@ -96,7 +96,7 @@ Doc T (Tuner Control Analysis: to be written) & Detailed tuner analysis. Use the
 
 \subsection*{Reference Tag Format}\label{reference-tag-format}
 
-\textbf{[Rn]} links to a source-index entry, indexed in \hyperref[appendix-a--source-document-reference-index]{Appendix~\ref*{appendix-a--source-document-reference-index}}. Where a source is publicly available, its web locator is given in the same row.
+\textbf{[Rn]} links to a source-index entry, indexed in \hyperref[appendix-a--source-document-reference-index]{Appendix~\ref*{appendix-a--source-document-reference-index}}. 
 
 \FloatBarrier\clearpage
 \part{SYSTEM OVERVIEW}
@@ -187,9 +187,9 @@ Location & Equipment & Notes \\
 \begin{itemize}
 \tightlist
 \item
-  \textbf{RF frequency.} This document uses \textbf{476.3 MHz} nominal. 
+  \textbf{RF frequency.} This document uses \textbf{476.3 MHz} as nominal. 
 \item
-  \textbf{Klystron cathode voltage and current.} These are adjusted continuously by the HVPS supervisory loop to hold drive power in range as beam current, klystron gain, and cavity conditions vary. Values quoted in this document are typical readbacks, not setpoints.
+  \textbf{Klystron cathode voltage and current.} These are adjusted continuously by the HVPS supervisory loop to hold drive power in range as beam current, klystron gain, and cavity conditions vary. Values quoted in this document are typical readbacks for normal operation at 500 mA.
 \end{itemize}
 
 \end{keynote}
@@ -252,7 +252,9 @@ Configuration & 2 units --- SPEAR1 and SPEAR2 & One unit is energized; the other
 
 This is a single consistent set of readbacks, used throughout this document to check the HVPS control-chain arithmetic. It is a snapshot, not a setpoint.
 
-\begin{longtable}[]{@{}llll@{}}
+% centered rather than flush left: this table is far narrower than \linewidth.
+\setlength{\LTleft}{\fill}\setlength{\LTright}{\fill}
+\begin{longtable}[]{@{}ll@{}}
 \toprule\noalign{}
 Parameter & Measured \\
 \midrule\noalign{}
@@ -265,6 +267,7 @@ Cathode Power & 1.398 MW \\
 SIG HI (J4-3) & 4.40 V \\
 Voltage Sense & 7.183 V \\
 \end{longtable}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
 
 \begin{keynote}
 \textbf{Basis}: The 16 June 2020 measurements are from \R{72}. The divider uses a 100 MΩ high arm and a 500 kΩ low arm loaded by the regulator input, giving approximately 10,000:1 overall \R{71}, \R{72}.
@@ -812,7 +815,7 @@ Two complete HVPS units exist: \textbf{SPEAR1} and \textbf{SPEAR2}. Both are mai
   transformer tank, at the left-hand end of the installation above. It reads: \textbf{Model No.\ 39308},
   \textbf{2,750 kVA klystron power supply}, input \textbf{12.5 kV at 127 A AC,
   3-phase, 60 Hz}, output \textbf{$-$90 kV DC at 27 A DC}, \qty{55}{\celsius} rise, Class OA,
-  7.5\% impedance, 95 kV BIL, 2,600 gallons of oil, 67,400 lb. The plate also
+  7.5\% impedance, 95 kV BIL, 2,600 gallons of oil, 67,400 lb, dated Mar 1997. The plate also
   carries the winding and rectifier schematic with its cumulative DC stage taps,
   and cites NWL drawings D36941 (physical outline) and D36943 (electrical
   schematic). SPEAR1 carries an identical
@@ -2029,7 +2032,7 @@ The original sources establish the following operating constraints:
 \appendix
 \section{Source Document Reference Index}\label{appendix-a--source-document-reference-index}
 
-References retain their established IDs and are grouped by source type. Publicly available sources carry their web locator in the same row.
+References retain their established IDs and are grouped by source type. 
 
 \subsection{Published Papers and Conference Proceedings}\label{a1-published-papers-and-conference-proceedings}
 
