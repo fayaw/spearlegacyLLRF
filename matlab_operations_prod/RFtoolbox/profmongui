@@ -1,0 +1,27 @@
+#!/bin/csh -f
+#==============================================================
+#
+#  Abs:  Compiled MATLAB X-Display for Profile Monitor
+#
+#  Name: profmongui
+#
+#  Rem:  This script launches  profmon_gui
+#
+#==============================================================
+#
+if (!(-d /afs/slac/g/spear)) then
+    setenv SPEAR_PRODUCTION
+    unsetenv MATLAB_DEV
+endif
+if (!(-d /prod/epics)) then
+    unsetenv SPEAR_PRODUCTION
+    setenv MATLAB_DEV
+endif
+if ($?MATLAB_DEV) then
+  source /afs/slac/g/spear/epics/epicsReset
+else
+  source /prod/epics/epicsReset
+endif
+cd $MATLABDATAFILES
+umask 000
+nice +10 matExeRun profmon_gui > profmongui`date +%Y_%m_%d_%H_%M_%S`.log

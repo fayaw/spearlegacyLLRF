@@ -1,0 +1,3 @@
+0,V151           ,ffff,0,0,f29,KineticSystems ,151,V151           ,2,0,3,ffffffff,0,0,0,0,0,ffff,ffff,ffff,1,3,0,A
+1,DEVICE_01_00   ,0,0,0,f29,KineticSystems ,52,MODEL_52       ,2,0,3,ffffffff,0,0,0,0,0,ffff,ffff,1fff,1,3,0,A
+256,AB-V6008       ,ffff,0,1,f00,Allen-Bradley  ,0,V6008-SV1R     ,0,0,0,c00000,1000,0,5,0,0,ffff,ffff,ffff,1,3,0,A

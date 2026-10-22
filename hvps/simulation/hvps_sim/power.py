@@ -357,7 +357,7 @@ class KlystronLoad:
 
     The klystron beam current follows a perveance law:
         I_beam = κ × V^(3/2)
-    where κ is the perveance (~2.0 µA/V^(3/2)).
+    where κ is the perveance (~1.0 µA/V^(3/2)).
     """
 
     def __init__(self, config: HVPSConfig):

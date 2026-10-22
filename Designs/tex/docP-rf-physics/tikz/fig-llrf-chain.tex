@@ -1,0 +1,53 @@
+% !TeX root = ../P_rf_physics_and_plant.tex
+% Legacy RFP signal chain (R13, R36).  Forward path along the top, measurement
+% path along the bottom, both on baseband I/Q.  The ripple DSP and the station
+% reference sit above the forward path.
+%
+% JOIN DISCIPLINE (as in fig-plant-overview): every connector starts and ends on
+% a node anchor.  The klystron and cavity boxes share one width so the drop
+% between them is vertical; the klystron-output lane to the DSP runs at y = 16,
+% above every forward-path box (tops at y ~ 5).
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+
+% ===== forward path ========================================================
+\node[circle,draw=cNeut,thick,fill=white,inner sep=1.2pt] (sum) at (3,0) {$\Sigma$};
+\node[blk,text width=26mm,anchor=west] (err) at (11,0)
+  {\textbf{ERROR AMP AND}\\\textbf{COMPENSATION}\\{\tiny $+15$ dB, lead $+$ integral, limiter}};
+\node[blk,text width=20mm,anchor=west] (bbm) at (45,0)
+  {\textbf{BASEBAND}\\\textbf{MODULATOR}\\{\tiny ripple, gain tracking}};
+\node[blk,text width=20mm,anchor=west] (rfm) at (73,0)
+  {\textbf{I/Q RF}\\\textbf{MODULATOR}};
+\node[blk,text width=13mm,anchor=west] (drv) at (101,0)
+  {\textbf{DRIVE}\\\textbf{AMP}};
+\node[pwr,text width=17mm,anchor=west] (kly) at (122,0)
+  {\textbf{KLYSTRON}\\{\tiny \qty{1.5}{\mega\watt}}};
+\draw[sig] (sum.east) -- (err.west);
+\foreach \a/\b in {err/bbm, bbm/rfm, rfm/drv, drv/kly}{\draw[sig] (\a.east) -- (\b.west);}
+
+% ===== reference and ripple DSP ============================================
+\node[ctrl,text width=26mm,anchor=center] (ref) at (3,16)
+  {\textbf{STATION REFERENCE}\\{\tiny RFP DAC pair, set by the DAC loop}};
+\node[blk,text width=34mm,anchor=center] (dsp) at (bbm.center |- 0,16)
+  {\textbf{RIPPLE DSP}\\{\tiny 30 line cancellers; DC coefficient from gain tracking (EPICS, 2 s)}};
+\draw[sig] (ref.south) -- (sum.north);
+\node[tag,anchor=south west] at ($(sum.north)+(0.4,0.4)$) {$+$};
+\draw[sig] (ref.east) -- node[above,tag] {reference} (dsp.west);
+\draw[sig] (dsp.south) -- (bbm.north);
+\draw[sig] (kly.north) |- node[above,tag,pos=0.75] {klystron output} (dsp.east);
+
+% ===== measurement path ====================================================
+\node[rf,text width=17mm,anchor=north] (cav) at (kly.center |- 0,-24)
+  {\textbf{CAVITIES}\\{\tiny four, with probes}};
+\draw[sig] (kly.south) -- node[right,tag] {drive, via splitters} (cav.north);
+\node[blk,text width=20mm,anchor=east] (dem) at (115,0 |- cav.center)
+  {\textbf{I/Q DEMOD}\\{\tiny one per probe}};
+\node[blk,text width=22mm,anchor=east] (cmb) at (86,0 |- cav.center)
+  {\textbf{COMBINING}\\\textbf{NETWORK}\\{\tiny weighted vector sum}};
+\node[blk,text width=26mm,anchor=east] (dlm) at (56,0 |- cav.center)
+  {\textbf{DIRECT-LOOP}\\\textbf{MODULATOR}\\{\tiny gain $G$, phase $\theta$, frequency-offset tracking}};
+\draw[sig] (cav.west) -- (dem.east);
+\draw[sig] (dem.west) -- (cmb.east);
+\draw[sig] (cmb.west) -- (dlm.east);
+\draw[sig] (dlm.west) -| (sum.south);
+\node[tag,anchor=north west] at ($(sum.south)+(0.4,-0.4)$) {$-$};
+\end{tikzpicture}

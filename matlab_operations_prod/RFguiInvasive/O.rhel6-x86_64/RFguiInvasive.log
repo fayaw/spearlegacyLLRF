@@ -1,0 +1,25 @@
+[?1h=
+                                                                             < M A T L A B (R) >
+                                                                   Copyright 1984-2020 The MathWorks, Inc.
+                                                               R2020a Update 4 (9.8.0.1417392) 64-bit (glnxa64)
+                                                                                June 24, 2020
+
+
+	Non-Degree Granting Education License -- for use at non-degree granting, nonprofit,
+	educational organizations only.  Not for government, commercial, or other organizational use.
+
+Compiler version: 8.0 (R2020a)
+Dependency analysis by REQUIREMENTS.
+Parsing file "/accphys/matlab/operations/RFguiInvasive/RFguiInvasive.m"
+	(referenced from command line).
+Deleting temporary MEX authorization files...
+Removing: '/tmp/4367-c400-aa91-f889_2703.auth'.
+Removing: '/tmp/90af-7f9e-b64f-4343_2703.auth'.
+Removing: '/tmp/6e21-de5d-9e0c-a17f_2703.auth'.
+Removing: '/tmp/96a4-ffc6-3896-ca2f_2703.auth'.
+Removing: '/tmp/497f-a7c8-115f-4beb_2703.auth'.
+Removing: '/tmp/5894-827d-c218-6ba1_2703.auth'.
+Removing: '/tmp/affe-dd3a-1fc1-7945_2703.auth'.
+Generating file "/accphys/matlab/operations/RFguiInvasive/O.rhel6-x86_64/readme.txt".
+Generating file "/accphys/matlab/operations/RFguiInvasive/O.rhel6-x86_64/run_RFguiInvasive.sh".
+[?1l>

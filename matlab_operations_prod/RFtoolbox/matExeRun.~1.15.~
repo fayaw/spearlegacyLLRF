@@ -1,0 +1,77 @@
+#!/bin/csh -f
+#==============================================================
+#
+#  Abs:  Exectuable C shell script to run an executable created
+#        by compiling a Matlab script
+#
+#  Name: matExeRun
+#
+#  Args:
+#    $1 = name of program to run
+#         This program must be in PATH and must already be extracted 
+#         using the matlab extractCTF command.
+#    $2 to $10 = optional arguments to the program
+#
+#--------------------------------------------------------------
+#
+if ($#argv < 1) then
+  echo "Program name not provided"
+  exit 1
+endif
+unsetenv MATLAB_VER
+if (!(-d /afs/slac/g/spear)) then
+    setenv SPEAR_PRODUCTION
+    unsetenv MATLAB_DEV
+endif
+if (!(-d /prod/epics)) then
+    unsetenv SPEAR_PRODUCTION
+    setenv MATLAB_DEV
+endif
+if ($?MATLAB_DEV) then
+  source /afs/slac/g/spear/epics/epicsReset
+else
+  source /prod/epics/epicsReset
+endif
+#
+# Aliases for adding to path.  These are removed at the end of this script.
+#
+alias mcappendpath  ' mappendpath  \!:1 \!:2 '
+alias mcprependpath ' mprependpath \!:1 \!:2 '
+alias mcontainpath echo '`echo ${\!:1} | egrep -e "(^\!:2"\:")|(:\!:2"\:")|(:\!:2"\$")|(^\!:2"\$")"` >>/dev/null'
+alias mappendpath  'setenv \!:1 ${\!:1}:\!:2'
+alias mprependpath 'setenv \!:1 \!:2\:${\!:1}'
+#
+# See http://www.mathworks.com/support/solutions/data/1-2R5223.html?solution=1-2R5223
+# for references on LD_LIBRARY_PATH.
+#
+# Required for libmwmclmcrrt.so.7.5:
+#
+mcappendpath LD_LIBRARY_PATH ${MCR_ROOT}/runtime/${MATLAB_HOST_ARCH}
+mcappendpath LD_LIBRARY_PATH ${MCR_ROOT}/bin/${MATLAB_HOST_ARCH}
+mcappendpath LD_LIBRARY_PATH ${MCR_ROOT}/sys/os/${MATLAB_HOST_ARCH}
+# Required for java:   
+mcappendpath LD_LIBRARY_PATH ${MCR_ROOT}/sys/java/jre/${MATLAB_HOST_ARCH}/jre/lib/${MATLAB_PROC_ARCH}/native_threads   
+mcappendpath LD_LIBRARY_PATH ${MCR_ROOT}/sys/java/jre/${MATLAB_HOST_ARCH}/jre/lib/${MATLAB_PROC_ARCH}/server   
+mcappendpath LD_LIBRARY_PATH ${MCR_ROOT}/sys/java/jre/${MATLAB_HOST_ARCH}/jre/lib/${MATLAB_PROC_ARCH}/client   
+mcappendpath LD_LIBRARY_PATH ${MCR_ROOT}/sys/java/jre/${MATLAB_HOST_ARCH}/jre/lib/${MATLAB_PROC_ARCH}   
+mcappendpath LD_LIBRARY_PATH ${MCR_ROOT}/sys/opengl/lib/${MATLAB_HOST_ARCH}
+  
+#
+# Remove aliases used only by this script.
+#
+unalias mcappendpath
+unalias mcprependpath
+unalias mcontainpath
+unalias mappendpath
+unalias mprependpath
+#
+# For running matlab guis:
+
+# http://www.mathworks.com/support/solutions/data/1-YIHQ4.html?solution=1-YIHQ4
+# http://www.faqs.org/faqs/Xt-FAQ/section-21.html
+setenv XAPPLRESDIR ${MCR_ROOT}/X11/app-defaults
+#
+set matExe_command = `which $1`
+#echo "invoking $matExe_command $2 $3 $4 $5 $6 $7 $8 $9 $10"
+$matExe_command $2 $3 $4 $5 $6 $7 $8 $9 $10
+#end of script

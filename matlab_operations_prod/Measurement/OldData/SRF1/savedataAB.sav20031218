@@ -1,0 +1,308 @@
+# save/restore V2.02	Automatically generated - DO NOT MODIFY
+SRF1:STN:GFFFAST:INIT                        DOUBLE  0
+SRF1:STN:FASTON:CTRL                         ENUM    "ON" 1
+SRF1:HVPS:VOLT:FASTON                        DOUBLE  55
+SRF1:HVPS:LOOP:DELAY                         DOUBLE  10
+SRF1:FD:PERIOD                               DOUBLE  10
+SRF1:MEM:PERIOD                              DOUBLE  10
+SRF1:CPU:PERIOD                              DOUBLE  10
+SRF1:STN:FAULT:TIME1                         STRING  "Dec 17, 2003 06:17:24"
+SRF1:STN:FAULT:TIME2                         STRING  "Dec 17, 2003 06:53:07"
+SRF1:STN:FAULT:TIME3                         STRING  "Dec 17, 2003 09:13:52"
+SRF1:STN:FAULT:TIME4                         STRING  "Dec 17, 2003 09:14:37"
+SRF1:STN:FAULT:TIME5                         STRING  "Dec 17, 2003 09:16:13"
+SRF1:STN:FAULT:TIME6                         STRING  "Dec 17, 2003 09:16:47"
+SRF1:STN:FAULT:TIME7                         STRING  "Dec 17, 2003 09:18:06"
+SRF1:STN:FAULT:TIME8                         STRING  "Dec 17, 2003 09:19:01"
+SRF1:STN:FAULT:TIME9                         STRING  "Dec 17, 2003 09:19:35"
+SRF1:STN:FAULT:TIME10                        STRING  "Dec 17, 2003 09:27:27"
+SRF1:STN:FAULT:TIME11                        STRING  "Dec 17, 2003 17:14:01"
+SRF1:STN:FAULT:TIME12                        STRING  "Dec 18, 2003 00:05:57"
+SRF1:STN:FAULT:TIME13                        STRING  "Dec 18, 2003 05:04:00"
+SRF1:STN:FAULT:TIME14                        STRING  "Dec 18, 2003 08:59:43"
+SRF1:STN:FAULT:TIME15                        STRING  "Dec 18, 2003 10:45:49"
+SRF1:STN:FAULT:NUM                           DOUBLE  15
+SRF1:STN:FAULT:ANUM                          DOUBLE  15
+SRF1:STN:FAULT:FSIZE                         DOUBLE  50
+SRF1:STN:FAULT:CTRL                          ENUM    "ON" 1
+SRF1:STN:STATE:CTRL                          ENUM    "ON_CW" 4
+SRF1:STN:STATE:RBCK                          ENUM    "ON_CW" 4
+SRF1:STN:RESET:COUNTER                       DOUBLE  0
+SRF1:STN:FMTYPE:CTRL                         ENUM    "400_HZ" 0
+SRF1:STN:FM400HZ:IFILE                       STRING  "/tbl/SWEEP_400_I"
+SRF1:STN:FM400HZ:QFILE                       STRING  "/tbl/SWEEP_400_Q"
+SRF1:STN:FM1000HZ:IFILE                      STRING  "/tbl/SWEEP_1000_I"
+SRF1:STN:FM1000HZ:QFILE                      STRING  "/tbl/SWEEP_1000_Q"
+SRF1:STN:TICKLE:IFILE                        STRING  "/tbl/DRIVE_HER_I"
+SRF1:STN:TICKLE:QFILE                        STRING  "/tbl/DRIVE_HER_Q"
+SRF1:STN:PHASE                               DOUBLE  -87.06
+SRF1:STN:PHASE:CALC.MDEL                     DOUBLE  1.0e-1
+SRF1:STN:TUNE:INIT                           DOUBLE  800
+SRF1:STN:ON:INIT                             DOUBLE  100
+SRF1:STN:GFF:INIT                            DOUBLE  80
+SRF1:STN:VOLT:CTRL                           DOUBLE  2900
+SRF1:STN:VOLT:SETTLE                         DOUBLE  10
+SRF1:STN:RAMP:SETTLE                         DOUBLE  3
+SRF1:STNRIPPLE:LOOP:AMPL.HOPR                DOUBLE  0.9
+SRF1:STNRIPPLE:LOOP:AMPL.LOPR                DOUBLE  0.55
+SRF1:STNRIPPLE:LOOP:AMPL.MDEL                DOUBLE  5.0e-3
+SRF1:STNDIRECT:LOOP:PHASE.MDEL               DOUBLE  1.0e-1
+SRF1:STNCOMB:LOOP:PHASE.MDEL                 DOUBLE  0.5
+SRF1:HVPSCONTACT:CLOSE:CTRL                  ENUM    "CLOSE" 1
+SRF1:HVPSSCR:ON:CTRL                         ENUM    "ON" 1
+SRF1:HVPS:VOLT:MIN                           DOUBLE  45
+SRF1:HVPS:VOLTULIM:CTRL.DRVH                 DOUBLE  87
+SRF1:HVPS:LOOP:VOLTDIFF                      DOUBLE  5
+SRF1:HVPS:LOOP:VOLTUP                        DOUBLE  1.0e-2
+SRF1:HVPS:LOOP:VOLTDOWN                      DOUBLE  -1.0e-2
+SRF1:STNREF:PHASE:OFFS                       DOUBLE  0
+SRF1:KLYSDRIVFRWD:PHASE:OFFS                 DOUBLE  0
+SRF1:KLYSDRIVFRWD:POWER:SAT                  DOUBLE  35
+SRF1:KLYSDRIVFRWD:POWER:ON                   DOUBLE  20
+SRF1:KLYSDRIVFRWD:POWER:HIGH                 DOUBLE  26
+SRF1:KLYS:GAIN:CTRL                          DOUBLE  42.8994
+SRF1:CIRCLDFRWD:PHASE:OFFS                   DOUBLE  0
+SRF1:CIRCLDREFL:PHASE:OFFS                   DOUBLE  0
+SRF1:KLYSOUTREFL:PHASE:OFFS                  DOUBLE  0
+SRF1:KLYSOUTFRWD:PHASE:OFFS                  DOUBLE  0
+SRF1:KLYSOUTFRWD:POWER:MAX                   DOUBLE  600
+SRF1:KLYSOUTFRWD:POWER:MIN                   DOUBLE  1
+SRF1:KLYSOUTFRWD:POWER:NORM                  DOUBLE  0
+SRF1:KLYSOUTFRWD:POWER:HIGH                  DOUBLE  740
+SRF1:KLYSOUTFRWD:POWER.HYST                  DOUBLE  10
+SRF1:WG01LDFRWD:PHASE:OFFS                   DOUBLE  0
+SRF1:WG01LDREFL:PHASE:OFFS                   DOUBLE  0
+SRF1:WG02LDFRWD:PHASE:OFFS                   DOUBLE  0
+SRF1:WG02LDREFL:PHASE:OFFS                   DOUBLE  0
+SRF1:WG03LDFRWD:PHASE:OFFS                   DOUBLE  0
+SRF1:WG03LDREFL:PHASE:OFFS                   DOUBLE  0
+SRF1:CAV:FREQOFFS:SMOO                       DOUBLE  0.5
+SRF1:CAVLOAD:ANGLE:ERRMAX                    DOUBLE  1
+SRF1:CAVLOAD:ANGLE:FORGET                    DOUBLE  0.999
+SRF1:CAVLOAD:ANGLE:K                         DOUBLE  5.0e-2
+SRF1:CAV:STRENGTH:DIFF                       DOUBLE  1.0e-2
+SRF1:CAVTUNR:LOOP:GAIN                       DOUBLE  1
+SRF1:CAV:VACM:MAX                            DOUBLE  8.0e-9
+SRF1:CAV:VOLT:MAX                            DOUBLE  850
+SRF1:CAV1:STRENGTH:CTRL                      DOUBLE  25
+SRF1:CAV1TUNR:POSN:ONHOME                    DOUBLE  -0.753387868404388
+SRF1:CAV1TUNR:POSN:PARKHOME                  DOUBLE  11.67
+SRF1:CAV1FRWD:PHASE:OFFS                     DOUBLE  63.9114
+SRF1:CAV1REFL:PHASE:OFFS                     DOUBLE  10.1798
+SRF1:CAV1PROBE:PHASE:OFFS                    DOUBLE  -170.642
+SRF1:CAV2:STRENGTH:CTRL                      DOUBLE  25
+SRF1:CAV2TUNR:POSN:ONHOME                    DOUBLE  -1.72469782829285
+SRF1:CAV2TUNR:POSN:PARKHOME                  DOUBLE  11.3
+SRF1:CAV2FRWD:PHASE:OFFS                     DOUBLE  -71.4243
+SRF1:CAV2REFL:PHASE:OFFS                     DOUBLE  -163.177
+SRF1:CAV2PROBE:PHASE:OFFS                    DOUBLE  -73.3677
+SRF1:CAV3:STRENGTH:CTRL                      DOUBLE  25
+SRF1:CAV3TUNR:POSN:ONHOME                    DOUBLE  -0.354901731014252
+SRF1:CAV3TUNR:POSN:PARKHOME                  DOUBLE  -26.03
+SRF1:CAV3FRWD:PHASE:OFFS                     DOUBLE  31.2814
+SRF1:CAV3REFL:PHASE:OFFS                     DOUBLE  6.8966
+SRF1:CAV3PROBE:PHASE:OFFS                    DOUBLE  -35.4602
+SRF1:CAV4:STRENGTH:CTRL                      DOUBLE  25
+SRF1:CAV4TUNR:POSN:ONHOME                    DOUBLE  -0.504334032535553
+SRF1:CAV4TUNR:POSN:PARKHOME                  DOUBLE  -12.88
+SRF1:CAV4FRWD:PHASE:OFFS                     DOUBLE  144.335
+SRF1:CAV4REFL:PHASE:OFFS                     DOUBLE  136.891
+SRF1:CAV4PROBE:PHASE:OFFS                    DOUBLE  26.7087
+SRF1:STN:VOLT.HOPR                           DOUBLE  3500
+SRF1:STNREF:POWER.HOPR                       DOUBLE  50
+SRF1:STNREF:POWER.LOLO                       DOUBLE  15
+SRF1:STNREF:POWER.LOW                        DOUBLE  15
+SRF1:KLYSOUTFRWD:POWER.HOPR                  DOUBLE  1300
+SRF1:KLYSCOLL:POWER.HOPR                     DOUBLE  1400
+SRF1:KLYSOUTREFL:POWER.HOPR                  DOUBLE  12
+SRF1:KLYSDRIVFRWD:POWER.HOPR                 DOUBLE  100
+SRF1:CIRCLDFRWD:POWER.HOPR                   DOUBLE  700
+SRF1:CIRCLDREFL:POWER.HOPR                   DOUBLE  12
+SRF1:WG01LDFRWD:POWER.HOPR                   DOUBLE  600
+SRF1:WG02LDFRWD:POWER.HOPR                   DOUBLE  650
+SRF1:WG03LDFRWD:POWER.HOPR                   DOUBLE  650
+SRF1:WG01LDREFL:POWER.HOPR                   DOUBLE  12
+SRF1:WG02LDREFL:POWER.HOPR                   DOUBLE  12
+SRF1:WG03LDREFL:POWER.HOPR                   DOUBLE  12
+SRF1:CAV1FRWD:POWER.HOPR                     DOUBLE  250
+SRF1:CAV2FRWD:POWER.HOPR                     DOUBLE  250
+SRF1:CAV3FRWD:POWER.HOPR                     DOUBLE  300
+SRF1:CAV4FRWD:POWER.HOPR                     DOUBLE  250
+SRF1:CAV1:POWER.HOPR                         DOUBLE  0
+SRF1:CAV2:POWER.HOPR                         DOUBLE  0
+SRF1:CAV3:POWER.HOPR                         DOUBLE  0
+SRF1:CAV4:POWER.HOPR                         DOUBLE  0
+SRF1:CAV1REFL:POWER.HOPR                     DOUBLE  350
+SRF1:CAV2REFL:POWER.HOPR                     DOUBLE  350
+SRF1:CAV3REFL:POWER.HOPR                     DOUBLE  350
+SRF1:CAV4REFL:POWER.HOPR                     DOUBLE  350
+SRF1:CAV1PROBE:AMPL.HOPR                     DOUBLE  1000
+SRF1:CAV2PROBE:AMPL.HOPR                     DOUBLE  1000
+SRF1:CAV3PROBE:AMPL.HOPR                     DOUBLE  1000
+SRF1:CAV4PROBE:AMPL.HOPR                     DOUBLE  1000
+SRF1:SOLNBUCK:CURR.HOPR                      DOUBLE  10
+SRF1:SOLNBUCK:VOLT.HOPR                      DOUBLE  6
+SRF1:SOLNMAIN:CURR.HOPR                      DOUBLE  45
+SRF1:SOLNMAIN:VOLT.HOPR                      DOUBLE  100
+SRF1:FILAMENT:VOLT.HOPR                      DOUBLE  150
+SRF1:FILAMENT:CURR.HOPR                      DOUBLE  5
+SRF1:FILAMENT:POWER.HOPR                     DOUBLE  1400
+SRF1:CIRC:CURR.HOPR                          DOUBLE  10
+SRF1:CAVTUNR:VOLT.HOPR                       DOUBLE  24
+SRF1:HVPS:PERV.HOPR                          DOUBLE  1.5
+SRF1:STN:VOLT:ERR.HOPR                       DOUBLE  50
+SRF1:KLYSDRIVFRWD:POWER:ERR.HOPR             DOUBLE  10
+SRF1:KLYSCOLLPLC:POWER.HIHI                  DOUBLE  1175
+SRF1:SOLNBUCK:CURR.HIHI                      DOUBLE  5.3
+SRF1:SOLNBUCK:VOLT.HIHI                      DOUBLE  5
+SRF1:SOLNMAIN:CURR.HIHI                      DOUBLE  48
+SRF1:SOLNMAIN:VOLT.HIHI                      DOUBLE  95
+SRF1:FILAMENT:VOLT.HIHI                      DOUBLE  109
+SRF1:FILAMENT:CURR.HIHI                      DOUBLE  5.3
+SRF1:CIRC:CURR.HIHI                          DOUBLE  101
+SRF1:CAVTUNR:VOLT.HIHI                       DOUBLE  101
+SRF1:STN:VOLT:ERR.HIHI                       DOUBLE  100
+SRF1:KLYSDRIVFRWD:POWER:ERR.HIHI             DOUBLE  5
+SRF1:KLYSCOLLPLC:POWER.HIGH                  DOUBLE  1150
+SRF1:SOLNBUCK:CURR.HIGH                      DOUBLE  5
+SRF1:SOLNBUCK:VOLT.HIGH                      DOUBLE  4
+SRF1:SOLNMAIN:CURR.HIGH                      DOUBLE  47.7
+SRF1:SOLNMAIN:VOLT.HIGH                      DOUBLE  94
+SRF1:FILAMENT:VOLT.HIGH                      DOUBLE  105
+SRF1:FILAMENT:CURR.HIGH                      DOUBLE  5.25
+SRF1:CIRC:CURR.HIGH                          DOUBLE  101
+SRF1:CAVTUNR:VOLT.HIGH                       DOUBLE  101
+SRF1:HVPS:PERV.HIGH                          DOUBLE  1.07
+SRF1:STN:VOLT:ERR.HIGH                       DOUBLE  0
+SRF1:KLYSDRIVFRWD:POWER:ERR.HIGH             DOUBLE  0
+SRF1:SOLNBUCK:CURR.LOW                       DOUBLE  -0.18
+SRF1:SOLNBUCK:VOLT.LOW                       DOUBLE  -0.5
+SRF1:SOLNMAIN:CURR.LOW                       DOUBLE  46.4
+SRF1:SOLNMAIN:VOLT.LOW                       DOUBLE  60
+SRF1:FILAMENT:VOLT.LOW                       DOUBLE  95
+SRF1:FILAMENT:CURR.LOW                       DOUBLE  4.5
+SRF1:CIRC:CURR.LOW                           DOUBLE  -101
+SRF1:CAVTUNR:VOLT.LOW                        DOUBLE  21
+SRF1:HVPS:PERV.LOW                           DOUBLE  0.92
+SRF1:STN:VOLT:ERR.LOW                        DOUBLE  0
+SRF1:KLYSDRIVFRWD:POWER:ERR.LOW              DOUBLE  0
+SRF1:SOLNBUCK:CURR.LOLO                      DOUBLE  -0.2
+SRF1:SOLNBUCK:VOLT.LOLO                      DOUBLE  -0.6
+SRF1:SOLNMAIN:CURR.LOLO                      DOUBLE  46.2
+SRF1:SOLNMAIN:VOLT.LOLO                      DOUBLE  59
+SRF1:FILAMENT:VOLT.LOLO                      DOUBLE  91
+SRF1:FILAMENT:CURR.LOLO                      DOUBLE  4.4
+SRF1:CIRC:CURR.LOLO                          DOUBLE  -101
+SRF1:CAVTUNR:VOLT.LOLO                       DOUBLE  20
+SRF1:HVPS:PERV.LOLO                          DOUBLE  0.9
+SRF1:STN:VOLT:ERR.LOLO                       DOUBLE  -100
+SRF1:KLYSDRIVFRWD:POWER:ERR.LOLO             DOUBLE  -1
+SRF1:SOLNBUCK:CURR.LOPR                      DOUBLE  0
+SRF1:SOLNBUCK:VOLT.LOPR                      DOUBLE  0
+SRF1:SOLNMAIN:CURR.LOPR                      DOUBLE  40
+SRF1:SOLNMAIN:VOLT.LOPR                      DOUBLE  50
+SRF1:FILAMENT:VOLT.LOPR                      DOUBLE  125
+SRF1:FILAMENT:CURR.LOPR                      DOUBLE  4
+SRF1:FILAMENT:POWER.LOPR                     DOUBLE  0
+SRF1:CIRC:CURR.LOPR                          DOUBLE  0
+SRF1:CAVTUNR:VOLT.LOPR                       DOUBLE  0
+SRF1:HVPS:PERV.LOPR                          DOUBLE  0.5
+SRF1:STN:VOLT:ERR.LOPR                       DOUBLE  -50
+SRF1:KLYSDRIVFRWD:POWER:ERR.LOPR             DOUBLE  -10
+SRF1:KLYSBD01WATR:TEMP.HOPR                  DOUBLE  20
+SRF1:KLYSBD01WATR:TEMP.HIHI                  DOUBLE  14
+SRF1:KLYSBD01WATR:TEMP.HIGH                  DOUBLE  13
+SRF1:KLYSBD02WATR:TEMP.HOPR                  DOUBLE  25
+SRF1:KLYSBD02WATR:TEMP.HIHI                  DOUBLE  20
+SRF1:KLYSBD02WATR:TEMP.HIGH                  DOUBLE  20
+SRF1:KLYSBD03WATR:TEMP.HOPR                  DOUBLE  400
+SRF1:KLYSBD03WATR:TEMP.HIHI                  DOUBLE  400
+SRF1:KLYSBD03WATR:TEMP.HIGH                  DOUBLE  400
+SRF1:KLYSCOLLWATR:TEMP.HOPR                  DOUBLE  20
+SRF1:KLYSCOLLWATR:TEMP.HIHI                  DOUBLE  19
+SRF1:KLYSCOLLWATR:TEMP.HIGH                  DOUBLE  18
+SRF1:KLYSWNDWAIR:TEMP.HOPR                   DOUBLE  25
+SRF1:KLYSWNDWAIR:TEMP.HIHI                   DOUBLE  53
+SRF1:KLYSWNDWAIR:TEMP.HIGH                   DOUBLE  52
+SRF1:KLYSDRIVAMPL:TEMP.HIHI                  DOUBLE  70
+SRF1:KLYSDRIVAMPL:TEMP.HIGH                  DOUBLE  65
+SRF1:STNCRATEPS:TEMP.HIHI                    DOUBLE  46
+SRF1:STNCRATEPS:TEMP.HIGH                    DOUBLE  44
+SRF1:CRATE:VXI:TEMP.HIHI                     DOUBLE  43
+SRF1:CRATE:VXI:TEMP.HIGH                     DOUBLE  42
+SRF1:STNAMBAIR:TEMP.HIHI                     DOUBLE  58
+SRF1:STNAMBAIR:TEMP.HIGH                     DOUBLE  57
+SRF1:STN:SUMY:STAT:VSTA                      LONG    8
+SRF1:STNREF:A:SMOO                           DOUBLE  0
+SRF1:KLYSDRIVFRWD:A:SMOO                     DOUBLE  0
+SRF1:CIRCLDFRWD:A:SMOO                       DOUBLE  0
+SRF1:CIRCLDREFL:A:SMOO                       DOUBLE  0
+SRF1:KLYSOUTREFL:A:SMOO                      DOUBLE  0
+SRF1:KLYSOUTFRWD:A:SMOO                      DOUBLE  0.9
+SRF1:WG01LDFRWD:A:SMOO                       DOUBLE  0
+SRF1:WG01LDREFL:A:SMOO                       DOUBLE  0
+SRF1:WG02LDFRWD:A:SMOO                       DOUBLE  0
+SRF1:WG02LDREFL:A:SMOO                       DOUBLE  0
+SRF1:WG03LDFRWD:A:SMOO                       DOUBLE  0
+SRF1:WG03LDREFL:A:SMOO                       DOUBLE  0
+SRF1:CAV1FRWD:A:SMOO                         DOUBLE  0
+SRF1:CAV1REFL:A:SMOO                         DOUBLE  0
+SRF1:CAV1PROBE:A:SMOO                        DOUBLE  0
+SRF1:CAV2FRWD:A:SMOO                         DOUBLE  0
+SRF1:CAV2REFL:A:SMOO                         DOUBLE  0
+SRF1:CAV2PROBE:A:SMOO                        DOUBLE  0
+SRF1:CAV3FRWD:A:SMOO                         DOUBLE  0
+SRF1:CAV3REFL:A:SMOO                         DOUBLE  0
+SRF1:CAV3PROBE:A:SMOO                        DOUBLE  0
+SRF1:CAV4FRWD:A:SMOO                         DOUBLE  0
+SRF1:CAV4REFL:A:SMOO                         DOUBLE  0
+SRF1:CAV4PROBE:A:SMOO                        DOUBLE  0
+SRF1:CAV1:BETA:CTRL                          DOUBLE  3.8
+SRF1:CAV2:BETA:CTRL                          DOUBLE  3.8
+SRF1:CAV3:BETA:CTRL                          DOUBLE  3.8
+SRF1:CAV4:BETA:CTRL                          DOUBLE  3.8
+SRF1:CAV1:Q0:CTRL                            DOUBLE  32000.3
+SRF1:CAV2:Q0:CTRL                            DOUBLE  32000.61
+SRF1:CAV3:Q0:CTRL                            DOUBLE  32003.63
+SRF1:CAV4:Q0:CTRL                            DOUBLE  32000.34
+SRF1:CAV1FRWD:DRCTVTY:DB                     DOUBLE  0
+SRF1:CAV1FRWD:DRCTVTY:PHASE                  DOUBLE  0
+SRF1:CAV1REFL:DRCTVTY:DB                     DOUBLE  0
+SRF1:CAV1REFL:DRCTVTY:PHASE                  DOUBLE  0
+SRF1:CAV2FRWD:DRCTVTY:DB                     DOUBLE  0
+SRF1:CAV2FRWD:DRCTVTY:PHASE                  DOUBLE  0
+SRF1:CAV2REFL:DRCTVTY:DB                     DOUBLE  0
+SRF1:CAV2REFL:DRCTVTY:PHASE                  DOUBLE  0
+SRF1:CAV3FRWD:DRCTVTY:DB                     DOUBLE  0
+SRF1:CAV3FRWD:DRCTVTY:PHASE                  DOUBLE  0
+SRF1:CAV3REFL:DRCTVTY:DB                     DOUBLE  0
+SRF1:CAV3REFL:DRCTVTY:PHASE                  DOUBLE  0
+SRF1:CAV4FRWD:DRCTVTY:DB                     DOUBLE  0
+SRF1:CAV4FRWD:DRCTVTY:PHASE                  DOUBLE  0
+SRF1:CAV4REFL:DRCTVTY:DB                     DOUBLE  0
+SRF1:CAV4REFL:DRCTVTY:PHASE                  DOUBLE  0
+SRF1:STN:TICKLE:CTRL                         ENUM    "OFF" 0
+SRF1:STN:TUNE:CTRL                           ENUM    "ON" 1
+SRF1:STN:ON:CTRL                             ENUM    "ON" 1
+SRF1:STNRIPPLE:LOOP:TRACK                    ENUM    "ON" 1
+SRF1:STNDIRECT:LOOP:TRACK                    ENUM    "ON" 1
+SRF1:STNDIRECT:LOOP:CTRL                     ENUM    "ON" 1
+SRF1:STNDIRECT:LEADCOMP:CTRL                 ENUM    "ON" 1
+SRF1:STNDIRECT:INTCOMP:CTRL                  ENUM    "ON" 1
+SRF1:STNCOMB:LOOP:CTRL                       ENUM    "OFF" 0
+SRF1:STN:GFF:CTRL                            ENUM    "OFF" 0
+SRF1:STN:LFB:CTRL                            ENUM    "OFF" 0
+SRF1:HVPS:LOOP:CTRL                          ENUM    "ON" 2
+SRF1:CAVLOAD:ANGLE:CTRL                      ENUM    "OFF" 0
+SRF1:CAVTUNR:LOOP:CTRL                       ENUM    "ON" 1
+SRF1:STN:AIM:SOLENOID                        ENUM    "On" 1
+SRF1:STN:CFM1:DATAALIGN                      ENUM    "0" 0
+SRF1:STN:CFM1:EQBNKSEL                       ENUM    "Bank 0" 0
+SRF1:STN:CFM2:DATAALIGN                      ENUM    "0" 0
+SRF1:STN:CFM2:EQBNKSEL                       ENUM    "Bank 0" 0
+SRF1:STN:CLK:TRNCLKSEL                       ENUM    "External Fiducial" 1
+SRF1:STN:GVF:DATAALIGN                       ENUM    "0" 0
+SRF1:STN:GVF:EQBNKSEL                        ENUM    "Bank 0" 0
+SRF1:STN:GVF:XFERFN                          ENUM    "Off" 0
+SRF1:STN:RFP:RIPPLELOOP                      ENUM    "On" 1
+# FILE-WRITES-COMPLETED-SUCCESSFULLY  Dec 18, 2003 16:09:25.307

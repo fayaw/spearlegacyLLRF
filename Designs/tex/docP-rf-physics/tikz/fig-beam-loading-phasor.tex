@@ -1,35 +1,36 @@
 % !TeX root = ../P_rf_physics_and_plant.tex
-% Beam loading phasor diagram, drawn at the real angles: the synchronous phase
-% is 69 deg from the voltage crest and the optimum detuning angle is -68 deg.
-% Vector lengths are to scale at 0.035 mm/kV, so V_b,res really is 2.6x V_gap.
-% Every label sits at its vector's TIP so that nothing overlaps the arrows.
+% Beam-loading CURRENT phasors per cavity at 500 mA, to scale (40 mm per ampere),
+% referred to the gap with V_gap on the real axis.  Values from
+% spear3rf/scripts/docP_figures.py (U0 = 1.09 MeV, V_gap = 712 kV, R_L = 780.6 kOhm):
+%   beam      I_b1 = 2 I_b = 1.000 A at 180 - phi_s = 112.49 deg
+%   generator I_g  = V/R_L + I_b1 cos(phi_s) = 0.9128 + 0.3825 = 1.2952 A, real
+%   total     I_t  = I_g + I_b1 = 0.9128 + j 0.9240 A, angle 45.35 deg = -psi_L
+% V = Z I_t with Z = R_L cos(psi_L) exp(j psi_L) rotates I_t back onto the real axis.
+% Every label sits clear of the arrows.
 \begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
                     ph/.style={-{Stealth[length=2.6mm]},line width=1.1pt}]
-\def\s{0.035}
+\def\s{40}
 
-\draw[draw=black!45] (-74,0) -- (44,0) node[right,lbl]{Real};
-\draw[draw=black!45] (0,-46) -- (0,30) node[above,lbl]{Imaginary};
+\draw[draw=black!45] (-6,0) -- (66,0) node[right,lbl]{Real (phase of $V_\text{gap}$)};
+\draw[draw=black!45] (0,-6) -- (0,46) node[above,lbl]{Imaginary};
 
-% cavity gap voltage, on the real axis
-\draw[ph,draw=cRf] (0,0) -- (712*\s,0);
-\node[tag,text=cRf,anchor=west,align=left] at (712*\s+2,2.5)
-  {$V_\text{gap}=\qty{712}{\kilo\volt}$};
+% generator current, in phase with the gap voltage at the optimum detuning
+\draw[ph,draw=cPlc] (0,0) -- (1.2952*\s,0) coordinate (G);
+\node[tag,font=\scriptsize,text=cPlc,anchor=north,align=center] at (0.5*1.2952*\s,-1.5)
+  {$I_g = V_\text{gap}/R_L + I_{b1}\cos\phi_s = \qty{1.30}{\ampere}$};
 
-% beam-induced voltage at resonance: 2.6x larger, and opposing
-\draw[ph,draw=cPwr] (0,0) -- (-1865*\s,0);
-\node[tag,text=cPwr,anchor=west,align=left] at (-1865*\s,4)
-  {$V_{b,\text{res}}=I_b R_s=\qty{1865}{\kilo\volt}$};
+% beam current, drawn from the tip of I_g so that the sum closes the triangle
+\draw[ph,draw=cPwr] (G) -- ++(112.49:\s) coordinate (T);
+\node[tag,font=\scriptsize,text=cPwr,anchor=west,align=left] at ($(G)!0.55!(T)+(1.5,0)$)
+  {$I_{b1} = 2I_b = \qty{1.0}{\ampere}$};
+\draw[draw=black!35,densely dashed] (G) -- ++(-14,0);
+\draw[draw=cPwr] ($(G)+(-9,0)$) arc (180:112.49:9);
+\node[tag,font=\scriptsize,text=cPwr,anchor=east] at ($(G)+(-7.5,10.5)$) {$\phi_s=67.5^\circ$};
 
-% synchronous phase, measured from the crest
-\draw[draw=cCtrl,densely dashed] (0,0) -- (69:30);
-\draw[draw=cCtrl] (14,0) arc (0:69:14);
-\node[tag,text=cCtrl,anchor=south west] at (69:31) {$\phi_s=69^\circ$};
-
-% generator voltage at the optimum detuning angle
-\draw[ph,draw=cPlc] (0,0) -- (-68:40);
-\node[tag,text=cPlc,anchor=north west,align=left] at (-68:41)
-  {$V_\text{gen}$ --- generator voltage};
-\draw[draw=cPlc] (22,0) arc (0:-68:22);
-\node[tag,text=cPlc,anchor=west] at (24,-12)
-  {$\psi_\text{opt}=-68^\circ$ (detuning angle)};
+% total current: leads V by |psi_L|, and the detuned cavity turns it back
+\draw[ph,draw=cRf] (0,0) -- (T);
+\node[tag,font=\scriptsize,text=cRf,anchor=south] at ($(T)+(0,1.5)$)
+  {$I_t = I_g + I_{b1} = \qty{1.30}{\ampere}$};
+\draw[draw=cRf] (14,0) arc (0:45.35:14);
+\node[tag,font=\scriptsize,text=cRf,anchor=west] at (15,3.2) {$-\psi_L = 45.4^\circ$};
 \end{tikzpicture}

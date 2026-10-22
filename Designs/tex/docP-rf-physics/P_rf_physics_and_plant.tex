@@ -14,16 +14,13 @@
 % --- [Rn] citation scheme --------------------------------------------------
 % Doc P uses a numbered [Rn] reference list rather than BibTeX, because the
 % numbering is already established across the whole document set.  \R{n} is a
-% hyperlink to the defining row in Appendix B; \RDEF{n} is that row.  The anchor
+% hyperlink to the defining row in Appendix A; \RDEF{n} is that row.  The anchor
 % is wrapped in a zero-size raisebox: a bare \hypertarget occupies a line box and
 % pushes the visible tag down a line inside a p{} cell.  Robust because these
 % appear in figure captions.
 \DeclareRobustCommand{\R}[1]{\hyperlink{ref:R#1}{[R#1]}}
 \DeclareRobustCommand{\RDEF}[1]{%
   \raisebox{0pt}[0pt][0pt]{\hypertarget{ref:R#1}{}}\textbf{[R#1]}}
-\DeclareRobustCommand{\W}[1]{\hyperlink{ref:W#1}{[W#1]}}
-\DeclareRobustCommand{\WDEF}[1]{%
-  \raisebox{0pt}[0pt][0pt]{\hypertarget{ref:W#1}{}}\textbf{[W#1]}}
 
 % Disturbance tags D1..D9 link back to the taxonomy table that defines them.
 \DeclareRobustCommand{\D}[1]{\hyperlink{dist:table}{\textbf{D#1}}}
@@ -50,7 +47,7 @@
 \textbf{Reviewer}    & Jim Sebek and others \\
 \textbf{Classification} & Tier 1 --- Physics and Plant Reference (implementation-independent) \\
 \textbf{Affiliation} & SSRL, SLAC National Accelerator Laboratory \\
-\textbf{Date}        & 29 September 2026 \\
+\textbf{Date}        & 9 October 2026 \\
 \end{tabular}
 \end{minipage}
 \end{center}
@@ -61,8 +58,7 @@ This document states the physics of the SPEAR3 RF plant and the control problem
 that follows from it: what disturbs the cavity field, over what frequency range,
 and which loop is responsible for each band. It is
 \emph{implementation-independent} --- the content does not change when the VXI
-hardware is replaced by the LLRF9 controller. Hardware-specific detail belongs
-in Doc~L (legacy plant) and Doc~0 (upgrade design).
+hardware is replaced by the LLRF9 controller.
 \end{keynote}
 
 \clearpage
@@ -76,10 +72,155 @@ in Doc~L (legacy plant) and Doc~0 (upgrade design).
 \end{document}
 
 % ---------------------------------------------------------------------------
-% REVISION HISTORY -- deliberately not rendered.  It belongs with the source,
-% not in a document sent to a reviewer.  Historical rows stay frozen: they
+% DEVELOPMENT LOG -- source only, never rendered.  The rendered Revision History
+% (top of body.tex) starts at R0, the first issue; the text must not mention
+% earlier drafts.  Historical rows stay frozen: they
 % record what was true at the time, including equation numbers as then issued.
 %
+% R0   2026-10-07  (snapshot) Legacy-station values replaced throughout by a new
+%                  read-only snapshot, SRF1 2026-10-07 16:36 (499 mA, 795 kW,
+%                  29.0 W, 75.5 kV / 22.4 A, U0 1.093 MeV, beta median 3.74,
+%                  phi_tr +11.6 deg, power readbacks 4.2% apart).  U0 stated once,
+%                  as measured.  [Wn] list removed; URLs folded into A.1, Dimtel
+%                  page is R47.  Enerpro keynote: the 1.39 ms firing interval
+%                  bounds only the sampling delay; the 2-3 cycle settling is the
+%                  PLL's.  Observed -1 kHz/C thermal coefficient removed (no data).
+% R0   2026-10-08  D9 per operating history (user): the daily f_RF change is a tidal
+%                  variation of up to ~100 Hz, not a 10 Hz/day thermal drift; the
+%                  ~4 kHz/year seasonal part stays thermal.  D9 renamed "ring
+%                  circumference change"; Fig 4 band extended to the 12.4 h tide.
+% R0   2026-10-08  (closed loop, synchrotron line) New Sec 6.2 "Closed-loop
+%                  response" paragraph and figure fig:closed-loop-tf (data
+%                  closed_loop_tf*.dat from docP_figures.py).  A resonator-times-
+%                  delay fit to the model's on-tune closed loop gives Q ~2860 and
+%                  ~745 ns, not the MeasDirCls 3447 / 621 ns: consistent only if
+%                  the MeasDirCls fit puts the delay inside the loop (else Q_L
+%                  ~7600, in-loop delay ~520 ns).  Cavity-A probe spectra of 8 Oct
+%                  (13:31 APE/60 sweeps; 15:35 RMS/100 power averages, analyzer
+%                  state saved and restored) give 8.79-8.83 kHz, sigma 1.09-1.16e3,
+%                  Q 24-26: P-only model 60-70% high; shared-phase integral path
+%                  f_i ~1 kHz fits (new R48, tab:robinson-today).  Findings 1-3,
+%                  Table 20, Sec 9 rows and procedure step 5 updated.  Date 8 Oct.
+% R0   2026-10-09  (MATLAB tools, references) matlab_operations_prod added as new R41
+%                  (RFgui/RFguiInvasive/RFtoolbox).  'MeasDirCls' = R12's name for RFgui
+%                  Measure Direct Closed; the printed fit lines come from cavityfit.m
+%                  (resonator x delay).  RFP networks from compute_loop.m/rftfresponse.m:
+%                  lead 944 kHz/2.39 MHz, lag 3.19 kHz/0.26 kHz (f_i 2.9 kHz, leak
+%                  0.26 kHz) -> Robinson-unstable in the model, so not the installed
+%                  network.  Fig 6 now includes the lead: +-82 kHz; fit Q 2920/630 ns vs
+%                  measured 3447/621 ns -> Q_L ~7700 needed.  PHASE.B 699.5 ns = Configure
+%                  Direct's fitted open-loop delay.  References renumbered contiguously:
+%                  10->8 ... 18->16, 21->17, 22->18, 25->19 ... 36->30, 38->31 ... 44->37,
+%                  46->38, 47->39, 48->40, new 41.  Spelling made American.  Date 9 Oct.
+% R0   2026-10-09  (closed-loop data of 2 Oct) matlab_operations_prod/Measurement: ten
+%                  RFgui Measure Direct Closed runs, 20-497 mA, PHASE.C -14..-23 deg.
+%                  New tab:mdc-fits from spear3rf/scripts/analyze_measure_direct.py (full
+%                  model, lead network, 2.5 MHz pole).  Low current: G 0.96 +- 0.03,
+%                  tau 624 +- 4 ns, Q_L 7600 +- 300, df ~ 0; theta = -24.6 - 1.28 PHASE.C,
+%                  i.e. a more negative PHASE.C leads, zero near -19 deg.  High current:
+%                  effective G 0.41-0.60, Q_L 4700-5100, tau 670-700 ns; the synchrotron
+%                  term changes the response <= 15% beyond 18 kHz and does not bias the
+%                  refit; output impropriety > 0.9, so the injected noise is effectively
+%                  one-dimensional (repo copies of NOISE_I/Q_BL.out do not match).  Fig 6:
+%                  measured 22 and 497 mA points replace the RFgui-fit squares.  Finding 3:
+%                  the tracking excess is a lag and lowers the damping by 5-11%.  Table 25
+%                  last row theta = -6 deg.  f_i 0.8-1.0 kHz (Table 20 loop) or 1.5-1.8 kHz
+%                  (effective 497 mA loop).  Open measurements now five.
+% R0   2026-10-09  (RAM dumps, historical data) DIRECT_[IQ]_CLOSED are RFP signal-RAM
+%                  records of TOTAL at 8 samples/turn (10.24 MHz); with the station
+%                  references (OldData/testdata/NOISE_[IQ]_BL.out, I = Q, corr 0.9998)
+%                  and conj(H1) as in measure_direct_closed.m they reproduce the .fig
+%                  to 0.03%/0.5 deg.  Fits now include the lag network: low current
+%                  G 0.88 +- 0.03, tau 624 +- 4, Q_L 6800 +- 250 (open-loop record 6500,
+%                  reflection 6760) -> the earlier Q_L 7600 was the missing integral
+%                  path; tab:mdc-fits replaced.  Near-carrier fit f_i 3.0-4.2 kHz; June
+%                  2020 drive/cavity line ratios follow the lag shape (G ~2) -> network =
+%                  RFgui lag network, so f_i ~1 kHz is effective and the model lacks
+%                  ~1e3/s of damping (Findings 2, Sec 8.4, Table 20, model limits).
+%                  Robinson poles in the TF: 8.3-9.4 kHz, sigma 1.0-1.6e3.  June 2020:
+%                  direct loop -35/-29 dB on the 360/720 Hz phase lines, -6/-2 dB on
+%                  amplitude (anisotropy); ripple keynote corrected.  PHASE.B 699.5 =
+%                  cavityfit delay of the stored OPEN_SP record (likely pre-Sept-2020
+%                  tube); May 2020 closed loop 700-780 ns.  Fig 6: G 0.875, dashed =
+%                  lag network.  TH_497 -6.0 -> -5.3 (Table 26 last row).  New R42
+%                  (OldData); R38 path Measurement/Oct2nd2026.  Klystron replaced
+%                  7 Sept 2020 (user); 2013 curves from the earlier tube.
+% R0   2026-10-09  (high-current response explained) Widely linear klystron model
+%                  (amplitude gain s, AM/PM kappa; 1-D injection along 45 deg) fits the four
+%                  high-current runs with G/tau/Q_L held at the low-current values: rms
+%                  0.012-0.015 vs 0.014-0.018 for the linear model with them free; kappa
+%                  1.1-1.4 needed (kappa = 0: 0.018-0.027), s 0.6-1.0; theta bounded to +-30
+%                  deg (mirror solution kappa -> -kappa near +70 deg).  Fig 6: dotted fit at
+%                  497 mA (data/closed_loop_wl_497.dat); panel (d) label moved.
+%                  spear3rf.timedomain.simulate gained klystron_amp_gain / klystron_am_pm
+%                  (s = 1, kappa = 0 unchanged; new test).  Robinson, 497 mA, lag network:
+%                  s 0.75 -> +140/s, kappa 0.6 -> +340/s; fitted (0.6, 1.2) -> 1.6e3/s at
+%                  7.1 kHz vs ~1e3/s at 8.3-8.8 kHz measured -> klystron AM/AM, AM/PM of the
+%                  present tube needed.  COUNTS.A 0.9 vs 1.3 dB moves f_coh by 50 Hz only.
+%                  PHASE.B 699.5 ns = previous tube (user); Finding 3 recommends 625 ns.
+%                  Data of earlier tubes framed as cross-checks.
+% R0   2026-10-09  (klystron from normal operation) OldData/SRF1 fault records (copied
+%                  13 Nov 2025): RFP signal RAM = drive (FBSIG 3), RFP cavity RAM = cavity-3
+%                  probe, IQA1 history = klystron output amplitude (mux 1), all frozen at the
+%                  trip; 4.9 ms pre-trip each, 10 usable.  Output vs drive (50-200 kHz, coh
+%                  0.93-0.98): s = 0.40 +- 0.05, same at ~40% and full power.  Drive -> probe
+%                  ratio A/B = kappa - j s: kappa 0.10 +- 0.04 (s 0.50, slight bias to linear).
+%                  The kappa 1.1-1.4 of the TF-only fits was the s-kappa degeneracy.  With s
+%                  0.40, kappa 0.10: low-current refits G 1.0-1.4 (G 0.88 = 1-D effective),
+%                  high current held rms 0.013-0.018, detuning within 4 kHz.  Robinson 497 mA
+%                  lag network: G 1.0 -> 950/s at 7.9 kHz; G 1.3 -> 450/s at 8.2 kHz (measured
+%                  ~1e3 at 8.3-8.8).  Live fault files dated 3-7 Oct 2026 (caget, read only).
+% R0   2026-10-07  (review) Restructured: old Secs 9 (HVPS) and 10 (tuner) folded
+%                  into Sec 2 (plant) with the delay budget; Sec 3 is now the I/Q
+%                  signal chain with a new chain figure; Sec 5 has a new loop-
+%                  architecture figure; Sec 6 adds gain tracking as its own loop
+%                  and condenses comb/woofer/gap feed-forward into one "PEP-II
+%                  loops not installed" subsection (comb figure dropped: it
+%                  contradicted R15, whose comb has peaks at the synchrotron
+%                  sidebands and a zero at the revolution harmonics); old App A
+%                  (parameter tables) removed as a duplicate of Secs 1-2.
+%                  Loop delay 621 -> 625 ns (all model numbers regenerated; new
+%                  870 ns LLRF9 estimate row).  Coupled-bunch index mu -> n,
+%                  beam-cavity coupling K -> kappa.  New phase-sweep figure at
+%                  0 dB, 100-500 mA.  Verified from the IOC sources: HVPS loop
+%                  regulates drive power on a ~0.5 s event-driven cycle; tuner
+%                  and gain-tracking loops run every 2 s; tuner position in mm,
+%                  p1 20-30 kHz/mm.  D9 now 10 Hz/day (ground motion and tunnel
+%                  temperature) and 4 kHz/year.  RFP delay given as a ~30 ns
+%                  estimate.  R23 (HVPS simulation) and R45 (Python package)
+%                  removed from the references; the simulation's perveance was
+%                  corrected to 1.0e-6 at the source.
+% R0   2026-10-06  (update) NEW Sec 8 "Synchrotron Damping and Direct-Loop
+%                  Optimization": characteristic equation of the beam-cavity-
+%                  loop system (Pedersen/Wilson limits), Robinson mode versus
+%                  current, gain, phase, delay and integral path (two pgfplots
+%                  figures from spear3rf/scripts/docP_figures.py, data in
+%                  data/), the legacy station from a read-only EPICS snapshot of
+%                  6 Oct 2026, evidence that the legacy loop gain is ~0 dB (not
+%                  15 dB), and a tuning procedure.  HVPS/Tuner/Performance are
+%                  now Secs 9-11.  U0 1.02 -> 1.09 MeV (dipoles 0.912 + IDs;
+%                  power balance 1.086 MeV) with the full cascade: phi_s 67.5,
+%                  sin 0.924, tan psi0 -4.84, psi_L -45.4, Df -36.0 kHz, a 2.00,
+%                  b 4.84, P_beam 136.3, P_gen 204, total 817 kW, |G|^2 1.3%,
+%                  P_fwd 207 kW, I_match 690 mA, transient table, both transient
+%                  figures; damping times now include the IDs (tau_s 2.36 ms).
+%                  f_RF note uses SPEAR:RFFreq.  Corrections: cavity envelope
+%                  transfer function had +jDw and R_s (now -jDw, R_L); eq
+%                  robinson-rate and cb-mode prefactors were dimensionally wrong;
+%                  delay rule 1/(4 tau) -> 1/(8 tau) with Gamp's G_max; legacy
+%                  delay 621 ns measured, LLRF9 270 ns is internal only; the
+%                  800 kHz / 15 dB / 40 dB claims replaced by gain-dependent
+%                  statements; ripple loop rewritten from sp3ripple.s (2006,
+%                  phase-only resonators at 30 line harmonics, 60-2880 Hz);
+%                  comb/GVF/woofer "not used" -> "not installed"; beam-loading
+%                  phasor redrawn (it still showed the pre-R0 1865 kV / -68 deg).
+%                  Figures 1 and 4 loop labels (direct "800 kHz", ripple "300 Hz",
+%                  "23 kHz", Robinson "by impedance reduction") brought in line;
+%                  comb+direct "40 dB" -> 16+20 dB at the PEP-II design point;
+%                  HVPS "-77 kV nominal" (a stage tap) -> -72 to -75 kV typical,
+%                  75.0 kV / 22.2 A measured; perveance from that point; new
+%                  margin row for the 800 kW IOC klystron limit (787 kW, 2%).
+%                  New refs R42-R46; R36 -> SPEAR3 firmware; R15 repo copy.
 % R0   2026-09-29  Reissued in the Doc L house style.  Front matter rebuilt
 %                  (title block, metadata table, list of figures).  All
 %                  hand-written "(Eq. N.M)" tags replaced by real LaTeX

@@ -1,0 +1,37 @@
+% !TeX root = ../P_rf_physics_and_plant.tex
+% Robinson damping at 500 mA versus direct-loop gain for several loop-phase errors.
+% Data: data/robinson_vs_gain.dat, written by spear3rf/scripts/docP_figures.py
+% (proportional loop, 625 ns delay, 2.5 MHz amplifier pole).  Columns: G (dB) and
+% sigma (1/s) for theta = -30, -15, 0, +15, +30 deg; nan where the field loop
+% itself is unstable, so each curve stops there.
+\begin{tikzpicture}[font=\small]
+\begin{axis}[
+  width=100mm, height=62mm, scale only axis,
+  xmin=-12, xmax=21, xlabel={direct-loop gain $G$ (dB)},
+  ymode=log, ymin=100, ymax=6000, ylabel={damping rate $\sigma$ (s$^{-1}$)},
+  ytick={100,200,500,1000,2000,5000}, log ticks with fixed point,
+  /pgf/number format/1000 sep={\,},
+  grid=both, grid style={draw=black!12},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+  unbounded coords=jump,
+  legend style={at={(0.97,0.97)},anchor=north east,draw=black!30,fill=white,font=\scriptsize},
+  legend cell align=left,
+]
+\addplot[cPwr!85!black,thick] table[x=G,y=pm30]{data/robinson_vs_gain.dat};
+\addlegendentry{$\theta=-30^\circ$ (lag)}
+\addplot[cPwr!55,thick,densely dashed] table[x=G,y=pm15]{data/robinson_vs_gain.dat};
+\addlegendentry{$\theta=-15^\circ$}
+\addplot[black,very thick] table[x=G,y=pp0]{data/robinson_vs_gain.dat};
+\addlegendentry{$\theta=0$}
+\addplot[cRf!60,thick,densely dashed] table[x=G,y=pp15]{data/robinson_vs_gain.dat};
+\addlegendentry{$\theta=+15^\circ$}
+\addplot[cRf!80!black,thick] table[x=G,y=pp30]{data/robinson_vs_gain.dat};
+\addlegendentry{$\theta=+30^\circ$ (lead)}
+\addplot[black!55,densely dashed,domain=-12:21,samples=2,forget plot] {424};
+\node[anchor=north west,font=\scriptsize,text=black!60] at (axis cs:-11.5,405) {radiation damping};
+% present legacy setting; the label sits in the empty lower-left region
+\addplot[only marks,mark=*,mark size=2.2pt,black,forget plot] coordinates {(0,1850)};
+\draw[-{Stealth[length=2mm]},black!70] (axis cs:-7,900) -- (axis cs:-0.5,1760);
+\node[anchor=north,font=\scriptsize,align=center] at (axis cs:-7,880) {present legacy\\setting (0 dB)};
+\end{axis}
+\end{tikzpicture}

@@ -1,0 +1,48 @@
+% !TeX root = ../P_rf_physics_and_plant.tex
+% Coherent dipole (Robinson) mode versus beam current, cavities at the optimum
+% detuning for each current.  Data: data/robinson_vs_current.dat, written by
+% spear3rf/scripts/docP_figures.py (U0 = 1.09 MeV, V_RF = 2.85 MV, beta = 3.78;
+% proportional loop with the measured 625 ns delay and a 2.5 MHz amplifier pole).
+% Columns: I f_open s_open f_g0 s_g0 f_g15 s_g15 f_inc a_rad (kHz, 1/s).
+% The 2021 point is the legacy measurement of [R4]: 8.932 kHz, Q 11.1.
+\begin{tikzpicture}[font=\small]
+\begin{axis}[
+  name=top, width=100mm, height=40mm, scale only axis,
+  xmin=0, xmax=800, xticklabels={},
+  ymin=3, ymax=10.8, ylabel={coherent $f$ (kHz)},
+  grid=both, grid style={draw=black!12},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+  legend style={at={(0.5,1.03)},anchor=south,legend columns=3,
+                draw=black!30,fill=white,font=\scriptsize},
+  legend cell align=left,
+]
+\addplot[cPwr!85!black,very thick] table[x=I,y=f_open]{data/robinson_vs_current.dat};
+\addlegendentry{no feedback}
+\addplot[cRf!75!black,very thick] table[x=I,y=f_g0]{data/robinson_vs_current.dat};
+\addlegendentry{$G=0$ dB (legacy now)}
+\addplot[cCtrl,very thick,dashdotted] table[x=I,y=f_g15]{data/robinson_vs_current.dat};
+\addlegendentry{$G=15$ dB (PEP-II design)}
+\addplot[black!55,densely dashed,thick] table[x=I,y=f_inc]{data/robinson_vs_current.dat};
+\addlegendentry{incoherent / radiation}
+\addplot[only marks,mark=square*,mark size=2pt,black] coordinates {(500,8.932)};
+\addlegendentry{measured 2021}
+\end{axis}
+\begin{axis}[
+  at={(top.below south west)}, anchor=north west, yshift=-4mm,
+  width=100mm, height=46mm, scale only axis,
+  xmin=0, xmax=800, xlabel={beam current $I_b$ (mA)},
+  ymode=log, ymin=250, ymax=10000, ylabel={damping rate $\sigma$ (s$^{-1}$)},
+  ytick={300,1000,3000,10000}, log ticks with fixed point,
+  /pgf/number format/1000 sep={\,},
+  grid=both, grid style={draw=black!12},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+]
+\addplot[cPwr!85!black,very thick] table[x=I,y=s_open]{data/robinson_vs_current.dat};
+\addplot[cRf!75!black,very thick] table[x=I,y=s_g0]{data/robinson_vs_current.dat};
+\addplot[cCtrl,very thick,dashdotted] table[x=I,y=s_g15]{data/robinson_vs_current.dat};
+\addplot[black!55,densely dashed,thick] table[x=I,y=a_rad]{data/robinson_vs_current.dat};
+\addplot[only marks,mark=square*,mark size=2pt,black] coordinates {(500,2528)};
+% the 15 dB curve hugs radiation damping, so the label goes below both
+\node[anchor=north,font=\scriptsize,text=black!60] at (axis cs:640,405) {radiation damping};
+\end{axis}
+\end{tikzpicture}

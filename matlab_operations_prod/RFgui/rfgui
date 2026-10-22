@@ -1,0 +1,38 @@
+#!/bin/csh -f
+#==============================================================
+#
+#  Abs:  Compiled MATLAB X-Display for RF gui
+#
+#  Name: rfgui
+#
+#  Rem:  This script launches RFgui 
+#
+#  Facility:  SLAC/PEPII Lpw-Level RF
+#
+#  Auth: 12-May-2003, William S. Colocho  (colocho)
+#  Rev:  15-May-2003, K. Luchini          (luchini)
+#
+#--------------------------------------------------------------
+#  Mod:  
+#        dd-mmm-yyyy, Reviewer's Name    (USERNAME)
+#          comments
+#==============================================================
+#
+if (!(-d /afs/slac/g/spear)) then
+    setenv SPEAR_PRODUCTION
+    unsetenv MATLAB_DEV
+endif
+if (!(-d /prod/epics)) then
+    unsetenv SPEAR_PRODUCTION
+    setenv MATLAB_DEV
+endif
+if ($?MATLAB_DEV) then
+  source /afs/slac/g/spear/epics/epicsReset
+else
+  source /prod/epics/epicsReset
+endif
+cd $MATLABDATAFILES
+umask 000
+rm -f rfgui.log
+nice +10 matExeRun RFgui | tee rfgui.log
+

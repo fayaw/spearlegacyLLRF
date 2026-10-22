@@ -1,0 +1,30 @@
+#!/bin/csh -f
+#==============================================================
+#
+#  Abs:  Reset environment and run matlab
+#
+#  Name: matlab_run
+#
+#  Args: none
+#
+#--------------------------------------------------------------
+#
+unsetenv MATLAB_VER
+if (!(-d /afs/slac/g/spear)) then
+    setenv SPEAR_PRODUCTION
+    unsetenv MATLAB_DEV
+endif
+if (!(-d /prod/epics)) then
+    unsetenv SPEAR_PRODUCTION
+    setenv MATLAB_DEV
+endif
+if ($?MATLAB_DEV) then
+  source /afs/slac/g/spear/epics/epicsReset
+else
+# test lines for backing out a version
+#  setenv MATLAB_DEV
+#  setenv MATLAB_VER R2012b
+  source /prod/epics/epicsReset
+endif
+matlab $* > /dev/null
+#end of script

@@ -19,7 +19,7 @@
 % ===== forward path ========================================================
 \node[ctrl,text width=18mm,anchor=west] (ref) at (0,0)   {\textbf{IQ Ref}\\{\tiny DAC}};
 \node[circle,draw=cNeut,thick,fill=white,inner sep=1.2pt] (sum) at (25,0) {$\Sigma$};
-\node[blk,text width=26mm,anchor=west] (bb)  at (32,0)   {\textbf{BASEBAND}\\\textbf{MODULATOR}\\{\tiny gain/phase tracking}};
+\node[blk,text width=26mm,anchor=west] (bb)  at (32,0)   {\textbf{ERROR AMP}\\{\tiny $+15$ dB, lead $+$ integral,}\\{\tiny ripple baseband modulator}};
 \node[blk,text width=22mm,anchor=west] (mod) at (64,0)   {\textbf{IQ RF MOD}\\{\tiny up to \qty{476}{\mega\hertz}}};
 \node[blk,text width=20mm,anchor=west] (drv) at (92,0)   {\textbf{DRIVE AMP}\\{\tiny $\approx\qty{29}{\watt}$}};
 \node[pwr,text width=26mm,anchor=west] (kly) at (118,0)  {\textbf{KLYSTRON}\\{\tiny \qty{1.5}{\mega\watt}, \qty{43}{\decibel}, ${<}\qty{150}{\nano\second}$}};
@@ -46,17 +46,18 @@
   {\textbf{IQ DEMOD $\rightarrow$ VECTOR SUM}\\{\tiny all four cavity probes}};
 \draw[sig] (166,-50) -- (dem.north);
 
-\node[ctrl,text width=56mm,anchor=north] (err) at (60,-58)
-  {\textbf{ERROR AMP}\\ lead $+$ integral compensation};
+\node[ctrl,text width=44mm,anchor=north] (err) at (54,-58)
+  {\textbf{DIRECT-LOOP MODULATOR}\\ gain $G$, phase $\theta$, frequency-offset tracking};
+% the two boxes differ in height: keep the return horizontal at the demodulator's centre
 \draw[sig] (dem.west) -- node[above,tag]
-  {\textbf{DIRECT LOOP} $\approx\qty{800}{\kilo\hertz}$} (err.east);
+  {\textbf{DIRECT LOOP}\quad $G\approx1$, half-bandwidth $\approx\qty{70}{\kilo\hertz}$} (dem.west -| err.east);
 \draw[sig] (err.west) -| (sum.south);
 
 % ===== ripple loop, fed down the reserved right-hand lane ==================
 \node[plc,text width=60mm,anchor=north] (rip) at (160,-84)
-  {\textbf{RIPPLE LOOP} $\approx\qty{300}{\hertz}$\\
-   {\tiny klystron forward power $\rightarrow$ IQ demod\\
-    DSP: AT\&T DSP1610, \qty{23}{\kilo\hertz} sample rate}};
+  {\textbf{RIPPLE LOOP} \qtyrange{0.06}{2.9}{\kilo\hertz} lines\\
+   {\tiny klystron output phase $\rightarrow$ 30 resonant cancellers, \qty{1}{\hertz} wide\\
+    DSP: AT\&T DSP1610, $\approx\qty{24.6}{\kilo\hertz}$ sample rate}};
 \coordinate (tapA) at ($(kly.north)+(0,6)$);
 \draw[draw=cNeut,thick] (kly.north) -- (tapA) -- (tapA -| 218,0);
 \draw[sig] (tapA -| 218,0) -- (rip.east -| 218,0) -- (rip.east);
@@ -66,14 +67,14 @@
 % Grouped rather than wired in: each acts on a different part of the plant, and
 % four more return paths would bury the direct loop.
 \node[plc,text width=60mm,anchor=north] (tun) at (36,-78)
-  {\textbf{TUNER LOOP} \qtyrange{0.01}{1}{\hertz}\\
-   {\tiny $\angle$probe $-$ $\angle$fwd $\rightarrow$ stepper $\rightarrow$ plunger}};
+  {\textbf{TUNER LOOP} \qtyrange{0.01}{0.05}{\hertz}\\
+   {\tiny $\angle$probe $-$ $\angle$fwd $\rightarrow$ stepper $\rightarrow$ plunger; \qty{2}{\second} cycle}};
 \node[plc,text width=60mm,anchor=north] (hv) at (36,-92)
-  {\textbf{HVPS LOOP} $\approx\qty{1}{\hertz}$\\
-   {\tiny drive power $\rightarrow$ PLC $\rightarrow$ SCR firing angle $\rightarrow V_k$}};
+  {\textbf{HVPS LOOP} $\lesssim\qty{0.1}{\hertz}$\\
+   {\tiny drive power $\rightarrow$ PLC $\rightarrow$ SCR firing angle $\rightarrow V_k$; \qty{0.5}{\second} cycle}};
 \node[ctrl,text width=60mm,anchor=north] (dac) at (36,-106)
   {\textbf{DAC LOOP} $\approx\qty{0.1}{\hertz}$\\
-   {\tiny maintains the $V_\text{gap}$ setpoint}};
+   {\tiny maintains the $V_\text{gap}$ setpoint through the reference DACs}};
 \node[grp,fit=(tun)(hv)(dac),inner sep=5pt] (supbox) {};
 \node[lbl,anchor=north west] at ($(supbox.south west)+(1,-1.5)$)
   {supervisory loops --- each acts on a different part of the plant};

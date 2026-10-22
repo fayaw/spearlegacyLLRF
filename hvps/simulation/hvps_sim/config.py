@@ -259,7 +259,7 @@ class KlystronLoadConfig:
     arc_probability_per_hour: float = 0.1 # random arcs
     arc_duration_us: float = 50.0         # µs typical arc
     # Beam characteristics
-    perveance: float = 2.0e-6             # A/V^(3/2) — klystron perveance
+    perveance: float = 1.0e-6             # A/V^(3/2); measured 19.4 A at 72.1 kV, 22.2 A at 75.0 kV
 
 
 @dataclass

@@ -1,0 +1,53 @@
+% !TeX root = ../P_rf_physics_and_plant.tex
+% The six active SPEAR3 loops in the order of Section 6: what each measures,
+% how and how often it acts, and what it drives.  Styles: rf = analog RFP,
+% blk = RFP DSP, ctrl = EPICS software, pwr = high-power actuator.
+% Rows: two RFP loops at y = 0, -13; four EPICS loops at y = -33 ... -72.  The
+% 20 mm step between the groups leaves room for the group label above the
+% second box (box borders sit 2.5 mm outside the nodes).
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+\tikzset{sen/.style={blk,text width=39mm,minimum height=8.5mm,
+                    execute at begin node={\hyphenpenalty=10000}},
+         lp/.style={text width=44mm,minimum height=8.5mm},
+         act/.style={blk,text width=39mm,minimum height=8.5mm,
+                    execute at begin node={\hyphenpenalty=10000}}}
+
+% column headers
+\node[lbl] at (20.9,15) {measures};
+\node[lbl] at (78,15) {loop: implementation and rate};
+\node[lbl] at (135.1,15) {acts on};
+
+% ===== RFP hardware ========================================================
+\node[sen] (s1) at (20.9,0)   {cavity probes, vector sum};
+\node[rf,lp] (l1) at (78,0) {\textbf{DIRECT LOOP}\\{\tiny analog RFP, continuous; $\approx 70$ kHz half-width}};
+\node[act] (a1) at (135.1,0)  {I/Q drive to the klystron};
+
+\node[sen] (s2) at (20.9,-13) {klystron output phase against the reference};
+\node[blk,lp] (l2) at (78,-13) {\textbf{RIPPLE LOOP}\\{\tiny RFP DSP, $\approx 24.6$ kHz; 30 lines at 60 Hz--2.9 kHz}};
+\node[act] (a2) at (135.1,-13) {baseband modulator in the drive path};
+
+% ===== EPICS software ======================================================
+\node[sen] (s3) at (20.9,-33) {klystron gain, from forward and drive power};
+\node[ctrl,lp] (l3) at (78,-33) {\textbf{GAIN TRACKING}\\{\tiny EPICS, every 2 s}};
+\node[act] (a3) at (135.1,-33) {DC coefficient of the ripple DSP};
+
+\node[sen] (s4) at (20.9,-46) {klystron drive power};
+\node[ctrl,lp] (l4) at (78,-46) {\textbf{HVPS LOOP}\\{\tiny EPICS, $\approx 0.5$ s cycle; $\lesssim 0.1$ Hz}};
+\node[pwr,text width=39mm,minimum height=8.5mm,execute at begin node={\hyphenpenalty=10000}] (a4) at (135.1,-46) {cathode voltage, via PLC and SCR firing angle};
+
+\node[sen] (s5) at (20.9,-59) {load angle of each cavity (probe $-$ forward phase)};
+\node[ctrl,lp] (l5) at (78,-59) {\textbf{TUNER LOOPS} ($\times 4$)\\{\tiny EPICS, every 2 s; 0.01--0.05 Hz}};
+\node[act] (a5) at (135.1,-59) {stepper motor and tuner plunger};
+
+\node[sen] (s6) at (20.9,-72) {gap voltage};
+\node[ctrl,lp] (l6) at (78,-72) {\textbf{DAC LOOP}\\{\tiny EPICS, $\approx 0.5$ s cycle; $\approx 0.1$ Hz}};
+\node[act] (a6) at (135.1,-72) {station reference DACs};
+
+\foreach \i in {1,...,6}{\draw[sig] (s\i.east) -- (l\i.west); \draw[sig] (l\i.east) -- (a\i.west);}
+
+% groups
+\node[grp,fit=(s1)(a2),inner sep=2.5mm] (g1) {};
+\node[lbl,anchor=south west] at ($(g1.north west)+(1,0.3)$) {RFP hardware (analog and DSP)};
+\node[grp,fit=(s3)(a6),inner sep=2.5mm] (g2) {};
+\node[lbl,anchor=south west] at ($(g2.north west)+(1,0.3)$) {EPICS software};
+\end{tikzpicture}

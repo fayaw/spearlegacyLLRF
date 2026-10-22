@@ -1,0 +1,47 @@
+% !TeX root = ../P_rf_physics_and_plant.tex
+% Robinson damping versus loop-phase error at the present legacy gain (0 dB),
+% for 100-500 mA with the cavities at the optimum detuning for each current.
+% Data: data/robinson_vs_phase.dat (625 ns delay, 2.5 MHz amplifier pole).
+% Columns: theta (deg) and sigma (1/s) for 100, 200, 300, 400, 500 mA.
+% Every value inside the axis window is plotted; the y range (-800 to 2200)
+% contains all of them for theta >= -60 deg (minimum -683, maximum 2032), so
+% nothing is clipped -- the frame only crops lags beyond -60 deg.
+\begin{tikzpicture}[font=\small]
+\begin{axis}[
+  width=100mm, height=62mm, scale only axis,
+  xmin=-60, xmax=90, xtick={-60,-45,...,90},
+  xticklabel={$\pgfmathprintnumber{\tick}^\circ$},
+  xlabel={loop-phase error $\theta$ (negative: lag)},
+  ymin=-800, ymax=2200, ytick={-500,0,500,1000,1500,2000},
+  ylabel={damping rate $\sigma$ (s$^{-1}$)},
+  /pgf/number format/1000 sep={\,},
+  grid=major, grid style={draw=black!12},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+  legend style={at={(0.97,0.03)},anchor=south east,draw=black!30,fill=white,font=\scriptsize},
+  legend cell align=left,
+]
+% unstable region and reference lines (drawn first, below the curves)
+\fill[cPwr!8] (axis cs:-60,-800) rectangle (axis cs:90,0);
+\addplot[black!45,thin,domain=-60:90,samples=2,forget plot] {0};
+\draw[black!30,thin] (axis cs:0,-800) -- (axis cs:0,2200);
+\addplot[black!55,densely dashed,domain=-60:90,samples=2,forget plot] {424};
+\addplot[black!55,densely dotted,thick,domain=-60:90,samples=2,forget plot] {848};
+% curves
+\addplot[cPwr!85!black,thick] table[x=theta,y=s100]{data/robinson_vs_phase.dat};
+\addlegendentry{100 mA}
+\addplot[cPwr!55,thick,densely dashed] table[x=theta,y=s200]{data/robinson_vs_phase.dat};
+\addlegendentry{200 mA}
+\addplot[black,very thick] table[x=theta,y=s300]{data/robinson_vs_phase.dat};
+\addlegendentry{300 mA}
+\addplot[cRf!60,thick,densely dashed] table[x=theta,y=s400]{data/robinson_vs_phase.dat};
+\addlegendentry{400 mA}
+\addplot[cRf!80!black,thick] table[x=theta,y=s500]{data/robinson_vs_phase.dat};
+\addlegendentry{500 mA}
+% labels, placed in regions the curves do not reach (all curves lie above
+% 860 s^-1 for theta >= 44 deg, and above 420 s^-1 for theta >= -8 deg); the
+% legend occupies the lower right, so the radiation-damping label sits mid-axis
+\node[anchor=north west,font=\scriptsize,text=black!60,inner sep=1pt] at (axis cs:2,410) {radiation damping};
+\node[anchor=north east,font=\scriptsize,text=black!60,inner sep=1pt] at (axis cs:88,834) {$2\times$ radiation damping};
+\node[anchor=south west,font=\scriptsize,text=cPwr!85!black] at (axis cs:-14,-760) {Robinson-unstable ($\sigma<0$)};
+\end{axis}
+\end{tikzpicture}

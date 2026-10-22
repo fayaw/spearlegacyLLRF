@@ -1,0 +1,113 @@
+% !TeX root = ../P_rf_physics_and_plant.tex
+% Closed-loop response T = G_OL/(1+G_OL) of the direct loop (eq:closed-loop), model of
+% tab:robinson-model (625 ns delay, 2.5 MHz amplifier pole) with the RFP lead network of the
+% RFgui loop models (zero 944 kHz, pole 2.39 MHz). Data: data/closed_loop_tf.dat
+% (+-300 kHz, 1 kHz steps) and data/closed_loop_tf_zoom.dat (+-12 kHz, 50 Hz steps), written by
+% spear3rf/scripts/docP_figures.py. Columns: f (kHz), then dB and phase (deg) for
+%   low  : on tune, G = 0.875, proportional only (gain fitted at 20-22 mA with the integral path in the model)
+%   lowi : the same with the integral path, the RFP lag network (f_i 2.93 kHz, leak 0.26 kHz, shared phase)
+%   p500 : 500 mA, optimum detuning (-36.0 kHz), G = 1, proportional only
+%   i500 : the same with the integral path
+% Measured points: data/closed_loop_meas_022.dat (2 Oct 2026, 09:47, 22 mA, PHASE.C -20) and
+% data/closed_loop_meas_497.dat (13:51, 497 mA, PHASE.C -20), columns f (kHz), db, ph (deg), T = -H, computed
+% from the RAM dumps as the RFgui routine does, |f| <= 300 kHz, +-18.8 kHz left out; written by
+% spear3rf/scripts/analyze_measure_direct.py, which also writes data/closed_loop_wl_497.dat: the 497 mA run
+% fitted with the klystron's amplitude gain and AM/PM free and G, delay, Q_L held at the low-current values.
+% Ranges: wide |T| -18.7..+0.1 dB (measured -22.9..-5.8), phase -145..+144 deg; zoom |T| -7.6..+0.2 dB,
+% phase -46..+21 deg.
+\begin{tikzpicture}[font=\small]
+% ---------------------------------------------------------------- (a) magnitude, +-300 kHz
+\begin{axis}[
+  name=magw, width=80mm, height=40mm, scale only axis,
+  xmin=-300, xmax=300, xtick={-300,-200,...,300}, xticklabels={},
+  ymin=-24, ymax=2, ytick={-20,-15,...,0}, ylabel={$\lvert T\rvert$ (dB)},
+  grid=major, grid style={draw=black!12},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+  legend style={at={(0.95,1.04)},anchor=south,legend columns=2,draw=black!30,fill=white,font=\scriptsize,
+                /tikz/every even column/.append style={column sep=3mm}},
+  legend cell align=left,
+]
+% integral-path curves first, so that the proportional curves lie on top and only the
+% narrow near-carrier feature of the integral path shows at this scale
+\addplot[black!55,densely dashed,thick,forget plot] table[x=f,y=lowi_db]{data/closed_loop_tf.dat};
+\addplot[cPwr!80,densely dashed,thick,forget plot] table[x=f,y=i500_db]{data/closed_loop_tf.dat};
+\addplot[black,thick,forget plot] table[x=f,y=low_db]{data/closed_loop_tf.dat};
+\addplot[cRf!80!black,thick,forget plot] table[x=f,y=p500_db]{data/closed_loop_tf.dat};
+\addplot[only marks,mark=o,mark size=0.8pt,mark options={line width=0.35pt},black!75,each nth point=3,forget plot]
+  table[x=f,y=db]{data/closed_loop_meas_022.dat};
+\addplot[only marks,mark=o,mark size=0.8pt,mark options={line width=0.35pt},cRf,each nth point=3,forget plot]
+  table[x=f,y=db]{data/closed_loop_meas_497.dat};
+\addplot[cRf!70!black,densely dotted,very thick,unbounded coords=jump,forget plot]
+  table[x=f,y=db]{data/closed_loop_wl_497.dat};
+\addlegendimage{black,thick}
+\addlegendentry{on tune, $G=0.875$, proportional}
+\addlegendimage{cRf!80!black,thick}
+\addlegendentry{500 mA, $G=1$, proportional}
+\addlegendimage{black!55,densely dashed,thick}
+\addlegendentry{on tune, with integral path}
+\addlegendimage{cPwr!80,densely dashed,thick}
+\addlegendentry{500 mA, with integral path}
+\addlegendimage{only marks,mark=o,mark size=1.2pt,mark options={line width=0.35pt},black!75}
+\addlegendentry{measured, 22 mA}
+\addlegendimage{only marks,mark=o,mark size=1.2pt,mark options={line width=0.35pt},cRf}
+\addlegendentry{measured, 497 mA}
+\addlegendimage{cRf!70!black,densely dotted,very thick}
+\addlegendentry{497 mA, klystron AM/PM (fit)}
+\node[anchor=north west,font=\scriptsize] at (rel axis cs:0.01,0.97) {(a)};
+\end{axis}
+% ---------------------------------------------------------------- (b) phase, +-300 kHz
+\begin{axis}[
+  name=phw, at={(magw.below south west)}, anchor=north west, yshift=-2mm,
+  width=80mm, height=34mm, scale only axis,
+  xmin=-300, xmax=300, xtick={-300,-200,...,300}, xlabel={offset from $f_\text{RF}$ (kHz)},
+  ymin=-180, ymax=180, ytick={-180,-90,0,90,180}, ylabel={phase of $T$ (deg)},
+  grid=major, grid style={draw=black!12},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+]
+\addplot[black!55,densely dashed,thick] table[x=f,y=lowi_ph]{data/closed_loop_tf.dat};
+\addplot[cPwr!80,densely dashed,thick] table[x=f,y=i500_ph]{data/closed_loop_tf.dat};
+\addplot[black,thick] table[x=f,y=low_ph]{data/closed_loop_tf.dat};
+\addplot[cRf!80!black,thick] table[x=f,y=p500_ph]{data/closed_loop_tf.dat};
+\addplot[only marks,mark=o,mark size=0.8pt,mark options={line width=0.35pt},black!75,each nth point=3]
+  table[x=f,y=ph]{data/closed_loop_meas_022.dat};
+\addplot[only marks,mark=o,mark size=0.8pt,mark options={line width=0.35pt},cRf,each nth point=3]
+  table[x=f,y=ph]{data/closed_loop_meas_497.dat};
+\addplot[cRf!70!black,densely dotted,very thick,unbounded coords=jump]
+  table[x=f,y=ph]{data/closed_loop_wl_497.dat};
+\node[anchor=south west,font=\scriptsize] at (rel axis cs:0.01,0.03) {(b)};
+\end{axis}
+% ---------------------------------------------------------------- (c) magnitude near the carrier
+\begin{axis}[
+  name=magz, at={(magw.north east)}, anchor=north west, xshift=16mm,
+  width=56mm, height=40mm, scale only axis,
+  xmin=-12, xmax=12, xtick={-12,-8,...,12}, xticklabels={},
+  ymin=-8, ymax=2, ytick={-8,-6,...,2},
+  grid=major, grid style={draw=black!12},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+]
+\draw[black!40,densely dotted,thick] (axis cs:-8.8,-8) -- (axis cs:-8.8,2) (axis cs:8.8,-8) -- (axis cs:8.8,2);
+\addplot[black!55,densely dashed,thick] table[x=f,y=lowi_db]{data/closed_loop_tf_zoom.dat};
+\addplot[cPwr!80,densely dashed,thick] table[x=f,y=i500_db]{data/closed_loop_tf_zoom.dat};
+\addplot[black,thick] table[x=f,y=low_db]{data/closed_loop_tf_zoom.dat};
+\addplot[cRf!80!black,thick] table[x=f,y=p500_db]{data/closed_loop_tf_zoom.dat};
+\node[anchor=north west,font=\scriptsize] at (rel axis cs:0.01,0.97) {(c)};
+\node[anchor=north west,font=\scriptsize,text=black!60,inner sep=1pt] at (axis cs:8.9,1.8) {$+f_s$};
+\node[anchor=north west,font=\scriptsize,text=black!60,inner sep=1pt] at (axis cs:-8.7,1.8) {$-f_s$};
+\end{axis}
+% ---------------------------------------------------------------- (d) phase near the carrier
+\begin{axis}[
+  name=phz, at={(magz.below south west)}, anchor=north west, yshift=-2mm,
+  width=56mm, height=34mm, scale only axis,
+  xmin=-12, xmax=12, xtick={-12,-8,...,12}, xlabel={offset from $f_\text{RF}$ (kHz)},
+  ymin=-50, ymax=30, ytick={-40,-20,0,20},
+  grid=major, grid style={draw=black!12},
+  tick label style={font=\scriptsize}, label style={font=\scriptsize},
+]
+\draw[black!40,densely dotted,thick] (axis cs:-8.8,-50) -- (axis cs:-8.8,30) (axis cs:8.8,-50) -- (axis cs:8.8,30);
+\addplot[black!55,densely dashed,thick] table[x=f,y=lowi_ph]{data/closed_loop_tf_zoom.dat};
+\addplot[cPwr!80,densely dashed,thick] table[x=f,y=i500_ph]{data/closed_loop_tf_zoom.dat};
+\addplot[black,thick] table[x=f,y=low_ph]{data/closed_loop_tf_zoom.dat};
+\addplot[cRf!80!black,thick] table[x=f,y=p500_ph]{data/closed_loop_tf_zoom.dat};
+\node[anchor=south west,font=\scriptsize] at (rel axis cs:0.01,0.03) {(d)};
+\end{axis}
+\end{tikzpicture}

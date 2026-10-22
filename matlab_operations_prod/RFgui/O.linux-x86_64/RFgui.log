@@ -1,0 +1,25 @@
+[?1h=
+                                                 < M A T L A B (R) >
+                                       Copyright 1984-2020 The MathWorks, Inc.
+                                  R2020a Update 4 (9.8.0.1417392) 64-bit (glnxa64)
+                                                    June 24, 2020
+
+
+	Non-Degree Granting Education License -- for use at non-degree granting, nonprofit,
+	educational organizations only.  Not for government, commercial, or other organizational use.
+
+Compiler version: 8.0 (R2020a)
+Dependency analysis by REQUIREMENTS.
+Parsing file "/accphys/matlab/operations/RFgui/RFgui.m"
+	(referenced from command line).
+Deleting temporary MEX authorization files...
+Removing: '/tmp/ffb8-1050-1efb-72d5_13383.auth'.
+Removing: '/tmp/de2a-1b55-8b25-2af5_13383.auth'.
+Removing: '/tmp/cea8-f542-a71e-aeaa_13383.auth'.
+Removing: '/tmp/4445-398b-a723-cb2c_13383.auth'.
+Removing: '/tmp/4dbd-2a53-77f5-630d_13383.auth'.
+Removing: '/tmp/c7c0-9a46-a0c0-74b1_13383.auth'.
+Removing: '/tmp/508e-a50a-4cac-d667_13383.auth'.
+Generating file "/accphys/matlab/operations/RFgui/O.linux-x86_64/readme.txt".
+Generating file "/accphys/matlab/operations/RFgui/O.linux-x86_64/run_RFgui.sh".
+[?1l>

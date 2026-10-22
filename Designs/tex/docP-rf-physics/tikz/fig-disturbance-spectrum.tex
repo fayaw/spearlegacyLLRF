@@ -24,14 +24,14 @@
 
 % ---- bands: {disturbance}/{loop}/{log f low}/{log f high}/{row}/{style} ----
 \foreach \lab/\loop/\a/\b/\r/\sty in {%
-  {D9 ring circumference drift}/{tuner, plus periodic RF master oscillator update}/-7.6/-7.2/0/pwr,
-  {D8 cavity thermal drift}/{tuner loop}/-3/-2/1/pwr,
-  {D6 klystron gain}/{HVPS loop $\approx\qty{1}{\hertz}$, DAC loop $\approx\qty{0.1}{\hertz}$}/-2/0/2/plc,
-  {D7 slow mechanical}/{tuner loop}/0/1/3/plc,
-  {D5 HVPS ripple}/{ripple loop $\approx\qty{300}{\hertz}$, plus the direct loop}/1.78/3.3/4/rf,
-  {D2 beam transients}/{direct loop $\approx\qty{800}{\kilo\hertz}$}/3/5/5/rf,
-  {D3 Robinson}/{direct loop, by impedance reduction}/3.9/4.1/6/ctrl,
-  {D4 coupled-bunch}/{direct loop, plus the PEP-II comb filter}/6.0/6.2/7/ctrl}{%
+  {D9 ring circumference change}/{RF frequency feedback moves $f_\text{RF}$ (tides ${\lesssim}\,\qty{100}{\hertz}$, \qty{4}{\kilo\hertz}/year); the tuners follow}/-7.5/-4.6/0/pwr,
+  {D8 cavity thermal drift}/{tuner loop}/-4/-2/1/pwr,
+  {D6 klystron gain}/{gain tracking (\qty{2}{\second}) and HVPS loop (\qty{0.5}{\second} cycle)}/-2/0/2/plc,
+  {D7 microphonics}/{negligible against the \qty{35.5}{\kilo\hertz} half-bandwidth}/0/2.5/3/plc,
+  {D5 HVPS ripple}/{DSP ripple canceller at the 60\,Hz--2.9\,kHz lines, plus the direct loop}/1.78/3.46/4/rf,
+  {D2 beam transients}/{direct loop, $\approx\qty{70}{\kilo\hertz}$ at $G\approx1$}/3/5/5/rf,
+  {D3 Robinson}/{damped by the cavity detuning; the direct-loop setting sets the rate}/3.9/4.1/6/ctrl,
+  {D4 coupled-bunch}/{fundamental-mode growth ${\le}\,5\;\text{s}^{-1}$, negligible; no comb at SPEAR3}/6.0/6.2/7/ctrl}{%
     \pgfmathsetmacro\xa{(\a+8)*\sc}
     \pgfmathsetmacro\xb{(\b+8)*\sc}
     \pgfmathsetmacro\y{9+\r*\rp}
