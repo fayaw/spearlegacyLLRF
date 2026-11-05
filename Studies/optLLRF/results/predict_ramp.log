@@ -1,0 +1,78 @@
+﻿== eff: linear klystron, shared-phase integral path, effective corner 1 kHz
+    10 mA: f_coh  10026 Hz  sigma    425/s  Q  74.1  |chi|max  74.1  jitter/unit PSD (timing) kPM 2.94e+05 kAM 5.34e+04 mPM 2.93e+05 mAM 5.31e+04
+    50 mA: f_coh  10011 Hz  sigma    437/s  Q  71.9  |chi|max  72.1  jitter/unit PSD (timing) kPM 2.94e+05 kAM 6.63e+04 mPM 2.75e+05 mAM 6.18e+04
+   100 mA: f_coh   9967 Hz  sigma    475/s  Q  65.9  |chi|max  66.6  jitter/unit PSD (timing) kPM 2.79e+05 kAM 8.06e+04 mPM 2.41e+05 mAM 6.95e+04
+   150 mA: f_coh   9894 Hz  sigma    535/s  Q  58.1  |chi|max  59.6  jitter/unit PSD (timing) kPM 2.54e+05 kAM 9.23e+04 mPM 2.03e+05 mAM 7.38e+04
+   200 mA: f_coh   9793 Hz  sigma    612/s  Q  50.3  |chi|max  52.7  jitter/unit PSD (timing) kPM 2.25e+05 kAM 1.02e+05 mPM 1.68e+05 mAM 7.56e+04
+   250 mA: f_coh   9667 Hz  sigma    700/s  Q  43.4  |chi|max  46.7  jitter/unit PSD (timing) kPM 1.98e+05 kAM  1.1e+05 mPM 1.38e+05 mAM 7.62e+04
+   300 mA: f_coh   9518 Hz  sigma    792/s  Q  37.8  |chi|max  41.9  jitter/unit PSD (timing) kPM 1.76e+05 kAM 1.18e+05 mPM 1.14e+05 mAM 7.65e+04
+   350 mA: f_coh   9348 Hz  sigma    881/s  Q  33.3  |chi|max  38.4  jitter/unit PSD (timing) kPM 1.57e+05 kAM 1.27e+05 mPM 9.56e+04 mAM 7.71e+04
+   400 mA: f_coh   9160 Hz  sigma    961/s  Q  29.9  |chi|max  35.9  jitter/unit PSD (timing) kPM 1.42e+05 kAM 1.37e+05 mPM 8.14e+04 mAM 7.84e+04
+   450 mA: f_coh   8956 Hz  sigma   1027/s  Q  27.4  |chi|max  34.3  jitter/unit PSD (timing) kPM 1.31e+05 kAM  1.5e+05 mPM 7.05e+04 mAM 8.05e+04
+   500 mA: f_coh   8741 Hz  sigma   1074/s  Q  25.6  |chi|max  33.6  jitter/unit PSD (timing) kPM 1.22e+05 kAM 1.65e+05 mPM 6.21e+04 mAM 8.36e+04
+== lag: installed lag network, klystron g_A 0.40 and k_AP 0.10 (normal operation)
+    10 mA: f_coh  10013 Hz  sigma    458/s  Q  68.8  |chi|max  68.9  jitter/unit PSD (timing) kPM 2.74e+05 kAM 1.26e+05 mPM 2.98e+05 mAM 9.06e+03
+    50 mA: f_coh   9944 Hz  sigma    597/s  Q  52.3  |chi|max  53.2  jitter/unit PSD (timing) kPM 2.14e+05 kAM 1.22e+05 mPM 2.19e+05 mAM 9.18e+03
+   100 mA: f_coh   9820 Hz  sigma    780/s  Q  39.5  |chi|max  41.2  jitter/unit PSD (timing) kPM 1.66e+05 kAM 1.21e+05 mPM 1.58e+05 mAM 9.49e+03
+   150 mA: f_coh   9656 Hz  sigma    961/s  Q  31.6  |chi|max  34.0  jitter/unit PSD (timing) kPM 1.35e+05 kAM 1.25e+05 mPM 1.21e+05 mAM 9.97e+03
+   200 mA: f_coh   9456 Hz  sigma   1125/s  Q  26.4  |chi|max  29.7  jitter/unit PSD (timing) kPM 1.15e+05 kAM 1.33e+05 mPM 9.59e+04 mAM 1.07e+04
+   250 mA: f_coh   9225 Hz  sigma   1256/s  Q  23.1  |chi|max  27.3  jitter/unit PSD (timing) kPM 1.01e+05 kAM 1.46e+05 mPM 7.94e+04 mAM 1.16e+04
+   300 mA: f_coh   8967 Hz  sigma   1342/s  Q  21.0  |chi|max  26.2  jitter/unit PSD (timing) kPM 9.22e+04 kAM 1.64e+05 mPM 6.82e+04 mAM 1.29e+04
+   350 mA: f_coh   8688 Hz  sigma   1374/s  Q  19.9  |chi|max  26.5  jitter/unit PSD (timing) kPM 8.68e+04 kAM 1.89e+05 mPM 6.08e+04 mAM 1.46e+04
+   400 mA: f_coh   8394 Hz  sigma   1345/s  Q  19.6  |chi|max  28.0  jitter/unit PSD (timing) kPM 8.48e+04 kAM 2.25e+05 mPM 5.62e+04 mAM 1.71e+04
+   450 mA: f_coh   8089 Hz  sigma   1253/s  Q  20.3  |chi|max  31.2  jitter/unit PSD (timing) kPM 8.62e+04 kAM 2.78e+05 mPM 5.43e+04 mAM 2.07e+04
+   500 mA: f_coh   7778 Hz  sigma   1101/s  Q  22.2  |chi|max  36.9  jitter/unit PSD (timing) kPM 9.22e+04 kAM  3.6e+05 mPM 5.52e+04 mAM 2.62e+04
+== prop: proportional loop only, linear klystron
+    10 mA: f_coh  10026 Hz  sigma    425/s  Q  74.1  |chi|max  74.1  jitter/unit PSD (timing) kPM  2.9e+05 kAM 5.26e+04 mPM 2.85e+05 mAM 5.17e+04
+    50 mA: f_coh  10012 Hz  sigma    446/s  Q  70.5  |chi|max  70.7  jitter/unit PSD (timing) kPM 2.85e+05 kAM  6.4e+04 mPM 2.63e+05 mAM 5.89e+04
+   100 mA: f_coh   9969 Hz  sigma    511/s  Q  61.3  |chi|max  62.0  jitter/unit PSD (timing) kPM 2.57e+05 kAM 7.38e+04 mPM 2.19e+05 mAM 6.29e+04
+   150 mA: f_coh   9898 Hz  sigma    614/s  Q  50.6  |chi|max  52.0  jitter/unit PSD (timing) kPM 2.19e+05 kAM 7.91e+04 mPM 1.73e+05 mAM 6.24e+04
+   200 mA: f_coh   9800 Hz  sigma    751/s  Q  41.0  |chi|max  42.9  jitter/unit PSD (timing) kPM 1.82e+05 kAM 8.15e+04 mPM 1.33e+05 mAM 5.98e+04
+   250 mA: f_coh   9678 Hz  sigma    914/s  Q  33.3  |chi|max  35.7  jitter/unit PSD (timing) kPM 1.51e+05 kAM 8.28e+04 mPM 1.03e+05 mAM 5.66e+04
+   300 mA: f_coh   9532 Hz  sigma   1096/s  Q  27.3  |chi|max  30.2  jitter/unit PSD (timing) kPM 1.26e+05 kAM  8.4e+04 mPM 8.06e+04 mAM 5.36e+04
+   350 mA: f_coh   9366 Hz  sigma   1288/s  Q  22.9  |chi|max  26.2  jitter/unit PSD (timing) kPM 1.07e+05 kAM 8.56e+04 mPM  6.4e+04 mAM 5.12e+04
+   400 mA: f_coh   9181 Hz  sigma   1482/s  Q  19.5  |chi|max  23.2  jitter/unit PSD (timing) kPM 9.21e+04 kAM 8.79e+04 mPM 5.17e+04 mAM 4.93e+04
+   450 mA: f_coh   8981 Hz  sigma   1671/s  Q  16.9  |chi|max  21.0  jitter/unit PSD (timing) kPM 8.04e+04 kAM  9.1e+04 mPM 4.24e+04 mAM  4.8e+04
+   500 mA: f_coh   8768 Hz  sigma   1850/s  Q  14.9  |chi|max  19.5  jitter/unit PSD (timing) kPM 7.11e+04 kAM  9.5e+04 mPM 3.53e+04 mAM 4.72e+04
+== lag-side phase margins (theta at sigma = 2 alpha_rad, sigma = 0)
+    25 mA: eff    0.0/   nan  lag    0.0/ -76.6  prop    0.0/   nan
+    50 mA: eff    0.0/ -71.6  lag    0.0/ -55.6  prop    0.0/ -75.0
+   100 mA: eff    0.0/ -44.7  lag    0.0/ -41.2  prop    0.0/ -49.1
+   150 mA: eff    0.0/ -35.7  lag   -5.3/ -36.6  prop    0.0/ -41.6
+   200 mA: eff    0.0/ -32.5  lag  -10.5/ -35.0  prop    0.0/ -40.3
+   250 mA: eff    0.0/ -31.9  lag  -13.8/ -34.6  prop   -4.0/ -41.7
+   300 mA: eff    0.0/ -32.6  lag  -15.8/ -34.7  prop  -13.7/ -44.8
+   350 mA: eff   -1.8/ -34.2  lag  -16.8/ -34.9  prop  -22.8/ -49.2
+   400 mA: eff   -6.3/ -36.5  lag  -16.7/ -35.0  prop  -32.0/ -54.9
+   450 mA: eff  -10.3/ -39.3  lag  -15.0/ -34.5  prop  -42.1/ -62.6
+   500 mA: eff  -14.0/ -42.6  lag  -11.0/ -33.2  prop  -54.5/ -75.0
+== lag network: sigma(I) [1/s] versus klystron amplitude gain g_A (k_AP 0.1; g_A = 1: linear)
+   100 mA: g_A 1.0:    403  g_A 0.8:    514  g_A 0.6:    618  g_A 0.4:    780
+   200 mA: g_A 1.0:    329  g_A 0.8:    552  g_A 0.6:    774  g_A 0.4:   1125
+   300 mA: g_A 1.0:    178  g_A 0.8:    492  g_A 0.6:    821  g_A 0.4:   1342
+   400 mA: g_A 1.0:    -72  g_A 0.8:    299  g_A 0.6:    701  g_A 0.4:   1345
+   500 mA: g_A 1.0:   -434  g_A 0.8:    -42  g_A 0.6:    393  g_A 0.4:   1101
+  g_A 1.0: unstable above 380 mA ; cavities anti-damp (sigma < alpha_rad) from 10 mA
+  g_A 0.8: unstable above 490 mA ; cavities anti-damp (sigma < alpha_rad) from 350 mA
+  g_A 0.6: stable to 500 mA ; cavities anti-damp (sigma < alpha_rad) from 500 mA
+  g_A 0.4: stable to 500 mA 
+== tuner lag: detuning as a fraction of the optimum (f_coh, sigma)
+  eff 100 mA: 0.6:  9991 Hz/  456  0.8:  9979 Hz/  466  1.0:  9967 Hz/  475  1.2:  9955 Hz/  485
+  eff 200 mA: 0.6:  9884 Hz/  545  0.8:  9838 Hz/  580  1.0:  9793 Hz/  612  1.2:  9751 Hz/  641
+  eff 300 mA: 0.6:  9708 Hz/  678  0.8:  9609 Hz/  742  1.0:  9518 Hz/  792  1.2:  9435 Hz/  828
+  eff 500 mA: 0.6:  9161 Hz/  996  0.8:  8928 Hz/ 1061  1.0:  8741 Hz/ 1074  1.2:  8599 Hz/ 1054
+  lag 100 mA: 0.6:  9842 Hz/  798  0.8:  9831 Hz/  790  1.0:  9820 Hz/  780  1.2:  9810 Hz/  768
+  lag 200 mA: 0.6:  9541 Hz/ 1218  0.8:  9494 Hz/ 1179  1.0:  9456 Hz/ 1125  1.2:  9426 Hz/ 1058
+  lag 300 mA: 0.6:  9133 Hz/ 1603  0.8:  9034 Hz/ 1492  1.0:  8967 Hz/ 1342  1.2:  8927 Hz/ 1173
+  lag 500 mA: 0.6:  8038 Hz/ 1901  0.8:  7841 Hz/ 1496  1.0:  7778 Hz/ 1101  1.2:  7811 Hz/  756
+== f_coh crossings of the 360 Hz family (6-pulse HVPS harmonics)
+  eff: f_coh =  9000 Hz at   440 mA (line HWHM  161 Hz -> +/- 39 mA)
+  eff: f_coh =  9360 Hz at   347 mA (line HWHM  139 Hz -> +/- 39 mA)
+  eff: f_coh =  9720 Hz at   230 mA (line HWHM  106 Hz -> +/- 41 mA)
+  lag: f_coh =  7920 Hz at   477 mA (line HWHM  187 Hz -> +/- 30 mA)
+  lag: f_coh =  8280 Hz at   419 mA (line HWHM  210 Hz -> +/- 35 mA)
+  lag: f_coh =  8640 Hz at   358 mA (line HWHM  219 Hz -> +/- 38 mA)
+  lag: f_coh =  9000 Hz at   294 mA (line HWHM  212 Hz -> +/- 40 mA)
+  lag: f_coh =  9360 Hz at   222 mA (line HWHM  189 Hz -> +/- 41 mA)
+  lag: f_coh =  9720 Hz at   132 mA (line HWHM  143 Hz -> +/- 42 mA)
+figures written to D:\OneDrive - SLAC National Accelerator Laboratory\SLACR\pyCode\spearlegacyLLRF\Studies\optLLRF\results

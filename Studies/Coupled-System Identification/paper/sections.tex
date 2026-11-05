@@ -1,0 +1,143 @@
+% ======================================================================================================
+\section{Introduction}\label{sec:intro}
+% ======================================================================================================
+
+In an electron storage ring the fundamental-mode RF system and the stored beam form one coupled dynamical system. The beam induces voltage in the accelerating cavities; the cavities are detuned to compensate the reactive part of that loading; feedback around the klystron lowers the impedance that the beam sees; and the coherent dipole motion of the bunches responds to every perturbation of the gap voltage that the feedback leaves. The classical analyses---Robinson's stability criteria~\cite{Robinson1964}, Pedersen's beam-loaded cavity~\cite{Pedersen1975}, and the treatments of RF feedback by Boussard~\cite{Boussard1985} and Wilson~\cite{Wilson1993}---describe this coupling with a handful of parameters: cavity bandwidth and detuning, loop gain, phase and delay, beam current and synchrotron frequency. Detailed models built on the same physics were used to design and commission the low-level RF (LLRF) systems of PEP-II and the LHC~\cite{Rivetta2007,Mastorides2010}.
+
+At an operating machine, however, several of these parameters are not known well. Components age and are replaced, calibrations are uncertain, parts of the loop setting are not recorded, and the klystron runs close to saturation, where its small-signal response to a change of drive amplitude differs from its response to a change of drive phase. A model assembled from design values may describe one operating point and fail at another. The operational questions---how the damping and frequency of the coherent mode, and the transfer of RF noise to the beam, change with beam current, loop gain and loop phase---call for a model identified from measurements. Such measurements must be made on a running machine: with the feedback closed, with stored beam, with small excitation, and preferably with the diagnostics that already exist~\cite{Forssell1999,Ljung1999}.
+
+This paper asks whether operational closed-loop measurements can identify a compact model that predicts beam--cavity--amplifier--feedback interactions across operating conditions. The approach is physics-informed (grey-box) identification~\cite{Bohlin2006,Pintelon2012}. Physics supplies the structure---cavity resonators, rigid-bunch dipole dynamics, the loop topology and the controller networks, the steady-state beam loading, the way the loop settings enter---and the data determine, and test, the parameters that the physics leaves uncertain. The emphasis is not on fitting one transfer function, which many models do, but on whether one set of physical parameters accounts for the changes of the dynamics as the beam current, the loop gain and the loop phase change, and whether the identified model predicts quantities that were not used to identify it.
+
+The data are the closed-loop responses recorded by the existing routine of the SPEAR3 RF station---band-limited noise injected into the klystron drive and the feedback signal recorded---at beam currents from 20 to \SI{500}{mA} and at several loop gains and phases, on two days a month apart, together with records that the station froze at trips of its present klystron. Four features make the problem a stringent test: (i) the excitation is one-dimensional, the same noise sequence on both quadratures, so each record measures a single projection of a response that is not rotation-invariant once the klystron is compressed; (ii) part of the loop phase is not recorded, because a tracking correction drifts by several degrees; (iii) the beam's coherent mode occupies a few kilohertz around $\pm f_s$, a band the routine itself discards; and (iv) independent information on the klystron exists only in those trip records, which are five years older than the closed-loop data.
+
+The paper makes four contributions. Section~\ref{sec:model} gives a two-quadrature (widely linear~\cite{Picinbono1995}) model of the closed loop with beam, including the klystron's compression and AM/PM conversion, and derives what a one-dimensional excitation records. Section~\ref{sec:ident} shows that single records do not determine the klystron's asymmetry, that records taken at different loop settings determine its compression but not its AM/PM conversion, and that the trip records supply the latter. Section~\ref{sec:explain} tests competing explanations for the change of the response with beam current. Section~\ref{sec:valid} validates the selected model by out-of-band prediction of the coupled beam mode, by prediction across operating conditions, and against the klystron compression measured in the trip records; the out-of-band test exposes, and the beam band then identifies, the one beam parameter that the loop band cannot determine---the synchrotron frequency.
+
+% ======================================================================================================
+\section{The measured system}\label{sec:system}
+% ======================================================================================================
+
+\subsection{RF station and direct feedback}
+
+SPEAR3 is a \SI{3}{GeV} storage ring with harmonic number $h=372$ and $\fRF=\SI{476.3}{MHz}$, operated at \SI{500}{mA} in top-off~\cite{Hettel1999,McIntosh2004}. One \SI{1.5}{MW} klystron drives four single-cell PEP-II cavities~\cite{Rimmer1992} through a circulator and a waveguide splitter; together they provide $V_\mathrm{RF}=\SI{2.85}{MV}$. Table~\ref{tab:params} lists the parameters used. The cavities are overcoupled ($\beta\approx3.8$, loaded quality factor $\QL\approx6800$, half-bandwidth \SI{35}{kHz}) and are detuned below $\fRF$ in proportion to the beam current, by about \SI{36}{kHz} at \SI{500}{mA}, to cancel the reactive beam loading; the tuner loops hold the load angle, so the detuning follows the current.
+
+The legacy LLRF processor (RFP), an analog VXI module of PEP-II design~\cite{Corredoura1999}, regulates the vector sum of the four probe signals with a direct loop: the measured vector sum is rotated and scaled by a baseband modulator (settings \PHC{} and \CNA{}, with a frequency-offset tracking correction added to the phase), the reference is subtracted, and a lead network and a lag (integral) network shape the error before the I/Q modulator that drives the klystron (Fig.~\ref{fig:loop}).
+
+\begin{figure}[tb]
+\centering
+\resizebox{\columnwidth}{!}{\input{fig_loop}}
+\caption{The measured system. Band-limited noise $\vect n$ is added to the klystron drive after the controller; the controller output $\vect x$ (TOTAL) is recorded. The beam couples to the four cavities through its dipole motion $\Delta\phi$ [Eq.~\eqref{eq:beam}]; the klystron responds differently to drive amplitude and phase [Eq.~\eqref{eq:klystron}]. Bold symbols are two-quadrature vectors and matrices in the cavity frame.}\label{fig:loop}
+\end{figure} The loop delay is about \SI{0.63}{\micro\second}, mostly in the klystron and the cables to the tunnel. A digital ripple loop acting on the 60-Hz harmonics up to \SI{2.9}{kHz}, and slow EPICS loops for the klystron voltage, the cavity tuners and the gain tracking, complete the system. The klystron-voltage loop holds the drive power at a set point, \SI{\driveSet}{W}, \SI{\driveMargin}{dB} below the saturation setting of \SI{\driveSat}{W}, by moving the HVPS voltage, so the klystron's voltage, and with it its gain, change with the beam current. In the snapshots of 2026 the drive is \SI{\driveLow}{W} without beam and \SI{\driveHigh}{W} at \SI{500}{mA}, with the HVPS at \SI{\hvpsLow}{kV} and \SI{\hvpsHigh}{kV}, a klystron gain of \SI{\klyGainLow}{dB} and \SI{\klyGainHigh}{dB}, and an output of \SI{\klyFwdLow}{kW} and \SI{\klyFwdHigh}{kW} at an efficiency of \SI{\klyEffLow}{\percent} and \SI{\klyEffHigh}{\percent}: at the same drive the tube works much closer to saturation with beam than without. Gain tracking holds the product of a DSP coefficient and the measured klystron gain constant; in the same snapshots it is \gaintrackHigh{} at \SI{500}{mA} and \gaintrackLow{} without beam, although the klystron gain differs by \SI{\klyGainDiff}{dB}. The forward-path gain is therefore independent of the operating point, and the loop gain changes only with \CNA. Neither the closed-loop records nor the trip records carry the HVPS voltage or the klystron's drive and output power.
+
+\begin{table}[tb]
+\caption{Parameters of the SPEAR3 RF station used in the model. Fixed values are taken from design documents and station measurements~\cite{McIntosh2004,SPEAR3_DocP}; identified values are those of Sec.~\ref{sec:explain}.}\label{tab:params}
+\footnotesize
+\begin{ruledtabular}
+\begin{tabular}{lll}
+Quantity & Symbol & Value \\
+\hline
+Energy; harmonic number & $E_0$; $h$ & \SI{3.0}{GeV}; 372 \\
+RF frequency & $\fRF$ & \SI{476.304}{MHz} \\
+Energy loss per turn (measured) & $U_0$ & \SI{1.09}{MeV} \\
+Total gap voltage & $V_\mathrm{RF}$ & \SI{2.85}{MV} \\
+Synchronous phase (from crest) & $\phi_s$ & \ang{67.5} \\
+Radiation damping rate & $\arad$ & \SI{424}{s^{-1}} \\
+Momentum compaction (design) & $\alpha_c$ & $1.18\times10^{-3}$ \\
+Cavities; $R/Q$ each (circuit) & $n_\mathrm{cav}$, $R/Q$ & 4; \SI{116.6}{\ohm} \\
+Lead network zero; pole & & \SI{944}{kHz}; \SI{2.39}{MHz} \\
+Lag network zero; pole & & \SI{3.19}{kHz}; \SI{0.26}{kHz} \\
+Drive-chain pole & $\omega_a/2\pi$ & \SI{2.5}{MHz} \\
+Klystron drive (set; saturation) & $P_\mathrm{d}$ & \SI{\driveSet}{W}; \SI{\driveSat}{W} \\
+Klystron AM/PM (trip records) & $\kAP$ & \kapTrip \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\subsection{The closed-loop measurement}
+
+The RFgui routine ``Measure Direct Closed'' plays a stored sequence of band-limited noise through two DACs whose output is summed into the klystron drive after the controller, and records the controller output (the summed feedback signal, TOTAL) in the RFP signal memory: $2^{18}$ complex samples at eight samples per turn (\SI{10.24}{MS/s}, \SI{25.6}{ms}). The stored reference is flat to $\pm\SI{500}{kHz}$. The routine estimates the transfer function from the reference to the record, which for a complex-linear loop is the complementary sensitivity $-L/(1+L)$, and discards $\pm\SI{18.8}{kHz}$ around the carrier. The same sequence is stored for the I and Q DACs (correlation \noiseCorr), so the excitation is one-dimensional. The measurement is non-invasive: the injected noise is a fraction of a percent of the drive and the routine runs with stored beam.
+
+\subsection{Data}
+
+Table~\ref{tab:data} lists the eighteen records of 2026 used in this paper. On 2 October the current was varied from 20 to \SI{497}{mA} at fixed gain, and the phase setting was stepped at \SI{22}{mA}. On 3 November, at about \SI{500}{mA}, the phase setting was stepped from \ang{-30} to \ang{-35} and the gain setting from $+1.3$ to $-0.2$~dB, after one record at \SI{242}{mA}. Each record file name carries the station voltage, the beam current, \CNA, \PHC{} and the time, e.g.\ \texttt{v2850i494gm002pm0350d20261103172932} for \SI{2.85}{MV}, \SI{494}{mA}, $-0.2$~dB and \ang{-35.0}; the frequency-offset tracking correction was on and is not recorded (station snapshots show it drifting between \ang{+2} and \ang{+13}).
+
+The trip records are a second, independent data set, of the same klystron, which has been in service since September 2020. At each trip the station freezes, together, the last \SI{5.0}{ms} of the klystron drive I/Q (RFP signal memory), one cavity probe I/Q (RFP cavity memory), and the klystron output amplitude (IQ\&A history), all at \SI{10.24}{MS/s}. Of the \tripN{} records of trips in 2021, \tripUsed{} hold RF in every memory: \tripFull{} at full klystron output and \tripReduced{} at \tripPower\% of that power---the output the station needs without beam (\klyFwdRatio\% in the snapshots)---with the same drive to within \tripDriveDiff\%. They carry neither the beam current, nor the loop settings, nor the HVPS voltage.
+
+\begin{table}[tb]
+\caption{Closed-loop records of 2026 (station voltage \SI{2.85}{MV}). $\Ib$: beam current; \CNA: loop gain setting; \PHC: loop phase setting. Group: operating point used for the klystron and noise-angle parameters.}\label{tab:data}
+\begin{ruledtabular}
+\begin{tabular}{lcccc}
+Date, time & $\Ib$ (mA) & \CNA{} (dB) & \PHC{} (deg) & Group \\
+\hline
+\input{table_data}
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+\subsection{Frequency-response estimation}\label{sec:estimation}
+
+For each record the transfer function $\hat H(f)$ is the Welch $H_1$ estimate~\cite{Bendat2010} with Hann windows and \SI{50}{\percent} overlap, in the convention of the routine (complex conjugate of the cross-spectral ratio), which makes the loop delay positive and places the high-current detuning below $\fRF$. Two resolutions are used: 8192-point segments (\SI{1.25}{kHz}) for the \emph{wideband} $15\le|f|\le\SI{400}{kHz}$, and $2^{15}$-point segments (\SI{312}{Hz}) for the \emph{beam band} $3\le|f|\le\SI{16}{kHz}$. The variance of each bin follows from the coherence $\gamma^2$, $\sigma_H^2=|H|^2(1-\gamma^2)/(\gamma^2 n_\mathrm{eff})$ with $n_\mathrm{eff}$ the overlap-corrected number of segments; the output-noise and input spectra entering it are median-smoothed over neighbouring bins so that a bin's weight does not follow the noise of its own estimate. In the beam band, where the coupled mode is only a few bins wide, the model is convolved with the window's power kernel before it is compared with the estimate. The complex residuals $(H_\mathrm{model}-\hat H)/\sigma_H$ define a Gaussian likelihood, so that $\chi^2/\nu\approx1$ indicates a fit at the noise level and differences of $\chi^2$ are log-likelihood ratios. A split-record test confirms the calibration of $\sigma_H$ for the bulk of the bins (App.~\ref{app:estimator}); bins carrying interference lines are down-weighted by the smoothing, which is why the best fits reach $\chi^2/\nu$ slightly below one (\lowcurChi{} for record-by-record linear fits at \SI{22}{mA}).
+
+% ======================================================================================================
+\section{Physics-informed model}\label{sec:model}
+% ======================================================================================================
+
+\subsection{Two-quadrature representation}
+
+Signals are complex envelopes on the carrier $e^{j\wRF t}$, and $s$ is the Laplace variable of the envelope ($s=j2\pi f$ at an offset $f$ from $\fRF$). Because the klystron and the beam treat amplitude and phase differently, each envelope is written as the real vector $\vect x=(x_I,x_Q)^\mathsf{T}$ in the \emph{cavity frame}, in which the steady total gap voltage is real, and each complex-coefficient transfer function $F(s)$ as the real matrix
+\begin{equation}\label{eq:realmatrix}
+\mat F(s)=\begin{pmatrix}F_r & -F_i\\ F_i & F_r\end{pmatrix},\quad
+F_{r,i}=\tfrac{1}{2}\left[F(s)\pm\bar F(s)\right]\big/\{1,j\},
+\end{equation}
+with $\bar F(s)=\overline{F(\bar s)}$ (Doc~P, App.~C~\cite{SPEAR3_DocP}). Blocks with a real impulse response---delays, the lead and lag networks, the drive-chain pole---are scalars times the identity; a detuned cavity, a rotation, the compressed klystron and the beam are not.
+
+\subsection{Cavities and beam}
+
+Cavity $k$ is the baseband resonator $Z_k(s)=R_L\omega_{1/2}/(s+\omega_{1/2}-j\Delta\omega_k)$, with $R_L=(R/Q)\QL$, $\omega_{1/2}=\wRF/2\QL$ and $\Delta\omega_k$ its detuning from $\fRF$. All four receive the same generator current $\vect i_g$ and the same beam current, so $\vect v_k=\mat Z_k(\vect i_g-I_{b1}\hat{\vect b}\,\Delta\phi)$, where $I_{b1}=2\Ib$ and $\Delta\phi$ is the phase of the bunch centroids (positive when late). For rigid bunches in the uniform-fill dipole mode~\cite{Pedersen1975,Chao1993},
+\begin{equation}\label{eq:beam}
+\left(s^2+2\arad s+\omega_s^2\right)\Delta\phi=\kappa_1\,\hat{\vect p}^\mathsf{T}\textstyle\sum_k\vect v_k,
+\end{equation}
+with $\kappa_1=\alpha_c\wRF/[(E_0/e)T_\mathrm{rev}]$, $\omega_s^2=\kappa_1V_\mathrm{RF}\sin\phi_s$, and the unit vectors $\hat{\vect b}=(-\sin\phi_s,-\cos\phi_s)^\mathsf{T}$, along which a phase shift changes the beam current, and $\hat{\vect p}=(\cos\phi_s,-\sin\phi_s)^\mathsf{T}$, along which the bunch senses the voltage. Eliminating $\Delta\phi$ gives the beam-loaded plant from generator current to the measured vector sum $\vect v_m=\sum_kw_k\vect v_k$ ($w_k=1/4$):
+\begin{align}
+\mat P_b&=\mat Z_m-\frac{\kappa_1I_{b1}}{D(s)}\,\mat Z_m\hat{\vect b}\,\hat{\vect p}^\mathsf{T}\mat Z_\Sigma,\label{eq:plant}\\
+D(s)&=s^2+2\arad s+\omega_s^2+\kappa_1I_{b1}\,\hat{\vect p}^\mathsf{T}\mat Z_\Sigma\hat{\vect b},\label{eq:Dopen}
+\end{align}
+where $\mat Z_\Sigma=\sum_k\mat Z_k$ and $\mat Z_m=\sum_kw_k\mat Z_k$. $D(s)=0$ is Pedersen's quartic for the beam-loaded cavity without feedback~\cite{Pedersen1975}.
+
+\subsection{Klystron}
+
+About its operating point the klystron is memoryless at these frequencies (its bandwidth is \SI{5}{MHz}). A change of drive amplitude changes the output amplitude with a relative gain $\gA$ and the output phase by $\kAP$ radians per unit relative amplitude (AM/PM conversion~\cite{Saleh1981,Cripps2006}); a change of drive phase passes with unit relative gain. In the cavity frame
+\begin{equation}\label{eq:klystron}
+\mat K=\mat R(\theta_g)\begin{pmatrix}\gA&0\\ \kAP&1\end{pmatrix}\mat R(-\theta_g),
+\end{equation}
+where $\mat R$ is a rotation and $\theta_g$ the angle of the steady generator current, computed from the beam loading [$\vect i_{g0}=V_\mathrm{cav}/Z_m(0)+I_{b1}e^{-j\phi_s}$]. A linear klystron has $\gA=1$, $\kAP=0$; a klystron driven close to saturation has $\gA<1$. Its phase-path gain is absorbed in the loop gain. Because the station holds the drive and moves the cathode voltage (Sec.~\ref{sec:system}), the klystron's gain and its place on its transfer curve change with the beam current. Gain tracking removes the change of gain from the loop; the change of place, and with it of $\gA$ and $\kAP$, remains.
+
+\subsection{Loop and recorded response}
+
+The noise $\vect n$ enters the drive after the controller, and the record is the controller output $\vect x$:
+\begin{equation}\label{eq:loop}
+\vect x=-\mat M(\vect x+\vect n),\qquad \mat M(s)=G\,c(s)\,\mat R(\theta)\,\mat P_b(s)\,\mat K/R_L,
+\end{equation}
+where $G$ is the loop gain of the phase path at an on-tune resonance, $\theta$ the loop phase error (positive = lead), and
+\begin{equation}\label{eq:chain}
+c(s)=e^{-s\tau}\,\frac{1+s/\omega_z}{1+s/\omega_p}\,\frac{s+\omega_{iz}}{s+\omega_{ip}}\,\frac{\omega_a}{s+\omega_a}
+\end{equation}
+collects the delay $\tau$, the lead and lag networks and the drive-chain pole (Table~\ref{tab:params}). The closed-loop response is $\mat T=-(\mat 1+\mat M)^{-1}\mat M$. A one-dimensional excitation along the angle $\alpha$ in the cavity frame records
+\begin{equation}\label{eq:recorded}
+H(f)=e^{-j\alpha}\,(1\;\;j)\,\mat T\begin{pmatrix}\cos\alpha\\ \sin\alpha\end{pmatrix}=H_1(f)+H_2(f)\,e^{-2j\alpha},
+\end{equation}
+with the direct and image responses $H_1=[T_{11}+T_{22}+j(T_{21}-T_{12})]/2$ and $H_2=[T_{11}-T_{22}+j(T_{21}+T_{12})]/2$~\cite{Picinbono1995,Schreier2010}. For a linear klystron and no beam, $H_2=0$ and $H=-L/(1+L)$ with $L=Ge^{j\theta}c\,Z_m/R_L$. Otherwise a single record measures one mixture of $H_1$ and $H_2$, set by $\alpha$, which depends on the klystron's insertion phase but not on the loop settings, because the noise enters after the controller's rotation. Elements outside the loop (the DAC filters and the recording channel) multiply $H$ by a smooth factor common to all records, $\exp(c_1x+c_2x^2)$ with $x=f/\SI{400}{kHz}$; its linear phase is not separable from the loop delay and is set to zero.
+
+\subsection{The coupled mode}
+
+The poles of $\mat T$ are the zeros of $\det[\mat 1+\mat M(s)]\,D(s)$. Tracked from zero current, one pair is the coherent dipole mode of beam, cavities, klystron and loop, $s=-\sigma\pm j\omega_c$. Without feedback it is Pedersen's root; with a linear klystron it is the root of the characteristic equation of Refs.~\cite{Boussard1985,SPEAR3_DocP}; the model reproduces both, and the two-quadrature roots of Ref.~\cite{SPEAR3_DocP}, to machine precision. The same model therefore predicts the recorded response in the wideband, where the loop dominates, and in the beam band, where the coupled mode does.
+
+\subsection{Parameter classes}
+
+The physics fixes the structure and the parameters of Table~\ref{tab:params}. The beam current of each record is measured; the loop gain is $G=G_0\,10^{(\CNA-0.9\,\mathrm{dB})/20}$, with $G_0$ the gain at the setting of 2 October, because gain tracking holds the forward path constant. The remaining parameters are identified, at the level at which physics says they can vary:
+\begin{itemize}
+\item station constants, common to all records: $G_0$, $\tau$, $\QL$, the measurement-chain coefficients and, where stated, $\alpha_c$;
+\item per operating point (date and current): the compression $\gA$ and the noise angle $\alpha$; the AM/PM conversion $\kAP$, which the closed-loop records do not determine (Sec.~\ref{sec:ident}), is fixed at the value measured in the trip records, and the alternative of one compression for all currents is tested in Sec.~\ref{sec:explain};
+\item per group of records taken minutes apart at one current: the detuning $\Delta f$;
+\item per record: the loop phase $\theta$, which carries the unrecorded tracking correction.
+\end{itemize}
+The steady generator-current angle $\theta_g$ follows from the detuning and the current.

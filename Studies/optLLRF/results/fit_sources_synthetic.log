@@ -1,0 +1,15 @@
+﻿synthetic scan, model eff, 500.0 mA: klystron PM/AM (3e-12, 3e-11), measurement PM/AM (1e-11, 1e-12), scatter 15%
+  COUNTS.A  1.3 dB: f  8741 Hz sigma  1074; S_n 1.04e-11 (true 9.88e-12)
+  COUNTS.A -0.2 dB: f  8550 Hz sigma  1363; S_n 1.28e-11 (true 1.13e-11)
+  COUNTS.A -1.7 dB: f  8358 Hz sigma  1682; S_n 1.35e-11 (true 1.28e-11)
+  COUNTS.A  1.3 dB: f  8741 Hz sigma  1074; S_n 8.12e-12 (true 9.88e-12)
+  COUNTS.A  2.8 dB: f  8925 Hz sigma   824; S_n 9.92e-12 (true 8.66e-12)
+  COUNTS.A  4.3 dB: f  9098 Hz sigma   620; S_n 8.19e-12 (true 7.66e-12)
+  COUNTS.A  1.3 dB: f  8741 Hz sigma  1074; S_n 9.11e-12 (true 9.88e-12)
+== 500 mA, 7 points: hypotheses ranked by the rms log residual of S_n
+  klystron amplitude only  measurement phase only     : rms 0.110; S_kly 3.06e-11 [2.8e-11, 3.4e-11], S_meas 1.54e-11 [7.8e-12, 2.0e-11] rad^2/Hz; cond 3.6
+  klystron amplitude only  measurement equal          : rms 0.111; S_kly 2.95e-11 [2.6e-11, 3.3e-11], S_meas 7.93e-12 [5.2e-12, 1.1e-11] rad^2/Hz; cond 4.3
+  klystron amplitude only  measurement amplitude only : rms 0.113; S_kly 2.84e-11 [2.3e-11, 3.2e-11], S_meas 1.62e-11 [1.0e-11, 2.3e-11] rad^2/Hz; cond 5.0
+  klystron equal           measurement phase only     : rms 0.116; S_kly 1.98e-11 [1.8e-11, 2.2e-11], S_meas 6.05e-12 [0.0e+00, 1.2e-11] rad^2/Hz; cond 4.1
+  klystron equal           measurement equal          : rms 0.116; S_kly 1.96e-11 [1.7e-11, 2.1e-11], S_meas 2.99e-12 [0.0e+00, 6.7e-12] rad^2/Hz; cond 5.0
+  truth: klystron group 3.3e-11 (mostly amplitude), measurement group 1.1e-11 (mostly phase)

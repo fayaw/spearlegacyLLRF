@@ -22,7 +22,7 @@
 \DeclareRobustCommand{\RDEF}[1]{%
   \raisebox{0pt}[0pt][0pt]{\hypertarget{ref:R#1}{}}\textbf{[R#1]}}
 
-% Disturbance tags D1..D9 link back to the taxonomy table that defines them.
+% Disturbance tags D1..D10 link back to the taxonomy table that defines them.
 \DeclareRobustCommand{\D}[1]{\hyperlink{dist:table}{\textbf{D#1}}}
 
 \hypersetup{pdftitle={SPEAR3 RF System: RF Physics, Control Theory and Physical Plant},
@@ -47,7 +47,7 @@
 \textbf{Reviewer}    & Jim Sebek and others \\
 \textbf{Classification} & Tier 1 --- Physics and Plant Reference (implementation-independent) \\
 \textbf{Affiliation} & SSRL, SLAC National Accelerator Laboratory \\
-\textbf{Date}        & 9 October 2026 \\
+\textbf{Date}        & 23 October 2026 \\
 \end{tabular}
 \end{minipage}
 \end{center}
@@ -170,6 +170,38 @@ hardware is replaced by the LLRF9 controller.
 %                  high current held rms 0.013-0.018, detuning within 4 kHz.  Robinson 497 mA
 %                  lag network: G 1.0 -> 950/s at 7.9 kHz; G 1.3 -> 450/s at 8.2 kHz (measured
 %                  ~1e3 at 8.3-8.8).  Live fault files dated 3-7 Oct 2026 (caget, read only).
+% R0   2026-10-22  (driven oscillator) The dipole mode as a driven, damped oscillator
+%                  (proposal reviewed with the model): Sec 8.1 renamed and rewritten (eq
+%                  rob-driven; n_eff = eps_A cot phi_s - eps_phi in the I/Q sign
+%                  convention; stiffness w_coh^2 + sigma^2).  New Sec 8.7 "Noise-Driven
+%                  Motion and the Gain Trade-off": chi = w_s^2/D0, boxed variance (3%
+%                  open loop, 1% from 0 dB), energy/timing weights, per-source drive
+%                  h_x, tab:robinson-drive, fig:robinson-noise, eq rob-target.  The
+%                  scalar S_up/|1+G_OL|^2 + |T|^2 S_sens fails for the detuned station:
+%                  closed/open drive at f_coh 1.03 (klystron PM) and 0.27 (AM) at 0 dB
+%                  against 0.41; feedback raises klystron-PM jitter 1.8x at 0 dB, which
+%                  time-domain noise injection confirms (timedomain.simulate_noise,
+%                  within 11%).  App C: external drive and two-quadrature form (new
+%                  spear3rf.quadrature; char_fn to 1e-15, time-domain klystron roots to
+%                  1%).  15:35 line area (eq rob-line-area): dphi 0.19-0.25 deg, dE/E
+%                  5.2-6.8e-5, S_n 1.9-3.2e-11 against a 4.7e-11 floor; lines 60-1080 Hz
+%                  -51.5 dBc.  New D10 (RF noise) in Sec 4, Fig 4 and Sec 9.1; eq
+%                  rejection in Sec 5.2; Sec 1.4 keynote; procedure steps 3-5, warning
+%                  signs; open measurements now seven.  Klystron s, kappa renamed g_A,
+%                  k_AP (clash with the Laplace s and the coupling kappa).  Numbers:
+%                  spear3rf/scripts/docP_noise.py.  No BPM material (user).  Date 22 Oct.
+% R0   2026-10-23  (correction, Sec 8.8) The 15:35 line area of 22 Oct included the 60 Hz
+%                  harmonics.  Masked (+-0.6 RBW): broadband -58.5/-59.8 dBc, dphi 0.19
+%                  (effective integral) / 0.14 deg (lag + klystron), S_n 1.8/1.1e-11 against
+%                  4.1e-11 from the floor.  The 6-pulse harmonics at 8640 and 9000 Hz (16 dB
+%                  above the floor, beam share 0.8-1.3) add 0.55/0.36 deg: total 0.58/0.39
+%                  deg (3.4/2.3 ps), dE/E 1.6/1.0e-4; with the 60-1080 Hz lines 0.40-0.60
+%                  deg.  2021 -> 2026, same drive: variance x2.2-2.9 (9000 Hz), x3.8-4.4
+%                  (8640 Hz).  Changed: Sec 1.4 keynote, D5, D10, Sec 8.8 paragraph and
+%                  Finding 5 (crossing of a 360 Hz harmonic at 220-230 mA in both models),
+%                  Sec 8.10 item 7 (1.3 dB), Sec 9.1 D10 row.  Numbers: docP_noise.py
+%                  section 6b, with Studies/optLLRF/code/python/optllrf.py; measurement
+%                  plan Studies/optLLRF/SPEAR3_Decoupling_Measurement_Plan.md.  Date 23 Oct.
 % R0   2026-10-07  (review) Restructured: old Secs 9 (HVPS) and 10 (tuner) folded
 %                  into Sec 2 (plant) with the delay budget; Sec 3 is now the I/Q
 %                  signal chain with a new chain figure; Sec 5 has a new loop-

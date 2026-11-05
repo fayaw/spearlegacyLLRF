@@ -1,11 +1,12 @@
 """Historical SRF1 data in matlab_operations_prod/Measurement/OldData, for Doc P and the performance study.
 
-  diags20200504/measureDirect...fig   closed-loop TF, 4 May 2020, no beam, COUNTS.A 5.1 dB, PHASE.C -33 deg
+  ../ClosedLoopTF/2020-05-04/measureDirect...fig   closed-loop TF, 4 May 2020, no beam, COUNTS.A 5.1 dB, PHASE.C -33 deg
   feedback/CAVITY_[IQ]*, DRIVE_[IQ]*  cavity-1 probe and klystron drive RAM dumps, 2 June 2020, six loop configurations
   klystron/gainCurves/20130311/*.mat  klystron transfer curves, 11 March 2013 (a tube replaced since)
   SRF1/savedata*.sav*                 saved IOC settings, December 2003
-  SRF1/FAULT*_<n>                     fault records (copied 13 Nov 2025, present tube): RFP drive I/Q (signal RAM,
-                                      FBSIG 3), RFP cavity-3 probe I/Q, IQA1 klystron-output amplitude, frozen together
+  ../FaultFiles/2021/FAULT*_<n>       trip records of 2021 (present tube; moved from OldData/SRF1, copied there
+                                      13 Nov 2025): RFP drive I/Q (signal RAM, FBSIG 3), RFP cavity-RAM probe I/Q
+                                      (mux code 3), IQA1 klystron-output amplitude, frozen together at the trip
 The klystron failed on 3 September 2020 and was replaced on 7 September 2020: the 2013 and 2020 data are from
 earlier tubes than the present one.
 """
@@ -22,13 +23,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import analyze_measure_direct as amd  # noqa: E402
 
 OLD = amd.MEAS / "OldData"
+TRIPS = amd.MEAS / "FaultFiles" / "2021"
 CONF = {"all loops on": "AllOn", "ripple loop off": "DirectOnRippleOff", "integral path off": "DirectOnRippleOnIntegralOff",
         "lead network off": "DirectOnRippleOnLeadOff", "direct loop off": "DirectOffRippleOn",
         "direct and ripple off": "DirectOffRippleOff"}
 
 
 def may2020_closed_loop():
-    path = OLD / "diags20200504" / "measureDirect000mA2850gp051pm33020200504.fig"
+    path = amd.MEAS / "ClosedLoopTF" / "2020-05-04" / "measureDirect000mA2850gp051pm33020200504.fig"
     # this older figure has one line per side, so all lines are read here rather than with amd.fig_tf
     data = sio.loadmat(path)["__function_workspace__"].tobytes()
     header = b"MATLAB 5.0 MAT-file, subsystem".ljust(116, b" ") + b"\x00" * 8 + data[0:4]
@@ -153,14 +155,14 @@ def fault_rfp(prefix, n):
     """RFP fault RAM (signal or cavity), oldest sample first; the low two bits of the first word give the mux."""
     parts = []
     for q in ("I", "Q"):
-        w = np.frombuffer((OLD / "SRF1" / f"{prefix}{q}_{n}").read_bytes()[16:], dtype=">i2").astype(np.int64)
+        w = np.frombuffer((TRIPS / f"{prefix}{q}_{n}").read_bytes()[16:], dtype=">i2").astype(np.int64)
         parts.append((int(w[0] & 3), np.fix(w / 16) / 2048))
     return parts[0][0], (parts[0][1] + 1j * parts[1][1])[::-1]
 
 
 def fault_iqa(module, n):
     """IQA amplitude history (newest sample first in the file); the low three bits give the mux channel."""
-    w = np.frombuffer((OLD / "SRF1" / f"FAULTIqa{module}Amp_{n}").read_bytes()[21:], dtype=">u2").astype(np.int64)
+    w = np.frombuffer((TRIPS / f"FAULTIqa{module}Amp_{n}").read_bytes()[21:], dtype=">u2").astype(np.int64)
     return int(w[0] & 7) + 1, (np.fix((w - 32768) / 16) / 2048)[::-1]
 
 

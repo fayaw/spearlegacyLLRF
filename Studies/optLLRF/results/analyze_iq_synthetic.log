@@ -1,0 +1,117 @@
+﻿synthetic probe, model eff, 500 mA, source klystron_PM: model line f 8741 Hz, sigma 1074/s, Q 25.6
+synthetic_eff_500mA_klystron_PM: 16.0 s at 50 kS/s, carrier offset +0.00 Hz, resolution 0.50 Hz
+  rms amplitude 9.86e-04, rms phase 0.028 deg (whole band)
+  upper sideband, 6-10 kHz | +/-3 HWHM: Lorentzian f  8770.0 |  8752.7 Hz, sigma  1113 |  1112/s; Fano f  8740.0 |  8738.8 Hz, sigma  1086 |  1116/s (asymmetry +2 deg)
+  lower sideband, 6-10 kHz | +/-3 HWHM: Lorentzian f  8780.5 |  8758.3 Hz, sigma  1130 |  1122/s; Fano f  8740.0 |  8738.5 Hz, sigma  1092 |  1126/s (asymmetry +0 deg)
+  line in the phase     spectrum (Lorentzian): f  7461.2 Hz, sigma  10649/s, peak/floor  11.5 dB
+  line in the amplitude spectrum (Lorentzian): f  8794.7 Hz, sigma    836/s, peak/floor 201.1 dB
+  harmonics above the local floor (AM and PM rms, deg-equivalent for PM):
+       9000 Hz (n 150, 6-pulse): AM 1.79e-04 (+16.2 dB), PM 0.0007 deg (+16.0 dB)
+       8640 Hz (n 144, 6-pulse): AM 1.70e-04 (+12.4 dB), PM 0.0014 deg (+12.4 dB)
+  recovered relative to the model pole (frequency offset, damping error); exact-spectrum peak at +3 / +5 Hz (upper/lower)
+    noisy upper sideband, lorentz       :   +29 Hz,   +4%
+    noisy upper sideband, lorentz_narrow:   +12 Hz,   +4%
+    noisy upper sideband, fano          :    -1 Hz,   +1%
+    noisy upper sideband, fano_narrow   :    -2 Hz,   +4%
+    noisy lower sideband, lorentz       :   +40 Hz,   +5%
+    noisy lower sideband, lorentz_narrow:   +18 Hz,   +4%
+    noisy lower sideband, fano          :    -1 Hz,   +2%
+    noisy lower sideband, fano_narrow   :    -2 Hz,   +5%
+    exact upper sideband, lorentz       :   +29 Hz,   +2%
+    exact upper sideband, lorentz_narrow:   +13 Hz,   +2%
+    exact upper sideband, fano          :    +0 Hz,   -0%
+    exact upper sideband, fano_narrow   :    +0 Hz,   +0%
+    exact lower sideband, lorentz       :   +39 Hz,   +3%
+    exact lower sideband, lorentz_narrow:   +18 Hz,   +3%
+    exact lower sideband, fano          :    +0 Hz,   +0%
+    exact lower sideband, fano_narrow   :    -0 Hz,   -0%
+    noisy phase spectrum, lorentz: -1279 Hz, +892%
+    noisy amplitude spectrum, lorentz:   +54 Hz,  -22%
+synthetic probe, model eff, 500 mA, source klystron_AM: model line f 8741 Hz, sigma 1074/s, Q 25.6
+synthetic_eff_500mA: 16.0 s at 50 kS/s, carrier offset +0.00 Hz, resolution 0.50 Hz
+  rms amplitude 1.23e-03, rms phase 0.015 deg (whole band)
+  upper sideband, 6-10 kHz | +/-3 HWHM: Lorentzian f  8650.9 |  8698.3 Hz, sigma   987 |  1098/s; Fano f  8650.9 |  8699.4 Hz, sigma   987 |  1056/s (asymmetry +35 deg)
+  lower sideband, 6-10 kHz | +/-3 HWHM: Lorentzian f  8646.3 |  8695.4 Hz, sigma   992 |  1100/s; Fano f  8646.3 |  8696.9 Hz, sigma   993 |  1049/s (asymmetry +36 deg)
+  line in the phase     spectrum (Lorentzian): f  8454.4 Hz, sigma   1321/s, peak/floor   6.8 dB
+  line in the amplitude spectrum (Lorentzian): f  8649.5 Hz, sigma    991/s, peak/floor  17.6 dB
+  harmonics above the local floor (AM and PM rms, deg-equivalent for PM):
+       8640 Hz (n 144, 6-pulse): AM 2.11e-04 (+12.3 dB), PM 0.0011 deg (+12.4 dB)
+       9000 Hz (n 150, 6-pulse): AM 1.77e-04 (+16.2 dB), PM 0.0003 deg (+16.3 dB)
+  recovered relative to the model pole (frequency offset, damping error); exact-spectrum peak at -13 / -14 Hz (upper/lower)
+    noisy upper sideband, lorentz       :   -90 Hz,   -8%
+    noisy upper sideband, lorentz_narrow:   -42 Hz,   +2%
+    noisy upper sideband, fano          :   -90 Hz,   -8%
+    noisy upper sideband, fano_narrow   :   -41 Hz,   -2%
+    noisy lower sideband, lorentz       :   -94 Hz,   -8%
+    noisy lower sideband, lorentz_narrow:   -45 Hz,   +2%
+    noisy lower sideband, fano          :   -94 Hz,   -8%
+    noisy lower sideband, fano_narrow   :   -44 Hz,   -2%
+    exact upper sideband, lorentz       :   -84 Hz,   -4%
+    exact upper sideband, lorentz_narrow:   -42 Hz,   +0%
+    exact upper sideband, fano          :   -84 Hz,   -4%
+    exact upper sideband, fano_narrow   :   -40 Hz,   -6%
+    exact lower sideband, lorentz       :   -88 Hz,   -3%
+    exact lower sideband, lorentz_narrow:   -45 Hz,   +0%
+    exact lower sideband, fano          :   -88 Hz,   -3%
+    exact lower sideband, fano_narrow   :   -43 Hz,   -6%
+    noisy phase spectrum, lorentz:  -286 Hz,  +23%
+    noisy amplitude spectrum, lorentz:   -91 Hz,   -8%
+synthetic probe, model eff, 500 mA, source measurement_PM: model line f 8741 Hz, sigma 1074/s, Q 25.6
+synthetic_eff_500mA_measurement_PM: 16.0 s at 50 kS/s, carrier offset +0.00 Hz, resolution 0.50 Hz
+  rms amplitude 6.99e-04, rms phase 0.021 deg (whole band)
+  upper sideband, 6-10 kHz | +/-3 HWHM: Lorentzian f  8769.6 |  8752.5 Hz, sigma  1111 |  1111/s; Fano f  8740.0 |  8738.8 Hz, sigma  1084 |  1116/s (asymmetry -1 deg)
+  lower sideband, 6-10 kHz | +/-3 HWHM: Lorentzian f  8780.0 |  8758.1 Hz, sigma  1128 |  1121/s; Fano f  8740.0 |  8738.5 Hz, sigma  1091 |  1126/s (asymmetry -0 deg)
+  line in the phase     spectrum (Lorentzian): f  7447.5 Hz, sigma  10795/s, peak/floor  12.1 dB
+  line in the amplitude spectrum (Lorentzian): f  8794.3 Hz, sigma    838/s, peak/floor 192.4 dB
+  harmonics above the local floor (AM and PM rms, deg-equivalent for PM):
+       9000 Hz (n 150, 6-pulse): AM 1.27e-04 (+16.2 dB), PM 0.0005 deg (+16.0 dB)
+       8640 Hz (n 144, 6-pulse): AM 1.21e-04 (+12.4 dB), PM 0.0010 deg (+12.4 dB)
+  recovered relative to the model pole (frequency offset, damping error); exact-spectrum peak at +3 / +5 Hz (upper/lower)
+    noisy upper sideband, lorentz       :   +29 Hz,   +3%
+    noisy upper sideband, lorentz_narrow:   +12 Hz,   +3%
+    noisy upper sideband, fano          :    -1 Hz,   +1%
+    noisy upper sideband, fano_narrow   :    -2 Hz,   +4%
+    noisy lower sideband, lorentz       :   +39 Hz,   +5%
+    noisy lower sideband, lorentz_narrow:   +17 Hz,   +4%
+    noisy lower sideband, fano          :    -1 Hz,   +2%
+    noisy lower sideband, fano_narrow   :    -2 Hz,   +5%
+    exact upper sideband, lorentz       :   +28 Hz,   +2%
+    exact upper sideband, lorentz_narrow:   +12 Hz,   +2%
+    exact upper sideband, fano          :    -0 Hz,   -0%
+    exact upper sideband, fano_narrow   :    +0 Hz,   +0%
+    exact lower sideband, lorentz       :   +38 Hz,   +3%
+    exact lower sideband, lorentz_narrow:   +17 Hz,   +2%
+    exact lower sideband, fano          :    -0 Hz,   +0%
+    exact lower sideband, fano_narrow   :    -0 Hz,   -0%
+    noisy phase spectrum, lorentz: -1293 Hz, +905%
+    noisy amplitude spectrum, lorentz:   +54 Hz,  -22%
+synthetic probe, model eff, 500 mA, source measurement_AM: model line f 8741 Hz, sigma 1074/s, Q 25.6
+synthetic_eff_500mA_measurement_AM: 16.0 s at 50 kS/s, carrier offset +0.00 Hz, resolution 0.50 Hz
+  rms amplitude 8.87e-04, rms phase 0.011 deg (whole band)
+  upper sideband, 6-10 kHz | +/-3 HWHM: Lorentzian f  8650.9 |  8698.2 Hz, sigma   985 |  1096/s; Fano f  8650.9 |  8699.2 Hz, sigma   985 |  1059/s (asymmetry +34 deg)
+  lower sideband, 6-10 kHz | +/-3 HWHM: Lorentzian f  8646.3 |  8695.2 Hz, sigma   991 |  1100/s; Fano f  8646.3 |  8696.8 Hz, sigma   991 |  1047/s (asymmetry +35 deg)
+  line in the phase     spectrum (Lorentzian): f  8458.0 Hz, sigma   1302/s, peak/floor   6.8 dB
+  line in the amplitude spectrum (Lorentzian): f  8649.5 Hz, sigma    989/s, peak/floor  17.5 dB
+  harmonics above the local floor (AM and PM rms, deg-equivalent for PM):
+       8640 Hz (n 144, 6-pulse): AM 1.50e-04 (+12.3 dB), PM 0.0008 deg (+12.4 dB)
+       9000 Hz (n 150, 6-pulse): AM 1.25e-04 (+16.2 dB), PM 0.0002 deg (+16.3 dB)
+  recovered relative to the model pole (frequency offset, damping error); exact-spectrum peak at -13 / -14 Hz (upper/lower)
+    noisy upper sideband, lorentz       :   -90 Hz,   -8%
+    noisy upper sideband, lorentz_narrow:   -42 Hz,   +2%
+    noisy upper sideband, fano          :   -90 Hz,   -8%
+    noisy upper sideband, fano_narrow   :   -41 Hz,   -1%
+    noisy lower sideband, lorentz       :   -94 Hz,   -8%
+    noisy lower sideband, lorentz_narrow:   -45 Hz,   +2%
+    noisy lower sideband, fano          :   -94 Hz,   -8%
+    noisy lower sideband, fano_narrow   :   -44 Hz,   -3%
+    exact upper sideband, lorentz       :   -84 Hz,   -4%
+    exact upper sideband, lorentz_narrow:   -42 Hz,   +0%
+    exact upper sideband, fano          :   -84 Hz,   -4%
+    exact upper sideband, fano_narrow   :   -40 Hz,   -6%
+    exact lower sideband, lorentz       :   -88 Hz,   -3%
+    exact lower sideband, lorentz_narrow:   -45 Hz,   +0%
+    exact lower sideband, fano          :   -88 Hz,   -3%
+    exact lower sideband, fano_narrow   :   -43 Hz,   -6%
+    noisy phase spectrum, lorentz:  -283 Hz,  +21%
+    noisy amplitude spectrum, lorentz:   -91 Hz,   -8%
+wrote D:\OneDrive - SLAC National Accelerator Laboratory\SLACR\pyCode\spearlegacyLLRF\Studies\optLLRF\results\iq_synthetic_bias.csv

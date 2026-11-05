@@ -41,14 +41,14 @@
 
 % ===== hardware outputs at each end ========================================
 \node[pwr,text width=50mm,anchor=north] (fout) at (\xA,-60)
-  {SCR ENABLE {\tiny(fiber $\rightarrow$ B514)}\\
-   CROWBAR FIRE {\tiny(fiber $\rightarrow$ B514)}\\
-   STATUS WORD {\tiny($\rightarrow$ AIM Slot 12)}};
+  {STATUS WORD {\tiny($\rightarrow$ AIM Slot 12)}\\
+   AIM commands {\tiny($\rightarrow$ RF Local Display Panel)}\\
+   {\tiny panel logic: SCR ENABLE, CROWBAR $\rightarrow$ B118}};
 \draw[sig] (fic.south) -- (fout.north);
 
 \node[pwr,text width=54mm,anchor=north] (sout) at (\xC,-60)
-  {SCR supervisory relay\\ Slot 5 OX8 $\rightarrow$ fiber $\rightarrow$ B514\\
-   {\tiny turns off the SCR gate drive}};
+  {SCR supervisory enable\\ Slot 5 OX8 output 0 (24 V)\\
+   {\tiny COMMANDS bus of the trigger boards, B118}};
 \draw[sig] (slc.south) -- (sout.north);
 
 % ===== Paths A and B =======================================================
@@ -70,7 +70,7 @@
 \node[ctrl,text width=60mm,anchor=north] (slot5) at (\xC,\yM)
   {\textbf{VXI SLOT 5} --- MPS SHUTOFF MODULE\\[2pt]
    {\tiny receives on its back connector:\\
-    RF MPS PLC permit (relay) $\cdot$ SPEAR MPS beam permit $\cdot$ orbit interlock}\\[2pt]
+    RF MPS PLC permit $\cdot$ SPEAR MPS beam permit $\cdot$ orbit interlock}\\[2pt]
    asserts RF\_FAULT on P2};
 
 % Path C: down the clear lane at x = 134, between the MPS and HVPS columns.

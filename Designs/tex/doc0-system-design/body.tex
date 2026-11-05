@@ -20,6 +20,7 @@ Revision & Date & Scope of Change & Summary \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
+\textbf{R4} & 2026-11-02 & RF Local Display Panel; beam abort; tuner control; HVPS control; status & \textbf{RF Local Display Panel}: the Local Control Chassis and the Local Panel 340-310 are one unit, named after its drawings; its three HVPS fibers run to the HVPS controller in B118 and its own logic forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort to the SPEAR MPS (J.~Sebek's fiber note and the panel drawings). \textbf{Beam abort}: kept as an Interface Chassis output. \textbf{Tuners}: LLRF9 Unit~1 runs the four tuner loops and drives the Galil DMC-4143 directly. \textbf{LLRF9 cabling}: the channel tables give the current cabling of the master (Unit~1, the vendor's four-cavity configuration, as in the 2021 setup) and the slave (Unit~2: reflected and load signals); the klystron drive power, on neither unit, is proposed for Waveform Buffer channel~1. \textbf{Status}: heater supply on a test stand with the live filament limits recorded; PPS Interface Box awaiting ADSO approval. \textbf{EPICS IOC}: the coordinator is the IOC \mbox{B132-IOCRF}, which moves from the VXI CPU to new hardware when the crate is retired. \textbf{HVPS control}: entirely in EPICS, with no Python layer, under the current HVPS PV names. \textbf{Open items}: O1 (soft IOC location) and O8 (tuner control split) closed and the others renumbered O1--O7; O3 now covers the panel logic and the beam-abort endpoint, and O4 the Waveform Buffer channel assignment. \\
 \textbf{R3} & 2026-09-25 & Arc detection re-selection; legacy unit disposition; chassis consolidation; heater vendor & \textbf{Arc detection}: Microstep-MIS abandoned (vendor unresponsive, and it would have required custom CF-flange adapters and a viewport redesign); replaced by the \textbf{AFT microwave GmbH ARC4} vendor chassis, whose fiber inputs mate with the tunnel fibers already installed --- no mechanical work. The custom SSRL Arc Detection Chassis OR/latch design is withdrawn; the Interface Chassis now faces only the 2 ARC4 system modules and the test module. Figure~4 redrawn. \textbf{Legacy units}: Fast Interlock Chassis 340-308, AIM (VXI Slot 12) and Local Panel 340-310 named explicitly as removed with the VXI crate, their functions absorbed by the Interface Chassis. \textbf{Chassis consolidation}: the Waveform Buffer and Interface Chassis share one physical chassis on two PCBs; Waveform Buffer complete (April 2026), Interface Chassis PCB at fabrication since August 2026. \textbf{Heater}: Chroma → \textbf{TDK Lambda}, with an external \qty{60}{\hertz} sync circuit in design. \\
 \textbf{R2} & 2026-04-28 & Technical consolidation and drawing update & Finalized system architecture and protection chain. Expanded and corrected arc detection design, refined interface-chassis / MPS responsibilities, corrected cavity gap voltage values, confirmed heater controller approach, and standardized terminology and signal naming across subsystems. \\
 \textbf{R1} & 2026-03-17 & Design clarification and corrections & Incorporated review feedback from J. Sebek: clarified HVPS power chain and signal flow, corrected RF signal monitoring assignments, refined software architecture descriptions, and resolved ambiguities in interlock and protection narratives. \\
@@ -41,15 +42,13 @@ it matters; the page column links back to that point.
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-O1 & Soft IOC location & Whether the coordinator IOC is hosted in B132 or B137 is not confirmed with the controls group. & Rack and network planning & \openpage{O1} \\
-O2 & LLRF9 $\leftrightarrow$ Interface Chassis logic levels & Exact voltage levels for the interlock input and output. The input is selectable (3.3 / 5 / \qty{24}{\volt}); the output is specified as \qty{4.75}{\volt} high through \qty{220}{\ohm}. Both Interface Chassis stages must be designed to match. & Interface Chassis PCB design & \openpage{O2} \\
-O3 & PPS connector part number & Field verification: the original Burndy circular 8-pin may already have been replaced by the Souriau Trim Trio equivalent (GOB1208PNE). & PPS Interface Box fabrication & \openpage{O3} \\
-O4 & Local Control Chassis disposition & The legacy Local Control Chassis fed the Fast IC 340-308 and has no documented I/O list. Whether any of its wiring is re-terminated on the Interface Chassis or retired with the Fast IC is undecided. & Interface Chassis I/O count freeze & \openpage{O4} \\
-O5 & Waveform Buffer RF spare channels & Two of the eight RF channels are unassigned. One is a candidate for a coupled klystron forward power signal feeding the collector power calculation. & Waveform Buffer channel assignment & \openpage{O5} \\
-O6 & AFT ARC4 $\rightarrow$ Interface Chassis & The external interface of the two system modules and the test module is not specified from vendor documentation: number of discrete lines, logic levels, whether fired-detector identification is parallel bits or an encoded word, and the latch reset mechanism. & Interface Chassis PCB layout & \openpage{O6} \\
-O7 & Klystron heater supply & The TDK Lambda unit is in hand, but the model's ASCII command subset, regulation figure and MTBF figure are not yet recorded here; the ASYN EPICS module does not exist yet; the external \qty{60}{\hertz} sync circuit is in design. & Heater subsystem commissioning & \openpage{O7} \\
-O8 & Tuner control split & Whether the tuner loop is closed inside the LLRF9 or run in the coordinator from LLRF9 phase data. & Motion controller acceptance & \openpage{O8} \\
-O9 & Network addressing & IP addresses and subnet allocation for both LLRF9 units, both PLCs, the motion controller and the Waveform Buffer are all unassigned. & Any integration testing & \openpage{O9} \\
+O1 & LLRF9 $\leftrightarrow$ Interface Chassis logic levels & Exact voltage levels for the interlock input and output. The input is selectable (3.3 / 5 / \qty{24}{\volt}); the output is specified as \qty{4.75}{\volt} high through \qty{220}{\ohm}. Both Interface Chassis stages must be designed to match. & Interface Chassis PCB design & \openpage{O1} \\
+O2 & PPS connector part number & Field verification: the original Burndy circular 8-pin may already have been replaced by the Souriau Trim Trio equivalent (GOB1208PNE). & PPS Interface Box fabrication & \openpage{O2} \\
+O3 & RF Local Display Panel logic and beam-abort endpoint & The panel's I/O is documented in its drawings and in J.~Sebek's fiber note, but the equations of its programmable logic device (GAL22V10), which forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort, are not. The endpoint of its beam-abort output (rear BNC J6) in the SPEAR MPS and the level that input expects are not on any RF drawing. & Interface Chassis logic design & \openpage{O3} \\
+O4 & Waveform Buffer RF channel assignment & Channel 1 is proposed for the klystron drive power, which is on neither LLRF9 unit. Channels 7 and 8 are unassigned; one is a candidate for a coupled klystron forward power signal feeding the collector power calculation. & Waveform Buffer channel assignment & \openpage{O4} \\
+O5 & AFT ARC4 $\rightarrow$ Interface Chassis & The external interface of the two system modules and the test module is not specified from vendor documentation: number of discrete lines, logic levels, whether fired-detector identification is parallel bits or an encoded word, and the latch reset mechanism. & Interface Chassis PCB layout & \openpage{O5} \\
+O6 & Klystron heater supply & The TDK Lambda unit is installed on a test stand. Its ASCII command subset, regulation figure and MTBF figure are not yet recorded here; the ASYN EPICS module does not exist yet; the external \qty{60}{\hertz} sync circuit is in design. All are to be closed in an acceptance test on the test stand with a load. & Heater subsystem commissioning & \openpage{O6} \\
+O7 & Network addressing & IP addresses and subnet allocation for both LLRF9 units, both PLCs, the motion controller and the Waveform Buffer are all unassigned. & Any integration testing & \openpage{O7} \\
 \end{longtable}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -170,7 +169,7 @@ The legacy SPEAR3 LLRF system was originally designed for the PEP-II B-Factory (
     See: \fpath{llrf/tuners/SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf}, \fpath{llrf/tuners/SLO-SYN.pdf}
   \end{itemize}
 \item
-  \textbf{Interlock System}: Distributed across analog modules, PLC I/O, and direct wiring. Some of the wiring is connected in a Local Control Chassis, which connects to the Fast Interlock Chassis 340-308. The interlock chassis also has fiber optic inputs to detect potential arcs in the waveguide system. The interlock chassis summarizes the status of these interlocks and reports them back to the VXI system through the Arc/Interlock Module (AIM, drawing 340-307), located in Slot 12 of the VXI crate. Operator-accessible local control and indication is provided by the Local Panel 340-310.
+  \textbf{Interlock System}: Distributed across analog modules, PLC I/O, and direct wiring. The Fast Interlock Chassis 340-308 has fiber optic inputs to detect potential arcs in the waveguide system and reflected-power comparators. It summarizes the status of these interlocks and reports them back to the VXI system through the Arc/Interlock Module (AIM, drawing 340-307), located in Slot 12 of the VXI crate, and passes the AIM's commands over fibers to the \textbf{RF Local Display Panel 340-310} (rack B132-12). The panel connects part of the hardwired interlock and control wiring to the RF MPS PLC, provides the operator-accessible local control and indication, and terminates the three HVPS fibers: its own logic forms SCR ENABLE and KLYSTRON CROWBAR for the HVPS controller in B118 and a beam abort for the SPEAR MPS (J.~Sebek's fiber note; drawings in \fpath{llrf/documentation/localPanel/}).
 \item
   \textbf{Communication}: The main intelligence for the existing system is a Kinetics Systems VXI IOC in the system VXI crate. The crate has a VME Allen-Bradley communication module through which it communicates, via a serial link, with the two Allen-Bradley RF MPS crates, the four cavity tuner stepper motor controllers, and the HVPS controller.
 
@@ -237,16 +236,14 @@ The upgraded system replaces all control electronics while retaining the RF plan
 \begin{itemize}
 \tightlist
 \item
-  \textbf{VXI crate} (Elma 13-slot) and every module in it --- CPU, Clock Module, RFP, IQA $\times$3 and the AIM --- and with it the Allen-Bradley Remote I/O serial link that the Slot 1 scanner mastered
+  \textbf{VXI crate} (Elma 13-slot) and every module in it --- CPU, Clock Module, RFP, IQA $\times$3 and the AIM --- and with it the Allen-Bradley Remote I/O serial link that the Slot 1 scanner mastered. The EPICS IOC \mbox{B132-IOCRF}, which runs on the VXI CPU today, moves to new hardware when the crate is retired.
 \item
-  \textbf{Fast Interlock Chassis 340-308} --- the legacy fast trip-decision element. Its fiber-optic arc inputs, reflected-power comparators and SCR ENABLE / CROWBAR outputs are all absorbed by the Interface Chassis.
+  \textbf{Fast Interlock Chassis 340-308} --- the legacy fast trip-decision element. Its fiber-optic arc inputs and reflected-power comparators are absorbed by the Interface Chassis, together with the fibers that link it to the RF Local Display Panel.
 \item
   \textbf{AIM --- Arc/Interlock Module} (VXI Slot 12, SLAC drawing 340-307), the digital companion to the Fast IC. Its per-channel arc latching and \texttt{RF\_FAULT} backplane assertion are replaced by the Interface Chassis first-fault register; its fault-history ring buffer is replaced by the Waveform Buffer circular buffers.
 \item
-  \textbf{Local Panel 340-310} --- legacy local/remote control and indication panel (drawings in \fpath{llrf/documentation/localPanel/}). Local control moves to the Interface Chassis front panel and to EPICS.
+  \textbf{RF Local Display Panel 340-310} (rack B132-12; also referred to as the Local Control Chassis) --- legacy local/remote control and indication panel and the end point of the three HVPS fibers; its logic forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort to the SPEAR MPS (drawings in \fpath{llrf/documentation/localPanel/}). These functions move to the Interface Chassis; local control moves to the Interface Chassis front panel and to EPICS.
 \end{itemize}
-
-%\textbf{Note}: the \textbf{Local Control Chassis} --- a separate B132 chassis that aggregated part of the station's hardwired interlock and control wiring and fed the Fast IC --- has no documented I/O list. Whether any of that wiring is re-terminated on the Interface Chassis or retired with the Fast IC is an open item (Section~\ref{open-interface-questions}).
 
 \noindent\textbf{Replaced / Upgraded}:
 
@@ -259,7 +256,7 @@ The upgraded system replaces all control electronics while retaining the RF plan
 \item
   HVPS Controller: SLC-500 → CompactLogix PLC + new Enerpro board + redesigned analog regulator
 \item
-  Tuner Motor Controllers: AB 1746-HSTP1 + Slo-Syn (\textbf{in service}) → Galil DMC-4143 Rev 1.3h 4-axis motion controller (\textbf{in development --- not installed, not operating; goes online when the LLRF upgrade completes}) (commissioned August 2025, operational)
+  Tuner Motor Controllers: AB 1746-HSTP1 + Slo-Syn (\textbf{in service}) → Galil DMC-4143 Rev 1.3h 4-axis motion controller, driven directly by LLRF9 Unit~1 (\textbf{built and tested on the SPEAR3 tuner motors under an EPICS control by M.~Dunning; not in service; goes online when the LLRF upgrade completes})
 
   \begin{itemize}
   \tightlist
@@ -320,7 +317,7 @@ Notes
 \textbf{Contactor Disconnect Panel} (Switchgear, B514) & Vacuum contactor (Ross HQ3), Contactor controller (Ross HCA-1-A), K4/MX/RR/L1 relays, S5 auxiliary contact & 12.47 kV AC switchgear \\
 \textbf{Termination Tank} (B132, near klystron) & HV cable termination, Ross Engineering HV relay, Danfysik DC-CT, Pearson CT-110 & Mineral oil filled \\
 \textbf{Switch-over Tank} (adjacent B514) & HV cable connections between HVPS1/HVPS2 and klystron & FR3 oil filled \\
-\textbf{Building B132} (Klystron) & Klystron, drive amplifier, LLRF9 units, RF MPS PLC, combined Interface Chassis / Waveform Buffer chassis, Motion Controller, AFT ARC4 arc detection chassis, soft IOC (may be in B137 --- not yet confirmed with the controls group\openitem{O1}) & Main control electronics location \\
+\textbf{Building B132} (Klystron) & Klystron, drive amplifier, LLRF9 units, RF MPS PLC, combined Interface Chassis / Waveform Buffer chassis, Motion Controller, AFT ARC4 arc detection chassis, EPICS IOC \mbox{B132-IOCRF} (moved from the VXI CPU to new hardware) & Main control electronics location \\
 \textbf{SPEAR3 Storage Ring Tunnel} & 4 RF cavities, waveguide distribution, tuner assemblies, arc detection sensors & Radiation area \\
 \end{longtable}
 
@@ -344,7 +341,7 @@ Route
 B118 → Switchgear (Contactor) & Belden 83715 & 15C \#16 Teflon & TS-5 to contactor controller \\
 B118 → Termination Tank (Grounding) & Belden 83709 + Belden 83715 & 9C + 15C \#16 Teflon & TS-6 to grounding tank \\
 B118 → B514 (HVPS) & Electrical cable pairs & SCR trigger cables (12 pairs) & Controller to Phase Tank thyristor stacks \\
-B118 → B514 (HVPS) & Fiber optic & SCR ENABLE, CROWBAR, STATUS & Controller to HVPS (upgrade: via Interface Chassis) \\
+B132 $\leftrightarrow$ B118 (HVPS controller) & Fiber optic & SCR ENABLE, KLYSTRON CROWBAR, STATUS & RF Local Display Panel $\leftrightarrow$ trigger interconnect boards of the HVPS controller (upgrade: Interface Chassis $\leftrightarrow$ HVPS controller) \\
 B132 → Tunnel & Coax cables & RF signals (forward, reflected, probe). Similar forward, reflected power from klystron and circulator load with B132 & LLRF inputs from cavities \\
 B132 → Tunnel & Multi-conductor & Motor power + encoder signals & To tuner assemblies \\
 \end{longtable}
@@ -451,29 +448,29 @@ Notes
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-1 & Klystron Output Forward Power & LLRF9 Unit 2 BRD2 & RF power at the klystron output traveling toward the circulator; primary measure of station RF output level. \\
-2 & Klystron Output Reflected Power & LLRF9 Unit 2 BRD2 & RF power reflected back into the klystron output port from the load chain; should be near zero; used for klystron protection. \\
-3 & Circulator Load Forward Power & LLRF9 Unit 1 BRD3 & Power delivered to the circulator load (circulator port 3); absorbs power the circulator does not properly direct to the cavities plus any net reflection returning from the waveguide network. Sits at \textasciitilde20 kW, increases to \textasciitilde40 kW at full power with no beam --- more significant signal than WG Load 1 Fwd. \\
+1 & Klystron Output Forward Power & LLRF9 Unit 1 CH2 & RF power at the klystron output traveling toward the circulator; primary measure of station RF output level. \\
+2 & Klystron Output Reflected Power & LLRF9 Unit 2 CH4 & RF power reflected back into the klystron output port from the load chain; should be near zero; used for klystron protection. \\
+3 & Circulator Load Forward Power & LLRF9 Unit 2 CH5 & Power delivered to the circulator load (circulator port 3); absorbs power the circulator does not properly direct to the cavities plus any net reflection returning from the waveguide network. Sits at \textasciitilde20 kW, increases to \textasciitilde40 kW at full power with no beam --- more significant signal than WG Load 1 Fwd. \\
 4 & Circulator Load Reflected Power & Waveform Buffer Ch2 & Power reflected from the circulator load back into the circulator; indicates load match quality. \\
-5 & Klystron Drive Power & LLRF9 Unit 2 BRD1 & Input drive signal level to the klystron from the drive amplifier; sets the klystron gain and operating point. \\
+5 & Klystron Drive Power & Waveform Buffer Ch1 (proposed) & Input drive signal level to the klystron from the drive amplifier; sets the klystron gain and operating point. \\
 6 & Station Reference Power & Waveform Buffer Ch3 & Monitor of the 476 MHz reference signal level distributed to the LLRF system; loss of this signal indicates a reference chain fault. \\
-7 & Waveguide Load 1 Forward Power & Waveform Buffer (slow) & Power entering WG Load 1 at port 4 of Magic Tee 1. Rarely exceeds 2 kW --- suitable for slow monitoring only. \\
+7 & Waveguide Load 1 Forward Power & LLRF9 Unit 2 CH6 & Power entering WG Load 1 at port 4 of Magic Tee 1. Rarely exceeds 2 kW. \\
 8 & Waveguide Load 1 Reflected Power & Waveform Buffer Ch4 & Power reflected from WG Load 1 back into Magic Tee 1; indicates load match quality. \\
-9 & Cavity A Forward Power & LLRF9 Unit 1 BRD1 & RF power traveling into Cavity A from Magic Tee 2; used to monitor power distribution balance and provide reference phase for cavity probe phase measurement. \\
-10 & Cavity A Reflected Power & LLRF9 Unit 2 BRD3 & Power reflected from Cavity A back into the waveguide; elevated reflection indicates cavity detuning or mismatch. \\
-11 & Cavity B Forward Power & LLRF9 Unit 1 BRD2 & RF power traveling into Cavity B from Magic Tee 2; compared with Cavity A forward to verify magic-tee balance and provide reference phase for cavity probe phase measurement. \\
-12 & Cavity B Reflected Power & LLRF9 Unit 2 BRD3 & Power reflected from Cavity B; monitored for detuning and arc detection. \\
-13 & Cavity A Probe Signal & LLRF9 Unit 1 BRD1 & Electric field sampled by Cavity A's internal pickup probe; direct measure of the accelerating voltage amplitude and phase; primary LLRF fast feedback and tuner control input for Cavity A. \\
-14 & Cavity B Probe Signal & LLRF9 Unit 1 BRD1 & Electric field from Cavity B's internal probe; used in the LLRF vector-sum feedback and Cavity B tuner control. \\
-15 & Waveguide Load 2 Forward Power & LLRF9 Unit 1 BRD3 & Power entering WG Load 2 at port 4 of Magic Tee 2; absorbs the sum of equal reflected power from Cavities A and B. \\
+9 & Cavity A Forward Power & LLRF9 Unit 1 CH5 & RF power traveling into Cavity A from Magic Tee 2; used to monitor power distribution balance and provide reference phase for cavity probe phase measurement. \\
+10 & Cavity A Reflected Power & LLRF9 Unit 2 CH0 & Power reflected from Cavity A back into the waveguide; elevated reflection indicates cavity detuning or mismatch. \\
+11 & Cavity B Forward Power & LLRF9 Unit 1 CH6 & RF power traveling into Cavity B from Magic Tee 2; compared with Cavity A forward to verify magic-tee balance and provide reference phase for cavity probe phase measurement. \\
+12 & Cavity B Reflected Power & LLRF9 Unit 2 CH1 & Power reflected from Cavity B; monitored for detuning and arc detection. \\
+13 & Cavity A Probe Signal & LLRF9 Unit 1 CH0 & Electric field sampled by Cavity A's internal pickup probe; direct measure of the accelerating voltage amplitude and phase; primary LLRF fast feedback and tuner control input for Cavity A. \\
+14 & Cavity B Probe Signal & LLRF9 Unit 1 CH1 & Electric field from Cavity B's internal probe; used in the LLRF vector-sum feedback and Cavity B tuner control. \\
+15 & Waveguide Load 2 Forward Power & LLRF9 Unit 2 CH7 & Power entering WG Load 2 at port 4 of Magic Tee 2; absorbs the sum of equal reflected power from Cavities A and B. \\
 16 & Waveguide Load 2 Reflected Power & Waveform Buffer Ch5 & Power reflected from WG Load 2; indicates match quality of the load. \\
-17 & Cavity C Forward Power & LLRF9 Unit 1 BRD2 & RF power traveling into Cavity C from Magic Tee 3. \\
-18 & Cavity C Reflected Power & LLRF9 Unit 2 BRD3 & Power reflected from Cavity C; monitored for detuning and arc detection. \\
-19 & Cavity D Forward Power & LLRF9 Unit 2 BRD1 & RF power traveling into Cavity D from Magic Tee 3. \\
-20 & Cavity D Reflected Power & LLRF9 Unit 2 BRD2 & Power reflected from Cavity D. \\
-21 & Cavity C Probe Signal & LLRF9 Unit 1 BRD2 & Electric field from Cavity C's internal probe; used in the LLRF vector-sum feedback and Cavity C tuner control. \\
-22 & Cavity D Probe Signal & LLRF9 Unit 2 BRD1 & Electric field from Cavity D's internal probe; used in the LLRF vector-sum feedback and Cavity D tuner control. \\
-23 & Waveguide Load 3 Forward Power & LLRF9 Unit 1 BRD3 & Power entering WG Load 3 at port 4 of Magic Tee 3; absorbs the sum of equal reflected power from Cavities C and D. \\
+17 & Cavity C Forward Power & LLRF9 Unit 1 CH7 & RF power traveling into Cavity C from Magic Tee 3. \\
+18 & Cavity C Reflected Power & LLRF9 Unit 2 CH2 & Power reflected from Cavity C; monitored for detuning and arc detection. \\
+19 & Cavity D Forward Power & LLRF9 Unit 1 CH8 & RF power traveling into Cavity D from Magic Tee 3. \\
+20 & Cavity D Reflected Power & LLRF9 Unit 2 CH3 & Power reflected from Cavity D. \\
+21 & Cavity C Probe Signal & LLRF9 Unit 1 CH3 & Electric field from Cavity C's internal probe; used in the LLRF vector-sum feedback and Cavity C tuner control. \\
+22 & Cavity D Probe Signal & LLRF9 Unit 1 CH4 & Electric field from Cavity D's internal probe; used in the LLRF vector-sum feedback and Cavity D tuner control. \\
+23 & Waveguide Load 3 Forward Power & LLRF9 Unit 2 CH8 & Power entering WG Load 3 at port 4 of Magic Tee 3; absorbs the sum of equal reflected power from Cavities C and D. \\
 24 & Waveguide Load 3 Reflected Power & Waveform Buffer Ch6 & Power reflected from WG Load 3; indicates match quality of the load. \\
 \end{longtable}
 
@@ -547,74 +544,51 @@ DAC Clock & 11/24 & 218.3065 \\
 
 \subsection{Two-Unit Configuration for SPEAR3}\label{two-unit-configuration-for-spear3}
 
-\textbf{Unit 1 --- Field Control \& Tuner Loops}:
+The two units are cabled as follows. Inputs CH0--CH2 belong to LLRF4.7 board~1, CH3--CH5 to board~2 and CH6--CH8 to board~3; the fourth input of every board takes the station reference (RF REF), against which the phases are measured. Only boards 1 and 2 have thermally stabilized output chains. Cavities 1 to 4 are cavities A to D of Section~\ref{rf-signal-monitoring}.
 
-\begin{longtable}[]{@{}P{\dimexpr 0.0781\linewidth-1.71\tabcolsep\relax}P{\dimexpr 0.1554\linewidth-1.71\tabcolsep\relax}P{\dimexpr 0.1486\linewidth-1.71\tabcolsep\relax}P{\dimexpr 0.1435\linewidth-1.71\tabcolsep\relax}P{\dimexpr 0.1384\linewidth-1.71\tabcolsep\relax}P{\dimexpr 0.1852\linewidth-1.71\tabcolsep\relax}P{\dimexpr 0.1507\linewidth-1.71\tabcolsep\relax}@{}}
+\begin{longtable}[]{@{}P{\dimexpr 0.1400\linewidth-1.333\tabcolsep\relax}P{\dimexpr 0.4300\linewidth-1.333\tabcolsep\relax}P{\dimexpr 0.4300\linewidth-1.333\tabcolsep\relax}@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Board
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Ch0 (Ref)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Ch1
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Ch2
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Ch3
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Output
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Thermal Stabilization
-\end{minipage} \\
+Connector & Unit 1 (master) & Unit 2 (slave) \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-BRD1 & Station Ref & Cav A Probe & Cav B Probe & Cav A Fwd & Klystron Drive & Y \\
-BRD2 & Station Ref & Cav C Probe & Cav C Fwd & Cav B Fwd & (Spare / Monitor) & Y \\
-BRD3 & Station Ref & Circ Load Fwd & WG Load 2 Fwd & WG Load 3 Fwd & (Not used) & N \\
+CH0 & Cavity 1 probe & Cavity 1 reflected \\
+CH1 & Cavity 2 probe & Cavity 2 reflected \\
+CH2 & Klystron forward & Cavity 3 reflected \\
+OUT0 & Klystron drive 1 & --- \\
+OUT1 & --- & --- \\
+CH3 & Cavity 3 probe & Cavity 4 reflected \\
+CH4 & Cavity 4 probe & Klystron reflected \\
+CH5 & Cavity 1 forward & Circulator load forward \\
+OUT2 & Klystron drive 2 & --- \\
+RF REF & Station reference & Station reference \\
+CH6 & Cavity 2 forward & Waveguide load 1 forward \\
+CH7 & Cavity 3 forward & Waveguide load 2 forward \\
+CH8 & Cavity 4 forward & Waveguide load 3 forward \\
+OUT3 & --- & --- \\
 \end{longtable}
+
+\textbf{Unit 1 (master) --- Field Control \& Tuner Loops}:
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Feedback Architecture}: Cavity probes A and B can be monitored on BRD1 with proportional and integral control driving output 1. Probes C and D can be monitored on BRD2 with integral control driving output 2. An external power combiner combines the outputs to generate a signal containing an integral of all four cavities. The outputs of the two boards are synchronized via phase controls.
+  \textbf{Feedback Architecture}: Cavity probes 1 and 2 (board 1) can be combined with proportional and integral control driving OUT0 (klystron drive 1). Probes 3 and 4 (board 2) can be combined with integral control driving OUT2 (klystron drive 2). An external power combiner combines the two outputs to generate a signal containing an integral of all four cavities. The outputs of the two boards are synchronized via phase controls.
 \item
-  \textbf{Tuner phase data}: All 4 cavity probe phases available at 10 Hz for tuner control
+  \textbf{Tuner loops}: all four cavity probe and forward signals are on this unit, so it runs the four tuner loops on synchronized 10 Hz phase data and drives the Galil DMC-4143 directly through its built-in driver (Section~\ref{upgraded-controller-1})
+\item
+  \textbf{Source of the allocation}: this is the vendor's four-cavity configuration, and the master's inputs match the 2021 LLRF9 setup at patch panel B132-11 channel for channel (\fpath{llrf/calibrations/b132R11PatchPanel.xlsx})
 \end{itemize}
 
-\textbf{Unit 2 --- Monitoring \& Interlocks}:
-
-\begin{longtable}[]{@{}P{\dimexpr 0.0891\linewidth-1.71\tabcolsep\relax}P{\dimexpr 0.1772\linewidth-1.71\tabcolsep\relax}P{\dimexpr 0.1500\linewidth-1.71\tabcolsep\relax}P{\dimexpr 0.1346\linewidth-1.71\tabcolsep\relax}P{\dimexpr 0.1258\linewidth-1.71\tabcolsep\relax}P{\dimexpr 0.1520\linewidth-1.71\tabcolsep\relax}P{\dimexpr 0.1713\linewidth-1.71\tabcolsep\relax}@{}}
-\toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
-Board
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Ch0 (Ref)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Ch1
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Ch2
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Ch3
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Output
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Thermal Stabilization
-\end{minipage} \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-BRD1 & Station Ref & Cav D Probe & Cav D Fwd & Drv Fwd & (Not used) & Y \\
-BRD2 & Station Ref & Cav D Refl & Kly Refl & Kly Fwd & (Not used) & Y \\
-BRD3 & Station Ref & Cav A Refl & Cav B Refl & Cav C Refl & (Not used) & N \\
-\end{longtable}
+\textbf{Unit 2 (slave) --- Monitoring \& Interlocks}:
 
 \begin{itemize}
 \tightlist
 \item
   \textbf{Reflected power monitoring}: All 4 cavity reflected + klystron reflected for arc/mismatch detection
+\item
+  \textbf{Load monitoring}: circulator load forward and the three waveguide-load forward signals
 \item
   \textbf{Interlock chain}: Reflected power events → Unit 2 interlock output → Interface Chassis → disables Unit 1 drive
 \item
@@ -622,7 +596,7 @@ BRD3 & Station Ref & Cav A Refl & Cav B Refl & Cav C Refl & (Not used) & N \\
 \end{itemize}
 
 \begin{quote}
-\textbf{Remaining RF signals}: The 6 signals not covered by the two LLRF9 units (Waveguide 1 Load Fwd, Circulator Load Refl, Station Reference, WG Load 1/2/3 Reflected) are monitored by the Waveform Buffer System --- see Section 11.
+\textbf{Remaining RF signals}: The 6 signals not covered by the two LLRF9 units (Klystron Drive Power, Circulator Load Refl, Station Reference, WG Load 1/2/3 Reflected) are assigned to the Waveform Buffer System, the drive power provisionally (O4) --- see Section 11.
 \end{quote}
 
 \subsection{Key Performance Specifications}\label{key-performance-specifications}
@@ -653,9 +627,9 @@ Interlock timestamp resolution & $\pm$17.4 ns \\
 \item
   \textbf{RF inputs}: 50 Ω SMA from cavity probes, forward couplers, reflected couplers, station reference
 \item
-  \textbf{RF output}: SMA to drive amplifier (Unit 1 only, thermally stabilized, BRD1 or BRD2)
+  \textbf{RF outputs}: Unit 1 OUT0 and OUT2 (klystron drive 1 and 2, the thermally stabilized outputs of boards 1 and 2), combined externally into the drive amplifier; Unit 2 has no drive output
 \item
-  \textbf{Interlock I/O}: LEMO connectors; Unit 1 external interlock input from Interface Chassis, Unit 2 interlock output to Interface Chassis (exact voltage logic levels still to be confirmed from the LLRF9 test summaries\openitem{O2})
+  \textbf{Interlock I/O}: LEMO connectors; Unit 1 external interlock input from Interface Chassis, Unit 2 interlock output to Interface Chassis (exact voltage logic levels still to be confirmed from the LLRF9 test summaries\openitem{O1})
 \item
   \textbf{Slow ADC}: DA-15 connector; HVPS monitoring signals, auxiliary sensors
 \item
@@ -774,7 +748,7 @@ CPU & AB-1747-L532 & Processor \\
 \item
   \textbf{Terminal Strips}: TS-5 (contactor, 15 terminals), TS-6 (grounding tank, 21 terminals), TS-3 (PPS LEDs), TS-7 (power distribution)
 \item
-  \textbf{PPS Connector}: Originally Burndy circular 8-pin; possibly replaced with Souriau Trim Trio equivalent (GOB1208PNE) --- exact current part number requires field verification\openitem{O3}
+  \textbf{PPS Connector}: Originally Burndy circular 8-pin; possibly replaced with Souriau Trim Trio equivalent (GOB1208PNE) --- exact current part number requires field verification\openitem{O2}
 \end{itemize}
 
 The SLC-500 PLC executes ladder logic for voltage regulation, contactor management, temperature monitoring, and --- critically --- PPS safety chain control:
@@ -848,12 +822,14 @@ PV Category & Example PV & Update Rate \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Setpoint & \fpath{SRF1:HVPS:VOLT:CTRL.VAL} & ≤1 Hz (from Python) \\
+Setpoint & \fpath{SRF1:HVPS:VOLT:CTRL.VAL} & ≤1 Hz (EPICS HVPS loop) \\
 Readback & \fpath{SRF1:HVPS:VOLT:RBCK} & \textasciitilde1 Hz \\
-Status & \fpath{SRF1:HVPS:STATUS:READY} & \textasciitilde1 Hz \\
-Control & \fpath{SRF1:HVPS:CONTACTOR:CMD} & On demand \\
-Interlock & \fpath{SRF1:HVPS:INTLK:SUMMARY} & \textasciitilde1 Hz \\
+Status & \fpath{SRF1:HVPSSUPPLY:READY:STAT} & \textasciitilde1 Hz \\
+Control & \fpath{SRF1:HVPSCONTACT:CLOSE:CTRL} & On demand \\
+Interlock & \fpath{SRF1:HVPSOFF:SUMY:STAT} & \textasciitilde1 Hz \\
 \end{longtable}
+
+All HVPS control stays in EPICS, in the IOC \mbox{B132-IOCRF}, with no Python layer. The upgraded controller keeps the current PV names of the legacy HVPS database (\fpath{spear-rf-code-legacy/rfApp/Db/rf_hvps.db,v}), so the screens, alarms and archiver that use them need no change.
 
 \textbf{Legacy HVPS Status PVs} (for reference and troubleshooting):
 
@@ -1010,7 +986,7 @@ Description
 \bottomrule\noalign{}
 \endlastfoot
 All input permit states & Status of every Interface Chassis input (LLRF9 Status, HVPS STATUS, SPEAR MPS permit, Orbit Interlock, Arc Detection, Waveform Buffer, expansion ports) \\
-All output permit states & Status of every Interface Chassis output (LLRF9 Enable, HVPS SCR ENABLE, HVPS CROWBAR) \\
+All output permit states & Status of every Interface Chassis output (LLRF9 Enable, HVPS SCR ENABLE, HVPS CROWBAR, beam abort to the SPEAR MPS) \\
 First-fault register & Identifies the initiating fault source when multiple faults cascade. Hardware-latched at the moment of initial fault detection. \\
 \end{longtable}
 
@@ -1164,7 +1140,7 @@ Description
 
 The Interface Chassis is a completely new subsystem that serves as the central hub for all hardware interlock coordination. It did not exist in the legacy system, where interlocks were distributed across analog modules, PLC I/O, and direct wiring with no central coordination point.
 
-\textbf{It absorbs the functions of three legacy units that are removed outright} (Section~\ref{what-stays-what-changes-what-is-new}): the \textbf{Fast Interlock Chassis 340-308} (fast trip decision, arc inputs, SCR ENABLE / CROWBAR outputs), the \textbf{AIM} in VXI Slot 12 (per-channel arc latching and \texttt{RF\_FAULT} assertion --- the fault-history buffer function goes to the Waveform Buffer instead), and the \textbf{Local Panel 340-310} (local control and indication). Consolidating all three into one chassis is what makes single-point first-fault detection possible; in the legacy system the trip decision, its digital record and the operator indication lived in three different boxes. The separate \textbf{Local Control Chassis} that aggregated part of the station's hardwired interlock wiring and fed the Fast IC has no documented I/O list, so whether any of it is re-terminated here or retired with the Fast IC is not yet decided.\openitem{O4}
+\textbf{It absorbs the functions of three legacy units that are removed outright} (Section~\ref{what-stays-what-changes-what-is-new}): the \textbf{Fast Interlock Chassis 340-308} (fast trip decision, arc inputs, reflected-power comparators), the \textbf{AIM} in VXI Slot 12 (per-channel arc latching and \texttt{RF\_FAULT} assertion --- the fault-history buffer function goes to the Waveform Buffer instead), and the \textbf{RF Local Display Panel 340-310} (the logic that forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort to the SPEAR MPS, the end of the three HVPS fibers, and local control and indication). Consolidating all three into one chassis is what makes single-point first-fault detection possible; in the legacy system the trip decision, its digital record and the operator indication lived in three different boxes. The panel's I/O is documented in its drawings and in J.~Sebek's fiber note, but the equations of its programmable logic are not, and the endpoint of its beam-abort output in the SPEAR MPS is not on any RF drawing.\openitem{O3}
 
 \textbf{Key capabilities}:
 
@@ -1186,7 +1162,9 @@ The Interface Chassis is a completely new subsystem that serves as the central h
 
 \textbf{Primary inputs}: LLRF9 status, HVPS fiber-optic status, MPS permits/heartbeat/reset, SPEAR MPS, orbit interlock, arc detection, power monitoring, expansion ports
 
-\textbf{Primary outputs}: LLRF9 enable, HVPS SCR ENABLE (fiber), HVPS CROWBAR (fiber), fault status reporting to MPS
+\textbf{Primary outputs}: LLRF9 enable, HVPS SCR ENABLE (fiber), HVPS CROWBAR (fiber), beam abort to the SPEAR MPS, fault status reporting to MPS
+
+\textbf{Beam abort}: the legacy station tells the SPEAR MPS that it is not ready for beam through the beam-abort output of the RF Local Display Panel (rear BNC J6). The panel combines the beam abort that the state machine forces through the AIM whenever it turns the station off or enters TUNE, the HVPS STATUS fiber and the main and bucking solenoid faults, and latches the result until reset. The Interface Chassis keeps this output with the same meaning.
 
 \textbf{Critical design consideration}: The Interface Chassis creates a bidirectional feedback loop between LLRF9 and HVPS that requires careful recovery sequencing logic.
 
@@ -1313,7 +1291,7 @@ Any modification to PPS wiring, control logic, or readback paths requires:
 \begin{itemize}
 \tightlist
 \item
-  Review and approval by SLAC AD Safety Division
+  Review and approval by the SLAC Accelerator Directorate Safety Office (ADSO)
 \item
   Formal change control documentation
 \item
@@ -1368,20 +1346,20 @@ Each of the 4 RF cavities has a mechanical tuner that adjusts the cavity resonan
 
 \subsection{Upgraded Controller}\label{upgraded-controller-1}
 
-The tuner motor controller is being replaced with a modern motion controller. The leading candidate is the \textbf{Galil DMC-4143} (4-axis), which is supported by the LLRF9's built-in tuner control features and EPICS motor records. Other candidates under investigation include the Domenico/Dunning design and Danh's design.
+The tuner motor controller is replaced by the \textbf{Galil DMC-4143} (4-axis). LLRF9 Unit~1 runs the four tuner loops and drives the Galil directly through its built-in Galil driver, so no separate motion-control IOC is needed. The Galil has been built and tested on the SPEAR3 tuner motors under an EPICS control by M.~Dunning; that control is not carried forward.
 
 \textbf{Upgraded tuner control loop}:
 
 \begin{itemize}
 \tightlist
 \item
-  LLRF9 measures cavity probe phase relative to station reference (10 Hz, sub-degree resolution)
+  LLRF9 Unit~1 compares each cavity's probe phase with its forward phase (10 Hz, synchronized across its boards, sub-degree resolution)
 \item
-  EPICS coordinator processes phase data and computes motor commands
+  Its built-in PID tuner loop computes the motor command, with a deadband on the load-angle error and a minimum forward power
 \item
-  Motor commands sent via EPICS motor records to motion controller
+  The LLRF9 sends the command to the Galil over Ethernet and reads back the encoder position, the limit switches and an analog input
 \item
-  Motion controller drives stepper motors
+  The Galil drives the stepper motors
 \end{itemize}
 
 \textbf{LLRF9 tuner support}: The LLRF9 includes built-in tuner control PVs (per cavity):
@@ -1419,18 +1397,18 @@ The load angle offset loop is a supervisory function that balances gap voltage a
 \begin{itemize}
 \tightlist
 \item
-  \textbf{LLRF9 Unit 1}: Provides 10 Hz phase measurements for all 4 cavities (BRD1: Cav 1,2; BRD2: Cav 3,4)
+  \textbf{LLRF9 Unit 1}: Measures the four cavity probe and forward phases at 10 Hz (probes on CH0, CH1, CH3 and CH4; forward signals on CH5 to CH8) and runs the four tuner loops
 \item
-  \textbf{Motion Controller}: EPICS motor records via Ethernet
+  \textbf{Galil DMC-4143}: Commanded by LLRF9 Unit~1 over Ethernet through the LLRF9's built-in driver
 \item
   \textbf{Stepper Motors}: Power and encoder cables to tunnel (existing field cabling)
 \item
-  \textbf{EPICS Coordinator}: Tuner manager module processes phase data, commands motor moves, manages load angle
+  \textbf{EPICS Coordinator}: Opens and closes the LLRF9 tuner loops with the station state and sets the load-angle offsets
 \end{itemize}
 
 \subsection{Risk Note}\label{risk-note}
 
-The tuner motor controller is identified as the hardest-to-prove subsystem. Previous attempts with candidate controllers have had reliability issues. The mitigation plan is to test the chosen controller on the SPEAR3 booster tuners first before committing to storage ring installation. The Galil controller has been selected for this purpose due to its proven track record and compatibility with the other facilities. The controller has been tested with SPEAR in Aug 2026, with successfully driven tuner motors for 4 cavities simultaneously, providing confidence for its deployment.
+The tuner motor controller is identified as the hardest-to-prove subsystem. Previous attempts with candidate controllers have had reliability issues. The mitigation plan is to test the chosen controller on the SPEAR3 booster tuners first before committing to storage ring installation. The Galil controller has been selected for this purpose due to its proven track record and compatibility with the other facilities. The controller has been tested with SPEAR in Aug 2026 under an EPICS control by M.~Dunning, successfully driving the tuner motors of all four cavities simultaneously, which gives confidence for its deployment. In service LLRF9 Unit~1 drives it directly, so that EPICS control is not carried forward.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -1485,13 +1463,13 @@ Purpose
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-1 & 7 & Waveguide Load 1 Forward Power & Slow monitoring of WG Load 1 forward power; signal rarely exceeds 2 kW. \\
+1 & 5 & Klystron Drive Power (proposed) & Drive level into the klystron; the drive power is on neither LLRF9 unit (O4) \\
 2 & 4 & Circulator Load Reflected Power & Indicates circulator load match quality \\
 3 & 6 & Station Reference Power & Monitors 476 MHz reference level; loss of reference triggers fault. Note: Dmitry's LLRF9 module may also measure this. \\
 4 & 8 & Waveguide Load 1 Reflected Power & Monitors WG Load 1 match quality \\
 5 & 16 & Waveguide Load 2 Reflected Power & Monitors WG Load 2 match quality \\
 6 & 24 & Waveguide Load 3 Reflected Power & Monitors WG Load 3 match quality \\
-7 & --- & (Spare --- consider klystron forward power coupled version for collector power calculation) & Reserved\openitem{O5} \\
+7 & --- & (Spare --- consider klystron forward power coupled version for collector power calculation) & Reserved\openitem{O4} \\
 8 & --- & (Spare) & Reserved for future use \\
 \end{longtable}
 
@@ -1645,7 +1623,7 @@ form of the system-module and test-module interface is not yet fixed: how many
 discrete lines there are, their logic levels, whether the fired-detector
 identification arrives as parallel bits or as an encoded word, and how the latch
 is reset. These must be taken from the AFT ARC4 documentation and settled
-\textbf{before the Interface Chassis PCB is laid out}.\openitem{O6}
+\textbf{before the Interface Chassis PCB is laid out}.\openitem{O5}
 \end{keynote}
 
 \subsection{Permit Logic}\label{arc-permit-logic}
@@ -1671,7 +1649,7 @@ is reset. These must be taken from the AFT ARC4 documentation and settled
 \item
   \textbf{Tunnel fibers → ARC4 detector modules}: one existing optical fiber per channel, landed on the detector module front panel. No adapters, no viewport changes.
 \item
-  \textbf{ARC4 system modules (×2) → Interface Chassis}: arc permit (fail-safe active-high) plus fired-detector identification. Signal count and logic levels not yet defined --- open item \textbf{O6}.
+  \textbf{ARC4 system modules (×2) → Interface Chassis}: arc permit (fail-safe active-high) plus fired-detector identification. Signal count and logic levels not yet defined --- open item \textbf{O5}.
 \item
   \textbf{ARC4 test module ↔ Interface Chassis}: test initiate and test response, plus latch reset.
 \item
@@ -1724,6 +1702,8 @@ Maximum Power Rating & \textasciitilde1 kW (1000 W) \\
 Nominal Operating Power & \textasciitilde500 W (actual sustained operation) \\
 Nominal Operating Voltage & 68 V (AC, at transformer input) \\
 Nominal Operating Current & 7.3 A \\
+RF MPS trip limits (PLC-5, live values) & 62.4--76.2 V; 5.24--9.77 A \\
+EPICS alarm limits LOLO / LOW / HIGH / HIHI (live values) & 63.8 / 66.5 / 72.1 / 76.2 V; 6.72 / 7.01 / 7.59 / 7.88 A \\
 Transformer Ratio & 10:1 step-down \\
 Secondary Output (Post-Transformer) & \textasciitilde6.8 V RMS at 73 A \\
 Maximum Rating & 14.0 V RMS @ 71 A \\
@@ -1731,7 +1711,7 @@ Maximum Rating & 14.0 V RMS @ 71 A \\
 
 \subsection{Upgraded System}\label{upgraded-system}
 
-The \textbf{TDK Lambda programmable AC power supply} is the selected replacement for the motor-driven variac, and the unit is already in hand. It requires an \textbf{external \qty{60}{\hertz} sync circuit}, which is being designed in-house by B.~Morris, so that the heater output stays phase-locked to the site line rather than free-running against it.\openitem{O7}
+The \textbf{TDK Lambda programmable AC power supply} is the selected replacement for the motor-driven variac, and the unit is installed on a test stand, where it is to be accepted with a load. It requires an \textbf{external \qty{60}{\hertz} sync circuit}, which is being designed in-house by B.~Morris, so that the heater output stays phase-locked to the site line rather than free-running against it.\openitem{O6}
 
 \textbf{Key advantages over the legacy variac}:
 
@@ -1913,7 +1893,7 @@ The legacy implementation is \fpath{rf_hvps_loop.st,v} (343 lines), which runs a
 
 The loop reports one of 16 status codes (for example \texttt{GOOD}, \texttt{CAVV\_LIM}, \texttt{VOLT\_TOL}, \texttt{VOLT\_LIM}, \texttt{VACM\_BAD}) together with a human-readable string, so the operator sees \emph{why} the loop is holding rather than only that it is.
 
-\textbf{In the upgrade} the same algorithm runs in the EPICS coordinator at \textasciitilde1 Hz. The differences are all at the interfaces: the voltage setpoint and readback move over Ethernet to the CompactLogix HVPS PLC instead of through the Allen-Bradley serial link to the SLC-500, and the gap-voltage and drive-power inputs come from the LLRF9 units rather than from the RFP and IQA modules. Because the Waveform Buffer System now measures HVPS voltage and current directly, the loop also has a true power reading available where the legacy loop had only a forward-power proxy.
+\textbf{In the upgrade} the same algorithm runs in EPICS, in the IOC \mbox{B132-IOCRF}, at \textasciitilde1 Hz, with no Python layer and under the current HVPS PV names. The differences are all at the interfaces: the voltage setpoint and readback move over Ethernet to the CompactLogix HVPS PLC instead of through the Allen-Bradley serial link to the SLC-500, and the gap-voltage and drive-power inputs come from the LLRF9 units rather than from the RFP and IQA modules. Because the Waveform Buffer System now measures HVPS voltage and current directly, the loop also has a true power reading available where the legacy loop had only a forward-power proxy.
 
 \subsection{Tuner Control Loops (×4, \textasciitilde1 Hz)}\label{tuner-control-loops-4-1-hz}
 
@@ -1935,7 +1915,7 @@ The legacy implementation is \fpath{rf_tuner_loop.st,v} (555 lines), instantiate
 
 Guards are on the motion rather than the arithmetic: five consecutive failed moves raise a motor-stall status, a missing or bad-severity phase measurement stops motion rather than moving on stale data, and forward power below the configured minimum disables the loop. There is a separate homing sequence with distinct home positions for the ON and PARK states, retried up to five times. The loop reports 14 status codes distinguishing the warning cases (at a drive limit, not at requested position, taking too long to move) from the non-functional cases (bad tuner readback, missing measurements, RF power too low).
 
-\textbf{In the upgrade} the phase measurement comes from the LLRF9 units, which deliver all four cavity probe phases at 10 Hz with sub-degree resolution --- an order of magnitude better than the legacy IQA chain --- and the motor command goes to the Galil DMC-4143 through EPICS motor records instead of to the Allen-Bradley 1746-HSTP1. The LLRF9 also provides its own built-in tuner control PVs (\texttt{GAIN\_P}, \texttt{GAIN\_I}, \texttt{OFFSET}, \texttt{CLOSE}, \texttt{MINFWD} per cavity), so the loop can either be closed inside the LLRF9 or run in the coordinator using LLRF9 phase data. Which of the two is used is a commissioning decision\openitem{O8}; the deadband, drive-limit and stall guards above are required either way.
+\textbf{In the upgrade} the phase measurement comes from LLRF9 Unit~1, which delivers all four cavity probe and forward phases at 10 Hz with sub-degree resolution --- an order of magnitude better than the legacy IQA chain. The loop is closed inside that unit, which drives the Galil DMC-4143 directly through its built-in Galil driver instead of the Allen-Bradley 1746-HSTP1. Its built-in tuner control PVs (\texttt{GAIN\_P}, \texttt{GAIN\_I}, \texttt{OFFSET}, \texttt{CLOSE}, \texttt{MINFWD} per cavity) set the PID gains, the load-angle offset, the loop state and the minimum forward power. The deadband, drive-limit and stall guards above are still required: the deadband and the minimum forward power are LLRF9 settings, and the drive limits are set in the Galil inside the mechanical travel of the tuners.
 
 \subsection{Load Angle Offset Loop (\textasciitilde1 Hz)}\label{load-angle-offset-loop-1-hz}
 
@@ -1963,7 +1943,7 @@ The legacy implementation is \fpath{rf_states.st,v} (2,227 lines) --- by a wide 
 
 Not every transition is legal. \texttt{PARK} cannot go directly to either ON state --- it must pass through \texttt{TUNE} --- and returning from \texttt{ON\_CW} to a lower state is routed through a controlled fallback rather than a direct jump. On a fault the sequencer captures the fault waveform files, performs an orderly shutdown, and then attempts an automatic restart up to a retry limit; a forced-fault latch blocks that automatic restart until an operator clears it.
 
-\textbf{In the upgrade} the sequencer moves to the EPICS coordinator and the state set collapses, because \texttt{ON\_FM} and the comb and gap-voltage-feedback ramps it existed to manage are PEP-II features that SPEAR3 does not use (Section~\ref{eliminated-loops}). Ramping drive power and closing the field loop become LLRF9 operations; the HVPS turn-on and turn-off sequences become CompactLogix operations; tuner homing becomes a Galil operation. What the coordinator retains is exactly the part that was always supervisory: deciding which transitions are legal, ordering the subsystem operations, arming and clearing the fault response, and enforcing the retry limit and the forced-fault latch.
+\textbf{In the upgrade} the sequencer moves to the EPICS coordinator and the state set collapses, because \texttt{ON\_FM} and the comb and gap-voltage-feedback ramps it existed to manage are PEP-II features that SPEAR3 does not use (Section~\ref{eliminated-loops}). Ramping drive power and closing the field loop become LLRF9 operations; the HVPS turn-on and turn-off sequences become CompactLogix operations; tuner motion becomes an LLRF9 operation through its Galil driver (the legacy homing to fixed ON and PARK positions has no counterpart, so turn-on from a detuned tuner position is verified at commissioning). What the coordinator retains is exactly the part that was always supervisory: deciding which transitions are legal, ordering the subsystem operations, arming and clearing the fault response, and enforcing the retry limit and the forced-fault latch.
 
 The one behaviour that must be preserved carefully is the interaction with the protection chain. The legacy sequencer could afford to be in the trip path because it ran on a real-time kernel; the upgraded coordinator is explicitly \emph{not} in the fast safety path (Section~\ref{protection-philosophy}), so the state machine must react to a trip that the Interface Chassis has already executed, rather than being the thing that executes it.
 
@@ -2026,18 +2006,20 @@ EPICS Coord
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\textbf{LLRF9 \#1} & --- & Interlock daisy (LEMO) & --- & --- & Status (5V digital) & --- & --- & --- & --- & EPICS (Ethernet) \\
+\textbf{LLRF9 \#1} & --- & Interlock daisy (LEMO) & --- & --- & Status (5V digital) & --- & --- & Tuner moves (Ethernet) & --- & EPICS (Ethernet) \\
 \textbf{LLRF9 \#2} & Interlock daisy (LEMO) & --- & --- & --- & Status (5V digital) & --- & --- & --- & --- & EPICS (Ethernet) \\
 \textbf{HVPS PLC} & --- & --- & --- & --- & STATUS (fiber), SCR EN (fiber), CROWBAR (fiber) & --- & --- & --- & --- & EPICS (Ethernet) \\
 \textbf{RF MPS PLC} & --- & --- & --- & --- & Summary, Heartbeat, Reset (digital) & --- & --- & --- & --- & EPICS (Ethernet) \\
 \textbf{Interface Chassis} & Enable (3.2V) & Enable (3.2V) & SCR EN, CROWBAR (fiber) & Fault status (digital) & --- & --- & --- & --- & --- & --- \\
 \textbf{Waveform Buffer} & --- & --- & --- & --- & Comparator trips (digital) & --- & --- & --- & --- & EPICS (Ethernet) \\
 \textbf{Arc Detect} & --- & --- & --- & --- & Permit + Latching & --- & --- & --- & --- & --- \\
-\textbf{Motor Ctrl} & --- & --- & --- & --- & --- & --- & --- & --- & --- & EPICS (Ethernet) \\
+\textbf{Motor Ctrl} & Position, limits (Ethernet) & --- & --- & --- & --- & --- & --- & --- & --- & Via LLRF9 \#1 \\
 \textbf{Heater Ctrl} & --- & --- & --- & --- & --- & --- & --- & --- & --- & EPICS (Ethernet) \\
-\textbf{EPICS Coord} & EPICS (Ethernet) & EPICS (Ethernet) & EPICS (Ethernet) & EPICS (Ethernet) & EPICS & EPICS (Ethernet) & --- & EPICS (Ethernet) & EPICS (Ethernet) & --- \\
+\textbf{EPICS Coord} & EPICS (Ethernet) & EPICS (Ethernet) & EPICS (Ethernet) & EPICS (Ethernet) & EPICS & EPICS (Ethernet) & --- & Via LLRF9 \#1 & EPICS (Ethernet) & --- \\
 \textbf{External (SPEAR MPS, Orbit)} & --- & --- & --- & --- & 24V permits & --- & --- & --- & --- & --- \\
 \end{longtable}
+
+The Interface Chassis also drives the beam-abort output to the SPEAR MPS, which has no column in the matrix (Section~\ref{interface-summary}).
 
 \subsection{Interface Signal Types Summary}\label{interface-signal-types-summary}
 
@@ -2059,7 +2041,7 @@ Two conventions apply across all of them. Every permit is \textbf{active-high}, 
 
 \subsection{Open Interface Questions}\label{open-interface-questions}
 
-Every unsettled interface detail is carried in the master \hyperref[open-items]{\textbf{Open Items}} table in the front matter (p.~\pageref{open-items}). The interface entries in that table are \textbf{O2} (LLRF9 $\leftrightarrow$ Interface Chassis logic levels), \textbf{O4} (Local Control Chassis disposition), \textbf{O5} (Waveform Buffer spare channels), \textbf{O6} (AFT ARC4 $\rightarrow$ Interface Chassis), \textbf{O7} (heater supply), \textbf{O8} (tuner control split) and \textbf{O9} (network addressing). Each must be closed before the corresponding subsystem can be integrated.
+Every unsettled interface detail is carried in the master \hyperref[open-items]{\textbf{Open Items}} table in the front matter (p.~\pageref{open-items}). The interface entries in that table are \textbf{O1} (LLRF9 $\leftrightarrow$ Interface Chassis logic levels), \textbf{O3} (RF Local Display Panel logic and beam-abort endpoint), \textbf{O4} (Waveform Buffer channel assignment), \textbf{O5} (AFT ARC4 $\rightarrow$ Interface Chassis), \textbf{O6} (heater supply) and \textbf{O7} (network addressing). Each must be closed before the corresponding subsystem can be integrated.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -2138,13 +2120,13 @@ Update Rate
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-LLRF9 Unit 1 & TBD\openitem{O9} & Built-in Linux IOC & \texttt{LLRF1:} & 10 Hz (scalars) \\
+LLRF9 Unit 1 & TBD\openitem{O7} & Built-in Linux IOC & \texttt{LLRF1:} & 10 Hz (scalars) \\
 LLRF9 Unit 2 & TBD & Built-in Linux IOC & \texttt{LLRF2:} & 10 Hz (scalars) \\
-HVPS CompactLogix & TBD & External EPICS gateway & \texttt{SRF1:HVPS:} & \textasciitilde1 Hz \\
+HVPS CompactLogix & TBD & Served by the IOC \mbox{B132-IOCRF} & \texttt{SRF1:HVPS:} (current names) & \textasciitilde1 Hz \\
 RF MPS ControlLogix & TBD & External EPICS gateway & \texttt{SRF1:MPS:} & \textasciitilde1 Hz \\
-Motion Controller & TBD & EPICS motor record IOC & \texttt{SRF1:MTR:} & On demand \\
+Motion Controller (Galil) & TBD & None; driven by LLRF9 Unit~1 & Through \texttt{LLRF1:} & On demand \\
 Waveform Buffer & TBD & Dedicated IOC & \texttt{SRF1:WFBUF:} & \textasciitilde1 Hz / event \\
-EPICS/MATLAB Coordinator & TBD & caproto / PyEPICS / MATLAB client & Various & \textasciitilde1 Hz \\
+EPICS/MATLAB Coordinator & TBD & IOC \mbox{B132-IOCRF}; caproto / PyEPICS / MATLAB clients & Various & \textasciitilde1 Hz \\
 \end{longtable}
 
 \subsection{Non-EPICS Communication Paths}\label{non-epics-communication-paths}
@@ -2164,6 +2146,8 @@ Purpose
 \endlastfoot
 Interface Chassis ↔ all hardware & Hardwired digital/fiber & Safety interlocks (no network dependency) \\
 LLRF9 Unit 1 ↔ Unit 2 & LEMO interlock daisy-chain & Fast interlock propagation \\
+LLRF9 Unit 1 ↔ Galil DMC-4143 & Ethernet, Galil command interface (LLRF9 built-in driver) & Tuner motion and readback \\
+Interface Chassis → SPEAR MPS & Hardwired & Beam abort (station not ready for beam) \\
 PPS ↔ PPS Interface Box & Hardwired (GOB1208PNE) & Personnel safety (no network dependency) \\
 AFT ARC4 system modules → Interface Chassis & Dry contact relay and/or semiconductor switches & Arc interlock (no network dependency) \\
 \end{longtable}
@@ -2275,15 +2259,16 @@ Notes
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-LLRF9 (4 units) & Hardware complete & Two units installed in B132; RF signals to be hooked up October 2026. Two spares on the shelf. \\
+LLRF9 (4 units) & Hardware complete & Two units installed in B132; RF cables to be connected in the coming weeks; Unit~1 will drive the Galil. Two spares on the shelf. \\
+Galil DMC-4143 tuner controller & Built and tested & Tested on the SPEAR3 tuner motors under an EPICS control by M.~Dunning; LLRF9 Unit~1 will drive it directly \\
 RF MPS PLC modules & Hardware complete & EPICS software under development \\
 HVPS PLC modules & Hardware complete (HVPS1, HVPS2, B44 Test Stand) & EPICS software under development \\
 Enerpro FCOG1200 boards & On order & 5 boards ordered; awaiting delivery \\
 Arc detection (AFT ARC4) & Done & Chassis fully assembled with all modules, September 2026 \\
 Waveform Buffer System & \textbf{Complete} & April 2026; shares one chassis with the Interface Chassis \\
 Interface Chassis & In progress & Prototype built. Front and back panels to be modified and the chassis raised from 2U to \textbf{3U} to arrange components better; bench test Oct--Nov 2026. \\
-Heater Controller (TDK Lambda programmable AC supply) & Supply in hand & Awaiting the software specification; external \qty{60}{\hertz} sync circuit in design (B.~Morris) \\
-PPS Interface Box & Initial design done & Awaiting design review \\
+Heater Controller (TDK Lambda programmable AC supply) & Supply on a test stand & Acceptance with a load on the test stand; software specification outstanding; external \qty{60}{\hertz} sync circuit in design (B.~Morris) \\
+PPS Interface Box & Initial version designed & Documentation mostly done; needs ADSO approval and the final design \\
 Software & In progress & Legacy code review complete; functional requirements being drafted; beta expected Spring 2027 \\
 \end{longtable}
 
@@ -2304,15 +2289,15 @@ Mitigation
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Tuner motor controller reliability & High & \textbf{Closed} & Galil tested on SPEAR in August 2026, driving all four cavity tuner motors simultaneously \\
+Tuner motor controller reliability & High & \textbf{Closed} & Galil tested on SPEAR in August 2026 under an EPICS control by M.~Dunning, driving all four cavity tuner motors simultaneously; in service LLRF9 Unit~1 drives it directly \\
 HVPS PLC code migration (SLC-500 → CompactLogix) & High & In progress & Reverse-engineer legacy code; build Test Stand 18 (B44) \\
-PPS Interface approval delays & High & In progress & Engage protection managers early; provide complete documentation. Initial design done, awaiting review. \\
+PPS Interface approval delays & High & In progress & Engage protection managers early; provide complete documentation. Initial version designed and documentation mostly done; ADSO approval and the final design outstanding. \\
 Interface Chassis logic design (LLRF9/HVPS feedback loop) & High & In progress & Design and simulate before fabrication; careful sequencing logic. Prototype built; panels being reworked and the chassis raised to 3U; bench test Oct--Nov 2026. \\
 Waveform Buffer System (new custom hardware) & Medium & \textbf{Closed} & Staged development completed; board complete April 2026 \\
 EPICS/MATLAB Coordinator software & Critical & In progress & Largest software scope: state machine, fault handling, auto-recovery sequences, operator interface, and integration with all subsystem IOCs. Legacy code review complete and functional requirements being drafted; beta expected Spring 2027. Must be developed in parallel with hardware integration. \\
 RF MPS PLC software integration & High & In progress & MPS hardware is assembled and tested standalone; EPICS IOC development is under way, but integration with Interface Chassis fault status, first-fault logic and reset sequencing has not begun. \\
 AFT ARC4 external interface definition & Medium & In progress & No longer an SSRL firmware task --- the OR and latch functions are inside the vendor chassis. The residual risk is that the system-module and test-module interface must be pinned down from AFT documentation before the Interface Chassis PCB is laid out. \\
-Heater supply \qty{60}{\hertz} sync circuit & Medium & In progress & TDK Lambda supply is in hand; the sync circuit design, build and test (B.~Morris) is a new in-house item on the heater critical path, and the software specification is still outstanding. \\
+Heater supply \qty{60}{\hertz} sync circuit & Medium & In progress & TDK Lambda supply is installed on a test stand; the sync circuit design, build and test (B.~Morris) is a new in-house item on the heater critical path, and the software specification is still outstanding. \\
 Communication latency (Ethernet/EPICS for \textasciitilde1 Hz control) & Low & Validated & Proven in LLRF9 prototype commissioning \\
 \end{longtable}
 

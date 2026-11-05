@@ -23,9 +23,8 @@ O2 & The mm-per-degree conversion is quoted as a \textbf{range}, 0.020--0.030 mm
 O3 & The \textbf{IQA phase calibration} that defines the zero of \texttt{LOAD:ANGLE:ERR} has no recorded procedure or last-performed date. & A written calibration procedure and the date it was last run on each cavity. & Trusting that \texttt{ERR}~=~0 means resonance & \openpage{O3} \\
 O4 & Whether \textbf{autosave} is actually enabled for the tuner parameter set on the production IOC. & The autosave request file list and a restart test. & Any statement about behavior after an IOC restart & \openpage{O4} \\
 O5 & The \textbf{loop gain} \texttt{CAVTUNR:LOOP:GAIN} is stated to run at unity, but the value is operator-settable and not archived. & The as-running value, read from the live IOC. & Reproducing the loop bandwidth figures & \openpage{O5} \\
-O6 & \textbf{Mechanical condition} of the tuner mechanisms. The 2023 inspection recorded bellows and limit-switch problems on three cavities. & A current inspection, and whether the recorded faults were repaired. & Assuming the full $-29.5$ to $+18$ mm travel is usable & \openpage{O6} \\
-O7 & The \textbf{Galil DMC-4143} replacement has test moves recorded but no commissioning record or cutover plan. & A commissioning test report and the cutover criteria. & Scheduling the controller swap & \openpage{O7} \\
-O8 & The inner-loop gain \cref{eq:geff} reuses the \emph{park}-mode degrees-per-kHz constant \texttt{0.00004726891}, which differs from the physical load-angle conversion by about a factor of five. & Confirmation of which conversion the inner loop is correctly analyzed with, ideally from a measured step response. & Any quantitative stability margin & \openpage{O8} \\
+O6 & The \textbf{Galil DMC-4143} replacement has test moves recorded under an EPICS control by M.~Dunning; in service LLRF9 Unit~1 will drive it directly, and that configuration has no commissioning record or cutover plan yet. & A commissioning test with the LLRF9 driving the Galil, including turn-on from a detuned tuner position, and the cutover criteria. & Scheduling the controller swap & \openpage{O6} \\
+O7 & The inner-loop gain \cref{eq:geff} reuses the \emph{park}-mode degrees-per-kHz constant \texttt{0.00004726891}, which differs from the physical load-angle conversion by about a factor of five. & Confirmation of which conversion the inner loop is correctly analyzed with, ideally from a measured step response. & Any quantitative stability margin & \openpage{O7} \\
 \end{longtable}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -193,7 +192,7 @@ Loop rate & \qty{0.5}{\hertz} --- one cycle every \qty{2}{\second} (SCAN="2 seco
 \subsection{Station State Machine Context}\label{sec:station-state}
 
 
-The tuner loop only acts in \texttt{ON\_CW} state. The state codes (from \texttt{rf\_\allowbreak{}station\_\allowbreak{}state.\allowbreak{}h,\allowbreak{}v}) are:
+The tuner loop runs in every station state except OFF \R{1}. It moves the tuners in TUNE and \texttt{ON\_CW} while the klystron forward power is above its minimum, holds in \texttt{ON\_FM}, and in OFF moves them only to a home position on request. The state codes (from \texttt{rf\_\allowbreak{}station\_\allowbreak{}state.\allowbreak{}h,\allowbreak{}v}) are:
 
 \begin{longtable}[]{@{}Q{\dimexpr 0.1111\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.0889\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.8000\linewidth-1.33\tabcolsep\relax}@{}}
 \toprule\noalign{}
@@ -202,10 +201,10 @@ State & Code & Tuner Behavior \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-OFF & 0 & Loop idle, no motor movement \\
-PARK & 1 & PEP-II only --- disabled in SPEAR3 \\
-TUNE & 2 & Ramp/transition state \\
-ON\_FM & 3 & Transition state \\
+OFF & 0 & Loop off; tuners move only to the ON or PARK home position when homing is requested \\
+PARK & 1 & PEP-II frequency-error path, without the forward-power check --- disabled in SPEAR3 \\
+TUNE & 2 & Active control, as in \texttt{ON\_CW}, while the klystron forward power is above its minimum \\
+ON\_FM & 3 & Loop holds (\texttt{ON\_FM} status); PEP-II state \\
 \textbf{ON\_CW} & \textbf{4} & \textbf{Active control --- phase-domain path} \\
 \end{longtable}
 
@@ -223,7 +222,7 @@ ON\_FM & 3 & Transition state \\
 \subsubsection{Galil controller status}\label{sec:galil-status}
 
 \begin{warnbox}
-Per the system owner: the Galil DMC-4143 control \textbf{has not been installed and is not in operation --- it is in development}. Test moves were performed on the existing cavity motors and worked fine, but the controller is expected to go online only \textbf{when the current LLRF upgrade project is finished}. It has \emph{not} replaced the Allen-Bradley hardware.
+Per the system owner: the Galil DMC-4143 control \textbf{has not been installed and is not in operation}. It has been built and tested on the existing cavity motors under an EPICS control by M.~Dunning, and the moves worked fine. In service, LLRF9 Unit~1 will run the four tuner loops and drive the Galil directly through its built-in Galil driver, so that EPICS control is not carried forward. The controller is expected to go online \textbf{when the current LLRF upgrade project is finished}. It has \emph{not} replaced the Allen-Bradley hardware.
 
 \textbf{The AB 1746-HSTP1 stepper controller remains the in-service hardware.} Everything in this document describing present-day tuner behavior refers to the AB path; Galil material is forward-looking.
 \end{warnbox}
@@ -763,7 +762,7 @@ For nominal values (\(C = 0.020\) mm/° (lower end of range), \(p_1 \approx 10\)
 \begin{keynote}
 \textbf{Note:} \Cref{eq:geff-num} is the single-cycle proportional gain. The \qty{0.5}{\hertz} rate and motor velocity limit prevent instability by severely band-limiting the loop. \texttt{CAVTUNR:\allowbreak{}LOOP:\allowbreak{}GAIN} (0--1) is critical for stability.
 
-The factor \(90°/4f_0\) in \cref{eq:geff} is the constant \texttt{0.00004726891} that \texttt{subSysFreqErr} uses \R{4}. That routine documents it as the \emph{park} frequency-error scaling (degrees per kHz per unit \(Q_L\)), which is about five times smaller than the physical load-angle conversion in \cref{eq:theta-to-df}. Whether the inner-loop gain estimate should use the park constant or the physical one has not been resolved here; the qualitative conclusion --- \(G_{eff} \gg 1\), so the loop gain scalar is what keeps the loop stable --- holds either way.\openitem{O8}
+The factor \(90°/4f_0\) in \cref{eq:geff} is the constant \texttt{0.00004726891} that \texttt{subSysFreqErr} uses \R{4}. That routine documents it as the \emph{park} frequency-error scaling (degrees per kHz per unit \(Q_L\)), which is about five times smaller than the physical load-angle conversion in \cref{eq:theta-to-df}. Whether the inner-loop gain estimate should use the park constant or the physical one has not been resolved here; the qualitative conclusion --- \(G_{eff} \gg 1\), so the loop gain scalar is what keeps the loop stable --- holds either way.\openitem{O7}
 \end{keynote}
 
 \subsection{Integrator Dynamics (Outer Loop)}\label{sec:integrator-dynamics}
@@ -832,7 +831,7 @@ The load angle offset integrator is a \textbf{leaky first-order IIR integrator},
 
 \textbf{EPICS record type:} \texttt{steppermotor} (custom AB 1746-HSTP1 driver record)\\
 \textbf{Physical device (legacy):} Allen-Bradley 1746-HSTP1 stepper module\\
-\textbf{Physical device (in development, not installed):} Galil DMC-4143 motion controller\openitem{O7}
+\textbf{Physical device (built and tested, not installed):} Galil DMC-4143 motion controller, to be driven by LLRF9 Unit~1\openitem{O6}
 
 \begin{codeblock}
 grecord(steppermotor,"$(S):$(C)TUNR:STEP:MOTOR") {
@@ -874,11 +873,13 @@ Time to stop from full speed & 0.5 s & ACCL is specified directly as seconds to 
 Min detectable move & 0.015875 mm & 1 RDBD = 5 steps \\
 \end{longtable}
 
-These are the \emph{commanded} limits taken from the motor record \R{8}. They
-assume the mechanism itself is free over the whole range: the June 2023 tuner
-inspection recorded bellows and mechanical-stop problems on cavities A and B and
-a limit-switch problem on cavity C, and whether those were repaired is not
-recorded here.\openitem{O6}
+These are the \emph{commanded} limits taken from the motor record \R{8}. The June
+2023 tuner inspection recorded bellows and mechanical-stop problems on cavities A and
+B and a limit-switch problem on cavity C. In September 2026 J.~Sebek and R.~Lion
+found that the plungers move only about \qty{\pm 4}{\milli\meter} over a year,
+against limit switches set at about \qty{\pm 25}{\milli\meter}; the mechanical travel
+will therefore be restricted to \qty{\pm 10}{\milli\meter}, which does not stress the
+bellows \R{17}.
 
 \subsection{Position Control and Initialization}\label{sec:position-init}
 

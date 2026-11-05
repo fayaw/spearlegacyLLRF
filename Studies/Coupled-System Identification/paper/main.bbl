@@ -1,0 +1,268 @@
+%apsrev4-2.bst 2019-01-14 (MD) hand-edited version of apsrev4-1.bst
+%Control: key (0)
+%Control: author (8) initials jnrlst
+%Control: editor formatted (1) identically to author
+%Control: production of article title (0) allowed
+%Control: page (0) single
+%Control: year (1) truncated
+%Control: production of eprint (0) enabled
+\begin{thebibliography}{24}%
+\makeatletter
+\providecommand \@ifxundefined [1]{%
+ \@ifx{#1\undefined}
+}%
+\providecommand \@ifnum [1]{%
+ \ifnum #1\expandafter \@firstoftwo
+ \else \expandafter \@secondoftwo
+ \fi
+}%
+\providecommand \@ifx [1]{%
+ \ifx #1\expandafter \@firstoftwo
+ \else \expandafter \@secondoftwo
+ \fi
+}%
+\providecommand \natexlab [1]{#1}%
+\providecommand \enquote  [1]{``#1''}%
+\providecommand \bibnamefont  [1]{#1}%
+\providecommand \bibfnamefont [1]{#1}%
+\providecommand \citenamefont [1]{#1}%
+\providecommand \href@noop [0]{\@secondoftwo}%
+\providecommand \href [0]{\begingroup \@sanitize@url \@href}%
+\providecommand \@href[1]{\@@startlink{#1}\@@href}%
+\providecommand \@@href[1]{\endgroup#1\@@endlink}%
+\providecommand \@sanitize@url [0]{\catcode `\\12\catcode `\$12\catcode
+  `\&12\catcode `\#12\catcode `\^12\catcode `\_12\catcode `\%12\relax}%
+\providecommand \@@startlink[1]{}%
+\providecommand \@@endlink[0]{}%
+\providecommand \url  [0]{\begingroup\@sanitize@url \@url }%
+\providecommand \@url [1]{\endgroup\@href {#1}{\urlprefix }}%
+\providecommand \urlprefix  [0]{URL }%
+\providecommand \Eprint [0]{\href }%
+\providecommand \doibase [0]{https://doi.org/}%
+\providecommand \selectlanguage [0]{\@gobble}%
+\providecommand \bibinfo  [0]{\@secondoftwo}%
+\providecommand \bibfield  [0]{\@secondoftwo}%
+\providecommand \translation [1]{[#1]}%
+\providecommand \BibitemOpen [0]{}%
+\providecommand \bibitemStop [0]{}%
+\providecommand \bibitemNoStop [0]{.\EOS\space}%
+\providecommand \EOS [0]{\spacefactor3000\relax}%
+\providecommand \BibitemShut  [1]{\csname bibitem#1\endcsname}%
+\let\auto@bib@innerbib\@empty
+%</preamble>
+\bibitem [{\citenamefont {Robinson}(1964)}]{Robinson1964}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {K.~W.}\ \bibnamefont
+  {Robinson}},\ }\bibfield  {title} {\bibinfo {title} {Stability of beam in
+  radiofrequency system},\ }\href@noop {} {\bibfield  {journal} {\bibinfo
+  {journal} {Cambridge Electron Accelerator Report}\ } (\bibinfo {year}
+  {1964})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Pedersen}(1975)}]{Pedersen1975}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {F.}~\bibnamefont
+  {Pedersen}},\ }\bibfield  {title} {\bibinfo {title} {Beam loading effects in
+  the {CERN PS Booster}},\ }\href {https://doi.org/10.1109/TNS.1975.4328024}
+  {\bibfield  {journal} {\bibinfo  {journal} {IEEE Trans. Nucl. Sci.}\ }\textbf
+  {\bibinfo {volume} {22}},\ \bibinfo {pages} {1906} (\bibinfo {year}
+  {1975})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Boussard}(1985)}]{Boussard1985}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.}~\bibnamefont
+  {Boussard}},\ }\bibfield  {title} {\bibinfo {title} {Control of cavities with
+  high beam loading},\ }\href {https://doi.org/10.1109/TNS.1985.4333745}
+  {\bibfield  {journal} {\bibinfo  {journal} {IEEE Trans. Nucl. Sci.}\ }\textbf
+  {\bibinfo {volume} {32}},\ \bibinfo {pages} {1852} (\bibinfo {year}
+  {1985})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Wilson}(1993)}]{Wilson1993}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.~B.}\ \bibnamefont
+  {Wilson}},\ }\href@noop {} {\emph {\bibinfo {title} {Fundamental-Mode {RF}
+  Design in $e^+e^-$ Storage Ring Factories}}},\ \bibinfo {type} {Tech. Rep.}\
+  \bibinfo {number} {SLAC-PUB-6062}\ (\bibinfo  {institution} {SLAC},\ \bibinfo
+  {year} {1993})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Rivetta}\ \emph {et~al.}(2007)\citenamefont
+  {Rivetta}, \citenamefont {Mastorides}, \citenamefont {Fox}, \citenamefont
+  {Teytelman},\ and\ \citenamefont {Winkle}}]{Rivetta2007}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {C.}~\bibnamefont
+  {Rivetta}}, \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont {Mastorides}},
+  \bibinfo {author} {\bibfnamefont {J.~D.}\ \bibnamefont {Fox}}, \bibinfo
+  {author} {\bibfnamefont {D.}~\bibnamefont {Teytelman}},\ and\ \bibinfo
+  {author} {\bibfnamefont {D.~V.}\ \bibnamefont {Winkle}},\ }\bibfield  {title}
+  {\bibinfo {title} {Modeling and simulation of longitudinal dynamics for {Low
+  Energy Ring--High Energy Ring} at the {Positron-Electron Project}},\ }\href
+  {https://doi.org/10.1103/PhysRevSTAB.10.022801} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. ST Accel. Beams}\ }\textbf {\bibinfo
+  {volume} {10}},\ \bibinfo {pages} {022801} (\bibinfo {year}
+  {2007})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Mastorides}\ \emph {et~al.}(2010)\citenamefont
+  {Mastorides}, \citenamefont {Rivetta}, \citenamefont {Fox}, \citenamefont
+  {Winkle},\ and\ \citenamefont {Teytelman}}]{Mastorides2010}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Mastorides}}, \bibinfo {author} {\bibfnamefont {C.}~\bibnamefont {Rivetta}},
+  \bibinfo {author} {\bibfnamefont {J.~D.}\ \bibnamefont {Fox}}, \bibinfo
+  {author} {\bibfnamefont {D.~V.}\ \bibnamefont {Winkle}},\ and\ \bibinfo
+  {author} {\bibfnamefont {D.}~\bibnamefont {Teytelman}},\ }\bibfield  {title}
+  {\bibinfo {title} {{RF} system models for the {CERN} {Large Hadron Collider}
+  with application to longitudinal dynamics},\ }\href
+  {https://doi.org/10.1103/PhysRevSTAB.13.102801} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. ST Accel. Beams}\ }\textbf {\bibinfo
+  {volume} {13}},\ \bibinfo {pages} {102801} (\bibinfo {year}
+  {2010})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Forssell}\ and\ \citenamefont
+  {Ljung}(1999)}]{Forssell1999}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {U.}~\bibnamefont
+  {Forssell}}\ and\ \bibinfo {author} {\bibfnamefont {L.}~\bibnamefont
+  {Ljung}},\ }\bibfield  {title} {\bibinfo {title} {Closed-loop identification
+  revisited},\ }\href {https://doi.org/10.1016/S0005-1098(99)00022-9}
+  {\bibfield  {journal} {\bibinfo  {journal} {Automatica}\ }\textbf {\bibinfo
+  {volume} {35}},\ \bibinfo {pages} {1215} (\bibinfo {year}
+  {1999})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Ljung}(1999)}]{Ljung1999}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {L.}~\bibnamefont
+  {Ljung}},\ }\href@noop {} {\emph {\bibinfo {title} {System Identification:
+  Theory for the User}}},\ \bibinfo {edition} {2nd}\ ed.\ (\bibinfo
+  {publisher} {Prentice Hall},\ \bibinfo {address} {Upper Saddle River, NJ},\
+  \bibinfo {year} {1999})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Bohlin}(2006)}]{Bohlin2006}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
+  {Bohlin}},\ }\href {https://doi.org/10.1007/1-84628-403-1} {\emph {\bibinfo
+  {title} {Practical Grey-box Process Identification: Theory and
+  Applications}}}\ (\bibinfo  {publisher} {Springer},\ \bibinfo {address}
+  {London},\ \bibinfo {year} {2006})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Pintelon}\ and\ \citenamefont
+  {Schoukens}(2012)}]{Pintelon2012}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
+  {Pintelon}}\ and\ \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Schoukens}},\ }\href {https://doi.org/10.1002/9781118287422} {\emph
+  {\bibinfo {title} {System Identification: A Frequency Domain Approach}}},\
+  \bibinfo {edition} {2nd}\ ed.\ (\bibinfo  {publisher} {Wiley--IEEE Press},\
+  \bibinfo {year} {2012})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Picinbono}\ and\ \citenamefont
+  {Chevalier}(1995)}]{Picinbono1995}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {B.}~\bibnamefont
+  {Picinbono}}\ and\ \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Chevalier}},\ }\bibfield  {title} {\bibinfo {title} {Widely linear
+  estimation with complex data},\ }\href {https://doi.org/10.1109/78.403373}
+  {\bibfield  {journal} {\bibinfo  {journal} {IEEE Trans. Signal Process.}\
+  }\textbf {\bibinfo {volume} {43}},\ \bibinfo {pages} {2030} (\bibinfo {year}
+  {1995})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Hettel}\ \emph {et~al.}(1999)\citenamefont {Hettel}
+  \emph {et~al.}}]{Hettel1999}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
+  {Hettel}} \emph {et~al.},\ }\bibfield  {title} {\bibinfo {title} {Design of
+  the {SPEAR 3} light source},\ }in\ \href@noop {} {\emph {\bibinfo {booktitle}
+  {Proc. 1999 Particle Accelerator Conf. (PAC'99)}}}\ (\bibinfo {year}
+  {1999})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {McIntosh}\ \emph {et~al.}(2004)\citenamefont
+  {McIntosh} \emph {et~al.}}]{McIntosh2004}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {McIntosh}} \emph {et~al.},\ }\bibfield  {title} {\bibinfo {title} {The
+  {SPEAR3} {RF} system},\ }in\ \href@noop {} {\emph {\bibinfo {booktitle}
+  {Proc. 9th European Particle Accelerator Conf. (EPAC'04)}}}\ (\bibinfo {year}
+  {2004})\ \bibinfo {note} {sLAC-PUB-10983}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Rimmer}\ \emph {et~al.}(1992)\citenamefont {Rimmer}
+  \emph {et~al.}}]{Rimmer1992}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.~A.}\ \bibnamefont
+  {Rimmer}} \emph {et~al.},\ }\href@noop {} {\emph {\bibinfo {title} {{RF}
+  Cavity Development for the {PEP-II} {B} Factory}}},\ \bibinfo {type} {Tech.
+  Rep.}\ \bibinfo {number} {LBL-33360}\ (\bibinfo  {institution} {LBL},\
+  \bibinfo {year} {1992})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Corredoura}(1999)}]{Corredoura1999}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
+  {Corredoura}},\ }\bibfield  {title} {\bibinfo {title} {Architecture and
+  performance of the {PEP-II} low-level {RF} system},\ }in\ \href@noop {}
+  {\emph {\bibinfo {booktitle} {Proc. 1999 Particle Accelerator Conf.
+  (PAC'99)}}}\ (\bibinfo {year} {1999})\ pp.\ \bibinfo {pages} {435--439},\
+  \bibinfo {note} {sLAC-PUB-8124}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {{SSRL RF group}}(2026)}]{SPEAR3_DocP}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibnamefont {{SSRL RF group}}},\
+  }\href@noop {} {\bibinfo {title} {{SPEAR3 RF Physics, Control Theory and
+  Plant (Doc P)}}},\ \bibinfo {howpublished} {Internal design document, SLAC
+  National Accelerator Laboratory} (\bibinfo {year} {2026})\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Bendat}\ and\ \citenamefont
+  {Piersol}(2010)}]{Bendat2010}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.~S.}\ \bibnamefont
+  {Bendat}}\ and\ \bibinfo {author} {\bibfnamefont {A.~G.}\ \bibnamefont
+  {Piersol}},\ }\href {https://doi.org/10.1002/9781118032428} {\emph {\bibinfo
+  {title} {Random Data: Analysis and Measurement Procedures}}},\ \bibinfo
+  {edition} {4th}\ ed.\ (\bibinfo  {publisher} {Wiley},\ \bibinfo {year}
+  {2010})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Chao}(1993)}]{Chao1993}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.~W.}\ \bibnamefont
+  {Chao}},\ }\href@noop {} {\emph {\bibinfo {title} {Physics of Collective Beam
+  Instabilities in High Energy Accelerators}}}\ (\bibinfo  {publisher}
+  {Wiley},\ \bibinfo {address} {New York},\ \bibinfo {year} {1993})\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Saleh}(1981)}]{Saleh1981}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.~A.~M.}\
+  \bibnamefont {Saleh}},\ }\bibfield  {title} {\bibinfo {title}
+  {Frequency-independent and frequency-dependent nonlinear models of {TWT}
+  amplifiers},\ }\href {https://doi.org/10.1109/TCOM.1981.1094911} {\bibfield
+  {journal} {\bibinfo  {journal} {IEEE Trans. Commun.}\ }\textbf {\bibinfo
+  {volume} {29}},\ \bibinfo {pages} {1715} (\bibinfo {year}
+  {1981})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Cripps}(2006)}]{Cripps2006}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.~C.}\ \bibnamefont
+  {Cripps}},\ }\href@noop {} {\emph {\bibinfo {title} {{RF} Power Amplifiers
+  for Wireless Communications}}},\ \bibinfo {edition} {2nd}\ ed.\ (\bibinfo
+  {publisher} {Artech House},\ \bibinfo {address} {Norwood, MA},\ \bibinfo
+  {year} {2006})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Schreier}\ and\ \citenamefont
+  {Scharf}(2010)}]{Schreier2010}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.~J.}\ \bibnamefont
+  {Schreier}}\ and\ \bibinfo {author} {\bibfnamefont {L.~L.}\ \bibnamefont
+  {Scharf}},\ }\href {https://doi.org/10.1017/CBO9780511815911} {\emph
+  {\bibinfo {title} {Statistical Signal Processing of Complex-Valued Data: The
+  Theory of Improper and Noncircular Signals}}}\ (\bibinfo  {publisher}
+  {Cambridge University Press},\ \bibinfo {year} {2010})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Raue}\ \emph {et~al.}(2009)\citenamefont {Raue},
+  \citenamefont {Kreutz}, \citenamefont {Maiwald}, \citenamefont {Bachmann},
+  \citenamefont {Schilling}, \citenamefont {Klingm{\"u}ller},\ and\
+  \citenamefont {Timmer}}]{Raue2009}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.}~\bibnamefont
+  {Raue}}, \bibinfo {author} {\bibfnamefont {C.}~\bibnamefont {Kreutz}},
+  \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont {Maiwald}}, \bibinfo
+  {author} {\bibfnamefont {J.}~\bibnamefont {Bachmann}}, \bibinfo {author}
+  {\bibfnamefont {M.}~\bibnamefont {Schilling}}, \bibinfo {author}
+  {\bibfnamefont {U.}~\bibnamefont {Klingm{\"u}ller}},\ and\ \bibinfo {author}
+  {\bibfnamefont {J.}~\bibnamefont {Timmer}},\ }\bibfield  {title} {\bibinfo
+  {title} {Structural and practical identifiability analysis of partially
+  observed dynamical models by exploiting the profile likelihood},\ }\href
+  {https://doi.org/10.1093/bioinformatics/btp358} {\bibfield  {journal}
+  {\bibinfo  {journal} {Bioinformatics}\ }\textbf {\bibinfo {volume} {25}},\
+  \bibinfo {pages} {1923} (\bibinfo {year} {2009})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Akaike}(1974)}]{Akaike1974}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.}~\bibnamefont
+  {Akaike}},\ }\bibfield  {title} {\bibinfo {title} {A new look at the
+  statistical model identification},\ }\href
+  {https://doi.org/10.1109/TAC.1974.1100705} {\bibfield  {journal} {\bibinfo
+  {journal} {IEEE Trans. Autom. Control}\ }\textbf {\bibinfo {volume} {19}},\
+  \bibinfo {pages} {716} (\bibinfo {year} {1974})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Schwarz}(1978)}]{Schwarz1978}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {G.}~\bibnamefont
+  {Schwarz}},\ }\bibfield  {title} {\bibinfo {title} {Estimating the dimension
+  of a model},\ }\href {https://doi.org/10.1214/aos/1176344136} {\bibfield
+  {journal} {\bibinfo  {journal} {Ann. Stat.}\ }\textbf {\bibinfo {volume}
+  {6}},\ \bibinfo {pages} {461} (\bibinfo {year} {1978})}\BibitemShut {NoStop}%
+\end{thebibliography}%

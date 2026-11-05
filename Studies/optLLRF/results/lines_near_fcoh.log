@@ -1,0 +1,29 @@
+﻿upper sideband, broadband part: f 8840 Hz, sigma 1094/s, Q 25.4, peak -85.8 dBc/Hz, floor -106.2 dBc/Hz, line -58.5 dBc
+lower sideband, broadband part: f 8809 Hz, sigma 1081/s, Q 25.6, peak -87.0 dBc/Hz, floor -103.4 dBc/Hz, line -59.8 dBc
+126 discrete lines on the 60 Hz grid between 2 and 10 kHz
+strongest lines within 1.5 kHz of f_coh (power, beam share AM/PM in model eff, beam phase):
+    +9000 Hz (n 150, 6-pulse):  -55.3 dBc, +16.1 dB; beam share 1.15/0.78; dphi 0.257 deg
+    -9000 Hz (n 150, 6-pulse):  -56.8 dBc, +15.6 dB; beam share 1.32/1.05; dphi 0.240 deg
+    +8640 Hz (n 144, 6-pulse):  -57.3 dBc, +17.0 dB; beam share 0.87/0.89; dphi 0.215 deg
+    -8640 Hz (n 144, 6-pulse):  -58.5 dBc, +16.2 dB; beam share 0.96/1.24; dphi 0.192 deg
+    -8280 Hz (n 138, 6-pulse):  -63.3 dBc, +17.1 dB; beam share 0.74/1.36; dphi 0.096 deg
+    +8280 Hz (n 138, 6-pulse):  -63.3 dBc, +16.5 dB; beam share 0.68/0.98; dphi 0.095 deg
+    +8880 Hz (n 148):  -64.0 dBc, + 4.8 dB; beam share 1.04/0.82; dphi 0.097 deg
+    +8820 Hz (n 147):  -64.8 dBc, + 4.8 dB; beam share 0.99/0.84; dphi 0.089 deg
+    +9720 Hz (n 162, 6-pulse):  -65.3 dBc, +17.0 dB; beam share 2.35/0.54; dphi 0.068 deg
+    -8880 Hz (n 148):  -65.6 dBc, + 4.4 dB; beam share 1.18/1.12; dphi 0.091 deg
+    -8820 Hz (n 147):  -66.1 dBc, + 5.0 dB; beam share 1.12/1.15; dphi 0.086 deg
+    -9720 Hz (n 162, 6-pulse):  -66.3 dBc, +16.9 dB; beam share 3.02/0.67; dphi 0.065 deg
+beam motion at the operating point (broadband line | beam-dominated lines | together):
+  eff: 0.186 | 0.554 | 0.584 deg rms (3.41 ps); dE/E 1.61e-04 rms; broadband drive S_n 1.80e-11 rad^2/Hz against 4.09e-11 from the floor
+  lag: 0.143 | 0.364 | 0.391 deg rms (2.28 ps); dE/E 1.05e-04 rms; broadband drive S_n 1.06e-11 rad^2/Hz against 4.09e-11 from the floor
+360 Hz-family lines (probe level at 500 mA) and the currents at which f_coh crosses them:
+   7200 Hz (-73.6 dBc): eff: none; lag: none
+   7560 Hz (-68.7 dBc): eff: none; lag: none
+   7920 Hz (-69.3 dBc): eff: none; lag: 477 mA
+   8280 Hz (-63.3 dBc): eff: none; lag: 419 mA
+   8640 Hz (-57.3 dBc): eff: none; lag: 358 mA
+   9000 Hz (-55.3 dBc): eff: 440 mA; lag: 294 mA
+   9360 Hz (-67.6 dBc): eff: 347 mA; lag: 222 mA
+   9720 Hz (-65.3 dBc): eff: 230 mA; lag: 132 mA
+wrote D:\OneDrive - SLAC National Accelerator Laboratory\SLACR\pyCode\spearlegacyLLRF\Studies\optLLRF\results\lines_FSW_cavA_matrix_20261008T153523.csv

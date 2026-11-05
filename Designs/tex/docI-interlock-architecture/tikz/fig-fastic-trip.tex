@@ -9,8 +9,9 @@
 
 % hardware outputs fired at the same instant, off to the side
 \node[pwr,text width=54mm,anchor=west] (out) at (92,-15)
-  {SCR ENABLE removed $\cdot$ CROWBAR fired\\
-   status word $\rightarrow$ AIM};
+  {status word $\rightarrow$ AIM\\
+   {\tiny SCR ENABLE and CROWBAR follow through the AIM's commands and the
+    RF Local Display Panel logic}};
 \draw[draw=cNeut,thick] (arc.south) -- (45,-24);
 \draw[sig] (45,-15) -- (out.west);
 

@@ -1,0 +1,73 @@
+model,I_mA,source,data,spectrum,fit,df_Hz,dsigma_pct
+eff,500,klystron_PM,noisy,upper,lorentz,29.4118,3.58724
+eff,500,klystron_PM,noisy,upper,lorentz_narrow,12.1038,3.51013
+eff,500,klystron_PM,noisy,upper,fano,-0.591625,1.07813
+eff,500,klystron_PM,noisy,upper,fano_narrow,-1.80896,3.91411
+eff,500,klystron_PM,noisy,lower,lorentz,39.8922,5.18795
+eff,500,klystron_PM,noisy,lower,lorentz_narrow,17.6626,4.4692
+eff,500,klystron_PM,noisy,lower,fano,-0.574515,1.69543
+eff,500,klystron_PM,noisy,lower,fano_narrow,-2.12529,4.8725
+eff,500,klystron_PM,exact,upper,lorentz,28.8509,1.99081
+eff,500,klystron_PM,exact,upper,lorentz_narrow,12.5769,1.62518
+eff,500,klystron_PM,exact,upper,fano,0.0171976,-0.188662
+eff,500,klystron_PM,exact,upper,fano_narrow,0.0115714,0.000639203
+eff,500,klystron_PM,exact,lower,lorentz,38.6791,3.25338
+eff,500,klystron_PM,exact,lower,lorentz_narrow,17.692,2.55029
+eff,500,klystron_PM,exact,lower,fano,0.0357852,0.414213
+eff,500,klystron_PM,exact,lower,fano_narrow,-0.0243683,-0.00117799
+eff,500,klystron_PM,noisy,phase spectrum,lorentz,-1279.44,891.504
+eff,500,klystron_PM,noisy,amplitude spectrum,lorentz,54.1179,-22.1854
+eff,500,klystron_AM,noisy,upper,lorentz,-89.6996,-8.12136
+eff,500,klystron_AM,noisy,upper,lorentz_narrow,-42.3094,2.18509
+eff,500,klystron_AM,noisy,upper,fano,-89.7103,-8.12197
+eff,500,klystron_AM,noisy,upper,fano_narrow,-41.1705,-1.68891
+eff,500,klystron_AM,noisy,lower,lorentz,-94.3338,-7.5955
+eff,500,klystron_AM,noisy,lower,lorentz_narrow,-45.2277,2.43769
+eff,500,klystron_AM,noisy,lower,fano,-94.3365,-7.59121
+eff,500,klystron_AM,noisy,lower,fano_narrow,-43.7468,-2.33144
+eff,500,klystron_AM,exact,upper,lorentz,-83.6991,-4.1686
+eff,500,klystron_AM,exact,upper,lorentz_narrow,-42.2672,0.194406
+eff,500,klystron_AM,exact,upper,fano,-83.7119,-4.17011
+eff,500,klystron_AM,exact,upper,fano_narrow,-40.0554,-5.65658
+eff,500,klystron_AM,exact,lower,lorentz,-88.4497,-3.33339
+eff,500,klystron_AM,exact,lower,lorentz_narrow,-44.9252,0.380762
+eff,500,klystron_AM,exact,lower,fano,-88.4643,-3.33491
+eff,500,klystron_AM,exact,lower,fano_narrow,-42.5205,-5.68296
+eff,500,klystron_AM,noisy,phase spectrum,lorentz,-286.163,23.0265
+eff,500,klystron_AM,noisy,amplitude spectrum,lorentz,-91.1319,-7.74834
+eff,500,measurement_PM,noisy,upper,lorentz,28.9535,3.46129
+eff,500,measurement_PM,noisy,upper,lorentz_narrow,11.9261,3.46722
+eff,500,measurement_PM,noisy,upper,fano,-0.625214,0.955558
+eff,500,measurement_PM,noisy,upper,fano_narrow,-1.80857,3.91598
+eff,500,measurement_PM,noisy,lower,lorentz,39.4207,5.03277
+eff,500,measurement_PM,noisy,lower,lorentz_narrow,17.4486,4.37802
+eff,500,measurement_PM,noisy,lower,fano,-0.636037,1.53515
+eff,500,measurement_PM,noisy,lower,fano_narrow,-2.09107,4.86346
+eff,500,measurement_PM,exact,upper,lorentz,28.4236,1.88156
+eff,500,measurement_PM,exact,upper,lorentz_narrow,12.3926,1.56957
+eff,500,measurement_PM,exact,upper,fano,-0.0149593,-0.313175
+eff,500,measurement_PM,exact,upper,fano_narrow,0.015445,0.000676165
+eff,500,measurement_PM,exact,lower,lorentz,38.2438,3.12238
+eff,500,measurement_PM,exact,lower,lorentz_narrow,17.4942,2.47775
+eff,500,measurement_PM,exact,lower,fano,-0.0227575,0.252059
+eff,500,measurement_PM,exact,lower,fano_narrow,-0.0184223,-0.00105669
+eff,500,measurement_PM,noisy,phase spectrum,lorentz,-1293.14,905.114
+eff,500,measurement_PM,noisy,amplitude spectrum,lorentz,53.7056,-22.0091
+eff,500,measurement_AM,noisy,upper,lorentz,-89.6846,-8.2699
+eff,500,measurement_AM,noisy,upper,lorentz_narrow,-42.3819,2.03614
+eff,500,measurement_AM,noisy,upper,fano,-89.6855,-8.26631
+eff,500,measurement_AM,noisy,upper,fano_narrow,-41.3701,-1.41151
+eff,500,measurement_AM,noisy,lower,lorentz,-94.2869,-7.74316
+eff,500,measurement_AM,noisy,lower,lorentz_narrow,-45.3981,2.44538
+eff,500,measurement_AM,noisy,lower,fano,-94.2895,-7.73866
+eff,500,measurement_AM,noisy,lower,fano_narrow,-43.8487,-2.53274
+eff,500,measurement_AM,exact,upper,lorentz,-83.6618,-4.31945
+eff,500,measurement_AM,exact,upper,lorentz_narrow,-42.3245,0.156299
+eff,500,measurement_AM,exact,upper,fano,-83.6676,-4.31988
+eff,500,measurement_AM,exact,upper,fano_narrow,-40.1243,-5.66519
+eff,500,measurement_AM,exact,lower,lorentz,-88.3891,-3.4894
+eff,500,measurement_AM,exact,lower,lorentz_narrow,-44.9874,0.348022
+eff,500,measurement_AM,exact,lower,fano,-88.4044,-3.49108
+eff,500,measurement_AM,exact,lower,fano_narrow,-42.588,-5.70107
+eff,500,measurement_AM,noisy,phase spectrum,lorentz,-282.65,21.1927
+eff,500,measurement_AM,noisy,amplitude spectrum,lorentz,-91.1075,-7.8869

@@ -9,7 +9,10 @@ Optionally the loop correction passes a klystron whose small-signal response dif
 for amplitude and phase (in the frame of the steady generator current):
 x -> s Re x + j (Im x + kappa Re x), with amplitude gain s and AM/PM kappa (rad per unit
 relative amplitude).  s = 1, kappa = 0 is the complex-linear loop of the characteristic
-equation; other values make the loop widely linear, which only this model covers.
+equation; quadrature.Quadrature covers the other values in the frequency domain.
+
+simulate_noise adds white amplitude or phase noise at the klystron output and returns the
+beam-phase variance it causes, an independent check of quadrature.beam_variance.
 """
 from __future__ import annotations
 
@@ -33,7 +36,8 @@ except ImportError:  # pragma: no cover - numba is optional
 
 @njit(cache=True)
 def _kernel(n_steps, every, nd, dt, ea, cin, w, Vk, Ig0, Vref, gp, ki, wl, wa,
-            RL, Ib1, phis, wrf, ac, E, T0, U0, arad, tau0, s_amp, kappa):
+            RL, Ib1, phis, wrf, ac, E, T0, U0, arad, tau0, s_amp, kappa,
+            hold, n_am, n_pm, seed):
     n_rec = n_steps // every
     rec = np.empty(n_rec)
     buf = np.empty(nd, dtype=np.complex128)
@@ -43,20 +47,31 @@ def _kernel(n_steps, every, nd, dt, ea, cin, w, Vk, Ig0, Vref, gp, ki, wl, wa,
     for i in range(nd):
         buf[i] = vm0
     gh = Ig0 / abs(Ig0)
+    ig_abs = abs(Ig0)
     p = 0
     x = 0j
     amp = 0j
     tau = tau0
     dlt = 0.0
     amp_c = 1.0 - math.exp(-wa * dt) if wa > 0.0 else 1.0
+    noisy = hold > 0
+    if noisy:
+        np.random.seed(seed)
+    na = 0.0
+    npm = 0.0
     j = 0
     for n in range(n_steps):
+        if noisy and n % hold == 0:
+            na = n_am * np.random.normal()
+            npm = n_pm * np.random.normal()
         e = Vref - buf[p]
         x += dt * (ki * e - wl * x)
         u = (gp * e + x) / RL
         amp += amp_c * (u - amp)
         r = amp * np.conj(gh)
         kly = (s_amp * r.real + 1j * (r.imag + kappa * r.real)) * gh
+        if noisy:
+            kly += ig_abs * (na + 1j * npm) * gh
         th = phis + wrf * tau
         ib = Ib1 * (math.cos(th) - 1j * math.sin(th))
         drive = Ig0 + kly - ib
@@ -107,14 +122,8 @@ def fit_damped_cosine(t: np.ndarray, x: np.ndarray) -> Mode:
     return Mode(complex(-sol.x[0], abs(sol.x[1])))
 
 
-def simulate(system: RFSystem, t_end: float = 4e-3, dt: float = 5e-9,
-             kick: float = 1e-16, record_every: int = 200, skip: float = 0.2e-3,
-             klystron_amp_gain: float = 1.0, klystron_am_pm: float = 0.0) -> Trace:
-    """Kick the bunch by ``kick`` seconds and fit the coherent oscillation.
-
-    Keep w_rf * kick * exp(growth * t_end) << 1, otherwise the bucket nonlinearity
-    lowers the fitted frequency of a growing mode.
-    """
+def _setup(system: RFSystem, dt: float):
+    """Kernel arguments that depend only on the system and the time step."""
     lp = system.loop
     if lp.lead_hz is not None:
         raise NotImplementedError("lead network not modelled in the time domain")
@@ -135,12 +144,46 @@ def simulate(system: RFSystem, t_end: float = 4e-3, dt: float = 5e-9,
     wl = 2 * np.pi * lp.f_leak_hz
     wa = 2 * np.pi * lp.f_amp_hz if lp.f_amp_hz else 0.0
     r = system.ring
+    return (nd, dt, ea.astype(np.complex128), cin.astype(np.complex128), w, vk.astype(np.complex128),
+            complex(ig0), vref, complex(gp), complex(ki), wl, wa, cav.RL, system.I_b1, system.phi_s,
+            r.w_rf, r.alpha_c, r.energy_eV, r.T_rev, r.U0_eV, r.alpha_rad)
+
+
+def simulate(system: RFSystem, t_end: float = 4e-3, dt: float = 5e-9,
+             kick: float = 1e-16, record_every: int = 200, skip: float = 0.2e-3,
+             klystron_amp_gain: float = 1.0, klystron_am_pm: float = 0.0) -> Trace:
+    """Kick the bunch by ``kick`` seconds and fit the coherent oscillation.
+
+    Keep w_rf * kick * exp(growth * t_end) << 1, otherwise the bucket nonlinearity
+    lowers the fitted frequency of a growing mode.
+    """
     n_steps = int(round(t_end / dt))
-    rec = _kernel(n_steps, record_every, nd, dt, ea.astype(np.complex128), cin.astype(np.complex128),
-                  w, vk.astype(np.complex128), complex(ig0), vref, complex(gp), complex(ki),
-                  wl, wa, cav.RL, system.I_b1, system.phi_s, r.w_rf, r.alpha_c,
-                  r.energy_eV, r.T_rev, r.U0_eV, r.alpha_rad, kick,
-                  float(klystron_amp_gain), float(klystron_am_pm))
+    rec = _kernel(n_steps, record_every, *_setup(system, dt), kick,
+                  float(klystron_amp_gain), float(klystron_am_pm), 0, 0.0, 0.0, 0)
     t = (np.arange(rec.size) + 1) * record_every * dt
     keep = t >= skip
     return Trace(t, rec, fit_damped_cosine(t[keep], rec[keep]))
+
+
+def simulate_noise(system: RFSystem, which: str, psd: float, t_end: float = 0.25, dt: float = 6.25e-9,
+                   hold: float = 100e-9, seed: int = 1, record_every: int = 80, skip: float = 2e-3,
+                   klystron_amp_gain: float = 1.0, klystron_am_pm: float = 0.0) -> tuple[float, np.ndarray]:
+    """Beam phase driven by white noise on the klystron output; returns (<dphi^2> [rad^2], dphi record).
+
+    ``which`` is "AM" (relative amplitude) or "PM" (rad), in the frame of the steady generator
+    current; ``psd`` is the one-sided spectral density [1/Hz], realised as zero-order-hold samples
+    of variance psd / (2 hold), flat to well beyond the cavity bandwidth.  Independent check of
+    quadrature.beam_variance for the "klystron_AM" / "klystron_PM" sources.
+    """
+    if which not in ("AM", "PM"):
+        raise ValueError("which must be 'AM' or 'PM'")
+    n_hold = max(1, int(round(hold / dt)))
+    sd = math.sqrt(psd / (2.0 * n_hold * dt))
+    n_steps = int(round(t_end / dt))
+    rec = _kernel(n_steps, record_every, *_setup(system, dt), 0.0,
+                  float(klystron_amp_gain), float(klystron_am_pm), n_hold,
+                  sd if which == "AM" else 0.0, sd if which == "PM" else 0.0, int(seed))
+    t = (np.arange(rec.size) + 1) * record_every * dt
+    dphi = system.ring.w_rf * rec[t >= skip]
+    dphi = dphi - dphi.mean()
+    return float(np.mean(dphi ** 2)), dphi

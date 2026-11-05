@@ -1,0 +1,41 @@
+model,I_mA,sources,points,condition
+eff,100,all four,5,4369.7
+eff,100,klystron PM+AM,5,38.9726
+eff,100,PM: klystron+measurement,5,4.19399
+eff,100,AM: klystron+measurement,5,4.20174
+eff,100,klystron PM + measurement AM,5,4.72843
+eff,200,all four,8,225.799
+eff,200,klystron PM+AM,8,17.047
+eff,200,PM: klystron+measurement,8,4.40488
+eff,200,AM: klystron+measurement,8,4.12986
+eff,200,klystron PM + measurement AM,8,5.24511
+eff,350,all four,5,1818.96
+eff,350,klystron PM+AM,5,14.4332
+eff,350,PM: klystron+measurement,5,4.24348
+eff,350,AM: klystron+measurement,5,4.22399
+eff,350,klystron PM + measurement AM,5,6.04032
+eff,500,all four,8,276.68
+eff,500,klystron PM+AM,8,10.5734
+eff,500,PM: klystron+measurement,8,4.59642
+eff,500,AM: klystron+measurement,8,4.27361
+eff,500,klystron PM + measurement AM,8,7.14546
+lag,100,all four,5,2779.61
+lag,100,klystron PM+AM,5,25.6017
+lag,100,PM: klystron+measurement,5,4.19315
+lag,100,AM: klystron+measurement,5,3.9819
+lag,100,klystron PM + measurement AM,5,3.42334
+lag,200,all four,8,220.149
+lag,200,klystron PM+AM,8,25.7939
+lag,200,PM: klystron+measurement,8,4.37064
+lag,200,AM: klystron+measurement,8,3.68003
+lag,200,klystron PM + measurement AM,8,3.60434
+lag,350,all four,5,22636.8
+lag,350,klystron PM+AM,5,146.237
+lag,350,PM: klystron+measurement,5,4.24778
+lag,350,AM: klystron+measurement,5,4.27328
+lag,350,klystron PM + measurement AM,5,4.40796
+lag,500,all four,8,306.968
+lag,500,klystron PM+AM,8,25.4156
+lag,500,PM: klystron+measurement,8,4.58092
+lag,500,AM: klystron+measurement,8,4.28912
+lag,500,klystron PM + measurement AM,8,5.04295

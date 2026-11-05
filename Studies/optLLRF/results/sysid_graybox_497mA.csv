@@ -1,0 +1,15 @@
+excitation,parameter,truth,estimate,std
+two-channel (A + B), H1 and H2,G,1.26,1.24974,0.00936257
+two-channel (A + B), H1 and H2,theta,9.07,9.25719,0.227476
+two-channel (A + B), H1 and H2,tau,618,619.956,2.74593
+two-channel (A + B), H1 and H2,QL,6921,6847,55.7812
+two-channel (A + B), H1 and H2,df,-37.66,-37.9118,0.286693
+two-channel (A + B), H1 and H2,gA,0.4,0.410486,0.00323941
+two-channel (A + B), H1 and H2,kAP,0.1,0.098674,0.00353038
+one-channel (I = Q), today's,G,1.26,1.2427,0.132785
+one-channel (I = Q), today's,theta,9.07,7.42398,2.63707
+one-channel (I = Q), today's,tau,618,621.281,7.96176
+one-channel (I = Q), today's,QL,6921,6919.71,345.166
+one-channel (I = Q), today's,df,-37.66,-38.7298,1.27581
+one-channel (I = Q), today's,gA,0.4,0.417353,0.0336103
+one-channel (I = Q), today's,kAP,0.1,0.112436,0.0265349

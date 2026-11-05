@@ -1,0 +1,58 @@
+% !TeX root = ../P_rf_physics_and_plant.tex
+% Beam jitter at 500 mA versus direct-loop gain, one noise source at a time.
+% Data: data/robinson_noise_vs_gain.dat, written by spear3rf/scripts/docP_noise.py
+% (proportional loop, theta = 0, 625 ns delay, 2.5 MHz amplifier pole, linear klystron).
+% Left column: white noise at the klystron output, variance relative to the same noise
+% without feedback (rt_k*, re_k*).  Right column: white noise in the measured vector sum
+% (or, with the opposite sign, the reference), relative to the present 0 dB (rt_m*, re_m*).
+% Top row: beam phase (timing) variance; bottom row: energy variance.  Solid: phase noise,
+% dashed: amplitude noise.  Above the dotted line at 1 the gain makes the motion larger.
+\begin{tikzpicture}[font=\small]
+% ---- top left: klystron noise, timing ----
+\begin{axis}[width=62mm, height=34mm, scale only axis, xmin=-10, xmax=16, ymode=log, ymin=0.04, ymax=40, ytick={0.1,1,10}, yticklabels={0.1,1,10}, grid=both, grid style={draw=black!12}, tick label style={font=\scriptsize}, label style={font=\scriptsize}, title style={font=\scriptsize\bfseries}, name=tl, xticklabels={},
+  title={noise at the klystron output},
+  ylabel={$\langle\Delta\phi^2\rangle$ / no feedback}]
+\addplot[cPwr!85!black,very thick] table[x=G,y=rt_kpm]{data/robinson_noise_vs_gain.dat};
+\addplot[cPwr!60,very thick,densely dashed] table[x=G,y=rt_kam]{data/robinson_noise_vs_gain.dat};
+\draw[black,densely dotted,thick] (axis cs:-10,1) -- (axis cs:16,1);
+\draw[black!50,thin] (axis cs:0,0.04) -- (axis cs:0,40);
+\node[anchor=north,font=\scriptsize] at (axis cs:4.5,0.93) {no feedback};
+\node[anchor=south,font=\scriptsize,text=cPwr!85!black] at (axis cs:11,2.2) {phase};
+\node[anchor=north,font=\scriptsize,text=cPwr!60] at (axis cs:11,0.15) {amplitude};
+\node[anchor=north west,font=\scriptsize,text=black!60] at (axis cs:0.3,36) {0 dB (now)};
+\end{axis}
+% ---- top right: measurement or reference noise, timing ----
+\begin{axis}[width=62mm, height=34mm, scale only axis, xmin=-10, xmax=16, ymode=log, ymin=0.04, ymax=40, ytick={0.1,1,10}, yticklabels={0.1,1,10}, grid=both, grid style={draw=black!12}, tick label style={font=\scriptsize}, label style={font=\scriptsize}, title style={font=\scriptsize\bfseries}, name=tr, at={($(tl.south east)+(21mm,0)$)}, anchor=south west, xticklabels={},
+  title={noise in the measurement or the reference},
+  ylabel={$\langle\Delta\phi^2\rangle$ / at 0 dB}]
+\addplot[cCtrl,very thick] table[x=G,y=rt_mpm]{data/robinson_noise_vs_gain.dat};
+\addplot[cCtrl!60,very thick,densely dashed] table[x=G,y=rt_mam]{data/robinson_noise_vs_gain.dat};
+\draw[black,densely dotted,thick] (axis cs:-10,1) -- (axis cs:16,1);
+\draw[black!50,thin] (axis cs:0,0.04) -- (axis cs:0,40);
+\node[anchor=south west,font=\scriptsize] at (axis cs:-9.6,1.05) {present setting};
+\node[anchor=south east,font=\scriptsize,text=cCtrl] at (axis cs:11,15) {phase};
+\node[anchor=north east,font=\scriptsize,text=cCtrl!60] at (axis cs:15.6,4.0) {amplitude};
+\end{axis}
+% ---- bottom left: klystron noise, energy ----
+\begin{axis}[width=62mm, height=34mm, scale only axis, xmin=-10, xmax=16, ymode=log, ymin=0.04, ymax=40, ytick={0.1,1,10}, yticklabels={0.1,1,10}, grid=both, grid style={draw=black!12}, tick label style={font=\scriptsize}, label style={font=\scriptsize}, title style={font=\scriptsize\bfseries}, at={(tl.below south west)}, anchor=north west, yshift=-3mm,
+  xlabel={direct-loop gain $G$ (dB)},
+  ylabel={$\langle(\Delta E/E_0)^2\rangle$ / no feedback}]
+\addplot[cPwr!85!black,very thick] table[x=G,y=re_kpm]{data/robinson_noise_vs_gain.dat};
+\addplot[cPwr!60,very thick,densely dashed] table[x=G,y=re_kam]{data/robinson_noise_vs_gain.dat};
+\draw[black,densely dotted,thick] (axis cs:-10,1) -- (axis cs:16,1);
+\draw[black!50,thin] (axis cs:0,0.04) -- (axis cs:0,40);
+\node[anchor=south,font=\scriptsize,text=cPwr!85!black] at (axis cs:11,4.5) {phase};
+\node[anchor=north,font=\scriptsize,text=cPwr!60] at (axis cs:11,0.35) {amplitude};
+\end{axis}
+% ---- bottom right: measurement or reference noise, energy ----
+\begin{axis}[width=62mm, height=34mm, scale only axis, xmin=-10, xmax=16, ymode=log, ymin=0.04, ymax=40, ytick={0.1,1,10}, yticklabels={0.1,1,10}, grid=both, grid style={draw=black!12}, tick label style={font=\scriptsize}, label style={font=\scriptsize}, title style={font=\scriptsize\bfseries}, at={(tr.below south west)}, anchor=north west, yshift=-3mm,
+  xlabel={direct-loop gain $G$ (dB)},
+  ylabel={$\langle(\Delta E/E_0)^2\rangle$ / at 0 dB}]
+\addplot[cCtrl,very thick] table[x=G,y=re_mpm]{data/robinson_noise_vs_gain.dat};
+\addplot[cCtrl!60,very thick,densely dashed] table[x=G,y=re_mam]{data/robinson_noise_vs_gain.dat};
+\draw[black,densely dotted,thick] (axis cs:-10,1) -- (axis cs:16,1);
+\draw[black!50,thin] (axis cs:0,0.04) -- (axis cs:0,40);
+\node[anchor=south east,font=\scriptsize,text=cCtrl] at (axis cs:11,18) {phase};
+\node[anchor=north east,font=\scriptsize,text=cCtrl!60] at (axis cs:15.6,5.0) {amplitude};
+\end{axis}
+\end{tikzpicture}

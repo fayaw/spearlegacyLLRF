@@ -17,7 +17,7 @@
   {$\approx\qty{10}{\milli\second}$, one PLC scan cycle} (coll.north);
 
 \node[plc,text width=104mm,anchor=north] (relay) at (52,-40)
-  {\textbf{RF MPS PLC fires its output relay} --- Path A activated};
+  {\textbf{RF MPS PLC drops its collector summary} --- Path A activated};
 \draw[sig] (coll.south) -- (relay.north);
 
 % four consequences of Path A: three hardware, one software
@@ -28,12 +28,12 @@
 \draw[bus] (14,\yS) -- (14,\yS-44);
 
 \foreach \i/\sty/\txt in {%
-  0/pwr/{\textbf{Fast IC:} SCR ENABLE fiber to B514 deasserted
-         ($<\qty{1}{\micro\second}$ after relay contact) $\rightarrow$ HVPS SCR gate
-         drivers disabled $\rightarrow$ HV output begins to collapse},
-  1/pwr/{\textbf{Fast IC:} CROWBAR FIRE $\rightarrow$ B514 crowbar triggered,
-         discharging residual capacitor energy},
-  2/rf/{\textbf{Fast IC:} RF\_FAULT asserted via AIM on the VXI backplane
+  0/pwr/{\textbf{RF Local Display Panel logic:} SCR ENABLE fiber to the HVPS
+         controller (B118) goes dark $\rightarrow$ thyristor triggers inhibited
+         $\rightarrow$ HV output begins to collapse},
+  1/pwr/{\textbf{RF Local Display Panel logic:} KLYSTRON CROWBAR fiber goes dark
+         if the logic so specifies (equations not documented), firing the crowbar},
+  2/rf/{\textbf{AB summary fiber:} the AIM asserts RF\_FAULT on the VXI backplane
         (redundant RF cut)},
   3/blk/{\textbf{Remote I/O:} \texttt{KLYSCOLL:POWER:LTCH} propagates to EPICS
          ($\approx\qty{100}{\milli\second}$) $\rightarrow$ \texttt{KLYS:SUMY:LTCH}

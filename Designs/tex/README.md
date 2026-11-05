@@ -9,6 +9,7 @@ git.
 | **Doc 0** — System Design Report (upgrade) | `doc0-system-design/` | `0_system_design_report.tex` |
 | **Doc I** — Legacy Interlock Architecture | `docI-interlock-architecture/` | `I_interlock_architecture.tex` |
 | **Doc L** — Legacy System Architecture | `docL-legacy-architecture/` | `L_legacy_system_architecture.tex` |
+| **Doc M** — Subsystem Integration and Migration Plan | `docM-integration-migration/` | `M_integration_migration_plan.tex` |
 | **Doc P** — RF Physics, Control Theory and Plant | `docP-rf-physics/` | `P_rf_physics_and_plant.tex` |
 | **Doc T** — Tuner Control System Analysis | `docT-tuner-control/` | `T_tuner_control_analysis.tex` |
 
@@ -25,6 +26,7 @@ powershell -ExecutionPolicy Bypass -File build.ps1 -Doc 0 -Clean   # Doc 0, from
 powershell -ExecutionPolicy Bypass -File build.ps1 -Doc I          # Doc I
 powershell -ExecutionPolicy Bypass -File build.ps1 -Doc P          # Doc P
 powershell -ExecutionPolicy Bypass -File build.ps1 -Doc T          # Doc T
+powershell -ExecutionPolicy Bypass -File build.ps1 -Doc M          # Doc M
 ```
 
 ## Converting a Markdown document

@@ -1,0 +1,63 @@
+﻿== model eff: linear klystron, shared-phase integral path, effective corner 1 kHz
+  100 mA set A G  1.3 dB: f  9967 Hz sigma   475 Q  65.9  motion vs baseline kPM 1.00 kAM 1.00 mPM 1.00 mAM 1.00; |chi| at 10080 Hz  36.9 
+  100 mA set A G -0.2 dB: f  9957 Hz sigma   500 Q  62.6  motion vs baseline kPM 1.11 kAM 1.15 mPM 0.78 mAM 0.82; |chi| at 10080 Hz  34.3 
+  100 mA set A G -1.7 dB: f  9947 Hz sigma   529 Q  59.0  motion vs baseline kPM 1.20 kAM 1.30 mPM 0.60 mAM 0.65; |chi| at 10080 Hz  31.8 
+  100 mA set A G  2.8 dB: f  9976 Hz sigma   456 Q  68.7  motion vs baseline kPM 0.88 kAM 0.85 mPM 1.24 mAM 1.19; |chi| at 10080 Hz  39.6 
+  100 mA set A G  4.3 dB: f  9985 Hz sigma   441 Q  71.1  motion vs baseline kPM 0.76 kAM 0.70 mPM 1.51 mAM 1.39; |chi| at 10080 Hz  42.4 
+  100 mA: condition numbers of the source fit (5 points): all four 4370, klystron PM+AM 39, PM: klystron+measurement 4, AM: klystron+measurement 4, klystron PM + measurement AM 5
+  200 mA set A G  1.3 dB: f  9793 Hz sigma   612 Q  50.3  motion vs baseline kPM 1.00 kAM 1.00 mPM 1.00 mAM 1.00; |chi| at 9720 Hz  42.3 
+  200 mA set A G -0.2 dB: f  9755 Hz sigma   701 Q  43.7  motion vs baseline kPM 1.01 kAM 1.08 mPM 0.71 mAM 0.76; |chi| at 9720 Hz  44.3 
+  200 mA set A G -1.7 dB: f  9715 Hz sigma   806 Q  37.9  motion vs baseline kPM 0.99 kAM 1.14 mPM 0.50 mAM 0.57; |chi| at 9720 Hz  40.4 
+  200 mA set A G  2.8 dB: f  9830 Hz sigma   541 Q  57.1  motion vs baseline kPM 0.97 kAM 0.90 mPM 1.37 mAM 1.27; |chi| at 9720 Hz  36.9 
+  200 mA set A G  4.3 dB: f  9863 Hz sigma   486 Q  63.7  motion vs baseline kPM 0.90 kAM 0.78 mPM 1.80 mAM 1.56; |chi| at 9720 Hz  31.5 
+  200 mA set B G  1.3 dB: f  9747 Hz sigma   685 Q  44.7  motion vs baseline kPM 0.84 kAM 1.00 mPM 0.94 mAM 0.77; |chi| at 9720 Hz  46.0 
+  200 mA set B G -1.7 dB: f  9672 Hz sigma   889 Q  34.2  motion vs baseline kPM 0.85 kAM 1.13 mPM 0.48 mAM 0.44; |chi| at 9720 Hz  34.9 
+  200 mA set B G  2.8 dB: f  9783 Hz sigma   606 Q  50.7  motion vs baseline kPM 0.81 kAM 0.91 mPM 1.28 mAM 0.99; |chi| at 9720 Hz  44.7 
+  200 mA: condition numbers of the source fit (8 points): all four 226, klystron PM+AM 17, PM: klystron+measurement 4, AM: klystron+measurement 4, klystron PM + measurement AM 5
+  350 mA set A G  1.3 dB: f  9348 Hz sigma   881 Q  33.3  motion vs baseline kPM 1.00 kAM 1.00 mPM 1.00 mAM 1.00; |chi| at 9360 Hz  38.3 
+  350 mA set A G -0.2 dB: f  9240 Hz sigma  1089 Q  26.7  motion vs baseline kPM 0.91 kAM 1.01 mPM 0.65 mAM 0.72; |chi| at 9360 Hz  25.8 
+  350 mA set A G -1.7 dB: f  9130 Hz sigma  1328 Q  21.6  motion vs baseline kPM 0.83 kAM 1.02 mPM 0.42 mAM 0.51; |chi| at 9000 Hz  22.5 
+  350 mA set A G  2.8 dB: f  9450 Hz sigma   708 Q  41.9  motion vs baseline kPM 1.09 kAM 0.98 mPM 1.54 mAM 1.38; |chi| at 9360 Hz  37.1 Q > 35
+  350 mA set A G  4.3 dB: f  9545 Hz sigma   572 Q  52.4  motion vs baseline kPM 1.16 kAM 0.93 mPM 2.31 mAM 1.85; |chi| at 9720 Hz  26.5 Q > 35
+  350 mA: condition numbers of the source fit (5 points): all four 1819, klystron PM+AM 14, PM: klystron+measurement 4, AM: klystron+measurement 4, klystron PM + measurement AM 6
+  500 mA set A G  1.3 dB: f  8741 Hz sigma  1074 Q  25.6  motion vs baseline kPM 1.00 kAM 1.00 mPM 1.00 mAM 1.00; |chi| at 8640 Hz  29.3 
+  500 mA set A G -0.2 dB: f  8550 Hz sigma  1363 Q  19.7  motion vs baseline kPM 0.86 kAM 0.99 mPM 0.61 mAM 0.70; |chi| at 8640 Hz  25.0 
+  500 mA set A G -1.7 dB: f  8358 Hz sigma  1682 Q  15.6  motion vs baseline kPM 0.76 kAM 0.99 mPM 0.38 mAM 0.50; |chi| at 8280 Hz  21.8 
+  500 mA set A G  2.8 dB: f  8925 Hz sigma   824 Q  34.0  motion vs baseline kPM 1.17 kAM 1.02 mPM 1.65 mAM 1.43; |chi| at 9000 Hz  37.1 
+  500 mA set A G  4.3 dB: f  9098 Hz sigma   620 Q  46.1  motion vs baseline kPM 1.37 kAM 1.03 mPM 2.73 mAM 2.06; |chi| at 9000 Hz  40.0 Q > 35
+  500 mA set B G  1.3 dB: f  8670 Hz sigma  1134 Q  24.0  motion vs baseline kPM 0.86 kAM 0.99 mPM 1.05 mAM 0.85; |chi| at 8640 Hz  31.8 
+  500 mA set B G -1.7 dB: f  8302 Hz sigma  1719 Q  15.2  motion vs baseline kPM 0.68 kAM 0.99 mPM 0.43 mAM 0.43; |chi| at 8280 Hz  22.2 
+  500 mA set B G  2.8 dB: f  8848 Hz sigma   891 Q  31.2  motion vs baseline kPM 0.98 kAM 0.99 mPM 1.66 mAM 1.19; |chi| at 9000 Hz  27.1 
+  500 mA: condition numbers of the source fit (8 points): all four 277, klystron PM+AM 11, PM: klystron+measurement 5, AM: klystron+measurement 4, klystron PM + measurement AM 7
+== model lag: installed lag network, klystron g_A 0.40 and k_AP 0.10 (normal operation)
+  100 mA set A G  1.3 dB: f  9820 Hz sigma   780 Q  39.5  motion vs baseline kPM 1.00 kAM 1.00 mPM 1.00 mAM 1.00; |chi| at 9720 Hz  32.4 
+  100 mA set A G -0.2 dB: f  9817 Hz sigma   832 Q  37.1  motion vs baseline kPM 1.10 kAM 1.04 mPM 0.78 mAM 0.72; |chi| at 9720 Hz  31.5 
+  100 mA set A G -1.7 dB: f  9815 Hz sigma   880 Q  35.0  motion vs baseline kPM 1.20 kAM 1.07 mPM 0.60 mAM 0.51; |chi| at 9720 Hz  30.6 
+  100 mA set A G  2.8 dB: f  9824 Hz sigma   725 Q  42.6  motion vs baseline kPM 0.90 kAM 0.96 mPM 1.28 mAM 1.39; |chi| at 9720 Hz  33.2 
+  100 mA set A G  4.3 dB: f  9831 Hz sigma   668 Q  46.2  motion vs baseline kPM 0.81 kAM 0.92 mPM 1.62 mAM 1.92; |chi| at 9720 Hz  33.6 
+  100 mA: condition numbers of the source fit (5 points): all four 2780, klystron PM+AM 26, PM: klystron+measurement 4, AM: klystron+measurement 4, klystron PM + measurement AM 3
+  200 mA set A G  1.3 dB: f  9456 Hz sigma  1125 Q  26.4  motion vs baseline kPM 1.00 kAM 1.00 mPM 1.00 mAM 1.00; |chi| at 9360 Hz  26.4 
+  200 mA set A G -0.2 dB: f  9429 Hz sigma  1274 Q  23.2  motion vs baseline kPM 1.02 kAM 1.00 mPM 0.72 mAM 0.70; |chi| at 9360 Hz  25.2 
+  200 mA set A G -1.7 dB: f  9405 Hz sigma  1423 Q  20.8  motion vs baseline kPM 1.05 kAM 0.99 mPM 0.52 mAM 0.49; |chi| at 9360 Hz  23.4 
+  200 mA set A G  2.8 dB: f  9486 Hz sigma   978 Q  30.5  motion vs baseline kPM 0.98 kAM 1.00 mPM 1.38 mAM 1.43; |chi| at 9360 Hz  26.8 
+  200 mA set A G  4.3 dB: f  9518 Hz sigma   839 Q  35.6  motion vs baseline kPM 0.95 kAM 1.01 mPM 1.90 mAM 2.04; |chi| at 9360 Hz  25.8 
+  200 mA set B G  1.3 dB: f  9399 Hz sigma  1245 Q  23.7  motion vs baseline kPM 0.87 kAM 1.01 mPM 0.92 mAM 0.62; |chi| at 9360 Hz  26.7 
+  200 mA set B G -1.7 dB: f  9356 Hz sigma  1554 Q  18.9  motion vs baseline kPM 0.93 kAM 0.99 mPM 0.49 mAM 0.29; |chi| at 9360 Hz  21.9 
+  200 mA set B G  2.8 dB: f  9426 Hz sigma  1088 Q  27.2  motion vs baseline kPM 0.84 kAM 1.02 mPM 1.26 mAM 0.91; |chi| at 9360 Hz  29.0 
+  200 mA: condition numbers of the source fit (8 points): all four 220, klystron PM+AM 26, PM: klystron+measurement 4, AM: klystron+measurement 4, klystron PM + measurement AM 4
+  350 mA set A G  1.3 dB: f  8688 Hz sigma  1374 Q  19.9  motion vs baseline kPM 1.00 kAM 1.00 mPM 1.00 mAM 1.00; |chi| at 8640 Hz  26.0 
+  350 mA set A G -0.2 dB: f  8600 Hz sigma  1667 Q  16.2  motion vs baseline kPM 0.94 kAM 0.94 mPM 0.66 mAM 0.67; |chi| at 8640 Hz  21.9 
+  350 mA set A G -1.7 dB: f  8517 Hz sigma  1969 Q  13.6  motion vs baseline kPM 0.89 kAM 0.90 mPM 0.45 mAM 0.46; |chi| at 8640 Hz  17.6 
+  350 mA set A G  2.8 dB: f  8781 Hz sigma  1096 Q  25.2  motion vs baseline kPM 1.09 kAM 1.08 mPM 1.53 mAM 1.51; |chi| at 8640 Hz  25.8 
+  350 mA set A G  4.3 dB: f  8878 Hz sigma   841 Q  33.2  motion vs baseline kPM 1.21 kAM 1.19 mPM 2.41 mAM 2.34; |chi| at 9000 Hz  31.1 
+  350 mA: condition numbers of the source fit (5 points): all four 22637, klystron PM+AM 146, PM: klystron+measurement 4, AM: klystron+measurement 4, klystron PM + measurement AM 4
+  500 mA set A G  1.3 dB: f  7778 Hz sigma  1101 Q  22.2  motion vs baseline kPM 1.00 kAM 1.00 mPM 1.00 mAM 1.00; |chi| at 7920 Hz  28.3 
+  500 mA set A G -0.2 dB: f  7621 Hz sigma  1465 Q  16.3  motion vs baseline kPM 0.83 kAM 0.87 mPM 0.59 mAM 0.62; |chi| at 7920 Hz  17.1 
+  500 mA set A G -1.7 dB: f  7474 Hz sigma  1839 Q  12.8  motion vs baseline kPM 0.72 kAM 0.79 mPM 0.37 mAM 0.40; |chi| at 7920 Hz  12.3 
+  500 mA set A G  2.8 dB: f  7944 Hz sigma   759 Q  32.9  motion vs baseline kPM 1.29 kAM 1.23 mPM 1.82 mAM 1.72; |chi| at 7920 Hz  51.1 
+  500 mA set A G  4.3 dB: f  8116 Hz sigma   449 Q  56.8  motion vs baseline kPM 1.92 kAM 1.75 mPM 3.80 mAM 3.40; |chi| at 8280 Hz  33.9 Q > 35
+  500 mA set B G  1.3 dB: f  7700 Hz sigma  1189 Q  20.3  motion vs baseline kPM 0.87 kAM 0.97 mPM 0.98 mAM 0.77; |chi| at 7920 Hz  22.1 
+  500 mA set B G -1.7 dB: f  7412 Hz sigma  1916 Q  12.2  motion vs baseline kPM 0.66 kAM 0.78 mPM 0.38 mAM 0.32; |chi| at 7920 Hz  11.1 
+  500 mA set B G  2.8 dB: f  7858 Hz sigma   849 Q  29.1  motion vs baseline kPM 1.07 kAM 1.17 mPM 1.70 mAM 1.28; |chi| at 7920 Hz  42.6 
+  500 mA: condition numbers of the source fit (8 points): all four 307, klystron PM+AM 25, PM: klystron+measurement 5, AM: klystron+measurement 4, klystron PM + measurement AM 5
+wrote D:\OneDrive - SLAC National Accelerator Laboratory\SLACR\pyCode\spearlegacyLLRF\Studies\optLLRF\results\scan_expected.csv and scan_signatures.png

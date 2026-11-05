@@ -1,0 +1,10 @@
+﻿v2850i022gp009pm0200d20261002094700: 22 mA, COUNTS.A 0.9 dB, PHASE.C -20.0 deg; coherence 0.89
+  18.8-382 kHz: G 0.875 theta +1.4 deg tau 620 ns Q_L 6939 df -1.1 kHz (rms 0.0127)
+  +-25 kHz (38 bins): integral corner f_i 3.49 kHz (leak 0.26 kHz held; lag network 2.93 kHz), G 0.840, theta +0.9 deg (rms 0.1056)
+  low current with g_A 0.4, k_AP 0.1: G 1.260, tau 618 ns, Q_L 6921 (rms 0.0126)
+v2850i497gp009pm0200d20261002135153: 497 mA, COUNTS.A 0.9 dB, PHASE.C -20.0 deg; coherence 0.78
+  18.8-382 kHz: G 0.419 theta -5.3 deg tau 673 ns Q_L 4611 df -35.9 kHz (rms 0.0155)
+  +-25 kHz: not fitted above 100 mA (the compressed klystron makes the response widely linear)
+  beam pole near +-f_s: f 8.32 kHz (sides 8.31/8.33), sigma 969/s (sides 915/1024)
+  klystron g_A 0.4, k_AP 0.1, G/tau/Q_L held at 1.26/618/6921: theta +9.1 deg, df -37.7 kHz (rms 0.0141)
+appended to D:\OneDrive - SLAC National Accelerator Laboratory\SLACR\pyCode\spearlegacyLLRF\Studies\optLLRF\results\closed_loop_demo_20261002.csv

@@ -1,0 +1,3 @@
+tag,I_mA,counts_A_dB,phase_C_deg,G,theta_deg,tau_ns,Q_L,df_kHz,rms_wide,G_near,theta_near_deg,f_i_kHz,rms_near,f_pole_kHz,sigma_pole,theta_kly_deg,df_kly_kHz,rms_kly
+v2850i022gp009pm0200d20261002094700,22,0.9,-20,0.874774,1.36684,619.625,6938.73,-1.09964,0.0126985,0.840082,0.875763,3.49391,0.105558,nan,nan,nan,nan,nan
+v2850i497gp009pm0200d20261002135153,497,0.9,-20,0.418991,-5.33693,672.61,4611.37,-35.9326,0.0154988,nan,nan,nan,nan,8.32084,969.405,9.06751,-37.6598,0.0140683

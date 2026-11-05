@@ -77,7 +77,8 @@
   "latex-workshop.latex.search.rootFiles.include": [
     "Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.tex",
     "Designs/tex/doc0-system-design/0_system_design_report.tex",
-    "Designs/tex/docI-interlock-architecture/I_interlock_architecture.tex"
+    "Designs/tex/docI-interlock-architecture/I_interlock_architecture.tex",
+    "Designs/tex/docM-integration-migration/M_integration_migration_plan.tex"
   ],
   "latex-workshop.latex.search.rootFiles.exclude": [
     "Designs/tex/common/tikztest.tex",
@@ -92,5 +93,6 @@
 
   "files.associations": {
     "*.tex": "latex"
-  }
+  },
+  "python-envs.defaultEnvManager": "ms-python.python:system"
 }

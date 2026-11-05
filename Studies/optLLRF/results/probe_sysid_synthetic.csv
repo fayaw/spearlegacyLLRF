@@ -1,0 +1,73 @@
+model,I_mA,source,seed,method,df_Hz,dsigma_pct,f_mains_est
+eff,492,klystron_PM,1,Lorentzian per side, comb masked,34.4025,2.30366,60.012
+eff,492,klystron_PM,1,Fano per side, comb masked,3.49154,-0.0133377,60.012
+eff,492,klystron_PM,1,Lorentzian per side, comb removed,34.5274,2.31063,60.012
+eff,492,klystron_PM,1,Fano per side, comb removed,3.54765,0.00888542,60.012
+eff,492,klystron_PM,1,joint sidebands, common pole,2.34041,0.0797741,60.012
+eff,492,klystron_PM,1,SSI, comb removed,1.66313,-0.065749,60.012
+eff,492,klystron_PM,2,Lorentzian per side, comb masked,34.5881,3.66294,60.012
+eff,492,klystron_PM,2,Fano per side, comb masked,1.11631,1.55162,60.012
+eff,492,klystron_PM,2,Lorentzian per side, comb removed,34.7496,3.55924,60.012
+eff,492,klystron_PM,2,Fano per side, comb removed,1.13807,1.46221,60.012
+eff,492,klystron_PM,2,joint sidebands, common pole,0.416813,0.900417,60.012
+eff,492,klystron_PM,2,SSI, comb removed,-1.80804,0.774122,60.012
+eff,492,klystron_PM,3,Lorentzian per side, comb masked,32.3054,3.52462,60.012
+eff,492,klystron_PM,3,Fano per side, comb masked,2.10274,1.3154,60.012
+eff,492,klystron_PM,3,Lorentzian per side, comb removed,32.2118,3.53829,60.012
+eff,492,klystron_PM,3,Fano per side, comb removed,1.86183,1.32179,60.012
+eff,492,klystron_PM,3,joint sidebands, common pole,2.20917,1.37145,60.012
+eff,492,klystron_PM,3,SSI, comb removed,0.805522,1.95522,60.012
+eff,492,klystron_AM,1,Lorentzian per side, comb masked,-85.3127,-5.56787,60.012
+eff,492,klystron_AM,1,Fano per side, comb masked,-85.3226,-5.56488,60.012
+eff,492,klystron_AM,1,Lorentzian per side, comb removed,-85.2886,-5.59892,60.012
+eff,492,klystron_AM,1,Fano per side, comb removed,-85.2986,-5.5959,60.012
+eff,492,klystron_AM,1,joint sidebands, common pole,-103.024,-4.11303,60.012
+eff,492,klystron_AM,1,SSI, comb removed,2.14736,0.199534,60.012
+eff,492,klystron_AM,2,Lorentzian per side, comb masked,-90.0308,-4.77471,60.012
+eff,492,klystron_AM,2,Fano per side, comb masked,-90.0327,-4.77337,60.012
+eff,492,klystron_AM,2,Lorentzian per side, comb removed,-89.9713,-4.72293,60.012
+eff,492,klystron_AM,2,Fano per side, comb removed,-89.9733,-4.72171,60.012
+eff,492,klystron_AM,2,joint sidebands, common pole,-107.784,-3.39844,60.012
+eff,492,klystron_AM,2,SSI, comb removed,-1.43434,0.101935,60.012
+eff,492,klystron_AM,3,Lorentzian per side, comb masked,-88.5007,-4.20875,60.012
+eff,492,klystron_AM,3,Fano per side, comb masked,-88.5041,-4.20846,60.012
+eff,492,klystron_AM,3,Lorentzian per side, comb removed,-88.4889,-4.11083,60.012
+eff,492,klystron_AM,3,Fano per side, comb removed,-88.4923,-4.1105,60.012
+eff,492,klystron_AM,3,joint sidebands, common pole,-104.959,-2.83541,60.012
+eff,492,klystron_AM,3,SSI, comb removed,0.894524,2.45954,60.012
+eff,492,measurement_PM,1,Lorentzian per side, comb masked,33.874,2.31633,60.012
+eff,492,measurement_PM,1,Fano per side, comb masked,3.31038,-0.0218678,60.012
+eff,492,measurement_PM,1,Lorentzian per side, comb removed,33.9706,2.28822,60.012
+eff,492,measurement_PM,1,Fano per side, comb removed,3.32716,-0.0284651,60.012
+eff,492,measurement_PM,1,joint sidebands, common pole,2.40736,0.0296597,60.012
+eff,492,measurement_PM,1,SSI, comb removed,1.29916,0.0324007,60.012
+eff,492,measurement_PM,2,Lorentzian per side, comb masked,34.2497,3.55017,60.012
+eff,492,measurement_PM,2,Fano per side, comb masked,1.23282,1.38557,60.012
+eff,492,measurement_PM,2,Lorentzian per side, comb removed,34.3889,3.46519,60.012
+eff,492,measurement_PM,2,Fano per side, comb removed,1.19883,1.32404,60.012
+eff,492,measurement_PM,2,joint sidebands, common pole,0.419897,0.74571,60.012
+eff,492,measurement_PM,2,SSI, comb removed,-1.59937,0.71599,60.012
+eff,492,measurement_PM,3,Lorentzian per side, comb masked,31.7674,3.30482,60.012
+eff,492,measurement_PM,3,Fano per side, comb masked,2.00433,1.11257,60.012
+eff,492,measurement_PM,3,Lorentzian per side, comb removed,31.7912,3.34386,60.012
+eff,492,measurement_PM,3,Fano per side, comb removed,1.81511,1.14009,60.012
+eff,492,measurement_PM,3,joint sidebands, common pole,2.30381,1.16313,60.012
+eff,492,measurement_PM,3,SSI, comb removed,0.965897,1.82481,60.012
+eff,492,measurement_AM,1,Lorentzian per side, comb masked,-85.1396,-5.82328,60.012
+eff,492,measurement_AM,1,Fano per side, comb masked,-85.1427,-5.81681,60.012
+eff,492,measurement_AM,1,Lorentzian per side, comb removed,-85.0708,-5.76434,60.012
+eff,492,measurement_AM,1,Fano per side, comb removed,-85.0758,-5.7599,60.012
+eff,492,measurement_AM,1,joint sidebands, common pole,-102.823,-4.26614,60.012
+eff,492,measurement_AM,1,SSI, comb removed,2.47266,0.283551,60.012
+eff,492,measurement_AM,2,Lorentzian per side, comb masked,-89.9575,-4.90427,60.012
+eff,492,measurement_AM,2,Fano per side, comb masked,-89.9637,-4.9064,60.012
+eff,492,measurement_AM,2,Lorentzian per side, comb removed,-89.8511,-4.88883,60.012
+eff,492,measurement_AM,2,Fano per side, comb removed,-89.8531,-4.88761,60.012
+eff,492,measurement_AM,2,joint sidebands, common pole,-107.47,-3.56739,60.012
+eff,492,measurement_AM,2,SSI, comb removed,-1.43357,0.206768,60.012
+eff,492,measurement_AM,3,Lorentzian per side, comb masked,-88.2032,-4.39827,60.012
+eff,492,measurement_AM,3,Fano per side, comb masked,-88.2008,-4.39333,60.012
+eff,492,measurement_AM,3,Lorentzian per side, comb removed,-88.2673,-4.34746,60.012
+eff,492,measurement_AM,3,Fano per side, comb removed,-88.2649,-4.34251,60.012
+eff,492,measurement_AM,3,joint sidebands, common pole,-104.667,-2.96281,60.012
+eff,492,measurement_AM,3,SSI, comb removed,5.09004,3.60571,60.012

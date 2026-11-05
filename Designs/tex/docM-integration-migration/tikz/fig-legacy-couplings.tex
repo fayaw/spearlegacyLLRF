@@ -1,0 +1,88 @@
+% !TeX root = ../M_integration_migration_plan.tex
+% Legacy couplings that a new subsystem must respect.
+% Four columns, boxes 30.8 mm wide (text 28 mm + inner sep), 15.2 mm gaps:
+%   col 1 VXI crate 10-40.8, col 2 56-86.8, col 3 102-132.8, col 4 148-178.8.
+% The AIM, Fast IC, RF Local Display Panel and HVPS controller share one row (y = -62)
+% so the protection chain is one straight line; the Remote I/O chain runs along
+% y = -20 and then down column 4.  RF_FAULT is a lane at x = 4 inside the crate.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  every node/.append style={execute at begin node=\hyphenpenalty 10000\relax}]
+
+% ----- VXI crate (column 1) ----------------------------------------------
+\node[ctrl,text width=28mm,anchor=west] (cpu) at (10,-4)
+  {\textbf{Slot 0 CPU}\\ EPICS IOC with\\ SNL programs;\\ single trip wire};
+\node[plc,text width=28mm,anchor=west] (scn) at (10,-20)
+  {\textbf{Slot 1 RIO scanner}};
+\node[rf,text width=28mm,anchor=west]  (rfp) at (10,-34)
+  {\textbf{Slot 4 RFP}\\ only drive source};
+\node[rf,text width=28mm,anchor=west]  (iqa) at (10,-48)
+  {\textbf{IQA $\times$3}\\ RF measurements};
+\node[plc,text width=28mm,anchor=west] (aim) at (10,-62)
+  {\textbf{Slot 12 AIM}};
+\node[plc,text width=28mm,anchor=west] (s5)  at (10,-76)
+  {\textbf{Slot 5 MPS Shutoff}};
+% a real node, so that the crate outline also encloses the RF_FAULT lane
+\node[inner sep=0pt,minimum size=0pt] (lane) at (2,-50) {};
+\node[grp,fit=(cpu)(scn)(rfp)(iqa)(aim)(s5)(lane)] (crate) {};
+\node[lbl,anchor=south west] at (crate.north west) {VXI crate, B132};
+
+% RF_FAULT: open-collector backplane line; every fast RF-off path ends here
+\draw[thick,draw=cNeut] (s5.west) -- (s5.west -| 4,0) -- (rfp.west -| 4,0);
+\draw[thick,draw=cNeut] (aim.west) -- (aim.west -| 4,0);
+\draw[thick,draw=cNeut] (iqa.west) -- (iqa.west -| 4,0);
+\draw[sig] (rfp.west -| 4,0) -- (rfp.west);
+\node[tag,rotate=90] at (4,-55) {RF\_FAULT};
+
+% ----- column 2 -----------------------------------------------------------
+\node[pwr,text width=28mm,anchor=west] (drv) at (56,-34)
+  {\textbf{Drive amplifier}\\ $\rightarrow$ klystron};
+\node[plc,text width=28mm,anchor=west] (fic) at (56,-62)
+  {\textbf{Fast Interlock}\\ \textbf{Chassis 340-308}\\ arc, reflected power};
+
+% ----- column 3 -----------------------------------------------------------
+\node[plc,text width=28mm,anchor=west] (mps) at (102,-20)
+  {\textbf{RF MPS PLC-5}\\ rack 3\\ about 230 slow channels};
+\node[plc,text width=28mm,anchor=west] (lp)  at (102,-62)
+  {\textbf{RF Local Display}\\ \textbf{Panel 340-310}\\ protection logic, display};
+
+% ----- column 4 -----------------------------------------------------------
+\node[plc,text width=28mm,anchor=west] (tun) at (148,-20)
+  {\textbf{Tuner chassis 340-315}\\ 4$\times$ 1746-HSTP1, rack 2};
+\node[plc,text width=28mm,anchor=west] (hv)  at (148,-62)
+  {\textbf{HVPS controller, B118}\\ SLC-500\\ trigger boards};
+
+% ----- external permits ---------------------------------------------------
+\node[blk,text width=28mm,anchor=north] (ext) at (s5.south |- 0,-92)
+  {SPEAR MPS beam permit\\ orbit interlock (24 V)};
+\draw[sig] (ext.north) -- (s5.south);
+\node[blk,text width=28mm,anchor=north] (bab) at (lp.south |- 0,-92)
+  {SPEAR MPS\\ beam abort input};
+\draw[sig] (lp.south) -- (bab.north);
+\node[tag,anchor=west] at ($(lp.south)!0.5!(bab.north)$) {BNC J6};
+
+% ----- Remote I/O daisy chain: scanner, PLC-5, tuner chassis, HVPS PLC ----
+\draw[bus] (scn.east) -- (mps.west);
+\draw[bus] (mps.east) -- (tun.west);
+\draw[bus] (tun.south) -- (hv.north);
+\node[tag,anchor=south] at (71,-19.4) {Remote I/O daisy chain};
+
+% ----- RF drive ------------------------------------------------------------
+\draw[sig] (rfp.east) -- (drv.west);
+
+% ----- protection row -------------------------------------------------------
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut]
+  (aim.east) -- (fic.west);
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut,densely dashed]
+  (fic.east) -- (lp.west);
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut,densely dashed]
+  (lp.east) -- (hv.west);
+\node[tag,anchor=south] at ($(aim.east)!0.5!(fic.west)$) {J15};
+\node[tag,anchor=south] at ($(fic.east)!0.5!(lp.west)$) {8 fibers};
+\node[tag,anchor=south] at ($(lp.east)!0.5!(hv.west)$) {3 fibers};
+
+% ----- PLC-5 to RF Local Display Panel --------------------------------------
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut]
+  (mps.south) -- (lp.north);
+\node[tag,anchor=west,align=left] at (119,-41)
+  {15 area summaries, AB\\ summary, AB heartbeat;\\ heater, focus and\\ bucking control; HVPS V/I};
+\end{tikzpicture}

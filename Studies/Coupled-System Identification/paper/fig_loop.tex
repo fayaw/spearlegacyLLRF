@@ -1,0 +1,29 @@
+% Block diagram of the measured closed loop with beam (column width).
+\begin{tikzpicture}[font=\footnotesize, >=Latex, node distance=4mm and 5mm,
+  blk/.style={draw, rounded corners=1pt, minimum height=7mm, minimum width=10mm, align=center, fill=white},
+  sum/.style={draw, circle, inner sep=0pt, minimum size=4.5mm},
+  sig/.style={->, thick},
+  lbl/.style={font=\scriptsize, align=center}]
+  % forward path
+  \node[sum] (s1) {};
+  \node[left=6mm of s1, lbl] (n) {noise $\vect n$\\(DACs)};
+  \node[blk, right=of s1] (chain) {drive\\$c(s)$};
+  \node[blk, right=of chain] (kly) {klystron\\$\mat K(\gA,\kAP)$};
+  \node[blk, right=of kly] (cav) {cavities\\$\mat Z_{1..4}$};
+  % beam
+  \node[blk, below=7mm of cav] (beam) {beam\\$D_\mathrm{inc}^{-1}$};
+  % feedback path
+  \node[blk, below=7mm of kly] (vs) {vector\\sum};
+  \node[blk, below=7mm of chain] (ctrl) {$G\mat R(\theta)$\\lead, lag};
+  \node[coordinate, below=7mm of s1] (rec) {};
+  \draw[sig] (n) -- node[above, lbl, pos=0.45]{$+$} (s1);
+  \draw[sig] (s1) -- node[above, lbl]{$\vect d$} (chain);
+  \draw[sig] (chain) -- (kly);
+  \draw[sig] (kly) -- node[above, lbl]{$\vect i_g$} (cav);
+  \draw[sig] ([xshift=2mm]cav.south) -- node[right, lbl]{$\hat{\vect p}^\mathsf{T}\!\sum\vect v_k$} ([xshift=2mm]beam.north);
+  \draw[sig] ([xshift=-2mm]beam.north) -- node[left, lbl]{$I_{b1}\hat{\vect b}\Delta\phi$} ([xshift=-2mm]cav.south);
+  \draw[sig] (cav.east) -- ++(3mm,0) |- ([yshift=-11mm]beam.south) -| (vs.south) node[pos=0.25, below, lbl]{probes $\vect v_k$};
+  \draw[sig] (vs) -- (ctrl);
+  \draw[sig] (ctrl) -- node[above, lbl]{$\vect x$} (rec) -- node[right, lbl]{$-$} (s1);
+  \draw[->, dashed] (rec) -- ++(-9mm,0) node[left, lbl]{TOTAL\\recorded};
+\end{tikzpicture}

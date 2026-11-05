@@ -1,0 +1,25 @@
+A gain transfer (497 mA)     J_lin_eff_ac          : held-out chi2/bin 1.916 1.963 2.047 1.733 (wide 1.43 1.38 1.44 1.24; beam 5.48 6.22 6.51 5.37) | in-sample 1.557 1.616 1.663 1.506
+A gain transfer (497 mA)     J_lin_shared_ac       : held-out chi2/bin 30.528 27.851 29.555 27.140 (wide 33.68 30.56 32.42 29.84; beam 7.26 7.85 8.34 7.19) | in-sample 19.743 18.058 19.332 17.423
+A gain transfer (497 mA)     J_wl_group_ac         : held-out chi2/bin 1.480 1.655 1.113 1.161 (wide 1.60 1.79 1.17 1.23; beam 0.60 0.63 0.70 0.65) | in-sample 0.830 0.974 0.710 0.757
+A gain transfer (497 mA)     J_wl_group_ac_ktrip   : held-out chi2/bin 1.488 1.663 1.139 1.181 (wide 1.60 1.80 1.20 1.25; beam 0.63 0.64 0.72 0.66) | in-sample 0.841 0.984 0.726 0.774
+A gain transfer (497 mA)     J_wl_global_ac_ktrip  : held-out chi2/bin 1.532 1.699 1.221 1.215 (wide 1.66 1.85 1.28 1.32; beam 0.59 0.55 0.75 0.46) | in-sample 0.866 1.008 0.767 0.787
+B phase transfer (22 mA)     J_lin_eff_ac          : held-out chi2/bin 2.899 1.551 (wide 3.17 1.62; beam 0.92 1.02) | in-sample 0.837 0.772
+B phase transfer (22 mA)     J_lin_shared_ac       : held-out chi2/bin 33.921 17.169 (wide 38.23 19.26; beam 2.10 1.73) | in-sample 27.924 13.242
+B phase transfer (22 mA)     J_wl_group_ac         : held-out chi2/bin 2.594 1.495 (wide 2.87 1.62; beam 0.57 0.58) | in-sample 2.153 1.924
+B phase transfer (22 mA)     J_wl_group_ac_ktrip   : held-out chi2/bin 2.675 1.506 (wide 2.95 1.62; beam 0.64 0.67) | in-sample 2.232 1.883
+B phase transfer (22 mA)     J_wl_global_ac_ktrip  : held-out chi2/bin 3.343 1.531 (wide 3.70 1.67; beam 0.71 0.51) | in-sample 2.645 2.041
+C current transfer 242 mA    J_lin_eff_ac          : held-out chi2/bin 2.654 (wide 2.13; beam 6.48) | in-sample 1.590
+C current transfer 242 mA    J_lin_shared_ac       : held-out chi2/bin 12.595 (wide 13.45; beam 6.17) | in-sample 11.250
+C current transfer 242 mA    J_wl_group_ac         : held-out chi2/bin 0.954 (wide 1.00; beam 0.57) | in-sample 0.731
+C current transfer 242 mA    J_wl_group_ac_ktrip   : held-out chi2/bin 0.920 (wide 0.97; beam 0.55) | in-sample 0.794
+C current transfer 242 mA    J_wl_global_ac_ktrip  : held-out chi2/bin 1.321 (wide 1.28; beam 1.60) | in-sample 1.173
+C current transfer 363 mA    J_lin_eff_ac          : held-out chi2/bin 6.345 (wide 6.10; beam 8.06) | in-sample 1.842
+C current transfer 363 mA    J_lin_shared_ac       : held-out chi2/bin 3.029 (wide 2.44; beam 7.34) | in-sample 2.889
+C current transfer 363 mA    J_wl_group_ac         : held-out chi2/bin 0.817 (wide 0.78; beam 1.05) | in-sample 0.735
+C current transfer 363 mA    J_wl_group_ac_ktrip   : held-out chi2/bin 0.777 (wide 0.75; beam 0.97) | in-sample 0.743
+C current transfer 363 mA    J_wl_global_ac_ktrip  : held-out chi2/bin 0.935 (wide 0.87; beam 1.39) | in-sample 0.906
+C current transfer 395 mA    J_lin_eff_ac          : held-out chi2/bin 10.311 (wide 10.72; beam 7.23) | in-sample 1.839
+C current transfer 395 mA    J_lin_shared_ac       : held-out chi2/bin 12.108 (wide 12.76; beam 7.18) | in-sample 11.000
+C current transfer 395 mA    J_wl_group_ac         : held-out chi2/bin 0.629 (wide 0.63; beam 0.60) | in-sample 0.608
+C current transfer 395 mA    J_wl_group_ac_ktrip   : held-out chi2/bin 0.691 (wide 0.71; beam 0.55) | in-sample 0.635
+C current transfer 395 mA    J_wl_global_ac_ktrip  : held-out chi2/bin 0.713 (wide 0.69; beam 0.86) | in-sample 0.688

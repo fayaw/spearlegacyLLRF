@@ -23,7 +23,7 @@
 
 % ===== EPICS coordinator ==================================================
 \node[ctrl,text width=154mm,anchor=north] (epics) at (80,-24)
-  {\textbf{EPICS (soft IOC) COORDINATOR}\\
+  {\textbf{EPICS COORDINATOR (IOC B132-IOCRF)}\\
    state machine $\cdot$ HVPS loop $\cdot$ tuner manager $\cdot$ fault manager
    $\cdot$ diagnostics $\cdot$ heartbeat monitoring};
 \draw[sig] (op.south) -- (op.south|-epics.north);
@@ -39,20 +39,20 @@
 
 % ===== upper subsystem row ================================================
 % centres 16 / 50 / 84 / 118, width 26  ->  spans 3-29, 37-63, 71-97, 105-131
+% The motion controller sits left of LLRF9 #1, which drives it directly over
+% Ethernet (not Channel Access), so the two links in this row are both short.
 \def\yU{-58}
-\node[rf,text width=26mm,anchor=west]  (l1)  at (3,\yU)
+\node[blk,text width=26mm,anchor=west] (mot) at (3,\yU)
+  {\textbf{MOTOR CTRL}\\ Galil DMC-4143\\ driven by\\ LLRF9 \#1};
+\node[rf,text width=26mm,anchor=west]  (l1)  at (37,\yU)
   {\textbf{LLRF9 \#1}\\ field control\\ tuner control\\ interlocks};
-\node[rf,text width=26mm,anchor=west]  (l2)  at (37,\yU)
-  {\textbf{LLRF9 \#2}\\ field control\\ tuner control\\ interlocks};
-\node[blk,text width=26mm,anchor=west] (mot) at (71,\yU)
-  {\textbf{MOTOR CTRL}\\ Galil DMC-4143\\ Ethernet,\\ heartbeat};
+\node[rf,text width=26mm,anchor=west]  (l2)  at (71,\yU)
+  {\textbf{LLRF9 \#2}\\ monitoring\\ interlocks};
 \node[plc,text width=26mm,anchor=west] (hp)  at (105,\yU)
   {\textbf{HVPS PLC}\\ CompactLogix\\ voltage control};
-\foreach \n in {l1,l2,mot,hp}{\draw[sig] (\n.north|-caY) -- (\n.north);}
-% The two LLRF9 interlock chains are wired directly to each other, not via the
-% Interface Chassis.  Unlabelled on purpose: the only clear space for a label
-% is the lane the Waveform Buffer feed uses.  Explained in the caption.
-\draw[{Stealth[length=2mm]}-{Stealth[length=2mm]},thick] (l1.east) -- (l2.west);
+\foreach \n in {l1,l2,hp}{\draw[sig] (\n.north|-caY) -- (\n.north);}
+% The two links in this row (LLRF9 interlock chain, LLRF9 #1 to Galil) are
+% drawn after the lower-row drops; see below.
 
 % ===== lower subsystem row ================================================
 % centres 33 / 67 / 101 / 135, width 26  ->  spans 20-46, 54-80, 88-114, 122-148
@@ -68,6 +68,15 @@
 % straight drops: 33, 67 and 101 all fall in gaps of the upper row
 \foreach \n in {wb,arc,mp}{\draw[sig] (\n.north|-caY) -- (\n.north);}
 \draw[sig] (mp.east) -- (heat.west);
+% Upper-row links, drawn now with a white halo so that they bridge the drops to
+% the Waveform Buffer (x = 33) and the ARC4 (x = 67).  The two LLRF9 interlock
+% chains are wired directly to each other, not via the Interface Chassis;
+% LLRF9 #1 drives the Galil over Ethernet.  Both explained in the caption.
+\draw[preaction={draw=white,line width=3pt,solid,arrows=-},
+      {Stealth[length=2mm]}-{Stealth[length=2mm]},thick] (l1.east) -- (l2.west);
+\draw[preaction={draw=white,line width=3pt,solid,arrows=-},
+      {Stealth[length=2mm]}-{Stealth[length=2mm]},thick,densely dotted]
+  (mot.east) -- (l1.west);
 
 % ===== interface chassis ==================================================
 \node[plc,text width=154mm,anchor=north] (ic) at (80,-104)
@@ -75,8 +84,9 @@
    first-fault detection $\cdot$ optocoupler / galvanic isolation $\cdot$
    fiber I/O $\cdot$ AND-gate permit logic};
 
-% straight drops: 16, 50, 84 all fall in gaps of the lower row
-\foreach \n in {l1,l2,mot}{\draw[sig] (\n.south) -- (\n.south|-ic.north);}
+% straight drops: 16, 50, 84 all fall in gaps of the lower row (the motion
+% controller has no Interface Chassis link)
+\foreach \n in {l1,l2}{\draw[sig] (\n.south) -- (\n.south|-ic.north);}
 \foreach \n in {wb,arc,mp}{\draw[sig] (\n.south) -- (\n.south|-ic.north);}
 % HVPS PLC takes the clear lane to the RIGHT of the heater controller
 \draw[draw=cNeut,thick] (hp.south) |- (152,-72);
@@ -86,8 +96,8 @@
 \node[blk,text width=60mm,anchor=north] (ext) at (38,-130)
   {\textbf{MACHINE PROTECTION SAFETY SYSTEMS}\\
    SPEAR MPS $\cdot$ orbit interlock $\cdot$ external permits\\
-   {\tiny feed into the Interface Chassis}};
-\draw[sig] (ext.north) -- (ext.north|-ic.south);
+   {\tiny permits in, beam abort out}};
+\draw[{Stealth[length=2mm]}-{Stealth[length=2mm]},thick] (ext.north) -- (ext.north|-ic.south);
 
 % ===== HVPS power section =================================================
 \node[pwr,text width=60mm,anchor=north] (hvps) at (116,-132)

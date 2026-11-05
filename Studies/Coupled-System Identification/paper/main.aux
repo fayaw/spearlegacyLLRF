@@ -1,0 +1,161 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{Robinson1964}
+\citation{Pedersen1975}
+\citation{Boussard1985}
+\citation{Wilson1993}
+\citation{Rivetta2007,Mastorides2010}
+\citation{Forssell1999,Ljung1999}
+\citation{Bohlin2006,Pintelon2012}
+\newlabel{FirstPage}{{}{1}{}{section*.1}{}}
+\@writefile{toc}{\contentsline {title}{Physics-informed identification of coupled beam--RF feedback dynamics\\from closed-loop measurements in a storage ring}{1}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {abstract}{Abstract}{1}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section*.3}\protected@file@percent }
+\newlabel{sec:intro}{{I}{1}{}{section*.3}{}}
+\citation{Picinbono1995}
+\citation{Hettel1999,McIntosh2004}
+\citation{Rimmer1992}
+\citation{Corredoura1999}
+\citation{McIntosh2004,SPEAR3_DocP}
+\citation{McIntosh2004,SPEAR3_DocP}
+\@writefile{toc}{\contentsline {section}{\numberline {II}The measured system}{2}{section*.4}\protected@file@percent }
+\newlabel{sec:system}{{II}{2}{}{section*.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A}RF station and direct feedback}{2}{section*.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The measured system. Band-limited noise $\bm  {n}$ is added to the klystron drive after the controller; the controller output $\bm  {x}$ (TOTAL) is recorded. The beam couples to the four cavities through its dipole motion $\Delta \phi $ [Eq.~\eqref  {eq:beam}]; the klystron responds differently to drive amplitude and phase [Eq.~\eqref  {eq:klystron}]. Bold symbols are two-quadrature vectors and matrices in the cavity frame.}}{2}{figure.1}\protected@file@percent }
+\newlabel{fig:loop}{{1}{2}{The measured system. Band-limited noise $\vect n$ is added to the klystron drive after the controller; the controller output $\vect x$ (TOTAL) is recorded. The beam couples to the four cavities through its dipole motion $\Delta \phi $ [Eq.~\eqref {eq:beam}]; the klystron responds differently to drive amplitude and phase [Eq.~\eqref {eq:klystron}]. Bold symbols are two-quadrature vectors and matrices in the cavity frame}{figure.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Parameters of the SPEAR3 RF station used in the model. Fixed values are taken from design documents and station measurements~\cite  {McIntosh2004,SPEAR3_DocP}; identified values are those of Sec.~\ref {sec:explain}.}}{2}{table.1}\protected@file@percent }
+\newlabel{tab:params}{{I}{2}{Parameters of the SPEAR3 RF station used in the model. Fixed values are taken from design documents and station measurements~\cite {McIntosh2004,SPEAR3_DocP}; identified values are those of Sec.~\ref {sec:explain}}{table.1}{}}
+\citation{Bendat2010}
+\@writefile{toc}{\contentsline {subsection}{\numberline {B}The closed-loop measurement}{3}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {C}Data}{3}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {D}Frequency-response estimation}{3}{section*.8}\protected@file@percent }
+\newlabel{sec:estimation}{{II\,D}{3}{}{section*.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Closed-loop records of 2026 (station voltage \SI {2.85}{MV}). $I_b$: beam current; \texttt  {COUNTS.A}: loop gain setting; \texttt  {PHASE.C}: loop phase setting. Group: operating point used for the klystron and noise-angle parameters.}}{3}{table.2}\protected@file@percent }
+\newlabel{tab:data}{{II}{3}{Closed-loop records of 2026 (station voltage \SI {2.85}{MV}). $\Ib $: beam current; \CNA : loop gain setting; \PHC : loop phase setting. Group: operating point used for the klystron and noise-angle parameters}{table.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Physics-informed model}{3}{section*.9}\protected@file@percent }
+\newlabel{sec:model}{{III}{3}{}{section*.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A}Two-quadrature representation}{3}{section*.10}\protected@file@percent }
+\citation{SPEAR3_DocP}
+\citation{Pedersen1975,Chao1993}
+\citation{Pedersen1975}
+\citation{Saleh1981,Cripps2006}
+\citation{Picinbono1995,Schreier2010}
+\citation{Boussard1985,SPEAR3_DocP}
+\citation{SPEAR3_DocP}
+\newlabel{eq:realmatrix}{{1}{4}{}{equation.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {B}Cavities and beam}{4}{section*.11}\protected@file@percent }
+\newlabel{eq:beam}{{2}{4}{}{equation.2}{}}
+\newlabel{eq:plant}{{3}{4}{}{equation.3}{}}
+\newlabel{eq:Dopen}{{4}{4}{}{equation.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {C}Klystron}{4}{section*.12}\protected@file@percent }
+\newlabel{eq:klystron}{{5}{4}{}{equation.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {D}Loop and recorded response}{4}{section*.13}\protected@file@percent }
+\newlabel{eq:loop}{{6}{4}{}{equation.6}{}}
+\newlabel{eq:chain}{{7}{4}{}{equation.7}{}}
+\newlabel{eq:recorded}{{8}{4}{}{equation.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {E}The coupled mode}{4}{section*.14}\protected@file@percent }
+\citation{Raue2009}
+\@writefile{toc}{\contentsline {subsection}{\numberline {F}Parameter classes}{5}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Identifiability}{5}{section*.16}\protected@file@percent }
+\newlabel{sec:ident}{{IV}{5}{}{section*.16}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A}What one record can and cannot determine}{5}{section*.17}\protected@file@percent }
+\newlabel{eq:twomodes}{{9}{5}{}{equation.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {B}What operating-condition diversity adds}{5}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {C}What the trip records add}{5}{section*.19}\protected@file@percent }
+\newlabel{sec:trips}{{IV\,C}{5}{}{section*.19}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Profile likelihood of the klystron's (a) amplitude compression $g_A$ and (b) AM/PM conversion $k_\mathrm  {AP}$ at the \SI {497}{mA} operating point, with both free at every operating point, for nested data sets: one record in the routine's band (\SI {15}{}--\SI {400}{kHz}), the same record with the beam band, the gain and phase scan at \SI {497}{mA}, and all records. Every other parameter is re-optimized at each point; the dotted line marks the 95\% level ($\Delta \chi ^2=3.84$). The vertical axis is linear below 10.}}{6}{figure.2}\protected@file@percent }
+\newlabel{fig:ident}{{2}{6}{Profile likelihood of the klystron's (a) amplitude compression $\gA $ and (b) AM/PM conversion $\kAP $ at the \SI {497}{mA} operating point, with both free at every operating point, for nested data sets: one record in the routine's band (\SI {15}{}--\SI {400}{kHz}), the same record with the beam band, the gain and phase scan at \SI {497}{mA}, and all records. Every other parameter is re-optimized at each point; the dotted line marks the 95\% level ($\Delta \chi ^2=3.84$). The vertical axis is linear below 10}{figure.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Competing explanations}{6}{section*.20}\protected@file@percent }
+\newlabel{sec:explain}{{V}{6}{}{section*.20}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A}The anomaly}{6}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {B}Explanations and their test}{6}{section*.22}\protected@file@percent }
+\citation{Akaike1974,Schwarz1978}
+\citation{Akaike1974,Schwarz1978}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The klystron in the trip records (present tube, 2021). (a) Ratio of the relative fluctuations of output and drive amplitude against frequency, for the records at full output (blue) and at the no-beam output (orange); shaded: \SIrange {50}{200}{kHz}. (b) AM/PM conversion from the probe's response to drive amplitude and phase, per record (band: mean $\pm $ standard deviation); crosses: the values of the closed-loop fit with $k_\mathrm  {AP}$ free at every operating point. (c) Compression identified from the closed-loop records at each operating point (squares) and as one value for all currents (dashed), against the trip records at \SIrange {50}{200}{kHz} (band) and above \SI {200}{kHz} (dotted); top axis: HVPS voltage estimated from the power balance at the fixed drive.}}{7}{figure.3}\protected@file@percent }
+\newlabel{fig:trips}{{3}{7}{The klystron in the trip records (present tube, 2021). (a) Ratio of the relative fluctuations of output and drive amplitude against frequency, for the records at full output (blue) and at the no-beam output (orange); shaded: \SIrange {50}{200}{kHz}. (b) AM/PM conversion from the probe's response to drive amplitude and phase, per record (band: mean $\pm $ standard deviation); crosses: the values of the closed-loop fit with $\kAP $ free at every operating point. (c) Compression identified from the closed-loop records at each operating point (squares) and as one value for all currents (dashed), against the trip records at \SIrange {50}{200}{kHz} (band) and above \SI {200}{kHz} (dotted); top axis: HVPS voltage estimated from the power balance at the fixed drive}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Measured closed-loop responses. (a) Magnitude and (b) phase in the wideband, the phase with \SI {630}{ns} of delay removed; colour: beam current. (c) The beam band at \SI {312}{Hz} resolution for the same records: the coupled mode appears as a resonance near $\pm f_s$ that moves down with current. (d) The beam band at \SI {497}{mA} for three gain settings.}}{7}{figure.4}\protected@file@percent }
+\newlabel{fig:data}{{4}{7}{Measured closed-loop responses. (a) Magnitude and (b) phase in the wideband, the phase with \SI {630}{ns} of delay removed; colour: beam current. (c) The beam band at \SI {312}{Hz} resolution for the same records: the coupled mode appears as a resonance near $\pm f_s$ that moves down with current. (d) The beam band at \SI {497}{mA} for three gain settings}{figure.4}{}}
+\citation{SPEAR3_DocP}
+\citation{SPEAR3_DocP}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Effective parameters of record-by-record complex-linear fits: (a) loop gain normalized to the 2 October gain setting, (b) loop delay, (c) loaded $Q$. Circles: 2 October and 3 November (\SI {242}{mA}); squares: 3 November at \SI {497}{mA}, the gain scan in orange (+1.3~dB in green). Dashed: the station constants of the selected model (Sec.~\ref {sec:selected}); grey band in (c): $Q_L$ of the four cavities from their reflected power.}}{8}{figure.5}\protected@file@percent }
+\newlabel{fig:effective}{{5}{8}{Effective parameters of record-by-record complex-linear fits: (a) loop gain normalized to the 2 October gain setting, (b) loop delay, (c) loaded $Q$. Circles: 2 October and 3 November (\SI {242}{mA}); squares: 3 November at \SI {497}{mA}, the gain scan in orange (+1.3~dB in green). Dashed: the station constants of the selected model (Sec.~\ref {sec:selected}); grey band in (c): $\QL $ of the four cavities from their reflected power}{figure.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Candidate explanations fitted to all records in the wideband and the beam band. The compressed-klystron models use the AM/PM conversion of the trip records unless stated. $n_p$: free parameters; $\chi ^2/\nu $ overall and per band; $\Delta $AIC and $\Delta $BIC relative to the selected model~\cite  {Akaike1974,Schwarz1978}.}}{8}{table.3}\protected@file@percent }
+\newlabel{tab:models}{{III}{8}{Candidate explanations fitted to all records in the wideband and the beam band. The compressed-klystron models use the AM/PM conversion of the trip records unless stated. $n_p$: free parameters; $\chi ^2/\nu $ overall and per band; $\Delta $AIC and $\Delta $BIC relative to the selected model~\cite {Akaike1974,Schwarz1978}}{table.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {C}The selected model}{8}{section*.23}\protected@file@percent }
+\newlabel{sec:selected}{{V\,C}{8}{}{section*.23}{}}
+\citation{SPEAR3_DocP}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces (a) $\chi ^2/\nu $ of the candidate explanations of Table~\ref {tab:models} in the wideband and the beam band (all records); the last three have the compression per operating point. (b) Normalized squared residuals in the wideband, averaged over all records and over nine neighbouring bins.}}{9}{figure.6}\protected@file@percent }
+\newlabel{fig:models}{{6}{9}{(a) $\chi ^2/\nu $ of the candidate explanations of Table~\ref {tab:models} in the wideband and the beam band (all records); the last three have the compression per operating point. (b) Normalized squared residuals in the wideband, averaged over all records and over nine neighbouring bins}{figure.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Recorded responses (grey) and the selected model (lines) for five operating points: magnitude and phase in the wideband (top, middle; phase with \SI {630}{ns} removed) and magnitude in the beam band (bottom, model convolved with the window kernel). One set of station constants describes all records.}}{9}{figure.7}\protected@file@percent }
+\newlabel{fig:fits}{{7}{9}{Recorded responses (grey) and the selected model (lines) for five operating points: magnitude and phase in the wideband (top, middle; phase with \SI {630}{ns} removed) and magnitude in the beam band (bottom, model convolved with the window kernel). One set of station constants describes all records}{figure.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Validation}{9}{section*.24}\protected@file@percent }
+\newlabel{sec:valid}{{VI}{9}{}{section*.24}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A}Out-of-band prediction of the coupled mode}{9}{section*.25}\protected@file@percent }
+\newlabel{sec:fs}{{VI\,A}{9}{}{section*.25}{}}
+\citation{McIntosh2004,SPEAR3_DocP}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Operating-point parameters of the selected model: klystron compression $g_A$ (statistical errors), noise angle $\alpha $ in the cavity frame, and detuning $\Delta f$ of each group of records. The AM/PM conversion is fixed at $k_\mathrm  {AP}=\ensuremath  {-}0.10$ (trip records, Sec.~\ref {sec:trips}). $V_k$: HVPS voltage, not recorded, estimated from the power balance at the fixed drive (Sec.~\ref {sec:selected}).}}{10}{table.4}\protected@file@percent }
+\newlabel{tab:groups}{{IV}{10}{Operating-point parameters of the selected model: klystron compression $\gA $ (statistical errors), noise angle $\alpha $ in the cavity frame, and detuning $\Delta f$ of each group of records. The AM/PM conversion is fixed at $\kAP =\kapTrip $ (trip records, Sec.~\ref {sec:trips}). $V_k$: HVPS voltage, not recorded, estimated from the power balance at the fixed drive (Sec.~\ref {sec:selected})}{table.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {B}Prediction across operating conditions}{10}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {C}Comparison with the trip records}{10}{section*.27}\protected@file@percent }
+\newlabel{sec:tripcomp}{{VI\,C}{10}{}{section*.27}{}}
+\citation{SPEAR3_DocP}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces The coupled beam--cavity--klystron--loop mode. (a) Frequency and damping rate measured without a model (black, $1\sigma $ errors), predicted from the wideband alone by the effective linear model (grey) and by the compressed-klystron model with nominal ring parameters (orange), and given by the joint model with the synchrotron frequency identified (blue). (b) Damping rate against beam current; at \SI {497}{mA} the colours mark the gain setting. Dotted: radiation damping.}}{11}{figure.8}\protected@file@percent }
+\newlabel{fig:mode}{{8}{11}{The coupled beam--cavity--klystron--loop mode. (a) Frequency and damping rate measured without a model (black, $1\sigma $ errors), predicted from the wideband alone by the effective linear model (grey) and by the compressed-klystron model with nominal ring parameters (orange), and given by the joint model with the synchrotron frequency identified (blue). (b) Damping rate against beam current; at \SI {497}{mA} the colours mark the gain setting. Dotted: radiation damping}{figure.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Held-out $\chi ^2/\nu $ (both bands) of records predicted from models trained without them: gain transfer at \SI {497}{mA} (four records), phase transfer at \SI {22}{mA} (two), and three beam currents. Bars: one-station linear model, effective model with transferred parameters, one compressed klystron for all currents, compression per operating point (selected). Black ticks: in-sample values of the selected model.}}{11}{figure.9}\protected@file@percent }
+\newlabel{fig:crossval}{{9}{11}{Held-out $\chi ^2/\nu $ (both bands) of records predicted from models trained without them: gain transfer at \SI {497}{mA} (four records), phase transfer at \SI {22}{mA} (two), and three beam currents. Bars: one-station linear model, effective model with transferred parameters, one compressed klystron for all currents, compression per operating point (selected). Black ticks: in-sample values of the selected model}{figure.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {D}Physical consistency}{11}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Discussion}{11}{section*.29}\protected@file@percent }
+\newlabel{sec:disc}{{VII}{11}{}{section*.29}{}}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {a}What changes with the beam.}{11}{section*.30}\protected@file@percent }
+\citation{SPEAR3_DocP}
+\citation{Pedersen1975,SPEAR3_DocP}
+\@writefile{toc}{\contentsline {paragraph}{\numberline {b}The synchrotron frequency.}{12}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {c}Limits.}{12}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{\numberline {d}Measurements that would add most.}{12}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Conclusions}{12}{section*.34}\protected@file@percent }
+\newlabel{sec:concl}{{VIII}{12}{}{section*.34}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {}Acknowledgments}{12}{section*.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {}Data and code availability}{12}{section*.36}\protected@file@percent }
+\@writefile{toc}{\appendix }
+\@writefile{toc}{\contentsline {section}{\numberline {A}Beam-loaded plant and recorded response}{12}{section*.37}\protected@file@percent }
+\newlabel{app:derivation}{{A}{12}{}{section*.37}{}}
+\citation{SPEAR3_DocP}
+\citation{Bendat2010}
+\bibdata{mainNotes,refs}
+\bibcite{Robinson1964}{{1}{1964}{{Robinson}}{{}}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}Estimator statistics}{13}{section*.38}\protected@file@percent }
+\newlabel{app:estimator}{{B}{13}{}{section*.38}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {C}Trip records}{13}{section*.39}\protected@file@percent }
+\newlabel{app:trips}{{C}{13}{}{section*.39}{}}
+\bibcite{Pedersen1975}{{2}{1975}{{Pedersen}}{{}}}
+\bibcite{Boussard1985}{{3}{1985}{{Boussard}}{{}}}
+\bibcite{Wilson1993}{{4}{1993}{{Wilson}}{{}}}
+\bibcite{Rivetta2007}{{5}{2007}{{Rivetta\ \emph  {et~al.}}}{{Rivetta, Mastorides, Fox, Teytelman,\ and\ Winkle}}}
+\bibcite{Mastorides2010}{{6}{2010}{{Mastorides\ \emph  {et~al.}}}{{Mastorides, Rivetta, Fox, Winkle,\ and\ Teytelman}}}
+\bibcite{Forssell1999}{{7}{1999}{{Forssell\ and\ Ljung}}{{}}}
+\bibcite{Ljung1999}{{8}{1999}{{Ljung}}{{}}}
+\bibcite{Bohlin2006}{{9}{2006}{{Bohlin}}{{}}}
+\bibcite{Pintelon2012}{{10}{2012}{{Pintelon\ and\ Schoukens}}{{}}}
+\bibcite{Picinbono1995}{{11}{1995}{{Picinbono\ and\ Chevalier}}{{}}}
+\bibcite{Hettel1999}{{12}{1999}{{Hettel\ \emph  {et~al.}}}{{Hettel \emph  {et~al.}}}}
+\bibcite{McIntosh2004}{{13}{2004}{{McIntosh\ \emph  {et~al.}}}{{McIntosh \emph  {et~al.}}}}
+\bibcite{Rimmer1992}{{14}{1992}{{Rimmer\ \emph  {et~al.}}}{{Rimmer \emph  {et~al.}}}}
+\bibcite{Corredoura1999}{{15}{1999}{{Corredoura}}{{}}}
+\bibcite{SPEAR3_DocP}{{16}{2026}{{{SSRL RF group}}}{{}}}
+\bibcite{Bendat2010}{{17}{2010}{{Bendat\ and\ Piersol}}{{}}}
+\bibcite{Chao1993}{{18}{1993}{{Chao}}{{}}}
+\bibcite{Saleh1981}{{19}{1981}{{Saleh}}{{}}}
+\bibcite{Cripps2006}{{20}{2006}{{Cripps}}{{}}}
+\bibcite{Schreier2010}{{21}{2010}{{Schreier\ and\ Scharf}}{{}}}
+\bibcite{Raue2009}{{22}{2009}{{Raue\ \emph  {et~al.}}}{{Raue, Kreutz, Maiwald, Bachmann, Schilling, Klingm{\"u}ller,\ and\ Timmer}}}
+\bibcite{Akaike1974}{{23}{1974}{{Akaike}}{{}}}
+\bibcite{Schwarz1978}{{24}{1978}{{Schwarz}}{{}}}
+\bibstyle{apsrev4-2}
+\citation{REVTEX42Control}
+\citation{apsrev42Control}
+\@writefile{toc}{\contentsline {section}{\numberline {}References}{14}{section*.40}\protected@file@percent }
+\newlabel{LastBibItem}{{24}{14}{}{section*.40}{}}
+\newlabel{LastPage}{{}{14}{}{}{}}
+\gdef \@abspage@last{14}

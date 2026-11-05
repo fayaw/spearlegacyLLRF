@@ -1,0 +1,16 @@
+﻿FSW_cavA_20261008T133059.json  (SRF1_20261008T133240.json)
+  497 mA, COUNTS.A 1.3 dB, PHASE.C -20.0 deg, PHASE.L -10.886170180013078 deg, tracking 1.0
+  line: f 8806/8768 Hz, sigma 1190/1156 1/s, Q 23.5; broadband -58.0/-59.3 dBc
+  pole cross-checks (mean of the sidebands): +/-3 HWHM f 8752 Hz sigma 1531; Fano f 8736 Hz sigma 1120
+  eff: beam phase broadband 0.194, lines 0.557, total 0.590 deg; dE/E 1.61e-04; S_n 2.10e-11; model f 8719 Hz sigma 1096
+  lag: beam phase broadband 0.149, lines 0.335, total 0.366 deg; dE/E 9.76e-05; S_n 1.24e-11; model f 7746 Hz sigma 1128
+  360 Hz family (dBc): 8280: -62.9, 8640: -56.8, 9000: -55.7, 9360: -67.1, 9720: -65.6, 10080: nan
+  warning: detector APE; noise levels biased
+FSW_cavA_matrix_20261008T153523.json  (SRF1_20261008T153755.json)
+  492 mA, COUNTS.A 1.3 dB, PHASE.C -20.0 deg, PHASE.L -6.535642703689938 deg, tracking 1.0
+  line: f 8840/8809 Hz, sigma 1094/1081 1/s, Q 25.5; broadband -58.5/-59.8 dBc
+  pole cross-checks (mean of the sidebands): +/-3 HWHM f 8801 Hz sigma 1276; Fano f 8779 Hz sigma 1071
+  eff: beam phase broadband 0.186, lines 0.554, total 0.584 deg; dE/E 1.61e-04; S_n 1.80e-11; model f 8752 Hz sigma 1082
+  lag: beam phase broadband 0.143, lines 0.364, total 0.391 deg; dE/E 1.05e-04; S_n 1.06e-11; model f 7793 Hz sigma 1142
+  360 Hz family (dBc): 8280: -63.3, 8640: -57.3, 9000: -55.3, 9360: -67.6, 9720: -65.3, 10080: nan
+appended to D:\OneDrive - SLAC National Accelerator Laboratory\SLACR\pyCode\spearlegacyLLRF\Studies\optLLRF\results\runlog_demo_20261008.csv

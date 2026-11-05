@@ -31,7 +31,8 @@
   {D5 HVPS ripple}/{DSP ripple canceller at the 60\,Hz--2.9\,kHz lines, plus the direct loop}/1.78/3.46/4/rf,
   {D2 beam transients}/{direct loop, $\approx\qty{70}{\kilo\hertz}$ at $G\approx1$}/3/5/5/rf,
   {D3 Robinson}/{damped by the cavity detuning; the direct-loop setting sets the rate}/3.9/4.1/6/ctrl,
-  {D4 coupled-bunch}/{fundamental-mode growth ${\le}\,5\;\text{s}^{-1}$, negligible; no comb at SPEAR3}/6.0/6.2/7/ctrl}{%
+  {D4 coupled-bunch}/{fundamental-mode growth ${\le}\,5\;\text{s}^{-1}$, negligible; no comb at SPEAR3}/6.0/6.2/7/ctrl,
+  {D10 RF noise}/{broadband; the beam responds near and below $f_s$; the direct loop shapes it, no loop removes it}/0/6.5/8/ctrl}{%
     \pgfmathsetmacro\xa{(\a+8)*\sc}
     \pgfmathsetmacro\xb{(\b+8)*\sc}
     \pgfmathsetmacro\y{9+\r*\rp}

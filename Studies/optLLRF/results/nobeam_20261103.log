@@ -1,0 +1,160 @@
+==============================================================================================================
+1. Station state, 3 Nov 2026 (EPICS snapshots, caget only)
+   time    beam  PHASE.C PHASE.K PHASE.L  avg FREQ:OFFS | FREQ:OFFS cav1-4 (kHz)     | tuner RBV cav1-4 (mm)       | load-angle err (deg)
+   093444   0.0   -20.0  +4.61  -15.39    -22.87     |   -3.2  -20.2  -56.7  -11.2 | -5.502 -0.945  0.220 -0.428 | -0.02 -0.13 +0.01 -0.42
+   093809   0.0   -20.0  +2.42  -17.58    -12.01     |    8.7  -15.5  -42.6    1.2 | -5.206 -1.087  0.357 -0.289 | +0.22 +0.17 +0.17 -0.38
+   094549   0.0   -20.0  +5.99  -14.01    -29.72     |   -5.7  -30.8  -61.5  -20.9 | -5.222 -1.091  0.366 -0.501 | +0.64 -0.04 -0.03 -0.28
+   f_RF 476.304794 MHz (+830 Hz since 7 Oct 2026, set by the ring); station 2852 kV; klystron 398 kW, drive 28.2 W (4.5 dB below SAT 80 W); HVPS 67.2 kV 18.8 A
+   loop: COUNTS.A 1.3 dB (L 1.161), PHASE.C -20.0, PHASE.B 699.5 ns, PHASE.F 0.80; tracking 1, INTCOMP 1, LEADCOMP 1, DSP ripple 1 (DC coef 0.90, gain tracking 1)
+   reflection check without beam: |G|^2 = ((b-1)^2 + t^2) / ((b+1)^2 + t^2), t = 2 Q0 df / f0, b = 3.8, Q0 = 32000
+   cav  |G|^2 meas  |G|^2 on tune  |df| from |G|^2 (kHz)  FREQ:OFFS (kHz)  |G|^2 at FREQ:OFFS
+    1      0.306        0.340              0.0                  -5.7            0.357
+    2      0.323        0.340              0.0                 -30.8            0.621
+    3      0.327        0.340              0.0                 -61.5            0.833
+    4      0.366        0.340              7.1                 -20.9            0.509
+   60 s record SRF1_loop_tuner_60s_20261103T094714.csv: PHASE.L -13.89 +/- 0.018, PHASE.K +6.11 +/- 0.018 deg
+     cav1: TUNR:POSN  -5.909 mm, motor RBV  -5.530 mm (difference -0.379 mm), FREQ:OFFS   -9.21 +/- 0.18 kHz
+     cav2: TUNR:POSN  -1.874 mm, motor RBV  -1.037 mm (difference -0.838 mm), FREQ:OFFS  -29.63 +/- 0.22 kHz
+     cav3: TUNR:POSN  -0.554 mm, motor RBV   0.347 mm (difference -0.901 mm), FREQ:OFFS  -61.82 +/- 0.20 kHz
+     cav4: TUNR:POSN  -1.077 mm, motor RBV  -0.482 mm (difference -0.595 mm), FREQ:OFFS  -20.68 +/- 0.06 kHz
+   tracking correction PHASE.K in the snapshots: +4.61, +2.42, +5.99 deg
+==============================================================================================================
+2. Swept spectra of the cavity-A probe: no beam (3 Nov 2026) against 492 mA (8 Oct 2026)
+   FSW_cavA_nobeam_20261103T093904.json: beam 0.0 mA, errors before/during/after -113,"Undefined header;FORM:BORD?" | 0,"No error" | 0,"No error"; restore differences none; remote 73.1 s
+   carrier: no beam 0.31 dBm, -39.5 Hz from SPEAR:RFFreq on the analyzer (its time base is not the master oscillator); 492 mA 1.09 dBm
+   broadband level between the 60 Hz lines (30 Hz RBW, RMS, median, dBc/Hz): no beam USB/LSB | 492 mA USB/LSB
+      2000-4000  Hz     -91.9 /   -93.6   |     -94.0 /   -94.1
+      4000-6000  Hz     -98.6 /   -96.6   |    -101.3 /   -99.4
+      6000-7500  Hz    -102.6 /  -101.2   |    -103.8 /  -102.2
+      7500-8500  Hz    -107.4 /  -106.5   |     -98.6 /   -98.7
+      8500-9200  Hz    -108.5 /  -107.1   |     -88.0 /   -89.1
+      9200-9990  Hz    -109.1 /  -107.7   |     -97.2 /   -98.1
+   peak between 2.0 and 3.5 kHz in the 100 Hz medians, relative to the 3.6-5 kHz level:
+     no beam USB:  -76.9 dBc/Hz at 2750 Hz, +20.9 dB
+     no beam LSB:  -81.2 dBc/Hz at 2750 Hz, +14.5 dB
+     492 mA  USB:  -90.1 dBc/Hz at 2650 Hz,  +7.7 dB
+     492 mA  LSB:  -90.9 dBc/Hz at 3250 Hz,  +6.1 dB
+   line harmonics 60-1080 Hz (3 Hz RBW, dBc): f | no beam USB/LSB | 492 mA USB/LSB
+        60 Hz   -58.9 /  -61.5  |   -57.6 /  -59.6
+       120 Hz   -67.0 /  -64.8  |   -69.2 /  -66.1
+       240 Hz   -69.2 /  -72.5  |   -69.4 /  -73.5
+       360 Hz   -63.2 /  -60.8  |   -63.9 /  -62.8
+       420 Hz   -70.7 /  -70.6  |   -70.6 /  -71.5
+       720 Hz   -58.4 /  -58.2  |   -58.8 /  -62.2
+      1080 Hz   -74.0 /    nan  |   -65.2 /  -67.6
+     total of the detected lines, no beam: -51.3 dBc
+     total of the detected lines, 492 mA: -51.5 dBc
+   wideband floor (1 kHz RBW, median, dBc/Hz): no beam USB/LSB | 492 mA USB/LSB
+        10-30    kHz   -106.1 /  -105.6  |   -105.4 /  -102.9
+        30-120   kHz   -119.9 /  -120.2  |   -122.0 /  -117.7
+       120-500   kHz   -127.2 /  -127.3  |   -127.5 /  -126.9
+       500-1400  kHz   -128.9 /  -129.0  |   -129.0 /  -129.1
+==============================================================================================================
+3. I/Q record of the cavity-A probe without beam
+   FSW_IQ_20261103T094550.npz: 800000 samples at 50000 S/s (16.0 s), beam 0.0 mA; errors before/during/after 0,"No error" | 0,"No error" | 0,"No error"; restore differences none; remote 17.1 s
+   total rms within +/-25 kHz: amplitude 0.943 %, phase 2.006 deg
+   band-limited rms, lines included: band | amplitude | phase
+         0.5-55      Hz: 0.1852 %, 0.5230 deg
+        55.0-2000    Hz: 0.2628 %, 0.0939 deg
+      2000.0-12000   Hz: 0.2755 %, 0.2451 deg
+     12000.0-25000   Hz: 0.0226 %, 0.0401 deg
+   mains frequency per 1 s block: 60.0121 to 60.0269 Hz (one value for the record: 60.0188 Hz)
+   line level with one mains frequency per record (probe_sysid.harmonic_regression) and tracked per 1 s block:
+     n  12 (  720.2 Hz) USB  -58.4 dBc fixed,  -58.3 dBc tracked
+     n 126 ( 7562.4 Hz) USB  -74.6 dBc fixed,  -71.2 dBc tracked
+     n 150 ( 9002.9 Hz) USB  -79.4 dBc fixed,  -75.9 dBc tracked
+     n 162 ( 9723.1 Hz) USB  -80.1 dBc fixed,  -76.4 dBc tracked
+   broadband, harmonics removed (median): band | AM dB re 1/Hz | PM dB re rad^2/Hz | USB / LSB dBc/Hz | drive S_n = cot^2 S_A + S_phi (rad^2/Hz)
+      0.3-1.0   kHz   -106.4    -101.9    -103.3 /  -103.2   6.80e-11
+      1.0-2.0   kHz   -101.4    -102.6    -101.6 /  -102.4   6.74e-11
+      3.0-6.0   kHz   -106.4    -107.2    -107.2 /  -106.3   2.29e-11
+      6.0-7.5   kHz   -113.0    -112.2    -113.4 /  -111.8   6.96e-12
+      7.5-8.5   kHz   -116.8    -113.3    -114.9 /  -114.4   4.99e-12
+      8.5-9.2   kHz   -118.6    -113.9    -115.8 /  -115.4   4.32e-12
+      9.2-10.0  kHz   -120.5    -114.1    -116.2 /  -116.2   4.02e-12
+     10.0-12.0  kHz   -122.2    -114.4    -116.6 /  -116.8   3.75e-12
+   peak near 2.75 kHz (residual, 30 Hz running median, against the 3.6-5 kHz level):
+     USB:  -76.8 dBc/Hz at 2763 Hz, FWHM 184 Hz, +30.4 dB over -107.2 dBc/Hz, excess power -53.4 dBc
+     LSB:  -81.4 dBc/Hz at 2752 Hz, FWHM 168 Hz, +24.5 dB over -105.9 dBc/Hz, excess power -58.5 dBc
+     AM in the peak: 0.167 % rms
+     PM in the peak: 0.103 deg rms
+   mains lines in the field, by band: AM rms | PM rms | AM share of a^2 + p^2 | drive n_eff rms | phase share of the drive
+      0.05-1.1   kHz: AM 0.2472 %, PM   70.3 mdeg, AM share 0.80, drive   91.5 mdeg, phase share 0.59
+      1.10-2.0   kHz: AM 0.0793 %, PM   39.6 mdeg, AM share 0.57, drive   43.9 mdeg, phase share 0.82
+      2.00-3.0   kHz: AM 0.1207 %, PM   43.5 mdeg, AM share 0.72, drive   52.1 mdeg, phase share 0.70
+      3.00-7.5   kHz: AM 0.1743 %, PM  210.6 mdeg, AM share 0.18, drive  214.7 mdeg, phase share 0.96
+      7.50-10.5  kHz: AM 0.0344 %, PM   46.7 mdeg, AM share 0.15, drive   47.4 mdeg, phase share 0.97
+     10.50-12.0  kHz: AM 0.0161 %, PM   22.0 mdeg, AM share 0.15, drive   22.4 mdeg, phase share 0.97
+   lines 2.4-3.0 kHz (* = processed by the DSP ripple loop):
+     *  2400.8 Hz  USB  -81.3  LSB  -81.3 dBc  AM  1.18e-4  PM   1.73 mdeg
+        2460.8 Hz  USB  -80.8  LSB  -78.9 dBc  AM  0.87e-4  PM   6.63 mdeg
+     *  2520.8 Hz  USB  -72.2  LSB  -68.0 dBc  AM  4.50e-4  PM   6.84 mdeg
+        2580.8 Hz  USB  -81.1  LSB  -77.2 dBc  AM  1.23e-4  PM   6.24 mdeg
+        2640.8 Hz  USB  -69.4  LSB  -71.9 dBc  AM  2.38e-4  PM  19.95 mdeg
+        2700.9 Hz  USB  -70.2  LSB  -73.4 dBc  AM  1.44e-4  PM  19.84 mdeg
+     *  2760.9 Hz  USB  -70.7  LSB  -73.4 dBc  AM  2.15e-4  PM  16.73 mdeg
+        2820.9 Hz  USB  -74.5  LSB  -81.5 dBc  AM  1.51e-4  PM   8.07 mdeg
+     *  2880.9 Hz  USB  -74.7  LSB  -66.3 dBc  AM  4.30e-4  PM  16.70 mdeg
+        2940.9 Hz  USB  -82.0  LSB  -88.7 dBc  AM  0.66e-4  PM   3.31 mdeg
+        3001.0 Hz  USB  -75.3  LSB  -75.8 dBc  AM  0.94e-4  PM  12.39 mdeg
+==============================================================================================================
+4. Loop rejection, klystron ripple and the motion these lines drive at 500 mA
+   direct loop without beam (G 0.88, on tune, lead and lag networks, 625 ns):
+        720 Hz: |L| 3.76 at  -58.8 deg; 1/(1+L) 0.23 at +47.5 deg (12.8 dB)
+       2760 Hz: |L| 1.33 at  -48.8 deg; 1/(1+L) 0.47 at +28.1 deg (6.6 dB)
+       2880 Hz: |L| 1.30 at  -48.1 deg; 1/(1+L) 0.47 at +27.4 deg (6.5 dB)
+       8640 Hz: |L| 0.91 at  -34.2 deg; 1/(1+L) 0.55 at +16.3 deg (5.2 dB)
+       9000 Hz: |L| 0.90 at  -34.2 deg; 1/(1+L) 0.55 at +16.2 deg (5.2 dB)
+       9720 Hz: |L| 0.89 at  -34.2 deg; 1/(1+L) 0.55 at +16.1 deg (5.1 dB)
+   klystron-output phase ripple estimated as field PM x |1+L| (360 Hz family): 7923 Hz 20 mdeg, 8283 Hz 28 mdeg, 8643 Hz 17 mdeg, 9003 Hz 23 mdeg, 9363 Hz 16 mdeg, 9723 Hz 21 mdeg, 10083 Hz 15 mdeg, 10443 Hz 21 mdeg
+   360 Hz family near f_coh, level in dBc: no beam (I/Q, tracked) USB/LSB | 492 mA (swept 30 Hz RBW) | difference
+        7202 Hz   -76.0 /  -74.9  |   -75.1 /  -73.6  |   +0.8 /  +1.3 dB   (AM share 0.16, PM  12.6 mdeg)
+        7562 Hz   -71.2 /  -70.0  |   -70.1 /  -68.7  |   +1.1 /  +1.3 dB   (AM share 0.16, PM  22.1 mdeg)
+        7923 Hz   -77.2 /  -76.1  |   -69.3 /  -70.2  |   +7.9 /  +5.9 dB   (AM share 0.16, PM  11.0 mdeg)
+        8283 Hz   -74.5 /  -73.5  |   -63.3 /  -63.3  |  +11.1 / +10.2 dB   (AM share 0.15, PM  15.0 mdeg)
+        8643 Hz   -78.6 /  -77.5  |   -57.3 /  -58.5  |  +21.3 / +19.1 dB   (AM share 0.15, PM   9.3 mdeg)
+        9003 Hz   -75.9 /  -75.0  |   -55.3 /  -56.8  |  +20.6 / +18.2 dB   (AM share 0.15, PM  12.6 mdeg)
+        9363 Hz   -79.0 /  -77.9  |   -67.6 /  -69.2  |  +11.4 /  +8.7 dB   (AM share 0.15, PM   9.0 mdeg)
+        9723 Hz   -76.4 /  -75.6  |   -65.3 /  -66.3  |  +11.1 /  +9.3 dB   (AM share 0.15, PM  11.8 mdeg)
+   360 Hz family at 2.9-7.6 kHz, 492 mA minus no beam (dB, mean of both sidebands): odd multiples of 360 Hz (6-pulse residual) | multiples of 720 Hz (12-pulse)
+     odd x 360 Hz: 3241 -4.1, 3961 -6.8, 4681 -8.6, 5402 -7.9, 6122 -7.6, 6842 -5.1, 7562 +1.2  -> mean -5.6 dB
+     x 720 Hz    : 2881 +4.9, 3601 +2.5, 4321 +2.3, 5042 -0.8, 5762 -7.4, 6482 -7.4, 7202 +1.1  -> mean -0.7 dB
+   beam phase at 500 mA = no-beam drive x |chi| of the 8 Oct line (8810 Hz, 1120 /s): band | phase | dE/E
+      2.0-3.0  kHz: 0.074 deg rms, dE/E 5.90e-06
+      3.0-7.5  kHz: 0.408 deg rms, dE/E 6.49e-05
+      7.5-10.5 kHz: 0.557 deg rms, dE/E 1.52e-04
+     10.5-12.0 kHz: 0.048 deg rms, dE/E 1.67e-05
+     all: 0.696 deg rms, dE/E 1.66e-04
+     check: 8643 Hz drive 9.5 mdeg -> 0.223 deg; Doc P from the 492 mA probe (eff): 0.215 deg
+     check: 9003 Hz drive 12.8 mdeg -> 0.275 deg; Doc P from the 492 mA probe (eff): 0.257 deg
+     largest contributors: 9003 Hz* 0.275 deg (16 %), 8883 Hz 0.256 deg (14 %), 8643 Hz* 0.223 deg (10 %), 8283 Hz* 0.161 deg (5 %), 4681 Hz* 0.144 deg (4 %), 3961 Hz* 0.128 deg (3 %), 5402 Hz* 0.127 deg (3 %), 3601 Hz* 0.121 deg (3 %), 6122 Hz* 0.118 deg (3 %), 6842 Hz* 0.117 deg (3 %)   (* 360 Hz family)
+     share of the 360 Hz family in 3.0-7.5 kHz: 0.82 of the variance
+     share of the 360 Hz family in 7.5-10.5 kHz: 0.59 of the variance
+     line-driven motion (2-12 kHz) without the 360 Hz family: 0.401 deg; also without the 8880 Hz line: 0.309 deg (all lines: 0.696 deg)
+   lines below 2 kHz: drive 0.101 deg rms; the beam follows with chi = 1.0 (integral path) to 1.3, i.e. 0.101-0.132 deg of timing
+   Doc P line budget from the 492 mA capture: counted lines (beam share > 0.5 under both hypotheses) against all lines under the phase hypothesis
+     eff: counted 0.554 deg | phase hypothesis 2.0-2.9 kHz 0.094, 2.9-7.0 kHz 0.329, 7.0-10 kHz 0.595, total 0.686 deg
+     lag: counted 0.364 deg | phase hypothesis 2.0-2.9 kHz 0.095, 2.9-7.0 kHz 0.330, 7.0-10 kHz 0.375, total 0.509 deg
+   timing budget at 500 mA, deg rms (lines 2-10/12 kHz, broadband line, lines below 2 kHz at chi 1.0-1.3):
+     eff, 492 mA lines, phase hypothesis : lines 0.686, broadband 0.186, low 0.101-0.132 -> 0.718-0.723 deg (4.2-4.2 ps)
+     eff, no-beam drive x chi            : lines 0.696, broadband 0.186, low 0.101-0.132 -> 0.728-0.733 deg (4.2-4.2 ps)
+     lag, 492 mA lines, phase hypothesis : lines 0.509, broadband 0.143, low 0.101-0.132 -> 0.538-0.545 deg (3.1-3.2 ps)
+     lag, no-beam drive x chi            : lines 0.696, broadband 0.143, low 0.101-0.132 -> 0.718-0.723 deg (4.2-4.2 ps)
+   gain scan at 500 mA (model shifts of the study plan, Appendix A, applied to the measured line); line-driven beam phase from the no-beam drive, deg rms
+     shape COUNTS.A  f_coh  sigma   Q | 2-3 kHz  3-7.5 kHz  7.5-10.5 kHz  all 2-12 kHz | dE/E all
+     eff    -1.7 dB    8427   1754  15 |  0.081     0.473       0.486         0.685   | 1.49e-04
+     eff    -0.2 dB    8619   1421  19 |  0.077     0.438       0.496         0.668   | 1.51e-04
+     eff    +1.3 dB    8810   1120  25 |  0.074     0.408       0.557         0.696   | 1.66e-04
+     eff    +2.8 dB    8994    859  33 |  0.071     0.383       0.707         0.809   | 2.07e-04
+     eff    +4.3 dB    9167    647  45 |  0.068     0.361       0.636         0.736   | 1.89e-04
+     lag    -1.7 dB    8506   1871  14 |  0.080     0.458       0.452         0.650   | 1.41e-04
+     lag    -0.2 dB    8653   1490  18 |  0.077     0.433       0.483         0.655   | 1.48e-04
+     lag    +1.3 dB    8810   1120  25 |  0.074     0.408       0.557         0.696   | 1.66e-04
+     lag    +2.8 dB    8976    772  37 |  0.071     0.385       0.763         0.859   | 2.21e-04
+     lag    +4.3 dB    9148    457  63 |  0.068     0.363       0.745         0.834   | 2.19e-04
+   loop-phase lead at 1.3 dB, 500 mA (study plan 6.1: per degree, f_coh -14 to -16 Hz, sigma +1.1 to +1.6 %):
+     + 0 deg: f_coh 8810-8810 Hz, sigma 1120-1120 /s | 7.5-10.5 kHz 0.557-0.557 | all 0.696-0.696 deg
+     + 5 deg: f_coh 8740-8730 Hz, sigma 1182-1210 /s | 7.5-10.5 kHz 0.529-0.535 | all 0.682-0.685 deg
+     +10 deg: f_coh 8670-8650 Hz, sigma 1243-1299 /s | 7.5-10.5 kHz 0.515-0.525 | all 0.679-0.685 deg
+   line table -> D:\OneDrive - SLAC National Accelerator Laboratory\SLACR\pyCode\spearlegacyLLRF\Studies\optLLRF\results\nobeam_20261103_lines.csv
+figures -> D:\OneDrive - SLAC National Accelerator Laboratory\SLACR\pyCode\spearlegacyLLRF\Studies\optLLRF\results\nobeam_20261103_spectra.png, D:\OneDrive - SLAC National Accelerator Laboratory\SLACR\pyCode\spearlegacyLLRF\Studies\optLLRF\results\nobeam_20261103_iq.png

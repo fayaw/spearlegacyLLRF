@@ -1,0 +1,8 @@
+== one record, 22 mA (10/02 09:47): n_data 1232, free g_A optimum 0.492, k_AP +3.000, chi2r 0.687; Fisher condition number (normalised) 8.68e+09
+   profile Delta chi2: 0.10:300.6 0.15:254.4 0.20:206.2 0.25:149.5 0.30:85.9 0.35:39.7 0.40:14.2 0.50:0.2 0.60:9.5 0.80:68.6 1.00:153.0
+== one record, 497 mA (11/03 17:27): n_data 1232, free g_A optimum 0.282, k_AP +0.376, chi2r 0.842; Fisher condition number (normalised) 2.55e+06
+   profile Delta chi2: 0.10:758.2 0.15:232.3 0.20:40.6 0.25:0.4 0.30:0.1 0.35:0.5 0.40:1.3 0.50:3.2 0.60:5.4 0.80:10.5 1.00:16.1
+== 500 mA gain/phase scan (7 records): n_data 8624, free g_A optimum 0.260, k_AP +0.268, chi2r 0.902; Fisher condition number (normalised) 2.81e+06
+   profile Delta chi2: 0.10:4349.2 0.15:1333.8 0.20:213.3 0.25:0.5 0.30:2.0 0.35:7.3 0.40:13.9 0.50:29.2 0.60:46.2 0.80:83.5 1.00:123.7
+== all 2026 records (18): n_data 22176, free g_A optimum 0.303, k_AP -0.317, chi2r 1.088; Fisher condition number (normalised) 2.88e+06
+   profile Delta chi2: 0.10:11871.0 0.15:5997.3 0.20:2100.5 0.25:306.3 0.30:108.1 0.35:111.4 0.40:120.5 0.50:145.2 0.60:173.8 0.80:0.0 1.00:32.1

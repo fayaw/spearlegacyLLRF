@@ -15,9 +15,9 @@
   2/{RF physics}/rf/{$P_\text{collector}=P_\text{cathode}$ ---
        all cathode power now lands on the collector},
   3/{RF protection}/plc/{RF MPS PLC: \texttt{KLYSCOLLPLC:POWER} exceeds the trip
-       limit $\rightarrow$ output relay fires $\rightarrow$ \textbf{Path A}},
-  4/{Hardware interlock}/pwr/{Fast IC $\rightarrow$ SCR ENABLE removed
-       $+$ CROWBAR fired $\rightarrow$ \textbf{HVPS killed}}}{%
+       limit $\rightarrow$ collector summary drops $\rightarrow$ \textbf{Path A}},
+  4/{Hardware interlock}/pwr/{RF Local Display Panel logic $\rightarrow$ SCR ENABLE
+       removed $\rightarrow$ \textbf{HVPS killed}}}{%
     \pgfmathsetmacro\y{-\i*20}
     \node[\sty,text width=\wB mm,anchor=west] (L\i) at (\xB,\y) {\txt};
     \node[lbl,anchor=east,align=right,text width=38mm] at (\xB-3,\y) {\layer\ layer};

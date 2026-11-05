@@ -1,0 +1,9 @@
+J_lin_eff_ac: start alpha_c 1.180e-3 kappa_scale 1.00 -> chi2r 1.4064
+J_lin_eff_ac: start alpha_c 1.300e-3 kappa_scale 1.00 -> chi2r 1.4101
+J_lin_eff_ac: start alpha_c 1.420e-3 kappa_scale 1.00 -> chi2r 1.4188
+J_wl_group_ac_ks: start alpha_c 1.416e-3 kappa_scale 1.00 -> chi2r 1.0017
+J_wl_group_ac_ks: start alpha_c 1.180e-3 kappa_scale 1.20 -> chi2r 1.0017
+J_wl_group_ac_ks: start alpha_c 1.180e-3 kappa_scale 1.00 -> chi2r 1.0017
+J_wl_group_ac_ks: start alpha_c 1.600e-3 kappa_scale 0.80 -> chi2r 1.0017
+== J_lin_eff_ac: chi2r 1.4064 AIC 35491; alpha_c 1.1789e-3 kappa_scale 1.000; f_s 10.022 kHz; total coupling scale 0.999
+== J_wl_group_ac_ks: chi2r 1.0017 AIC 25294; alpha_c 1.4097e-3 kappa_scale 0.977; f_s 10.959 kHz; total coupling scale 1.167

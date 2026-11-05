@@ -2,8 +2,8 @@
 transfer functions from the RFP signal-RAM dumps, fits, and the numbers and figure data quoted in Doc P.
 
 Data (matlab_operations_prod/Measurement):
-  Oct2nd2026/DIRECT_[IQ]_CLOSED<tag>, measureDirect<tag>.fig   ten runs, 2 October 2026
-  OldData/testdata/DIRECT_[IQ]_CLOSED<tag>                      one run, 10 November 2025
+  ClosedLoopTF/2026-10-02/DIRECT_[IQ]_CLOSED<tag>, measureDirect<tag>.fig   ten runs, 2 October 2026
+  ClosedLoopTF/2025-11-10/DIRECT_[IQ]_CLOSED<tag>                          one run, 10 November 2025
   OldData/testdata/NOISE_[IQ]_BL.out                            station noise reference (copy of 13 Nov 2025)
   OldData/testdata/DIRECT_[IQ]_OPEN_SP, NOISE_[IQ]_BL_SMALL.out  Configure Direct open-loop record, its reference
   tag = v<kV>i<mA>gp<COUNTS.A x10>pm<-PHASE.C x10>d<yyyymmddhhmmss>
@@ -36,7 +36,8 @@ from spear3rf.stability import char_fn  # noqa: E402
 from spear3rf.system import RFSystem  # noqa: E402
 
 MEAS = ROOT / "matlab_operations_prod" / "Measurement"
-RUNS = MEAS / "Oct2nd2026"
+RUNS = MEAS / "ClosedLoopTF" / "2026-10-02"
+RUNS_2025 = MEAS / "ClosedLoopTF" / "2025-11-10"
 TEST = MEAS / "OldData" / "testdata"
 OUT = ROOT / "Designs" / "tex" / "docP-rf-physics" / "data"
 F_RF = 476.3039e6
@@ -266,7 +267,7 @@ def main():
     print(f"noise reference NOISE_[IQ]_BL.out: {ni.size} samples; corr(I, Q) = {np.corrcoef(ni, nq)[0, 1]:+.4f}"
           f" (identical records: one-dimensional injection)")
     caps = [(p.name.replace("DIRECT_I_CLOSED", ""), p) for p in sorted(RUNS.glob("DIRECT_I_CLOSED*"))]
-    caps += [(p.name.replace("DIRECT_I_CLOSED", ""), p) for p in sorted(TEST.glob("DIRECT_I_CLOSED*"))]
+    caps += [(p.name.replace("DIRECT_I_CLOSED", ""), p) for p in sorted(RUNS_2025.glob("DIRECT_I_CLOSED*"))]
     caps.sort(key=lambda c: c[0][-14:])
     runs = []
     print("\n== TF from the dumps vs the routine's figure (8192-point windows, 1.25 kHz bins)")

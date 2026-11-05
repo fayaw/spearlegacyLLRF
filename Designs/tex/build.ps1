@@ -11,6 +11,7 @@ $docs = @{
     "I" = @{ dir = "docI-interlock-architecture"; job = "I_interlock_architecture"      }
     "P" = @{ dir = "docP-rf-physics";             job = "P_rf_physics_and_plant"        }
     "T" = @{ dir = "docT-tuner-control";          job = "T_tuner_control_analysis"      }
+    "M" = @{ dir = "docM-integration-migration";  job = "M_integration_migration_plan"  }
 }
 if (-not $docs.ContainsKey($Doc)) {
     throw "Unknown -Doc '$Doc'. Known: $($docs.Keys -join ', ')"

@@ -1,0 +1,74 @@
+% ============================================================================
+%  Doc M -- SPEAR3 LLRF Upgrade: Subsystem Integration and Migration Plan
+%  Build:  powershell -ExecutionPolicy Bypass -File build.ps1 -Doc M
+%  Engine: LuaLaTeX (required -- see the Unicode note in preamble.tex)
+% ============================================================================
+\documentclass[letterpaper,11pt]{article}
+\input{../common/preamble}
+
+% [Rn] source index, as in Doc L: \R{n} links to the row \RDEF{n} in Appendix A.
+% Robust because they appear in figure captions.
+\DeclareRobustCommand{\R}[1]{\hyperlink{ref:R#1}{[R#1]}}
+\DeclareRobustCommand{\RDEF}[1]{%
+  \raisebox{0pt}[0pt][0pt]{\hypertarget{ref:R#1}{}}\textbf{[R#1]}}
+
+% Open-item tag: links forward to the register; the register links back here.
+\DeclareRobustCommand{\openitem}[1]{\,%
+  \raisebox{0pt}[0pt][0pt]{\hypertarget{open:#1}{}}\label{openp:#1}%
+  \hyperlink{openitems}{\textcolor{cPlc}{\bfseries\scriptsize[#1]}}}
+\newcommand{\openpage}[1]{\hyperlink{open:#1}{p.~\pageref*{openp:#1}}}
+\newcommand{\openitemlegend}{\textcolor{cPlc}{\bfseries\scriptsize[O\textit{n}]}}
+
+% Column width for longtables with @{} edges: fraction of \linewidth minus the
+% per-column share of the inter-column padding, 2(n-1)/n \tabcolsep.
+\newcommand{\cw}[2]{\dimexpr #1\linewidth-#2\tabcolsep\relax}
+
+\hypersetup{pdftitle={SPEAR3 LLRF Upgrade: Subsystem Integration and Migration Plan},
+  pdfauthor={Faya Wang},pdfsubject={Doc M R0 - Draft for review}}
+
+\title{\vspace{-1.4cm}\bfseries SPEAR3 LLRF Upgrade\\[2mm]
+       \Large Subsystem Integration and Migration Plan}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{plain}
+
+\begin{center}
+\begin{minipage}{0.86\linewidth}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{Document ID}    & Doc M \\
+\textbf{Revision}       & R0 \\
+\textbf{Status}         & Draft \\
+\textbf{Author}         & Faya Wang \\
+\textbf{Reviewer}       & Jim Sebek and the subsystem leads \\
+\textbf{Classification} & Tier 1 --- Project integration and migration plan \\
+\textbf{Affiliation}    & SSRL, SLAC National Accelerator Laboratory \\
+\textbf{Date}           & 3 November 2026 \\
+\end{tabular}
+\end{minipage}
+\end{center}
+
+\vspace{4mm}
+\begin{keynote}
+This plan analyzes how each subsystem of the SPEAR3 LLRF Upgrade can be put into
+service inside the running legacy RF station, which subsystems are independent of
+the others and which are not, and how to proceed if some subsystems are deferred.
+It is based on the project status and decisions of 31 October to 3 November 2026,
+the upgrade design (Doc~0), the legacy documentation, the original drawings and
+design notes, and the legacy EPICS source code. Statements that still need
+confirmation are
+tagged \openitemlegend{} and collected in the
+\hyperref[sec:open-items]{Open Items} register.
+\end{keynote}
+
+\clearpage
+\tableofcontents
+\bigskip
+\listoffigures
+\clearpage
+
+\input{body}
+
+\end{document}

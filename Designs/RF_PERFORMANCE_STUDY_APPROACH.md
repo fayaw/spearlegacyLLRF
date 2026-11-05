@@ -241,7 +241,8 @@ flowchart LR
 ### 5.3 Closed-loop measurements of 2 October 2026
 
 Ten RFgui Measure Direct Closed runs, `COUNTS.A` 0.9 dB, 2.85 MV, in
-`matlab_operations_prod/Measurement/Oct2nd2026`. The `DIRECT_I/Q_CLOSED` files are RFP signal-RAM
+`matlab_operations_prod/Measurement/ClosedLoopTF/2026-10-02` (all closed-loop records are now in
+`Measurement/ClosedLoopTF`). The `DIRECT_I/Q_CLOSED` files are RFP signal-RAM
 records of `TOTAL` (FBSIG 0) during the injection. With the station references
 `OldData/testdata/NOISE_I/Q_BL.out`, fs = 10.24 MHz, 8192-point windows and conj(H1), the TF
 recomputed from the records matches the `.fig` to |ratio| 0.9998–1.0003 and 0.25–0.46° rms.
@@ -585,7 +586,7 @@ AP and LLRF9 settings (§9, §10). Confirmed results go to Doc P.
 1. Access to the EPICS archiver: loop settings, klystron forward and drive power, HVPS voltage and
    `c_DC` at the 2 October run times and at the trip times of 3–7 October; `COUNTS.A`/`PHASE.C` on
    2 June 2020. A copy of the current fault records in `RF_DATA/SRF1` (15 sets, 3–7 October 2026).
-   The other `RF_DATA/SRF1` files needed so far have been received (`Measurement/Oct2nd2026`,
+   The other `RF_DATA/SRF1` files needed so far have been received (now `Measurement/ClosedLoopTF/2026-10-02`,
    `Measurement/OldData`).
 2. HVPS oscilloscope: model and network interface; set-up (channels, scales, pre-trigger, record
    length, sampling); whether event traces are saved today, and copies of saved traces with their
@@ -631,7 +632,7 @@ AP and LLRF9 settings (§9, §10). Confirmed results go to Doc P.
 | `scripts/fsw_matrix.py` | FSW capture with state save and restore: Robinson line (20 kHz span, 30 Hz RBW, RMS detector, 100 power averages); line harmonics (2.2 kHz span, 3 Hz RBW); 3 MHz span |
 | `scripts/fsw_matrix_analyze.py` | Lorentzian fit of each synchrotron sideband (log-space, robust loss), line-harmonic table, revolution-harmonic and coupled-bunch sidebands |
 | `scripts/docP_figures.py` | All Doc P numbers and figure data, including the closed-loop response |
-| `scripts/analyze_measure_direct.py` | RFgui Measure Direct Closed runs in `matlab_operations_prod/Measurement/Oct2nd2026`: recomputes the TF from the RFP RAM records and the station noise references (checked against the `.fig`), fits the closed-loop model with and without the integral path and, at high current, with a widely-linear klystron; phase calibration, output impropriety, Robinson poles near ±f_s, the Configure Direct open-loop record, synchrotron-motion check, Doc P figure points |
+| `scripts/analyze_measure_direct.py` | RFgui Measure Direct Closed runs in `matlab_operations_prod/Measurement/ClosedLoopTF/2026-10-02`: recomputes the TF from the RFP RAM records and the station noise references (checked against the `.fig`), fits the closed-loop model with and without the integral path and, at high current, with a widely-linear klystron; phase calibration, output impropriety, Robinson poles near ±f_s, the Configure Direct open-loop record, synchrotron-motion check, Doc P figure points |
 | `scripts/analyze_old_rf_data.py` | Historical data in `Measurement/OldData`: closed loop of 4 May 2020, HVPS lines in the loop on/off records of 2 June 2020, klystron transfer curves of 2013, saved settings of 2003, and the klystron's s and κ from the fault records |
 | `data/snapshots`, `data/spectra` | Archived snapshots and captures; every capture is paired with a snapshot |
 | `hvps/simulation/hvps_sim` (outside `spear3rf`) | HVPS simulation; `generate_monitoring_signals.py` gives the four monitor signals for normal operation, start-up and an arc |
@@ -647,7 +648,7 @@ files) are sampled at 8 samples per turn, fs = 10.24 MHz. The production Measure
 
 | Action, file | What it does | Use here |
 | --- | --- | --- |
-| Measure Direct Closed, `measure_direct_closed.m` | Plays the noise files `NOISE_I/Q_BL` through the RFP DACs and records the `TOTAL` signal (2^18 samples) with the direct loop closed. Computes the closed-loop TF with `tfestimate` (Hanning window, 8192 points, 1.25 kHz bins) and plots ±800 kHz. No fit in the 2021 version; the production version used on 2 October blanks ±18.8 kHz and overlays a resonator × delay fit. Called `MeasDirCls` in PS-340-330-52; does not disturb stored beam. | Ten runs of 2 October in `Measurement/Oct2nd2026` (RAM records and figures); the station noise references `NOISE_I/Q_BL.out` and a 485 mA run of 10 November 2025 in `Measurement/OldData/testdata` |
+| Measure Direct Closed, `measure_direct_closed.m` | Plays the noise files `NOISE_I/Q_BL` through the RFP DACs and records the `TOTAL` signal (2^18 samples) with the direct loop closed. Computes the closed-loop TF with `tfestimate` (Hanning window, 8192 points, 1.25 kHz bins) and plots ±800 kHz. No fit in the 2021 version; the production version used on 2 October blanks ±18.8 kHz and overlays a resonator × delay fit. Called `MeasDirCls` in PS-340-330-52; does not disturb stored beam. | Ten runs of 2 October in `Measurement/ClosedLoopTF/2026-10-02` (RAM records and figures); the station noise references `NOISE_I/Q_BL.out` in `Measurement/OldData/testdata` and a 485 mA run of 10 November 2025 in `Measurement/ClosedLoopTF/2025-11-10` |
 | Plot Closed TF, `plot_TFC2.m` | Same measurement (2^19 samples, 1.18 kHz bins). Removes revolution harmonics, then fits the closed-loop model `L/(1−L)` with `compute_loop.m`: cavity × delay × lead network, free F_r, Q_L, G, T_d and φ. The fit has zero weight within ±90 kHz and higher weight above 150 and 500 kHz. SPEAR initial guess: T_d = 355 ns. Results appear only in the plot title. | The best existing in-loop delay fit; needs its plot or raw data |
 | Measure Cavity, Plot Cavity / Total / Drive / Noise; Measure Ripple; Plot Klystron Out; Plot AIM | Passive captures of RFP and IQA buffers: probe, `TOTAL`, drive, klystron output (23 kHz IQ&A channel, 0.7 Hz resolution); AIM HVPS waveforms | Field noise, klystron ripple and HVPS waveforms beside the FSW data |
 | Measure Klystron TF, `measure_klystron_TF.m` | Noise injection to the klystron output with the loop closed. Its `fs` is hard-coded to the PEP-II value. | Klystron bandwidth and phase (after fixing `fs`) |
