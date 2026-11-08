@@ -1,61 +1,48 @@
 % !TeX root = ../M_integration_migration_plan.tex
-% Stage dependencies.  Column 2 is ordered so that the two inputs of the S6
-% join (S4 and the minimal coordinator) are adjacent: every other line then
-% passes clear of that join bar.  Bars (thick vertical lines) mean "all of".
-%   col 1 S0 0-30.8, spine x = 38; col 2 44-86.8; S6 join x = 94;
-%   S6 102-132.8; S7 join x = 142; S7 150-180.8.
+% Integration sequence I0-I8.  Main row (pitch 20.5 mm): I0 I1 I2 I3 I4 I5 I7 I8.
+% I6 (LLRF9 as drive source) sits above I4 and I5 because it runs in parallel with
+% them as soon as its software is ready.  Solid arrows are technical
+% prerequisites, dashed arrows only the planned order.  The row boxes are centred
+% on one line (anchor=west) so the arrows stay level even if one box grows taller.
 \begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
-  every node/.append style={execute at begin node=\hyphenpenalty 10000\relax}]
+  every node/.append style={execute at begin node=\hyphenpenalty 10000\relax},
+  stp/.style={text width=15.6mm,minimum height=30mm,anchor=west}]
 
-% ----- column 2: the independent stages and the two software releases ------
-\node[rf,  text width=40mm,anchor=west] (s1)   at (44,0)
-  {\textbf{S1 Tuner}: LLRF9 drives the Galil; RFP still drives};
-\node[plc, text width=40mm,anchor=west] (s2)   at (44,-18)
-  {\textbf{S2 RF MPS}: ControlLogix with legacy PVs};
-\node[blk, text width=40mm,anchor=west] (s3)   at (44,-36)
-  {\textbf{S3 Heater}: Genesys AC under the legacy enable};
-\node[pwr, text width=40mm,anchor=west] (s5)   at (44,-54)
-  {\textbf{S5 HVPS controller and PPS box}: off-duty unit first};
-\node[plc, text width=40mm,anchor=west] (s4)   at (44,-72)
-  {\textbf{S4 Interface Chassis and Waveform Buffer}: IC in series; ARC4 trip enabled};
-\node[ctrl,text width=40mm,anchor=west] (sw9)  at (44,-90)
-  {\textbf{Minimal coordinator} (SW9)};
-\node[ctrl,text width=40mm,anchor=west] (sw10) at (44,-108)
-  {\textbf{Full coordinator} (SW10)};
+\node[blk, stp] (i0) at (0,-15)     {\textbf{I0}\\ preparation};
+\node[rf,  stp] (i1) at (20.5,-15)  {\textbf{I1}\\ ARC4 and LLRF9 measurement, monitor-only};
+\node[ctrl,stp,line width=1.1pt] (i2) at (41,-15)
+  {\textbf{I2}\\ Interface Chassis and Waveform Buffer replace the Fast IC and the panel};
+\node[rf,  stp] (i3) at (61.5,-15)  {\textbf{I3}\\ tuner control: LLRF9 Unit 1 drives the Galil};
+\node[plc, stp] (i4) at (82,-15)    {\textbf{I4}\\ RF MPS};
+\node[pwr, stp] (i5) at (102.5,-15) {\textbf{I5}\\ heater supply under RF MPS control};
+\node[pwr, stp] (i7) at (123,-15)
+  {\textbf{I7}\\ new HVPS controller (Hoffman box) and PPS box, unit by unit};
+\node[blk, stp,draw=cPwr!70,fill=cPwr!5] (i8) at (143.5,-15)
+  {\textbf{I8}\\ legacy retirement, \mbox{B132-IOCRF} to new hardware (SW10); needs I1--I7};
 
-% ----- column 1: stage 0 feeds every independent stage ---------------------
-\node[blk,text width=28mm,minimum height=84mm,anchor=north west] (s0) at (0,5)
-  {\textbf{S0 Now}\\[1mm]
-   decisions D1--D11\\[0.5mm]
-   RF hookup as a controlled change\\[0.5mm]
-   ARC4 monitor-only\\[0.5mm]
-   heater acceptance on the test stand\\[0.5mm]
-   Interface Chassis and Waveform Buffer review\\[0.5mm]
-   panel logic, beam-abort endpoint\\[0.5mm]
-   PPS box to ADSO approval\\[0.5mm]
-   software SW0--SW8 started};
-\draw[thick,draw=cNeut] (38,0) -- (38,-72);
-\draw[thick,draw=cNeut] (s0.east) -- (s0.east -| 38,0);
-\foreach \n in {s1,s2,s3,s5,s4}{\draw[sig] (\n.west -| 38,0) -- (\n.west);}
+% ----- I6 runs in parallel with I4 and I5 -------------------------------------
+\node[rf,text width=36.1mm,minimum height=14mm,anchor=west] (i6) at (82,18)
+  {\textbf{I6}\\ LLRF9 as drive source, as soon as SW9 (minimal coordinator)
+   is ready};
 
-% ----- S6: needs the Interface Chassis AND the minimal coordinator ---------
-\node[rf,text width=28mm,anchor=west] (s6) at (102,-81)
-  {\textbf{S6 LLRF9 drives}\\ RFP hot standby};
-\draw[thick,draw=cNeut] (s4.east)  -- (s4.east -| 94,0);
-\draw[thick,draw=cNeut] (sw9.east) -- (sw9.east -| 94,0);
-\draw[line width=1.8pt,draw=cNeut] (94,-72) -- (94,-90);
-\draw[sig] (94,-81) -- (s6.west);
+% ----- main row --------------------------------------------------------------
+\draw[sig] (i0.east) -- (i1.west);
+\draw[sig,densely dashed] (i1.east) -- (i2.west);
+\draw[sig,densely dashed] (i2.east) -- (i3.west);
+\draw[sig,densely dashed] (i3.east) -- (i4.west);
+\draw[sig] (i4.east) -- (i5.west);
+\draw[sig,densely dashed] (i5.east) -- (i7.west);
+\draw[sig] (i7.east) -- (i8.west);
 
-% ----- S7: needs all of S1, S2, S5, S6 and the full coordinator ------------
-\node[blk,text width=28mm,anchor=west,draw=cPwr!70,fill=cPwr!5] (s7) at (150,-45)
-  {\textbf{S7 Retire} the VXI crate, Fast IC, AIM and RF Local Display Panel;
-   B132-IOCRF to new hardware};
-\draw[line width=1.8pt,draw=cNeut] (142,0) -- (142,-108);
-\draw[thick,draw=cNeut] (s1.east)   -- (s1.east -| 142,0);
-\draw[thick,draw=cNeut] (s2.east)   -- (s2.east -| 142,0);
-\draw[thick,draw=cNeut,densely dashed] (s3.east) -- (s3.east -| 142,0);
-\draw[thick,draw=cNeut] (s5.east)   -- (s5.east -| 142,0);
-\draw[thick,draw=cNeut] (s6.east)   -- (s6.east -| 142,0);
-\draw[thick,draw=cNeut] (sw10.east) -- (sw10.east -| 142,0);
-\draw[sig] (142,-45) -- (s7.west);
+% ----- links to and from I6, and the LLRF9 measurement -------------------------
+\draw[sig] (i2.north) to[out=70,in=180]
+  node[tag,pos=0.5,anchor=south east,align=right]
+  {LLRF9 enable,\\ SPEAR MPS and\\ orbit permits} ([yshift=3mm]i6.west);
+\draw[sig,densely dashed] (i3.north) |- ([yshift=-3mm]i6.west);
+\draw[sig,densely dashed] (i6.east) -| (i7.north);
+\draw[sig] (i1.south) to[out=-40,in=-140]
+  node[tag,below]{LLRF9 measurement} (i3.south);
+
+\node[lbl,anchor=north west,align=left] at (91,-35)
+  {solid arrow: technical prerequisite\\ dashed arrow: planned order only};
 \end{tikzpicture}

@@ -43,33 +43,37 @@
 
 % ---- Layer 3 -------------------------------------------------------------
 \node[act,draw=cPlc!70,fill=cPlc!7,text=cPlc!80!black] (l3) at (10,-103)
-  {\textbf{LAYER 3 --- SLC-500 HVPS PLC} \hfill scan / timer dependent\\
-  {\tiny Independent controller, not an output of the RF MPS relay.
-    Monitors HVPS oil, crowbar, transformer arc, overvoltage.}};
+  {\textbf{LAYER 3 --- HVPS controller, B118} \hfill trigger boards and SLC-500\\
+  {\tiny Independent of the RF MPS relay. The arc triggers act in hardware; the SLC-500
+    monitors oil, crowbar, both arc triggers and overvoltage (scan / timer dependent).}};
 \node[br] (l3a) at (18,-119)
+  {Klystron arc (Pearson CT-110, termination tank) or transformer arc $\rightarrow$
+   trigger interconnect boards: \textbf{crowbar fired} and A/C triggers inhibited,
+   without the PLC; STATUS goes dark.};
+\node[br] (l3b) at (18,-128)
   {Slot-5 output 0 (24~V fault/enable) drops $\rightarrow$ thyristor triggers disabled
    on the trigger interconnect boards; STATUS goes dark.};
-\node[br] (l3b) at (18,-128)
+\node[br] (l3c) at (18,-137)
   {HVPS status $\rightarrow$ VXI IOC via Remote I/O.};
 
 % ---- Layer 4 -------------------------------------------------------------
-\node[act,draw=cCtrl!70,fill=cCtrl!6,text=cCtrl!85!black] (l4) at (10,-139)
+\node[act,draw=cCtrl!70,fill=cCtrl!6,text=cCtrl!85!black] (l4) at (10,-148)
   {\textbf{LAYER 4 --- EPICS / \texttt{rf\_states.st}} \hfill supervisory,
   event driven\\ {\tiny Sequencing and reporting, not fast hardware protection.}};
-\node[br] (l4a) at (18,-153)
+\node[br] (l4a) at (18,-162)
   {Fault file capture (\texttt{/dat/FAULT*\_N}).};
-\node[br] (l4b) at (18,-162)
+\node[br] (l4b) at (18,-171)
   {Station state $\rightarrow$ OFF (orderly HVPS shutdown via
   \texttt{s\_go\_off}; includes a nominal 5 s ramp wait when applicable).};
-\node[br] (l4c) at (18,-171)
+\node[br] (l4c) at (18,-180)
   {Operator alarm and notification.};
 
 % ---- spine ---------------------------------------------------------------
 % Stubs leave the rail at each layer box's own anchor height, so they are
 % exactly horizontal regardless of how tall the box turns out.
 \coordinate (rail) at (5,0);
-\draw[bus] (5,-6) -- (5,-176);
+\draw[bus] (5,-6) -- (5,-185);
 \foreach \n in {l1,l2,l3,l4}{\draw[sig] (\n.west -| rail) -- (\n.west);}
-\foreach \n in {l1a,l1b,l1c,l2a,l2b,l2c,l3a,l3b,l4a,l4b,l4c}
+\foreach \n in {l1a,l1b,l1c,l2a,l2b,l2c,l3a,l3b,l3c,l4a,l4b,l4c}
   {\draw[draw=black!35] (\n.west -| 14,0) ++(0,4) -- (\n.west -| 14,0) -- (\n.west);}
 \end{tikzpicture}

@@ -20,7 +20,7 @@ Revision & Date & Scope of Change & Summary \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\textbf{R4} & 2026-11-02 & RF Local Display Panel; beam abort; tuner control; HVPS control; status & \textbf{RF Local Display Panel}: the Local Control Chassis and the Local Panel 340-310 are one unit, named after its drawings; its three HVPS fibers run to the HVPS controller in B118 and its own logic forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort to the SPEAR MPS (J.~Sebek's fiber note and the panel drawings). \textbf{Beam abort}: kept as an Interface Chassis output. \textbf{Tuners}: LLRF9 Unit~1 runs the four tuner loops and drives the Galil DMC-4143 directly. \textbf{LLRF9 cabling}: the channel tables give the current cabling of the master (Unit~1, the vendor's four-cavity configuration, as in the 2021 setup) and the slave (Unit~2: reflected and load signals); the klystron drive power, on neither unit, is proposed for Waveform Buffer channel~1. \textbf{Status}: heater supply on a test stand with the live filament limits recorded; PPS Interface Box awaiting ADSO approval. \textbf{EPICS IOC}: the coordinator is the IOC \mbox{B132-IOCRF}, which moves from the VXI CPU to new hardware when the crate is retired. \textbf{HVPS control}: entirely in EPICS, with no Python layer, under the current HVPS PV names. \textbf{Open items}: O1 (soft IOC location) and O8 (tuner control split) closed and the others renumbered O1--O7; O3 now covers the panel logic and the beam-abort endpoint, and O4 the Waveform Buffer channel assignment. \\
+\textbf{R4} & 2026-11-05 & RF Local Display Panel; beam abort; tuner control; HVPS controller; transition; status & \textbf{RF Local Display Panel}: the Local Control Chassis and the Local Panel 340-310 are one unit, named after its drawings; its three HVPS fibers run to the HVPS controller in B118 and its own logic forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort to the SPEAR MPS (J.~Sebek's fiber note and the panel drawings). \textbf{Beam abort}: kept as an Interface Chassis output. \textbf{Tuners}: LLRF9 Unit~1 runs the four tuner loops and drives the Galil DMC-4143 directly. \textbf{LLRF9 cabling}: the channel tables give the current cabling of the master (Unit~1, the vendor's four-cavity configuration, as in the 2021 setup) and the slave (Unit~2: reflected and load signals); the klystron drive power, on neither unit, is proposed for Waveform Buffer channel~1. \textbf{Status}: heater supply on a test stand with the live filament limits recorded; PPS Interface Box awaiting ADSO approval. \textbf{EPICS IOC}: the coordinator is the IOC \mbox{B132-IOCRF}, which moves from the VXI CPU to new hardware when the crate is retired. \textbf{HVPS controller}: a complete new Hoffman box for each HVPS unit retires the existing one; all HVPS control is in EPICS, with no Python layer, under the current HVPS PV names. \textbf{Transition}: a new section gives the integration sequence I0--I8 of the Subsystem Integration and Migration Plan (Doc~M); the Interface Chassis section adds the transition interfaces it needs while the AIM, the PLC-5 and the legacy HVPS controllers are still in service, and the command path that replaces the AIM cable J15; a table gives the new home of each legacy function that has no one-to-one successor. \textbf{Open items}: O1 (soft IOC location) and O8 (tuner control split) closed and the others renumbered O1--O7; O3 now covers the panel logic and the beam-abort endpoint, and O4 the Waveform Buffer channel assignment. \textbf{Corrections}: the 10:1 T1 of the heater chassis is the ammeter's current transformer, not a step-down transformer; the tuner motors have no encoders; the legacy automatic reset is inhibited by the AIM forced-fault latch. \\
 \textbf{R3} & 2026-09-25 & Arc detection re-selection; legacy unit disposition; chassis consolidation; heater vendor & \textbf{Arc detection}: Microstep-MIS abandoned (vendor unresponsive, and it would have required custom CF-flange adapters and a viewport redesign); replaced by the \textbf{AFT microwave GmbH ARC4} vendor chassis, whose fiber inputs mate with the tunnel fibers already installed --- no mechanical work. The custom SSRL Arc Detection Chassis OR/latch design is withdrawn; the Interface Chassis now faces only the 2 ARC4 system modules and the test module. Figure~4 redrawn. \textbf{Legacy units}: Fast Interlock Chassis 340-308, AIM (VXI Slot 12) and Local Panel 340-310 named explicitly as removed with the VXI crate, their functions absorbed by the Interface Chassis. \textbf{Chassis consolidation}: the Waveform Buffer and Interface Chassis share one physical chassis on two PCBs; Waveform Buffer complete (April 2026), Interface Chassis PCB at fabrication since August 2026. \textbf{Heater}: Chroma → \textbf{TDK Lambda}, with an external \qty{60}{\hertz} sync circuit in design. \\
 \textbf{R2} & 2026-04-28 & Technical consolidation and drawing update & Finalized system architecture and protection chain. Expanded and corrected arc detection design, refined interface-chassis / MPS responsibilities, corrected cavity gap voltage values, confirmed heater controller approach, and standardized terminology and signal naming across subsystems. \\
 \textbf{R1} & 2026-03-17 & Design clarification and corrections & Incorporated review feedback from J. Sebek: clarified HVPS power chain and signal flow, corrected RF signal monitoring assignments, refined software architecture descriptions, and resolved ambiguities in interlock and protection narratives. \\
@@ -254,7 +254,7 @@ The upgraded system replaces all control electronics while retaining the RF plan
 \item
   RF MPS: PLC-5 1771 → ControlLogix 1756
 \item
-  HVPS Controller: SLC-500 → CompactLogix PLC + new Enerpro board + redesigned analog regulator
+  HVPS Controller: the legacy Hoffman box (SLC-500, Enerpro firing boards, regulator card, trigger interconnect boards, power supplies, local control panel) → a complete new Hoffman box for each HVPS unit, with a CompactLogix PLC, Enerpro FCOG1200 boards and a redesigned analog regulator
 \item
   Tuner Motor Controllers: AB 1746-HSTP1 + Slo-Syn (\textbf{in service}) → Galil DMC-4143 Rev 1.3h 4-axis motion controller, driven directly by LLRF9 Unit~1 (\textbf{built and tested on the SPEAR3 tuner motors under an EPICS control by M.~Dunning; not in service; goes online when the LLRF upgrade completes})
 
@@ -292,6 +292,30 @@ The upgraded system replaces all control electronics while retaining the RF plan
 \item
   Collector Power Protection --- Forward power proxy → Waveform Buffer System measures HVPS voltage and current and klystron forward power → Collector power calculation performed in RF MPS
 \end{itemize}
+
+\subsection{Legacy Functions Without a One-to-One Successor}\label{legacy-functions}
+
+Several functions of the legacy station belong to none of the replaced units alone. Each has a home in the upgrade; the order in which they move is part of the integration sequence (Section~\ref{transition-integration-sequence}).
+
+\begin{longtable}[]{@{}P{\dimexpr 0.27\linewidth-1.33\tabcolsep\relax}P{\dimexpr 0.35\linewidth-1.33\tabcolsep\relax}P{\dimexpr 0.38\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Function & Legacy implementation & Home in the upgrade \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Beam abort to the SPEAR MPS & Forced and reset by the state machine through the AIM; the RF Local Display Panel adds the HVPS STATUS and the solenoid faults; rear BNC J6 & Interface Chassis output; force and reset from the coordinator \\
+Main focus and bucking-coil supply control and interlocks & RF MPS PLC-5 through the panel & RF MPS outputs \\
+Filament request and timer bypass & AIM, Fast Interlock Chassis, panel and PLC-5 & RF MPS and the heater IOC \\
+HV-detected, RF-detected, local/remote and online/offline indications & Panel to the PLC-5 & RF MPS inputs \\
+HVPS voltage and current for the collector power & Buffered by the panel for the PLC-5 & Analog signals from the HVPS controller to the Waveform Buffer and the RF MPS \\
+HV turn-on gate & AIM ``HVPS on'' request into the panel's logic & Interface Chassis logic; the request from the coordinator \\
+Automatic reset after a trip, with its retry count and forced-fault inhibit & SNL state machine; AIM forced-fault latch, set by operator command & Coordinator \\
+Reference power, crate and Remote I/O health monitors & SNL and VXI records & Reference distribution monitor; IOC health records \\
+Fault capture and MATLAB fault tools & AIM, IQA and RFP history buffers; MATLAB tools & LLRF9 and Waveform Buffer post-mortem; ported tools \\
+Readbacks for other subsystems (tuner positions and temperatures, stepper supply, filament, coil supplies, ion pumps, window temperatures, HVPS oil temperature) & PLC-5 channels & RF MPS, under the same PV names \\
+\qty{476}{\mega\hertz} reference distribution & VXI CLK module & Separate reference distribution chassis \\
+\end{longtable}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -343,7 +367,7 @@ B118 → Termination Tank (Grounding) & Belden 83709 + Belden 83715 & 9C + 15C \
 B118 → B514 (HVPS) & Electrical cable pairs & SCR trigger cables (12 pairs) & Controller to Phase Tank thyristor stacks \\
 B132 $\leftrightarrow$ B118 (HVPS controller) & Fiber optic & SCR ENABLE, KLYSTRON CROWBAR, STATUS & RF Local Display Panel $\leftrightarrow$ trigger interconnect boards of the HVPS controller (upgrade: Interface Chassis $\leftrightarrow$ HVPS controller) \\
 B132 → Tunnel & Coax cables & RF signals (forward, reflected, probe). Similar forward, reflected power from klystron and circulator load with B132 & LLRF inputs from cavities \\
-B132 → Tunnel & Multi-conductor & Motor power + encoder signals & To tuner assemblies \\
+B132 → Tunnel & Multi-conductor & Motor power and limit-switch signals & To tuner assemblies \\
 \end{longtable}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -781,7 +805,7 @@ The SLC-500 PLC executes ladder logic for voltage regulation, contactor manageme
 
 \subsection{Upgraded Controller}\label{upgraded-controller}
 
-The HVPS controller upgrade replaces the PLC and SCR gate driver while retaining the power section and Hoffman enclosure.
+The HVPS controller upgrade builds a complete new Hoffman box for each HVPS unit, which retires the existing box with its SLC-500, firing and regulator boards, trigger interconnect boards, power supplies and local control panel. The power section and the field cables to it, to the contactor controller and to the grounding tank are retained.
 
 \textbf{New hardware}:
 
@@ -1168,6 +1192,28 @@ The Interface Chassis is a completely new subsystem that serves as the central h
 
 \textbf{Critical design consideration}: The Interface Chassis creates a bidirectional feedback loop between LLRF9 and HVPS that requires careful recovery sequencing logic.
 
+\subsection{Transition Interfaces}\label{ic-transition-interfaces}
+
+The Interface Chassis goes in early: it replaces the Fast Interlock Chassis and the RF Local Display Panel while the AIM, the RF MPS PLC-5 and the legacy HVPS controllers are still in service (integration I2, Section~\ref{transition-integration-sequence}). Until those units are retired it must also present the interfaces of the two units it replaces:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{AIM cable J15}: accepted unchanged. The chassis receives the AIM's six commands (station online, filament and focus, HVPS on, beam abort, filament-timeout bypass, fault reset) at their present levels, drives the AB summary fault (pin~10) and the AB heartbeat (pin~23) into the AIM's Schmitt-trigger inputs, and terminates the other AIM lines as the Fast Interlock Chassis does.
+\item
+  \textbf{RF MPS cables J2 and J3 at cross-connect X530}: accepted unchanged, with every line reproduced --- the requests, the HV-detected, RF-detected, local and online indications, the filament and coil-supply controls, the 15 area summaries, the AB summary and the AB heartbeat.
+\item
+  \textbf{HVPS voltage and current}: buffered into the PLC-5's analog inputs with unchanged scaling, because the PLC-5 computes the collector power from them.
+\item
+  \textbf{Klystron forward power}: the output of the Fast Interlock Chassis's forward-power detector (Section~\ref{legacy-collector-power-protection}) reproduced with unchanged scaling while the PLC-5 uses it.
+\item
+  \textbf{Panel logic}: the equations, latching and reset of the panel's GAL22V10, which forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort from the HVPS-on request, the VXI and HVPS beam aborts, the main and bucking solenoid faults, the waveguide-pressure and collector summaries and the online key switch; every deliberate difference is documented and reviewed.
+\item
+  \textbf{Operator controls}: a status display and the station online/offline and local/remote key switches, with all states also in EPICS.
+\end{itemize}
+
+The end-state inputs (LLRF9 status and enable, SPEAR MPS and orbit permits, arc detection, power monitoring, expansion ports) are built in from the start and masked, each with a bypass or simulate jumper, until the integration that uses them. A command path from the Interface Chassis IOC replaces the AIM cable J15 when the AIM is retired with the VXI crate.
+
 \subsection{Implementation Status}\label{implementation-status}
 
 \textbf{Shared physical chassis}: the Interface Chassis and the Waveform Buffer System (Section~\ref{subsystem-7-waveform-buffer-system}) are \textbf{one small physical chassis carrying two separate PCBs} --- one board per subsystem. They remain functionally distinct subsystems with distinct interfaces, and this report continues to describe them separately, but they are procured, fabricated and installed as a single unit.
@@ -1327,7 +1373,7 @@ Each of the 4 RF cavities has a mechanical tuner that adjusts the cavity resonan
 \item
   ON home positions: \textasciitilde10.1--10.7 mm (cavity-dependent)
 \item
-  Park positions: retracted position for safe storage
+  Park positions: defined in the legacy software; the PARK state is not used at SPEAR3
 \end{itemize}
 
 \subsection{Legacy Controller}\label{legacy-controller-1}
@@ -1357,7 +1403,7 @@ The tuner motor controller is replaced by the \textbf{Galil DMC-4143} (4-axis). 
 \item
   Its built-in PID tuner loop computes the motor command, with a deadband on the load-angle error and a minimum forward power
 \item
-  The LLRF9 sends the command to the Galil over Ethernet and reads back the encoder position, the limit switches and an analog input
+  The LLRF9 sends the command to the Galil over Ethernet and reads back the limit switches and an analog input; the tuner motors have no encoders
 \item
   The Galil drives the stepper motors
 \end{itemize}
@@ -1401,7 +1447,7 @@ The load angle offset loop is a supervisory function that balances gap voltage a
 \item
   \textbf{Galil DMC-4143}: Commanded by LLRF9 Unit~1 over Ethernet through the LLRF9's built-in driver
 \item
-  \textbf{Stepper Motors}: Power and encoder cables to tunnel (existing field cabling)
+  \textbf{Stepper Motors}: Power and limit-switch cables to tunnel (existing field cabling)
 \item
   \textbf{EPICS Coordinator}: Opens and closes the LLRF9 tuner loops with the station state and sets the load-angle offsets
 \end{itemize}
@@ -1678,11 +1724,9 @@ The system was originally designed for the PEP-II B-Factory program at SLAC by P
 
 Motor-driven variac providing continuously variable AC voltage
 
-10:1 step-down toroidal isolation transformer (T1)
-
 Solid-state relay (SSR) for on/off switching
 
-Comprehensive monitoring: AC voltmeter, AC ammeter, current transformer (Texmate CT), and elapsed-time meter
+Comprehensive monitoring: AC voltmeter, AC ammeter fed by a 10:1 current transformer (Texmate CT, T1), and elapsed-time meter
 
 Remote control interface via Allen-Bradley (A/B) PLC digital/analog I/O
 
@@ -1700,13 +1744,11 @@ Parameter & Legacy \\
 AC Input & 120 VAC, 60 Hz \\
 Maximum Power Rating & \textasciitilde1 kW (1000 W) \\
 Nominal Operating Power & \textasciitilde500 W (actual sustained operation) \\
-Nominal Operating Voltage & 68 V (AC, at transformer input) \\
+Nominal Operating Voltage & 68 V (AC, chassis output) \\
 Nominal Operating Current & 7.3 A \\
 RF MPS trip limits (PLC-5, live values) & 62.4--76.2 V; 5.24--9.77 A \\
 EPICS alarm limits LOLO / LOW / HIGH / HIHI (live values) & 63.8 / 66.5 / 72.1 / 76.2 V; 6.72 / 7.01 / 7.59 / 7.88 A \\
-Transformer Ratio & 10:1 step-down \\
-Secondary Output (Post-Transformer) & \textasciitilde6.8 V RMS at 73 A \\
-Maximum Rating & 14.0 V RMS @ 71 A \\
+Maximum Rating & 140 V RMS, 1.0 kVA (chassis output) \\
 \end{longtable}
 
 \subsection{Upgraded System}\label{upgraded-system}
@@ -2243,6 +2285,30 @@ AFT ARC4 system modules → Interface Chassis & Dry contact relay and/or semicon
 \item
   \textbf{Documentation}: Complete commissioning report
 \end{itemize}
+
+\subsection{Transition: Integration Sequence}\label{transition-integration-sequence}
+
+The upgrade replaces the legacy equipment inside the running station, one integration per scheduled down, in the order set by the Subsystem Integration and Migration Plan (Doc~M, \fpath{Designs/tex/docM-integration-migration/}). Doc~M gives for each integration the legacy interfaces it must keep, the hardware and software it needs, its tests, its entry criteria and its fallback; Phases 2 to 4 above are carried out within this sequence.
+
+\begin{longtable}[]{@{}P{\dimexpr 0.07\linewidth-1.33\tabcolsep\relax}P{\dimexpr 0.40\linewidth-1.33\tabcolsep\relax}P{\dimexpr 0.53\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Step & Integration & Replaces \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+I0 & Preparation & --- \\
+I1 & AFT ARC4 arc detection and the two LLRF9 units, monitor-only & The disconnected legacy optical arc front end \\
+I2 & Interface Chassis and Waveform Buffer & Fast Interlock Chassis 340-308 and RF Local Display Panel 340-310 \\
+I3 & Tuner control by LLRF9 Unit~1 and the Galil, with the RFP still driving & The 1746-HSTP1 tuner control \\
+I4 & RF MPS (ControlLogix) & The PLC-5 \\
+I5 & Klystron heater supply under RF MPS control & The variac stage \\
+I6 & LLRF9 as drive source, in parallel with I4 and I5 & The RFP as drive source \\
+I7 & New HVPS controller (Hoffman box) and PPS Interface Box & The legacy Hoffman box and its PPS wiring, one HVPS unit at a time \\
+I8 & Legacy retirement & The VXI crate, the Remote I/O link and the tuner chassis; the IOC \mbox{B132-IOCRF} moves to new hardware \\
+\end{longtable}
+
+Until I6 the legacy SNL programs stay in charge; the coordinator comes as a minimal release on the VXI CPU for I6 and as the full release on new hardware for I8. The legacy PV names are kept, and each legacy unit stays in place as the fallback until the next integration has run without it.
 
 \subsection{Status}\label{status}
 

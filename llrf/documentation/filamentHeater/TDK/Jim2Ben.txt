@@ -1,0 +1,5 @@
+Dear Ben,
+
+Here are the files I told you about for a 60 Hz BPF upstream to use to generate a trigger for the filament supply.  There is a matlab file to calculate values of resistances once one chooses a capacitor and a Q, and then LTspice files to verify the design.  I figure you start with a low power 120 VAC control transformer, clean up any transients with the filter, run the filter output through a comparator and have it trigger a monostable to get a pulse for the power supply.
+
+Jim

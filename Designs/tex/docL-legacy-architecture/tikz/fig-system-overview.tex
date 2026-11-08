@@ -38,10 +38,10 @@
 
 % ===== Row D -- the three RIO adapters =====================================
 \node[plc,text width=42mm,anchor=north] (slc) at (\colL,-48)
-  {\textbf{SLC-500 PLC}\quad[B118]\\ 
-   HVPS sequencing $\cdot$ voltage regulation\\
-   Temperature monitoring\\
-   PPS relay chain $\cdot$ Enerpro SCR control\\
+  {\textbf{HVPS CONTROLLER}\\\textbf{SLC-500 PLC}\quad[B118]\\ 
+   Sequencing $\cdot$ voltage regulation\\
+   Temperature $\cdot$ PPS relay chain\\
+   Enerpro firing $\cdot$ trigger boards\\
    {\tiny 1747-L532 CPU\ +\ 1747-DCM adapter}};
 
 \node[plc,text width=42mm,anchor=north] (mps) at (\colM,-48)
@@ -51,25 +51,37 @@
    $\cdot$ HVPS fault status};
 
 \node[plc,text width=42mm,anchor=north] (step) at (\colR,-48)
-  {\textbf{STEPPER CHASSIS}\\\textbf{340-315}\quad[B132]\\   
+  {\textbf{TUNER DRIVE}\quad[B132]\\   
+   Stepper chassis 340-315:\\
    SLC adapter\ +\ $4\times$ AB 1746-HSTP1\\
-   (step/direction pulse output)};
+   step/dir $\rightarrow$ $4\times$ SS2000MD4\\
+   PWM translators $\rightarrow$ motor current};
 
 \foreach \n in {slc,mps,step}{\draw[sig] (\n.north|-busY) -- (\n.north);}
 
-% ===== Row E -- fast interlock chassis and stepper translators =============
-\node[plc,text width=42mm,anchor=north] (fic) at (\colM,-88)
-  {\textbf{FAST INTERLOCK CHASSIS}\\\textbf{340-308}\quad[B132]\\[2pt]
-   In: arc sensors (fiber) $\cdot$ reflected-power detectors $\cdot$
-   HVPS status (fiber) $\cdot$ MPS permit relay\\[2pt]
-  Out: FISTAT $\rightarrow$ AIM $\cdot$ \mbox{SCR ENABLE}
-  $\cdot$ CROWBAR\\ };
-\draw[sig] (mps.south) -- node[tagr,align=left]{hardwired I/O\\(permits)} (fic.north);
+% ===== Row E -- RF Local Display Panel and Fast Interlock Chassis ===========
+% The panel, not the Fast IC, terminates the three HVPS fibers.
+\node[plc,text width=38mm,anchor=north] (panel) at (75,-88)
+  {\textbf{RF LOCAL DISPLAY}\\\textbf{PANEL 340-310}\quad[B132]\\[2pt]
+   Logic $\rightarrow$ \mbox{SCR ENABLE}, \mbox{KLYSTRON CROWBAR}, beam abort (J6)\\[2pt]
+   STATUS = HVPS beam abort};
+\draw[sig,{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]}] (panel.north |- mps.south)
+  -- node[tagr,align=left]{hardwired, J2/J3\\via X530} (panel.north);
 
-\node[blk,text width=42mm,anchor=north] (xlat) at (\colR,-88)
-  {\textbf{SS2000MD4 PWM}\\\textbf{TRANSLATORS $\times$ 4}\quad[B132]\\
-   step/dir $\rightarrow$ bipolar motor current};
-\draw[sig] (step.south) -- node[tagr]{step/dir} (xlat.north);
+% SCR ENABLE and KLYSTRON CROWBAR out, STATUS back
+\coordinate (hF) at ($(slc.south east)+(-5,0)$);
+\coordinate (pW) at ($(panel.north west)!0.4!(panel.south west)$);
+\draw[fib,{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]}] (hF) -- (hF |- pW) -- (pW);
+\node[tagr] at ($(hF)!0.5!(hF |- pW)$) {3 fibers};
+
+\node[plc,text width=40mm,anchor=north] (fic) at (\colR,-88)
+  {\textbf{FAST INTERLOCK CHASSIS}\\\textbf{340-308}\quad[B132]\\[2pt]
+   In: optical arc detectors (fiber)\\and reflected-power detectors\\[2pt]
+   Out: FISTAT $\rightarrow$ AIM (J15)};
+% AIM commands out, AB summary and heartbeat back
+\coordinate (pE) at ($(panel.north east)!0.6!(panel.south east)$);
+\draw[fib,{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]}] (pE)
+  -- node[tag,above=0.4mm]{8 fibers} (pE -| fic.west);
 
 % ===== Row F -- HVPS power section ========================================
 \node[pwr,text width=142mm,anchor=north] (hvps) at (\colM,-124)
@@ -88,9 +100,7 @@
    $\rightarrow$ HV DC out};
 
 \draw[sig] (slc.south) -- (slc.south|-hvps.north)
-  node[pos=0.62,tagl,align=right]{PPS relay chain\\(PLC ladder)};
-\draw[fib] (fic.south) -- (fic.south|-hvps.north)
-  node[pos=0.55,tagr,align=left]{fast permits / status\\HVPS control interfaces};
+  node[pos=0.62,tagl,align=right]{SCR firing, crowbar,\\PPS relay chain};
 
 % ===== Row G1 -- RF signal path, first leg ================================
 % Row members are anchored WEST at a common y so the connectors between them
@@ -135,7 +145,7 @@
   {SLO-SYN M093-FC11 stepper $\rightarrow$ tuner plunger\\
    {\tiny one per cavity, linear-pot feedback}};
 \coordinate (railR) at (156,0);
-\draw[sig] (xlat.east) -- (xlat.east -| railR) -- (tun.east -| railR) -- (tun.east);
+\draw[sig] (step.east) -- (step.east -| railR) -- (tun.east -| railR) -- (tun.east);
 \node[tag,rotate=90,anchor=north] at (157.4,-150) {motor cables to tunnel};
 
 \node[ctrl,text width=52mm,anchor=north] (iqa) at (36,-206)

@@ -40,7 +40,7 @@ Revision & Date & Scope of Change & Summary \\
 \bottomrule\noalign{}
 \endlastfoot
 %\textbf{R1} & 2026-09-29 & Original-source audit; reviewer issue & Corrected RF mapping, tuner units, HVPS ratings/energy and protection/software claims. Added front Open Items; reconciled references and layout. Issued for review; approvals pending. \\
-\textbf{R1} & 2026-11-02 & RF Local Display Panel; HVPS fibers; klystron tube history & Identified the Local Control Chassis as the RF Local Display Panel 340-310 (rack B132-12) and rewrote \cref{sec:interlock-chassis} from its drawings and J.~Sebek's notes. The three HVPS fibers run between the panel in B132 and the HVPS controller in B118, not to B514; the rack photograph, trigger-board description, cabling table and \cref{fig:trip-chain} are updated to match. FICTRL destinations now name the panel, and \texttt{Beam\_Abort\_Reset} is a register bit, not one of Dusatko's six control signals. Open item O7 now covers the panel logic and the beam-abort endpoint. Added the klystron tube history and spares status. Added \R{81}--\R{84}; \R{5} now cites Doc 0 R4. \\
+\textbf{R1} & 2026-11-05 & RF Local Display Panel; HVPS fibers; klystron tube history; filament chassis; station modes & Identified the Local Control Chassis as the RF Local Display Panel 340-310 (rack B132-12) and rewrote \cref{sec:interlock-chassis} from its drawings and J.~Sebek's notes. The three HVPS fibers run between the panel in B132 and the HVPS controller in B118, not to B514; the rack photograph, trigger-board description, cabling table and \cref{fig:system-overview,fig:trip-chain} are updated to match. FICTRL destinations now name the panel, and \texttt{Beam\_Abort\_Reset} is a register bit, not one of Dusatko's six control signals. Open item O7 now covers the panel logic and the beam-abort endpoint. Added the klystron tube history and spares status. Added \R{81}--\R{84}; \R{5} now cites Doc 0 R4. From the original drawings and J.~Sebek's notes: the 10:1 T1 of the filament chassis is the ammeter's current transformer, not a step-down transformer, and the PLC-5, not the AIM, switches the chassis \R{85}; the panel's solenoid inputs come from PLC-5 outputs \R{82}; SPEAR3 does not use PARK or ON\_FM \R{86}. Added \R{85} and \R{86}. Listed the control racks B132-11 to B132-15 (\cref{sec:physical-layout}) and the two arc triggers of the HVPS controller (\cref{sec:arc-triggers}); added \R{87}. \\
 \textbf{R0} & 2026-10-05 & Draft & Initial draft of the Tier 2 legacy system reference for the SPEAR3 RF system, documenting the complete "as-built" and operational configuration prior to the LLRF Upgrade Project. \\
 \end{longtable}
 
@@ -112,7 +112,7 @@ SPEAR3 adopted the PEP-II High Energy Ring station architecture: one klystron, f
 
 \subsection{Top-Level System Block Diagram}
 
-The legacy SPEAR3 RF system consists of the major elements listed below, connected as shown in \cref{fig:system-overview}. \Cref{fig:llrf-in-room-101-building-132} shows the B132 rack row that holds the control electronics.
+The legacy SPEAR3 RF system consists of the major elements listed below, connected as shown in \cref{fig:system-overview}. \Cref{fig:llrf-in-room-101-building-132} shows the B132 rack row that holds the control electronics; \cref{sec:physical-layout} lists its five racks.
 
 \begin{figure}[p]
 \centering
@@ -121,8 +121,7 @@ The legacy SPEAR3 RF system consists of the major elements listed below, connect
 \caption{Top-level architecture of the legacy SPEAR3 RF station.  Buildings:
   \textbf{B132} klystron and control, \textbf{B118} HVPS control,
   \textbf{B514} HVPS power.  Solid lines are electrical or hardwired
-  connections; dashed lines represent optical/control interfaces whose installed
-  endpoints require confirmation.}\label{fig:system-overview}
+  connections; dashed lines are optical fibers.}\label{fig:system-overview}
 \end{figure}
 
 \begin{longtable}[]{@{}Q{\dimexpr 0.25\linewidth-1.333\tabcolsep\relax}Q{\dimexpr 0.15\linewidth-1.333\tabcolsep\relax}Q{\dimexpr 0.60\linewidth-1.333\tabcolsep\relax}@{}}
@@ -143,14 +142,14 @@ Waveguide / cavities & B132 / tunnel & AFT circulator, three magic-tees, loads a
 Tuner system & B132 / tunnel & Four 1746-HSTP1 axes and SS2000MD4 drivers operate M093-FC11 motors; potentiometers indicate position (\cref{sec:tuner-control}) \R{36}, \R{78}. \\
 \end{longtable}
 
-\photofig{llrf_in_room_101_building_132.png}{LLRF control electronics in Room 101, Building B132 --- the primary control location for the SPEAR3 RF station, housing the VXI crate, drive amplifier, and associated electronics racks}{fig:llrf-in-room-101-building-132}
+\photofig{llrf_in_room_101_building_132.png}{LLRF control electronics in Room 101, Building B132 --- racks B132-11 to B132-15 from left to right, the primary control location for the SPEAR3 RF station}{fig:llrf-in-room-101-building-132}
 
 \subsection{Control Boundaries}
 
 The RFP closes the fast RF loop in hardware. The IOC provides setpoints, tuner control, sequencing and diagnostics; its Remote I/O link is not the fast interlock path. The RF MPS and HVPS PLCs have separate protection responsibilities. PPS contactor and grounding functions require their own approved safety logic and verification.
 
 
-\section{Physical Layout and Locations}
+\section{Physical Layout and Locations}\label{sec:physical-layout}
 
 The SPEAR3 RF station is distributed across several buildings at SSRL. The physical geography governs cable runs, signal latency and maintenance access.
 
@@ -161,13 +160,29 @@ Location & Equipment & Notes \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\textbf{Building B132} (Room 101) & Klystron, drive amplifier, VXI crate (LLRF controller), RF MPS PLC, Fast Interlock Chassis, RF Local Display Panel (rack B132-12), stepper motor controllers & --- (primary location) \\
+\textbf{Building B132} (Room 101) & Klystron; control racks B132-11 to B132-15 (below) with the VXI crate (LLRF controller), drive amplifier, Fast Interlock Chassis, RF Local Display Panel, RF MPS PLC, stepper motor controllers and the heater and coil supplies & --- (primary location) \\
 \textbf{Building B118} (Power Supply Room) & HVPS controller enclosure and local control panel (Hoffman Box), SLC-500 PLC, Enerpro firing boards, analog regulator card, monitoring oscilloscope & \textasciitilde100 m cable run to B514 \\
 \textbf{Building B514} (HVPS Substation) & HVPS Main Tank (transformer, rectifier, inductor, filter caps), Phase Tank (12 thyristor stacks), Crowbar Tank (4 thyristor stacks, output voltage divider) & --- \\
 \textbf{Contactor Disconnect Panel} (Switchgear) & Vacuum contactor (Ross HQ3), contactor controller/driver (Ross HCA-1-A), K4/MX/RR/TX/BR relays, L1 holding and L2 closing coils, S2--S5 auxiliary contacts & B514 \\
 \textbf{Termination Tank} (B132, Room 101) & HV cable termination, Ross Engineering HV grounding switch, Danfysik DC-CT, Pearson CT-110 current transformer & Near klystron \\
 \textbf{Switch-over Tank} & HV cable connections between SPEAR1/SPEAR2 HVPS and klystron & Adjacent to B514 \\
 \textbf{SPEAR3 Storage Ring Tunnel} & 4 RF cavities, waveguide distribution network (circulator, magic-tees, waveguide loads), tuner motor assemblies, arc detection sensor mounting points & Radiation area, restricted access \\
+\end{longtable}
+
+In B132 Room 101 the control electronics stand in five racks, B132-11 to B132-15, left to right in \cref{fig:llrf-in-room-101-building-132}. The panel and X530 placements follow J.~Sebek's notes \R{81}.
+
+\begin{longtable}[]{@{}P{\dimexpr 0.12\linewidth-1.000\tabcolsep\relax}P{\dimexpr 0.88\linewidth-1.000\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Rack & Equipment \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+B132-11 & VXI crate (\cref{sec:vxi-llrf}) with the Fast Interlock Chassis 340-308 below it; drive amplifier; RF patch panel \\
+B132-12 & RF Local Display Panel 340-310 (\cref{sec:interlock-chassis}) \\
+B132-13 & RF MPS PLC-5, a main 1771 crate with a second crate below it; Cavity Tuner Motor Driver 340-315; the two LLRF9 units of the upgrade \\
+B132-14 & Cross-connect blocks, among them X530 for the RF Local Display Panel's connectors J2 and J3 and X15 for the waveguide pressure switches; a spectrum analyzer and, above it, the 2U ``LLRF Window Interlock Status'' chassis, built in 2021 to turn a legacy permit into an enable for the LLRF9 \\
+B132-15 & Klystron filament heater chassis (\cref{fig:klystron-filament-control-chassis}); main focus and bucking coil supplies \\
 \end{longtable}
 
 \Cref{fig:bldg132,fig:building514} show the two buildings. \Cref{fig:hvps-grounding-tank-in-building132-termination-t} shows the termination tank in B132 Room 101, which carries the grounding switch and the cathode-current instrumentation, and \cref{fig:cavities-in-tunnel-inward-view} the cavity row inside the tunnel.
@@ -291,7 +306,7 @@ The subsections that follow take the crate in slot order --- the clock and RF re
 
 \photofig{llrf_vx_works_crate.jpg}{Legacy VXI crate in B132. IQA-2 measures cavities 1--2 and IQA-3 cavities 3--4, including forward, reflected and probe signals \R{60}, \R{76}.}{fig:llrf-vx-works-crate}
 
-\tallfig{back_of_llrf_rack.jpg}{Rear of the LLRF VXI crate and Fast Interlock Chassis in Building B132. The three blue optical fibers joined to the three orange ones on the outside run to the HVPS controller in B118 (SCR ENABLE, KLYSTRON CROWBAR and STATUS); the remaining blue fibers come from the arc detectors.}{fig:back-of-llrf-rack}
+\tallfig{back_of_llrf_rack.jpg}{Rear of the LLRF VXI crate and Fast Interlock Chassis in rack B132-11. The three blue optical fibers joined to the three orange ones on the outside run to the HVPS controller in B118 (SCR ENABLE, KLYSTRON CROWBAR and STATUS); the remaining blue fibers come from the optical arc detectors, of which those at the cavity windows are not in use \R{87}.}{fig:back-of-llrf-rack}
 
 \subsection{VXI Crate Layout and Module Inventory}
 
@@ -556,7 +571,7 @@ Signal & Bit & Symbol & Dusatko's six? & Ultimate destination \\
 \texttt{Filament\_Timeout} & 3 & \texttt{AIM\_V\_FILTMOOVRD} & Yes & RF Local Display Panel (filament timeout bypass), then the PLC-5 as a 24~V request \R{81} \\
 \texttt{Forced\_Fault} & 4 & \texttt{AIM\_V\_FRCDFLT} & \textbf{No --- test input} & Fast IC forced-fault test stimulus \\
 \texttt{Fault\_Reset} & 5 & \texttt{AIM\_V\_FLTRESET} & Yes & Fast IC arc latch reset and RF Local Display Panel reset \R{81} \\
-\texttt{Beam\_Abort} & 6 & \texttt{AIM\_V\_FRCBMABT} & Yes & RF Local Display Panel (VXI beam abort); its logic drives the beam-abort output to the SPEAR MPS, whose endpoint requires confirmation (O7) \\
+\texttt{Beam\_Abort} & 6 & \texttt{AIM\_V\_FRCBMABT} & Yes & RF Local Display Panel (VXI beam abort); its logic combines it with the HVPS beam abort, received on the STATUS fiber, and drives the beam-abort output to the SPEAR MPS, whose endpoint requires confirmation (O7) \\
 \texttt{Beam\_Abort\_Reset} & 7 & \texttt{AIM\_V\_RSTBMABT} & \textbf{No --- register bit} & Resets the AIM beam-abort latch; no fiber of its own \R{81} \\
 \end{longtable}
 
@@ -652,11 +667,11 @@ Spares status. Two additional PEP-II retired K3512S tubes reside at TS18 awaitin
   Separately, processing mode in \texttt{rf\_hvps\_loop.st,v} reduces requested voltage for excessive \emph{forward RF power}, cavity voltage or vacuum. 
 \end{enumerate}
 
-\Cref{fig:marconi-klystron} shows the installed tube with its collector cooling and solenoid assembly. The heater is run from the separate filament control chassis of \cref{fig:klystron-filament-control-chassis}, which the AIM enables through \texttt{Klys\_Filament\_On}.
+\Cref{fig:marconi-klystron} shows the installed tube with its collector cooling and solenoid assembly. The heater is run from the separate filament control chassis of \cref{fig:klystron-filament-control-chassis}, which the PLC-5 switches on and ramps up through connector J1 \R{85}; the AIM's filament and focus request reaches the PLC-5 through the Fast Interlock Chassis and the RF Local Display Panel (\cref{sec:interlock-chassis}) \R{81}.
 
 \photofig{marconi_klystron.png}{Marconi klystron in B132, with collector cooling and solenoid assembly.}{fig:marconi-klystron}
 
-\photofig{klystron_filament_control_chassis.jpg}{Klystron filament control chassis --- manages the klystron heater/filament power and sequencing during startup and shutdown. The legacy chassis uses a motor-driven variac feeding a 10:1 step-down toroidal isolation transformer and a solid-state relay; it is enabled by the AIM \texttt{Klys\_Filament\_On} signal and its variac position is commanded through Allen-Bradley I/O \R{5}.}{fig:klystron-filament-control-chassis}
+\photofig{klystron_filament_control_chassis.jpg}{Klystron filament control chassis (SD-340-311-00) --- supplies the klystron heater. A solid-state relay switches the 120~V input and a motor-driven variac sets the output, rated 140~V and 1~kVA; an AC voltmeter and an ammeter, fed by the 10:1 current transformer T1, monitor it. The PLC-5 drives FILAMENT\_ON and MOTOR-UP through connector J1 and reads the voltage and current monitors there \R{85}.}{fig:klystron-filament-control-chassis}
 
 
 \subsection{Drive Amplifier}
@@ -914,7 +929,7 @@ Inductor 2 Voltage & T2 firing circuit timing verification (sawtooth) & Inductor
 Transformer 1 Phase Current & T1 firing circuit health monitoring & Transformer CT \\
 \end{longtable}
 
-Two further sensors in the Termination Tank feed protection rather than monitoring: a \textbf{3.333 mΩ (15 A = 50 mV) shunt} in the HV return cable, wired via TS-6 20/21 to BNC-12 as the klystron arc trigger; and a \textbf{Pearson CT-110} (10 A/V) wide-bandwidth current transformer whose coaxial output feeds J1 of the Left Side Trigger Interconnect Board (SD-730-793-08-C1) and initiates a crowbar trigger on a large enough transient \R{25}.
+Two further sensors in the Termination Tank feed protection rather than monitoring: a \textbf{3.333 mΩ (15 A = 50 mV) shunt} in the HV return cable, wired via TS-6 20/21 to BNC-12; and a \textbf{Pearson CT-110} (10 A/V) wide-bandwidth current transformer whose coaxial output feeds J1 of the Left Side Trigger Interconnect Board (SD-730-793-08-C1) and initiates a crowbar trigger on a large enough transient \R{25}. \Cref{sec:arc-triggers} describes both arc triggers.
 
 
 \subsection{Stored Energy and Discharge Times}
@@ -1391,7 +1406,21 @@ Layer & Protection & Signal latency & Physical response & Mechanism \\
 4 & Cable termination inductors & --- & Passive circuit response & Limit cable-discharge current. The 1997 design uses 200 μH; the SPEAR3 grounding-tank drawing specifies 350 μH, 40 A \R{6}, \R{62}. \\
 \end{longtable}
 
-Layers 1 and 2 are actively commanded --- in the legacy system by the \textbf{Fast Interlock Chassis 340-308} and, on a slower supervisory path, by the \textbf{SLC-500 HVPS PLC}. Layers 3 and 4 are passive properties of the circuit topology. 
+Layers 1 and 2 are actively commanded: over the SCR ENABLE and KLYSTRON CROWBAR fibers from the RF Local Display Panel (\cref{sec:interlock-chassis}), by the two arc triggers on the trigger interconnect boards of the HVPS controller (\cref{sec:arc-triggers}) and, on a slower supervisory path, by the \textbf{SLC-500 HVPS PLC}. Layers 3 and 4 are passive properties of the circuit topology. 
+
+\subsection{Arc Trigger Inputs}\label{sec:arc-triggers}
+
+Two arc triggers enter the trigger interconnect boards of the HVPS controller in B118 directly. Either one fires the crowbar and inhibits the A and C phase triggers on both boards in hardware, without the SLC-500 \R{83}, \R{87}:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Klystron arc.} The Pearson CT-110 (10 A/V) in the termination tank watches the HV cable for the fast transients of a klystron arc. Its coaxial output feeds J1, ``KLYSTRON ARC TRIGGER'', of the Left Side Trigger Interconnect Board SD-730-793-08-C1 \R{25}, \R{62}, \R{64}. The return-cable shunt reaches BNC-12 through TS-6 terminals 20 and 21 \R{25}. J.~Sebek's MPS note takes the klystron arc trigger from BNC-12 and leaves open whether it is the shunt, as the schematic shows, or a direct link to the Pearson \R{87}.
+\item
+  \textbf{Transformer arc.} The ``TRANSFORMER ARC TRIGGER'' enters J1 of the Right Side Trigger Interconnect Board SD-730-793-07-C2. A high level inhibits the A and C triggers through the same path as SCR ENABLE and fires the crowbar through SLAVE CB TRIGGER. J.~Sebek's note takes it from BNC-0 in the Hoffman box; its sensor, the AC mains input current or a Stangenes transformer in the crowbar tank that senses ground-fault current, is still to be verified \R{87}.
+\end{itemize}
+
+On the drawings, neither trigger passes through the Fast Interlock Chassis or the RF Local Display Panel. When the crowbar fires, the STATUS fiber goes dark and the panel raises the HVPS beam abort (\cref{sec:interlock-chassis}). The SLC-500 only monitors the two triggers, on slot-6 inputs 3 and 5 (\cref{sec:slot6-inputs}); EPICS shows them as the latched bits \texttt{\{STN\}:\allowbreak{}HVPSKLYS:\allowbreak{}ARC:\allowbreak{}LTCH} and \texttt{\{STN\}:\allowbreak{}HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} \R{60}.
 
 \subsection{Klystron Arc Energy Budget}
 
@@ -1657,6 +1686,7 @@ Layer & Speed & Hardware & Function \\
 \bottomrule\noalign{}
 \endlastfoot
 Fast hardware & No installed end-to-end latency record & Fast IC, AIM, IQA and RFP & Hardware faults and RF-drive inhibit \\
+HVPS arc triggers & Hardware; no installed timing record & Trigger interconnect boards of the HVPS controller & Klystron-arc and transformer-arc crowbar triggers (\cref{sec:arc-triggers}) \\
 RF MPS logic & Scan and I/O dependent; unmeasured here & PLC-5 & Equipment protection calculations \\
 HVPS logic & Estimated 5 ms scan; timed functions differ \R{37} & SLC-500 & HVPS sequencing and monitoring \\
 IOC supervision & Event/scan driven; shutdown includes explicit waits & VXI IOC / SNL & Sequencing, alarms and fault export \\
@@ -1671,9 +1701,9 @@ Two B132 units carry the hardwired protection signals between the VXI crate, the
 \item
   The \textbf{Fast Interlock Chassis 340-308} is the trip-decision element described below. Its connector J15 is cabled to J3 of the AIM (VXI slot~12), and eight fibers link it to the RF Local Display Panel: six carry the AIM's commands (station online request, filament and focus request, HVPS on request, VXI beam abort, filament timeout bypass and reset) and two return the PLC-5's AB summary and AB heartbeat \R{79}, \R{81}.
 \item
-  The \textbf{RF Local Display Panel 340-310} (rack B132-12; also referred to as the Local Control Chassis) displays the station status and carries the station online/offline and local/remote key switches. Two 25-pin connectors, J2 and J3, wire it to cross-connect block X530 in rack B132-14 and on to the PLC-5 (WD-340-330-02 in \R{21}). It terminates the three HVPS fibers, which run to the trigger interconnect boards of the HVPS controller in B118 (WD-340-330-29 in \R{21}; \R{82}, \R{83}): SCR ENABLE (lit to enable the thyristor triggers) to the right-side board, KLYSTRON CROWBAR (lit for no crowbar) to the left-side board, and STATUS from the left-side board, which the panel receives as the HVPS beam abort.
+  The \textbf{RF Local Display Panel 340-310} (rack B132-12; also referred to as the Local Control Chassis) displays the station status and carries the station online/offline and local/remote key switches. Two 25-pin connectors, J2 and J3, wire it to cross-connect block X530 in rack B132-14 and on to the PLC-5 (WD-340-330-02 in \R{21}). It terminates the three HVPS fibers, which run to the trigger interconnect boards of the HVPS controller in B118 (WD-340-330-29 in \R{21}; \R{82}, \R{83}): SCR ENABLE (lit to enable the phase-control triggers; while it is dark only B+ and B- keep firing) to the right-side board, KLYSTRON CROWBAR (lit for no crowbar) to the left-side board, and STATUS from the left-side board, which the panel receives as the HVPS beam abort.
 \item
-  A programmable logic device on the panel (GAL22V10) forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort from the HVPS on request, the VXI and HVPS beam aborts, the main and bucking solenoid faults, the waveguide pressure and collector summaries of the PLC-5 and the station online key switch; the beam abort and the crowbar are latched until reset. The beam abort leaves on a rear-panel BNC connector (J6); its endpoint, taken to be the SPEAR MPS, is not on any RF drawing \R{84}. The equations of the logic are not documented.\openitem{O7}
+  A programmable logic device on the panel (GAL22V10) forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort from the HVPS on request, the VXI and HVPS beam aborts, the station online key switch and four lines from the PLC-5: the main and bucking solenoid interlocks, which the PLC-5 repeats on its outputs 032 and 033 from the supplies' dry contacts on its inputs 025 and 026 \R{82}, and the waveguide pressure and collector summaries. Two flip-flops latch the beam abort and the crowbar until reset. The beam abort leaves on a rear-panel BNC connector (J6); its endpoint, taken to be the SPEAR MPS, is not on any RF drawing \R{84}. The equations of the logic are not documented.\openitem{O7}
 \end{itemize}
 
 \noindent The Fast Interlock Chassis receives and summarizes hardware interlock signals; its installed sensor mappings, masks and hardware response require proof-test records:
@@ -1681,7 +1711,7 @@ Two B132 units carry the hardwired protection signals between the VXI crate, the
 \begin{itemize}
 \tightlist
 \item
-  Arc detection inputs from waveguide fiber optic sensors
+  Arc detection inputs from the optical arc detectors, over fibers; those at the cavity windows are not in use \R{87}
 \item
   Reflected power monitor inputs
 \item
@@ -1690,11 +1720,13 @@ Two B132 units carry the hardwired protection signals between the VXI crate, the
   HVPS status, represented by \texttt{HVPSON} in AIM \texttt{FISTAT} \R{60}. The STATUS fiber ends on the RF Local Display Panel, not on this chassis \R{82}, so the meaning of this bit must be verified against the installed logic.
 \end{itemize}
 
+The klystron-arc and transformer-arc triggers do not enter this chassis or the panel. They act on the trigger interconnect boards of the HVPS controller (\cref{sec:arc-triggers}) and reach the panel only as a dark STATUS fiber.
+
 \begin{keynote}
 \textbf{RF inhibit versus HV shutdown}: The MPS shutoff interface drives \texttt{RF\_FAULT} directly; the RFP then removes RF drive \R{53}. IOC alarm summaries separately request \texttt{s\_go\_off}, which includes explicit shutdown waits \R{16}. Loss of RF can raise collector dissipation, but the claimed 20--30 ms collector-overpower cascade has no measurement record in the cited originals and must not be relied on as a protection guarantee.
 \end{keynote}
 
-It reports summarized interlock status to the VXI crate through the ARC/Interlock Module (AIM).
+The Fast Interlock Chassis reports summarized interlock status to the VXI crate through the ARC/Interlock Module (AIM).
 
 \subsection{Complete Trip Chain}
 
@@ -1702,7 +1734,7 @@ It reports summarized interlock status to the VXI crate through the ARC/Interloc
 
 \begin{figure}[tbp]\centering
 \begin{fitpicture}\input{tikz/fig-trip-chain}\end{fitpicture}
-\caption{Protection interfaces and supervisory actions. The Layer~1 fibers run between the RF Local Display Panel in B132 and the HVPS controller in B118 (\cref{sec:interlock-chassis}).}\label{fig:trip-chain}
+\caption{Protection interfaces and supervisory actions. The Layer~1 fibers run between the RF Local Display Panel in B132 and the HVPS controller in B118 (\cref{sec:interlock-chassis}); the klystron-arc and transformer-arc triggers act on the controller's trigger boards (\cref{sec:arc-triggers}).}\label{fig:trip-chain}
 \end{figure}
 
 \Cref{fig:interlock-chassis-front} shows the front panel of the Fast Interlock Chassis that implements the hardware layer.
@@ -1741,6 +1773,8 @@ The total is \textbf{7,112 source lines}, including comments and blanks, recount
 \subsection{rf\_states.st --- Master Station State Machine}
 
 \textbf{Primary States}: OFF (0) → PARK (1) → TUNE (2) → ON\_FM (3) → ON\_CW (4)
+
+SPEAR3 runs in OFF, TUNE and ON\_CW. PARK was designed for PEP-II, for a station that was down, and ON\_FM for processing the cavities after a vacuum incident; neither is used \R{86}.
 
 \textbf{State architecture}: 3 concurrent state sets:
 
@@ -2092,7 +2126,7 @@ Ref & Document & Repository Path \\
 \bottomrule\noalign{}
 \endlastfoot
 \RDEF{4} & LLRF9 Commissioning Tests (J. Sebek, 2021) --- source of the \textasciitilde712 kV/cavity operating gap voltage & \fpath{llrf/tests/llrf9Tests.pdf}, \fpath{llrf/tests/llrf9Tests.tex} \\
-\RDEF{5} & Project Physical Design Report R2 (28 April 2026); current companion Doc 0 is R4 (2 November 2026) & \fpath{Designs/docx/SPEAR3_LLRF_PDR_R2.docx}; \fpath{Designs/tex/doc0-system-design/0_system_design_report.pdf} \\
+\RDEF{5} & Project Physical Design Report R2 (28 April 2026); current companion Doc 0 is R4 (5 November 2026) & \fpath{Designs/docx/SPEAR3_LLRF_PDR_R2.docx}; \fpath{Designs/tex/doc0-system-design/0_system_design_report.pdf} \\
 \RDEF{7} & PEP-II RF System Description (Schwarz, PS-340-330-51-R0) --- cavity R\_s, Q\_0, β & \fpath{llrf/documentation/legacyArchitecture/ps3403305100.pdf} \\
 \RDEF{8} & LLRF Feedback Loop Description (Schwarz, PS-340-330-52-R0) & \fpath{llrf/documentation/legacyArchitecture/ps3403305200.pdf} \\
 \RDEF{9} & HVPS System Schematic (top-level) & \fpath{hvps/documentation/schematics/sd7307900101.pdf} \\
@@ -2131,7 +2165,7 @@ Ref & Document & Repository Path \\
 \RDEF{54} & Ross, W., \emph{PEP-II/SPEAR3 LLRF System Clock Module Revision 2}, SLAC ESD Engineering Document, 1 September 2001 & Cited as reference 3 of \R{53}; document not held in this repository \\
 \RDEF{56} & Sebek, J., \emph{SPEAR3 High Voltage Power Supply Hazards}. Source of operating snapshots and discharge models; Doc L corrects its T0-rating inference and output-energy sum & \fpath{hvps/documentation/procedures/spear3HvpsHazards.tex} \\
 \RDEF{58} & Sebek, J., \emph{Enerpro Phase Reference Adapter} --- the upgrade adapter design (576 kΩ / 200 kΩ into FCOG1200 J7) & \fpath{hvps/controls/enerpro/enerproPhaseReferenceAdapter.docx} \\
-\RDEF{60} & Legacy IOC boot and Remote I/O configuration & \fpath{spear-rf-code-legacy/iocBoot/b132-iocrf/st.cmd,v}, \texttt{config.ab,v}; \fpath{spear-rf-code-legacy/rfApp/DbIoc/srf1.substitutions,v}; \fpath{spear-rf-code-legacy/rfApp/Db/rf_ab_4CV.substitutions,v}; \fpath{spear-rf-code-legacy/rfApp/src/db/p2RfAimDef.h,v}; \fpath{spear-rf-code-legacy/allenBradley/documentation/allenBradley.html,v} \\
+\RDEF{60} & Legacy IOC boot and Remote I/O configuration & \fpath{spear-rf-code-legacy/iocBoot/b132-iocrf/st.cmd,v}, \texttt{config.ab,v}; \fpath{spear-rf-code-legacy/rfApp/DbIoc/srf1.substitutions,v}; \fpath{spear-rf-code-legacy/rfApp/Db/rf_ab_4CV.substitutions,v}; \fpath{spear-rf-code-legacy/rfApp/src/db/p2RfAimDef.h,v}; \fpath{spear-rf-code-legacy/allenBradley/documentation/allenBradley.html,v}; \fpath{spear-rf-code-legacy/rfApp/Db/rf_digital_All.substitutions,v} \\
 \RDEF{61} & SCR trigger, interlock and monitor board schematics (SD-730-793 series) --- verified by direct reading of the scanned drawings, September 2026 & \fpath{hvps/documentation/schematics/sd7307930304.pdf}, \texttt{sd7307930402.pdf}, \texttt{sd7307930702.pdf}, \texttt{sd7307930801.pdf}, \texttt{sd7307931203.pdf}, \texttt{sd7307931301.pdf} \\
 \RDEF{62} & Grounding Tank schematic, SD-730-790-05-C1 (R. Cassel, 2/13/03) --- verified by direct reading, September 2026 & \fpath{hvps/documentation/schematics/sd7307900501.pdf} \\
 \RDEF{63} & \textbf{Trigger Enclosure Wiring, WD-730-790-02-C6} (R. Cassel / W. Gorecki / S. Lowe; revisions C1--C6, 06/03 to 01/07) --- master wiring diagram for the B118 trigger enclosure; verified by direct reading, September 2026 & \fpath{hvps/documentation/wiringDiagrams/wd7307900206.pdf} \\
@@ -2154,6 +2188,9 @@ Ref & Document & Repository Path \\
 \RDEF{82} & Sebek, J., fiber-optic connections between the LLRF system and the HVPS controller, Rev~3 --- the three HVPS fibers and the meaning of their light states & \fpath{llrf/documentation/fiberOpticCableSignalControlRev3.docx} \\
 \RDEF{83} & Sebek, J., fiber-optic connections between the RF system controllers (HVPS controller side) --- slot-5 output 0 (24~V fault/enable) and the COMMANDS bus of the trigger interconnect boards & \fpath{hvps/architecture/designNotes/controllerFiberOpticConnections.docx} \\
 \RDEF{84} & RF Local Display Panel drawings: drawing list DL-340-310-00, front and rear panels SI-340-310-05 and -02, schematic SD-340-311-01 (``PEP-II RF System Local Panel''); its fibers are on WD-340-330-29 and its cross-connects on WD-340-330-02 in \R{21} & \fpath{llrf/documentation/localPanel/} \\
+\RDEF{85} & Klystron filament control chassis schematic SD-340-311-00 Rev E2 (``PEP II RF Klystron Filament Schematic'', P.~Corredoura, 1996) --- solid-state relay, motor-driven variac, voltmeter and ammeter with a 10:1 current transformer, control connector J1 & \fpath{llrf/documentation/filamentHeater/sd3403110002.pdf} \\
+\RDEF{86} & Sebek, J., \emph{SPEAR3 RF station operation} --- station modes, turn-on sequence and tuner control & \fpath{llrf/documentation/LLRFOperation_jims.docx} \\
+\RDEF{87} & Sebek, J., \emph{RF system MPS requirements} --- the five sources that disable the HVPS triggers, among them the klystron-arc and transformer-arc triggers, and the protection of the klystron and the cavities & \fpath{hvps/architecture/designNotes/RFSystemMPSRequirements.docx} \\
 \end{longtable}
 
 \clearpage

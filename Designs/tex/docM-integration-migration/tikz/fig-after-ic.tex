@@ -1,0 +1,88 @@
+% !TeX root = ../M_integration_migration_plan.tex
+% The station after integration I2: same grid as fig-legacy-couplings, with the
+% Interface Chassis (and the Waveform Buffer in the same chassis) spanning
+% columns 2 and 3 of the protection row, where the Fast Interlock Chassis and
+% the RF Local Display Panel were.  Inputs used later (the ARC4 trip after a
+% logged run; the LLRF9 enable and permits from I6 on) are dashed.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  every node/.append style={execute at begin node=\hyphenpenalty 10000\relax},
+  new/.style={ctrl,line width=1.1pt}]
+
+% ----- VXI crate (column 1), unchanged ------------------------------------
+\node[ctrl,text width=28mm,anchor=west] (cpu) at (10,-4)
+  {\textbf{Slot 0 CPU}\\ IOC B132-IOCRF,\\ SNL programs;\\ single trip wire};
+\node[plc,text width=28mm,anchor=west] (scn) at (10,-20)
+  {\textbf{Slot 1 RIO scanner}};
+\node[rf,text width=28mm,anchor=west]  (rfp) at (10,-34)
+  {\textbf{Slot 4 RFP}\\ only drive source};
+\node[rf,text width=28mm,anchor=west]  (iqa) at (10,-48)
+  {\textbf{IQA $\times$3}\\ RF measurements};
+\node[plc,text width=28mm,anchor=west] (aim) at (10,-62)
+  {\textbf{Slot 12 AIM}};
+\node[plc,text width=28mm,anchor=west] (s5)  at (10,-76)
+  {\textbf{Slot 5 MPS Shutoff}};
+\node[inner sep=0pt,minimum size=0pt] (lane) at (2,-50) {};
+\node[grp,fit=(cpu)(scn)(rfp)(iqa)(aim)(s5)(lane)] (crate) {};
+\node[lbl,anchor=south west] at (crate.north west) {VXI crate, rack B132-11};
+
+\draw[thick,draw=cNeut] (s5.west) -- (s5.west -| 4,0) -- (rfp.west -| 4,0);
+\draw[thick,draw=cNeut] (aim.west) -- (aim.west -| 4,0);
+\draw[thick,draw=cNeut] (iqa.west) -- (iqa.west -| 4,0);
+\draw[sig] (rfp.west -| 4,0) -- (rfp.west);
+\node[tag,rotate=90] at (4,-55) {RF\_FAULT};
+
+% ----- unchanged boxes ------------------------------------------------------
+\node[pwr,text width=28mm,anchor=west] (drv) at (56,-34)
+  {\textbf{Drive amplifier}\\ B132-11 $\rightarrow$ klystron};
+\node[pwr,text width=28mm,anchor=west] (htr) at (102,-2)
+  {\textbf{Heater (variac) and}\\ \textbf{coil supplies}\\ B132-15};
+\node[plc,text width=28mm,anchor=west] (mps) at (102,-22)
+  {\textbf{RF MPS PLC-5}\\ B132-13\\ about 230 slow channels};
+\node[plc,text width=28mm,anchor=west] (tun) at (148,-22)
+  {\textbf{Tuner chassis 340-315}\\ 4$\times$ \mbox{1746-HSTP1}, B132-13};
+\node[plc,text width=28mm,anchor=west] (hv)  at (148,-62)
+  {\textbf{HVPS controller, B118}\\ SLC-500\\ trigger boards};
+
+% ----- the new chassis -------------------------------------------------------
+\node[new,text width=74mm,anchor=west] (ic) at (56,-62)
+  {\textbf{Interface Chassis + Waveform Buffer} (one chassis)\\
+   in place of the Fast Interlock Chassis and the RF Local Display Panel:\\
+   panel logic, key switches, display, HVPS V/I buffers;\\
+   Waveform Buffer on RF taps, HVPS V/I and inductor voltages};
+
+% ----- external connections -------------------------------------------------
+\node[blk,text width=28mm,anchor=north] (ext) at (s5.south |- 0,-92)
+  {SPEAR MPS beam permit\\ orbit interlock (24 V)};
+\draw[sig] (ext.north) -- (s5.south);
+\node[blk,text width=28mm,anchor=north] (bab) at (117.4,-92)
+  {SPEAR MPS\\ beam abort input};
+\draw[sig] (ic.south -| bab.north) -- (bab.north);
+\node[tag,anchor=west] at (118.4,-82) {beam abort};
+\node[blk,text width=28mm,anchor=north,densely dashed] (later) at (71.4,-92)
+  {later inputs: ARC4 trip\\ (after a logged run);\\ LLRF9 enable, SPEAR MPS\\ and orbit permits (I6)};
+\draw[sig,densely dashed] (later.north) -- (later.north |- ic.south);
+
+% ----- Remote I/O daisy chain, unchanged ------------------------------------
+\draw[bus] (scn.east) -- (scn.east -| mps.west);
+\draw[bus] (mps.east |- 0,-20) -- (tun.west |- 0,-20);
+\draw[bus] (tun.south) -- (hv.north);
+\node[tag,anchor=south] at (71,-19.4) {Remote I/O daisy chain};
+
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut]
+  (htr.south) -- (mps.north);
+\node[tag,anchor=west] at (118.4,-11.6) {on/off, V/I, interlocks};
+\draw[sig] (rfp.east) -- (drv.west);
+
+% ----- protection row through the Interface Chassis -------------------------
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut]
+  (aim.east) -- (ic.west);
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut,densely dashed]
+  (ic.east) -- (hv.west);
+\node[tag,anchor=south] at ($(aim.east)!0.5!(ic.west)$) {J15};
+\node[tag,anchor=south] at ($(ic.east)!0.5!(hv.west)$) {3 fibers};
+
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut]
+  (mps.south) -- (mps.south |- ic.north);
+\node[tag,anchor=west,align=left] at (119,-40)
+  {X530 cables J2, J3\\ (B132-14), unchanged:\\ summaries, AB summary,\\ AB heartbeat, requests,\\ coil supplies, HVPS V/I};
+\end{tikzpicture}

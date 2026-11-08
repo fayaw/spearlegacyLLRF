@@ -10,7 +10,7 @@
 
 % ----- VXI crate (column 1) ----------------------------------------------
 \node[ctrl,text width=28mm,anchor=west] (cpu) at (10,-4)
-  {\textbf{Slot 0 CPU}\\ EPICS IOC with\\ SNL programs;\\ single trip wire};
+  {\textbf{Slot 0 CPU}\\ IOC B132-IOCRF,\\ SNL programs;\\ single trip wire};
 \node[plc,text width=28mm,anchor=west] (scn) at (10,-20)
   {\textbf{Slot 1 RIO scanner}};
 \node[rf,text width=28mm,anchor=west]  (rfp) at (10,-34)
@@ -24,7 +24,7 @@
 % a real node, so that the crate outline also encloses the RF_FAULT lane
 \node[inner sep=0pt,minimum size=0pt] (lane) at (2,-50) {};
 \node[grp,fit=(cpu)(scn)(rfp)(iqa)(aim)(s5)(lane)] (crate) {};
-\node[lbl,anchor=south west] at (crate.north west) {VXI crate, B132};
+\node[lbl,anchor=south west] at (crate.north west) {VXI crate, rack B132-11};
 
 % RF_FAULT: open-collector backplane line; every fast RF-off path ends here
 \draw[thick,draw=cNeut] (s5.west) -- (s5.west -| 4,0) -- (rfp.west -| 4,0);
@@ -35,19 +35,21 @@
 
 % ----- column 2 -----------------------------------------------------------
 \node[pwr,text width=28mm,anchor=west] (drv) at (56,-34)
-  {\textbf{Drive amplifier}\\ $\rightarrow$ klystron};
+  {\textbf{Drive amplifier}\\ B132-11 $\rightarrow$ klystron};
 \node[plc,text width=28mm,anchor=west] (fic) at (56,-62)
-  {\textbf{Fast Interlock}\\ \textbf{Chassis 340-308}\\ arc, reflected power};
+  {\textbf{Fast Interlock}\\ \textbf{Chassis 340-308}\\ B132-11};
 
 % ----- column 3 -----------------------------------------------------------
-\node[plc,text width=28mm,anchor=west] (mps) at (102,-20)
-  {\textbf{RF MPS PLC-5}\\ rack 3\\ about 230 slow channels};
+\node[pwr,text width=28mm,anchor=west] (htr) at (102,-2)
+  {\textbf{Heater (variac) and}\\ \textbf{coil supplies}\\ B132-15};
+\node[plc,text width=28mm,anchor=west] (mps) at (102,-22)
+  {\textbf{RF MPS PLC-5}\\ B132-13\\ about 230 slow channels};
 \node[plc,text width=28mm,anchor=west] (lp)  at (102,-62)
-  {\textbf{RF Local Display}\\ \textbf{Panel 340-310}\\ protection logic, display};
+  {\textbf{RF Local Display}\\ \textbf{Panel 340-310}\\ B132-12; logic, display};
 
 % ----- column 4 -----------------------------------------------------------
-\node[plc,text width=28mm,anchor=west] (tun) at (148,-20)
-  {\textbf{Tuner chassis 340-315}\\ 4$\times$ 1746-HSTP1, rack 2};
+\node[plc,text width=28mm,anchor=west] (tun) at (148,-22)
+  {\textbf{Tuner chassis 340-315}\\ 4$\times$ \mbox{1746-HSTP1}, B132-13};
 \node[plc,text width=28mm,anchor=west] (hv)  at (148,-62)
   {\textbf{HVPS controller, B118}\\ SLC-500\\ trigger boards};
 
@@ -61,10 +63,15 @@
 \node[tag,anchor=west] at ($(lp.south)!0.5!(bab.north)$) {BNC J6};
 
 % ----- Remote I/O daisy chain: scanner, PLC-5, tuner chassis, HVPS PLC ----
-\draw[bus] (scn.east) -- (mps.west);
-\draw[bus] (mps.east) -- (tun.west);
+\draw[bus] (scn.east) -- (scn.east -| mps.west);
+\draw[bus] (mps.east |- 0,-20) -- (tun.west |- 0,-20);
 \draw[bus] (tun.south) -- (hv.north);
 \node[tag,anchor=south] at (71,-19.4) {Remote I/O daisy chain};
+
+% ----- heater and coil supplies on the PLC-5 --------------------------------
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut]
+  (htr.south) -- (mps.north);
+\node[tag,anchor=west] at (118.4,-11.6) {on/off, V/I, interlocks};
 
 % ----- RF drive ------------------------------------------------------------
 \draw[sig] (rfp.east) -- (drv.west);
@@ -83,6 +90,6 @@
 % ----- PLC-5 to RF Local Display Panel --------------------------------------
 \draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut]
   (mps.south) -- (lp.north);
-\node[tag,anchor=west,align=left] at (119,-41)
-  {15 area summaries, AB\\ summary, AB heartbeat;\\ heater, focus and\\ bucking control; HVPS V/I};
+\node[tag,anchor=west,align=left] at (119,-42)
+  {X530 (B132-14): 15 area\\ summaries, AB summary,\\ AB heartbeat; heater,\\ focus and bucking\\ control; HVPS V/I};
 \end{tikzpicture}
