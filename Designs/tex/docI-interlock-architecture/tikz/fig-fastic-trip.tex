@@ -4,12 +4,12 @@
 \begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
 
 \node[rf,text width=78mm,anchor=north] (arc) at (45,0)
-  {\textbf{Arc detected on any channel} ($<\qty{1}{\micro\second}$)\\
-   \emph{or} Fast Interlock Chassis status asserted};
+  {\textbf{Arc on any channel} ($<\qty{1}{\micro\second}$)\\
+   the Fast Interlock Chassis signal exceeds the AIM's threshold};
 
 % hardware outputs fired at the same instant, off to the side
 \node[pwr,text width=54mm,anchor=west] (out) at (92,-15)
-  {status word $\rightarrow$ AIM\\
+  {AIM latches the arc; its fault logic sets the commands\\
    {\tiny SCR ENABLE and CROWBAR follow through the AIM's commands and the
     RF Local Display Panel logic}};
 \draw[draw=cNeut,thick] (arc.south) -- (45,-24);

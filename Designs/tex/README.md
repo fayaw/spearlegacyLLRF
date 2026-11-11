@@ -7,6 +7,7 @@ git.
 | Doc | Folder | Main file |
 |---|---|---|
 | **Doc 0** — System Design Report (upgrade) | `doc0-system-design/` | `0_system_design_report.tex` |
+| **Doc C** — Interface Chassis and Waveform Buffer Design Requirements | `docC-interface-chassis/` | `C_interface_chassis_requirements.tex` |
 | **Doc I** — Legacy Interlock Architecture | `docI-interlock-architecture/` | `I_interlock_architecture.tex` |
 | **Doc L** — Legacy System Architecture | `docL-legacy-architecture/` | `L_legacy_system_architecture.tex` |
 | **Doc M** — Subsystem Integration and Migration Plan | `docM-integration-migration/` | `M_integration_migration_plan.tex` |
@@ -27,6 +28,7 @@ powershell -ExecutionPolicy Bypass -File build.ps1 -Doc I          # Doc I
 powershell -ExecutionPolicy Bypass -File build.ps1 -Doc P          # Doc P
 powershell -ExecutionPolicy Bypass -File build.ps1 -Doc T          # Doc T
 powershell -ExecutionPolicy Bypass -File build.ps1 -Doc M          # Doc M
+powershell -ExecutionPolicy Bypass -File build.ps1 -Doc C          # Doc C
 ```
 
 ## Converting a Markdown document

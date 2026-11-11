@@ -61,7 +61,7 @@ O3 & RF MPS trip matrix & Supply deployed logic and a per-fault truth table link
 O4 & Terminal inventory & Complete TS-1--TS-8 identification and distinguish surveyed wiring from drawing-only assignments. & Controller rewiring & \openpage{O4} \\
 O5 & Physical RF channel map & Verify the recovered 24-input logical map \R{76} against connectors, cable labels and cavity identities. & RF cabling changes & \openpage{O5} \\
 O6 & PPS pin pairs / lamps & Confirm E--F, G--H, A--B and C--D functions, readback excitation and lamp-state interpretation with PPS. & PPS approval & \openpage{O6} \\
-O7 & RF Local Display Panel logic & Read out the equations of the panel's GAL22V10 logic device, which forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort, and trace the endpoint of its beam-abort output (rear BNC J6) in the SPEAR MPS \R{84}. & Interface Chassis logic design & \openpage{O7} \\
+O7 & RF Local Display Panel logic & Read out the equations of the panel's GAL22V10 logic device, which forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort \R{84}. & Interface Chassis logic design & \openpage{O7} \\
 O8 & Crowbar configuration & Record SCR type and matching trigger-board revision/components for every stack. & Board replacement & \openpage{O8} \\
 O9 & TS-5 assignments & Reconcile the terminal/color/function disagreements in the controller and switchgear drawings by an approved field trace. & Contactor rewiring & \openpage{O9} \\
 O10 & Current-sense circuit & Confirm the 0.5-ohm burden and Slot-9 input assignment; \R{72}'s prose and measurement table disagree. & Regulator calibration & \openpage{O10} \\
@@ -565,15 +565,17 @@ Signal & Bit & Symbol & Dusatko's six? & Ultimate destination \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\texttt{Solenoid\_On} & 0 & \texttt{AIM\_V\_SOLENOID} & Yes & RF Local Display Panel (filament and focus request), then the PLC-5 \R{81} \\
+\texttt{Solenoid\_On} & 0 & \texttt{AIM\_V\_SOLENOID} & Yes & RF Local Display Panel (station online request), then the PLC-5 \R{84} \\
 \texttt{HVPS\_On} & 1 & \texttt{AIM\_V\_HVPS} & Yes & RF Local Display Panel logic, which forms SCR ENABLE for the HVPS controller in B118 \R{81}, \R{84} \\
-\texttt{Klys\_Filament\_On} & 2 & \texttt{AIM\_V\_FILAMENT} & Yes & RF Local Display Panel (station online request), then the PLC-5 \R{81} \\
+\texttt{Klys\_Filament\_On} & 2 & \texttt{AIM\_V\_FILAMENT} & Yes & RF Local Display Panel (filament and focus request), then the PLC-5 \R{84} \\
 \texttt{Filament\_Timeout} & 3 & \texttt{AIM\_V\_FILTMOOVRD} & Yes & RF Local Display Panel (filament timeout bypass), then the PLC-5 as a 24~V request \R{81} \\
 \texttt{Forced\_Fault} & 4 & \texttt{AIM\_V\_FRCDFLT} & \textbf{No --- test input} & Fast IC forced-fault test stimulus \\
 \texttt{Fault\_Reset} & 5 & \texttt{AIM\_V\_FLTRESET} & Yes & Fast IC arc latch reset and RF Local Display Panel reset \R{81} \\
-\texttt{Beam\_Abort} & 6 & \texttt{AIM\_V\_FRCBMABT} & Yes & RF Local Display Panel (VXI beam abort); its logic combines it with the HVPS beam abort, received on the STATUS fiber, and drives the beam-abort output to the SPEAR MPS, whose endpoint requires confirmation (O7) \\
+\texttt{Beam\_Abort} & 6 & \texttt{AIM\_V\_FRCBMABT} & Yes & RF Local Display Panel (VXI beam abort); its logic combines it with the HVPS beam abort, received on the STATUS fiber, and drives the beam-abort output on BNC J6, which is not cabled at SPEAR3 \\
 \texttt{Beam\_Abort\_Reset} & 7 & \texttt{AIM\_V\_RSTBMABT} & \textbf{No --- register bit} & Resets the AIM beam-abort latch; no fiber of its own \R{81} \\
 \end{longtable}
+
+The filament and solenoid commands follow the panel schematic: receiver U13 (``solenoid on'') drives the station online request and U14 (``filament on'') the filament and focus request \R{84}, as the legacy message logger also has it \R{20}. WD-340-330-29 and \R{81} pair them the other way round; their labels at the Fast Interlock Chassis end are swapped.
 
 \textbf{\texttt{RF\_FAULT} backplane line}: Shared hardware fault line driven by the CLK, RFP, IQA, MPS interlock interface and AIM. The RFP uses it to inhibit klystron RF drive; the AIM monitors it for station fault handling \R{53}. This action does not depend on the Remote I/O scanner or SNL polling.
 
@@ -662,7 +664,7 @@ Spares status. Two additional PEP-II retired K3512S tubes reside at TS18 awaitin
 \item
   The RF MPS computes a collector-power estimate from cathode power and measured RF output.
 \item
-  The Fast IC has a detected-klystron-power input (J16); this input alone is not a complete collector-power measurement.
+  The Fast IC's RF detector takes the klystron forward power on its rear input J32 and sends the detected level from its rear output J31 (RF AMPL.) to the PLC-5, which forms the collector power from it and the HVPS voltage and current \R{79}; its front BNC J16 (DETECTED KLYSTRON POWER) is a monitor output and is not cabled.
 \item
   Separately, processing mode in \texttt{rf\_hvps\_loop.st,v} reduces requested voltage for excessive \emph{forward RF power}, cavity voltage or vacuum. 
 \end{enumerate}
@@ -1703,7 +1705,7 @@ Two B132 units carry the hardwired protection signals between the VXI crate, the
 \item
   The \textbf{RF Local Display Panel 340-310} (rack B132-12; also referred to as the Local Control Chassis) displays the station status and carries the station online/offline and local/remote key switches. Two 25-pin connectors, J2 and J3, wire it to cross-connect block X530 in rack B132-14 and on to the PLC-5 (WD-340-330-02 in \R{21}). It terminates the three HVPS fibers, which run to the trigger interconnect boards of the HVPS controller in B118 (WD-340-330-29 in \R{21}; \R{82}, \R{83}): SCR ENABLE (lit to enable the phase-control triggers; while it is dark only B+ and B- keep firing) to the right-side board, KLYSTRON CROWBAR (lit for no crowbar) to the left-side board, and STATUS from the left-side board, which the panel receives as the HVPS beam abort.
 \item
-  A programmable logic device on the panel (GAL22V10) forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort from the HVPS on request, the VXI and HVPS beam aborts, the station online key switch and four lines from the PLC-5: the main and bucking solenoid interlocks, which the PLC-5 repeats on its outputs 032 and 033 from the supplies' dry contacts on its inputs 025 and 026 \R{82}, and the waveguide pressure and collector summaries. Two flip-flops latch the beam abort and the crowbar until reset. The beam abort leaves on a rear-panel BNC connector (J6); its endpoint, taken to be the SPEAR MPS, is not on any RF drawing \R{84}. The equations of the logic are not documented.\openitem{O7}
+  A programmable logic device on the panel (GAL22V10) forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort from the HVPS on request, the VXI and HVPS beam aborts, the station online key switch and four lines from the PLC-5: the main and bucking solenoid interlocks, which the PLC-5 repeats on its outputs 032 and 033 from the supplies' dry contacts on its inputs 025 and 026 \R{82}, and the waveguide pressure and collector summaries. Two flip-flops latch the beam abort and the crowbar until reset. The beam abort leaves on a rear-panel BNC connector (J6), made for the PEP-II beam-abort system \R{10}; at SPEAR3 J6 is not cabled (checked November 2026), and the SPEAR MPS takes no status from the RF in hardware. The equations of the logic are not documented.\openitem{O7}
 \end{itemize}
 
 \noindent The Fast Interlock Chassis receives and summarizes hardware interlock signals; its installed sensor mappings, masks and hardware response require proof-test records:
@@ -1739,7 +1741,7 @@ The Fast Interlock Chassis reports summarized interlock status to the VXI crate 
 
 \Cref{fig:interlock-chassis-front} shows the front panel of the Fast Interlock Chassis that implements the hardware layer.
 
-\widefig{interlocak_chassis_front.jpg}{Fast Interlock Chassis 340-308 in B132: reset, filament-timeout and beam-abort controls, channel monitor points, supply-enable indicators and J16 detected-klystron-power input.}{fig:interlock-chassis-front}
+\widefig{interlocak_chassis_front.jpg}{Fast Interlock Chassis 340-308 in B132: lamps for the six AIM commands and the twelve arc trip tests, channel monitor points, the spare-fault input and the J16 detected-klystron-power monitor output, which is not cabled.}{fig:interlock-chassis-front}
 
 
 \FloatBarrier\clearpage

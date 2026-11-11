@@ -17,7 +17,7 @@
 
 % ===== fault sources =======================================================
 \node[blk,text width=54mm,anchor=north] (s1) at (\xA,-2)
-  {Arc \slash\ RF overpower\\ {\tiny fiber, coax}};
+  {Arc\\ {\tiny fiber}};
 \node[blk,text width=58mm,anchor=north] (s2) at (\xB,-2)
   {Collector, vacuum, cooling,\\ reflected power {\tiny (protection)}};
 \node[blk,text width=54mm,anchor=north] (s3) at (\xC,-2)
@@ -30,7 +30,7 @@
 \node[rf,text width=54mm,anchor=north] (fic) at (\xA,\yA)
   {\textbf{FAST INTERLOCK}\\\textbf{CHASSIS 340-308}\\
    B132, $<\qty{1}{\micro\second}$\\[2pt]
-   {\tiny analog comparators\\ no CPU, no firmware}};
+   {\tiny photodetectors, peak detectors\\ no CPU, no firmware}};
 \node[plc,text width=58mm,anchor=north] (mps) at (\xB,\yA)
   {\textbf{RF MPS PLC}\\ AB PLC-5 with 1771 I/O, B132\\
    $\approx\qty{10}{\milli\second}$ scan cycle};
@@ -41,7 +41,7 @@
 
 % ===== hardware outputs at each end ========================================
 \node[pwr,text width=50mm,anchor=north] (fout) at (\xA,-60)
-  {STATUS WORD {\tiny($\rightarrow$ AIM Slot 12)}\\
+  {ARC SIGNALS {\tiny($\rightarrow$ AIM Slot 12)}\\
    AIM commands {\tiny($\rightarrow$ RF Local Display Panel)}\\
    {\tiny panel logic: SCR ENABLE, CROWBAR $\rightarrow$ B118}};
 \draw[sig] (fic.south) -- (fout.north);
@@ -62,10 +62,10 @@
 \def\yM{-84}
 \node[ctrl,text width=76mm,anchor=north] (aim) at (\xA,\yM)
   {\textbf{AIM MODULE} --- VXI Slot 12 \texttt{devP2RfAim.c}\\[2pt]
-   {\tiny arc channel registers \mbox{\texttt{ARCCURSTT}}, \mbox{\texttt{ARCLTDSTT}},
-    populated from the Fast IC status word}\\[2pt]
+   {\tiny arc comparators and latches \mbox{\texttt{ARCCURSTT}}, \mbox{\texttt{ARCLTDSTT}},
+    thresholds from \mbox{\texttt{TRIPLVL}}}\\[2pt]
    asserts RF\_FAULT on the VXI P2 backplane};
-\draw[sig] (fout.south) -- node[right,tag,xshift=1mm]{direct chassis-to-module cable} (aim.north);
+\draw[sig] (fout.south) -- node[right,tag,xshift=1mm]{37-pin cable, J2 to J4} (aim.north);
 
 \node[ctrl,text width=60mm,anchor=north] (slot5) at (\xC,\yM)
   {\textbf{VXI SLOT 5} --- MPS SHUTOFF MODULE\\[2pt]

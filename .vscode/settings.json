@@ -78,7 +78,8 @@
     "Designs/tex/docL-legacy-architecture/L_legacy_system_architecture.tex",
     "Designs/tex/doc0-system-design/0_system_design_report.tex",
     "Designs/tex/docI-interlock-architecture/I_interlock_architecture.tex",
-    "Designs/tex/docM-integration-migration/M_integration_migration_plan.tex"
+    "Designs/tex/docM-integration-migration/M_integration_migration_plan.tex",
+    "Designs/tex/docC-interface-chassis/C_interface_chassis_requirements.tex"
   ],
   "latex-workshop.latex.search.rootFiles.exclude": [
     "Designs/tex/common/tikztest.tex",

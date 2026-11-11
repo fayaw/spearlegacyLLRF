@@ -96,8 +96,8 @@
 \node[blk,text width=60mm,anchor=north] (ext) at (38,-130)
   {\textbf{MACHINE PROTECTION SAFETY SYSTEMS}\\
    SPEAR MPS $\cdot$ orbit interlock $\cdot$ external permits\\
-   {\tiny permits in, beam abort out}};
-\draw[{Stealth[length=2mm]}-{Stealth[length=2mm]},thick] (ext.north) -- (ext.north|-ic.south);
+   {\tiny permits in}};
+\draw[-{Stealth[length=2mm]},thick] (ext.north) -- (ext.north|-ic.south);
 
 % ===== HVPS power section =================================================
 \node[pwr,text width=60mm,anchor=north] (hvps) at (116,-132)

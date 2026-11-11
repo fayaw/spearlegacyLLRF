@@ -14,12 +14,13 @@ Revision & Date & Scope of Change & Summary \\
 \endhead
 \bottomrule
 \endlastfoot
-\textbf{R0} & 2026-11-08 & Draft for review & Initial issue: layout and couplings of
+\textbf{R0} & 2026-11-10 & Draft for review & Initial issue: layout and couplings of
 the legacy station, integration sequence I1--I8, the requirements of each
 integration (interfaces, entry criteria and fallback) with a worklist of hardware,
 software and tests, software plan, deferral and contingency, based on the project
 status on 8 November 2026, the decoded PLC-5 program and the LLRF9 software of April
-2026. \\
+2026. On 10 November the Interface Chassis lost the key switches and the beam-abort
+output, which nothing at SPEAR3 uses (Doc~C). \\
 \end{longtable}
 
 % ===========================================================================
@@ -40,57 +41,57 @@ ID & Item & What is needed & Needed before & Page \\
 \endhead
 \bottomrule
 \endlastfoot
-O1 & RF Local Display Panel logic & Recover the equations of the programmable logic
-(GAL22V10) that forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort, by reading the
-device on the spare panel board or by a truth-table test of that board, so that the
-panel in service is not touched. & Interface Chassis logic design (I2)
+O1 & Interface Chassis logic & The equations that form SCR ENABLE, KLYSTRON CROWBAR
+and the LLRF9 enable are written from our understanding of the
+system's required behavior \R{45}, not recovered from the panel's GAL22V10, whose
+equations are not documented. Review them with J.~Sebek and the HVPS and SPEAR MPS
+owners, and compare them with the recorded behavior of the panel (I0-T1); each
+difference is kept or removed deliberately. & Interface Chassis logic design (I2)
 & \openpage{O1} \\
-O2 & Beam-abort endpoint & Trace where the panel's beam-abort connector (J6) is
-cabled, and agree with the SPEAR MPS group on the signal level, polarity, latching and
-the action it causes. & Interface Chassis production design (I2) & \openpage{O2} \\
-O3 & Panel cross-connect lines & The PLC-5 program and the wiring diagrams give the
+O2 & Panel cross-connect lines & The PLC-5 program and the wiring diagrams give the
 direction, level (\qty{24}{\volt}) and use of every J2 and J3 line
 (\cref{tab:plc5-panel}). The drawings disagree on the terminal numbers at X530 and the
 panel schematic and the cross-connect diagram on the J3 pin order; check every line by
 continuity before the Interface Chassis cables are made. & Interface Chassis
-interface to the PLC-5 (I2) & \openpage{O3} \\
-O4 & Fast Interlock Chassis functions & Confirm which of the AIM's 23 outputs on J15
-are used besides the six commands; which output of the chassis's klystron
-forward-power detector (J16 or J31) is cabled to the PLC-5 input ``RF PWR LEVEL'',
-which the program uses in the collector-power trip; whether any AIM input depends on
-the chassis; which AIM arc channels are enabled and which tunnel fibers feed them; and
+interface to the PLC-5 (I2) & \openpage{O2} \\
+O3 & Fast Interlock Chassis functions & Confirm on the hardware how the AIM's 23
+outputs on J15 are used besides the six commands (by the drawings, the AIM's supplies
+to the chassis and twelve arc trip tests); what drives the chassis's spare-fault input,
+which reaches the AIM through the 37-pin cable to its J4; whether any other AIM input
+depends on the chassis; which AIM arc channels are enabled and which tunnel fibers feed
+them, and whether its spare fault is enabled; and
 that the klystron-arc and transformer-arc triggers reach only the HVPS controller, as
 the drawings show. & Moving the arc fibers (I1); Interface Chassis interface to the
-AIM (I2) & \openpage{O4} \\
-O5 & Legacy heartbeat & The program sets the heartbeat: a pulse one scan long every
+AIM (I2) & \openpage{O3} \\
+O4 & Legacy heartbeat & The program sets the heartbeat: a pulse one scan long every
 \qty{50}{\milli\second} plus a scan or two, stopped by a read error from any analog
 or thermocouple module until reset. Measure its period and duty cycle at the panel
 output and at the AIM input, and size the Interface Chassis watchdog from them. &
-Interface Chassis production design (I2) & \openpage{O5} \\
-O6 & Legacy IOC changes & Confirm that the legacy database can still be built and
+Interface Chassis production design (I2) & \openpage{O4} \\
+O5 & Legacy IOC changes & Confirm that the legacy database can still be built and
 reloaded (last changed in 2021), whether the SNL programs can still be rebuilt
 (EPICS 3.14.11 for vxWorks~5.4, built on a Solaris host according to the release
 notes), and whether a test IOC can be set up. & Any legacy IOC change; the minimal
-coordinator (I6) & \openpage{O6} \\
-O7 & Slot~5 permit loop & Trace the SPEAR MPS and orbit-interlock wiring into VXI
+coordinator (I6) & \openpage{O5} \\
+O6 & Slot~5 permit loop & Trace the SPEAR MPS and orbit-interlock wiring into VXI
 Slot~5 and check the source current budget for a second input in the Interface
-Chassis. & LLRF9 as drive source (I6) & \openpage{O7} \\
-O8 & 2021 LLRF9 setup & The vendor software of April 2026 holds the SPEAR3
+Chassis. & LLRF9 as drive source (I6) & \openpage{O6} \\
+O7 & 2021 LLRF9 setup & The vendor software of April 2026 holds the SPEAR3
 configuration built since 2021---channel maps, tuner loops, a tuner interface to the
 legacy steppers, an HVPS loop and a station state machine---linked to PVs with the
 prefix SRFTEST. Recover what SRFTEST was, how the drive was switched, how the
 interlocks were wired and how turn-on was sequenced in the 2021 tests, and document
 the 2U ``LLRF Window Interlock Status'' chassis in rack B132-14, built in 2021, which
 turns a legacy permit into an enable for the LLRF9. & LLRF9 as drive source (I6) &
-\openpage{O8} \\
-O9 & RF MPS program & The decoded PLC-5 program of 2011 and 2012 is the reference.
+\openpage{O7} \\
+O8 & RF MPS program & The decoded PLC-5 program of 2011 and 2012 is the reference.
 Upload the program in service, which carries the 2021 filament changes, and compare
 it with that reference; then confirm, rung by rung, that the ControlLogix program
 reproduces it, including the hardwired outputs, the global interlock sum and the
-heartbeat. & RF MPS (I4) & \openpage{O9} \\
-O10 & HVPS unit transfer & Write the list of connections transferred when the active
+heartbeat. & RF MPS (I4) & \openpage{O8} \\
+O9 & HVPS unit transfer & Write the list of connections transferred when the active
 HVPS unit is switched between a legacy and a new Hoffman box. & HVPS and PPS (I7) &
-\openpage{O10} \\
+\openpage{O9} \\
 \end{longtable}
 
 % ===========================================================================
@@ -103,7 +104,7 @@ scheduled downs. This plan sets the order in which the upgrade subsystems of Doc
 integrated into the running station and works out, for each integration, the
 interfaces of the legacy station it must keep, the hardware and software it needs, its
 tests and its fallback. The high-power plant that is kept (klystron, HVPS power
-section, waveguide, cavities) and the proposed solid-state amplifier project \R{23}
+section, waveguide, cavities) and the proposed solid-state amplifier project \R{22}
 are out of scope.
 
 The plan is based on:
@@ -111,19 +112,20 @@ The plan is based on:
 \item the upgrade design, Doc~0 R4 \R{1}, which includes the transition interfaces of
 the Interface Chassis, the legacy functions of \cref{tab:orphans} and the integration
 sequence of this plan;
+\item the design requirements of the Interface Chassis and the Waveform Buffer, Doc~C
+\R{45};
 \item the legacy system: Doc~L \R{2}; J.~Sebek's design notes and test report
-\R{3}--\R{6}, \R{9}, \R{24}, \R{25}, \R{35}, \R{38}; the original drawings and spreadsheets
-\R{7}, \R{8}, \R{22}, \R{26}--\R{31}, \R{42}; the legacy EPICS source code
-\R{11}--\R{20}, \R{33}, \R{37}, \R{43}--\R{45}; the RF MPS PLC-5 program \R{39}; the
-LLRF9 vendor software and documentation \R{21}, \R{36}, \R{40}, \R{41};
-\item the project status and decisions of 31 October to 8 November 2026, and the
-subsystem leads of the April 2026 project schedule \R{10}.
+\R{3}--\R{6}, \R{9}, \R{23}, \R{24}, \R{34}, \R{37}; the original drawings and spreadsheets
+\R{7}, \R{8}, \R{21}, \R{25}--\R{30}, \R{41}; the legacy EPICS source code
+\R{10}--\R{19}, \R{32}, \R{36}, \R{42}--\R{44}; the RF MPS PLC-5 program \R{38}; the
+LLRF9 vendor software and documentation \R{20}, \R{35}, \R{39}, \R{40};
+\item the project current status  on 8 November 2026.
 \end{itemize}
 ``No software has been written'' refers to the EPICS side. The PLC ladder programs are
 taken as recorded: the RF MPS program written and tested on SPEAR3 without RF power
-\R{1}, and the HVPS program about \qty{95}{\percent} complete in April 2026 \R{10}. The
+\R{1}, and the HVPS program is still being completed. The
 PLC-5 program that the RF MPS program must reproduce is available in its 2011 and 2012
-versions, decoded into readable listings \R{39}.
+versions, decoded into readable listings \R{38}.
 
 \paragraph{Terms.}
 \begin{description}
@@ -132,7 +134,7 @@ MPS, HVPS controllers, 1746-HSTP1 tuner controllers, Fast Interlock Chassis 340-
 AIM, RF Local Display Panel 340-310 and the variac heater supply.
 \item[RF Local Display Panel] The legacy panel 340-310 in rack B132-12, also called
 the Local Control Chassis; its schematic SD-340-311-01 is titled ``PEP-II RF System
-Local Panel'' \R{27}. Its logic forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort
+Local Panel'' \R{26}. Its logic forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort
 (\cref{sec:hwchain}).
 \item[Hoffman box] The enclosure in B118 that is one HVPS controller: SLC-500, firing
 and regulator boards, trigger interconnect boards, power supplies, local control panel
@@ -164,16 +166,17 @@ and the ARC4 can trip only through the Interface Chassis, from I2 on.
 \item \textbf{I2 is the hardest integration.} While the AIM, the PLC-5 and the HVPS
 controllers are still in service, the Interface Chassis must present what the two
 legacy units present today---the AIM's J15 cable, the panel's cross-connect lines to
-the PLC-5, the three HVPS fibers, the beam abort, the key switches and the buffered
-HVPS voltage and current---and reproduce the panel's undocumented logic
-(\cref{sec:i-ic}). These transition interfaces are not in the Interface Chassis
+the PLC-5, the three HVPS fibers and the buffered
+HVPS voltage and current---and form the panel's outputs with logic written from the
+required behavior of the system, because the panel's own equations are not
+documented (\cref{sec:i-ic}). These transition interfaces are not in the Interface Chassis
 specification \R{3}.
 \item \textbf{The LLRF9 goes in in two steps.} I3 moves tuner control to the LLRF9 and
 the Galil without a change to the legacy SNL programs. I6, the LLRF9 as drive source,
 needs the Interface Chassis and the minimal coordinator in \mbox{B132-IOCRF}, which
 runs on the VXI CPU until I8; it goes in when that software is ready, so the legacy
-build environment (O6) gates only I6. The vendor software already holds a station
-state machine and an HVPS loop on the drive power \R{40}, which the coordinator
+build environment (O5) gates only I6. The vendor software already holds a station
+state machine and an HVPS loop on the drive power \R{39}, which the coordinator
 configures and commands rather than writes.
 \item \textbf{I4 before I5} lets the heater go straight to its final control by the
 RF MPS. I7 comes last before retirement, one HVPS unit at a time; I8 needs all the
@@ -207,19 +210,19 @@ LLRF9 (two units) & Installed in B132; RF cabling to be completed in the coming
 weeks. One unit will run the four tuner loops and drive the Galil directly. & Vendor
 IOC, upgraded to EPICS~7 in June 2026 \R{1}; the vendor software of 29 April 2026
 holds the SPEAR3 channel maps, tuner loops, HVPS loop and station state machine
-\R{40} \\
+\R{39} \\
 Galil DMC-4143 & Chassis built; tested on the SPEAR3 tuner motors under an EPICS
-control written by M.~Dunning \R{10}, \R{34}. That control is not carried forward, because
+control written by M.~Dunning \R{1}, \R{33}. That control is not carried forward, because
 the LLRF9 drives the Galil directly. & None needed beyond the LLRF9 \\
 ARC4 & Assembled; parts from the same vendor as the existing arc-detection hardware;
 accepts the existing tunnel fibers; ready to install & None; its signals are read
 through the Interface Chassis \\
 Interface Chassis and Waveform Buffer & One chassis with two boards; prototype ready
-for review, then production & Waveform Buffer data acquisition and screens working
-(April schedule \R{10}); none for the Interface Chassis \\
+for review, then production & Waveform Buffer tested standalone in April 2026
+\R{1}; none for the Interface Chassis \\
 RF MPS (ControlLogix) & Assembled; online for software development; EPICS
 communication working; ladder program written, to be compared with the decoded PLC-5
-program (O9) & None \\
+program (O8) & None \\
 HVPS controller (new Hoffman box) & CompactLogix online for software development, EPICS
 communication working; FCOG1200 firing boards ordered; regulator board being
 redesigned & None \\
@@ -261,7 +264,7 @@ B132-13 & RF MPS PLC-5 (main crate and a second crate below it); tuner stepper c
 340-315; the two LLRF9 units \\
 B132-14 & Cross-connect blocks, among them X530 for the panel's connectors J2 and J3
 and X15 for the waveguide pressure switches; a spectrum analyzer and, above it, the
-LLRF Window Interlock Status chassis of 2021 (O8) \\
+LLRF Window Interlock Status chassis of 2021 (O7) \\
 B132-15 & Klystron filament heater chassis (variac) and the main focus and bucking
 coil supplies \\
 B118 & HVPS controllers, one Hoffman box per HVPS unit \\
@@ -281,7 +284,7 @@ front end (\cref{sec:rfpath});
 coordinate the station (\cref{sec:ioc}).
 \end{enumerate}
 The heater and the focus and bucking coil supplies hang on the PLC-5, which switches
-them and reads and trips on their voltages and currents \R{7}, \R{14}, \R{22}. An integration
+them and reads and trips on their voltages and currents \R{7}, \R{13}, \R{21}. An integration
 can be done inside the running station only where its interfaces to these couplings
 stay the same, or where the new subsystem reproduces them.
 % keep Figure 1 below the section heading on this page
@@ -298,7 +301,7 @@ through the RF MPS PLC-5 and the tuner chassis to the HVPS controller. Every fas
 RF-off path ends on the RFP through the open-collector backplane line RF\_FAULT. The
 AIM, the Fast Interlock Chassis, the RF Local Display Panel and the HVPS controller
 form one hardwired protection chain; the panel's logic forms SCR ENABLE, KLYSTRON
-CROWBAR and the beam abort to the SPEAR MPS. The PLC-5 controls the filament heater
+CROWBAR and a beam abort on BNC J6, which is not cabled. The PLC-5 controls the filament heater
 and the focus and bucking coil supplies; the coil-supply faults also enter the panel's
 logic. Dashed arrows are fibers.}\label{fig:legacy-couplings}
 \end{figure}
@@ -307,25 +310,25 @@ logic. Dashed arrows are fibers.}\label{fig:legacy-couplings}
 
 The VXI slot-1 Allen-Bradley 6008-SV1R scanner, mounted through an HP E1407A adapter,
 is the master of a single RIO link \R{2}. Its configuration addresses the three PLCs as
-logical racks \R{12}, \R{33}; this plan names them after their devices
+logical racks \R{11}, \R{32}; this plan names them after their devices
 (\cref{tab:rio}).
 
-\begin{longtable}[c]{@{}Q{\cw{0.14}{1.6}}Q{\cw{0.11}{1.6}}Q{\cw{0.08}{1.6}}Q{\cw{0.50}{1.6}}Q{\cw{0.17}{1.6}}@{}}
+\begin{longtable}[c]{@{}Q{\cw{0.14}{1.6}}Q{\cw{0.15}{1.6}}Q{\cw{0.50}{1.6}}Q{\cw{0.17}{1.6}}@{}}
 \caption{Nodes of the legacy RIO link.}\label{tab:rio}\\
 \toprule
-Node & Logical rack & Size & Device and adapter & Physical rack \\
+Node & Logical rack & Device and adapter & Physical rack \\
 \midrule
 \endfirsthead
 \toprule
-Node & Logical rack & Size & Device and adapter & Physical rack \\
+Node & Logical rack & Device and adapter & Physical rack \\
 \midrule
 \endhead
 \bottomrule
 \endlastfoot
-PLC-5 node & 3 & 1/4 & RF MPS PLC-5 through a 1771-DCM; first node & B132-13 \\
-Tuner node & 2 & 3/4 & SLC-500 tuner chassis 340-315 with four 1746-HSTP1 modules;
+PLC-5 node & 3 & RF MPS PLC-5 through a 1771-DCM; first node & B132-13 \\
+Tuner node & 2 & SLC-500 tuner chassis 340-315 with four 1746-HSTP1 modules;
 middle node & B132-13 \\
-HVPS node & 1 & Full & HVPS SLC-500 through a 1747-DCM; last node & B118 \\
+HVPS node & 1 & HVPS SLC-500 through a 1747-DCM; last node & B118 \\
 \end{longtable}
 
 The chain runs from the scanner to the DCM in the main PLC-5 crate, on to the tuner
@@ -345,7 +348,7 @@ because its LOCA field is not set: while the IOC runs, the PLC-5 values freeze, 
 adapter and DCM records go to MAJOR, the station status shows HWERROR and nothing
 trips; after an IOC reboot without the node the PLC-5 records stay undefined and the
 state machine refuses to turn the station on. The scanner driver instead sends the
-HVPS records to INVALID, which turns the station off \R{43}. The PLC-5 itself does not
+HVPS records to INVALID, which turns the station off \R{42}. The PLC-5 itself does not
 depend on the link (\cref{sec:plc5prog}), so its node can be taken off with the IOC
 running, as the I4 entry test does (\cref{sec:i-mps}); the node's records are then
 re-pointed as in \cref{sec:legacyioc}.
@@ -354,42 +357,44 @@ re-pointed as in \cref{sec:legacyioc}.
 \subsection{The Hardwired Protection Chain}\label{sec:hwchain}
 
 The chain is documented at the level of connectors and fibers in J.~Sebek's notes
-\R{6}, \R{35} and in the original drawings \R{27}--\R{31}:
+\R{6}, \R{34} and in the original drawings \R{26}--\R{30}:
 \begin{itemize}
 \item \textbf{Fast Interlock Chassis 340-308.} Connector J15 is cabled to J3 of the
 AIM (VXI slot~12). Of its 25 lines, 23 are driven by the AIM. Six of these are the
-commands FILAMENT\_ON (station online request), SOLENOID\_ON (filament and focus
+commands FILAMENT\_ON (filament and focus request), SOLENOID\_ON (station online
 request), HVPS\_ON, BEAM\_ABORT, FILAMENT\_TIMEOUT (filament timeout bypass) and
 FAULT\_RESET, which the chassis converts to fibers to the panel. The two inputs, the
 AB summary fault (pin~10) and the AB heartbeat (pin~23), arrive as fibers from the
-panel and drive Schmitt-trigger inputs on the AIM \R{6}, \R{29}. The chassis also holds
-a detector for the klystron forward power, with input J32 and buffered outputs J16
-and J31, and an arc-detection front end on J2 that is largely disconnected \R{6},
-\R{28}.
+panel and drive Schmitt-trigger inputs on the AIM \R{6}, \R{28}. The chassis also holds
+a detector for the klystron forward power, with RF input J32 and output J31 on the rear
+panel, cabled to the PLC-5, and a front monitor output J16 that is not cabled; an
+arc-detection front end that is largely disconnected, whose 37-pin connector J2 is
+cabled to J4 of the AIM; and a spare-fault input that reaches the AIM through the same
+cable \R{6}, \R{27}.
 \item \textbf{RF Local Display Panel 340-310.} Eleven fibers
 (Appendix~\ref*{app:localpanel}): the six commands and the AB summary and heartbeat to
-and from the Fast Interlock Chassis \R{30}, and three to and from the HVPS controller. Two
+and from the Fast Interlock Chassis \R{29}, and three to and from the HVPS controller. Two
 25-pin connectors, J2 and J3, are wired to cross-connect block X530 in rack B132-14
-\R{6}, \R{7}, \R{31}. They carry the AIM's requests to the PLC-5 as \qty{24}{\volt}
+\R{6}, \R{7}, \R{30}. They carry the AIM's requests to the PLC-5 as \qty{24}{\volt}
 lines, the PLC-5's 15 area summaries, its global interlock sum (the AB summary) and its
 heartbeat, the filament, focus and bucking-coil supply control and interlocks, and the
 HVPS voltage and current, which the panel buffers for the PLC-5's collector-power
 calculation (\cref{tab:plc5-panel}). The panel displays the station status and carries
-the station online/offline and local/remote key switches \R{27}.
+the station online/offline and local/remote key switches \R{26}.
 \item \textbf{The panel's logic.} A programmable logic device (GAL22V10) forms SCR
 ENABLE, KLYSTRON CROWBAR and the beam abort from the HVPS on request, the VXI and HVPS
 beam aborts, the station online key switch and four lines from the PLC-5, whose logic
-the program gives \R{39}: the main-focus and bucking-coil summaries, the waveguide
+the program gives \R{38}: the main-focus and bucking-coil summaries, the waveguide
 air-pressure summary and the collector-power summary. A coil summary is on while the
 filament is requested and the supply's voltage and current are inside their limits;
 the main-focus summary also drops when the supply's internal contact (PLC-5 input
 025) opens, while the bucking-coil contact (input 026) is not used. Two flip-flops
-latch the beam abort and the crowbar until reset \R{27}, \R{35}. The beam abort leaves
-on a rear-panel BNC connector (J6) for the SPEAR MPS \R{27}. The equations of the logic
-are not documented.
+latch the beam abort and the crowbar until reset \R{26}, \R{34}. The beam abort leaves
+on a rear-panel BNC connector (J6), which is not cabled at SPEAR3 \R{26}, \R{46}. The equations of the logic
+are not documented, so the Interface Chassis does not copy them (O1).
 \item \textbf{HVPS fibers.} Three fibers run between the panel and the trigger
 interconnect boards of the active HVPS controller in B118, through a switchbox that
-selects the unit \R{6}, \R{30}, \R{32}, \R{35}. SCR ENABLE (lit to enable) goes to the
+selects the unit \R{6}, \R{29}, \R{31}, \R{34}. SCR ENABLE (lit to enable) goes to the
 Right Side Trigger Interconnect board (SD-730-793-07), which passes it to the Left Side
 board; while it is dark both boards inhibit the triggers of phases A and C, and
 B$^+$ and B$^-$ keep firing so that the filter inductors discharge \R{4}, \R{5}.
@@ -397,16 +402,16 @@ KLYSTRON CROWBAR (lit for no crowbar) goes to the Left Side board (SD-730-793-08
 when it goes dark the crowbar fires and the triggers are inhibited. STATUS comes from
 the Left Side board and is lit while the controller's ``24~V fault/enable'' output is
 high and no crowbar is commanded; the panel receives it as the ``HVPS beam abort''
-\R{4}, \R{27}.
+\R{4}, \R{26}.
 \item \textbf{Arc triggers in the HVPS controller.} A Pearson current transformer in
 the termination tank feeds the klystron-arc trigger input of the Left Side board, and
 the transformer-arc trigger enters the Right Side board. Either one fires the crowbar
 and inhibits the triggers in hardware; the SLC-500 only latches both as status bits
-\R{4}, \R{5}, \R{15}, \R{26}. Neither passes through the Fast Interlock Chassis or the
+\R{4}, \R{5}, \R{14}, \R{25}. Neither passes through the Fast Interlock Chassis or the
 panel, which sees them only as a dark STATUS fiber.
 \item \textbf{VXI Slot~5 (``MPS Shutoff'').} The SPEAR MPS beam permit and the orbit
 interlock (\qty{24}{\volt} each) \R{3}; dropping either asserts RF\_FAULT \R{2}. The
-module and its wiring are traced under O7.
+module and its wiring are traced under O6.
 \item \textbf{RF\_FAULT.} An open-collector VXI backplane line. The AIM, the IQAs,
 Slot~5, the CLK module and the RFP can assert it; the RFP then removes the drive
 \R{2}.
@@ -414,9 +419,13 @@ Slot~5, the CLK module and the RFP can assert it; the RFP then removes the drive
 
 \paragraph{Beam abort.} The state machine forces a beam abort through the AIM whenever
 it turns the station off, enters TUNE or switches the direct loop, and resets it when
-the station reaches ON\_CW with no faults \R{18}. The panel's logic combines it with
-the HVPS STATUS and its other inputs, by equations still to be recovered (O1). The
-signal therefore tells the SPEAR MPS that the RF station is not ready for beam.
+the station reaches ON\_CW with no faults \R{17}. The panel's logic combines it with
+the HVPS STATUS and its other inputs, by equations that are not documented (O1), and
+drives J6. The output was made for the PEP-II beam-abort system \R{46}; at SPEAR3 J6
+is not cabled, and the SPEAR MPS takes no status from the RF in hardware: it dumps the
+beam by removing the RF permit through Slot~5 \R{3}. The beam abort therefore stays
+inside the station: the AIM's latch, which the state machine reads, and the panel's
+lamps.
 
 \begin{warnbox}
 Every fast RF-off path of the legacy station ends on the RFP. High voltage is removed
@@ -424,7 +433,7 @@ in hardware through the panel's SCR ENABLE and KLYSTRON CROWBAR fibers or inside
 HVPS controller. A SPEAR MPS or orbit trip reaches the HVPS only through the RF cut and
 the state machine, unless the PLC-5's collector-power protection acts first: after any
 trip the state machine spends about \qty{1}{\second} in TUNE and \qty{5}{\second}
-ramping the HVPS down before it removes the triggers and the RF switch \R{18}.
+ramping the HVPS down before it removes the triggers and the RF switch \R{17}.
 \end{warnbox}
 
 \subsection{The RF Drive and Measurement Path}\label{sec:rfpath}
@@ -450,19 +459,20 @@ calibration constants were changed to compensate \R{9}.
 one expanded database, \fpath{srf1.db}, restores saved settings, configures the RIO
 scanner from \fpath{config.ab} and starts nine SNL program instances: the state
 machine, four tuner loops, the HVPS loop, the DAC loop, a calibration sequence and the
-message logger \R{11}. It stays the station IOC and the coordinator, and moves to new
+message logger \R{10}. It stays the station IOC and the coordinator, and moves to new
 hardware at I8.
 \item The state machine trips on one summary, \fpath{SRF1:STNOFF:SUMY:STAT}. It
-collects the VXI latch, the HVPS off summary, the online key switch of the RF Local
-Display Panel, the AB summary latch and the PLC-5's own station summary bit; turn-on
-is blocked by a similar summary, \fpath{SRF1:STNON:SUMY:STAT} \R{18}, \R{20}. Cavity,
+collects the VXI latch, the HVPS off summary, the PLC-5's online bit (the panel's
+online key and the station-online command), the AB summary latch and the PLC-5's own
+station summary bit; turn-on
+is blocked by a similar summary, \fpath{SRF1:STNON:SUMY:STAT} \R{17}, \R{19}. Cavity,
 tuner and temperature alarms reach only the station status display.
 \item A database change is a text edit and a reboot. An SNL change needs the EPICS
 3.14.11 vxWorks cross-development environment, whose availability is not
-confirmed.\openitem{O6} The release was built on Solaris for vxWorks~5.4, in AFS and
-later in NFS, and its last changes, in 2021, were to the database only \R{44}.
+confirmed.\openitem{O5} The release was built on Solaris for vxWorks~5.4, in AFS and
+later in NFS, and its last changes, in 2021, were to the database only \R{43}.
 \item The SNL bindings that matter for the integrations, among them the HVPS loop's
-dependence on the RFP \R{17}, are listed in Appendix~\ref*{app:epics}.
+dependence on the RFP \R{16}, are listed in Appendix~\ref*{app:epics}.
 \end{itemize}
 
 \subsection{Data the PLC-5 Provides to Other Subsystems}\label{sec:plc5data}
@@ -470,23 +480,23 @@ dependence on the RFP \R{17}, are listed in Appendix~\ref*{app:epics}.
 The PLC-5 is the station's slow data system as well as an equipment-protection PLC.
 About 230 template instances in the legacy database take their data from it
 (Appendix~\ref*{app:epics}): about 110 temperatures, about 40 interlock bits, about 30
-analog channels and about 50 summary, module and digital status points \R{14},
-\R{15}. Several belong to other subsystems: the tuner potentiometer positions
+analog channels and about 50 summary, module and digital status points \R{13},
+\R{14}. Several belong to other subsystems: the tuner potentiometer positions
 (\fpath{SRF1:CAVnTUNR:POSN}) and temperatures; the stepper drivers' bulk supply
-voltage (\fpath{SRF1:CAVTUNR:VOLT}), whose latch feeds the tuner summary \R{14},
-\R{20}; filament voltage and current with their PLC-5 trip limits, and the main focus
+voltage (\fpath{SRF1:CAVTUNR:VOLT}), whose latch feeds the tuner summary \R{13},
+\R{19}; filament voltage and current with their PLC-5 trip limits, and the main focus
 and bucking-coil supply voltages and currents; klystron and circulator ion-pump
 currents and window temperatures; and the HVPS voltage and current as seen by the PLC
-(the collector-power inputs) and the HVPS oil temperature \R{13}. Every integration
+(the collector-power inputs) and the HVPS oil temperature \R{12}. Every integration
 that touches the PLC-5, the tuner, the heater or the HVPS checks these channels.
 
 \subsection{The RF MPS Program}\label{sec:plc5prog}
 
 Four RSLogix~5 projects of the PLC-5 program---an undated one with the address
 descriptions and edits saved in November 2011 and February 2012---have been decoded
-into readable listings \R{39}. Their logic is the same apart from two limit changes.
+into readable listings \R{38}. Their logic is the same apart from two limit changes.
 The 2021 filament changes are not in them, so the program in service has to be
-uploaded and compared (O9). The program shows:
+uploaded and compared (O8). The program shows:
 \begin{itemize}
 \item \textbf{EPICS link.} The PLC-5 writes eight 64-word pages to the DCM in turn;
 word~3 of each page holds the page number, which is the table number that the legacy
@@ -506,7 +516,7 @@ on for one scan each time it expires. It stops when any of the 16 analog and
 thermocouple modules reports a read error, until reset; the DCM is not involved.
 \item \textbf{Collector power.} The beam power from the HVPS voltage and current
 buffered by the panel, minus the RF output power from the forward-power detector input
-``RF PWR LEVEL'' \R{42}, trips above \qty{1200}{\kilo\watt} for
+``RF PWR LEVEL'' \R{41}, trips above \qty{1200}{\kilo\watt} for
 \qty{0.7}{\second}. HV detected and RF detected are thresholds on the same inputs, at
 about \qty{9.7}{\kilo\volt} and \qty{9}{\kilo\watt}.
 \item \textbf{Filament.} The warm-up sequence of \cref{sec:i-heater}, the trips on the
@@ -549,25 +559,25 @@ Step & Integration & Replaces & Hard prerequisites & Fallback \\
 \endlastfoot
 I0 & Preparation (\cref{sec:i0}) & --- & --- & --- \\
 I1 & ARC4 and LLRF9 measurement, monitor-only (\cref{sec:i-monitor}) & Disconnected
-optical arc front end & Arc fibers checked (O4); LLRF9 hookup as a controlled change;
-SW8 & None needed; taps reversible \\
+optical arc front end & Arc fibers checked (O3); LLRF9 hookup as a controlled change;
+SW8 & None needed \\
 I2 & Interface Chassis and Waveform Buffer (\cref{sec:i-ic}) & Fast Interlock Chassis;
-RF Local Display Panel & Production unit with the transition interfaces; O1 to O5;
+RF Local Display Panel & Production unit with the transition interfaces; O1 to O4;
 SW7; baseline test of the legacy chain; failure-mode analysis & Reinstall the Fast
 Interlock Chassis and the panel \\
 I3 & Tuner control by LLRF9 Unit~1 and the Galil (\cref{sec:i-tuner}) & 1746-HSTP1
 tuner control & I1; SW2; legacy tuner loops off with their alarms adjusted & Motor
 cables back to the SS2000 drivers \\
-I4 & RF MPS (\cref{sec:i-mps}) & PLC-5 & Legacy-faithful program (O9); SW1 and SW5;
+I4 & RF MPS (\cref{sec:i-mps}) & PLC-5 & Legacy-faithful program (O8); SW1 and SW5;
 legacy database change; RIO splice; trip test & PLC-5 \\
 I5 & Klystron heater supply under RF MPS control (\cref{sec:i-heater}) & Variac stage
 & I4; \qty{60}{\hertz} sync circuit; SW3; acceptance on the test stand; a long down &
 Variac chassis \\
-I6 & LLRF9 as drive source (\cref{sec:i-drive}) & RFP as drive source & I2; SW9; O6
-to O8; interlocked RF transfer switch & Transfer switch to the RFP \\
+I6 & LLRF9 as drive source (\cref{sec:i-drive}) & RFP as drive source & I2; SW9; O5
+to O7; interlocked RF transfer switch & Transfer switch to the RFP \\
 I7 & New HVPS controller and PPS Interface Box (\cref{sec:i-hvps}) & Hoffman box of
 the HVPS controller and its PPS wiring, unit by unit & ADSO approval; PPS
-certification; the new box; SW6; O10 & Other HVPS unit \\
+certification; the new box; SW6; O9 & Other HVPS unit \\
 I8 & Legacy retirement (\cref{sec:i-retire}) & VXI crate; RIO link; tuner chassis &
 I1 to I7, both HVPS units; SW10 on the new hardware of \mbox{B132-IOCRF}; reference
 distribution; a home for every legacy function & None practical \\
@@ -632,23 +642,24 @@ Item & Work & Depends on \\
 \bottomrule
 \endlastfoot
 I0-H1 & Production review of the Interface Chassis and the Waveform Buffer with the
-requirements of \cref{sec:i-ic} (A7) & O1 to O5 \\
+requirements of \cref{sec:i-ic} and Doc~C \R{45} (A6) & O1 to O4 \\
 I0-S1 & Decisions D1 to D11 recorded (A1); PV naming policy, legacy compatibility
 rules and one interface control document per integration (SW0) & --- \\
 I0-S2 & Legacy IOC owner named; test IOC set up; procedure to edit, build and reload
-\fpath{srf1.db} written and rehearsed; SNL build checked (SW1, A2) & O6 \\
+\fpath{srf1.db} written and rehearsed; SNL build checked (SW1, A2) & O5 \\
 I0-S3 & The LLRF9 vendor software of April 2026 reviewed on a spare unit: its links
 to legacy PVs, which carry the prefix SRFTEST, its HVPS loop, tuner interfaces and
-state machine \R{40} (A18) & O8 \\
+state machine \R{39} (A17) & O7 \\
 I0-T1 & Baseline of the legacy protection chain: the panel's response to every input
-that can be set without high voltage, the beam abort at the SPEAR MPS, the three HVPS
-fibers, the HVPS controller's arc triggers as seen on STATUS, and the heartbeat at the
-panel and at the AIM (A3, A6) & O5 \\
+that can be set without high voltage, the three HVPS
+fibers, the HVPS controller's arc triggers as seen on STATUS, the heartbeat at the
+panel and at the AIM, and the request line at X530 that each AIM command drives (A3,
+A5) & O4 \\
 I0-T2 & The PLC-5 program in service uploaded and compared with the decoded 2012
-program \R{39} (A17) & O9 \\
-I0-T3 & The PLC-5 trip matrix run on the PLC-5 in service (A14) & I0-T2 \\
+program \R{38} (A16) & O8 \\
+I0-T3 & The PLC-5 trip matrix run on the PLC-5 in service (A13) & I0-T2 \\
 I0-T4 & Work that needs no window, started early: the Galil bench test (I3-T1), the
-heater test-stand acceptance (I5-T1), the PPS box approval steps (A15) & --- \\
+heater test-stand acceptance (I5-T1), the PPS box approval steps (A14) & --- \\
 \end{longtable}
 
 % ---------------------------------------------------------------------------
@@ -671,7 +682,7 @@ RF cabling is to be completed.
 \begin{itemize}
 \item ARC4: the tunnel fibers, which arrive at the rear of the VXI crate and the Fast
 Interlock Chassis today \R{2}, move to the ARC4 once none is found to feed a live AIM
-arc channel (O4). The system-module outputs stay unconnected until I2, so until then
+arc channel (O3). The system-module outputs stay unconnected until I2, so until then
 the ARC4 is watched only at its front panel.
 \item LLRF9: taps and splitters on the legacy RF signals, and the reference from output
 RF3 of the VXI CLK module, as in 2021 \R{8}. Every tap or splitter lowers a legacy
@@ -684,7 +695,7 @@ unit---Unit~1 the four probes, the klystron forward and the four cavity forward
 signals; Unit~2 the four cavity reflected, the klystron reflected, the circulator-load
 forward and the three waveguide-load forward signals---and also functions that write
 to other IOCs: an HVPS loop, a tuner interface that writes the legacy stepper targets,
-and a station state machine \R{40}. In I1 none of them may act on the station.
+and a station state machine \R{39}. In I1 none of them may act on the station.
 \end{itemize}
 
 \paragraph{Worklist.} \Cref{tab:wl-i1}.
@@ -704,18 +715,18 @@ Item & Work & Depends on \\
 I1-H1 & ARC4 chassis installed in B132 with its detector, system and test modules; its
 outputs left unconnected until I2 & Doc~0 O5 \\
 I1-H2 & Tunnel arc fibers moved from the rear of the VXI crate and the Fast Interlock
-Chassis to the ARC4, once none is found to feed a live AIM arc channel & O4, I1-T1 \\
+Chassis to the ARC4, once none is found to feed a live AIM arc channel & O3, I1-T1 \\
 I1-H3 & LLRF9 RF hookup as a controlled change: the 2021 couplers and splitters for
 the nine signals of Unit~1; new taps for the circulator-load and waveguide-load
 forward signals of Unit~2; the reference from CLK output RF3 to both units; the
-patch-panel record updated (A9) & --- \\
+patch-panel record updated (A8) & --- \\
 I1-H4 & Both LLRF9 units on the controls network & --- \\
 I1-S1 & SW8: vendor IOC of April 2026 with the control channel map on Unit~1 and the
-monitor map on Unit~2 \R{40}; calibration against the IQAs; screens, alarms, archiving
+monitor map on Unit~2 \R{39}; calibration against the IQAs; screens, alarms, archiving
 and the Channel Access gateway & I1-H3 \\
 I1-S2 & Monitor-only safeguards in the vendor IOC: the HVPS loop in its open mode,
 the tuner interfaces disabled, the station state machine not used, and no Channel
-Access write from the LLRF9 to \mbox{B132-IOCRF} or to any SRFTEST name \R{40} & O8,
+Access write from the LLRF9 to \mbox{B132-IOCRF} or to any SRFTEST name \R{39} & O7,
 I0-S3 \\
 I1-T1 & Light test of every arc fiber end to end at the next tunnel access (none has
 been used in service); the ARC4 electronics exercised with its test module & --- \\
@@ -742,8 +753,8 @@ Buffer boards, replaces the Fast Interlock Chassis 340-308 and the RF Local Disp
 Panel 340-310 in one down (\cref{fig:after-ic}). The AIM, the RFP, the PLC-5, the
 tuner chassis and the HVPS controllers stay in service, so the Interface Chassis must
 work with each of them exactly as the two legacy units do. I2 is a replacement, not a
-series insertion: from I2 on, the Interface Chassis itself generates SCR ENABLE,
-KLYSTRON CROWBAR and the beam abort (rule~2 of \cref{sec:rules}). The ARC4, installed
+series insertion: from I2 on, the Interface Chassis itself generates SCR ENABLE
+and KLYSTRON CROWBAR (rule~2 of \cref{sec:rules}). The ARC4, installed
 at I1, is read in from the start; its trip is enabled after a logged run.
 
 \begin{figure}[tbp]
@@ -754,8 +765,7 @@ at I1, is read in from the start; its trip is enabled after a logged run.
 \caption[The station after I2.]{The station after I2. The Interface Chassis, with the
 Waveform Buffer in the same chassis, takes the place of the Fast Interlock Chassis and
 the RF Local Display Panel and presents their interfaces to the AIM (J15), the PLC-5
-(cross-connect X530), the HVPS controller (three fibers) and the SPEAR MPS (beam
-abort). Everything else is as in \cref{fig:legacy-couplings}, apart from the
+(cross-connect X530) and the HVPS controller (three fibers). Everything else is as in \cref{fig:legacy-couplings}, apart from the
 monitor-only ARC4 and LLRF9 units of I1. Dashed: fibers, and the inputs used later (the
 ARC4 trip after a logged run; the LLRF9 enable and the permits from I6
 on).}\label{fig:after-ic}
@@ -763,7 +773,9 @@ on).}\label{fig:after-ic}
 
 \paragraph{Interfaces.} \Cref{tab:i1} lists what the Interface Chassis must present
 at I2. These transition interfaces are not in J.~Sebek's specification \R{3}, which
-describes the end state; Doc~0 includes them \R{1}.
+describes the end state; Doc~0 includes them \R{1}. Doc~C sets the design
+requirements of the Interface Chassis and the Waveform Buffer for I2 and the end
+state: signals, levels, logic, timing and status reporting \R{45}.
 
 \begin{longtable}[c]{@{}Q{\cw{0.16}{1.333}}Q{\cw{0.32}{1.333}}Q{\cw{0.52}{1.333}}@{}}
 \caption{Interfaces of the Interface Chassis at I2.}\label{tab:i1}\\
@@ -781,41 +793,50 @@ AIM, cable J15 & The Fast Interlock Chassis turns the AIM's six commands into fi
 and returns the AB summary and heartbeat \R{6} & Accept the J15 cable unchanged:
 receive the six commands at the levels the chassis receives them today; drive the AB
 summary fault (pin~10) and the AB heartbeat (pin~23) into the AIM's Schmitt-trigger
-inputs; terminate the other AIM lines as the chassis does.\openitem{O4} \\
+inputs; leave the AIM's supply pins and trip-test lines unconnected. The AIM's arc
+channels and spare fault are disabled before the Fast Interlock Chassis is removed,
+since the AIM then reads its open J4 as a spare fault.\openitem{O3} \\
 PLC-5, cables J2 and J3 at X530 & The panel exchanges \qty{24}{\volt} lines with the
 PLC-5 and buffers the HVPS voltage and current (Appendix~\ref*{app:localpanel}) &
-Accept both cables unchanged and reproduce every line\openitem{O3}: the requests
-(online/offline, filament on/off, filament timer bypass, interlock reset), the
-indications (HV detected, RF detected, local mode, online mode), the PLC-5's filament
-and coil-supply controls, the 15 area summaries, the AB summary and the AB
-heartbeat\openitem{O5}; buffer the HVPS voltage and current into the PLC-5's analog
-inputs with unchanged scaling, because the collector power is computed from them \\
-Klystron forward power & A detector in the Fast Interlock Chassis (input J32, outputs
-J16 and J31), which Doc~0 places in the PLC-5's collector-power calculation \R{1},
-\R{6} & The same detector output with unchanged scaling, unless O4 shows that it is not
-used \\
+Accept both cables unchanged\openitem{O2}; drive the request lines (station online,
+filament and focus, filament timer bypass, interlock reset); hold the online-mode line
+on, so that the station-online command from EPICS alone sets the PLC-5's online bit,
+and leave the local-mode line open \R{45}; take the coil, waveguide-pressure and collector summaries
+into the logic and pass the AB summary and the AB heartbeat\openitem{O4} to the AIM;
+buffer the HVPS voltage and current into the PLC-5's analog inputs with unchanged
+scaling, because the collector power is computed from them. The lines that the panel
+only displays (HV and RF detected, filament, timeout, coil supplies on, the other area
+summaries) are not connected; the PLC-5 reports them to EPICS \R{45} \\
+Klystron forward power & A detector in the Fast Interlock Chassis: RF input J32 and
+output J31 on the rear, cabled to the PLC-5 input ``RF PWR LEVEL'' that its
+collector-power trip uses; the front monitor output J16 is not cabled \R{1}, \R{6},
+\R{41} & The same detector output on the J31 cable, with unchanged scaling \\
 Coil supplies & PLC-5 outputs 032 and 033 carry the main-focus and bucking-coil
 summaries into the panel's logic: filament requested and supply voltage and current
 inside their limits, and for the main focus the supply's internal contact on input
-025; the bucking-coil contact on input 026 is not used \R{35}, \R{39} & Take both
+025; the bucking-coil contact on input 026 is not used \R{34}, \R{38} & Take both
 lines into the logic \\
 HVPS controller, three fibers & The panel drives SCR ENABLE and KLYSTRON CROWBAR and
-receives STATUS \R{4}, \R{35} & Same fibers and light conventions: lit SCR ENABLE
+receives STATUS \R{4}, \R{34} & Same fibers and light conventions: lit SCR ENABLE
 enables the triggers, lit KLYSTRON CROWBAR means no crowbar, lit STATUS means the HVPS
 can run \\
 Klystron arc & A Pearson current transformer in the termination tank feeds the
-klystron-arc trigger of the HVPS controller, which fires the crowbar \R{5}, \R{26} &
+klystron-arc trigger of the HVPS controller, which fires the crowbar \R{5}, \R{25} &
 None at I2: the trip stays in the HVPS controller and reaches the Interface Chassis as
-a dark STATUS fiber (O4); I7 keeps the input \\
+a dark STATUS fiber (O3); I7 keeps the input \\
 Transformer arc & The transformer-arc trigger enters the HVPS controller, which
 inhibits the triggers and fires the crowbar \R{5} & As for the klystron arc \\
-SPEAR MPS & Beam abort on the panel's BNC J6, latched until reset \R{27} & A
-beam-abort output with the same level, polarity and latching, its state reported to
-EPICS\openitem{O2} \\
+SPEAR MPS & Beam abort on the panel's BNC J6, latched until reset; made for PEP-II and
+not cabled at SPEAR3 \R{26}, \R{46} & None: the SPEAR MPS takes no status from the RF
+in hardware \R{3}, \R{45} \\
 Operators & Status display; station online/offline and local/remote key switches
-\R{27} & Front-panel display and the same two key switches; all states also in EPICS \\
-Logic & GAL22V10 in the panel & The same equations, latching and reset; every
-deliberate difference documented and reviewed\openitem{O1} \\
+\R{26} & Front-panel display only, with no key switches and no reset button: the
+station is set online or offline through \fpath{SRF1:STN:AIM:SOLENOID}, and reset,
+from EPICS; all states also in EPICS \R{45} \\
+Logic & GAL22V10 in the panel; its equations are not documented & Equations written
+from the required behavior of the system, with latching until reset as in the panel
+\R{45}; compared with the recorded behavior of the panel (I0-T1), every difference
+documented and reviewed\openitem{O1} \\
 \end{longtable}
 
 The end-state inputs of the specification \R{3}---LLRF9 status and enable, the RF MPS
@@ -844,14 +865,15 @@ Item & Work & Depends on \\
 I2-H1 & Production chassis with both boards: the transition interfaces of
 \cref{tab:i1}, the end-state inputs with bypass or simulate jumpers, the J15 command
 path for I8; isolated inputs and fail-safe outputs, so that loss of power or of an
-input removes the permits \R{3} & O1 to O5, I0-H1 \\
-I2-H2 & LLRF9 interface as the vendor specifies it: each interlock input driven high
-for enable with at least \qty{7}{\milli\ampere} at the level set at the factory
-(\qty{3.3}{\volt}, \qty{5}{\volt} or \qty{24}{\volt}); each interlock output and
-HVPS-interlock output read as \qty{4.75}{\volt} through \qty{220}{\ohm}, below
-\qty{0.1}{\volt} when tripped \R{41} & Doc~0 O1 \\
-I2-H3 & A place in B132 that the J15 cable, the X530 cables, the three HVPS fibers,
-the beam-abort cable and the ARC4 outputs reach; otherwise new runs & --- \\
+input removes the permits \R{3} & O1 to O4, I0-H1 \\
+I2-H2 & LLRF9 interface as the vendor specifies it, for the daisy chain of Doc~0
+\R{1}: Unit~2's interlock input, the head of the chain, driven high for enable with at
+least \qty{7}{\milli\ampere} at the level set at the factory (\qty{3.3}{\volt},
+\qty{5}{\volt} or \qty{24}{\volt}); Unit~1's interlock output, the end of the chain,
+and the HVPS-interlock outputs of both units read as \qty{4.75}{\volt} through
+\qty{220}{\ohm}, below \qty{0.1}{\volt} when tripped \R{40} & Doc~0 O1 \\
+I2-H3 & A place in B132 that the J15 cable, the X530 cables, the three HVPS fibers
+and the ARC4 outputs reach; otherwise new runs & --- \\
 I2-H4 & Waveform Buffer inputs: taps for its six RF channels (circulator-load
 reflected, station reference, waveguide loads 1 to 3 reflected and, proposed, the
 klystron drive power \R{1}), installed as a controlled change; the HVPS voltage and
@@ -859,24 +881,31 @@ current from the Interface Chassis buffers through high-impedance inputs; new ca
 for the two inductor voltages. A Waveform Buffer fault reaches the Interface Chassis
 only through its comparator outputs & --- \\
 I2-H5 & The Fast Interlock Chassis and the panel kept intact, their cables labeled,
-as the fallback and as spares until I8 & --- \\
+as the fallback and as spares until I8; before the Fast Interlock Chassis is removed,
+the AIM's arc channels and spare fault disabled, and the source on its spare-fault
+input moved to an Interface Chassis expansion input if it is still needed & O3 \\
 I2-S1 & SW7: the Interface Chassis and Waveform Buffer IOC with the input and output
-states, the first-fault record, the beam-abort state, the ARC4 permit and
+states, the first-fault record, the ARC4 permit and
 fired-detector identity and the waveforms, in the alarm handler and the archiver &
 SW0 \\
 I2-S2 & SW4: the ARC4 signals read out to the screens & I2-S1 \\
-I2-T1 & Bench: the logic against the recovered equations for every input
+I2-S3 & Operator screens and procedures without the panel's key switches: the station
+online/offline control (\fpath{SRF1:STN:AIM:SOLENOID}) on the station screen; every
+procedure step that uses the panel keys, lockout and maintenance included, moved to
+EPICS or to the HVPS controller's PERMIT key \R{45} & --- \\
+I2-T1 & Bench: the logic against the equations of Doc~C \R{45} for every input
 combination, including latching and reset; every J15 and X530 line at its level, with
 simulators of the AIM and PLC-5 sides that reproduce the four PLC-5 lines into the
 logic and the heartbeat as the program forms it (\cref{sec:plc5prog}); the fiber
 transmitters and receivers; power loss and input loss driving every output to its
-safe state; the first-fault record & O1, O3, O5 \\
+safe state; the first-fault record & O1, O2, O4 \\
 I2-T2 & In place, without high voltage: every AIM command from EPICS through to the
-PLC-5; every PLC-5 summary and the heartbeat through to the AIM; the key switches; the
-scaling of the HVPS voltage and current at the PLC-5 inputs; the beam abort at the
-SPEAR MPS input, with the SPEAR MPS group; the ARC4 inputs with its test module; the
+PLC-5; the AB summary and the heartbeat through to the AIM; online and offline from
+EPICS through to \fpath{SRF1:STN:LOCAL:ON} and SCR ENABLE; the
+scaling of the HVPS voltage and current at the PLC-5 inputs; the ARC4 inputs with its
+test module; the
 AIM and PLC-5 records seeing the same bits, so that the legacy database needs no change
-& O2, I2-H1 \\
+& I2-H1 \\
 I2-T3 & With high voltage, before beam: turn-on through the state machine; the
 responses to an HVPS trip, a klystron-arc and a transformer-arc trigger, a collector
 or waveguide-pressure summary, a VXI beam abort and a simulated coil-supply fault,
@@ -888,13 +917,13 @@ nuisance trips, which may be why the original optical system was never commissio
 with the PLC-5's & I1-T1, Doc~0 O5 \\
 \end{longtable}
 
-\paragraph{Entry criteria.} The production unit; O1 to O5 closed; the baseline of
-I0-T1; the failure-mode analysis; I2-S1; I2-H4 installed as a controlled change; the
+\paragraph{Entry criteria.} The production unit; O1 to O4 closed; the baseline of
+I0-T1; the failure-mode analysis; I2-S1 and I2-S3; I2-H4 installed as a controlled change; the
 fallback rehearsed. Before the ARC4 trip is enabled: I1-T1, Doc~0 O5 closed and the
 latch reset assigned to the ARC4 front panel or the Interface Chassis.
 
 \paragraph{Fallback.} Reinstall the Fast Interlock Chassis and the panel, and
-reconnect the J15 and X530 cables, the fibers and the beam-abort cable. The ARC4 trip
+reconnect the J15 and X530 cables and the fibers. The ARC4 trip
 alone is undone by masking its input.
 
 % ---------------------------------------------------------------------------
@@ -911,22 +940,22 @@ tuner node alive on the RIO link.
 \begin{itemize}
 \item Tuners: the motor cables move from the SS2000 drivers to the Galil. Unit~1
 commands the tuner velocity through the Galil, which also reads the limit switches
-and has an analog input \R{21}, \R{36}. The vendor's Galil database serves the
+and has an analog input \R{20}, \R{35}. The vendor's Galil database serves the
 DMC-21X3 and DMC-41X3 families, defines two axes and has no home or absolute move; it
-reads the Galil analog input as a potentiometer readback \R{40}. The tuner motors have
+reads the Galil analog input as a potentiometer readback \R{39}. The tuner motors have
 no encoders; the potentiometers give the only position readback and are used in no
-loop \R{25}. They stay on the PLC-5 with the tuner temperatures and the bulk-supply
+loop \R{24}. They stay on the PLC-5 with the tuner temperatures and the bulk-supply
 channel (\cref{sec:plc5data}).
 \item EPICS: the legacy tuner loops are switched off (\fpath{SRF1:CAVTUNR:LOOP:CTRL}).
 That record and the loop status in its LOOP\_OFF state are MAJOR alarms that roll up
 into the station severity summary, not into the trip summaries, so their severities
-or the alarm configuration are adjusted \R{19}, \R{20}.
+or the alarm configuration are adjusted \R{18}, \R{19}.
 \item The LLRF9 interlock outputs are read into the Interface Chassis as monitor-only
 inputs, so that I6 starts with a record of them.
 \item A second actuator path exists in the vendor software: a SPEAR3 interface in which
 the LLRF9 loops write the target positions of the legacy steppers
 (\fpath{SRF1:CAVnTUNR:POSN:CTRL}, linked to SRFTEST names in the vendor files) once a
-second after the previous move has finished \R{40}. It needs no cable change and can
+second after the previous move has finished \R{39}. It needs no cable change and can
 close the LLRF9 loops on the existing steppers before the Galil takes over, or keep
 them closed if the Galil fails.
 \end{itemize}
@@ -935,12 +964,12 @@ them closed if the Galil fails.
 the phase between the probe and forward signals, computed every \qty{0.1}{\second},
 with a deadband, a loop sign, a load-angle offset and a minimum forward power below
 which it does not move the tuner; a probe-balancing loop can shift the offsets
-\R{21}, \R{36}, \R{40}. The legacy loop runs every \qty{2}{\second} and
-moves a tuner only in TUNE and ON\_CW above a minimum klystron forward power \R{19},
-\R{37}; a slower load-angle offset loop, when enabled, shifts the phase setpoints to
-balance the cavity voltages \R{19}, \R{25}. \Cref{tab:tuner-cases} compares the two.
-SPEAR3 does not use the PARK state \R{25}, in which the state machine moves the tuners
-to park positions \R{18}, so no park move is needed.
+\R{20}, \R{35}, \R{39}. The legacy loop runs every \qty{2}{\second} and
+moves a tuner only in TUNE and ON\_CW above a minimum klystron forward power \R{18},
+\R{36}; a slower load-angle offset loop, when enabled, shifts the phase setpoints to
+balance the cavity voltages \R{18}, \R{24}. \Cref{tab:tuner-cases} compares the two.
+SPEAR3 does not use the PARK state \R{24}, in which the state machine moves the tuners
+to park positions \R{17}, so no park move is needed.
 
 \begin{longtable}[c]{@{}Q{\cw{0.14}{1.5}}Q{\cw{0.28}{1.5}}Q{\cw{0.32}{1.5}}Q{\cw{0.26}{1.5}}@{}}
 \caption{Tuner control in each operating condition.}\label{tab:tuner-cases}\\
@@ -955,31 +984,31 @@ Condition & Legacy tuner control & LLRF9 driving the Galil & Needed \\
 \bottomrule
 \endlastfoot
 Normal operation (ON or TUNE) & SNL loop every \qty{2}{\second} on the IQA load angle,
-with the setpoint shifted by the load-angle offset loop when it is enabled \R{19},
-\R{37} & PID every \qty{0.1}{\second} on the LLRF9's own probe and forward phases,
-with a fixed load-angle offset \R{36} & Legacy loops off; LLRF9 offsets set from the
+with the setpoint shifted by the load-angle offset loop when it is enabled \R{18},
+\R{36} & PID every \qty{0.1}{\second} on the LLRF9's own probe and forward phases,
+with a fixed load-angle offset \R{35} & Legacy loops off; LLRF9 offsets set from the
 legacy setpoints in shadow; any cavity balancing held at its last offsets until the
 coordinator or the vendor probe-balancing loop provides it \\
 Turn-on & The state machine homes the tuners to their ON positions and waits 60 ticks
-(\qty{1}{\second}) before enabling HV \R{18}, \R{25} & No preset move in the LLRF9: the
+(\qty{1}{\second}) before enabling HV \R{17}, \R{24} & No preset move in the LLRF9: the
 tuners start where they stopped, and the loop starts once the forward power exceeds
 its minimum & A home move on the Galil when the station is off, which J.~Sebek asks
-for \R{25} (SW2) \\
-Commanded turn-off & Station OFF; the loop holds \R{37} & Forward power below the
+for \R{24} (SW2) \\
+Commanded turn-off & Station OFF; the loop holds \R{36} & Forward power below the
 minimum; the loop holds & None \\
 Trip & As turn-off, after the RF cut & As turn-off; the few samples taken while the
 fields decay are limited by the deadband and the gains & Trip tests with beam confirm
 that the tuners do not move during the decay \\
 LLRF9 IOC or unit down & --- & The tuners hold; the detuning then follows beam current
-and temperature & Restore the IOC, use a spare unit \R{38} or fall back to the legacy
+and temperature & Restore the IOC, use a spare unit \R{37} or fall back to the legacy
 cables \\
 \end{longtable}
 
 Today every turn-on starts from the ON home positions, about \qty{2.5}{\milli\meter}
 from where the loop then tunes the cavities at low power; in normal operation the
-tuners move about \qty{0.2}{\milli\meter} \R{25}. J.~Sebek's operation note asks that
+tuners move about \qty{0.2}{\milli\meter} \R{24}. J.~Sebek's operation note asks that
 the upgrade keep a defined home position, moved to when the station is off, and keep
-the tuner loops off until the cavity has a minimum of power \R{25}. The LLRF9 does the
+the tuner loops off until the cavity has a minimum of power \R{24}. The LLRF9 does the
 second; SW2 adds the first on the Galil, so that a tuner does not start from wherever
 it stopped, for example from its full-current position after a trip.
 
@@ -1005,19 +1034,19 @@ which leaves the PLC-5 readings unchanged & --- \\
 I3-S1 & SW2: the vendor Galil configuration extended to four axes A to D, stepper
 with no encoder, in millimeters, with soft limits inside the legacy drive limits
 (\qty{18}{\milli\meter} and \qty{-29.5}{\milli\meter} in the archived database
-\R{19}) and the mechanical restriction to \qty{\pm 10}{\milli\meter} recorded in
+\R{18}) and the mechanical restriction to \qty{\pm 10}{\milli\meter} recorded in
 Doc~L \R{2} & I3-T1 \\
 I3-S2 & SW2: a home move, not in the vendor software, made when the station turns off
-\R{25} & I3-H2 \\
-I3-S3 & SW2: the vendor SPEAR3 tuner loops \R{40}: probe and forward indices checked
+\R{24} & I3-H2 \\
+I3-S3 & SW2: the vendor SPEAR3 tuner loops \R{39}: probe and forward indices checked
 against the cabling of Unit~1; minimum forward power, deadband, gains and sign; the
 load-angle offsets set from the legacy setpoints in shadow & I1-T2 \\
 I3-S4 & The legacy tuner loops off and the severities or alarm configuration of
-\fpath{SRF1:CAVTUNR:LOOP:CTRL} and the loop status adjusted \R{19}, \R{20} & SW1 \\
+\fpath{SRF1:CAVTUNR:LOOP:CTRL} and the loop status adjusted \R{18}, \R{19} & SW1 \\
 I3-S5 & Optional first step and fallback: the vendor stepper interface re-pointed to
 the SRF1 names, with the legacy loops off & SW1, I0-S3 \\
 I3-T1 & Bench: the Galil driver with the installed DMC-4143, whose screen is labeled
-for the DMC-21X3 \R{21}, and a spare motor: velocity commands, limit switches, stop,
+for the DMC-21X3 \R{20}, and a spare motor: velocity commands, limit switches, stop,
 reconnection after a network loss & --- \\
 I3-T2 & In place: the loops closed one cavity at a time, first at low power, with
 their detuning and reflected power compared with the legacy values & I3-S3 \\
@@ -1033,14 +1062,14 @@ disconnection & I3-H1 \\
 (I1-T2); I3-S1 to I3-S4; the alarm changes tested.
 
 \paragraph{Fallback.} The motor cables back on the SS2000 drivers, the legacy step
-counters realigned to the potentiometers with the stop-and-init function \R{25}, and
+counters realigned to the potentiometers with the stop-and-init function \R{24}, and
 the legacy tuner loops on; or, with I3-S5, the LLRF9 loops on the legacy steppers.
 
 % ---------------------------------------------------------------------------
 \subsection{I4: RF MPS}\label{sec:i-mps}
 
 \paragraph{Scope.} The ControlLogix replaces the PLC-5, both crates, in B132-13. Its
-program was written and tested on SPEAR3 without RF power \R{1}, \R{38}, and the system is
+program was written and tested on SPEAR3 without RF power \R{1}, \R{37}, and the system is
 online for software development with EPICS communication. The behavior it must
 reproduce is that of the decoded PLC-5 program (\cref{sec:plc5prog}) as uploaded from
 the PLC-5 in service.
@@ -1048,17 +1077,17 @@ the PLC-5 in service.
 \paragraph{Interfaces.}
 \begin{itemize}
 \item Field I/O through the 1771 field-wiring arms, reused by the Rockwell conversion
-kit \R{1}, \R{38}.
+kit \R{1}, \R{37}.
 \item The X530 lines to the Interface Chassis, as the PLC-5 drives them from I2 on:
 area summaries, AB summary and heartbeat, the filament, focus and bucking-coil control
-and the HVPS voltage and current inputs for the collector power \R{7}, \R{35}
+and the HVPS voltage and current inputs for the collector power \R{7}, \R{34}
 (\cref{tab:plc5-panel}).
 \item EPICS: every channel of \cref{sec:plc5data} under its legacy name, scaling and
 alarm limits, through legacy records re-pointed to the new IOC (\cref{sec:legacyioc}).
 \item RIO: the PLC-5 node is first taken off the link with the IOC running, in a
 maintenance period before the window (I4-T1). The code predicts no trip, HWERROR on the
-station status and frozen PLC-5 values \R{43}; the program predicts no change of the
-global sum or the heartbeat at the AIM \R{39}. The IOC is not rebooted while the node is
+station status and frozen PLC-5 values \R{42}; the program predicts no change of the
+global sum or the heartbeat at the AIM \R{38}. The IOC is not rebooted while the node is
 off. At I4 the trunk is spliced through to the tuner and HVPS nodes, and the legacy
 database change removes the rack-3 adapter, card and DCM records, or \fpath{config.ab}
 drops the node, so that the absent node raises no HWERROR.
@@ -1085,10 +1114,10 @@ I4-H3 & An analog output for the programming input of the heater supply, for I5
 (\cref{sec:i-heater}) & --- \\
 I4-S1 & Legacy-faithful program, checked rung by rung against the decoded PLC-5
 program and the upload of the program in service: the global interlock sum with its
-online bypass; latching and reset; the heartbeat and its module-error gating; the
+online bypass, whose online-mode input the Interface Chassis holds on \R{45}; latching and reset; the heartbeat and its module-error gating; the
 collector power and the HV-detected and RF-detected thresholds; the filament
 sequence; the focus and bucking-coil control and summaries; the cavity-vacuum time
-trips; the thermocouple conversions and temperature-rise trips\openitem{O9} &
+trips; the thermocouple conversions and temperature-rise trips\openitem{O8} &
 I0-T2 \\
 I4-S2 & Legacy data image: the eight 64-word DCM pages as tag arrays, with the page
 number in word~3 (\cref{sec:image}) & D5 \\
@@ -1116,7 +1145,7 @@ variac: warm-up, the ramp window, high and low trips, bypass, blower run-on & I4
 \\
 \end{longtable}
 
-\paragraph{Entry criteria.} O9; I4-S1 to I4-S4; I4-T1 and I4-T2; the trip-matrix
+\paragraph{Entry criteria.} O8; I4-S1 to I4-S4; I4-T1 and I4-T2; the trip-matrix
 procedure and the I0-T3 baseline.
 
 \paragraph{Fallback.} The PLC-5 stays intact: the field-wiring arms moved back and the
@@ -1128,7 +1157,7 @@ previous \fpath{config.ab} and \fpath{srf1.db} restored.
 \paragraph{Scope.} In the filament heater chassis in B132-15 the Genesys AC replaces
 the solid-state relay and the motor-driven variac; the chassis keeps its voltmeter and
 ammeter, the ammeter's current transformer, the output terminal block and connector J1
-\R{22}. With the RF MPS in
+\R{21}. With the RF MPS in
 place (I4), the supply goes straight to its target design: the RF MPS drives its
 analog programming input, and Ethernet carries monitoring and enable \R{1}. The supply
 runs on a test stand with a load; its external \qty{60}{\hertz} sync circuit is in
@@ -1137,19 +1166,19 @@ design \R{1}.
 \paragraph{Interfaces.} The filament request reaches the RF MPS from the AIM through
 the Interface Chassis \R{6}, \R{7}. Today the PLC-5 drives two lines on J1,
 FILAMENT\_ON to the solid-state relay and MOTOR-UP to the variac motor, and reads the
-voltage and current monitors there \R{22}. The RF MPS instead enables the supply and
+voltage and current monitors there \R{21}. The RF MPS instead enables the supply and
 ramps its analog programming input; the monitors keep feeding the RF MPS, so its
 heater interlock and limits are unchanged.
 
 \paragraph{Operating point and limits.} The heater runs at \qty{68}{\volt} and
 \qty{7.3}{\ampere} at the chassis output \R{1}, within the chassis rating of
-\qty{140}{\volt} and 1~kVA \R{22}. \Cref{tab:filament} gives the PLC-5 trip limits,
+\qty{140}{\volt} and 1~kVA \R{21}. \Cref{tab:filament} gives the PLC-5 trip limits,
 which the RF MPS keeps and which are read back into EPICS
 (\fpath{SRF1:FILAMENT:VOLT:ULIM}, \fpath{SRF1:FILAMENT:VOLT:LLIM} and the same for the
-current) \R{14}, and the live EPICS alarm limits. The archived substitution file holds
-different limits (\qtyrange{95}{128}{\volt}, \qtyrange{4.7}{6.5}{\ampere}) \R{14}.
+current) \R{13}, and the live EPICS alarm limits. The archived substitution file holds
+different limits (\qtyrange{95}{128}{\volt}, \qtyrange{4.7}{6.5}{\ampere}) \R{13}.
 They bracket neither today's operating point nor the \qty{135}{\volt} that the chassis
-drawing gives as the expected value \R{22}, so any new database takes its limits from
+drawing gives as the expected value \R{21}, so any new database takes its limits from
 the live configuration.
 
 \begin{longtable}[c]{@{}Q{\cw{0.20}{1.714}}Q{\cw{0.14}{1.714}}Q{\cw{0.13}{1.714}}Q{\cw{0.13}{1.714}}Q{\cw{0.13}{1.714}}Q{\cw{0.13}{1.714}}Q{\cw{0.14}{1.714}}@{}}
@@ -1169,8 +1198,8 @@ Current (A) & 5.24 & 6.72 & 7.01 & 7.59 & 7.88 & 9.77 \\
 \end{longtable}
 
 \paragraph{Legacy sequence.} The PLC-5 program runs the heater as follows, given with
-the values of the 2012 program; the program in service carries the 2021 changes (O9)
-\R{39}. The RF MPS keeps all of it and, in upgrade mode, replaces MOTOR-UP by a ramp of
+the values of the 2012 program; the program in service carries the 2021 changes (O8)
+\R{38}. The RF MPS keeps all of it and, in upgrade mode, replaces MOTOR-UP by a ramp of
 the programming input to the same end point.
 \begin{itemize}
 \item The filament request starts a first timer (\qty{1000}{\second}) and switches
@@ -1188,7 +1217,7 @@ the warm-up from zero after the reset; a low trip drops the filament summary. Th
 trips also latch at every cold start and need a reset once the heater is up.
 \item The filament summary is part of the global interlock sum. Without it the legacy
 database disables the HVPS contactor sequence, and the message logger opens the
-contactor on a fault \R{13}, \R{45}.
+contactor on a fault \R{12}, \R{44}.
 \item The window-air blower runs while the filament is on and for \qty{600}{\second}
 after.
 \end{itemize}
@@ -1208,7 +1237,7 @@ Item & Work & Depends on \\
 \bottomrule
 \endlastfoot
 I5-H1 & The Genesys AC in the heater chassis in place of the solid-state relay and the
-variac; the voltmeter, ammeter, current transformer, TB2 and J1 kept \R{22} & I5-T1
+variac; the voltmeter, ammeter, current transformer, TB2 and J1 kept \R{21} & I5-T1
 \\
 I5-H2 & The external \qty{60}{\hertz} sync circuit \R{1} & --- \\
 I5-H3 & The RF MPS analog output wired to the supply's programming input, with
@@ -1217,7 +1246,7 @@ FILAMENT\_ON (J1-A) as its hardware enable; the J1 monitors unchanged into the R
 I5-H4 & Ethernet from the supply to the heater IOC & --- \\
 I5-S1 & RF MPS heater logic in upgrade mode: the ramp of the programming input in
 place of MOTOR-UP, ending at today's constants, with the timers, trips, bypass and
-blower of the legacy sequence & I4-S3, O9 \\
+blower of the legacy sequence & I4-S3, O8 \\
 I5-S2 & SW3: the heater IOC over Ethernet for monitoring, supply status and the
 software enable \R{1}; the hardware enable and the ramp stay with the RF MPS & SW0 \\
 I5-T1 & On the test stand, closing Doc~0 O6: command set and IOC; regulation and
@@ -1254,15 +1283,18 @@ measuring.
 switch with its position read into EPICS, instead of a patch cable.
 \item Reference: output RF3 of the VXI CLK module, as in 2021 \R{8}, until the
 separate reference distribution of I8.
-\item Interlocks: the Interface Chassis drives the Unit~1 interlock input, which
-enables the unit while held high, and reads the interlock outputs of both units and
-their HVPS-interlock outputs (LEMO; levels as in I2-H2 \R{41}). A trip of the unit,
-from the external input or any of its 17 internal sources, turns off the drive and
-opens the absorptive switches in its output chains \R{41}. The SPEAR MPS and orbit
+\item Interlocks: the two units are daisy-chained, as decided in Doc~0 \R{1}: the
+Interface Chassis enable drives Unit~2's interlock input, Unit~2's interlock output
+drives Unit~1's interlock input, and Unit~1's interlock output returns to the
+Interface Chassis, which also reads the HVPS-interlock outputs of both units (LEMO;
+levels as in I2-H2 \R{40}). A unit trips on its external input or any of its 17
+internal sources; Unit~1 then turns off the drive and opens the absorptive switches in
+its output chains \R{40}, and a trip of Unit~2 reaches Unit~1 through the chain. The
+SPEAR MPS and orbit
 permits, which today reach only Slot~5, must also reach the Interface Chassis,
 paralleled from the Slot~5 wiring or routed through the Interface Chassis with an
-isolated contact returned to Slot~5.\openitem{O7}
-\item EPICS: the vendor station state machine and HVPS loop \R{40}, or the legacy
+isolated contact returned to Slot~5.\openitem{O6}
+\item EPICS: the vendor station state machine and HVPS loop \R{39}, or the legacy
 HVPS loop fed from the LLRF9 (\cref{sec:coordinator}); exactly one loop writes
 \fpath{SRF1:HVPS:VOLT:CTRL}.
 \end{itemize}
@@ -1284,21 +1316,21 @@ Fault source & Legacy fast action & Required with the LLRF9 driving \\
 \endlastfoot
 Reflected power, cavity field & IQA amplitude comparators assert RF\_FAULT & The
 LLRF9's own interlocks: an overvoltage comparator on each RF input and eight
-slow-ADC window comparators \R{41} \\
+slow-ADC window comparators \R{40} \\
 Arc (ARC4) & --- & The Interface Chassis removes the LLRF9 enable and SCR ENABLE \\
 SPEAR MPS beam permit, orbit interlock & Slot~5 asserts RF\_FAULT; the state machine
-removes high voltage later & The Interface Chassis removes the LLRF9 enable (O7) \\
+removes high voltage later & The Interface Chassis removes the LLRF9 enable (O6) \\
 RF MPS trip & AB summary to the AIM; collector and waveguide-pressure summaries into
 the panel's logic & High voltage removed by the Interface Chassis logic as by the
 panel's, and the LLRF9 enable removed on the AB summary \\
 HVPS controller trip, including its klystron-arc and transformer-arc triggers & High
-voltage removed; STATUS goes dark and raises the beam abort; the drive stays on until
+voltage removed; STATUS goes dark; the drive stays on until
 the state machine turns it off & STATUS also removes the LLRF9 enable \R{3} \\
 AIM and the other RF\_FAULT sources in the crate & RF\_FAULT & The state machine acts,
-unless an AIM output reaches the Interface Chassis (O4) \\
+unless an AIM output reaches the Interface Chassis (O3) \\
 \end{longtable}
 
-\paragraph{Worklist.} \Cref{tab:wl-i6}. Two spare LLRF9 units exist \R{38}.
+\paragraph{Worklist.} \Cref{tab:wl-i6}. Two spare LLRF9 units exist \R{37}.
 
 \begin{longtable}[c]{@{}Q{\cw{0.10}{1.333}}Q{\cw{0.70}{1.333}}Q{\cw{0.20}{1.333}}@{}}
 \caption{Worklist of I6.}\label{tab:wl-i6}\\
@@ -1314,26 +1346,26 @@ Item & Work & Depends on \\
 \endlastfoot
 I6-H1 & The interlocked RF transfer switch at the drive-amplifier input in B132-11,
 its position read into EPICS & --- \\
-I6-H2 & LLRF9 interlock wiring: the Interface Chassis to the Unit~1 interlock input;
-the interlock and HVPS-interlock outputs of both units to the Interface Chassis & I2,
+I6-H2 & LLRF9 interlock wiring as a daisy chain: the Interface Chassis to Unit~2's
+interlock input, Unit~2's interlock output to Unit~1's input, Unit~1's interlock
+output and the HVPS-interlock outputs of both units to the Interface Chassis & I2,
 I2-H2 \\
-I6-H3 & The SPEAR MPS and orbit permits into the Interface Chassis & O7 \\
+I6-H3 & The SPEAR MPS and orbit permits into the Interface Chassis & O6 \\
 I6-S1 & SW9: the vendor state machine configured for SPEAR3 (open-loop turn-on, tuning
 check, loop close, ramp, turn-off) and commanded by the minimal coordinator in step
-with the legacy state machine \R{40} & O6, D11 \\
+with the legacy state machine \R{39} & O5, D11 \\
 I6-S2 & SW9: one HVPS loop on the drive power---the vendor loop or the legacy loop fed
 from the LLRF9---and an interlock that keeps the other from writing the setpoint
 (\cref{sec:coordinator}) & D11 \\
 I6-S3 & The vendor links re-pointed from the SRFTEST names to the SRF1 names: drive
-power, HVPS minimum and maximum, collector power and the HVPS setpoint \R{40} & O8,
+power, HVPS minimum and maximum, collector power and the HVPS setpoint \R{39} & O7,
 I0-S3 \\
 I6-S4 & SW9: the RFP-specific SNL functions disabled; the fault response (HVPS
-ramp-down and SCR disable, Interface Chassis reset); the beam abort still forced and
-reset through the AIM & O6 \\
+ramp-down and SCR disable, Interface Chassis reset) & O5 \\
 I6-T1 & Bench: the LLRF9 interlock chain with the Interface Chassis, each internal
 source and the external input; the transfer-switch interlock & I6-H1, I6-H2 \\
 I6-T2 & With the LLRF9 driving: the transfer at low power, following the switching,
-interlock and turn-on procedure of the 2021 tests\openitem{O8}; every path of
+interlock and turn-on procedure of the 2021 tests\openitem{O7}; every path of
 \cref{tab:protection}; the hand-over of the HVPS loop, with only one loop writing
 the setpoint & I6-S1 to I6-S4 \\
 I6-T3 & Stability, ripple rejection and synchrotron-line damping against acceptance
@@ -1344,7 +1376,7 @@ system, with the synchrotron line at \qty{9657}{\hertz} and a quality factor of 
 against \qty{8932}{\hertz} and 11.1 \R{9} & I6-T2 \\
 \end{longtable}
 
-\paragraph{Entry criteria.} I2; O6, O7 and O8 closed; I6-S1 to I6-S4; I6-H1; the
+\paragraph{Entry criteria.} I2; O5, O6 and O7 closed; I6-S1 to I6-S4; I6-H1; the
 acceptance criteria; a record of the LLRF9 interlocks, kept from I3 on.
 
 \paragraph{Fallback.} The transfer switch back to the RFP and the legacy SNL
@@ -1361,16 +1393,15 @@ In the same down and under one PPS certification the PPS Interface Box takes the
 chains out of the PLC. The second unit follows at a later down, and both must be
 converted before I8 removes the RIO link; one unit is energized at a time, and the
 units exchange roles in scheduled downs, typically in April and August \R{1}. The
-CompactLogix is online with EPICS communication and its ladder program was about
-\qty{95}{\percent} complete in April 2026, with klystron cathode control remaining
-\R{10}; the FCOG1200 boards are ordered and the regulator is being redesigned \R{1}.
+CompactLogix is online with EPICS communication and its ladder program is
+still being completed; the FCOG1200 boards are ordered and the regulator is being redesigned \R{1}.
 
 \paragraph{Interfaces.}
 \begin{itemize}
 \item Field cables: the existing cables to the HVPS power section, the contactor
 controller and the grounding tank land on the new box unchanged \R{1}, among them the
 klystron-arc coax from the Pearson current transformer and the transformer-arc
-trigger, which fire the crowbar in hardware \R{5}, \R{26}.
+trigger, which fire the crowbar in hardware \R{5}, \R{25}.
 \item HVPS fibers: the three fibers from the Interface Chassis with unchanged light
 conventions; the new box keeps the trigger inhibit of \cref{sec:hwchain}, which leaves
 B$^+$ and B$^-$ firing so that the filter inductors discharge \R{4}, \R{5}.
@@ -1378,19 +1409,19 @@ B$^+$ and B$^-$ firing so that the filter inductors discharge \R{4}, \R{5}.
 Interface Chassis buffers them for the collector power and the Waveform Buffer.
 \item EPICS: all HVPS control stays in EPICS, with no Python layer, under the current
 PV names in \mbox{B132-IOCRF}: eleven records of the HVPS node plus 32 status bits
-(Appendix~\ref*{app:epics}) \R{13}. While one unit is legacy and the other new, the IOC
+(Appendix~\ref*{app:epics}) \R{12}. While one unit is legacy and the other new, the IOC
 serves either through two database variants or a selector. The switch-over procedure
 moves six terminal blocks, the three fibers and the klystron-arc BNC in a switchbox
-in B118 and the water over-pressure interlock in B514 \R{32}; with one legacy and one
-new box, every line on those blocks has to be listed.\openitem{O10}
+in B118 and the water over-pressure interlock in B514 \R{31}; with one legacy and one
+new box, every line on those blocks has to be listed.\openitem{O9}
 \item RIO: the HVPS node removed and the chain re-terminated.
 \item PPS: today PPS~1 enters an SLC-500 input and the supply of the output that drives
 contactor K4, and PPS~2 enters another input while rung 0016 drives the Ross
 grounding-switch coil from a PLC output; chain~2 has no hardware protection against a
-PLC output stuck on \R{26}. The PPS box drives K4 and the Ross coil directly, the
+PLC output stuck on \R{25}. The PPS box drives K4 and the Ross coil directly, the
 Ross coil from PPS~2 alone where the legacy ladder needs both chains \R{1}, \R{2}; this
 belongs in the PPS review. Two units need one box each, or a cable moved at the
-switch-over, which already breaks the PPS chain \R{32}.
+switch-over, which already breaks the PPS chain \R{31}.
 \item The local control panel (touch panel, PERMIT key switch, EMERGENCY OFF button
 with two contacts) is reproduced in the new box; the EMERGENCY OFF test of Doc~L (O12)
 is part of the commissioning.
@@ -1416,14 +1447,14 @@ panel with touch panel, PERMIT key switch and two-contact EMERGENCY OFF button &
 I7-H2 & The PPS Interface Box (B.~Morris): a Bud enclosure with four relays, status
 LEDs and one PPS-lockable connector, two permit and two readback channels, the
 standard design of the 6575 modulator and gallery systems \R{1}; one per unit, or a
-cable moved at the switch-over & A15 \\
+cable moved at the switch-over & A14 \\
 I7-H3 & The field cables landed on the new box unchanged, including the klystron-arc
 coax and the transformer-arc trigger; the three fibers; the voltage and current
-monitor outputs with unchanged scaling & O10 \\
+monitor outputs with unchanged scaling & O9 \\
 I7-H4 & After both units: the HVPS node removed from the RIO link and the chain
 re-terminated & I7-T2 \\
-I7-S1 & The CompactLogix program completed (klystron cathode control remained in April
-2026 \R{10}) and reviewed against the SLC-500 program & --- \\
+I7-S1 & The CompactLogix program completed and reviewed against the SLC-500
+program & --- \\
 I7-S2 & SW6: the HVPS IOC behind the current names, and the selector or database
 variants while one unit is legacy and the other new; SW1 for the legacy database
 change & SW1 \\
@@ -1433,12 +1464,12 @@ I7-T2 & At SPEAR3, the new box against the legacy unit: regulation and ripple; e
 HVPS interlock and crowbar source, including the klystron-arc and transformer-arc
 triggers; the fiber trio with the Interface Chassis; the HVPS loop in use (legacy or
 LLRF9) writing the same setpoint name & I7-T1 \\
-I7-T3 & PPS certification; the EMERGENCY OFF test of Doc~L (O12) & A15 \\
+I7-T3 & PPS certification; the EMERGENCY OFF test of Doc~L (O12) & A14 \\
 \end{longtable}
 
-\paragraph{Entry criteria.} The PPS steps of A15, ending in ADSO approval of the final
+\paragraph{Entry criteria.} The PPS steps of A14, ending in ADSO approval of the final
 design and documentation of the PPS box; the Radiation Safety Work Control Form;
-I7-H1 complete, bench-tested and run on Test Stand~18 (I7-T1); I7-S1 and I7-S2; O10
+I7-H1 complete, bench-tested and run on Test Stand~18 (I7-T1); I7-S1 and I7-S2; O9
 closed.
 
 \paragraph{Fallback.} Switch to the other HVPS unit, with its legacy Hoffman box and PPS
@@ -1455,14 +1486,14 @@ the full coordinator.
 \paragraph{What changes.}
 \begin{itemize}
 \item The AIM's commands to the Interface Chassis---station online, filament and
-focus, HVPS on and filament-timeout requests, the beam abort and the fault reset---come
+focus, HVPS on and filament-timeout requests and the fault reset---come
 from the coordinator through the Interface Chassis IOC instead of J15.
 \item The SPEAR MPS and orbit permits reach only the Interface Chassis.
 \item The LLRF9 reference comes from a separate \qty{476}{\mega\hertz} distribution.
 \item The transfer switch stays on the LLRF9, and the RFP is gone.
 \item Every legacy function of \cref{tab:orphans} has its new home.
 \item Links to legacy names move with the names: the vendor HVPS loop reads its drive
-power from an IQA today, so it needs another drive-power measurement \R{40}.
+power from an IQA today, so it needs another drive-power measurement \R{39}.
 \end{itemize}
 
 \paragraph{Worklist.} \Cref{tab:wl-i8}.
@@ -1485,18 +1516,18 @@ I8-H2 & New hardware for \mbox{B132-IOCRF} & --- \\
 I8-H3 & A drive-power measurement for the HVPS loop that does not use an IQA: the
 proposed Waveform Buffer channel or an LLRF9 input & I2-H4 \\
 I8-H4 & Removal of the VXI crate, the tuner chassis, the RIO link and the spare Fast
-Interlock Chassis and panel; as-built drawings of the new station \R{38} & I8-T1 \\
+Interlock Chassis and panel; as-built drawings of the new station \R{37} & I8-T1 \\
 I8-S1 & SW10: the full coordinator on the new hardware (\cref{sec:coordinator}) & D9
 \\
-I8-S2 & SW7: the command path from the Interface Chassis IOC in place of J15 & I2-H1
+I8-S2 & SW7: the command path from the Interface Chassis IOC in place of J15, among
+them the station-online command, the only online/offline control from I2 \R{45} & I2-H1
 \\
 I8-S3 & Every Channel Access link to a retired legacy name re-pointed, among them the
 LLRF9's drive-power and collector-power links; legacy names that are not kept retired;
 screens, alarm tree and archiver moved & D3 \\
 I8-T1 & SW10 tested on the new hardware with every subsystem in its final form & I1 to
 I7 \\
-I8-T2 & An end-to-end interlock test with fault injection on every layer, including the
-beam abort to the SPEAR MPS & I8-T1 \\
+I8-T2 & An end-to-end interlock test with fault injection on every layer & I8-T1 \\
 I8-T3 & Full-power commissioning; operator training & I8-T2 \\
 \end{longtable}
 
@@ -1527,21 +1558,23 @@ at I2, several pass through the Interface Chassis first.
 \endhead
 \bottomrule
 \endlastfoot
-1 & Beam abort to the SPEAR MPS (required) & AIM force and reset by the state
-machine; the panel's logic; BNC J6 \R{18}, \R{27} & Interface Chassis output; force
-and reset from the coordinator & I2; I8 \\
+1 & Beam abort to the SPEAR MPS & AIM force and reset by the state
+machine; the panel's logic; BNC J6, not cabled at SPEAR3 \R{17}, \R{26} & None: the
+SPEAR MPS takes no status from the RF in hardware \R{3}, \R{45} & --- \\
 2 & Main focus and bucking-coil supply control and interlocks & PLC-5 through the panel
 \R{7} & Interface Chassis passes the lines; later RF MPS outputs & I2; I4 \\
 3 & Filament request and timer bypass & AIM, Fast Interlock Chassis, panel and PLC-5
 \R{6} & Interface Chassis passes the requests; later RF MPS and heater IOC & I2; I8 \\
-4 & HV detected, RF detected, local/remote, online/offline & Panel to PLC-5 \R{7} &
-Interface Chassis; later RF MPS inputs & I2; I4 \\
+4 & HV-detected and RF-detected lamps; online/offline and local/remote key switches &
+Lamps driven by the PLC-5; keys into PLC-5 inputs \R{7} & Lamp states reported to EPICS
+by the PLC-5, later the RF MPS; online/offline from EPICS, with the online-mode line
+held on by the Interface Chassis; no local/remote key \R{45} & I2 \\
 5 & Buffered HVPS voltage and current for the collector power & Panel buffers \R{7} &
 Interface Chassis buffers; later HVPS controller to RF MPS & I2; I7 \\
 6 & HV turn-on gate & AIM ``HVPS on'' request into the panel's logic & Interface
 Chassis logic; the request from the coordinator after the AIM is gone & I2; I8 \\
 7 & Automatic reset after a trip, with its retry count and forced-fault inhibit & State
-machine; AIM forced-fault latch, set by operator command \R{18} & Coordinator & I8 \\
+machine; AIM forced-fault latch, set by operator command \R{17} & Coordinator & I8 \\
 8 & Reference power, crate and RIO health monitors & SNL and VXI records & Reference
 distribution monitor; IOC health records & I8 \\
 9 & Fault capture and MATLAB fault tools & AIM, IQA and RFP history buffers; MATLAB
@@ -1550,8 +1583,8 @@ tools & LLRF9 and Waveform Buffer post-mortem; ported tools & I6; I8 \\
 with the same names & I4 \\
 11 & \qty{476}{\mega\hertz} reference distribution & VXI CLK module & Separate
 reference distribution chassis & I8 \\
-12 & Drive power for the HVPS loop & IQA measurement of the klystron drive \R{17}, also
-read by the vendor HVPS loop \R{40} & Waveform Buffer drive-power channel or an LLRF9
+12 & Drive power for the HVPS loop & IQA measurement of the klystron drive \R{16}, also
+read by the vendor HVPS loop \R{39} & Waveform Buffer drive-power channel or an LLRF9
 input & I8 \\
 \end{longtable}
 
@@ -1561,7 +1594,7 @@ input & I8 \\
 \subsection{Coordinator and Principles}\label{sec:principles}
 
 The coordinator is the IOC \mbox{B132-IOCRF}: a minimal release (SW9) on the VXI CPU
-for I6, which needs the legacy build environment (O6), and a full release (SW10) on new
+for I6, which needs the legacy build environment (O5), and a full release (SW10) on new
 hardware for I8, each with one adapter per subsystem that talks to either the legacy or
 the new hardware, so that the order of I4 to I7 can change (\cref{sec:coordinator}).
 All HVPS functions stay in EPICS, with no Python layer. Principles:
@@ -1574,7 +1607,7 @@ legacy database change.
 databases; alarm limits come from the IOC's saved settings, because the archived files
 differ from the live values (\cref{sec:i-heater}).
 \item \textbf{Standard modules and vendor software first}: the LLRF9's own IOC with its
-tuner loops, Galil driver, station state machine and HVPS loop \R{40}, a standard
+tuner loops, Galil driver, station state machine and HVPS loop \R{39}, a standard
 driver for the Genesys AC, and the EtherNet/IP driver for the ControlLogix and
 CompactLogix.
 \end{enumerate}
@@ -1610,7 +1643,7 @@ SW5 & RF MPS IOC generated from the legacy substitution files, the saved setting
 the legacy data image; legacy records re-pointed & I4 & Medium & M.~Larrus \\
 SW6 & HVPS IOC behind the current HVPS names in \mbox{B132-IOCRF}; selector in the
 legacy database for the legacy or new HVPS unit & I7 & Small & M.~Larrus \\
-SW7 & Interface Chassis and Waveform Buffer IOC: states, first fault, beam abort,
+SW7 & Interface Chassis and Waveform Buffer IOC: states, first fault,
 waveforms; later the command path that replaces J15 & I2, I8 & Medium & J.~Sebek,
 D.~Zhang, D.~Scott \\
 SW8 & LLRF9 configuration, cross-calibration, screens, alarms and archiving; the
@@ -1638,13 +1671,13 @@ are prerequisites for I3, I4, I6 and I7.
 
 The PLC-5 and the SLC-500 exchange their data with EPICS through the RIO images of
 their DCMs, and the legacy records address these images by link, adapter, card and
-signal \R{13}, \R{33}. If each new PLC program keeps tag arrays with exactly this
+signal \R{12}, \R{32}. If each new PLC program keeps tag arrays with exactly this
 layout, maintained by the ladder logic, the legacy records can be re-pointed one for
 one, the new IOC databases can be generated from the legacy substitution files, and
 old and new values can be compared word by word during commissioning. The cost is a
 small amount of ladder logic; the image is retired with the VXI crate.
 
-For the PLC-5 the program gives the layout \R{39}: eight pages of 64 words, each with
+For the PLC-5 the program gives the layout \R{38}: eight pages of 64 words, each with
 its page number in word~3. Pages 0 and 1 hold the alarm limits of the 112
 thermocouples; pages 2 and 3 their readings, with five temperature rises of the
 klystron (body, collector and window air) in place of five of its readings; page 4 the
@@ -1657,7 +1690,7 @@ bits and the summaries; page 7 only its number.
 
 Two IOCs serving one name give undefined Channel Access behavior. While a legacy record
 exists, its name belongs to \mbox{B132-IOCRF}; the HVPS keeps its current names, such
-as \fpath{SRF1:HVPS:VOLT:CTRL} and \fpath{SRF1:HVPS:VOLT:RBCK} \R{13}; other new IOCs
+as \fpath{SRF1:HVPS:VOLT:CTRL} and \fpath{SRF1:HVPS:VOLT:RBCK} \R{12}; other new IOCs
 use prefixes that cannot collide with legacy names, such as \fpath{SRF1:MPS:} and
 \fpath{SRF1:WFBUF:} in Doc~0 \R{1}. Exceptions are deliberate and recorded, and legacy
 names that are not kept are retired with the VXI crate.
@@ -1666,15 +1699,15 @@ names that are not kept are retired with the VXI crate.
 
 \paragraph{Minimal release (SW9), for I6.}
 \begin{itemize}
-\item LLRF9 turn-on and turn-off: the vendor station state machine \R{40}, which
+\item LLRF9 turn-on and turn-off: the vendor station state machine \R{39}, which
 resets the interlocks with a set number of retries, turns on open loop, waits until
 the tuning errors are in range, closes the field loop, ramps to the operating point and
 ramps down, configured for SPEAR3 and commanded in step with the legacy state machine.
 \item One HVPS supervisory loop on the LLRF9 drive power, chosen by D11 from the
 options below.
 \item Fault response: HVPS ramp-down and SCR disable, and the Interface Chassis reset.
-The beam abort is still forced and reset through the AIM, and the automatic reset,
-with its retry count and forced-fault inhibit, stays in the legacy SNL.
+The automatic reset, with its retry count and forced-fault inhibit, stays in the
+legacy SNL.
 \item Adapters for the subsystems that are still legacy.
 \end{itemize}
 
@@ -1682,7 +1715,7 @@ with its retry count and forced-fault inhibit, stays in the legacy SNL.
 \fpath{SRF1:HVPS:VOLT:CTRL}; the others are held open, and the hand-over is tested
 (I6-T2).
 \begin{enumerate}
-\item \textbf{The vendor loop} \R{40}. Every \qty{0.5}{\second} it compares the
+\item \textbf{The vendor loop} \R{39}. Every \qty{0.5}{\second} it compares the
 klystron drive power with a setpoint of \qty{28}{\watt}, or \qty{29}{\watt} above a
 klystron forward power of \qty{600}{\kilo\watt}, and outside a deadband of
 \qty{0.1}{\watt} lowers the HVPS voltage by \qty{0.05}{\kilo\volt} per watt of
@@ -1697,12 +1730,12 @@ names, and its output is a record inside the LLRF9 IOC, so all are re-pointed
 HVPS loop while the LLRF9 drives. The loop regulates on database records, such as the
 HVPS step \fpath{SRF1:KLYSDRIVFRWD:HVPS:DELTA} computed from the drive power and its
 setpoint, and checks the RFP's direct-loop flag and severity,
-\fpath{SRF1:STN:RFP:MODU.DLE} and \fpath{SRF1:STN:RFP:MODU.SEVR} \R{17}. Fed from the
+\fpath{SRF1:STN:RFP:MODU.DLE} and \fpath{SRF1:STN:RFP:MODU.SEVR} \R{16}. Fed from the
 LLRF9, or held in their operating state while the RFP stands by, these let the loop
 keep regulating with no SNL change. The flag also acts on the RFP and the DAC loop, so
 the option is proven on the test IOC first.
 \item \textbf{The legacy loop, changed in SNL} so that it no longer depends on the RFP,
-keeping its states, status codes and tolerance checks; this needs the SNL build (O6).
+keeping its states, status codes and tolerance checks; this needs the SNL build (O5).
 \end{enumerate}
 With option 1 or 2, I6 needs the SNL build only for other SNL changes, and SW9 shrinks
 to commanding the vendor state machine and the fault response. All three read the
@@ -1710,9 +1743,9 @@ klystron drive power from an IQA, which goes at I8 (\cref{tab:orphans}, row 12).
 
 \paragraph{Full release (SW10), for I8.} On the new hardware of \mbox{B132-IOCRF}:
 station state machine, the commands to the Interface Chassis that the AIM sends today,
-beam-abort force and reset, automatic recovery with its retry count and forced-fault
+automatic recovery with its retry count and forced-fault
 inhibit, station-level calibration, the load-angle offset loop that balances the
-cavity voltages through the LLRF9 offsets \R{21}, \R{25}, the tuner home move, fault
+cavity voltages through the LLRF9 offsets \R{20}, \R{24}, the tuner home move, fault
 manager and
 post-mortem from the LLRF9 and Waveform Buffer data, operator and expert screens,
 alarm and archiver configuration, and ported MATLAB tools.
@@ -1739,8 +1772,8 @@ LLRF9 measurement (I1) & I2, I4, I5, I7 & I3, I6, I8 & The Interface Chassis and
 Waveform Buffer still add protection and diagnostics \\
 Interface Chassis production (I2) & I1, I3, I4, I5, I7 & The ARC4 trip; I6; I8 & An
 interim ARC4 trip point in the legacy chain, chosen from the Fast Interlock Chassis and
-AIM drawings \R{28}, \R{29}; for the LLRF9, the existing LLRF Window Interlock Status
-chassis, which turned a legacy permit into an LLRF9 enable in 2021 (O8) \\
+AIM drawings \R{27}, \R{28}; for the LLRF9, the existing LLRF Window Interlock Status
+chassis, which turned a legacy permit into an LLRF9 enable in 2021 (O7) \\
 Galil (I3) & All others; I6 with the legacy tuner loops on IQA phases & I8 & None \\
 RF MPS (I4) & All except I5 in its target form and I8 & I5 under RF MPS control; I8
 & The heater goes in with the legacy enable and monitors \\
@@ -1748,7 +1781,7 @@ Heater (I5) & All & None, if the RF MPS keeps the legacy heater I/O & None \\
 EPICS-side software & I1 with the vendor LLRF9 IOC & Every later integration &
 Generated databases, standard drivers and vendor software, minimal coordinator first
 \\
-Legacy build environment (O6) & I1 to I5 and I7, with database-only changes; I6 with
+Legacy build environment (O5) & I1 to I5 and I7, with database-only changes; I6 with
 the vendor state machine and an HVPS loop that needs no SNL change & I8; I6 if it
 needs an SNL change & Find or rebuild the environment early; expert-run LLRF9 tests as
 in 2021; options 1 and 2 of \cref{sec:coordinator} for I6 \\
@@ -1814,11 +1847,12 @@ with the legacy station.
 \endlastfoot
 1 & No owner or build environment for the legacy IOC & The minimal coordinator and
 every legacy database change blocked, and with them I3, I4, I6 and I7 & Name an owner;
-set up a test IOC; find the vxWorks build environment early (O6); prefer
+set up a test IOC; find the vxWorks build environment early (O5); prefer
 database-only changes \\
-2 & Panel logic not recovered, or reproduced wrongly & The Interface Chassis behaves
-differently from the legacy chain & Read the device or test the truth table (O1);
-baseline test in I0; equivalence test before I2 \\
+2 & The Interface Chassis logic misses or changes a function of the panel & The
+Interface Chassis behaves differently from the legacy chain & Equations written from
+the required behavior and reviewed (O1); baseline test in I0; equivalence test before
+I2; if needed, a truth-table test of the spare panel board \\
 3 & Transition interfaces missing from the production Interface Chassis & I2 slips,
 and with it the ARC4 trip, I6 and I8 & Add them at the production review (D6) \\
 4 & The Interface Chassis fails after I2 & Station down & The Fast Interlock Chassis
@@ -1827,14 +1861,14 @@ and the panel kept as spares until I8; spare boards \\
 drivers and vendor software, two coordinator releases \\
 6 & Hidden behavior of the PLC-5 program & Unexpected trips or a missing interlock
 after I4 & The program decoded (\cref{sec:plc5prog}) and compared with the one in
-service (O9); legacy-faithful mode, legacy data image, full trip matrix \\
+service (O8); legacy-faithful mode, legacy data image, full trip matrix \\
 7 & RF hookup changes legacy calibrations & Protection thresholds move & Controlled
 change with recheck of thresholds \\
 8 & Drive-source mix-up & Klystron driven by an unintended source & Interlocked
 transfer switch with readback \\
 9 & Loss of the fast RF cut with the LLRF9 driving & Delayed RF removal after a SPEAR
 MPS or orbit trip & SPEAR MPS and orbit permits in the Interface Chassis before I6
-(O7); every path of \cref{tab:protection} tested \\
+(O6); every path of \cref{tab:protection} tested \\
 10 & PV name collisions & Undefined Channel Access behavior & Naming policy (SW0) \\
 11 & RIO chain broken during I4 or I7 & Loss of HVPS and tuner data & Splice prepared
 and tested; node terminals kept connected \\
@@ -1846,13 +1880,13 @@ Windows planned by person (rule~4 of \cref{sec:rules}) \\
 record before enabling \\
 15 & A solid-state amplifier project starts during the migration & Priorities and
 people diverted & Keep the integrations independent; the Interface Chassis and
-coordinator design do not depend on the RF source \R{23} \\
+coordinator design do not depend on the RF source \R{22} \\
 16 & Legacy functions discovered late & VXI retirement delayed & \Cref{tab:orphans}
 reviewed with operations and the SPEAR MPS group \\
 17 & Tuner control depends on the LLRF9 IOC & No tuning while it is down & Legacy
-tuner hardware kept connected as fallback; spare LLRF9 units \R{38}; IOC health alarm \\
+tuner hardware kept connected as fallback; spare LLRF9 units \R{37}; IOC health alarm \\
 18 & LLRF9 vendor functions that write to other IOCs: the HVPS loop, the stepper
-interface and the state machine \R{40} & An unintended HVPS or tuner move, or two
+interface and the state machine \R{39} & An unintended HVPS or tuner move, or two
 loops writing the HVPS setpoint & Vendor software reviewed (I0-S3); monitor-only
 safeguards in I1 (I1-S2); links re-pointed only in I3 or I6, with one writer of
 \fpath{SRF1:HVPS:VOLT:CTRL} \\
@@ -1883,7 +1917,7 @@ D4 & RF MPS EPICS path & Re-pointed legacy records with a new IOC
 (\cref{sec:legacyioc}) & Before SW5 \\
 D5 & Legacy data image & In both new PLC programs & Before SW5 and SW6 \\
 D6 & Interface Chassis production scope & The transition interfaces of
-\cref{tab:i1}, the beam-abort output (required), the end-state inputs and the
+\cref{tab:i1}, the end-state inputs and the
 command path that replaces J15 at I8 & Production review (I0) \\
 D7 & Heater control & Decided: under RF MPS control from I5; the legacy enable only if
 I4 slips & Decided \\
@@ -1915,36 +1949,34 @@ SW9 \\
 \bottomrule
 \endlastfoot
 A1 & Record decisions D1 to D11 & Project lead & I0 \\
-A2 & Name a legacy IOC owner; set up a test IOC; check the SNL build (O6) & D.~Scott
+A2 & Name a legacy IOC owner; set up a test IOC; check the SNL build (O5) & D.~Scott
 (controls group) & I0 \\
 A3 & Record the baseline test of the legacy protection chain & J.~Sebek & I0 \\
-A4 & Recover the panel logic (O1), establish the X530 lines (O3) and confirm the Fast
-Interlock Chassis functions (O4) & J.~Sebek, D.~Zhang & I1, I2 \\
-A5 & Trace the beam-abort output to the SPEAR MPS and agree its signal convention (O2)
-& Project lead with the SPEAR MPS group & I2 \\
-A6 & Measure the legacy heartbeat (O5) & J.~Sebek & I2 \\
-A7 & Hold the production review of the Interface Chassis and Waveform Buffer with the
-requirements of \cref{sec:i-ic} & J.~Sebek, D.~Zhang & I2 \\
-A8 & Define the ARC4 output interface (Doc~0 O5) and plan the fiber test & J.~Sebek,
+A4 & Review the Interface Chassis logic equations (O1), check the X530 lines (O2) and
+confirm the Fast Interlock Chassis functions (O3) & J.~Sebek, D.~Zhang & I1, I2 \\
+A5 & Measure the legacy heartbeat (O4) & J.~Sebek & I2 \\
+A6 & Hold the production review of the Interface Chassis and Waveform Buffer with the
+requirements of \cref{sec:i-ic} and Doc~C \R{45} & J.~Sebek, D.~Zhang & I2 \\
+A7 & Define the ARC4 output interface (Doc~0 O5) and plan the fiber test & J.~Sebek,
 D.~Zhang & I1 \\
-A9 & Plan the RF hookup as a controlled change, including the threshold recheck &
+A8 & Plan the RF hookup as a controlled change, including the threshold recheck &
 J.~Sebek & I1 \\
-A10 & Trace the Slot~5 permit loop (O7) & J.~Sebek & I6 \\
-A11 & Recover the 2021 LLRF9 configuration (O8) & J.~Sebek & I6 \\
-A12 & Configure the LLRF9 tuner loops and the Galil driver; bench-test with the
+A9 & Trace the Slot~5 permit loop (O6) & J.~Sebek & I6 \\
+A10 & Recover the 2021 LLRF9 configuration (O7) & J.~Sebek & I6 \\
+A11 & Configure the LLRF9 tuner loops and the Galil driver; bench-test with the
 DMC-4143; run the shadow comparison & M.~Dunning & I1, I3 \\
-A13 & Complete the heater test-stand acceptance and the sync circuit & B.~Morris & I5
+A12 & Complete the heater test-stand acceptance and the sync circuit & B.~Morris & I5
 \\
-A14 & Run the PLC-5 trip matrix & S.~Condamoor & I4 \\
-A15 & Approve the PPS Interface Box in four steps: (a) a proposal to separate the PPS
+A13 & Run the PLC-5 trip matrix & S.~Condamoor & I4 \\
+A14 & Approve the PPS Interface Box in four steps: (a) a proposal to separate the PPS
 wires and connectors, from J.~Sebek, B.~Morris and M.~Larrus; (b) its confirmation
 with J.~Schroder and P.~Schuh; (c) a review with S.~Fleming's safety group; (d) the
 final design and documentation submitted for ADSO approval & B.~Morris & I7 \\
-A16 & Write the HVPS unit transfer list and the switch-over procedure (O10) &
+A15 & Write the HVPS unit transfer list and the switch-over procedure (O9) &
 M.~Larrus & I7 \\
-A17 & Upload the PLC-5 program in service and compare it with the decoded 2012
-program (O9) & S.~Condamoor & I4 \\
-A18 & Review the LLRF9 vendor software of April 2026 on a spare unit: its links to
+A16 & Upload the PLC-5 program in service and compare it with the decoded 2012
+program (O8) & S.~Condamoor & I4 \\
+A17 & Review the LLRF9 vendor software of April 2026 on a spare unit: its links to
 legacy PVs, HVPS loop, tuner interfaces and state machine & J.~Sebek, M.~Dunning & I1
 \\
 \end{longtable}
@@ -1981,80 +2013,82 @@ WD-340-330-02) & \fpath{llrf/documentation/LocalPanelToXConnectMapping.xlsx} \\
 \fpath{llrf/calibrations/b132R11PatchPanel.xlsx} \\
 \RDEF{9} & J.~Sebek, comparison of the LLRF9 with the legacy LLRF system (2021) &
 \fpath{llrf/tests/llrf9Tests.tex} \\
-\RDEF{10} & SPEAR3 LLRF Upgrade project schedule, April 2026 &
-\fpath{Designs/docx/SPEAR3_LLRF_Upgrade_Project_Schedule.xlsx} \\
-\RDEF{11} & Legacy IOC startup script, head revision 1.18 &
+\RDEF{10} & Legacy IOC startup script, head revision 1.18 &
 \fpath{spear-rf-code-legacy/iocBoot/} \\
-\RDEF{12} & Legacy RIO scanner configuration (\fpath{config.ab,v}) &
+\RDEF{11} & Legacy RIO scanner configuration (\fpath{config.ab,v}) &
 \fpath{spear-rf-code-legacy/iocBoot/} \\
-\RDEF{13} & Legacy HVPS database (\fpath{rf_hvps.db,v}) &
+\RDEF{12} & Legacy HVPS database (\fpath{rf_hvps.db,v}) &
 \fpath{spear-rf-code-legacy/rfApp/} \\
-\RDEF{14} & Legacy analog channel template and substitutions (\fpath{rf_analog.db},
+\RDEF{13} & Legacy analog channel template and substitutions (\fpath{rf_analog.db},
 \fpath{rf_analog_All}, \fpath{rf_analog_4CV}) & \fpath{spear-rf-code-legacy/rfApp/} \\
-\RDEF{15} & Legacy temperature, interlock and digital substitutions &
+\RDEF{14} & Legacy temperature, interlock and digital substitutions &
 \fpath{spear-rf-code-legacy/rfApp/} \\
-\RDEF{16} & Legacy tuner loop PV definitions (\fpath{rf_tuner_loop_pvs.h,v}) &
+\RDEF{15} & Legacy tuner loop PV definitions (\fpath{rf_tuner_loop_pvs.h,v}) &
 \fpath{spear-rf-code-legacy/rfApp/} \\
-\RDEF{17} & Legacy HVPS loop PV definitions (\fpath{rf_hvps_loop_pvs.h,v}) &
+\RDEF{16} & Legacy HVPS loop PV definitions (\fpath{rf_hvps_loop_pvs.h,v}) &
 \fpath{spear-rf-code-legacy/rfApp/} \\
-\RDEF{18} & Legacy station state machine (\fpath{rf_states.st,v}) &
+\RDEF{17} & Legacy station state machine (\fpath{rf_states.st,v}) &
 \fpath{spear-rf-code-legacy/rfApp/} \\
-\RDEF{19} & Legacy cavity database with the tuner records (\fpath{rf_cav.db,v},
+\RDEF{18} & Legacy cavity database with the tuner records (\fpath{rf_cav.db,v},
 \fpath{rf_stn_cav.db,v}) & \fpath{spear-rf-code-legacy/rfApp/} \\
-\RDEF{20} & Legacy cavity and station summaries (\fpath{rf_sumy_cav.db,v},
+\RDEF{19} & Legacy cavity and station summaries (\fpath{rf_sumy_cav.db,v},
 \fpath{rf_sumy_stn.db,v}) & \fpath{spear-rf-code-legacy/rfApp/} \\
-\RDEF{21} & LLRF9 tuner loop and Galil screens (\fpath{tuner.edl},
+\RDEF{20} & LLRF9 tuner loop and Galil screens (\fpath{tuner.edl},
 \fpath{motor_galil.edl}) & \fpath{llrf/llrf9/iGp/dl_llrf/} \\
-\RDEF{22} & Klystron filament heater control chassis drawing &
+\RDEF{21} & Klystron filament heater control chassis drawing &
 \fpath{llrf/documentation/filamentHeater/sd3403110002.pdf} \\
-\RDEF{23} & SSA upgrade summary, v11 (Test Stand~18 status, proposed SSA project) &
+\RDEF{22} & SSA upgrade summary, v11 (Test Stand~18 status, proposed SSA project) &
 \fpath{SSA_upgrade/} \\
-\RDEF{24} & J.~Sebek, interfaces between the RF system controllers &
+\RDEF{23} & J.~Sebek, interfaces between the RF system controllers &
 \fpath{hvps/architecture/designNotes/interfacesBetweenRFSystemControllers.docx} \\
-\RDEF{25} & J.~Sebek, SPEAR3 RF station operation &
+\RDEF{24} & J.~Sebek, SPEAR3 RF station operation &
 \fpath{llrf/documentation/LLRFOperation_jims.docx} \\
-\RDEF{26} & Hoffman box PPS wiring & \fpath{pps/HoffmanBoxPPSWiring.docx} \\
-\RDEF{27} & RF Local Display Panel drawings: drawing list DL-340-310-00, front and rear
+\RDEF{25} & Hoffman box PPS wiring & \fpath{pps/HoffmanBoxPPSWiring.docx} \\
+\RDEF{26} & RF Local Display Panel drawings: drawing list DL-340-310-00, front and rear
 panels SI-340-310-05 and -02, schematic SD-340-311-01 (``PEP-II RF System Local
 Panel'') & \fpath{llrf/documentation/localPanel/} \\
-\RDEF{28} & Fast Interlock Chassis schematics SD-340-308-01 and -02 &
+\RDEF{27} & Fast Interlock Chassis schematics SD-340-308-01 and -02 &
 \fpath{llrf/documentation/legacyInterfaceModules/} \\
-\RDEF{29} & AIM schematic SD-340-309-01 &
+\RDEF{28} & AIM schematic SD-340-309-01 &
 \fpath{llrf/documentation/legacyInterfaceModules/sd3403090102.pdf} \\
-\RDEF{30} & Wiring diagram WD-340-330-29 (control fiber-optic cables of the RF Local
+\RDEF{29} & Wiring diagram WD-340-330-29 (control fiber-optic cables of the RF Local
 Display Panel) & \fpath{llrf/documentation/mpsWiringDiagrams/wd3403302900.pdf} \\
-\RDEF{31} & Wiring diagram WD-340-330-02 (RF Local Display Panel cross-connects) &
+\RDEF{30} & Wiring diagram WD-340-330-02 (RF Local Display Panel cross-connects) &
 \fpath{llrf/documentation/mpsWiringDiagrams/wd3403300200.pdf} \\
-\RDEF{32} & HVPS switch-over procedure, R0 &
+\RDEF{31} & HVPS switch-over procedure, R0 &
 \fpath{hvps/documentation/procedures/spearRfHvpsSwitchProcedureR0.docx} \\
-\RDEF{33} & Legacy RIO adapter substitutions (\fpath{rf_ab_4CV.substitutions,v}) &
+\RDEF{32} & Legacy RIO adapter substitutions (\fpath{rf_ab_4CV.substitutions,v}) &
 \fpath{spear-rf-code-legacy/rfApp/} \\
-\RDEF{34} & Galil test records (2024--2025) and commissioning notes &
+\RDEF{33} & Galil test records (2024--2025) and commissioning notes &
 \fpath{llrf/tuners/galil/} \\
-\RDEF{35} & J.~Sebek, fiber-optic connections between the LLRF system and the HVPS
+\RDEF{34} & J.~Sebek, fiber-optic connections between the LLRF system and the HVPS
 controller, Rev~3 & \fpath{llrf/documentation/fiberOpticCableSignalControlRev3.docx} \\
-\RDEF{36} & Dimtel, LLRF9 manual (SPEAR3 screens) &
+\RDEF{35} & Dimtel, LLRF9 manual (SPEAR3 screens) &
 \fpath{llrf/llrf9/llrf9_manual_s3_screen.pdf} \\
-\RDEF{37} & Legacy tuner loop program (\fpath{rf_tuner_loop.st,v}) &
+\RDEF{36} & Legacy tuner loop program (\fpath{rf_tuner_loop.st,v}) &
 \fpath{spear-rf-code-legacy/rfApp/} \\
-\RDEF{38} & J.~Sebek, LLRF upgrade task list, Rev~3 &
+\RDEF{37} & J.~Sebek, LLRF upgrade task list, Rev~3 &
 \fpath{llrf/documentation/LLRFUpgradeTaskListRev3.docx} \\
-\RDEF{39} & RF MPS PLC-5 program: four RSLogix~5 projects (undated, November 2011,
+\RDEF{38} & RF MPS PLC-5 program: four RSLogix~5 projects (undated, November 2011,
 February 2012), the decoder and the decoded listings & \fpath{llrf/allenBradley/} \\
-\RDEF{40} & Dimtel, LLRF9 software of 29 April 2026: EPICS IOC with the SPEAR3 channel
+\RDEF{39} & Dimtel, LLRF9 software of 29 April 2026: EPICS IOC with the SPEAR3 channel
 maps, tuner, Galil and stepper interfaces, HVPS loop and station state machine; FPGA
 image; IOC installer & \fpath{llrf/llrf9/llrf9_2026/} \\
-\RDEF{41} & Dimtel, LLRF9 manual, revision 1.6 (12 November 2025) &
+\RDEF{40} & Dimtel, LLRF9 manual, revision 1.6 (12 November 2025) &
 \fpath{llrf/llrf9/llrf9_2026/llrf9_manual_screen.pdf} \\
-\RDEF{42} & Wiring diagrams WD-340-330-21, -22, -23 and -25 (PLC-5 analog inputs 1
+\RDEF{41} & Wiring diagrams WD-340-330-21, -22, -23 and -25 (PLC-5 analog inputs 1
 and 2, digital input 1, digital output 1) &
 \fpath{llrf/documentation/mpsWiringDiagrams/} \\
-\RDEF{43} & Legacy RIO scanner driver and DCM record and device support &
+\RDEF{42} & Legacy RIO scanner driver and DCM record and device support &
 \fpath{spear-rf-code-legacy/allenBradley/} \\
-\RDEF{44} & Legacy build configuration and release notes (\fpath{RELEASE,v},
+\RDEF{43} & Legacy build configuration and release notes (\fpath{RELEASE,v},
 \fpath{RELEASE_NOTES,v}) & \fpath{spear-rf-code-legacy/} \\
-\RDEF{45} & Legacy message logger program (\fpath{rf_msgs.st,v}) &
+\RDEF{44} & Legacy message logger program (\fpath{rf_msgs.st,v}) &
 \fpath{spear-rf-code-legacy/rfApp/} \\
+\RDEF{45} & Doc~C, Interface Chassis and Waveform Buffer Design Requirements, R0 &
+\fpath{Designs/tex/docC-interface-chassis/} \\
+\RDEF{46} & PEP-II RF station block diagram BD-340-330-00 &
+\fpath{llrf/documentation/legacyArchitecture/bd3403300000.pdf} \\
 \end{longtable}
 
 % ---------------------------------------------------------------------------
@@ -2065,7 +2099,7 @@ All record names carry the prefix \fpath{SRF1:}.
 \subsection{HVPS Records on the HVPS RIO Node}
 
 \begin{longtable}[c]{@{}Q{\cw{0.34}{1.5}}Q{\cw{0.10}{1.5}}Q{\cw{0.40}{1.5}}Q{\cw{0.16}{1.5}}@{}}
-\caption{HVPS records on the HVPS RIO node (logical rack~1) \R{13}.}\label{tab:hvpsrecords}\\
+\caption{HVPS records on the HVPS RIO node (logical rack~1) \R{12}.}\label{tab:hvpsrecords}\\
 \toprule
 Record & Type & Function & Address \\
 \midrule
@@ -2090,7 +2124,7 @@ Record & Type & Function & Address \\
 \end{longtable}
 
 In addition, 32 status bits of the HVPS controller are read from the HVPS node through
-the digital templates \R{15}, and the HVPS oil temperature comes from the PLC-5.
+the digital templates \R{14}, and the HVPS oil temperature comes from the PLC-5.
 
 \subsection{Template Instances Fed by the PLC-5}
 
@@ -2100,7 +2134,7 @@ several records (value, alarm latch, summary links). A few further records in th
 klystron, station and HVPS databases also read the PLC-5.
 
 \begin{longtable}[c]{@{}Q{\cw{0.22}{1.333}}Q{\cw{0.60}{1.333}}Q{\cw{0.18}{1.333}}@{}}
-\caption{Legacy template instances fed by the PLC-5 \R{14}, \R{15}.}\label{tab:templates}\\
+\caption{Legacy template instances fed by the PLC-5 \R{13}, \R{14}.}\label{tab:templates}\\
 \toprule
 Template & Content & Instances \\
 \midrule
@@ -2140,46 +2174,46 @@ Program & PVs & Use & Effect of the migration \\
 \endlastfoot
 HVPS loop & \fpath{STN:RFP:MODU.DLE}, \fpath{STN:RFP:MODU.SEVR} & Regulation mode;
 RFP health & With the RFP idle the loop regulates on the wrong variable or alarms
-\R{17}, unless they are fed from the LLRF9 (\cref{sec:coordinator}) \\
+\R{16}, unless they are fed from the LLRF9 (\cref{sec:coordinator}) \\
 HVPS loop & \fpath{HVPS:VOLT:CTRL}, \fpath{HVPS:VOLT} & Setpoint and readback &
-Re-pointed to the HVPS IOC \R{17} \\
+Re-pointed to the HVPS IOC \R{16} \\
 HVPS loop & \fpath{KLYSOUTFRWD:POWER}, \fpath{KLYSDRIVFRWD:POWER:ERR},
 \fpath{STN:VOLT} & IQA inputs & Must stay valid while the legacy HVPS loop runs
-\R{17} \\
+\R{16} \\
 Tuner loop & \fpath{CAVnTUNR:STEP:MOTOR} fields \texttt{RBV}, \texttt{DRVH},
 \texttt{DRVL}, \texttt{DMOV}, \texttt{RDBD} & Motor readback, limits, done flag,
-deadband & Unused with the LLRF9 driving the Galil; kept for the fallback \R{16},
-\R{19} \\
+deadband & Unused with the LLRF9 driving the Galil; kept for the fallback \R{15},
+\R{18} \\
 Tuner loop & \fpath{CAVnTUNR:POSN:CTRL} & Target position & Unused with the legacy
-loops off \R{16} \\
+loops off \R{15} \\
 Tuner loop & \fpath{CAVnTUNR:POSN} & Potentiometer readback from the PLC-5 & Kept
-through the RF MPS cutover \R{16} \\
+through the RF MPS cutover \R{15} \\
 Tuner loop & \fpath{KLYSOUTFRWD:POWER:MIN}, \fpath{CAVnLOAD:ANGLE:ERR} & Minimum power;
-phase error & From the IQAs \R{16} \\
+phase error & From the IQAs \R{15} \\
 State machine & \fpath{CAVTUNR:LOOPON:RESET}, \fpath{CAVTUNR:LOOPPARK:RESET} & Tuner
 home and park, then a fixed wait & No effect on the tuners driven by the LLRF9; the
-Galil home move of SW2 replaces it \R{18} \\
+Galil home move of SW2 replaces it \R{17} \\
 State machine & \fpath{STN:AIM:FRCBMABT}, \fpath{STN:AIM:MODU.RBA} & Force and reset of
-the beam abort & Replaced by the coordinator's force and reset of the Interface Chassis
-output \R{18} \\
+the beam abort & Not carried over: the Interface Chassis has no beam-abort output
+\R{17}, \R{45} \\
 Message logger & \fpath{HVPSCONTACT:CLOSE:CTRL}, filament latches & Opens the HVPS
 contactor on any filament fault & The filament latches keep their legacy names under
-the RF MPS \R{45} \\
+the RF MPS \R{44} \\
 LLRF9 HVPS loop (vendor) & \fpath{KLYSDRIVFRWD:POWER}, \fpath{HVPS:VOLT:MIN},
 \fpath{HVPS:VOLTULIM:CTRL}, \fpath{KLYSCOLLPLC:POWER}, prefix SRFTEST & Loop inputs &
-Re-pointed to SRF1 at I6; drive power replaced at I8 \R{40} \\
+Re-pointed to SRF1 at I6; drive power replaced at I8 \R{39} \\
 LLRF9 stepper interface (vendor) & \fpath{CAVnTUNR:POSN:CTRL},
 \fpath{CAVnTUNR:STEP:MOTOR.RBV}, prefix SRFTEST & Stepper target and readback &
-Disabled in I1; optional in I3 \R{40} \\
+Disabled in I1; optional in I3 \R{39} \\
 \end{longtable}
 
 % ---------------------------------------------------------------------------
 \section{RF Local Display Panel I/O}\label{app:localpanel}
 
 The RF Local Display Panel 340-310 sits in rack B132-12 and connects to cross-connect
-block X530 in rack B132-14 through two 25-pin connectors \R{6}, \R{7}, \R{27},
-\R{31}. The Interface Chassis reproduces this interface at I2 (\cref{tab:i1}). Its
-eleven fibers are listed in \cref{tab:fibers} \R{6}, \R{27}, \R{30}.
+block X530 in rack B132-14 through two 25-pin connectors \R{6}, \R{7}, \R{26},
+\R{30}. The Interface Chassis reproduces this interface at I2 (\cref{tab:i1}). Its
+eleven fibers are listed in \cref{tab:fibers} \R{6}, \R{26}, \R{29}.
 
 \begin{longtable}[c]{@{}Q{\cw{0.12}{1.5}}Q{\cw{0.34}{1.5}}Q{\cw{0.20}{1.5}}Q{\cw{0.34}{1.5}}@{}}
 \caption{Fibers of the RF Local Display Panel.}\label{tab:fibers}\\
@@ -2196,8 +2230,8 @@ Panel device & Panel label & Light means & Other end \\
 U10 & VXI beam abort & No abort & Fast Interlock Chassis (BEAM\_ABORT) \\
 U11 & HVPS beam abort & No abort & HVPS controller (STATUS) \\
 U12 & HVPS on request & Request & Fast Interlock Chassis (HVPS\_ON) \\
-U13 & Station online request & Request & Fast Interlock Chassis (FILAMENT\_ON) \\
-U14 & Filament and focus request & Request & Fast Interlock Chassis (SOLENOID\_ON) \\
+U13 & Station online request & Request & Fast Interlock Chassis (SOLENOID\_ON) \\
+U14 & Filament and focus request & Request & Fast Interlock Chassis (FILAMENT\_ON) \\
 U15 & Filament timeout bypass & Bypass & Fast Interlock Chassis (FILAMENT\_TIMEOUT) \\
 U16 & Reset & Reset & Fast Interlock Chassis (FAULT\_RESET) \\
 U19 & HVPS triggers enable & HVPS on & HVPS controller (SCR ENABLE) \\
@@ -2206,20 +2240,27 @@ U21 & AB heartbeat & Pulsing & Fast Interlock Chassis (HEARTBEAT) \\
 U22 & AB summary & No fault & Fast Interlock Chassis (A/B SUMMARY) \\
 \end{longtable}
 
+The fiber-cable diagram labels the Fast Interlock Chassis ends of the U13 and U14
+fibers FILAMENT and SOLENOID \R{29}, and J.~Sebek's notes follow it \R{6}. Those two
+labels are swapped: the panel drives the solenoid-request line from U13 and the
+filament-request line from U14 \R{26}, and the legacy software treats SOLENOID as the
+station online/offline command and FILAMENT as the filament \R{44}. The copy of the
+drawing in the repository carries a note.
+
 The labels below are those of the panel schematic SD-340-311-01 with the
 cross-connect labels of WD-340-330-02; the source does not state signal directions.
 The labels suggest that the ``Req'' lines carry requests from the panel to the PLC-5
 and the ``Ctrl'' lines carry the PLC-5's commands. J.~Sebek traces the two ``Fault15''
-lines to PLC-5 outputs 032 and 033 \R{35}, which WD-340-330-25 shows ending at the
-output cross-connect \R{42}. The program makes them the main-focus and
+lines to PLC-5 outputs 032 and 033 \R{34}, which WD-340-330-25 shows ending at the
+output cross-connect \R{41}. The program makes them the main-focus and
 bucking-coil summaries, not repeats of the supplies' contacts: input 025 enters the
-main-focus summary and input 026 is not used \R{39}. \Cref{tab:plc5-panel} matches
+main-focus summary and input 026 is not used \R{38}. \Cref{tab:plc5-panel} matches
 each line to its PLC-5 point by the signal names of the panel schematic and of the
-digital and analog I/O drawings \R{42}, which agree; the drawings disagree only on
-pin and terminal numbers, which are checked by continuity (O3).
+digital and analog I/O drawings \R{41}, which agree; the drawings disagree only on
+pin and terminal numbers, which are checked by continuity (O2).
 
 \begin{longtable}[c]{@{}Q{\cw{0.30}{1.5}}Q{\cw{0.14}{1.5}}Q{\cw{0.16}{1.5}}Q{\cw{0.40}{1.5}}@{}}
-\caption{Panel lines and PLC-5 points \R{39}, \R{42}.}\label{tab:plc5-panel}\\
+\caption{Panel lines and PLC-5 points \R{38}, \R{41}.}\label{tab:plc5-panel}\\
 \toprule
 Line (pin, SD-340-311-01) & Direction & PLC-5 point & Use in the program \\
 \midrule
@@ -2235,7 +2276,8 @@ HVPS Vout, Iout (J2-03, J2-04) & To PLC-5 & Analog input module 2, channels 13 a
 Main focus on (J2-06) & To panel & O:031/1 & Filament requested and no main-focus
 overvoltage latch \\
 Main focus Fault15 (J2-07) & To panel & O:031/12 (032) & Main-focus summary \\
-Filament (J2-09) & To panel & O:031/3 & First warm-up timer running \\
+Filament (J2-09) & To panel & O:031/3 & Filament requested and no high-trip latch;
+the heater's FILAMENT\_ON \\
 Timeout (J2-10) & To panel & O:030/5 & Warm-up complete or bypassed \\
 HV detected (J2-11) & To panel & O:031/7 & HVPS voltage above threshold \\
 Local mode (J2-12) & To PLC-5 & I:030/1 & Read by EPICS only \\
@@ -2297,7 +2339,7 @@ to~4 (J3-01, J3-14, J3-02, J3-15), klystron (J3-03), focus (J3-04), magic tee~1 
 on J3-12 and J3-13. The cross-connect diagram numbers the same signals in reverse pin
 order (for example, its J3-05 ``Interlock Sum'' corresponds to J3-09 and its J3-18
 ``AB Heartbeat'' to J3-21), and it assigns ``Waveguide Air MPS'' to the line that the
-schematic shows as spare~1 (J3-22); J.~Sebek records the same discrepancy \R{35}. Any
+schematic shows as spare~1 (J3-22); J.~Sebek records the same discrepancy \R{34}. Any
 connection at J3 is checked on the hardware first.
 
 % ---------------------------------------------------------------------------

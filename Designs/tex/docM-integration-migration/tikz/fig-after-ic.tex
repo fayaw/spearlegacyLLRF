@@ -47,17 +47,13 @@
 \node[new,text width=74mm,anchor=west] (ic) at (56,-62)
   {\textbf{Interface Chassis + Waveform Buffer} (one chassis)\\
    in place of the Fast Interlock Chassis and the RF Local Display Panel:\\
-   panel logic, key switches, display, HVPS V/I buffers;\\
+   panel logic, display, HVPS V/I buffers;\\
    Waveform Buffer on RF taps, HVPS V/I and inductor voltages};
 
 % ----- external connections -------------------------------------------------
 \node[blk,text width=28mm,anchor=north] (ext) at (s5.south |- 0,-92)
   {SPEAR MPS beam permit\\ orbit interlock (24 V)};
 \draw[sig] (ext.north) -- (s5.south);
-\node[blk,text width=28mm,anchor=north] (bab) at (117.4,-92)
-  {SPEAR MPS\\ beam abort input};
-\draw[sig] (ic.south -| bab.north) -- (bab.north);
-\node[tag,anchor=west] at (118.4,-82) {beam abort};
 \node[blk,text width=28mm,anchor=north,densely dashed] (later) at (71.4,-92)
   {later inputs: ARC4 trip\\ (after a logged run);\\ LLRF9 enable, SPEAR MPS\\ and orbit permits (I6)};
 \draw[sig,densely dashed] (later.north) -- (later.north |- ic.south);

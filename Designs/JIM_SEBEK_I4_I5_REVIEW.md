@@ -163,7 +163,7 @@ main-focus low-voltage limit edit in the 2012 file that was saved but not accept
   for one scan and the timer restarts (6:33, 6:34): a one-scan pulse every 50 ms plus a scan or two.
   A module error stops the pulses until the panel's reset line clears the error counters. The DCM
   is not in this logic, so the heartbeat does not stop when the IOC stops reading. The pulse width
-  is set by the scan time, so the measurement in Doc M O5 is still needed for the Interface Chassis
+  is set by the scan time, so the measurement in Doc M O4 is still needed for the Interface Chassis
   watchdog.
 - **Station summary and AB summary.** They are one bit, the global interlock sum (18:41). EPICS
   reads it as `STN:SUMY:PLC`, and output O:031/00, "GLOBAL INTERLOCK SUM", drives it out. The panel
@@ -240,7 +240,7 @@ Suggested order:
 - The hardware permits are covered from I2 on by the Interface Chassis (D. Zhang), which takes the
   PLC-5's summaries, AB summary and heartbeat.
 - The ControlLogix program has to keep the global interlock sum as it is, including the online
-  bypass, and the heartbeat with its gating by module errors (Section 4.6; Doc M O9).
+  bypass, and the heartbeat with its gating by module errors (Section 4.6; Doc M O8).
 - The alternative is to keep the PLC-5 until the total switch (I8). That needs no legacy database
   work, but makes I8 a larger single change and keeps the station on the PLC-5 longer.
 
@@ -324,9 +324,9 @@ heartbeat, the filament ramp and the faults that drop the station and AB summari
 
 | Item | Needed for |
 | --- | --- |
-| Get the program in service (an upload from the processor, or the file of J. Sebek's 2021 change) and compare it with the 2012 file: ramp constants, timer split, filament limits and the logic of Section 4.6 | I5 chassis; PAMM test; legacy-faithful program (Doc M O9) |
+| Get the program in service (an upload from the processor, or the file of J. Sebek's 2021 change) and compare it with the 2012 file: ramp constants, timer split, filament limits and the logic of Section 4.6 | I5 chassis; PAMM test; legacy-faithful program (Doc M O8) |
 | Read `SRF1:STN:DCM:MODU.LOCA` on the running IOC | PAMM test |
-| Measure the heartbeat's period and duty cycle at the panel (Doc M O5) | Interface Chassis watchdog |
+| Measure the heartbeat's period and duty cycle at the panel (Doc M O4) | Interface Chassis watchdog |
 | Measure the J1 voltage and current monitor outputs at the operating point; settle the T1 ratio | Monitor chassis |
 | Write the PAMM test procedure (Section 4.7) | I4 |
 

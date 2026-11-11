@@ -19,9 +19,9 @@ ID & Item & Required Evidence & Needed Before & Page \\
 \bottomrule
 \endlastfoot
 O1 & Slot 5 physical module & Confirm what is physically installed in VXI slot 5 of the SRF1 crate. The crate template labels it "MPS Shutoff" and the CF2 database is loaded as a PEP-II artifact. & VXI crate retirement & \openpage{O1} \\
-O2 & RF MPS PLC $\leftrightarrow$ Fast IC and panel wiring & Confirm whether any hardwired line runs from the PLC-5 to the Fast Interlock Chassis besides the AB summary and AB heartbeat that pass through the RF Local Display Panel, and confirm the J3 pin order, which is reversed between SD-340-311-01 and WD-340-330-02 \R{27}, \R{30}. & Interface I/O freeze & \openpage{O2} \\
-O3 & Fast IC $\rightarrow$ AIM connection & Identify the physical cable and connector carrying the Fast IC status word, and whether it runs over the VXI backplane or an external cable. & Protection acceptance & \openpage{O3} \\
-O4 & RF Local Display Panel logic & Read out the equations of the panel's GAL22V10 logic device, which forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort, and trace the endpoint of its beam-abort output (rear BNC J6) in the SPEAR MPS \R{29}. & Interface Chassis logic design & \openpage{O4} \\
+O2 & RF MPS PLC $\leftrightarrow$ Fast IC and panel wiring & Confirm whether any hardwired line runs from the PLC-5 to the Fast Interlock Chassis besides the AB summary and AB heartbeat that pass through the RF Local Display Panel (the detector output J31 runs the other way, to PLC-5 analog input~2 \R{26}), and confirm the J3 pin order, which is reversed between SD-340-311-01 and WD-340-330-02 \R{27}, \R{30}. & Interface I/O freeze & \openpage{O2} \\
+O3 & Fast IC $\rightarrow$ AIM connection & The drawings show an external 37-pin cable from the Fast IC's J2 to the AIM's J4, carrying the twelve analog arc signals and the spare-fault line \R{32}. Confirm it on the hardware and identify what drives the Fast IC's spare-fault input. & Protection acceptance & \openpage{O3} \\
+O4 & RF Local Display Panel logic & Read out the equations of the panel's GAL22V10 logic device, which forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort \R{29}. & Interface Chassis logic design & \openpage{O4} \\
 O5 & Remote I/O word/bit map & Cross-check the assignments derived from \R{9} against the deployed SLC-500 ladder program. & Controller replacement & \openpage{O5} \\
 O6 & Arc sensor count & Confirm the installed sensor count and locations against the six locations and eleven total sensors quoted for the upgrade. & Arc detection changes & \openpage{O6} \\
 \end{longtable}
@@ -76,8 +76,8 @@ Actor & Speed & Location & What It Protects Against \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\textbf{Fast Interlock Chassis} (340-308) & \textless{} 1 μs & B132 & Arc breakdown, reflections exceeding cavity/klystron ratings \\
-\textbf{AIM Module} (VXI Slot 12) & \textless{} 1 μs (HW) / \textasciitilde10 μs (ISR) & VXI Crate & Digitizes arc channel status from Fast IC; asserts RF\_FAULT on VXI backplane; forces the beam abort; captures fault waveforms; drives control outputs (HVPS\_On, Filament, Solenoid) through the Fast IC to the RF Local Display Panel \\
+\textbf{Fast Interlock Chassis} (340-308) & \textless{} 1 μs & B132 & Arc breakdown: converts the arc light into analog signals for the AIM; carries the AIM's commands to the panel \\
+\textbf{AIM Module} (VXI Slot 12) & \textless{} 1 μs (HW) / \textasciitilde10 μs (ISR) & VXI Crate & Compares the Fast IC's arc signals with its thresholds and latches them; watches the AB summary and heartbeat; asserts RF\_FAULT on VXI backplane; forces the beam abort; captures fault waveforms; drives control outputs (HVPS\_On, Filament, Solenoid) through the Fast IC to the RF Local Display Panel \\
 \textbf{RF MPS PLC} (PLC-5/1771) & \textasciitilde10 ms & B132 & Collector overpower, vacuum excursion, secondary arc, cooling \\
 \textbf{SLC-500 HVPS PLC} (RIO adapter 1) & \textasciitilde20 ms & B118 & HVPS internal faults: oil, transformer, crowbar, overvoltage, arc in HV tank \\
 \textbf{SNL State Machine} (\texttt{rf\_\allowbreak{}states.\allowbreak{}st,v}) & \textasciitilde1 s & VXI CPU (VxWorks) & Orderly shutdown sequencing, fault recording, recovery coordination \\
@@ -103,7 +103,7 @@ Path & Actor & Hardware action & EPICS notification & SNL response \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Arc / RF overpow. → Fast IC & Fast IC 340-308 & \textless{} 1 μs (RF cut through the AIM; SCR ENABLE and CROWBAR through the AIM commands and the RF Local Display Panel logic) & \textasciitilde50--500 μs (AIM ISR → VXI:LTCH) & \textasciitilde1 s (orderly HVPS shutdown) \\
+Arc → Fast IC and AIM & Fast IC 340-308 and AIM & \textless{} 1 μs (RF cut by the AIM; SCR ENABLE and CROWBAR through the AIM commands and the RF Local Display Panel logic) & \textasciitilde50--500 μs (AIM ISR → VXI:LTCH) & \textasciitilde1 s (orderly HVPS shutdown) \\
 MPS PLC Path A → panel logic and AIM & RF MPS PLC + RF Local Display Panel + AIM & \textasciitilde10--15 ms (HVPS kill through SCR ENABLE for collector and waveguide pressure faults; RF cut through the AB summary) & \textasciitilde1 s (Remote I/O Path B) & \textasciitilde1 s (orderly HVPS shutdown, HVPS already dead) \\
 MPS PLC Path C → Slot 5 & RF MPS PLC + Slot 5 & \textasciitilde10--15 ms (RF cut only; no immediate hardware HVPS kill) & \textasciitilde50--500 μs (AIM ISR → VXI:LTCH → STNOFF) & \textasciitilde6 s (orderly HVPS shutdown via s\_go\_off) \\
 SPEAR MPS permit / orbit interlock → Slot 5 & VXI Slot 5 & \textasciitilde5--15 ms (RF cut only; no \emph{direct} hardware HVPS kill from Slot 5; but see cascade note) & \textasciitilde50--500 μs (AIM ISR → VXI:LTCH → STNOFF) & \textasciitilde6 s (SNL orderly shutdown) --- \textbf{but in practice \textasciitilde20--30 ms} via collector overpower cascade → MPS PLC Path A → Fast IC (see \cref{sec:cascade}) \\
@@ -120,7 +120,7 @@ HVPS controller trip & SLC-500 HVPS PLC & \textasciitilde10--20 ms (24 V fault/e
 \subsection{Function}\label{sec:fastic-function}
 
 
-The Fast Interlock Chassis is a pure analog hardware circuit --- no software, no firmware, no CPU in the trip path. It provides sub-microsecond RF protection that is completely independent of all PLCs and computers.
+The Fast Interlock Chassis is the analog front end of the AIM. It turns the light of the twelve arc-detector fibers into peak-detected analog signals for the AIM, whose comparators, latches and fault logic make the trip decision; it passes the AIM's six commands to the RF Local Display Panel as fibers and returns the PLC-5's AB summary and heartbeat to the AIM; and it holds the klystron forward-power detector that feeds the PLC-5. It has no processor and no power supply of its own: the AIM powers it through J15 \R{32}.
 
 \textbf{Physical location}: B132 electronics rack, right below the VXI crate.
 
@@ -134,13 +134,14 @@ Input Type & Source & Connection & Notes \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Arc detection (fiber optic) & 4× cavity waveguide window sensors & Fiber optic receivers on chassis & Raw optical arc pulses → analog comparators \\
+Arc detection (fiber optic) & 4× cavity waveguide window sensors & Fiber optic receivers on chassis & Photodetector, amplifier and peak detector per channel; the analog signal goes to the AIM's comparator \R{32} \\
 Arc detection (fiber optic) & Klystron output window sensor & Fiber optic receiver & \\
 Arc detection (fiber optic) & Main circulator sensor & Fiber optic receiver & \\
-RF reflected power & Detector diodes at cavity and waveguide junctions & Coaxial cable, analog voltage & Compared against DC threshold \\
-RF forward power & Detector diodes (klystron output monitor) & Coaxial cable, J16 "DETECTED KLYSTRON POWER" & \\
+RF forward power & Klystron forward coupler & Coaxial cable to the rear RF input J32; the detected level leaves on the rear output J31 (RF AMPL.) for the PLC-5 & The front BNC J16 (DETECTED KLYSTRON POWER) is a monitor output and is not cabled \R{26} \\
 HVPS status (\texttt{HVPSON} in AIM \texttt{FISTAT}, bit 6) & Not documented & --- & The HVPS STATUS fiber ends on the RF Local Display Panel, where it is received as the HVPS beam abort, not on this chassis \R{26}, \R{27}; the source of the \texttt{FISTAT} bit is not documented. The AIM uses the bit to gate arc voltage readback (arc peaks not read when \texttt{HVPSON=0}). \\
-AB summary and AB heartbeat & RF MPS PLC-5, through the RF Local Display Panel & Two fibers from the panel; passed to the AIM on J15 & AB summary fault reaches the AIM (Path A) \R{26} \\
+AB summary and AB heartbeat & RF MPS PLC-5, through the RF Local Display Panel & Two fibers from the panel; passed to the AIM on J15 & The AIM latches an AB summary fault and an AB heartbeat fault (Path A) \R{14}, \R{26} \\
+AIM commands, supplies and trip tests & AIM, cable J15 & 25-pin cable & The six commands, inverted and sent as fibers; the AIM's fused \qty{\pm 12}{\volt} and \qty{5}{\volt}, which power the chassis; twelve trip-test lines that drive test-light fibers \R{32} \\
+Spare fault & Not identified & Front LEMO, cabled & \qty{24}{\volt} input through an optocoupler that trips on a low input; passed to the AIM on the 37-pin cable \R{32} \\
 \end{longtable}
 
 \begin{keynote}
@@ -159,7 +160,9 @@ Output & Destination & Latency & Mechanism \\
 \endlastfoot
 AIM commands (six) & RF Local Display Panel (B132) & \textless{} 1 μs & FILAMENT\_ON, SOLENOID\_ON, HVPS\_ON, BEAM\_ABORT, FILAMENT\_TIMEOUT and FAULT\_RESET from the AIM, inverted and sent as fibers \R{26} \\
 AB summary, AB heartbeat & AIM Module (VXI Slot 12) & \textasciitilde1 μs & From the panel's fibers, on J15 \\
-Status word & AIM Module (VXI Slot 12) & \textasciitilde1 μs & Direct chassis-to-module connection \\
+Arc signals (12) and spare fault & AIM Module (VXI Slot 12) & \textasciitilde1 μs & Analog arc signals, differential, and the spare-fault line, on the 37-pin cable from J2 to the AIM's J4 \R{32} \\
+Detected klystron power & RF MPS PLC-5, analog input~2, channel~12 & --- & Rear output J31 (RF AMPL.); the front BNC J16 is not cabled \R{26} \\
+Test light (12) & Arc-detector fibers & --- & Fiber transmitters J33 to J44, driven by the AIM's trip-test lines \R{32} \\
 \end{longtable}
 
 \begin{keynote}
@@ -193,43 +196,37 @@ The front panel of the Fast Interlock Chassis (SLAC drawing 340-308; photographe
 \begin{itemize}
 \tightlist
 \item
-  \textbf{FAULT RESET} button --- latches cannot be cleared without this
+  Lamps for the six AIM commands: \textbf{FILAMENT ON}, \textbf{SOLENOID ON}, \textbf{HVPS ON}, \textbf{BEAM ABORT}, \textbf{FILAMENT TIMEOUT} and \textbf{FAULT RESET}; each is lit while its fiber to the RF Local Display Panel is lit, so \textbf{BEAM ABORT} is lit when there is no abort
 \item
-  \textbf{LAMENT TIMEOUT} indicator --- klystron filament interlock
+  \textbf{TEST CH.} 1 to 12 lamps for the AIM's arc trip tests
 \item
-  \textbf{BEAM ABORT} indicator/control
+  \textbf{INPUT MON.} CH.1 through CH.12 monitor points of the arc channels
 \item
-  \textbf{TEST PORT} 12-channel test port for arc threshold adjustment
+  \textbf{SPARE FAULT} input (LEMO), cabled
 \item
-  \textbf{INPUT MONITOR} --- CH.1 through CH.12 input monitor test points
-\item
-  \textbf{HVPS ON}, \textbf{SOLENOID ON}, \textbf{FILAMENT ON} status indicators
-\item
-  \textbf{J16 DETECTED KLYSTRON POWER} coaxial input
+  \textbf{J16 DETECTED KLYSTRON POWER} --- BNC monitor output of the RF detector, not cabled; the RF input J32 and the output J31 to the PLC-5 are on the rear panel \R{26}
 \end{itemize}
 
 \subsection{Trip Mechanism}\label{sec:fastic-trip}
 
 
-Each arc detection channel has an adjustable current threshold set by AIM configurable with software. When a fiber-optic arc pulse arrives (arc sensors generate an optical burst on breakdown):
+Each arc channel has a threshold that the AIM sets in software. When a fiber-optic arc pulse arrives (arc sensors generate an optical burst on breakdown):
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Analog comparator fires
+  The Fast IC's photodetector and peak detector pass the pulse to the AIM as an analog signal
 \item
-  Fault latch is set (latching relay or SR flip-flop --- requires hardware FAULT RESET to clear)
+  The AIM's comparator for that channel fires against its threshold, set by a DAC from the \texttt{TRIPLVL} register \R{32}
 \item
-  The status word to the AIM changes; the AIM latches the arc and asserts \texttt{RF\_FAULT}
+  The AIM latches the arc (\texttt{ARCLTDSTT}, held until a fault reset) and asserts \texttt{RF\_FAULT}
 \item
   The AIM's six command signals are set by its register bits and by its on-board fault logic \R{31}; when they drop the HVPS on request or force the beam abort, the RF Local Display Panel logic removes SCR ENABLE and, as its equations specify, fires the crowbar (O4)
 \end{enumerate}
 
-For reflected power, the analog input voltage from the RF detectors is compared to a DC threshold. Exceeding the threshold fires the same trip mechanism.
-
 \begin{keynote}
-\textbf{Source}: \R{1} (interlock architecture and signal chain); \R{21}.
+\textbf{Source}: \R{1} (interlock architecture and signal chain); \R{21}; \R{32}.
 \end{keynote}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -253,11 +250,11 @@ For reflected power, the analog input voltage from the RF detectors is compared 
 \item
   Directly receives fiber-optic arc sensor pulses from cavity windows, klystron output, and circulator
 \item
-  Performs sub-microsecond analog threshold comparisons (no CPU, no firmware, no software in the trip path)
+  Converts the arc light into analog signals, one photodetector, amplifier and peak detector per channel; the threshold comparison is made on the AIM
 \item
   Passes the AIM's six command signals to the RF Local Display Panel as fibers and returns the PLC-5's AB summary and heartbeat to the AIM; SCR ENABLE and KLYSTRON CROWBAR are formed by the panel (\cref{sec:fastic-outputs})
 \item
-  Sends the resulting arc-channel status word to the AIM module via a direct chassis-to-module cable
+  Sends the twelve analog arc signals and the spare-fault line to the AIM over a 37-pin cable from its J2 to the AIM's J4 \R{32}
 \end{itemize}
 
 \textbf{AIM module 340-307} is the \textbf{VXI digital companion}:
@@ -265,11 +262,11 @@ For reflected power, the analog input voltage from the RF detectors is compared 
 \begin{itemize}
 \tightlist
 \item
-  Receives arc-channel status word from Fast IC via direct hardware connection; the physical cable and connector are not identified\openitem{O3}
+  Receives the twelve analog arc signals on its J4 and compares each with its own threshold; the cable is to be confirmed on the hardware\openitem{O3}
 \item
-  Its 12-channel arc registers (\texttt{ARCCURSTT}, \texttt{ARCLTDSTT}) digitally represent the Fast IC's per-channel arc detector states
+  Its 12-channel arc registers (\texttt{ARCCURSTT}, \texttt{ARCLTDSTT}) hold the states of its own comparators
 \item
-  \textbf{Provides the VXI configuration interface for Fast IC comparator thresholds}: writing to the AIM's \texttt{TRIPLVL} registers (A24 address space) sets the arc detection threshold for each channel; the Fast IC reads these values from the AIM via their direct link and applies them to its analog comparators. Enforced range: 10--255 (MINTRIPLVL / MAXTRIPLVL in \texttt{devP2RfAim.c}).
+  \textbf{Sets the comparator thresholds}: writing to the AIM's \texttt{TRIPLVL} registers (A24 address space) sets the DAC that drives the comparator of each channel on the AIM \R{32}. Enforced range: 10--255 (MINTRIPLVL / MAXTRIPLVL in \texttt{devP2RfAim.c}).
 \item
   Asserts \texttt{RF\_FAULT} on the VXI P2 backplane (sub-μs) to cut RF drive from the RFP module
 \item
@@ -277,14 +274,14 @@ For reflected power, the analog input voltage from the RF detectors is compared 
 \item
   Drives six control signals, which the Fast Interlock Chassis converts to fibers for the RF Local Display Panel: station online request, filament and focus request, HVPS on request, VXI beam abort, filament timeout bypass and reset \R{26}, \R{31}
 \item
-  Forces the beam abort and resets it; the beam abort reaches the SPEAR MPS through the panel's beam-abort output (\cref{sec:aim-bats})
+  Forces the beam abort and resets it; the panel's beam-abort output is not cabled at SPEAR3 (\cref{sec:aim-bats})
 \item
-  \textbf{Captures arc-channel history waveforms} via on-module 512 KB ADC ring buffer (12-ch AIM \texttt{HISBUF}): the Fast IC's fast ADC continuously samples all arc channel voltages and the HVPS voltage into this buffer; on fault the buffer freezes and is read back
+  \textbf{Captures arc-channel history waveforms} via on-module 512 KB ADC ring buffer (12-ch AIM \texttt{HISBUF}): the AIM's fast ADC continuously samples all arc channel voltages and the HVPS voltage into this buffer; on fault the buffer freezes and is read back
 \item
   Captures RF/IQA fault waveforms at the SNL level (11 channels → \texttt{/dat/FAULT*\_N} files)
 \end{itemize}
 
-\textbf{Key distinction}: The AIM IS correctly named as an arc detector --- it registers and latches per-channel arc events and asserts the VXI-level RF protection. However, it does \textbf{not} process raw fiber-optic arc pulses directly. All raw optical signal processing is done by the Fast IC 340-308. The AIM's arc detection is the digital representation and VXI-backplane consequence of what the Fast IC detected.
+\textbf{Key distinction}: The AIM makes the arc decision --- it compares each channel's analog signal with its threshold, latches per-channel arc events and asserts the VXI-level RF protection. It does \textbf{not} receive the fiber-optic pulses directly: the Fast IC 340-308 converts and peak-detects them \R{32}.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -317,11 +314,11 @@ The AIM module has 12 independently configurable arc detection channels. Each ch
 \item
   \textbf{Enable/disable} bit (\texttt{ARCENBSTT} register, \texttt{MODU.AFES} field)
 \item
-  \textbf{Threshold} setting (8-bit value, range 10--255): configured via EPICS writing to the AIM's \texttt{TRIPLVL} registers (A24 offset \texttt{0x0020} for ch 0, successive offsets per channel). The device driver (\texttt{devP2RfAim.c}) writes the value to the AIM VXI register; the Fast IC reads it via their direct hardware link and applies it to its analog comparator for that channel. The old method of adjusting thresholds via the Fast IC front panel is superseded by this software interface.
+  \textbf{Threshold} setting (8-bit value, range 10--255): configured via EPICS writing to the AIM's \texttt{TRIPLVL} registers (A24 offset \texttt{0x0020} for ch 0, successive offsets per channel). The device driver (\texttt{devP2RfAim.c}) writes the value to the AIM VXI register, which sets the DAC of that channel's comparator on the AIM \R{32}.
 \item
-  \textbf{Current status} (\texttt{ARCCURSTT}, \texttt{MODU.ACST}) --- real-time arc presence (populated from Fast IC status word)
+  \textbf{Current status} (\texttt{ARCCURSTT}, \texttt{MODU.ACST}) --- real-time state of the AIM's comparator
 \item
-  \textbf{Latched status} (\texttt{ARCLTDSTT}, \texttt{MODU.ALST}) --- fault held since last reset (populated from Fast IC status word)
+  \textbf{Latched status} (\texttt{ARCLTDSTT}, \texttt{MODU.ALST}) --- comparator state latched since the last fault reset
 \end{itemize}
 
 \begin{keynote}
@@ -336,7 +333,7 @@ This is the fastest path, entirely in hardware with no software involvement (\cr
 \begin{figure}[tbp]
 \centering
 \begin{fitpicture}\input{tikz/fig-fastic-trip}\end{fitpicture}
-\caption{Fast Interlock Chassis trip mechanism. Pure analog comparators with no CPU in the path.}\label{fig:fastic-trip}
+\caption{Arc trip path. The Fast Interlock Chassis converts the arc light; the AIM's comparators and latches decide and assert RF\_FAULT. No processor is in the path.}\label{fig:fastic-trip}
 \end{figure}
 
 The \texttt{RF\_FAULT} line is \textbf{open-collector}: any module on the VXI P2 bus can assert it. The RFP module's reaction is purely analog --- no DSP, no SNL, no EPICS involved.
@@ -356,7 +353,7 @@ AimIsr() {
 \end{codeblock}
 
 \begin{keynote}
-\textbf{Critical 2004 fix} (Sass, \texttt{rf\_\allowbreak{}interlock\_\allowbreak{}vxi.\allowbreak{}db} rev 1.2): Prior to January 2004, the VXI interlock records read the AIM \textbf{interrupt status register} (ISR). Because EPICS processed these records continuously, the ISR bits self-cleared on every read --- a latched fault could be invisible to the alarm system because it was cleared before alarm propagation. The fix changed to reading the AIM \textbf{fast interlock status/latch register}, which holds bits until the operator presses the hardware FAULT RESET button on the interlock chassis front panel. This was a significant reliability fix.
+\textbf{Critical 2004 fix} (Sass, \texttt{rf\_\allowbreak{}interlock\_\allowbreak{}vxi.\allowbreak{}db} rev 1.2): Prior to January 2004, the VXI interlock records read the AIM \textbf{interrupt status register} (ISR). Because EPICS processed these records continuously, the ISR bits self-cleared on every read --- a latched fault could be invisible to the alarm system because it was cleared before alarm propagation. The fix changed to reading the AIM \textbf{fast interlock status/latch register}, which holds bits until a fault reset (\texttt{MODU.RSTF}) clears them. This was a significant reliability fix.
 \end{keynote}
 
 The record \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU} then processes via a three-stage fanout (\texttt{FANO1} → \texttt{FANO2} → \texttt{FANO3}) that updates all derivative records.
@@ -372,10 +369,10 @@ PV & AIM Register & Content \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCCURSTT} & \texttt{MODU.ACST} & mbbiDirect --- 12-bit arc current status word (one bit per channel) \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & \texttt{MODU.ALST} & mbbiDirect --- 12-bit arc latched status (holds until FAULT RESET) \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & \texttt{MODU.ALST} & mbbiDirect --- 12-bit arc latched status (holds until a fault reset) \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCENBSTT} & \texttt{MODU.AFES} & mbbiDirect --- 12-bit arc enable bitmap \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTFLT} & \texttt{MODU.FFLT} & mbbiDirect --- fast fault status from Fast IC \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTINTSTT} & \texttt{MODU.FSTT} & mbbiDirect --- fast interlock state (daisy chain) \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTFLT} & \texttt{MODU.FFLT} & mbbiDirect --- first-fault arc channel \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTINTSTT} & \texttt{MODU.FSTT} & mbbiDirect --- fast interlock status register: VXI backplane, AB heartbeat, AB summary and forced faults, latched; HVPS on; spare fault \R{6}, \R{14} \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}INTSTATE} & \texttt{MODU.ISTT} & mbbiDirect --- overall AIM interlock state \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}INTACK} & \texttt{MODU.IACK} & mbboDirect --- interlock acknowledge \\
 \end{longtable}
@@ -390,7 +387,7 @@ These feed into \texttt{rf\_\allowbreak{}interlock\_\allowbreak{}vxi.\allowbreak
 \subsection{AIM Control Output Signals (Fiber Optic Outputs)}\label{sec:aim-outputs}
 
 
-The AIM module drives \textbf{6 control output signals} via the \texttt{FICTRL} (Fast Interlock Control) register (A16 address \texttt{0x20}). They are set by the SNL state machine and by the AIM's on-board fault logic \R{31}. They leave the AIM on J3, pass through the Fast Interlock Chassis (J15), which inverts them and converts them to light, and reach the RF Local Display Panel as six fibers \R{26}:
+The AIM module drives \textbf{6 control output signals} via the \texttt{FICTRL} (Fast Interlock Control) register (A16 address \texttt{0x20}). They are set by the SNL state machine and by the AIM's on-board fault logic \R{31}; the filament and solenoid commands are set by the operator. They leave the AIM on J3, pass through the Fast Interlock Chassis (J15), which inverts them and converts them to light, and reach the RF Local Display Panel as six fibers \R{26}:
 
 \begin{longtable}[]{@{}Q{\dimexpr 0.1008\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.1874\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.0982\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.2015\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.4122\linewidth-1.60\tabcolsep\relax}@{}}
 \toprule\noalign{}
@@ -399,24 +396,24 @@ Signal Name & EPICS PV & AIM FICTRL bit & Destination & Function \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Klystron Filament On & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FILAMENT} & bit 2 (\texttt{MODU.FOO}) & RF Local Display Panel (station online request), then the PLC-5 & Enables klystron filament heater; required before HVPS startup \\
-Solenoid On & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}SOLENOID} & bit 0 (\texttt{MODU.SOO}) & RF Local Display Panel (filament and focus request), then the PLC-5 & Enables solenoid; required before HVPS startup \\
+Klystron Filament On & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FILAMENT} & bit 2 (\texttt{MODU.FOO}) & RF Local Display Panel (filament and focus request), then the PLC-5 & Starts the PLC-5's filament warm-up and enables the focus supplies; required before HVPS startup \\
+Solenoid On & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}SOLENOID} & bit 0 (\texttt{MODU.SOO}) & RF Local Display Panel (station online request), then the PLC-5 & With the online key switch, sets the PLC-5's station-online bit (\texttt{STN:\allowbreak{}LOCAL:\allowbreak{}ON}); required before HVPS startup \\
 \textbf{HVPS On (aimon)} & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}HVPS} & bit 1 (\texttt{MODU.HVPS}) & RF Local Display Panel logic (HVPS on request) & \textbf{Hardware enable gate} --- AIM holds LOW at startup; SCR ENABLE cannot be lit until IOC asserts it in \texttt{HVPSONSUB} \\
-Force Beam Abort (fba) & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FRCBMABT} & bit 6 (\texttt{MODU.FBA}) & RF Local Display Panel (VXI beam abort), then its beam-abort output & Station not ready for beam; asserted in \texttt{s\_go\_off} Step 1 \\
-Fault Reset & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}RSTF} & bit 5 (\texttt{MODU.RSTF}) & Fast IC arc latches; RF Local Display Panel reset & Clears arc latches in Fast IC and AIM (equivalent to pressing front-panel FAULT RESET button) and the panel's latches \\
+Force Beam Abort (fba) & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FRCBMABT} & bit 6 (\texttt{MODU.FBA}) & RF Local Display Panel (VXI beam abort); its beam-abort output is not cabled & Station not ready for beam; asserted in \texttt{s\_go\_off} Step 1 \\
+Fault Reset & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}RSTF} & bit 5 (\texttt{MODU.RSTF}) & AIM latches; RF Local Display Panel and PLC-5 reset & Clears the AIM's arc and fast-interlock latches; through the fiber, resets the panel's latches and the PLC-5's \\
 Filament Timeout & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}FTOR} & bit 3 (\texttt{MODU.FTOR}) & RF Local Display Panel (filament timeout bypass), then the PLC-5 as a 24~V request & Filament timer bypass; not commonly used in normal SPEAR3 operation \\
 \end{longtable}
 
 \begin{keynote}
-\textbf{Note}: \texttt{Forced\_Fault} (bit 4, \texttt{MODU.FF}, PV \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FRCFLT}) is a test input of the Fast IC, not one of the six fibers, and \texttt{Beam\_Abort\_Reset} (bit 7) resets the AIM's beam-abort latch without a fiber of its own \R{26}, \R{31}.
+\textbf{Note}: \texttt{Forced\_Fault} (bit 4, \texttt{MODU.FF}, PV \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FRCFLT}) is the AIM's own forced fault, set from EPICS, not one of the six fibers, and \texttt{Beam\_Abort\_Reset} (bit 7) resets the AIM's beam-abort latch without a fiber of its own \R{26}, \R{31}.
 \end{keynote}
 
 Strobed signals (HVPS, FILTMOOVRD, FLTRESET, RSTBMABT) are written high then immediately re-cleared in the same processing cycle to avoid latching; latching signals (SOLENOID, FILAMENT, FRCDFLT, FRCBMABT) hold their state.
 
-\subsection{BATS --- Beam Abort Trip Signal}\label{sec:aim-bats}
+\subsection{Beam Abort}\label{sec:aim-bats}
 
 
-The state machine forces a beam abort (\texttt{fba}) whenever it turns the station off or enters TUNE (\texttt{TUNESUB}), and resets it when the station reaches ON or PARK with no faults \R{2}. The forced abort leaves the AIM as the VXI beam abort fiber, through the Fast Interlock Chassis, to the RF Local Display Panel. The panel's logic combines it with the HVPS STATUS fiber (the HVPS beam abort) and the main and bucking solenoid faults, latches the result until reset and drives a rear-panel BNC output (J6) \R{26}, \R{29}. The signal therefore tells the SPEAR MPS that the RF station is not ready for beam. The endpoint of J6 and the action taken at the SPEAR MPS are not on any RF drawing (O4).
+The state machine forces a beam abort (\texttt{fba}) whenever it turns the station off or enters TUNE (\texttt{TUNESUB}), and resets it when the station reaches ON or PARK with no faults \R{2}. The forced abort leaves the AIM as the VXI beam abort fiber, through the Fast Interlock Chassis, to the RF Local Display Panel. The panel's logic combines it with the HVPS STATUS fiber (the HVPS beam abort) and the main and bucking solenoid faults, latches the result until reset and drives a rear-panel BNC output (J6) \R{26}, \R{29}. The output was made for the PEP-II beam-abort system \R{33}; at SPEAR3 J6 is not cabled (checked November 2026), and the SPEAR MPS takes no status from the RF in hardware: it dumps the beam by removing the RF permit through VXI Slot~5. The beam abort therefore acts only inside the station: on the AIM's latch (\texttt{STN:BEAMABORT:STAT}), the panel's lamps and the ripple loop, which sets no new DC coefficient until the abort is reset. The code's comments call this reset ``resetting BATS''.
 
 \textbf{BATS reset sequence} (required before restarting):
 
@@ -439,7 +436,7 @@ There are \textbf{two completely separate} capture systems that activate on faul
 \subsubsection{System A --- AIM Hardware History Buffer (12-channel AIM only)}\label{sec:aim-hisbuf}
 
 
-The 12-channel AIM module includes a 512 KB on-module ring buffer (\texttt{HISBUF}, A24 address \texttt{0x0038}, \texttt{AIM\_\allowbreak{}K\_\allowbreak{}HISBUFID}). The \textbf{Fast IC has an onboard fast ADC} that continuously samples all arc channel voltages and the HVPS voltage, storing them into this AIM memory. Two \texttt{FICTRL} bits control the ADC:
+The 12-channel AIM module includes a 512 KB on-module ring buffer (\texttt{HISBUF}, A24 address \texttt{0x0038}, \texttt{AIM\_\allowbreak{}K\_\allowbreak{}HISBUFID}). An \textbf{on-board fast ADC of the AIM} continuously samples all arc channel voltages and the HVPS voltage into this memory \R{32}. Two \texttt{FICTRL} bits control the ADC:
 
 \begin{longtable}[]{@{}Q{\dimexpr 0.1075\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.0645\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.4839\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.3441\linewidth-1.50\tabcolsep\relax}@{}}
 \toprule\noalign{}
@@ -519,11 +516,10 @@ Input & Source & Connection & Notes \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Arc channel status (12 channels, \texttt{ARCCURSTT}) & Fast Interlock Chassis 340-308 & Direct chassis-to-module cable & Digital arc-detected status word, one bit per channel; ARCLTDSTT holds bits until FAULT RESET \\
-Fast IC interlock chain state (\texttt{FSTINTSTT}, \texttt{MODU.FSTT}) & Fast Interlock Chassis 340-308 & Direct chassis-to-module cable & Daisy-chain fast interlock state \\
-Fast IC fast fault status (\texttt{FSTFLT}, \texttt{MODU.FFLT}) & Fast Interlock Chassis 340-308 & Direct chassis-to-module cable & Aggregated fast fault indication \\
+Arc signals (12 channels) & Fast Interlock Chassis 340-308 & 37-pin cable, Fast IC J2 to AIM J4 & Analog, peak-detected; compared on the AIM with its thresholds; \texttt{ARCCURSTT} and \texttt{ARCLTDSTT} hold the comparator states, the latter until a fault reset \R{32} \\
+Spare fault & Fast IC spare-fault input & 37-pin cable, pin~34 & Read in the fast interlock status register (\texttt{FSTINTSTT}, \texttt{MODU.FSTT}) \R{6}, \R{32} \\
 AIM interrupt & AIM on-board IRQ logic & VXI interrupt line & \texttt{AIM\_M\_ARCDETD} (arc detected), \texttt{AIM\_\allowbreak{}M\_\allowbreak{}VXIBPFLT} (VXI backplane fault), \texttt{AIM\_\allowbreak{}M\_\allowbreak{}FRCDFLTINT} (forced fault), etc. \\
-AB summary and AB heartbeat & RF MPS PLC-5, through the RF Local Display Panel fibers and the Fast IC & J15 of the Fast IC to J3 of the AIM \R{26} & Watchdog for the PLC-5 and its summary fault; contributes to \texttt{AIMARC:LTCH} via first-fault register \\
+AB summary and AB heartbeat & RF MPS PLC-5, through the RF Local Display Panel fibers and the Fast IC & J15 of the Fast IC to J3 of the AIM \R{26} & The AIM latches an AB summary fault and, when the pulses stop, an AB heartbeat fault, in its fast interlock status register \R{14} \\
 AIM\_M\_SOFTWARE interrupt & EPICS IOC write & VXI register write & Software-triggered interrupt (for test/forced-fault operations) \\
 \end{longtable}
 
@@ -539,11 +535,11 @@ Output & Destination & Mechanism & Notes \\
 \endlastfoot
 \texttt{RF\_FAULT} assertion (open-collector LOW) & VXI P2 backplane & VXI bus & Sub-μs; causes RFP (slot 4) to zero RF drive DAC and CLK (slot 2) to react \\
 HVPS\_On fiber (\texttt{aimon}, \texttt{MODU.HVPS}) & RF Local Display Panel logic (HVPS on request $\rightarrow$ SCR ENABLE) & Through the Fast IC, then fiber & Software gate; must be explicitly asserted by SNL \texttt{HVPSONSUB}; AIM holds LOW at startup \\
-Klystron Filament On (\texttt{MODU.FOO}) & RF Local Display Panel (station online request), then the PLC-5 & Through the Fast IC, then fiber & Commanded by SNL; part of HVPS startup sequence \\
-Solenoid On (\texttt{MODU.SOO}) & RF Local Display Panel (filament and focus request), then the PLC-5 & Through the Fast IC, then fiber & Commanded by SNL; required before HVPS can be energized \\
-Force Beam Abort (\texttt{MODU.FBA}, \texttt{fba}) & RF Local Display Panel (VXI beam abort), then its beam-abort output & Through the Fast IC, then fiber & Station not ready for beam; asserted in \texttt{s\_go\_off} Step 1 \\
+Klystron Filament On (\texttt{MODU.FOO}) & RF Local Display Panel (filament and focus request), then the PLC-5 & Through the Fast IC, then fiber & Set by the operator, not by the SNL; the filament must be warm before HVPS turn-on \\
+Solenoid On (\texttt{MODU.SOO}) & RF Local Display Panel (station online request), then the PLC-5 & Through the Fast IC, then fiber & Set by the operator, not by the SNL; the station-online bit it sets is required before HVPS can be energized \\
+Force Beam Abort (\texttt{MODU.FBA}, \texttt{fba}) & RF Local Display Panel (VXI beam abort); its beam-abort output is not cabled & Through the Fast IC, then fiber & Station not ready for beam; asserted in \texttt{s\_go\_off} Step 1 \\
 Reset Beam Abort (\texttt{MODU.RBA}, \texttt{rba}) & AIM beam-abort latch & AIM register write & De-asserts the forced beam abort; used in recovery \texttt{RESET\_\allowbreak{}BMABTSUB} \\
-Fault Reset (\texttt{MODU.RSTF}, \texttt{rstf}) & AIM hardware latches & AIM register write & Clears \texttt{ARCLTDSTT}, \texttt{AIMARC:LTCH}, fast interlock latches --- same effect as hardware FAULT RESET button \\
+Fault Reset (\texttt{MODU.RSTF}, \texttt{rstf}) & AIM hardware latches & AIM register write & Clears \texttt{ARCLTDSTT}, \texttt{AIMARC:LTCH} and the fast interlock latches \\
 EPICS PVs (arc status, interlock state) & EPICS IOC (VxWorks) & EPICS CA record processing & \texttt{ARCCURSTT}, \texttt{ARCLTDSTT}, \texttt{ARCENBSTT}, \texttt{FSTFLT}, \texttt{INTSTATE} → \texttt{STN:VXI:LTCH} → alarm tree \\
 \end{longtable}
 
@@ -667,7 +663,7 @@ Fault source & Immediate HVPS hardware kill from this path & HVPS shutdown time 
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Arc / RF overpow. (Fast IC) & Through the AIM's commands and the panel logic, as their logic specifies (O4) & μs scale if so; otherwise through the cascade or the SNL \\
+Arc (Fast IC and AIM) & Through the AIM's commands and the panel logic, as their logic specifies (O4) & μs scale if so; otherwise through the cascade or the SNL \\
 RF MPS PLC (Path A) & Yes for collector and waveguide pressure faults --- SCR ENABLE removed by the panel logic (\textasciitilde10--15 ms); other faults through the cascade & \textasciitilde10--30 ms (hardware) \\
 SPEAR MPS / orbit (Slot 5) & \textbf{No} --- no panel input in this path from Slot 5 & \textasciitilde6 s (SNL orderly shutdown) --- \textbf{but in practice \textasciitilde20--30 ms} via collector overpower cascade → Path A (see \cref{sec:cascade}) \\
 \end{longtable}
@@ -744,7 +740,7 @@ EPICS PV & Record & Source & Description \\
 
 When klystron output power drops abruptly, the sudden impedance change at the output waveguide may produce a brief transient in reflected power at the klystron output junction. Operational calibration data records \texttt{\{STN\}:\allowbreak{}KLYSOUTREFL:\allowbreak{}POWER} (IQA1 Ch2) HIHI = 10.8 W, HIGH = 8.1 W --- these are the EPICS IQA-based software alarm thresholds.
 
-The Fast Interlock Chassis independently monitors reflected power at multiple waveguide points via dedicated analog diode detectors and hardwired comparators. If a transient at any monitored junction exceeds the Fast IC's threshold, the Fast IC trips in \textless{} 1 μs and the AIM cuts RF.
+No hardware comparator watches reflected power in the legacy station: the Fast Interlock Chassis has no reflected-power inputs \R{32}, so a transient acts only through the IQA software thresholds above.
 
 However, this mechanism is conditional and less certain than Mechanism 1:
 
@@ -753,13 +749,13 @@ However, this mechanism is conditional and less certain than Mechanism 1:
 \item
   \textbf{Circulator isolation}: The circulator between the klystron output and the cavities is specifically designed to route reflected power (including cavity ring-down) to a load port, providing \textasciitilde20 dB or better isolation to the klystron. A well-functioning circulator absorbs the transient.
 \item
-  \textbf{Threshold uncertainty}: The Fast IC's analog comparator threshold is not directly software-readable; it may differ from the EPICS IQA HIHI thresholds.
+  \textbf{Software only}: the IQA thresholds act through EPICS, at the IQA's update rate, not in hardware.
 \item
-  \textbf{Drive-level dependence}: If the klystron was operating at reduced power before the trip, the reflected power transient may be too small to exceed the Fast IC threshold.
+  \textbf{Drive-level dependence}: If the klystron was operating at reduced power before the trip, the reflected power transient may be too small to exceed the IQA threshold.
 \end{itemize}
 
 \begin{keynote}
-\textbf{Conclusion}: Mechanism 1 (collector overpower) is the dominant, reliable secondary trip that fires after any RF drive cutoff with HVPS energized at normal operating power. Mechanism 2 (reflected power transient) is a possible additional trigger but is not guaranteed.
+\textbf{Conclusion}: Mechanism 1 (collector overpower) is the dominant, reliable secondary trip that fires after any RF drive cutoff with HVPS energized at normal operating power. Mechanism 2 (reflected power transient) is a possible additional software trigger but is not guaranteed.
 \end{keynote}
 
 \subsection{Net Effect on HVPS Kill Timing}\label{sec:cascade-net}
@@ -774,7 +770,7 @@ Scenario & HVPS kill mechanism & Time from SPEAR MPS / orbit trip \\
 \endlastfoot
 Software path only (no cascade) & SNL \texttt{s\_go\_off} Step 4: \texttt{hvpstrig=OFF} & \textasciitilde6 s \\
 Via collector overpower cascade (normal operation) & RF MPS PLC collector summary → RF Local Display Panel logic: SCR ENABLE removed (crowbar as the logic specifies) & \textbf{\textasciitilde20--30 ms} \\
-Via reflected power transient (conditional) & Fast IC analog comparator trip, then the AIM and the panel logic (O4) & \textless{} 1 μs to the RF cut (if it fires) \\
+Via reflected power transient (conditional) & No hardware path: only the IQA software alarm & Software time scale (if it fires) \\
 \end{longtable}
 
 \begin{keynote}
@@ -1311,7 +1307,7 @@ Input PV & Source & Connection & Role \\
 \texttt{\{STN\}:\allowbreak{}HVPS:\allowbreak{}VOLT} (\texttt{hvpsvoltrd}) & SLC-500 AI (RIO word 30) & EPICS CA \texttt{pvGet} & HVPS voltage readback for ramp control \\
 \texttt{\{STN\}:\allowbreak{}HVPS:\allowbreak{}CURR} & SLC-500 AI (RIO word 31) & EPICS CA \texttt{pvGet} & HVPS current readback \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & AIM ARCLTDSTT register & EPICS CA \texttt{pvMonitor} & Arc latched status --- used to distinguish arc fault from other faults \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{}LTCH} (\texttt{forced\_fault}) & AIM first-fault register bit & EPICS CA \texttt{pvMonitor} & Hard arc latch --- blocks auto-reset \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{}LTCH} (\texttt{forced\_fault}) & AIM fast interlock status register bit & EPICS CA \texttt{pvMonitor} & Forced fault set from EPICS --- blocks auto-reset \\
 \texttt{\{STN\}:\allowbreak{}HVPSOFF:\allowbreak{}SUMY:\allowbreak{}STAT} & EPICS HVPS alarm tree & EPICS CA \texttt{pvMonitor} & HVPS off/fault status, feeds \texttt{fault\_stnoff} \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}LOCAL:\allowbreak{}ON} & Local panel switch & EPICS CA & Local/remote mode; local mode forces OFF \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}STATE} (\texttt{stnstate}) & EPICS state PV & EPICS CA & Station state (restored at boot in \texttt{s\_init}) \\
@@ -1329,7 +1325,7 @@ Output PV & Destination & Action \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FRCBMABT} (\texttt{fba}) & AIM \texttt{MODU.FBA} → RF Local Display Panel → beam-abort output & Force Beam Abort --- station not ready for beam; set in \texttt{s\_go\_off} Step 1 \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FRCBMABT} (\texttt{fba}) & AIM \texttt{MODU.FBA} → RF Local Display Panel (output J6 not cabled) & Force Beam Abort --- station not ready for beam; set in \texttt{s\_go\_off} Step 1 \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}RBA} (\texttt{rba}) & AIM \texttt{MODU.RBA} & Reset Beam Abort --- de-asserts the forced beam abort during recovery \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}RSTF} (\texttt{rstf}) & AIM hardware latches & Resets all AIM arc latches and fast interlock latches \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}HVPS} (\texttt{aimon}) & AIM HVPS\_On → RF Local Display Panel (HVPS on request) & Hardware gate for SCR ENABLE; set in \texttt{HVPSONSUB} \\
@@ -1485,10 +1481,10 @@ if (fault == NO_ALARM) {
 \setcounter{enumi}{2}
 \tightlist
 \item
-  The station stays locked in \texttt{s\_off} until an operator physically presses the \textbf{FAULT RESET} button on the Fast Interlock Chassis front panel --- this clears the AIM hardware latch and de-asserts \texttt{forced\_fault}
+  The station stays locked in \texttt{s\_off} until an operator turns the forced fault off (\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FRCFLT}) and resets the AIM from EPICS (\texttt{MODU.RSTF}) --- this clears the AIM latch and de-asserts \texttt{forced\_fault}. The Fast Interlock Chassis has no reset button: its FAULT RESET is a lamp that shows the AIM's reset command \R{32}
 \end{enumerate}
 
-This was a SPEAR3-specific customization (Sass comment 2004: \emph{"SPEAR is using forced fault to trip the station under certain conditions"}) to prevent automatic recovery after hard arcs.
+This was a SPEAR3-specific customization (Sass comment 2004: \emph{"SPEAR is using forced fault to trip the station under certain conditions"}): an operator sets the forced fault from EPICS to trip the station and keep it from resetting itself.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -1501,8 +1497,8 @@ This was a SPEAR3-specific customization (Sass comment 2004: \emph{"SPEAR is usi
 \begin{timeline}
   \tlrow{t = 0 ns}{Arc breakdown at cavity waveguide window:\newline
       $\rightarrow$~fiber-optic light pulse arrives at Fast Interlock Chassis}
-  \tlrow{t < 1 μs}{Fast IC analog comparator fires:\newline
-      $\rightarrow$~Status word updated → AIM module received\newline
+  \tlrow{t < 1 μs}{The Fast IC passes the peak-detected pulse; the AIM's comparator fires:\newline
+      $\rightarrow$~the AIM latches the channel (\texttt{ARCLTDSTT})\newline
       $\rightarrow$~If the AIM's fault logic drops the HVPS on request or forces\newline
       the beam abort, the RF Local Display Panel logic removes SCR ENABLE\newline
       (fiber → HVPS controller, B118) and, as its equations specify,\newline
@@ -1661,7 +1657,7 @@ This example illustrates a \textbf{HVPS internal fault} monitored by the SLC-500
 \end{timeline}
 
 \begin{keynote}
-\textbf{Key features of this type of trip}: (1) The SLC-500 HVPS PLC is the first actor (\textasciitilde10--20 ms); the RF MPS PLC and Fast IC are not involved. (2) HVPS shutdown is via the \textbf{SLC-500 supervisory output} (\cref{sec:scr-enable} path) --- this is distinct from the SCR ENABLE fiber of the RF Local Display Panel. (3) The HVPS STATUS fiber goes dark with the 24~V fault/enable; the RF Local Display Panel receives it as the HVPS beam abort and drives its beam-abort output, but the fiber does not reach the Fast IC or the AIM. (4) \textbf{RF drive shutdown signal chain}: There is no documented hardware path from the SLC-500 HVPS PLC trip to the RFP module RF drive. The RF drive remains asserted at the software level until \texttt{s\_go\_off} Step 6 writes \texttt{rfswitch\ =\ OFF} at approximately t ≈ 6 s after the initial trip. During the intervening period the klystron cathode HV has already collapsed --- the klystron produces no RF output even with drive signal still applied, because klystron amplification requires cathode high voltage. This is safe but the indirection must be understood. See \cref{sec:xl-rf-shutdown} for the complete RF shutdown signal trace for this scenario. (5) Fault files capture the RF/IQA signal waveform at HVPS collapse time. (6) The \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} bit identifies the source; \texttt{ARCLTDSTT\ =\ 0} and \texttt{FSTFLT\ =\ 0} confirm no waveguide arc was involved.
+\textbf{Key features of this type of trip}: (1) The SLC-500 HVPS PLC is the first actor (\textasciitilde10--20 ms); the RF MPS PLC and Fast IC are not involved. (2) HVPS shutdown is via the \textbf{SLC-500 supervisory output} (\cref{sec:scr-enable} path) --- this is distinct from the SCR ENABLE fiber of the RF Local Display Panel. (3) The HVPS STATUS fiber goes dark with the 24~V fault/enable; the RF Local Display Panel receives it as the HVPS beam abort and sets its beam-abort output, which is not cabled; the fiber does not reach the Fast IC or the AIM. (4) \textbf{RF drive shutdown signal chain}: There is no documented hardware path from the SLC-500 HVPS PLC trip to the RFP module RF drive. The RF drive remains asserted at the software level until \texttt{s\_go\_off} Step 6 writes \texttt{rfswitch\ =\ OFF} at approximately t ≈ 6 s after the initial trip. During the intervening period the klystron cathode HV has already collapsed --- the klystron produces no RF output even with drive signal still applied, because klystron amplification requires cathode high voltage. This is safe but the indirection must be understood. See \cref{sec:xl-rf-shutdown} for the complete RF shutdown signal trace for this scenario. (5) Fault files capture the RF/IQA signal waveform at HVPS collapse time. (6) The \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} bit identifies the source; \texttt{ARCLTDSTT\ =\ 0} and \texttt{FSTFLT\ =\ 0} confirm no waveguide arc was involved.
 \end{keynote}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -1674,9 +1670,9 @@ Operator observes fault via EPICS display
     → Checks fault files (/dat/FAULT*_N for latest fault slot)
     → Identifies fault channel (ARCLTDSTT bit, FSTFLT word, etc.)
 
-Physical action:
-    → Presses FAULT RESET on Fast Interlock Chassis front panel
-      → Clears hardware arc latches in AIM module
+Reset (EPICS):
+    → Forced fault off; fault reset to the AIM (MODU.RSTF)
+      → Clears the arc latches in the AIM module
       → Clears forced_fault latch
       → ARCLTDSTT bits cleared
       → {STN}:STN:FORCED:LTCH → OK → STNMPS:SUMY:LTCH clears
@@ -1770,7 +1766,7 @@ PV & Value & Interpretation \\
 
 \textbf{Key feature}: The \texttt{KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} flag appears as the hardware event that killed the HVPS --- even though the root cause was SPEAR MPS. An operator must compare EPICS archiver timestamps: \texttt{STN:MPS:LTCH} timestamp precedes \texttt{KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} by \textasciitilde15--20 ms, confirming the cascade direction. With default 1 Hz archiver resolution, both may appear at the same timestamp; event-driven archiving is required for precise sequencing.
 
-\textbf{Recovery}: Standard recovery sequence (\cref{sec:tl-recovery}). Both \texttt{STN:MPS:LTCH} and \texttt{KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} must clear (SPEAR MPS must restore its permit; operator presses FAULT RESET) before the station can return to ON\_CW.
+\textbf{Recovery}: Standard recovery sequence (\cref{sec:tl-recovery}). Both \texttt{STN:MPS:LTCH} and \texttt{KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} must clear (SPEAR MPS must restore its permit; then a fault reset) before the station can return to ON\_CW.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -1795,12 +1791,12 @@ In the fault path, \texttt{aimon} is NOT explicitly cleared in \texttt{s\_go\_of
 \subsection{\texorpdfstring{\texttt{forced\_fault} Anti-Auto-Reset}{forced\_fault Anti-Auto-Reset}}\label{sec:xl-forced-fault}
 
 
-Without \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{}LTCH}, the auto-reset state (\texttt{s\_\allowbreak{}go\_\allowbreak{}stn\_\allowbreak{}reset}) would retry \texttt{reset\_count} times automatically. With \texttt{forced\_\allowbreak{}fault\ =\ MAJOR}, the auto-reset loop exits immediately to \texttt{s\_off}, requiring operator intervention. This prevents the HVPS from automatically re-energizing after a hard arc event --- critical for SPEAR3 where arc repetition can damage cavity surfaces.
+Without \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{}LTCH}, the auto-reset state (\texttt{s\_\allowbreak{}go\_\allowbreak{}stn\_\allowbreak{}reset}) would retry \texttt{reset\_count} times automatically. With \texttt{forced\_\allowbreak{}fault\ =\ MAJOR}, the auto-reset loop exits immediately to \texttt{s\_off}, requiring operator intervention. This keeps a station that an operator has tripped on purpose from re-energizing itself.
 
 \subsection{VXI Interlock Latch Register Fix (2004)}\label{sec:xl-latchfix}
 
 
-Before January 2004, VXI interlock bits were read from the AIM interrupt status register (ISR). EPICS processed the AIM:MODU record continuously, and each read cleared the ISR --- a latched fault could be invisible to the alarm system because it self-cleared between EPICS scans. Sass changed \texttt{rf\_\allowbreak{}interlock\_\allowbreak{}vxi.\allowbreak{}db} (rev 1.2, Jan 2004) to read from the AIM \textbf{fast interlock status/latch register}, which holds bits until the hardware FAULT RESET button is pressed. \textbf{This is a critical reliability fix} --- without it, the software alarm chain would miss fast faults.
+Before January 2004, VXI interlock bits were read from the AIM interrupt status register (ISR). EPICS processed the AIM:MODU record continuously, and each read cleared the ISR --- a latched fault could be invisible to the alarm system because it self-cleared between EPICS scans. Sass changed \texttt{rf\_\allowbreak{}interlock\_\allowbreak{}vxi.\allowbreak{}db} (rev 1.2, Jan 2004) to read from the AIM \textbf{fast interlock status/latch register}, which holds bits until a fault reset clears them. \textbf{This is a critical reliability fix} --- without it, the software alarm chain would miss fast faults.
 
 \subsection{Dual SCR Enable Paths --- Supervisory vs. Fast}\label{sec:xl-dual-scr}
 
@@ -1870,8 +1866,8 @@ The complete RF shutdown signal trace for a HVPS PLC-only trip is:
       $\rightarrow$~HVPS HV output begins to collapse (SCR gates disabled)}
   \tlrow{t ≈ 0 ms}{HVPS STATUS fiber goes dark (it follows the 24~V fault/enable):\newline
       $\rightarrow$~RF Local Display Panel receives the HVPS beam abort\newline
-      $\rightarrow$~The panel's beam-abort output is set; no documented path\newline
-      leads from it to the AIM or the RFP (O4)}
+      $\rightarrow$~The panel's beam-abort output is set; it is not cabled, so\newline
+      nothing leads from it to the AIM or the RFP}
   \tlrow{t ≈ 0 ms}{KLYSTRON CATHODE VOLTAGE COLLAPSES:\newline
       $\rightarrow$~Klystron cathode at approximately 0 V (or HVPS residual)\newline
       $\rightarrow$~RF drive signal still present from RFP module (software unaware)\newline
@@ -1898,7 +1894,7 @@ The complete RF shutdown signal trace for a HVPS PLC-only trip is:
 
 \textbf{Why the \textasciitilde6 s latency is safe}: A klystron is a velocity-modulation amplifier that requires cathode high voltage to produce RF output. Without cathode HV, even a full-amplitude drive signal produces no forward power. The cavity fields have completely decayed within \textasciitilde1 ms of HV collapse. The \textasciitilde6 s period between HVPS trip and \texttt{rfswitch\ =\ OFF} therefore does not produce any RF output and poses no equipment hazard --- the klystron is a passive, inert component during this window.
 
-\textbf{No direct hardware RF kill path from HVPS PLC}: Unlike an arc at the Fast IC (where the AIM asserts RF\_FAULT to cut drive), the SLC-500 HVPS PLC trip path has no documented direct RF kill. Its STATUS fiber ends on the RF Local Display Panel, whose beam-abort output's endpoint is not documented (O4).
+\textbf{No direct hardware RF kill path from HVPS PLC}: Unlike an arc at the Fast IC (where the AIM asserts RF\_FAULT to cut drive), the SLC-500 HVPS PLC trip path has no documented direct RF kill. Its STATUS fiber ends on the RF Local Display Panel, whose beam-abort output is not cabled.
 
 \textbf{Possible indirect secondary path (not guaranteed)}: If the sudden HVPS voltage collapse causes reflected power to rise at the cavity junctions (forward power drops → VSWR increases), the RF MPS PLC may detect a reflected power trip condition and set its AB summary fault (Path A: fiber → AIM → RF\_FAULT). This would cut RF drive in \textasciitilde10--15 ms via AIM → VXI backplane. However, this secondary path is \textbf{not guaranteed}: if drive power was low before the trip, reflected power may stay below the MPS threshold.
 
@@ -1991,7 +1987,7 @@ Source & What It Captures & Time Resolution & Latency to Availability & Storage 
 \subsection{AIM Hardware History Buffer}\label{sec:fd-hisbuf}
 
 
-\textbf{What it contains}: The Fast Interlock Chassis (340-308) onboard fast ADC continuously digitizes all 12 arc channel voltages and the HVPS DC voltage into the AIM module's 512 KB ring buffer (\texttt{HISBUF}, A24 address space, offset \texttt{0x0038}). On fault, the \texttt{ADCCTL} bit freezes the buffer, preserving the pre-fault arc waveforms.
+\textbf{What it contains}: The AIM's on-board fast ADC continuously digitizes the 12 arc channel voltages from the Fast Interlock Chassis (340-308) and the HVPS DC voltage into the AIM module's 512 KB ring buffer (\texttt{HISBUF}, A24 address space, offset \texttt{0x0038}). On fault, the \texttt{ADCCTL} bit freezes the buffer, preserving the pre-fault arc waveforms.
 
 \textbf{Where stored}: VXI AIM module on-board memory. The device driver (\texttt{devP2RfAim.c}) reads arc voltage peaks via the \texttt{ARCVOL} register and crate voltage via \texttt{CRTVOL}. The history data is exported to \texttt{/\allowbreak{}dat/\allowbreak{}aimHist.\allowbreak{}dat} on the IOC. Note: buffer readout is \textbf{gated} --- if \texttt{FISTAT.\allowbreak{}HVPSON\ =\ 0} (HVPS off at fault time), the driver skips arc voltage readback.
 
@@ -2005,8 +2001,8 @@ PV & Content \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCCURSTT} & 12-bit real-time arc channel status (clears when arc ends) \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & 12-bit latched arc channel status (holds until FAULT RESET button pressed) \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTFLT} & Fast IC aggregated fast fault status word \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & 12-bit latched arc channel status (holds until a fault reset) \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTFLT} & First-fault arc channel \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}INTSTATE} & AIM overall interlock state \\
 \end{longtable}
 
@@ -2140,7 +2136,7 @@ Category & PV & What to Look For \\
 \bottomrule\noalign{}
 \endlastfoot
 Arc fault & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & Which bit(s) set at fault time? \\
-Fast IC fault & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTFLT} & Fast IC fault word at trip instant \\
+First arc channel & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTFLT} & Which arc channel tripped first \\
 MPS PLC & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH} & Did MPS PLC trip independently of arc? \\
 HVPS summary & \texttt{\{STN\}:\allowbreak{}HVPSSTN:\allowbreak{}SUMY:\allowbreak{}LTCH} & Which HVPS sub-fault latched? \\
 Transformer arc & \texttt{\{STN\}:\allowbreak{}HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} & HV transformer internal arc event? \\
@@ -2149,7 +2145,7 @@ Overvoltage & \texttt{\{STN\}:\allowbreak{}HVPS:\allowbreak{}VOLT:\allowbreak{}L
 HVPS voltage & \texttt{\{STN\}:\allowbreak{}HVPS:\allowbreak{}VOLT} & Pre-fault and collapse waveform (1 Hz; limited time resolution) \\
 Station state & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}STATE} & State machine transitions: ON\_CW → s\_go\_off → OFF \\
 Fault slot & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FAULT:\allowbreak{}NUM} & Fault file slot number --- use to locate \texttt{/dat/FAULT*\_N} files \\
-Forced fault & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{}LTCH} & Hard arc latch --- requires manual FAULT RESET to clear \\
+Forced fault & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{}LTCH} & Forced fault set from EPICS (\texttt{STN:\allowbreak{}AIM:\allowbreak{}FRCFLT}); blocks the automatic reset until it is turned off and reset \\
 \end{longtable}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -2179,7 +2175,7 @@ Forced fault & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{
   \item
     \texttt{STN:MPS:LTCH} set → MPS PLC trip (cooling, vacuum, or power)
   \item
-    \texttt{STN:\allowbreak{}FORCED:\allowbreak{}LTCH} set → Hard arc; manual FAULT RESET required before recovery
+    \texttt{STN:\allowbreak{}FORCED:\allowbreak{}LTCH} set → Forced fault from EPICS; turn it off and reset before recovery
   \end{itemize}
 \item
   \textbf{Note fault slot number} from \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FAULT:\allowbreak{}NUM} --- needed to retrieve fault files
@@ -2194,7 +2190,7 @@ Forced fault & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{
     Did CH4 drop at the same instant as CH1, or before?
   \end{itemize}
 \item
-  \textbf{Do NOT press FAULT RESET} on the Fast Interlock Chassis front panel until the cause is understood --- pressing it clears the arc latch evidence
+  \textbf{Do NOT issue a fault reset} until the cause is understood --- the reset clears the arc latch evidence
 \end{enumerate}
 
 \subsubsection{Detailed Analysis (after initial survey)}\label{sec:fd-detailed}
@@ -2236,9 +2232,9 @@ Observed Indicators & Most Likely Initiating Event & First Actor \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\texttt{ARCLTDSTT} bits 0--3 set & Cavity waveguide window arc (cavity N = bit N) & Fast IC (\textless{} 1 μs) \\
-\texttt{ARCLTDSTT} bit 4 set & Klystron output window arc & Fast IC (\textless{} 1 μs) \\
-\texttt{ARCLTDSTT} bit 5 set & Main circulator arc & Fast IC (\textless{} 1 μs) \\
+\texttt{ARCLTDSTT} bits 0--3 set & Cavity waveguide window arc (cavity N = bit N) & AIM, on the Fast IC signal (\textless{} 1 μs) \\
+\texttt{ARCLTDSTT} bit 4 set & Klystron output window arc & AIM, on the Fast IC signal (\textless{} 1 μs) \\
+\texttt{ARCLTDSTT} bit 5 set & Main circulator arc & AIM, on the Fast IC signal (\textless{} 1 μs) \\
 \texttt{ARCLTDSTT\ =\ 0}, \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} set & HV transformer internal arc & SLC-500 HVPS PLC (\textasciitilde10--20 ms) \\
 \texttt{ARCLTDSTT\ =\ 0}, \texttt{HVPS:\allowbreak{}CROWBAR:\allowbreak{}LTCH} set, no arc latch & HVPS overvoltage → crowbar self-fired; OR analog crowbar threshold exceeded & Crowbar analog circuit (\textless{} 1 μs) \\
 \texttt{ARCLTDSTT\ =\ 0}, \texttt{STN:MPS:LTCH} set & RF MPS PLC trip (cooling water over-temp, vacuum excursion, or overpower) & RF MPS PLC (\textasciitilde10 ms) \\
@@ -2275,7 +2271,7 @@ PV & Description & Normal State \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}RBA} & Reset Beam Abort (\texttt{rba}) & --- (write only) \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & Arc latched status (12-bit word) & 0 = no arc \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCCURSTT} & Arc current status (12-bit word) & 0 = no arc \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTFLT} & Fast fault status from Fast IC & 0 = OK \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTFLT} & First-fault arc channel & 0 = none \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}VXI:\allowbreak{}LTCH} & VXI interlock latch (from AIM latch register) & OK \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{}LTCH} & Forced fault latch (blocks auto-reset) & OK \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH} & RF MPS PLC permit status & OK \\
@@ -2376,4 +2372,6 @@ Ref & File & Location & Content \\
 \RDEF{29} & RF Local Display Panel drawings & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}localPanel/} & DL-340-310-00, front and rear panels SI-340-310-05 and -02, schematic SD-340-311-01 (GAL22V10 logic, fiber transceivers, beam-abort BNC J6) \\
 \RDEF{30} & Wiring diagrams WD-340-330-29 and -02 & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}mpsWiringDiagrams/} & Control fiber-optic cables of the RF Local Display Panel; cross-connect X530 to its connectors J2 and J3 \\
 \RDEF{31} & \texttt{SP3\_writeup\_\allowbreak{}V1d2.\allowbreak{}pdf} & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}legacyArchitecture/} & J. Dusatko, SPEAR3 LLRF system description, v1.2 --- the AIM's six control signals, set by register bits and its on-board fault logic \\
+\RDEF{32} & Fast Interlock Chassis and AIM schematics & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}legacyInterfaceModules/} & SD-340-308-01 and -02 (Fast IC: photodetectors and peak detectors, command fibers, RF detector; J2, J15, J16, J31, J32) and SD-340-309-01 (AIM: comparators with DAC thresholds, latches, fast ADC; J3, J4) \\
+\RDEF{33} & PEP-II RF station block diagram BD-340-330-00 & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}legacyArchitecture/} & P.~Corredoura, 1999: the local panel's beam-abort output leaves the station for the PEP-II beam-abort system \\
 \end{longtable}

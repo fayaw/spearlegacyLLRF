@@ -63,7 +63,7 @@
 % The panel, not the Fast IC, terminates the three HVPS fibers.
 \node[plc,text width=38mm,anchor=north] (panel) at (75,-88)
   {\textbf{RF LOCAL DISPLAY}\\\textbf{PANEL 340-310}\quad[B132]\\[2pt]
-   Logic $\rightarrow$ \mbox{SCR ENABLE}, \mbox{KLYSTRON CROWBAR}, beam abort (J6)\\[2pt]
+   Logic $\rightarrow$ \mbox{SCR ENABLE}, \mbox{KLYSTRON CROWBAR}, beam abort (J6, not cabled)\\[2pt]
    STATUS = HVPS beam abort};
 \draw[sig,{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]}] (panel.north |- mps.south)
   -- node[tagr,align=left]{hardwired, J2/J3\\via X530} (panel.north);
@@ -76,8 +76,8 @@
 
 \node[plc,text width=40mm,anchor=north] (fic) at (\colR,-88)
   {\textbf{FAST INTERLOCK CHASSIS}\\\textbf{340-308}\quad[B132]\\[2pt]
-   In: optical arc detectors (fiber)\\and reflected-power detectors\\[2pt]
-   Out: FISTAT $\rightarrow$ AIM (J15)};
+   In: arc-detector fibers;\\AIM commands (J15)\\[2pt]
+   Out: analog arc signals\\$\rightarrow$ AIM (J4)};
 % AIM commands out, AB summary and heartbeat back
 \coordinate (pE) at ($(panel.north east)!0.6!(panel.south east)$);
 \draw[fib,{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]}] (pE)
