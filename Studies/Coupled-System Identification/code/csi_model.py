@@ -33,21 +33,30 @@ from dataclasses import dataclass, field, replace
 
 import numpy as np
 
-# ------------------------------------------------------------------ fixed physics (Doc P sec. 1-2)
+# ------------------------------------------------------------------ fixed physics
+# Ring: SPEAR 3 Design Report (Hettel et al., SLAC-R-609, 2002), Table 3.2 and 3.4: E0 3 GeV, h 372, dipole loss
+# 912 keV with J_s 1.79; alpha_c 1.18e-3 of the operating achromat lattice (Huang et al., PAC'07).
+# Cavities: R/Q 117.3 ohm (circuit convention, R = V^2/2P) and Q0 32 469, measured on the PEP-II production cavities
+# (Rimmer, Byrd and Li, PRSTAB 3, 102001, 2000, Table I).
+# U0 from the power balance of the four cavities at 500 mA in the station snapshots of 2026 (make_numbers.py):
+# forward - reflected - wall power, the wall power from the probe voltages and R/Q Q0; the insertion devices add
+# their loss to the dipoles' 912 keV and damp with J_s = 2 (they sit in dispersion-free straights).
 E0_EV = 3.0e9
 HARMONIC = 372
 F_RF = 476.3039e6
 W_RF = 2 * math.pi * F_RF
 T_REV = HARMONIC / F_RF
 ALPHA_C = 1.18e-3
-U0_EV = 1.09e6
-J_S = 2.0 + (1.79 - 2.0) * 0.912e6 / U0_EV          # dipoles (1.79) + insertion devices (2): 1.82
-ALPHA_RAD = J_S * U0_EV / (2 * E0_EV * T_REV)         # 424 1/s
-R_OVER_Q = 116.6                                      # ohm per cavity, circuit convention
+U0_EV = 1.10e6
+U0_DIPOLES_EV = 0.912e6
+J_S = 2.0 + (1.79 - 2.0) * U0_DIPOLES_EV / U0_EV      # dipoles (1.79) + insertion devices (2): 1.83
+ALPHA_RAD = J_S * U0_EV / (2 * E0_EV * T_REV)         # 429 1/s
+R_OVER_Q = 117.3                                      # ohm per cavity, circuit convention
+Q0_CAV = 32469.0
 N_CAV = 4
 KAPPA1 = ALPHA_C * W_RF / (E0_EV * T_REV)             # 1/(V s^2)
 
-# RFP networks of the RFgui loop models (RFgui/compute_loop.m), as in Doc P sec. 6.2
+# RFP networks from the module's circuit values (lead: 301 ohm, 560 pF, 196 ohm; lag: 499 ohm, 5620 ohm, 0.1 uF)
 LEAD_FZ = 1 / (2 * math.pi * 301 * 560e-12)                       # 944 kHz
 LEAD_FP = 1 / (2 * math.pi * (196 * 301 / 497) * 560e-12)         # 2.39 MHz
 LAG_FZ = 1 / (2 * math.pi * 499 * 0.1e-6)                         # 3.19 kHz
@@ -67,8 +76,10 @@ class Station:
     Q_L: float = 6700.0
     df: float = 0.0                   # mean detuning f_r - f_RF [Hz]
     df_spread: float = 0.0            # cavities at df + df_spread * (-1.5, -0.5, 0.5, 1.5)/1.5
+    q_rel: tuple = (1.0, 1.0, 1.0, 1.0)   # loaded Q of each cavity relative to Q_L (measured from the reflection)
     g_A: float = 1.0
     k_AP: float = 0.0
+    f_A: float = 0.0                  # bandwidth of the klystron's amplitude response [Hz]; 0: memoryless
     alpha: float = 45.0               # noise direction in the cavity frame
     theta_g: float | None = None      # klystron frame; None: steady generator-current angle from beam loading
     f_amp: float = F_AMP
@@ -180,9 +191,17 @@ def chain(st: Station, s):
     return c
 
 
-def klystron_matrix(st: Station) -> np.ndarray:
+def klystron_matrix(st: Station, s=None) -> np.ndarray:
+    """K in the cavity frame, (2, 2); with a finite amplitude bandwidth f_A and Laplace variables s, (n, 2, 2): the
+    amplitude path g_A and the AM/PM conversion k_AP follow the output amplitude through w_A/(s + w_A)."""
     th = st.steady()["theta_g"] if st.theta_g is None else math.radians(st.theta_g)
-    return _rot(th) @ np.array([[st.g_A, 0.0], [st.k_AP, 1.0]]) @ _rot(-th)
+    if not st.f_A or s is None:
+        return _rot(th) @ np.array([[st.g_A, 0.0], [st.k_AP, 1.0]]) @ _rot(-th)
+    s = np.atleast_1d(np.asarray(s, dtype=complex))
+    lp = 2 * math.pi * st.f_A / (s + 2 * math.pi * st.f_A)
+    k = np.zeros(s.shape + (2, 2), dtype=complex)
+    k[:, 0, 0], k[:, 1, 0], k[:, 1, 1] = st.g_A * lp, st.k_AP * lp, 1.0
+    return np.einsum("ij,njk,kl->nil", _rot(th), k, _rot(-th))
 
 
 @dataclass
@@ -199,7 +218,7 @@ class Blocks:
 def blocks(st: Station, s) -> Blocks:
     s = np.atleast_1d(np.asarray(s, dtype=complex))
     w = st.w_half
-    zk = [_resonator(s, st.R_L, w, 2 * math.pi * d) for d in st.detunings]
+    zk = [_resonator(s, st.R_L * q, w / q, 2 * math.pi * d) for d, q in zip(st.detunings, st.q_rel)]
     z_sum = sum(zk)
     z_m = z_sum / N_CAV
     ps = st.phi_s
@@ -216,9 +235,11 @@ def blocks(st: Station, s) -> Blocks:
     else:
         d_open = np.full(s.shape, np.nan + 0j)
         p_b = z_m
-    K = klystron_matrix(st)
+    K = klystron_matrix(st, s)
+    if K.ndim == 2:
+        K = np.broadcast_to(K, s.shape + (2, 2))
     c = chain(st, s)
-    M = (st.G * c / st.R_L)[:, None, None] * np.einsum("ij,njk,kl->nil", _rot(math.radians(st.theta)), p_b, K)
+    M = (st.G * c / st.R_L)[:, None, None] * np.einsum("ij,njk,nkl->nil", _rot(math.radians(st.theta)), p_b, K)
     return Blocks(s, z_sum, z_m, p_b, d_open, M, K)
 
 

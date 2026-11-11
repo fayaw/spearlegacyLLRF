@@ -6,7 +6,7 @@
 %Control: page (0) single
 %Control: year (1) truncated
 %Control: production of eprint (0) enabled
-\begin{thebibliography}{24}%
+\begin{thebibliography}{27}%
 \makeatletter
 \providecommand \@ifxundefined [1]{%
  \@ifx{#1\undefined}
@@ -153,14 +153,14 @@
   {\bibfield  {journal} {\bibinfo  {journal} {IEEE Trans. Signal Process.}\
   }\textbf {\bibinfo {volume} {43}},\ \bibinfo {pages} {2030} (\bibinfo {year}
   {1995})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Hettel}\ \emph {et~al.}(1999)\citenamefont {Hettel}
-  \emph {et~al.}}]{Hettel1999}%
+\bibitem [{\citenamefont {Hettel}\ \emph {et~al.}(2002)\citenamefont {Hettel}
+  \emph {et~al.}}]{Hettel2002}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
-  {Hettel}} \emph {et~al.},\ }\bibfield  {title} {\bibinfo {title} {Design of
-  the {SPEAR 3} light source},\ }in\ \href@noop {} {\emph {\bibinfo {booktitle}
-  {Proc. 1999 Particle Accelerator Conf. (PAC'99)}}}\ (\bibinfo {year}
-  {1999})\BibitemShut {NoStop}%
+  {Hettel}} \emph {et~al.},\ }\href {https://doi.org/10.2172/808721} {\emph
+  {\bibinfo {title} {{SPEAR 3} Design Report}}},\ \bibinfo {type} {Tech. Rep.}\
+  \bibinfo {number} {SLAC-R-609}\ (\bibinfo  {institution} {SLAC},\ \bibinfo
+  {year} {2002})\BibitemShut {NoStop}%
 \bibitem [{\citenamefont {McIntosh}\ \emph {et~al.}(2004)\citenamefont
   {McIntosh} \emph {et~al.}}]{McIntosh2004}%
   \BibitemOpen
@@ -168,15 +168,39 @@
   {McIntosh}} \emph {et~al.},\ }\bibfield  {title} {\bibinfo {title} {The
   {SPEAR3} {RF} system},\ }in\ \href@noop {} {\emph {\bibinfo {booktitle}
   {Proc. 9th European Particle Accelerator Conf. (EPAC'04)}}}\ (\bibinfo {year}
-  {2004})\ \bibinfo {note} {sLAC-PUB-10983}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Rimmer}\ \emph {et~al.}(1992)\citenamefont {Rimmer}
-  \emph {et~al.}}]{Rimmer1992}%
+  {2004})\ \bibinfo {note} {{SLAC-PUB-10983}}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Rimmer}\ \emph {et~al.}(1995)\citenamefont {Rimmer},
+  \citenamefont {Allen}, \citenamefont {Saba}, \citenamefont {Schwarz} \emph
+  {et~al.}}]{Rimmer1995}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.~A.}\ \bibnamefont
-  {Rimmer}} \emph {et~al.},\ }\href@noop {} {\emph {\bibinfo {title} {{RF}
-  Cavity Development for the {PEP-II} {B} Factory}}},\ \bibinfo {type} {Tech.
-  Rep.}\ \bibinfo {number} {LBL-33360}\ (\bibinfo  {institution} {LBL},\
-  \bibinfo {year} {1992})\BibitemShut {NoStop}%
+  {Rimmer}}, \bibinfo {author} {\bibfnamefont {M.~A.}\ \bibnamefont {Allen}},
+  \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Saba}}, \bibinfo {author}
+  {\bibfnamefont {H.}~\bibnamefont {Schwarz}}, \emph {et~al.},\ }\bibfield
+  {title} {\bibinfo {title} {Development of a high-power {RF} cavity for the
+  {PEP-II} {B} factory},\ }in\ \href@noop {} {\emph {\bibinfo {booktitle}
+  {Proc. 1995 Particle Accelerator Conf. (PAC'95)}}}\ (\bibinfo {year} {1995})\
+  p.\ \bibinfo {pages} {1729},\ \bibinfo {note} {{SLAC-PUB-7135}}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Rimmer}\ \emph {et~al.}(2000)\citenamefont {Rimmer},
+  \citenamefont {Byrd},\ and\ \citenamefont {Li}}]{Rimmer2000}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.~A.}\ \bibnamefont
+  {Rimmer}}, \bibinfo {author} {\bibfnamefont {J.~M.}\ \bibnamefont {Byrd}},\
+  and\ \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont {Li}},\ }\bibfield
+  {title} {\bibinfo {title} {Comparison of calculated, measured, and beam
+  sampled impedances of a higher-order-mode-damped rf cavity},\ }\href
+  {https://doi.org/10.1103/PhysRevSTAB.3.102001} {\bibfield  {journal}
+  {\bibinfo  {journal} {Phys. Rev. ST Accel. Beams}\ }\textbf {\bibinfo
+  {volume} {3}},\ \bibinfo {pages} {102001} (\bibinfo {year}
+  {2000})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Sands}(1970)}]{Sands1970}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Sands}},\ }\href@noop {} {\emph {\bibinfo {title} {The Physics of Electron
+  Storage Rings: An Introduction}}},\ \bibinfo {type} {Tech. Rep.}\ \bibinfo
+  {number} {SLAC-121}\ (\bibinfo  {institution} {SLAC},\ \bibinfo {year}
+  {1970})\BibitemShut {NoStop}%
 \bibitem [{\citenamefont {Corredoura}(1999)}]{Corredoura1999}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
@@ -184,23 +208,47 @@
   performance of the {PEP-II} low-level {RF} system},\ }in\ \href@noop {}
   {\emph {\bibinfo {booktitle} {Proc. 1999 Particle Accelerator Conf.
   (PAC'99)}}}\ (\bibinfo {year} {1999})\ pp.\ \bibinfo {pages} {435--439},\
-  \bibinfo {note} {sLAC-PUB-8124}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {{SSRL RF group}}(2026)}]{SPEAR3_DocP}%
+  \bibinfo {note} {{SLAC-PUB-8124}}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Sebek}(2026)}]{Sebek2026}%
   \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibnamefont {{SSRL RF group}}},\
-  }\href@noop {} {\bibinfo {title} {{SPEAR3 RF Physics, Control Theory and
-  Plant (Doc P)}}},\ \bibinfo {howpublished} {Internal design document, SLAC
-  National Accelerator Laboratory} (\bibinfo {year} {2026})\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Bendat}\ and\ \citenamefont
-  {Piersol}(2010)}]{Bendat2010}%
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {Sebek}},\ }\href@noop {} {}\bibinfo {howpublished} {private communication}
+  (\bibinfo {year} {2026})\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Huang}\ \emph {et~al.}(2007)\citenamefont {Huang},
+  \citenamefont {Safranek}, \citenamefont {Corbett}, \citenamefont {Nosochkov},
+  \citenamefont {Sebek},\ and\ \citenamefont {Terebilo}}]{Huang2007}%
   \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.~S.}\ \bibnamefont
-  {Bendat}}\ and\ \bibinfo {author} {\bibfnamefont {A.~G.}\ \bibnamefont
-  {Piersol}},\ }\href {https://doi.org/10.1002/9781118032428} {\emph {\bibinfo
-  {title} {Random Data: Analysis and Measurement Procedures}}},\ \bibinfo
-  {edition} {4th}\ ed.\ (\bibinfo  {publisher} {Wiley},\ \bibinfo {year}
-  {2010})\BibitemShut {NoStop}%
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {X.}~\bibnamefont
+  {Huang}}, \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Safranek}},
+  \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Corbett}}, \bibinfo
+  {author} {\bibfnamefont {Y.}~\bibnamefont {Nosochkov}}, \bibinfo {author}
+  {\bibfnamefont {J.}~\bibnamefont {Sebek}},\ and\ \bibinfo {author}
+  {\bibfnamefont {A.}~\bibnamefont {Terebilo}},\ }\bibfield  {title} {\bibinfo
+  {title} {Low alpha mode for {SPEAR3}},\ }in\ \href@noop {} {\emph {\bibinfo
+  {booktitle} {Proc. 2007 Particle Accelerator Conf. (PAC'07)}}}\ (\bibinfo
+  {year} {2007})\ \bibinfo {note} {{SLAC-PUB-12601}}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Pintelon}\ \emph {et~al.}(2010)\citenamefont
+  {Pintelon}, \citenamefont {Schoukens}, \citenamefont {Vandersteen},\ and\
+  \citenamefont {Barb\'{e}}}]{Pintelon2010}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
+  {Pintelon}}, \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Schoukens}},
+  \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont {Vandersteen}},\ and\
+  \bibinfo {author} {\bibfnamefont {K.}~\bibnamefont {Barb\'{e}}},\ }\bibfield
+  {title} {\bibinfo {title} {Estimation of nonparametric noise and {FRF} models
+  for multivariable systems---{Part I}: Theory},\ }\href
+  {https://doi.org/10.1016/j.ymssp.2009.08.009} {\bibfield  {journal} {\bibinfo
+   {journal} {Mech. Syst. Signal Process.}\ }\textbf {\bibinfo {volume} {24}},\
+  \bibinfo {pages} {573} (\bibinfo {year} {2010})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Schreier}\ and\ \citenamefont
+  {Scharf}(2010)}]{Schreier2010}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.~J.}\ \bibnamefont
+  {Schreier}}\ and\ \bibinfo {author} {\bibfnamefont {L.~L.}\ \bibnamefont
+  {Scharf}},\ }\href {https://doi.org/10.1017/CBO9780511815911} {\emph
+  {\bibinfo {title} {Statistical Signal Processing of Complex-Valued Data: The
+  Theory of Improper and Noncircular Signals}}}\ (\bibinfo  {publisher}
+  {Cambridge University Press},\ \bibinfo {year} {2010})\BibitemShut {NoStop}%
 \bibitem [{\citenamefont {Chao}(1993)}]{Chao1993}%
   \BibitemOpen
   \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.~W.}\ \bibnamefont
@@ -224,15 +272,6 @@
   for Wireless Communications}}},\ \bibinfo {edition} {2nd}\ ed.\ (\bibinfo
   {publisher} {Artech House},\ \bibinfo {address} {Norwood, MA},\ \bibinfo
   {year} {2006})\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Schreier}\ and\ \citenamefont
-  {Scharf}(2010)}]{Schreier2010}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.~J.}\ \bibnamefont
-  {Schreier}}\ and\ \bibinfo {author} {\bibfnamefont {L.~L.}\ \bibnamefont
-  {Scharf}},\ }\href {https://doi.org/10.1017/CBO9780511815911} {\emph
-  {\bibinfo {title} {Statistical Signal Processing of Complex-Valued Data: The
-  Theory of Improper and Noncircular Signals}}}\ (\bibinfo  {publisher}
-  {Cambridge University Press},\ \bibinfo {year} {2010})\BibitemShut {NoStop}%
 \bibitem [{\citenamefont {Raue}\ \emph {et~al.}(2009)\citenamefont {Raue},
   \citenamefont {Kreutz}, \citenamefont {Maiwald}, \citenamefont {Bachmann},
   \citenamefont {Schilling}, \citenamefont {Klingm{\"u}ller},\ and\

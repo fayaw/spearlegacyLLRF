@@ -81,6 +81,10 @@ FAMILIES = {
     "J_wl_group_ac_ktrip_ks": dict(hw="global", df="dgroup", kly="group", chain=True, joint=True, alpha_c=True,
                                    kap_fixed=K_TRIP, kscale=True),
     "wl_group_ktrip": dict(hw="global", df="dgroup", kly="group", chain=True, kap_fixed=K_TRIP),
+    # the klystron's amplitude response with a finite bandwidth (one global f_A)
+    "J_wl_group_ac_ktrip_fA": dict(hw="global", df="dgroup", kly="group", chain=True, joint=True, alpha_c=True,
+                                   kap_fixed=K_TRIP, kly_bw=True),
+    "J_lin_eff_fA": dict(hw="record", df="dgroup", kly=None, chain=True, joint=True),
 }
 
 
@@ -119,17 +123,18 @@ def group_labels(recs, groups=None) -> list:
     return [out[k] for k in sorted(out)]
 
 
-def wide_specs(recs, fmin=15e3, fmax=400e3, nfft=8192):
-    return [[cf.spectrum(r, nfft, fmin, fmax)] for r in recs]
+def wide_specs(recs):
+    """Loop band only (25-550 kHz), the identification that the out-of-band test of the coupled mode starts from."""
+    return [[cf.lpm_spectrum(r, cf.F_SPLIT, cf.F_HI)] for r in recs]
 
 
 BEAM_BAND = (3e3, 16e3)
 
 
 def joint_specs(recs):
-    """Wideband (15-400 kHz, 1.25 kHz bins) and beam-mode band (3-16 kHz, 312 Hz bins, window smearing)."""
-    return [[cf.spectrum(r, 8192, 15e3, 400e3), cf.spectrum(r, 2 ** 15, BEAM_BAND[0], BEAM_BAND[1], smear=True, smooth=5)]
-            for r in recs]
+    """The full band of every record (0.3-550 kHz), in two contiguous regions: loop band 25-550 kHz (index 0) and
+    near-carrier band 0.3-25 kHz (index 1), which holds the coupled beam mode."""
+    return [[cf.lpm_spectrum(r, cf.F_SPLIT, cf.F_HI), cf.lpm_spectrum(r, cf.F_LO, cf.F_SPLIT)] for r in recs]
 
 
 def specs_for(recs, fam_name):
@@ -194,6 +199,8 @@ def build(recs, specs, fam: dict, start: dict) -> cf.Fit:
         pars.append(cf.Par("alpha_c", start.get("alpha_c", 1.30e-3), lo=0.8e-3, hi=2.2e-3, scale=0.05e-3))
     if fam.get("kscale"):
         pars.append(cf.Par("kappa_scale", start.get("kappa_scale", 1.0), lo=0.3, hi=3.0, scale=0.05))
+    if fam.get("kly_bw"):
+        pars.append(cf.Par("f_A", start.get("f_A", 1e6), lo=5e4, hi=5e7, scale=1e5))
     return cf.Fit(specs, base, pars, derived=GainScaled([r.counts_db for r in recs], scale_g=(hw != "record")))
 
 

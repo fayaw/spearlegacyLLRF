@@ -1,9 +1,12 @@
 """Spectra, weighting and least-squares machinery for single-record and multi-condition fits.
 
-A Spectrum holds one record's transfer function in one band at one resolution, with the variance of each bin
-from the coherence (H1 random error), smoothed over neighbouring bins so that the weights do not follow the
-noise of their own estimate. Narrow-band models are convolved with the Hann window's power kernel, which is
-what the Welch H1 estimate measures for a flat excitation spectrum.
+A Spectrum holds one record's transfer function in one band: the estimate H at each data point, sigma the standard
+deviation of its real and of its imaginary part (half the complex variance, so that sum |model - H|^2/sigma^2 is
+chi^2 with two degrees of freedom per point), and how to evaluate a model's expectation for each point: at the
+point's frequency, or -- for the full-band LPM estimates (csi_lpm) near the carrier -- as an exact weighted sum of
+the model over the DFT bins that enter the estimate (f_eval and the sparse matrix M). The Welch estimates of earlier
+versions (spectrum) are kept for comparison; their narrow-band models are convolved with the Hann window's power
+kernel.
 
 A Fit maps one parameter vector to a list of Station objects (one per record). Each parameter is either
 global (one value), per record, or per group of records (for example, one noise angle per operating current),
@@ -19,7 +22,10 @@ from scipy.ndimage import median_filter
 from scipy.optimize import least_squares
 
 import csi_data as cd
+import csi_lpm as lp
 import csi_model as cm
+
+F_LO, F_SPLIT, F_HI = 0.0, 25e3, 550e3        # full band from the carrier; near band | loop band
 
 
 @dataclass
@@ -27,12 +33,14 @@ class Spectrum:
     rec: cd.Record
     f: np.ndarray
     H: np.ndarray
-    sigma: np.ndarray        # std of the complex estimate, sqrt(E|H_hat - H|^2)
-    coh: np.ndarray
+    sigma: np.ndarray        # std of the real and of the imaginary part of the estimate, sqrt(E|H_hat - H|^2 / 2)
+    coh: np.ndarray | None
     nfft: int
     smear: bool
     kern_off: np.ndarray | None = None
     kern_w: np.ndarray | None = None
+    f_eval: np.ndarray | None = None
+    M: object = None         # sparse: expectation of the estimates = M @ model(f_eval)
 
     @property
     def n(self) -> int:
@@ -66,13 +74,21 @@ def spectrum(rec: cd.Record, nfft: int, fmin: float, fmax: float, smear: bool = 
     sel = (a >= fmin) & (a <= fmax)
     for lo, hi in exclude:
         sel &= ~((tf.f >= lo) & (tf.f <= hi))
-    sp = Spectrum(rec, tf.f[sel], tf.H[sel], np.sqrt(var[sel]), tf.coh[sel], nfft, smear)
+    sp = Spectrum(rec, tf.f[sel], tf.H[sel], np.sqrt(var[sel] / 2), tf.coh[sel], nfft, smear)
     if smear:
         sp.kern_off, sp.kern_w = window_kernel(nfft)
     return sp
 
 
+def lpm_spectrum(rec: cd.Record, fmin: float, fmax: float) -> Spectrum:
+    """Full-band LPM estimate (csi_lpm) of one record in fmin <= |f| < fmax, as cells with their expectation map."""
+    c = lp.cells(lp.estimate(rec, F_LO, F_HI), fmin, fmax)
+    return Spectrum(rec, c["f"], c["H"], c["sigma"] / math.sqrt(2), None, 0, False, f_eval=c["f_eval"], M=c["M"])
+
+
 def model_on(st: cm.Station, sp: Spectrum) -> np.ndarray:
+    if sp.M is not None:
+        return sp.M @ cm.measured_tf(st, sp.f_eval)
     if not sp.smear:
         return cm.measured_tf(st, sp.f)
     fine = (sp.f[:, None] + sp.kern_off[None, :]).ravel()

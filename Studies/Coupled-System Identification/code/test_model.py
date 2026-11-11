@@ -1,4 +1,4 @@
-"""Consistency checks of csi_model against the independent Doc P / spear3rf implementations.
+"""Consistency checks of csi_model against an independent implementation (spear3rf package and analysis scripts).
 
 1. complex-linear loop, no beam: -L/(1+L) of analyze_measure_direct.closed_loop
 2. widely-linear klystron, no beam: analyze_measure_direct.closed_loop_wl
@@ -26,7 +26,7 @@ from spear3rf.system import RFSystem  # noqa: E402
 
 def rfsystem(st: cm.Station, lead=True, lag=True, amp=True) -> RFSystem:
     ring = Ring(f_rf=cm.F_RF, U0_eV=st.U0, alpha_c=st.alpha_c)
-    cav = Cavity(R_over_Q=cm.R_OVER_Q, Q0=32000.0, beta=32000.0 / st.Q_L - 1)
+    cav = Cavity(R_over_Q=cm.R_OVER_Q, Q0=cm.Q0_CAV, beta=cm.Q0_CAV / st.Q_L - 1)
     loop = Loop(gain=st.G, phase_deg=st.theta, delay=st.tau,
                 gi=st.G if lag else 0.0, fi_hz=(cm.LAG_FZ - cm.LAG_FP) if lag else 0.0, phase_i_deg=st.theta,
                 f_leak_hz=cm.LAG_FP if lag else 0.0, f_amp_hz=cm.F_AMP if amp else None,
@@ -72,20 +72,24 @@ def main():
               f" quadrature f {s_ref.imag/2/math.pi:8.2f} sigma {-s_ref.real:8.2f}")
         ok &= abs(s_mine - s_ref) < 1e-3 * abs(s_ref)
 
-    # 5. det(1 + M) D = det(1 + F Z_m) D_0 (matrix determinant lemma), at arbitrary complex s
-    st5 = cm.Station(I_b=0.45, G=1.3, theta=12.0, tau=640e-9, Q_L=6500, g_A=0.35, k_AP=-0.4, df=-30e3, alpha_c=1.37e-3)
-    s = np.array([2e3 + 2j * np.pi * 8.3e3, -500 + 2j * np.pi * 25e3, 1e4 - 2j * np.pi * 60e3])
-    lhs = cm.char_det(st5, s)
-    bl = cm.blocks(st5, s)
-    F = np.einsum("ij,n,jk->nik", bl.K, st5.G * cm.chain(st5, s) / st5.R_L, cm._rot(math.radians(st5.theta)))
-    A = np.eye(2) + np.einsum("nij,njk->nik", F, bl.Z_m)
-    Ainv, detA = cm._inv2(A)
-    ps = st5.phi_s
-    b = np.array([-math.sin(ps), -math.cos(ps)])
-    p = np.array([math.cos(ps), -math.sin(ps)])
-    zb = np.einsum("nij,njk->nik", bl.Z_sum, Ainv)
-    D0 = s * s + 2 * cm.ALPHA_RAD * s + st5.w_s ** 2 + st5.kappa1 * st5.I_b1 * np.einsum("i,nij,j->n", p, zb, b)
-    e5 = np.max(np.abs(lhs - detA * D0) / np.abs(lhs))
+    # 5. det(1 + M) D = det(1 + F Z_m) D_0 (matrix determinant lemma), at arbitrary complex s; memoryless klystron
+    #    and one with a finite amplitude bandwidth
+    e5 = 0.0
+    for f_A in (0.0, 0.8e6):
+        st5 = cm.Station(I_b=0.45, G=1.3, theta=12.0, tau=640e-9, Q_L=6500, g_A=0.35, k_AP=-0.4, df=-30e3,
+                         alpha_c=1.37e-3, f_A=f_A)
+        s = np.array([2e3 + 2j * np.pi * 8.3e3, -500 + 2j * np.pi * 25e3, 1e4 - 2j * np.pi * 60e3])
+        lhs = cm.char_det(st5, s)
+        bl = cm.blocks(st5, s)
+        F = np.einsum("nij,n,jk->nik", bl.K, st5.G * cm.chain(st5, s) / st5.R_L, cm._rot(math.radians(st5.theta)))
+        A = np.eye(2) + np.einsum("nij,njk->nik", F, bl.Z_m)
+        Ainv, detA = cm._inv2(A)
+        ps = st5.phi_s
+        b = np.array([-math.sin(ps), -math.cos(ps)])
+        p = np.array([math.cos(ps), -math.sin(ps)])
+        zb = np.einsum("nij,njk->nik", bl.Z_sum, Ainv)
+        D0 = s * s + 2 * cm.ALPHA_RAD * s + st5.w_s ** 2 + st5.kappa1 * st5.I_b1 * np.einsum("i,nij,j->n", p, zb, b)
+        e5 = max(e5, float(np.max(np.abs(lhs - detA * D0) / np.abs(lhs))))
     print(f"5. det(1+M) D = det(1+F Z_m) D_0: max relative difference {e5:.2e}")
     ok &= e5 < 1e-9
 

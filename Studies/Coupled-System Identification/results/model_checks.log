@@ -1,0 +1,9 @@
+reference     : chi2 33195 chi2r 1.6184 Q_L 6627 alpha_c 1.411 | near 1.04 loop 1.81
+unequal Q     : chi2 33203 chi2r 1.6188 Q_L 6633 alpha_c 1.411 | near 1.04 loop 1.81
+f_A 250000    : chi2 56760 chi2r 2.7673 Q_L 5454 alpha_c 1.455 | near 2.11 loop 2.98
+f_A 400000    : chi2 46674 chi2r 2.2756 Q_L 5679 alpha_c 1.417 | near 1.50 loop 2.53
+f_A 600000    : chi2 39086 chi2r 1.9056 Q_L 6189 alpha_c 1.383 | near 1.38 loop 2.08
+f_A 900000    : chi2 36634 chi2r 1.7861 Q_L 6382 alpha_c 1.400 | near 1.32 loop 1.94
+f_A 1400000   : chi2 35424 chi2r 1.7271 Q_L 6479 alpha_c 1.406 | near 1.17 loop 1.91
+f_A 2500000   : chi2 34291 chi2r 1.6718 Q_L 6554 alpha_c 1.409 | near 1.08 loop 1.86
+f_A 5000000   : chi2 33681 chi2r 1.6421 Q_L 6595 alpha_c 1.410 | near 1.05 loop 1.83

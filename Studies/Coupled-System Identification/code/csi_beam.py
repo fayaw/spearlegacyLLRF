@@ -3,11 +3,11 @@
 Model-free: within 3 <= |f| <= 16 kHz the recorded response is a smooth background plus the closed-loop
 pole pair of the dipole mode, s = -sigma +- j w_c:
     H(f) = b0 + b1 (f/1e4) + b2 (f/1e4)^2 + r+/(j 2 pi f - p) + r-/(j 2 pi f - conj p),  p = -sigma + j w_c
-(complex b's and residues), convolved with the Hann window's power kernel of the 2^15-point estimate. The
-pole is common to both sidebands, as it must be for a real (I/Q-coupled) mode.
+(complex b's and residues), compared with the full-band LPM estimates through their exact expectation (csi_lpm).
+The pole is common to both sidebands, as it must be for a real (I/Q-coupled) mode.
 
-Model-based: csi_model.coupled_mode() of the station identified from the wideband response, and the
-predicted response itself on the same bins.
+Model-based: csi_model.coupled_mode() of the station identified from the loop band, and the predicted response
+itself on the same estimates.
 """
 from __future__ import annotations
 
@@ -20,12 +20,11 @@ import csi_data as cd
 import csi_fit as cf
 import csi_model as cm
 
-NFFT = 2 ** 15
 BAND = (3e3, 16e3)
 
 
-def beam_spectrum(rec, band=BAND, nfft=NFFT, exclude=()):
-    return cf.spectrum(rec, nfft, band[0], band[1], smear=True, smooth=5, exclude=exclude)
+def beam_spectrum(rec, band=BAND):
+    return cf.lpm_spectrum(rec, band[0], band[1])
 
 
 def pole_model(q, f):
@@ -36,10 +35,8 @@ def pole_model(q, f):
 
 
 def pole_fit(sp: cf.Spectrum, f0_list=(8.0, 9.0, 10.0), sig0_list=(500.0, 1500.0)):
-    fine = (sp.f[:, None] + sp.kern_off[None, :])
-
     def res(q):
-        m = pole_model(q, fine.ravel()).reshape(fine.shape) @ sp.kern_w
+        m = sp.M @ pole_model(q, sp.f_eval)
         d = (m - sp.H) / sp.sigma
         return np.concatenate([d.real, d.imag])
     best = None
