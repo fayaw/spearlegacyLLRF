@@ -13,12 +13,20 @@ $docs = @{
     "T" = @{ dir = "docT-tuner-control";          job = "T_tuner_control_analysis"      }
     "M" = @{ dir = "docM-integration-migration";  job = "M_integration_migration_plan"  }
     "C" = @{ dir = "docC-interface-chassis";      job = "C_interface_chassis_requirements" }
+    "W" = @{ dir = "docW-station-wiring";         job = "W_station_wiring_reference"; gen = "docw-gen.js" }
 }
 if (-not $docs.ContainsKey($Doc)) {
     throw "Unknown -Doc '$Doc'. Known: $($docs.Keys -join ', ')"
 }
 $dir = $docs[$Doc].dir
 $job = $docs[$Doc].job
+
+# A document built from data files (Doc W) regenerates its tables first; a data
+# error stops the build rather than producing a PDF from stale tables.
+if ($docs[$Doc].gen) {
+    & node (Join-Path $PSScriptRoot "scripts\$($docs[$Doc].gen)")
+    if ($LASTEXITCODE -ne 0) { throw "$($docs[$Doc].gen) found errors in the data; nothing built." }
+}
 Push-Location (Join-Path $PSScriptRoot $dir)
 
 if ($Clean) {

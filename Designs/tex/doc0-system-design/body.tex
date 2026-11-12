@@ -20,7 +20,8 @@ Revision & Date & Scope of Change & Summary \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\textbf{R4} & 2026-11-10 & RF Local Display Panel; beam abort; tuner control; HVPS controller; transition; status; Interface Chassis logic; LLRF9 interlock chain & \textbf{RF Local Display Panel}: the Local Control Chassis and the Local Panel 340-310 are one unit, named after its drawings; its three HVPS fibers run to the HVPS controller in B118 and its own logic forms SCR ENABLE, KLYSTRON CROWBAR and a beam abort on BNC J6 (J.~Sebek's fiber note and the panel drawings). \textbf{Beam abort}: J6 was made for PEP-II and is not cabled at SPEAR3, so the Interface Chassis has no beam-abort output (10 November). \textbf{Tuners}: LLRF9 Unit~1 runs the four tuner loops and drives the Galil DMC-4143 directly. \textbf{LLRF9 cabling}: the channel tables give the current cabling of the master (Unit~1, the vendor's four-cavity configuration, as in the 2021 setup) and the slave (Unit~2: reflected and load signals); the klystron drive power, on neither unit, is proposed for Waveform Buffer channel~1. \textbf{Status}: heater supply on a test stand with the live filament limits recorded; PPS Interface Box awaiting ADSO approval. \textbf{EPICS IOC}: the coordinator is the IOC \mbox{B132-IOCRF}, which moves from the VXI CPU to new hardware when the crate is retired. \textbf{HVPS controller}: a complete new Hoffman box for each HVPS unit retires the existing one; all HVPS control is in EPICS, with no Python layer, under the current HVPS PV names. \textbf{Transition}: a new section gives the integration sequence I0--I8 of the Subsystem Integration and Migration Plan (Doc~M); the Interface Chassis section adds the transition interfaces it needs while the AIM, the PLC-5 and the legacy HVPS controllers are still in service, and the command path that replaces the AIM cable J15; a table gives the new home of each legacy function that has no one-to-one successor. \textbf{Interface Chassis logic}: written from the required behavior of the system (Doc~C), not copied from the panel. \textbf{LLRF9 interlocks}: daisy chain decided, Interface Chassis to Unit~2 to Unit~1 and back. \textbf{Open items}: O1 (soft IOC location) and O8 (tuner control split) closed and the others renumbered O1--O7; O3 now covers the Interface Chassis logic, and O4 the Waveform Buffer channel assignment. \textbf{Corrections}: the 10:1 T1 of the heater chassis is the ammeter's current transformer, not a step-down transformer; the tuner motors have no encoders; the legacy automatic reset is inhibited by the AIM forced-fault latch; the project schedule is removed from the sources. \textbf{Interface Chassis operator controls} (10 November): no key switches and no reset button; online/offline and reset from EPICS; the panel's display-only lines are not taken over, nor is its beam-abort output, which is not cabled at SPEAR3. \\
+\textbf{R4} & 2026-11-11 & RF Local Display Panel; beam abort; tuner control; HVPS controller; transition; status; Interface Chassis logic; LLRF9 interlock chain & \textbf{RF Local Display Panel}: the Local Control Chassis and the Local Panel 340-310 are one unit, named after its drawings; its three HVPS fibers run to the HVPS controller in B118 and its own logic forms SCR ENABLE, KLYSTRON CROWBAR and a beam abort on BNC J6 (J.~Sebek's fiber note and the panel drawings). \textbf{Beam abort}: J6 was made for PEP-II and is not cabled at SPEAR3, so the Interface Chassis has no beam-abort output (10 November). \textbf{Tuners}: LLRF9 Unit~1 runs the four tuner loops and drives the Galil DMC-4143 directly. \textbf{LLRF9 cabling}: the channel tables give the current cabling of the master (Unit~1, the vendor's four-cavity configuration, as in the 2021 setup) and the slave (Unit~2: reflected and load signals); the klystron drive power, on neither unit, is proposed for Waveform Buffer channel~1. \textbf{Status}: heater supply on a test stand with the live filament limits recorded; PPS Interface Box awaiting ADSO approval. \textbf{EPICS IOC}: the coordinator is the IOC \mbox{B132-IOCRF}, which moves from the VXI CPU to new hardware when the crate is retired. \textbf{HVPS controller}: a complete new Hoffman box for each HVPS unit retires the existing one; all HVPS control is in EPICS, with no Python layer, under the current HVPS PV names. \textbf{Transition}: a new section gives the integration sequence I0--I8 of the Subsystem Integration and Migration Plan (Doc~M); the Interface Chassis section adds the transition interfaces it needs while the AIM, the PLC-5 and the legacy HVPS controllers are still in service, and the command path that replaces the AIM cable J15; a table gives the new home of each legacy function that has no one-to-one successor. \textbf{Interface Chassis logic}: written from the required behavior of the system (Doc~C), not copied from the panel. \textbf{LLRF9 interlocks}: daisy chain decided, Interface Chassis to Unit~2 to Unit~1 and back. \textbf{Open items}: O1 (soft IOC location) and O8 (tuner control split) closed and the others renumbered O1--O7; O3 now covers the Interface Chassis logic, and O4 the Waveform Buffer channel assignment. \textbf{Corrections}: the 10:1 T1 of the heater chassis is the ammeter's current transformer, not a step-down transformer; the tuner motors have no encoders; the legacy automatic reset is inhibited by the AIM forced-fault latch; the project schedule is removed from the sources. \\
+ & & & \textbf{Interface Chassis operator controls} (10 November): no key switches and no reset button; online/offline and reset from EPICS; the panel's display-only lines are not taken over, nor is its beam-abort output, which is not cabled at SPEAR3. \textbf{Machine permits} (11 November): the SPEAR MPS and orbit permits reach the Interface Chassis from I2, in parallel with VXI Slot~5, which keeps the RF cut until the crate goes; they remove SCR ENABLE once I2 is integrated, and the chassis drives the AIM's External MPS line on the 37-pin cable in place of Slot~5's J3. \textbf{Waveform Buffer HVPS channels} (11 November): the four signals of the B118 oscilloscope, the HVPS voltage and current, the transformer current and the SCR firing signal, in place of two inductor voltages. \textbf{AIM drawing number} (11 November): the AIM is schematic SD-340-309-01; 340-307 is a spare, slightly different Fast Interlock Chassis, not in use. \\
 \textbf{R3} & 2026-09-25 & Arc detection re-selection; legacy unit disposition; chassis consolidation; heater vendor & \textbf{Arc detection}: Microstep-MIS abandoned (vendor unresponsive, and it would have required custom CF-flange adapters and a viewport redesign); replaced by the \textbf{AFT microwave GmbH ARC4} vendor chassis, whose fiber inputs mate with the tunnel fibers already installed --- no mechanical work. The custom SSRL Arc Detection Chassis OR/latch design is withdrawn; the Interface Chassis now faces only the 2 ARC4 system modules and the test module. Figure~4 redrawn. \textbf{Legacy units}: Fast Interlock Chassis 340-308, AIM (VXI Slot 12) and Local Panel 340-310 named explicitly as removed with the VXI crate, their functions absorbed by the Interface Chassis. \textbf{Chassis consolidation}: the Waveform Buffer and Interface Chassis share one physical chassis on two PCBs; Waveform Buffer complete (April 2026), Interface Chassis PCB at fabrication since August 2026. \textbf{Heater}: Chroma → \textbf{TDK Lambda}, with an external \qty{60}{\hertz} sync circuit in design. \\
 \textbf{R2} & 2026-04-28 & Technical consolidation and drawing update & Finalized system architecture and protection chain. Expanded and corrected arc detection design, refined interface-chassis / MPS responsibilities, corrected cavity gap voltage values, confirmed heater controller approach, and standardized terminology and signal naming across subsystems. \\
 \textbf{R1} & 2026-03-17 & Design clarification and corrections & Incorporated review feedback from J. Sebek: clarified HVPS power chain and signal flow, corrected RF signal monitoring assignments, refined software architecture descriptions, and resolved ambiguities in interlock and protection narratives. \\
@@ -169,7 +170,7 @@ The legacy SPEAR3 LLRF system was originally designed for the PEP-II B-Factory (
     See: \fpath{llrf/tuners/SLO-SYN_SS2000MD4M_Step_Drive_Translator_Manual.pdf}, \fpath{llrf/tuners/SLO-SYN.pdf}
   \end{itemize}
 \item
-  \textbf{Interlock System}: Distributed across analog modules, PLC I/O, and direct wiring. The Fast Interlock Chassis 340-308 converts the light of the arc-detector fibers into analog signals for the Arc/Interlock Module (AIM, drawing 340-307) in Slot 12 of the VXI crate, whose comparators and latches make the arc trip decision, and passes the AIM's commands over fibers to the \textbf{RF Local Display Panel 340-310} (rack B132-12). The panel connects part of the hardwired interlock and control wiring to the RF MPS PLC, provides local indication and the station key switches, and terminates the three HVPS fibers: its own logic forms SCR ENABLE and KLYSTRON CROWBAR for the HVPS controller in B118, and a beam abort on a BNC output that is not cabled at SPEAR3 (J.~Sebek's fiber note; drawings in \fpath{llrf/documentation/localPanel/}).
+  \textbf{Interlock System}: Distributed across analog modules, PLC I/O, and direct wiring. The Fast Interlock Chassis 340-308 converts the light of the arc-detector fibers into analog signals for the Arc/Interlock Module (AIM, schematic SD-340-309-01) in Slot 12 of the VXI crate, whose comparators and latches make the arc trip decision, and passes the AIM's commands over fibers to the \textbf{RF Local Display Panel 340-310} (rack B132-12). The panel connects part of the hardwired interlock and control wiring to the RF MPS PLC, provides local indication and the station key switches, and terminates the three HVPS fibers: its own logic forms SCR ENABLE and KLYSTRON CROWBAR for the HVPS controller in B118, and a beam abort on a BNC output that is not cabled at SPEAR3 (J.~Sebek's fiber note; drawings in \fpath{llrf/documentation/localPanel/}).
 \item
   \textbf{Communication}: The main intelligence for the existing system is a Kinetics Systems VXI IOC in the system VXI crate. The crate has a VME Allen-Bradley communication module through which it communicates, via a serial link, with the two Allen-Bradley RF MPS crates, the four cavity tuner stepper motor controllers, and the HVPS controller.
 
@@ -240,7 +241,7 @@ The upgraded system replaces all control electronics while retaining the RF plan
 \item
   \textbf{Fast Interlock Chassis 340-308} --- the legacy analog front end of the AIM: it converts the arc-detector light, passes the AIM's commands to the RF Local Display Panel as fibers and holds the klystron forward-power detector. Its arc inputs move to the ARC4; its command fibers and detector are absorbed by the Interface Chassis.
 \item
-  \textbf{AIM --- Arc/Interlock Module} (VXI Slot 12, SLAC drawing 340-307), the digital companion to the Fast IC. Its per-channel arc latching and \texttt{RF\_FAULT} backplane assertion are replaced by the Interface Chassis first-fault register; its fault-history ring buffer is replaced by the Waveform Buffer circular buffers.
+  \textbf{AIM --- Arc/Interlock Module} (VXI Slot 12, schematic SD-340-309-01), the digital companion to the Fast IC. Its per-channel arc latching and \texttt{RF\_FAULT} backplane assertion are replaced by the Interface Chassis first-fault register; its fault-history ring buffer is replaced by the Waveform Buffer circular buffers.
 \item
   \textbf{RF Local Display Panel 340-310} (rack B132-12; also referred to as the Local Control Chassis) --- legacy local/remote control and indication panel and the end point of the three HVPS fibers; its logic forms SCR ENABLE, KLYSTRON CROWBAR and a beam abort on BNC J6, which is not cabled at SPEAR3 (drawings in \fpath{llrf/documentation/localPanel/}). These functions move to the Interface Chassis; the indications move to the Interface Chassis front panel and to EPICS, and the online/offline control to EPICS alone.
 \end{itemize}
@@ -745,7 +746,7 @@ Function
 CPU & AB-1747-L532 & Processor \\
 1 & AB-1747-DCM & Data Communications (Scanner) \\
 2 & AB-1746-IO8 & 8-pt Digital I/O --- Ross switch coil (OUT3) \\
-3 & AB-1746-THERMC & Thermocouple inputs (SCR/air/transformer temps) \\
+3 & AB-1746-THERMC & Four thermocouples: SCR tank top and bottom oil, crowbar, air \\
 5 & AB-1746-OX8 & 8-pt Relay Output --- Contactor enable K4 (OUT2), Contactor On/Off (OUT1) \\
 6 & AB-1746-IB16 & 16 DC Input --- PPS 1 (IN14), PPS 2 (IN15), Oil Level (IN8), Manual GRN SW (IN9) \\
 7 & AB-1746-IV16 & 16 DC Input (various permits) \\
@@ -919,7 +920,7 @@ Fast Inhibit/Slow Start & Enerpro protection states & Gate driver board \\
 \item
   \textbf{EPICS Coordinator} (Ethernet): Voltage setpoint, readbacks, fault status
 \item
-  \textbf{Waveform Buffer System}: HVPS voltage, current, inductor voltages monitored on 4 dedicated channels. HVPS voltage and current sent back to B132 as analog signals for RF MPS.
+  \textbf{Waveform Buffer System}: the four signals of the B118 HVPS oscilloscope (voltage, current, transformer current and SCR firing signal) monitored on 4 dedicated channels. HVPS voltage and current sent back to B132 as analog signals for RF MPS.
 \item
   \textbf{Switchgear}: Existing field cables to vacuum contactor controller and grounding tank
 \end{itemize}
@@ -954,7 +955,7 @@ The RF MPS does \textbf{not} directly control the LLRF9 or HVPS hardware. Instea
 
 \subsection{Legacy System}\label{legacy-system-1}
 
-The legacy RF MPS uses an \textbf{Allen-Bradley PLC-5} processor with \textbf{1771-series I/O modules}. It aggregates interlock signals from the RF system (via distributed analog modules and direct wiring) and the HVPS, and manages the RF permit chain. The SPEAR MPS beam permit and orbit interlock are \textbf{not} direct inputs to the legacy RF MPS PLC --- they wire to the back connector of VXI Slot 5 (MPS Shutoff module) where they participate in the VXI-backplane RF permit logic. See Doc~I §4.2.
+The legacy RF MPS uses an \textbf{Allen-Bradley PLC-5} processor with \textbf{1771-series I/O modules}. It aggregates interlock signals from the RF system (via distributed analog modules and direct wiring) and the HVPS, and manages the RF permit chain. The SPEAR MPS beam permit and orbit interlock are \textbf{not} direct inputs to the legacy RF MPS PLC --- they enter VXI Slot 5 (MPS Shutoff module), which asserts RF\_FAULT on the VXI backplane when either drops; its J3 output also reaches the AIM, through the Fast Interlock Chassis, as the External MPS channel. See Doc~I §4.2.
 
 In the legacy system, interlock coordination was distributed across analog modules, PLC I/O, and direct point-to-point wiring with no central coordination point. The PLC-5 communicated with the EPICS control system via a 1771-DCM scanner module.
 
@@ -1193,12 +1194,16 @@ The Interface Chassis is a completely new subsystem that serves as the central h
 
 \subsection{Transition Interfaces}\label{ic-transition-interfaces}
 
-The Interface Chassis goes in early: it replaces the Fast Interlock Chassis and the RF Local Display Panel while the AIM, the RF MPS PLC-5 and the legacy HVPS controllers are still in service (integration I2, Section~\ref{transition-integration-sequence}). Until those units are retired it must also present the interfaces of the two units it replaces:
+The Interface Chassis goes in early: it replaces the Fast Interlock Chassis and the RF Local Display Panel while the AIM, VXI Slot~5, the RF MPS PLC-5 and the legacy HVPS controllers are still in service (integration I2, Section~\ref{transition-integration-sequence}). Until those units are retired it must also present the interfaces of the two units it replaces:
 
 \begin{itemize}
 \tightlist
 \item
   \textbf{AIM cable J15}: accepted unchanged. The chassis receives the AIM's six commands (station online, filament and focus, HVPS on, beam abort, filament-timeout bypass, fault reset) at their present levels, drives the AB summary fault (pin~10) and the AB heartbeat (pin~23) into the AIM's Schmitt-trigger inputs, and leaves the AIM's supply pins and arc trip-test lines unconnected.
+\item
+  \textbf{AIM cable J4 (37-pin)}: accepted unchanged. The chassis holds the AIM's spare-fault line low while both machine permits are present, so that the AIM's External MPS channel works as it does today with VXI Slot~5's J3 output, which is left open; it holds the twelve arc lines at their no-arc level, so that the AIM's channel jumpers stay as they are.
+\item
+  \textbf{SPEAR MPS and orbit permits}: taken in parallel with VXI Slot~5, which keeps the RF cut and the legacy software trip until the crate is retired. The chassis records which permit dropped and, once I2 is integrated, removes SCR ENABLE when either drops.
 \item
   \textbf{RF MPS cables J2 and J3 at cross-connect X530}: accepted unchanged. The chassis drives the four request lines, holds the online-mode line on, takes the coil, waveguide-pressure and collector summaries into its logic and passes the AB summary and the AB heartbeat to the AIM; the lines that the panel only displays and the local-mode line are left unconnected, since the PLC-5 reports those states to EPICS itself.
 \item
@@ -1211,7 +1216,7 @@ The Interface Chassis goes in early: it replaces the Fast Interlock Chassis and 
   \textbf{Operator controls}: a status display only, with no key switches and no reset button; the station is set online or offline, and reset, from EPICS, where all states also appear.
 \end{itemize}
 
-The end-state inputs (LLRF9 status and enable, SPEAR MPS and orbit permits, arc detection, power monitoring, expansion ports) are built in from the start and masked, each with a bypass or simulate jumper, until the integration that uses them. A command path from the Interface Chassis IOC replaces the AIM cable J15 when the AIM is retired with the VXI crate.
+The other end-state inputs (LLRF9 status and enable, arc detection, power monitoring, expansion ports) are built in from the start and masked, each with a bypass or simulate jumper, until the integration that uses them. A command path from the Interface Chassis IOC replaces the AIM cable J15 when the AIM is retired with the VXI crate.
 
 \subsection{Implementation Status}\label{implementation-status}
 
@@ -1482,7 +1487,7 @@ The Waveform Buffer System is a new signal conditioning and monitoring chassis t
 \item
   \textbf{Extended RF signal monitoring} --- 8 RF channels with circular waveform buffers for pre-fault capture; monitors the 6 RF signals not assigned to the two LLRF9 units
 \item
-  \textbf{HVPS signal monitoring} --- 4 channels (voltage, current, 2 inductor voltages) with circular buffers
+  \textbf{HVPS signal monitoring} --- 4 channels (voltage, current, transformer current, SCR firing signal: the signals of the B118 oscilloscope) with circular buffers
 \item
   \textbf{Enhanced klystron collector power protection} --- computes DC power minus RF power (vs.~legacy forward power proxy) and triggers a hardware trip if collector power exceeds the limit
 \end{itemize}
@@ -1529,8 +1534,8 @@ Channel & Signal & Conditioning & Purpose \\
 \endlastfoot
 1 & HVPS Voltage & Voltage divider & Regulation monitoring \\
 2 & HVPS Current & Current transformer & Load monitoring \\
-3 & Inductor 1 Voltage & Voltage divider & Firing circuit health \\
-4 & Inductor 2 Voltage & Voltage divider & Firing circuit health \\
+3 & Transformer Current & Divider; source in B118 (Doc~C O9) & Firing circuit health \\
+4 & SCR Firing Signal & Divider; source in B118 (Doc~C O9) & Firing circuit health \\
 \end{longtable}
 
 \subsection{Key Features}\label{key-features}

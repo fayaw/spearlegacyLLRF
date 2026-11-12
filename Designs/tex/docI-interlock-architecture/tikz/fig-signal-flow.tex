@@ -1,5 +1,5 @@
 % !TeX root = ../I_interlock_architecture.tex
-% Doc I master diagram.  Three fault sources, three actors, three MPS paths.
+% Doc I master diagram.  Three fault sources, three actors, two MPS paths.
 % Read top to bottom: the hardware layer (upper two thirds) acts in under a
 % microsecond and is independent of software; the EPICS alarm tree and the SNL
 % state machine (lower third) only observe and then tidy up.
@@ -7,8 +7,9 @@
 % Layout rules used here:
 %   * every box in a column shares that column's centre x, so the vertical
 %     connectors between them are exactly vertical;
-%   * the three MPS paths run in lanes that touch no box -- A across the gap at
-%     the actor row, B straight down the centre, C down the lane at x = 134;
+%   * the MPS paths run in lanes that touch no box -- A across the gap at the
+%     actor row, B straight down the centre; the SPEAR MPS and orbit permits
+%     come down the lane at x = 134 into Slot 5;
 %   * the HVPS Remote I/O path runs down the far right at x = 203 so that it
 %     does not pass through the VXI Slot 5 box.
 \begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
@@ -69,16 +70,14 @@
 
 \node[ctrl,text width=60mm,anchor=north] (slot5) at (\xC,\yM)
   {\textbf{VXI SLOT 5} --- MPS SHUTOFF MODULE\\[2pt]
-   {\tiny receives on its back connector:\\
-    RF MPS PLC permit $\cdot$ SPEAR MPS beam permit $\cdot$ orbit interlock}\\[2pt]
+   {\tiny inputs: SPEAR MPS permit $\cdot$ orbit-interlock permit (24 V)\\
+    J3 $\rightarrow$ Fast IC spare fault $\rightarrow$ AIM External MPS}\\[2pt]
    asserts RF\_FAULT on P2};
 
-% Path C: down the clear lane at x = 134, between the MPS and HVPS columns.
-% Both turns are projected from node anchors: the MPS box and the Slot 5 box
-% differ in height, so a hardcoded y here tilts the first and last segments.
-\coordinate (pcTurn) at (mps.east -| 134,0);
-\draw[sig] (mps.east) -- (pcTurn) -- (pcTurn |- slot5.west) -- (slot5.west);
-\node[tag,anchor=east] at (132,-62) {\textbf{Path C}};
+% The machine permits come down the clear lane at x = 134, between the MPS and
+% HVPS columns; the last turn is projected from the Slot 5 anchor.
+\node[tag,anchor=north,align=center] (perm) at (134,-46) {SPEAR MPS,\\ orbit permits};
+\draw[sig] (perm.south) -- (perm.south |- slot5.west) -- (slot5.west);
 
 % ===== the RFP module, cut by either asserter ==============================
 \node[rf,text width=54mm,anchor=north] (rfp) at (\xA,-118)
@@ -95,8 +94,8 @@
    \texttt{rf\_sumy\_stn.db} / \texttt{rf\_sumy\_stn\_spr.db}\quad
    {\tiny($\approx\qty{100}{\milli\second}$ CA propagation)}\\[3pt]
    {\footnotesize\texttt{STN:VXI:LTCH} $\rightarrow$ \texttt{STNPARK:SUMY:STAT}
-    \qquad \texttt{STNMPS:SUMY:LTCH} $\rightarrow$ \texttt{STN:MPS:LTCH},
-    \texttt{STN:FORCED:LTCH}, \texttt{STN:VXI:LTCH}
+    \qquad \texttt{STN:ABSUMY:LTCH}, \texttt{STN:SUMY:PLC},
+    \texttt{STN:LOCAL:ON}
     \qquad \texttt{HVPSOFF:SUMY:STAT} $\rightarrow$ \texttt{HVPSSTN:SUMY:LTCH},
     \texttt{HVPSCONTACT:SUMY:STAT}}\\[3pt]
    \textbf{\texttt{\{STN\}:STNOFF:SUMY:STAT.SEVR} --- the single SNL trip wire}};

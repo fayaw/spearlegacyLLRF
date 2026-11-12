@@ -13,11 +13,17 @@ git.
 | **Doc M** — Subsystem Integration and Migration Plan | `docM-integration-migration/` | `M_integration_migration_plan.tex` |
 | **Doc P** — RF Physics, Control Theory and Plant | `docP-rf-physics/` | `P_rf_physics_and_plant.tex` |
 | **Doc T** — Tuner Control System Analysis | `docT-tuner-control/` | `T_tuner_control_analysis.tex` |
+| **Doc W** — RF Station Wiring and Interconnection Reference | `docW-station-wiring/` | `W_station_wiring_reference.tex` |
 
 Each document folder holds its own `body.tex` and its own `tikz/`, so figure
 names need no document prefix. Everything shared lives in `common/`. A change
 to `common/preamble.tex` affects every document — rebuild them all before
 committing one.
+
+Doc W is built from data: its tables are generated from the CSV files in
+`docW-station-wiring/data/` by `scripts/docw-gen.js` (see
+[scripts/README.md](scripts/README.md)). Edit the data, never
+`docW-station-wiring/generated/`.
 
 ## Build
 
@@ -29,32 +35,26 @@ powershell -ExecutionPolicy Bypass -File build.ps1 -Doc P          # Doc P
 powershell -ExecutionPolicy Bypass -File build.ps1 -Doc T          # Doc T
 powershell -ExecutionPolicy Bypass -File build.ps1 -Doc M          # Doc M
 powershell -ExecutionPolicy Bypass -File build.ps1 -Doc C          # Doc C
+powershell -ExecutionPolicy Bypass -File build.ps1 -Doc W          # Doc W (regenerates its tables first)
 ```
-
-## Converting a Markdown document
-
-`scripts/md2tex.js` runs preprocess → pandoc → postprocess in one pass, and
-`scripts/verify.js` checks the result against the source (headings, key facts,
-equation count, equation tags, table and figure counts):
-
-```powershell
-node scripts/md2tex.js P
-node scripts/verify.js P
-```
-
-Add a document by extending the `DOCS` table at the top of each script. The
-converter writes a visible “figure not yet drawn” placeholder for any figure it
-has a name for but no `tikz/` file, so a half-finished conversion still builds
-and the gaps are obvious.
 
 `build.ps1` runs LuaLaTeX three times and then **fails the build** on any
 LaTeX error or any silently dropped character. Read the summary it prints; a
-clean build reports zero for both.
+clean build reports zero errors, zero dropped characters, zero unresolved
+references and no overfull box over 20 pt. For Doc W it first runs
+`scripts/docw-gen.js` and stops if the data have errors. The editor's
+build-on-save runs LuaLaTeX only, so after editing Doc W's data run
+`build.ps1 -Doc W` (or `node scripts/docw-gen.js`) once.
+
+Before releasing Doc L, also run `node scripts/verify-docL.js` (see
+[scripts/README.md](scripts/README.md)).
+
+## Tools
 
 Preview a single diagram while working on it:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File preview-figs.ps1                       # all, both docs
+powershell -ExecutionPolicy Bypass -File preview-figs.ps1                       # every figure of every document
 powershell -ExecutionPolicy Bypass -File preview-figs.ps1 -Only fig-vxi-crate   # one
 powershell -ExecutionPolicy Bypass -File preview-figs.ps1 -Doc 0*              # one document
 ```
@@ -89,25 +89,28 @@ something that locks it. Close it, or use a viewer that does not lock.
 
 ## Revision history
 
-The revision history lives at the top of `body.tex` inside a
-`\begin{comment}` block. It is deliberately **not rendered** — it belongs with
-the source, not in a document sent to a reviewer. Add a row when making a
-substantive change; leave historical rows frozen, since they record what was
-true at the time.
+The revision history is the first section of `body.tex` and is rendered in
+Docs 0, C, L, M, P and W; Doc I keeps an unrendered history, as comments in its
+main file, and Doc T has none yet.
+Add a row for each substantive change; leave historical rows frozen, since
+they record what was true at the time.
 
 ## Layout
 
 | Path | Contents |
 |---|---|
+| `build.ps1` | Builds one document and checks its log |
+| `preview-figs.ps1` | Builds each TikZ figure on its own page, to check it |
 | `common/preamble.tex` | Shared preamble for every document in this set |
 | `common/tikztest.tex` | Single-figure preview harness (a tool, not an artifact) |
 | `common/figsize.tex` | Reports a figure's natural size (a tool, not an artifact) |
 | `common/photos/` | Photographs, copied here with LaTeX-safe names, shared across documents |
-| `common/generated/` | Data plots built by `scripts/` (git-ignored) |
 | `<doc>/` — main `.tex` | Title block and front matter; `\input{../common/preamble}` and `\input{body}` |
 | `<doc>/body.tex` | The document text. **Edit this** for content changes. |
 | `<doc>/tikz/` | That document's hand-authored block diagrams, one file per figure |
-| `scripts/` | Generation of data-derived plots — see its README |
+| `docW-station-wiring/data/` | Doc W's data: drawings, errata, field checks, units, links, connections, cables |
+| `docW-station-wiring/generated/` | Doc W's tables, written by `scripts/docw-gen.js`; never edit |
+| `scripts/` | Doc W generator and Doc L release check — see its README |
 
 ## Adding a document
 
@@ -117,6 +120,8 @@ true at the time.
 4. Add the main file to `latex-workshop.latex.search.rootFiles.include` in
    `.vscode/settings.json`, and put `% !TeX root =` at the top of `body.tex`
    and every `tikz/*.tex`.
+5. A document built from data names its generator in the `$docs` entry
+   (`gen = "<script>.js"`, as Doc W does); `build.ps1` runs it first.
 
 ## LuaLaTeX is required
 

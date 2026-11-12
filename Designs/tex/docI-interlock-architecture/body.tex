@@ -18,12 +18,12 @@ ID & Item & Required Evidence & Needed Before & Page \\
 \endhead
 \bottomrule
 \endlastfoot
-O1 & Slot 5 physical module & Confirm what is physically installed in VXI slot 5 of the SRF1 crate. The crate template labels it "MPS Shutoff" and the CF2 database is loaded as a PEP-II artifact. & VXI crate retirement & \openpage{O1} \\
+O1 & Slot 5 MPS Shutoff module & Find the module's drawing, and record how the SPEAR MPS and orbit-interlock permits enter it and the electrical form of its J3 output, which is cabled to the Fast Interlock Chassis's spare-fault input. & Interface Chassis installation & \openpage{O1} \\
 O2 & RF MPS PLC $\leftrightarrow$ Fast IC and panel wiring & Confirm whether any hardwired line runs from the PLC-5 to the Fast Interlock Chassis besides the AB summary and AB heartbeat that pass through the RF Local Display Panel (the detector output J31 runs the other way, to PLC-5 analog input~2 \R{26}), and confirm the J3 pin order, which is reversed between SD-340-311-01 and WD-340-330-02 \R{27}, \R{30}. & Interface I/O freeze & \openpage{O2} \\
-O3 & Fast IC $\rightarrow$ AIM connection & The drawings show an external 37-pin cable from the Fast IC's J2 to the AIM's J4, carrying the twelve analog arc signals and the spare-fault line \R{32}. Confirm it on the hardware and identify what drives the Fast IC's spare-fault input. & Protection acceptance & \openpage{O3} \\
+O3 & AIM response to External MPS & The AIM's spare channel, External MPS, is enabled. Confirm on the hardware what the AIM does when it trips: whether it asserts RF\_FAULT and drops the HVPS on request, as for an arc. & Interface Chassis installation & \openpage{O3} \\
 O4 & RF Local Display Panel logic & Read out the equations of the panel's GAL22V10 logic device, which forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort \R{29}. & Interface Chassis logic design & \openpage{O4} \\
 O5 & Remote I/O word/bit map & Cross-check the assignments derived from \R{9} against the deployed SLC-500 ladder program. & Controller replacement & \openpage{O5} \\
-O6 & Arc sensor count & Confirm the installed sensor count and locations against the six locations and eleven total sensors quoted for the upgrade. & Arc detection changes & \openpage{O6} \\
+O6 & Arc sensors & Confirm which of the ten enabled arc channels have a detector installed, and where. & Arc detection changes & \openpage{O6} \\
 \end{longtable}
 
 \section*{Background}\label{sec:background}
@@ -91,7 +91,7 @@ Three fault sources feed five actors, as shown in \cref{fig:signal-flow}. Hardwa
 \begin{figure}[tbp]
 \centering
 \begin{fitpicture}\input{tikz/fig-signal-flow}\end{fitpicture}
-\caption[Legacy interlock signal flow.]{Legacy interlock signal flow. Three fault sources feed five actors. The hardware paths across the top are independent of software; the EPICS alarm tree at the bottom is the single software trip wire into the SNL state machine. The RF MPS PLC acts on three paths: \textbf{Path A} sends its collector and waveguide pressure summaries to the logic of the RF Local Display Panel (not drawn), which removes SCR ENABLE, and its AB summary over the panel's fibers to the Fast Interlock Chassis and the AIM; \textbf{Path B} clears the Remote I/O permit bit, setting \texttt{STN:MPS:LTCH} to MAJOR in the alarm tree; \textbf{Path C} drives VXI Slot 5, which asserts RF\_FAULT on the backplane as a redundant RF cut. The three HVPS fibers run between the RF Local Display Panel in B132 and the HVPS controller in B118.}\label{fig:signal-flow}
+\caption[Legacy interlock signal flow.]{Legacy interlock signal flow. Three fault sources feed five actors. The hardware paths across the top are independent of software; the EPICS alarm tree at the bottom is the single software trip wire into the SNL state machine. The RF MPS PLC acts on two paths: \textbf{Path A} sends its collector and waveguide pressure summaries to the logic of the RF Local Display Panel (not drawn), which removes SCR ENABLE, and its AB summary over the panel's fibers to the Fast Interlock Chassis and the AIM; \textbf{Path B} is the Remote I/O copy of its global interlock summary, \texttt{STN:SUMY:PLC}, in the alarm tree. VXI Slot 5 takes the SPEAR MPS and orbit-interlock permits: it asserts RF\_FAULT on the backplane, and its J3 output reaches the AIM through the Fast Interlock Chassis as the External MPS channel. The three HVPS fibers run between the RF Local Display Panel in B132 and the HVPS controller in B118.}\label{fig:signal-flow}
 \end{figure}
 
 \textbf{Speed summary by path:}
@@ -104,9 +104,8 @@ Path & Actor & Hardware action & EPICS notification & SNL response \\
 \bottomrule\noalign{}
 \endlastfoot
 Arc → Fast IC and AIM & Fast IC 340-308 and AIM & \textless{} 1 μs (RF cut by the AIM; SCR ENABLE and CROWBAR through the AIM commands and the RF Local Display Panel logic) & \textasciitilde50--500 μs (AIM ISR → VXI:LTCH) & \textasciitilde1 s (orderly HVPS shutdown) \\
-MPS PLC Path A → panel logic and AIM & RF MPS PLC + RF Local Display Panel + AIM & \textasciitilde10--15 ms (HVPS kill through SCR ENABLE for collector and waveguide pressure faults; RF cut through the AB summary) & \textasciitilde1 s (Remote I/O Path B) & \textasciitilde1 s (orderly HVPS shutdown, HVPS already dead) \\
-MPS PLC Path C → Slot 5 & RF MPS PLC + Slot 5 & \textasciitilde10--15 ms (RF cut only; no immediate hardware HVPS kill) & \textasciitilde50--500 μs (AIM ISR → VXI:LTCH → STNOFF) & \textasciitilde6 s (orderly HVPS shutdown via s\_go\_off) \\
-SPEAR MPS permit / orbit interlock → Slot 5 & VXI Slot 5 & \textasciitilde5--15 ms (RF cut only; no \emph{direct} hardware HVPS kill from Slot 5; but see cascade note) & \textasciitilde50--500 μs (AIM ISR → VXI:LTCH → STNOFF) & \textasciitilde6 s (SNL orderly shutdown) --- \textbf{but in practice \textasciitilde20--30 ms} via collector overpower cascade → MPS PLC Path A → Fast IC (see \cref{sec:cascade}) \\
+MPS PLC Path A → panel logic and AIM & RF MPS PLC + RF Local Display Panel + AIM & \textasciitilde10--15 ms once the PLC trips (HVPS kill through SCR ENABLE for collector and waveguide pressure faults; RF cut through the AB summary); the collector protection trips only after \qty{0.70}{\second} above its limit & \textasciitilde1 s (Remote I/O Path B) & \textasciitilde1 s (orderly HVPS shutdown, HVPS already dead) \\
+SPEAR MPS permit / orbit interlock → Slot 5 & VXI Slot 5 & RF cut only; the module's response time is not documented (O1), and Slot 5 has no hardware HVPS path & \textasciitilde50--500 μs (AIM ISR → VXI:LTCH → STNOFF; External MPS → MPS:LTCH) & \textasciitilde6 s (SNL orderly shutdown); earlier only through the AIM (O3) or the collector-power cascade after \qty{0.7}{\second} (\cref{sec:cascade}) \\
 HVPS controller trip & SLC-500 HVPS PLC & \textasciitilde10--20 ms (24 V fault/enable removed from the trigger boards) & \textasciitilde100 ms--1 s (Remote I/O → EPICS) & \textasciitilde1 s (orderly RF shutdown, HVPS already off) \\
 \end{longtable}
 
@@ -141,11 +140,11 @@ RF forward power & Klystron forward coupler & Coaxial cable to the rear RF input
 HVPS status (\texttt{HVPSON} in AIM \texttt{FISTAT}, bit 6) & Not documented & --- & The HVPS STATUS fiber ends on the RF Local Display Panel, where it is received as the HVPS beam abort, not on this chassis \R{26}, \R{27}; the source of the \texttt{FISTAT} bit is not documented. The AIM uses the bit to gate arc voltage readback (arc peaks not read when \texttt{HVPSON=0}). \\
 AB summary and AB heartbeat & RF MPS PLC-5, through the RF Local Display Panel & Two fibers from the panel; passed to the AIM on J15 & The AIM latches an AB summary fault and an AB heartbeat fault (Path A) \R{14}, \R{26} \\
 AIM commands, supplies and trip tests & AIM, cable J15 & 25-pin cable & The six commands, inverted and sent as fibers; the AIM's fused \qty{\pm 12}{\volt} and \qty{5}{\volt}, which power the chassis; twelve trip-test lines that drive test-light fibers \R{32} \\
-Spare fault & Not identified & Front LEMO, cabled & \qty{24}{\volt} input through an optocoupler that trips on a low input; passed to the AIM on the 37-pin cable \R{32} \\
+Spare fault & VXI Slot~5 MPS Shutoff module, J3 (checked November 2026) & Front LEMO & \qty{24}{\volt} input through an optocoupler that trips on a low input; passed to the AIM on the 37-pin cable as the External MPS channel (\cref{sec:slot5-sw}) \R{32} \\
 \end{longtable}
 
 \begin{keynote}
-\textbf{Signal routing correction}: The SPEAR MPS beam permit and orbit interlock signals are \textbf{not} inputs to the Fast Interlock Chassis. They are wired to the back connector of the \textbf{VXI Slot 5 MPS Shutoff module}. When either permit is removed, Slot 5 asserts \texttt{RF\_FAULT} on the VXI P2 backplane, cutting RF drive. See \cref{sec:slot5-hw} for the complete Slot 5 input description.
+\textbf{Signal routing}: The SPEAR MPS and orbit-interlock permits are inputs of the \textbf{VXI Slot 5 MPS Shutoff module}, not of the Fast Interlock Chassis \R{31}, \R{34}. When either permit is removed, Slot 5 asserts \texttt{RF\_FAULT} on the VXI P2 backplane, cutting RF drive. Its J3 output is cabled to this chassis's spare-fault input, which passes it to the AIM as the External MPS channel. See \cref{sec:slot5-hw} for the Slot 5 description.
 \end{keynote}
 
 \subsection{Outputs}\label{sec:fastic-outputs}
@@ -161,7 +160,7 @@ Output & Destination & Latency & Mechanism \\
 AIM commands (six) & RF Local Display Panel (B132) & \textless{} 1 μs & FILAMENT\_ON, SOLENOID\_ON, HVPS\_ON, BEAM\_ABORT, FILAMENT\_TIMEOUT and FAULT\_RESET from the AIM, inverted and sent as fibers \R{26} \\
 AB summary, AB heartbeat & AIM Module (VXI Slot 12) & \textasciitilde1 μs & From the panel's fibers, on J15 \\
 Arc signals (12) and spare fault & AIM Module (VXI Slot 12) & \textasciitilde1 μs & Analog arc signals, differential, and the spare-fault line, on the 37-pin cable from J2 to the AIM's J4 \R{32} \\
-Detected klystron power & RF MPS PLC-5, analog input~2, channel~12 & --- & Rear output J31 (RF AMPL.); the front BNC J16 is not cabled \R{26} \\
+Detected klystron power & RF MPS PLC-5, analog input~2, channel~10 (terminal~12) & --- & Rear output J31 (RF AMPL.); the front BNC J16 is not cabled \R{26} \\
 Test light (12) & Arc-detector fibers & --- & Fiber transmitters J33 to J44, driven by the AIM's trip-test lines \R{32} \\
 \end{longtable}
 
@@ -191,7 +190,7 @@ Removing SCR gate drive does \textbf{not} stop conduction immediately --- the th
 \subsection{Front Panel}\label{sec:fastic-panel}
 
 
-The front panel of the Fast Interlock Chassis (SLAC drawing 340-308; photographed in Doc~L) shows:
+The front panel of the Fast Interlock Chassis (SLAC drawing 340-308; front and rear photographed in Doc~L) shows:
 
 \begin{itemize}
 \tightlist
@@ -202,7 +201,7 @@ The front panel of the Fast Interlock Chassis (SLAC drawing 340-308; photographe
 \item
   \textbf{INPUT MON.} CH.1 through CH.12 monitor points of the arc channels
 \item
-  \textbf{SPARE FAULT} input (LEMO), cabled
+  \textbf{SPARE FAULT} input (LEMO), cabled to J3 of the VXI Slot~5 MPS Shutoff module
 \item
   \textbf{J16 DETECTED KLYSTRON POWER} --- BNC monitor output of the RF detector, not cabled; the RF input J32 and the output J31 to the PLC-5 are on the rear panel \R{26}
 \end{itemize}
@@ -240,7 +239,7 @@ Each arc channel has a threshold that the AIM sets in software. When a fiber-opt
 
 
 \begin{keynote}
-\textbf{The AIM module (drawing 340-307) and the Fast Interlock Chassis (drawing 340-308) are companion units designed as a pair.} Their sequential SLAC drawing numbers reflect this: 340-307 is the VXI digital module; 340-308 is the external analog chassis.
+\textbf{The AIM (schematic SD-340-309-01) and the Fast Interlock Chassis 340-308 (schematics SD-340-308-01 and -02) are companion units designed as a pair.} A spare Fast Interlock Chassis of a slightly different version, 340-307, sits above the RF Local Display Panel in rack B132-12 and is not in use; the unit in service is the 340-308.
 \end{keynote}
 
 \textbf{Fast Interlock Chassis 340-308} is the \textbf{analog front-end}:
@@ -257,12 +256,12 @@ Each arc channel has a threshold that the AIM sets in software. When a fiber-opt
   Sends the twelve analog arc signals and the spare-fault line to the AIM over a 37-pin cable from its J2 to the AIM's J4 \R{32}
 \end{itemize}
 
-\textbf{AIM module 340-307} is the \textbf{VXI digital companion}:
+\textbf{The AIM} (schematic SD-340-309-01) is the \textbf{VXI digital companion}:
 
 \begin{itemize}
 \tightlist
 \item
-  Receives the twelve analog arc signals on its J4 and compares each with its own threshold; the cable is to be confirmed on the hardware\openitem{O3}
+  Receives the twelve analog arc signals and the spare-fault line on its J4, and compares each arc signal with its own threshold \R{32}
 \item
   Its 12-channel arc registers (\texttt{ARCCURSTT}, \texttt{ARCLTDSTT}) hold the states of its own comparators
 \item
@@ -291,7 +290,7 @@ Each arc channel has a threshold that the AIM sets in software. When a fiber-opt
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Module type}: SLAC PEP-II RF custom VXI module --- "Arc detector / Interlock Module" (AIM), drawing 340-307
+  \textbf{Module type}: SLAC PEP-II RF custom VXI module --- "Arc detector / Interlock Module" (AIM), schematic SD-340-309-01
 \item
   \textbf{VXI slot}: 12 (last slot, rightmost in crate)
 \item
@@ -312,17 +311,36 @@ The AIM module has 12 independently configurable arc detection channels. Each ch
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Enable/disable} bit (\texttt{ARCENBSTT} register, \texttt{MODU.AFES} field)
+  \textbf{Fault enable}, set by a jumper on the AIM (headers H5 and H6; no jumper = enabled) and read back as \texttt{ARCENBSTT} (\texttt{MODU.AFES}); EPICS cannot change it \R{3}, \R{32}
 \item
   \textbf{Threshold} setting (8-bit value, range 10--255): configured via EPICS writing to the AIM's \texttt{TRIPLVL} registers (A24 offset \texttt{0x0020} for ch 0, successive offsets per channel). The device driver (\texttt{devP2RfAim.c}) writes the value to the AIM VXI register, which sets the DAC of that channel's comparator on the AIM \R{32}.
 \item
-  \textbf{Current status} (\texttt{ARCCURSTT}, \texttt{MODU.ACST}) --- real-time state of the AIM's comparator
+  \textbf{Current status} (\texttt{ARCCURSTT}, \texttt{MODU.ACST}) --- real-time state of the AIM's comparator: 1 = clear, 0 = tripped
 \item
-  \textbf{Latched status} (\texttt{ARCLTDSTT}, \texttt{MODU.ALST}) --- comparator state latched since the last fault reset
+  \textbf{Latched status} (\texttt{ARCLTDSTT}, \texttt{MODU.ALST}) --- 1 = clear, 0 = tripped since the last fault reset. The driver masks both status words with the enables, so a disabled channel reads 0 \R{3}
 \end{itemize}
 
+The SPEAR3 database names eleven channels \R{35}. The AIM's fault-enable word read \texttt{0x71FB} (29179) on 11 November 2026, which enables exactly these eleven:
+
+\begin{longtable}[]{@{}Q{\dimexpr 0.14\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.60\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.26\linewidth-1.33\tabcolsep\relax}@{}}
+\toprule\noalign{}
+Bit & Channel (latch record) & Fault enable, 11 November 2026 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+0 & Klystron arc (\texttt{KLYS:\allowbreak{}ARC:\allowbreak{}LTCH}) & Enabled \\
+1 & Circulator arc (\texttt{CIRC:\allowbreak{}ARC:\allowbreak{}LTCH}) & Enabled \\
+2 & Not named & Disabled \\
+3--6 & Cavity 1--4 window arc, air side (\texttt{CAV\textit{n}AIR:\allowbreak{}ARC:\allowbreak{}LTCH}) & Enabled \\
+7, 12--14 & Cavity 1--4 window arc, vacuum side (\texttt{CAV\textit{n}VACM:\allowbreak{}ARC:\allowbreak{}LTCH}) & Enabled \\
+8 & External MPS, the spare input (\texttt{STN:\allowbreak{}MPS:\allowbreak{}LTCH}; \cref{sec:slot5-sw}) & Enabled \\
+9--11 & Not channels & --- \\
+15 & Not named & Disabled \\
+\end{longtable}
+
 \begin{keynote}
-\textbf{Note on channel count}: The legacy AIM supports 12 hardware channels. The SPEAR3 deployment uses 6 sensor locations (4 cavity windows + 1 klystron window + 1 circulator), provisioned with up to 11 total sensors including spares. The authoritative upgrade count is in Doc~0; the installed count has not been confirmed by inspection.\openitem{O6}
+\textbf{Note on channel count}: Ten arc channels are enabled, at six locations: the klystron, the circulator and the four cavity windows, each window on its air and vacuum sides. The enables are jumpers, so they do not show whether a detector is connected; which channels have one has not been confirmed by inspection.\openitem{O6}
 \end{keynote}
 
 \subsection{Hardware Trip Path --- RF\_FAULT Backplane Line}\label{sec:aim-rffault}
@@ -368,9 +386,9 @@ PV & AIM Register & Content \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCCURSTT} & \texttt{MODU.ACST} & mbbiDirect --- 12-bit arc current status word (one bit per channel) \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & \texttt{MODU.ALST} & mbbiDirect --- 12-bit arc latched status (holds until a fault reset) \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCENBSTT} & \texttt{MODU.AFES} & mbbiDirect --- 12-bit arc enable bitmap \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCCURSTT} & \texttt{MODU.ACST} & mbbiDirect --- arc current status, one bit per channel (1 = clear) \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & \texttt{MODU.ALST} & mbbiDirect --- arc latched status, one bit per channel (1 = clear, 0 = latched until a fault reset) \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCENBSTT} & \texttt{MODU.AFES} & mbbiDirect --- fault-enable word, set by jumpers on the AIM; \texttt{0x71FB} on 11 November 2026 \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTFLT} & \texttt{MODU.FFLT} & mbbiDirect --- first-fault arc channel \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTINTSTT} & \texttt{MODU.FSTT} & mbbiDirect --- fast interlock status register: VXI backplane, AB heartbeat, AB summary and forced faults, latched; HVPS on; spare fault \R{6}, \R{14} \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}INTSTATE} & \texttt{MODU.ISTT} & mbbiDirect --- overall AIM interlock state \\
@@ -381,7 +399,8 @@ These feed into \texttt{rf\_\allowbreak{}interlock\_\allowbreak{}vxi.\allowbreak
 
 \begin{sigblock}
 {STN}:STN:AIM:LTCH.BN  →  {STN}:STN:VXI:LTCH  (bi, MAJOR alarm)
-    → {STN}:STNMPS:SUMY:LTCH.INPC
+    → {STN}:STNPARK:SUMY:STAT → {STN}:STNOFF:SUMY:STAT   (trip)
+    → {STN}:STNMPS:SUMY:LTCH.INPC                        (status)
 \end{sigblock}
 
 \subsection{AIM Control Output Signals (Fiber Optic Outputs)}\label{sec:aim-outputs}
@@ -517,7 +536,7 @@ Input & Source & Connection & Notes \\
 \bottomrule\noalign{}
 \endlastfoot
 Arc signals (12 channels) & Fast Interlock Chassis 340-308 & 37-pin cable, Fast IC J2 to AIM J4 & Analog, peak-detected; compared on the AIM with its thresholds; \texttt{ARCCURSTT} and \texttt{ARCLTDSTT} hold the comparator states, the latter until a fault reset \R{32} \\
-Spare fault & Fast IC spare-fault input & 37-pin cable, pin~34 & Read in the fast interlock status register (\texttt{FSTINTSTT}, \texttt{MODU.FSTT}) \R{6}, \R{32} \\
+Spare fault (External MPS) & VXI Slot~5 J3, through the Fast IC's spare-fault input & 37-pin cable, pin~34 & Bit~8 of the arc registers and of the fast interlock status register (\texttt{FSTINTSTT}, \texttt{MODU.FSTT}); \texttt{STN:MPS:LTCH} (\cref{sec:slot5-sw}) \R{6}, \R{32}, \R{35} \\
 AIM interrupt & AIM on-board IRQ logic & VXI interrupt line & \texttt{AIM\_M\_ARCDETD} (arc detected), \texttt{AIM\_\allowbreak{}M\_\allowbreak{}VXIBPFLT} (VXI backplane fault), \texttt{AIM\_\allowbreak{}M\_\allowbreak{}FRCDFLTINT} (forced fault), etc. \\
 AB summary and AB heartbeat & RF MPS PLC-5, through the RF Local Display Panel fibers and the Fast IC & J15 of the Fast IC to J3 of the AIM \R{26} & The AIM latches an AB summary fault and, when the pulses stop, an AB heartbeat fault, in its fast interlock status register \R{14} \\
 AIM\_M\_SOFTWARE interrupt & EPICS IOC write & VXI register write & Software-triggered interrupt (for test/forced-fault operations) \\
@@ -545,9 +564,9 @@ EPICS PVs (arc status, interlock state) & EPICS IOC (VxWorks) & EPICS CA record 
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
-\section{VXI Slot 5: "MPS Shutoff" --- Clarification}\label{sec:slot5}
+\section{VXI Slot 5: MPS Shutoff Module}\label{sec:slot5}
 
-\emph{Sources}: \R{5}, \R{17}, \R{18}, \R{19}, \R{20}.
+\emph{Sources}: \R{5}, \R{17}, \R{18}, \R{19}, \R{20}, \R{31}, \R{34}, \R{35}.
 
 
 \subsection{What It Is}\label{sec:slot5-what}
@@ -555,7 +574,7 @@ EPICS PVs (arc status, interlock state) & EPICS IOC (VxWorks) & EPICS CA record 
 
 \textbf{This slot requires careful distinction between hardware labeling, software configuration, and functional role.}
 
-The SPEAR3 VXI crate (SRF1) at slot 5 is labeled \textbf{"MPS Shutoff"} in the crate physical template (\texttt{crat\_\allowbreak{}vxi\_\allowbreak{}13slot.\allowbreak{}template,v}) \R{17}. This is its functional designation in the SPEAR3 system; what is physically installed in the slot has not been confirmed.\openitem{O1}
+The SRF1 crate configuration names slot 5 \textbf{``MPS Shutoff''} and slot 6 ``Link Passthru''; the crate template \texttt{crat\_\allowbreak{}vxi\_\allowbreak{}13slot.\allowbreak{}template,v} takes the slot names as macros \R{17}, \R{35}. The module in slot 5 has a connector J3 that is cabled to the Fast Interlock Chassis (checked November 2026). J.~Dusatko describes it as the MPS interlock module: it receives the interlock signal of the SPEAR MPS and drives \texttt{RF\_FAULT} on the VXI backplane; it has no VXIbus interface and takes only crate power and \texttt{RF\_FAULT} from the backplane \R{31}. No drawing of the module is in the repository.\openitem{O1}
 
 The IOC software (\texttt{rf\_\allowbreak{}vxi\_\allowbreak{}modules\_\allowbreak{}All.\allowbreak{}substitutions,v}) \R{18} loads \texttt{cf2.db} (the Comb Filter 2 database) for slot 5 --- \textbf{this is a PEP-II inherited template artifact}. The \texttt{devP2RfCf2.c} driver (2,970 lines) is a PEP-II-only module; the CF2 DSP functionality (comb filter, group delay equalizer, filter bank) is \textbf{not exercised in SPEAR3}.
 
@@ -579,53 +598,53 @@ Functional use & RF comb filter feedback & MPS permit interface \\
 \subsection{Hardware Function}\label{sec:slot5-hw}
 
 
-The "MPS Shutoff" module in slot 5 provides the \textbf{VXI-backplane permit interface} for machine-level and machine-protection signals. Its role is:
+The MPS Shutoff module in slot 5 is the station's input for the SPEAR3 machine permits:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  The module occupies slot 5 and has access to the VXI P2 backplane
+  It uses the VXI P2 backplane only for power and \texttt{RF\_FAULT} \R{31}
 \item
-  It receives \textbf{three permit signals} at its back connector (rear I/O):
-
-  \begin{itemize}
-  \tightlist
-  \item
-    \textbf{RF MPS PLC permit} --- from the RF MPS PLC (PLC-5/1771), via a hardwired contact
-  \item
-    \textbf{SPEAR MPS beam permit} --- from the SPEAR machine-level MPS, directly wired to the back connector
-  \item
-    \textbf{Orbit interlock} --- from the SPEAR3 orbit feedback system, directly wired to the back connector
-  \end{itemize}
+  Its inputs are the two machine permits: the SPEAR MPS and the orbit interlock each give the LLRF a \qty{24}{\volt} permit \R{34}. Their wiring into the module is not on any RF drawing in the repository (O1). The RF MPS PLC does not feed it: the PLC-5's output drawings show no line to the VXI crate \R{36}
 \item
-  When all permits are \textbf{present}: the module holds the \texttt{RF\_PERMIT} backplane line HIGH (or asserts a permissive signal); the RFP module (slot 4) is allowed to output RF drive
+  When a permit is lost, the module asserts \texttt{RF\_FAULT}: the RFP removes the drive at once, and the AIM latches the backplane fault (\texttt{STN:\allowbreak{}VXI:\allowbreak{}LTCH}), which turns the station off through the state machine \R{14}, \R{31}
 \item
-  When any permit is \textbf{removed}: the module drops \texttt{RF\_PERMIT} or asserts \texttt{RF\_FAULT} on the backplane; the RFP module immediately cuts output (same hardware-speed path as the arc trip)
+  Its J3 output is cabled to the Fast Interlock Chassis's SPARE FAULT input, which passes it to the AIM's J4 on pin~34 of the 37-pin cable \R{32}; the AIM holds it as its spare channel, External MPS (\cref{sec:slot5-sw})
 \end{enumerate}
 
 \begin{keynote}
-\textbf{Key routing fact}: The SPEAR MPS beam permit and orbit interlock signals wire directly to the \textbf{back connector of the MPS Shutoff module (Slot 5)}. They do \textbf{not} connect to the inputs of the Fast Interlock Chassis 340-308 or of the RF Local Display Panel. This means removal of these permits cuts RF drive immediately (via VXI backplane \texttt{RF\_FAULT}) but does \textbf{not} remove SCR ENABLE or fire the crowbar directly --- there is no immediate hardware HVPS shutdown path through the SPEAR MPS permit or orbit interlock. However, the \texttt{RF\_FAULT} assertion on the VXI backplane propagates through the EPICS alarm chain (\texttt{STN:VXI:LTCH} MAJOR → \texttt{STNPARK:\allowbreak{}SUMY:\allowbreak{}STAT} MAJOR → \texttt{STNOFF:\allowbreak{}SUMY:\allowbreak{}STAT} MAJOR → \texttt{fault\_stnoff} in the SNL state machine), which drives \texttt{s\_go\_off} and performs an orderly HVPS shutdown approximately 6 seconds later.
+\textbf{Key routing fact}: The SPEAR MPS and orbit-interlock permits do \textbf{not} reach the RF Local Display Panel, and they reach the Fast Interlock Chassis only as the module's J3 output on its spare-fault input. Their removal cuts RF drive at once through \texttt{RF\_FAULT}, but Slot 5 has no path that removes SCR ENABLE or fires the crowbar. A hardware HVPS kill can come only from the AIM, if its fault logic acts on the External MPS channel as on an arc (O3), or from the collector-power cascade (\cref{sec:cascade}). Otherwise the \texttt{RF\_FAULT} assertion propagates through the EPICS alarm chain (\texttt{STN:VXI:LTCH} MAJOR → \texttt{STNPARK:\allowbreak{}SUMY:\allowbreak{}STAT} MAJOR → \texttt{STNOFF:\allowbreak{}SUMY:\allowbreak{}STAT} MAJOR → \texttt{fault\_stnoff} in the SNL state machine), which drives \texttt{s\_go\_off} and performs an orderly HVPS shutdown approximately 6 seconds later.
 \end{keynote}
 
 \subsection{Software Visibility}\label{sec:slot5-sw}
 
 
-The MPS permit status is tracked in EPICS via \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH} --- a binary input record reading from the AB Remote I/O communication registers (\texttt{rf\_\allowbreak{}interlock.\allowbreak{}db}, \texttt{DTYP="AB-\allowbreak{}1771DCM\ BI"}, word \texttt{T6{[}WL,B{]}}). This is the software-visible representation of the MPS permit held by the RF MPS PLC.
+The module has no VXIbus interface, so no EPICS record reads it \R{31}. A Slot 5 trip appears in EPICS in two ways:
 
-The \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}VXI:\allowbreak{}LTCH} record (from \texttt{rf\_\allowbreak{}interlock\_\allowbreak{}vxi.\allowbreak{}db}) reads from the AIM latch register bits (\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}LTCH.\allowbreak{}BN}) --- not from the CF2 slot 5 module. The CF2 OVFL and status records (\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}CF2OVFL:\allowbreak{}STAT}) are loaded in the DB but are not connected to any active hardware in SPEAR3 (their \texttt{DTYP="Soft\ Channel"} reads from the inactive \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}CF2:\allowbreak{}MODU} record).
+\begin{itemize}
+\tightlist
+\item
+  \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}VXI:\allowbreak{}LTCH}, the AIM's latch of the backplane fault in its fast interlock status register \R{14}. This is the record that trips the station, through \texttt{STNPARK:\allowbreak{}SUMY:\allowbreak{}STAT} and \texttt{STNOFF:\allowbreak{}SUMY:\allowbreak{}STAT} \R{11}. It does not tell which module asserted \texttt{RF\_FAULT}.
+\item
+  \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH}, ``External MPS'': the AIM's spare channel (arc-register bit~8), which carries the J3 output. SPEAR3 took over this channel, reserved for MPS, in 2003 \R{35}. The record shows the AIM's latch of the channel when the channel's fault enable is set, and reads OK otherwise. It feeds \texttt{STNMPS:\allowbreak{}SUMY:\allowbreak{}LTCH} \R{12}, a station status summary; it is not an input of \texttt{STNPARK}, \texttt{STNON} or \texttt{STNOFF}, and the state machine does not read it \R{2}, \R{11}. The AIM's first-fault register has no bit for it \R{6}.
+\end{itemize}
+
+The channel is enabled: the AIM's fault-enable word \texttt{STN:\allowbreak{}AIM:\allowbreak{}ARCENBSTT} read \texttt{0x71FB} on 11 November 2026, with bit~8 set (\cref{sec:aim-arc}). The enables are jumpers on the AIM board. What the AIM's fault logic does when this channel trips is not documented.\openitem{O3}
+
+The CF2 OVFL and status records (\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}CF2OVFL:\allowbreak{}STAT}) loaded for slot 5 are not connected to any active hardware in SPEAR3 (their \texttt{DTYP="Soft\ Channel"} reads from the inactive \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}CF2:\allowbreak{}MODU} record).
 
 \subsection{Key Conclusion}\label{sec:slot5-conclusion}
 
 
 \begin{keynote}
-\textbf{VXI Slot 5 in SPEAR3 is a permit gate at the VXI backplane level.} It receives three permit signals at its back connector: the RF MPS PLC permit, the SPEAR MPS beam permit (directly wired), and the orbit interlock (directly wired). It does NOT run the CF2 DSP firmware. The cf2.db PV records loaded for slot 5 are inactive (hardware not present). Removal of any permit causes the RFP module to cut RF drive at hardware speed through the VXI backplane permit line and --- via the EPICS alarm chain (\texttt{STN:VXI:LTCH} → \texttt{STNOFF:\allowbreak{}SUMY:\allowbreak{}STAT} → \texttt{fault\_stnoff}) --- the SNL state machine performs an orderly HVPS shutdown \textasciitilde6 s later. The SPEAR MPS permit and orbit interlock do NOT connect to the Fast Interlock Chassis or the RF Local Display Panel: their removal produces no \textbf{immediate hardware} HVPS shutdown from Slot 5 itself (no SCR ENABLE removal, no crowbar), but HVPS IS shut down through the SNL software path. However, the RF drive cutoff invariably creates a cascade secondary trip --- with drive = 0 and HVPS on, the klystron collector absorbs full cathode power, the RF MPS PLC drops its collector summary (Path A) within \textasciitilde10--15 ms and the RF Local Display Panel logic removes SCR ENABLE within \textasciitilde20--30 ms total. See \cref{sec:cascade} for the complete cascade physics.
+\textbf{VXI Slot 5 in SPEAR3 is the station's input for the SPEAR MPS and orbit-interlock permits.} It does NOT run the CF2 DSP firmware; the cf2.db PV records loaded for slot 5 are inactive (hardware not present). Removal of either permit causes the RFP module to cut RF drive at hardware speed through \texttt{RF\_FAULT} and --- via the EPICS alarm chain (\texttt{STN:VXI:LTCH} → \texttt{STNOFF:\allowbreak{}SUMY:\allowbreak{}STAT} → \texttt{fault\_stnoff}) --- the SNL state machine performs an orderly HVPS shutdown \textasciitilde6 s later. The module's J3 output reaches the AIM as the External MPS channel, which records the cause. Slot 5 itself produces no \textbf{immediate hardware} HVPS shutdown (no SCR ENABLE removal, no crowbar); the AIM may, if its fault logic acts on the External MPS channel (O3). With the drive cut and the HVPS on, the klystron collector also takes the full cathode power, and the RF MPS PLC removes SCR ENABLE through the RF Local Display Panel logic if that power stays above its \qty{1200}{\kilo\watt} limit for \qty{0.70}{\second} (\cref{sec:cascade}).
 \end{keynote}
 
 \subsection{Analysis: Is the MPS Shutoff Module Necessary?}\label{sec:slot5-analysis}
 
 
-The MPS PLC acts in hardware through the RF Local Display Panel (its collector and waveguide pressure summaries feed the panel logic, and its AB summary reaches the AIM over the panel and Fast IC fibers) and through a permit input of the VXI Slot 5 module. In addition, the SPEAR MPS beam permit and orbit interlock wire \textbf{directly} to the Slot 5 back connector --- independently of the RF MPS PLC. When the RF MPS PLC trips, or when either direct permit is removed, the following consequences apply:
+The MPS PLC acts in hardware through the RF Local Display Panel: its collector and waveguide pressure summaries feed the panel logic, and its AB summary reaches the AIM over the panel and Fast IC fibers. The SPEAR MPS and orbit-interlock permits enter Slot 5, independently of the RF MPS PLC. When the RF MPS PLC trips, or when either permit is removed, the following consequences apply:
 
 \begin{longtable}[]{@{}Q{\dimexpr 0.1504\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.1917\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.2256\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.2932\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.1391\linewidth-1.60\tabcolsep\relax}@{}}
 \toprule\noalign{}
@@ -635,16 +654,12 @@ Path & Triggered By & Immediate HVPS Action & Delayed HVPS Action (SNL) & RF Dri
 \bottomrule\noalign{}
 \endlastfoot
 \textbf{Path A} --- RF Local Display Panel and AIM (\cref{sec:mps-paths}) & Collector or waveguide pressure summary drops; AB summary fault & \textbf{SCR ENABLE removed by the panel logic} (fiber → HVPS controller, B118, \textasciitilde10--15 ms); crowbar as the logic specifies (O4) & Orderly ramp-to-zero + \texttt{hvpstrig=OFF} (\textasciitilde1--2 s, but HVPS already dead) & \texttt{RF\_FAULT} via AIM → VXI backplane \\
-\textbf{Path C} --- VXI Slot 5 (RF MPS permit) & RF MPS permit removed → Slot 5 loses permit & \textbf{None} --- Slot 5 has no connection to the SCR ENABLE or crowbar fibers & Orderly HVPS shutdown via SNL \texttt{s\_go\_off} (\textasciitilde6 s: \texttt{VXI:LTCH} → \texttt{STNOFF} → \texttt{fault\_stnoff}) & \texttt{RF\_FAULT} asserted on VXI P2 backplane \\
-\textbf{Path C} --- VXI Slot 5 (SPEAR MPS direct) & SPEAR MPS beam permit removed → Slot 5 loses permit & \textbf{None} --- Slot 5 has no connection to the SCR ENABLE or crowbar fibers & Orderly HVPS shutdown via SNL \texttt{s\_go\_off} (\textasciitilde6 s: same alarm chain) & \texttt{RF\_FAULT} asserted on VXI P2 backplane \\
-\textbf{Path C} --- VXI Slot 5 (orbit direct) & Orbit interlock trips → Slot 5 loses permit & \textbf{None} --- Slot 5 has no connection to the SCR ENABLE or crowbar fibers & Orderly HVPS shutdown via SNL \texttt{s\_go\_off} (\textasciitilde6 s: same alarm chain) & \texttt{RF\_FAULT} asserted on VXI P2 backplane \\
+\textbf{Slot 5} --- SPEAR MPS or orbit permit & Either permit removed & \textbf{None} from Slot 5 --- it has no connection to the SCR ENABLE or crowbar fibers; the AIM may act on its External MPS channel (O3) & Orderly HVPS shutdown via SNL \texttt{s\_go\_off} (\textasciitilde6 s: \texttt{VXI:LTCH} → \texttt{STNOFF} → \texttt{fault\_stnoff}) & \texttt{RF\_FAULT} asserted on VXI P2 backplane \\
 \end{longtable}
 
 \textbf{Assessment:}
 
-The Slot 5 RF drive kill via VXI backplane is \textbf{functionally redundant} with the RF\_FAULT assertion that already results from Path A (AB summary → AIM) for an RF MPS PLC trip. Both respond to the same PLC fault, and both assert \texttt{RF\_FAULT} on the VXI P2 bus at sub-millisecond to \textasciitilde15 ms speed.
-
-For the SPEAR MPS permit and orbit interlock inputs, Slot 5 is the \textbf{exclusive} RF kill path --- there is no parallel Fast IC action for these signals. Their removal cuts RF drive immediately (via VXI backplane) and also triggers an orderly HVPS shutdown via the SNL state machine approximately 6 seconds later through the following alarm chain:
+For the SPEAR MPS and orbit-interlock permits, Slot 5 is the \textbf{exclusive} RF kill path; the Fast Interlock Chassis only passes its J3 output to the AIM. Their removal cuts RF drive immediately (via VXI backplane) and also triggers an orderly HVPS shutdown via the SNL state machine approximately 6 seconds later through the following alarm chain:
 
 \begin{sigblock}
 Slot 5 RF_FAULT → AIM ISR (~10 μs) → STN:VXI:LTCH (MAJOR)
@@ -664,11 +679,11 @@ Fault source & Immediate HVPS hardware kill from this path & HVPS shutdown time 
 \bottomrule\noalign{}
 \endlastfoot
 Arc (Fast IC and AIM) & Through the AIM's commands and the panel logic, as their logic specifies (O4) & μs scale if so; otherwise through the cascade or the SNL \\
-RF MPS PLC (Path A) & Yes for collector and waveguide pressure faults --- SCR ENABLE removed by the panel logic (\textasciitilde10--15 ms); other faults through the cascade & \textasciitilde10--30 ms (hardware) \\
-SPEAR MPS / orbit (Slot 5) & \textbf{No} --- no panel input in this path from Slot 5 & \textasciitilde6 s (SNL orderly shutdown) --- \textbf{but in practice \textasciitilde20--30 ms} via collector overpower cascade → Path A (see \cref{sec:cascade}) \\
+RF MPS PLC (Path A) & Yes for collector and waveguide pressure faults --- SCR ENABLE removed by the panel logic once the PLC trips; other faults through the cascade & \textasciitilde10 ms after the PLC trips; the collector protection itself waits \qty{0.70}{\second} \\
+SPEAR MPS / orbit (Slot 5) & \textbf{No} from Slot 5 itself; possibly from the AIM's External MPS channel (O3) & \textasciitilde6 s (SNL orderly shutdown), or \qty{0.7}{\second} through the collector-power cascade if the collector power stays above its limit (\cref{sec:cascade}) \\
 \end{longtable}
 
-Critically, Slot 5 does \textbf{not} independently produce an immediate HVPS shutdown for its direct-permit inputs. The hardware HVPS kill (SCR ENABLE removal, and the crowbar if the logic so specifies) comes from the RF Local Display Panel logic responding to its own inputs. However, the RF drive cutoff itself creates a cascade secondary trip through the RF MPS PLC collector overpower protection: with drive = 0 and HVPS on, the klystron collector absorbs full cathode power, the PLC detects the overpower within \textasciitilde10 ms and drops its collector summary (Path A), and the panel logic removes SCR ENABLE within \textasciitilde20--30 ms of the initial RF cut. See \cref{sec:cascade} for the full mechanics and signal chain.
+Critically, Slot 5 does \textbf{not} independently produce an immediate HVPS shutdown. The hardware HVPS kill (SCR ENABLE removal, and the crowbar if the logic so specifies) comes from the RF Local Display Panel logic responding to its own inputs: the AIM's commands, if its fault logic acts on the External MPS channel (O3), or the RF MPS PLC's collector summary. With drive = 0 and HVPS on, the klystron collector absorbs full cathode power; the PLC latches collector overpower once that power has stayed above \qty{1200}{\kilo\watt} for \qty{0.70}{\second} and drops its collector summary (Path A), and the panel logic then removes SCR ENABLE. See \cref{sec:cascade} for the full mechanics and signal chain.
 
 \textbf{Why Slot 5 is essential --- not merely retained:}
 
@@ -677,27 +692,25 @@ Slot 5 is \textbf{architecturally necessary} for SPEAR3 RF protection:
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  \textbf{Sole integration point for SPEAR MPS and orbit interlock}: These two signals are wired only to the Slot 5 back connector. Without Slot 5, their removal would have zero effect on either RF drive or HVPS --- the klystron would continue transmitting into the cavity regardless of the machine beam-permit status or orbit feedback state. There is no alternative wiring path, no RIO register, and no EPICS record that would carry these signals to any other protective device.
+  \textbf{Sole integration point for SPEAR MPS and orbit interlock}: These two permits are wired only to Slot 5. Without Slot 5, their removal would have zero effect on either RF drive or HVPS --- the klystron would continue transmitting into the cavity regardless of the machine beam-permit status or orbit feedback state. No other wiring path or RIO register carries them; EPICS sees them only through the AIM, as \texttt{STN:VXI:LTCH} and the External MPS channel.
 \item
-  \textbf{Provides the only VXI-backplane RF kill for machine-level permits}: The Fast IC, the RF Local Display Panel and the SLC-500 HVPS PLC have no knowledge of SPEAR MPS beam permit or orbit interlock state. Only Slot 5 bridges these machine-level signals into the RF station protection architecture.
+  \textbf{Provides the only VXI-backplane RF kill for machine-level permits}: The RF Local Display Panel and the SLC-500 HVPS PLC have no knowledge of the SPEAR MPS or orbit-interlock permits, and the Fast IC only passes Slot 5's J3 output to the AIM. Only Slot 5 bridges these machine-level signals into the RF station protection architecture.
 \item
-  \textbf{Defense-in-depth for RF MPS PLC trips (Slot 5 redundant with Path A for RF cut)}: For an RF MPS PLC trip, Slot 5 provides a redundant direct-hardware RF kill via VXI backplane that is independent of the AIM module's health. If the AIM failed to assert \texttt{RF\_FAULT} after an AB summary fault, Slot 5 would still cut RF drive.
-\item
-  \textbf{Carried forward from PEP-II architecture}: The CF2 slot served a different function in PEP-II; the physical slot was repurposed in SPEAR3 as a multi-input permit gate and is integral to SPEAR3 machine protection integration.
+  \textbf{Carried forward from PEP-II architecture}: The CF2 slot served a different function in PEP-II; the physical slot was repurposed in SPEAR3 for the machine permits and is integral to SPEAR3 machine protection integration.
 \end{enumerate}
 
 \begin{keynote}
-\textbf{Conclusion}: VXI Slot 5 is \textbf{essential} to the SPEAR3 RF protection architecture. It is the \textbf{exclusive} integration point for the SPEAR MPS beam permit and orbit interlock into RF station protection. For the RF MPS PLC, it provides redundant defense-in-depth RF cut alongside Path A. Removal of any of its three permit inputs results in: (1) immediate hardware RF drive cut via VXI backplane, and (2) orderly HVPS shutdown via SNL \texttt{s\_go\_off} \textasciitilde6 s later (but in practice HVPS is hardware-killed within \textasciitilde20--30 ms via collector overpower cascade --- see \cref{sec:cascade}). For the SPEAR MPS and orbit paths, Slot 5 itself has no connection to the SCR ENABLE or crowbar fibers; the hardware HVPS kill is produced by the cascade described in \cref{sec:cascade}.
+\textbf{Conclusion}: VXI Slot 5 is \textbf{essential} to the SPEAR3 RF protection architecture. It is the \textbf{exclusive} integration point for the SPEAR MPS and orbit-interlock permits into RF station protection. Removal of either permit results in: (1) immediate hardware RF drive cut via VXI backplane, (2) the External MPS indication in the AIM, and (3) orderly HVPS shutdown via SNL \texttt{s\_go\_off} \textasciitilde6 s later. Slot 5 itself has no connection to the SCR ENABLE or crowbar fibers; an earlier hardware HVPS kill can come only from the AIM (O3) or from the collector-power cascade after \qty{0.7}{\second} (\cref{sec:cascade}).
 \end{keynote}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
 \section{Cascade Physics: Secondary Trips Following RF Drive Cutoff}\label{sec:cascade}
 
-\emph{Sources}: \R{13}, \R{16}, \R{23}.
+\emph{Sources}: \R{13}, \R{16}, \R{23}, \R{37}.
 
 
-When RF drive is cut by a SPEAR MPS permit withdrawal or orbit interlock trip (via Slot 5, or by any mechanism that sets the RFP drive DAC to zero), the immediate RF cutoff creates a secondary physical condition that fires the RF MPS PLC collector overpower protection within one PLC scan cycle. This cascade produces a hardware-speed HVPS kill within \textasciitilde20--30 ms of the initial RF cut --- far faster than the \textasciitilde6 s SNL orderly shutdown path.
+When RF drive is cut by a SPEAR MPS permit withdrawal or orbit interlock trip (via Slot 5, or by any mechanism that sets the RFP drive DAC to zero), the immediate RF cutoff creates a secondary physical condition that can fire the RF MPS PLC's collector overpower protection. The PLC-5 trips on it only after the collector power has stayed above \qty{1200}{\kilo\watt} for \qty{0.70}{\second} \R{37}, so this cascade removes SCR ENABLE about \qty{0.7}{\second} after the RF cut, if the high voltage has not been lowered below the limit first. That is earlier than the SNL removes the SCR supervisory enable (\textasciitilde6 s), but it is not a fast path.
 
 \subsection{Mechanism 1 --- Klystron Collector Overpower (High Certainty)}\label{sec:cascade-collector}
 
@@ -718,13 +731,13 @@ EPICS PV & Record & Source & Description \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{\{STN\}:\allowbreak{}KLYSCOLLPLC:\allowbreak{}POWER} & \texttt{ai} & AB Remote I/O T4{[}41{]}, EGUF=1200 kW & Real-time PLC collector power reading (HIHI=1175 kW MAJOR, HIGH=1150 kW MINOR) \\
-\texttt{\{STN\}:\allowbreak{}KLYSCOLL:\allowbreak{}POWER:\allowbreak{}ULIM} & \texttt{ai} & AB Remote I/O T4{[}42{]}, EGUF=1200 kW & Configurable PLC trip limit register (operator-set; the PLC drops its collector summary when measured power exceeds this value) \\
+\texttt{\{STN\}:\allowbreak{}KLYSCOLL:\allowbreak{}POWER:\allowbreak{}ULIM} & \texttt{ai} & AB Remote I/O T4{[}42{]}, EGUF=1200 kW & The PLC's trip limit, read back: fixed at \qty{1200}{\kilo\watt} in the program, with a \qty{0.70}{\second} delay \R{37} \\
 \texttt{\{STN\}:\allowbreak{}KLYSCOLL:\allowbreak{}POWER} & \texttt{sub} (subIQpowerNet) & INPA=\texttt{HVPS:POWER}, INPB=\texttt{KLYSOUTFRWD:\allowbreak{}POWER} & EPICS-computed collector power = cathode power − klystron RF output \\
 \texttt{\{STN\}:\allowbreak{}KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} & \texttt{bi} & AB Remote I/O WL=16, WF=31, B=2 & Hardware latch bit set by PLC when it trips on collector overpower \\
 \end{longtable}
 
 \begin{keynote}
-\textbf{Important distinction}: \texttt{KLYSCOLLPLC:\allowbreak{}POWER.\allowbreak{}HIHI\ =\ 1175\ kW} is an \textbf{EPICS software alarm} that propagates through Channel Access; it does not directly change the PLC outputs. The PLC's own internal comparator --- comparing the measured analog value against the limit stored in T4{[}42{]} --- drops the collector summary to the RF Local Display Panel independently of EPICS. The PLC acts first (\textasciitilde10 ms); the EPICS alarm propagates \textasciitilde100 ms later via Remote I/O polling.
+\textbf{Important distinction}: \texttt{KLYSCOLLPLC:\allowbreak{}POWER.\allowbreak{}HIHI\ =\ 1175\ kW} is an \textbf{EPICS software alarm} that propagates through Channel Access; it does not directly change the PLC outputs. The PLC computes the collector power itself, as the HVPS voltage times the current minus the square of 0.017 times the RF detector reading, and latches collector overpower when that stays above \qty{1200}{\kilo\watt} for \qty{0.70}{\second}; the latch drops the collector summary to the RF Local Display Panel and the PLC's global interlock summary, independently of EPICS \R{37}.
 \end{keynote}
 
 \textbf{Cascade signal chain} (\cref{fig:cascade}):
@@ -755,7 +768,7 @@ However, this mechanism is conditional and less certain than Mechanism 1:
 \end{itemize}
 
 \begin{keynote}
-\textbf{Conclusion}: Mechanism 1 (collector overpower) is the dominant, reliable secondary trip that fires after any RF drive cutoff with HVPS energized at normal operating power. Mechanism 2 (reflected power transient) is a possible additional software trigger but is not guaranteed.
+\textbf{Conclusion}: Mechanism 1 (collector overpower) is the dominant secondary trip: it fires \qty{0.70}{\second} after an RF drive cutoff when the HVPS stays energized at normal operating power, where the cathode power (about \qty{1.4}{\mega\watt} at \qty{72}{\kilo\volt} and \qty{19.4}{\ampere} \R{1}) exceeds the \qty{1200}{\kilo\watt} limit. Mechanism 2 (reflected power transient) is a possible additional software trigger but is not guaranteed.
 \end{keynote}
 
 \subsection{Net Effect on HVPS Kill Timing}\label{sec:cascade-net}
@@ -769,12 +782,13 @@ Scenario & HVPS kill mechanism & Time from SPEAR MPS / orbit trip \\
 \bottomrule\noalign{}
 \endlastfoot
 Software path only (no cascade) & SNL \texttt{s\_go\_off} Step 4: \texttt{hvpstrig=OFF} & \textasciitilde6 s \\
-Via collector overpower cascade (normal operation) & RF MPS PLC collector summary → RF Local Display Panel logic: SCR ENABLE removed (crowbar as the logic specifies) & \textbf{\textasciitilde20--30 ms} \\
+Via the AIM's External MPS channel, if its fault logic drops the HVPS on request & RF Local Display Panel logic: SCR ENABLE removed & μs scale (not documented, O3) \\
+Via collector overpower cascade (normal operation) & RF MPS PLC collector summary → RF Local Display Panel logic: SCR ENABLE removed (crowbar as the logic specifies) & \textbf{\textasciitilde\qty{0.7}{\second}}, if the collector power stays above \qty{1200}{\kilo\watt} \\
 Via reflected power transient (conditional) & No hardware path: only the IQA software alarm & Software time scale (if it fires) \\
 \end{longtable}
 
 \begin{keynote}
-\textbf{Fault record implication}: The cascade trigger appears in the fault record as \texttt{\{STN\}:\allowbreak{}KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} (collector overpower), not as \texttt{STN:MPS:LTCH} or \texttt{STN:VXI:LTCH}. The root cause (SPEAR MPS or orbit trip) is visible in those latter PVs but with a \textasciitilde15--20 ms earlier timestamp. EPICS archiver resolution (\textasciitilde1 Hz default) may not distinguish these --- event-driven archiver timestamps are required for precise sequencing.
+\textbf{Fault record implication}: The cascade trigger appears in the fault record as \texttt{\{STN\}:\allowbreak{}KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} (collector overpower), not as \texttt{STN:MPS:LTCH} or \texttt{STN:VXI:LTCH}. The root cause (SPEAR MPS or orbit trip) is visible in those latter PVs, about \qty{0.7}{\second} earlier. At the default \textasciitilde1 Hz archiver resolution the two may fall in the same or adjacent samples --- event-driven archiver timestamps are required for precise sequencing.
 \end{keynote}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -797,7 +811,7 @@ Attribute & Detail \\
 Hardware & Allen-Bradley PLC-5 with 1771 I/O (upgraded from PLC-5 / 1771-DCM) \\
 Location & B132 (same rack as VXI crate) \\
 Remote I/O adapter & \textbf{Adapter 3} (\texttt{STNDCM}) \\
-Status & Hardware replaced; software written and tested without RF power \\
+Status & In service. A ControlLogix replacement is assembled and was tested without RF power; it is not in service \R{1} \\
 \end{longtable}
 
 \subsection{Inputs}\label{sec:mps-inputs}
@@ -834,8 +848,7 @@ Output & Destination & Connection & Notes \\
 \textbf{Collector and waveguide pressure summaries} (Path A) & RF Local Display Panel logic (J3) & 24~V lines through cross-connect X530 & Dropping either removes SCR ENABLE (and fires the crowbar as the panel logic specifies, O4) \R{27}, \R{29} \\
 \textbf{AB summary and AB heartbeat} (Path A) & AIM, through the RF Local Display Panel fibers and the Fast IC & 24~V lines (J3), then fiber & AB summary fault → AIM → \texttt{RF\_FAULT} \R{26} \\
 15 area summaries & RF Local Display Panel display (J3) & 24~V lines through X530 & Status indication only \\
-\textbf{MPS permit} (Path C) & VXI Slot 5 MPS Shutoff module (back connector) & Hardwired contact & De-energizing removes one of Slot 5's three permits → RFP drive cut via VXI backplane \\
-Remote I/O permit status bit & EPICS IOC (via AB-6008 scanner) & RIO word T6{[}WL,B{]} & Software path (Path B) --- updates \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH} \\
+Remote I/O data table & EPICS IOC (via AB-6008 scanner) & RIO words \texttt{T6{[}W,B{]}} & Software path (Path B) --- the global interlock summary \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}SUMY:\allowbreak{}PLC} (table~6, word~35, bit~0), an input of \texttt{STNOFF:\allowbreak{}SUMY:\allowbreak{}STAT}, and the fault latches \R{9}, \R{11} \\
 \end{longtable}
 
 \subsection{Protection Functions}\label{sec:mps-functions}
@@ -860,7 +873,7 @@ Monitored Parameter & Trip Condition & Notes \\
 \textbf{Reference power level} & \texttt{\{STN\}:\allowbreak{}STNREF:\allowbreak{}POWER:\allowbreak{}LTCH} & 476 MHz reference monitor \\
 \end{longtable}
 
-\subsection{Trip Actions --- Three Paths}\label{sec:mps-paths}
+\subsection{Trip Actions --- Two Paths}\label{sec:mps-paths}
 
 
 \textbf{Path A --- Hardware HVPS shutdown + RF cut (fast, \textasciitilde10 ms PLC scan):}
@@ -878,7 +891,7 @@ The MPS PLC's hardwired outputs run as 24~V lines through cross-connect X530 to 
   The AB summary reaches the AIM over the panel's fiber and the Fast Interlock Chassis → AIM asserts \texttt{RF\_FAULT} on VXI backplane → RFP RF drive zeroed
 \end{enumerate}
 
-This path: \textasciitilde10 ms (PLC scan) + panel logic and fiber response (μs scale) ≈ \textbf{\textasciitilde10--15 ms total}.
+This path: \textasciitilde10 ms (PLC scan) + panel logic and fiber response (μs scale) ≈ \textbf{\textasciitilde10--15 ms total} once the PLC has decided; the collector protection decides only after \qty{0.70}{\second} above its limit (\cref{sec:cascade}).
 \textbf{Action}: HVPS shutdown (SCR ENABLE) for the faults wired into the panel logic, AND RF drive cut. Other MPS faults, for example cooling or vacuum \R{27}, remove high voltage only through the collector-power cascade (\cref{sec:cascade}) or the SNL.
 
 \textbf{Path B --- Software/EPICS notification (slow, \textasciitilde1 s):}
@@ -887,13 +900,13 @@ This path: \textasciitilde10 ms (PLC scan) + panel logic and fiber response (μs
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  PLC writes "no permit" status to its Remote I/O output data table
+  The PLC's global interlock summary and fault latches change in its Remote I/O data table
 \item
   VXI AB6008 scanner reads Remote I/O registers at \textasciitilde1 Hz
 \item
-  Updates \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH} EPICS record
+  Updates \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}SUMY:\allowbreak{}PLC} and the latch records \R{9}
 \item
-  Alarm propagates via \texttt{rf\_\allowbreak{}sumy\_\allowbreak{}stn\_\allowbreak{}spr.\allowbreak{}db} → \texttt{\{STN\}:\allowbreak{}STNMPS:\allowbreak{}SUMY:\allowbreak{}LTCH.\allowbreak{}INPI} → \texttt{\{STN\}:\allowbreak{}STNOFF:\allowbreak{}SUMY:\allowbreak{}STAT.\allowbreak{}SEVR}
+  \texttt{STN:\allowbreak{}SUMY:\allowbreak{}PLC} is an input of \texttt{\{STN\}:\allowbreak{}STNOFF:\allowbreak{}SUMY:\allowbreak{}STAT.\allowbreak{}SEVR} \R{11}
 \item
   SNL \texttt{fault\_\allowbreak{}stnoff\ !=\ NO\_\allowbreak{}ALARM} triggers \texttt{s\_go\_off}
 \end{enumerate}
@@ -901,31 +914,24 @@ This path: \textasciitilde10 ms (PLC scan) + panel logic and fiber response (μs
 Path B is \textbf{bookkeeping} --- the MPS hardware has already acted on Path A. Path B ensures the EPICS state machine learns about the fault, logs it, triggers fault file capture, and performs the orderly shutdown sequence.
 \textbf{Action}: Orderly HVPS ramp-to-zero + fault file capture (hardware already tripped via Path A).
 
-\textbf{Path C --- VXI backplane RF permit gate (\textasciitilde10 ms PLC scan):}
-
-The same PLC fault that triggers Path A also removes the RF MPS PLC permit from the VXI Slot 5 MPS Shutoff module (back connector). The module asserts \texttt{RF\_FAULT} (or removes \texttt{RF\_PERMIT}) on the VXI P2 backplane → RFP RF drive cut.
-
-Path C: \textasciitilde10 ms (PLC scan) + output response ≈ \textbf{\textasciitilde10 ms total}.
-\textbf{Action}: Immediate RF drive cut. No immediate HVPS hardware action. HVPS orderly shutdown follows via SNL \texttt{s\_go\_off} (\textasciitilde6 s).
-
 \begin{keynote}
-\textbf{Note on SPEAR MPS and orbit interlock}: These two signals are wired \textbf{directly} to the Slot 5 back connector --- they enter Slot 5 independently of the RF MPS PLC. Their removal triggers \texttt{RF\_FAULT} on the VXI backplane (same immediate RF drive cut as Path C above) but does \textbf{not} trigger Path A, so there is no immediate HVPS hardware shutdown. However, the \texttt{RF\_FAULT} line asserted by Slot 5 is seen by the AIM module's ISR, which propagates through the EPICS alarm chain (\texttt{STN:VXI:LTCH} → \texttt{STNPARK:\allowbreak{}SUMY:\allowbreak{}STAT} → \texttt{STNOFF:\allowbreak{}SUMY:\allowbreak{}STAT} → \texttt{fault\_stnoff}) and causes the SNL \texttt{s\_go\_off} to execute an orderly HVPS shutdown \textasciitilde6 s later. The RF MPS PLC does not relay these signals to the Fast IC or the RF Local Display Panel. See \cref{sec:slot5-hw} for the complete Slot 5 input list and \cref{sec:slot5-analysis} for the alarm chain analysis.
+\textbf{Note on SPEAR MPS and orbit interlock}: These two permits enter VXI Slot 5, independently of the RF MPS PLC. Their removal triggers \texttt{RF\_FAULT} on the VXI backplane but does \textbf{not} trigger Path A. The \texttt{RF\_FAULT} line asserted by Slot 5 is seen by the AIM module's ISR, which propagates through the EPICS alarm chain (\texttt{STN:VXI:LTCH} → \texttt{STNPARK:\allowbreak{}SUMY:\allowbreak{}STAT} → \texttt{STNOFF:\allowbreak{}SUMY:\allowbreak{}STAT} → \texttt{fault\_stnoff}) and causes the SNL \texttt{s\_go\_off} to execute an orderly HVPS shutdown \textasciitilde6 s later; Slot 5's J3 output also sets the AIM's External MPS channel. The RF MPS PLC does not relay these signals. See \cref{sec:slot5-hw} for the Slot 5 inputs and \cref{sec:slot5-analysis} for the alarm chain analysis.
 \end{keynote}
 
 \begin{keynote}
-\textbf{Note}: Path C provides a redundant VXI-backplane RF cut that is independent of the AIM module's health. The immediate HVPS shutdown is owned by Path A through the RF Local Display Panel logic.
+\textbf{Note}: The immediate HVPS shutdown is owned by Path A through the RF Local Display Panel logic; Path B only informs the state machine.
 \end{keynote}
 
 \subsection{EPICS PV Path}\label{sec:mps-epics}
 
 
-\Cref{fig:mps-plc-io} summarizes the PLC's inputs and outputs.
+\Cref{fig:mps-plc-io} shows how a PLC trip reaches the state machine through Remote I/O (Path B).
 
 
 \begin{figure}[tbp]
 \centering
 \begin{fitpicture}\input{tikz/fig-mps-plc-io}\end{fitpicture}
-\caption{RF MPS PLC (Allen-Bradley PLC-5 with 1771 I/O) inputs and outputs.}\label{fig:mps-plc-io}
+\caption{RF MPS PLC (Allen-Bradley PLC-5 with 1771 I/O): its global interlock summary reaches the SNL trip wire through Remote I/O (Path B).}\label{fig:mps-plc-io}
 \end{figure}
 
 \subsection{MPS Wiring Documents}\label{sec:mps-wiring}
@@ -1381,17 +1387,17 @@ when (fault_stnoff != NO_ALARM) {
 \subsection{\texorpdfstring{STNMPS Alarm Tree (SPEAR3-specific, \texttt{rf\_\allowbreak{}sumy\_\allowbreak{}stn\_\allowbreak{}spr.\allowbreak{}db})}{STNMPS Alarm Tree (SPEAR3-specific, rf\_sumy\_stn\_spr.db)}}\label{sec:snl-stnmps}
 
 
-The SPEAR3-specific MPS summary aggregates into the station trip path:
+The SPEAR3-specific MPS summary feeds the station status summary \texttt{STN:\allowbreak{}SUMY:\allowbreak{}LTCH}, not the trip wire: it is not an input of \texttt{STNOFF:\allowbreak{}SUMY:\allowbreak{}STAT} \R{11}, \R{12}. Of its inputs, only \texttt{STN:VXI:LTCH} also reaches the trip wire, on its own path through \texttt{STNPARK:\allowbreak{}SUMY:\allowbreak{}STAT}.
 
 \begin{sigblock}
 {STN}:STNMPS:SUMY:LTCH
     INPB: {STN}:STN:FORCED:LTCH    (AIM forced fault latch)
-    INPC: {STN}:STN:VXI:LTCH       (AIM fast interlock status bits)
+    INPC: {STN}:STN:VXI:LTCH       (AIM latch of RF_FAULT; trips via STNPARK)
     INPE: {STN}:STN:NCV:PLC        (no-current-value PLC)
     INPF: {STN}:STNREF:POWER:LTCH  (476 MHz reference power)
     INPG: {STN}:STNCRATEPS:TEMP:LTCH (VXI crate power supply temperature)
     INPH: {STN}:STN:RF476MHZREF:LTCH (476 MHz reference status)
-    INPI: {STN}:STN:MPS:LTCH        (RF MPS PLC permit)
+    INPI: {STN}:STN:MPS:LTCH        (External MPS: AIM spare channel, Slot 5 J3)
 \end{sigblock}
 
 \subsection{\texorpdfstring{Orderly Shutdown Sequence (\texttt{s\_go\_off})}{Orderly Shutdown Sequence (s\_go\_off)}}\label{sec:snl-shutdown}
@@ -1459,13 +1465,13 @@ if (fault == NO_ALARM) {
 \subsection{\texorpdfstring{\texttt{forced\_fault} Latch --- Blocking Auto-Reset}{forced\_fault Latch --- Blocking Auto-Reset}}\label{sec:snl-forced-fault}
 
 
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{}LTCH} is set by AIM hardware on detection of a severe arc event. When this latch is set:
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{}LTCH} is the AIM's forced fault, which an operator sets from EPICS (\texttt{STN:\allowbreak{}AIM:\allowbreak{}FRCFLT}) \R{7}. When this latch is set:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \texttt{\{STN\}:\allowbreak{}STNMPS:\allowbreak{}SUMY:\allowbreak{}LTCH.\allowbreak{}INPB} is MAJOR → contributes to \texttt{STNOFF:\allowbreak{}SUMY:\allowbreak{}STAT}
+  \texttt{\{STN\}:\allowbreak{}STNMPS:\allowbreak{}SUMY:\allowbreak{}LTCH.\allowbreak{}INPB} is MAJOR (station status summary, not the trip wire)
 \item
   In \texttt{s\_\allowbreak{}go\_\allowbreak{}stn\_\allowbreak{}reset} (auto-reset state):
 \end{enumerate}
@@ -1509,17 +1515,17 @@ This was a SPEAR3-specific customization (Sass comment 2004: \emph{"SPEAR is usi
       RF power into klystron collapses}
   \tlrow{t ≈ 5\textendash{}50 μs}{AIM ISR fires:\newline
       $\rightarrow$~Reads ARCLTDSTT latch register (not ISR register \textemdash{} retains fault)\newline
-      $\rightarrow$~forced\_fault latch set if arc current exceeded threshold\newline
       $\rightarrow$~scanOnce(\{STN\}:STN:AIM:MODU)}
   \tlrow{t ≈ 50\textendash{}500 μs}{EPICS IOC processes AIM:MODU record:\newline
       $\rightarrow$~FANO1/2/3 fanout updates ARCCURSTT, ARCLTDSTT, FSTFLT records\newline
       $\rightarrow$~\{STN\}:STN:VXI:LTCH goes MAJOR\newline
-      $\rightarrow$~\{STN\}:STNMPS:SUMY:LTCH propagates (MS) → STNOFF:SUMY:STAT MAJOR}
+      $\rightarrow$~\{STN\}:STNPARK:SUMY:STAT propagates (MS) → STNOFF:SUMY:STAT MAJOR}
   \tlrow{t ≈ 10\textendash{}15 ms}{MPS PLC (PLC-5/1771) next scan cycle:\newline
       $\rightarrow$~Detects the fault through its own inputs, if any, and sets its\newline
       AB summary fault (fiber → AIM); the collector summary follows\newline
-      if the RF cut raises collector power (\cref{sec:cascade})\newline
-      $\rightarrow$~Writes STN:MPS:LTCH bit OFF in Remote I/O output data table}
+      after \qty{0.70}{\second} if the RF cut keeps the collector power\newline
+      above its limit (\cref{sec:cascade})\newline
+      $\rightarrow$~Remote I/O: STN:SUMY:PLC = FAULT if it tripped}
   \tlrow{t ≈ 20 ms}{SLC-500 detects HVPS crowbar event, if the crowbar fired:\newline
       $\rightarrow$~Updates HVPS:CROWBAR:LTCH = FAULT in Remote I/O registers\newline
       $\rightarrow$~HVPSSTN:SUMY:LTCH → HVPSOFF:SUMY:STAT → STNOFF:SUMY:STAT}
@@ -1559,42 +1565,40 @@ This example illustrates a \textbf{slow equipment-protection fault} picked up by
       $\rightarrow$~Asserts RF\_FAULT on VXI P2 backplane (open-collector)\newline
       $\rightarrow$~RFP module (Slot 4) monitors RF\_FAULT\newline
       RF drive DAC output zeroed in hardware\newline
-      RF power into klystron collapses\newline
-      VXI Slot 5 MPS Shutoff module responds simultaneously (Path C):\newline
-      $\rightarrow$~Also asserts RF\_FAULT on VXI P2 backplane\newline
-      (redundant with AIM assertion above)}
-  \tlrow{t ≈ 20\textendash{}50 ms}{Collector-power cascade (\cref{sec:cascade}):\newline
-      $\rightarrow$~PLC drops the collector summary\newline
-      $\rightarrow$~RF Local Display Panel logic removes SCR ENABLE\newline
-      (fiber → HVPS controller, B118); HV output begins to collapse}
+      RF power into klystron collapses}
   \tlrow{t ≈ 5\textendash{}50 μs}{AIM ISR fires:\newline
       $\rightarrow$~Reads FISTAT latch register (Sass 2004 fix)\newline
       $\rightarrow$~scanOnce(\{STN\}:STN:AIM:MODU) scheduled}
-  \tlrow{t ≈ 10\textendash{}30 ms}{PLC writes permit bit OFF to Remote I/O output data table (Path B):\newline
+  \tlrow{t ≈ 10\textendash{}30 ms}{PLC global interlock summary in its Remote I/O data table (Path B):\newline
       $\rightarrow$~AB-6008 scanner reads at \textasciitilde{}1 Hz\newline
-      $\rightarrow$~\{STN\}:STN:MPS:LTCH → MAJOR alarm set}
+      $\rightarrow$~\{STN\}:STN:SUMY:PLC → MAJOR alarm set}
   \tlrow{t ≈ 50\textendash{}500 ms}{EPICS propagates alarm:\newline
-      $\rightarrow$~\{STN\}:STNMPS:SUMY:LTCH.INPI = MAJOR\newline
+      $\rightarrow$~\{STN\}:STN:ABSUMY:LTCH and \{STN\}:STN:SUMY:PLC = MAJOR\newline
       $\rightarrow$~\{STN\}:STNOFF:SUMY:STAT.SEVR = MAJOR}
+  \tlrow{t ≈ 0.7 s}{Collector-power cascade, if the collector power has stayed\newline
+      above \qty{1200}{\kilo\watt} for \qty{0.70}{\second} (\cref{sec:cascade}):\newline
+      $\rightarrow$~PLC drops the collector summary\newline
+      $\rightarrow$~RF Local Display Panel logic removes SCR ENABLE\newline
+      (fiber → HVPS controller, B118); HV output begins to collapse}
   \tlrow{t ≈ 1 s}{SNL rf\_states.st detects fault\_stnoff != NO\_ALARM:\newline
       $\rightarrow$~Transitions s\_on\_cw → s\_go\_off}
   \tlrow{t ≈ 1.0\textendash{}6 s}{s\_go\_off orderly shutdown:\newline
       $\rightarrow$~Step 1: fba = 1 (beam abort forced from the software side)\newline
       $\rightarrow$~Steps 2\textendash{}4: HVPS voltage setpoint → 0; \textasciitilde{}5 s ramp\newline
-      (HVPS already off through the cascade)\newline
+      (HVPS already off if the cascade fired)\newline
       $\rightarrow$~Step 5: hvpstrig = OFF (SCR supervisory enable removed)\newline
       $\rightarrow$~Step 6: rfswitch = OFF (RF drive enable removed)}
   \tlrow{t ≈ 6\textendash{}10 s}{ss rf\_statesFF: Fault file capture\newline
       $\rightarrow$~11 signal channels → /dat/FAULT*\_N files}
   \tlrow{t > 10 s}{State machine in s\_off\newline
-      $\rightarrow$~EPICS operator display shows MPS trip: STN:MPS:LTCH = FAULT\newline
+      $\rightarrow$~EPICS operator display shows the PLC trip: STN:SUMY:PLC = FAULT\newline
       $\rightarrow$~No forced\_fault latch set (cooling fault, not arc)\newline
       $\rightarrow$~Auto-reset allowed once fault clears (cooling temp returns to normal)\newline
       $\rightarrow$~Operator may allow auto-recovery or command manual restart}
 \end{timeline}
 
 \begin{keynote}
-\textbf{Key features of this type of trip}: (1) The PLC is the first actor (\textasciitilde10--30 ms). (2) RF is cut through the AB summary and the AIM (with Slot 5 as a redundant RF cut); the HVPS follows through the collector-power cascade into the RF Local Display Panel logic, because the cooling summary is not an input of that logic. (3) No \texttt{forced\_fault} latch is set, so SNL auto-reset may proceed after cooling fault clears. (4) The fault is identifiable by \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH\ =\ FAULT} with a normal (empty) \texttt{ARCLTDSTT} register.
+\textbf{Key features of this type of trip}: (1) The PLC is the first actor (\textasciitilde10--30 ms). (2) RF is cut through the AB summary and the AIM; the HVPS follows through the collector-power cascade into the RF Local Display Panel logic (\qty{0.7}{\second}) or the SNL, because the cooling summary is not an input of that logic. (3) No \texttt{forced\_fault} latch is set, so SNL auto-reset may proceed after cooling fault clears. (4) The fault is identifiable by \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}SUMY:\allowbreak{}PLC\ =\ FAULT} and the PLC's latch for the tripped input, with no arc channel latched in \texttt{ARCLTDSTT}.
 \end{keynote}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -1650,14 +1654,14 @@ This example illustrates a \textbf{HVPS internal fault} monitored by the SLC-500
   \tlrow{t > 10 s}{State machine in s\_off\newline
       $\rightarrow$~Operator alarms: HVPSXFORM:ARC:LTCH and HVPSSTN:SUMY:LTCH\newline
       $\rightarrow$~HVPS must be inspected before restart\newline
-      $\rightarrow$~No arc in RF waveguide: ARCLTDSTT = 0, FSTFLT = 0\newline
+      $\rightarrow$~No arc in RF waveguide: no channel latched, FSTFLT = 0\newline
       $\rightarrow$~No forced\_fault latch (this is HVPS path, not Fast IC/AIM arc)\newline
       $\rightarrow$~Recovery requires: clearing HVPS arc latch, verifying HVPS\newline
       oil/insulation condition, then normal restart sequence}
 \end{timeline}
 
 \begin{keynote}
-\textbf{Key features of this type of trip}: (1) The SLC-500 HVPS PLC is the first actor (\textasciitilde10--20 ms); the RF MPS PLC and Fast IC are not involved. (2) HVPS shutdown is via the \textbf{SLC-500 supervisory output} (\cref{sec:scr-enable} path) --- this is distinct from the SCR ENABLE fiber of the RF Local Display Panel. (3) The HVPS STATUS fiber goes dark with the 24~V fault/enable; the RF Local Display Panel receives it as the HVPS beam abort and sets its beam-abort output, which is not cabled; the fiber does not reach the Fast IC or the AIM. (4) \textbf{RF drive shutdown signal chain}: There is no documented hardware path from the SLC-500 HVPS PLC trip to the RFP module RF drive. The RF drive remains asserted at the software level until \texttt{s\_go\_off} Step 6 writes \texttt{rfswitch\ =\ OFF} at approximately t ≈ 6 s after the initial trip. During the intervening period the klystron cathode HV has already collapsed --- the klystron produces no RF output even with drive signal still applied, because klystron amplification requires cathode high voltage. This is safe but the indirection must be understood. See \cref{sec:xl-rf-shutdown} for the complete RF shutdown signal trace for this scenario. (5) Fault files capture the RF/IQA signal waveform at HVPS collapse time. (6) The \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} bit identifies the source; \texttt{ARCLTDSTT\ =\ 0} and \texttt{FSTFLT\ =\ 0} confirm no waveguide arc was involved.
+\textbf{Key features of this type of trip}: (1) The SLC-500 HVPS PLC is the first actor (\textasciitilde10--20 ms); the RF MPS PLC and Fast IC are not involved. (2) HVPS shutdown is via the \textbf{SLC-500 supervisory output} (\cref{sec:scr-enable} path) --- this is distinct from the SCR ENABLE fiber of the RF Local Display Panel. (3) The HVPS STATUS fiber goes dark with the 24~V fault/enable; the RF Local Display Panel receives it as the HVPS beam abort and sets its beam-abort output, which is not cabled; the fiber does not reach the Fast IC or the AIM. (4) \textbf{RF drive shutdown signal chain}: There is no documented hardware path from the SLC-500 HVPS PLC trip to the RFP module RF drive. The RF drive remains asserted at the software level until \texttt{s\_go\_off} Step 6 writes \texttt{rfswitch\ =\ OFF} at approximately t ≈ 6 s after the initial trip. During the intervening period the klystron cathode HV has already collapsed --- the klystron produces no RF output even with drive signal still applied, because klystron amplification requires cathode high voltage. This is safe but the indirection must be understood. See \cref{sec:xl-rf-shutdown} for the complete RF shutdown signal trace for this scenario. (5) Fault files capture the RF/IQA signal waveform at HVPS collapse time. (6) The \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} bit identifies the source; no channel latched in \texttt{ARCLTDSTT} and \texttt{FSTFLT\ =\ 0} confirm no waveguide arc was involved.
 \end{keynote}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -1699,29 +1703,30 @@ SNL response:
 
 This example traces the complete fault event when SPEAR MPS withdraws its beam permit (e.g., due to a beam loss or machine protection interlock condition). It illustrates the Slot 5 primary RF cut followed by the collector overpower cascade described in \cref{sec:cascade}.
 
-\textbf{System state before fault:} RF station ON\_CW, klystron at rated output power, HVPS fully energized (\textasciitilde75 kV), normal beam circulating in SPEAR3.
+\textbf{System state before fault:} RF station ON\_CW, HVPS at about \qty{72}{\kilo\volt} and \qty{19.4}{\ampere} (cathode power about \qty{1.4}{\mega\watt}, the June 2020 operating point \R{1}), normal beam circulating in SPEAR3.
 
 \begin{timeline}
   \tlrow{t = 0 ms}{SPEAR MPS withdraws beam permit:\newline
-      $\rightarrow$~Slot 5 MPS Shutoff Module back-connector input drops\newline
-      $\rightarrow$~Slot 5 asserts RF\_FAULT on VXI P2 backplane (hardware, < 1 μs)\newline
+      $\rightarrow$~Permit input of the Slot 5 MPS Shutoff module drops\newline
+      $\rightarrow$~Slot 5 asserts RF\_FAULT on VXI P2 backplane\newline
       $\rightarrow$~RFP module (Slot 4) RF drive DAC → 0 (hardware, < 1 μs)\newline
+      $\rightarrow$~Slot 5 J3 → Fast IC spare-fault input → AIM External MPS\newline
       $\rightarrow$~Klystron RF output: begins dropping to \textasciitilde{}0 (\textasciitilde{}1\textendash{}5 μs settling)}
   \tlrow{t ≈ 10 μs}{AIM Module (Slot 12) ISR fires:\newline
-      $\rightarrow$~STN:VXI:LTCH = MAJOR (EPICS Channel Access write)\newline
+      $\rightarrow$~STN:VXI:LTCH = MAJOR; STN:MPS:LTCH = FAULT (External MPS)\newline
       $\rightarrow$~STNPARK:SUMY:STAT alarm begins propagating through EPICS tree\newline
       ── At this instant ──────────────────────────────────────────────\newline
-      HVPS still fully energized at \textasciitilde{}75 kV, \textasciitilde{}10 A cathode current\newline
+      HVPS still fully energized at \textasciitilde{}72 kV, \textasciitilde{}19 A cathode current\newline
       RF output ≈ 0; cavity begins ring-down (\textasciitilde{}1 ms time constant)\newline
       ALL cathode beam power now depositing in klystron collector\newline
-      P\_collector  ≈  P\_cathode  (= V\_HV × I\_cathode, typ. 500\textendash{}750 kW)\newline
+      P\_collector  ≈  P\_cathode  (≈ 1.4 MW, above the 1200 kW limit)\newline
       ─────────────────────────────────────────────────────────────────}
-  \tlrow{t ≈ 10\textendash{}20 ms}{RF MPS PLC (next scan cycle completes):\newline
-      $\rightarrow$~Reads KLYSCOLLPLC:POWER (RIO T4[41]): elevated above normal\newline
-      (collector power ≈ full cathode input; well above operating value)\newline
-      $\rightarrow$~Internal comparator: measured power > KLYSCOLL:POWER:ULIM\newline
-      $\rightarrow$~PLC drops its collector summary → Path A activated:}
-  \tlrow{t ≈ 15\textendash{}25 ms}{Path A \textemdash{} RF Local Display Panel logic responds (μs scale):\newline
+  \tlrow{t ≈ 0.7 s}{RF MPS PLC collector protection:\newline
+      $\rightarrow$~Collector power (HV × current − RF output) above 1200 kW\newline
+      since t = 0; the PLC-5 timer runs out after 0.70 s\newline
+      $\rightarrow$~PLC latches collector overpower and drops its collector\newline
+      summary and its global interlock summary → Path A activated:}
+  \tlrow{t ≈ 0.7 s}{Path A \textemdash{} RF Local Display Panel logic responds (μs scale):\newline
       ┌─→ SCR ENABLE fiber → HVPS controller (B118) goes dark\newline
       │     → thyristor triggers inhibited\newline
       │     → HVPS HV output begins to collapse\newline
@@ -1730,17 +1735,16 @@ This example traces the complete fault event when SPEAR MPS withdraws its beam p
       └─→ AB summary fiber → AIM → RF\_FAULT (redundant RF cut confirmation)\newline
       Remote I/O latch: KLYSCOLL:POWER:LTCH (WL=16/WF=31/B=2) = MAJOR latched\newline
       (hardware latch confirming the PLC trip; propagates to EPICS)}
-  \tlrow{t ≈ 30\textendash{}50 ms}{HVPS STATUS fiber goes dark → RF Local Display Panel (HVPS beam abort)\newline
+  \tlrow{t ≈ 0.7 s}{HVPS STATUS fiber goes dark → RF Local Display Panel (HVPS beam abort)\newline
       [the panel's beam-abort output is already set \textemdash{} see \cref{sec:aim-bats}]}
-  \tlrow{t ≈ 100\textendash{}300 ms}{EPICS Remote I/O data arrives at IOC:\newline
+  \tlrow{t ≈ 1 s}{EPICS Remote I/O data arrives at IOC (\textasciitilde{}1 Hz):\newline
       $\rightarrow$~\{STN\}:KLYSCOLL:POWER:LTCH propagates → KLYS:SUMY:LTCH = MAJOR\newline
-      $\rightarrow$~\{STN\}:STN:MPS:LTCH = MAJOR (Path B permit bit from PLC)\newline
-      $\rightarrow$~STN:ABSUMY:LTCH → STNOFF:SUMY:STAT = MAJOR\newline
-      $\rightarrow$~fault\_stnoff ≠ NO\_ALARM → SNL detects fault condition}
+      $\rightarrow$~STN:SUMY:PLC and STN:ABSUMY:LTCH = MAJOR\newline
+      (STNOFF:SUMY:STAT is already MAJOR through STN:VXI:LTCH)}
   \tlrow{t ≈ 1 s}{SNL s\_go\_off sequence begins:\newline
       $\rightarrow$~Step 1: fba = 1 (beam abort forced from the software side)\newline
       $\rightarrow$~Steps 2\textendash{}4: HVPS ramp setpoint → 0 and hvpstrig=OFF\newline
-      [no-op: HVPS already hardware-killed at \textasciitilde{}20\textendash{}25 ms]\newline
+      [HVPS already hardware-killed at \textasciitilde{}0.7 s if the cascade fired]\newline
       $\rightarrow$~Step 5: rfswitch = OFF (software confirms RF drive off;\newline
       was already 0 from Slot 5 at t = 0)\newline
       $\rightarrow$~Step 6: Fault files captured (11 RF/IQA channels)\newline
@@ -1757,16 +1761,16 @@ PV & Value & Interpretation \\
 \bottomrule\noalign{}
 \endlastfoot
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}VXI:\allowbreak{}LTCH} & MAJOR & Slot 5 RF\_FAULT seen by AIM ISR (root cause --- timestamps \textasciitilde10 μs after t=0) \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH} & MAJOR & SPEAR MPS permit removed (root cause visible via Remote I/O Path B) \\
-\texttt{\{STN\}:\allowbreak{}KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} & MAJOR & Collector overpower trip in the PLC (cascade precipitating HVPS kill --- timestamps \textasciitilde15--25 ms after t=0) \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & 0x000 & No waveguide arc detected (all zeros --- confirms not a cavity arc event) \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH} & FAULT & External MPS: the AIM's spare channel, driven by Slot 5 J3 (root cause) \\
+\texttt{\{STN\}:\allowbreak{}KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} & MAJOR & Collector overpower trip in the PLC (cascade precipitating HVPS kill --- about \qty{0.7}{\second} after t=0) \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & \texttt{0x70FB} & Bit~8 (External MPS) latched; every arc channel clear --- not an arc event \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}ABSUMY:\allowbreak{}LTCH} & MAJOR & AB summary fault from the RF MPS PLC (collector overpower) \\
-\texttt{\{STN\}:\allowbreak{}HVPS:\allowbreak{}VOLT} & collapsing to 0 after \textasciitilde25 ms & Thyristor triggers inhibited by the panel's SCR ENABLE \\
+\texttt{\{STN\}:\allowbreak{}HVPS:\allowbreak{}VOLT} & falling from about \qty{0.7}{\second} & Thyristor triggers inhibited by the panel's SCR ENABLE (cascade), or the SNL ramp from about \qty{1}{\second} \\
 \end{longtable}
 
-\textbf{Key feature}: The \texttt{KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} flag appears as the hardware event that killed the HVPS --- even though the root cause was SPEAR MPS. An operator must compare EPICS archiver timestamps: \texttt{STN:MPS:LTCH} timestamp precedes \texttt{KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} by \textasciitilde15--20 ms, confirming the cascade direction. With default 1 Hz archiver resolution, both may appear at the same timestamp; event-driven archiving is required for precise sequencing.
+\textbf{Key feature}: The \texttt{KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} flag appears as the hardware event that killed the HVPS --- even though the root cause was SPEAR MPS. An operator must compare EPICS archiver timestamps: \texttt{STN:MPS:LTCH} timestamp precedes \texttt{KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} by about \qty{0.7}{\second}, confirming the cascade direction. With default 1 Hz archiver resolution, both may appear in the same or adjacent samples; event-driven archiving is required for precise sequencing.
 
-\textbf{Recovery}: Standard recovery sequence (\cref{sec:tl-recovery}). Both \texttt{STN:MPS:LTCH} and \texttt{KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH} must clear (SPEAR MPS must restore its permit; then a fault reset) before the station can return to ON\_CW.
+\textbf{Recovery}: Standard recovery sequence (\cref{sec:tl-recovery}). SPEAR MPS must restore its permit; a fault reset then clears \texttt{STN:VXI:LTCH} and \texttt{STN:MPS:LTCH} in the AIM and, through the PLC-5 reset, \texttt{KLYSCOLL:\allowbreak{}POWER:\allowbreak{}LTCH}, before the station can return to ON\_CW.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -1816,10 +1820,10 @@ SLC-500 output 0 → COMMANDS bus (B118) & Supervisory enable & \textasciitilde2
 
 The SLC-500 output is the \textbf{supervisory gate} --- it deliberately enables the HVPS at the beginning of the startup sequence and is the controlled OFF path during orderly shutdown. The panel's SCR ENABLE fiber is the \textbf{fast-trip gate} --- held lit during normal operation, dark on fault. Both must be satisfied simultaneously for the HVPS to produce HV output.
 
-\subsection{RF MPS PLC Three-Path Architecture --- Defense in Depth}\label{sec:xl-three-path}
+\subsection{RF MPS PLC Two-Path Architecture --- Defense in Depth}\label{sec:xl-three-path}
 
 
-The RF MPS PLC is unique among the five actors in that a single fault produces consequences on three independent signal paths simultaneously (see \cref{sec:mps-paths} for full description). This is a cross-layer interaction worth noting explicitly:
+A single RF MPS PLC fault produces consequences on two independent signal paths simultaneously (see \cref{sec:mps-paths} for full description). This is a cross-layer interaction worth noting explicitly:
 
 \begin{longtable}[]{@{}Q{\dimexpr 0.0962\linewidth-1.71\tabcolsep\relax}Q{\dimexpr 0.0873\linewidth-1.71\tabcolsep\relax}Q{\dimexpr 0.1924\linewidth-1.71\tabcolsep\relax}Q{\dimexpr 0.2405\linewidth-1.71\tabcolsep\relax}Q{\dimexpr 0.1250\linewidth-1.71\tabcolsep\relax}Q{\dimexpr 0.0485\linewidth-1.71\tabcolsep\relax}Q{\dimexpr 0.2103\linewidth-1.71\tabcolsep\relax}@{}}
 \toprule\noalign{}
@@ -1829,8 +1833,7 @@ Path & Layer & Immediate HVPS Effect & Delayed HVPS Effect (SNL) & RF Effect & S
 \bottomrule\noalign{}
 \endlastfoot
 \textbf{A} --- MPS summaries → panel logic and AIM & Hardware interlock & \textbf{SCR ENABLE removed by the panel logic} for collector and waveguide pressure faults (fiber → HVPS controller, B118); crowbar per O4 & Orderly \texttt{hvpstrig=OFF} (\textasciitilde1 s, HVPS already dead) & RF\_FAULT via AIM & \textless{} 15 ms total & Primary HVPS shutdown path for the faults wired into the panel logic \\
-\textbf{B} --- Remote I/O permit bit & Software / EPICS & None & SNL orderly \texttt{s\_go\_off}: HVPS ramp + \texttt{hvpstrig=OFF} & SNL orderly shutdown & \textasciitilde1 s & Fault record, fault file, state machine bookkeeping; hardware already acted \\
-\textbf{C} --- MPS permit → VXI Slot 5 & Hardware backplane & \textbf{None} --- Slot 5 has no connection to the SCR ENABLE or crowbar fibers & Orderly HVPS shutdown via SNL \texttt{s\_go\_off} (\textasciitilde6 s, via \texttt{VXI:LTCH} alarm chain) & RF\_FAULT via Slot 5 & \textless{} 15 ms (RF cut) & Redundant RF cut; HVPS shutdown via SNL only \\
+\textbf{B} --- Remote I/O global interlock summary (\texttt{STN:\allowbreak{}SUMY:\allowbreak{}PLC}) & Software / EPICS & None & SNL orderly \texttt{s\_go\_off}: HVPS ramp + \texttt{hvpstrig=OFF} & SNL orderly shutdown & \textasciitilde1 s & Fault record, fault file, state machine bookkeeping; hardware already acted \\
 \end{longtable}
 
 \textbf{For SPEAR MPS permit and orbit interlock (Slot 5 direct inputs):}
@@ -1842,15 +1845,15 @@ Input & Immediate HVPS Effect & Delayed HVPS Effect (SNL) & RF Effect & Speed \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-SPEAR MPS beam permit removal & \textbf{None} from Slot 5 --- no panel path; \textbf{but collector overpower cascade fires Path A within \textasciitilde20--30 ms (see \cref{sec:cascade})} & Primary: orderly SNL \texttt{s\_go\_off} (\textasciitilde6 s); \textbf{in practice: cascade hardware kill \textasciitilde20--30 ms} & RF\_FAULT via Slot 5 & \textasciitilde5--15 ms (RF cut) \\
-Orbit interlock trip & \textbf{None} from Slot 5 --- no panel path; \textbf{but collector overpower cascade fires Path A within \textasciitilde20--30 ms (see \cref{sec:cascade})} & Primary: orderly SNL \texttt{s\_go\_off} (\textasciitilde6 s); \textbf{in practice: cascade hardware kill \textasciitilde20--30 ms} & RF\_FAULT via Slot 5 & \textasciitilde5--15 ms (RF cut) \\
+SPEAR MPS beam permit removal & \textbf{None} from Slot 5 --- no panel path; the AIM may act on its External MPS channel (O3), and the collector overpower cascade fires Path A after \qty{0.7}{\second} (\cref{sec:cascade}) & Orderly SNL \texttt{s\_go\_off} (\textasciitilde6 s) & RF\_FAULT via Slot 5 & Not documented (O1) \\
+Orbit interlock trip & \textbf{None} from Slot 5 --- no panel path; the AIM may act on its External MPS channel (O3), and the collector overpower cascade fires Path A after \qty{0.7}{\second} (\cref{sec:cascade}) & Orderly SNL \texttt{s\_go\_off} (\textasciitilde6 s) & RF\_FAULT via Slot 5 & Not documented (O1) \\
 \end{longtable}
 
-The design consequence: for an RF MPS PLC trip on collector power or waveguide pressure, the immediate HVPS hardware shutdown is \textbf{owned by Path A} through the RF Local Display Panel logic; other MPS faults reach the HVPS through the collector-power cascade or the SNL. Paths B and C cannot produce immediate HVPS shutdown. If Path A were to fail (e.g., a panel fault), Path C would still cut RF drive, and the SNL would perform orderly HVPS shutdown \textasciitilde6 s later, but there would be no immediate HVPS hardware kill.
+The design consequence: for an RF MPS PLC trip on collector power or waveguide pressure, the immediate HVPS hardware shutdown is \textbf{owned by Path A} through the RF Local Display Panel logic; other MPS faults reach the HVPS through the collector-power cascade or the SNL. Path B cannot produce an immediate HVPS shutdown. If Path A were to fail (e.g., a panel fault), the SNL would still perform orderly HVPS shutdown \textasciitilde6 s later through Path B, but there would be no immediate HVPS hardware kill.
 
-For SPEAR MPS and orbit interlock signals, Slot 5 has \textbf{no connection} to the SCR ENABLE or crowbar fibers. There is no \emph{primary} hardware HVPS kill from these signals. However, the RF drive cutoff invariably creates a cascade secondary trip: with drive = 0 and HVPS on, the klystron collector absorbs full cathode power, the RF MPS PLC drops its collector summary (Path A) within \textasciitilde10--20 ms, and the panel logic removes SCR ENABLE within \textasciitilde20--30 ms of the initial trip. In practice, HVPS hardware shutdown occurs within \textasciitilde20--30 ms, not \textasciitilde6 s. See \cref{sec:cascade} for the complete physics and signal chain, and \cref{sec:tl-spearmps} for an example fault timeline.
+For SPEAR MPS and orbit interlock signals, Slot 5 has \textbf{no connection} to the SCR ENABLE or crowbar fibers. A hardware HVPS kill can come only from the AIM, if its fault logic acts on the External MPS channel (O3), or from the cascade: with drive = 0 and HVPS on, the klystron collector absorbs full cathode power, and the RF MPS PLC drops its collector summary (Path A) once that power has stayed above \qty{1200}{\kilo\watt} for \qty{0.70}{\second}; the panel logic then removes SCR ENABLE. Otherwise the HVPS is shut down by the SNL, about 6 s after the trip. See \cref{sec:cascade} for the complete physics and signal chain, and \cref{sec:tl-spearmps} for an example fault timeline.
 
-This asymmetry should be considered during upgrade architecture design: the new Interface Chassis interlock design must maintain an equivalent hardware-speed path from MPS signals to the HVPS SCR/crowbar circuit. Although the cascade (\cref{sec:cascade}, \cref{sec:xl-cascade}) provides a de facto hardware HVPS kill within \textasciitilde20--30 ms, it relies on the klystron physics and the RF MPS PLC --- a \textbf{direct} wired path from SPEAR MPS permit removal to the HVPS SCR kill (bypassing the cascade dependency) is currently absent and should be evaluated for the upgrade.
+This asymmetry should be considered during upgrade architecture design: the new Interface Chassis interlock design must maintain an equivalent hardware-speed path from MPS signals to the HVPS SCR/crowbar circuit. Although the cascade (\cref{sec:cascade}, \cref{sec:xl-cascade}) provides a de facto hardware HVPS kill after about \qty{0.7}{\second}, it relies on the klystron physics and the RF MPS PLC --- a \textbf{direct} wired path from SPEAR MPS permit removal to the HVPS SCR kill (bypassing the cascade dependency) is currently absent and should be evaluated for the upgrade.
 
 \subsection{RF Shutdown Path Following HVPS PLC Trip}\label{sec:xl-rf-shutdown}
 
@@ -1923,7 +1926,7 @@ t ≈ 1 s & SNL s\_go\_off sequence begins & Drive ON (Steps 1--5 in progress) \
 \subsection{Cascade Cross-Layer Interaction: RF Drive Cutoff → Secondary Trip Chain}\label{sec:xl-cascade}
 
 
-The collector overpower cascade (\cref{sec:cascade}) is a cross-layer interaction in which an event that originates in the machine-protection / permit layer (SPEAR MPS permit withdrawal → Slot 5 RF cut) propagates back into the hardware protection layer (RF MPS PLC collector summary → RF Local Display Panel logic), producing an immediate hardware-speed HVPS kill.
+The collector overpower cascade (\cref{sec:cascade}) is a cross-layer interaction in which an event that originates in the machine-protection / permit layer (SPEAR MPS permit withdrawal → Slot 5 RF cut) propagates back into the hardware protection layer (RF MPS PLC collector summary → RF Local Display Panel logic), producing a hardware HVPS kill about \qty{0.7}{\second} later.
 
 This behavior is consistent with the defense-in-depth design principle: the RF MPS PLC independently monitors a physical parameter (collector power) that is deterministically correlated with the RF drive state. It does not need to "know" that a SPEAR MPS event occurred --- it simply responds to an out-of-bounds physical condition.
 
@@ -1940,7 +1943,7 @@ This behavior is consistent with the defense-in-depth design principle: the RF M
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  \textbf{The cascade is deterministic} for normally-operating klystrons. RF drive cutoff with HVPS energized will always drive the collector to absorb full cathode power. As long as the trip limit (\texttt{KLYSCOLL:\allowbreak{}POWER:\allowbreak{}ULIM}) is set below the full-cathode-power value (which it must be to protect the klystron), the PLC will drop its collector summary within one scan cycle.
+  \textbf{The cascade is deterministic} for normally-operating klystrons. RF drive cutoff with HVPS energized will always drive the collector to absorb full cathode power. The trip limit is fixed at \qty{1200}{\kilo\watt} in the PLC-5 program, below the full cathode power at the normal operating point (about \qty{1.4}{\mega\watt}), so the PLC drops its collector summary \qty{0.70}{\second} after the cut unless the high voltage has been lowered first \R{37}.
 \item
   \textbf{Path A is the hardware HVPS kill for collector overpower} --- whether triggered by a primary RF MPS PLC protection event or by this cascade, the collector summary into the RF Local Display Panel logic is the mechanism. Any detected collector overpower therefore removes SCR ENABLE in hardware, regardless of how the overpower arose.
 \item
@@ -1956,7 +1959,7 @@ This behavior is consistent with the defense-in-depth design principle: the RF M
 \end{enumerate}
 
 \begin{keynote}
-\textbf{Upgrade architecture note}: The cascade provides a \emph{de facto} hardware HVPS kill for SPEAR MPS and orbit interlock trips via an indirect physics path. The upgrade Interface Chassis design should consider whether to implement a \emph{direct} hardware path (permit removal → HVPS SCR kill, without depending on the klystron physics cascade), which would be faster (\textasciitilde1 ms vs. \textasciitilde20--30 ms), more transparent in fault records, and functional even at low RF power levels where the cascade may not fire.
+\textbf{Upgrade architecture note}: The cascade provides a \emph{de facto} hardware HVPS kill for SPEAR MPS and orbit interlock trips via an indirect physics path. The upgrade Interface Chassis design should consider whether to implement a \emph{direct} hardware path (permit removal → HVPS SCR kill, without depending on the klystron physics cascade), which would be faster (\textasciitilde1 ms vs. \textasciitilde\qty{0.7}{\second}), more transparent in fault records, and functional even at low RF power levels where the cascade may not fire.
 \end{keynote}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -2000,26 +2003,29 @@ PV & Content \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCCURSTT} & 12-bit real-time arc channel status (clears when arc ends) \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & 12-bit latched arc channel status (holds until a fault reset) \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCCURSTT} & Real-time arc channel status, one bit per channel (1 = clear; a tripped channel reads 0 until the arc ends) \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & Latched arc channel status, one bit per channel (a latched channel reads 0 until a fault reset) \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTFLT} & First-fault arc channel \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}INTSTATE} & AIM overall interlock state \\
 \end{longtable}
 
-\textbf{Interpreting \texttt{ARCLTDSTT} bit pattern}:
+\textbf{Interpreting \texttt{ARCLTDSTT} bit pattern} (1 = clear, 0 = latched; disabled channels read 0) \R{3}, \R{35}:
 
 \begin{longtable}[]{@{}Q{\dimexpr 0.0826\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.3670\linewidth-1.33\tabcolsep\relax}Q{\dimexpr 0.5505\linewidth-1.33\tabcolsep\relax}@{}}
 \toprule\noalign{}
-Bits & Sensor Location & Notes \\
+Bits & Channel & Latch record \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-0--3 & Four cavity waveguide window arc sensors & Cavity 1--4 in numerical order \\
-4 & Klystron output window arc sensor & High-energy arc in klystron output waveguide \\
-5 & Main circulator arc sensor & Arc at circulator assembly \\
-6--11 & Spare channels (not connected in SPEAR3) & Should always be 0 \\
-\textbf{All zeros} & \textbf{No waveguide arc detected} & Fault originated from HVPS, MPS PLC, or other non-arc source \\
+0 & Klystron arc & \texttt{KLYS:\allowbreak{}ARC:\allowbreak{}LTCH} \\
+1 & Circulator arc & \texttt{CIRC:\allowbreak{}ARC:\allowbreak{}LTCH} \\
+3--6 & Cavity 1--4 window arc, air side & \texttt{CAV\textit{n}AIR:\allowbreak{}ARC:\allowbreak{}LTCH} \\
+7, 12--14 & Cavity 1--4 window arc, vacuum side & \texttt{CAV\textit{n}VACM:\allowbreak{}ARC:\allowbreak{}LTCH} \\
+8 & External MPS: SPEAR MPS or orbit permit, through Slot 5 & \texttt{STN:\allowbreak{}MPS:\allowbreak{}LTCH} \\
+2, 15 & Not named; disabled & Always 0 \\
+9--11 & Not channels & Always 0 \\
+\textbf{\texttt{0x71FB}} & \textbf{Nothing latched} (enables of 11 November 2026) & A latched channel clears its bit \\
 \end{longtable}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -2135,9 +2141,10 @@ Category & PV & What to Look For \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Arc fault & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & Which bit(s) set at fault time? \\
+Arc fault & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & Which enabled bit(s) cleared at fault time? \\
 First arc channel & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTFLT} & Which arc channel tripped first \\
-MPS PLC & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH} & Did MPS PLC trip independently of arc? \\
+External MPS & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH} & Did the SPEAR MPS or orbit permit trip the station (Slot 5)? \\
+MPS PLC & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}SUMY:\allowbreak{}PLC} & Did the RF MPS PLC trip? \\
 HVPS summary & \texttt{\{STN\}:\allowbreak{}HVPSSTN:\allowbreak{}SUMY:\allowbreak{}LTCH} & Which HVPS sub-fault latched? \\
 Transformer arc & \texttt{\{STN\}:\allowbreak{}HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} & HV transformer internal arc event? \\
 Crowbar & \texttt{\{STN\}:\allowbreak{}HVPS:\allowbreak{}CROWBAR:\allowbreak{}LTCH} & Crowbar activated? \\
@@ -2167,13 +2174,15 @@ Forced fault & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{
   \begin{itemize}
   \tightlist
   \item
-    \texttt{ARCLTDSTT\ ≠\ 0} → Arc fault; note which bit(s)
+    An enabled bit of \texttt{ARCLTDSTT} at 0 → that channel latched; note which bit(s) (bit 8 = External MPS)
   \item
     \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} set → HV transformer internal arc
   \item
     \texttt{HVPS:\allowbreak{}CROWBAR:\allowbreak{}LTCH} set → Crowbar fired
   \item
-    \texttt{STN:MPS:LTCH} set → MPS PLC trip (cooling, vacuum, or power)
+    \texttt{STN:MPS:LTCH} = FAULT → SPEAR MPS or orbit permit lost (Slot 5)
+  \item
+    \texttt{STN:\allowbreak{}SUMY:\allowbreak{}PLC} = FAULT → RF MPS PLC trip (cooling, vacuum, or power)
   \item
     \texttt{STN:\allowbreak{}FORCED:\allowbreak{}LTCH} set → Forced fault from EPICS; turn it off and reset before recovery
   \end{itemize}
@@ -2232,14 +2241,14 @@ Observed Indicators & Most Likely Initiating Event & First Actor \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\texttt{ARCLTDSTT} bits 0--3 set & Cavity waveguide window arc (cavity N = bit N) & AIM, on the Fast IC signal (\textless{} 1 μs) \\
-\texttt{ARCLTDSTT} bit 4 set & Klystron output window arc & AIM, on the Fast IC signal (\textless{} 1 μs) \\
-\texttt{ARCLTDSTT} bit 5 set & Main circulator arc & AIM, on the Fast IC signal (\textless{} 1 μs) \\
-\texttt{ARCLTDSTT\ =\ 0}, \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} set & HV transformer internal arc & SLC-500 HVPS PLC (\textasciitilde10--20 ms) \\
-\texttt{ARCLTDSTT\ =\ 0}, \texttt{HVPS:\allowbreak{}CROWBAR:\allowbreak{}LTCH} set, no arc latch & HVPS overvoltage → crowbar self-fired; OR analog crowbar threshold exceeded & Crowbar analog circuit (\textless{} 1 μs) \\
-\texttt{ARCLTDSTT\ =\ 0}, \texttt{STN:MPS:LTCH} set & RF MPS PLC trip (cooling water over-temp, vacuum excursion, or overpower) & RF MPS PLC (\textasciitilde10 ms) \\
-\texttt{ARCLTDSTT\ =\ 0}, \texttt{HVPSOIL:\allowbreak{}TEMP:\allowbreak{}LTCH} set & Oil overtemperature (slow thermal fault) & SLC-500 HVPS PLC (\textasciitilde10--20 ms) \\
-\texttt{ARCLTDSTT\ =\ 0}, \texttt{HVPS:\allowbreak{}VOLT:\allowbreak{}LTCH} set & HVPS DC output overvoltage & SLC-500 HVPS PLC (\textasciitilde10--20 ms) \\
+\texttt{ARCLTDSTT} bit 0 or 1 cleared & Klystron or circulator arc & AIM, on the Fast IC signal (\textless{} 1 μs) \\
+\texttt{ARCLTDSTT} bits 3--6 or 7, 12--14 cleared & Cavity 1--4 window arc, air or vacuum side & AIM, on the Fast IC signal (\textless{} 1 μs) \\
+\texttt{ARCLTDSTT} bit 8 cleared, \texttt{STN:MPS:LTCH} = FAULT & SPEAR MPS or orbit permit lost (External MPS) & VXI Slot 5 (\texttt{RF\_FAULT}) \\
+No arc latched, \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} set & HV transformer internal arc & SLC-500 HVPS PLC (\textasciitilde10--20 ms) \\
+\texttt{HVPS:\allowbreak{}CROWBAR:\allowbreak{}LTCH} set, no arc latched & HVPS overvoltage → crowbar self-fired; OR analog crowbar threshold exceeded & Crowbar analog circuit (\textless{} 1 μs) \\
+No arc latched, \texttt{STN:\allowbreak{}SUMY:\allowbreak{}PLC} = FAULT & RF MPS PLC trip (cooling water over-temp, vacuum excursion, or overpower) & RF MPS PLC (\textasciitilde10 ms; collector protection \qty{0.70}{\second}) \\
+No arc latched, \texttt{HVPSOIL:\allowbreak{}TEMP:\allowbreak{}LTCH} set & Oil overtemperature (slow thermal fault) & SLC-500 HVPS PLC (\textasciitilde10--20 ms) \\
+No arc latched, \texttt{HVPS:\allowbreak{}VOLT:\allowbreak{}LTCH} set & HVPS DC output overvoltage & SLC-500 HVPS PLC (\textasciitilde10--20 ms) \\
 CH3 waveform entirely absent (oscilloscope) & SCR firing stopped --- contactor open, or full SCR fault & Hardware, timing depends on cause \\
 CH4 waveform asymmetric or one phase missing & Phase imbalance in primary; possible SCR failure or phase loss & SLC-500 or AC protection \\
 CH1 voltage collapse: instant step to \textasciitilde0 V & Crowbar fired & Crowbar circuit (trigger signal \textless{} 1 µs; the crowbar then \textbf{conducts ≈ 10 µs} later, and the primary current is interrupted in \textbf{4--8 ms} --- SLAC-PUB-7591) \\
@@ -2269,12 +2278,14 @@ PV & Description & Normal State \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FRCBMABT} & Force Beam Abort (\texttt{fba}) & 0 when ON \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}RSTF} & Reset AIM Faults (\texttt{rstf}) & --- (write only) \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}RBA} & Reset Beam Abort (\texttt{rba}) & --- (write only) \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & Arc latched status (12-bit word) & 0 = no arc \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCCURSTT} & Arc current status (12-bit word) & 0 = no arc \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCLTDSTT} & Arc latched status, one bit per channel & \texttt{0x71FB} = nothing latched \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCCURSTT} & Arc current status, one bit per channel & \texttt{0x71FB} = no arc \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}ARCENBSTT} & Arc fault enables (jumpers on the AIM) & \texttt{0x71FB} \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}FSTFLT} & First-fault arc channel & 0 = none \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}VXI:\allowbreak{}LTCH} & VXI interlock latch (from AIM latch register) & OK \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{}LTCH} & Forced fault latch (blocks auto-reset) & OK \\
-\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH} & RF MPS PLC permit status & OK \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}MPS:\allowbreak{}LTCH} & External MPS: the AIM's spare channel, from VXI Slot 5 (SPEAR MPS and orbit permits) & OK \\
+\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}SUMY:\allowbreak{}PLC} & RF MPS PLC global interlock summary & OK \\
 \texttt{\{STN\}:\allowbreak{}HVPSSCR:\allowbreak{}ON:\allowbreak{}CTRL} & HVPS SCR enable switch (\texttt{hvpstrig}) & 1 when ON \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}RFP:\allowbreak{}RFENABLE} & RF drive enable (\texttt{rfswitch}) & 1 when ON \\
 \texttt{\{STN\}:\allowbreak{}HVPS:\allowbreak{}CROWBAR:\allowbreak{}LTCH} & HVPS crowbar fired latch & OK \\
@@ -2345,7 +2356,7 @@ Ref & File & Location & Role \\
 \RDEF{14} & \texttt{rf\_\allowbreak{}interlock\_\allowbreak{}vxi.\allowbreak{}db,v} & \texttt{rfApp/Db/} & VXI-based interlock channels --- AIM latch register bits \\
 \RDEF{15} & \texttt{rf\_\allowbreak{}analog\_\allowbreak{}All.\allowbreak{}substitutions,v} & \texttt{rfApp/Db/} & Analog channel assignments (HVPS volts, current, temperature) \\
 \RDEF{16} & \texttt{rf\_hvps.db,v} & \texttt{rfApp/Db/} & HVPS supervisory records --- voltage setpoints, SCR control, oil temp \\
-\RDEF{17} & \texttt{crat\_\allowbreak{}vxi\_\allowbreak{}13slot.\allowbreak{}template,v} & \texttt{rfApp/Db/} & VXI crate slot labeling --- confirms slot 5 = "MPS Shutoff" \\
+\RDEF{17} & \texttt{crat\_\allowbreak{}vxi\_\allowbreak{}13slot.\allowbreak{}template,v} & \texttt{rfApp/Db/} & VXI crate template; the slot names are macros, filled by \texttt{srf1.\allowbreak{}substitutions,v} \R{35} \\
 \RDEF{18} & \texttt{rf\_\allowbreak{}vxi\_\allowbreak{}modules\_\allowbreak{}All.\allowbreak{}substitutions,v} & \texttt{rfApp/Db/} & VXI module DB loading --- \texttt{cf2.db} assigned to slot 5 (PEP-II artifact) \\
 \end{longtable}
 
@@ -2371,7 +2382,11 @@ Ref & File & Location & Content \\
 \RDEF{28} & \texttt{controllerFiber\allowbreak{}OpticConnections.\allowbreak{}docx} & \texttt{hvps/\allowbreak{}architecture/\allowbreak{}designNotes/} & J. Sebek --- HVPS controller side: slot-5 output 0 (24~V fault/enable) on the COMMANDS bus of the trigger interconnect boards \\
 \RDEF{29} & RF Local Display Panel drawings & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}localPanel/} & DL-340-310-00, front and rear panels SI-340-310-05 and -02, schematic SD-340-311-01 (GAL22V10 logic, fiber transceivers, beam-abort BNC J6) \\
 \RDEF{30} & Wiring diagrams WD-340-330-29 and -02 & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}mpsWiringDiagrams/} & Control fiber-optic cables of the RF Local Display Panel; cross-connect X530 to its connectors J2 and J3 \\
-\RDEF{31} & \texttt{SP3\_writeup\_\allowbreak{}V1d2.\allowbreak{}pdf} & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}legacyArchitecture/} & J. Dusatko, SPEAR3 LLRF system description, v1.2 --- the AIM's six control signals, set by register bits and its on-board fault logic \\
-\RDEF{32} & Fast Interlock Chassis and AIM schematics & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}legacyInterfaceModules/} & SD-340-308-01 and -02 (Fast IC: photodetectors and peak detectors, command fibers, RF detector; J2, J15, J16, J31, J32) and SD-340-309-01 (AIM: comparators with DAC thresholds, latches, fast ADC; J3, J4) \\
+\RDEF{31} & \texttt{SP3\_writeup\_\allowbreak{}V1d2.\allowbreak{}pdf} & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}legacyArchitecture/} & J. Dusatko, SPEAR3 LLRF system description, v1.2 --- the AIM's six control signals, set by register bits and its on-board fault logic; the MPS interlock module, which drives RF\_FAULT and has no VXIbus interface \\
+\RDEF{32} & Fast Interlock Chassis and AIM schematics & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}legacyInterfaceModules/} & SD-340-308-01 and -02 (Fast IC: photodetectors and peak detectors, command fibers, RF detector; J2, J15, J16, J31, J32) and SD-340-309-01 (AIM: comparators with DAC thresholds, latches, fast ADC, fault-enable jumper headers H5 and H6; J3, J4) \\
 \RDEF{33} & PEP-II RF station block diagram BD-340-330-00 & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}legacyArchitecture/} & P.~Corredoura, 1999: the local panel's beam-abort output leaves the station for the PEP-II beam-abort system \\
+\RDEF{34} & \texttt{llrfInterface\allowbreak{}Chassis.\allowbreak{}docx} & \texttt{llrf/\allowbreak{}architecture/} & J. Sebek, LLRF Interface Chassis specification --- the SPEAR MPS and the orbit interlock each give the LLRF a \qty{24}{\volt} permit \\
+\RDEF{35} & SPEAR3 station database: \texttt{rf\_\allowbreak{}stn\_\allowbreak{}All.\allowbreak{}substitutions,v}, \texttt{rf\_\allowbreak{}stn\_\allowbreak{}4CVAll.\allowbreak{}substitutions,v}, \texttt{rf\_\allowbreak{}interlock\_\allowbreak{}arc.\allowbreak{}db,v}; \texttt{srf1.\allowbreak{}substitutions,v} & \texttt{rfApp/Db/}; \texttt{rfApp/\allowbreak{}DbIoc/} & The AIM arc channels and their names, with External MPS on the spare channel since 2003; the slot names of the SRF1 crate (slot 5 MPS Shutoff, slot 6 Link Passthru) \\
+\RDEF{36} & Wiring diagrams WD-340-330-23 and -25 & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}mpsWiringDiagrams/} & RF MPS PLC-5 digital inputs and outputs \\
+\RDEF{37} & RF MPS PLC-5 program (2011--2012), decoded & \texttt{llrf/\allowbreak{}allenBradley/\allowbreak{}decoded/} & Collector protection: HVPS voltage times current minus the square of 0.017 times the RF detector reading, above \qty{1200}{\kilo\watt} for \qty{0.70}{\second}, latches and drops the collector output and the global interlock summary \\
 \end{longtable}

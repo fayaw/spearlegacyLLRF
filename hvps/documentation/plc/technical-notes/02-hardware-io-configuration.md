@@ -266,7 +266,7 @@ These individual bits are set in ladder logic and sent to the VXI/EPICS IOC:
 
 ## Thermocouple Module (Slot 3)
 
-Thermocouple inputs are copied into N7:100–N7:107 via COP instruction in Rung 92. Only 4 channels are actively scaled by the SCALE subroutine (LAD 4) for QuickPanel display:
+Thermocouple inputs are copied into N7:100–N7:107 via COP instruction in Rung 92. The module has 4 channels (IN0–IN3 on WD-730-790-02): the 8 words are 4 channel data words and 4 channel status words, and Rung 115 writes 4 configuration words. All 4 channels are scaled by the SCALE subroutine (LAD 4) for QuickPanel display:
 
 | Register | Input | Function | Scaled Output | Scale Range |
 |----------|-------|----------|---------------|-------------|
@@ -274,7 +274,7 @@ Thermocouple inputs are copied into N7:100–N7:107 via COP instruction in Rung 
 | N7:101 | TC Ch 1 | SCR Bottom Oil (Phase Lower TC) | N7:111 | 0–999 → 0–9999 |
 | N7:102 | TC Ch 2 | Crowbar Tank Oil | N7:112 | 0–999 → 0–9999 |
 | N7:103 | TC Ch 3 | Control Cabinet Air Temperature | N7:113 | 0–999 → 0–9999 |
-| N7:104–N7:107 | TC Ch 4–7 | Additional sensors (data copied but not scaled) | — | — |
+| N7:104–N7:107 | Status Ch 0–3 | Channel status words (copied, not used) | — | — |
 
 Temperature thresholds used in oil temperature interlock (Rung 43):
 - N7:108 = 800 (upper limit, Ch 0)

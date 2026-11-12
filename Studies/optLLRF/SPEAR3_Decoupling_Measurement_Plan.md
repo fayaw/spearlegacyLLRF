@@ -137,7 +137,7 @@ Two models reproduce the measured 500 mA line, and they cannot both be right at 
 
 | Model | Integral path | Klystron | 500 mA prediction | Source |
 |---|---|---|---|---|
-| `eff` | Shared phase, effective corner 1 kHz | Linear | 8.74 kHz, 1074 s⁻¹ | Reproduces the measured damping (Doc P Table 27) |
+| `eff` | Shared phase, effective corner 1 kHz | Linear | 8.74 kHz, 1074 s⁻¹ | Reproduces the measured damping (Doc P Table 8) |
 | `lag` | Installed RFP lag network (2.93 kHz corner, 0.26 kHz leak) | Measured in normal operation: $g_A$ = 0.40, $k_{AP}$ = 0.10 | 7.78 kHz, 1101 s⁻¹ | The network the closed-loop data show; the klystron from fault records (Doc P §8.10) |
 
 The `lag` model gets the damping right but the frequency 12% low, a known open discrepancy (Doc P §8.10). Both use the loop gain $G$ = 1.0 at COUNTS.A = 1.3 dB, with 625 ns delay, θ = 0 and the tuners at the optimum detuning. A third model, `prop` (proportional loop only, linear klystron), describes the station with INTCOMP off (E5) and serves as a reference in §4.3.
@@ -414,7 +414,7 @@ The lag of the loop phase θ at which σ falls to 2α_rad and to zero ([`ramp_ph
 ![Phase margins along the fill](results/ramp_phase_tolerance.png)
 
 A lead is safe: it adds damping at every current (Doc P §8.4). Sources of a lag during a fill:
-- **A mis-set PHASE.C.** θ = 0 was found near PHASE.C ≈ −19° at 20 mA, with tracking on. A more negative setting is a lead, by 1.2–1.3° of loop phase per degree (Doc P Table 26).
+- **A mis-set PHASE.C.** θ = 0 was found near PHASE.C ≈ −19° at 20 mA, with tracking on. A more negative setting is a lead, by 1.2–1.3° of loop phase per degree (Doc P Table 7).
 - **Frequency-offset tracking with the stale tuner model.** On 8 October PHASE.L read −10.9° at 13:31 and −6.5° at 15:35 with PHASE.C = −20°.
   - φ_tr drifted by 4.4°, about 5.5° of loop phase towards lag, at constant current. Positive φ_tr is a lag (Doc P §8.8).
   - The model predicts 7% less damping for that change. The two captures show 6% (1160 → 1086 s⁻¹; the 13:31 capture used the Auto-Peak detector).
@@ -514,7 +514,7 @@ Procedure (from the first draft, with a sign check):
 
 ### 6.2 Phase setting
 
-- **Set A (primary):** PHASE.C for θ ≈ 0 at low current. Doc P Table 26 puts it near −19°, but that was measured with tracking on and φ_tr not recorded. Confirm it with one closed-loop measurement at the first current, then hold it for the whole study. If in doubt, err towards a more negative PHASE.C (lead).
+- **Set A (primary):** PHASE.C for θ ≈ 0 at low current. Doc P Table 7 puts it near −19°, but that was measured with tracking on and φ_tr not recorded. Confirm it with one closed-loop measurement at the first current, then hold it for the whole study. If in doubt, err towards a more negative PHASE.C (lead).
 - **Set B (model check, 200 and 500 mA only):** about +5° of lead (PHASE.C ≈ −24°) at 1.3, −1.7 and +2.8 dB. The models predict σ +2 to +12% and $f_{coh}$ −43 to −86 Hz ([`scan_expected.csv`](results/scan_expected.csv), phase set B). A clearly larger change means the loop phase is not where we think it is.
 
 ### 6.3 Held fixed and recorded
@@ -763,7 +763,7 @@ Return to the baseline gain and stop the scan at that current if any of the foll
 
 1. **Dry-run the analysis.** Done on stored data:
    - `analyze_line.py --demo` on the 8 October captures reproduces the numbers of §3.4;
-   - `analyze_closed_loop.py --demo` on the 2 October runs reproduces Doc P Table 26 and the beam pole;
+   - `analyze_closed_loop.py --demo` on the 2 October runs reproduces Doc P Table 7 and the beam pole;
    - `fit_sources.py --synthetic`, `analyze_iq.py --synthetic`, `probe_sysid.py --synthetic --ram` and `sysid_multisine.py --selftest` run their self-tests;
    - `fault_postmortem.py` reads the 15 fault records of November 2025.
 2. **Bench-test the I/Q capture.** Test `fsw_iq_capture.py` on a signal generator: verify the SCPI sequence, the record length, the state restore and the return to local. Then run `probe_sysid.py` and `analyze_iq.py` on the record.

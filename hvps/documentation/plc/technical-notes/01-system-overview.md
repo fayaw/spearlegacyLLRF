@@ -22,7 +22,7 @@ The PLC controls a **SPEAR RF Klystron High Voltage Power Supply (HVPS)** used t
 | 0 | SLC 500 CPU | Main processor |
 | 1 | 1747-DCM (DCM-FULL) | Direct Communication Module — VXI/EPICS interface |
 | 2 | 1746-IO8 | 8-point digital I/O combo (12 kV, 240V power, GRD switch relay) |
-| 3 | Thermocouple Module | 8-channel temperature sensing (N7:100–N7:107, 4 channels actively scaled to N7:110–N7:113) |
+| 3 | Thermocouple Module | 4-channel temperature sensing (TC-1 to TC-4 on WD-730-790-02). Its 8 input words, 4 data and 4 status, are copied to N7:100–N7:107; channels 0–3 are scaled to N7:110–N7:113 |
 | 4 | (empty) | Unused slot |
 | 5 | 1746-OX8 | 8-point relay output (SCR enable, contactor, crowbar, fast inhibit) |
 | 6 | 1746-IB16 | 16-point 24V DC digital input (fiber optic signals, oil levels, PPS) |
@@ -80,7 +80,7 @@ Legend:
 • CPU    = SLC 500 Processor
 • DCM    = 1747-DCM-FULL (VXI/EPICS Interface)
 • IO8    = 1746-IO8 (8-pt Digital I/O Combo)
-• TC     = Thermocouple Module (8 channels)
+• TC     = Thermocouple Module (4 channels)
 • OX8    = 1746-OX8 (8-pt Relay Output)
 • IB16   = 1746-IB16 (16-pt 24V Input)
 • IV16   = 1746-IV16 (16-pt 24V Input)

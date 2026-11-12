@@ -9,7 +9,7 @@
 | **Organization** | Stanford Linear Accelerator Center |
 | **Date** | July 21, 1999 |
 | **Pages** | 8 |
-| **Source PDF** | `feedbackLoopDescriptionps3403305200.pdf` (identical to `ps3403305200.pdf`) |
+| **Source PDF** | `feedbackLoopDescriptionps3403305200.pdf` (an identical copy, `ps3403305200.pdf`, was removed in November 2026) |
 
 > **See also:** [SPEAR3 LLRF FBK Loops Description](PEPII_LLRF_FBK_Loops_Description.md) — Comprehensive technical description of all eight feedback loops with full signal-path detail and SPEAR3 integration context (updated 3/20/2026).
 

@@ -11,14 +11,14 @@
    ($\sim\si{\micro\second}$ settling)};
 
 \node[rf,text width=104mm,anchor=north] (coll) at (52,-22)
-  {$P_\text{collector}\approx P_\text{cathode}$ --- exceeds the
-   \texttt{KLYSCOLL:POWER:ULIM} trip limit};
-\draw[sig] (cut.south) -- node[right,tag,xshift=1mm]
-  {$\approx\qty{10}{\milli\second}$, one PLC scan cycle} (coll.north);
+  {$P_\text{collector}\approx P_\text{cathode}$ --- above the PLC-5's
+   \qty{1200}{\kilo\watt} limit at full power};
+\draw[sig] (cut.south) -- (coll.north);
 
 \node[plc,text width=104mm,anchor=north] (relay) at (52,-40)
   {\textbf{RF MPS PLC drops its collector summary} --- Path A activated};
-\draw[sig] (coll.south) -- (relay.north);
+\draw[sig] (coll.south) -- node[right,tag,xshift=1mm]
+  {\qty{0.70}{\second} above the limit (PLC-5 timer)} (relay.north);
 
 % four consequences of Path A: three hardware, one software
 \def\yS{-52}
@@ -35,9 +35,9 @@
          if the logic so specifies (equations not documented), firing the crowbar},
   2/rf/{\textbf{AB summary fiber:} the AIM asserts RF\_FAULT on the VXI backplane
         (redundant RF cut)},
-  3/blk/{\textbf{Remote I/O:} \texttt{KLYSCOLL:POWER:LTCH} propagates to EPICS
-         ($\approx\qty{100}{\milli\second}$) $\rightarrow$ \texttt{KLYS:SUMY:LTCH}
-         $\rightarrow$ \texttt{STNOFF:SUMY:STAT} $\rightarrow$ \texttt{s\_go\_off}}}{%
+  3/blk/{\textbf{Remote I/O:} \texttt{KLYSCOLL:POWER:LTCH} and \texttt{STN:SUMY:PLC}
+         reach EPICS $\rightarrow$ \texttt{STN:SUMY:PLC} $\rightarrow$
+         \texttt{STNOFF:SUMY:STAT} $\rightarrow$ \texttt{s\_go\_off}}}{%
     \pgfmathsetmacro\y{\yS-6-\i*12}
     \node[\sty,text width=104mm,anchor=west] (b\i) at (22,\y) {\txt};
     \draw[sig] (14,\y) -- (b\i.west);
@@ -45,7 +45,8 @@
 
 \node[draw=cCtrl!45,fill=cCtrl!5,rounded corners=2pt,inner sep=4pt,
       text width=104mm,anchor=north west,align=left] at (22,-108)
-  {Total time from RF cut to \textbf{hardware} HVPS kill:
-   $\approx\qtyrange{20}{30}{\milli\second}$ --- far faster than the
-   $\approx\qty{6}{\second}$ orderly SNL shutdown.};
+  {Time from RF cut to the \textbf{hardware} HVPS kill:
+   $\approx\qty{0.7}{\second}$, and only if the collector power stays above the
+   limit that long; the SNL removes the SCR supervisory enable at
+   $\approx\qty{6}{\second}$.};
 \end{tikzpicture}

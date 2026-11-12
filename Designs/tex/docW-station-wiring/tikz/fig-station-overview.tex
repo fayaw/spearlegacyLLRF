@@ -1,0 +1,75 @@
+% !TeX root = ../W_station_wiring_reference.tex
+% Level 0: the legacy station by building and rack.  Links end on building
+% frames; the trunk table gives the exact unit at each end.
+\begin{tikzpicture}[x=1mm,y=1mm,font=\scriptsize,every node/.style={outer sep=0pt},
+  ext/.style={blk,anchor=north west,minimum height=8mm,inner sep=2pt},
+  bldg/.style={draw=black!50,rounded corners=2.5pt,line width=0.6pt},
+  ttl/.style={anchor=north west,font=\scriptsize\bfseries,inner sep=1.2pt},
+  unit/.style={draw=cNeut,fill=white,rounded corners=1.2pt,anchor=north west,align=left,
+               font={\tiny\uchyph=0\relax},inner sep=1pt,text width=#1},
+  rack/.style={unit=14.1mm,minimum height=38mm},
+  num/.style={circle,draw=black!65,fill=white,inner sep=0pt,minimum size=3.1mm,font=\tiny,solid},
+  hd/.style={-{Stealth[length=1.8mm]}},
+  hd2/.style={{Stealth[length=1.8mm]}-{Stealth[length=1.8mm]}},
+  pw/.style={draw=cPwr,thick,hd},
+  rfl/.style={draw=cRf,thick,hd},
+  sg/.style={draw=cCtrl,thick,hd},
+  ilk/.style={draw=cPlc,thick,hd},
+  fbr/.style={draw=cPlc,thick,densely dashed},
+]
+% ---- outside systems ------------------------------------------------------
+\node[ext,minimum width=26mm,text width=22mm] (feed) at (0,0) {12.47~kV feeder};
+\node[ext,minimum width=26mm,text width=22mm] (pps)  at (34,0) {SPEAR PPS};
+\node[ext,minimum width=43mm,text width=39mm] (mps)  at (70,0) {SPEAR MPS and orbit interlock};
+\node[ext,minimum width=43mm,text width=39mm] (net)  at (117,0) {Controls network (EPICS)};
+
+% ---- B514 -----------------------------------------------------------------
+\draw[bldg] (0,-14) rectangle (26,-56);
+\node[ttl] at (0,-14) {B514};
+\node[unit=23mm,minimum height=8mm] at (1.5,-19.5) {12.47~kV contactor disconnects};
+\node[unit=23mm,minimum height=12mm] at (1.5,-30) {HVPS power sections SPEAR~1 and SPEAR~2 (NWL 39308); one unit active};
+\node[unit=23mm,minimum height=7mm] at (1.5,-45) {Cable switch tank: connects one unit};
+
+% ---- B118 -----------------------------------------------------------------
+\draw[bldg] (34,-14) rectangle (60,-56);
+\node[ttl] at (34,-14) {B118};
+\node[unit=23mm,minimum height=16mm] at (35.5,-19.5) {HVPS controllers SPEAR~1 and SPEAR~2 (Hoffman boxes): SLC-500, firing, regulator, trigger and monitor boards};
+\node[unit=23mm,minimum height=7mm] at (35.5,-38) {Junction box J1--J6, fibers, BNC-1};
+\node[unit=23mm,minimum height=6mm] at (35.5,-47.5) {HVPS oscilloscope};
+
+% ---- B132 Room 101 --------------------------------------------------------
+\draw[bldg] (70,-14) rectangle (160,-80);
+\node[ttl] at (70,-14) {B132 Room 101};
+\node[rack] at (72,-20)    {\textbf{B132-11}\\[1pt]VXI crate: IOC, CLK, RFP, IQA~1--3, Slot~5, AIM\\[1pt]Fast Interlock Chassis 340-308\\[1pt]Drive amplifier\\[1pt]RF patch panel};
+\node[rack] at (89.6,-20)  {\textbf{B132-12}\\[1pt]Spare Fast Interlock Chassis 340-307, not used\\[1pt]RF Local Display Panel 340-310};
+\node[rack] at (107.2,-20) {\textbf{B132-13}\\[1pt]RF MPS PLC-5\\[1pt]Cavity Tuner Motor Driver 340-315\\[1pt]LLRF9 Units 1 and~2 (monitoring)};
+\node[rack] at (124.8,-20) {\textbf{B132-14}\\[1pt]Cross-connects X530, X15\\[1pt]LLRF Window Interlock Status\\[1pt]Spectrum analyzer};
+\node[rack] at (142.4,-20) {\textbf{B132-15}\\[1pt]Klystron filament control chassis 340-311\\[1pt]Focus and bucking coil supplies};
+\node[unit=86mm,minimum height=13mm] at (72,-63) {Klystron and solenoid\quad$\cdot$\quad circulator, waveguide, magic tees and loads\quad$\cdot$\quad HVPS termination and grounding tank};
+
+% ---- tunnel ---------------------------------------------------------------
+\draw[bldg] (70,-88) rectangle (160,-102);
+\node[ttl] at (70,-88) {SPEAR3 tunnel};
+\node[anchor=north west,font=\tiny,text width=86mm,align=left] at (72,-92.5)
+  {Cavities 1--4 (A--D) with tuners, probes and couplers; cavity-window arc detectors (not in use)};
+
+% ---- links (numbers as in tab:trunks) -------------------------------------
+\draw[ilk] (91.5,-8) -- (91.5,-14) node[num,midway] {1};
+\draw[sg,hd2] (138.5,-8) -- (138.5,-14) node[num,midway] {2};
+\draw[ilk] (47,-8) -- (47,-14) node[num,midway] {3};
+\draw[sg,hd2] (60,-19) -- (70,-19) node[num,midway] {5};
+\draw[fbr,hd2] (60,-25) -- (70,-25) node[num,midway] {4};
+\draw[sg] (60,-31) -- (70,-31) node[num,midway] {6};
+\draw[sg] (70,-37) -- (60,-37) node[num,midway] {15};
+\draw[sg] (60,-43) -- (70,-43) node[num,midway] {16};
+\draw[ilk] (70,-49) -- (60,-49) node[num,midway] {17};
+\draw[sg,hd2] (34,-33) -- (26,-33) node[num,midway] {7};
+\draw[ilk] (34,-23.5) -- (26,-23.5) node[num,midway] {8};
+\draw[ilk] (26,-48.5) -- (34,-48.5) node[num,midway] {18};
+\draw[pw]  (13,-8) -- (13,-14) node[num,midway] {9};
+\draw[pw]  (0,-50) -- (-4,-50) -- (-4,-84) -- node[num,pos=0.4] {10} (78,-84) -- (78,-80);
+\draw[rfl] (146,-80) -- (146,-88) node[num,midway] {11};
+\draw[rfl] (96,-88) -- (96,-80) node[num,midway] {12};
+\draw[sg]  (114,-80) -- (114,-88) node[num,midway] {13};
+\draw[fbr,hd] (130,-88) -- (130,-80) node[num,midway] {14};
+\end{tikzpicture}

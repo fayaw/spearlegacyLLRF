@@ -1,0 +1,51 @@
+conn,pin,alt_pin,label,label_alt,dir,x530,next,point,use,until,ver
+PANEL J2,1,,Vin+ (from HVPS),HVPS Vin+,from HVPS,1,X513-6,,N1 +,I2,V1
+PANEL J2,2,,Iin+ (from HVPS),HVPS Iin+,from HVPS,2,X513-11,,N2 +,I2,V1
+PANEL J2,3,,Vout (to AB),HVPS Vout,to PLC-5,3,X517-13,AI 2 ch 11,N3,I2,V1
+PANEL J2,4,,Iout (to AB),HVPS Iout,to PLC-5,4,X517-14,AI 2 ch 12,N4,I2,V1
+PANEL J2,5,,GND,Return,return,5,return bus,,return,I2,V1
+PANEL J2,6,,SolenoidM Ctrl24,Main Focus On,to panel,6,X522-23,O:031/1,display only,I2,V1
+PANEL J2,7,,SolenoidM Fault15,Main Focus PS Interlock,to panel,7,X522-34,O:031/12,P1,I2,V1
+PANEL J2,8,,GND,Return,return,8,return bus,,return,I2,V1
+PANEL J2,9,,Filament Ctrl24,Filament On,to panel,9,X522-25,O:031/3,display only,I2,V1
+PANEL J2,10,,Timeout Ctrl24,Filament Timer Bypass from A-B,to panel,10,X522-7,O:030/5,display only,I2,V1
+PANEL J2,11,,HV Detected24,HV Detected,to panel,11,X522-29,O:031/7,display only,I2,V1
+PANEL J2,12,,Local Mode24,Station Local/Remote Mode,to PLC-5,12,X519-2,I:030/1,P12 (open),I2,V1
+PANEL J2,13,,GND,Return,return,13,return bus,,return,I2,V1
+PANEL J2,14,,Vin- (from HVPS),HVPS Vin-,from HVPS,14,X513-7,,N1 −,I2,V1
+PANEL J2,15,,Iin- (from HVPS),HVPS Iin-,from HVPS,15,X513-12,,N2 −,I2,V1
+PANEL J2,16,,AGnd,Return,return,16,return bus,,N3 return,I2,V1
+PANEL J2,17,,AGnd,Return,return,17,return bus,,N4 return,I2,V1
+PANEL J2,18,,Solenoid Req24,Online/Offline Request to A-B,to PLC-5,18,X519-24,I:031/3,P7,I2,V1
+PANEL J2,19,,SolenoidB Ctrl24,Bucking Coil PS On/Off,to panel,19,X522-24,O:031/2,display only,I2,V1
+PANEL J2,20,,SolenoidB Fault15,Bucking Coil PS Interlock,to panel,20,X522-35,O:031/13,P2,I2,V1
+PANEL J2,21,,Filament Req24,Filament PS On/Off,to PLC-5,21,X519-22,I:031/1,P8,I2,V1
+PANEL J2,22,,Timeout Req24,Filament Timer Bypass,to PLC-5,22,X519-23,I:031/2,P9,I2,V1
+PANEL J2,23,,Reset Req24,Interlock Reset,to PLC-5,23,X519-1,I:030/0,P10,I2,V1
+PANEL J2,24,,RF detected24,RF On Indicator,to panel,24,X522-32,O:031/10,display only,I2,V1
+PANEL J2,25,,Online mode24,Online/Offline Control,to PLC-5,25,X519-28,I:031/7,P11 (held on),I2,V1
+PANEL J3,1,13,Cavity1 Summary24,Cavity A Sum,to panel,38,X522-2,O:030/0,display only,I2,V0
+PANEL J3,2,12,Cavity3 Summary24,Cavity C Sum,to panel,37,X522-4,O:030/2,display only,I2,V0
+PANEL J3,3,11,Klystron Summary24,Klystron Sum,to panel,36,X522-6,O:030/4,display only,I2,V0
+PANEL J3,4,10,Focus Summary24,Focus Sum,to panel,35,X522-8,O:030/6,display only,I2,V0
+PANEL J3,5,9,Magic Tee2 Summary24,Magic Tee 2 Sum,to panel,34,X522-12,O:030/10,display only,I2,V0
+PANEL J3,6,8,Waveguide Pressure24,Waveguide Air,to panel,33,X522-14,O:030/12,P3,I2,V0
+PANEL J3,7,7,Water Flow Summary24,Flow Sum,to panel,32,X522-16,O:030/14,display only,I2,V0
+PANEL J3,8,6,Temperature Summary24,Temp Sum,to panel,31,X522-18,O:030/16,display only,I2,V0
+PANEL J3,9,5,AB Summary24,Interlock Sum,to panel,30,X522-22,O:031/0,P5,I2,V0
+PANEL J3,10,4,Spare2 24,Spare 2,+24 V,29,X518,,open,I2,V0
+PANEL J3,11,3,Spare4 24,Spare 4,+24 V,28,X518,,open,I2,V0
+PANEL J3,12,2,GND,Return,return,27,return bus,,return,I2,V0
+PANEL J3,13,1,GND,Return,return,26,return bus,,return,I2,V0
+PANEL J3,14,25,Cavity2 Summary24,Cavity B Sum,to panel,50,X522-3,O:030/1,display only,I2,V0
+PANEL J3,15,24,Cavity4 Summary24,Cavity D Sum,to panel,49,X522-5,O:030/3,display only,I2,V0
+PANEL J3,16,23,Collector Summary24,Collector Sum,to panel,48,X522-28,O:031/6,P4,I2,V0
+PANEL J3,17,22,Magic Tee1 Summary24,Magic Tee 1 Sum,to panel,47,X522-9,O:030/7,display only,I2,V0
+PANEL J3,18,21,Magic Tee3 Summary24,Magic Tee 3 Sum,to panel,46,X522-13,O:030/11,display only,I2,V0
+PANEL J3,19,20,Circulator Summary24,Circulator Sum,to panel,45,X522-15,O:030/13,display only,I2,V0
+PANEL J3,20,19,Vacuum Summary24,Vacuum Sum,to panel,44,X522-17,O:030/15,display only,I2,V0
+PANEL J3,21,18,AB Heartbeat24,A-B Heartbeat,to panel,43,X522-27,O:031/5,P6,I2,V0
+PANEL J3,22,17,Spare1 24,Waveguide Air MPS,to panel,42,X522-19,O:030/17,open,I2,V0
+PANEL J3,23,16,Spare3 24,Spare 3,+24 V,41,X518,,open,I2,V0
+PANEL J3,24,15,Spare5 24,Spare 5,+24 V,40,X518,,open,I2,V0
+PANEL J3,25,14,(spare),N/C,none,39,,,open,I2,V0

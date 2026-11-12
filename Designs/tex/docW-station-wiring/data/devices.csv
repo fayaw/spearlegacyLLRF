@@ -1,0 +1,42 @@
+id,unit,model,location,place,status,from,until,notes
+VXI,"VXI crate: IOC B132-IOCRF, CLK, RFP, IQA 1–3",Elma 13-slot,B132-11,,in service,,I8,the IOC moves to new hardware at I8
+AIM,Arc/Interlock Module,SD-340-309-01,B132-11,VXI slot 12,in service,,I8,
+SLOT5,MPS Shutoff module,drawing not found,B132-11,VXI slot 5,in service,,I8,"SPEAR MPS and orbit permits in, J3 to the Fast Interlock Chassis spare-fault input"
+FIC,Fast Interlock Chassis,340-308,B132-11,below the VXI crate,in service,,I2,kept as fallback until I8
+DRVAMP,Drive amplifier,,B132-11,,in service,,,
+PATCH,RF patch panel,,B132-11,,in service,,,
+FICSP,Fast Interlock Chassis (spare),340-307 SN04,B132-12,above the panel,spare,,,"a slightly different version, not used"
+PANEL,RF Local Display Panel,340-310 SN12,B132-12,,in service,,I2,kept as fallback until I8
+PLC5,RF MPS PLC-5 (main 1771 crate and a second crate),Allen-Bradley PLC-5,B132-13,,in service,,I4,
+TUNERDRV,"Cavity Tuner Motor Driver: SLC-500 chassis with four 1746-HSTP1 modules",340-315 SN08,B132-13,,in service,,I8,"Remote I/O node 2; the motor cables move from the SS2000MD4 drivers to the Galil at I3, the chassis stays on the link and as fallback"
+LLRF9-1,LLRF9 Unit 1,Dimtel LLRF9,B132-13,,in service (monitoring),,,drives the station from I6
+LLRF9-2,LLRF9 Unit 2,Dimtel LLRF9,B132-13,,in service (monitoring),,,
+X530,Cross-connect X530,,B132-14,,in service,,,panel cable J2 on terminals 1–25 and J3 on 26–50
+X15,Cross-connect X15,,B132-14,,in service,,,waveguide pressure switches
+WINLCK,LLRF Window Interlock Status chassis (2U),built 2021,B132-14,above the spectrum analyzer,in service,,,turns a legacy permit into an LLRF9 enable
+SPECAN,Spectrum analyzer,,B132-14,,in service,,,
+X519,Cross-connect X519 (PLC-5 input module),,not recorded,,in service,,,
+X522,Cross-connect X522 (PLC-5 output module),,not recorded,,in service,,,
+X517,Cross-connect X517 (PLC-5 analog input module 2),,not recorded,,in service,,,
+X513,Cross-connect X513 (lines from the HVPS controller),,not recorded,,in service,,,
+X518,24 V bus X518,,not recorded,,in service,,,feeds the output module and four panel spares
+HEATER,Klystron filament control chassis,340-311 SN14,B132-15,,in service,,I5,
+COILS,Main focus and bucking coil supplies,,B132-15,,in service,,,
+KLY,Klystron and solenoid,Marconi,B132 Room 101,,in service,,,
+WG,"Circulator, waveguide, magic tees and loads",,B132 Room 101,,in service,,,
+TTANK,HVPS termination and grounding tank,SD-730-790-05,B132 Room 101,,in service,,,"Ross HV grounding switch, Danfysik DC-CT (cathode current), 3.3 mΩ return shunt, Pearson CT-110"
+HVC,HVPS controllers SPEAR 1 and SPEAR 2 (Hoffman boxes),WD-730-790-02,B118,,in service,,I7,"SLC-500, Enerpro firing boards, regulator, trigger interconnect and monitor boards"
+JBOX118,HVPS junction box (pluggable terminal blocks J1 to J6; fiber-optics box; BNC-1),EI-444-636-00,B118,,in service,,,above the SPEAR 1 controller; connects the cables from B132 and B514 to the controller in service
+SCOPE,HVPS oscilloscope,Tektronix,B118,,in service,,,"channels: HVPS voltage, HVPS current, transformer current, SCR firing signal"
+HVPS,HVPS power sections SPEAR 1 and SPEAR 2,NWL 39308,B514,,in service,,,one unit active at a time
+SWTANK,HVPS cable switch tank,EI-444-636-00,B514,,in service,,,connects the −90 kV output of one unit to the cable to the termination tank
+SWG,12.47 kV contactor disconnects,GP-439-704-02,B514,,in service,,,
+CAV,"Cavities 1–4 (A–D) with tuners, probes and couplers",,SPEAR3 tunnel,,in service,,,
+ARCDET,Cavity-window arc detectors,,SPEAR3 tunnel,,not in use,,,
+ARC4,AFT ARC4 arc detection,AFT microwave ARC4,B132 (rack to be set),,planned,I1,,
+IC,Interface Chassis and Waveform Buffer,Doc C,B132 (rack to be set),,planned,I2,,
+GALIL,Galil tuner controller,DMC-4143,B132 (rack to be set),,planned,I3,,driven by LLRF9 Unit 1
+CLX,RF MPS ControlLogix,Allen-Bradley 1756,B132 (rack to be set),,planned,I4,,
+TDK,Klystron heater supply,TDK-Lambda Genesys,B132 (rack to be set),,planned,I5,,
+HOFF,New Hoffman box and PPS Interface Box per HVPS unit,,B118,,planned,I7,,
+IOCHW,IOC B132-IOCRF on new hardware,,B132 (rack to be set),,planned,I8,,

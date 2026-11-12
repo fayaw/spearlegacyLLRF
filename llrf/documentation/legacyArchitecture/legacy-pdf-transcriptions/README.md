@@ -46,7 +46,7 @@ This directory contains faithful markdown transcriptions of all **17 original le
 
 | # | Document | PDF | Notes |
 |---|----------|-----|-------|
-| 17 | *(not transcribed separately)* | `ps3403305200.pdf` | Identical content to `feedbackLoopDescriptionps3403305200.pdf` (PS-340-330-52) |
+| 17 | *(not transcribed separately)* | `ps3403305200.pdf` | Identical content to `feedbackLoopDescriptionps3403305200.pdf` (PS-340-330-52); removed from the repository, November 2026 |
 
 ---
 

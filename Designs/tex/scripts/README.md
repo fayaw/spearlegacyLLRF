@@ -1,6 +1,58 @@
-# Figure generation scripts
+# Scripts
 
-## Doc L Release Check
+Node scripts that support the LaTeX documents. There is no Python on this
+machine's toolchain; do not introduce a dependency on one without saying so
+here.
+
+## Doc W generator
+
+[docw-gen.js](docw-gen.js) builds the tables of Doc W (station wiring
+reference) from the data files in `../docW-station-wiring/data/`:
+
+```powershell
+node Designs/tex/scripts/docw-gen.js                          # from the repository root
+powershell -ExecutionPolicy Bypass -File Designs/tex/build.ps1 -Doc W   # runs it, then builds
+```
+
+It reads nine CSV files (RFC 4180, UTF-8, CRLF or LF):
+
+| File | Holds | Table in Doc W |
+|---|---|---|
+| `drawings.csv` | Every drawing PDF in the drawing folders, with status and errata | `tab:drawings`, `tab:drawing-summary` |
+| `errata.csv` | Errors found in the drawings (E1, E2, ...) | `tab:errata` |
+| `checks.csv` | Field checks (FC1, FC2, ...) and the open items each replaces | `tab:checks` |
+| `devices.csv` | Units by location, with the integration step that brings in or retires each | `tab:units-legacy`, `tab:units-planned` |
+| `trunks.csv` | Links between buildings, numbered as in the station overview figure | `tab:trunks` |
+| `connections.csv` | Connector pins, with a verification level V0 to V3 | `tab:panel-j2`, `tab:panel-j3` |
+| `cables.csv` | Cables, fibers and the B118 junction box, read from both ends | `tab:cable-j15`, `tab:cable-j2`, `tab:fibers`, `tab:jbox` |
+| `plcmodules.csv` | The I/O modules of the RF MPS PLC-5 | `tab:plc-modules` |
+| `plcio.csv` | Every point of those modules: terminal, signal, far end, cross-connects, EPICS record or program symbol | `tab:plcio-tc`, `tab:plcio-ai`, `tab:plcio-di`, `tab:plcio-do` |
+
+It checks the data and stops (exit code 1) on an error:
+
+- unique identifiers; known statuses; every erratum a drawing names exists, and
+  every drawing an erratum names lists it; every PLC-5 point names a known module,
+  and the errata and field checks it cites exist;
+- every revision keeps its leading zero (`01`, not `1`). A spreadsheet program
+  drops it when it saves the file, so edit the CSV files in a text editor;
+- every file in the register exists; copies of one drawing are byte-identical,
+  unless the notes say "same pages" (compared page by page);
+- every drawing PDF in the scanned folders is registered (reported as a warning
+  until it is);
+- integration steps I0 to I8, verification levels V0 to V3.
+
+It also scans the `body.tex` of Docs 0, C, I, L, M, P and T for each drawing's
+number and file name to fill the "Cited in" column, and writes
+`../docW-station-wiring/generated/*.tex` plus `stats.tex`, which defines the
+counts used in the text (`\WDrawings`, `\WVerified`, ...). Never edit the
+generated files; they are kept in git so that the editor's build-on-save works
+from a fresh clone.
+
+The numbers in Doc W's station overview figure are drawn by hand in
+`../docW-station-wiring/tikz/fig-station-overview.tex`; a change to
+`trunks.csv` needs the same change there.
+
+## Doc L release check
 
 From the repository root:
 
@@ -15,51 +67,3 @@ head inventories, and all horizontal/vertical overflow diagnostics. Use
 `--source-only` while editing, before rebuilding. The checker does not replace
 engineering review or the field-verification records listed in Doc L.
 
-Most diagrams in these documents are hand-authored TikZ and live in
-`../tikz/`. They are plain text, diff cleanly, and need no build step beyond
-LaTeX itself — that is the right home for block diagrams, signal flows and
-rack layouts.
-
-This folder is for the other kind of figure: **plots derived from data**.
-Nothing here is required to build Doc L, which currently has no data plots.
-The convention is set up so that when one is needed, it is reproducible.
-
-## Convention
-
-```text
-scripts/
-  data/            measured or exported data, committed as CSV
-  make-figures.ps1 regenerates everything into ../figures/generated/
-  <name>.tex       a standalone pgfplots figure reading from data/
-```
-
-Rules:
-
-1. **Commit the data.** A plot whose input is not in the repository cannot be
-   checked or regenerated. CSV, one header row, SI units in the column names.
-2. **Prefer pgfplots over an external toolchain.** It reads the CSV directly at
-   compile time, so the figure always matches the committed data, fonts match
-   the surrounding text automatically, and there is no binary artifact to keep
-   in sync. There is no Python on this machine; do not introduce a dependency
-   on one without saying so here.
-3. **Generated output goes to `../figures/generated/`** and is git-ignored.
-   Never edit anything in that folder by hand.
-4. If a plot genuinely needs a real programming language, add the script here,
-   have it write a PDF into `../figures/generated/`, and call it from
-   `make-figures.ps1` so one command still rebuilds everything.
-
-## Reading data in a figure
-
-```latex
-\pgfplotstableread[col sep=comma]{scripts/data/ripple.csv}\ripple
-\begin{tikzpicture}
-  \begin{axis}[xlabel={Time (\unit{\milli\second})},
-               ylabel={Cathode voltage (\unit{\kilo\volt})},
-               width=0.8\linewidth, height=0.32\textheight]
-    \addplot table[x=t_ms, y=v_kv] {\ripple};
-  \end{axis}
-\end{tikzpicture}
-```
-
-Size plots with `width` and `height` the same way photographs are sized in
-`preamble.tex`: roughly a third of a page, never more than half.

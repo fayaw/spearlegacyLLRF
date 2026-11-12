@@ -102,6 +102,26 @@ require field verification.
 % not in a document sent to a reviewer.  Add a row for a substantive change;
 % leave historical rows frozen, since they record what was true at the time.
 %
+% 1.10 2026-11-11  Faya Wang
+%   The AIM is schematic SD-340-309-01, not "drawing 340-307": 340-307 is a
+%   spare, slightly different Fast Interlock Chassis (nameplate photo, B132-12,
+%   not in use); the unit in service is the 340-308.  The "sequential drawing
+%   numbers" remark is removed.
+%
+% 1.9  2026-11-11  Faya Wang
+%   Slot 5 and External MPS corrections (field check, RCS heads, PLC-5 program).
+%   (a) Slot 5 takes only the SPEAR MPS and orbit-interlock permits; the "RF MPS
+%       PLC permit" input, Path C and the RF_PERMIT line were not sourced.  Its
+%       J3 output drives the Fast IC spare-fault input = AIM spare channel.
+%   (b) STN:MPS:LTCH is that channel ("External MPS", rf_stn_4CVAll 2003), not a
+%       Remote I/O PLC bit; it feeds STNMPS:SUMY:LTCH, a status summary that is
+%       not in STNOFF.  The PLC's software path is STN:SUMY:PLC.
+%   (c) Arc channel map from the station database; ARCENBSTT read 0x71FB on
+%       11 Nov 2026; status words are 1 = clear, 0 = latched (not 0 = no arc).
+%   (d) Collector protection trips after 0.70 s above 1200 kW, so the cascade
+%       acts in about 0.7 s, not 20-30 ms.
+%   Open items: O1 = Slot 5 module, O3 = AIM response to External MPS, O6 text.
+%
 % 1.8  2026-09-03  Faya Wang
 %   R17: Source-verification pass against the original EPICS/IOC configuration
 %   files, aligning with Doc L v3.0.

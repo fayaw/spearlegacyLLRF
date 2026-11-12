@@ -1,0 +1,69 @@
+% ============================================================================
+%  Doc W -- SPEAR3 RF Station Wiring and Interconnection Reference
+%  Build:  powershell -ExecutionPolicy Bypass -File build.ps1 -Doc W
+%          (runs scripts/docw-gen.js first, which writes generated/ from data/)
+%  Engine: LuaLaTeX (required -- see the Unicode note in preamble.tex)
+% ============================================================================
+\documentclass[letterpaper,11pt]{article}
+\input{../common/preamble}
+
+% Column width for longtables with @{} edges: fraction of \linewidth minus the
+% per-column share of the inter-column padding, 2(n-1)/n \tabcolsep.
+\newcommand{\cw}[2]{\dimexpr #1\linewidth-#2\tabcolsep\relax}
+% Dense data tables: footnote size, ragged right; \uchyph=0 keeps signal names
+% such as HEARTBEAT from being hyphenated.
+\newcolumntype{F}[1]{>{\footnotesize\RaggedRight\uchyph=0\arraybackslash}p{#1}}
+% A repository path at table size: no letter-spacing, breaks only at separators.
+\newcommand{\dpath}[1]{{\ttfamily\scriptsize\Urlmuskip=0mu\relax
+  \def\UrlBreaks{\do\/\do\.\do\-\do\_}\urlstyle{tt}\nolinkurl{#1}}}
+
+% Counts written by the generator (\WDrawings, \WVerified, ...).
+\input{generated/stats}
+
+\hypersetup{pdftitle={SPEAR3 RF Station Wiring and Interconnection Reference},
+  pdfauthor={Faya Wang},pdfsubject={Doc W R0 - Draft for review}}
+
+\title{\vspace{-1.4cm}\bfseries SPEAR3 RF Station\\[2mm]
+       \Large Wiring and Interconnection Reference}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{plain}
+
+\begin{center}
+\begin{minipage}{0.86\linewidth}\small
+\begin{tabular}{@{}ll@{}}
+\textbf{Document ID}    & Doc W \\
+\textbf{Revision}       & R0 \\
+\textbf{Status}         & Draft \\
+\textbf{Author}         & Faya Wang \\
+\textbf{Reviewer}       & Jim Sebek \\
+\textbf{Classification} & Tier 2 --- Station reference \\
+\textbf{Affiliation}    & SSRL, SLAC National Accelerator Laboratory \\
+\textbf{Date}           & 11 November 2026 \\
+\end{tabular}
+\end{minipage}
+\end{center}
+
+\vspace{4mm}
+\begin{keynote}
+This document records how the SPEAR3 RF station is wired: where each unit stands, the
+links between the buildings, every drawing in the repository with its status and its
+known errors, the connector pin tables, and the field checks still needed. The other
+documents describe how the station works (Doc~L), what the new hardware must do
+(Doc~C) and how the change is made (Doc~M); the wiring they rely on is kept here,
+with the evidence for each line. It has two parts: the legacy station as it stands
+(I0), and the upgraded station, filled in at each step of the migration. All tables
+are generated from data files checked by a script; the data, not the tables, are
+edited.
+\end{keynote}
+
+\clearpage
+\tableofcontents
+\clearpage
+
+\input{body}
+
+\end{document}

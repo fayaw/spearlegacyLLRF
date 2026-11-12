@@ -98,7 +98,7 @@ This is a comprehensive schematic diagram and general arrangement drawing for a 
 
 - Rating: **14.5 kV, 400 A, 3-pole**
 - Line protection: **50E fuses in 400 A holders**, three phases
-- Type: HQ3 model (Ross Engineering) — see `TN_DOC041421_RossEngr713203_SystemSchematic.md`
+- Type: HQ3 model (Ross Engineering) — see `pps/diagrams/02_rossEngr713203_vacuum_contactor_driver.md`
 - Heater: Typical installation on each compartment
 - Surge arrester: Installed on incoming line side
 - Operating mechanism: Stored energy closing with toggle mechanism

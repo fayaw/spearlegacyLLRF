@@ -115,7 +115,7 @@ Raw thermocouple inputs from Slot 3 (copied via COP in Rung 92):
 | N7:101 | TC Ch 1 | SCR Bottom Oil (Phase Lower) | N7:111 = 56 | 0 (at capture) |
 | N7:102 | TC Ch 2 | Crowbar Tank Oil | N7:112 = 40 | 192 |
 | N7:103 | TC Ch 3 | Control Cabinet Air | N7:113 = 32 | 287 |
-| N7:104–N7:107 | TC Ch 4–7 | Additional sensors | (not scaled) | — |
+| N7:104–N7:107 | Status Ch 0–3 | Channel status words | (not used) | — |
 
 > **Note:** N7:100–N7:103 are raw values; N7:110–N7:113 are scaled (0–999 → 0–9999) by the SCALE subroutine (LAD 4) for QuickPanel display.
 

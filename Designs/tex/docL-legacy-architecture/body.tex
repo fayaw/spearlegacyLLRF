@@ -55,19 +55,19 @@ ID & Item & Required Evidence & Needed Before & Page \\
 \endhead
 \bottomrule
 \endlastfoot
-O1 & K4/RR relay trace & Confirm relay identities, K4/86 contacts and rung-to-output wiring; reconcile \R{25}, \R{65}, \R{67}. & PPS review / wiring changes & \openpage{O1} \\
-O2 & Manual ground-switch contact & Identify the landed NO/NC contact and test its sense; distinguish the test-stand wiring \R{64} from the SPEAR3 schematic \R{62}. & Grounding verification & \openpage{O2} \\
-O3 & RF MPS trip matrix & Supply deployed logic and a per-fault truth table linking inputs to RF inhibit, SCR inhibit, crowbar and reset behavior. & Protection acceptance & \openpage{O3} \\
-O4 & Terminal inventory & Complete TS-1--TS-8 identification and distinguish surveyed wiring from drawing-only assignments. & Controller rewiring & \openpage{O4} \\
-O5 & Physical RF channel map & Verify the recovered 24-input logical map \R{76} against connectors, cable labels and cavity identities. & RF cabling changes & \openpage{O5} \\
-O6 & PPS pin pairs / lamps & Confirm E--F, G--H, A--B and C--D functions, readback excitation and lamp-state interpretation with PPS. & PPS approval & \openpage{O6} \\
-O7 & RF Local Display Panel logic & Read out the equations of the panel's GAL22V10 logic device, which forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort \R{84}. & Interface Chassis logic design & \openpage{O7} \\
-O8 & Crowbar configuration & Record SCR type and matching trigger-board revision/components for every stack. & Board replacement & \openpage{O8} \\
-O9 & TS-5 assignments & Reconcile the terminal/color/function disagreements in the controller and switchgear drawings by an approved field trace. & Contactor rewiring & \openpage{O9} \\
-O10 & Current-sense circuit & Confirm the 0.5-ohm burden and Slot-9 input assignment; \R{72}'s prose and measurement table disagree. & Regulator calibration & \openpage{O10} \\
-O11 & PPS sequence / timing & Supply the external PPS logic and end-to-end tests, including either-permit loss, stuck outputs and contactor blocking. & PPS approval & \openpage{O11} \\
-O12 & EMERGENCY OFF scope & Test the mushroom end to end: record which slot-6 inputs drop, whether the emergency-off latch and alarm assert, and whether the vacuum contactor opens. Compare the running ladder against \R{26}. & Any reliance on the mushroom for operation & \openpage{O12} \\
-O13 & PS-3 5 V rail & Check at the terminals whether the 5 V supply still feeds the gate-trigger \texttt{BIAS} inputs, or is grounded. & Controller refurbishment & \openpage{O13} \\
+O1 & Manual ground-switch contact & Identify the landed NO/NC contact and test its sense; distinguish the test-stand wiring \R{64} from the SPEAR3 schematic \R{62}. & Grounding verification & \openpage{O1} \\
+O2 & RF MPS trip matrix & Supply deployed logic and a per-fault truth table linking inputs to RF inhibit, SCR inhibit, crowbar and reset behavior. & Protection acceptance & \openpage{O2} \\
+O3 & Terminal inventory & Complete TS-1--TS-8 identification and distinguish surveyed wiring from drawing-only assignments. & Controller rewiring & \openpage{O3} \\
+O4 & Physical RF channel map & Verify the recovered 24-input logical map \R{76} against connectors, cable labels and cavity identities. & RF cabling changes & \openpage{O4} \\
+O5 & PPS pin pairs / lamps & Confirm E--F, G--H, A--B and C--D functions, readback excitation and lamp-state interpretation with PPS. & PPS approval & \openpage{O5} \\
+O6 & RF Local Display Panel logic & Read out the equations of the panel's GAL22V10 logic device, which forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort \R{84}. & Interface Chassis logic design & \openpage{O6} \\
+O7 & Crowbar configuration & Record SCR type and matching trigger-board revision/components for every stack. & Board replacement & \openpage{O7} \\
+O8 & TS-5 assignments & Reconcile the terminal/color/function disagreements in the controller and switchgear drawings by an approved field trace. & Contactor rewiring & \openpage{O8} \\
+O9 & Current-sense circuit & Confirm the 0.5-ohm burden and Slot-9 input assignment; \R{72}'s prose and measurement table disagree. & Regulator calibration & \openpage{O9} \\
+O10 & PPS sequence / timing & Supply the external PPS logic and end-to-end tests, including either-permit loss, stuck outputs and contactor blocking. & PPS approval & \openpage{O10} \\
+O11 & EMERGENCY OFF scope & Test the mushroom end to end: record which slot-6 inputs drop, whether the emergency-off latch and alarm assert, and whether the vacuum contactor opens. Compare the running ladder against \R{26}. & Any reliance on the mushroom for operation & \openpage{O11} \\
+O12 & PS-3 5 V rail & Check at the terminals whether the 5 V supply still feeds the gate-trigger \texttt{BIAS} inputs, or is grounded. & Controller refurbishment & \openpage{O12} \\
+O13 & MPS Shutoff module & Find its drawing; record how the SPEAR MPS and orbit-interlock permits enter it and the electrical form of its J3 output, and confirm what the AIM does when its External MPS channel, which is enabled, trips. & Interface Chassis installation & \openpage{O13} \\
 \end{longtable}
 
 \section*{Document Scope and Provenance}\markboth{Document Scope and Provenance}{Document Scope and Provenance}\addcontentsline{toc}{section}{Document Scope and Provenance}\label{document-scope-and-provenance}
@@ -135,7 +135,7 @@ IOC / VXI crate & B132 & VxWorks IOC, six SNL programs, CLK, RFP, three IQAs and
 Remote I/O & B132 / B118 & One 6008-SV1R scanner with HVPS, stepper and RF MPS adapters; map in \cref{sec:communication} \R{60}. \\
 HVPS controller & B118 & SLC-500, analog regulator and Enerpro firing boards; power sequencing and regulation in \crefrange{sec:hvps-control}{sec:enerpro} \R{25}, \R{26}, \R{40}. \\
 RF MPS & B132 & PLC-5 / 1771 equipment protection; distinct from facility MPS and PPS. Trip-matrix limits in \cref{sec:rf-mps} \R{21}. \\
-Interlock interfaces & B132 & Fast IC 340-308, AIM and RF Local Display Panel 340-310; the panel's logic equations remain O7. Hardware boundaries in \cref{sec:interlocks} \R{53}, \R{79}, \R{81}. \\
+Interlock interfaces & B132 & Fast IC 340-308, AIM and RF Local Display Panel 340-310; the panel's logic equations remain O6. Hardware boundaries in \cref{sec:interlocks} \R{53}, \R{79}, \R{81}. \\
 HVPS power / PPS & B514 / B132 & Two selectable supplies, primary contactor and termination-tank grounding switch. Ratings, stored energy and PPS dependencies in \cref{sec:hvps-power} and \crefrange{sec:arc-protection}{sec:pps} \R{6}, \R{22}, \R{25}. \\
 Klystron / drive & B132 & Marconi tube driven by KAW2051M12 amplifier; more details on the tube are discussed in \cref{sec:klystron-drive} \R{1}, \R{32}, \R{56}. \\
 Waveguide / cavities & B132 / tunnel & AFT circulator, three magic-tees, loads and four HOM-damped copper cavities (\crefrange{sec:waveguide}{sec:cavities}) \R{1}, \R{7}. \\
@@ -179,7 +179,7 @@ Rack & Equipment \\
 \bottomrule\noalign{}
 \endlastfoot
 B132-11 & VXI crate (\cref{sec:vxi-llrf}) with the Fast Interlock Chassis 340-308 below it; drive amplifier; RF patch panel \\
-B132-12 & RF Local Display Panel 340-310 (\cref{sec:interlock-chassis}) \\
+B132-12 & RF Local Display Panel 340-310 (\cref{sec:interlock-chassis}), with a spare Fast Interlock Chassis 340-307 above it, a slightly different version of the 340-308 in service, not in use \\
 B132-13 & RF MPS PLC-5, a main 1771 crate with a second crate below it; Cavity Tuner Motor Driver 340-315; the two LLRF9 units of the upgrade \\
 B132-14 & Cross-connect blocks, among them X530 for the RF Local Display Panel's connectors J2 and J3 and X15 for the waveguide pressure switches; a spectrum analyzer and, above it, the 2U ``LLRF Window Interlock Status'' chassis, built in 2021 to turn a legacy permit into an enable for the LLRF9 \\
 B132-15 & Klystron filament heater chassis (\cref{fig:klystron-filament-control-chassis}); main focus and bucking coil supplies \\
@@ -490,6 +490,24 @@ The RFP module is the central signal processing module in the VXI crate. It perf
 \end{center}
 
 
+\subsection{MPS Shutoff Module (Slot 5)}\label{sec:mps-shutoff}
+
+The MPS Shutoff module connects the station to the SPEAR3 machine protection system. J.~Dusatko describes it as the MPS interlock module: it receives the interlock signal of the SPEAR MPS and drives \texttt{RF\_FAULT} on the VXI backplane, so that the RFP removes the klystron drive; it has no VXIbus interface and takes only crate power and \texttt{RF\_FAULT} from the backplane \R{53}. His description places the RF amplifier for the clock input in slot~5; the crate configuration in service names slot~5 ``MPS Shutoff'' and slot~6 ``Link Passthru'' \R{60}.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Inputs}: the SPEAR MPS and the orbit interlock each give the LLRF a 24~V permit \R{89}. Their wiring into the module is not on any RF drawing in the repository.
+\item
+  \textbf{\texttt{RF\_FAULT}}: asserted on the VXI P2 backplane when a permit is lost. The RFP removes the drive, and the AIM latches the backplane fault, which the state machine reads as \texttt{STN:VXI:LTCH} and answers by turning the station off \R{16}, \R{53}, \R{60}.
+\item
+  \textbf{J3}: cabled to the SPARE FAULT input on the front of the Fast Interlock Chassis (checked November 2026). That input drives an optocoupler that reads a fault when no current flows, and the chassis passes it on pin~34 of the 37-pin cable from its J2 to the AIM's J4, where an open line also reads as a fault \R{79}.
+\item
+  \textbf{No VXIbus interface}: no EPICS record reads the module itself \R{53}.
+\end{itemize}
+
+In the AIM the J3 signal appears as the spare channel of the arc registers and, since January 2003, as a bit of the fast interlock status register. The SPEAR3 database names that channel External MPS: \texttt{\{STN\}:STN:MPS:LTCH} shows the AIM's latch of it when the AIM's hardware fault enable for the channel is set, and reads OK otherwise, and the SPEAR3 station MPS summary \texttt{STNMPS:SUMY:LTCH} includes it \R{60}, \R{88}. The record shows on the station status which permit tripped the station; the trip itself reaches the state machine through \texttt{STN:VXI:LTCH}. The channel is enabled: no jumper is fitted for it on the AIM, and \texttt{STN:AIM:ARCENBSTT} read \texttt{0x71FB} on 11 November 2026, with bit~8 set. What the AIM's fault logic does when it trips, for example whether it drops its HVPS on request as for an arc, is not documented\openitem{O13}.
+
 \subsection{IQA (IQ/Amplitude Detector) Modules}\label{sec:iqa-map}
 
 Three IQA modules measure RF signals by downconversion and quadrature sampling \R{53}, producing:
@@ -523,7 +541,7 @@ CH (input) & IQA-1, slot 7 & IQA-2, slot 9 & IQA-3, slot 11 \\
 7 (8) & WG01 load reflected & WG02 load reflected & WG03 load reflected \\
 \end{longtable}
 
-IQA-1 also sources the backplane ripple link to the RFP \R{53}. The logical map is source-verified; match physical connector labels and cable destinations to the installed station before cabling work for the upgrade LLRF9 system.\openitem{O5}
+IQA-1 also sources the backplane ripple link to the RFP \R{53}. The logical map is source-verified; match physical connector labels and cable destinations to the installed station before cabling work for the upgrade LLRF9 system.\openitem{O4}
 
 Each IQA muxes 8 RF input channels through a single ADC in round-robin fashion, downconverting from 476.3 MHz to the 5.1216 MHz IF (using the 471.187 MHz LO from the CLK module) and bandpass-filtering at the IF before quadrature sampling with the 20.486 MHz CLK20. The PEP-II variant of the module uses a different IF (4.9072 MHz) and therefore a different bandpass filter --- this filter change was one of the modifications required to adapt the IQA to SPEAR3 \R{53}. The 8 channels also have amplitude threshold comparators that assert \texttt{RF\_FAULT} on the VXIbus backplane if any channel exceeds its programmed limit. Each IQA contains circular history buffers that record I/Q data per channel and can be read out over VXI after a fault.
 
@@ -551,9 +569,9 @@ The AIM module provides the interface between the VXI crate and the external int
     \textbf{System B}: The IOC's \texttt{rf\_statesFF} state set requests module history-file exports after the shutdown sequence. It configures up to 11 file families, including an AIM export; these are not 11 additional AIM ADC channels.
   \end{itemize}
 \item
-  Station fault word monitoring (AIM reads \texttt{FISTAT} A16 register from Fast IC)
+  Fast interlock status register (\texttt{FISTAT}, A16): the AIM's latches of the VXI backplane, AB heartbeat, AB summary and forced faults (bits 1 to 4), the HVPS-on state (bit 6) and, since 2003, the spare fault (bit 8), which carries the External MPS signal (\cref{sec:mps-shutoff}). The first-fault register records which arc channel or which of the four latched faults came first; it has no bit for the spare fault \R{60}
 \item
-  Arc-threshold configuration through the AIM \texttt{TRIPLVL} registers. Thresholds, channel enables and the physical sensor map must be recorded together \R{53}, \R{60}.
+  Arc-threshold configuration through the AIM \texttt{TRIPLVL} registers. Thresholds, channel enables and the physical sensor map must be recorded together \R{53}, \R{60}. The SPEAR3 database names eleven channels: the klystron and circulator arcs (bits 0 and 1), the air-side and vacuum-side window arcs of cavities 1 to 4 (bits 3 to 6, and 7, 12, 13 and 14) and External MPS (bit 8) \R{88}. The fault enables are jumpers on the AIM (headers H5 and H6; no jumper = enabled) \R{79}; on 11 November 2026 \texttt{STN:AIM:ARCENBSTT} read \texttt{0x71FB}, which enables exactly these eleven channels. In the arc status words an enabled channel reads 1 while clear and 0 once tripped; disabled channels read 0 \R{60}.
 \end{itemize}
 
 \textbf{AIM \texttt{FICTRL} control register} (A16 offset \texttt{0x20}): Dusatko identifies six outgoing control signals routed through the ARC chassis and its isolated interfaces \R{53}. The original register definition also includes a forced-fault test bit and beam-abort reset bit \R{60}:
@@ -569,8 +587,8 @@ Signal & Bit & Symbol & Dusatko's six? & Ultimate destination \\
 \texttt{HVPS\_On} & 1 & \texttt{AIM\_V\_HVPS} & Yes & RF Local Display Panel logic, which forms SCR ENABLE for the HVPS controller in B118 \R{81}, \R{84} \\
 \texttt{Klys\_Filament\_On} & 2 & \texttt{AIM\_V\_FILAMENT} & Yes & RF Local Display Panel (filament and focus request), then the PLC-5 \R{84} \\
 \texttt{Filament\_Timeout} & 3 & \texttt{AIM\_V\_FILTMOOVRD} & Yes & RF Local Display Panel (filament timeout bypass), then the PLC-5 as a 24~V request \R{81} \\
-\texttt{Forced\_Fault} & 4 & \texttt{AIM\_V\_FRCDFLT} & \textbf{No --- test input} & Fast IC forced-fault test stimulus \\
-\texttt{Fault\_Reset} & 5 & \texttt{AIM\_V\_FLTRESET} & Yes & Fast IC arc latch reset and RF Local Display Panel reset \R{81} \\
+\texttt{Forced\_Fault} & 4 & \texttt{AIM\_V\_FRCDFLT} & \textbf{No --- register bit} & The AIM's own forced fault, set from EPICS; it trips the station and blocks the automatic reset \R{16}, \R{60} \\
+\texttt{Fault\_Reset} & 5 & \texttt{AIM\_V\_FLTRESET} & Yes & Clears the AIM's latches; through its fiber, resets the RF Local Display Panel's latches and the PLC-5 \R{81} \\
 \texttt{Beam\_Abort} & 6 & \texttt{AIM\_V\_FRCBMABT} & Yes & RF Local Display Panel (VXI beam abort); its logic combines it with the HVPS beam abort, received on the STATUS fiber, and drives the beam-abort output on BNC J6, which is not cabled at SPEAR3 \\
 \texttt{Beam\_Abort\_Reset} & 7 & \texttt{AIM\_V\_RSTBMABT} & \textbf{No --- register bit} & Resets the AIM beam-abort latch; no fiber of its own \R{81} \\
 \end{longtable}
@@ -906,7 +924,7 @@ Boards \textbf{-03}, \textbf{-04} and \textbf{-13} share the same \textbf{4DB-P1
 \textbf{SCR variants}: SD-730-793-04-C2 distinguishes optical and conventional SCR trigger configurations by R3/R37 values of 24.9 kΩ and 78.70 kΩ respectively. The 2004 SPEAR3 paper reports optical SCRs \R{1}; this does not identify every presently installed stack.
 \end{keynote}
 
-Confirm SCR type and matching trigger-board configuration before replacing a board.\openitem{O8}
+Confirm SCR type and matching trigger-board configuration before replacing a board.\openitem{O7}
 
 
 \begin{keynote}
@@ -1019,7 +1037,7 @@ SPEAR1 and SPEAR2 each have a complete pair; the off-duty unit's pair is de-ener
   every SCR gate-trigger module as \texttt{+100V} (red, PS-1 and PS-4),
   \texttt{+200V} (orange, PS-2) and \texttt{BIAS} (blue, PS-3), and rung 0068
   switches their 120 V AC feed; whether the 5 V rail is still loaded has not been
-  checked.\openitem{O13}}{fig:hoffman-box-spear1-opened}
+  checked.\openitem{O12}}{fig:hoffman-box-spear1-opened}
 
 \tallfig{SPEAR1_hoffman_box_touchPanel_statusLEDs.jpg}{SPEAR1 \textbf{local
   control panel} labeled "SPEAR 1 HOFFMANN BOX". Across the top are the
@@ -1050,7 +1068,7 @@ Slot & Module & Function \\
 0 & SLC-500 CPU (AB-1747-L532) & Main processor \\
 1 & 1747-DCM (DCM-FULL) & Remote I/O adapter --- presents the SLC-500 to the VXI 6008-SV1R scanner as RIO rack 1 \\
 2 & 1746-IO8 & 8-point digital I/O. OUT3 (terminal 5) drives the Ross Grounding Switch coil (120 VAC); also 12 kV and 240 V control \\
-3 & Thermocouple Module & 8-channel temperature sensing (4 channels actively scaled) \\
+3 & Thermocouple Module (AB-1746-THERMC on \R{63}) & Four thermocouples: IN0 SCR tank top oil (TC-1), IN1 SCR tank bottom oil (TC-2), IN2 crowbar (TC-3), IN3 air (TC-4) \R{63}. The program copies the module's eight input words, four channel data and four channel status, to N7:100--N7:107 (rung 0092) and writes four configuration words from N7:90--N7:93 (rung 0115); channels 0 and 1 hold the oil-temperature permit B3:4/1 while both read below 800 (rung 0043), and channels 0--3 are scaled for the touch panel \R{26} \\
 4 & (empty) & Unused slot \\
 5 & 1746-OX8 & 8-point relay output. OUT1 = Contactor On/Off (TS-5 2); OUT2 = Contactor Enable → K4 coil (TS-5 4); also SCR enable, crowbar, fast inhibit \\
 6 & 1746-IB16 & 16-point 24 V DC digital input --- interlock, oil-level, arc, permit and PPS status. Complete input map in \cref{sec:slot6-inputs} \\
@@ -1125,7 +1143,7 @@ Register & Purpose \\
 \endlastfoot
 N7:10 & Voltage reference output (to analog regulator) \\
 N7:11 & Phase angle / SIG HI feedforward \\
-N7:100--N7:107 & Thermocouple raw readings \\
+N7:100--N7:103 & Thermocouple data, channels 0--3 (N7:104--N7:107: channel status, unused) \\
 N7:110--N7:113 & Scaled temperature values \\
 I:1 / O:1 & Remote I/O data words (VXI interface) \\
 \end{longtable}
@@ -1167,7 +1185,7 @@ Pressing the mushroom therefore de-energizes \texttt{I:6/13} \emph{and} \texttt{
 \textbf{Consequence 2 --- losing \texttt{ENABLE} commands both a firing inhibit and a contactor open.} Rung 0011 forces the reference and phase-angle words \texttt{N7:10} and \texttt{N7:11} to zero, and rung 0012 asserts \texttt{FAST INHIBIT} on both the \texttt{O:5/6} relay and the Enerpro status bit, stopping thyristor firing; with the primary still energized the output then falls to the $\approx$~1.3 kV of rectified leakage \R{56} rather than to zero. \texttt{ENABLE B3:0/6} is \emph{also} a plain series contact in rung 0002, ahead of the seal-in branch --- and that branch parallels only the momentary ON pulses, not \texttt{ENABLE}. On the printed listing, losing \texttt{ENABLE} therefore also drops \texttt{CLOSE CONTACTOR O:5/1}, the point \R{63} labels \textbf{CONT. ON/OFF}, which drives the MX On/Off coil through TS-5 terminals 2 and 1 \R{80}; \R{65} opens the vacuum contactor when MX drops.
 
 \begin{keynote}
-\textbf{Neither consequence has been tested.} Both are derived from \R{63}, \R{80}, \R{65} and the 2021 ladder printout \R{26}. The scope of the mushroom and the state of the vacuum contactor after a press have not been verified on the installed units, and a printed listing is not proof of the program now running. Until an end-to-end test is recorded, the mushroom must be treated as a firing inhibit and permit break, \textbf{not} as an AC disconnect or an isolation device.\openitem{O12}
+\textbf{Neither consequence has been tested.} Both are derived from \R{63}, \R{80}, \R{65} and the 2021 ladder printout \R{26}. The scope of the mushroom and the state of the vacuum contactor after a press have not been verified on the installed units, and a printed listing is not proof of the program now running. Until an end-to-end test is recorded, the mushroom must be treated as a firing inhibit and permit break, \textbf{not} as an AC disconnect or an isolation device.\openitem{O11}
 \end{keynote}
 
 
@@ -1195,7 +1213,7 @@ with a source resistance of 882.4 Ω. The feedforward therefore sets the operati
 
 \subsection{Terminal Strips and External Connections}\label{sec:terminal-strips}
 
-The inventory below follows the source drawings and analysis; incomplete or conflicting terminal assignments still require a field record.\openitem{O4}\openitem{O9}
+The inventory below follows the source drawings and analysis; incomplete or conflicting terminal assignments still require a field record.\openitem{O3}\openitem{O8}
 
 Internal wiring in the controller enclosure is organized on numbered terminal strips (reference drawing WD-730-790-02-C6 \R{15}). The strips identified in the original PPS wiring trace \R{25} are:
 
@@ -1219,7 +1237,7 @@ TS-8 & PPS permits --- PPS 1 on terminal 1, PPS 2 on terminal 3, common on termi
 
 \subsubsection{What the four lamps are wired to}
 
-PPS pin pairing and readback excitation need verification against installed behavior.\openitem{O6}
+PPS pin pairing and readback excitation need verification against installed behavior.\openitem{O5}
 
 Each lamp is a bare LED with its anode on one PPS circuit node and its cathode on the system common (GOB pin \textbf{H} --- TS-5 1/8, TS-2 2/4/6, TS-6 2). The anode assignments below are given identically by the drawing \R{63} and by the terminal-by-terminal trace \R{25}, down to the cable color code.
 
@@ -1245,7 +1263,7 @@ The table gives the intended interpretation of the circuit nodes. A dark lamp ca
 The adjacent local control panel has a separate \textbf{PPS PERMIT} lamp on the PPS 2 line (GOB pin G), in series with the emergency-off contact \R{63}. It does not indicate both PPS channels. The PPS 1 line also enters the local emergency-off/key-switch circuit \R{25}.
 
 \begin{keynote}
-\textbf{Verification limits}: TS-1 is unidentified; TS-5 has conflicting source labels. The TS-5/TS-6/TS-8 trace in \R{25} needs verification against the installed system. See \hyperref[sec:open-items]{Open Items}, O1, O4, O6 and O9.
+\textbf{Verification limits}: TS-1 is unidentified; TS-5 has conflicting source labels. The TS-5/TS-6/TS-8 trace in \R{25} needs verification against the installed system. See \hyperref[sec:open-items]{Open Items}, O3, O5 and O8.
 \end{keynote}
 
 
@@ -1279,7 +1297,7 @@ SIG HI is formed in \textbf{two stages}. The SLAC-designed regulator card \textb
 
 \textbf{(b) Voltage regulation dominates at the documented operating point.} The AC-current reference at J4-2 (IL1) is the Enerpro +5 V reference. With the approximately 2 V current readback in \R{72}, the current error amplifier saturates positive and does not win the minimum-select. This operating-point analysis does \emph{not} prove that it can never take control at higher current. The separate overcurrent comparator remains a protection function; its as-set threshold requires verification.
 
-\textbf{(c) AC and DC current are separate measurements.} The regulator uses rectified 300:5 input CT signals and a drawing-stated 0.5 Ω burden \R{67}, \R{70}. The Danfysik transducer separately measures cathode DC current. Confirm the burden and the Slot-9 input mapping, for which \R{72} contains conflicting prose and table entries.\openitem{O10}
+\textbf{(c) AC and DC current are separate measurements.} The regulator uses rectified 300:5 input CT signals and a drawing-stated 0.5 Ω burden \R{67}, \R{70}. The Danfysik transducer separately measures cathode DC current. Confirm the burden and the Slot-9 input mapping, for which \R{72} contains conflicting prose and table entries.\openitem{O9}
 
 \paragraph{Signal path summary}\label{signal-path-summary}
 
@@ -1476,13 +1494,13 @@ The PPS interface controls two critical safety functions: the HV vacuum contacto
 \end{keynote}
 
 \begin{keynote}
-\textbf{Pin-letter caveat}: The E--F/G--H enable and A--B/C--D readback assignments remain assumptions in \R{25}; see \hyperref[sec:open-items]{Open Items}, O6.
+\textbf{Pin-letter caveat}: The E--F/G--H enable and A--B/C--D readback assignments remain assumptions in \R{25}; see \hyperref[sec:open-items]{Open Items}, O5.
 \end{keynote}
 
 \subsection{Identified Issues}
 
-The K4/RR interpretation requires an installed-wiring check.\openitem{O1}
-The manual grounding-switch contact sense also differs between the schematic and the test-stand wiring drawing.\openitem{O2}
+WD-730-790-01-C3 \R{67} and WD-730-794-02-C0 \R{80} label coil RR ``PPS'' and coil K-4 ``RESET''. The two labels are swapped, as \R{25} found: K-4 is the PPS control relay and RR the remote reset relay \R{69}. The repository copy of WD-730-790-01-C3 carries a note (November 2026).
+The manual grounding-switch contact sense differs between the schematic and the test-stand wiring drawing.\openitem{O1}
 
 \begin{longtable}[]{@{}P{\dimexpr 0.1502\linewidth-1.333\tabcolsep\relax}P{\dimexpr 0.0967\linewidth-1.333\tabcolsep\relax}P{\dimexpr 0.7531\linewidth-1.333\tabcolsep\relax}@{}}
 \toprule\noalign{}
@@ -1494,7 +1512,7 @@ Issue & Severity & Details \\
 PLC in PPS chain & Critical & Both PPS chains route through SLC-500 PLC ladder logic \\
 PPS wiring exposed & High & PPS wires terminate on TS-5, TS-6 and TS-8 inside the HVPS controller enclosure, co-located with non-PPS wiring \\
 Ross switch PLC dependency & High & Ross switch coil is driven by a PLC 120 VAC output (Slot-2 IO8 OUT3), with no hardware PPS element in series \\
-K4/RR relay labels & Medium & \R{25} infers that the PPS/reset labels on WD-730-794-02-C0 are swapped and that K4 NO / 86 NC contacts are omitted from the MX path. Confirm the installed relay functions and issue reconciled drawings; the note explicitly leaves field verification open. \\
+K4/RR relay labels & Closed & WD-730-790-01-C3 \R{67} and WD-730-794-02-C0 \R{80} label RR ``PPS'' and K-4 ``RESET''; the labels are swapped, as \R{25} found: K-4 is the PPS control relay and RR the remote reset relay. The repository copy of WD-730-790-01-C3 carries a note (November 2026). \R{25} also notes that the drawings omit the K4 NO and 86 NC contacts in the MX path. \\
 Contactor re-close delay & Low & Because K4 removes all control power from the contactor controller, capacitor C6 must recharge before K3 can re-energize --- this is why the contactor takes several seconds to re-close after a PPS enable is restored \R{25} \\
 Hardware obsolescence & High & SLC-500 and 1746 modules are end-of-life \\
 \end{longtable}
@@ -1594,7 +1612,7 @@ The contactor and grounding-switch chains perform \textbf{complementary function
 \end{longtable}
 
 \textbf{Sequence not established here.} Because rung 0016 requires both permits, removing PPS 1 also commands the grounding-switch coil off. The sources do not support a sequence in which PPS 1 is removed, the supply is allowed to discharge, and only then PPS 2 is removed to initiate grounding. Actual contactor opening, grounding-switch closure, external PPS sequencing and access authorization require a validated end-to-end timing/logic record. No lamp or PLC bit alone proves absence of hazardous energy.
-\openitem{O11}
+\openitem{O10}
 
 \textbf{Dependency Comparison}:
 
@@ -1653,7 +1671,7 @@ The RF MPS monitors and protects against:
 \end{itemize}
 
 The original sources distinguish the following interfaces; they do \textbf{not} establish that one RF MPS relay drives three simultaneous, independent shutdown paths:
-\openitem{O3}
+\openitem{O2}
 
 \begin{itemize}
 \tightlist
@@ -1662,7 +1680,7 @@ The original sources distinguish the following interfaces; they do \textbf{not} 
 \item
   \textbf{Remote I/O}: Status and permits are read by the IOC for alarms and sequencing. A serial status bit is not a direct hardware RF cutoff, and no fixed 10 ms response is established \R{60}.
 \item
-  \textbf{SPEAR MPS shutoff interface}: The VXI interlock module asserts \texttt{RF\_FAULT}, which directly inhibits RFP drive without waiting for EPICS. Its slot is 5 in the archived four-cavity configuration; \R{53} describes the earlier slot-6 implementation \R{60}.
+  \textbf{SPEAR MPS shutoff interface}: The VXI interlock module asserts \texttt{RF\_FAULT}, which directly inhibits RFP drive without waiting for EPICS. Its slot is 5 in the archived four-cavity configuration; \R{53} describes the earlier slot-6 implementation \R{60}. Its J3 output also reaches the AIM as the External MPS channel (\cref{sec:mps-shutoff}).
 \end{itemize}
 
 \begin{keynote}
@@ -1703,10 +1721,12 @@ Two B132 units carry the hardwired protection signals between the VXI crate, the
 \item
   The \textbf{Fast Interlock Chassis 340-308} is the trip-decision element described below. Its connector J15 is cabled to J3 of the AIM (VXI slot~12), and eight fibers link it to the RF Local Display Panel: six carry the AIM's commands (station online request, filament and focus request, HVPS on request, VXI beam abort, filament timeout bypass and reset) and two return the PLC-5's AB summary and AB heartbeat \R{79}, \R{81}.
 \item
-  The \textbf{RF Local Display Panel 340-310} (rack B132-12; also referred to as the Local Control Chassis) displays the station status and carries the station online/offline and local/remote key switches. Two 25-pin connectors, J2 and J3, wire it to cross-connect block X530 in rack B132-14 and on to the PLC-5 (WD-340-330-02 in \R{21}). It terminates the three HVPS fibers, which run to the trigger interconnect boards of the HVPS controller in B118 (WD-340-330-29 in \R{21}; \R{82}, \R{83}): SCR ENABLE (lit to enable the phase-control triggers; while it is dark only B+ and B- keep firing) to the right-side board, KLYSTRON CROWBAR (lit for no crowbar) to the left-side board, and STATUS from the left-side board, which the panel receives as the HVPS beam abort.
+  The \textbf{RF Local Display Panel 340-310} (rack B132-12; also referred to as the Local Control Chassis; \cref{fig:local-display-panel}) displays the station status and carries the station online/offline (STATION LOCK-OUT) and local/remote (STATION MODE) key switches (\cref{fig:local-display-panel-front}). On its rear (\cref{fig:local-display-panel-rear}), two 25-pin connectors, J2 (SYSTEM I/O, female) and J3 (FROM A/B INPUTS, male) \R{84}, wire it to cross-connect block X530 in rack B132-14 and on to the PLC-5 (WD-340-330-02 in \R{21}); beside them are the eleven fibers, the beam-abort connector J6, the fuse F1 and the AC inlet J1. It terminates the three HVPS fibers, which run to the trigger interconnect boards of the HVPS controller in B118 (WD-340-330-29 in \R{21}; \R{82}, \R{83}): SCR ENABLE (lit to enable the phase-control triggers; while it is dark only B+ and B- keep firing) to the right-side board, KLYSTRON CROWBAR (lit for no crowbar) to the left-side board, and STATUS from the left-side board, which the panel receives as the HVPS beam abort.
 \item
-  A programmable logic device on the panel (GAL22V10) forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort from the HVPS on request, the VXI and HVPS beam aborts, the station online key switch and four lines from the PLC-5: the main and bucking solenoid interlocks, which the PLC-5 repeats on its outputs 032 and 033 from the supplies' dry contacts on its inputs 025 and 026 \R{82}, and the waveguide pressure and collector summaries. Two flip-flops latch the beam abort and the crowbar until reset. The beam abort leaves on a rear-panel BNC connector (J6), made for the PEP-II beam-abort system \R{10}; at SPEAR3 J6 is not cabled (checked November 2026), and the SPEAR MPS takes no status from the RF in hardware. The equations of the logic are not documented.\openitem{O7}
+  A programmable logic device on the panel (GAL22V10) forms SCR ENABLE, KLYSTRON CROWBAR and the beam abort from the HVPS on request, the VXI and HVPS beam aborts, the station online key switch and four lines from the PLC-5: the main and bucking solenoid interlocks, which the PLC-5 repeats on its outputs 032 and 033 from the supplies' dry contacts on its inputs 025 and 026 \R{82}, and the waveguide pressure and collector summaries. Two flip-flops latch the beam abort and the crowbar until reset. The beam abort leaves on a rear-panel BNC connector (J6), made for the PEP-II beam-abort system \R{10}; at SPEAR3 J6 is not cabled (checked November 2026), and the SPEAR MPS takes no status from the RF in hardware. The equations of the logic are not documented.\openitem{O6}
 \end{itemize}
+
+\tallpairfig{rf_local_display_panel_front.jpg}{Front}{fig:local-display-panel-front}{rf_local_display_panel_rear.jpg}{Rear}{fig:local-display-panel-rear}{RF Local Display Panel 340-310 (serial 12) in rack B132-12. (a)~Front: the station mimic and summary lamps, among them the five SPARE lamps, all lit; the STATION LOCK-OUT (online/offline) and STATION MODE (local/remote) key switches; the HVPS voltage and current monitor connectors. (b)~Rear: the eleven orange fibers, the beam-abort BNC J6 (not cabled), J2 (SYSTEM I/O) and J3 (FROM A/B INPUTS) with their cables, the fuse F1 (1/2~A) and the AC inlet J1. The chassis above it is a spare Fast Interlock Chassis 340-307, a slightly different version of the 340-308 in service, not in use.}{fig:local-display-panel}
 
 \noindent The Fast Interlock Chassis receives and summarizes hardware interlock signals; its installed sensor mappings, masks and hardware response require proof-test records:
 
@@ -1739,9 +1759,11 @@ The Fast Interlock Chassis reports summarized interlock status to the VXI crate 
 \caption{Protection interfaces and supervisory actions. The Layer~1 fibers run between the RF Local Display Panel in B132 and the HVPS controller in B118 (\cref{sec:interlock-chassis}); the klystron-arc and transformer-arc triggers act on the controller's trigger boards (\cref{sec:arc-triggers}).}\label{fig:trip-chain}
 \end{figure}
 
-\Cref{fig:interlock-chassis-front} shows the front panel of the Fast Interlock Chassis that implements the hardware layer.
+\Cref{fig:interlock-chassis-front,fig:interlock-chassis-rear} show the front and rear panels of the Fast Interlock Chassis that implements the hardware layer.
 
 \widefig{interlocak_chassis_front.jpg}{Fast Interlock Chassis 340-308 in B132: lamps for the six AIM commands and the twelve arc trip tests, channel monitor points, the spare-fault input and the J16 detected-klystron-power monitor output, which is not cabled.}{fig:interlock-chassis-front}
+
+\widefig{interlocak_chassis_rear.jpg}{Rear of the Fast Interlock Chassis 340-308 in rack B132-11: the blue arc-detector fibers on the transmit (TX CH.1 to 12, J33 to J44) and receive (RX CH.1 to 12, J17 to J28) connectors; the six orange command fibers to the RF Local Display Panel (J45 to J50: FILAMENT ON, SOLENOID ON, HVPS ON, BEAM ABORT, FILAMENT TIMEOUT, FAULT RESET) and the two from it (J29 HEARTBEAT, J30 A/B SUMMARY); at the right, the RF amplitude output J31 and the RF input J32.}{fig:interlock-chassis-rear}
 
 
 \FloatBarrier\clearpage
@@ -1924,7 +1946,7 @@ Maximum move per cycle & 1 mm in the source comment & \texttt{INPD}; live restor
 
 \subsection{RF Signal Monitoring}
 
-The 24 logical IQA inputs are listed in \cref{sec:iqa-map}. Their physical distribution is described in \cref{sec:waveguide}; the installed connector mapping remains open (O5). Upgrade assignments belong to Doc 0.
+The 24 logical IQA inputs are listed in \cref{sec:iqa-map}. Their physical distribution is described in \cref{sec:waveguide}; the installed connector mapping remains open (O4). Upgrade assignments belong to Doc 0.
 
 \subsection{HVPS Monitoring}
 
@@ -1993,10 +2015,10 @@ PV & Significance \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\texttt{\{STN\}:STN:AIM:ARCLTDSTT} & Latched arc-channel mask. Decode using the installed sensor-to-channel map; zero does not exclude a missed, reset or unavailable arc indication. \\
+\texttt{\{STN\}:STN:AIM:ARCLTDSTT} & Latched arc-channel word: an enabled channel reads 1 while clear and 0 once latched, so \texttt{0x71FB} means nothing is latched with the enables of 11 November 2026 (bit 8 is External MPS). Decode using the installed sensor-to-channel map; a clear word does not exclude a missed, reset or unavailable arc indication. \\
 \texttt{\{STN\}:HVPSXFORM:ARC:LTCH} & HV transformer internal arc \\
 \texttt{\{STN\}:HVPS:CROWBAR:LTCH} & Crowbar fired \\
-\texttt{\{STN\}:STN:MPS:LTCH} & RF MPS PLC trip \\
+\texttt{\{STN\}:STN:MPS:LTCH} & External MPS: the SPEAR MPS or orbit-interlock permit was lost (MPS Shutoff module, \cref{sec:mps-shutoff}) \\
 \texttt{\{STN\}:HVPSSTN:SUMY:LTCH} & Aggregated HVPS fault summary \\
 \texttt{\{STN\}:STN:FAULT:NUM} & Fault file slot number (1--15) --- use to locate \fpath{/dat/FAULT*_N} \\
 \texttt{\{STN\}:STN:FAULT:TIME1} \ldots{} \texttt{TIME15} & Timestamp of each stored fault event \\
@@ -2130,7 +2152,7 @@ Ref & Document & Repository Path \\
 \RDEF{4} & LLRF9 Commissioning Tests (J. Sebek, 2021) --- source of the \textasciitilde712 kV/cavity operating gap voltage & \fpath{llrf/tests/llrf9Tests.pdf}, \fpath{llrf/tests/llrf9Tests.tex} \\
 \RDEF{5} & Project Physical Design Report R2 (28 April 2026); current companion Doc 0 is R4 (5 November 2026) & \fpath{Designs/docx/SPEAR3_LLRF_PDR_R2.docx}; \fpath{Designs/tex/doc0-system-design/0_system_design_report.pdf} \\
 \RDEF{7} & PEP-II RF System Description (Schwarz, PS-340-330-51-R0) --- cavity R\_s, Q\_0, β & \fpath{llrf/documentation/legacyArchitecture/ps3403305100.pdf} \\
-\RDEF{8} & LLRF Feedback Loop Description (Schwarz, PS-340-330-52-R0) & \fpath{llrf/documentation/legacyArchitecture/ps3403305200.pdf} \\
+\RDEF{8} & LLRF Feedback Loop Description (Schwarz, PS-340-330-52-R0) & \fpath{llrf/documentation/legacyArchitecture/feedbackLoopDescriptionps3403305200.pdf} \\
 \RDEF{9} & HVPS System Schematic (top-level) & \fpath{hvps/documentation/schematics/sd7307900101.pdf} \\
 \RDEF{10} & LLRF Block Diagram (HER configuration) & \fpath{llrf/documentation/legacyArchitecture/bd3403300000.pdf} \\
 \RDEF{11} & LLRF Block Diagram (alternative view) & \fpath{llrf/documentation/legacyArchitecture/bd3403300100.pdf} \\
@@ -2167,14 +2189,14 @@ Ref & Document & Repository Path \\
 \RDEF{54} & Ross, W., \emph{PEP-II/SPEAR3 LLRF System Clock Module Revision 2}, SLAC ESD Engineering Document, 1 September 2001 & Cited as reference 3 of \R{53}; document not held in this repository \\
 \RDEF{56} & Sebek, J., \emph{SPEAR3 High Voltage Power Supply Hazards}. Source of operating snapshots and discharge models; Doc L corrects its T0-rating inference and output-energy sum & \fpath{hvps/documentation/procedures/spear3HvpsHazards.tex} \\
 \RDEF{58} & Sebek, J., \emph{Enerpro Phase Reference Adapter} --- the upgrade adapter design (576 kΩ / 200 kΩ into FCOG1200 J7) & \fpath{hvps/controls/enerpro/enerproPhaseReferenceAdapter.docx} \\
-\RDEF{60} & Legacy IOC boot and Remote I/O configuration & \fpath{spear-rf-code-legacy/iocBoot/b132-iocrf/st.cmd,v}, \texttt{config.ab,v}; \fpath{spear-rf-code-legacy/rfApp/DbIoc/srf1.substitutions,v}; \fpath{spear-rf-code-legacy/rfApp/Db/rf_ab_4CV.substitutions,v}; \fpath{spear-rf-code-legacy/rfApp/src/db/p2RfAimDef.h,v}; \fpath{spear-rf-code-legacy/allenBradley/documentation/allenBradley.html,v}; \fpath{spear-rf-code-legacy/rfApp/Db/rf_digital_All.substitutions,v} \\
+\RDEF{60} & Legacy IOC boot and Remote I/O configuration & \fpath{spear-rf-code-legacy/iocBoot/b132-iocrf/st.cmd,v}, \texttt{config.ab,v}; \fpath{spear-rf-code-legacy/rfApp/DbIoc/srf1.substitutions,v}; \fpath{spear-rf-code-legacy/rfApp/Db/rf_ab_4CV.substitutions,v}; \fpath{spear-rf-code-legacy/rfApp/src/db/p2RfAimDef.h,v}; \fpath{spear-rf-code-legacy/rfApp/src/db/devP2RfAim.c,v}; \fpath{spear-rf-code-legacy/allenBradley/documentation/allenBradley.html,v}; \fpath{spear-rf-code-legacy/rfApp/Db/rf_digital_All.substitutions,v} \\
 \RDEF{61} & SCR trigger, interlock and monitor board schematics (SD-730-793 series) --- verified by direct reading of the scanned drawings, September 2026 & \fpath{hvps/documentation/schematics/sd7307930304.pdf}, \texttt{sd7307930402.pdf}, \texttt{sd7307930702.pdf}, \texttt{sd7307930801.pdf}, \texttt{sd7307931203.pdf}, \texttt{sd7307931301.pdf} \\
 \RDEF{62} & Grounding Tank schematic, SD-730-790-05-C1 (R. Cassel, 2/13/03) --- verified by direct reading, September 2026 & \fpath{hvps/documentation/schematics/sd7307900501.pdf} \\
 \RDEF{63} & \textbf{Trigger Enclosure Wiring, WD-730-790-02-C6} (R. Cassel / W. Gorecki / S. Lowe; revisions C1--C6, 06/03 to 01/07) --- master wiring diagram for the B118 trigger enclosure; verified by direct reading, September 2026 & \fpath{hvps/documentation/wiringDiagrams/wd7307900206.pdf} \\
 \RDEF{64} & Grounding Tank Wiring, WD-730-794-06-C0 (R. Cassel / W. Gorecki 03/03/2000 / S. Lowe 4/3/00) --- \textbf{test stand} configuration, no revisions recorded; verified by direct reading, September 2026 & \fpath{hvps/documentation/wiringDiagrams/wd7307940600.pdf} \\
 \RDEF{65} & Vacuum Contactor Controller Electrical Schematic, GP-439-704-02-C1 (redrawn to CAD per as-built, 09/25/06) --- verified by direct reading, September 2026 & \fpath{hvps/documentation/switchgear/gp4397040201.pdf} \\
 \RDEF{66} & Ross Engineering 713203 E-1, High Speed Vacuum Contactor Energy Storage Closing \& Holding System Schematic (driver HCA-1-A P/N 820360; contactor HQ3 P/N 813203; last revision E, 2-2-83) --- verified by direct reading, September 2026 & \fpath{hvps/documentation/switchgear/rossEngr713203.pdf} \\
-\RDEF{67} & \textbf{Interconnection Wiring, WD-730-790-01-C3} (R. Cassel / W. Gorecki 03/02/2000 / S. Lowe; revisions C1--C3, 08/03 to 10/03) --- system-level interconnection between the B118 Hoffman Box, Contactor Disconnect and Termination Tank; verified by direct reading, September 2026 & \fpath{hvps/documentation/wiringDiagrams/wd7307900103.pdf} \\
+\RDEF{67} & \textbf{Interconnection Wiring, WD-730-790-01-C3} (R. Cassel / W. Gorecki 03/02/2000 / S. Lowe; revisions C1--C3, 08/03 to 10/03) --- system-level interconnection between the B118 Hoffman Box, Contactor Disconnect and Termination Tank; verified by direct reading, September 2026; the repository copy notes that the K-4 and RR coil labels are swapped (November 2026) & \fpath{hvps/documentation/wiringDiagrams/wd7307900103.pdf} \\
 \RDEF{68} & \textbf{12.47 kV Vacuum Contactor Controller, Electrical Connection Wiring Diagram, ID-308-801-06-C1} (redrawn to CAD and resized D→E, revised per as-built, 09/25/06; supersedes ID-308-801-06 R0) --- the connection-wiring companion to \R{65}; verified by direct reading, September 2026 & \fpath{hvps/documentation/switchgear/id3088010601.pdf} \\
 \RDEF{69} & \textbf{12.47 kV Outdoor Metal-Enclosed Combination Vacuum Contactor Controller --- Schematic Diagram \& General Arrangement, GP-308-500-01-R3} (Lawrence Berkeley Laboratory; A. Tseng / L. Johnson, 6-23-77, revisions 1--3) --- the original PEP-era design drawing; authoritative source for the relay device legend; verified by direct reading, September 2026 & \fpath{hvps/documentation/switchgear/gp3085000103.pdf} \\
 \RDEF{70} & \textbf{Klystron Power Supply Electrical Schematic, EI-730-790-00-C0 / NWL \# 39308} (NWL Transformers, Bordentown NJ; SLAC issue R. Cassel / W. Gorecki 12/17/02 / J. Olszewski 1/21/03; NWL revisions A--F, 1996--2001) --- the \textbf{transformer manufacturer's own schematic}; authoritative for transformer ratings, monitor windings and oil/pressure protection setpoints; verified by direct reading, September 2026 & \fpath{hvps/documentation/wiringDiagrams/ei7307900000.pdf} \\
@@ -2193,6 +2215,8 @@ Ref & Document & Repository Path \\
 \RDEF{85} & Klystron filament control chassis schematic SD-340-311-00 Rev E2 (``PEP II RF Klystron Filament Schematic'', P.~Corredoura, 1996) --- solid-state relay, motor-driven variac, voltmeter and ammeter with a 10:1 current transformer, control connector J1 & \fpath{llrf/documentation/filamentHeater/sd3403110002.pdf} \\
 \RDEF{86} & Sebek, J., \emph{SPEAR3 RF station operation} --- station modes, turn-on sequence and tuner control & \fpath{llrf/documentation/LLRFOperation_jims.docx} \\
 \RDEF{87} & Sebek, J., \emph{RF system MPS requirements} --- the five sources that disable the HVPS triggers, among them the klystron-arc and transformer-arc triggers, and the protection of the klystron and the cavities & \fpath{hvps/architecture/designNotes/RFSystemMPSRequirements.docx} \\
+\RDEF{88} & Legacy SPEAR3 station database: the AIM arc channels, among them External MPS on the spare channel (\fpath{rf_stn_All.substitutions,v}, \fpath{rf_stn_4CVAll.substitutions,v}, \fpath{rf_interlock_arc.db,v}), and the SPEAR3 station MPS summary (\fpath{rf_sumy_stn_spr.db,v}) & \fpath{spear-rf-code-legacy/rfApp/Db/} \\
+\RDEF{89} & Sebek, J., \emph{LLRF Interface Chassis specification} --- the SPEAR MPS and the orbit interlock each give the LLRF a 24~V permit & \fpath{llrf/architecture/llrfInterfaceChassis.docx} \\
 \end{longtable}
 
 \clearpage
@@ -2232,7 +2256,7 @@ Abbreviation & Definition \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-AIM & Arc/Interlock Module (VXI slot 12, SLAC drawing 340-307) \\
+AIM & Arc/Interlock Module (VXI slot 12, schematic SD-340-309-01) \\
 CLK & Clock/RF Distribution module (VXI slot 2) \\
 DCM & Direct Communication Module --- an Allen-Bradley \textbf{Remote I/O adapter} (1747-DCM for SLC-500, 1771-DCM for PLC-5) \\
 Fast IC & Fast Interlock Chassis (SLAC drawing 340-308) \\

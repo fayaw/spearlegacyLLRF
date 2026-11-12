@@ -14,8 +14,8 @@
        $\rightarrow$ klystron output $=0$ \quad\emph{(HVPS still on)}},
   2/{RF physics}/rf/{$P_\text{collector}=P_\text{cathode}$ ---
        all cathode power now lands on the collector},
-  3/{RF protection}/plc/{RF MPS PLC: \texttt{KLYSCOLLPLC:POWER} exceeds the trip
-       limit $\rightarrow$ collector summary drops $\rightarrow$ \textbf{Path A}},
+  3/{RF protection}/plc/{RF MPS PLC: collector power above \qty{1200}{\kilo\watt}
+       for \qty{0.70}{\second} $\rightarrow$ collector summary drops $\rightarrow$ \textbf{Path A}},
   4/{Hardware interlock}/pwr/{RF Local Display Panel logic $\rightarrow$ SCR ENABLE
        removed $\rightarrow$ \textbf{HVPS killed}}}{%
     \pgfmathsetmacro\y{-\i*20}
@@ -23,7 +23,7 @@
     \node[lbl,anchor=east,align=right,text width=38mm] at (\xB-3,\y) {\layer\ layer};
   }
 
-\foreach \i/\dt in {0/{}, 1/{}, 2/{$\approx\qty{10}{\milli\second}$}, 3/{}}{%
+\foreach \i/\dt in {0/{}, 1/{}, 2/{\qty{0.70}{\second} timer}, 3/{}}{%
   \pgfmathsetmacro\ya{-\i*20}
   \draw[sig] (\xB+\wB/2,\ya-7) -- node[right,tag,xshift=1mm]{\dt} (\xB+\wB/2,\ya-13);
 }
@@ -31,5 +31,6 @@
 \node[draw=cPwr!50,fill=cPwr!5,rounded corners=2pt,inner sep=4pt,
       anchor=north west,text width=\wB mm] at (\xB,-90)
   {Elapsed from the original permit withdrawal to the hardware HVPS kill:
-   $\approx\qty{30}{\milli\second}$.};
+   $\approx\qty{0.7}{\second}$, if the collector power stays above the limit
+   that long.};
 \end{tikzpicture}

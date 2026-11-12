@@ -40,7 +40,7 @@ The group `3403` corresponds to the PEP-II RF/LLRF system documentation.
 | 3 | `blockDiagrambd3403290100-1.pdf` | Block Diagram | 1 | 100 KB | **PEP-II Low Level RF block diagram** — additional LLRF block diagram (note: drawing group 3290 vs 3300), shows RF modulator, amplifier chain, system I/Q, longitudinal feedback interface | ★★☆ |
 | 4 | `feedbackLoopDescriptionps3403305200.pdf` | Process Spec | 8 | 812 KB | **LLRF Feedback Loop Description (PS-340-330-52-R0)** — CRITICAL document describing all feedback loops: Direct, Comb, Tuner, HVPS, DAC, Ripple, Gap FF, LFB Woofer, Optimized Station Phasing. Includes block diagrams. Reconstructed in `01_FEEDBACK_LOOP_ARCHITECTURE.md` | ★★★ |
 | 5 | `ps3403305100.pdf` | Process Spec | 11 | 597 KB | **PEP-II RF System Description (PS-340-330-51-R0)** — comprehensive system overview: HER (5 stations, 4 cav/station) and LER (2 stations, 2 cav/station) layouts, nominal parameter table (shunt impedance, Q values, beam loading), station cross-section drawings, plan views of Regions 4/8/12 | ★★★ |
-| 6 | `ps3403305200.pdf` | Process Spec | 8 | 813 KB | **LLRF Feedback Loop Description (PS-340-330-52-R0)** — identical content to #4 (duplicate copy) | ★★★ |
+| 6 | `ps3403305200.pdf` | Process Spec | 8 | 813 KB | **LLRF Feedback Loop Description (PS-340-330-52-R0)** — identical content to #4 (duplicate copy; removed from the repository, November 2026) | ★★★ |
 | 7 | `ps3403305300.pdf` | Oper. Procedure | 4 | 184 KB | **RF Cavity Low Power Calibration Procedure (PS-340-330-53-R0)** — cold cavity measurement: sampling loop installation, network analyzer setup, coupling measurement (nominal 99.6 dB), resonance curve fitting | ★★☆ |
 | 8 | `ps3403305400.pdf` | Oper. Procedure | 2 | 114 KB | **RF Station Safety Certification Check-Off List (PS-340-330-54-R0)** — waveguide flange torque test (>25 ft-lbs), interlock test, RF non-ionizing radiation survey checklist | ★☆☆ |
 | 9 | `ps3403305503.pdf` | Oper. Procedure | 4 | 220 KB | **RF Station Safety Survey (PS-340-330-55-R3)** — Rev 3 safety survey form for RF station klystron department/engineering sign-offs | ★☆☆ |
@@ -60,7 +60,7 @@ The group `3403` corresponds to the PEP-II RF/LLRF system documentation.
 | Design Specifications | 2 | `legacy-pdf-transcriptions/design-specifications/` |
 | Operational Procedures | 9 | `legacy-pdf-transcriptions/operational-procedures/` |
 | Block Diagrams | 3 | `legacy-pdf-transcriptions/block-diagrams/` |
-| Duplicate (not transcribed) | 1 | `ps3403305200.pdf` = identical to `feedbackLoopDescriptionps3403305200.pdf` |
+| Duplicate (not transcribed) | 1 | `ps3403305200.pdf` = identical to `feedbackLoopDescriptionps3403305200.pdf`; removed November 2026 |
 
 **Key transcription files for cross-referencing**:
 - `PS-340-330-51_RF_System_Description.md` — Complete parameter tables, station layouts, cooling systems

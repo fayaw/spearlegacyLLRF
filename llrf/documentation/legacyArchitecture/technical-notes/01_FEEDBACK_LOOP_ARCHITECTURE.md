@@ -899,7 +899,7 @@ This model validated the LLRF design and explored stability limits at higher cur
 | PDF File | Pages | Verified Content (OCR-confirmed) |
 |----------|-------|----------------------------------|
 | `feedbackLoopDescriptionps3403305200.pdf` | 8 | **LLRF Feedback Loop Description (PS-340-330-52-R0)** — CRITICAL: describes all loops (Direct, Comb, Tuner, HVPS, DAC, Ripple, Gap FF, LFB Woofer). This document is the primary source reconstructed in this technical note |
-| `ps3403305200.pdf` | 8 | Same as above (duplicate copy) |
+| `ps3403305200.pdf` | 8 | Same as above (duplicate copy; removed from the repository, November 2026) |
 | `ps3403305100.pdf` | 11 | **RF System Description (PS-340-330-51-R0)** — system overview, parameter tables, station layouts |
 | `ps3403305300.pdf` | 4 | **Cavity Low Power Calibration Procedure (PS-340-330-53-R0)** — cold cavity measurement |
 | `ps3403305400.pdf` | 2 | **Safety Certification Check-Off List (PS-340-330-54-R0)** — waveguide flange torque, interlock test |

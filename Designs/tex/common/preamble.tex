@@ -70,6 +70,13 @@
 \usepackage{float}
 \usepackage[font=small,labelfont=bf,width=0.92\linewidth]{caption}
 \usepackage{comment}
+% longtable* (from ltcaption, loaded by caption) is for tables without a caption,
+% but longtable still steps the table counter.  Give it a private anchor and take
+% the number back, so the numbered tables run 1, 2, 3 and their links are unique.
+\makeatletter
+\AddToHook{env/longtable*/begin}{\def\theHtable{nocap.\arabic{LT@tables}}}
+\AddToHook{env/longtable*/after}{\addtocounter{table}{-1}}
+\makeatother
 
 % A figure must not drift out of the section it belongs to.  With 47 floats
 % LaTeX will otherwise push them pages away from the text that discusses them.

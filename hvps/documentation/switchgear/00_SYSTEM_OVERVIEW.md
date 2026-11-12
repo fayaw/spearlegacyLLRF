@@ -32,9 +32,9 @@ This document provides a comprehensive overview of the SPEAR3 High Voltage Power
 | [`gp3085000103.pdf`](gp3085000103.pdf) | **GP-308-500-01-R3** — Lawrence Berkeley Laboratory, A. Tseng / L. Johnson, 6-23-77. The **original PEP-era design drawing**. Authoritative for the **relay legend** (27, MX, IP, RR, TX, BR, 50-51, 01/LT, M), the contactor rating, and the blocking-relay design intent | [`technical_notes/TN_gp3085000103_SwitchgearSchematicAndArrangement.md`](technical_notes/TN_gp3085000103_SwitchgearSchematicAndArrangement.md) |
 | [`gp4397040201.pdf`](gp4397040201.pdf) | **GP-439-704-02-C1** — SLAC as-built schematic, redrawn to CAD 09/25/06. Contains the **sequence of operation** and the **PPS (CONTACTOR) = TB3-22/23/24** wire-name table | [`technical_notes/TN_gp4397040201_VacContSchematicDiagram.md`](technical_notes/TN_gp4397040201_VacContSchematicDiagram.md) |
 | [`id3088010601.pdf`](id3088010601.pdf) | **ID-308-801-06-C1** — as-built connection wiring, the companion to GP-439-704-02. Supplies the middle link in the PPS readback trace | [`technical_notes/TN_id3088010601_ConnectionWiringDiagram.md`](technical_notes/TN_id3088010601_ConnectionWiringDiagram.md) |
-| [`rossEngr713203.pdf`](rossEngr713203.pdf) | **Ross Engineering 713203 E-1** — HCA-1-A driver (P/N 820360) and HQ3 contactor (P/N 813203). **300–400 V DC stored energy**; 5 s door dump; 5 min manual wait | [`technical_notes/TN_DOC041421_RossEngr713203_SystemSchematic.md`](technical_notes/TN_DOC041421_RossEngr713203_SystemSchematic.md) |
+| [`rossEngr713203.pdf`](rossEngr713203.pdf) | **Ross Engineering 713203 E-1** — HCA-1-A driver (P/N 820360) and HQ3 contactor (P/N 813203). **300–400 V DC stored energy**; 5 s door dump; 5 min manual wait | [`pps/diagrams/02_rossEngr713203_vacuum_contactor_driver.md`](../../../pps/diagrams/02_rossEngr713203_vacuum_contactor_driver.md) |
 
-> `DOC041421-04142021114320.pdf` and `rossEngr713203.pdf` are the same size (69,376 bytes) and appear to be **the same document under two names**.
+> `DOC041421-04142021114320.pdf` was the same scan as `rossEngr713203.pdf` under the scanner's file name (byte-identical); it was removed in November 2026, with the technical note named after it.
 >
 > The `.docx` files in `technical_notes/` are conversions **of** their same-named `.md` files, not independent originals. The only sources are the PDFs above.
 
@@ -720,7 +720,6 @@ Located in this directory (`hvps/documentation/switchgear/technical_notes/`):
 
 | Document | Content | Key Information |
 |----------|---------|-----------------|
-| `TN_DOC041421_RossEngr713203_SystemSchematic.md` | Ross Engineering energy storage system | HCA-1-A panel, capacitor charging, safety interlocks |
 | `TN_gp3085000103_SwitchgearSchematicAndArrangement.md` | 12.47 kV switchgear overview | Physical arrangement, protection relays, CT connections |
 | `TN_gp4397040201_VacContSchematicDiagram.md` | Detailed electrical schematic | Complete circuit logic, 9-step operation sequence |
 | `TN_id3088010601_ConnectionWiringDiagram.md` | Physical wiring connections | Terminal blocks, wire routing, cabinet layout |

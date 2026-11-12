@@ -1,0 +1,433 @@
+% !TeX root = W_station_wiring_reference.tex
+% Body of Doc W.  The tables in generated/ are written by scripts/docw-gen.js
+% from the files in data/: edit the data, never the generated files.
+
+% ===========================================================================
+\section*{Revision History}
+\markboth{Revision History}{Revision History}
+\addcontentsline{toc}{section}{Revision History}\label{revision-history}
+
+\begin{longtable*}[c]{@{}Q{\cw{0.10}{1.5}}Q{\cw{0.14}{1.5}}Q{\cw{0.18}{1.5}}Q{\cw{0.58}{1.5}}@{}}
+\toprule
+Revision & Date & Scope of Change & Summary \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+\textbf{R0} & 2026-11-11 & Draft for review & Initial issue. The legacy station:
+its units by building and rack, the links between the buildings, a register of the
+\WDrawings{} drawings in the repository, each read and given a final status, with
+what each shows and the documents that cite it, \WErrata{} errata of the drawings,
+the pin tables of the RF Local Display Panel's J2 and J3, of the two cables between
+the Fast Interlock Chassis and the AIM, of the panel's eleven fibers and of the HVPS
+junction box in B118, the \WPLCPoints{} input and output points of the RF MPS PLC-5,
+and \WChecks{} field checks that
+gather the open wiring items of Docs~0, C, I, L and~M. The upgraded station: its
+units by integration step. \\
+\end{longtable*}
+
+% ===========================================================================
+\section{Purpose and Scope}\label{sec:purpose}
+
+The SPEAR3 RF station spreads over four places: the HVPS power sections and their
+\qty{12.47}{\kilo\volt} contactors in B514, the HVPS controllers in B118, the control
+racks, klystron and waveguide in Room~101 of B132, and the cavities in the tunnel. Its
+wiring is drawn on about a hundred original drawings, some of which disagree with each
+other or with the hardware, and the other documents of the upgrade each describe the
+part they need. This document gathers it in one place:
+\begin{itemize}
+\item the units of the station and where they stand (\cref{sec:overview});
+\item the links between the buildings and to the outside (\cref{tab:trunks});
+\item every drawing in the repository, with what is known of it (\cref{sec:register});
+\item the errors found in the drawings (\cref{sec:errata});
+\item connector pin tables, each line with its verification level
+  (\cref{sec:connections});
+\item the checks on the hardware still needed (\cref{sec:checks}).
+\end{itemize}
+
+It records the wiring, not how the station works, which is in Doc~L, nor what the new
+hardware must do, which is in Doc~C, nor the order of the changes, which is in Doc~M.
+Where another document lists the same pins it must agree with the tables here, and
+this document keeps the evidence for each line.
+
+The legacy station, as it stands at I0, is described in
+\cref{sec:overview,sec:register,sec:errata,sec:connections,sec:checks}; the upgraded
+station in \cref{sec:upgrade}, which is filled in at each step of the migration
+(Doc~M): its rule of configuration control asks that every hybrid configuration be
+recorded, and the connections are recorded here.
+
+Two scales grade what is known. A drawing has a \emph{status} (\cref{tab:status}),
+which says how far it has been read and checked; a connection has a
+\emph{verification level} (\cref{tab:levels}), which says what confirms it.
+
+\begin{longtable}[c]{@{}Q{\cw{0.16}{1.0}}Q{\cw{0.84}{1.0}}@{}}
+\caption{Status of a drawing.}\label{tab:status}\\
+\toprule
+Status & Meaning \\
+\midrule
+\endfirsthead
+\toprule
+Status & Meaning \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+verified & Read and compared with other drawings, the PLC program, the EPICS database,
+photographs or measurements of the hardware, or an account of the installed system;
+no error found. \\
+errata & Read; it has errors, listed in \cref{tab:errata}. \\
+disputed & Read; it disagrees with another drawing, and which is right is not yet
+known (\cref{tab:errata}). \\
+cited & Read for an item cited in the documents, but not compared with other
+sources. \\
+read & Read: title and content recorded, not yet compared with other sources. \\
+reference & Holds no wiring to check: a mechanical or fabrication drawing, a board
+layout, vendor data, or a design not installed in the station. \\
+PEP-II & Drawn or written for PEP-II: background for SPEAR3, not a record of the
+station; where it is known to differ, the notes say so. \\
+not read & In the repository but not yet read; its title is filled in when it is. \\
+\end{longtable}
+
+\begin{longtable}[c]{@{}Q{\cw{0.08}{1.33}}Q{\cw{0.19}{1.33}}Q{\cw{0.73}{1.33}}@{}}
+\caption{Verification level of a connection.}\label{tab:levels}\\
+\toprule
+Level & Name & Meaning \\
+\midrule
+\endfirsthead
+\toprule
+Level & Name & Meaning \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+V0 & Drawing only & Taken from one drawing, or from drawings that disagree. \\
+V1 & Sources agree & Two independent sources agree, such as two drawings, or a
+drawing and the PLC program; or their difference is explained by an erratum. \\
+V2 & Software confirms & The behavior seen in EPICS or in the running program confirms
+the line, for example a PV that follows a switch on it. \\
+V3 & Field verified & Checked on the hardware: continuity, a meter reading, or the
+label read on the cable. \\
+\end{longtable}
+
+% ===========================================================================
+\section{How the Data Are Kept}\label{sec:data}
+
+Every table from \cref{sec:overview} on is generated. The data are nine files of
+comma-separated values in the folder \fpath{data/} of this document
+(Appendix~\ref{app:files}). The build, \texttt{build.ps1 -Doc W}, first runs
+\fpath{scripts/docw-gen.js}, which reads the files, checks them and writes the tables
+into \fpath{generated/}; an error in the data stops the build. The script checks that:
+\begin{itemize}
+\item every identifier is unique: drawing number, erratum, field check, unit,
+  connector contact, and PLC-5 module and point;
+\item every status is one defined here; the errata a drawing names exist and name
+  the drawing in turn, and a drawing with the status \emph{errata} or \emph{disputed}
+  names one;
+\item every revision keeps its leading zero;
+\item every file in the register exists, and the copies of one drawing are identical
+  byte for byte, unless the notes record that they were compared page by page;
+\item every drawing file in the drawing folders of the repository is in the register,
+  so that a new file is reported until it is entered;
+\item integration steps run from I0 to I8, and verification levels from V0 to V3.
+\end{itemize}
+It also finds where each drawing is cited, by reading the source of Docs~0, C, I, L,
+M, P and T for the drawing number, including lists such as ``WD-340-330-21, -22
+and~-25'', and for the file name.
+
+Rules for the data:
+\begin{enumerate}
+\item Edit the data, never the generated tables, and use a text editor: a spreadsheet
+  program drops the leading zeros of the revisions when it saves the file.
+\item Never reuse an identifier. A closed erratum or check keeps its number; its status
+  changes and its result is recorded.
+\item Raise a connection's verification level only with the evidence recorded.
+\item When a field check is done, record the result and the date in its row, update
+  the rows it affects, and close the open items it names in the other documents at
+  their next revision.
+\item A note added to a drawing in the repository is recorded with its erratum.
+\end{enumerate}
+
+% ===========================================================================
+\section{The Legacy Station}\label{sec:overview}
+
+\Cref{fig:station-overview} shows the station by building and rack,
+\cref{tab:units-legacy} lists its units and \cref{tab:trunks} the links between the
+buildings and to the outside. The station has two HVPS units, SPEAR~1 and SPEAR~2,
+each with a power section in B514 and a controller in B118; one of them is connected
+at a time. The racks in B132 are numbered B132-11 to B132-15 from left to right, as in
+Doc~L. The cross-connects X513, X517, X518, X519 and X522, between X530 and the PLC-5
+modules and the HVPS lines, are not yet located in the racks.
+
+\begin{figure}[tbp]
+\centering
+\begin{fitpicture}
+\input{tikz/fig-station-overview}
+\end{fitpicture}
+\caption[The legacy station by building and rack.]{The legacy station (I0) by building
+and rack. Links are drawn to the building, not to the unit; the numbers refer to
+\cref{tab:trunks}, which names the unit at each end. Brown: power; green: RF; blue:
+control and monitor signals; olive: interlocks and permits, dashed where on fiber.
+Arrows show the direction of the signals, double arrows both directions.}
+\label{fig:station-overview}
+\end{figure}
+
+\input{generated/devices-legacy}
+
+\input{generated/trunks}
+
+% ===========================================================================
+\section{Drawing Register}\label{sec:register}
+
+The register lists every drawing file in the drawing folders of the repository:
+\fpath{hvps/documentation/} (schematics, stack assemblies, switchgear and wiring
+diagrams), \fpath{llrf/documentation/} (coaxial cables, filament heater, the PEP-II
+block diagrams and system descriptions, the legacy interface modules, the RF Local
+Display Panel and the RF MPS wiring diagrams) and \fpath{pps/}, and the HVPS technical
+specification in \fpath{hvps/architecture/originalDocuments/}. It holds \WDrawings{}
+drawings (\cref{tab:drawing-summary}): \WStatusList. A drawing is verified against
+another drawing, the PLC program, the EPICS database, a photograph or measurement of
+the hardware, or an account of the installed system by the RF group (F.~Wang's
+confirmation or J.~Sebek's notes); the notes say which. Where the
+repository holds more than one copy of a drawing, all are listed. The last column of
+\cref{tab:drawings} gives the documents that cite the drawing, by number or by file
+name.
+
+\input{generated/drawings-summary}
+
+\input{generated/drawings}
+
+% ===========================================================================
+\section{Errata of the Drawings}\label{sec:errata}
+
+An erratum is an error found in an original drawing, or a disagreement between two
+drawings that is not yet settled. \WErrata{} are recorded, \WErrataOpen{} of them open
+(\cref{tab:errata}). The status \emph{resolved} means the right reading is known;
+\emph{documented}, that the error is known and harmless once recorded; \emph{open},
+that a field check is needed. Where the repository copy of a drawing carries a note,
+the status column says so; ``here only'' means that no other document records the
+erratum.
+
+\input{generated/errata}
+
+% ===========================================================================
+\section{Connector Tables}\label{sec:connections}
+
+\subsection{RF Local Display Panel J2 and J3}\label{sec:panel-pins}
+
+The RF Local Display Panel 340-310 in rack B132-12 meets the RF MPS PLC-5 through two
+25-contact connectors on its rear, J2 and J3, cabled to cross-connect X530: J2 to
+terminals 1 to~25 and J3 to terminals 26 to~50. The panel schematic SD-340-311-01
+gives J2 as female and J3 as male, as does the material list ML-340-310-00. The
+tables give for each contact the labels of the schematic and of the cross-connect
+diagram WD-340-330-02, the direction, the X530 terminal, the next point on the way to
+the PLC-5, the PLC-5 point, the use the Interface Chassis makes of the line (its
+identifiers P1 to P12 and N1 to N4, Doc~C), and the verification level. The panel
+leaves service at I2, when the Interface Chassis takes over the lines it uses; the
+lines the panel only displays end there.
+
+\input{generated/conn-panel-j2}
+
+J2 is at level V1: the schematic and WD-340-330-02 give the same contact for every
+line. J3 stays at V0 (erratum E4). The two drawings number J3 as mirror images of
+each other: the schematic's contact $s$ is WD-340-330-02's contact $14-s$ on the row
+of 13 contacts and $39-s$ on the row of 12. Both give the same order of signals; they
+differ only in the end from which the contacts are numbered. The first column of
+\cref{tab:panel-j3} follows the schematic and the second gives WD-340-330-02's
+number; the X530 terminal is 25 plus WD-340-330-02's number. Field check FC1
+(\cref{tab:checks}) settles which numbering is stamped on the connector.
+
+\input{generated/conn-panel-j3}
+
+Six contacts of J3 need a remark. Four, the panel's spares 2 to~5, carry
+\qty{24}{\volt} from bus X518 at all times. Spare~1 is not spare: the program drives
+output O:030/17 onto it, the waveguide-air MPS line (erratum E8). Contact~25 is not
+connected.
+
+\subsection{Fast Interlock Chassis to AIM}\label{sec:fic-aim}
+
+Two cables join the Fast Interlock Chassis 340-308 to the AIM in VXI slot~12: a
+25-pin cable from the chassis's J15 to the AIM's J3, which carries the six commands,
+the AB summary and heartbeat, the AIM's fused supplies and twelve trip-test lines,
+and a 37-pin cable from J2 of the chassis's receiver board to the AIM's J4, which
+carries the twelve arc signals and the spare-fault line. At I2 the Interface Chassis
+takes over the chassis end of both cables (Doc~C, IC-24 and IC-27a); the AIM end stays
+until~I8.
+
+The tables are read from both ends: the Fast Interlock Chassis receiver board
+SD-340-308-02, a scan, and the AIM schematic SD-340-309-01, a CAD drawing whose wires
+were traced pin by pin from the drawing's own geometry. The two agree on every pin,
+so every line is at level V1. The chassis numbers its arc channels and trip tests
+from~1 and the AIM from~0: its PEAK\_$n$ is the AIM's ARC$\pm(n-1)$ and its
+TEST\_CH$n$ the AIM's TT$(n-1)$. On the 37-pin cable the receiver board grounds the
+negative wire of each arc pair, and it connects nothing to pins 17 to~19 and 35
+to~37, where the AIM puts its ground and its fused \qty{5}{\volt}.
+
+\input{generated/cable-j15-j3}
+
+\input{generated/cable-j2-j4}
+
+\subsection{Fibers of the RF Local Display Panel}\label{sec:fibers}
+
+Eleven fibers leave the panel (\cref{tab:fibers}): eight to and from the Fast Interlock
+Chassis, which carry the AIM's commands and return the AB summary and heartbeat, and
+three to and from the HVPS controllers in B118. The panel devices and far ends are
+those of WD-340-330-29, whose labels at the Fast Interlock Chassis end of the U13 and
+U14 fibers are swapped (erratum E1). The chassis jacks are read from its rear panel
+and, for J29 and J30, its receiver board; the HVPS jacks from the trigger interconnect
+boards SD-730-793-07 and -08. At I2 the eight Fast Interlock Chassis fibers become
+internal to the Interface Chassis, which drives the three HVPS fibers as F1 to F3
+(Doc~C).
+
+\input{generated/cable-fibers}
+
+\subsection{HVPS Junction Box in B118}\label{sec:jbox}
+
+The cables from B132 and from the cable switch tank in B514 end on a junction box
+above the SPEAR~1 controller in B118 (\cref{tab:jbox}). EI-444-636-00 draws each
+strip wired to both units; the switch-over procedure (J.~Sebek, R0, January 2023,
+\fpath{hvps/documentation/procedures/spearRfHvpsSwitchProcedureR0.docx}), which calls
+the junction box the switchbox, shows that one unit is connected at a time: the
+strips J1 to~J6 are 10-position pluggable terminal blocks which, with the three panel
+fibers and the klystron-arc BNC, are plugged into the controller in service. The table follows EI-444-636-00, which matches
+the installed system (F.~Wang, 11 November 2026); errata E16 and E17 record two
+drafting slips on its sheet~1.
+
+\input{generated/cable-jbox}
+
+\subsection{RF MPS PLC-5 Inputs and Outputs}\label{sec:plcio}
+
+The RF MPS PLC-5 reads and drives the station through \WPLCModules{} I/O modules in two
+1771 chassis, X430 and X420, in rack B132-13 (\cref{tab:plc-modules}): fourteen
+thermocouple modules and two each of analog input, digital input and digital output
+modules, each with its own wiring diagram, WD-340-330-07 to~-26.
+\Cref{tab:plcio-tc,tab:plcio-ai,tab:plcio-di,tab:plcio-do} list all \WPLCPoints{}
+points: the module terminal, the signal, the far end and the cross-connects on the way
+(\emph{Through}), and the name the software uses. That name is the EPICS record of a
+thermocouple or analog channel, read through the 1771-DCM, and the symbol of a digital
+point in the decoded PLC-5 program (\emph{Symbol}). A point is at level V1 when the drawing and the
+software agree, or when an erratum explains the difference; consecutive spare points
+are listed as one row.
+
+Two numbering rules matter. An analog channel is numbered in the order the module and
+EPICS read it, so its terminal differs: terminals 5, 10 and~15 are returns, and
+channel~9 is on terminal~11. And the drawings number some cross-connects differently:
+X519 (E7), and X530 and the panel contacts, for which the tables follow WD-340-330-02
+(E6). Reading the module drawings against the program found three more errata: two
+thermocouple modules labeled with the wrong slot (E20), five input labels one row late
+(E21) and an input drawn spare that the program reads (E22).
+
+At I4 the conversion kit puts these field-wiring arms on the ControlLogix (Doc~M), so
+each row maps a terminal to its tag; FC24 gathers the points still open. At I2 the
+Interface Chassis takes over the panel lines marked in the Chassis column (P1 to~P12,
+N3 and~N4) and drives the RF power level on analog input~2, channel~10 (N6, Doc~C).
+
+\input{generated/plc-modules}
+\input{generated/plcio-tc}
+\input{generated/plcio-ai}
+\input{generated/plcio-di}
+\input{generated/plcio-do}
+
+\subsection{Interfaces Not Tabulated in R0}\label{sec:coverage}
+
+The remaining interfaces of the legacy station are not tabulated pin by pin, each for
+the reason given; the field check named closes the gap.
+\begin{itemize}
+\item VXI Slot~5: no drawing of the MPS Shutoff module or of the wiring of the SPEAR
+  MPS and orbit permits into it has been found (FC2). Its J3 output reaches the AIM
+  through the SPARE FAULT input of the Fast Interlock Chassis (\cref{tab:cable-j2},
+  pin~34).
+\item The arc-detector fibers of the Fast Interlock Chassis (receivers J17 to~J28,
+  transmitters J33 to~J44): which detectors feed which channels is not recorded
+  (FC5); the fibers move to the ARC4 at~I1. The drawing WD-340-330-30 is for PEP-II.
+\item The detector of the Fast Interlock Chassis: its RF input J32 and the level and
+  transfer curve of its output J31 (FC4); the PLC-5 end of that output is analog
+  input~2, channel~10 (\cref{tab:plcio-ai}).
+\item The terminal strips TS-1 to~TS-8 inside the HVPS controllers: the drawings
+  disagree and a field survey is needed (FC9, FC10).
+\item The field side of the RF MPS sensors beyond the cross-connects (WD-340-330-03,
+  -04, -28 and -31 to~-34): their PLC-5 ends are in
+  \cref{tab:plcio-tc,tab:plcio-ai,tab:plcio-di,tab:plcio-do}, and the field wiring
+  stays in place at~I4.
+\item The tuner motor wiring, WD-340-330-27: chassis 340-315 to the motor drivers and
+  the cavity junction boxes; it is replaced at I3 (Doc~M), so it is not needed before
+  then.
+\item The coax of the RF patch panel in B132-11 (link~12): SD-340-330-01 draws the
+  four-cavity PEP-II plant, and the SPEAR3 jack map is FC8.
+\item The ARC4 modules, the Interface Chassis and its Waveform Buffer, and the
+  interlocks of the two LLRF9 units: their designs are not released; they are added
+  to \cref{sec:upgrade} when they are.
+\end{itemize}
+
+% ===========================================================================
+\section{Field Checks}\label{sec:checks}
+
+\Cref{tab:checks} lists the \WChecks{} checks on the hardware that the documents still
+need, \ifnum\WChecksOpen=\WChecks\relax all of them open\else \WChecksOpen{} of them
+open\fi. Each replaces the open items named in its last
+column, which ask for the same check in different documents. The method is a
+proposal; each check is planned with the RF group, and where the station must be off,
+in a shutdown.
+
+\input{generated/checks}
+
+% ===========================================================================
+\section{The Upgraded Station}\label{sec:upgrade}
+
+\Cref{tab:units-planned} lists the units of the upgrade with the integration step that
+brings each into service (Doc~M); \cref{tab:units-legacy} gives the step that retires
+each legacy unit. A unit's place, connections and drawings are added here when its
+design is released, and the record of each step is complete when this document shows
+the station as it stands after it. The overview of the end state is drawn when the
+rack layout is fixed.
+
+\input{generated/devices-planned}
+
+% ===========================================================================
+\appendix
+\section{Data Files}\label{app:files}
+
+The data are kept in \fpath{Designs/tex/docW-station-wiring/data/}, one file per table,
+in UTF-8 with a header row. A field that holds a comma is quoted; lists inside a field
+are separated by semicolons.
+
+\begin{longtable}[c]{@{}Q{\cw{0.19}{1.33}}Q{\cw{0.25}{1.33}}Q{\cw{0.56}{1.33}}@{}}
+\caption{Data files and their columns.}\label{tab:files}\\
+\toprule
+File & Feeds & Columns \\
+\midrule
+\endfirsthead
+\toprule
+File & Feeds & Columns \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+\fpath{drawings.csv} & \Cref{tab:drawing-summary,tab:drawings} & number, revision,
+title, area, status (\cref{tab:status}), errata, files (repository paths; copies
+separated by semicolons), notes \\
+\fpath{errata.csv} & \Cref{tab:errata} & identifier, drawings, finding, evidence,
+status, note on the repository copy, documents where it is recorded \\
+\fpath{checks.csv} & \Cref{tab:checks} & identifier, what to establish, method, the
+step that needs it, the open items it replaces, status (open or done) \\
+\fpath{devices.csv} & \Cref{tab:units-legacy,tab:units-planned} & identifier, unit,
+model or drawing, location, place, status, the step that brings it in, the step that
+retires it, notes \\
+\fpath{trunks.csv} & \Cref{tab:trunks} & number, from, to,
+medium, content, drawings \\
+\fpath{connections.csv} & \Cref{tab:panel-j2,tab:panel-j3} & connector, contact, the
+other drawing's contact, labels of the two drawings, direction, X530 terminal, next
+point, PLC-5 point, use in the Interface Chassis, the step that retires it,
+verification level (\cref{tab:levels}) \\
+\fpath{cables.csv} & \Cref{tab:cable-j15,tab:cable-j2,tab:fibers,tab:jbox} & cable, pin
+or strip, signal, the two ends, sense, use in the Interface Chassis, the step that
+retires it, verification level, notes \\
+\fpath{plcmodules.csv} & \Cref{tab:plc-modules} & module, catalog number, location,
+PLC-5 address, drawing, content, notes \\
+\fpath{plcio.csv} & \Cref{tab:plcio-tc,tab:plcio-ai,tab:plcio-di,tab:plcio-do} & module,
+channel or address, module terminal, signal, far end, cross-connects, EPICS record or
+program symbol, use in the Interface Chassis, verification level, notes \\
+\end{longtable}
+
+The numbers of \cref{fig:station-overview} are drawn by hand in
+\fpath{tikz/fig-station-overview.tex}; a change to \fpath{trunks.csv} needs the same
+change there.

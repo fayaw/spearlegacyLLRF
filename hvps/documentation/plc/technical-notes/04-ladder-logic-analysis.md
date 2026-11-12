@@ -494,7 +494,7 @@ These rungs scale raw 16-bit values to engineering units for display. The genera
 **Operations (executed in sequence):**
 
 1. MOV N7:4 → O:1.1 — AC Current to DCM Register 1
-2. COP I:3.0 → N7:100 (length 8) — Thermocouple data to N7:100–N7:107
+2. COP I:3.0 → N7:100 (length 8) — Thermocouple data (channels 0–3) to N7:100–N7:103 and channel status to N7:104–N7:107
 3. MOV N7:10 → O:1.2 — Reference voltage to DCM Register 2
 4. MOV N7:15 → O:1.3 — Voltage Monitor 1 to DCM Register 3
 5. MOV N7:17 → O:1.4 — DC Current to DCM Register 4

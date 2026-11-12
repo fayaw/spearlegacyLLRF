@@ -199,7 +199,7 @@ The load-angle errors were within ±0.7°, so the tuner loop is converged; only 
 - **Position readbacks disagree.** The readback the model uses (TUNR:POSN) differs from the motor readback (STEP:MOTOR.RBV) by −0.38 to −0.90 mm, which is 10–28 kHz at 27–31 kHz/mm. Which readback the polynomials were calibrated against is a question for the RF group.
 
 Consequences:
-- **The loop phase steps when the tuners move.** At constant (zero) current, φ_tr moved by 3.7° within 14 minutes, i.e. about 4.5° of loop phase (1.2–1.3° per degree, Doc P Table 26). Over 60 s it was steady (±0.02°).
+- **The loop phase steps when the tuners move.** At constant (zero) current, φ_tr moved by 3.7° within 14 minutes, i.e. about 4.5° of loop phase (1.2–1.3° per degree, Doc P Table 7). Over 60 s it was steady (±0.02°).
 - **A scan with tracking on aliases this into σ.** At 500 mA each degree of loop phase changes σ by 1.1–1.6% (study plan §6.1), comparable with the effects a scan has to resolve.
 - **Switching tracking off today is a safe step.** φ_tr is positive, which is a lag, so removing it is a lead step of 3–8° of loop phase (study plan §6.1).
 
