@@ -15,7 +15,7 @@ Revision & Date & Scope of Change & Summary \\
 \bottomrule
 \endlastfoot
 \textbf{R0} & 2026-11-13 & Draft for review & Initial issue: requirements of both
-boards for the transition period and the end state; decisions D1 to D12. \\
+boards for the transition period and the end state; decisions D1 to D13. \\
 \end{longtable*}
 
 % R0 drafting notes, not rendered (frozen):
@@ -1401,7 +1401,7 @@ station by itself if the retry count \fpath{SRF1:STN:RESET:COUNTER} is above zer
 forced fault is set and the HVPS contactor is closed with the station online. It runs
 the reset sequence, lowers the count by one and waits \qty{5}{\second}, until the
 turn-on summary (\fpath{SRF1:STNON:SUMY:STAT}) is clean or the count runs out; then it
-turns the station back on in the state it had, or leaves it off \R{22}.
+turns the station back on in the state it had, or leaves it off \R{22}. Either an accepted procedure for this or a summary record the legacy summary can read.
 
 \paragraph{Turn-on.} The turn-on to ON\_CW spends four to five seconds loading the
 DACs, homing the tuners and setting the loops; it then turns on the RF switch, sets
@@ -1455,7 +1455,7 @@ undisturbed. & \R{22}, \R{26} \\
 
 The legacy turn-on summary does not include the chassis latches: a latch that the
 resets cannot clear lets the automatic reset turn the station on without high voltage,
-until its retry count runs out \R{22}, \R{23}.
+until its retry count runs out \R{22}, \R{23}. 
 
 % ===========================================================================
 \section{Electrical, Timing and Fail-Safe Requirements}\label{sec:electrical}
@@ -1520,7 +1520,7 @@ Waveform Buffer or TTL input to every output it affects: at most
 IC-41. & \R{1}, \R{4} \\
 IC-41 & Inputs from PLC lines may be filtered for up to \qty{1}{\milli\second}
 against contact and switching noise (\emph{proposed}); other inputs reject pulses
-shorter than \qty{0.2}{\micro\second} (\emph{proposed}). & --- \\
+shorter than \qty{1}{\micro\second} (\emph{proposed}). & --- \\
 IC-42 & Loss of chassis power, of any internal supply or of the interlock
 board removes every permit: both fibers dark, the LLRF9 enable low, the External MPS
 line open. A dark KLYSTRON CROWBAR fiber fires the
@@ -1868,7 +1868,7 @@ needs a change to the legacy EPICS (IC-9, IC-10) & Decided \\
 D3 & Crowbar group & The coil summaries only, as the panel; arcs at the klystron
 window and the circulator can be added by jumper if the ARC4 gives their identity in
 hardware. Whether a coil fault with the high voltage off also fires the crowbar follows
-the baseline of the panel (I0-T1) & Production review \\
+the baseline of the panel & Production review \\
 D4 & Beam abort & Decided (10 and 12 November 2026): no beam-abort output, and the VXI
 beam abort on J15 pin~15 not connected (IC-19, IC-20, \cref{sec:io-ba}) & Decided \\
 D5 & LLRF9 status in the permit path & Direct, with a record latch, so that a restart
