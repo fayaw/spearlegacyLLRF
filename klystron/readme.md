@@ -1,0 +1,1 @@
+Gain curve and cathode emission curve for the current operation klystron.
