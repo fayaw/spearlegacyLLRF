@@ -1,0 +1,86 @@
+% !TeX root = ../C_interface_chassis_requirements.tex
+% The Interface Chassis and every external interface. Left: legacy units and the
+% RF MPS; right: HVPS, LLRF9, ARC4 and RF sources. Signal IDs are those of
+% tab:signals; dashed lines are fibers. All boxes of a side share one anchor x so
+% the arrows stay horizontal.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  every node/.append style={execute at begin node=\hyphenpenalty 10000\relax},
+  pl/.style={text width=31mm,anchor=east},
+  pr/.style={text width=31mm,anchor=west},
+  one/.style={text width=31mm,anchor=west,minimum height=8mm}]
+
+% ----- the chassis -------------------------------------------------------------
+\node[plc,text width=46mm,minimum height=93mm,anchor=north] (ib) at (80,-9)
+  {\textbf{Interlock board}\\[3pt]
+   permit logic (\cref{sec:logic})\\
+   fault latches and act masks\\
+   first-fault registers\\[3pt]
+   fiber, LLRF9, 24\,V, TTL\\ and switch interfaces\\[3pt]
+   klystron forward-power detector\\
+   HVPS voltage and current buffers\\[3pt]
+   front-panel indicators};
+\node[rf,text width=38mm,minimum height=30mm,anchor=north] (wb) at (84,-114)
+  {\textbf{Waveform Buffer board}\\[2pt]
+   8 RF and 4 HVPS channels:\\ circular buffers, comparators,\\
+   collector power (\cref{sec:wfb})};
+\node[ctrl,text width=46mm,anchor=north] (cpu) at (80,-152)
+  {\textbf{Chassis processor}\\ one IOC for both boards};
+\node[ctrl,text width=46mm,anchor=north] (net) at (80,-168)
+  {\textbf{Controls network}\\ EPICS screens, alarms, archiver};
+\begin{scope}[on background layer]
+  \node[grp,fit=(ib)(wb)(cpu)] (ch) {};
+\end{scope}
+\node[lbl,anchor=south west] at (ch.north west) {Interface Chassis: one 19-inch chassis};
+
+% ----- partners on the left ------------------------------------------------------
+\node[blk,pl] (smps) at (40,-16) {\textbf{SPEAR MPS, orbit interlock}\\ also VXI Slot~5 until I8};
+\node[plc,pl] (j15)  at (40,-30) {\textbf{AIM, cable J15}\\ I2 to I7};
+\node[plc,pl] (j4)   at (40,-44) {\textbf{AIM, 37-pin cable to J4}\\ arc lines only terminated};
+\node[plc,pl] (x530) at (40,-58) {\textbf{RF MPS, X530 J2 and J3}\\ PLC-5; ControlLogix from I4};
+\node[plc,pl] (ai)   at (40,-74) {\textbf{RF MPS analog inputs}\\ collector power};
+\node[rf,pl]  (kf)   at (40,-87) {\textbf{Klystron forward coupler}\\ cable now on J32};
+
+\draw[sig] (smps.east |- 0,-16) -- (ib.west |- 0,-16) node[tag,midway,above]{S1, S2};
+\draw[sig] (j15.east |- 0,-27)  -- (ib.west |- 0,-27) node[tag,midway,above]{V1--V5};
+\draw[sig] (ib.west |- 0,-33)   -- (j15.east |- 0,-33) node[tag,midway,below]{V6, V7};
+\draw[sig] (ib.west |- 0,-44)   -- (j4.east |- 0,-44) node[tag,midway,above]{V8};
+\draw[sig] (x530.east |- 0,-55) -- (ib.west |- 0,-55) node[tag,midway,above]{P1--P6};
+\draw[sig] (ib.west |- 0,-61)   -- (x530.east |- 0,-61) node[tag,midway,below]{P7--P11};
+\draw[sig] (ib.west |- 0,-74)   -- (ai.east |- 0,-74) node[tag,midway,above]{N3, N4, N6};
+\draw[sig] (kf.east |- 0,-87)   -- (ib.west |- 0,-87) node[tag,midway,above]{N5};
+
+% ----- partners on the right -----------------------------------------------------
+\node[blk,pr] (arc) at (120,-16) {\textbf{ARC4}\\ system and test modules};
+\node[pwr,pr,minimum height=17mm] (hv) at (120,-34)
+  {\textbf{HVPS controller}, B118\\ through the switchbox;\\ HVPS monitor board};
+\node[rf,pr] (u2)  at (120,-53) {\textbf{LLRF9 Unit~2}\\ head of the chain};
+\node[rf,pr] (u1)  at (120,-68) {\textbf{LLRF9 Unit~1}\\ end of the chain};
+\node[blk,pr] (exp) at (120,-84) {\textbf{Expansion ports}\\ as assigned};
+\node[rf,one]  (rfc)  at (120,-118) {\textbf{RF couplers}, reference};
+\node[pwr,one] (pick) at (120,-128) {\textbf{B118 pick-offs}};
+
+\draw[sig] (arc.west |- 0,-13) -- (ib.east |- 0,-13) node[tag,midway,above]{A1, A2};
+\draw[sig] (ib.east |- 0,-19)  -- (arc.west |- 0,-19) node[tag,midway,below]{A3};
+\draw[fib] (ib.east |- 0,-28)  -- (hv.west |- 0,-28) node[tag,midway,above]{F1, F2};
+\draw[fib] (hv.west |- 0,-34)  -- (ib.east |- 0,-34) node[tag,midway,above]{F3};
+\draw[sig] (hv.west |- 0,-40)  -- (ib.east |- 0,-40) node[tag,midway,below]{N1, N2};
+\draw[sig] (ib.east |- 0,-50)  -- (u2.west |- 0,-50) node[tag,midway,above]{L1};
+\draw[sig] (u1.west |- 0,-68)  -- (ib.east |- 0,-68) node[tag,midway,above]{L2};
+\draw[sig] (u2.east) -- ++(4,0) |- (u1.east);
+\node[tag,rotate=90] at ($(u2.east)+(4,-7.5)$) {chain};
+\draw[sig] (exp.west |- 0,-84) -- (ib.east |- 0,-84) node[tag,midway,above]{X1--X4};
+\draw[sig] (rfc.west)  -- (wb.east |- rfc.west)  node[tag,midway,above]{RF1--RF8};
+\draw[sig] (pick.west) -- (wb.east |- pick.west) node[tag,midway,above]{HV3, HV4};
+
+% ----- inside the chassis --------------------------------------------------------
+\draw[sig] ([xshift=-7mm]wb.north |- ib.south) -- ([xshift=-7mm]wb.north)
+  node[tag,midway,left,align=right]{freeze,\\ HVPS V, I};
+\draw[sig] ([xshift=7mm]wb.north) -- ([xshift=7mm]wb.north |- ib.south)
+  node[tag,midway,right,align=left]{WB permit,\\ comparators};
+\draw[sig,{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]}] (59,0 |- ib.south) -- (59,0 |- cpu.north)
+  node[tag,midway,rotate=90]{states, latches; reset, commands};
+\draw[sig,{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]}] (wb.south) -- (wb.south |- cpu.north)
+  node[tag,midway,left,align=right,xshift=-1.5mm]{waveforms; freeze,\\ re-arm, thresholds};
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut]
+  (cpu.south) -- (net.north) node[tag,midway,right]{E1, Ethernet};
+\end{tikzpicture}

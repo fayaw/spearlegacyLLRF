@@ -2,11 +2,9 @@
 % Figure 3 -- HVPS power chain, B514.  12-pulse phase-controlled rectifier.
 %
 % Full conversion chain from the incoming substation feeder to the klystron
-% cathode.  Component values are the VERIFIED as-built ones from Doc L §9.3 --
-% they deliberately differ from the 1997 PEP-II design figures that circulated
-% earlier (T0 2750 kVA not 350 kVA; capacitors 8 uF per stage x 4 stages not
-% 8 uF total; divider ~10,000:1 not 1000:1; termination inductors 350 uH not
-% 200 uH; crowbar conduction ~10 us not ~1 us).
+% cathode.  Component values follow Doc L: the complete supply is rated
+% 2750 kVA, T0 alone 350 kVA nominal; capacitors 8 uF per stage x 4 stages;
+% divider ~10,000:1; termination inductors 350 uH; crowbar conduction ~10 us.
 %
 % Layout: power chain in a 150 mm column on the right; the Waveform Buffer on
 % the left with four dashed monitoring taps.  Tap lanes are ordered so that the
@@ -28,7 +26,8 @@
 % ===== incoming feeder ===================================================
 \node[full,fill=black!8,draw=black!55,text=black!75] (sub) at (133,0)
   {\textbf{SUBSTATION 507, BREAKER 160}\\
-   \qty{12.47}{\kilo\volt} RMS 3-phase AC};
+   \qty{12.47}{\kilo\volt} RMS 3-phase AC $\cdot$ supply rated
+   \qty{2750}{\kilo\voltampere}, \qty{127}{\ampere}};
 
 \node[full] (sw) at (133,-16)
   {\textbf{SWITCHGEAR \& SAFETY}\\
@@ -39,8 +38,7 @@
 
 \node[full] (t0) at (133,-38)
   {\textbf{PHASE-SHIFT TRANSFORMER T0}\\
-   extended delta $\cdot$ \qty{2750}{\kilo\voltampere},
-   \qty{12.5}{\kilo\volt} at \qty{127}{\ampere} RMS\\
+   extended delta $\cdot$ \qty{350}{\kilo\voltampere} nominal\\
    primary \qty{12.47}{\kilo\volt} delta \quad$\vert$\quad
    secondary dual wye, $\pm 15^\circ$ phase shift};
 \draw[sig] (sw.south) -- node[right,tag]{\qty{12.47}{\kilo\volt} delta} (t0.north);
@@ -131,13 +129,13 @@
   {\textbf{WAVEFORM}\\\textbf{BUFFER SYSTEM}\\[1pt]
    {\tiny 4 HVPS channels, circular\\ buffers, pre-fault capture}\\[2pt]
    {\tiny \textbf{1} HVPS voltage\\ \textbf{2} HVPS current\\
-          \textbf{3} Inductor 1 voltage\\ \textbf{4} Inductor 2 voltage}};
+          \textbf{3} Transformer current\\ \textbf{4} SCR firing signal}};
 
-% ch 3 -- Inductor 1 voltage: lane 40, turns first (highest entry)
-\draw[tap] (l1.west) -| (40,-163) -- (35,-163);
-\node[cn] at (52,-122) {3};
+% ch 3 -- one T1 phase current: lane 40, turns first (highest entry)
+\draw[tap] (t1.west) -| (40,-163) -- (35,-163);
+\node[cn] at ($(t1.west)+(-3,0)$) {3};
 
-% ch 4 -- Inductor 2 voltage: lane 45.  Crosses the L1 power drop at x = 85.
+% ch 4 -- SCR firing signal (inductor 2 voltage): lane 45.  Crosses the L1 power drop at x = 85.
 \draw[tap] (l2.west) -| (150,-133) -- (45,-133) -- (45,-168) -- (35,-168);
 \node[cn] at (148,-122) {4};
 

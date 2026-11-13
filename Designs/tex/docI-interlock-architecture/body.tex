@@ -106,7 +106,7 @@ Path & Actor & Hardware action & EPICS notification & SNL response \\
 Arc → Fast IC and AIM & Fast IC 340-308 and AIM & \textless{} 1 μs (RF cut by the AIM; SCR ENABLE and CROWBAR through the AIM commands and the RF Local Display Panel logic) & \textasciitilde50--500 μs (AIM ISR → VXI:LTCH) & \textasciitilde1 s (orderly HVPS shutdown) \\
 MPS PLC Path A → panel logic and AIM & RF MPS PLC + RF Local Display Panel + AIM & \textasciitilde10--15 ms once the PLC trips (HVPS kill through SCR ENABLE for collector and waveguide pressure faults; RF cut through the AB summary); the collector protection trips only after \qty{0.70}{\second} above its limit & \textasciitilde1 s (Remote I/O Path B) & \textasciitilde1 s (orderly HVPS shutdown, HVPS already dead) \\
 SPEAR MPS permit / orbit interlock → Slot 5 & VXI Slot 5 & RF cut only; the module's response time is not documented (O1), and Slot 5 has no hardware HVPS path & \textasciitilde50--500 μs (AIM ISR → VXI:LTCH → STNOFF; External MPS → MPS:LTCH) & \textasciitilde6 s (SNL orderly shutdown); earlier only through the AIM (O3) or the collector-power cascade after \qty{0.7}{\second} (\cref{sec:cascade}) \\
-HVPS controller trip & SLC-500 HVPS PLC & \textasciitilde10--20 ms (24 V fault/enable removed from the trigger boards) & \textasciitilde100 ms--1 s (Remote I/O → EPICS) & \textasciitilde1 s (orderly RF shutdown, HVPS already off) \\
+HVPS controller trip & HVPS controller & \textless{} 1 μs for an arc (the trigger boards fire the crowbar); \textasciitilde10--20 ms for a fault the SLC-500 program detects (SCR ON latch dropped; the contactor opened on a crowbar or current trip) \R{38} & \textasciitilde100 ms--1 s (Remote I/O → EPICS) & \textasciitilde1 s (orderly RF shutdown, HVPS already off) \\
 \end{longtable}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -710,7 +710,7 @@ Slot 5 is \textbf{architecturally necessary} for SPEAR3 RF protection:
 \emph{Sources}: \R{13}, \R{16}, \R{23}, \R{37}.
 
 
-When RF drive is cut by a SPEAR MPS permit withdrawal or orbit interlock trip (via Slot 5, or by any mechanism that sets the RFP drive DAC to zero), the immediate RF cutoff creates a secondary physical condition that can fire the RF MPS PLC's collector overpower protection. The PLC-5 trips on it only after the collector power has stayed above \qty{1200}{\kilo\watt} for \qty{0.70}{\second} \R{37}, so this cascade removes SCR ENABLE about \qty{0.7}{\second} after the RF cut, if the high voltage has not been lowered below the limit first. That is earlier than the SNL removes the SCR supervisory enable (\textasciitilde6 s), but it is not a fast path.
+When RF drive is cut by a SPEAR MPS permit withdrawal or orbit interlock trip (via Slot 5, or by any mechanism that sets the RFP drive DAC to zero), the immediate RF cutoff creates a secondary physical condition that can fire the RF MPS PLC's collector overpower protection. The PLC-5 trips on it only after the collector power has stayed above \qty{1200}{\kilo\watt} for \qty{0.70}{\second} \R{37}, so this cascade removes SCR ENABLE about \qty{0.7}{\second} after the RF cut, if the high voltage has not been lowered below the limit first. That is earlier than the SNL turns off the HVPS trigger enable (\textasciitilde6 s), but it is not a fast path.
 
 \subsection{Mechanism 1 --- Klystron Collector Overpower (High Certainty)}\label{sec:cascade-collector}
 
@@ -943,7 +943,7 @@ Path B is \textbf{bookkeeping} --- the MPS hardware has already acted on Path A.
 
 \section{SLC-500 HVPS PLC}\label{sec:slc500}
 
-\emph{Sources}: \R{4}, \R{8}, \R{9}, \R{10}, \R{15}, \R{16}, \R{23}, \R{24}, \R{25}.
+\emph{Sources}: \R{4}, \R{8}, \R{9}, \R{10}, \R{15}, \R{16}, \R{23}, \R{24}, \R{25}, \R{38}.
 
 
 \subsection{Platform}\label{sec:slc-platform}
@@ -984,7 +984,7 @@ Oil level & Float switch in HV tank & Slot 6 IB16 digital input & \texttt{HVPSOI
 Transformer arc & Arc detector inside HV transformer & Slot 6 IB16 digital input & \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} \\
 SCR bank status & SCR gate driver feedback & Slot 6 IB16 digital inputs & \texttt{HVPSSCR1:\allowbreak{}ON:\allowbreak{}STAT}, \texttt{HVPSSCR2:\allowbreak{}ON:\allowbreak{}STAT} \\
 Contactor status & HV vacuum contactor auxiliary contacts & \textbf{Slot 7 IV16} digital inputs 0--3 & Blocking relay (IN0), overcurrent relay (IN1), contactor closed (IN2), contactor ready (IN3) --- \texttt{HVPSCONTACT:\allowbreak{}*:\allowbreak{}STAT} group. These sit on the \textbf{IV16 in slot 7}, not on the slot-6 IB16 \\
-\texttt{hvpstrig} (SCR enable command) & EPICS IOC via Remote I/O (SNL \texttt{HVPSONSUB}) & Remote I/O incoming data table → Slot 5 OX8 output 0 & Supervisory SCR enable gate; must be ON for HVPS to produce HV \\
+\texttt{hvpstrig} (trigger enable, \texttt{HVPSSCR:\allowbreak{}ON:\allowbreak{}CTRL}) & EPICS IOC via Remote I/O (SNL \texttt{HVPSONSUB}) & Remote I/O input \texttt{I:1/64} (CONTROL ENABLE) & Starts the regulator through the SCR ON latch; must stay ON for the HVPS to produce HV (\cref{sec:scr-enable}) \R{38} \\
 \end{longtable}
 
 \subsection{Outputs}\label{sec:slc-outputs}
@@ -997,8 +997,8 @@ Output & Destination & Connection & Notes \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\textbf{24~V fault/enable} (\texttt{HVPSSCR:\allowbreak{}ON:\allowbreak{}CTRL}) & Trigger interconnect boards (COMMANDS bus), same B118 enclosure & Slot 5 OX8 output 0; no fiber \R{28} & Supervisory thyristor-trigger enable; \textasciitilde20 ms speed; must be on together with the SCR ENABLE fiber from the RF Local Display Panel \\
-\textbf{HVPS STATUS fiber} & RF Local Display Panel (B132), received as the HVPS beam abort & HFBR-1412 transmitter on the left-side trigger interconnect board & Lit while the 24~V fault/enable is high and no crowbar is commanded; it says nothing about whether the thyristors fire \R{27}, \R{28} \\
+\textbf{24~V fault/enable} & Trigger interconnect boards (COMMANDS bus), same B118 enclosure & Slot 5 OX8 output 0; no fiber \R{28} & Thyristor-trigger enable set by the program: on about \qty{3}{\second} after the vacuum contactor closes, off when it opens; not commanded from EPICS (\cref{sec:scr-enable}) \R{38}; must be on together with the SCR ENABLE fiber from the RF Local Display Panel \\
+\textbf{HVPS STATUS fiber} & RF Local Display Panel (B132), received as the HVPS beam abort & HFBR-1412 transmitter on the left-side trigger interconnect board & Lit while the 24~V fault/enable is high and no crowbar is commanded; it says nothing about whether the thyristors fire \R{27}, \R{28}. It stays lit through an orderly shutdown and goes dark when the contactor opens or the crowbar fires \R{38} \\
 Ross grounding switch command & Ross Engineering HQ3 grounding switch & Slot 2 IO8 (120 VAC) & \textbf{PPS Chain 2}: grounds HV tank before personnel entry \\
 HV vacuum contactor command & Ross Engineering HQ3 vacuum contactor & Slot 5 OX8 OUT2 → relay chain (K4 → MX → RR → L1) & \textbf{PPS Chain 1}: connects/disconnects 12.47 kV AC to HVPS primary (fail-safe open) \\
 \textbf{HVPS Remote I/O status registers} & EPICS IOC (via AB-6008 scanner, adapter 1) & Remote I/O & All \texttt{HVPS*:*:LTCH} and \texttt{HVPS*:*:STAT} PVs populated from these registers \\
@@ -1131,34 +1131,29 @@ PV & Source & Alarm Limits & Description \\
 \texttt{\{STN\}:\allowbreak{}HVPSOIL:\allowbreak{}TEMP} & Thermocouple slot 3 & ULIM configurable & Oil temperature (°C) \\
 \end{longtable}
 
-\subsection{SCR Enable Output --- The HVPS Supervisory Enable Path}\label{sec:scr-enable}
+\subsection{Thyristor Enables of the SLC-500}\label{sec:scr-enable}
 
 
-The SLC-500 enables the thyristor triggers through output 0 of its slot-5 relay module (24~V fault/enable), which drives the COMMANDS bus of the trigger interconnect boards in the same B118 enclosure; no fiber is involved \R{28}. This is the \textbf{supervisory SCR ENABLE path} --- it must be held on for the HVPS to maintain output voltage, and the HVPS STATUS fiber is lit only while it is on. \Cref{fig:hvps-enable-chain} shows the sequence that establishes it.
+The SLC-500 program governs thyristor firing in two ways, neither of which is the SCR ENABLE fiber of the RF Local Display Panel \R{28}, \R{38}:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{24~V fault/enable} (slot-5 output 0, ``Control System Enable'' in the program). It drives the COMMANDS bus of the trigger interconnect boards in the same B118 enclosure, with no fiber; while it is low both boards inhibit their triggers. The program turns it on about \qty{3}{\second} after the vacuum contactor closes, with its 240~V power on, and holds it while the contactor stays closed (rung 0003). It is \textbf{not} commanded from EPICS. The HVPS STATUS fiber is lit only while it is on and no crowbar trigger is present, so STATUS stays lit through an orderly shutdown and goes dark when the contactor opens or the crowbar fires.
+\item
+  \textbf{Trigger enable} (\texttt{\{STN\}:\allowbreak{}HVPSSCR:\allowbreak{}ON:\allowbreak{}CTRL}, \texttt{hvpstrig}). It reaches the program over Remote I/O as input \texttt{I:1/64}, CONTROL ENABLE. Its rising edge opens a \qty{0.5}{\second} window (rung 0009) in which the SCR ON latch sets, if the contactor has been closed for \qty{3}{\second}, the system is ready, no current or overvoltage trip is present, the crowbar latch is healthy and the SCR ENABLE fiber is lit; the latch then holds itself (rung 0004) and is reported as \texttt{HVPSSUPPLY:\allowbreak{}ON:\allowbreak{}STAT}. The regulator turns on \qty{3}{\second} after the latch sets (rung 0010); while it is off the program forces the voltage-reference and phase-angle words to zero (rung 0011), so the thyristors stop firing. Turning the trigger enable off, or losing any condition of the chain, a dark SCR ENABLE among them, drops the latch, and the HVPS restarts only on a new rising edge of the trigger enable.
+\end{itemize}
+
+\Cref{fig:hvps-enable-chain} shows the turn-on through the trigger enable; \cref{sec:xl-dual-scr} compares the three conditions that must all hold for the thyristors to fire.
 
 \begin{figure}[tbp]
 \centering
 \begin{fitpicture}\input{tikz/fig-hvps-enable-chain}\end{fitpicture}
-\caption{HVPS enable chain executed by the \texttt{HVPSONSUB()} macro in \texttt{rf\_states.st}.}\label{fig:hvps-enable-chain}
+\caption{HVPS enable chain: the \texttt{HVPSONSUB()} macro in \texttt{rf\_states.st} and the SLC-500 program.}\label{fig:hvps-enable-chain}
 \end{figure}
 
-This path is \textbf{distinct from} the SCR ENABLE fiber formed by the RF Local Display Panel:
-
-\begin{longtable}[]{@{}Q{\dimexpr 0.2991\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.0499\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.2375\linewidth-1.50\tabcolsep\relax}Q{\dimexpr 0.4135\linewidth-1.50\tabcolsep\relax}@{}}
-\toprule\noalign{}
-Path & Speed & Source & Notes \\
-\midrule\noalign{}
-\endhead
-\bottomrule\noalign{}
-\endlastfoot
-RF Local Display Panel → SCR ENABLE (fiber) & μs & Panel logic & Hardware permit, removed on fault \\
-SLC-500 output 0 → COMMANDS bus (24~V) & \textasciitilde20 ms & Supervisory enable/disable & Must be explicitly enabled; cleared in s\_go\_off \\
-\end{longtable}
-
-Both act on the trigger interconnect boards in B118: the panel's path is a fiber from B132, the SLC-500's is wired on the COMMANDS bus. \textbf{Both} must be asserted for the thyristors to fire. The panel path is the fast-trip path; the SLC-500 path is the supervisory gate that must be deliberately enabled by the SNL state machine as part of the startup sequence.
-
 \begin{keynote}
-\textbf{PV}: \texttt{\{STN\}:\allowbreak{}HVPSSCR:\allowbreak{}ON:\allowbreak{}CTRL} (bo record, \texttt{rf\_hvps.db,v}): "HVPS SCR Enable Switch". Writing ON enables the HVPS; writing OFF disables (part of s\_go\_off orderly shutdown).
+\textbf{PV}: \texttt{\{STN\}:\allowbreak{}HVPSSCR:\allowbreak{}ON:\allowbreak{}CTRL} (bo record, \texttt{rf\_hvps.db,v}): "HVPS SCR Enable Switch". Writing ON starts the regulator through the SCR ON latch, if SCR ENABLE is lit; writing OFF stops it, as part of the \texttt{s\_go\_off} orderly shutdown. The contactor stays closed and STATUS stays lit.
 \end{keynote}
 
 \subsection{HVPS Alarm Aggregation Tree}\label{sec:hvps-alarm-tree}
@@ -1317,7 +1312,6 @@ Input PV & Source & Connection & Role \\
 \texttt{\{STN\}:\allowbreak{}HVPSOFF:\allowbreak{}SUMY:\allowbreak{}STAT} & EPICS HVPS alarm tree & EPICS CA \texttt{pvMonitor} & HVPS off/fault status, feeds \texttt{fault\_stnoff} \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}LOCAL:\allowbreak{}ON} & Local panel switch & EPICS CA & Local/remote mode; local mode forces OFF \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}STATE} (\texttt{stnstate}) & EPICS state PV & EPICS CA & Station state (restored at boot in \texttt{s\_init}) \\
-\texttt{\{STN\}:\allowbreak{}HVPSSCR:\allowbreak{}ON:\allowbreak{}CTRL} readback & Remote I/O readback from SLC-500 & EPICS CA & SCR enable relay state confirmation \\
 TAXI/GVF status (via \texttt{rf\_msgs.st,v}) & GVF module software PVs & EPICS inter-IOC & TAXI error monitoring; triggers resync if TAXI errors detected \\
 \end{longtable}
 
@@ -1335,8 +1329,8 @@ Output PV & Destination & Action \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}RBA} (\texttt{rba}) & AIM \texttt{MODU.RBA} & Reset Beam Abort --- de-asserts the forced beam abort during recovery \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}RSTF} (\texttt{rstf}) & AIM hardware latches & Resets all AIM arc latches and fast interlock latches \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\allowbreak{}MODU.\allowbreak{}HVPS} (\texttt{aimon}) & AIM HVPS\_On → RF Local Display Panel (HVPS on request) & Hardware gate for SCR ENABLE; set in \texttt{HVPSONSUB} \\
-\texttt{\{STN\}:\allowbreak{}HVPSSCR:\allowbreak{}ON:\allowbreak{}CTRL} (\texttt{hvpstrig}) & SLC-500 Remote I/O → Slot 5 OX8 output 0 → trigger boards & Supervisory SCR ENABLE gate; ON in \texttt{HVPSONSUB}, OFF in \texttt{s\_go\_off} Step 5 \\
-\texttt{\{STN\}:\allowbreak{}HVPS:\allowbreak{}VOLT:\allowbreak{}SP} (\texttt{hvpswdefault}) & SLC-500 Remote I/O → Analog output → SCR firing angle & HVPS voltage setpoint; set to 0 in \texttt{s\_go\_off} Step 3 \\
+\texttt{\{STN\}:\allowbreak{}HVPSSCR:\allowbreak{}ON:\allowbreak{}CTRL} (\texttt{hvpstrig}) & SLC-500 Remote I/O → input \texttt{I:1/64} (CONTROL ENABLE) → SCR ON latch & Trigger enable: starts the regulator, if SCR ENABLE is lit; ON in \texttt{HVPSONSUB}, OFF in \texttt{s\_go\_off} Step 5 (\cref{sec:scr-enable}) \\
+\texttt{\{STN\}:\allowbreak{}HVPS:\allowbreak{}VOLT:\allowbreak{}CTRL} (\texttt{hvpswdefault}) & SLC-500 Remote I/O → Analog output → SCR firing angle & HVPS voltage setpoint; set to 0 in \texttt{s\_go\_off} Step 3 \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}RFP:\allowbreak{}RFENABLE} (\texttt{rfswitch}) & RFP module RF drive enable & RF drive gate; ON in \texttt{HVPSONSUB}, OFF in \texttt{s\_go\_off} Step 6 \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}STATE} (\texttt{stnstate}) & EPICS state display PV & Operator state display: OFF/PARK/TUNE/ON\_FM/ON\_CW \\
 \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}INTCOMP} (\texttt{intcomp}) & RFP/IQA integrator compensation & Direct feedback integrator; disabled in \texttt{s\_go\_off} Step 7 \\
@@ -1420,7 +1414,8 @@ Step 4: taskDelay(300)           → ~5 second wait for HVPS to discharge
 
 Step 5: hvpstrig = OFF   pvPut(hvpstrig)
     → {STN}:HVPSSCR:ON:CTRL = 0  → Remote I/O → SLC-500 (RIO adapter 1)
-    → SCR gate drive disabled from supervisory path
+    → SCR ON latch drops; regulator off (reference and phase angle zero)
+    → contactor stays closed; output 0 and STATUS stay on
 
 Step 6: rfswitch = OFF   pvPut(rfswitch)
     → {STN}:STN:RFP:RFENABLE = 0 → RF drive enable explicitly removed
@@ -1442,7 +1437,7 @@ HVPSONSUB():
     rfswitch = ON          pvPut(rfswitch)   → RF drive enabled
     pvGet(hvpswdefault)                       → read default voltage setpoint
     /* call TUNESUB to home tuners */
-    hvpstrig = ON          pvPut(hvpstrig)   → SCR gate drive enabled via Remote I/O
+    hvpstrig = ON          pvPut(hvpstrig)   → CONTROL ENABLE: SCR ON latch, regulator on
     aimon = ON             pvPut(aimon)       → write {STN}:STN:AIM:MODU.HVPS = 1
                                                 → AIM fiber "HVPS_On" asserted
     /* wait up to 10 s checking fault_stnoff */
@@ -1539,7 +1534,7 @@ This was a SPEAR3-specific customization (Sass comment 2004: \emph{"SPEAR is usi
       $\rightarrow$~rf\_hvps\_loop.st ramps HVPS voltage down to zero\newline
       $\rightarrow$~\textasciitilde{}5 s wait for capacitor bank to discharge}
   \tlrow{t ≈ 6 s}{s\_go\_off Steps 5\textendash{}7:\newline
-      $\rightarrow$~hvpstrig = OFF (SCR supervisory enable removed via Remote I/O)\newline
+      $\rightarrow$~hvpstrig = OFF (trigger enable off via Remote I/O: SCR ON latch drops)\newline
       $\rightarrow$~rfswitch = OFF (RFP drive enable removed)\newline
       $\rightarrow$~intcomp = OFF}
   \tlrow{t ≈ 6\textendash{}10 s}{ss rf\_statesFF: Fault file capture\newline
@@ -1586,7 +1581,7 @@ This example illustrates a \textbf{slow equipment-protection fault} picked up by
       $\rightarrow$~Step 1: fba = 1 (beam abort forced from the software side)\newline
       $\rightarrow$~Steps 2\textendash{}4: HVPS voltage setpoint → 0; \textasciitilde{}5 s ramp\newline
       (HVPS already off if the cascade fired)\newline
-      $\rightarrow$~Step 5: hvpstrig = OFF (SCR supervisory enable removed)\newline
+      $\rightarrow$~Step 5: hvpstrig = OFF (trigger enable off)\newline
       $\rightarrow$~Step 6: rfswitch = OFF (RF drive enable removed)}
   \tlrow{t ≈ 6\textendash{}10 s}{ss rf\_statesFF: Fault file capture\newline
       $\rightarrow$~11 signal channels → /dat/FAULT*\_N files}
@@ -1610,23 +1605,25 @@ This example illustrates a \textbf{HVPS internal fault} monitored by the SLC-500
 
 \begin{timeline}
   \tlrow{t = 0 ms}{Arc discharge inside the HV transformer tank (B514):\newline
-      $\rightarrow$~Arc detector sensor inside HV tank registers arc current surge\newline
-      $\rightarrow$~If arc is energetic enough: crowbar may self-fire via\newline
-      analog crowbar trigger circuit (independent of HVPS PLC)}
-  \tlrow{t ≈ 10\textendash{}20 ms}{SLC-500 HVPS PLC scan cycle (B118):\newline
-      $\rightarrow$~Reads arc detector digital input:\newline
-      Slot 6 IB16 input: C14.10 = HVPSXFORM:ARC:LTCH = FAULT\newline
-      $\rightarrow$~PLC ladder logic sets HVPS fault state\newline
-      $\rightarrow$~Slot 5 OX8 output 0 (24~V fault/enable) dropped\newline
-      (supervisory thyristor-trigger enable removed on the COMMANDS bus)\newline
-      $\rightarrow$~Remote I/O output data table updated with fault status}
-  \tlrow{t ≈ 10\textendash{}20 ms}{Thyristor triggers inhibited by the SLC-500 supervisory path:\newline
-      $\rightarrow$~HV output begins to collapse (no gate drive on SCR thyristors)\newline
-      $\rightarrow$~HVPS STATUS fiber goes dark (it follows the 24~V fault/enable)\newline
+      $\rightarrow$~The transformer-arc circuit of the right-side trigger board\newline
+      inhibits its triggers and raises the slave crowbar trigger; the\newline
+      left-side board fires the crowbar and inhibits its own triggers, in\newline
+      hardware, independent of the SLC-500 \R{28}\newline
+      $\rightarrow$~HV output collapses through the crowbar}
+  \tlrow{t ≈ 0 ms}{HVPS STATUS fiber goes dark with the crowbar trigger:\newline
       $\rightarrow$~RF Local Display Panel receives it as the HVPS beam abort:\newline
       its logic latches the beam abort; its effect on SCR ENABLE\newline
       and the crowbar is set by the undocumented equations (O4)\newline
       $\rightarrow$~The STATUS fiber does not reach the Fast IC or the AIM}
+  \tlrow{t ≈ 10\textendash{}20 ms}{SLC-500 HVPS PLC scan cycle (B118) \R{38}:\newline
+      $\rightarrow$~Latches the transformer-arc input (slot 6, input 5; rung 0057),\newline
+      on Remote I/O as C14.10 = HVPSXFORM:ARC:LTCH\newline
+      $\rightarrow$~Sees the crowbar fire (slot 6, input 2) and drops its crowbar\newline
+      latch (rung 0013): the SCR ON latch drops (regulator off, rung 0004)\newline
+      and the vacuum contactor opens (rung 0002), unless the crowbar-lockout\newline
+      bit is set\newline
+      $\rightarrow$~Slot 5 OX8 output 0 (24~V fault/enable) drops with the contactor\newline
+      (rung 0003), so STATUS stays dark until the contactor is closed again}
   \tlrow{t ≈ 100 ms\textendash{}1 s}{EPICS alarm propagation:\newline
       $\rightarrow$~AB-6008 scanner reads Remote I/O at \textasciitilde{}1 Hz\newline
       $\rightarrow$~\{STN\}:HVPSXFORM:ARC:LTCH = MAJOR\newline
@@ -1640,11 +1637,11 @@ This example illustrates a \textbf{HVPS internal fault} monitored by the SLC-500
       $\rightarrow$~runmode = TUNE}
   \tlrow{t ≈ 1.1\textendash{}6 s}{s\_go\_off Steps 2\textendash{}4: HVPS voltage setpoint → 0\newline
       $\rightarrow$~rf\_hvps\_loop.st attempts HVPS voltage ramp down\newline
-      (HVPS is already de-energized via the SLC-500 output;\newline
-      ramp command is a no-op but the sequence must complete)\newline
+      (the crowbar has discharged the HVPS and the contactor is open;\newline
+      the ramp command is a no-op but the sequence must complete)\newline
       $\rightarrow$~\textasciitilde{}5 s wait}
   \tlrow{t ≈ 6 s}{s\_go\_off Steps 5\textendash{}7:\newline
-      $\rightarrow$~hvpstrig = OFF (SCR supervisory enable again confirmed OFF)\newline
+      $\rightarrow$~hvpstrig = OFF (trigger enable off; the SCR ON latch has already dropped)\newline
       $\rightarrow$~rfswitch = OFF (RF drive enable removed)\newline
       $\rightarrow$~intcomp = OFF}
   \tlrow{t ≈ 6\textendash{}10 s}{ss rf\_statesFF: Fault file capture\newline
@@ -1656,12 +1653,13 @@ This example illustrates a \textbf{HVPS internal fault} monitored by the SLC-500
       $\rightarrow$~HVPS must be inspected before restart\newline
       $\rightarrow$~No arc in RF waveguide: no channel latched, FSTFLT = 0\newline
       $\rightarrow$~No forced\_fault latch (this is HVPS path, not Fast IC/AIM arc)\newline
-      $\rightarrow$~Recovery requires: clearing HVPS arc latch, verifying HVPS\newline
-      oil/insulation condition, then normal restart sequence}
+      $\rightarrow$~Recovery requires: clearing the HVPS arc and crowbar latches\newline
+      (HVPS reset), verifying HVPS oil/insulation condition, closing the\newline
+      contactor, then normal restart sequence}
 \end{timeline}
 
 \begin{keynote}
-\textbf{Key features of this type of trip}: (1) The SLC-500 HVPS PLC is the first actor (\textasciitilde10--20 ms); the RF MPS PLC and Fast IC are not involved. (2) HVPS shutdown is via the \textbf{SLC-500 supervisory output} (\cref{sec:scr-enable} path) --- this is distinct from the SCR ENABLE fiber of the RF Local Display Panel. (3) The HVPS STATUS fiber goes dark with the 24~V fault/enable; the RF Local Display Panel receives it as the HVPS beam abort and sets its beam-abort output, which is not cabled; the fiber does not reach the Fast IC or the AIM. (4) \textbf{RF drive shutdown signal chain}: There is no documented hardware path from the SLC-500 HVPS PLC trip to the RFP module RF drive. The RF drive remains asserted at the software level until \texttt{s\_go\_off} Step 6 writes \texttt{rfswitch\ =\ OFF} at approximately t ≈ 6 s after the initial trip. During the intervening period the klystron cathode HV has already collapsed --- the klystron produces no RF output even with drive signal still applied, because klystron amplification requires cathode high voltage. This is safe but the indirection must be understood. See \cref{sec:xl-rf-shutdown} for the complete RF shutdown signal trace for this scenario. (5) Fault files capture the RF/IQA signal waveform at HVPS collapse time. (6) The \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} bit identifies the source; no channel latched in \texttt{ARCLTDSTT} and \texttt{FSTFLT\ =\ 0} confirm no waveguide arc was involved.
+\textbf{Key features of this type of trip}: (1) The HVPS controller is the only actor: its trigger boards fire the crowbar in hardware, and its SLC-500 opens the contactor within a scan (\textasciitilde10--20 ms); the RF MPS PLC and Fast IC are not involved. (2) HVPS shutdown is by the crowbar and the contactor inside the controller (\cref{sec:scr-enable}) --- not by the SCR ENABLE fiber of the RF Local Display Panel. (3) The HVPS STATUS fiber goes dark with the crowbar trigger and stays dark while the contactor is open; the RF Local Display Panel receives it as the HVPS beam abort and sets its beam-abort output, which is not cabled; the fiber does not reach the Fast IC or the AIM. (4) \textbf{RF drive shutdown signal chain}: There is no documented hardware path from the SLC-500 HVPS PLC trip to the RFP module RF drive. The RF drive remains asserted at the software level until \texttt{s\_go\_off} Step 6 writes \texttt{rfswitch\ =\ OFF} at approximately t ≈ 6 s after the initial trip. During the intervening period the klystron cathode HV has already collapsed --- the klystron produces no RF output even with drive signal still applied, because klystron amplification requires cathode high voltage. This is safe but the indirection must be understood. See \cref{sec:xl-rf-shutdown} for the complete RF shutdown signal trace for this scenario. (5) Fault files capture the RF/IQA signal waveform at HVPS collapse time. (6) The \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} bit identifies the source; no channel latched in \texttt{ARCLTDSTT} and \texttt{FSTFLT\ =\ 0} confirm no waveguide arc was involved.
 \end{keynote}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -1689,7 +1687,7 @@ SNL response:
     → s_off → s_go_park → s_go_tune → s_go_on_cw
     → HVPSONSUB():
         rfswitch = ON
-        hvpstrig = ON  → SLC-500 (RIO adapter 1) output 0 on → thyristor triggers enabled
+        hvpstrig = ON  → SLC-500 CONTROL ENABLE → SCR ON latch → regulator on
         aimon = ON     → AIM "HVPS_On" asserted → HVPS on request to the panel
     → RESET_BMABTSUB():
         fba = 0 → rba → rstf  (beam abort reset, arc hardware latches cleared)
@@ -1790,7 +1788,7 @@ The \texttt{aimon} write (\texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}AIM:\all
   If the software is not in the ON transition sequence (e.g., the IOC is dead), AIM holds this output LOW and HVPS cannot be energized
 \end{itemize}
 
-In the fault path, \texttt{aimon} is NOT explicitly cleared in \texttt{s\_go\_off} --- the hardware trip (SCR ENABLE removed by the panel logic + SLC-500 \texttt{hvpstrig=OFF}) has already shut down the HVPS. The explicit \texttt{aimon=ON} is only needed at startup.
+In the fault path, \texttt{aimon} is NOT explicitly cleared in \texttt{s\_go\_off} --- the hardware trip (SCR ENABLE removed by the panel logic) or the SNL's \texttt{hvpstrig=OFF}, which drops the SLC-500's SCR ON latch, shuts down the HVPS. The explicit \texttt{aimon=ON} is only needed at startup.
 
 \subsection{\texorpdfstring{\texttt{forced\_fault} Anti-Auto-Reset}{forced\_fault Anti-Auto-Reset}}\label{sec:xl-forced-fault}
 
@@ -1802,12 +1800,12 @@ Without \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{}LTCH},
 
 Before January 2004, VXI interlock bits were read from the AIM interrupt status register (ISR). EPICS processed the AIM:MODU record continuously, and each read cleared the ISR --- a latched fault could be invisible to the alarm system because it self-cleared between EPICS scans. Sass changed \texttt{rf\_\allowbreak{}interlock\_\allowbreak{}vxi.\allowbreak{}db} (rev 1.2, Jan 2004) to read from the AIM \textbf{fast interlock status/latch register}, which holds bits until a fault reset clears them. \textbf{This is a critical reliability fix} --- without it, the software alarm chain would miss fast faults.
 
-\subsection{Dual SCR Enable Paths --- Supervisory vs. Fast}\label{sec:xl-dual-scr}
+\subsection{Thyristor Enable Paths --- Controller, Trigger Enable and Panel}\label{sec:xl-dual-scr}
 
 
-The HVPS SCR bank has two independent enable paths that operate in different domains:
+Three conditions must all hold for the HVPS thyristors to fire, in three different domains \R{28}, \R{38}:
 
-\begin{longtable}[]{@{}Q{\dimexpr 0.2868\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.1613\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.0500\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.2510\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.2510\linewidth-1.60\tabcolsep\relax}@{}}
+\begin{longtable}[]{@{}Q{\dimexpr 0.2500\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.1400\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.1100\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.2500\linewidth-1.60\tabcolsep\relax}Q{\dimexpr 0.2500\linewidth-1.60\tabcolsep\relax}@{}}
 \toprule\noalign{}
 Path & Owner & Speed & Set by & Cleared by \\
 \midrule\noalign{}
@@ -1815,10 +1813,11 @@ Path & Owner & Speed & Set by & Cleared by \\
 \bottomrule\noalign{}
 \endlastfoot
 RF Local Display Panel → SCR ENABLE fiber → trigger boards (B118) & Hardware interlock & μs & HVPS on request with no fault & Panel logic (O4) \\
-SLC-500 output 0 → COMMANDS bus (B118) & Supervisory enable & \textasciitilde20 ms & SNL \texttt{hvpstrig=ON} in \texttt{HVPSONSUB} & SNL \texttt{hvpstrig=OFF} in \texttt{s\_go\_off} \\
+SLC-500 output 0 (24~V fault/enable) → COMMANDS bus (B118) & HVPS controller & With the contactor & About \qty{3}{\second} after the contactor closes, with 240~V power (rung 0003) & The contactor opening \\
+SLC-500 SCR ON latch → regulator & HVPS controller, from EPICS & Scan; regulator after \qty{3}{\second} & Rising edge of \texttt{hvpstrig} in \texttt{HVPSONSUB}, with SCR ENABLE lit, within \qty{0.5}{\second} (rungs 0004, 0009, 0010) & \texttt{hvpstrig=OFF} in \texttt{s\_go\_off}; a dark SCR ENABLE; a current, overvoltage or crowbar trip \\
 \end{longtable}
 
-The SLC-500 output is the \textbf{supervisory gate} --- it deliberately enables the HVPS at the beginning of the startup sequence and is the controlled OFF path during orderly shutdown. The panel's SCR ENABLE fiber is the \textbf{fast-trip gate} --- held lit during normal operation, dark on fault. Both must be satisfied simultaneously for the HVPS to produce HV output.
+The trigger enable is the \textbf{controlled ON/OFF path}: the SNL starts the regulator with it at the beginning of the startup sequence and stops it in the orderly shutdown. The SCR ON latch drops on any fault of its chain and does not restart by itself, so a dark SCR ENABLE stops the HVPS until the next turn-on. Output 0 is not commanded from EPICS: it follows the contactor, and STATUS follows it. The panel's SCR ENABLE fiber is the \textbf{fast-trip gate} --- held lit during normal operation, dark on fault.
 
 \subsection{RF MPS PLC Two-Path Architecture --- Defense in Depth}\label{sec:xl-three-path}
 
@@ -1863,11 +1862,13 @@ This asymmetry should be considered during upgrade architecture design: the new 
 The complete RF shutdown signal trace for a HVPS PLC-only trip is:
 
 \begin{timeline}
-  \tlrow{t = 0 ms}{SLC-500 HVPS PLC detects internal fault (e.g., transformer arc):\newline
-      $\rightarrow$~Slot-5 output 0 (24~V fault/enable) drops\newline
-      $\rightarrow$~Thyristor triggers inhibited on the COMMANDS bus (B118)\newline
-      $\rightarrow$~HVPS HV output begins to collapse (SCR gates disabled)}
-  \tlrow{t ≈ 0 ms}{HVPS STATUS fiber goes dark (it follows the 24~V fault/enable):\newline
+  \tlrow{t = 0 ms}{HVPS controller trips (e.g., transformer arc):\newline
+      $\rightarrow$~The trigger boards fire the crowbar and inhibit the triggers\newline
+      $\rightarrow$~HVPS HV output collapses through the crowbar\newline
+      $\rightarrow$~About 10\textendash{}20 ms later the SLC-500 drops its SCR ON latch\newline
+      and opens the contactor; slot-5 output 0 (24~V fault/enable) drops\newline
+      with it \R{38}}
+  \tlrow{t ≈ 0 ms}{HVPS STATUS fiber goes dark (crowbar trigger, then output 0):\newline
       $\rightarrow$~RF Local Display Panel receives the HVPS beam abort\newline
       $\rightarrow$~The panel's beam-abort output is set; it is not cabled, so\newline
       nothing leads from it to the AIM or the RFP}
@@ -1888,7 +1889,7 @@ The complete RF shutdown signal trace for a HVPS PLC-only trip is:
   \tlrow{t ≈ 1 s}{SNL rf\_states.st detects fault → enters s\_go\_off:\newline
       $\rightarrow$~Step 1: fba = 1 (beam abort forced from the software side)\newline
       $\rightarrow$~Steps 2\textendash{}4: HVPS voltage setpoint → 0 (no-op; already collapsed)\newline
-      $\rightarrow$~Step 5: hvpstrig = OFF (SCR supervisory enable confirmed OFF)\newline
+      $\rightarrow$~Step 5: hvpstrig = OFF (trigger enable off)\newline
       $\rightarrow$~Step 6: rfswitch = OFF\newline
       \{STN\}:STN:RFP:RFENABLE = 0\newline
       $\rightarrow$~RFP module RF drive DAC output disabled\newline
@@ -1910,7 +1911,7 @@ Time & Event & RF Drive State \\
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-t = 0 & HVPS PLC trips; SCR ENABLE removed & Drive ON; klystron de-powered \\
+t = 0 & HVPS controller trips: crowbar fired; SCR ON latch dropped and contactor opened within a scan & Drive ON; klystron de-powered \\
 t ≈ 0 & HVPS HV collapses; klystron cathode at \textasciitilde0 V & Drive ON (software unaware); RF output = 0 \\
 t ≈ 100 ms--1 s & EPICS alarms propagate via Remote I/O & Drive ON (SNL not yet triggered) \\
 t ≈ 1 s & SNL s\_go\_off sequence begins & Drive ON (Steps 1--5 in progress) \\
@@ -1981,7 +1982,7 @@ Source & What It Captures & Time Resolution & Latency to Availability & Storage 
 \endlastfoot
 \textbf{AIM Hardware History Buffer} & 12 arc channel voltages + HVPS voltage (continuous ADC ring buffer) & \textasciitilde μs per sample & Immediately (freezes on fault) & VXI AIM module on-board memory; exported to IOC \texttt{/\allowbreak{}dat/\allowbreak{}aimHist.\allowbreak{}dat} \\
 \textbf{SNL Fault Files} (\texttt{/\allowbreak{}dat/\allowbreak{}FAULT*\_N}) & 11 RF/IQA signal channels (I/Q waveforms, amplitude waveforms) & \textasciitilde1 ms per sample & \textasciitilde6--10 s post-fault & VxWorks virtual disk \texttt{/dat/} on VXI IOC \\
-\textbf{B118 Oscilloscope (4-channel)} & HVPS DC voltage, HVPS DC current, inductor T2 sawtooth voltage, transformer T1 AC current & Oscilloscope sweep rate (operator-set; typical 10--100 ms/div) & Continuous display; capture on trigger & Local oscilloscope (memory, USB, or printout) \\
+\textbf{B118 Oscilloscope (4-channel)} & HVPS DC voltage, HVPS DC current, transformer T1 AC current, inductor T2 sawtooth voltage & Oscilloscope sweep rate (operator-set; typical 10--100 ms/div) & Continuous display; capture on trigger & Local oscilloscope (memory, USB, or printout) \\
 \textbf{EPICS Channel Archiver} & All EPICS PVs --- alarm states, analog readbacks, timestamps, state machine transitions & 1 Hz nominal; event-driven on PV change & Always available; rolling multi-year history & EPICS archiver server (see \cref{sec:fd-archiver}) \\
 \end{longtable}
 
@@ -2092,8 +2093,8 @@ Channel & Signal & Source Hardware & Expected Waveform Pattern & Diagnostic Valu
 \endlastfoot
 \textbf{CH1} & HVPS DC Output Voltage & Resistive voltage divider (≈10,000:1) from HVPS DC bus & Smooth DC at ≈ −72 to −75 kV typical; slight 12-pulse ripple (\textasciitilde6.9\% P-P) & Crowbar: instant collapse to \textasciitilde0 V; SCR disable: decay over \textasciitilde100 ms; setpoint changes visible as slow ramp \\
 \textbf{CH2} & HVPS DC Output Current & Danfysik DC-CT (Hall-effect current transducer) & DC at \textasciitilde22 A nominal & Arc event: current spike; crowbar: current spike then zero; HVPS trip: current decay \\
-\textbf{CH3} & Inductor 2 (T2) Sawtooth Voltage & SCR firing circuit monitor winding on T2 & \textbf{Bipolar asymmetric sawtooth} (inverted direction vs. theoretical model --- this is normal for real SPEAR3) & Waveform disappears when SCR firing stops; asymmetry changes indicate firing angle / regulation shifts; absence indicates HVPS off \\
-\textbf{CH4} & Transformer 1 (T1) AC Phase Current & Current transducer on T1 primary winding & \textbf{Bipolar asymmetric square pulses} with commutation spikes (not sinusoidal --- characteristic of 12-pulse discrete switching) & Dropout indicates HVPS de-energized; asymmetric pulses indicate phase balance issue; commutation spike amplitude indicates SCR health \\
+\textbf{CH3} & Transformer 1 (T1) AC Phase Current & Current transducer on T1 primary winding & \textbf{Bipolar asymmetric square pulses} with commutation spikes (not sinusoidal --- characteristic of 12-pulse discrete switching) & Dropout indicates HVPS de-energized; asymmetric pulses indicate phase balance issue; commutation spike amplitude indicates SCR health \\
+\textbf{CH4} & Inductor 2 (T2) Sawtooth Voltage (SCR firing signal) & SCR firing circuit monitor winding on T2 & \textbf{Bipolar asymmetric sawtooth} (inverted direction vs. theoretical model --- this is normal for real SPEAR3) & Waveform disappears when SCR firing stops; asymmetry changes indicate firing angle / regulation shifts; absence indicates HVPS off \\
 \end{longtable}
 
 \textbf{Accessing data for fault analysis}:
@@ -2196,7 +2197,7 @@ Forced fault & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{
   \item
     Was CH1 a sudden drop (crowbar) or a slow decay (SCR disable)?
   \item
-    Did CH4 drop at the same instant as CH1, or before?
+    Did CH3 drop at the same instant as CH1, or before?
   \end{itemize}
 \item
   \textbf{Do NOT issue a fault reset} until the cause is understood --- the reset clears the arc latch evidence
@@ -2226,7 +2227,7 @@ Forced fault & \texttt{\{STN\}:\allowbreak{}STN:\allowbreak{}FORCED:\allowbreak{
 \setcounter{enumi}{3}
 \tightlist
 \item
-  \textbf{Review the B118 oscilloscope capture} (see \cref{sec:fd-scope}): note whether CH1 (DC voltage) shows an abrupt collapse (crowbar, \textless{} 1 μs) or a gradual decay (\textasciitilde100 ms for SCR disable), and whether CH4 (T1 AC current) dropped simultaneously with or prior to CH1
+  \textbf{Review the B118 oscilloscope capture} (see \cref{sec:fd-scope}): note whether CH1 (DC voltage) shows an abrupt collapse (crowbar, \textless{} 1 μs) or a gradual decay (\textasciitilde100 ms for SCR disable), and whether CH3 (T1 AC current) dropped simultaneously with or prior to CH1
 \item
   \textbf{Determine the initiating event} --- use EPICS timestamp ordering (1 Hz resolution for Remote I/O PVs) to sequence events among HVPS faults; use the arc channel bit pattern for hardware-speed (\textless{} 1 μs) faults
 \end{enumerate}
@@ -2249,10 +2250,10 @@ No arc latched, \texttt{HVPSXFORM:\allowbreak{}ARC:\allowbreak{}LTCH} set & HV t
 No arc latched, \texttt{STN:\allowbreak{}SUMY:\allowbreak{}PLC} = FAULT & RF MPS PLC trip (cooling water over-temp, vacuum excursion, or overpower) & RF MPS PLC (\textasciitilde10 ms; collector protection \qty{0.70}{\second}) \\
 No arc latched, \texttt{HVPSOIL:\allowbreak{}TEMP:\allowbreak{}LTCH} set & Oil overtemperature (slow thermal fault) & SLC-500 HVPS PLC (\textasciitilde10--20 ms) \\
 No arc latched, \texttt{HVPS:\allowbreak{}VOLT:\allowbreak{}LTCH} set & HVPS DC output overvoltage & SLC-500 HVPS PLC (\textasciitilde10--20 ms) \\
-CH3 waveform entirely absent (oscilloscope) & SCR firing stopped --- contactor open, or full SCR fault & Hardware, timing depends on cause \\
-CH4 waveform asymmetric or one phase missing & Phase imbalance in primary; possible SCR failure or phase loss & SLC-500 or AC protection \\
+CH3 waveform asymmetric or one phase missing & Phase imbalance in primary; possible SCR failure or phase loss & SLC-500 or AC protection \\
+CH4 waveform entirely absent (oscilloscope) & SCR firing stopped --- contactor open, or full SCR fault & Hardware, timing depends on cause \\
 CH1 voltage collapse: instant step to \textasciitilde0 V & Crowbar fired & Crowbar circuit (trigger signal \textless{} 1 µs; the crowbar then \textbf{conducts ≈ 10 µs} later, and the primary current is interrupted in \textbf{4--8 ms} --- SLAC-PUB-7591) \\
-CH1 voltage collapse: exponential decay over \textasciitilde100 ms & SCR gate drive disabled (supervisory path) & SLC-500 relay (\textasciitilde10--20 ms) \\
+CH1 voltage collapse: exponential decay over \textasciitilde100 ms & Firing stopped without the crowbar: SCR ENABLE dark, the regulator off (SCR ON latch dropped) or the contactor open & Panel logic (μs) or SLC-500 program (\textasciitilde10--20 ms) \\
 \end{longtable}
 
 \begin{keynote}
@@ -2389,4 +2390,5 @@ Ref & File & Location & Content \\
 \RDEF{35} & SPEAR3 station database: \texttt{rf\_\allowbreak{}stn\_\allowbreak{}All.\allowbreak{}substitutions,v}, \texttt{rf\_\allowbreak{}stn\_\allowbreak{}4CVAll.\allowbreak{}substitutions,v}, \texttt{rf\_\allowbreak{}interlock\_\allowbreak{}arc.\allowbreak{}db,v}; \texttt{srf1.\allowbreak{}substitutions,v} & \texttt{rfApp/Db/}; \texttt{rfApp/\allowbreak{}DbIoc/} & The AIM arc channels and their names, with External MPS on the spare channel since 2003; the slot names of the SRF1 crate (slot 5 MPS Shutoff, slot 6 Link Passthru) \\
 \RDEF{36} & Wiring diagrams WD-340-330-23 and -25 & \texttt{llrf/\allowbreak{}documentation/\allowbreak{}mpsWiringDiagrams/} & RF MPS PLC-5 digital inputs and outputs \\
 \RDEF{37} & RF MPS PLC-5 program (2011--2012), decoded & \texttt{llrf/\allowbreak{}allenBradley/\allowbreak{}decoded/} & Collector protection: HVPS voltage times current minus the square of 0.017 times the RF detector reading, above \qty{1200}{\kilo\watt} for \qty{0.70}{\second}, latches and drops the collector output and the global interlock summary \\
+\RDEF{38} & HVPS controller SLC-500 program, printout of 23 June 2021 & \texttt{hvps/\allowbreak{}documentation/\allowbreak{}plc/\allowbreak{}CasselPLCCode.\allowbreak{}pdf} & Rungs 0002--0004 and 0009--0013: the contactor latch; output 0 (24~V fault/enable), on \qty{3}{\second} after the contactor closes; the SCR ON latch, set by the EPICS trigger enable within \qty{0.5}{\second}; the regulator; the crowbar latch. Rung 0057: the transformer-arc latch \\
 \end{longtable}

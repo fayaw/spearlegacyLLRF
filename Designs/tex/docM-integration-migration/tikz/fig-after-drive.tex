@@ -1,0 +1,90 @@
+% !TeX root = ../M_integration_migration_plan.tex
+% The station after I6, drawn with I3 to I5 done; I7a adds no wiring. Same grid as
+% fig-legacy-couplings and fig-after-ic. Heavy outlines mark what changed since
+% fig-after-ic. The drive and the L1/L2 lines pass over the Remote I/O link.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  every node/.append style={execute at begin node=\hyphenpenalty 10000\relax},
+  chg/.style={line width=1.1pt},
+  two/.style={{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut}]
+
+% ----- VXI crate (column 1), until I8 --------------------------------------
+\node[ctrl,text width=28mm,anchor=west] (cpu) at (10,-4)
+  {\textbf{Slot 0 CPU}\\ IOC B132-IOCRF,\\ SNL programs,\\ minimal coordinator};
+\node[plc,text width=28mm,anchor=west] (scn) at (10,-20)
+  {\textbf{Slot 1 RIO scanner}};
+\node[rf,chg,text width=28mm,anchor=west] (rfp) at (10,-34)
+  {\textbf{Slot 4 RFP}\\ hot standby};
+\node[rf,text width=28mm,anchor=west]  (iqa) at (10,-48)
+  {\textbf{IQA $\times$3}\\ RF measurements};
+\node[plc,text width=28mm,anchor=west] (aim) at (10,-62)
+  {\textbf{Slot 12 AIM}};
+\node[plc,text width=28mm,anchor=west] (s5)  at (10,-76)
+  {\textbf{Slot 5 MPS Shutoff}};
+\node[inner sep=0pt,minimum size=0pt] (lane) at (2,-50) {};
+\node[grp,fit=(cpu)(scn)(rfp)(iqa)(aim)(s5)(lane)] (crate) {};
+\node[lbl,anchor=south west] at (crate.north west) {VXI crate, rack B132-11, until I8};
+
+\draw[thick,draw=cNeut] (s5.west) -- (s5.west -| 4,0) -- (rfp.west -| 4,0);
+\draw[thick,draw=cNeut] (aim.west) -- (aim.west -| 4,0);
+\draw[thick,draw=cNeut] (iqa.west) -- (iqa.west -| 4,0);
+\draw[sig] (rfp.west -| 4,0) -- (rfp.west);
+\node[tag,rotate=90] at (4,-55) {RF\_FAULT};
+
+% ----- LLRF9, Galil and the drive --------------------------------------------
+\node[rf,chg,text width=28mm,anchor=west] (llrf) at (56,-4)
+  {\textbf{LLRF9 Units 1 and 2}\\ B132-13: field loop,\\ drive, tuner loops,\\ vendor HVPS loop};
+\node[plc,chg,text width=28mm,anchor=west] (gal) at (102,-4)
+  {\textbf{Galil DMC-4143}\\ four tuner motors};
+\node[pwr,chg,text width=22mm,anchor=west] (drv) at (56,-34)
+  {\textbf{Transfer switch,}\\ \textbf{drive amplifier}\\ B132-11 $\rightarrow$ klystron};
+\draw[sig] (llrf.east) -- (gal.west) node[tag,midway,above]{Ethernet};
+\draw[sig] (llrf.west) -- (cpu.east) node[tag,midway,above,align=center]{HVPS\\ setpoint};
+\draw[sig] (rfp.east) -- (rfp.east -| drv.west) node[tag,midway,above]{standby};
+
+% ----- RF MPS and heater -------------------------------------------------------
+\node[plc,chg,text width=28mm,anchor=west] (mps) at (102,-38)
+  {\textbf{RF MPS ControlLogix}\\ B132-13, from I4};
+\node[pwr,chg,text width=28mm,anchor=west] (htr) at (148,-38)
+  {\textbf{Heater supply}\\ Genesys AC, from I5;\\ coil supplies};
+\draw[two] (mps.east) -- (htr.west) node[tag,midway,above]{control, V/I};
+
+% ----- Remote I/O link: the PLC-5 node is gone, the tuner and HVPS nodes stay ----
+\node[plc,text width=28mm,anchor=west] (tun) at (148,-22)
+  {\textbf{Tuner chassis 340-315}\\ fallback of I3,\\ motors disconnected};
+\node[pwr,text width=28mm,anchor=west] (hv)  at (148,-62)
+  {\textbf{HVPS controller, B118}\\ legacy SLC-500\\ until I7b};
+\draw[bus] (scn.east) -- (scn.east -| tun.west);
+\draw[bus] (tun.east |- 0,-20) -- (183,-20) |- (hv.east);
+\node[tag,anchor=south] at (125,-19.4) {Remote I/O link};
+% gaps in the bus where the LLRF9 lines pass over it
+\fill[white] (66.9,-21.6) rectangle (69.9,-18.4);
+\fill[white] (82.5,-21.6) rectangle (85.5,-18.4);
+
+% ----- the Interface Chassis ---------------------------------------------------
+\node[ctrl,text width=74mm,anchor=west] (ic) at (56,-62)
+  {\textbf{Interface Chassis + Waveform Buffer}\\
+   permits remove the LLRF9 enable and SCR ENABLE;\\
+   the LLRF9 status acts from I6};
+\draw[sig] (68.4,0 |- llrf.south) -- (68.4,0 |- drv.north) node[tag,pos=0.75,right]{drive};
+\draw[two] (84,0 |- llrf.south) -- (84,0 |- ic.north) node[tag,pos=0.8,right]{L1, L2};
+\draw[two] (aim.east) -- (ic.west) node[tag,midway,above]{J15, 37-pin};
+\draw[two,densely dashed] (ic.east) -- (hv.west) node[tag,midway,above]{3 fibers};
+\draw[two] (mps.south) -- (mps.south |- ic.north) node[tag,midway,right]{X530 J2, J3};
+\draw[sig] (108,0 |- ic.north) -- (108,0 |- mps.south) node[tag,midway,left]{J31};
+
+% ----- permits, arc detection, forward power ------------------------------------
+\node[blk,text width=28mm,anchor=north] (ext) at (s5.south |- 0,-92)
+  {SPEAR MPS beam permit\\ orbit interlock (24 V)};
+\draw[sig] (ext.north) -- (s5.south);
+\draw[sig] (ext.east) -| (48,-67) -- (ic.west |- 0,-67);
+\node[blk,text width=28mm,anchor=north] (det) at (71.4,-92)
+  {\textbf{Optical arc detectors}\\ tunnel fibers};
+\node[blk,text width=28mm,anchor=north] (arc) at (117.4,-92) {\textbf{ARC4}};
+\draw[two,densely dashed] (det.east) -- (det.east -| arc.west);
+\draw[two] (arc.north) -- (arc.north |- ic.south);
+\node[tag,anchor=east] at (116,-80) {A1--A3};
+\node[rf,text width=28mm,anchor=north] (kf) at (hv.south |- 0,-92)
+  {\textbf{Klystron forward}\\ \textbf{coupler}};
+\draw[sig] (kf.north) |- (128,-82) -- (128,0 |- ic.south);
+\node[tag,anchor=south] at (146,-82) {J32};
+\end{tikzpicture}

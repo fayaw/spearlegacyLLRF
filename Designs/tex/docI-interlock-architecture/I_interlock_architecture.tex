@@ -102,6 +102,24 @@ require field verification.
 % not in a document sent to a reviewer.  Add a row for a substantive change;
 % leave historical rows frozen, since they record what was true at the time.
 %
+% 1.12 2026-11-13  Faya Wang
+%   The EPICS trigger enable (hvpstrig, HVPSSCR:ON:CTRL) is not slot-5 output 0.
+%   From the HVPS controller program (new R38, CasselPLCCode.pdf): it is input
+%   I:1/64 CONTROL ENABLE, whose rising edge sets the SCR ON latch within 0.5 s
+%   and starts the regulator (rungs 0004, 0009-0011); output 0 (24 V
+%   fault/enable) comes on about 3 s after the contactor closes (rung 0003), so
+%   STATUS stays lit at an orderly turn-off.  A crowbar drops the crowbar latch,
+%   which opens the contactor (rungs 0002, 0013).  sec:scr-enable and
+%   sec:xl-dual-scr rewritten; signal tables, SNL listings, HVPS-trip timelines,
+%   fault guide, enable-chain, signal-flow and cascade figures corrected.  The
+%   voltage setpoint written by s_go_off is SRF1:HVPS:VOLT:CTRL, not HVPS:VOLT:SP.
+%
+% 1.11 2026-11-12  Faya Wang
+%   B118 oscilloscope channels follow the instrument setup (Instruments/
+%   setup.md): CH3 = transformer T1 current, CH4 = SCR firing signal (inductor
+%   T2 sawtooth).  The old order came from the HVPS simulation's plot layout.
+%   Data-source table, channel table, checklist and fault guide updated.
+%
 % 1.10 2026-11-11  Faya Wang
 %   The AIM is schematic SD-340-309-01, not "drawing 340-307": 340-307 is a
 %   spare, slightly different Fast Interlock Chassis (nameplate photo, B132-12,

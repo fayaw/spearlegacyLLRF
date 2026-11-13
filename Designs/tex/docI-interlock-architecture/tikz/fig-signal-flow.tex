@@ -48,7 +48,7 @@
 \draw[sig] (fic.south) -- (fout.north);
 
 \node[pwr,text width=54mm,anchor=north] (sout) at (\xC,-60)
-  {SCR supervisory enable\\ Slot 5 OX8 output 0 (24 V)\\
+  {regulator off (SCR ON latch)\\ contactor open, output 0 (24 V) off\\
    {\tiny COMMANDS bus of the trigger boards, B118}};
 \draw[sig] (slc.south) -- (sout.north);
 
@@ -116,7 +116,7 @@
   {\textbf{SNL STATE MACHINE} \texttt{rf\_states.st} --- VxWorks IOC,
    $\approx\qty{1}{\second}$ response\\[3pt]
    {\footnotesize \texttt{s\_go\_off}: force beam abort $\rightarrow$ HVPS setpoint to zero
-    $\rightarrow$ \qty{5}{\second} ramp $\rightarrow$ SCR gate off $\rightarrow$ RF drive off
+    $\rightarrow$ \qty{5}{\second} ramp $\rightarrow$ trigger enable off $\rightarrow$ RF drive off
     $\rightarrow$ fault file capture (11 channels)}};
 \draw[sig] (epics.south) -- node[right,tag,xshift=1mm]
   {\texttt{fault\_stnoff} $\neq$ NO\_ALARM} (snl.north);

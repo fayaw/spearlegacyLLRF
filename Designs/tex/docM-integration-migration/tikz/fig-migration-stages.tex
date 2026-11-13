@@ -16,7 +16,7 @@
 \node[plc, stp] (i4) at (82,-15)    {\textbf{I4}\\ RF MPS};
 \node[pwr, stp] (i5) at (102.5,-15) {\textbf{I5}\\ heater supply under RF MPS control};
 \node[pwr, stp] (i7) at (123,-15)
-  {\textbf{I7}\\ new HVPS controller (Hoffman box) and PPS box, unit by unit};
+  {\textbf{I7}\\ I7a HVPS control by the LLRF9; I7b, I7c new Hoffman and PPS boxes, unit by unit};
 \node[blk, stp,draw=cPwr!70,fill=cPwr!5] (i8) at (143.5,-15)
   {\textbf{I8}\\ legacy retirement, \mbox{B132-IOCRF} to new hardware (SW10); needs I1--I7};
 
@@ -39,7 +39,7 @@
   node[tag,pos=0.5,anchor=south east,align=right]
   {LLRF9 enable,\\ SPEAR MPS and\\ orbit permits} ([yshift=3mm]i6.west);
 \draw[sig,densely dashed] (i3.north) |- ([yshift=-3mm]i6.west);
-\draw[sig,densely dashed] (i6.east) -| (i7.north);
+\draw[sig] (i6.east) -| (i7.north);
 \draw[sig] (i1.south) to[out=-40,in=-140]
   node[tag,below]{LLRF9 measurement} (i3.south);
 

@@ -1,0 +1,77 @@
+% !TeX root = ../C_interface_chassis_requirements.tex
+% Permit logic of the interlock board (eq:station to eq:xmps), left to right:
+% inputs, fault latches and act masks, AND gates, outputs. The LLRF9 chain lies
+% outside the chassis; Unit 1's interlock output comes back as the input L2.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  every node/.append style={execute at begin node=\hyphenpenalty 10000\relax},
+  il/.style={anchor=east,inner sep=1pt},
+  ol/.style={anchor=west,inner sep=1pt},
+  w/.style={draw=cNeut,thick},
+  gate/.style={plc,minimum width=6mm,inner sep=0pt,font=\small\bfseries},
+  lm/.style={plc,minimum width=10mm,inner sep=0pt,font=\tiny,align=center},
+  dot/.style={circle,fill=cNeut,inner sep=0pt,minimum size=1.4mm}]
+
+% ----- HVPS STATUS: latched, enters the LLRF9 enable only -------------------------
+\node[il] at (30,9) {F3 HVPS STATUS};
+\node[lm,minimum height=7mm] (lb) at (41,9) {latch,\\ mask};
+\draw[w] (30.5,9) -- (lb.west);
+
+% ----- station permits ---------------------------------------------------------
+\foreach \y/\t in {0/S1 SPEAR MPS, -5/S2 orbit interlock, -10/P5 RF MPS summary,
+                   -15/{P6 heartbeat, alarm only}, -20/A1 ARC4 arc permit,
+                   -25/Waveform Buffer permit, -30/X1--X4 expansion}
+  {\node[il] at (30,\y) {\t};
+   \draw[w] (30.5,\y) -- (36,\y);
+   \draw[w] (46,\y) -- (56,\y);}
+\node[lm,minimum height=35mm] (la) at (41,-15) {};
+\node[rotate=90,font=\tiny,text=cPlc!80!black] at (la) {fault latch and act mask, \cref{eq:pk}};
+\node[gate,minimum height=35mm] (gps) at (59,-15) {\&};
+\node[gate,minimum height=12mm] (gen) at (75,-15) {\&};
+\draw[w] (gps.east) -- (gen.west) node[tag,pos=0.62,above]{$P_S$};
+\draw[w] (lb.east) -- (lb.east -| gen.north) -- (gen.north);
+\node[tag,right] at (75,0) {$p_{ST}$};
+
+% ----- LLRF9 enable and the chain ------------------------------------------------
+\node[plc,text width=18mm,anchor=west] (mode) at (84,-15)
+  {\textbf{L1 mode} (jumper)\\ I2: held on\\ from I3: logic};
+\draw[w] (gen.east) -- (mode.west) node[tag,midway,above]{EN};
+\node[rf,text width=30mm,anchor=west] (u2) at (114,-15)
+  {\textbf{LLRF9 Unit~2}\\ head of the chain};
+\node[rf,text width=30mm,anchor=west] (u1) at (114,-35)
+  {\textbf{LLRF9 Unit~1}\\ drives the klystron\\ interlock out: L2};
+\draw[sig] (mode.east) -- (u2.west) node[tag,midway,above]{L1};
+\draw[sig] (u2.south) -- (u2.south |- u1.north)
+  node[tag,midway,right]{interlock out to in};
+
+% ----- SCR ENABLE ----------------------------------------------------------------
+\node[gate,minimum height=41mm] (gscr) at (93,-64) {\&};
+\node[dot] at (66,-15) {};
+\draw[w] (66,-15) |- (gscr.west |- 0,-46);
+\foreach \y/\t in {-51/P3 waveguide pressure, -56/P4 collector}
+  {\node[il] at (30,\y) {\t}; \draw[w] (30.5,\y) -- (36,\y); \draw[w] (46,\y) -- (90,\y);}
+\node[lm,minimum height=10mm] at (41,-53.5) {latch,\\ mask};
+\node[il] at (30,-63) {L2 LLRF9 status};
+\draw[w] (30.5,-63) -- (36,-63); \draw[w] (46,-63) -- (90,-63);
+\node[lm,minimum height=7mm] at (41,-63) {mask\\ only};
+\foreach \y/\t in {-70/V3 HVPS-on request, -75/V2 station online}
+  {\node[il] at (30,\y) {\t}; \draw[w] (30.5,\y) -- (90,\y);}
+\draw[sig] (gscr.east) -- ++(5,0) node[ol]{F1 SCR ENABLE, to the HVPS controller};
+
+% ----- KLYSTRON CROWBAR ----------------------------------------------------------
+\foreach \y/\t in {-92/P1 main-focus summary, -97/P2 bucking-coil summary}
+  {\node[il] at (30,\y) {\t}; \draw[w] (30.5,\y) -- (36,\y); \draw[w] (46,\y) -- (56,\y);}
+\node[lm,minimum height=10mm] at (41,-94.5) {latch,\\ mask};
+\node[il] at (30,-102) {crowbar group, jumpers};
+\draw[w] (30.5,-102) -- (56,-102);
+\node[gate,minimum height=15mm] (gcb) at (59,-97) {\&};
+\node[dot] at (86,-97) {};
+\draw[w] (86,-97) |- (gscr.west |- 0,-82);
+\draw[w] (gcb.east) -- (86,-97) node[tag,midway,above]{CB};
+\draw[sig] (86,-97) -- (101,-97) node[ol]{F2 KLYSTRON CROWBAR, to the HVPS controller};
+
+% ----- External MPS line ---------------------------------------------------------
+\foreach \y/\t in {-112/S1 SPEAR MPS{,} raw, -117/S2 orbit interlock{,} raw}
+  {\node[il] at (30,\y) {\t}; \draw[w] (30.5,\y) -- (56,\y);}
+\node[gate,minimum height=10mm] (gx) at (59,-114.5) {\&};
+\draw[sig] (gx.east) -- (101,-114.5) node[ol]{V8 External MPS line, to the AIM's J4};
+\end{tikzpicture}

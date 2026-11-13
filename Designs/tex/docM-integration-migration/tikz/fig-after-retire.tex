@@ -1,0 +1,80 @@
+% !TeX root = ../M_integration_migration_plan.tex
+% The station after I8: no VXI crate, no Remote I/O link, no tuner chassis. Same grid
+% as fig-after-drive; the controls network takes the row of the Remote I/O link.
+% Heavy outlines mark what changed since fig-after-drive. The LLRF9 lines and the
+% reference pass over the network.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  every node/.append style={execute at begin node=\hyphenpenalty 10000\relax},
+  chg/.style={line width=1.1pt},
+  two/.style={{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut},
+  tap/.style={draw=cCtrl,thick}]
+
+% ----- coordinator, reference and machine permits (column 1) -------------------
+\node[ctrl,chg,text width=28mm,anchor=west] (cpu) at (10,-4)
+  {\textbf{IOC B132-IOCRF}\\ new hardware,\\ full coordinator};
+\node[rf,chg,text width=28mm,anchor=west] (ref) at (10,-34)
+  {\textbf{476\,MHz reference}\\ \textbf{distribution}};
+\node[blk,text width=28mm,anchor=west] (ext) at (10,-60)
+  {SPEAR MPS beam permit\\ orbit interlock (24 V)};
+
+% ----- LLRF9, Galil and the drive --------------------------------------------
+\node[rf,text width=28mm,anchor=west] (llrf) at (56,-4)
+  {\textbf{LLRF9 Units 1 and 2}\\ B132-13: field loop,\\ drive, tuner loops,\\ vendor HVPS loop};
+\node[plc,text width=28mm,anchor=west] (gal) at (102,-4)
+  {\textbf{Galil DMC-4143}\\ four tuner motors};
+\node[pwr,text width=22mm,anchor=west] (drv) at (56,-34)
+  {\textbf{Drive amplifier}\\ B132-11 $\rightarrow$ klystron};
+\draw[sig] (llrf.east) -- (gal.west) node[tag,midway,above]{Ethernet};
+
+% ----- RF MPS, heater and HVPS -----------------------------------------------------
+\node[plc,text width=28mm,anchor=west] (mps) at (102,-38)
+  {\textbf{RF MPS ControlLogix}\\ B132-13};
+\node[pwr,text width=28mm,anchor=west] (htr) at (148,-38)
+  {\textbf{Heater supply}\\ Genesys AC;\\ coil supplies};
+\draw[two] (mps.east) -- (htr.west) node[tag,midway,above]{control, V/I};
+\node[pwr,chg,text width=28mm,anchor=west] (hv)  at (148,-60)
+  {\textbf{HVPS controllers, B118}\\ new Hoffman boxes,\\ PPS Interface Boxes};
+
+% ----- the Interface Chassis ---------------------------------------------------
+\node[ctrl,chg,text width=74mm,anchor=west] (ic) at (56,-60)
+  {\textbf{Interface Chassis + Waveform Buffer}\\
+   every permit; the commands from the coordinator\\
+   through its own IOC, in place of J15};
+
+% ----- controls network, in the row of the old Remote I/O link -------------------
+\draw[bus,draw=cCtrl] (cpu.south |- 0,-20) -- (183,-20) |- (hv.east);
+\node[tag,anchor=south] at (140,-19.4) {controls network (EPICS)};
+\draw[tap] (cpu.south) -- (cpu.south |- 0,-20);
+\draw[tap] (60,0 |- llrf.south) -- (60,-20);
+\draw[tap] (94,-20) -- (94,0 |- ic.north);
+\draw[tap] (125,-20) -- (125,0 |- mps.north);
+\draw[tap] (170,-20) -- (170,0 |- htr.north);
+% gaps in the network where the reference and the LLRF9 lines pass over it
+\fill[white] (46.5,-21.6) rectangle (49.5,-18.4);
+\fill[white] (66.9,-21.6) rectangle (69.9,-18.4);
+\fill[white] (82.5,-21.6) rectangle (85.5,-18.4);
+
+% ----- RF, interlock and reference lines ---------------------------------------
+\draw[sig] (68.4,0 |- llrf.south) -- (68.4,0 |- drv.north) node[tag,pos=0.75,right]{drive};
+\draw[two] (84,0 |- llrf.south) -- (84,0 |- ic.north) node[tag,pos=0.8,right]{L1, L2};
+\draw[thick,draw=cNeut] (ref.east) -- (48,-34);
+\draw[sig] (48,-34) |- (llrf.west |- 0,-8);
+\draw[sig] (48,-34) |- (ic.west |- 0,-56);
+\fill[cNeut] (48,-34) circle (0.6);
+\draw[sig] (ext.east) -- (ic.west) node[tag,midway,above]{S1, S2};
+\draw[two,densely dashed] (ic.east) -- (hv.west) node[tag,midway,above]{3 fibers};
+\draw[two] (mps.south) -- (mps.south |- ic.north) node[tag,midway,right]{X530 J2, J3};
+\draw[sig] (108,0 |- ic.north) -- (108,0 |- mps.south) node[tag,midway,left]{J31};
+
+% ----- arc detection and forward power, as since I2 ------------------------------
+\node[blk,text width=28mm,anchor=north] (det) at (71.4,-78)
+  {\textbf{Optical arc detectors}\\ tunnel fibers};
+\node[blk,text width=28mm,anchor=north] (arc) at (117.4,-78) {\textbf{ARC4}};
+\draw[two,densely dashed] (det.east) -- (det.east -| arc.west);
+\draw[two] (arc.north) -- (arc.north |- ic.south);
+\node[tag,anchor=east] at (116,-72) {A1--A3};
+\node[rf,text width=28mm,anchor=north] (kf) at (hv.south |- 0,-78)
+  {\textbf{Klystron forward}\\ \textbf{coupler}};
+\draw[sig] (kf.north) |- (128,-72) -- (128,0 |- ic.south);
+\node[tag,anchor=south] at (146,-72) {J32};
+\end{tikzpicture}

@@ -58,6 +58,20 @@
   {SPEAR MPS beam permit\\ orbit interlock (24 V)};
 \draw[sig] (ext.north) -- (s5.south);
 
+% ----- arc-detector fibers and the forward-power detector of the Fast IC ----
+\node[blk,text width=28mm,anchor=north] (det) at (fic.south |- 0,-92)
+  {\textbf{Optical arc detectors}\\ tunnel fibers};
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut,densely dashed]
+  (det.north) -- (fic.south);
+\node[tag,anchor=east] at ($(det.north)!0.5!(fic.south)+(-1,0)$) {12 fibers};
+\node[rf,text width=28mm,anchor=north] (kf) at (hv.south |- 0,-92)
+  {\textbf{Klystron forward}\\ \textbf{coupler}};
+% J32 enters the Fast IC from below; J31 runs up to a PLC-5 analog input
+\draw[sig] (kf.north) |- ([xshift=8.6mm]fic.south |- 0,-80) -- ([xshift=8.6mm]fic.south);
+\node[tag,anchor=south] at (122,-80) {J32, RF in};
+\draw[sig] ([xshift=8.6mm]fic.north) |- (108,-46) -- (108,0 |- mps.south);
+\node[tag,anchor=south] at (94,-46) {J31, level};
+
 % ----- Remote I/O daisy chain: scanner, PLC-5, tuner chassis, HVPS PLC ----
 \draw[bus] (scn.east) -- (scn.east -| mps.west);
 \draw[bus] (mps.east |- 0,-20) -- (tun.west |- 0,-20);

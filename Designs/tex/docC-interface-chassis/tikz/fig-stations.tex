@@ -1,0 +1,74 @@
+% !TeX root = ../C_interface_chassis_requirements.tex
+% Legacy station (a) and the station from I2 (b): the cables and fibers that the
+% Interface Chassis takes over. Same columns in both panels; dashed lines are fibers.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  every node/.append style={execute at begin node=\hyphenpenalty 10000\relax},
+  vxi/.style={ctrl,text width=22mm,minimum height=9mm,anchor=west},
+  endbox/.style={text width=24mm,minimum height=9mm,anchor=west},
+  two/.style={sig,{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]}},
+  twof/.style={fib,{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]}}]
+
+% ===== (a) today =============================================================
+\node[anchor=south west,font=\small\bfseries] at (0,4) {(a) Today};
+\node[vxi] (aaim) at (0,-8)  {\textbf{AIM}\\ VXI slot~12};
+\node[vxi] (as5)  at (0,-24) {\textbf{VXI Slot~5}\\ SPEAR MPS and orbit permits};
+\begin{scope}[on background layer]
+  \node[grp,fit=(aaim)(as5)] (avxi) {};
+\end{scope}
+\node[lbl,anchor=south west] at (avxi.north west) {VXI crate, B132-11};
+\node[blk,text width=26mm,minimum height=26mm,anchor=west] (afic) at (47,-16)
+  {\textbf{Fast Interlock Chassis}\\ 340-308, B132-11};
+\node[blk,text width=26mm,minimum height=26mm,anchor=west] (apan) at (98,-16)
+  {\textbf{RF Local Display Panel}\\ 340-310, B132-12};
+\node[plc,endbox] (aplc) at (149,-8)  {\textbf{RF MPS PLC-5}\\ B132-13};
+\node[pwr,endbox] (ahv)  at (149,-24) {\textbf{HVPS controller}\\ B118};
+\node[rf,text width=22mm,anchor=north] (akf) at (66,-35)
+  {\textbf{Klystron}\\ \textbf{forward coupler}};
+\node[blk,text width=18mm,anchor=west] (adet) at (0,-42)
+  {\textbf{Optical arc}\\ \textbf{detectors}};
+
+\draw[two] (aaim.east |- 0,-5.5) -- (afic.west |- 0,-5.5) node[tag,midway,above]{J15, 25-pin};
+\draw[sig] (afic.west |- 0,-10.5) -- (aaim.east |- 0,-10.5) node[tag,midway,below]{37-pin to J4};
+\draw[sig] (as5.east) -- (as5.east -| afic.west) node[tag,midway,above]{spare fault, LEMO};
+\draw[twof] (afic.east) -- (apan.west) node[tag,midway,above]{8 fibers};
+\draw[two] (apan.east |- aplc.west) -- (aplc.west) node[tag,midway,above]{J2, J3: 25-pin, X530};
+\draw[twof] (apan.east |- ahv.west) -- (ahv.west) node[tag,midway,above]{3 fibers};
+\draw[sig] (akf.north) -- (akf.north |- afic.south) node[tag,midway,right]{J32 (RF INPUT)};
+\draw[twof] (adet.east) -| ([xshift=2mm]afic.south west)
+  node[tag,pos=0.25,above]{12 fibers};
+% the J31 cable runs over the panel to the PLC-5's analog input
+\draw[sig] ([xshift=22mm]afic.north west) -- ++(0,4) -| (aplc.north)
+  node[tag,pos=0.25,above]{J31 (RF AMPL OUTPUT)};
+
+% ===== (b) from I2 ===========================================================
+\node[anchor=south west,font=\small\bfseries] at (0,-55) {(b) From I2};
+\node[vxi] (baim) at (0,-67) {\textbf{AIM}\\ VXI slot~12};
+\node[vxi] (bs5)  at (0,-83) {\textbf{VXI Slot~5}\\ RF cut until I8;\\ J3 left open};
+\begin{scope}[on background layer]
+  \node[grp,fit=(baim)(bs5)] (bvxi) {};
+\end{scope}
+\node[lbl,anchor=south west] at (bvxi.north west) {VXI crate};
+\node[plc,text width=76.6mm,minimum height=26mm,anchor=west] (bic) at (47,-75)
+  {\textbf{Interface Chassis}, B132\\ interlock board and Waveform Buffer board};
+\node[plc,endbox] (bplc) at (149,-67) {\textbf{RF MPS PLC-5}\\ ControlLogix from I4};
+\node[pwr,endbox] (bhv)  at (149,-83) {\textbf{HVPS controller}\\ B118; new unit from I7};
+\node[rf,text width=22mm,anchor=north] (bkf) at (66,-95)
+  {\textbf{Klystron}\\ \textbf{forward coupler}};
+\node[blk,text width=42mm,anchor=north east] (bnew) at (bic.east |- 0,-95)
+  {\textbf{New:} SPEAR MPS and orbit permits, in parallel with Slot~5;
+   LLRF9 Units~1 and 2; RF and HVPS taps; EPICS};
+\node[blk,text width=18mm,anchor=west] (bdet) at (0,-101)
+  {\textbf{Optical arc}\\ \textbf{detectors}};
+\node[blk,text width=11mm,anchor=west] (barc) at (31,-101) {\textbf{ARC4}\\ from I1};
+
+\draw[two] (baim.east |- 0,-64.5) -- (bic.west |- 0,-64.5) node[tag,midway,above]{J15, 25-pin};
+\draw[sig] (bic.west |- 0,-69.5) -- (baim.east |- 0,-69.5) node[tag,midway,below]{37-pin to J4};
+\draw[two] (bic.east |- bplc.west) -- (bplc.west) node[tag,midway,above]{J2, J3: 25-pin, X530};
+\draw[twof] (bic.east |- bhv.west) -- (bhv.west) node[tag,midway,above]{3 fibers};
+\draw[sig] (bkf.north) -- (bkf.north |- bic.south) node[tag,midway,right]{J32 (RF INPUT)};
+\draw[two] (bnew.north) -- (bnew.north |- bic.south);
+\draw[twof] (bdet.east) -- (barc.west);
+\draw[two] (barc.north) |- (bic.west |- 0,-84) node[tag,pos=0.75,above]{A1--A3};
+\draw[sig] ([xshift=22mm]bic.north west) -- ++(0,4) -| (bplc.north)
+  node[tag,pos=0.25,above]{J31 (RF AMPL OUTPUT)};
+\end{tikzpicture}

@@ -2,8 +2,8 @@
 % The station after integration I2: same grid as fig-legacy-couplings, with the
 % Interface Chassis (and the Waveform Buffer in the same chassis) spanning
 % columns 2 and 3 of the protection row, where the Fast Interlock Chassis and
-% the RF Local Display Panel were.  Inputs used later (the ARC4 trip and the machine
-% permits after a logged run; the LLRF9 enable from I6 on) are dashed.
+% the RF Local Display Panel were.  Inputs that act only after a logged run (the ARC4
+% and the machine permits) are dashed.
 \begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
   every node/.append style={execute at begin node=\hyphenpenalty 10000\relax},
   new/.style={ctrl,line width=1.1pt}]
@@ -46,20 +46,33 @@
 % ----- the new chassis -------------------------------------------------------
 \node[new,text width=74mm,anchor=west] (ic) at (56,-62)
   {\textbf{Interface Chassis + Waveform Buffer} (one chassis)\\
-   in place of the Fast Interlock Chassis and the RF Local Display Panel:\\
-   panel logic, display, HVPS V/I buffers;\\
-   Waveform Buffer on RF taps, HVPS V/I and inductor voltages};
+   in place of the Fast Interlock Chassis and the panel:\\
+   panel logic, HVPS V/I buffers, forward-power detector;\\
+   Waveform Buffer on RF taps and the B118 HVPS signals};
 
 % ----- external connections -------------------------------------------------
 \node[blk,text width=28mm,anchor=north] (ext) at (s5.south |- 0,-92)
   {SPEAR MPS beam permit\\ orbit interlock (24 V)};
 \draw[sig] (ext.north) -- (s5.south);
 % the same permits, in parallel, into the Interface Chassis
-\draw[sig,densely dashed] (ext.east) -| (ic.south -| 62,0);
-\node[tag,anchor=west,align=left] at (63,-84) {in parallel from I2};
-\node[blk,text width=34mm,anchor=north,densely dashed] (later) at (104,-92)
-  {later inputs: ARC4 trip and the\\ machine permits (after a\\ logged run); LLRF9 enable (I6)};
-\draw[sig,densely dashed] (later.north) -- (later.north |- ic.south);
+\draw[sig,densely dashed] (ext.east) -| (48,-67) -- (ic.west |- 0,-67);
+\node[tag,anchor=west,align=left] at (49,-84) {in parallel from I2;\\ act after a logged run};
+% the arc fibers moved to the ARC4 at I1; its trip acts after a logged run
+\node[blk,text width=28mm,anchor=north] (det) at (71.4,-92)
+  {\textbf{Optical arc detectors}\\ tunnel fibers};
+\node[blk,text width=28mm,anchor=north] (arc) at (117.4,-92)
+  {\textbf{ARC4}\\ fibers moved at I1};
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut,densely dashed]
+  (det.east) -- (det.east -| arc.west);
+\draw[{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]},thick,draw=cNeut,densely dashed]
+  (arc.north) -- (arc.north |- ic.south);
+\node[tag,anchor=east] at (116,-80) {A1--A3};
+% the forward-power detector, now in the Interface Chassis
+\node[rf,text width=28mm,anchor=north] (kf) at (hv.south |- 0,-92)
+  {\textbf{Klystron forward}\\ \textbf{coupler}};
+\draw[sig] (kf.north) |- (128,-82) -- (128,0 |- ic.south);
+\node[tag,anchor=south] at (146,-82) {J32, RF in};
+\draw[sig] (108,0 |- ic.north) -- (108,0 |- mps.south) node[tag,midway,left]{J31, level};
 
 % ----- Remote I/O daisy chain, unchanged ------------------------------------
 \draw[bus] (scn.east) -- (scn.east -| mps.west);

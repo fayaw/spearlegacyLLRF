@@ -13,7 +13,7 @@ LLRF9-1,LLRF9 Unit 1,Dimtel LLRF9,B132-13,,in service (monitoring),,,drives the 
 LLRF9-2,LLRF9 Unit 2,Dimtel LLRF9,B132-13,,in service (monitoring),,,
 X530,Cross-connect X530,,B132-14,,in service,,,panel cable J2 on terminals 1–25 and J3 on 26–50
 X15,Cross-connect X15,,B132-14,,in service,,,waveguide pressure switches
-WINLCK,LLRF Window Interlock Status chassis (2U),built 2021,B132-14,above the spectrum analyzer,in service,,,turns a legacy permit into an LLRF9 enable
+WINLCK,LLRF Window Interlock Status chassis (2U),built 2021,B132-14,above the spectrum analyzer,in service,,I2,turns a legacy permit into an LLRF9 enable; replaced by the Interface Chassis at I2 (Doc C D8)
 SPECAN,Spectrum analyzer,,B132-14,,in service,,,
 X519,Cross-connect X519 (PLC-5 input module),,not recorded,,in service,,,
 X522,Cross-connect X522 (PLC-5 output module),,not recorded,,in service,,,
@@ -25,7 +25,7 @@ COILS,Main focus and bucking coil supplies,,B132-15,,in service,,,
 KLY,Klystron and solenoid,Marconi,B132 Room 101,,in service,,,
 WG,"Circulator, waveguide, magic tees and loads",,B132 Room 101,,in service,,,
 TTANK,HVPS termination and grounding tank,SD-730-790-05,B132 Room 101,,in service,,,"Ross HV grounding switch, Danfysik DC-CT (cathode current), 3.3 mΩ return shunt, Pearson CT-110"
-HVC,HVPS controllers SPEAR 1 and SPEAR 2 (Hoffman boxes),WD-730-790-02,B118,,in service,,I7,"SLC-500, Enerpro firing boards, regulator, trigger interconnect and monitor boards"
+HVC,HVPS controllers SPEAR 1 and SPEAR 2 (Hoffman boxes),WD-730-790-02,B118,,in service,,I7,"SLC-500, Enerpro firing boards, regulator, trigger interconnect and monitor boards; one unit replaced at I7b, the other at I7c"
 JBOX118,HVPS junction box (pluggable terminal blocks J1 to J6; fiber-optics box; BNC-1),EI-444-636-00,B118,,in service,,,above the SPEAR 1 controller; connects the cables from B132 and B514 to the controller in service
 SCOPE,HVPS oscilloscope,Tektronix,B118,,in service,,,"channels: HVPS voltage, HVPS current, transformer current, SCR firing signal"
 HVPS,HVPS power sections SPEAR 1 and SPEAR 2,NWL 39308,B514,,in service,,,one unit active at a time
@@ -38,5 +38,5 @@ IC,Interface Chassis and Waveform Buffer,Doc C,B132 (rack to be set),,planned,I2
 GALIL,Galil tuner controller,DMC-4143,B132 (rack to be set),,planned,I3,,driven by LLRF9 Unit 1
 CLX,RF MPS ControlLogix,Allen-Bradley 1756,B132 (rack to be set),,planned,I4,,
 TDK,Klystron heater supply,TDK-Lambda Genesys,B132 (rack to be set),,planned,I5,,
-HOFF,New Hoffman box and PPS Interface Box per HVPS unit,,B118,,planned,I7,,
+HOFF,New Hoffman box and PPS Interface Box per HVPS unit,,B118,,planned,I7,,"first unit at I7b, second at I7c"
 IOCHW,IOC B132-IOCRF on new hardware,,B132 (rack to be set),,planned,I8,,

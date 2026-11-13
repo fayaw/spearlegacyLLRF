@@ -1,0 +1,65 @@
+% !TeX root = ../C_interface_chassis_requirements.tex
+% Waveform Buffer board: each conditioned signal goes to a digitizer and buffer
+% and to a latched comparator; the latched trips form the WB permit. RF trips go
+% up and HVPS trips down so that no path crosses another.
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  every node/.append style={execute at begin node=\hyphenpenalty 10000\relax},
+  w/.style={draw=cNeut,thick},
+  dot/.style={circle,fill=cNeut,inner sep=0pt,minimum size=1.4mm}]
+
+% ----- inputs and conditioning ---------------------------------------------------
+\node[rf,text width=15mm,anchor=west]  (rfin) at (0,4)   {\textbf{RF1--RF8}\\ SMA};
+\node[pwr,text width=15mm,anchor=west] (hvin) at (0,-10) {\textbf{HV1--HV4}};
+\node[rf,text width=28mm,anchor=west]  (crf)  at (22,4)
+  {attenuator, log detector,\\ amplifier ${\times}5$};
+\node[pwr,text width=28mm,anchor=west] (chv)  at (22,-10)
+  {HV1, HV2: board buffers\\ HV3, HV4: dividers};
+\draw[sig] (rfin) -- (crf);
+\draw[sig] (hvin) -- (chv);
+
+% ----- digitizers, buffers and the IOC -------------------------------------------
+\node[ctrl,text width=20mm,minimum height=24mm,anchor=west] (adc) at (62,-3)
+  {\textbf{ADCs}, 12 bit\\ RF 1~MSPS\\ HVPS 1~MSPS\\ or 250~kS/s};
+\node[ctrl,text width=22mm,minimum height=24mm,anchor=west] (buf) at (90,-3)
+  {\textbf{Circular buffers}\\ RF 32~kS\\ HVPS $\geq$100~ms\\ 75\,\% before the trigger};
+\node[ctrl,text width=26mm,minimum height=24mm,anchor=west] (ioc) at (120,-3)
+  {\textbf{Chassis IOC}\\ waveforms and freeze time, 1~s averages, thresholds, $P_C$, re-arm};
+\node[dot] (srf) at (57,4) {};
+\node[dot] (shv) at (57,-10) {};
+\draw[w] (crf.east) -- (srf);
+\draw[w] (chv.east) -- (shv);
+\draw[sig] (srf) -- (adc.west |- srf);
+\draw[sig] (shv) -- (adc.west |- shv);
+\draw[sig] (adc) -- (buf);
+\draw[sig] (buf) -- (ioc);
+
+% ----- freeze --------------------------------------------------------------------
+\node[ctrl,text width=40mm,anchor=west] (frz) at (104,19)
+  {\textbf{Freeze} on any input latch,\\ a trip or EPICS};
+\draw[sig] ([xshift=-16mm]frz.south) -- ([xshift=-16mm]frz.south |- buf.north);
+
+% ----- comparators and trips -----------------------------------------------------
+\node[plc,text width=20mm,anchor=west] (cmr) at (62,19) {comparators\\ high or low};
+\node[plc,anchor=west,minimum width=10mm] (lr) at (90,19) {latch};
+\draw[sig] (srf) |- (cmr.west);
+\draw[sig] (cmr) -- (lr);
+\node[plc,text width=20mm,anchor=west] (cmh) at (62,-25) {comparators\\ HV1 OV, HV2 OC};
+\node[plc,anchor=west,minimum width=10mm] (lh) at (90,-25) {latch};
+\node[dot] (sh2) at (57,-25) {};
+\draw[w] (shv) -- (sh2);
+\draw[sig] (sh2) -- (cmh.west);
+\draw[sig] (cmh) -- (lh);
+\node[plc,text width=40mm,anchor=west] (pc) at (40,-42)
+  {collector power $P_C = VI - P_F$\\ ($V$, $I$: HV1, HV2; $P_F$: RF7)\\ above 1200~kW for 0.7~s};
+\node[plc,anchor=west,minimum width=10mm] (lp) at (90,-42) {latch};
+\draw[sig] (sh2) -- (sh2 |- pc.north);
+\draw[sig] (pc) -- (lp);
+
+% ----- Waveform Buffer permit ----------------------------------------------------
+\node[plc,text width=24mm,minimum height=24mm,anchor=west] (perm) at (120,-34)
+  {\textbf{WB permit}\\ product of the trips whose mask is set};
+\draw[sig] (lh.east) -- (perm.west |- lh.east);
+\draw[sig] (lp.east) -- (perm.west |- lp.east);
+\draw[sig] (lr.north) -- ++(0,7) -| ([xshift=5mm]perm.east) -- (perm.east);
+\draw[sig] (perm.south) -- ++(0,-7) node[below]{$p_{WB}$ to the interlock board};
+\end{tikzpicture}
